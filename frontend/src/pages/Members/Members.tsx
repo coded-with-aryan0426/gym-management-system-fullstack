@@ -218,7 +218,7 @@ const Members: React.FC = () => {
               </div>
               <div className="form-group">
                 <label>Email</label>
-                <input type="email" className="form-input" value="john.doe@apexgym.com" readOnly />
+                <input type="email" className="form-input" value="john.doe@athlonx.com" readOnly />
               </div>
               <div className="form-group">
                 <label>Phone</label>

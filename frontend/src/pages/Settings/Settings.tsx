@@ -15,7 +15,7 @@ const Settings: React.FC = () => {
 
   const [profile, setProfile] = useState({
     name: "John Doe",
-    email: "john.doe@apexgym.com",
+    email: "john.doe@athlonx.com",
     phone: "(902) 456-7770",
   })
 

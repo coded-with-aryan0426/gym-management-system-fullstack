@@ -96,7 +96,7 @@ const CommandRail: React.FC<CommandRailProps> = ({ isCollapsed = false, onToggle
             <path d="M12 2L2 19h20L12 2zm0 4l7 11H5l7-11z" />
           </svg>
         </div>
-        <span className="command-rail__logo-text">Apex Gym</span>
+        <span className="command-rail__logo-text">AthlonX</span>
       </div>
 
       {/* Navigation */}
