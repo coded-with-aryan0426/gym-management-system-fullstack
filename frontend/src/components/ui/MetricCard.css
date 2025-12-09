@@ -1,0 +1,95 @@
+/* ============================================================================
+   MetricCard Component Styles
+   ============================================================================ */
+
+.metric-card {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--card-radius);
+  padding: var(--space-4);
+  min-width: 160px;
+}
+
+.metric-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+}
+
+.metric-card__title {
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--text-secondary);
+}
+
+.metric-card__alert-icon {
+  color: var(--color-amber);
+}
+
+.metric-card__value-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.metric-card__value {
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  line-height: 1.2;
+  font-feature-settings: "tnum" 1;
+}
+
+.metric-card__trend {
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+}
+
+.metric-card__trend--up {
+  color: var(--color-emerald);
+}
+
+.metric-card__trend--down {
+  color: var(--color-crimson);
+}
+
+.metric-card__trend--neutral {
+  color: var(--text-tertiary);
+}
+
+.metric-card__subtitle {
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+}
+
+/* Variants */
+.metric-card--warning {
+  border-color: var(--color-amber);
+}
+
+.metric-card--success {
+  border-color: var(--color-emerald);
+}
+
+.metric-card--danger {
+  border-color: var(--color-crimson);
+}
+
+/* Added progress bar styles with CSS custom property for dynamic width */
+.metric-card__progress {
+  margin-top: var(--space-3);
+  height: 4px;
+  background-color: var(--bg-tertiary);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.metric-card__progress-bar {
+  height: 100%;
+  width: var(--progress-width, 0%);
+  background-color: var(--color-emerald);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}

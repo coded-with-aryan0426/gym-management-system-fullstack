@@ -1,0 +1,492 @@
+/* ============================================================================
+   AthlonX Design System - Global Styles
+   Base styles applied throughout the application
+   ============================================================================ */
+
+@import './variables.css';
+@import './reset.css';
+
+/* ========================
+   BASE STYLES
+   ======================== */
+
+body {
+    font-family: var(--font-family);
+    font-size: var(--text-base);
+    font-weight: var(--font-normal);
+    color: var(--text-primary);
+    background-color: var(--bg-primary);
+    line-height: var(--leading-normal);
+}
+
+/* ========================
+   TYPOGRAPHY
+   ======================== */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-weight: var(--font-semibold);
+    line-height: var(--leading-tight);
+    color: var(--text-primary);
+}
+
+h1 {
+    font-size: var(--text-3xl);
+}
+
+h2 {
+    font-size: var(--text-2xl);
+}
+
+h3 {
+    font-size: var(--text-xl);
+}
+
+h4 {
+    font-size: var(--text-lg);
+}
+
+h5 {
+    font-size: var(--text-md);
+}
+
+h6 {
+    font-size: var(--text-base);
+}
+
+p {
+    color: var(--text-secondary);
+    margin-bottom: var(--space-4);
+}
+
+p:last-child {
+    margin-bottom: 0;
+}
+
+small {
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
+}
+
+strong {
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
+}
+
+/* ========================
+   LINKS
+   ======================== */
+
+a {
+    color: var(--color-crimson);
+    transition: color var(--transition-fast);
+}
+
+a:hover {
+    color: var(--color-crimson-hover);
+}
+
+/* ========================
+   CODE
+   ======================== */
+
+code,
+pre {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+}
+
+code {
+    background: var(--bg-tertiary);
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--button-radius);
+}
+
+pre {
+    background: var(--bg-tertiary);
+    padding: var(--space-4);
+    border-radius: var(--card-radius);
+    overflow-x: auto;
+}
+
+/* ========================
+   METRIC NUMBERS
+   ======================== */
+
+.metric-value {
+    font-family: var(--font-family);
+    font-weight: var(--font-bold);
+    font-feature-settings: 'tnum' 1;
+    letter-spacing: -0.02em;
+}
+
+.metric-currency {
+    font-size: var(--text-4xl);
+    color: var(--text-primary);
+}
+
+.metric-large {
+    font-size: var(--text-3xl);
+}
+
+.metric-medium {
+    font-size: var(--text-2xl);
+}
+
+/* ========================
+   STATUS COLORS
+   ======================== */
+
+.text-success {
+    color: var(--color-emerald);
+}
+
+.text-warning {
+    color: var(--color-amber);
+}
+
+.text-error {
+    color: var(--color-crimson);
+}
+
+.text-info {
+    color: var(--color-ocean);
+}
+
+.bg-success {
+    background-color: var(--color-emerald-light);
+}
+
+.bg-warning {
+    background-color: var(--color-amber-light);
+}
+
+.bg-error {
+    background-color: var(--color-crimson-light);
+}
+
+.bg-info {
+    background-color: var(--color-ocean-light);
+}
+
+/* ========================
+   ANIMATIONS
+   ======================== */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-fadeIn {
+    animation: fadeIn 0.3s ease;
+}
+
+.animate-slideUp {
+    animation: slideUp 0.3s ease;
+}
+
+.animate-pulse {
+    animation: pulse 2s infinite;
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+/* ========================
+   UTILITY CLASSES
+   ======================== */
+
+/* Flexbox */
+.flex {
+    display: flex;
+}
+
+.flex-col {
+    flex-direction: column;
+}
+
+.flex-wrap {
+    flex-wrap: wrap;
+}
+
+.items-center {
+    align-items: center;
+}
+
+.items-start {
+    align-items: flex-start;
+}
+
+.items-end {
+    align-items: flex-end;
+}
+
+.justify-center {
+    justify-content: center;
+}
+
+.justify-between {
+    justify-content: space-between;
+}
+
+.justify-end {
+    justify-content: flex-end;
+}
+
+.flex-1 {
+    flex: 1;
+}
+
+.flex-shrink-0 {
+    flex-shrink: 0;
+}
+
+/* Grid */
+.grid {
+    display: grid;
+}
+
+.grid-cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-cols-3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-cols-4 {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+/* Gap */
+.gap-1 {
+    gap: var(--space-1);
+}
+
+.gap-2 {
+    gap: var(--space-2);
+}
+
+.gap-3 {
+    gap: var(--space-3);
+}
+
+.gap-4 {
+    gap: var(--space-4);
+}
+
+.gap-6 {
+    gap: var(--space-6);
+}
+
+/* Padding */
+.p-2 {
+    padding: var(--space-2);
+}
+
+.p-3 {
+    padding: var(--space-3);
+}
+
+.p-4 {
+    padding: var(--space-4);
+}
+
+.p-6 {
+    padding: var(--space-6);
+}
+
+/* Margin */
+.m-0 {
+    margin: 0;
+}
+
+.mt-2 {
+    margin-top: var(--space-2);
+}
+
+.mt-4 {
+    margin-top: var(--space-4);
+}
+
+.mb-2 {
+    margin-bottom: var(--space-2);
+}
+
+.mb-4 {
+    margin-bottom: var(--space-4);
+}
+
+/* Text */
+.text-center {
+    text-align: center;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.text-sm {
+    font-size: var(--text-sm);
+}
+
+.text-xs {
+    font-size: var(--text-xs);
+}
+
+.font-medium {
+    font-weight: var(--font-medium);
+}
+
+.font-semibold {
+    font-weight: var(--font-semibold);
+}
+
+.truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Visibility */
+.hidden {
+    display: none;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+/* Cursor */
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.cursor-not-allowed {
+    cursor: not-allowed;
+}
+
+/* Overflow */
+.overflow-hidden {
+    overflow: hidden;
+}
+
+.overflow-auto {
+    overflow: auto;
+}
+
+/* Position */
+.relative {
+    position: relative;
+}
+
+.absolute {
+    position: absolute;
+}
+
+.fixed {
+    position: fixed;
+}
+
+.sticky {
+    position: sticky;
+}
+
+/* Width/Height */
+.w-full {
+    width: 100%;
+}
+
+.h-full {
+    height: 100%;
+}
+
+.min-h-screen {
+    min-height: 100vh;
+}
+
+/* Border Radius */
+.rounded {
+    border-radius: var(--button-radius);
+}
+
+.rounded-lg {
+    border-radius: var(--card-radius);
+}
+
+.rounded-full {
+    border-radius: 9999px;
+}
+
+/* ========================
+   PAGE LOADER
+   ======================== */
+
+.page-loader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 400px;
+}
+
+.page-loader__spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--border-primary);
+    border-top-color: var(--color-crimson);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}

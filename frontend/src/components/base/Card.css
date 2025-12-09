@@ -1,0 +1,63 @@
+@import '../../styles/design-system.css';
+
+.card {
+  background-color: var(--color-bg-primary);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-base);
+}
+
+/* ========== ELEVATION ========== */
+
+.card--elevation-1 {
+  box-shadow: var(--elevation-1);
+}
+
+.card--elevation-2 {
+  box-shadow: var(--elevation-2);
+}
+
+.card--elevation-3 {
+  box-shadow: var(--elevation-3);
+}
+
+.card--elevation-4 {
+  box-shadow: var(--elevation-4);
+}
+
+.card--elevation-5 {
+  box-shadow: var(--elevation-5);
+}
+
+/* ========== PADDING ========== */
+
+.card--padding-none {
+  padding: 0;
+}
+
+.card--padding-sm {
+  padding: var(--spacing-4);
+}
+
+.card--padding-md {
+  padding: var(--spacing-6);
+}
+
+.card--padding-lg {
+  padding: var(--spacing-8);
+}
+
+/* ========== MODIFIERS ========== */
+
+.card--hoverable:hover {
+  box-shadow: var(--elevation-4);
+  transform: translateY(-2px);
+}
+
+.card--clickable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.card--clickable:active {
+  transform: translateY(0);
+}

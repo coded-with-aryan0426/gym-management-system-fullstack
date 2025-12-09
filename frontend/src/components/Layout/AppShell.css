@@ -1,0 +1,49 @@
+/* ============================================================================
+   AppShell - Main Application Layout with Smooth Sidebar Transition
+   ============================================================================ */
+
+.app-shell {
+    display: flex;
+    min-height: 100vh;
+    background-color: var(--bg-primary);
+}
+
+.app-shell__main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    /* Prevent flex child overflow */
+    margin-left: var(--sidebar-width);
+    /* Match sidebar transition for smooth experience */
+    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: margin-left;
+}
+
+/* Collapsed sidebar state */
+.app-shell--collapsed .app-shell__main {
+    margin-left: var(--sidebar-collapsed);
+}
+
+.app-shell__content {
+    flex: 1;
+    padding: var(--space-6);
+    overflow-y: auto;
+    background-color: var(--bg-primary);
+}
+
+/* Content area scrollbar hidden but functional */
+.app-shell__content::-webkit-scrollbar {
+    width: 0;
+}
+
+/* Responsive: Hide sidebar on mobile */
+@media (max-width: 768px) {
+    .app-shell__main {
+        margin-left: 0;
+    }
+
+    .app-shell--collapsed .app-shell__main {
+        margin-left: 0;
+    }
+}

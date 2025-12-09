@@ -1,0 +1,193 @@
+/* ============================================================================
+   PREMIUM MODAL STYLES
+   AthlonX Gym Management System
+   ============================================================================ */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+
+.modal {
+  /* Layout and Sizing */
+  position: relative;
+  width: 72vw;
+  max-width: 960px;
+  min-width: 320px;
+  min-height: 60vh;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+
+  /* Base Appearance */
+  background: var(--card-glass-bg, #1e293b);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  box-shadow: var(--elevation-3, 0 25px 50px -12px rgba(0, 0, 0, 0.5));
+  color: var(--text-primary);
+
+  /* Animation */
+  animation: modalAppear 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Gradient border glow effect */
+.modal::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  z-index: -1;
+  filter: blur(15px);
+  opacity: 0.15;
+}
+
+/* Header */
+.modal__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  /* Reduced vertical padding */
+  border-bottom: 1px solid var(--glass-border);
+  background: var(--glass-bg-light, rgba(255, 255, 255, 0.05));
+  border-radius: 20px 20px 0 0;
+  flex-shrink: 0;
+}
+
+.modal__title {
+  margin: 0;
+  font-family: var(--font-family-display, system-ui);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.modal__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: var(--glass-border);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modal__close:hover {
+  color: var(--color-error-500);
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+  transform: rotate(90deg);
+}
+
+/* Body */
+.modal__body {
+  padding: 12px 24px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  color: var(--text-primary);
+  /* Hide scrollbar but allow scrolling */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* Hide scrollbar for webkit browsers */
+.modal__body::-webkit-scrollbar {
+  display: none;
+}
+
+/* Footer */
+.modal__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--glass-border);
+  background: var(--bg-secondary);
+  /* Ensures proper contrast in light mode */
+  border-radius: 0 0 20px 20px;
+  flex-shrink: 0;
+}
+
+/* Modal Size Variants */
+.modal--sm {
+  max-width: 400px;
+}
+
+.modal--lg {
+  max-width: 800px;
+}
+
+.modal--xl {
+  max-width: 1000px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .modal-overlay {
+    padding: 16px;
+  }
+
+  .modal {
+    max-width: 100%;
+    max-height: 85vh;
+    border-radius: 16px;
+  }
+
+  .modal__header {
+    padding: 16px 20px;
+    border-radius: 16px 16px 0 0;
+  }
+
+  .modal__body {
+    padding: 20px;
+  }
+
+  .modal__footer {
+    padding: 16px 20px;
+    border-radius: 0 0 16px 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-overlay {
+    padding: 12px;
+  }
+
+  .modal {
+    max-height: 90vh;
+  }
+
+  .modal__footer {
+    flex-direction: column;
+  }
+
+  .modal__footer button {
+    width: 100%;
+  }
+}

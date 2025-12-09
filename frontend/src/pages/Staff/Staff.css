@@ -1,0 +1,101 @@
+/* ============================================================================
+   Staff Directory Page Styles
+   ============================================================================ */
+
+.staff-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* Header */
+.staff-page__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.staff-page__title-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.staff-page__title {
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.staff-page__count {
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+}
+
+.staff-page__actions {
+  display: flex;
+  gap: var(--space-3);
+}
+
+/* Grid Layout - Full Width */
+.staff-page__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+}
+
+/* Staff List Card - Full Width */
+.staff-page__list {
+  overflow: hidden;
+  width: 100%;
+}
+
+/* Staff Cell */
+.staff-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.staff-name {
+  font-weight: var(--font-medium);
+  color: var(--text-primary);
+}
+
+.staff-role {
+  color: var(--text-secondary);
+}
+
+/* Actions */
+.staff-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.action-menu-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--button-radius);
+  color: var(--text-tertiary);
+  font-size: var(--text-lg);
+  letter-spacing: 2px;
+  transition: all var(--transition-fast);
+}
+
+.action-menu-btn:hover {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .staff-page__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

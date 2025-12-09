@@ -1,0 +1,18 @@
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.status-badge--active {
+  background-color: rgba(76, 175, 80, 0.2);
+  color: var(--success);
+}
+
+.status-badge--expired {
+  background-color: rgba(255, 152, 0, 0.2);
+  color: var(--warning);
+}

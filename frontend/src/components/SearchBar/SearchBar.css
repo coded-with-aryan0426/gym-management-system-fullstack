@@ -1,0 +1,120 @@
+/* ============================================================================
+   PREMIUM SEARCH BAR STYLES
+   AthlonX Gym Management System
+   ============================================================================ */
+
+.search-bar {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  max-width: 360px;
+}
+
+.search-bar__input {
+  width: 100%;
+  padding: var(--spacing-3) var(--spacing-4);
+  padding-right: var(--spacing-12);
+  background: var(--glass-bg-dark);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-premium-md);
+  font-family: var(--font-family-premium);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--text-primary);
+  outline: none;
+  transition: var(--transition-smooth);
+}
+
+.search-bar__input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.search-bar__input:hover {
+  border-color: var(--glass-border-hover);
+}
+
+.search-bar__input:focus {
+  border-color: var(--color-primary-500);
+  background: var(--color-bg-secondary);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+}
+
+.search-bar__icon {
+  position: absolute;
+  right: var(--spacing-4);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-tertiary);
+  font-size: 18px;
+  pointer-events: none;
+  transition: color var(--transition-fast);
+}
+
+.search-bar__input:focus+.search-bar__icon,
+.search-bar:hover .search-bar__icon {
+  color: var(--color-primary-400);
+}
+
+/* Clear button */
+.search-bar__clear {
+  position: absolute;
+  right: var(--spacing-4);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--glass-bg-light);
+  border: none;
+  border-radius: var(--radius-full);
+  color: var(--text-tertiary);
+  cursor: pointer;
+  opacity: 0;
+  transition: var(--transition-fast);
+}
+
+.search-bar__input:not(:placeholder-shown)~.search-bar__clear {
+  opacity: 1;
+}
+
+.search-bar__clear:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: var(--color-error-500);
+}
+
+/* Loading state */
+.search-bar--loading .search-bar__icon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: translateY(-50%) rotate(0deg);
+  }
+
+  to {
+    transform: translateY(-50%) rotate(360deg);
+  }
+}
+
+/* Size variants */
+.search-bar--sm .search-bar__input {
+  padding: var(--spacing-2) var(--spacing-3);
+  padding-right: var(--spacing-10);
+  font-size: var(--font-size-xs);
+}
+
+.search-bar--lg .search-bar__input {
+  padding: var(--spacing-4) var(--spacing-5);
+  padding-right: var(--spacing-12);
+  font-size: var(--font-size-base);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .search-bar {
+    max-width: 100%;
+  }
+}
