@@ -1,0 +1,234 @@
+/* ============================================================================
+   Financials Page Styles
+   ============================================================================ */
+
+.financials-page {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+}
+
+/* Header */
+.financials-page__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+}
+
+.financials-page__title-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.financials-page__title {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.financials-page__count {
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
+}
+
+.financials-page__actions {
+    display: flex;
+    gap: var(--space-3);
+}
+
+/* Chart Card */
+.financials-page__chart {
+    width: 100%;
+}
+
+.chart-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.chart-legend {
+    display: flex;
+    gap: var(--space-6);
+    justify-content: flex-end;
+}
+
+.chart-legend-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+}
+
+.legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.legend-dot--revenue {
+    background-color: var(--color-crimson);
+}
+
+.legend-dot--expenses {
+    background-color: var(--color-emerald);
+}
+
+.profit-indicator {
+    position: absolute;
+    right: var(--space-6);
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--space-1);
+    background-color: var(--bg-tertiary);
+    padding: var(--space-3);
+    border-radius: var(--button-radius);
+}
+
+.profit-value {
+    font-size: var(--text-xl);
+    font-weight: var(--font-bold);
+    color: var(--text-primary);
+}
+
+.profit-label {
+    font-size: var(--text-sm);
+}
+
+.chart-visual {
+    height: 200px;
+    position: relative;
+}
+
+.chart-svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* Grid */
+.financials-page__grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: var(--space-4);
+}
+
+@media (max-width: 1024px) {
+    .financials-page__grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Transactions Table */
+.transactions-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.transactions-table th {
+    text-align: left;
+    padding: var(--space-3);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--text-tertiary);
+    border-bottom: 1px solid var(--border-secondary);
+}
+
+.transactions-table td {
+    padding: var(--space-3);
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-secondary);
+}
+
+.transactions-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* Breakdown */
+.breakdown-content {
+    display: flex;
+    align-items: center;
+    gap: var(--space-6);
+}
+
+.donut-chart {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    flex-shrink: 0;
+}
+
+.donut-svg {
+    width: 100%;
+    height: 100%;
+}
+
+.donut-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.donut-value {
+    display: block;
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
+    color: var(--text-primary);
+}
+
+.donut-label {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+}
+
+.breakdown-legend {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    flex: 1;
+}
+
+.breakdown-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.breakdown-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+}
+
+.breakdown-label {
+    flex: 1;
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+}
+
+.breakdown-percentage {
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .financials-page__header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .breakdown-content {
+        flex-direction: column;
+    }
+}

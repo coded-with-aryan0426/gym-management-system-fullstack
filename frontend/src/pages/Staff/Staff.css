@@ -1,0 +1,173 @@
+/* ============================================================================
+   Staff Directory Page Styles
+   ============================================================================ */
+
+.staff-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* Header */
+.staff-page__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.staff-page__title-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.staff-page__title {
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.staff-page__count {
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+}
+
+.staff-page__actions {
+  display: flex;
+  gap: var(--space-3);
+}
+
+/* Grid Layout */
+.staff-page__grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: var(--space-4);
+}
+
+@media (max-width: 1024px) {
+  .staff-page__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Staff List Card */
+.staff-page__list {
+  overflow: hidden;
+}
+
+/* Staff Cell */
+.staff-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.staff-name {
+  font-weight: var(--font-medium);
+  color: var(--text-primary);
+}
+
+.staff-role {
+  color: var(--text-secondary);
+}
+
+/* Performance */
+.staff-performance {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.performance-icon {
+  color: var(--color-emerald);
+}
+
+.performance-value {
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+}
+
+.performance-trend {
+  font-size: var(--text-sm);
+}
+
+/* Actions */
+.staff-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.action-menu-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--button-radius);
+  color: var(--text-tertiary);
+  font-size: var(--text-lg);
+  letter-spacing: 2px;
+  transition: all var(--transition-fast);
+}
+
+.action-menu-btn:hover {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+/* Performance Chart */
+.staff-page__performance {
+  position: relative;
+}
+
+.performance-chart {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  height: 200px;
+  padding-bottom: var(--space-6);
+  border-bottom: 1px solid var(--border-secondary);
+}
+
+.performance-bar-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1;
+}
+
+.performance-bar {
+  width: 24px;
+  background-color: var(--color-emerald);
+  border-radius: 4px 4px 0 0;
+  min-height: 10px;
+  transition: height 0.3s ease;
+}
+
+.performance-label {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+}
+
+.performance-scale {
+  position: absolute;
+  left: var(--space-4);
+  top: 60px;
+  bottom: 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .staff-page__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

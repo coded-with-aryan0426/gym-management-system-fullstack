@@ -1,0 +1,286 @@
+/* ============================================================================
+   PREMIUM ACTIVITY FEED STYLES
+   AthlonX Gym Management System
+   ============================================================================ */
+
+.activity-feed {
+  background: var(--card-glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-premium-lg);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: var(--shadow-premium-sm);
+}
+
+.activity-feed__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-5);
+  border-bottom: 1px solid var(--glass-border);
+  background: linear-gradient(135deg,
+      rgba(139, 92, 246, 0.05) 0%,
+      rgba(99, 102, 241, 0.02) 100%);
+}
+
+.activity-feed__title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.activity-feed__title-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gradient-primary);
+  border-radius: var(--radius-md);
+  color: white;
+}
+
+.activity-feed__badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 var(--spacing-2);
+  background: var(--gradient-error);
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 700;
+  color: white;
+}
+
+.activity-feed__list {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.activity-feed__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: var(--text-tertiary);
+  font-size: var(--font-size-sm);
+  gap: var(--spacing-3);
+}
+
+.activity-feed__empty svg {
+  opacity: 0.4;
+}
+
+/* Activity Item */
+.activity-item {
+  display: flex;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3) var(--spacing-4);
+  background: var(--glass-bg-light);
+  border: 1px solid transparent;
+  border-radius: var(--radius-premium-md);
+  transition: var(--transition-smooth);
+  cursor: pointer;
+  position: relative;
+}
+
+.activity-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 0;
+  background: var(--gradient-primary);
+  border-radius: var(--radius-full);
+  transition: height var(--transition-fast);
+}
+
+.activity-item:hover {
+  background: rgba(99, 102, 241, 0.1);
+  border-color: var(--glass-border);
+  transform: translateX(4px);
+}
+
+.activity-item:hover::before {
+  height: 60%;
+}
+
+/* Activity Item Icon */
+.activity-item__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: var(--transition-smooth);
+}
+
+.activity-item:hover .activity-item__icon {
+  transform: scale(1.1);
+}
+
+.activity-item__icon--primary {
+  background: var(--gradient-info-light);
+  color: var(--color-info-500);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.activity-item__icon--success {
+  background: var(--gradient-success-light);
+  color: var(--color-success-500);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.activity-item__icon--warning {
+  background: var(--gradient-warning-light);
+  color: var(--color-warning-500);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.activity-item__icon--error {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--color-error-500);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.activity-item__icon--info {
+  background: var(--gradient-info-light);
+  color: var(--color-info-500);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+/* Activity Item Content */
+.activity-item__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.activity-item__title {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.activity-item__description {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.activity-item__timestamp {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+}
+
+.activity-item__timestamp::before {
+  content: '';
+  width: 4px;
+  height: 4px;
+  background: var(--text-tertiary);
+  border-radius: 50%;
+  opacity: 0.5;
+}
+
+/* Activity Item Types */
+.activity-item--unread {
+  background: rgba(99, 102, 241, 0.08);
+  border-color: rgba(99, 102, 241, 0.2);
+}
+
+.activity-item--unread::after {
+  content: '';
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 8px;
+  height: 8px;
+  background: var(--gradient-primary);
+  border-radius: 50%;
+}
+
+/* View All Button */
+.activity-feed__footer {
+  padding: var(--spacing-4);
+  border-top: 1px solid var(--glass-border);
+  display: flex;
+  justify-content: center;
+}
+
+.activity-feed__view-all {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-4);
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: var(--radius-premium-md);
+  color: var(--color-primary-400);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.activity-feed__view-all:hover {
+  background: rgba(99, 102, 241, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Scrollbar styling */
+.activity-feed__list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.activity-feed__list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.activity-feed__list::-webkit-scrollbar-thumb {
+  background: var(--glass-border);
+  border-radius: 3px;
+}
+
+.activity-feed__list::-webkit-scrollbar-thumb:hover {
+  background: var(--glass-border-hover);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .activity-feed__header {
+    padding: var(--spacing-4);
+  }
+
+  .activity-item {
+    padding: var(--spacing-3);
+  }
+
+  .activity-item__icon {
+    width: 32px;
+    height: 32px;
+  }
+}

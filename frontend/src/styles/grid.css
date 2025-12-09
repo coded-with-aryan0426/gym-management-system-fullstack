@@ -1,0 +1,80 @@
+@import './design-system.css';
+
+/* ============================================================================
+   RESPONSIVE GRID SYSTEM
+   ============================================================================ */
+
+.grid-container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-6);
+}
+
+.grid {
+  display: grid;
+  gap: var(--spacing-6);
+}
+
+/* ========== DESKTOP (1200px+) - 2×2 Grid ========== */
+@media (min-width: 1200px) {
+  .grid--dashboard {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: auto;
+  }
+  
+  .grid-container {
+    padding: 0 var(--spacing-8);
+  }
+}
+
+/* ========== TABLET (768px-1199px) - 2×1 Grid ========== */
+@media (min-width: 768px) and (max-width: 1199px) {
+  .grid--dashboard {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: auto;
+  }
+  
+  .grid-container {
+    padding: 0 var(--spacing-6);
+  }
+}
+
+/* ========== MOBILE (< 768px) - 1 Column ========== */
+@media (max-width: 767px) {
+  .grid--dashboard {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+  }
+  
+  .grid-container {
+    padding: 0 var(--spacing-4);
+  }
+  
+  .grid {
+    gap: var(--spacing-4);
+  }
+}
+
+/* ========== GRID ITEM UTILITIES ========== */
+
+.grid-item {
+  min-width: 0; /* Prevent grid blowout */
+}
+
+.grid-item--span-2 {
+  grid-column: span 2;
+}
+
+@media (max-width: 767px) {
+  .grid-item--span-2 {
+    grid-column: span 1;
+  }
+}
+
+/* ========== SMOOTH TRANSITIONS ========== */
+
+.grid,
+.grid-item {
+  transition: all var(--transition-base);
+}

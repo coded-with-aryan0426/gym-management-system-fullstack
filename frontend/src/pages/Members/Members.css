@@ -1,0 +1,100 @@
+/* ============================================================================
+   Members Directory Page Styles
+   ============================================================================ */
+
+.members-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* Header */
+.members-page__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.members-page__title-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.members-page__title {
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.members-page__count {
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+}
+
+.members-page__actions {
+  display: flex;
+  gap: var(--space-3);
+}
+
+/* Table Container */
+.members-page__table-container {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--card-radius);
+  overflow: hidden;
+}
+
+/* Member Cell */
+.member-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.member-name {
+  font-weight: var(--font-medium);
+  color: var(--text-primary);
+}
+
+.member-plan {
+  color: var(--text-secondary);
+}
+
+.member-last-visit {
+  color: var(--text-secondary);
+}
+
+/* Actions */
+.member-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.action-menu-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--button-radius);
+  color: var(--text-tertiary);
+  font-size: var(--text-lg);
+  letter-spacing: 2px;
+  transition: all var(--transition-fast);
+}
+
+.action-menu-btn:hover {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .members-page__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

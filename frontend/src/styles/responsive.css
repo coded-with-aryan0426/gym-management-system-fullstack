@@ -1,0 +1,122 @@
+@import './design-system.css';
+
+/* ============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================ */
+
+/* ========== BREAKPOINTS ========== */
+/* Desktop: 1200px+ */
+/* Tablet: 768px-1199px */
+/* Mobile: < 768px */
+
+/* ========== DESKTOP (1200px+) ========== */
+@media (min-width: 1200px) {
+  .hide-desktop {
+    display: none !important;
+  }
+}
+
+/* ========== TABLET (768px-1199px) ========== */
+@media (min-width: 768px) and (max-width: 1199px) {
+  .hide-tablet {
+    display: none !important;
+  }
+  
+  /* Adjust font sizes */
+  :root {
+    --font-size-3xl: 1.75rem;
+    --font-size-4xl: 2rem;
+    --font-size-5xl: 2.5rem;
+  }
+  
+  /* Adjust spacing */
+  .container {
+    padding: 0 var(--spacing-6);
+  }
+}
+
+/* ========== MOBILE (< 768px) ========== */
+@media (max-width: 767px) {
+  .hide-mobile {
+    display: none !important;
+  }
+  
+  /* Adjust font sizes */
+  :root {
+    --font-size-xl: 1.125rem;
+    --font-size-2xl: 1.25rem;
+    --font-size-3xl: 1.5rem;
+    --font-size-4xl: 1.75rem;
+    --font-size-5xl: 2rem;
+  }
+  
+  /* Adjust spacing */
+  .container {
+    padding: 0 var(--spacing-4);
+  }
+  
+  /* Stack elements vertically */
+  .mobile-stack {
+    flex-direction: column !important;
+  }
+  
+  /* Full width on mobile */
+  .mobile-full-width {
+    width: 100% !important;
+  }
+  
+  /* Hide non-essential elements */
+  .mobile-hide-secondary {
+    display: none !important;
+  }
+  
+  /* Adjust button sizes */
+  .btn {
+    height: 44px; /* Larger touch target */
+  }
+  
+  /* Adjust input sizes */
+  .input {
+    height: 44px; /* Larger touch target */
+  }
+}
+
+/* ========== SMOOTH TRANSITIONS ========== */
+
+@media (min-width: 768px) {
+  .responsive-transition {
+    transition: all var(--transition-base);
+  }
+}
+
+/* ========== UTILITY CLASSES ========== */
+
+.show-mobile-only {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .show-mobile-only {
+    display: block;
+  }
+}
+
+.show-tablet-up {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .show-tablet-up {
+    display: block;
+  }
+}
+
+.show-desktop-only {
+  display: none;
+}
+
+@media (min-width: 1200px) {
+  .show-desktop-only {
+    display: block;
+  }
+}
