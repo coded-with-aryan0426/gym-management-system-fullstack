@@ -7,6 +7,12 @@ export default defineConfig({
   server: {
     host: true, // Expose to network
     port: 5173,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+    },
   },
   build: {
     rollupOptions: {

@@ -16,6 +16,9 @@ const Classes = lazy(() => import('./pages/Classes/Classes'));
 const Financials = lazy(() => import('./pages/Financials/Financials'));
 const PTSessions = lazy(() => import('./pages/PTSessions/PTSessions'));
 const Settings = lazy(() => import('./pages/Settings/Settings'));
+const LandingPage = lazy(() => import('./pages/LandingPage'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const SignupPage = lazy(() => import('./pages/SignupPage'));
 
 // Loading spinner for page transitions
 const PageLoader = () => (
@@ -29,21 +32,34 @@ function App() {
     <ThemeProvider>
       <CurrencyProvider>
         <BrowserRouter>
-          <AppShell>
-            <Suspense fallback={<PageLoader />}>
-              <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/staff" element={<Staff />} />
-                <Route path="/members" element={<Members />} />
-                <Route path="/classes" element={<Classes />} />
-                <Route path="/financials" element={<Financials />} />
-                <Route path="/pt-sessions" element={<PTSessions />} />
-                <Route path="/reports" element={<Dashboard />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </Suspense>
-          </AppShell>
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/signup" element={<SignupPage />} />
+
+              {/* Protected Routes */}
+              <Route
+                path="/*"
+                element={
+                  <AppShell>
+                    <Routes>
+                      <Route path="/dashboard" element={<Dashboard />} />
+                      <Route path="/staff" element={<Staff />} />
+                      <Route path="/members" element={<Members />} />
+                      <Route path="/classes" element={<Classes />} />
+                      <Route path="/financials" element={<Financials />} />
+                      <Route path="/pt-sessions" element={<PTSessions />} />
+                      <Route path="/reports" element={<Dashboard />} />
+                      <Route path="/settings" element={<Settings />} />
+                      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                    </Routes>
+                  </AppShell>
+                }
+              />
+            </Routes>
+          </Suspense>
           <Toaster
             position="top-right"
             toastOptions={{
