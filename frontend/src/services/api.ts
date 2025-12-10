@@ -3,7 +3,7 @@ import type { User, CreateUserDto, UpdateUserDto } from '../types/user';
 import type { GymSettings, UpdateSettingsDto } from '../types/settings';
 import type { DashboardStats } from '../types/api';
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+const BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 const apiClient: AxiosInstance = axios.create({
   baseURL: BASE_URL,
@@ -63,6 +63,27 @@ const api = {
 
   async deleteUser(id: number): Promise<void> {
     await apiClient.delete(`/users/${id}`);
+  },
+
+  // Auth endpoints
+  async login(credentials: any): Promise<any> {
+    const response = await apiClient.post('/auth/login', credentials);
+    return response.data;
+  },
+
+  async signupStaff(data: any): Promise<any> {
+    const response = await apiClient.post('/auth/signup/staff', data);
+    return response.data;
+  },
+
+  async signupMember(data: any): Promise<any> {
+    const response = await apiClient.post('/auth/signup/member', data);
+    return response.data;
+  },
+
+  async setActiveGym(data: { userId: number, gymId: number, context: string }): Promise<any> {
+    const response = await apiClient.post('/auth/set-active-gym', data);
+    return response.data;
   },
 
   // Stats endpoint
@@ -132,6 +153,26 @@ const api = {
 
   async removeCustomerFromTrainer(trainerId: number, customerId: number): Promise<User> {
     const response = await apiClient.delete<User>(`/users/${trainerId}/customers/${customerId}`);
+    return response.data;
+  },
+
+  // Transaction endpoints
+  async createTransaction(data: { userId: number; amount: number; type: string; description: string }): Promise<unknown> {
+    const response = await apiClient.post('/transactions', data);
+    return response.data;
+  },
+
+  async getTransactions(filters?: { startDate?: string; endDate?: string }): Promise<unknown[]> {
+    const response = await apiClient.get('/dashboard/transactions', { params: filters });
+    return response.data;
+  },
+
+  // PT Session creation (quick method for Staff page)
+  async createPTSession(data: { trainerId: number; date: string; time: string; duration: number; notes?: string }): Promise<unknown> {
+    const response = await apiClient.post('/pt-sessions', {
+      ...data,
+      status: 'SCHEDULED',
+    });
     return response.data;
   },
 

@@ -15,6 +15,7 @@ const Members = lazy(() => import('./pages/Members/Members'));
 const Classes = lazy(() => import('./pages/Classes/Classes'));
 const Financials = lazy(() => import('./pages/Financials/Financials'));
 const PTSessions = lazy(() => import('./pages/PTSessions/PTSessions'));
+const Reports = lazy(() => import('./pages/Reports/Reports'));
 const Settings = lazy(() => import('./pages/Settings/Settings'));
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
@@ -51,7 +52,7 @@ function App() {
                       <Route path="/classes" element={<Classes />} />
                       <Route path="/financials" element={<Financials />} />
                       <Route path="/pt-sessions" element={<PTSessions />} />
-                      <Route path="/reports" element={<Dashboard />} />
+                      <Route path="/reports" element={<Reports />} />
                       <Route path="/settings" element={<Settings />} />
                       <Route path="*" element={<Navigate to="/dashboard" replace />} />
                     </Routes>

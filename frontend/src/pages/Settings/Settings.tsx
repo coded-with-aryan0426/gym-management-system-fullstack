@@ -3,8 +3,16 @@
 import type React from "react"
 import { useState, useCallback, useEffect } from "react"
 import { motion } from "framer-motion"
+import { toast } from "react-hot-toast"
 import api from "../../services/api"
 import "./Settings.css"
+
+interface UserProfile {
+  userId: number
+  fullName: string
+  email: string
+  phone: string
+}
 
 const Settings: React.FC = () => {
   const [notifications, setNotifications] = useState({
@@ -13,30 +21,116 @@ const Settings: React.FC = () => {
     sms: false,
   })
 
-  const [profile, setProfile] = useState({
-    name: "John Doe",
-    email: "john.doe@athlonx.com",
-    phone: "(902) 456-7770",
+  const [profile, setProfile] = useState<UserProfile>({
+    userId: 0,
+    fullName: "",
+    email: "",
+    phone: "",
   })
 
-  const loadSettings = useCallback(async () => {
+  const [originalProfile, setOriginalProfile] = useState<UserProfile | null>(null)
+  const [isSaving, setIsSaving] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Password change state
+  const [showPasswordModal, setShowPasswordModal] = useState(false)
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  })
+
+  const loadUserProfile = useCallback(async () => {
+    setIsLoading(true)
     try {
-      const settings = await api.getSettings()
-      if (settings) {
-        // Update settings from backend
-        console.log("[v0] Settings loaded:", settings)
+      // Get user data from localStorage (set during login)
+      const userData = localStorage.getItem("user")
+      if (userData) {
+        const user = JSON.parse(userData)
+        const loadedProfile = {
+          userId: user.userId || 0,
+          fullName: user.fullName || user.username || "User",
+          email: user.email || "",
+          phone: user.phone || "",
+        }
+        setProfile(loadedProfile)
+        setOriginalProfile(loadedProfile)
       }
     } catch (err) {
-      console.log("[v0] Using default settings - backend may not be running")
+      console.error("Failed to load user profile:", err)
+      toast.error("Failed to load profile")
+    } finally {
+      setIsLoading(false)
     }
   }, [])
 
   useEffect(() => {
-    loadSettings()
-  }, [loadSettings])
+    loadUserProfile()
+  }, [loadUserProfile])
 
   const handleNotificationToggle = (key: keyof typeof notifications) => {
     setNotifications((prev) => ({ ...prev, [key]: !prev[key] }))
+    toast.success(`${key.charAt(0).toUpperCase() + key.slice(1)} notifications ${notifications[key] ? "disabled" : "enabled"}`)
+  }
+
+  const hasProfileChanges = () => {
+    if (!originalProfile) return false
+    return (
+      profile.fullName !== originalProfile.fullName ||
+      profile.email !== originalProfile.email ||
+      profile.phone !== originalProfile.phone
+    )
+  }
+
+  const handleSaveProfile = async () => {
+    if (!hasProfileChanges()) {
+      toast("No changes to save")
+      return
+    }
+
+    setIsSaving(true)
+    try {
+      // Update user via API
+      await api.updateUser(profile.userId, {
+        fullName: profile.fullName,
+        email: profile.email,
+        phone: profile.phone,
+      })
+
+      // Update localStorage
+      const userData = localStorage.getItem("user")
+      if (userData) {
+        const user = JSON.parse(userData)
+        user.fullName = profile.fullName
+        user.email = profile.email
+        user.phone = profile.phone
+        localStorage.setItem("user", JSON.stringify(user))
+      }
+
+      setOriginalProfile({ ...profile })
+      toast.success("Profile updated successfully!")
+    } catch (err) {
+      console.error("Failed to update profile:", err)
+      toast.error("Failed to update profile. Please try again.")
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleChangePassword = async () => {
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      toast.error("Passwords do not match")
+      return
+    }
+    if (passwordForm.newPassword.length < 8) {
+      toast.error("Password must be at least 8 characters")
+      return
+    }
+
+    // For now, show success - backend endpoint needs to be implemented
+    toast.success("Password change feature coming soon!")
+    setShowPasswordModal(false)
+    setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" })
   }
 
   const pageTransition = {
@@ -58,35 +152,50 @@ const Settings: React.FC = () => {
         <div className="settings-card">
           <div className="settings-card__header">
             <h3>Personal Information</h3>
+            {hasProfileChanges() && (
+              <button
+                className="settings-save-btn"
+                onClick={handleSaveProfile}
+                disabled={isSaving}
+              >
+                {isSaving ? "Saving..." : "Save Changes"}
+              </button>
+            )}
           </div>
           <div className="settings-card__body">
-            <div className="form-group">
-              <label>Name</label>
-              <input
-                type="text"
-                className="form-input"
-                value={profile.name}
-                onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-              />
-            </div>
-            <div className="form-group">
-              <label>Email</label>
-              <input
-                type="email"
-                className="form-input"
-                value={profile.email}
-                onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-              />
-            </div>
-            <div className="form-group">
-              <label>Phone</label>
-              <input
-                type="tel"
-                className="form-input"
-                value={profile.phone}
-                onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-              />
-            </div>
+            {isLoading ? (
+              <div className="settings-loading">Loading profile...</div>
+            ) : (
+              <>
+                  <div className="form-group">
+                    <label>Full Name</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={profile.fullName}
+                      onChange={(e) => setProfile({ ...profile, fullName: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Email</label>
+                    <input
+                      type="email"
+                      className="form-input"
+                      value={profile.email}
+                      onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Phone</label>
+                    <input
+                      type="tel"
+                      className="form-input"
+                      value={profile.phone}
+                      onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+                    />
+                  </div>
+              </>
+            )}
           </div>
         </div>
 
@@ -96,7 +205,7 @@ const Settings: React.FC = () => {
             <h3>Security & Login</h3>
           </div>
           <div className="settings-card__body">
-            <div className="settings-menu-item">
+            <div className="settings-menu-item" onClick={() => setShowPasswordModal(true)} style={{ cursor: "pointer" }}>
               <div className="settings-menu-item__icon">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
@@ -105,7 +214,7 @@ const Settings: React.FC = () => {
               </div>
               <div className="settings-menu-item__content">
                 <span className="settings-menu-item__title">Change Password</span>
-                <span className="settings-menu-item__subtitle">Change password and security.</span>
+                <span className="settings-menu-item__subtitle">Update your password for security.</span>
               </div>
               <svg
                 className="settings-menu-item__arrow"
@@ -299,6 +408,62 @@ const Settings: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Password Change Modal */}
+      {showPasswordModal && (
+        <div className="settings-modal-overlay" onClick={() => setShowPasswordModal(false)}>
+          <div className="settings-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="settings-modal__header">
+              <h3>Change Password</h3>
+              <button className="settings-modal__close" onClick={() => setShowPasswordModal(false)}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="settings-modal__body">
+              <div className="form-group">
+                <label>Current Password</label>
+                <input
+                  type="password"
+                  className="form-input"
+                  value={passwordForm.currentPassword}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+                  placeholder="Enter current password"
+                />
+              </div>
+              <div className="form-group">
+                <label>New Password</label>
+                <input
+                  type="password"
+                  className="form-input"
+                  value={passwordForm.newPassword}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                  placeholder="Enter new password (min 8 characters)"
+                />
+              </div>
+              <div className="form-group">
+                <label>Confirm New Password</label>
+                <input
+                  type="password"
+                  className="form-input"
+                  value={passwordForm.confirmPassword}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                  placeholder="Confirm new password"
+                />
+              </div>
+            </div>
+            <div className="settings-modal__footer">
+              <button className="settings-modal__cancel" onClick={() => setShowPasswordModal(false)}>
+                Cancel
+              </button>
+              <button className="settings-modal__submit" onClick={handleChangePassword}>
+                Change Password
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </motion.div>
   )
 }

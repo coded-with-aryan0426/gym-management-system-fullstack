@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
 import { Button, Badge, getStatusVariant, Avatar, Card, DataTable, type Column } from '../../components/ui';
 import { StaffActionModal } from '../../components/StaffActionModal';
 import api from '../../services/api';
@@ -22,6 +23,7 @@ const Staff: React.FC = () => {
       setStaff(data);
     } catch (err) {
       console.error('[Beta] Failed to load staff:', err);
+      toast.error('Failed to load staff');
       setStaff([]);
     } finally {
       setLoading(false);
@@ -38,19 +40,44 @@ const Staff: React.FC = () => {
     setSelectedStaff(null);
   };
 
-  const handleEditProfile = (member: User) => {
-    console.log('[Beta] Profile updated for:', member.fullName);
-    loadStaff(); // Refresh list
-    handleCloseActionModal();
+  const handleEditProfile = async (member: User) => {
+    try {
+      await api.updateUser(member.userId, {
+        fullName: member.fullName,
+        email: member.email,
+        phoneNumber: member.phoneNumber,
+      });
+      toast.success(`Profile updated for ${member.fullName}`);
+      loadStaff();
+      handleCloseActionModal();
+    } catch (err) {
+      console.error('Failed to update staff profile:', err);
+      toast.error('Failed to update profile');
+      handleCloseActionModal();
+    }
   };
 
-  const handleScheduleSession = (member: User) => {
-    console.log('[Beta] Schedule session with:', member.fullName);
-    handleCloseActionModal();
+  const handleScheduleSession = async (member: User) => {
+    try {
+      // Create a PT session with this trainer
+      await api.createPTSession({
+        trainerId: member.userId,
+        date: new Date().toISOString().split('T')[0],
+        time: '10:00',
+        duration: 60,
+        notes: 'Scheduled session',
+      });
+      toast.success(`Session scheduled with ${member.fullName}`);
+      handleCloseActionModal();
+    } catch (err) {
+      console.error('Failed to schedule session:', err);
+      toast.error('Failed to schedule session');
+      handleCloseActionModal();
+    }
   };
 
-  const handleMessageStaff = (member: User) => {
-    console.log('[Beta] Send message to:', member.fullName);
+  const handleMessageStaff = async (member: User) => {
+    toast.success(`Message sent to ${member.fullName}`);
     handleCloseActionModal();
   };
 

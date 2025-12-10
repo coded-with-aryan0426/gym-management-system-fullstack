@@ -1,5 +1,7 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import GymSelector from '../components/GymSelector/GymSelector';
+import { AthlonXLogo } from '../components/ui/AthlonXLogo';
 
 const colors = {
     bgPrimary: "#0D0D0D",
@@ -14,74 +16,171 @@ const colors = {
     emerald: "#10B981",
 };
 
+interface GymAssociation {
+    gymId: number;
+    gymName: string;
+    role?: string;
+    status: string;
+    membershipEndDate?: string;
+}
+
 export default function LoginPage() {
     const navigate = useNavigate();
-    const [email, setEmail] = useState("")
-    const [password, setPassword] = useState("")
-    const [showPassword, setShowPassword] = useState(false)
-    const [isLoading, setIsLoading] = useState(false)
-    const [error, setError] = useState("")
+    const [searchParams] = useSearchParams();
 
-    const onNavigate = (page: string) => {
-        navigate('/' + page);
-    };
+    // Role selection state
+    const [selectedRole, setSelectedRole] = useState<'STAFF' | 'MEMBER' | null>(null);
 
-    const onLogin = () => {
-        // In a real app, you would set authentication state/context here
-        navigate('/dashboard');
+    // Form state
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [emailError, setEmailError] = useState("");
+    const [passwordError, setPasswordError] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
+
+    // Gym selection state (after login)
+    const [showGymSelector, setShowGymSelector] = useState(false);
+    const [gymAssociations, setGymAssociations] = useState<GymAssociation[]>([]);
+    const [loginResponse, setLoginResponse] = useState<any>(null);
+
+    // Check for signup success
+    useEffect(() => {
+        if (searchParams.get('signup') === 'success') {
+            setSuccessMessage('Account created successfully! Please log in with your credentials.');
+            // Clear the param after showing message
+            setTimeout(() => setSuccessMessage(''), 5000);
+        }
+    }, [searchParams]);
+
+    // Email validation
+    const isValidEmail = (email: string) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        setError("")
-        setIsLoading(true)
+        e.preventDefault();
+        setEmailError("");
+        setPasswordError("");
+
+        // Validate with inline errors
+        let hasError = false;
+
+        if (!email) {
+            setEmailError("Email is required");
+            hasError = true;
+        } else if (!isValidEmail(email)) {
+            setEmailError("Enter a valid email (e.g., name@company.com)");
+            hasError = true;
+        }
+
+        if (!password) {
+            setPasswordError("Password is required");
+            hasError = true;
+        }
+
+        if (hasError) return;
+
+        if (!selectedRole) {
+            setEmailError("Please select a role first");
+            return;
+        }
+
+        setIsLoading(true);
 
         try {
-            // Real API Call
             const response = await fetch('/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: email, password: password }) // Assuming email is username
-                // Note: Backend endpoint expects 'username', but UI field says 'email'. 
-                // We should really handle username vs email. For now, sending email as username.
+                body: JSON.stringify({
+                    username: email,
+                    password: password,
+                    loginContext: selectedRole
+                })
             });
 
             if (response.ok) {
                 const data = await response.json();
-                // Store auth data (token, role, etc)
-                localStorage.setItem('user', JSON.stringify(data));
-                onLogin();
+                setLoginResponse(data);
+
+                // Check if we need gym selection
+                if (data.gymAssociations && data.gymAssociations.length > 1 && !data.activeGymId) {
+                    setGymAssociations(data.gymAssociations);
+                    setShowGymSelector(true);
+                } else {
+                    // Direct login
+                    localStorage.setItem('user', JSON.stringify(data));
+                    navigate('/dashboard');
+                }
             } else {
-                setError("Invalid email or password");
+                const errorData = await response.json();
+
+                // Check if user has access via other role
+                if (errorData.hasStaffAccess !== undefined || errorData.hasMemberAccess !== undefined) {
+                    if (selectedRole === 'STAFF' && errorData.hasMemberAccess) {
+                        setPasswordError("You don't have staff access. Try logging in as a Member.");
+                    } else if (selectedRole === 'MEMBER' && errorData.hasStaffAccess) {
+                        setPasswordError("You don't have member access. Try logging in as Staff.");
+                    } else {
+                        setPasswordError(errorData.error || "Login failed");
+                    }
+                } else {
+                    setPasswordError(errorData.error || "Invalid email or password");
+                }
             }
         } catch (err) {
-            setError("An error occurred. Please try again.");
+            setPasswordError("An error occurred. Please try again.");
         } finally {
-            setIsLoading(false)
+            setIsLoading(false);
         }
-    }
+    };
+
+    const handleGymSelect = async (gymId: number) => {
+        if (!loginResponse) return;
+
+        try {
+            const response = await fetch('/api/auth/set-active-gym', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: loginResponse.id,
+                    gymId: gymId,
+                    context: selectedRole
+                })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                localStorage.setItem('user', JSON.stringify({
+                    ...loginResponse,
+                    ...data
+                }));
+                navigate('/dashboard');
+            }
+        } catch (err) {
+            setPasswordError("Failed to select gym");
+        }
+    };
 
     return (
-        <div
-            style={{
-                minHeight: "100vh",
-                background: colors.bgPrimary,
-                color: colors.textPrimary,
-                display: "flex",
-                fontFamily: "'Inter', sans-serif",
-            }}
-        >
+        <div style={{
+            height: "100vh",
+            maxHeight: "100vh",
+            overflow: "hidden",
+            background: colors.bgPrimary,
+            color: colors.textPrimary,
+            display: "flex",
+            fontFamily: "'Inter', sans-serif",
+        }}>
             {/* Left Side - Image & Branding */}
-            <div
-                className="login-sidebar"
-                style={{
-                    flex: 1,
-                    position: "relative",
-                    overflow: "hidden",
-                    display: "none", // Hidden on mobile by default, handled by CSS media queries if we added them
-                }}
-            >
-                {/* We use inline style for display:block on desktop logic usually, but here simply: */}
+            <div className="login-sidebar" style={{
+                flex: 1,
+                position: "relative",
+                overflow: "hidden",
+                display: "none",
+            }}>
                 <div style={{
                     position: "absolute",
                     inset: 0,
@@ -89,39 +188,19 @@ export default function LoginPage() {
                     backgroundSize: "cover",
                     backgroundPosition: "center",
                 }} />
-
                 <div style={{
                     position: "absolute",
                     inset: 0,
                     background: `linear-gradient(to top, ${colors.bgPrimary} 0%, rgba(13,13,13,0.6) 50%, rgba(13,13,13,0.4) 100%)`
                 }} />
-
                 <div style={{
                     position: "absolute",
                     bottom: 60,
                     left: 60,
                     maxWidth: 480,
-                    animation: "fadeInUp 0.8s ease-out"
                 }}>
-                    <div
-                        style={{
-                            width: 64,
-                            height: 64,
-                            background: colors.crimson,
-                            borderRadius: 16,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontWeight: 700,
-                            fontSize: 32,
-                            marginBottom: 24,
-                            color: "#fff",
-                            boxShadow: "0 10px 25px rgba(220, 38, 38, 0.3)"
-                        }}
-                    >
-                        A
-                    </div>
-                    <h1 style={{ fontSize: 42, fontWeight: 800, marginBottom: 16, lineHeight: 1.1 }}>
+                    <AthlonXLogo size="xl" showText={false} />
+                    <h1 style={{ fontSize: 42, fontWeight: 800, marginBottom: 16, lineHeight: 1.1, marginTop: 24 }}>
                         Welcome to <span style={{ color: colors.crimson }}>AthlonX</span>
                     </h1>
                     <p style={{ fontSize: 18, color: "rgba(255,255,255,0.8)", lineHeight: 1.6 }}>
@@ -131,22 +210,20 @@ export default function LoginPage() {
             </div>
 
             {/* Right Side - Login Form */}
-            <div
-                style={{
-                    flex: 1,
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    padding: 60,
-                    background: colors.bgPrimary,
-                    position: "relative"
-                }}
-            >
-                <div style={{ width: "100%", maxWidth: 420, animation: "fadeIn 0.6s ease-out" }}>
+            <div style={{
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+                padding: 60,
+                background: colors.bgPrimary,
+                position: "relative"
+            }}>
+                <div style={{ width: "100%", maxWidth: 420 }}>
 
                     <button
-                        onClick={() => onNavigate("")}
+                        onClick={() => navigate('/')}
                         style={{
                             position: "absolute",
                             top: 40,
@@ -155,113 +232,149 @@ export default function LoginPage() {
                             border: "none",
                             color: colors.textSecondary,
                             cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 8,
                             fontSize: 14,
-                            transition: "color 0.2s"
                         }}
-                        onMouseOver={(e) => e.currentTarget.style.color = colors.textPrimary}
-                        onMouseOut={(e) => e.currentTarget.style.color = colors.textSecondary}
                     >
                         Back to Home
                     </button>
 
-                    <div style={{ marginBottom: 40 }}>
-                        <h2 style={{ fontSize: 32, fontWeight: 700, marginBottom: 12 }}>Sign In</h2>
+                    <div style={{ marginBottom: 32 }}>
+                        <h2 style={{ fontSize: 32, fontWeight: 700, marginBottom: 12 }}>Login</h2>
                         <p style={{ color: colors.textSecondary }}>Access your gym management dashboard</p>
                     </div>
 
-                    {error && (
-                        <div
-                            style={{
-                                background: "rgba(220, 38, 38, 0.1)",
-                                border: "1px solid rgba(220, 38, 38, 0.2)",
-                                color: "#ff6b6b", // slightly brighter for dark mode
-                                padding: "12px 16px",
-                                borderRadius: 8,
-                                marginBottom: 24,
-                                fontSize: 14,
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 12
-                            }}
-                        >
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-                            {error}
+                    {/* Role Selection Toggle */}
+                    <div style={{ marginBottom: 24 }}>
+                        <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: colors.textSecondary, marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                            I want to login as
+                        </label>
+                        <div style={{ display: "flex", gap: 8 }}>
+                            <button
+                                type="button"
+                                className="role-btn"
+                                onClick={() => setSelectedRole('STAFF')}
+                                style={{
+                                    flex: 1,
+                                    padding: "14px 16px",
+                                    background: selectedRole === 'STAFF' ? colors.crimson : colors.bgSecondary,
+                                    border: `2px solid ${selectedRole === 'STAFF' ? colors.crimson : colors.borderPrimary}`,
+                                    borderRadius: 12,
+                                    color: selectedRole === 'STAFF' ? "#fff" : colors.textSecondary,
+                                    cursor: "pointer",
+                                    fontSize: 14,
+                                    fontWeight: 600,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    gap: 8,
+                                    transition: "all 0.2s",
+                                }}
+                            >
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 21h18M5 21V7l8-4 8 4v14M9 21v-6h6v6" /></svg>
+                                Gym Staff
+                            </button>
+                            <button
+                                type="button"
+                                className="role-btn"
+                                onClick={() => setSelectedRole('MEMBER')}
+                                style={{
+                                    flex: 1,
+                                    padding: "14px 16px",
+                                    background: selectedRole === 'MEMBER' ? colors.emerald : colors.bgSecondary,
+                                    border: `2px solid ${selectedRole === 'MEMBER' ? colors.emerald : colors.borderPrimary}`,
+                                    borderRadius: 12,
+                                    color: selectedRole === 'MEMBER' ? "#fff" : colors.textSecondary,
+                                    cursor: "pointer",
+                                    fontSize: 14,
+                                    fontWeight: 600,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    gap: 8,
+                                    transition: "all 0.2s",
+                                }}
+                            >
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" /></svg>
+                                Member
+                            </button>
                         </div>
-                    )}
+                    </div>
 
                     <form onSubmit={handleSubmit}>
-                        <div style={{ marginBottom: 20 }}>
-                            <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: colors.textSecondary, marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.5px" }}>Email Address</label>
-                            <div style={{ position: "relative", transition: "all 0.2s" }}>
+                        {/* Email Field with Inline Error */}
+                        <div style={{ marginBottom: 16 }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                                <label style={{ fontSize: 12, fontWeight: 600, color: colors.textSecondary, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                                    Email Address
+                                </label>
+                                {emailError && (
+                                    <span style={{ color: "#DC2626", fontSize: 11, display: "flex", alignItems: "center", gap: 3 }}>
+                                        ⚠ {emailError}
+                                    </span>
+                                )}
+                            </div>
+                            <div style={{ position: "relative" }}>
                                 <div style={{ position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)", color: colors.textTertiary }}>
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                        <polyline points="22,6 12,13 2,6"></polyline>
+                                    </svg>
                                 </div>
                                 <input
                                     type="email"
                                     value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
+                                    onChange={(e) => { setEmail(e.target.value); setEmailError(""); }}
                                     placeholder="name@company.com"
                                     style={{
                                         width: "100%",
-                                        padding: "14px 16px 14px 48px", // Added left padding for icon
+                                        padding: "14px 16px 14px 48px",
                                         background: colors.bgSecondary,
-                                        border: `1px solid ${colors.borderPrimary}`,
+                                        border: `1px solid ${emailError ? "#DC2626" : colors.borderPrimary}`,
                                         borderRadius: 12,
                                         color: colors.textPrimary,
                                         fontSize: 15,
                                         outline: "none",
                                         boxSizing: "border-box",
-                                        transition: "border-color 0.2s, box-shadow 0.2s"
-                                    }}
-                                    onFocus={(e) => {
-                                        e.target.style.borderColor = colors.crimson;
-                                        e.target.style.boxShadow = `0 0 0 4px ${colors.crimson}20`;
-                                    }}
-                                    onBlur={(e) => {
-                                        e.target.style.borderColor = colors.borderPrimary;
-                                        e.target.style.boxShadow = "none";
                                     }}
                                 />
                             </div>
                         </div>
 
-                        <div style={{ marginBottom: 24 }}>
-                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-                                <label style={{ fontSize: 13, fontWeight: 600, color: colors.textSecondary, textTransform: "uppercase", letterSpacing: "0.5px" }}>Password</label>
-                                <a href="#" style={{ color: colors.crimson, textDecoration: "none", fontSize: 13, fontWeight: 500 }}>Forgot password?</a>
+                        {/* Password Field with Inline Error */}
+                        <div style={{ marginBottom: 20 }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                    <label style={{ fontSize: 12, fontWeight: 600, color: colors.textSecondary, textTransform: "uppercase", letterSpacing: "0.5px" }}>Password</label>
+                                    {passwordError && (
+                                        <span style={{ color: "#DC2626", fontSize: 11, display: "flex", alignItems: "center", gap: 3 }}>
+                                            ⚠ {passwordError}
+                                        </span>
+                                    )}
+                                </div>
+                                <a href="#" style={{ color: colors.crimson, textDecoration: "none", fontSize: 12, fontWeight: 500 }}>Forgot password?</a>
                             </div>
                             <div style={{ position: "relative" }}>
                                 <div style={{ position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)", color: colors.textTertiary }}>
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                    </svg>
                                 </div>
                                 <input
                                     type={showPassword ? "text" : "password"}
                                     value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
+                                    onChange={(e) => { setPassword(e.target.value); setPasswordError(""); }}
                                     placeholder="Enter your password"
                                     style={{
                                         width: "100%",
                                         padding: "14px 48px 14px 48px",
                                         background: colors.bgSecondary,
-                                        border: `1px solid ${colors.borderPrimary}`,
+                                        border: `1px solid ${passwordError ? "#DC2626" : colors.borderPrimary}`,
                                         borderRadius: 12,
                                         color: colors.textPrimary,
                                         fontSize: 15,
                                         outline: "none",
                                         boxSizing: "border-box",
-                                        transition: "border-color 0.2s, box-shadow 0.2s"
-
-                                    }}
-                                    onFocus={(e) => {
-                                        e.target.style.borderColor = colors.crimson;
-                                        e.target.style.boxShadow = `0 0 0 4px ${colors.crimson}20`;
-                                    }}
-                                    onBlur={(e) => {
-                                        e.target.style.borderColor = colors.borderPrimary;
-                                        e.target.style.boxShadow = "none";
                                     }}
                                 />
                                 <button
@@ -276,8 +389,11 @@ export default function LoginPage() {
                                         border: "none",
                                         cursor: "pointer",
                                         color: colors.textTertiary,
+                                        minHeight: 44,
+                                        minWidth: 44,
                                         display: "flex",
-                                        alignItems: "center"
+                                        alignItems: "center",
+                                        justifyContent: "center",
                                     }}
                                 >
                                     {showPassword ? (
@@ -295,47 +411,50 @@ export default function LoginPage() {
                             </div>
                         </div>
 
+                        {/* Sign Up Link - Above Submit Button */}
+                        <p style={{ textAlign: "center", marginBottom: 16, color: colors.textSecondary, fontSize: 14 }}>
+                            Don't have an account?{" "}
+                            <button
+                                type="button"
+                                onClick={() => navigate('/signup')}
+                                style={{
+                                    background: "transparent",
+                                    border: "none",
+                                    color: colors.crimson,
+                                    cursor: "pointer",
+                                    fontWeight: 600,
+                                    fontSize: 14,
+                                    padding: 0,
+                                    textDecoration: "underline",
+                                }}
+                            >
+                                Sign up free
+                            </button>
+                        </p>
+
                         <button
                             type="submit"
-                            disabled={isLoading}
+                            disabled={isLoading || !selectedRole}
                             style={{
                                 width: "100%",
                                 padding: "16px",
-                                background: `linear-gradient(to right, ${colors.crimson}, ${colors.crimsonHover || '#b91c1c'})`,
+                                background: selectedRole ? `linear-gradient(to right, ${colors.crimson}, ${colors.crimsonHover})` : colors.bgTertiary,
                                 border: "none",
                                 borderRadius: 12,
-                                color: "#fff",
+                                color: selectedRole ? "#fff" : colors.textTertiary,
                                 fontSize: 16,
                                 fontWeight: 600,
-                                cursor: isLoading ? "not-allowed" : "pointer",
+                                cursor: isLoading || !selectedRole ? "not-allowed" : "pointer",
                                 opacity: isLoading ? 0.7 : 1,
                                 display: "flex",
                                 alignItems: "center",
                                 justifyContent: "center",
                                 gap: 12,
-                                transition: "transform 0.1s, box-shadow 0.2s",
-                                boxShadow: `0 4px 6px -1px rgba(220, 38, 38, 0.2), 0 2px 4px -1px rgba(220, 38, 38, 0.1)`
-                            }}
-                            onMouseOver={(e) => {
-                                if (!isLoading) e.currentTarget.style.transform = "translateY(-1px)";
-                                if (!isLoading) e.currentTarget.style.boxShadow = `0 10px 15px -3px rgba(220, 38, 38, 0.3)`;
-                            }}
-                            onMouseOut={(e) => {
-                                if (!isLoading) e.currentTarget.style.transform = "none";
-                                if (!isLoading) e.currentTarget.style.boxShadow = `0 4px 6px -1px rgba(220, 38, 38, 0.2)`;
                             }}
                         >
                             {isLoading ? (
                                 <>
-                                    <svg
-                                        width="20"
-                                        height="20"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                        style={{ animation: "spin 1s linear infinite" }}
-                                    >
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ animation: "spin 1s linear infinite" }}>
                                         <circle cx="12" cy="12" r="10" opacity="0.3" />
                                         <path d="M12 2a10 10 0 0 1 10 10" />
                                     </svg>
@@ -343,60 +462,89 @@ export default function LoginPage() {
                                 </>
                             ) : (
                                 <>
-                                    Sign In
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                                        {!selectedRole ? "Select a role to continue" : `Sign In as ${selectedRole === 'STAFF' ? 'Staff' : 'Member'}`}
+                                        {selectedRole && (
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                                <polyline points="12 5 19 12 12 19"></polyline>
+                                            </svg>
+                                        )}
                                 </>
                             )}
                         </button>
                     </form>
-
-                    <div style={{ marginTop: 32, textAlign: "center" }}>
-                        <p style={{ color: colors.textSecondary, fontSize: 15 }}>
-                            Don't have an account?{" "}
-                            <button
-                                onClick={() => onNavigate("signup")}
-                                style={{
-                                    background: "transparent",
-                                    border: "none",
-                                    color: colors.crimson,
-                                    cursor: "pointer",
-                                    fontWeight: 600,
-                                    fontSize: 15,
-                                    padding: 0
-                                }}
-                            >
-                                Sign up free
-                            </button>
-                        </p>
-                    </div>
                 </div>
 
-                {/* Footer info */}
                 <div style={{ position: "absolute", bottom: 24, fontSize: 13, color: colors.textTertiary }}>
-                    &copy; 2025 AthlonX Inc.
+                    © 2025 AthlonX Inc.
                 </div>
             </div>
 
+            {/* Gym Selector Modal */}
+            {showGymSelector && (
+                <GymSelector
+                    gyms={gymAssociations}
+                    context={selectedRole!}
+                    onSelectGym={handleGymSelect}
+                    onClose={() => setShowGymSelector(false)}
+                />
+            )}
+
             <style>{`
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        @media (min-width: 1024px) {
-            .login-sidebar {
-                display: block !important;
-            }
-        }
-      `}</style>
+                @keyframes spin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+                @keyframes pulse {
+                    0%, 100% { opacity: 1; }
+                    50% { opacity: 0.7; }
+                }
+                @keyframes slideIn {
+                    from { opacity: 0; transform: translateY(-10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                @media (min-width: 1024px) {
+                    .login-sidebar { display: block !important; }
+                }
+                
+                /* Input focus glow effect */
+                input:focus {
+                    border-color: #10B981 !important;
+                    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15), 0 0 20px rgba(16, 185, 129, 0.1) !important;
+                    transition: all 0.2s ease !important;
+                }
+                
+                /* Role button hover lift */
+                .role-btn {
+                    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+                }
+                .role-btn:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+                }
+                .role-btn:active {
+                    transform: translateY(0);
+                }
+                
+                /* Submit button hover effect */
+                button[type="submit"]:not(:disabled):hover {
+                    transform: translateY(-1px);
+                    box-shadow: 0 4px 20px rgba(220, 38, 38, 0.3);
+                }
+                button[type="submit"]:active {
+                    transform: translateY(0);
+                }
+                
+                /* Link hover underline */
+                a:hover {
+                    text-decoration: underline !important;
+                }
+                
+                /* Error animation */
+                .error-box {
+                    animation: slideIn 0.3s ease;
+                }
+            `}</style>
         </div>
-    )
+    );
 }

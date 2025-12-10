@@ -1,9 +1,11 @@
 "use client"
 
 import type React from "react"
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useCallback } from "react"
 import { useNavigate } from "react-router-dom"
 import { CreateUserModal } from "../index"
+import api from "../../services/api"
+import type { User } from "../../types/user"
 import "./UtilityBar.css"
 
 interface Notification {
@@ -15,12 +17,24 @@ interface Notification {
   read: boolean
 }
 
+interface SearchResult {
+  id: number
+  name: string
+  email: string
+  type: "member" | "staff"
+}
+
 const UtilityBar: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("")
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([])
+  const [showSearchResults, setShowSearchResults] = useState(false)
+  const [isSearching, setIsSearching] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const navigate = useNavigate()
   const notificationRef = useRef<HTMLDivElement>(null)
+  const searchRef = useRef<HTMLDivElement>(null)
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const [notifications] = useState<Notification[]>([
     { id: 1, type: "member", title: "New Member", message: "John Doe signed up.", time: "2 months ago", read: false },
@@ -57,15 +71,73 @@ const UtilityBar: React.FC = () => {
       if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
         setShowNotifications(false)
       }
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowSearchResults(false)
+      }
     }
     document.addEventListener("mousedown", handleClickOutside)
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
-  const handleSearch = (e: React.FormEvent) => {
+  // Debounced search function
+  const performSearch = useCallback(async (query: string) => {
+    if (!query.trim()) {
+      setSearchResults([])
+      setShowSearchResults(false)
+      return
+    }
+
+    setIsSearching(true)
+    try {
+      // Search both members and staff
+      const [members, staff] = await Promise.all([
+        api.searchUsers("CUSTOMER", query).catch(() => []),
+        api.searchUsers("TRAINER", query).catch(() => []),
+      ])
+
+      const results: SearchResult[] = [
+        ...members.map((m: User) => ({ id: m.userId, name: m.fullName, email: m.email, type: "member" as const })),
+        ...staff.map((s: User) => ({ id: s.userId, name: s.fullName, email: s.email, type: "staff" as const })),
+      ]
+
+      setSearchResults(results.slice(0, 10)) // Limit to 10 results
+      setShowSearchResults(true)
+    } catch (err) {
+      console.error("Search failed:", err)
+      setSearchResults([])
+    } finally {
+      setIsSearching(false)
+    }
+  }, [])
+
+  // Handle search input change with debounce
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value
+    setSearchQuery(query)
+
+    // Clear previous timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current)
+    }
+
+    // Debounce search
+    searchTimeoutRef.current = setTimeout(() => {
+      performSearch(query)
+    }, 300)
+  }
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (searchQuery.trim()) {
-      console.log("Searching:", searchQuery)
+    performSearch(searchQuery)
+  }
+
+  const handleResultClick = (result: SearchResult) => {
+    setShowSearchResults(false)
+    setSearchQuery("")
+    if (result.type === "member") {
+      navigate(`/members?userId=${result.id}`)
+    } else {
+      navigate(`/staff?userId=${result.id}`)
     }
   }
 
@@ -117,28 +189,67 @@ const UtilityBar: React.FC = () => {
   return (
     <header className="utility-bar">
       {/* Search */}
-      <form className="utility-bar__search" onSubmit={handleSearch}>
-        <svg
-          className="utility-bar__search-icon"
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-        >
-          <circle cx="11" cy="11" r="8" />
-          <path d="m21 21-4.35-4.35" />
-        </svg>
-        <input
-          type="text"
-          className="utility-bar__search-input"
-          placeholder="Search members, classes, or staff (Cmd+K)"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-        <kbd className="utility-bar__shortcut">⌘K</kbd>
-      </form>
+      <div className="utility-bar__search-container" ref={searchRef}>
+        <form className="utility-bar__search" onSubmit={handleSearchSubmit}>
+          <svg
+            className="utility-bar__search-icon"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.35-4.35" />
+          </svg>
+          <input
+            type="text"
+            className="utility-bar__search-input"
+            placeholder="Search members, classes, or staff (Cmd+K)"
+            value={searchQuery}
+            onChange={handleSearchChange}
+            onFocus={() => searchQuery.trim() && setShowSearchResults(true)}
+          />
+          {isSearching ? (
+            <span className="utility-bar__spinner" />
+          ) : (
+              <kbd className="utility-bar__shortcut">⌘K</kbd>
+          )}
+        </form>
+
+        {/* Search Results Dropdown */}
+        {showSearchResults && (
+          <div className="utility-bar__search-results">
+            {searchResults.length === 0 ? (
+              <div className="search-results__empty">
+                {isSearching ? "Searching..." : `No results for "${searchQuery}"`}
+              </div>
+            ) : (
+              <>
+                <div className="search-results__header">
+                  Found {searchResults.length} result{searchResults.length !== 1 ? "s" : ""}
+                </div>
+                {searchResults.map((result) => (
+                  <button
+                    key={`${result.type}-${result.id}`}
+                    className="search-results__item"
+                    onClick={() => handleResultClick(result)}
+                  >
+                    <span className={`search-results__badge search-results__badge--${result.type}`}>
+                      {result.type === "member" ? "M" : "S"}
+                    </span>
+                    <div className="search-results__info">
+                      <span className="search-results__name">{result.name}</span>
+                      <span className="search-results__email">{result.email}</span>
+                    </div>
+                  </button>
+                ))}
+              </>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Actions */}
       <div className="utility-bar__actions">

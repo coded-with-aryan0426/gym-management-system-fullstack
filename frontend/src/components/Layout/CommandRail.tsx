@@ -2,6 +2,7 @@
 
 import type React from "react"
 import { NavLink } from "react-router-dom"
+import { AthlonXLogo } from "../ui/AthlonXLogo"
 import "./CommandRail.css"
 
 // Icons as inline SVGs for better performance
@@ -74,7 +75,7 @@ const icons = {
 }
 
 const navItems = [
-  { path: "/", label: "Dashboard", icon: icons.dashboard },
+  { path: "/dashboard", label: "Dashboard", icon: icons.dashboard },
   { path: "/members", label: "Members", icon: icons.members },
   { path: "/classes", label: "Classes", icon: icons.classes },
   { path: "/staff", label: "Staff", icon: icons.staff },
@@ -91,12 +92,7 @@ const CommandRail: React.FC<CommandRailProps> = ({ isCollapsed = false, onToggle
   return (
     <aside className={`command-rail ${isCollapsed ? "command-rail--collapsed" : ""}`}>
       <div className="command-rail__logo">
-        <div className="command-rail__logo-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2L2 19h20L12 2zm0 4l7 11H5l7-11z" />
-          </svg>
-        </div>
-        <span className="command-rail__logo-text">AthlonX</span>
+        <AthlonXLogo size={isCollapsed ? "sm" : "md"} showText={!isCollapsed} />
       </div>
 
       {/* Navigation */}

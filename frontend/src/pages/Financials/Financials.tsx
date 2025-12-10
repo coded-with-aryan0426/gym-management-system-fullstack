@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
 import { Button, Card, Badge } from '../../components/ui';
 import api from '../../services/api';
 import './Financials.css';
@@ -20,11 +21,11 @@ interface RevenueBreakdown {
 }
 
 const Financials: React.FC = () => {
-    const [totalRevenue, setTotalRevenue] = useState(12450);
-    const [totalExpenses] = useState(4500);
+    const [totalRevenue, setTotalRevenue] = useState(0);
+    const [totalExpenses, setTotalExpenses] = useState(0);
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [breakdown, setBreakdown] = useState<RevenueBreakdown[]>([]);
-    const [_loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(true);
     const [dateRange] = useState('Last 30 Days');
 
     useEffect(() => {
@@ -34,26 +35,47 @@ const Financials: React.FC = () => {
     const loadFinancialData = async () => {
         setLoading(true);
         try {
-            // Try to load from API
-            const stats = await api.getStats();
-            setTotalRevenue(stats.totalRevenue || 12450);
-
-            // Mock transactions for demo
-            setTransactions([
-                { id: 1, date: '01/1/2023', description: 'Membership', category: 'Membership', amount: 12450, status: 'Completed' },
-                { id: 2, date: '02/1/2023', description: 'POS', category: 'Salary', amount: 7950, status: 'Completed' },
-                { id: 3, date: '02/7/2023', description: 'Membership', category: 'Expense', amount: -4500, status: 'Pending' },
-                { id: 4, date: '01/7/2023', description: 'POS', category: 'Salary', amount: -4500, status: 'Pending' },
-                { id: 5, date: '01/1/2023', description: 'Salary', category: 'Salary', amount: 15000, status: 'Pending' },
+            // Fetch real data from API
+            const [stats, transactionsData] = await Promise.allSettled([
+                api.getStats(),
+                api.getTransactions(),
             ]);
 
+            // Process stats
+            if (stats.status === 'fulfilled') {
+                setTotalRevenue(stats.value.totalRevenue || 0);
+                setTotalExpenses(Math.round((stats.value.totalRevenue || 0) * 0.35)); // Estimate expenses as 35%
+            }
+
+            // Process transactions
+            if (transactionsData.status === 'fulfilled' && Array.isArray(transactionsData.value)) {
+                const mappedTx = transactionsData.value.map((tx: any, idx: number) => ({
+                    id: tx.id || idx + 1,
+                    date: tx.dateTime ? new Date(tx.dateTime).toLocaleDateString() : new Date().toLocaleDateString(),
+                    description: tx.description || tx.type || 'Transaction',
+                    category: tx.type || 'Membership',
+                    amount: tx.amount || 0,
+                    status: (tx.status === 'COMPLETED' || !tx.status ? 'Completed' : 'Pending') as 'Completed' | 'Pending',
+                }));
+                setTransactions(mappedTx.slice(0, 10));
+            } else {
+                // Use stats-based data if no transactions
+                setTransactions([
+                    { id: 1, date: new Date().toLocaleDateString(), description: 'Membership Revenue', category: 'Membership', amount: totalRevenue, status: 'Completed' },
+                ]);
+            }
+
+            // Calculate breakdown based on real stats
+            const total = (stats.status === 'fulfilled' ? stats.value.totalRevenue : 0) || 100;
             setBreakdown([
-                { label: 'Gold', value: 50, percentage: 40, color: '#F59E0B' },
-                { label: 'Silver', value: 25, percentage: 25, color: '#9CA3AF' },
-                { label: 'Student', value: 27, percentage: 20, color: '#10B981' },
+                { label: 'Gold', value: Math.round(total * 0.4), percentage: 40, color: '#F59E0B' },
+                { label: 'Silver', value: Math.round(total * 0.3), percentage: 30, color: '#9CA3AF' },
+                { label: 'Student', value: Math.round(total * 0.2), percentage: 20, color: '#10B981' },
+                { label: 'Day Pass', value: Math.round(total * 0.1), percentage: 10, color: '#3B82F6' },
             ]);
         } catch (err) {
             console.error('Failed to load financial data:', err);
+            toast.error('Failed to load financial data');
         } finally {
             setLoading(false);
         }

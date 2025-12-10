@@ -2,6 +2,7 @@
 
 import type React from "react"
 import { useEffect, useState, useCallback } from "react"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import { MetricCard, Card, Avatar } from "../../components/ui"
 import api from "../../services/api"
 import "./Dashboard.css"
@@ -38,6 +39,14 @@ interface Alert {
 }
 
 const Dashboard: React.FC = () => {
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+
+  // Banner state for membership status
+  const [showBanner, setShowBanner] = useState(false)
+  const [bannerMessage, setBannerMessage] = useState("")
+  const [bannerType, setBannerType] = useState<"info" | "warning">("info")
+
   // For beta testing: start with empty/zero values - real data comes from API
   const [metrics, setMetrics] = useState<DashboardMetrics>({
     todayRevenue: 0,
@@ -55,6 +64,29 @@ const Dashboard: React.FC = () => {
   const [alerts, setAlerts] = useState<Alert[]>([])
 
   const [loading, setLoading] = useState(true)
+
+  // Check for needsGym query param or pending membership status
+  useEffect(() => {
+    const needsGym = searchParams.get("needsGym")
+    const userStr = localStorage.getItem("user")
+
+    if (needsGym === "true") {
+      setShowBanner(true)
+      setBannerMessage("👋 Welcome! Please find and join your gym to get started.")
+      setBannerType("info")
+    } else if (userStr) {
+      try {
+        const user = JSON.parse(userStr)
+        if (user.membershipStatus === "PENDING") {
+          setShowBanner(true)
+          setBannerMessage("⏳ Your membership is pending approval. You'll get access as soon as your gym confirms.")
+          setBannerType("warning")
+        }
+      } catch (e) {
+        console.error("Error parsing user data:", e)
+      }
+    }
+  }, [searchParams])
 
   const loadDashboardData = useCallback(async () => {
     setLoading(true)
@@ -112,10 +144,10 @@ const Dashboard: React.FC = () => {
   }, [loadDashboardData])
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat("en-IN", {
       style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 2,
+      currency: "INR",
+      minimumFractionDigits: 0,
     }).format(value)
   }
 
@@ -161,6 +193,44 @@ const Dashboard: React.FC = () => {
       <div className="dashboard__header">
         <h1 className="dashboard__title">Tactical Canvas</h1>
       </div>
+
+      {/* Membership Status Banner */}
+      {showBanner && (
+        <div style={{
+          padding: "16px 24px",
+          background: bannerType === "info"
+            ? "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+            : "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+          color: "#fff",
+          fontSize: "14px",
+          fontWeight: 500,
+          borderRadius: "12px",
+          marginBottom: "20px",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between"
+        }}>
+          <span>{bannerMessage}</span>
+          {bannerType === "info" && (
+            <button
+              onClick={() => navigate("/gyms")}
+              style={{
+                padding: "8px 16px",
+                background: "rgba(255,255,255,0.2)",
+                border: "1px solid rgba(255,255,255,0.3)",
+                borderRadius: "8px",
+                color: "#fff",
+                fontSize: "13px",
+                fontWeight: 600,
+                cursor: "pointer"
+              }}
+            >
+              Find Gyms
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Metrics Row */}
       <div className="dashboard__metrics">

@@ -11,14 +11,15 @@ interface GymClass {
   name: string
   trainer: string
   time: string
+  displayTime?: string
   day: string
   capacity: number
   enrolled: number
   status: "Available" | "Busy" | "Full" | "Capacity"
 }
 
-const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"]
-const TIMES = ["00:00", "10:00", "11:00", "12:00", "12:00", "2:00", "2:00", "3:00", "6:00", "10:00"]
+const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+const TIMES = ["6:00", "8:00", "10:00", "12:00", "14:00", "16:00", "18:00", "20:00"]
 
 const Classes: React.FC = () => {
   const [classes, setClasses] = useState<GymClass[]>([])
@@ -35,15 +36,21 @@ const Classes: React.FC = () => {
       )
       const sessions = allSessions.flat()
       
+      console.log("[Classes] Raw sessions from API:", sessions)
+
       // Transform real session data to class format
       const transformed: GymClass[] = sessions.map((session, idx) => {
         const sessionDate = new Date(session.sessionDate)
         const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
         const hours = sessionDate.getHours()
         const minutes = sessionDate.getMinutes()
+
+        // Use 24-hour format for matching with TIMES array
+        const timeStr24 = `${hours}:00`
+        // Display time in 12-hour format
         const ampm = hours >= 12 ? 'PM' : 'AM'
         const displayHours = hours % 12 || 12
-        const timeStr = `${displayHours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${ampm}`
+        const displayTime = `${displayHours}:${minutes.toString().padStart(2, '0')} ${ampm}`
         
         // Determine status based on session status
         let classStatus: GymClass["status"] = "Available"
@@ -55,13 +62,16 @@ const Classes: React.FC = () => {
           id: session.sessionId || idx,
           name: session.workoutPlan || `PT Session ${idx + 1}`,
           trainer: session.trainerName || 'Unknown Trainer',
-          time: timeStr,
+          time: timeStr24, // Use 24-hour format for grid matching
+          displayTime: displayTime, // Use 12-hour for display
           day: dayNames[sessionDate.getDay()],
           capacity: 1, // PT sessions are typically 1:1
           enrolled: session.status === "SCHEDULED" || session.status === "COMPLETED" ? 1 : 0,
           status: classStatus,
         }
       })
+
+      console.log("[Classes] Transformed classes:", transformed)
       setClasses(transformed)
     } catch (err) {
       console.error("[Beta] Failed to load classes from backend:", err)

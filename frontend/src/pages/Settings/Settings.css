@@ -46,6 +46,9 @@
 .settings-card__header {
   padding: var(--space-4);
   border-bottom: 1px solid var(--border-secondary);
+  display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .settings-card__header h3 {
@@ -55,6 +58,32 @@
   margin: 0;
 }
 
+.settings-save-btn {
+  padding: 8px 16px;
+  background: var(--color-crimson);
+  color: white;
+  border: none;
+  border-radius: var(--button-radius);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.settings-save-btn:hover {
+  background: var(--color-crimson-hover);
+}
+
+.settings-save-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.settings-loading {
+  padding: var(--space-4);
+  text-align: center;
+  color: var(--text-secondary);
+}
 .settings-card__body {
   padding: var(--space-4);
   display: flex;
@@ -214,4 +243,115 @@
     padding: var(--space-3);
     gap: var(--space-3);
   }
+}
+
+/* Settings Modal */
+.settings-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.settings-modal {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--card-radius);
+  width: 100%;
+  max-width: 400px;
+  box-shadow: var(--shadow-xl);
+  animation: modalSlideIn 0.2s ease;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.settings-modal__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.settings-modal__header h3 {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+}
+
+.settings-modal__close {
+  background: transparent;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all var(--transition-fast);
+}
+
+.settings-modal__close:hover {
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+}
+
+.settings-modal__body {
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.settings-modal__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-top: 1px solid var(--border-primary);
+}
+
+.settings-modal__cancel {
+  padding: 10px 20px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--button-radius);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.settings-modal__cancel:hover {
+  background: var(--bg-elevated);
+}
+
+.settings-modal__submit {
+  padding: 10px 20px;
+  background: var(--color-crimson);
+  border: none;
+  border-radius: var(--button-radius);
+  color: white;
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.settings-modal__submit:hover {
+  background: var(--color-crimson-hover);
 }

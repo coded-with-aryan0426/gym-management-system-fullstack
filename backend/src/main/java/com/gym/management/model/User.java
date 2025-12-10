@@ -54,6 +54,16 @@ public class User {
 
     private String email;
 
+    private String phone;
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

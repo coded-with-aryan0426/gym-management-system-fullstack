@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { AthlonXLogo } from '../components/ui/AthlonXLogo';
 
 // Color System matching reference design
 const colors = {
@@ -126,25 +127,7 @@ export default function LandingPage() {
                         alignItems: "center",
                     }}
                 >
-                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                        <div
-                            style={{
-                                width: 40,
-                                height: 40,
-                                background: colors.crimson,
-                                borderRadius: 8,
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                fontWeight: 700,
-                                fontSize: 20,
-                                color: "#fff",
-                            }}
-                        >
-                            A
-                        </div>
-                        <span style={{ fontWeight: 700, fontSize: 20 }}>AthlonX</span>
-                    </div>
+                    <AthlonXLogo size="md" />
 
                     <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
                         <a href="#features" style={{ color: colors.textSecondary, textDecoration: "none", fontSize: 14 }}>
@@ -338,25 +321,7 @@ export default function LandingPage() {
                         <div style={{ padding: 24, display: "flex", gap: 24 }}>
                             {/* Mini Sidebar */}
                             <div style={{ width: 180, flexShrink: 0 }}>
-                                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 24 }}>
-                                    <div
-                                        style={{
-                                            width: 28,
-                                            height: 28,
-                                            background: colors.crimson,
-                                            borderRadius: 6,
-                                            display: "flex",
-                                            alignItems: "center",
-                                            justifyContent: "center",
-                                            fontWeight: 700,
-                                            fontSize: 12,
-                                            color: "#fff",
-                                        }}
-                                    >
-                                        A
-                                    </div>
-                                    <span style={{ fontWeight: 600, fontSize: 14 }}>Apex Gym</span>
-                                </div>
+                                <AthlonXLogo size="sm" />
                                 {["Dashboard", "Members", "Classes", "Staff", "Financials"].map((item, i) => (
                                     <div
                                         key={item}
@@ -506,7 +471,7 @@ export default function LandingPage() {
                 >
                     <h2 style={{ fontSize: 36, fontWeight: 700, marginBottom: 16 }}>Ready to Transform Your Gym?</h2>
                     <p style={{ fontSize: 18, color: colors.textSecondary, marginBottom: 32 }}>
-                        Join 500+ gyms already using Apex to streamline their operations.
+                        Join 500+ gyms already using AthlonX to streamline their operations.
                     </p>
                     <button
                         onClick={() => onNavigate("signup")}
@@ -538,27 +503,9 @@ export default function LandingPage() {
                         alignItems: "center",
                     }}
                 >
-                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                        <div
-                            style={{
-                                width: 32,
-                                height: 32,
-                                background: colors.crimson,
-                                borderRadius: 6,
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                fontWeight: 700,
-                                fontSize: 14,
-                                color: "#fff",
-                            }}
-                        >
-                            A
-                        </div>
-                        <span style={{ fontWeight: 600 }}>Apex Gym</span>
-                    </div>
+                    <AthlonXLogo size="sm" />
                     <p style={{ color: colors.textTertiary, fontSize: 14 }}>
-                        &copy; 2025 Apex Gym Management. All rights reserved.
+                        &copy; 2025 AthlonX Gym Management. All rights reserved.
                     </p>
                 </div>
             </footer>

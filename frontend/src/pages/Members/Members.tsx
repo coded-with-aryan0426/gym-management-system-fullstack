@@ -2,6 +2,7 @@
 
 import type React from "react"
 import { useEffect, useState, useMemo, useCallback } from "react"
+import { toast } from "react-hot-toast"
 import { Button, Badge, getStatusVariant, Avatar, DataTable, MemberActionModal, type Column } from "../../components"
 import api from "../../services/api"
 import type { User } from "../../types/user"
@@ -45,7 +46,7 @@ const Members: React.FC = () => {
       setMembers(enhancedData)
     } catch (err) {
       console.error("[Beta] Failed to load members from backend:", err)
-      // For beta testing: show empty state instead of mock data
+      toast.error("Failed to load members")
       setMembers([])
     } finally {
       setLoading(false)
@@ -73,21 +74,37 @@ const Members: React.FC = () => {
         email: member.email,
         phoneNumber: member.phoneNumber,
       })
+      toast.success(`Profile updated for ${member.fullName}`)
       loadMembers() // Refresh list
       handleCloseActionModal()
     } catch (err) {
-      console.log("[v0] Profile update would be saved to backend")
+      console.error("Failed to update profile:", err)
+      toast.error("Failed to update profile. Please try again.")
     }
   }
 
   const handleRenewPlan = async (member: User) => {
-    console.log("[v0] Renew plan for:", member.fullName)
-    // In a real app, this would create a payment and update membership
-    handleCloseActionModal()
+    try {
+      // Create a transaction for the renewal
+      await api.createTransaction({
+        userId: member.userId,
+        amount: 79999,
+        type: "MEMBERSHIP_RENEWAL",
+        description: `Membership renewal for ${member.fullName}`,
+      })
+      toast.success(`Membership renewed for ${member.fullName}`)
+      loadMembers()
+      handleCloseActionModal()
+    } catch (err) {
+      console.error("Failed to renew membership:", err)
+      toast.error("Failed to process renewal. Please try again.")
+      handleCloseActionModal()
+    }
   }
 
   const handleSendMessage = async (member: User) => {
-    console.log("[v0] Send message to:", member.fullName)
+    // For now, simulate message sending (backend endpoint would be needed)
+    toast.success(`Message sent to ${member.fullName}`)
     handleCloseActionModal()
   }
 

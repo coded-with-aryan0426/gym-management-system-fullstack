@@ -45,7 +45,7 @@ const MemberActionModal: React.FC<MemberActionModalProps> = ({
   const [renewForm, setRenewForm] = useState({
     plan: "Gold Plan",
     duration: "1 Year",
-    amount: "999.00",
+    amount: "79,999",
   })
 
   // Message form state
@@ -71,7 +71,7 @@ const MemberActionModal: React.FC<MemberActionModalProps> = ({
       setEditForm({
         fullName: member.fullName,
         email: member.email,
-        phone: member.phoneNumber || "+1 555 0100",
+        phone: member.phoneNumber || "+91 98765 43210",
         notes: "",
       })
     }
@@ -420,10 +420,10 @@ const MemberActionModal: React.FC<MemberActionModalProps> = ({
                       <label>Total Amount</label>
                       <input
                         type="text"
-                        value={`$${renewForm.amount}`}
-                        onChange={(e) => setRenewForm({ ...renewForm, amount: e.target.value.replace("$", "") })}
+                        value={`₹${renewForm.amount}`}
+                        onChange={(e) => setRenewForm({ ...renewForm, amount: e.target.value.replace("₹", "") })}
                         className="form-input"
-                        placeholder="e.g., $999.00"
+                        placeholder="e.g., ₹79,999"
                       />
                     </div>
                   </div>
