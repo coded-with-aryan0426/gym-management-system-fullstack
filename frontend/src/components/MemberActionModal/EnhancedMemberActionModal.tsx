@@ -175,6 +175,13 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
   const handleAddTrainer = async (trainer: User) => {
     if (!member) return
 
+    // Check if trainer is already assigned
+    const isAlreadyAssigned = assignedTrainers.some(t => t.userId === trainer.userId)
+    if (isAlreadyAssigned) {
+      showError('Trainer is already assigned to this member')
+      return
+    }
+
     try {
       // Optimistically add trainer to the list
       setAssignedTrainers(prev => [...prev, trainer])
@@ -233,26 +240,26 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
     try {
       showLoading('save-profile')
       
-      const updatedUser = await enhancedApi.updateUserWithVersion(
-        member.userId,
-        {
-          fullName: editForm.fullName,
-          email: editForm.email,
-          phoneNumber: editForm.phone
-        },
-        1 // Version would come from real data
-      )
+      // Use the regular API instead of enhanced API for better compatibility
+      const updatedUser = await api.updateUser(member.userId, {
+        fullName: editForm.fullName,
+        email: editForm.email,
+        phoneNumber: editForm.phone
+      })
       
-      onEditProfile(updatedUser)
+      // Create a properly typed member object for the callback
+      const updatedMember = {
+        ...member,
+        fullName: editForm.fullName,
+        email: editForm.email,
+        phone: editForm.phone
+      }
+      
+      onEditProfile(updatedMember)
       setActiveSubModal(null)
       showSuccess('Profile updated successfully')
     } catch (error) {
-      showError({
-        code: 'PROFILE_UPDATE_FAILED',
-        message: 'Failed to update profile',
-        recoverable: true,
-        retryable: true
-      })
+      showError('Failed to update profile')
     } finally {
       clearLoading('save-profile')
     }
@@ -298,16 +305,12 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
 
   // Helper functions
   const getPlanForMember = () => {
-    if (userData?.user) {
-      return (userData.user as any)?.plan || "Gold Plan"
-    }
-    return (member as any)?.plan || "Gold Plan"
+    // Use the actual planName from the member data
+    return (member as any)?.planName || "No Plan"
   }
 
   const getStatusForMember = () => {
-    if (userData?.user) {
-      return (userData.user as any)?.status || "Active"
-    }
+    // Use the actual status from the member data
     return (member as any)?.status || "Active"
   }
 
@@ -334,14 +337,8 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
           >
             {/* Modal Header */}
             <div className="member-action-modal__header">
-              <h2>Manage Member: {member.fullName} <span style={{color: '#10b981', fontSize: '12px'}}>[Enhanced]</span></h2>
+              <h2>Manage Member: {member.fullName}</h2>
               <div className="header-status">
-                {realTimeEnabled && (
-                  <div className={`connection-status ${isConnected ? 'connected' : 'disconnected'}`}>
-                    <span className="status-dot"></span>
-                    {isConnected ? 'Live' : 'Offline'}
-                  </div>
-                )}
                 <button className="member-action-modal__close" onClick={onClose}>
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <line x1="18" y1="6" x2="6" y2="18" />
@@ -362,11 +359,6 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
               <div className="member-info__details">
                 <h3 className="member-info__name">{member.fullName}</h3>
                 <span className="member-info__plan">{getPlanForMember()}</span>
-                {userData?.lastUpdated && (
-                  <span className="member-info__last-updated">
-                    Updated: {new Date(userData.lastUpdated).toLocaleTimeString()}
-                  </span>
-                )}
               </div>
               <span className={`member-info__status member-info__status--${getStatusForMember().toLowerCase()}`}>
                 {getStatusForMember()}

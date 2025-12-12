@@ -247,6 +247,13 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
   const handleAddCustomer = async (customer: User) => {
     if (!staff) return
 
+    // Check if customer is already assigned
+    const isAlreadyAssigned = assignedCustomers.some(c => c.userId === customer.userId)
+    if (isAlreadyAssigned) {
+      showError('Customer is already assigned to this trainer')
+      return
+    }
+
     try {
       // Optimistically add customer to the list
       setAssignedCustomers(prev => [...prev, customer])
@@ -617,20 +624,8 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
           >
             {/* Modal Header */}
             <div className="staff-action-modal__header">
-              <h2>Manage Staff: {staff.fullName} <span style={{color: '#10b981', fontSize: '12px'}}>[Enhanced]</span></h2>
+              <h2>Manage Staff: {staff.fullName}</h2>
               <div className="header-status">
-                <NotificationBell
-                  count={notifications.length}
-                  notifications={notifications}
-                  onNotificationClick={handleNotificationClick}
-                  onClearAll={handleClearAllNotifications}
-                />
-                {realTimeEnabled && (
-                  <div className={`connection-status ${isConnected ? 'connected' : 'disconnected'}`}>
-                    <span className="status-dot"></span>
-                    {isConnected ? 'Live' : 'Offline'}
-                  </div>
-                )}
                 <button className="staff-action-modal__close" onClick={onClose}>
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <line x1="18" y1="6" x2="6" y2="18" />
@@ -660,11 +655,7 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
                     </svg>
                   </ContextualHelp>
                 </div>
-                {userData?.lastUpdated && (
-                  <span className="staff-info__last-updated">
-                    Updated: {new Date(userData.lastUpdated).toLocaleTimeString()}
-                  </span>
-                )}
+
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
                 <span className={`staff-info__status staff-info__status--${getStatusForStaff().toLowerCase()}`}>
