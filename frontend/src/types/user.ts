@@ -2,28 +2,29 @@
 export interface User {
   userId: number;
   username: string;
-  email: string;
   fullName: string;
-  password?: string;
-  avatarUrl?: string;
+  email: string;
   phoneNumber?: string;
-  address?: string;
-  roles: Role[];
-  plan?: MembershipPlan;
-  status?: 'ACTIVE' | 'EXPIRED';
-  createdAt: string;
+  roles?: Role[];
+  role?: string; // Legacy support
+  // Frontend transient fields
+  plan?: string | { name: string };
+  status?: string;
 }
 
-export interface UserSummary {
-  id: number;
-  name: string;
+export interface MemberDTO {
+  userId: number;
+  fullName: string;
   email: string;
-  avatarUrl?: string;
+  phone?: string;
+  planName: string;
+  status: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 export interface Role {
   roleId: number;
-  roleName: 'OWNER' | 'TRAINER' | 'STAFF' | 'CUSTOMER';
 }
 
 export interface MembershipPlan {

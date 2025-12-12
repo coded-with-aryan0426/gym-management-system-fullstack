@@ -29,7 +29,8 @@ export default function LoginPage() {
     const [searchParams] = useSearchParams();
 
     // Role selection state
-    const [selectedRole, setSelectedRole] = useState<'STAFF' | 'MEMBER' | null>(null);
+    // V1 Owner Pivot: Default to STAFF role
+    const [selectedRole, setSelectedRole] = useState<'STAFF' | 'MEMBER' | null>('STAFF');
 
     // Form state
     const [email, setEmail] = useState("");
@@ -83,11 +84,6 @@ export default function LoginPage() {
 
         if (hasError) return;
 
-        if (!selectedRole) {
-            setEmailError("Please select a role first");
-            return;
-        }
-
         setIsLoading(true);
 
         try {
@@ -97,7 +93,7 @@ export default function LoginPage() {
                 body: JSON.stringify({
                     username: email,
                     password: password,
-                    loginContext: selectedRole
+                    loginContext: selectedRole // Always send STAFF context for V1
                 })
             });
 
@@ -243,62 +239,7 @@ export default function LoginPage() {
                         <p style={{ color: colors.textSecondary }}>Access your gym management dashboard</p>
                     </div>
 
-                    {/* Role Selection Toggle */}
-                    <div style={{ marginBottom: 24 }}>
-                        <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: colors.textSecondary, marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                            I want to login as
-                        </label>
-                        <div style={{ display: "flex", gap: 8 }}>
-                            <button
-                                type="button"
-                                className="role-btn"
-                                onClick={() => setSelectedRole('STAFF')}
-                                style={{
-                                    flex: 1,
-                                    padding: "14px 16px",
-                                    background: selectedRole === 'STAFF' ? colors.crimson : colors.bgSecondary,
-                                    border: `2px solid ${selectedRole === 'STAFF' ? colors.crimson : colors.borderPrimary}`,
-                                    borderRadius: 12,
-                                    color: selectedRole === 'STAFF' ? "#fff" : colors.textSecondary,
-                                    cursor: "pointer",
-                                    fontSize: 14,
-                                    fontWeight: 600,
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    gap: 8,
-                                    transition: "all 0.2s",
-                                }}
-                            >
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 21h18M5 21V7l8-4 8 4v14M9 21v-6h6v6" /></svg>
-                                Gym Staff
-                            </button>
-                            <button
-                                type="button"
-                                className="role-btn"
-                                onClick={() => setSelectedRole('MEMBER')}
-                                style={{
-                                    flex: 1,
-                                    padding: "14px 16px",
-                                    background: selectedRole === 'MEMBER' ? colors.emerald : colors.bgSecondary,
-                                    border: `2px solid ${selectedRole === 'MEMBER' ? colors.emerald : colors.borderPrimary}`,
-                                    borderRadius: 12,
-                                    color: selectedRole === 'MEMBER' ? "#fff" : colors.textSecondary,
-                                    cursor: "pointer",
-                                    fontSize: 14,
-                                    fontWeight: 600,
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    gap: 8,
-                                    transition: "all 0.2s",
-                                }}
-                            >
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" /></svg>
-                                Member
-                            </button>
-                        </div>
-                    </div>
+                    {/* Role Selection Removed for V1 - Default to Staff */}
 
                     <form onSubmit={handleSubmit}>
                         {/* Email Field with Inline Error */}
@@ -434,7 +375,7 @@ export default function LoginPage() {
 
                         <button
                             type="submit"
-                            disabled={isLoading || !selectedRole}
+                            disabled={isLoading}
                             style={{
                                 width: "100%",
                                 padding: "16px",
@@ -461,15 +402,7 @@ export default function LoginPage() {
                                     Signing in...
                                 </>
                             ) : (
-                                <>
-                                        {!selectedRole ? "Select a role to continue" : `Sign In as ${selectedRole === 'STAFF' ? 'Staff' : 'Member'}`}
-                                        {selectedRole && (
-                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                                                <polyline points="12 5 19 12 12 19"></polyline>
-                                            </svg>
-                                        )}
-                                </>
+                                    "Sign In"
                             )}
                         </button>
                     </form>

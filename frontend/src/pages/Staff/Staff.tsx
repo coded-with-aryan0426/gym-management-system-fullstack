@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { Button, Badge, getStatusVariant, Avatar, Card, DataTable, type Column } from '../../components/ui';
-import { StaffActionModal } from '../../components/StaffActionModal';
+import EnhancedStaffActionModal from '../../components/StaffActionModal/EnhancedStaffActionModal';
 import api from '../../services/api';
 import type { User } from '../../types/user';
 import './Staff.css';
@@ -160,7 +160,7 @@ const Staff: React.FC = () => {
       </div>
 
       {/* Staff Action Modal */}
-      <StaffActionModal
+      <EnhancedStaffActionModal
         isOpen={isActionModalOpen}
         onClose={handleCloseActionModal}
         staff={selectedStaff}

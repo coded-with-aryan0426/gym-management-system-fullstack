@@ -54,6 +54,7 @@ com\gym\management\dto\StaffPerformanceDTO.class
 com\gym\management\model\SubscriptionPlan.class
 com\gym\management\controller\StaffPerformanceController.class
 com\gym\management\dto\PTConfigDTO.class
+com\gym\management\dto\MemberDTO.class
 com\gym\management\repository\GymSettingsRepository.class
 com\gym\management\controller\AuthController.class
 com\gym\management\model\MembershipStatus.class

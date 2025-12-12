@@ -10,7 +10,7 @@ export { default as Skeleton, SkeletonText, SkeletonCard, SkeletonTableRow, Skel
 
 // Modal Components Export
 export { default as Modal } from "./Modal/Modal"
-export { default as MemberActionModal } from "./MemberActionModal/MemberActionModal"
+export { default as MemberActionModal } from "./MemberActionModal/EnhancedMemberActionModal"
 export { default as CreateUserModal } from "./CreateUserModal/CreateUserModal"
 
 // Components barrel export

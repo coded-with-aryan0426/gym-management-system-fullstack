@@ -32,8 +32,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
                 Long userId = tokenProvider.getUserIdFromJWT(jwt);
-                String context = tokenProvider.getContextFromJWT(jwt);
-                Long gymId = tokenProvider.getGymIdFromJWT(jwt);
+                // Context and GymId available if needed for custom auth object
+                // String context = tokenProvider.getContextFromJWT(jwt);
+                // Long gymId = tokenProvider.getGymIdFromJWT(jwt);
 
                 UserDetails userDetails = customUserDetailsService.loadUserById(userId);
                 

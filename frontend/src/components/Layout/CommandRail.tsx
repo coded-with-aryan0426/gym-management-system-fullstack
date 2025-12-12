@@ -89,6 +89,36 @@ interface CommandRailProps {
 }
 
 const CommandRail: React.FC<CommandRailProps> = ({ isCollapsed = false, onToggle }) => {
+  // Get user role from storage
+  const getUserRole = () => {
+    try {
+      const userStr = localStorage.getItem('user');
+      if (!userStr) return null;
+      const user = JSON.parse(userStr);
+
+      // Return specific role
+      // V1 Pivot: Only handle STAFF context
+      if (user.context === 'STAFF') {
+        return user.staffRole || 'TRAINER';
+      }
+      return 'TRAINER'; // Default fallback
+    } catch (e) {
+      return 'TRAINER';
+    }
+  };
+
+  const role = getUserRole();
+
+  // Filter items based on role
+  const filteredNavItems = navItems.filter(item => {
+    // 1. Owner sees everything
+    if (role === 'OWNER') return true;
+
+    // 2. Trainer (Staff) sees Operations but NOT Financials/Reports
+    const restricted = ['/financials', '/reports'];
+    return !restricted.includes(item.path);
+  });
+
   return (
     <aside className={`command-rail ${isCollapsed ? "command-rail--collapsed" : ""}`}>
       <div className="command-rail__logo">
@@ -97,7 +127,7 @@ const CommandRail: React.FC<CommandRailProps> = ({ isCollapsed = false, onToggle
 
       {/* Navigation */}
       <nav className="command-rail__nav">
-        {navItems.map((item) => (
+        {filteredNavItems.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}
@@ -112,14 +142,17 @@ const CommandRail: React.FC<CommandRailProps> = ({ isCollapsed = false, onToggle
 
       {/* Footer with Account Settings and Toggle */}
       <div className="command-rail__footer">
-        <NavLink
-          to="/settings"
-          className={({ isActive }) => `command-rail__link ${isActive ? "command-rail__link--active" : ""}`}
-          title={isCollapsed ? "Account Settings" : undefined}
-        >
-          <span className="command-rail__icon">{icons.settings}</span>
-          <span className="command-rail__label">Account Settings</span>
-        </NavLink>
+        {/* Only Owner gets "Account Settings" (Gym config) - Members/Trainers get Profile via TopBar or hidden for V1 */}
+        {role === 'OWNER' && (
+          <NavLink
+            to="/settings"
+            className={({ isActive }) => `command-rail__link ${isActive ? "command-rail__link--active" : ""}`}
+            title={isCollapsed ? "Account Settings" : undefined}
+          >
+            <span className="command-rail__icon">{icons.settings}</span>
+            <span className="command-rail__label">Account Settings</span>
+          </NavLink>
+        )}
 
         {/* Collapse Toggle Button */}
         <button

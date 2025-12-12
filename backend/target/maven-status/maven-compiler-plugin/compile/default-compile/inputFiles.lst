@@ -42,6 +42,7 @@ D:\Intenship\AthonX Applaction\backend\src\main\java\com\gym\management\reposito
 D:\Intenship\AthonX Applaction\backend\src\main\java\com\gym\management\service\PTSessionService.java
 D:\Intenship\AthonX Applaction\backend\src\main\java\com\gym\management\controller\GymController.java
 D:\Intenship\AthonX Applaction\backend\src\main\java\com\gym\management\repository\GymStaffRepository.java
+D:\Intenship\AthonX Applaction\backend\src\main\java\com\gym\management\dto\MemberDTO.java
 D:\Intenship\AthonX Applaction\backend\src\main\java\com\gym\management\model\User.java
 D:\Intenship\AthonX Applaction\backend\src\main\java\com\gym\management\repository\StaffPerformanceRepository.java
 D:\Intenship\AthonX Applaction\backend\src\main\java\com\gym\management\security\JwtAuthenticationFilter.java

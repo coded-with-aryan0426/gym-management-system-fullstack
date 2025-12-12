@@ -48,12 +48,14 @@ export const AthlonXLogo: React.FC<AthlonXLogoProps> = ({
           <path d="M12 2L2 19h20L12 2zm0 4l7 11H5l7-11z" />
         </svg>
       </div>
+
       {showText && (
-        <span style={{
+        <span style={{ 
+          color: "white",
+          fontWeight: 700, 
           fontSize: text,
-          fontWeight: 700,
-          color: "#fff",
-          letterSpacing: "-0.5px"
+          fontFamily: "'Inter', sans-serif",
+          letterSpacing: "-0.02em"
         }}>
           AthlonX
         </span>
@@ -61,5 +63,3 @@ export const AthlonXLogo: React.FC<AthlonXLogoProps> = ({
     </div>
   )
 }
-
-export default AthlonXLogo

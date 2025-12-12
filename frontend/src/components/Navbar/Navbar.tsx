@@ -19,7 +19,11 @@ import {
   HelpCircle,
   Moon,
   Sun,
-  Menu
+  Menu,
+  Plus,
+  UserPlus,
+  ClipboardList,
+  CalendarPlus
 } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 import './Navbar.css';
@@ -54,9 +58,11 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [createMenuOpen, setCreateMenuOpen] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const notificationsRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
+  const createRef = useRef<HTMLDivElement>(null);
   const [unreadCount] = useState(3);
 
   const [notifications] = useState<Notification[]>([
@@ -190,6 +196,9 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
       if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
         setProfileOpen(false);
       }
+      if (createRef.current && !createRef.current.contains(event.target as Node)) {
+        setCreateMenuOpen(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -276,12 +285,60 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
 
         {/* Right Section */}
         <div className="navbar-premium__right">
+          {/* Create Button */}
+          <div className="navbar-premium__dropdown-wrapper" ref={createRef}>
+            <motion.button
+              className={`navbar-premium__create-btn ${createMenuOpen ? 'active' : ''}`}
+              onClick={() => {
+                setCreateMenuOpen(!createMenuOpen);
+                setNotificationsOpen(false);
+                setProfileOpen(false);
+              }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Plus size={18} />
+              <span>Create</span>
+            </motion.button>
+
+            {/* Create Dropdown */}
+            {createMenuOpen && createPortal(
+              <AnimatePresence>
+                <motion.div
+                  className="dropdown-portal dropdown-portal--create"
+                  initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  <div className="dropdown-portal__item" onClick={() => { navigate('/members?action=create'); setCreateMenuOpen(false); }}>
+                    <UserPlus size={16} />
+                    <span>Add Member</span>
+                  </div>
+                  <div className="dropdown-portal__item" onClick={() => { navigate('/staff?action=create'); setCreateMenuOpen(false); }}>
+                    <UserCheck size={16} />
+                    <span>Add Staff</span>
+                  </div>
+                  <div className="dropdown-portal__item" onClick={() => { navigate('/settings?tab=packages'); setCreateMenuOpen(false); }}>
+                    <ClipboardList size={16} />
+                    <span>Create Plan</span>
+                  </div>
+                  <div className="dropdown-portal__item" onClick={() => { navigate('/classes?action=create'); setCreateMenuOpen(false); }}>
+                    <CalendarPlus size={16} />
+                    <span>Schedule Class</span>
+                  </div>
+                </motion.div>
+              </AnimatePresence>,
+              document.body
+            )}
+          </div>
+
           {/* Global Search Button */}
           <motion.button
             className="navbar-premium__search-btn"
             onClick={() => setSearchOpen(true)}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
             <Search size={18} />
             <span className="navbar-premium__search-hint">
@@ -314,54 +371,38 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
               )}
             </motion.button>
 
-            {/* Notification Dropdown - rendered via portal */}
+            {/* Notification Dropdown */}
             {notificationsOpen && createPortal(
               <AnimatePresence>
                 <motion.div
-                  className="notifications-dropdown-portal"
-                  ref={notificationsRef}
-                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  className="dropdown-portal dropdown-portal--notifications"
+                  initial={{ opacity: 0, y: 8, scale: 0.96 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                  transition={{ duration: 0.2 }}
-                  style={{
-                    position: 'fixed',
-                    top: '70px',
-                    right: '120px',
-                    width: '360px',
-                    background: 'var(--card-glass-bg)',
-                    backdropFilter: 'blur(20px)',
-                    border: '1px solid var(--glass-border)',
-                    borderRadius: '16px',
-                    boxShadow: 'var(--shadow-xl)',
-                    zIndex: 9999,
-                    overflow: 'hidden',
-                    color: 'var(--text-primary)'
-                  }}
+                  exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                  transition={{ duration: 0.15 }}
                 >
-                  <div className="notifications-dropdown__header">
+                  <div className="dropdown-portal__header">
                     <h3>Notifications</h3>
-                    <button className="notifications-dropdown__mark-read">Mark all read</button>
+                    <button className="dropdown-portal__action">Mark all read</button>
                   </div>
-                  <div className="notifications-dropdown__list">
+                  <div className="dropdown-portal__list">
                     {notifications.map(notification => (
-                      <motion.div
+                      <div
                         key={notification.id}
-                        className={`notification-item ${!notification.isRead ? 'unread' : ''}`}
-                        whileHover={{ backgroundColor: 'rgba(99, 102, 241, 0.1)' }}
+                        className={`dropdown-portal__notification ${!notification.isRead ? 'dropdown-portal__notification--unread' : ''}`}
                       >
-                        <div className={`notification-item__icon ${getNotificationIcon(notification.type)}`}>
+                        <div className={`dropdown-portal__notification-icon dropdown-portal__notification-icon--${notification.type}`}>
                           <Bell size={14} />
                         </div>
-                        <div className="notification-item__content">
-                          <p className="notification-item__title">{notification.title}</p>
-                          <p className="notification-item__message">{notification.message}</p>
-                          <span className="notification-item__time">{notification.time}</span>
+                        <div className="dropdown-portal__notification-content">
+                          <p className="dropdown-portal__notification-title">{notification.title}</p>
+                          <p className="dropdown-portal__notification-message">{notification.message}</p>
+                          <span className="dropdown-portal__notification-time">{notification.time}</span>
                         </div>
-                      </motion.div>
+                      </div>
                     ))}
                   </div>
-                  <div className="notifications-dropdown__footer">
+                  <div className="dropdown-portal__footer">
                     <button onClick={() => setNotificationsOpen(false)}>View All Notifications</button>
                   </div>
                 </motion.div>
@@ -400,49 +441,33 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
               </div>
             </motion.button>
 
-            {/* Profile Dropdown - rendered via portal */}
+            {/* Profile Dropdown */}
             {profileOpen && createPortal(
               <AnimatePresence>
                 <motion.div
-                  className="profile-dropdown-portal"
-                  ref={profileRef}
-                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  className="dropdown-portal dropdown-portal--profile"
+                  initial={{ opacity: 0, y: 8, scale: 0.96 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                  transition={{ duration: 0.2 }}
-                  style={{
-                    position: 'fixed',
-                    top: '70px',
-                    right: '24px',
-                    width: '240px',
-                    background: 'var(--card-glass-bg)',
-                    backdropFilter: 'blur(20px)',
-                    border: '1px solid var(--glass-border)',
-                    borderRadius: '16px',
-                    boxShadow: 'var(--shadow-xl)',
-                    zIndex: 9999,
-                    overflow: 'hidden',
-                    padding: '8px',
-                    color: 'var(--text-primary)'
-                  }}
+                  exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                  transition={{ duration: 0.15 }}
                 >
-                  <div className="profile-dropdown__item" onClick={() => { navigate('/settings'); setProfileOpen(false); }}>
+                  <div className="dropdown-portal__item" onClick={() => { navigate('/settings'); setProfileOpen(false); }}>
                     <User size={16} />
                     <span>My Profile</span>
-                    <ChevronRight size={14} />
+                    <ChevronRight size={14} className="dropdown-portal__chevron" />
                   </div>
-                  <div className="profile-dropdown__item" onClick={() => { navigate('/settings'); setProfileOpen(false); }}>
+                  <div className="dropdown-portal__item" onClick={() => { navigate('/settings'); setProfileOpen(false); }}>
                     <CreditCard size={16} />
                     <span>Billing</span>
-                    <ChevronRight size={14} />
+                    <ChevronRight size={14} className="dropdown-portal__chevron" />
                   </div>
-                  <div className="profile-dropdown__item" onClick={() => setProfileOpen(false)}>
+                  <div className="dropdown-portal__item" onClick={() => setProfileOpen(false)}>
                     <HelpCircle size={16} />
                     <span>Help & Support</span>
-                    <ChevronRight size={14} />
+                    <ChevronRight size={14} className="dropdown-portal__chevron" />
                   </div>
-                  <div className="profile-dropdown__divider" />
-                  <div className="profile-dropdown__item profile-dropdown__item--danger" onClick={() => { onLogout(); setProfileOpen(false); }}>
+                  <div className="dropdown-portal__divider" />
+                  <div className="dropdown-portal__item dropdown-portal__item--danger" onClick={() => { onLogout(); setProfileOpen(false); }}>
                     <LogOut size={16} />
                     <span>Logout</span>
                   </div>

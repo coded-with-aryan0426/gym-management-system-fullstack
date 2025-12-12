@@ -206,15 +206,13 @@ const UtilityBar: React.FC = () => {
           <input
             type="text"
             className="utility-bar__search-input"
-            placeholder="Search members, classes, or staff (Cmd+K)"
+            placeholder="Search members, classes, or staff"
             value={searchQuery}
             onChange={handleSearchChange}
             onFocus={() => searchQuery.trim() && setShowSearchResults(true)}
           />
-          {isSearching ? (
+          {isSearching && (
             <span className="utility-bar__spinner" />
-          ) : (
-              <kbd className="utility-bar__shortcut">⌘K</kbd>
           )}
         </form>
 

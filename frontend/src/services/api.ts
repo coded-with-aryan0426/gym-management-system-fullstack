@@ -1,5 +1,5 @@
 import axios, { type AxiosInstance, type AxiosError } from 'axios';
-import type { User, CreateUserDto, UpdateUserDto } from '../types/user';
+import type { User, CreateUserDto, UpdateUserDto, MemberDTO } from '../types/user';
 import type { GymSettings, UpdateSettingsDto } from '../types/settings';
 import type { DashboardStats } from '../types/api';
 
@@ -38,6 +38,11 @@ const api = {
   async getUsers(role?: string): Promise<User[]> {
     const params = role ? { role } : {};
     const response = await apiClient.get<User[]>('/users', { params });
+    return response.data;
+  },
+
+  async getMembers(): Promise<MemberDTO[]> {
+    const response = await apiClient.get<MemberDTO[]>('/users/members');
     return response.data;
   },
 
@@ -168,10 +173,17 @@ const api = {
   },
 
   // PT Session creation (quick method for Staff page)
-  async createPTSession(data: { trainerId: number; date: string; time: string; duration: number; notes?: string }): Promise<unknown> {
+  async createPTSession(data: { trainerId: number; memberId?: number; date: string; time: string; duration: number; notes?: string }): Promise<unknown> {
+    // Combine date and time into LocalDateTime format
+    const sessionDate = `${data.date}T${data.time}:00`;
+    
     const response = await apiClient.post('/pt-sessions', {
-      ...data,
+      trainerId: data.trainerId,
+      memberId: data.memberId || 1, // Default to member ID 1 if not provided
+      sessionDate: sessionDate,
+      durationMinutes: data.duration,
       status: 'SCHEDULED',
+      progressNotes: data.notes || '',
     });
     return response.data;
   },

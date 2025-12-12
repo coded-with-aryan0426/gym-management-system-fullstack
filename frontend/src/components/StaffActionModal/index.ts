@@ -1,1 +1,1 @@
-export { default as StaffActionModal } from './StaffActionModal';
+export { default as StaffActionModal } from './EnhancedStaffActionModal';

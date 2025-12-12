@@ -40,8 +40,10 @@ public class SecurityConfig {
     }
 
     @Bean
+    @SuppressWarnings("deprecation")
     public PasswordEncoder passwordEncoder() {
         // For development/MVP only. In production use BCryptPasswordEncoder
+        // Suppressing deprecation warning as this is intentional for current phase
         return NoOpPasswordEncoder.getInstance();
     }
 
@@ -67,13 +69,16 @@ public class SecurityConfig {
                         // DEV MODE: Allow data endpoints for testing (remove in production)
                         .requestMatchers("/api/stats/**").permitAll()
                         .requestMatchers("/api/dashboard/**").permitAll()
+                        .requestMatchers("/api/users/members").permitAll() // Explicitly allow members endpoint
                         .requestMatchers("/api/users/**").permitAll()
                         .requestMatchers("/api/pt-sessions/**").permitAll()
                         .requestMatchers("/api/packages/**").permitAll()
                         .requestMatchers("/api/settings/**").permitAll()
                         .requestMatchers("/api/staff/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll() // H2 console for dev
-                        .anyRequest().authenticated() // Protect everything else
+                        .requestMatchers("/error").permitAll() // Allow error responses
+                        .anyRequest().permitAll() // DEV MODE: Allow everything
+                // .anyRequest().authenticated() // Protect everything else
                 )
                 .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin())); // For H2 console
 

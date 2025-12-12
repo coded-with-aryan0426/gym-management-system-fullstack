@@ -12,7 +12,11 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
     "@lottiefiles/dotlottie-react": "^0.17.9",
+    "@mui/icons-material": "^7.3.6",
+    "@mui/material": "^7.3.6",
     "@tanstack/react-table": "^8.21.3",
     "axios": "^1.13.2",
     "date-fns": "^4.1.0",

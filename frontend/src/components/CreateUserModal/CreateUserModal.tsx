@@ -34,6 +34,8 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClose, onSu
     phoneNumber: "",
     address: "",
     packageId: "",
+    startDate: new Date().toISOString().split('T')[0],
+    paymentStatus: "PAID",
   })
 
   // Reset state when modal opens
@@ -54,6 +56,8 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClose, onSu
         phoneNumber: "",
         address: "",
         packageId: "",
+        startDate: new Date().toISOString().split('T')[0],
+        paymentStatus: "PAID",
       })
     }
   }, [isOpen, initialRole])
@@ -109,16 +113,45 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClose, onSu
     
     if (!role) return
 
-    if (!formData.username || !formData.password || !formData.email || !formData.fullName) {
-      toast.error("Please fill in all required fields")
+    // V1 Pivot: Auto-generate credentials for Members
+    let effectiveFormData = { ...formData };
+    if (role === "CUSTOMER") {
+      if (!effectiveFormData.phoneNumber) {
+        toast.error("Phone number is required for members");
+        return;
+      }
+      // Use Phone as Username and Password (or some default)
+      effectiveFormData.username = effectiveFormData.phoneNumber;
+      effectiveFormData.password = "12345678"; // Default password since they don't login
+
+      // Dummy email if empty (optional in V1)
+      if (!effectiveFormData.email) {
+        effectiveFormData.email = `${effectiveFormData.phoneNumber}@athlonx.local`;
+      }
+    } else {
+      // Staff validation
+      if (!formData.username || !formData.password || !formData.email) {
+        toast.error("Please fill in all required fields");
+        return;
+      }
+    }
+
+    if (!effectiveFormData.fullName) {
+      toast.error("Full Name is required")
       return
     }
 
     setLoading(true)
     try {
       const payload: Record<string, unknown> = {
-        ...formData,
+        ...effectiveFormData,
         roles: [{ roleId: 0, roleName: role }],
+      }
+      
+      // Add customer-specific fields
+      if (role === "CUSTOMER") {
+        payload.startDate = effectiveFormData.startDate;
+        payload.paymentStatus = effectiveFormData.paymentStatus;
       }
       
       if (role === "CUSTOMER" && formData.packageId) {
@@ -260,46 +293,61 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClose, onSu
             )}
 
             {step === "FORM" && (
-              <form onSubmit={handleSubmit} className="create-user-modal__body">
+              <form className="create-user-modal__body">
                 <div className="form-row">
                   <div className="form-group">
                     <label>Full Name *</label>
                     <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} className="form-input" placeholder="John Doe" required />
                   </div>
                   <div className="form-group">
-                    <label>Username *</label>
-                    <input type="text" name="username" value={formData.username} onChange={handleChange} className="form-input" placeholder="johndoe" required />
+                    <label>Phone Number *</label>
+                    <input type="tel" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} className="form-input" placeholder="+91 98765 43210" required />
                   </div>
                 </div>
 
                 <div className="form-row">
                   <div className="form-group">
-                    <label>Email *</label>
-                    <input type="email" name="email" value={formData.email} onChange={handleChange} className="form-input" placeholder="john@example.com" required />
+                    <label>Email (Optional)</label>
+                    <input type="email" name="email" value={formData.email} onChange={handleChange} className="form-input" placeholder="john@example.com" />
                   </div>
-                  <div className="form-group">
-                    <label>Phone Number</label>
-                    <input type="tel" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} className="form-input" placeholder="+1 234 567 8900" />
-                  </div>
-                </div>
 
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Password *</label>
-                    <input type="password" name="password" value={formData.password} onChange={handleChange} className="form-input" placeholder="••••••••" required />
-                  </div>
-                  {role === "CUSTOMER" && (
+                  {/* V1: Staff/Trainer still needs credentials */}
+                  {role !== "CUSTOMER" && (
                     <div className="form-group">
-                      <label>Membership Plan</label>
-                      <select name="packageId" value={formData.packageId} onChange={handleChange} className="form-input" disabled={fetchingPlans}>
-                        <option value="">Select a plan</option>
-                        {availablePlans.map(plan => (
-                          <option key={plan.packageId} value={plan.packageId}>{plan.packageName} - ${plan.price}</option>
-                        ))}
-                      </select>
+                      <label>Password *</label>
+                      <input type="password" name="password" value={formData.password} onChange={handleChange} className="form-input" placeholder="••••••••" required />
                     </div>
                   )}
                 </div>
+
+                {role === "CUSTOMER" && (
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Membership Plan *</label>
+                      <select name="packageId" value={formData.packageId} onChange={handleChange} className="form-input" disabled={fetchingPlans} required>
+                        <option value="">Select a plan</option>
+                        {availablePlans.map(plan => (
+                          <option key={plan.packageId} value={plan.packageId}>{plan.packageName} - ₹{plan.price}</option>
+                        ))}
+                      </select>
+                    </div>
+                    {/* V1: Start Date */}
+                    <div className="form-group">
+                      <label>Start Date</label>
+                      <input type="date" name="startDate" value={formData.startDate} onChange={handleChange} className="form-input" />
+                    </div>
+                  </div>
+                )}
+
+                {role === "CUSTOMER" && (
+                  <div className="form-group">
+                    <label>Payment Status</label>
+                    <select name="paymentStatus" value={formData.paymentStatus} onChange={handleChange} className="form-input">
+                      <option value="PAID">Paid (Cash/Card)</option>
+                      <option value="PENDING">Pending (Pay Later)</option>
+                    </select>
+                  </div>
+                )}
 
                 <div className="form-group">
                   <label>Address</label>

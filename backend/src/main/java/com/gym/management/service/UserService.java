@@ -38,6 +38,52 @@ public class UserService {
         return userRepository.searchUsers(roleName, query);
     }
 
+    @Autowired
+    private com.gym.management.repository.MembershipRepository membershipRepository;
+
+    @Transactional(readOnly = true)
+    public List<com.gym.management.dto.MemberDTO> getAllMembers() {
+        List<User> customers = userRepository.findByRoleName("CUSTOMER");
+        return customers.stream().map(user -> {
+            com.gym.management.dto.MemberDTO dto = new com.gym.management.dto.MemberDTO();
+            dto.setUserId(user.getUserId());
+            dto.setFullName(user.getFullName());
+            dto.setEmail(user.getEmail());
+            dto.setPhone(user.getPhone());
+
+            // Fetch membership
+            List<com.gym.management.model.Membership> memberships = membershipRepository
+                    .findByUserUserId(user.getUserId());
+            if (!memberships.isEmpty()) {
+                // Determine active membership (simplistic logic: take the last one or active
+                // one)
+                com.gym.management.model.Membership activeMembership = memberships.stream()
+                        .filter(m -> m.getStatus() == com.gym.management.model.MembershipStatus.ACTIVE)
+                        .findFirst()
+                        .orElse(memberships.get(0)); // Fallback to first
+
+                if (activeMembership.getStatus() != null) {
+                    dto.setStatus(activeMembership.getStatus().name());
+                } else {
+                    dto.setStatus("UNKNOWN");
+                }
+
+                if (activeMembership.getMembershipPackage() != null) {
+                    dto.setPlanName(activeMembership.getMembershipPackage().getPackageName());
+                } else {
+                    dto.setPlanName("Unknown Plan");
+                }
+
+                dto.setStartDate(activeMembership.getStartDate());
+                dto.setEndDate(activeMembership.getEndDate());
+            } else {
+                dto.setStatus("Inactive");
+                dto.setPlanName("No Plan");
+            }
+            return dto;
+        }).collect(java.util.stream.Collectors.toList());
+    }
+
     public User getUserById(Long id) {
         Objects.requireNonNull(id, "User ID must not be null");
         return userRepository.findById(id).orElse(null);

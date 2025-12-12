@@ -33,7 +33,7 @@ export default function SignupPage() {
     const navigate = useNavigate();
 
     // 1. Role Selection
-    const [selectedRole, setSelectedRole] = useState<'STAFF' | 'MEMBER' | null>(null);
+    const [selectedRole, setSelectedRole] = useState<'OWNER' | 'TRAINER' | null>(null);
 
     // 2. Base Form Data
     const [formData, setFormData] = useState({
@@ -45,7 +45,6 @@ export default function SignupPage() {
     });
 
     // 3. Staff Specific Data
-    const [isCreatingGym, setIsCreatingGym] = useState(true);
     const [staffData, setStaffData] = useState({
         gymName: "",
         gymAddress: "",
@@ -92,15 +91,13 @@ export default function SignupPage() {
             else delete newErrors.confirmPassword;
         }
 
-        // Staff fields
-        if (selectedRole === 'STAFF') {
-            if (isCreatingGym) {
-                if (name === 'gymName') !value ? newErrors.gymName = "Required" : delete newErrors.gymName;
-                if (name === 'gymAddress') !value ? newErrors.gymAddress = "Required" : delete newErrors.gymAddress;
-                if (name === 'gymCity') !value ? newErrors.gymCity = "Required" : delete newErrors.gymCity;
-            } else {
-                if (name === 'inviteCodeStaff') !value ? newErrors.inviteCodeStaff = "Required" : delete newErrors.inviteCodeStaff;
-            }
+        // Role fields
+        if (selectedRole === 'OWNER') {
+            if (name === 'gymName') !value ? newErrors.gymName = "Required" : delete newErrors.gymName;
+            if (name === 'gymAddress') !value ? newErrors.gymAddress = "Required" : delete newErrors.gymAddress;
+            if (name === 'gymCity') !value ? newErrors.gymCity = "Required" : delete newErrors.gymCity;
+        } else if (selectedRole === 'TRAINER') {
+            if (name === 'inviteCodeStaff') !value ? newErrors.inviteCodeStaff = "Required" : delete newErrors.inviteCodeStaff;
         }
 
         setErrors(newErrors);
@@ -136,7 +133,9 @@ export default function SignupPage() {
 
         try {
             let response;
-            if (selectedRole === 'STAFF') {
+            if (selectedRole === 'OWNER' || selectedRole === 'TRAINER') {
+                const isCreatingGym = selectedRole === 'OWNER';
+
                 const payload = {
                     ...formData,
                     createNewGym: isCreatingGym,
@@ -232,22 +231,22 @@ export default function SignupPage() {
                         <p style={{ color: colors.textSecondary, fontSize: 14 }}>Start your fitness journey today</p>
                     </div>
 
-                    {/* Compact Role Selection */}
+                    {/* V1 Explicit Role Selection */}
                     <div style={{ marginBottom: 24 }}>
                         <div style={{ display: "flex", gap: 10, background: colors.bgTertiary, padding: 4, borderRadius: 14 }}>
                             <RoleButton
-                                active={selectedRole === 'STAFF'}
-                                onClick={() => setSelectedRole('STAFF')}
+                                active={selectedRole === 'OWNER'}
+                                onClick={() => setSelectedRole('OWNER')}
                                 icon={<GymIcon />}
-                                title="Gym Owner / Staff"
+                                title="Gym Owner"
                                 color={colors.crimson}
                             />
                             <RoleButton
-                                active={selectedRole === 'MEMBER'}
-                                onClick={() => setSelectedRole('MEMBER')}
-                                icon={<UserIcon />}
-                                title="Member"
-                                color={colors.emerald}
+                                active={selectedRole === 'TRAINER'}
+                                onClick={() => setSelectedRole('TRAINER')}
+                                icon={<TrainerIcon />}
+                                title="Trainer"
+                                color="#D97706"
                             />
                         </div>
                         {!selectedRole && <p style={{ textAlign: "center", fontSize: 12, color: colors.textSecondary, marginTop: 8 }}>Select a role to proceed</p>}
@@ -266,7 +265,7 @@ export default function SignupPage() {
                                 <InputField 
                                     label="Full Name"
                                     value={formData.fullName} 
-                                    onChange={(val) => handleBaseChange('fullName', val)}
+                                    onChange={(val: string) => handleBaseChange('fullName', val)}
                                     error={errors.fullName}
                                     placeholder="John Doe"
                                 />
@@ -276,7 +275,7 @@ export default function SignupPage() {
                                 label="Email"
                                 type="email"
                                 value={formData.email} 
-                                onChange={(val) => handleBaseChange('email', val)}
+                                onChange={(val: string) => handleBaseChange('email', val)}
                                 error={errors.email}
                                 placeholder="name@company.com"
                                 isValid={isValidEmail(formData.email)}
@@ -302,48 +301,37 @@ export default function SignupPage() {
                             opacity: selectedRole ? 1 : 0,
                             marginBottom: selectedRole ? 12 : 0
                         }}>
-                            {/* Staff Specific Fields */}
-                            {selectedRole === 'STAFF' && (
-                                <div style={{ padding: 16, background: "rgba(255,255,255,0.03)", borderRadius: 12, border: `1px solid ${colors.borderPrimary}`, marginTop: 4 }}>
-                                    <div style={{ display: "flex", marginBottom: 16, borderBottom: `1px solid ${colors.borderPrimary}`, paddingBottom: 12, gap: 24 }}>
-                                        <RadioOption checked={isCreatingGym} onChange={() => setIsCreatingGym(true)} label="Create Gym" />
-                                        <RadioOption checked={!isCreatingGym} onChange={() => setIsCreatingGym(false)} label="Join Gym" />
-                                    </div>
-
-                                    {isCreatingGym ? (
-                                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                                            <div style={{ gridColumn: "span 2" }}>
-                                                <InputField label="Gym Name" value={staffData.gymName} onChange={(val) => handleStaffChange('gymName', val)} error={errors.gymName} placeholder="Apex Fitness" />
-                                            </div>
-                                            <InputField label="City" value={staffData.gymCity} onChange={(val: string) => handleStaffChange('gymCity', val)} error={errors.gymCity} placeholder="Mumbai" />
-                                            <InputField label="Phone (Opt)" value={staffData.gymPhone} onChange={(val: string) => handleStaffChange('gymPhone', val)} placeholder="9876543210" maxLength={10} />
-                                            <div style={{ gridColumn: "span 2" }}>
-                                                <InputField label="Address" value={staffData.gymAddress} onChange={(val) => handleStaffChange('gymAddress', val)} error={errors.gymAddress} placeholder="123 Main St" />
-                                            </div>
+                            {/* Owner Specific Fields */}
+                            {selectedRole === 'OWNER' && (
+                                <div style={{ padding: 16, background: "rgba(220, 38, 38, 0.05)", borderRadius: 12, border: `1px solid ${colors.crimson}40`, marginTop: 4 }}>
+                                    <h4 style={{ fontSize: 12, color: colors.crimson, marginBottom: 12, fontWeight: 700, textTransform: 'uppercase' }}>Gym Details</h4>
+                                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                                        <div style={{ gridColumn: "span 2" }}>
+                                            <InputField label="Gym Name" value={staffData.gymName} onChange={(val: string) => handleStaffChange('gymName', val)} error={errors.gymName} placeholder="Apex Fitness" />
                                         </div>
-                                    ) : (
-                                        <InputField
-                                            label="Invite Code"
-                                            value={staffData.inviteCode}
-                                            onChange={(val) => handleStaffChange('inviteCode', val)}
-                                            error={errors.inviteCodeStaff}
-                                            placeholder="Enter invite code"
-                                        />
-                                    )}
+                                        <InputField label="City" value={staffData.gymCity} onChange={(val: string) => handleStaffChange('gymCity', val)} error={errors.gymCity} placeholder="Mumbai" />
+                                        <InputField label="Phone (Opt)" value={staffData.gymPhone} onChange={(val: string) => handleStaffChange('gymPhone', val)} placeholder="9876543210" maxLength={10} />
+                                        <div style={{ gridColumn: "span 2" }}>
+                                            <InputField label="Address" value={staffData.gymAddress} onChange={(val: string) => handleStaffChange('gymAddress', val)} error={errors.gymAddress} placeholder="123 Main St" />
+                                        </div>
+                                    </div>
                                 </div>
                             )}
 
-                            {/* Member Specific Fields */}
-                            {selectedRole === 'MEMBER' && (
-                                <div style={{ marginTop: 4 }}>
-                                    <InputField 
-                                        label="Gym Invite Code (Optional)"
-                                        value={memberData.inviteCode}
-                                        onChange={(val) => handleMemberChange('inviteCode', val)}
-                                        placeholder="Enter code if you have one"
+                            {/* Trainer Specific Fields */}
+                            {selectedRole === 'TRAINER' && (
+                                <div style={{ padding: 16, background: "rgba(217, 119, 6, 0.05)", borderRadius: 12, border: `1px solid #D9770640`, marginTop: 4 }}>
+                                    <h4 style={{ fontSize: 12, color: "#D97706", marginBottom: 12, fontWeight: 700, textTransform: 'uppercase' }}>Join a Workspace</h4>
+                                    <InputField
+                                        label="Gym Invite Code"
+                                        value={staffData.inviteCode}
+                                        onChange={(val: string) => handleStaffChange('inviteCode', val)}
+                                        error={errors.inviteCode}
+                                        placeholder="Enter code from your manager"
                                     />
                                 </div>
                             )}
+
                         </div>
 
                         {/* Passwords */}
@@ -351,7 +339,7 @@ export default function SignupPage() {
                             <PasswordField 
                                 label="Password"
                                 value={formData.password}
-                                onChange={(val) => handleBaseChange('password', val)}
+                                onChange={(val: string) => handleBaseChange('password', val)}
                                 error={errors.password}
                                 show={showPassword}
                                 onToggle={() => setShowPassword(!showPassword)}
@@ -359,7 +347,7 @@ export default function SignupPage() {
                             <PasswordField
                                 label="Confirm"
                                 value={formData.confirmPassword}
-                                onChange={(val) => handleBaseChange('confirmPassword', val)}
+                                onChange={(val: string) => handleBaseChange('confirmPassword', val)}
                                 error={errors.confirmPassword}
                                 show={showConfirmPassword}
                                 onToggle={() => setShowConfirmPassword(!showConfirmPassword)}
@@ -387,7 +375,7 @@ export default function SignupPage() {
                                 width: "100%",
                                 padding: "14px",
                                 marginTop: 12,
-                                background: selectedRole ? `linear-gradient(to right, ${colors.crimson}, ${colors.crimsonHover})` : colors.bgTertiary,
+                                background: selectedRole ? (selectedRole === 'TRAINER' ? '#D97706' : colors.crimson) : colors.bgTertiary,
                                 border: "none",
                                 borderRadius: 12,
                                 color: selectedRole ? "#fff" : colors.textTertiary,
@@ -398,7 +386,7 @@ export default function SignupPage() {
                                 transition: "all 0.2s"
                             }}
                         >
-                            {isLoading ? "Creating..." : "Create Account"}
+                            {isLoading ? "Creating..." : selectedRole === 'OWNER' ? "Create Gym & Account" : "Create Account"}
                         </button>
 
                         <p style={{ textAlign: "center", marginTop: 12, color: colors.textSecondary, fontSize: 13 }}>
@@ -435,18 +423,19 @@ const RoleButton = ({ active, onClick, icon, title, color }: any) => (
         onClick={onClick}
         style={{
             flex: 1,
-            padding: "10px",
+            padding: "10px 4px",
             background: active ? color : "transparent",
             borderRadius: 10,
             border: "none",
             color: active ? "#fff" : colors.textSecondary,
             cursor: "pointer",
             fontWeight: 600,
-            fontSize: 13,
+            fontSize: 12,
             display: "flex",
+            flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            gap: 8,
+            gap: 6,
             transition: "all 0.2s"
         }}
     >
@@ -529,3 +518,4 @@ const PasswordField = ({ label, value, onChange, error, show, onToggle }: any) =
 // Icons
 const GymIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 21h18M5 21V7l8-4 8 4v14M9 21v-6h6v6" /></svg>;
 const UserIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" /></svg>;
+const TrainerIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><line x1="19" y1="8" x2="19" y2="14" /><line x1="22" y1="11" x2="16" y2="11" /></svg>;

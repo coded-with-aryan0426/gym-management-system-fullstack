@@ -24,6 +24,11 @@ public class UserController {
         return userService.getAllUsers();
     }
 
+    @GetMapping("/members")
+    public List<com.gym.management.dto.MemberDTO> getMembers() {
+        return userService.getAllMembers();
+    }
+
     @GetMapping("/search")
     public List<User> searchUsers(
             @RequestParam String role,
@@ -31,7 +36,7 @@ public class UserController {
         return userService.searchUsers(role.toUpperCase(), q);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id:\\d+}")
     public User getUser(@PathVariable Long id) {
         return userService.getUserById(id);
     }
