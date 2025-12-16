@@ -22,10 +22,23 @@ interface AppShellProps {
 }
 
 const AppShell: React.FC<AppShellProps> = ({ children }) => {
-    const [isCollapsed, setIsCollapsed] = useState(false);
+    // Persist sidebar collapsed state across refreshes
+    const [isCollapsed, setIsCollapsed] = useState(() => {
+        try {
+            return localStorage.getItem('sidebar-collapsed') === 'true';
+        } catch {
+            return false;
+        }
+    });
 
     const toggleCollapsed = () => {
-        setIsCollapsed(prev => !prev);
+        setIsCollapsed(prev => {
+            const next = !prev;
+            try {
+                localStorage.setItem('sidebar-collapsed', String(next));
+            } catch { /* ignore */ }
+            return next;
+        });
     };
 
     return (
