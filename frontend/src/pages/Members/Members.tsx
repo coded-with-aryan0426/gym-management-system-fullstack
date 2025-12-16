@@ -103,8 +103,8 @@ const Members: React.FC = () => {
       // 3. Plan Filter
       const matchesPlan = filters.plan.length === 0 ||
         filters.plan.some(p => {
-          const name = (member.planName || "").toLowerCase().trim()
-          return name === p.toLowerCase().trim()
+          const name = (member.planName || "").toLowerCase()
+          return name.includes(p.toLowerCase())
         })
 
       // 4. Month Filter (Start Date)
@@ -352,31 +352,31 @@ const Members: React.FC = () => {
           </button>
 
           <div className="members-stats-badge">
-            <div
+            <button
               className={`stat-pill stat-pill--active ${filters.status.includes('Active') ? 'selected' : ''}`}
               onClick={() => setFilters(prev => ({ ...prev, status: ['Active'] }))}
-              style={{ cursor: 'pointer' }}
+              style={{ cursor: 'pointer', border: 'none', background: 'transparent' }}
             >
               <span className="stat-dot active"></span>
               <span>{stats.active} Active</span>
-            </div>
+            </button>
             <div className="stat-divider"></div>
-            <div
+            <button
               className={`stat-pill ${filters.status.includes('Inactive') ? 'selected' : ''}`}
               onClick={() => setFilters(prev => ({ ...prev, status: ['Inactive'] }))}
-              style={{ cursor: 'pointer' }}
+              style={{ cursor: 'pointer', border: 'none', background: 'transparent' }}
             >
               <span className="stat-dot inactive"></span>
               <span>{stats.inactive} Inactive</span>
-            </div>
+            </button>
             <div className="stat-divider"></div>
-            <div
+            <button
               className={`stat-pill ${filters.status.length === 0 ? 'selected' : ''}`}
               onClick={() => setFilters(prev => ({ ...prev, status: [] }))}
-              style={{ cursor: 'pointer' }}
+              style={{ cursor: 'pointer', border: 'none', background: 'transparent' }}
             >
               <span>{stats.total} Total</span>
-            </div>
+            </button>
           </div>
         </div>
       </div>
@@ -396,8 +396,7 @@ const Members: React.FC = () => {
             >
               <option value="" disabled>Status</option>
               <option value="Active">Active</option>
-              <option value="Inactive">Inactive</option>
-              <option value="Pending">Pending</option>
+              <option value="Expired">Expired</option>
             </select>
 
             {/* Plan Filter */}
@@ -410,11 +409,9 @@ const Members: React.FC = () => {
               }}
             >
               <option value="" disabled>Plan</option>
-              <option value="Basic Plan">Basic Plan</option>
-              <option value="Silver Plan">Silver Plan</option>
-              <option value="Gold Plan">Gold Plan</option>
-              <option value="Platinum Plan">Platinum Plan</option>
-              <option value="Annual Gold Plan">Annual Gold Plan</option>
+              <option value="Basic">Basic</option>
+              <option value="Premium">Premium</option>
+              <option value="Standard">Standard</option>
             </select>
 
             {/* Join Date Filter */}
