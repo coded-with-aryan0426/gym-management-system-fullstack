@@ -342,10 +342,18 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
 
       // Update local member state for real-time display
       if (selectedPkg) {
+        // Calculate new end date for immediate UI update
+        const months = Number(renewForm.customDuration)
+        const newEndDate = new Date()
+        newEndDate.setMonth(newEndDate.getMonth() + months)
+
         setLocalMember(prev => prev ? {
           ...prev,
           planName: selectedPkg.packageName || selectedPkg.name,
-          status: 'Active'
+          status: 'Active',
+          // Update end date so "Days Left" recalculates immediately
+          endDate: newEndDate.toISOString(),
+          membershipEndDate: newEndDate.toISOString()
         } as User : null)
       }
 
@@ -450,6 +458,39 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
     }
   }
 
+  // Calculate days remaining from membership end date
+  const calculateDaysRemaining = (): number | null => {
+    if (!localMember) return null
+
+    // Try to get end date from various possible sources
+    const endDateStr = (localMember as any).endDate ||
+      (localMember as any).membershipEndDate ||
+      (localMember as any).planEndDate
+
+    if (!endDateStr) {
+      // If no end date, calculate from join date + 30 days as default
+      const joinDateStr = localMember.joinDate || localMember.createdAt
+      if (joinDateStr) {
+        const joinDate = new Date(joinDateStr)
+        const defaultEndDate = new Date(joinDate)
+        defaultEndDate.setDate(defaultEndDate.getDate() + 30) // Assume 30 day plan
+        const today = new Date()
+        const diffTime = defaultEndDate.getTime() - today.getTime()
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+        return Math.max(0, diffDays)
+      }
+      return null
+    }
+
+    const endDate = new Date(endDateStr)
+    const today = new Date()
+    const diffTime = endDate.getTime() - today.getTime()
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    return Math.max(0, diffDays)
+  }
+
+  const daysRemaining = calculateDaysRemaining()
+
   if (!member || !localMember) return null
 
   const modalContent =
@@ -480,21 +521,31 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
               exit={{ opacity: 0, y: 24 }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
             >
-              {/* Member Info Header - Simplified */}
+              {/* Member Info Header - Compact with Stats */}
               <div className="member-action-modal__profile-header">
-                <div className="member-info__avatar member-info__avatar--large">
+                <div className="profile-header__avatar">
                   <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${localMember.fullName}`} alt={localMember.fullName} />
-                  {isRealTimeLoading && <div className="avatar-loading-overlay">
-                    <div className="loading-spinner"></div>
-                  </div>}
                 </div>
-                <div className="member-info__header-details">
-                  <h2 className="member-info__name-large">{localMember.fullName}</h2>
-                  <span className="member-info__plan-badge">{getPlanForMember()}</span>
+                <div className="profile-header__info">
+                  <h2 className="profile-header__name">{localMember.fullName}</h2>
+                  <div className="profile-header__meta">
+                    <span className="plan-badge plan-badge--member">{getPlanForMember()}</span>
+                    <span className={`status-badge status-badge--${getStatusForMember().toLowerCase()}`}>
+                      <span className="status-dot"></span>
+                      {getStatusForMember()}
+                    </span>
+                  </div>
                 </div>
-                <span className={`member-info__status-badge member-info__status-badge--${getStatusForMember().toLowerCase()}`}>
-                  {getStatusForMember()}
-                </span>
+                <div className="profile-header__stats">
+                  <div className="stat-item">
+                    <span className="stat-value">{assignedTrainers.length}</span>
+                    <span className="stat-label">Trainers</span>
+                  </div>
+                  <div className="stat-item">
+                    <span className="stat-value">{daysRemaining !== null ? daysRemaining : '—'}</span>
+                    <span className="stat-label">Days Left</span>
+                  </div>
+                </div>
               </div>
 
               {/* Two-Column Content Layout with Dynamic Panels */}

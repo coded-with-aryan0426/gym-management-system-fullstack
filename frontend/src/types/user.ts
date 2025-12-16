@@ -13,6 +13,7 @@ export interface User {
   status?: string;
   joinDate?: string;
   createdAt?: string;
+  membershipDaysRemaining?: number; // Calculated field for display
 }
 
 export interface MemberDTO {
