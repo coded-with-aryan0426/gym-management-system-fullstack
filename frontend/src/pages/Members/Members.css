@@ -8,133 +8,251 @@
   gap: var(--space-6);
 }
 
-/* Header */
+/* Header - Redesigned Compact Version */
 .members-page__header {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
+  /* Align bottom for better typography baseline */
   justify-content: space-between;
   gap: var(--space-4);
+  padding: 0 var(--space-2) var(--space-4) var(--space-2);
+  border-bottom: 1px solid var(--border-secondary);
+  height: 60px;
+  /* Specific height for consistency */
 }
 
 .members-page__title-section {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: 2px;
 }
 
 .members-page__title {
-  font-size: var(--text-2xl);
-  font-weight: var(--font-bold);
+  font-size: 1.5rem;
+  /* Reduced from 2xl */
+  font-weight: 700;
   color: var(--text-primary);
   margin: 0;
+  line-height: 1.2;
 }
 
-.members-page__count {
-  font-size: var(--text-sm);
+.members-page__subtitle {
+  font-size: 0.875rem;
   color: var(--text-tertiary);
+  font-weight: 500;
 }
 
-.members-page__actions {
+.members-page__header-right {
   display: flex;
-  gap: var(--space-3);
-}
-
-/* Content Layout with Filters */
-.members-page__content {
-  display: grid;
-  grid-template-columns: 1fr;
-  /* Default: Full width table */
+  align-items: center;
   gap: var(--space-4);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  /* Ensure container takes remaining height if needed */
-  min-height: 500px;
 }
 
-
-
-/* Table Container (moved inside content grid) */
-.members-page__table-container {
-  background-color: var(--bg-secondary);
+.members-stats-badge {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 6px 12px;
+  background: var(--bg-secondary);
   border: 1px solid var(--border-secondary);
-  border-radius: var(--card-radius);
-  overflow: hidden;
-  height: fit-content;
-  /* Allow table to define its height */
+  border-radius: 20px;
 }
 
-/* Filters Panel */
-.members-page__filters-panel {
-  /* No animation needed for fixed layout */
-  height: fit-content;
+.stat-pill {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-@keyframes slideInRight {
+.stat-pill--active {
+  color: var(--color-emerald);
+}
+
+.stat-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.stat-dot.active {
+  background-color: var(--color-emerald);
+}
+
+.stat-dot.inactive {
+  background-color: var(--text-tertiary);
+}
+
+.stat-divider {
+  width: 1px;
+  height: 12px;
+  background: var(--border-secondary);
+}
+
+/* Smart Filter Bar - Sticky & Functional */
+.smart-filter-bar {
+  position: sticky;
+  top: 70px;
+  /* Below UtilityBar (70px) */
+  z-index: 90;
+  background: var(--bg-primary);
+  /* Match page background for opacity */
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid transparent;
+  transition: all 0.2s;
+}
+
+.smart-filter-bar--stuck {
+  background: var(--bg-secondary);
+  border-bottom-color: var(--border-primary);
+  padding: var(--space-3) var(--space-2);
+  margin: 0 -1rem;
+  /* Negative margin to span full width if in container */
+  padding-left: 1rem;
+  padding-right: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.filter-controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.filter-primary-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+/* Filter Search Input */
+.filter-search-input {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  padding: 8px 12px 8px 36px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  width: 240px;
+  transition: all 0.2s;
+}
+
+.filter-search-input:focus {
+  width: 280px;
+  border-color: var(--color-crimson);
+  outline: none;
+}
+
+.filter-search-wrapper {
+  position: relative;
+}
+
+.filter-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-tertiary);
+  pointer-events: none;
+}
+
+/* Pill Selects */
+.filter-pill {
+  appearance: none;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-pill:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.filter-pill--active {
+  background: rgba(220, 38, 38, 0.1);
+  color: var(--color-crimson);
+  border-color: var(--color-crimson);
+}
+
+.filter-select {
+  /* Hiding default select arrow mostly */
+  padding-right: 32px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+}
+
+/* More Filters Toggle */
+.btn-more-filters {
+  background: none;
+  border: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-crimson);
+  cursor: pointer;
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-clear-filters {
+  background: none;
+  border: none;
+  font-size: 0.875rem;
+  color: var(--text-tertiary);
+  cursor: pointer;
+}
+
+.btn-clear-filters:hover {
+  color: var(--text-primary);
+  text-decoration: underline;
+}
+
+/* Secondary Filters (Collapsible) */
+.filter-secondary-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border-secondary);
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
   from {
     opacity: 0;
-    transform: translateX(20px);
+    transform: translateY(-10px);
   }
 
   to {
     opacity: 1;
-    transform: translateX(0);
+    transform: translateY(0);
   }
 }
 
-/* Enterprise Filter Panel Design */
-/* Enterprise Filter Panel Design */
-.filters-panel {
-  /* Local Scope Variables */
-  --fp-bg: #1E1E1E;
-  --fp-border: #2B2B2B;
-  --fp-text-primary: #FFFFFF;
-  --fp-text-secondary: #A9A9A9;
-
-  --fp-accent-success: #1DB954;
-  --fp-accent-error: #E3515C;
-  --fp-accent-warning: #D9A441;
-  --fp-accent-neutral: #4A4A4A;
-  --fp-accent-primary: #E74C4C;
-
-  /* Plan Colors */
-  --fp-plan-basic: #64748B;
-  --fp-plan-silver: #94A3B8;
-  --fp-plan-gold: #F59E0B;
-  --fp-plan-platinum: #8B5CF6;
-
-  background-color: var(--fp-bg);
-  border: 1px solid var(--fp-border);
-  border-radius: 8px;
-  padding: 16px;
-  /* Reduced from 24px */
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  /* Reduced from 32px */
-  position: sticky;
-  top: 20px;
-  max-height: calc(100vh - 40px);
-  /* Ensure it fits in window */
-  overflow-y: auto;
-  /* Allow internal scrolling if needed */
+/* Insight Row */
+.filter-insight-row {
+  font-size: 0.875rem;
+  color: var(--text-tertiary);
+  margin-top: var(--space-2);
+  font-weight: 500;
 }
 
-/* Rest of Filter Styles (Unchanged) */
-.filter-section h4 {
-  font-family: 'Inter', system-ui, sans-serif;
-  font-size: 16px;
+.highlight-count {
+  color: var(--text-primary);
   font-weight: 600;
-  color: var(--fp-text-primary);
-  margin: 0 0 16px 0;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--fp-border);
-}
-
-.filter-checkboxes,
-.filter-radios {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
-  /* Reduced from 8px */
 }
 
 /* Enterprise Chip Styles */

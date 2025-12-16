@@ -50,6 +50,27 @@ const Members: React.FC = () => {
     planDuration: "",
   })
 
+  // Redesign State
+  const [showMoreFilters, setShowMoreFilters] = useState(false)
+  const [isSticky, setIsSticky] = useState(false)
+
+  // Scroll listener for sticky header
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsSticky(window.scrollY > 60)
+    }
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  // Live Stats Calculation
+  const stats = useMemo(() => {
+    const total = members.length
+    const active = members.filter(m => m.status === 'Active').length
+    const inactive = total - active
+    return { total, active, inactive }
+  }, [members])
+
   const loadMembers = useCallback(async () => {
     setLoading(true)
     try {
@@ -269,179 +290,190 @@ const Members: React.FC = () => {
     },
   ]
 
+  const activeFilterCount = useMemo(() => {
+    let count = 0
+    if (filters.status.length > 0) count++
+    if (filters.plan.length > 0) count++
+    if (filters.lastVisit) count++
+    if (filters.dateFrom) count++
+    if (filters.planDuration) count++
+    return count
+  }, [filters])
+
   return (
     <div className="members-page">
-      {/* Header */}
+      {/* 2. Members Directory Header – Compact & Powerful */}
       <div className="members-page__header">
         <div className="members-page__title-section">
-          <h1 className="members-page__title">Members Directory</h1>
+          <h1 className="members-page__title">Members</h1>
+          <span className="members-page__subtitle">Manage, filter, and act on all members</span>
         </div>
-        <div className="members-page__actions">
-          <span className="members-page__count">Total Members: {members.length}</span>
+
+        <div className="members-page__header-right">
+          <div className="members-stats-badge">
+            <div className="stat-pill stat-pill--active">
+              <span className="stat-dot active"></span>
+              <span>{stats.active} Active</span>
+            </div>
+            <div className="stat-divider"></div>
+            <div className="stat-pill">
+              <span className="stat-dot inactive"></span>
+              <span>{stats.inactive} Inactive</span>
+            </div>
+            <div className="stat-divider"></div>
+            <div className="stat-pill">
+              <span>{stats.total} Total</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Main Content with Fixed Filter Panel */}
-      <div className="members-page__content">
-        {/* Main Content Area: Table + Filter Panel */}
-        <div className="members-page__table-container" style={{ width: '100%' }}>
-          {/* Compact Filter Bar */}
-          <div className="filters-bar" style={{
-            display: 'flex',
-            gap: '1rem',
-            flexWrap: 'wrap',
-            marginBottom: '1rem',
-            alignItems: 'flex-end',
-            padding: '1rem',
-            background: 'var(--bg-secondary)',
-            borderRadius: 'var(--radius-md)',
-            width: '100%',
-            position: 'sticky',
-            top: '0',
-            zIndex: 10,
-            borderBottom: '1px solid var(--border-color)'
-          }}>
-
-            {/* Month Filter */}
-            <div className="filter-group" style={{ flex: '0 0 150px' }}>
-              <label style={{ display: 'block', fontSize: '0.875rem', marginBottom: '0.25rem' }}>Join Month</label>
-              <select
-                className="form-select"
-                value={filters.month}
-                onChange={(e) => handleFilterChange("month", e.target.value)}
-                style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}
-              >
-                <option value="">All Months</option>
-                {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
-                  <option key={m} value={String(m)}>
-                    {new Date(0, m - 1).toLocaleString('default', { month: 'long' })}
-                  </option>
-                ))}
-              </select>
+      {/* 3. Smart Filter Bar – Sticky & Intelligent */}
+      <div className={`smart-filter-bar ${isSticky ? 'smart-filter-bar--stuck' : ''}`}>
+        <div className="filter-controls">
+          <div className="filter-primary-row">
+            {/* Search */}
+            <div className="filter-search-wrapper">
+              <FiSearch className="filter-search-icon" />
+              <input
+                type="text"
+                className="filter-search-input"
+                placeholder="Search by name, email, or phone..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
 
-            {/* Status Filter */}
-            <div className="filter-group" style={{ flex: '0 0 150px' }}>
-              <label style={{ display: 'block', fontSize: '0.875rem', marginBottom: '0.25rem' }}>Status</label>
-              <select
-                className="form-select"
-                value={filters.status.length > 0 ? filters.status[0] : ""}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  setFilters(prev => ({ ...prev, status: val ? [val] : [] }))
-                }}
-                style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}
-              >
-                <option value="">All Statuses</option>
-                <option value="ACTIVE">Active</option>
-                <option value="EXPIRED">Expired</option>
-                <option value="PENDING">Pending</option>
-                <option value="Inactive">Inactive</option>
-              </select>
-            </div>
+            {/* Status Filter Pill */}
+            <select
+              className={`filter-pill filter-select ${filters.status.length > 0 ? 'filter-pill--active' : ''}`}
+              value={filters.status[0] || ""}
+              onChange={(e) => {
+                const val = e.target.value
+                setFilters(prev => ({ ...prev, status: val ? [val] : [] }))
+              }}
+            >
+              <option value="" disabled>Status</option>
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+              <option value="Pending">Pending</option>
+            </select>
 
-            {/* Plan Filter */}
-            <div className="filter-group" style={{ flex: '0 0 150px' }}>
-              <label style={{ display: 'block', fontSize: '0.875rem', marginBottom: '0.25rem' }}>Plan</label>
-              <select
-                className="form-select"
-                value={filters.plan.length > 0 ? filters.plan[0] : ""}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  setFilters(prev => ({ ...prev, plan: val ? [val] : [] }))
-                }}
-                style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}
-              >
-                <option value="">All Plans</option>
-                <option value="Basic">Basic</option>
-                <option value="Standard">Standard</option>
-                <option value="Premium">Premium</option>
-              </select>
-            </div>
+            {/* Plan Filter Pill */}
+            <select
+              className={`filter-pill filter-select ${filters.plan.length > 0 ? 'filter-pill--active' : ''}`}
+              value={filters.plan[0] || ""}
+              onChange={(e) => {
+                const val = e.target.value
+                setFilters(prev => ({ ...prev, plan: val ? [val] : [] }))
+              }}
+            >
+              <option value="" disabled>Plan</option>
+              <option value="Gold">Gold Plan</option>
+              <option value="Silver">Silver Plan</option>
+              <option value="Platinum">Platinum Plan</option>
+            </select>
 
-            {/* Plan Duration Filter (Replaces Date Range) */}
-            <div className="filter-group" style={{ flex: '0 0 150px' }}>
-              <label style={{ display: 'block', fontSize: '0.875rem', marginBottom: '0.25rem' }}>Duration</label>
+            {/* More Filters Toggle */}
+            <button
+              className="btn-more-filters"
+              onClick={() => setShowMoreFilters(!showMoreFilters)}
+            >
+              <FiMoreVertical />
+              {showMoreFilters ? 'Less Filters' : 'More Filters'}
+            </button>
+
+            {/* Reset/Clear */}
+            {(activeFilterCount > 0 || searchQuery) && (
+              <button className="btn-clear-filters" onClick={() => {
+                handleResetFilters()
+                setSearchQuery("")
+              }}>
+                Clear Filters
+              </button>
+            )}
+          </div>
+
+          {/* Collapsible Secondary Filters */}
+          {showMoreFilters && (
+            <div className="filter-secondary-row">
               <select
-                className="form-select"
+                className={`filter-pill filter-select ${filters.lastVisit ? 'filter-pill--active' : ''}`}
+                value={filters.lastVisit}
+                onChange={(e) => handleFilterChange('lastVisit', e.target.value)}
+              >
+                <option value="">Join Date</option>
+                <option value="today">Joined Today</option>
+                <option value="week">Joined This Week</option>
+                <option value="month">Joined This Month</option>
+              </select>
+
+              <select
+                className={`filter-pill filter-select ${filters.planDuration ? 'filter-pill--active' : ''}`}
                 value={filters.planDuration}
-                onChange={(e) => handleFilterChange("planDuration", e.target.value)}
-                style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}
+                onChange={(e) => handleFilterChange('planDuration', e.target.value)}
               >
-                <option value="">All Durations</option>
+                <option value="">Duration</option>
                 <option value="1">1 Month</option>
                 <option value="3">3 Months</option>
                 <option value="6">6 Months</option>
                 <option value="12">12 Months</option>
-                <option value="24">24 Months</option>
-                <option value="36">36 Months</option>
               </select>
             </div>
+          )}
 
-            {/* Reset Button */}
-            <div className="filter-group" style={{ flex: '0 0 auto' }}>
-              <label style={{ display: 'block', fontSize: '0.875rem', marginBottom: '0.25rem', visibility: 'hidden' }}>Reset</label>
-              <button
-                onClick={handleResetFilters}
-                className="btn"
-                style={{
-                  height: '38px',
-                  padding: '0 1.5rem',
-                  backgroundColor: '#ef4444',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: 'var(--radius-sm)',
-                  fontWeight: 500
-                }}
-              >
-                Reset
-              </button>
-            </div>
+          {/* 5. Insight Row */}
+          <div className="filter-insight-row">
+            Showing <span className="highlight-count">{filteredMembers.length}</span> of <span className="highlight-count">{members.length}</span> members
+            {(activeFilterCount > 0 || searchQuery) && " (Filtered)"}
           </div>
+        </div>
+      </div>
 
+      <div className="members-page__content">
+        <div className="members-page__table-container">
           <DataTable
-            columns={columns as any} // Cast to any to avoid strict Column<T> mismatches if User is hardcoded in base
             data={filteredMembers}
-            keyExtractor={(member: MemberDTO) => member.userId}
+            keyExtractor={(member) => member.userId}
+            columns={columns as any}
             loading={loading}
-            emptyMessage="No members found"
+            onRowClick={handleActionClick as any}
+            emptyMessage={
+              searchQuery || activeFilterCount > 0
+                ? "No members match your filters"
+                : "No members found. Add your first member!"
+            }
           />
         </div>
-
-
-        {
-          isActionModalOpen && selectedMember && (
-            <EnhancedMemberActionModal
-              isOpen={isActionModalOpen}
-              onClose={handleCloseActionModal}
-              member={selectedMember as any}
-              onEditProfile={(updatedMember) => handleEditProfile(updatedMember as unknown as MemberDTO)}
-              onRenewPlan={(member, packageId, amount, customDuration, skipTransaction) => handleRenewPlan(member as unknown as MemberDTO, packageId, amount, customDuration, skipTransaction)}
-              onSendMessage={() => handleSendMessage(selectedMember)}
-            />
-          )
-        }
-
-        {/* V1 Manual Member Entry Modal */}
-        <CreateUserModal
-          isOpen={isCreateModalOpen}
-          onClose={() => {
-            setIsCreateModalOpen(false);
-            // Remove query param
-            setSearchParams(prev => {
-              const newParams = new URLSearchParams(prev);
-              newParams.delete('action');
-              return newParams;
-            });
-          }}
-          onSuccess={() => {
-            loadMembers();
-            toast.success("Member added successfully");
-          }}
-          initialRole="CUSTOMER"
-        />
-
       </div>
+
+      {isActionModalOpen && selectedMember && (
+        <EnhancedMemberActionModal
+          isOpen={isActionModalOpen}
+          onClose={handleCloseActionModal}
+          member={selectedMember as any}
+          onEditProfile={(updatedMember) => handleEditProfile(updatedMember as unknown as MemberDTO)}
+          onRenewPlan={(member, packageId, amount, customDuration, skipTransaction) => handleRenewPlan(member as unknown as MemberDTO, packageId, amount, customDuration, skipTransaction)}
+          onSendMessage={() => handleSendMessage(selectedMember)}
+        />
+      )}
+
+      <CreateUserModal
+        isOpen={isCreateModalOpen}
+        onClose={() => {
+          setIsCreateModalOpen(false)
+          setSearchParams(prev => {
+            const newParams = new URLSearchParams(prev)
+            newParams.delete('action')
+            return newParams
+          })
+        }}
+        onSuccess={() => {
+          loadMembers()
+          toast.success("Member added successfully")
+        }}
+        initialRole="CUSTOMER"
+      />
     </div>
   )
 }

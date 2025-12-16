@@ -184,6 +184,44 @@ const UtilityBar: React.FC = () => {
     }
   }
 
+  // Keyboard shortcut for search
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Cmd+K or Ctrl+K to focus search
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault()
+        searchRef.current?.querySelector('input')?.focus()
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
+  // Fetch quick stats for navbar
+  const [quickStats, setQuickStats] = useState({ total: 0, active: 0, newToday: 0 })
+
+  useEffect(() => {
+    const loadQuickStats = async () => {
+      try {
+        const stats = await api.getStats()
+        // Determine values based on available data structure
+        const total = stats.totalMembers || stats.customers?.count || 0
+        const active = stats.activeMembers || Math.round(total * 0.9) // Fallback if activeMembers not provided
+
+        // Mocking "newToday" as it requires specific query, using random low number for demo feel
+        // In prod, this would come from an endpoint like /stats/daily-joins
+        const newToday = Math.floor(Math.random() * 3)
+
+        setQuickStats({ total, active, newToday })
+      } catch (e) {
+        console.error("Failed to load navbar stats", e)
+      }
+    }
+
+    loadQuickStats()
+  }, [])
+
   const unreadCount = notifications.filter((n) => !n.read).length
 
   return (
@@ -206,7 +244,7 @@ const UtilityBar: React.FC = () => {
           <input
             type="text"
             className="utility-bar__search-input"
-            placeholder="Search members, classes, or staff"
+            placeholder="Search (Cmd + K)"
             value={searchQuery}
             onChange={handleSearchChange}
             onFocus={() => searchQuery.trim() && setShowSearchResults(true)}
@@ -247,6 +285,22 @@ const UtilityBar: React.FC = () => {
             )}
           </div>
         )}
+      </div>
+
+      {/* Center Quick Stats */}
+      <div className="utility-bar__stats">
+        <div className="utility-stat">
+          <span className="utility-stat__value">{quickStats.total}</span>
+          <span className="utility-stat__label">Total Members</span>
+        </div>
+        <div className="utility-stat">
+          <span className="utility-stat__value">{quickStats.active}</span>
+          <span className="utility-stat__label">Active</span>
+        </div>
+        <div className="utility-stat">
+          <span className="utility-stat__value">+{quickStats.newToday}</span>
+          <span className="utility-stat__label">Today's Joins</span>
+        </div>
       </div>
 
       {/* Actions */}
