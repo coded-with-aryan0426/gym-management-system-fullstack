@@ -3,6 +3,7 @@ import { Toaster } from 'react-hot-toast';
 import { lazy, Suspense } from 'react';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { CurrencyProvider } from './contexts/CurrencyContext';
+import { MembersProvider } from './contexts/MembersContext';
 import { AppShell } from './components/Layout';
 
 // Import new design system
@@ -44,19 +45,21 @@ function App() {
               <Route
                 path="/*"
                 element={
-                  <AppShell>
-                    <Routes>
-                      <Route path="/dashboard" element={<Dashboard />} />
-                      <Route path="/staff" element={<Staff />} />
-                      <Route path="/members" element={<Members />} />
-                      <Route path="/classes" element={<Classes />} />
-                      <Route path="/financials" element={<Financials />} />
-                      <Route path="/pt-sessions" element={<PTSessions />} />
-                      <Route path="/reports" element={<Reports />} />
-                      <Route path="/settings" element={<Settings />} />
-                      <Route path="*" element={<Navigate to="/dashboard" replace />} />
-                    </Routes>
-                  </AppShell>
+                  <MembersProvider>
+                    <AppShell>
+                      <Routes>
+                        <Route path="/dashboard" element={<Dashboard />} />
+                        <Route path="/staff" element={<Staff />} />
+                        <Route path="/members" element={<Members />} />
+                        <Route path="/classes" element={<Classes />} />
+                        <Route path="/financials" element={<Financials />} />
+                        <Route path="/pt-sessions" element={<PTSessions />} />
+                        <Route path="/reports" element={<Reports />} />
+                        <Route path="/settings" element={<Settings />} />
+                        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                      </Routes>
+                    </AppShell>
+                  </MembersProvider>
                 }
               />
             </Routes>

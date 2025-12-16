@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { Button, Badge, getStatusVariant, Avatar, Card, DataTable, type Column } from '../../components/ui';
 import EnhancedStaffActionModal from '../../components/StaffActionModal/EnhancedStaffActionModal';
@@ -11,6 +12,9 @@ const Staff: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [selectedStaff, setSelectedStaff] = useState<User | null>(null);
   const [isActionModalOpen, setIsActionModalOpen] = useState(false);
+
+  // Deep linking for Global Search
+  const [searchParams] = useSearchParams();
 
   const [filters, setFilters] = useState({
     role: "",
@@ -39,6 +43,17 @@ const Staff: React.FC = () => {
   useEffect(() => {
     loadStaff();
   }, []);
+
+  // Handle Search Param Navigation
+  useEffect(() => {
+    const userId = searchParams.get('userId');
+    if (userId && staff.length > 0) {
+      const member = staff.find(s => s.userId.toString() === userId);
+      if (member) {
+        handleActionClick(member);
+      }
+    }
+  }, [searchParams, staff]);
 
   const loadStaff = async () => {
     setLoading(true);
@@ -110,7 +125,11 @@ const Staff: React.FC = () => {
       key: 'member',
       header: 'Staff Member',
       render: (member) => (
-        <div className="staff-cell">
+        <div
+          className="staff-cell"
+          onClick={(e) => { e.stopPropagation(); handleActionClick(member); }}
+          style={{ cursor: 'pointer' }}
+        >
           <Avatar name={member.fullName} size="md" />
           <span className="staff-name">{member.fullName}</span>
         </div>

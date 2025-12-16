@@ -2,13 +2,14 @@
 
 import type React from "react"
 import { useEffect, useState, useMemo, useCallback } from "react"
-import { FiMoreVertical, FiSearch } from "react-icons/fi"
+import { FiMoreVertical, FiSearch, FiFilter, FiX } from "react-icons/fi"
 import { toast } from "react-hot-toast"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { Button, Badge, getStatusVariant, Avatar, DataTable, CreateUserModal, type Column } from "../../components"
 import EnhancedMemberActionModal from "../../components/MemberActionModal/EnhancedMemberActionModal"
 import api from "../../services/api"
 import type { User, MemberDTO } from "../../types/user"
+import { useMembers } from "../../contexts/MembersContext"
 import "./Members.css"
 
 interface FilterState {
@@ -23,21 +24,42 @@ interface FilterState {
 }
 
 const Members: React.FC = () => {
-  const [members, setMembers] = useState<MemberDTO[]>([])
-  const [loading, setLoading] = useState(true)
+  // Use Global State
+  const { members, loading, refreshMembers, stats: globalStats } = useMembers()
+
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedMember, setSelectedMember] = useState<MemberDTO | null>(null)
   const [isActionModalOpen, setIsActionModalOpen] = useState(false)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
 
-  // V1 Manual Entry: Check query param for auto-open
+  const handleActionClick = (member: MemberDTO) => {
+    setSelectedMember(member)
+    setIsActionModalOpen(true)
+  }
+
+  const handleCloseActionModal = () => {
+    setIsActionModalOpen(false)
+    setSelectedMember(null)
+  }
+
+  // V1 Manual Entry & Global Search Navigation
   const [searchParams, setSearchParams] = useSearchParams()
 
   useEffect(() => {
+    // Handle 'create' action
     if (searchParams.get('action') === 'create') {
       setIsCreateModalOpen(true);
     }
-  }, [searchParams]);
+
+    // Handle 'userId' from Global Search
+    const userId = searchParams.get('userId')
+    if (userId && members.length > 0) {
+      const member = members.find(m => m.userId.toString() === userId)
+      if (member) {
+        handleActionClick(member)
+      }
+    }
+  }, [searchParams, members]);
 
 
   const [filters, setFilters] = useState<FilterState>({
@@ -51,7 +73,7 @@ const Members: React.FC = () => {
   })
 
   // Redesign State
-  const [showMoreFilters, setShowMoreFilters] = useState(false)
+  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false)
   const [isSticky, setIsSticky] = useState(false)
 
   // Scroll listener for sticky header
@@ -63,47 +85,116 @@ const Members: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // Live Stats Calculation
+  // Live Stats Calculation (derived from Filtered or Global)
+  // Replaced loadMembers with refreshMembers from context
+
+  // Filter members based on search and filters
+  const filteredMembers = useMemo(() => {
+    return members.filter((member) => {
+      // 1. Search Query (Name/Email)
+      const matchesSearch =
+        member.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        member.email.toLowerCase().includes(searchQuery.toLowerCase())
+
+      // 2. Status Filter
+      const matchesStatus = filters.status.length === 0 ||
+        filters.status.some(s => s.toLowerCase() === (member.status || "inactive").toLowerCase())
+
+      // 3. Plan Filter
+      const matchesPlan = filters.plan.length === 0 ||
+        filters.plan.some(p => {
+          const name = (member.planName || "").toLowerCase().trim()
+          return name === p.toLowerCase().trim()
+        })
+
+      // 4. Month Filter (Start Date)
+      // Check if start month matches filter (1-12)
+      const matchesMonth = filters.month === "" ||
+        (member.startDate && new Date(member.startDate).getMonth() + 1 === Number(filters.month))
+
+      // 5. Plan Duration Filter (Smart Parsing for Days/Months)
+      let matchesDuration = true
+      if (filters.planDuration !== "") {
+        const raw = (member.planDuration || "").toLowerCase()
+        const num = parseInt(raw) || 0
+        let months = 0
+
+        if (raw.includes('day')) months = Math.round(num / 30)
+        else if (raw.includes('year')) months = num * 12
+        else months = num // Default to months if unit missing or 'month' present
+
+        // Strict equality on normalized months
+        matchesDuration = months === Number(filters.planDuration)
+      }
+
+      // 6. Join Date / Last Visit Filter
+      let matchesDate = true
+
+      // Use efficient date checking
+      const dateStr = member.joinDate || member.startDate || member.createdAt
+      if (dateStr) {
+        const joinDate = new Date(dateStr)
+        const today = new Date()
+
+        switch (filters.lastVisit) {
+          case "today": {
+            const startOfDay = new Date(today.setHours(0, 0, 0, 0))
+            matchesDate = joinDate >= startOfDay
+            break
+          }
+          case "week": {
+            const firstDay = new Date(today.setDate(today.getDate() - today.getDay())) // Sunday
+            firstDay.setHours(0, 0, 0, 0)
+            matchesDate = joinDate >= firstDay
+            break
+          }
+          case "month": {
+            const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
+            matchesDate = joinDate >= firstDayOfMonth
+            break
+          }
+          default:
+            matchesDate = true
+        }
+      } else if (filters.lastVisit) {
+        matchesDate = false // Filter active but no date -> exclude
+      }
+
+      // STRICT AND LOGIC
+      return matchesSearch && matchesStatus && matchesPlan && matchesMonth && matchesDuration && matchesDate
+    })
+  }, [members, searchQuery, filters])
+
+  // Stats Logic: If filters active, show filtered counts. Else show global.
+  // Note: activeFilterCount calculation needs to be here or above
+  const activeFilterCount = useMemo(() => {
+    let count = 0
+    if (filters.status.length > 0) count++
+    if (filters.plan.length > 0) count++
+    if (filters.lastVisit) count++
+    if (filters.planDuration) count++
+    return count
+  }, [filters])
+
   const stats = useMemo(() => {
-    const total = members.length
-    const active = members.filter(m => m.status === 'Active').length
-    const inactive = total - active
-    return { total, active, inactive }
-  }, [members])
-
-  const loadMembers = useCallback(async () => {
-    setLoading(true)
-    try {
-      // V1: Load all members directly (no gym checks)
-      const data = await api.getMembers()
-      console.log("[Debug] Real Member Data:", data[0]);
-      setMembers(data)
-    } catch (err) {
-      console.error("[Beta] Failed to load members from backend:", err)
-      toast.error("Failed to load members")
-      setMembers([])
-    } finally {
-      setLoading(false)
+    if (activeFilterCount > 0) {
+      return {
+        total: filteredMembers.length,
+        active: filteredMembers.filter(m => (m.status || 'Inactive').toLowerCase() === 'active').length,
+        inactive: filteredMembers.filter(m => (m.status || 'Inactive').toLowerCase() !== 'active').length
+      }
     }
-  }, [])
+    // Check if globalStats is loaded, else fallback
+    return {
+      total: globalStats.total,
+      active: globalStats.active,
+      inactive: globalStats.inactive || (globalStats.total - globalStats.active)
+    }
+  }, [activeFilterCount, filteredMembers, globalStats])
 
-  useEffect(() => {
-    loadMembers()
-  }, [loadMembers])
-
-  const handleActionClick = (member: MemberDTO) => {
-    setSelectedMember(member)
-    setIsActionModalOpen(true)
-  }
-
-  const handleCloseActionModal = () => {
-    setIsActionModalOpen(false)
-    setSelectedMember(null)
-  }
-
+  // Callbacks replacing manual load
   const handleEditProfile = async (member: MemberDTO) => {
-    // API call already made in EnhancedMemberActionModal, just refresh the list
-    loadMembers() // Refresh list but keep modal open
+    refreshMembers()
   }
 
   const handleRenewPlan = async (member: MemberDTO, packageId?: number, amount?: number, customDuration?: number, skipTransaction?: boolean) => {
@@ -128,7 +219,7 @@ const Members: React.FC = () => {
 
         // toast.success(`Membership renewed${skipTransaction ? '' : ' and payment recorded'} for ${member.fullName}`) -> Handled in modal
         console.log(`Membership renewed for ${member.fullName}`)
-        loadMembers() // Refresh list but keep modal open
+        refreshMembers() // Refresh list but keep modal open
       } else {
         console.warn("Renew plan called without packageId")
       }
@@ -173,63 +264,7 @@ const Members: React.FC = () => {
     })
   }
 
-  // Filter members based on search and filters
-  const filteredMembers = useMemo(() => {
-    return members.filter((member) => {
-      const matchesSearch =
-        member.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        member.email.toLowerCase().includes(searchQuery.toLowerCase())
 
-      const matchesStatus = filters.status.length === 0 || filters.status.includes(member.status || "Inactive")
-      const matchesPlan = filters.plan.length === 0 || filters.plan.some(p => (member.planName || "").includes(p))
-
-      const matchesMonth = filters.month === "" || (member.startDate && new Date(member.startDate).getMonth() + 1 === Number(filters.month))
-
-      const matchesDuration = filters.planDuration === "" || (member.planDuration && String(member.planDuration).includes(filters.planDuration))
-
-
-      // Date Filter Implementation (targeting startDate / Join Date)
-      let matchesDate = true
-      if (member.startDate) {
-        const joinDate = new Date(member.startDate)
-        const today = new Date()
-        const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate())
-
-        switch (filters.lastVisit) {
-          case "today":
-            matchesDate = joinDate >= startOfDay && joinDate < new Date(startOfDay.getTime() + 86400000)
-            break
-          case "week": {
-            const firstDay = new Date(today.setDate(today.getDate() - today.getDay())) // Sunday
-            firstDay.setHours(0, 0, 0, 0)
-            matchesDate = joinDate >= firstDay
-            break
-          }
-          case "month": {
-            const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
-            matchesDate = joinDate >= firstDayOfMonth
-            break
-          }
-          case "custom":
-            if (filters.dateFrom && filters.dateTo) {
-              const from = new Date(filters.dateFrom)
-              from.setHours(0, 0, 0, 0)
-              const to = new Date(filters.dateTo)
-              to.setHours(23, 59, 59, 999)
-              matchesDate = joinDate >= from && joinDate <= to
-            }
-            break
-          default:
-            matchesDate = true // "all" or empty
-        }
-      } else if (filters.lastVisit && filters.lastVisit !== "") {
-        // If member has no date but filter is active, exclude them
-        matchesDate = false
-      }
-
-      return matchesSearch && matchesStatus && matchesPlan && matchesMonth && matchesDuration
-    })
-  }, [members, searchQuery, filters])
 
   // Table columns definition
   // Note: DataTable probably expects Generic. Casting for safety if needed.
@@ -244,7 +279,11 @@ const Members: React.FC = () => {
       key: "fullName",
       header: "Name",
       render: (member) => (
-        <div className="member-cell">
+        <div
+          className="member-cell"
+          onClick={(e) => { e.stopPropagation(); handleActionClick(member) }}
+          style={{ cursor: 'pointer' }}
+        >
           <Avatar name={member.fullName} size="md" />
           <span className="member-name">{member.fullName}</span>
         </div>
@@ -290,15 +329,7 @@ const Members: React.FC = () => {
     },
   ]
 
-  const activeFilterCount = useMemo(() => {
-    let count = 0
-    if (filters.status.length > 0) count++
-    if (filters.plan.length > 0) count++
-    if (filters.lastVisit) count++
-    if (filters.dateFrom) count++
-    if (filters.planDuration) count++
-    return count
-  }, [filters])
+
 
   return (
     <div className="members-page">
@@ -310,41 +341,51 @@ const Members: React.FC = () => {
         </div>
 
         <div className="members-page__header-right">
+          {/* Filter Toggle Button */}
+          <button
+            className={`btn-filters ${activeFilterCount > 0 ? 'btn-filters--active' : ''}`}
+            onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
+          >
+            <FiFilter />
+            Filters
+            {activeFilterCount > 0 && ` (${activeFilterCount})`}
+          </button>
+
           <div className="members-stats-badge">
-            <div className="stat-pill stat-pill--active">
+            <div
+              className={`stat-pill stat-pill--active ${filters.status.includes('Active') ? 'selected' : ''}`}
+              onClick={() => setFilters(prev => ({ ...prev, status: ['Active'] }))}
+              style={{ cursor: 'pointer' }}
+            >
               <span className="stat-dot active"></span>
               <span>{stats.active} Active</span>
             </div>
             <div className="stat-divider"></div>
-            <div className="stat-pill">
+            <div
+              className={`stat-pill ${filters.status.includes('Inactive') ? 'selected' : ''}`}
+              onClick={() => setFilters(prev => ({ ...prev, status: ['Inactive'] }))}
+              style={{ cursor: 'pointer' }}
+            >
               <span className="stat-dot inactive"></span>
               <span>{stats.inactive} Inactive</span>
             </div>
             <div className="stat-divider"></div>
-            <div className="stat-pill">
+            <div
+              className={`stat-pill ${filters.status.length === 0 ? 'selected' : ''}`}
+              onClick={() => setFilters(prev => ({ ...prev, status: [] }))}
+              style={{ cursor: 'pointer' }}
+            >
               <span>{stats.total} Total</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 3. Smart Filter Bar – Sticky & Intelligent */}
-      <div className={`smart-filter-bar ${isSticky ? 'smart-filter-bar--stuck' : ''}`}>
-        <div className="filter-controls">
-          <div className="filter-primary-row">
-            {/* Search */}
-            <div className="filter-search-wrapper">
-              <FiSearch className="filter-search-icon" />
-              <input
-                type="text"
-                className="filter-search-input"
-                placeholder="Search by name, email, or phone..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-
-            {/* Status Filter Pill */}
+      {/* 3. Horizontal Filter Panel – On Demand */}
+      {isFilterPanelOpen && (
+        <div className="members-filter-panel">
+          <div className="members-filter-panel__row">
+            {/* Status Filter */}
             <select
               className={`filter-pill filter-select ${filters.status.length > 0 ? 'filter-pill--active' : ''}`}
               value={filters.status[0] || ""}
@@ -359,7 +400,7 @@ const Members: React.FC = () => {
               <option value="Pending">Pending</option>
             </select>
 
-            {/* Plan Filter Pill */}
+            {/* Plan Filter */}
             <select
               className={`filter-pill filter-select ${filters.plan.length > 0 ? 'filter-pill--active' : ''}`}
               value={filters.plan[0] || ""}
@@ -369,66 +410,46 @@ const Members: React.FC = () => {
               }}
             >
               <option value="" disabled>Plan</option>
-              <option value="Gold">Gold Plan</option>
-              <option value="Silver">Silver Plan</option>
-              <option value="Platinum">Platinum Plan</option>
+              <option value="Basic Plan">Basic Plan</option>
+              <option value="Silver Plan">Silver Plan</option>
+              <option value="Gold Plan">Gold Plan</option>
+              <option value="Platinum Plan">Platinum Plan</option>
+              <option value="Annual Gold Plan">Annual Gold Plan</option>
             </select>
 
-            {/* More Filters Toggle */}
-            <button
-              className="btn-more-filters"
-              onClick={() => setShowMoreFilters(!showMoreFilters)}
+            {/* Join Date Filter */}
+            <select
+              className={`filter-pill filter-select ${filters.lastVisit ? 'filter-pill--active' : ''}`}
+              value={filters.lastVisit}
+              onChange={(e) => handleFilterChange('lastVisit', e.target.value)}
             >
-              <FiMoreVertical />
-              {showMoreFilters ? 'Less Filters' : 'More Filters'}
+              <option value="">Join Date</option>
+              <option value="today">Joined Today</option>
+              <option value="week">Joined This Week</option>
+              <option value="month">Joined This Month</option>
+            </select>
+
+            {/* Duration Filter */}
+            <select
+              className={`filter-pill filter-select ${filters.planDuration ? 'filter-pill--active' : ''}`}
+              value={filters.planDuration}
+              onChange={(e) => handleFilterChange('planDuration', e.target.value)}
+            >
+              <option value="">Duration</option>
+              <option value="1">1 Month</option>
+              <option value="3">3 Months</option>
+              <option value="6">6 Months</option>
+              <option value="12">12 Months</option>
+            </select>
+          </div>
+
+          {activeFilterCount > 0 && (
+            <button className="btn-clear-all" onClick={handleResetFilters}>
+              Clear all
             </button>
-
-            {/* Reset/Clear */}
-            {(activeFilterCount > 0 || searchQuery) && (
-              <button className="btn-clear-filters" onClick={() => {
-                handleResetFilters()
-                setSearchQuery("")
-              }}>
-                Clear Filters
-              </button>
-            )}
-          </div>
-
-          {/* Collapsible Secondary Filters */}
-          {showMoreFilters && (
-            <div className="filter-secondary-row">
-              <select
-                className={`filter-pill filter-select ${filters.lastVisit ? 'filter-pill--active' : ''}`}
-                value={filters.lastVisit}
-                onChange={(e) => handleFilterChange('lastVisit', e.target.value)}
-              >
-                <option value="">Join Date</option>
-                <option value="today">Joined Today</option>
-                <option value="week">Joined This Week</option>
-                <option value="month">Joined This Month</option>
-              </select>
-
-              <select
-                className={`filter-pill filter-select ${filters.planDuration ? 'filter-pill--active' : ''}`}
-                value={filters.planDuration}
-                onChange={(e) => handleFilterChange('planDuration', e.target.value)}
-              >
-                <option value="">Duration</option>
-                <option value="1">1 Month</option>
-                <option value="3">3 Months</option>
-                <option value="6">6 Months</option>
-                <option value="12">12 Months</option>
-              </select>
-            </div>
           )}
-
-          {/* 5. Insight Row */}
-          <div className="filter-insight-row">
-            Showing <span className="highlight-count">{filteredMembers.length}</span> of <span className="highlight-count">{members.length}</span> members
-            {(activeFilterCount > 0 || searchQuery) && " (Filtered)"}
-          </div>
         </div>
-      </div>
+      )}
 
       <div className="members-page__content">
         <div className="members-page__table-container">
@@ -469,7 +490,7 @@ const Members: React.FC = () => {
           })
         }}
         onSuccess={() => {
-          loadMembers()
+          refreshMembers()
           toast.success("Member added successfully")
         }}
         initialRole="CUSTOMER"

@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom"
 import { CreateUserModal } from "../index"
 import api from "../../services/api"
 import type { User } from "../../types/user"
+import { useMembers } from '../../contexts/MembersContext'
 import "./UtilityBar.css"
 
 interface Notification {
@@ -199,28 +200,8 @@ const UtilityBar: React.FC = () => {
   }, [])
 
   // Fetch quick stats for navbar
-  const [quickStats, setQuickStats] = useState({ total: 0, active: 0, newToday: 0 })
-
-  useEffect(() => {
-    const loadQuickStats = async () => {
-      try {
-        const stats = await api.getStats()
-        // Determine values based on available data structure
-        const total = stats.totalMembers || stats.customers?.count || 0
-        const active = stats.activeMembers || Math.round(total * 0.9) // Fallback if activeMembers not provided
-
-        // Mocking "newToday" as it requires specific query, using random low number for demo feel
-        // In prod, this would come from an endpoint like /stats/daily-joins
-        const newToday = Math.floor(Math.random() * 3)
-
-        setQuickStats({ total, active, newToday })
-      } catch (e) {
-        console.error("Failed to load navbar stats", e)
-      }
-    }
-
-    loadQuickStats()
-  }, [])
+  // Use real-time stats from MembersContext
+  const { stats: quickStats } = useMembers()
 
   const unreadCount = notifications.filter((n) => !n.read).length
 
@@ -298,7 +279,7 @@ const UtilityBar: React.FC = () => {
           <span className="utility-stat__label">Active</span>
         </div>
         <div className="utility-stat">
-          <span className="utility-stat__value">+{quickStats.newToday}</span>
+          <span className="utility-stat__value">+{quickStats.todaysJoins}</span>
           <span className="utility-stat__label">Today's Joins</span>
         </div>
       </div>
