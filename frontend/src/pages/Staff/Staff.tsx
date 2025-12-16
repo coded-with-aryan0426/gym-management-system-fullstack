@@ -251,8 +251,7 @@ const Staff: React.FC = () => {
         onClose={handleCloseActionModal}
         staff={selectedStaff}
         onEditProfile={handleEditProfile}
-        onScheduleSession={handleScheduleSession}
-        onMessageStaff={handleMessageStaff}
+        onUpdate={loadStaff}
       />
     </div>
   );
