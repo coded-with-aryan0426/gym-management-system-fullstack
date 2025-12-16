@@ -25,17 +25,16 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClose, onSu
   const [step, setStep] = useState<ModalStep>("CATEGORY")
   const [role, setRole] = useState<"CUSTOMER" | "TRAINER" | "STAFF" | null>(null)
   const [availablePlans, setAvailablePlans] = useState<MembershipPackageDTO[]>([])
-  
+
   const [formData, setFormData] = useState({
     username: "",
     password: "",
     fullName: "",
     email: "",
     phoneNumber: "",
-    address: "",
     packageId: "",
+    duration: "1", // 1, 3, 6, or 12 months
     startDate: new Date().toISOString().split('T')[0],
-    paymentStatus: "PAID",
   })
 
   // Reset state when modal opens
@@ -54,10 +53,9 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClose, onSu
         fullName: "",
         email: "",
         phoneNumber: "",
-        address: "",
         packageId: "",
+        duration: "1",
         startDate: new Date().toISOString().split('T')[0],
-        paymentStatus: "PAID",
       })
     }
   }, [isOpen, initialRole])
@@ -82,7 +80,48 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClose, onSu
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
+
+    // Phone number: only allow digits and limit to 10
+    if (name === "phoneNumber") {
+      const digitsOnly = value.replace(/\D/g, "").slice(0, 10)
+      setFormData((prev) => ({ ...prev, [name]: digitsOnly }))
+      return
+    }
+
     setFormData((prev) => ({ ...prev, [name]: value }))
+  }
+
+  // Validation helpers
+  const isValidFullName = (name: string) => name.trim().length >= 2
+  const isValidPhone = (phone: string) => phone.length === 10
+
+  // Comprehensive email validation:
+  // - Local part: letters, numbers, dots, hyphens, underscores (no consecutive dots, no start/end with dot)
+  // - Domain: letters, numbers, hyphens (no start/end with hyphen)
+  // - TLD: 2-6 letters only (com, org, co.in, etc.)
+  const isValidEmail = (email: string) => {
+    const emailRegex = /^[a-zA-Z0-9](?:[a-zA-Z0-9._-]*[a-zA-Z0-9])?@[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?(?:\.[a-zA-Z]{2,6})+$/
+    return emailRegex.test(email)
+  }
+  const isValidPassword = (password: string) => password.length >= 6
+
+  // Validation Icon Component
+  const ValidationIcon = ({ isValid, show }: { isValid: boolean; show: boolean }) => {
+    if (!show) return null
+    return isValid ? (
+      <span className="validation-icon validation-icon--valid" title="Valid">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+      </span>
+    ) : (
+      <span className="validation-icon validation-icon--invalid" title="Invalid">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </span>
+    )
   }
 
   const handleCategorySelect = (category: "USER" | "SCHEDULE") => {
@@ -110,24 +149,25 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClose, onSu
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!role) return
 
     // V1 Pivot: Auto-generate credentials for Members
     let effectiveFormData = { ...formData };
     if (role === "CUSTOMER") {
-      if (!effectiveFormData.phoneNumber) {
-        toast.error("Phone number is required for members");
+      // Validate phone: exactly 10 digits
+      if (!effectiveFormData.phoneNumber || effectiveFormData.phoneNumber.length !== 10) {
+        toast.error("Phone number must be exactly 10 digits");
+        return;
+      }
+      // Validate email: mandatory
+      if (!effectiveFormData.email) {
+        toast.error("Email is required");
         return;
       }
       // Use Phone as Username and Password (or some default)
       effectiveFormData.username = effectiveFormData.phoneNumber;
       effectiveFormData.password = "12345678"; // Default password since they don't login
-
-      // Dummy email if empty (optional in V1)
-      if (!effectiveFormData.email) {
-        effectiveFormData.email = `${effectiveFormData.phoneNumber}@athlonx.local`;
-      }
     } else {
       // Staff validation
       if (!formData.username || !formData.password || !formData.email) {
@@ -147,13 +187,13 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClose, onSu
         ...effectiveFormData,
         roles: [{ roleId: 0, roleName: role }],
       }
-      
+
       // Add customer-specific fields
       if (role === "CUSTOMER") {
         payload.startDate = effectiveFormData.startDate;
-        payload.paymentStatus = effectiveFormData.paymentStatus;
+        payload.duration = parseInt(effectiveFormData.duration);
       }
-      
+
       if (role === "CUSTOMER" && formData.packageId) {
         payload.packageId = parseInt(formData.packageId)
       }
@@ -293,29 +333,59 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClose, onSu
             )}
 
             {step === "FORM" && (
-              <form className="create-user-modal__body">
+              <form className="create-user-modal__body" onSubmit={handleSubmit}>
                 <div className="form-row">
                   <div className="form-group">
                     <label>Full Name *</label>
-                    <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} className="form-input" placeholder="John Doe" required />
+                    <div className="input-with-validation">
+                      <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} className="form-input" placeholder="John Doe" required />
+                      <ValidationIcon show={formData.fullName.length > 0} isValid={isValidFullName(formData.fullName)} />
+                    </div>
                   </div>
                   <div className="form-group">
-                    <label>Phone Number *</label>
-                    <input type="tel" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} className="form-input" placeholder="+91 98765 43210" required />
+                    <label>Phone Number * (10 digits)</label>
+                    <div className="input-with-validation">
+                      <input
+                        type="tel"
+                        name="phoneNumber"
+                        value={formData.phoneNumber}
+                        onChange={handleChange}
+                        className="form-input"
+                        placeholder="9876543210"
+                        maxLength={10}
+                        pattern="[0-9]{10}"
+                        required
+                      />
+                      <ValidationIcon show={formData.phoneNumber.length > 0} isValid={isValidPhone(formData.phoneNumber)} />
+                    </div>
                   </div>
                 </div>
 
                 <div className="form-row">
                   <div className="form-group">
-                    <label>Email (Optional)</label>
-                    <input type="email" name="email" value={formData.email} onChange={handleChange} className="form-input" placeholder="john@example.com" />
+                    <label>Email *</label>
+                    <div className="input-with-validation">
+                      <input type="email" name="email" value={formData.email} onChange={handleChange} className="form-input" placeholder="john@example.com" required />
+                      <ValidationIcon show={formData.email.length > 0} isValid={isValidEmail(formData.email)} />
+                    </div>
                   </div>
+
+                  {/* Start Date beside Email for Members */}
+                  {role === "CUSTOMER" && (
+                    <div className="form-group">
+                      <label>Start Date</label>
+                      <input type="date" name="startDate" value={formData.startDate} onChange={handleChange} className="form-input" />
+                    </div>
+                  )}
 
                   {/* V1: Staff/Trainer still needs credentials */}
                   {role !== "CUSTOMER" && (
                     <div className="form-group">
-                      <label>Password *</label>
-                      <input type="password" name="password" value={formData.password} onChange={handleChange} className="form-input" placeholder="••••••••" required />
+                      <label>Password * (min 6 chars)</label>
+                      <div className="input-with-validation">
+                        <input type="password" name="password" value={formData.password} onChange={handleChange} className="form-input" placeholder="••••••••" required />
+                        <ValidationIcon show={formData.password.length > 0} isValid={isValidPassword(formData.password)} />
+                      </div>
                     </div>
                   )}
                 </div>
@@ -326,33 +396,29 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClose, onSu
                       <label>Membership Plan *</label>
                       <select name="packageId" value={formData.packageId} onChange={handleChange} className="form-input" disabled={fetchingPlans} required>
                         <option value="">Select a plan</option>
-                        {availablePlans.map(plan => (
-                          <option key={plan.packageId} value={plan.packageId}>{plan.packageName} - ₹{plan.price}</option>
-                        ))}
+                        {/* Remove duplicates by filtering unique plan names */}
+                        {availablePlans
+                          .filter((plan, index, self) =>
+                            index === self.findIndex(p => p.packageName === plan.packageName)
+                          )
+                          .map(plan => (
+                            <option key={plan.packageId} value={plan.packageId}>{plan.packageName} - ₹{plan.price}</option>
+                          ))}
                       </select>
                     </div>
-                    {/* V1: Start Date */}
                     <div className="form-group">
-                      <label>Start Date</label>
-                      <input type="date" name="startDate" value={formData.startDate} onChange={handleChange} className="form-input" />
+                      <label>Duration *</label>
+                      <select name="duration" value={formData.duration} onChange={handleChange} className="form-input" required>
+                        <option value="1">1 Month</option>
+                        <option value="3">3 Months</option>
+                        <option value="6">6 Months</option>
+                        <option value="12">12 Months</option>
+                      </select>
                     </div>
                   </div>
                 )}
 
-                {role === "CUSTOMER" && (
-                  <div className="form-group">
-                    <label>Payment Status</label>
-                    <select name="paymentStatus" value={formData.paymentStatus} onChange={handleChange} className="form-input">
-                      <option value="PAID">Paid (Cash/Card)</option>
-                      <option value="PENDING">Pending (Pay Later)</option>
-                    </select>
-                  </div>
-                )}
-
-                <div className="form-group">
-                  <label>Address</label>
-                  <input type="text" name="address" value={formData.address} onChange={handleChange} className="form-input" placeholder="123 Main St, City, Country" />
-                </div>
+                {/* Payment Status and Address removed as per requirements */}
               </form>
             )}
 

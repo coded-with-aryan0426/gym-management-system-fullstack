@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useState, useCallback, useRef } from "react"
 import { Button, Card } from "../../components/ui"
 import { ptSessionApi } from "../../services/api"
 import "./Classes.css"
@@ -10,81 +10,139 @@ interface GymClass {
   id: number
   name: string
   trainer: string
+  trainerAvatar?: string
   time: string
-  displayTime?: string
+  displayTime: string
   day: string
   capacity: number
   enrolled: number
   status: "Available" | "Busy" | "Full" | "Capacity"
+  room?: string
+  tags?: string[]
+  color?: string
+}
+
+// Filter State Type
+interface ClassFilter {
+  trainer: string
+  type: string
+  status: "All" | "Available" | "Full"
 }
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 const TIMES = ["6:00", "8:00", "10:00", "12:00", "14:00", "16:00", "18:00", "20:00"]
 
+const CLASSES_TYPES = ["Yoga", "HIIT", "Cardio", "Strength", "Pilates", "CrossFit"]
+
+// Mock helpers for visual enhancement
+const getRandomColor = (id: number) => {
+  const colors = ["#10B981", "#8B5CF6", "#3B82F6", "#F59E0B", "#EC4899", "#EF4444"]
+  return colors[id % colors.length]
+}
+
+const getMockCapacity = (id: number) => {
+  // Deterministic random capacity between 10 and 30
+  return 10 + (id % 20)
+}
+
+const getMockEnrolled = (id: number, capacity: number) => {
+  // Deterministic random enrolled count
+  const percent = ((id * 17) % 100) / 100
+  return Math.floor(capacity * percent)
+}
+
 const Classes: React.FC = () => {
   const [classes, setClasses] = useState<GymClass[]>([])
+  const [filteredClasses, setFilteredClasses] = useState<GymClass[]>([])
   const [loading, setLoading] = useState(true)
   const [showFilters, setShowFilters] = useState(false)
+  const [filter, setFilter] = useState<ClassFilter>({
+    trainer: "All",
+    type: "All",
+    status: "All"
+  })
+
+  // Refs for scrolling
+  const classRefs = useRef<{ [key: number]: HTMLDivElement | null }>({})
 
   const loadClasses = useCallback(async () => {
     setLoading(true)
     try {
-      // Fetch sessions from multiple trainers (85-90 have sessions)
-      const trainerIds = [85, 86, 87, 88, 89, 90]
-      const allSessions = await Promise.all(
-        trainerIds.map(id => ptSessionApi.getTrainerSessions(id).catch(() => []))
-      )
-      const sessions = allSessions.flat()
-      
-      console.log("[Classes] Raw sessions from API:", sessions)
+      const sessions = await ptSessionApi.getAllSessions()
+      console.log("[Classes] Raw sessions:", sessions)
 
-      // Transform real session data to class format
       const transformed: GymClass[] = sessions.map((session, idx) => {
         const sessionDate = new Date(session.sessionDate)
-        const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-        const hours = sessionDate.getHours()
+        const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+        const hour = sessionDate.getHours()
         const minutes = sessionDate.getMinutes()
+        const timeStr24 = `${hour}:00` // Simplified for grid
+        const ampm = hour >= 12 ? 'PM' : 'AM'
+        const displayH = hour % 12 || 12
+        const displayTime = `${displayH}:${minutes.toString().padStart(2, '0')} ${ampm}`
 
-        // Use 24-hour format for matching with TIMES array
-        const timeStr24 = `${hours}:00`
-        // Display time in 12-hour format
-        const ampm = hours >= 12 ? 'PM' : 'AM'
-        const displayHours = hours % 12 || 12
-        const displayTime = `${displayHours}:${minutes.toString().padStart(2, '0')} ${ampm}`
-        
-        // Determine status based on session status
-        let classStatus: GymClass["status"] = "Available"
-        if (session.status === "COMPLETED") classStatus = "Full"
-        else if (session.status === "CANCELLED") classStatus = "Capacity"
-        else if (session.status === "SCHEDULED") classStatus = "Busy"
-        
+        // Enhance with mock data for better UI demo
+        const capacity = getMockCapacity(idx)
+        const enrolled = getMockEnrolled(idx, capacity)
+        const isFull = enrolled >= capacity
+        const isBusy = enrolled >= capacity * 0.8
+
+        let status: GymClass["status"] = "Available"
+        if (isFull) status = "Full"
+        else if (isBusy) status = "Busy"
+
         return {
           id: session.sessionId || idx,
-          name: session.workoutPlan || `PT Session ${idx + 1}`,
-          trainer: session.trainerName || 'Unknown Trainer',
-          time: timeStr24, // Use 24-hour format for grid matching
-          displayTime: displayTime, // Use 12-hour for display
-          day: dayNames[sessionDate.getDay()],
-          capacity: 1, // PT sessions are typically 1:1
-          enrolled: session.status === "SCHEDULED" || session.status === "COMPLETED" ? 1 : 0,
-          status: classStatus,
+          name: session.workoutPlan || "PT Session",
+          trainer: session.trainerName || "Staff Trainer",
+          time: timeStr24,
+          displayTime: displayTime,
+          day: days[sessionDate.getDay()],
+          capacity: capacity,
+          enrolled: enrolled,
+          status: status,
+          room: `Studio ${1 + (idx % 3)}`,
+          color: getRandomColor(idx),
+          tags: [session.workoutPlan || "General"]
         }
       })
 
-      console.log("[Classes] Transformed classes:", transformed)
       setClasses(transformed)
+      setFilteredClasses(transformed)
     } catch (err) {
-      console.error("[Beta] Failed to load classes from backend:", err)
-      // For beta testing: show empty state instead of demo data
+      console.error("Failed to load classes", err)
       setClasses([])
     } finally {
       setLoading(false)
     }
   }, [])
 
+  // Filter Logic
+  useEffect(() => {
+    let result = classes
+    if (filter.trainer !== "All") {
+      result = result.filter(c => c.trainer === filter.trainer)
+    }
+    if (filter.status !== "All") {
+      if (filter.status === "Available") result = result.filter(c => c.status === "Available")
+      if (filter.status === "Full") result = result.filter(c => c.status === "Full")
+    }
+    setFilteredClasses(result)
+  }, [filter, classes])
+
   useEffect(() => {
     loadClasses()
   }, [loadClasses])
+
+  const scrollToClass = (id: number) => {
+    const element = classRefs.current[id]
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      // Add highlight effect logic here if needed
+      element.classList.add('highlight-flash')
+      setTimeout(() => element.classList.remove('highlight-flash'), 1000)
+    }
+  }
 
   const getCapacityPercent = (enrolled: number, capacity: number) => Math.round((enrolled / capacity) * 100)
 
@@ -101,32 +159,6 @@ const Classes: React.FC = () => {
     }
   }
 
-  const getClassColor = (name: string) => {
-    switch (name) {
-      case "Yoga Flow":
-        return "#10B981" // Emerald
-      case "HIIT Burn":
-        return "#8B5CF6" // Purple
-      case "Spin Cycle":
-        return "#3B82F6" // Blue
-      case "CrossFit":
-        return "#F59E0B" // Amber
-      case "Pilates":
-        return "#EC4899" // Pink
-      default:
-        return "#6B7280" // Gray
-    }
-  }
-
-  // Get classes for a specific day and time slot
-  const getClassesForSlot = (day: string, time: string) => {
-    return classes.filter((c) => {
-      const classHour = c.time.split(":")[0]
-      const slotHour = time.split(":")[0]
-      return c.day === day && classHour === slotHour
-    })
-  }
-
   // Today's classes for the right panel
   const todayClasses = classes.slice(0, 10)
 
@@ -136,55 +168,86 @@ const Classes: React.FC = () => {
       <div className="classes-page__header">
         <div className="classes-page__title-section">
           <h1 className="classes-page__title">Class Schedule</h1>
-          <span className="classes-page__count">Upcoming: {classes.length} Classes Today</span>
+          <div className="classes-page__subtitle">
+            <span>Dec 16 – Dec 22</span>
+            <span className="classes-stat-pill">{filteredClasses.length} Classes</span>
+            <span className="classes-stat-pill">85% Capacity</span>
+          </div>
         </div>
-        <div className="classes-page__actions">
-          <Button
-            variant="secondary"
-            onClick={() => setShowFilters(!showFilters)}
-            icon={
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
-              </svg>
-            }
+
+        {/* Compact Filter Bar */}
+        <div className="classes-filter-bar">
+          <select
+            className="filter-select"
+            value={filter.type}
+            onChange={(e) => setFilter(prev => ({ ...prev, type: e.target.value }))}
           >
-            Filter
-          </Button>
+            <option value="All">All Types</option>
+            {CLASSES_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+          </select>
+
+          <select
+            className="filter-select"
+            value={filter.trainer}
+            onChange={(e) => setFilter(prev => ({ ...prev, trainer: e.target.value }))}
+          >
+            <option value="All">All Trainers</option>
+            {Array.from(new Set(classes.map(c => c.trainer))).map(t => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+          </select>
+
+          <select
+            className="filter-select"
+            value={filter.status}
+            onChange={(e) => setFilter(prev => ({ ...prev, status: e.target.value as any }))}
+          >
+            <option value="All">All Status</option>
+            <option value="Available">Available</option>
+            <option value="Full">Full</option>
+          </select>
         </div>
       </div>
 
       {/* Content Grid */}
       <div className="classes-page__grid">
         {/* Weekly View */}
-        <Card
-          title="Weekly View"
-          action={<button className="card-action-btn">•••</button>}
-          className="classes-page__weekly"
-        >
+        <Card title="Weekly Schedule" className="classes-page__weekly">
           <div className="weekly-calendar">
             <div className="weekly-header">
               <div className="weekly-time-header"></div>
               {DAYS.map((day) => (
-                <div key={day} className="weekly-day-header">
-                  {day}
-                </div>
+                <div key={day} className="weekly-day-header">{day}</div>
               ))}
             </div>
             <div className="weekly-body">
               {TIMES.map((time, timeIdx) => (
-                <div key={`${time}-${timeIdx}`} className="weekly-row">
+                <div key={time} className="weekly-row">
                   <div className="weekly-time">{time}</div>
                   {DAYS.map((day) => {
-                    const slotClasses = getClassesForSlot(day, time)
+                    const slotClasses = filteredClasses.filter(c => {
+                      const classHour = c.time.split(":")[0]
+                      const slotHour = time.split(":")[0]
+                      return c.day === day && classHour === slotHour
+                    })
+
                     return (
-                      <div key={`${day}-${time}-${timeIdx}`} className="weekly-cell">
+                      <div key={`${day}-${time}`} className="weekly-cell">
                         {slotClasses.map((cls) => (
                           <div
                             key={cls.id}
-                            className="weekly-class"
-                            style={{ backgroundColor: getClassColor(cls.name) }}
+                            className="class-card"
+                            style={{ "--card-color": cls.color || "var(--primary-color)" } as React.CSSProperties}
+                            onClick={() => scrollToClass(cls.id)}
                           >
-                            {cls.name}
+                            <span className="class-card__title">{cls.name}</span>
+                            <div className="class-card__meta">
+                              <span>{cls.trainer.split(' ')[0]}</span>
+                              <span
+                                className="capacity-dot"
+                                style={{ backgroundColor: getStatusColor(cls.status || "Available") }}
+                              />
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -197,39 +260,63 @@ const Classes: React.FC = () => {
         </Card>
 
         {/* Today's Classes */}
-        <Card
-          title="Today's Classes"
-          action={<button className="card-action-btn">•••</button>}
-          className="classes-page__today"
-        >
+        <Card title="Today's Classes" className="classes-page__today">
           <div className="today-list">
-            <div className="today-header">
-              <span>Time</span>
-              <span>Class</span>
-              <span>Trainer</span>
-              <span>Capacity</span>
-              <span>Actions</span>
-            </div>
-            {todayClasses.map((cls) => (
-              <div key={cls.id} className="today-row">
-                <span className="today-time">{cls.time}</span>
-                <span className="today-class">{cls.name}</span>
-                <span className="today-trainer">{cls.trainer}</span>
-                <div className="today-capacity">
-                  <span className="capacity-text">{cls.status}</span>
-                  <div
-                    className="capacity-bar"
-                    style={
-                      {
-                        "--capacity-width": `${getCapacityPercent(cls.enrolled, cls.capacity)}%`,
-                        "--capacity-color": getStatusColor(cls.status),
-                      } as React.CSSProperties
-                    }
-                  />
-                </div>
-                <button className="action-menu-btn">•••</button>
+            {/* Group by time logic */}
+            {Array.from(new Set(filteredClasses.map(c => c.time)))
+              .sort((a, b) => parseInt(a) - parseInt(b))
+              .map(timeSlot => {
+                const slotClasses = filteredClasses.filter(c => c.time === timeSlot && c.day === "Mon") // Demo: Mon as Today
+                if (slotClasses.length === 0) return null
+
+                return (
+                  <div key={timeSlot} className="today-slot">
+                    <div className="slot-time">{timeSlot}</div>
+                    <div className="slot-cards">
+                      {slotClasses.map(cls => (
+                        <div
+                          key={cls.id}
+                          className="today-card"
+                          ref={el => { classRefs.current[cls.id] = el }}
+                        >
+                          <div className="today-card__info">
+                            <div className="today-card__title">{cls.name}</div>
+                            <div className="today-card__trainer">
+                              <div className="trainer-avatar-small">
+                                {cls.trainer.charAt(0)}
+                              </div>
+                              {cls.trainer} • {cls.room}
+                            </div>
+                          </div>
+
+                          <div className="today-card__stats">
+                            <div className="capacity-text">
+                              <span>{cls.status}</span>
+                              <span>{cls.enrolled}/{cls.capacity}</span>
+                            </div>
+                            <div className="progress-bar">
+                              <div
+                                className="progress-fill"
+                                style={{
+                                  width: `${getCapacityPercent(cls.enrolled, cls.capacity)}%`,
+                                  backgroundColor: getStatusColor(cls.status)
+                                }}
+                              />
+                            </div>
+                          </div>
+
+                          <button className="card-action-btn">•••</button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )
+              })}
+            {filteredClasses.length === 0 && (
+              <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                No classes found for the selected filters.
               </div>
-            ))}
+            )}
           </div>
         </Card>
       </div>

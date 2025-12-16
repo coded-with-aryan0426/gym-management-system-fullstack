@@ -20,6 +20,12 @@ public class PTSessionController {
     @Autowired
     private PTSessionService ptSessionService;
 
+    @GetMapping
+    public ResponseEntity<List<PTSessionDTO>> getAllSessions() {
+        List<PTSessionDTO> sessions = ptSessionService.getAllSessions();
+        return ResponseEntity.ok(sessions);
+    }
+
     @PostMapping
     public ResponseEntity<?> createSession(@Valid @RequestBody PTSessionDTO dto) {
         try {

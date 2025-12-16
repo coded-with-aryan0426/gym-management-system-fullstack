@@ -207,6 +207,18 @@ public class PTSessionService {
     }
 
     /**
+     * Get all PT sessions
+     * 
+     * @return List of all session DTOs
+     */
+    public List<PTSessionDTO> getAllSessions() {
+        List<PTSession> sessions = ptSessionRepository.findAll();
+        return sessions.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
      * Get all sessions for a trainer
      * 
      * @param trainerId Trainer ID

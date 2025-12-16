@@ -162,6 +162,16 @@ const api = {
   },
 
   // Transaction endpoints
+  async getPackages(activeOnly: boolean = true): Promise<any[]> {
+    const response = await apiClient.get<any[]>('/packages', { params: { active: activeOnly } });
+    return response.data;
+  },
+
+  async renewMembership(userId: number, packageId: number, customDurationMonths?: number): Promise<any> {
+    const response = await apiClient.post('/memberships/renew', { userId, packageId, customDurationMonths });
+    return response.data;
+  },
+
   async createTransaction(data: { userId: number; amount: number; type: string; description: string }): Promise<unknown> {
     const response = await apiClient.post('/transactions', data);
     return response.data;
@@ -176,7 +186,7 @@ const api = {
   async createPTSession(data: { trainerId: number; memberId?: number; date: string; time: string; duration: number; notes?: string }): Promise<unknown> {
     // Combine date and time into LocalDateTime format
     const sessionDate = `${data.date}T${data.time}:00`;
-    
+
     const response = await apiClient.post('/pt-sessions', {
       trainerId: data.trainerId,
       memberId: data.memberId || 1, // Default to member ID 1 if not provided
@@ -213,6 +223,11 @@ import type { GymHoursDTO, PTConfigDTO, BlackoutDayDTO } from '../types/gymSetti
 import type { MembershipPackageDTO } from '../types/membershipPackage';
 
 const ptSessionApi = {
+  async getAllSessions(): Promise<PTSessionDTO[]> {
+    const response = await apiClient.get<PTSessionDTO[]>('/pt-sessions');
+    return response.data;
+  },
+
   async createSession(session: PTSessionDTO): Promise<PTSessionDTO> {
     const response = await apiClient.post<PTSessionDTO>('/pt-sessions', session);
     return response.data;

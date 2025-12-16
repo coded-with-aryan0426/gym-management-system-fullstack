@@ -91,12 +91,16 @@ export default function SignupPage() {
             else delete newErrors.confirmPassword;
         }
 
-        // Role fields
-        if (selectedRole === 'OWNER') {
-            if (name === 'gymName') !value ? newErrors.gymName = "Required" : delete newErrors.gymName;
-            if (name === 'gymAddress') !value ? newErrors.gymAddress = "Required" : delete newErrors.gymAddress;
-            if (name === 'gymCity') !value ? newErrors.gymCity = "Required" : delete newErrors.gymCity;
-        } else if (selectedRole === 'TRAINER') {
+        // TEMPORARILY DISABLED: Add New Gym feature
+        // if (selectedRole === 'OWNER') {
+        //     if (name === 'gymName') !value ? newErrors.gymName = "Required" : delete newErrors.gymName;
+        //     if (name === 'gymAddress') !value ? newErrors.gymAddress = "Required" : delete newErrors.gymAddress;
+        //     if (name === 'gymCity') !value ? newErrors.gymCity = "Required" : delete newErrors.gymCity;
+        // } else if (selectedRole === 'TRAINER') {
+        //     if (name === 'inviteCodeStaff') !value ? newErrors.inviteCodeStaff = "Required" : delete newErrors.inviteCodeStaff;
+        // }
+        // Trainer validation (standalone since OWNER is disabled)
+        if (selectedRole === 'TRAINER') {
             if (name === 'inviteCodeStaff') !value ? newErrors.inviteCodeStaff = "Required" : delete newErrors.inviteCodeStaff;
         }
 
@@ -134,22 +138,15 @@ export default function SignupPage() {
         try {
             let response;
             if (selectedRole === 'OWNER' || selectedRole === 'TRAINER') {
-                const isCreatingGym = selectedRole === 'OWNER';
-
+                // V1: Simple signup with role, no gym logic
                 const payload = {
                     ...formData,
-                    createNewGym: isCreatingGym,
-                    gymName: isCreatingGym ? staffData.gymName : undefined,
-                    gymAddress: isCreatingGym ? staffData.gymAddress : undefined,
-                    gymCity: isCreatingGym ? staffData.gymCity : undefined,
-                    gymPhone: isCreatingGym ? staffData.gymPhone : undefined,
-                    inviteCode: !isCreatingGym ? staffData.inviteCode : undefined,
+                    role: selectedRole, // V1: Include role in payload
                 };
                 response = await api.signupStaff(payload);
             } else {
                 const payload = {
                     ...formData,
-                    inviteCode: memberData.inviteCode || undefined,
                 };
                 response = await api.signupMember(payload);
             }
@@ -159,12 +156,8 @@ export default function SignupPage() {
                 localStorage.setItem('user', JSON.stringify(response));
                 localStorage.setItem('token', response.token);
 
-                // PRIORITY 1: If member with no gym, redirect to find-gym
-                if (response.context === 'MEMBER' && !response.activeGymId) {
-                    navigate('/dashboard?needsGym=true');
-                } else {
-                    navigate('/dashboard');
-                }
+                // V1: Direct redirect to dashboard (no gym checks)
+                navigate('/dashboard');
             }
         } catch (err: any) {
             console.error("Signup error:", err);
@@ -241,6 +234,7 @@ export default function SignupPage() {
                                 title="Gym Owner"
                                 color={colors.crimson}
                             />
+                            {/* Note: Gym Details form is disabled - Owner signup will use invite code like Trainer */}
                             <RoleButton
                                 active={selectedRole === 'TRAINER'}
                                 onClick={() => setSelectedRole('TRAINER')}
@@ -262,29 +256,29 @@ export default function SignupPage() {
                         {/* Common Fields - Compact Grid */}
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                             <div style={{ gridColumn: "span 2" }}>
-                                <InputField 
+                                <InputField
                                     label="Full Name"
-                                    value={formData.fullName} 
+                                    value={formData.fullName}
                                     onChange={(val: string) => handleBaseChange('fullName', val)}
                                     error={errors.fullName}
                                     placeholder="John Doe"
                                 />
                             </div>
 
-                            <InputField 
+                            <InputField
                                 label="Email"
                                 type="email"
-                                value={formData.email} 
+                                value={formData.email}
                                 onChange={(val: string) => handleBaseChange('email', val)}
                                 error={errors.email}
                                 placeholder="name@company.com"
                                 isValid={isValidEmail(formData.email)}
                             />
 
-                            <InputField 
+                            <InputField
                                 label="Phone"
                                 type="tel"
-                                value={formData.phone} 
+                                value={formData.phone}
                                 onChange={(val: string) => handleBaseChange('phone', val)}
                                 error={errors.phone}
                                 placeholder="9876543210"
@@ -301,7 +295,7 @@ export default function SignupPage() {
                             opacity: selectedRole ? 1 : 0,
                             marginBottom: selectedRole ? 12 : 0
                         }}>
-                            {/* Owner Specific Fields */}
+                            {/* TEMPORARILY DISABLED: Gym Owner form fields - Add New Gym feature
                             {selectedRole === 'OWNER' && (
                                 <div style={{ padding: 16, background: "rgba(220, 38, 38, 0.05)", borderRadius: 12, border: `1px solid ${colors.crimson}40`, marginTop: 4 }}>
                                     <h4 style={{ fontSize: 12, color: colors.crimson, marginBottom: 12, fontWeight: 700, textTransform: 'uppercase' }}>Gym Details</h4>
@@ -317,8 +311,9 @@ export default function SignupPage() {
                                     </div>
                                 </div>
                             )}
+                            */}
 
-                            {/* Trainer Specific Fields */}
+                            {/* TEMPORARILY DISABLED: Trainer Join Workspace form fields
                             {selectedRole === 'TRAINER' && (
                                 <div style={{ padding: 16, background: "rgba(217, 119, 6, 0.05)", borderRadius: 12, border: `1px solid #D9770640`, marginTop: 4 }}>
                                     <h4 style={{ fontSize: 12, color: "#D97706", marginBottom: 12, fontWeight: 700, textTransform: 'uppercase' }}>Join a Workspace</h4>
@@ -331,12 +326,13 @@ export default function SignupPage() {
                                     />
                                 </div>
                             )}
+                            */}
 
                         </div>
 
                         {/* Passwords */}
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                            <PasswordField 
+                            <PasswordField
                                 label="Password"
                                 value={formData.password}
                                 onChange={(val: string) => handleBaseChange('password', val)}
@@ -386,7 +382,7 @@ export default function SignupPage() {
                                 transition: "all 0.2s"
                             }}
                         >
-                            {isLoading ? "Creating..." : selectedRole === 'OWNER' ? "Create Gym & Account" : "Create Account"}
+                            {isLoading ? "Creating..." : /* selectedRole === 'OWNER' ? "Create Gym & Account" : */ "Create Account"}
                         </button>
 
                         <p style={{ textAlign: "center", marginTop: 12, color: colors.textSecondary, fontSize: 13 }}>

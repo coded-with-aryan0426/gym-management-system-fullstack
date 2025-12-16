@@ -70,12 +70,23 @@ public class UserService {
 
                 if (activeMembership.getMembershipPackage() != null) {
                     dto.setPlanName(activeMembership.getMembershipPackage().getPackageName());
+                    Integer months = activeMembership.getMembershipPackage().getDurationMonths();
+                    if (months != null) {
+                        dto.setPlanDuration(months + (months == 1 ? " Month" : " Months"));
+                    } else {
+                        // Fallback logic if null (though migration should fix only on restart)
+                        dto.setPlanDuration(activeMembership.getMembershipPackage().getDurationDays() + " Days");
+                    }
                 } else {
                     dto.setPlanName("Unknown Plan");
+                    dto.setPlanDuration("-");
                 }
 
                 dto.setStartDate(activeMembership.getStartDate());
                 dto.setEndDate(activeMembership.getEndDate());
+                if (user.getCreatedAt() != null) {
+                    dto.setJoinDate(user.getCreatedAt().toLocalDate());
+                }
             } else {
                 dto.setStatus("Inactive");
                 dto.setPlanName("No Plan");
@@ -89,14 +100,30 @@ public class UserService {
         return userRepository.findById(id).orElse(null);
     }
 
+    @Autowired
+    private com.gym.management.repository.MembershipPackageRepository membershipPackageRepository;
+
+    @Autowired
+    private com.gym.management.repository.GymRepository gymRepository;
+
+    @Transactional
     public User createUser(User user) {
+        // Map phoneNumber to phone if provided
+        if (user.getPhoneNumber() != null && !user.getPhoneNumber().isEmpty()) {
+            user.setPhone(user.getPhoneNumber());
+        }
+
         // Look up actual Role entities from the database based on role names
+        boolean isCustomer = false;
         if (user.getRoles() != null && !user.getRoles().isEmpty()) {
             Set<Role> actualRoles = new HashSet<>();
             for (Role role : user.getRoles()) {
                 Role dbRole = null;
                 if (role.getRoleName() != null) {
                     dbRole = roleRepository.findByRoleName(role.getRoleName());
+                    if ("CUSTOMER".equalsIgnoreCase(role.getRoleName())) {
+                        isCustomer = true;
+                    }
                 }
                 if (dbRole != null) {
                     actualRoles.add(dbRole);
@@ -110,12 +137,54 @@ public class UserService {
                 Set<Role> roles = new HashSet<>();
                 roles.add(customerRole);
                 user.setRoles(roles);
+                isCustomer = true;
             }
         }
 
         // Save user with roles
-        userRepository.save(user);
-        return user;
+        User savedUser = userRepository.save(user);
+
+        // Create Membership if this is a CUSTOMER with packageId
+        if (isCustomer && user.getPackageId() != null) {
+            try {
+                com.gym.management.model.MembershipPackage pkg = membershipPackageRepository
+                        .findById(user.getPackageId())
+                        .orElseThrow(() -> new RuntimeException("Package not found: " + user.getPackageId()));
+
+                // Get default gym (id=1)
+                com.gym.management.model.Gym defaultGym = gymRepository.findById(1L)
+                        .orElseThrow(() -> new RuntimeException("Default gym not found"));
+
+                com.gym.management.model.Membership membership = new com.gym.management.model.Membership();
+                membership.setUser(savedUser);
+                membership.setGym(defaultGym); // Set required gym
+                membership.setMembershipPackage(pkg);
+
+                // Set start date (default to today if not provided)
+                java.time.LocalDate startDate = user.getStartDate() != null
+                        ? user.getStartDate()
+                        : java.time.LocalDate.now();
+                membership.setStartDate(startDate);
+
+                // Calculate end date based on duration
+                int months = user.getDuration() != null ? user.getDuration() : 1;
+                if (months <= 0) {
+                    months = pkg.getDurationMonths() != null ? pkg.getDurationMonths() : 1;
+                }
+                java.time.LocalDate endDate = startDate.plusMonths(months);
+                membership.setEndDate(endDate);
+
+                // Set status to ACTIVE
+                membership.setStatus(com.gym.management.model.MembershipStatus.ACTIVE);
+
+                membershipRepository.save(membership);
+            } catch (Exception e) {
+                // Log but don't fail user creation
+                System.err.println("Failed to create membership: " + e.getMessage());
+            }
+        }
+
+        return savedUser;
     }
 
     public User updateUser(Long id, User user) {
@@ -138,6 +207,14 @@ public class UserService {
             // Update roles if provided
             if (user.getRoles() != null && !user.getRoles().isEmpty()) {
                 existingUser.setRoles(user.getRoles());
+            }
+            // Update phone if provided
+            if (user.getPhone() != null) {
+                existingUser.setPhone(user.getPhone());
+            }
+            // Update join date if provided
+            if (user.getJoinDate() != null) {
+                existingUser.setCreatedAt(user.getJoinDate().atStartOfDay());
             }
             return userRepository.save(existingUser);
         }

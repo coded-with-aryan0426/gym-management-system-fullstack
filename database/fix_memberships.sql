@@ -29,7 +29,7 @@ DECLARE
 BEGIN
     SELECT count(*) INTO v_count FROM gyms WHERE name = 'AthlonX Main';
     IF v_count = 0 THEN
-        INSERT INTO gyms (name, address, invite_code, country) VALUES ('AthlonX Main', '123 Fitness Blvd', 'ATHLONX-001', 'USA');
+        INSERT INTO gyms (name, address, invite_code) VALUES ('AthlonX Main', '123 Fitness Blvd', 'ATHLONX-001');
     END IF;
     COMMIT;
 END;
@@ -100,10 +100,13 @@ BEGIN
     BEGIN
         FOR r IN (
             SELECT user_id 
-            FROM users 
-            WHERE email NOT LIKE 'staff%' 
-            AND email NOT LIKE 'trainer%' 
-            AND email NOT LIKE 'jane.owner%'
+            FROM users u
+            WHERE u.user_id IN (
+                SELECT map.user_id 
+                FROM user_role_map map
+                JOIN roles r ON map.role_id = r.role_id
+                WHERE r.role_name = 'CUSTOMER'
+            )
         ) LOOP
             -- Determine Package and Duration
             v_pkg_id := MOD(r.user_id, 4) + 1;

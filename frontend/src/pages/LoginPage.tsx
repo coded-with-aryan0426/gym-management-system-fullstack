@@ -402,7 +402,7 @@ export default function LoginPage() {
                                     Signing in...
                                 </>
                             ) : (
-                                    "Sign In"
+                                "Sign In"
                             )}
                         </button>
                     </form>

@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
  */
 @Entity
 @Table(name = "memberships", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"gym_id", "user_id"})
+        @UniqueConstraint(columnNames = { "gym_id", "user_id" })
 })
 @Data
 @NoArgsConstructor
@@ -22,6 +22,7 @@ public class Membership {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "membership_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -59,17 +60,36 @@ public class Membership {
     }
 
     // Convenience getters
-    public Long getId() { return id; }
-    public Gym getGym() { return gym; }
-    public User getUser() { return user; }
-    public MembershipStatus getStatus() { return status; }
-    public LocalDate getStartDate() { return startDate; }
-    public LocalDate getEndDate() { return endDate; }
-    
+    public Long getId() {
+        return id;
+    }
+
+    public Gym getGym() {
+        return gym;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public MembershipStatus getStatus() {
+        return status;
+    }
+
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
     // Check if membership is currently active
     public boolean isActive() {
-        if (status != MembershipStatus.ACTIVE) return false;
-        if (endDate == null) return true;
+        if (status != MembershipStatus.ACTIVE)
+            return false;
+        if (endDate == null)
+            return true;
         return !LocalDate.now().isAfter(endDate);
     }
 }

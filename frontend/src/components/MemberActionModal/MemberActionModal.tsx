@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import ReactDOM from "react-dom"
 import { motion, AnimatePresence } from "framer-motion"
 import type { User } from "../../types/user"
@@ -18,7 +18,7 @@ interface MemberActionModalProps {
   onClose: () => void
   member: User | null
   onEditProfile: (member: User) => void
-  onRenewPlan: (member: User) => void
+  onRenewPlan: (member: User, packageId?: number, amount?: number) => void
   onSendMessage: (member: User) => void
 }
 
@@ -33,19 +33,36 @@ const MemberActionModal: React.FC<MemberActionModalProps> = ({
   const [activeSubModal, setActiveSubModal] = useState<"edit" | "renew" | "message" | null>(null)
   const [showTrainerSearch, setShowTrainerSearch] = useState(false)
 
+  // Renew Plan form state
+  const [availablePackages, setAvailablePackages] = useState<any[]>([])
+  const [renewForm, setRenewForm] = useState({
+    packageId: 0,
+    amount: "0",
+  })
+
+  // Load packages when submodal opens
+  useEffect(() => {
+    if (activeSubModal === "renew") {
+      import("../../services/api").then(module => {
+        module.default.getPackages(true).then(pkgs => {
+          setAvailablePackages(pkgs)
+          if (pkgs.length > 0) {
+            setRenewForm({
+              packageId: pkgs[0].packageId,
+              amount: String(pkgs[0].price)
+            })
+          }
+        })
+      })
+    }
+  }, [activeSubModal])
+
   // Edit Profile form state
   const [editForm, setEditForm] = useState({
     fullName: "",
     email: "",
     phone: "",
     notes: "",
-  })
-
-  // Renew Plan form state
-  const [renewForm, setRenewForm] = useState({
-    plan: "Gold Plan",
-    duration: "1 Year",
-    amount: "79,999",
   })
 
   // Message form state
@@ -95,8 +112,8 @@ const MemberActionModal: React.FC<MemberActionModalProps> = ({
   }
 
   const handleRenewAndPay = () => {
-    if (member) {
-      onRenewPlan(member)
+    if (member && renewForm.packageId) {
+      onRenewPlan(member, renewForm.packageId, Number(renewForm.amount))
     }
     setActiveSubModal(null)
   }
@@ -392,38 +409,47 @@ const MemberActionModal: React.FC<MemberActionModalProps> = ({
                       <span className="current-plan-name">{getPlanForMember()}</span>
                       <span className="current-plan-expiry">Expires: Dec 31, 2025</span>
                     </div>
+
                     <div className="form-group">
                       <label>Select New Plan</label>
                       <select
-                        value={renewForm.plan}
-                        onChange={(e) => setRenewForm({ ...renewForm, plan: e.target.value })}
+                        value={renewForm.packageId}
+                        onChange={(e) => {
+                          const pid = Number(e.target.value)
+                          const pkg = availablePackages.find(p => p.packageId === pid)
+                          if (pkg) {
+                            setRenewForm({
+                              packageId: pid,
+                              amount: String(pkg.price)
+                            })
+                          }
+                        }}
                         className="form-select"
                       >
-                        <option value="Gold Plan">Gold Plan</option>
-                        <option value="Silver Plan">Silver Plan</option>
-                        <option value="Platinum Plan">Platinum Plan</option>
+                        <option value={0} disabled>Select a plan</option>
+                        {availablePackages.map(pkg => (
+                          <option key={pkg.packageId} value={pkg.packageId}>
+                            {pkg.packageName || pkg.name}
+                          </option>
+                        ))}
                       </select>
                     </div>
                     <div className="form-group">
                       <label>Duration</label>
-                      <select
-                        value={renewForm.duration}
-                        onChange={(e) => setRenewForm({ ...renewForm, duration: e.target.value })}
-                        className="form-select"
-                      >
-                        <option value="1 Month">1 Month</option>
-                        <option value="6 Months">6 Months</option>
-                        <option value="1 Year">1 Year</option>
-                      </select>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={availablePackages.find(p => p.packageId === renewForm.packageId)?.durationMonths ? availablePackages.find(p => p.packageId === renewForm.packageId)?.durationMonths + " Months" : "1 Month"}
+                        disabled
+                      />
                     </div>
                     <div className="form-group">
                       <label>Total Amount</label>
                       <input
                         type="text"
                         value={`₹${renewForm.amount}`}
-                        onChange={(e) => setRenewForm({ ...renewForm, amount: e.target.value.replace("₹", "") })}
+                        readOnly
                         className="form-input"
-                        placeholder="e.g., ₹79,999"
                       />
                     </div>
                   </div>

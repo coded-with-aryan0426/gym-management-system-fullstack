@@ -42,12 +42,12 @@
 /* Content Layout with Filters */
 .members-page__content {
   display: grid;
-  grid-template-columns: 1fr 340px;
-    /* Default: Full width table */
+  grid-template-columns: 1fr;
+  /* Default: Full width table */
   gap: var(--space-4);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    /* Ensure container takes remaining height if needed */
-    min-height: 500px;
+  /* Ensure container takes remaining height if needed */
+  min-height: 500px;
 }
 
 
@@ -59,7 +59,7 @@
   border-radius: var(--card-radius);
   overflow: hidden;
   height: fit-content;
-    /* Allow table to define its height */
+  /* Allow table to define its height */
 }
 
 /* Filters Panel */
@@ -109,13 +109,13 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
-    /* Reduced from 32px */
-    position: sticky;
-    top: 20px;
-    max-height: calc(100vh - 40px);
-    /* Ensure it fits in window */
-    overflow-y: auto;
-    /* Allow internal scrolling if needed */
+  /* Reduced from 32px */
+  position: sticky;
+  top: 20px;
+  max-height: calc(100vh - 40px);
+  /* Ensure it fits in window */
+  overflow-y: auto;
+  /* Allow internal scrolling if needed */
 }
 
 /* Rest of Filter Styles (Unchanged) */
@@ -145,16 +145,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
-    padding: 8px 12px;
-    /* Reduced padding */
-    background-color: transparent;
-    border: 1px solid var(--fp-border);
-    border-radius: 6px;
+  padding: 8px 12px;
+  /* Reduced padding */
+  background-color: transparent;
+  border: 1px solid var(--fp-border);
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    text-align: center;
-    min-height: 38px;
-    /* Reduced from 48px */
+  text-align: center;
+  min-height: 38px;
+  /* Reduced from 48px */
 }
 
 .filter-checkbox:hover,
@@ -184,21 +184,23 @@
   color: var(--fp-text-secondary);
   transition: color 0.2s;
 }
-    /* ============================================================================
+
+/* ============================================================================
        Interaction States (The "Enterprise" Polish)
        ============================================================================ */
-  
-    /* General Selected State */
-    .filter-checkbox:has(input:checked),
-    .filter-radio:has(input:checked) {
-      border-color: var(--fp-text-primary);
-      background-color: rgba(255, 255, 255, 0.05);
-    }
-    .filter-checkbox:has(input:checked) .filter-text,
-    .filter-checkbox:has(input:checked) .filter-checkbox__label,
-    .filter-radio:has(input:checked) .filter-radio__label {
-      color: var(--fp-text-primary);
-      font-weight: 600;
+
+/* General Selected State */
+.filter-checkbox:has(input:checked),
+.filter-radio:has(input:checked) {
+  border-color: var(--fp-text-primary);
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.filter-checkbox:has(input:checked) .filter-text,
+.filter-checkbox:has(input:checked) .filter-checkbox__label,
+.filter-radio:has(input:checked) .filter-radio__label {
+  color: var(--fp-text-primary);
+  font-weight: 600;
 }
 
 /* Status-Specific Variants */
@@ -273,6 +275,7 @@
   background-color: rgba(139, 92, 246, 0.1);
   box-shadow: 0 0 0 1px var(--fp-plan-platinum);
 }
+
 .filter-checkbox[data-variant="plan-platinum"]:has(input:checked) .filter-text {
   color: var(--fp-plan-platinum);
 }
@@ -282,18 +285,19 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
-    margin-top: 16px;
+  margin-top: 16px;
 }
 
 .date-input input {
   width: 100%;
   padding: 12px;
-    background-color: #252525;
-    border: 1px solid var(--fp-border);
-    border-radius: 6px;
-    color: var(--fp-text-primary);
-    font-size: 14px;
+  background-color: #252525;
+  border: 1px solid var(--fp-border);
+  border-radius: 6px;
+  color: var(--fp-text-primary);
+  font-size: 14px;
 }
+
 .date-input input:focus {
   outline: none;
   border-color: var(--fp-accent-primary);
@@ -303,18 +307,18 @@
 .filter-actions {
   display: flex;
   gap: 12px;
-    padding-top: 24px;
-    border-top: 1px solid var(--fp-border);
-    margin-top: auto;
+  padding-top: 24px;
+  border-top: 1px solid var(--fp-border);
+  margin-top: auto;
 }
 
 .filter-actions .btn {
   flex: 1;
   padding: 12px;
-    border-radius: 6px;
-    font-size: 15px;
-    font-weight: 600;
-    text-align: center;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  text-align: center;
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -324,20 +328,22 @@
   color: white;
   border: none;
 }
+
 .filter-actions .btn--primary:hover {
   background-color: #ff5f5f;
-    box-shadow: 0 4px 12px rgba(231, 76, 76, 0.3);
+  box-shadow: 0 4px 12px rgba(231, 76, 76, 0.3);
 }
 
 .filter-actions .btn--secondary {
   background-color: transparent;
-    border: 1px solid var(--fp-border);
-    color: var(--fp-text-secondary);
+  border: 1px solid var(--fp-border);
+  color: var(--fp-text-secondary);
 }
+
 .filter-actions .btn--secondary:hover {
   border-color: var(--fp-text-primary);
-    color: var(--fp-text-primary);
-    background-color: rgba(255, 255, 255, 0.05);
+  color: var(--fp-text-primary);
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
 /* Member Cell */
@@ -389,7 +395,7 @@
   .members-page__content--with-filters {
     grid-template-columns: 1fr;
     position: relative;
-      /* Context for overlay */
+    /* Context for overlay */
   }
 
   .members-page__filters-panel {
@@ -398,12 +404,12 @@
     right: 0;
     bottom: 0;
     width: 320px;
-      z-index: 1000;
-      /* Ensure it's above other content */
+    z-index: 1000;
+    /* Ensure it's above other content */
     background-color: var(--bg-primary);
     padding: var(--space-4);
     box-shadow: -4px 0 24px rgba(0, 0, 0, 0.2);
-      overflow-y: auto;
+    overflow-y: auto;
   }
 }
 
@@ -412,11 +418,12 @@
     flex-direction: column;
     align-items: flex-start;
   }
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                /* Stack filters below on mobile */
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                .members-page__content {
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  grid-template-columns: 1fr !important;
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                }
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                }
+
+  /* Stack filters below on mobile */
+  .members-page__content {
+    grid-template-columns: 1fr !important;
+  }
+}
 
 /* Danger Button */
 .btn.btn--danger {
@@ -424,6 +431,7 @@
   color: white;
   border: 1px solid #ef4444;
 }
+
 .btn.btn--danger:hover {
   background-color: #dc2626;
   border-color: #dc2626;

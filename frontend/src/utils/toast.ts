@@ -1,71 +1,33 @@
 import toast from 'react-hot-toast';
 
 export const showToast = {
-  success: (message: string) => {
+  success: (message: string, id?: string) => {
     toast.success(message, {
+      id, // Allows updating an existing toast (e.g. replacing loading state)
       duration: 3000,
-      position: 'top-right',
-      style: {
-        background: 'var(--bg-secondary)',
-        color: 'var(--text-primary)',
-        border: '1px solid var(--success)',
-        borderRadius: 'var(--radius-lg)',
-        padding: 'var(--spacing-4)',
-      },
-      iconTheme: {
-        primary: 'var(--success)',
-        secondary: 'var(--bg-secondary)',
-      },
     });
   },
 
-  error: (message: string) => {
+  error: (message: string, id?: string) => {
     toast.error(message, {
-      duration: 4000,
-      position: 'top-right',
-      style: {
-        background: 'var(--bg-secondary)',
-        color: 'var(--text-primary)',
-        border: '1px solid var(--error)',
-        borderRadius: 'var(--radius-lg)',
-        padding: 'var(--spacing-4)',
-      },
-      iconTheme: {
-        primary: 'var(--error)',
-        secondary: 'var(--bg-secondary)',
-      },
+      id,
+      duration: 5000,
     });
   },
 
-  info: (message: string) => {
+  info: (message: string, id?: string) => {
     toast(message, {
+      id,
       duration: 3000,
-      position: 'top-right',
       icon: 'ℹ️',
-      style: {
-        background: 'var(--bg-secondary)',
-        color: 'var(--text-primary)',
-        border: '1px solid var(--accent-primary)',
-        borderRadius: 'var(--radius-lg)',
-        padding: 'var(--spacing-4)',
-      },
     });
   },
 
   loading: (message: string) => {
-    return toast.loading(message, {
-      position: 'top-right',
-      style: {
-        background: 'var(--bg-secondary)',
-        color: 'var(--text-primary)',
-        border: '1px solid var(--border)',
-        borderRadius: 'var(--radius-lg)',
-        padding: 'var(--spacing-4)',
-      },
-    });
+    return toast.loading(message);
   },
 
-  dismiss: (toastId: string) => {
+  dismiss: (toastId?: string) => {
     toast.dismiss(toastId);
   },
 };

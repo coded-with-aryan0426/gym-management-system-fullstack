@@ -12,6 +12,30 @@ const Staff: React.FC = () => {
   const [selectedStaff, setSelectedStaff] = useState<User | null>(null);
   const [isActionModalOpen, setIsActionModalOpen] = useState(false);
 
+  const [filters, setFilters] = useState({
+    role: "",
+    status: ""
+  });
+
+  const filteredStaff = React.useMemo(() => {
+    return staff.filter(member => {
+      // Access role correctly. Note: API might return roles array.
+      const roleName = member.roles?.[0]?.roleName || member.role || 'TRAINER';
+      const matchesRole = filters.role === "" || roleName === filters.role;
+      // Mock status check since data is hardcoded active
+      const matchesStatus = filters.status === "" || "Active" === filters.status;
+      return matchesRole && matchesStatus;
+    });
+  }, [staff, filters]);
+
+  const handleResetFilters = () => {
+    setFilters({ role: "", status: "" });
+  };
+
+  const handleFilterChange = (key: string, value: string) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+  };
+
   useEffect(() => {
     loadStaff();
   }, []);
@@ -128,21 +152,83 @@ const Staff: React.FC = () => {
       <div className="staff-page__header">
         <div className="staff-page__title-section">
           <h1 className="staff-page__title">Staff Directory</h1>
-          <span className="staff-page__count">Total Active Staff: {staff.length}</span>
+          <span className="staff-page__count">Total Active Staff: {filteredStaff.length}</span>
         </div>
         <div className="staff-page__actions">
-          <Button variant="secondary" icon={
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
-            </svg>
-          }>
-            Filter by Role
-          </Button>
+          {/* Filter button removed */}
         </div>
       </div>
 
       {/* Content Grid - Full Width */}
       <div className="staff-page__grid">
+
+        {/* Compact Filter Bar - Matching Members Page Design */}
+        <div className="filters-bar" style={{
+          display: 'flex',
+          gap: '1rem',
+          flexWrap: 'wrap',
+          marginBottom: '1rem',
+          alignItems: 'flex-end',
+          padding: '1rem',
+          background: 'var(--bg-secondary)',
+          borderRadius: 'var(--radius-md)',
+          width: '100%',
+          position: 'sticky',
+          top: '0',
+          zIndex: 10,
+          borderBottom: '1px solid var(--border-color)'
+        }}>
+
+          {/* Role Filter */}
+          <div className="filter-group" style={{ flex: '0 0 150px' }}>
+            <label style={{ display: 'block', fontSize: '0.875rem', marginBottom: '0.25rem' }}>Role</label>
+            <select
+              className="form-select"
+              value={filters.role}
+              onChange={(e) => handleFilterChange("role", e.target.value)}
+              style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}
+            >
+              <option value="">All Roles</option>
+              <option value="TRAINER">Trainer</option>
+              <option value="ADMIN">Admin</option>
+              <option value="MANAGER">Manager</option>
+            </select>
+          </div>
+
+          {/* Status Filter */}
+          <div className="filter-group" style={{ flex: '0 0 150px' }}>
+            <label style={{ display: 'block', fontSize: '0.875rem', marginBottom: '0.25rem' }}>Status</label>
+            <select
+              className="form-select"
+              value={filters.status}
+              onChange={(e) => handleFilterChange("status", e.target.value)}
+              style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}
+            >
+              <option value="">All Statuses</option>
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+
+          {/* Reset Button */}
+          <div className="filter-group" style={{ flex: '0 0 auto' }}>
+            <label style={{ display: 'block', fontSize: '0.875rem', marginBottom: '0.25rem', visibility: 'hidden' }}>Reset</label>
+            <Button
+              variant="secondary"
+              onClick={handleResetFilters}
+              style={{
+                borderColor: 'var(--color-crimson)',
+                color: 'var(--color-crimson)',
+                height: '38px', // Match select height approximately
+                display: 'flex',
+                alignItems: 'center'
+              }}
+            >
+              Reset
+            </Button>
+          </div>
+        </div>
+
         {/* Staff List */}
         <Card
           title="Staff List"
@@ -151,7 +237,7 @@ const Staff: React.FC = () => {
         >
           <DataTable
             columns={columns}
-            data={staff}
+            data={filteredStaff}
             keyExtractor={(s) => s.userId}
             loading={loading}
             emptyMessage="No staff found"

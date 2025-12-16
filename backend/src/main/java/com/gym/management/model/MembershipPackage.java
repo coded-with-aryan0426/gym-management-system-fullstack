@@ -30,6 +30,9 @@ public class MembershipPackage {
     @Column(name = "duration_days", nullable = false)
     private Integer durationDays;
 
+    @Column(name = "duration_months")
+    private Integer durationMonths;
+
     @Column(name = "included_pt_sessions")
     private Integer includedPTSessions;
 

@@ -8,10 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -37,8 +34,8 @@ public class AuthController {
     private JwtTokenProvider tokenProvider;
 
     /**
-     * Login endpoint with role context selection
-     * User chooses to login as either STAFF or MEMBER
+     * V1 Simplified Login - No gym dependency
+     * User authenticates and gets access based on their roles
      */
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequest request) {
@@ -60,115 +57,52 @@ public class AuthController {
             return ResponseEntity.status(401).body(Map.of("error", "Invalid password"));
         }
 
-        String loginContext = request.getLoginContext();
-        if (loginContext == null) {
-            loginContext = "STAFF"; // Default to staff for backward compatibility
+        // V1: Determine role from user's roles (no gym context needed)
+        String userRole = "CUSTOMER"; // Default
+        if (user.getRoles() != null) {
+            for (Role role : user.getRoles()) {
+                String roleName = role.getRoleName();
+                if ("OWNER".equalsIgnoreCase(roleName)) {
+                    userRole = "OWNER";
+                    break;
+                } else if ("TRAINER".equalsIgnoreCase(roleName) || "STAFF".equalsIgnoreCase(roleName)) {
+                    userRole = "TRAINER";
+                }
+            }
         }
 
+        // Build simple response
         AuthResponse response = new AuthResponse();
         response.setId(user.getUserId());
         response.setUsername(user.getUsername());
         response.setFullName(user.getFullName());
         response.setEmail(user.getEmail());
-        response.setContext(loginContext);
+        response.setContext("STAFF"); // V1: everyone is effectively staff for dashboard access
+        response.setStaffRole(userRole);
+        response.setHasStaffAccess(true);
+        response.setHasMemberAccess(true);
 
-        // Initial defaults
-        Long activeGymId = null;
-        String activeStaffRole = null;
-
-        // Check what access the user has
-        List<GymStaff> staffAssociations = gymStaffRepository.findByUserUserIdAndStatus(
-                user.getUserId(), StaffStatus.ACTIVE);
-        List<Membership> memberships = membershipRepository.findByUserUserId(user.getUserId());
-
-        response.setHasStaffAccess(!staffAssociations.isEmpty());
-        response.setHasMemberAccess(!memberships.isEmpty());
-
-        List<AuthResponse.GymAssociation> gymAssociations = new ArrayList<>();
-
-        if ("STAFF".equalsIgnoreCase(loginContext)) {
-            if (staffAssociations.isEmpty()) {
-                // If attempting to login as staff but no access, check if they have member
-                // access
-                // If so, maybe we should suggest switching, but for API strictness we return
-                // 403
-                return ResponseEntity.status(403).body(Map.of(
-                        "error", "No gym staff access found",
-                        "hasMemberAccess", !memberships.isEmpty()));
-            }
-
-            // Build staff gym associations
-            for (GymStaff gs : staffAssociations) {
-                AuthResponse.GymAssociation ga = new AuthResponse.GymAssociation();
-                ga.setGymId(gs.getGym().getGymId());
-                ga.setGymName(gs.getGym().getName());
-                ga.setRole(gs.getStaffRole().name());
-                ga.setStatus("ACTIVE");
-                gymAssociations.add(ga);
-            }
-
-            // If only one gym, auto-select it
-            if (staffAssociations.size() == 1) {
-                GymStaff gs = staffAssociations.get(0);
-                activeGymId = gs.getGym().getGymId();
-                activeStaffRole = gs.getStaffRole().name();
-
-                response.setActiveGymId(activeGymId);
-                response.setActiveGymName(gs.getGym().getName());
-                response.setStaffRole(activeStaffRole);
-            }
-
-        } else if ("MEMBER".equalsIgnoreCase(loginContext)) {
-            if (memberships.isEmpty()) {
-                return ResponseEntity.status(403).body(Map.of(
-                        "error", "No gym memberships found",
-                        "hasStaffAccess", !staffAssociations.isEmpty()));
-            }
-
-            // Build member gym associations
-            for (Membership m : memberships) {
-                AuthResponse.GymAssociation ga = new AuthResponse.GymAssociation();
-                ga.setGymId(m.getGym().getGymId());
-                ga.setGymName(m.getGym().getName());
-                ga.setStatus(m.getStatus().name());
-                if (m.getEndDate() != null) {
-                    ga.setMembershipEndDate(m.getEndDate().toString());
-                }
-                gymAssociations.add(ga);
-            }
-
-            // Filter to get active memberships
-            List<Membership> activeMemberships = memberships.stream()
-                    .filter(m -> m.getStatus() == MembershipStatus.ACTIVE)
-                    .collect(Collectors.toList());
-
-            // If only one active gym, auto-select it
-            if (activeMemberships.size() == 1) {
-                Membership m = activeMemberships.get(0);
-                activeGymId = m.getGym().getGymId();
-                response.setActiveGymId(activeGymId);
-                response.setActiveGymName(m.getGym().getName());
-            }
-        }
-
-        response.setGymAssociations(gymAssociations);
-
-        // Generate REAL JWT token
-        String token = tokenProvider.generateTokenFromUser(user, loginContext, activeGymId, activeStaffRole, null);
+        // V1: Generate token without gym context
+        String token = tokenProvider.generateTokenFromUser(user, "STAFF", null, userRole, null);
         response.setToken(token);
 
         return ResponseEntity.ok(response);
     }
 
     /**
-     * Staff signup - creates user, gym (optionally), and auto-logins with gym
-     * context
+     * V1 Staff signup - creates user with role, no gym dependency
      */
     @PostMapping("/signup/staff")
     public ResponseEntity<?> signupStaff(@RequestBody StaffSignupRequest request) {
         // Validate email doesn't exist
         if (userRepository.existsByUsername(request.getEmail())) {
             return ResponseEntity.badRequest().body(Map.of("error", "Email already registered"));
+        }
+
+        // Determine role from request (default to TRAINER)
+        String requestedRole = request.getRole();
+        if (requestedRole == null) {
+            requestedRole = "TRAINER";
         }
 
         // Create user
@@ -179,79 +113,37 @@ public class AuthController {
         user.setFullName(request.getFullName());
         user.setPhone(request.getPhone());
 
-        // Set staff role
-        Role staffRole = roleRepository.findByRoleName("STAFF");
-        if (staffRole != null) {
-            user.setRoles(new HashSet<>(Collections.singletonList(staffRole)));
+        // Set role based on request
+        Role role = roleRepository.findByRoleName(requestedRole.toUpperCase());
+        if (role == null) {
+            role = roleRepository.findByRoleName("STAFF"); // Fallback
+        }
+        if (role != null) {
+            user.setRoles(new HashSet<>(Collections.singletonList(role)));
         }
 
         user = userRepository.save(user);
 
-        Gym gym;
-        StaffRole role;
-
-        if (request.isCreateNewGym()) {
-            // Create new gym
-            gym = new Gym();
-            gym.setName(request.getGymName());
-            gym.setAddress(request.getGymAddress());
-            gym.setCity(request.getGymCity());
-            gym.setPhone(request.getGymPhone());
-            gym.setEmail(request.getEmail());
-
-            if (request.getSubscriptionPlan() != null) {
-                try {
-                    gym.setSubscriptionPlan(SubscriptionPlan.valueOf(request.getSubscriptionPlan()));
-                } catch (IllegalArgumentException e) {
-                    gym.setSubscriptionPlan(SubscriptionPlan.STARTER);
-                }
-            }
-
-            gym = gymRepository.save(gym);
-            role = StaffRole.OWNER;
-
-        } else {
-            // Join via invite code
-            Optional<Gym> gymOpt = gymRepository.findByInviteCode(request.getInviteCode());
-            if (gymOpt.isEmpty()) {
-                return ResponseEntity.badRequest().body(Map.of("error", "Invalid invite code"));
-            }
-            gym = gymOpt.get();
-            role = StaffRole.TRAINER; // Default role for invited staff
-        }
-
-        // Create gym-staff association
-        GymStaff gymStaff = new GymStaff();
-        gymStaff.setGym(gym);
-        gymStaff.setUser(user);
-        gymStaff.setStaffRole(role);
-        gymStaff.setStatus(StaffStatus.ACTIVE);
-        gymStaff.setJoinedAt(LocalDateTime.now());
-        gymStaffRepository.save(gymStaff);
-
-        // AUTO-LOGIN: Build response with JWT (no redirect to login needed)
+        // V1: Build simple response (no gym context)
         AuthResponse response = new AuthResponse();
         response.setId(user.getUserId());
         response.setUsername(user.getUsername());
         response.setFullName(user.getFullName());
         response.setEmail(user.getEmail());
         response.setContext("STAFF");
-        response.setActiveGymId(gym.getGymId());
-        response.setActiveGymName(gym.getName());
-        response.setStaffRole(role.name());
+        response.setStaffRole(requestedRole.toUpperCase());
         response.setHasStaffAccess(true);
         response.setHasMemberAccess(false);
 
-        // Generate Token with gym context
-        String token = tokenProvider.generateTokenFromUser(user, "STAFF", gym.getGymId(), role.name(), null);
+        // V1: Generate token without gym context
+        String token = tokenProvider.generateTokenFromUser(user, "STAFF", null, requestedRole.toUpperCase(), null);
         response.setToken(token);
 
         return ResponseEntity.ok(response);
     }
 
     /**
-     * Member signup - creates user, optionally joins gym, and auto-logins with gym
-     * context
+     * V1 Member signup - creates user with CUSTOMER role, no gym dependency
      */
     @PostMapping("/signup/member")
     public ResponseEntity<?> signupMember(@RequestBody MemberSignupRequest request) {
@@ -276,48 +168,7 @@ public class AuthController {
 
         user = userRepository.save(user);
 
-        // Resolve gym context
-        Long gymId = null;
-        String gymName = null;
-        Gym gym = null;
-
-        // If gym ID or invite code provided, join gym
-        if (request.getGymId() != null) {
-            Optional<Gym> gymOpt = gymRepository.findById(request.getGymId());
-            if (gymOpt.isPresent()) {
-                gym = gymOpt.get();
-            }
-        } else if (request.getInviteCode() != null && !request.getInviteCode().isEmpty()) {
-            Optional<Gym> gymOpt = gymRepository.findByInviteCode(request.getInviteCode());
-            if (gymOpt.isPresent()) {
-                gym = gymOpt.get();
-            }
-        }
-
-        // Create membership if gym found
-        String membershipStatus = null;
-        if (gym != null) {
-            Membership membership = new Membership();
-            membership.setGym(gym);
-            membership.setUser(user);
-
-            // Public gyms allow instant join, private require approval
-            if (gym.getIsPublic()) {
-                membership.setStatus(MembershipStatus.ACTIVE);
-                membership.setStartDate(LocalDate.now());
-                membershipStatus = "APPROVED";
-            } else {
-                membership.setStatus(MembershipStatus.PENDING);
-                membershipStatus = "PENDING";
-            }
-
-            membershipRepository.save(membership);
-
-            gymId = gym.getGymId();
-            gymName = gym.getName();
-        }
-
-        // AUTO-LOGIN: Build response with JWT
+        // V1: Build simple response (no gym context)
         AuthResponse response = new AuthResponse();
         response.setId(user.getUserId());
         response.setUsername(user.getUsername());
@@ -325,16 +176,10 @@ public class AuthController {
         response.setEmail(user.getEmail());
         response.setContext("MEMBER");
         response.setHasStaffAccess(false);
-        response.setHasMemberAccess(gym != null);
-        response.setMembershipStatus(membershipStatus);
+        response.setHasMemberAccess(true);
 
-        if (gym != null) {
-            response.setActiveGymId(gymId);
-            response.setActiveGymName(gymName);
-        }
-
-        // Generate Token with gym context (null gym ID if no gym joined yet)
-        String token = tokenProvider.generateTokenFromUser(user, "MEMBER", gymId, null, membershipStatus);
+        // V1: Generate token without gym context
+        String token = tokenProvider.generateTokenFromUser(user, "MEMBER", null, "CUSTOMER", null);
         response.setToken(token);
 
         return ResponseEntity.ok(response);
@@ -421,4 +266,3 @@ public class AuthController {
         return ResponseEntity.ok("User registered successfully");
     }
 }
-

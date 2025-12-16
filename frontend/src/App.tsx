@@ -64,33 +64,43 @@ function App() {
           <Toaster
             position="top-right"
             toastOptions={{
-              duration: 3000,
+              duration: 4000,
+              className: 'modern-toast',
               style: {
-                background: 'var(--bg-tertiary)',
-                color: 'var(--text-primary)',
-                borderRadius: 'var(--button-radius)',
-                border: '1px solid var(--border-primary)',
-                padding: '12px 16px',
-                boxShadow: 'var(--shadow-lg)',
+                background: '#1e1e24', // Darker cleaner background
+                color: '#fff',
+                borderRadius: '12px',
+                border: '1px solid rgba(255,255,255,0.08)',
+                padding: '14px 18px',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+                fontSize: '14px',
+                fontWeight: 500,
+                maxWidth: '380px',
               },
               success: {
                 iconTheme: {
-                  primary: 'var(--color-emerald)',
+                  primary: '#22c55e', // Emerald 500
                   secondary: '#fff',
                 },
                 style: {
-                  border: '1px solid var(--color-emerald)',
+                  border: '1px solid rgba(34, 197, 94, 0.2)', // Subtle green border
                 },
               },
               error: {
+                duration: 5000,
                 iconTheme: {
-                  primary: 'var(--color-crimson)',
+                  primary: '#ef4444', // Red 500
                   secondary: '#fff',
                 },
                 style: {
-                  border: '1px solid var(--color-crimson)',
+                  border: '1px solid rgba(239, 68, 68, 0.2)', // Subtle red border
                 },
               },
+              loading: {
+                style: {
+                  border: '1px solid rgba(59, 130, 246, 0.2)', // Subtle blue border
+                },
+              }
             }}
           />
         </BrowserRouter>

@@ -4,20 +4,20 @@ import type React from "react"
 import { useEffect, useState, useCallback } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { MetricCard, Card, Avatar } from "../../components/ui"
-import { 
-  LineChart, 
-  Line, 
-  AreaChart, 
-  Area, 
-  BarChart, 
-  Bar, 
-  PieChart, 
-  Pie, 
-  Cell, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
+import {
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
   ResponsiveContainer,
   Legend
 } from 'recharts'
@@ -141,21 +141,15 @@ const Dashboard: React.FC = () => {
   const [refreshInterval, setRefreshInterval] = useState<number | null>(null)
   const [selectedTimeRange, setSelectedTimeRange] = useState<'24H' | '7D' | '30D'>('30D')
 
-  // Check for needsGym query param or pending membership status
+  // V1: No gym checks needed - show banner only for pending membership status
   useEffect(() => {
-    const needsGym = searchParams.get("needsGym")
     const userStr = localStorage.getItem("user")
-
-    if (needsGym === "true") {
-      setShowBanner(true)
-      setBannerMessage("👋 Welcome! Please find and join your gym to get started.")
-      setBannerType("info")
-    } else if (userStr) {
+    if (userStr) {
       try {
         const user = JSON.parse(userStr)
         if (user.membershipStatus === "PENDING") {
           setShowBanner(true)
-          setBannerMessage("⏳ Your membership is pending approval. You'll get access as soon as your gym confirms.")
+          setBannerMessage("⏳ Your membership is pending approval.")
           setBannerType("warning")
         }
       } catch (e) {
@@ -167,6 +161,8 @@ const Dashboard: React.FC = () => {
   const loadDashboardData = useCallback(async () => {
     setLoading(true)
     try {
+      // V1: Load data directly for all users (no gym checks)
+
       // Try to fetch real data from backend with enhanced analytics
       const [statsData, floorData, alertsData, transactionsData, metricsData, membersData, sessionsData] = await Promise.allSettled([
         api.getStats(),
@@ -181,27 +177,27 @@ const Dashboard: React.FC = () => {
       // Update metrics with real-time calculations
       if (statsData.status === "fulfilled") {
         const stats = statsData.value
-        
+
         // Calculate real-time metrics from actual data
         let realTimeRevenue = 2450.0
         let realTimeMembers = 450
         let realTimeActive = 38
-        
+
         // If we have members data, calculate real metrics
         if (membersData.status === "fulfilled" && Array.isArray(membersData.value)) {
           const members = membersData.value
           realTimeMembers = members.length
           realTimeActive = members.filter((m: any) => m.status === 'ACTIVE').length
-          
+
           // Calculate revenue based on membership types (mock calculation)
           realTimeRevenue = members.reduce((total: number, member: any) => {
-            const membershipValue = member.membershipType === 'GOLD' ? 150 : 
-                                  member.membershipType === 'SILVER' ? 100 : 
-                                  member.membershipType === 'PLATINUM' ? 200 : 50
+            const membershipValue = member.membershipType === 'GOLD' ? 150 :
+              member.membershipType === 'SILVER' ? 100 :
+                member.membershipType === 'PLATINUM' ? 200 : 50
             return total + membershipValue
           }, 0)
         }
-        
+
         setMetrics(prev => ({
           ...prev,
           todayRevenue: realTimeRevenue,
@@ -258,8 +254,8 @@ const Dashboard: React.FC = () => {
       console.log("[Dashboard] Using demo data - backend may not be running")
       // Load demo data
       loadDemoData()
-    setPerformanceMetrics(generatePerformanceMetrics())
-    setRealtimeStats(generateRealtimeStats())
+      setPerformanceMetrics(generatePerformanceMetrics())
+      setRealtimeStats(generateRealtimeStats())
     } finally {
       setLoading(false)
     }
@@ -288,17 +284,17 @@ const Dashboard: React.FC = () => {
   const generateRevenueData = (timeRange: '24H' | '7D' | '30D'): RevenueData[] => {
     const data = []
     const days = timeRange === '24H' ? 1 : timeRange === '7D' ? 7 : 30
-    
+
     for (let i = days - 1; i >= 0; i--) {
       const date = new Date()
       date.setDate(date.getDate() - i)
-      
+
       // Generate more realistic data with trends
       const baseMultiplier = timeRange === '24H' ? 0.1 : 1
       const weekendBoost = date.getDay() === 0 || date.getDay() === 6 ? 1.3 : 1
-      
+
       data.push({
-        date: timeRange === '24H' 
+        date: timeRange === '24H'
           ? date.toLocaleTimeString('en-US', { hour: 'numeric' })
           : date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
         memberships: Math.floor((Math.random() * 2000 + 1000) * baseMultiplier * weekendBoost),
@@ -373,14 +369,14 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     loadDashboardData()
-    
+
     // Set up real-time updates every 15 seconds for more responsive data
     const interval = setInterval(() => {
       loadDashboardData()
     }, 15000)
-    
+
     setRefreshInterval(interval)
-    
+
     return () => {
       if (interval) clearInterval(interval)
     }
@@ -464,17 +460,17 @@ const Dashboard: React.FC = () => {
             <span className="last-updated">Updated {new Date().toLocaleTimeString()}</span>
           </div>
         </div>
-        <button 
+        <button
           className={`dashboard__refresh-btn ${loading ? 'loading' : ''}`}
           onClick={() => loadDashboardData()}
           disabled={loading}
         >
-          <svg 
-            width="16" 
-            height="16" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
             strokeWidth="2"
             className={loading ? 'spinning' : ''}
           >
@@ -514,12 +510,12 @@ const Dashboard: React.FC = () => {
             />
           </>
         )}
-        
+
         {isStaff && (
           <>
-            <MetricCard 
-              title="Live Check-ins" 
-              value={metrics.liveCheckIns} 
+            <MetricCard
+              title="Live Check-ins"
+              value={metrics.liveCheckIns}
               subtitle="Currently active"
               trend={{ value: `${metrics.activeMembers} total active`, direction: "neutral" }}
             />
@@ -558,7 +554,7 @@ const Dashboard: React.FC = () => {
                   {metric.current}%
                 </div>
                 <div className="performance-progress">
-                  <div 
+                  <div
                     className="performance-progress-fill"
                     style={{ width: `${(metric.current / metric.target) * 100}%` }}
                   />
@@ -600,12 +596,12 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
             <div className="occupancy-bar">
-              <div 
+              <div
                 className="occupancy-fill"
-                style={{ 
+                style={{
                   width: `${(realtimeStats.currentOccupancy / realtimeStats.maxCapacity) * 100}%`,
-                  backgroundColor: realtimeStats.currentOccupancy > 80 ? '#DC2626' : 
-                                 realtimeStats.currentOccupancy > 60 ? '#F59E0B' : '#10B981'
+                  backgroundColor: realtimeStats.currentOccupancy > 80 ? '#DC2626' :
+                    realtimeStats.currentOccupancy > 60 ? '#F59E0B' : '#10B981'
                 }}
               />
             </div>
@@ -621,19 +617,19 @@ const Dashboard: React.FC = () => {
             title="Revenue Analytics"
             action={
               <div className="chart-controls">
-                <button 
+                <button
                   className={`chart-control-btn ${selectedTimeRange === '30D' ? 'active' : ''}`}
                   onClick={() => setSelectedTimeRange('30D')}
                 >
                   30D
                 </button>
-                <button 
+                <button
                   className={`chart-control-btn ${selectedTimeRange === '7D' ? 'active' : ''}`}
                   onClick={() => setSelectedTimeRange('7D')}
                 >
                   7D
                 </button>
-                <button 
+                <button
                   className={`chart-control-btn ${selectedTimeRange === '24H' ? 'active' : ''}`}
                   onClick={() => setSelectedTimeRange('24H')}
                 >
@@ -647,22 +643,22 @@ const Dashboard: React.FC = () => {
               <AreaChart data={revenueData}>
                 <defs>
                   <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#DC2626" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#DC2626" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#DC2626" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#DC2626" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border-secondary)" />
-                <XAxis 
-                  dataKey="date" 
+                <XAxis
+                  dataKey="date"
                   stroke="var(--text-tertiary)"
                   fontSize={12}
                 />
-                <YAxis 
+                <YAxis
                   stroke="var(--text-tertiary)"
                   fontSize={12}
                   tickFormatter={(value) => `₹${value}`}
                 />
-                <Tooltip 
+                <Tooltip
                   contentStyle={{
                     backgroundColor: 'var(--bg-secondary)',
                     border: '1px solid var(--border-primary)',
@@ -708,7 +704,7 @@ const Dashboard: React.FC = () => {
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip 
+                <Tooltip
                   contentStyle={{
                     backgroundColor: 'var(--bg-secondary)',
                     border: '1px solid var(--border-primary)',
@@ -732,16 +728,16 @@ const Dashboard: React.FC = () => {
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={hourlyActivity}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border-secondary)" />
-                <XAxis 
-                  dataKey="hour" 
+                <XAxis
+                  dataKey="hour"
                   stroke="var(--text-tertiary)"
                   fontSize={12}
                 />
-                <YAxis 
+                <YAxis
                   stroke="var(--text-tertiary)"
                   fontSize={12}
                 />
-                <Tooltip 
+                <Tooltip
                   contentStyle={{
                     backgroundColor: 'var(--bg-secondary)',
                     border: '1px solid var(--border-primary)',
@@ -812,9 +808,9 @@ const Dashboard: React.FC = () => {
                   <div className="class-capacity-info">
                     <span className="capacity-text">{cls.enrolled}/{cls.capacity}</span>
                     <div className="capacity-bar">
-                      <div 
-                        className="capacity-fill" 
-                        style={{ 
+                      <div
+                        className="capacity-fill"
+                        style={{
                           width: `${getCapacityPercent(cls.enrolled, cls.capacity)}%`,
                           backgroundColor: getCapacityColor(getCapacityPercent(cls.enrolled, cls.capacity))
                         }}

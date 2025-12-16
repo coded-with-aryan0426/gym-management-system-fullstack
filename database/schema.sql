@@ -50,12 +50,12 @@ INSERT INTO roles (role_name) VALUES ('CUSTOMER');
 -- 7. Seed Data: Users
 -- Password 'pass123' for all (for v1 demo purposes)
 INSERT INTO users (username, password, full_name, email) VALUES ('admin', 'pass123', 'John Owner', 'owner@gym.com');
-INSERT INTO users (username, password, full_name, email) VALUES ('trainer1', 'pass123', 'Mike Tyson', 'mike@gym.com');
-INSERT INTO users (username, password, full_name, email) VALUES ('trainer2', 'pass123', 'Sarah Connor', 'sarah@gym.com');
-INSERT INTO users (username, password, full_name, email) VALUES ('staff1', 'pass123', 'Jim Halpert', 'jim@gym.com');
-INSERT INTO users (username, password, full_name, email) VALUES ('cust1', 'pass123', 'Alice Smith', 'alice@gym.com');
-INSERT INTO users (username, password, full_name, email) VALUES ('cust2', 'pass123', 'Bob Jones', 'bob@gym.com');
-INSERT INTO users (username, password, full_name, email) VALUES ('cust3', 'pass123', 'Charlie Brown', 'charlie@gym.com');
+INSERT INTO users (username, password, full_name, email) VALUES ('mike.tyson', 'pass123', 'Mike Tyson', 'mike.tyson@gym.com');
+INSERT INTO users (username, password, full_name, email) VALUES ('sarah.connor', 'pass123', 'Sarah Connor', 'sarah.connor@gym.com');
+INSERT INTO users (username, password, full_name, email) VALUES ('jim.halpert', 'pass123', 'Jim Halpert', 'jim.halpert@gym.com');
+INSERT INTO users (username, password, full_name, email) VALUES ('alice.smith', 'pass123', 'Alice Smith', 'alice.smith@gym.com');
+INSERT INTO users (username, password, full_name, email) VALUES ('bob.jones', 'pass123', 'Bob Jones', 'bob.jones@gym.com');
+INSERT INTO users (username, password, full_name, email) VALUES ('charlie.brown', 'pass123', 'Charlie Brown', 'charlie.brown@gym.com');
 
 -- 8. Seed Data: User Role Mappings
 -- Assuming IDs: 1=admin, 2=trainer1, 3=trainer2, 4=staff1, 5=cust1, 6=cust2, 7=cust3
@@ -78,11 +78,11 @@ INSERT INTO trainer_customer_map (trainer_user_id, customer_user_id) VALUES (3, 
 
 -- Additional Seed Data
 -- New Users
-INSERT INTO users (username, password, full_name, email) VALUES ('owner2', 'pass123', 'Jane Doe', 'jane.owner@gym.com');
-INSERT INTO users (username, password, full_name, email) VALUES ('trainer3', 'pass123', 'Rocky Balboa', 'rocky@gym.com');
-INSERT INTO users (username, password, full_name, email) VALUES ('staff2', 'pass123', 'Pam Beesly', 'pam@gym.com');
-INSERT INTO users (username, password, full_name, email) VALUES ('cust4', 'pass123', 'David Beckham', 'david@gym.com');
-INSERT INTO users (username, password, full_name, email) VALUES ('cust5', 'pass123', 'Serena Williams', 'serena@gym.com');
+INSERT INTO users (username, password, full_name, email) VALUES ('jane.doe', 'pass123', 'Jane Doe', 'jane.doe@gym.com');
+INSERT INTO users (username, password, full_name, email) VALUES ('rocky.balboa', 'pass123', 'Rocky Balboa', 'rocky.balboa@gym.com');
+INSERT INTO users (username, password, full_name, email) VALUES ('pam.beesly', 'pass123', 'Pam Beesly', 'pam.beesly@gym.com');
+INSERT INTO users (username, password, full_name, email) VALUES ('david.beckham', 'pass123', 'David Beckham', 'david.beckham@gym.com');
+INSERT INTO users (username, password, full_name, email) VALUES ('serena.williams', 'pass123', 'Serena Williams', 'serena.williams@gym.com');
 
 -- New User Role Mappings
 -- IDs: 8=owner2, 9=trainer3, 10=staff2, 11=cust4, 12=cust5

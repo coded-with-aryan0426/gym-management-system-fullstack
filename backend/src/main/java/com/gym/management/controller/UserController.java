@@ -25,8 +25,14 @@ public class UserController {
     }
 
     @GetMapping("/members")
-    public List<com.gym.management.dto.MemberDTO> getMembers() {
-        return userService.getAllMembers();
+    public ResponseEntity<?> getMembers() {
+        try {
+            return ResponseEntity.ok(userService.getAllMembers());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500)
+                    .body(java.util.Map.of("error", e.getMessage(), "type", e.getClass().getName()));
+        }
     }
 
     @GetMapping("/search")

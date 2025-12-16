@@ -2,6 +2,7 @@
 
 import type React from "react"
 import { useEffect, useState, useMemo, useCallback } from "react"
+import { FiMoreVertical, FiSearch } from "react-icons/fi"
 import { toast } from "react-hot-toast"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { Button, Badge, getStatusVariant, Avatar, DataTable, CreateUserModal, type Column } from "../../components"
@@ -16,6 +17,9 @@ interface FilterState {
   lastVisit: string
   dateFrom: string
   dateTo: string
+
+  month: string
+  planDuration: string
 }
 
 const Members: React.FC = () => {
@@ -42,11 +46,14 @@ const Members: React.FC = () => {
     lastVisit: "",
     dateFrom: "",
     dateTo: "",
+    month: "",
+    planDuration: "",
   })
 
   const loadMembers = useCallback(async () => {
     setLoading(true)
     try {
+      // V1: Load all members directly (no gym checks)
       const data = await api.getMembers()
       console.log("[Debug] Real Member Data:", data[0]);
       setMembers(data)
@@ -74,42 +81,45 @@ const Members: React.FC = () => {
   }
 
   const handleEditProfile = async (member: MemberDTO) => {
-    try {
-      await api.updateUser(member.userId, {
-        fullName: member.fullName,
-        email: member.email,
-        phoneNumber: member.phone,
-      })
-      toast.success(`Profile updated for ${member.fullName}`)
-      loadMembers() 
-      handleCloseActionModal()
-    } catch (err) {
-      console.error("Failed to update profile:", err)
-      toast.error("Failed to update profile. Please try again.")
-    }
+    // API call already made in EnhancedMemberActionModal, just refresh the list
+    loadMembers() // Refresh list but keep modal open
   }
 
-  const handleRenewPlan = async (member: MemberDTO) => {
+  const handleRenewPlan = async (member: MemberDTO, packageId?: number, amount?: number, customDuration?: number, skipTransaction?: boolean) => {
     try {
-      await api.createTransaction({
-        userId: member.userId,
-        amount: 79999,
-        type: "MEMBERSHIP_RENEWAL",
-        description: `Membership renewal for ${member.fullName}`,
-      })
-      toast.success(`Membership renewed for ${member.fullName}`)
-      loadMembers()
-      handleCloseActionModal()
+      if (packageId) {
+        // Call API
+        await api.renewMembership(member.userId, packageId, customDuration)
+
+        // Create transaction record for history if not skipped
+        if (amount && !skipTransaction) {
+          try {
+            await api.createTransaction({
+              userId: member.userId,
+              amount: amount,
+              type: "MEMBERSHIP_RENEWAL",
+              description: `Membership renewal for ${member.fullName}`,
+            })
+          } catch (txErr) {
+            console.error("Transaction creation failed:", txErr)
+          }
+        }
+
+        // toast.success(`Membership renewed${skipTransaction ? '' : ' and payment recorded'} for ${member.fullName}`) -> Handled in modal
+        console.log(`Membership renewed for ${member.fullName}`)
+        loadMembers() // Refresh list but keep modal open
+      } else {
+        console.warn("Renew plan called without packageId")
+      }
     } catch (err) {
       console.error("Failed to renew membership:", err)
       toast.error("Failed to process renewal. Please try again.")
-      handleCloseActionModal()
     }
   }
 
   const handleSendMessage = async (member: MemberDTO) => {
     toast.success(`Message sent to ${member.fullName}`)
-    handleCloseActionModal()
+    // Keep modal open after sending message
   }
 
   const handleFilterChange = (key: keyof FilterState, value: any) => {
@@ -137,6 +147,8 @@ const Members: React.FC = () => {
       lastVisit: "",
       dateFrom: "",
       dateTo: "",
+      month: "",
+      planDuration: "",
     })
   }
 
@@ -148,7 +160,12 @@ const Members: React.FC = () => {
         member.email.toLowerCase().includes(searchQuery.toLowerCase())
 
       const matchesStatus = filters.status.length === 0 || filters.status.includes(member.status || "Inactive")
-      const matchesPlan = filters.plan.length === 0 || filters.plan.includes(member.planName || "No Plan")
+      const matchesPlan = filters.plan.length === 0 || filters.plan.some(p => (member.planName || "").includes(p))
+
+      const matchesMonth = filters.month === "" || (member.startDate && new Date(member.startDate).getMonth() + 1 === Number(filters.month))
+
+      const matchesDuration = filters.planDuration === "" || (member.planDuration && String(member.planDuration).includes(filters.planDuration))
+
 
       // Date Filter Implementation (targeting startDate / Join Date)
       let matchesDate = true
@@ -189,7 +206,7 @@ const Members: React.FC = () => {
         matchesDate = false
       }
 
-      return matchesSearch && matchesStatus && matchesPlan && matchesDate
+      return matchesSearch && matchesStatus && matchesPlan && matchesMonth && matchesDuration
     })
   }, [members, searchQuery, filters])
 
@@ -197,7 +214,13 @@ const Members: React.FC = () => {
   // Note: DataTable probably expects Generic. Casting for safety if needed.
   const columns: Column<MemberDTO>[] = [
     {
-      key: "fullName", 
+      key: "index",
+      header: "#",
+      width: "50px",
+      render: (_, index) => <span className="member-index" style={{ color: 'var(--text-tertiary)', fontSize: '0.875rem' }}>{index + 1}</span>,
+    },
+    {
+      key: "fullName",
       header: "Name",
       render: (member) => (
         <div className="member-cell">
@@ -207,9 +230,14 @@ const Members: React.FC = () => {
       ),
     },
     {
-      key: "planName", 
+      key: "planName",
       header: "Plan",
       render: (member) => <span className="member-plan">{member.planName}</span>,
+    },
+    {
+      key: "planDuration",
+      header: "Duration",
+      render: (member) => <span className="member-plan-duration">{member.planDuration || "-"}</span>,
     },
     {
       key: "joinDate",
@@ -228,7 +256,7 @@ const Members: React.FC = () => {
       },
     },
     {
-      key: "actions", 
+      key: "actions",
       header: "",
       width: "80px",
       render: (member) => (
@@ -256,7 +284,121 @@ const Members: React.FC = () => {
       {/* Main Content with Fixed Filter Panel */}
       <div className="members-page__content">
         {/* Main Content Area: Table + Filter Panel */}
-        <div className="members-page__table-container">
+        <div className="members-page__table-container" style={{ width: '100%' }}>
+          {/* Compact Filter Bar */}
+          <div className="filters-bar" style={{
+            display: 'flex',
+            gap: '1rem',
+            flexWrap: 'wrap',
+            marginBottom: '1rem',
+            alignItems: 'flex-end',
+            padding: '1rem',
+            background: 'var(--bg-secondary)',
+            borderRadius: 'var(--radius-md)',
+            width: '100%',
+            position: 'sticky',
+            top: '0',
+            zIndex: 10,
+            borderBottom: '1px solid var(--border-color)'
+          }}>
+
+            {/* Month Filter */}
+            <div className="filter-group" style={{ flex: '0 0 150px' }}>
+              <label style={{ display: 'block', fontSize: '0.875rem', marginBottom: '0.25rem' }}>Join Month</label>
+              <select
+                className="form-select"
+                value={filters.month}
+                onChange={(e) => handleFilterChange("month", e.target.value)}
+                style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}
+              >
+                <option value="">All Months</option>
+                {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
+                  <option key={m} value={String(m)}>
+                    {new Date(0, m - 1).toLocaleString('default', { month: 'long' })}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Status Filter */}
+            <div className="filter-group" style={{ flex: '0 0 150px' }}>
+              <label style={{ display: 'block', fontSize: '0.875rem', marginBottom: '0.25rem' }}>Status</label>
+              <select
+                className="form-select"
+                value={filters.status.length > 0 ? filters.status[0] : ""}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setFilters(prev => ({ ...prev, status: val ? [val] : [] }))
+                }}
+                style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}
+              >
+                <option value="">All Statuses</option>
+                <option value="ACTIVE">Active</option>
+                <option value="EXPIRED">Expired</option>
+                <option value="PENDING">Pending</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+            </div>
+
+            {/* Plan Filter */}
+            <div className="filter-group" style={{ flex: '0 0 150px' }}>
+              <label style={{ display: 'block', fontSize: '0.875rem', marginBottom: '0.25rem' }}>Plan</label>
+              <select
+                className="form-select"
+                value={filters.plan.length > 0 ? filters.plan[0] : ""}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setFilters(prev => ({ ...prev, plan: val ? [val] : [] }))
+                }}
+                style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}
+              >
+                <option value="">All Plans</option>
+                <option value="Basic">Basic</option>
+                <option value="Standard">Standard</option>
+                <option value="Premium">Premium</option>
+              </select>
+            </div>
+
+            {/* Plan Duration Filter (Replaces Date Range) */}
+            <div className="filter-group" style={{ flex: '0 0 150px' }}>
+              <label style={{ display: 'block', fontSize: '0.875rem', marginBottom: '0.25rem' }}>Duration</label>
+              <select
+                className="form-select"
+                value={filters.planDuration}
+                onChange={(e) => handleFilterChange("planDuration", e.target.value)}
+                style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}
+              >
+                <option value="">All Durations</option>
+                <option value="1">1 Month</option>
+                <option value="3">3 Months</option>
+                <option value="6">6 Months</option>
+                <option value="12">12 Months</option>
+                <option value="24">24 Months</option>
+                <option value="36">36 Months</option>
+              </select>
+            </div>
+
+            {/* Reset Button */}
+            <div className="filter-group" style={{ flex: '0 0 auto' }}>
+              <label style={{ display: 'block', fontSize: '0.875rem', marginBottom: '0.25rem', visibility: 'hidden' }}>Reset</label>
+              <button
+                onClick={handleResetFilters}
+                className="btn"
+                style={{
+                  height: '38px',
+                  padding: '0 1.5rem',
+                  backgroundColor: '#ef4444',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: 'var(--radius-sm)',
+                  fontWeight: 500
+                }}
+              >
+                Reset
+              </button>
+            </div>
+          </div>
+
           <DataTable
             columns={columns as any} // Cast to any to avoid strict Column<T> mismatches if User is hardcoded in base
             data={filteredMembers}
@@ -266,199 +408,40 @@ const Members: React.FC = () => {
           />
         </div>
 
-        {/* Right Side - Filters Panel */}
-        <div className="members-page__filters-panel">
-            <div className="filters-panel">
-              {/* Status Filters */}
-              <div className="filter-section">
-                <h4>Status Filters</h4>
-                <div className="filter-checkboxes">
-                <label className="filter-checkbox" data-variant="success">
-                    <input
-                      type="checkbox"
-                    checked={filters.status.includes("ACTIVE")}
-                    onChange={() => handleStatusFilter("ACTIVE")}
-                    />
-                  <span className="filter-text">Active</span>
-                  </label>
-                <label className="filter-checkbox" data-variant="error">
-                    <input
-                      type="checkbox"
-                    checked={filters.status.includes("EXPIRED")}
-                    onChange={() => handleStatusFilter("EXPIRED")}
-                    />
-                  <span className="filter-text">Expired</span>
-                  </label>
-                <label className="filter-checkbox" data-variant="warning">
-                    <input
-                      type="checkbox"
-                    checked={filters.status.includes("PENDING")}
-                    onChange={() => handleStatusFilter("PENDING")}
-                    />
-                  <span className="filter-text">Pending</span>
-                </label>
-                <label className="filter-checkbox" data-variant="neutral">
-                  <input
-                    type="checkbox"
-                    checked={filters.status.includes("Inactive")}
-                    onChange={() => handleStatusFilter("Inactive")}
-                  />
-                  <span className="filter-text">Inactive</span>
-                  </label>
-                </div>
-              </div>
 
-              {/* Plan Filters */}
-              <div className="filter-section">
-                <h4>Plan Filters</h4>
-                <div className="filter-checkboxes">
-                <label className="filter-checkbox" data-variant="plan-basic">
-                    <input
-                      type="checkbox"
-                    checked={filters.plan.includes("Basic Plan")}
-                    onChange={() => handlePlanFilter("Basic Plan")}
-                    />
-                  <span className="filter-text">Basic</span>
-                  </label>
-                <label className="filter-checkbox" data-variant="plan-silver">
-                    <input
-                      type="checkbox"
-                    checked={filters.plan.includes("Silver Plan")}
-                    onChange={() => handlePlanFilter("Silver Plan")}
-                    />
-                  <span className="filter-text">Silver</span>
-                  </label>
-                <label className="filter-checkbox" data-variant="plan-gold">
-                    <input
-                      type="checkbox"
-                    checked={filters.plan.includes("Gold Plan")}
-                    onChange={() => handlePlanFilter("Gold Plan")}
-                    />
-                  <span className="filter-text">Gold</span>
-                </label>
-                <label className="filter-checkbox" data-variant="plan-platinum">
-                  <input
-                    type="checkbox"
-                    checked={filters.plan.includes("Platinum Plan")}
-                    onChange={() => handlePlanFilter("Platinum Plan")}
-                  />
-                  <span className="filter-text">Platinum</span>
-                  </label>
-                </div>
-              </div>
+        {
+          isActionModalOpen && selectedMember && (
+            <EnhancedMemberActionModal
+              isOpen={isActionModalOpen}
+              onClose={handleCloseActionModal}
+              member={selectedMember as any}
+              onEditProfile={(updatedMember) => handleEditProfile(updatedMember as unknown as MemberDTO)}
+              onRenewPlan={(member, packageId, amount, customDuration, skipTransaction) => handleRenewPlan(member as unknown as MemberDTO, packageId, amount, customDuration, skipTransaction)}
+              onSendMessage={() => handleSendMessage(selectedMember)}
+            />
+          )
+        }
 
-            {/* Join Date Filters */}
-              <div className="filter-section">
-              <h4>Join Date Filters</h4>
-                <div className="filter-radios">
-                  <label className="filter-radio">
-                    <input
-                      type="radio"
-                      name="lastVisit"
-                    checked={filters.lastVisit === ""}
-                    onChange={() => handleFilterChange("lastVisit", "")}
-                  />
-                  <span className="filter-radio__label">All Time</span>
-                </label>
-                <label className="filter-radio">
-                  <input
-                    type="radio"
-                    name="lastVisit"
-                      checked={filters.lastVisit === "today"}
-                      onChange={() => handleFilterChange("lastVisit", "today")}
-                    />
-                    <span className="filter-radio__label">Today</span>
-                  </label>
-                  <label className="filter-radio">
-                    <input
-                      type="radio"
-                      name="lastVisit"
-                      checked={filters.lastVisit === "week"}
-                      onChange={() => handleFilterChange("lastVisit", "week")}
-                    />
-                    <span className="filter-radio__label">This Week</span>
-                  </label>
-                  <label className="filter-radio">
-                    <input
-                      type="radio"
-                      name="lastVisit"
-                      checked={filters.lastVisit === "month"}
-                      onChange={() => handleFilterChange("lastVisit", "month")}
-                    />
-                    <span className="filter-radio__label">This Month</span>
-                  </label>
-                  <label className="filter-radio">
-                    <input
-                      type="radio"
-                      name="lastVisit"
-                      checked={filters.lastVisit === "custom"}
-                      onChange={() => handleFilterChange("lastVisit", "custom")}
-                    />
-                    <span className="filter-radio__label">Custom Range</span>
-                  </label>
-                </div>
-
-                {filters.lastVisit === "custom" && (
-                  <div className="date-range">
-                    <div className="date-input">
-                      <input
-                        type="date"
-                        value={filters.dateFrom}
-                        onChange={(e) => handleFilterChange("dateFrom", e.target.value)}
-                        className="form-input"
-                      />
-                    </div>
-                    <div className="date-input">
-                      <input
-                        type="date"
-                        value={filters.dateTo}
-                        onChange={(e) => handleFilterChange("dateTo", e.target.value)}
-                        className="form-input"
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Filter Actions */}
-              <div className="filter-actions">
-              <button className="btn btn--danger" onClick={handleResetFilters}>
-                  Reset
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {isActionModalOpen && selectedMember && (
-        <EnhancedMemberActionModal
-          isOpen={isActionModalOpen}
-          onClose={handleCloseActionModal}
-          member={selectedMember as any}
-          onEditProfile={() => handleEditProfile(selectedMember)}
-          onRenewPlan={() => handleRenewPlan(selectedMember)}
-          onSendMessage={() => handleSendMessage(selectedMember)}
+        {/* V1 Manual Member Entry Modal */}
+        <CreateUserModal
+          isOpen={isCreateModalOpen}
+          onClose={() => {
+            setIsCreateModalOpen(false);
+            // Remove query param
+            setSearchParams(prev => {
+              const newParams = new URLSearchParams(prev);
+              newParams.delete('action');
+              return newParams;
+            });
+          }}
+          onSuccess={() => {
+            loadMembers();
+            toast.success("Member added successfully");
+          }}
+          initialRole="CUSTOMER"
         />
-      )}
 
-      {/* V1 Manual Member Entry Modal */}
-      <CreateUserModal
-        isOpen={isCreateModalOpen}
-        onClose={() => {
-          setIsCreateModalOpen(false);
-          // Remove query param
-          setSearchParams(prev => {
-            const newParams = new URLSearchParams(prev);
-            newParams.delete('action');
-            return newParams;
-          });
-        }}
-        onSuccess={() => {
-          loadMembers();
-          toast.success("Member added successfully");
-        }}
-        initialRole="CUSTOMER"
-      />
+      </div>
     </div>
   )
 }

@@ -5,11 +5,14 @@ export interface User {
   fullName: string;
   email: string;
   phoneNumber?: string;
+  phone?: string;
   roles?: Role[];
   role?: string; // Legacy support
   // Frontend transient fields
   plan?: string | { name: string };
   status?: string;
+  joinDate?: string;
+  createdAt?: string;
 }
 
 export interface MemberDTO {
@@ -17,14 +20,18 @@ export interface MemberDTO {
   fullName: string;
   email: string;
   phone?: string;
-  planName: string;
+  planName: string
+  planDuration: string
   status: string;
   startDate?: string;
   endDate?: string;
+  createdAt?: string;
+  joinDate?: string;
 }
 
 export interface Role {
   roleId: number;
+  roleName?: string;
 }
 
 export interface MembershipPlan {
@@ -41,6 +48,7 @@ export interface CreateUserDto {
   fullName: string;
   password: string;
   phoneNumber?: string;
+  phone?: string;
   address?: string;
   roles?: Role[];
 }
@@ -50,6 +58,7 @@ export interface UpdateUserDto {
   fullName?: string;
   password?: string;
   phoneNumber?: string;
+  phone?: string;
   address?: string;
   avatarUrl?: string;
   roles?: Role[];

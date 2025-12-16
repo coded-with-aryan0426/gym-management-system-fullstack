@@ -175,18 +175,95 @@
   padding: 1.5rem;
   border-top: 1px solid var(--border-primary);
   display: flex;
-  justify-content: space-between; 
+  justify-content: space-between;
   align-items: center;
   background-color: var(--bg-tertiary);
 }
 
 .button-group {
-    display: flex;
-    gap: 1rem;
+  display: flex;
+  gap: 1rem;
 }
 
 @media (max-width: 640px) {
   .form-row {
     grid-template-columns: 1fr;
   }
+}
+
+/* Input with validation icon wrapper */
+.input-with-validation {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-with-validation .form-input {
+  flex: 1;
+  padding-right: 2.5rem;
+  /* Make room for icon */
+}
+
+.validation-icon {
+  position: absolute;
+  right: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.validation-icon--valid {
+  color: #22c55e;
+  /* Green */
+}
+
+.validation-icon--invalid {
+  color: #ef4444;
+  /* Red */
+}
+
+/* Subtle border color change based on validation */
+.input-with-validation:has(.validation-icon--valid) .form-input {
+  border-color: rgba(34, 197, 94, 0.5);
+}
+
+.input-with-validation:has(.validation-icon--invalid) .form-input {
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+/* Date Input Dark Theme */
+input[type="date"] {
+  color-scheme: dark;
+  /* Forces dark mode styling */
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: brightness(0) invert(1);
+  cursor: pointer;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 0.8;
+}
+
+/* Firefox date picker icon */
+input[type="date"]::-moz-calendar-picker-indicator {
+  filter: brightness(0) invert(1);
+}
+
+/* Dark theme for the date picker popup (WebKit) */
+::-webkit-datetime-edit {
+  color: var(--text-primary);
+}
+
+::-webkit-datetime-edit-fields-wrapper {
+  background-color: transparent;
+}
+
+::-webkit-datetime-edit-text,
+::-webkit-datetime-edit-month-field,
+::-webkit-datetime-edit-day-field,
+::-webkit-datetime-edit-year-field {
+  color: var(--text-primary);
 }

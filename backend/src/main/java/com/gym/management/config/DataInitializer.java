@@ -23,6 +23,20 @@ import java.util.Set;
 @Component
 public class DataInitializer implements CommandLineRunner {
 
+    private static final String[] FIRST_NAMES = {
+            "James", "John", "Robert", "Michael", "William", "David", "Richard", "Joseph", "Thomas", "Charles",
+            "Mary", "Patricia", "Jennifer", "Linda", "Elizabeth", "Barbara", "Susan", "Jessica", "Sarah", "Karen",
+            "Christopher", "Daniel", "Matthew", "Anthony", "Mark", "Donald", "Steven", "Paul", "Andrew", "Joshua"
+    };
+
+    private static final String[] LAST_NAMES = {
+            "Smith", "Johnson", "Williams", "Jones", "Brown", "Davis", "Miller", "Wilson", "Moore", "Taylor",
+            "Anderson", "Thomas", "Jackson", "White", "Harris", "Martin", "Thompson", "Garcia", "Martinez", "Robinson",
+            "Clark", "Rodriguez", "Lewis", "Lee", "Walker", "Hall", "Allen", "Young", "Hernandez", "King"
+    };
+
+    private java.util.Random random = new java.util.Random();
+
     @Autowired
     private MembershipPackageRepository membershipPackageRepository;
 
@@ -124,17 +138,21 @@ public class DataInitializer implements CommandLineRunner {
         Role customerRole = roleRepository.findByRoleName("CUSTOMER");
         Role staffRole = roleRepository.findByRoleName("STAFF");
         Role ownerRole = roleRepository.findByRoleName("OWNER");
-        
+
         System.out.println("Initializing bulk users schema...");
 
         // Create 30 Trainers
         for (int i = 1; i <= 30; i++) {
-            String username = "trainer_" + i;
+            String firstName = FIRST_NAMES[random.nextInt(FIRST_NAMES.length)];
+            String lastName = LAST_NAMES[random.nextInt(LAST_NAMES.length)];
+            String fullName = firstName + " " + lastName;
+            String username = (firstName + "." + lastName + i).toLowerCase();
+
             if (!userRepository.existsByUsername(username)) {
                 User user = new User();
                 user.setUsername(username);
-                user.setFullName("Trainer " + i);
-                user.setEmail("trainer" + i + "@gym.com");
+                user.setFullName(fullName);
+                user.setEmail(username + "@gym.com");
                 user.setPassword("password123");
                 Set<Role> roles = new HashSet<>();
                 roles.add(trainerRole);
@@ -145,12 +163,16 @@ public class DataInitializer implements CommandLineRunner {
 
         // Create 100 Members/Customers
         for (int i = 1; i <= 100; i++) {
-            String username = "member_" + i;
+            String firstName = FIRST_NAMES[random.nextInt(FIRST_NAMES.length)];
+            String lastName = LAST_NAMES[random.nextInt(LAST_NAMES.length)];
+            String fullName = firstName + " " + lastName;
+            String username = (firstName + "." + lastName + i).toLowerCase(); // Add i to ensure uniqueness
+
             if (!userRepository.existsByUsername(username)) {
                 User user = new User();
                 user.setUsername(username);
-                user.setFullName("Member " + i);
-                user.setEmail("member" + i + "@gym.com");
+                user.setFullName(fullName);
+                user.setEmail(username + "@gym.com");
                 user.setPassword("password123");
                 Set<Role> roles = new HashSet<>();
                 roles.add(customerRole);
@@ -161,12 +183,16 @@ public class DataInitializer implements CommandLineRunner {
 
         // Create 20 Staff members
         for (int i = 1; i <= 20; i++) {
-            String username = "staff_" + i;
+            String firstName = FIRST_NAMES[random.nextInt(FIRST_NAMES.length)];
+            String lastName = LAST_NAMES[random.nextInt(LAST_NAMES.length)];
+            String fullName = firstName + " " + lastName;
+            String username = ("staff." + firstName + "." + lastName + i).toLowerCase();
+
             if (!userRepository.existsByUsername(username)) {
                 User user = new User();
                 user.setUsername(username);
-                user.setFullName("Staff " + i);
-                user.setEmail("staff" + i + "@gym.com");
+                user.setFullName(fullName);
+                user.setEmail(username + "@gym.com");
                 user.setPassword("password123");
                 Set<Role> roles = new HashSet<>();
                 roles.add(staffRole);
@@ -174,13 +200,13 @@ public class DataInitializer implements CommandLineRunner {
                 userRepository.save(user);
             }
         }
-        
+
         // Ensure Admin exists
         if (!userRepository.existsByUsername("admin")) {
             User user = new User();
             user.setUsername("admin");
             user.setFullName("Admin User");
-            user.setEmail("admin@example.com"); // Changed to example to allow unique constraint if admin@gym.com taken
+            user.setEmail("admin@gym.com");
             user.setPassword("password123");
             Set<Role> roles = new HashSet<>();
             roles.add(ownerRole != null ? ownerRole : staffRole);
@@ -188,7 +214,7 @@ public class DataInitializer implements CommandLineRunner {
             userRepository.save(user);
         }
 
-        System.out.println("✅ Bulk users initialized (30 Trainers, 100 Members, 20 Staff)!");
+        System.out.println("✅ Bulk users initialized with realistic data!");
     }
 
     private void initializeSamplePTSessions() {
