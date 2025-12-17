@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
-import { Button, Badge, getStatusVariant, Avatar, Card, DataTable, type Column } from '../../components/ui';
+import { Badge, getStatusVariant, Avatar, DataTable, type Column } from '../../components/ui';
 import EnhancedStaffActionModal from '../../components/StaffActionModal/EnhancedStaffActionModal';
 import api from '../../services/api';
 import type { User } from '../../types/user';
@@ -167,101 +167,64 @@ const Staff: React.FC = () => {
 
   return (
     <div className="staff-page">
-      {/* Header */}
+      {/* Header - Matching Members Page */}
       <div className="staff-page__header">
         <div className="staff-page__title-section">
           <h1 className="staff-page__title">Staff Directory</h1>
-          <span className="staff-page__count">Total Active Staff: {filteredStaff.length}</span>
+          <span className="staff-page__subtitle">Manage your team members</span>
         </div>
-        <div className="staff-page__actions">
-          {/* Filter button removed */}
+        <div className="staff-page__header-right">
+          <div className="staff-stats-badge">
+            <span className="staff-stat-pill">
+              <strong>{staff.length}</strong> Total
+            </span>
+            <span className="staff-stat-divider" />
+            <span className="staff-stat-pill staff-stat-pill--active">
+              <strong>{filteredStaff.length}</strong> Active
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* Content Grid - Full Width */}
-      <div className="staff-page__grid">
-
-        {/* Compact Filter Bar - Matching Members Page Design */}
-        <div className="filters-bar" style={{
-          display: 'flex',
-          gap: '1rem',
-          flexWrap: 'wrap',
-          marginBottom: '1rem',
-          alignItems: 'flex-end',
-          padding: '1rem',
-          background: 'var(--bg-secondary)',
-          borderRadius: 'var(--radius-md)',
-          width: '100%',
-          position: 'sticky',
-          top: '0',
-          zIndex: 10,
-          borderBottom: '1px solid var(--border-color)'
-        }}>
-
-          {/* Role Filter */}
-          <div className="filter-group" style={{ flex: '0 0 150px' }}>
-            <label style={{ display: 'block', fontSize: '0.875rem', marginBottom: '0.25rem' }}>Role</label>
-            <select
-              className="form-select"
-              value={filters.role}
-              onChange={(e) => handleFilterChange("role", e.target.value)}
-              style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}
-            >
-              <option value="">All Roles</option>
-              <option value="TRAINER">Trainer</option>
-              <option value="ADMIN">Admin</option>
-              <option value="MANAGER">Manager</option>
-            </select>
-          </div>
-
-          {/* Status Filter */}
-          <div className="filter-group" style={{ flex: '0 0 150px' }}>
-            <label style={{ display: 'block', fontSize: '0.875rem', marginBottom: '0.25rem' }}>Status</label>
-            <select
-              className="form-select"
-              value={filters.status}
-              onChange={(e) => handleFilterChange("status", e.target.value)}
-              style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}
-            >
-              <option value="">All Statuses</option>
-              <option value="Active">Active</option>
-              <option value="Inactive">Inactive</option>
-            </select>
-          </div>
-
-          {/* Reset Button */}
-          <div className="filter-group" style={{ flex: '0 0 auto' }}>
-            <label style={{ display: 'block', fontSize: '0.875rem', marginBottom: '0.25rem', visibility: 'hidden' }}>Reset</label>
-            <Button
-              variant="secondary"
-              onClick={handleResetFilters}
-              style={{
-                borderColor: 'var(--color-crimson)',
-                color: 'var(--color-crimson)',
-                height: '38px', // Match select height approximately
-                display: 'flex',
-                alignItems: 'center'
-              }}
-            >
-              Reset
-            </Button>
-          </div>
-        </div>
-
-        {/* Staff List */}
-        <Card
-          title="Staff List"
-          className="staff-page__list"
-          noPadding
+      {/* Filter Bar - Compact */}
+      <div className="staff-filter-bar">
+        <select
+          className="filter-select"
+          value={filters.role}
+          onChange={(e) => handleFilterChange("role", e.target.value)}
         >
-          <DataTable
-            columns={columns}
-            data={filteredStaff}
-            keyExtractor={(s) => s.userId}
-            loading={loading}
-            emptyMessage="No staff found"
-          />
-        </Card>
+          <option value="">All Roles</option>
+          <option value="TRAINER">Trainer</option>
+          <option value="ADMIN">Admin</option>
+          <option value="MANAGER">Manager</option>
+        </select>
+
+        <select
+          className="filter-select"
+          value={filters.status}
+          onChange={(e) => handleFilterChange("status", e.target.value)}
+        >
+          <option value="">All Status</option>
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
+        </select>
+
+        {(filters.role || filters.status) && (
+          <button className="staff-reset-btn" onClick={handleResetFilters}>
+            Reset
+          </button>
+        )}
+      </div>
+
+      {/* Staff List */}
+      <div className="staff-page__grid">
+        <DataTable
+          columns={columns}
+          data={filteredStaff}
+          keyExtractor={(s) => s.userId}
+          loading={loading}
+          emptyMessage="No staff found"
+        />
       </div>
 
       {/* Staff Action Modal */}

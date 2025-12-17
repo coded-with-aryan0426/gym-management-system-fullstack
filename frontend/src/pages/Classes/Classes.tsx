@@ -1,325 +1,323 @@
 "use client"
 
-import type React from "react"
-import { useEffect, useState, useCallback, useRef } from "react"
-import { Button, Card } from "../../components/ui"
+import React, { useEffect, useState, useMemo, useRef } from "react"
+import { toast } from "react-hot-toast"
 import { ptSessionApi } from "../../services/api"
+import { ScheduleHeader, ScheduleFilters, DaySection, ClassFormDrawer, type ClassData } from "./components"
 import "./Classes.css"
 
-interface GymClass {
-  id: number
-  name: string
-  trainer: string
-  trainerAvatar?: string
-  time: string
-  displayTime: string
-  day: string
-  capacity: number
-  enrolled: number
-  status: "Available" | "Busy" | "Full" | "Capacity"
-  room?: string
-  tags?: string[]
-  color?: string
-}
+// Class types for filtering
+const CLASS_TYPES = ["Yoga", "HIIT", "Cardio", "Strength", "Pilates", "CrossFit"]
 
-// Filter State Type
-interface ClassFilter {
-  trainer: string
-  type: string
-  status: "All" | "Available" | "Full"
-}
+// Mock data generator for demo
+const generateMockClasses = (): ClassData[] => {
+  const trainers = ["Sarah Miller", "John Davis", "Emma Wilson", "Mike Chen", "Lisa Park"]
+  const rooms = ["Studio A", "Studio B", "Main Hall", "Gym Floor"]
+  const statuses: ("Available" | "Full" | "Cancelled")[] = ["Available", "Available", "Available", "Full", "Cancelled"]
 
-const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-const TIMES = ["6:00", "8:00", "10:00", "12:00", "14:00", "16:00", "18:00", "20:00"]
+  const classes: ClassData[] = []
+  const today = new Date()
 
-const CLASSES_TYPES = ["Yoga", "HIIT", "Cardio", "Strength", "Pilates", "CrossFit"]
+  // Generate classes for the next 7 days
+  for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
+    const date = new Date(today)
+    date.setDate(today.getDate() + dayOffset)
+    const dateStr = date.toISOString().split('T')[0]
 
-// Mock helpers for visual enhancement
-const getRandomColor = (id: number) => {
-  const colors = ["#10B981", "#8B5CF6", "#3B82F6", "#F59E0B", "#EC4899", "#EF4444"]
-  return colors[id % colors.length]
-}
+    // Generate 3-6 classes per day
+    const numClasses = Math.floor(Math.random() * 4) + 3
+    const usedTimes = new Set<string>()
 
-const getMockCapacity = (id: number) => {
-  // Deterministic random capacity between 10 and 30
-  return 10 + (id % 20)
-}
+    for (let i = 0; i < numClasses; i++) {
+      let startHour = Math.floor(Math.random() * 12) + 6 // 6am to 6pm
+      while (usedTimes.has(String(startHour))) {
+        startHour = Math.floor(Math.random() * 12) + 6
+      }
+      usedTimes.add(String(startHour))
 
-const getMockEnrolled = (id: number, capacity: number) => {
-  // Deterministic random enrolled count
-  const percent = ((id * 17) % 100) / 100
-  return Math.floor(capacity * percent)
+      const startTime = `${String(startHour).padStart(2, '0')}:00`
+      const endTime = `${String(startHour + 1).padStart(2, '0')}:00`
+      const type = CLASS_TYPES[Math.floor(Math.random() * CLASS_TYPES.length)]
+      const capacity = Math.floor(Math.random() * 15) + 8
+      const enrolled = Math.floor(Math.random() * capacity)
+      const status = enrolled >= capacity ? "Full" : statuses[Math.floor(Math.random() * statuses.length)]
+
+      classes.push({
+        id: dayOffset * 10 + i + 1,
+        name: `${type} Class`,
+        trainer: trainers[Math.floor(Math.random() * trainers.length)],
+        startTime,
+        endTime,
+        date: dateStr,
+        capacity,
+        enrolled: status === "Full" ? capacity : enrolled,
+        status: status === "Cancelled" ? "Cancelled" : (enrolled >= capacity ? "Full" : "Available"),
+        room: rooms[Math.floor(Math.random() * rooms.length)],
+        type,
+      })
+    }
+  }
+
+  return classes.sort((a, b) => {
+    if (a.date !== b.date) return a.date.localeCompare(b.date)
+    return a.startTime.localeCompare(b.startTime)
+  })
 }
 
 const Classes: React.FC = () => {
-  const [classes, setClasses] = useState<GymClass[]>([])
-  const [filteredClasses, setFilteredClasses] = useState<GymClass[]>([])
+  const [classes, setClasses] = useState<ClassData[]>([])
   const [loading, setLoading] = useState(true)
-  const [showFilters, setShowFilters] = useState(false)
-  const [filter, setFilter] = useState<ClassFilter>({
-    trainer: "All",
+  const [selectedDay, setSelectedDay] = useState<'today' | 'week' | 'custom'>('week')
+  const [filter, setFilter] = useState({
     type: "All",
-    status: "All"
+    trainer: "All",
+    status: "All",
   })
 
-  // Refs for scrolling
-  const classRefs = useRef<{ [key: number]: HTMLDivElement | null }>({})
+  // Drawer state
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const [editingClass, setEditingClass] = useState<ClassData | null>(null)
 
-  const loadClasses = useCallback(async () => {
-    setLoading(true)
-    try {
-      const sessions = await ptSessionApi.getAllSessions()
-      console.log("[Classes] Raw sessions:", sessions)
+  // Use ref to store mock data so it doesn't regenerate on re-renders
+  const mockDataRef = useRef<ClassData[] | null>(null)
 
-      const transformed: GymClass[] = sessions.map((session, idx) => {
-        const sessionDate = new Date(session.sessionDate)
-        const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-        const hour = sessionDate.getHours()
-        const minutes = sessionDate.getMinutes()
-        const timeStr24 = `${hour}:00` // Simplified for grid
-        const ampm = hour >= 12 ? 'PM' : 'AM'
-        const displayH = hour % 12 || 12
-        const displayTime = `${displayH}:${minutes.toString().padStart(2, '0')} ${ampm}`
-
-        // Enhance with mock data for better UI demo
-        const capacity = getMockCapacity(idx)
-        const enrolled = getMockEnrolled(idx, capacity)
-        const isFull = enrolled >= capacity
-        const isBusy = enrolled >= capacity * 0.8
-
-        let status: GymClass["status"] = "Available"
-        if (isFull) status = "Full"
-        else if (isBusy) status = "Busy"
-
-        return {
-          id: session.sessionId || idx,
-          name: session.workoutPlan || "PT Session",
-          trainer: session.trainerName || "Staff Trainer",
-          time: timeStr24,
-          displayTime: displayTime,
-          day: days[sessionDate.getDay()],
-          capacity: capacity,
-          enrolled: enrolled,
-          status: status,
-          room: `Studio ${1 + (idx % 3)}`,
-          color: getRandomColor(idx),
-          tags: [session.workoutPlan || "General"]
+  // Fetch classes
+  useEffect(() => {
+    const fetchClasses = async () => {
+      setLoading(true)
+      try {
+        // Try to fetch from API
+        const data = await ptSessionApi.getAllSessions()
+        if (data && data.length > 0) {
+          // Transform API data to ClassData format
+          const transformed: ClassData[] = data.map((session: any) => ({
+            id: session.sessionId || session.id,
+            name: session.sessionType || session.name || "Class",
+            trainer: session.trainerName || session.trainer || "Unknown",
+            startTime: session.startTime || "09:00",
+            endTime: session.endTime || "10:00",
+            date: session.sessionDate || new Date().toISOString().split('T')[0],
+            capacity: session.capacity || 15,
+            enrolled: session.enrolled || 0,
+            status: session.status || "Available",
+            room: session.location || session.room || "Studio A",
+            type: session.sessionType || session.type || "General",
+          }))
+          setClasses(transformed)
+        } else {
+          // Use mock data if no API data
+          setClasses(generateMockClasses())
         }
-      })
-
-      setClasses(transformed)
-      setFilteredClasses(transformed)
-    } catch (err) {
-      console.error("Failed to load classes", err)
-      setClasses([])
-    } finally {
-      setLoading(false)
+      } catch (error) {
+        console.log("Using mock class data")
+        setClasses(generateMockClasses())
+      } finally {
+        setLoading(false)
+      }
     }
+    fetchClasses()
   }, [])
 
-  // Filter Logic
-  useEffect(() => {
-    let result = classes
-    if (filter.trainer !== "All") {
-      result = result.filter(c => c.trainer === filter.trainer)
-    }
-    if (filter.status !== "All") {
-      if (filter.status === "Available") result = result.filter(c => c.status === "Available")
-      if (filter.status === "Full") result = result.filter(c => c.status === "Full")
-    }
-    setFilteredClasses(result)
-  }, [filter, classes])
+  // Get unique trainers from classes
+  const trainers = useMemo(() => {
+    return Array.from(new Set(classes.map(c => c.trainer)))
+  }, [classes])
 
-  useEffect(() => {
-    loadClasses()
-  }, [loadClasses])
+  // Filter classes
+  const filteredClasses = useMemo(() => {
+    return classes.filter(cls => {
+      if (filter.type !== "All" && cls.type !== filter.type) return false
+      if (filter.trainer !== "All" && cls.trainer !== filter.trainer) return false
+      if (filter.status !== "All" && cls.status !== filter.status) return false
+      return true
+    })
+  }, [classes, filter])
 
-  const scrollToClass = (id: number) => {
-    const element = classRefs.current[id]
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      // Add highlight effect logic here if needed
-      element.classList.add('highlight-flash')
-      setTimeout(() => element.classList.remove('highlight-flash'), 1000)
+  // Group classes by date
+  const groupedByDate = useMemo(() => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    const groups: Map<string, ClassData[]> = new Map()
+
+    filteredClasses.forEach(cls => {
+      const dateKey = cls.date
+      if (!groups.has(dateKey)) {
+        groups.set(dateKey, [])
+      }
+      groups.get(dateKey)!.push(cls)
+    })
+
+    // Filter based on selected day
+    if (selectedDay === 'today') {
+      const todayStr = today.toISOString().split('T')[0]
+      const todayClasses = groups.get(todayStr) || []
+      return new Map([[todayStr, todayClasses]])
     }
+
+    return groups
+  }, [filteredClasses, selectedDay])
+
+  // Calculate stats
+  const stats = useMemo(() => {
+    const total = filteredClasses.length
+    const totalCapacity = filteredClasses.reduce((sum, c) => sum + c.capacity, 0)
+    const totalEnrolled = filteredClasses.reduce((sum, c) => sum + c.enrolled, 0)
+    const capacityPercent = totalCapacity > 0 ? Math.round((totalEnrolled / totalCapacity) * 100) : 0
+    return { total, capacityPercent }
+  }, [filteredClasses])
+
+  // Get date range string
+  const getDateRange = () => {
+    const today = new Date()
+    const endDate = new Date(today)
+    endDate.setDate(today.getDate() + 6)
+
+    const formatDate = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    return `${formatDate(today)} – ${formatDate(endDate)}`
   }
 
-  const getCapacityPercent = (enrolled: number, capacity: number) => Math.round((enrolled / capacity) * 100)
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "Full":
-        return "var(--color-crimson)"
-      case "Busy":
-        return "var(--color-amber)"
-      case "Capacity":
-        return "var(--color-crimson)"
-      default:
-        return "var(--color-emerald)"
-    }
+  const handleClassClick = (classData: ClassData) => {
+    // Open edit drawer
+    setEditingClass(classData)
+    setIsDrawerOpen(true)
   }
 
-  // Today's classes for the right panel
-  const todayClasses = classes.slice(0, 10)
+  const handleAddClass = () => {
+    setEditingClass(null)
+    setIsDrawerOpen(true)
+  }
+
+  const handleEditClass = (classData: ClassData) => {
+    setEditingClass(classData)
+    setIsDrawerOpen(true)
+  }
+
+  const handleCancelClass = (classData: ClassData) => {
+    // Mark class as cancelled
+    setClasses(prev => prev.map(cls =>
+      cls.id === classData.id
+        ? { ...cls, status: 'Cancelled' as const }
+        : cls
+    ))
+    toast.success(`${classData.name} has been cancelled`)
+  }
+
+  const handleSaveClass = (classData: Partial<ClassData>) => {
+    if (editingClass) {
+      // Update existing class
+      setClasses(prev => prev.map(cls =>
+        cls.id === editingClass.id
+          ? { ...cls, ...classData } as ClassData
+          : cls
+      ))
+      toast.success('Class updated successfully')
+    } else {
+      // Add new class
+      const newClass: ClassData = {
+        id: Date.now(),
+        name: classData.name || 'New Class',
+        trainer: classData.trainer || 'Unknown',
+        startTime: classData.startTime || '09:00',
+        endTime: classData.endTime || '10:00',
+        date: classData.date || new Date().toISOString().split('T')[0],
+        capacity: classData.capacity || 15,
+        enrolled: 0,
+        status: 'Available',
+        room: classData.room || 'Studio A',
+        type: classData.type || 'General',
+      }
+      setClasses(prev => [...prev, newClass])
+      toast.success('Class created successfully')
+    }
+    setIsDrawerOpen(false)
+    setEditingClass(null)
+  }
+
+  const handleCloseDrawer = () => {
+    setIsDrawerOpen(false)
+    setEditingClass(null)
+  }
+
+  if (loading) {
+    return (
+      <div className="classes-page">
+        <div className="classes-page__loading">
+          <div className="loading-spinner" />
+          <span>Loading schedule...</span>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="classes-page">
       {/* Header */}
-      <div className="classes-page__header">
-        <div className="classes-page__title-section">
-          <h1 className="classes-page__title">Class Schedule</h1>
-          <div className="classes-page__subtitle">
-            <span>Dec 16 – Dec 22</span>
-            <span className="classes-stat-pill">{filteredClasses.length} Classes</span>
-            <span className="classes-stat-pill">85% Capacity</span>
+      <ScheduleHeader
+        totalClasses={stats.total}
+        capacityPercent={stats.capacityPercent}
+        dateRange={getDateRange()}
+      />
+
+      {/* Filters */}
+      <ScheduleFilters
+        selectedDay={selectedDay}
+        onDayChange={setSelectedDay}
+        classType={filter.type}
+        onClassTypeChange={(type) => setFilter(prev => ({ ...prev, type }))}
+        trainer={filter.trainer}
+        onTrainerChange={(trainer) => setFilter(prev => ({ ...prev, trainer }))}
+        status={filter.status}
+        onStatusChange={(status) => setFilter(prev => ({ ...prev, status }))}
+        classTypes={CLASS_TYPES}
+        trainers={trainers}
+        onAddClass={handleAddClass}
+      />
+
+      {/* Agenda View - Classes grouped by day */}
+      <div className="classes-page__content">
+        {groupedByDate.size > 0 ? (
+          Array.from(groupedByDate.entries()).map(([dateStr, dayClasses]) => {
+            const date = new Date(dateStr)
+            const today = new Date()
+            today.setHours(0, 0, 0, 0)
+            const isToday = date.toDateString() === today.toDateString()
+
+            return (
+              <DaySection
+                key={dateStr}
+                date={date}
+                classes={dayClasses}
+                isToday={isToday}
+                onClassClick={handleClassClick}
+                onEdit={handleEditClass}
+                onCancel={handleCancelClass}
+              />
+            )
+          })
+        ) : (
+          <div className="classes-page__empty">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
+            </svg>
+            <h3>No classes found</h3>
+            <p>Try adjusting your filters or add a new class.</p>
           </div>
-        </div>
-
-        {/* Compact Filter Bar */}
-        <div className="classes-filter-bar">
-          <select
-            className="filter-select"
-            value={filter.type}
-            onChange={(e) => setFilter(prev => ({ ...prev, type: e.target.value }))}
-          >
-            <option value="All">All Types</option>
-            {CLASSES_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-          </select>
-
-          <select
-            className="filter-select"
-            value={filter.trainer}
-            onChange={(e) => setFilter(prev => ({ ...prev, trainer: e.target.value }))}
-          >
-            <option value="All">All Trainers</option>
-            {Array.from(new Set(classes.map(c => c.trainer))).map(t => (
-              <option key={t} value={t}>{t}</option>
-            ))}
-          </select>
-
-          <select
-            className="filter-select"
-            value={filter.status}
-            onChange={(e) => setFilter(prev => ({ ...prev, status: e.target.value as any }))}
-          >
-            <option value="All">All Status</option>
-            <option value="Available">Available</option>
-            <option value="Full">Full</option>
-          </select>
-        </div>
+        )}
       </div>
 
-      {/* Content Grid */}
-      <div className="classes-page__grid">
-        {/* Weekly View */}
-        <Card title="Weekly Schedule" className="classes-page__weekly">
-          <div className="weekly-calendar">
-            <div className="weekly-header">
-              <div className="weekly-time-header"></div>
-              {DAYS.map((day) => (
-                <div key={day} className="weekly-day-header">{day}</div>
-              ))}
-            </div>
-            <div className="weekly-body">
-              {TIMES.map((time, timeIdx) => (
-                <div key={time} className="weekly-row">
-                  <div className="weekly-time">{time}</div>
-                  {DAYS.map((day) => {
-                    const slotClasses = filteredClasses.filter(c => {
-                      const classHour = c.time.split(":")[0]
-                      const slotHour = time.split(":")[0]
-                      return c.day === day && classHour === slotHour
-                    })
-
-                    return (
-                      <div key={`${day}-${time}`} className="weekly-cell">
-                        {slotClasses.map((cls) => (
-                          <div
-                            key={cls.id}
-                            className="class-card"
-                            style={{ "--card-color": cls.color || "var(--primary-color)" } as React.CSSProperties}
-                            onClick={() => scrollToClass(cls.id)}
-                          >
-                            <span className="class-card__title">{cls.name}</span>
-                            <div className="class-card__meta">
-                              <span>{cls.trainer.split(' ')[0]}</span>
-                              <span
-                                className="capacity-dot"
-                                style={{ backgroundColor: getStatusColor(cls.status || "Available") }}
-                              />
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )
-                  })}
-                </div>
-              ))}
-            </div>
-          </div>
-        </Card>
-
-        {/* Today's Classes */}
-        <Card title="Today's Classes" className="classes-page__today">
-          <div className="today-list">
-            {/* Group by time logic */}
-            {Array.from(new Set(filteredClasses.map(c => c.time)))
-              .sort((a, b) => parseInt(a) - parseInt(b))
-              .map(timeSlot => {
-                const slotClasses = filteredClasses.filter(c => c.time === timeSlot && c.day === "Mon") // Demo: Mon as Today
-                if (slotClasses.length === 0) return null
-
-                return (
-                  <div key={timeSlot} className="today-slot">
-                    <div className="slot-time">{timeSlot}</div>
-                    <div className="slot-cards">
-                      {slotClasses.map(cls => (
-                        <div
-                          key={cls.id}
-                          className="today-card"
-                          ref={el => { classRefs.current[cls.id] = el }}
-                        >
-                          <div className="today-card__info">
-                            <div className="today-card__title">{cls.name}</div>
-                            <div className="today-card__trainer">
-                              <div className="trainer-avatar-small">
-                                {cls.trainer.charAt(0)}
-                              </div>
-                              {cls.trainer} • {cls.room}
-                            </div>
-                          </div>
-
-                          <div className="today-card__stats">
-                            <div className="capacity-text">
-                              <span>{cls.status}</span>
-                              <span>{cls.enrolled}/{cls.capacity}</span>
-                            </div>
-                            <div className="progress-bar">
-                              <div
-                                className="progress-fill"
-                                style={{
-                                  width: `${getCapacityPercent(cls.enrolled, cls.capacity)}%`,
-                                  backgroundColor: getStatusColor(cls.status)
-                                }}
-                              />
-                            </div>
-                          </div>
-
-                          <button className="card-action-btn">•••</button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )
-              })}
-            {filteredClasses.length === 0 && (
-              <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-secondary)' }}>
-                No classes found for the selected filters.
-              </div>
-            )}
-          </div>
-        </Card>
-      </div>
+      {/* Add/Edit Class Drawer */}
+      <ClassFormDrawer
+        isOpen={isDrawerOpen}
+        onClose={handleCloseDrawer}
+        onSave={handleSaveClass}
+        classData={editingClass}
+        trainers={trainers}
+        classTypes={CLASS_TYPES}
+      />
     </div>
   )
 }
