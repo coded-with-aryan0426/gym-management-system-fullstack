@@ -1,0 +1,332 @@
+/* ============================================================================
+   Shared Directory Components - Unified Styles
+   ============================================================================ */
+
+/* ============================================================================
+   Action Menu Button - Animated Three Dots
+   ============================================================================ */
+
+.action-menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.action-menu-btn:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--border-primary);
+}
+
+.action-menu-btn:focus {
+    outline: none;
+    border-color: var(--color-crimson);
+}
+
+.action-dot {
+    width: 4px;
+    height: 4px;
+    background: var(--text-tertiary);
+    border-radius: 50%;
+    transition: all 0.2s;
+}
+
+.action-menu-btn:hover .action-dot {
+    background: var(--text-primary);
+}
+
+.action-menu-btn:hover .action-dot:nth-child(1) {
+    transform: translateY(-2px);
+}
+
+.action-menu-btn:hover .action-dot:nth-child(3) {
+    transform: translateY(2px);
+}
+
+/* ============================================================================
+   Sort Button
+   ============================================================================ */
+
+.sort-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.sort-btn:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--text-tertiary);
+    color: var(--text-primary);
+}
+
+.sort-btn--active {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: var(--color-emerald);
+    color: var(--color-emerald);
+}
+
+/* ============================================================================
+   Stats Badge
+   ============================================================================ */
+
+.stats-badge {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 4px 10px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-secondary);
+    border-radius: 16px;
+}
+
+.stats-badge__pill {
+    font-size: 0.6875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.stats-badge__pill strong {
+    color: var(--text-primary);
+}
+
+.stats-badge__pill--active {
+    color: var(--color-emerald);
+}
+
+.stats-badge__pill--active strong {
+    color: var(--color-emerald);
+}
+
+.stats-badge__pill--inactive {
+    color: var(--text-tertiary);
+}
+
+.stats-badge__divider {
+    width: 1px;
+    height: 12px;
+    background: var(--border-secondary);
+}
+
+/* ============================================================================
+   Filter Button
+   ============================================================================ */
+
+.filter-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.filter-btn:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--text-tertiary);
+    color: var(--text-primary);
+}
+
+.filter-btn--active {
+    background: var(--bg-tertiary);
+    border-color: var(--color-crimson);
+    color: var(--text-primary);
+}
+
+.filter-btn--has-filters {
+    border-color: var(--color-emerald);
+}
+
+.filter-btn__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    background: var(--color-emerald);
+    color: white;
+    font-size: 0.625rem;
+    font-weight: 600;
+    border-radius: 9px;
+}
+
+/* ============================================================================
+   Filter Dropdown Panel
+   ============================================================================ */
+
+.filter-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    width: 280px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-primary);
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    z-index: 100;
+    animation: filterDropdownIn 0.15s ease-out;
+}
+
+@keyframes filterDropdownIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.filter-dropdown__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-secondary);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.filter-dropdown__clear {
+    padding: 4px 8px;
+    background: transparent;
+    border: none;
+    color: var(--color-crimson);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+
+.filter-dropdown__clear:hover {
+    opacity: 0.8;
+}
+
+.filter-dropdown__content {
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.filter-dropdown__group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.filter-dropdown__label {
+    font-size: 0.6875rem;
+    font-weight: 500;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.filter-dropdown__select {
+    padding: 8px 32px 8px 12px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: 6px;
+    font-size: 0.75rem;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: border-color 0.15s;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+}
+
+.filter-dropdown__select:hover {
+    border-color: var(--text-tertiary);
+}
+
+.filter-dropdown__select:focus {
+    outline: none;
+    border-color: var(--color-crimson);
+}
+
+/* ============================================================================
+   Filter Chips
+   ============================================================================ */
+
+.filter-chips {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px 4px 10px;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid var(--color-emerald);
+    border-radius: 14px;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    color: var(--color-emerald);
+}
+
+.filter-chip button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    color: var(--color-emerald);
+    font-size: 0.875rem;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.15s;
+}
+
+.filter-chip button:hover {
+    opacity: 1;
+}
+
+/* ============================================================================
+   Directory Header Controls
+   ============================================================================ */
+
+.directory-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+}

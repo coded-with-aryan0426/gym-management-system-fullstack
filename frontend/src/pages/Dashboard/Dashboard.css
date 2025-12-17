@@ -5,7 +5,8 @@
 .dashboard {
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
+  gap: var(--space-4);
+  padding: 4px 12px 12px 12px;
 }
 
 /* Enhanced Header */
@@ -13,7 +14,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--space-6);
+  margin-bottom: var(--space-3);
 }
 
 .dashboard__title-section {
@@ -89,8 +90,13 @@
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Banner */
@@ -110,8 +116,8 @@
 
 .banner-action-btn {
   padding: var(--space-2) var(--space-4);
-  background: rgba(255,255,255,0.2);
-  border: 1px solid rgba(255,255,255,0.3);
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: var(--button-radius);
   color: white;
   font-size: var(--text-sm);
@@ -121,7 +127,7 @@
 }
 
 .banner-action-btn:hover {
-  background: rgba(255,255,255,0.3);
+  background: rgba(255, 255, 255, 0.3);
 }
 
 /* Metrics Row */
@@ -718,43 +724,43 @@
   .dashboard__enhanced-grid {
     grid-template-columns: repeat(8, 1fr);
   }
-  
+
   .dashboard__performance-metrics {
     grid-column: span 8;
   }
-  
+
   .dashboard__occupancy-widget {
     grid-column: span 8;
   }
-  
+
   .dashboard__revenue-chart {
     grid-column: span 8;
   }
-  
+
   .dashboard__membership-pie {
     grid-column: span 4;
   }
-  
+
   .dashboard__activity-chart {
     grid-column: span 4;
   }
-  
+
   .dashboard__floor-status {
     grid-column: span 8;
   }
-  
+
   .dashboard__class-schedule {
     grid-column: span 8;
   }
-  
+
   .dashboard__alerts-enhanced {
     grid-column: span 8;
   }
-  
+
   .performance-grid {
     grid-template-columns: repeat(4, 1fr);
   }
-  
+
   .occupancy-stats {
     grid-template-columns: repeat(4, 1fr);
   }
@@ -764,7 +770,7 @@
   .dashboard__enhanced-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .dashboard__performance-metrics,
   .dashboard__occupancy-widget,
   .dashboard__revenue-chart,
@@ -775,11 +781,11 @@
   .dashboard__alerts-enhanced {
     grid-column: span 1;
   }
-  
+
   .performance-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .occupancy-stats {
     grid-template-columns: repeat(2, 1fr);
   }

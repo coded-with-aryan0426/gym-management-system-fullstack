@@ -1,0 +1,78 @@
+/* Financial Alerts Widget Style */
+.financial-alerts-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.financial-alert {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid;
+    font-size: 0.875rem;
+    background: var(--bg-secondary);
+}
+
+.alert--critical {
+    background: linear-gradient(to right, rgba(239, 68, 68, 0.1), transparent);
+    border-color: rgba(239, 68, 68, 0.3);
+    border-left-width: 3px;
+    border-left-color: var(--color-crimson);
+}
+
+.alert--warning {
+    background: linear-gradient(to right, rgba(245, 158, 11, 0.1), transparent);
+    border-color: rgba(245, 158, 11, 0.3);
+    border-left-width: 3px;
+    border-left-color: var(--color-amber);
+}
+
+.alert--info {
+    background: linear-gradient(to right, rgba(59, 130, 246, 0.05), transparent);
+    border-color: rgba(59, 130, 246, 0.2);
+    border-left-width: 3px;
+    border-left-color: var(--color-blue);
+}
+
+.alert-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    flex: 1;
+}
+
+.alert-icon {
+    font-size: 1rem;
+    line-height: 1.2;
+}
+
+.alert-message {
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--text-primary);
+}
+
+.alert-action-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.75rem;
+    cursor: pointer;
+    margin-left: 8px;
+    white-space: nowrap;
+    opacity: 0.7;
+    transition: all 0.2s;
+}
+
+.alert-action-btn:hover {
+    opacity: 1;
+    color: var(--color-primary);
+    transform: translateX(2px);
+}

@@ -1,241 +1,201 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
-import { Button, Card, Badge } from '../../components/ui';
-import api from '../../services/api';
+import type { KPIStats, Transaction, TransactionCategory } from '../../types/finance';
+import KPIStrip from './components/KPIStrip';
+import FinancialChart from './components/FinancialChart';
+import TransactionTable from './components/TransactionTable';
+import RevenueChart from './components/RevenueChart';
+import ExpenseChart from './components/ExpenseChart';
+import TransactionModal from './components/TransactionModal';
+import { exportToCSV } from '../../utils/exportUtils';
+import FinancialAlerts from './components/FinancialAlerts';
 import './Financials.css';
 
-interface Transaction {
-    id: number;
-    date: string;
-    description: string;
-    category: string;
-    amount: number;
-    status: 'Completed' | 'Pending';
-}
-
-interface RevenueBreakdown {
-    label: string;
-    value: number;
-    percentage: number;
-    color: string;
-}
-
 const Financials: React.FC = () => {
-    const [totalRevenue, setTotalRevenue] = useState(0);
-    const [totalExpenses, setTotalExpenses] = useState(0);
-    const [transactions, setTransactions] = useState<Transaction[]>([]);
-    const [breakdown, setBreakdown] = useState<RevenueBreakdown[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [dateRange] = useState('Last 30 Days');
+    // 1. KPI State
+    const [kpiStats, setKpiStats] = useState<KPIStats>({
+        totalRevenue: 125000, revenueChange: 12.5,
+        totalExpenses: 45000, expensesChange: -5.2,
+        netProfit: 80000, profitMargin: 64,
+        pendingPayments: 24000, pendingCount: 8,
+        cashInHand: 15400
+    });
 
-    useEffect(() => {
-        loadFinancialData();
-    }, []);
+    const [chartPeriod, setChartPeriod] = useState<'day' | 'week' | 'month'>('week');
 
-    const loadFinancialData = async () => {
-        setLoading(true);
-        try {
-            // Fetch real data from API
-            const [stats, transactionsData] = await Promise.allSettled([
-                api.getStats(),
-                api.getTransactions(),
-            ]);
+    // Mock Chart Data for different periods
+    const mockChartData = {
+        day: Array.from({ length: 12 }, (_, i) => ({ name: `${i * 2}h`, value: Math.floor(Math.random() * 5000) + 1000 })),
+        week: Array.from({ length: 7 }, (_, i) => ({ name: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][i], value: Math.floor(Math.random() * 20000) + 5000 })),
+        month: Array.from({ length: 4 }, (_, i) => ({ name: `Week ${i + 1}`, value: Math.floor(Math.random() * 80000) + 20000 }))
+    };
 
-            // Process stats
-            if (stats.status === 'fulfilled') {
-                setTotalRevenue(stats.value.totalRevenue || 0);
-                setTotalExpenses(Math.round((stats.value.totalRevenue || 0) * 0.35)); // Estimate expenses as 35%
-            }
+    // 2. Transactions State (Mock Data aligned with Transaction Interface)
+    const [transactions, setTransactions] = useState<Transaction[]>(() => {
+        const base = [
+            { id: '1', invoiceId: 'INV-001', date: '2024-11-01', description: 'Membership - Gold', amount: 5000, category: 'Membership', status: 'Completed', method: 'UPI' },
+            { id: '2', invoiceId: 'EXP-002', date: '2024-11-02', description: 'Rent Payment', amount: -25000, category: 'Other', status: 'Completed', method: 'Bank Transfer' },
+            { id: '3', invoiceId: 'INV-003', date: '2024-11-03', description: 'PT Session 10 Pack', amount: 15000, category: 'Personal Training', status: 'Pending', method: 'Card' },
+            { id: '4', invoiceId: 'EXP-004', date: '2024-11-04', description: 'Equipment Maint', amount: -2000, category: 'Other', status: 'Completed', method: 'Cash' },
+            { id: '5', invoiceId: 'INV-005', date: '2024-11-05', description: 'Supplements', amount: 3500, category: 'Merchandise', status: 'Completed', method: 'UPI' },
+        ];
+        // Generate 45 more for scrolling proof
+        const more = Array.from({ length: 45 }, (_, i) => ({
+            id: `gen-${i}`,
+            invoiceId: `INV-0${10 + i}`,
+            date: `2024-11-${10 + (i % 20)}`,
+            description: i % 3 === 0 ? 'Day Pass' : i % 3 === 1 ? 'Protein Shake' : 'Monthly Sub',
+            amount: i % 3 === 0 ? 500 : i % 3 === 1 ? 250 : 3000,
+            category: i % 3 === 0 ? 'Registration' : i % 3 === 1 ? 'Merchandise' : 'Membership',
+            status: i % 5 === 0 ? 'Pending' : 'Completed',
+            method: 'UPI'
+        }));
+        return [...base, ...more] as Transaction[];
+    });
 
-            // Process transactions
-            if (transactionsData.status === 'fulfilled' && Array.isArray(transactionsData.value)) {
-                const mappedTx = transactionsData.value.map((tx: any, idx: number) => ({
-                    id: tx.id || idx + 1,
-                    date: tx.dateTime ? new Date(tx.dateTime).toLocaleDateString() : new Date().toLocaleDateString(),
-                    description: tx.description || tx.type || 'Transaction',
-                    category: tx.type || 'Membership',
-                    amount: tx.amount || 0,
-                    status: (tx.status === 'COMPLETED' || !tx.status ? 'Completed' : 'Pending') as 'Completed' | 'Pending',
-                }));
-                setTransactions(mappedTx.slice(0, 10));
-            } else {
-                // Use stats-based data if no transactions
-                setTransactions([
-                    { id: 1, date: new Date().toLocaleDateString(), description: 'Membership Revenue', category: 'Membership', amount: totalRevenue, status: 'Completed' },
-                ]);
-            }
+    // 3. Filter State
+    const [filterCategory, setFilterCategory] = useState<string | null>(null);
 
-            // Calculate breakdown based on real stats
-            const total = (stats.status === 'fulfilled' ? stats.value.totalRevenue : 0) || 100;
-            setBreakdown([
-                { label: 'Gold', value: Math.round(total * 0.4), percentage: 40, color: '#F59E0B' },
-                { label: 'Silver', value: Math.round(total * 0.3), percentage: 30, color: '#9CA3AF' },
-                { label: 'Student', value: Math.round(total * 0.2), percentage: 20, color: '#10B981' },
-                { label: 'Day Pass', value: Math.round(total * 0.1), percentage: 10, color: '#3B82F6' },
-            ]);
-        } catch (err) {
-            console.error('Failed to load financial data:', err);
-            toast.error('Failed to load financial data');
-        } finally {
-            setLoading(false);
+    const filteredTransactions = filterCategory
+        ? transactions.filter(t => t.category === filterCategory)
+        : transactions;
+
+    // 4. Modal State
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    // Handlers
+    const handleExport = () => {
+        exportToCSV(transactions, `transactions_${new Date().toISOString().split('T')[0]}`);
+        toast.success('Report downloaded successfully');
+    };
+
+    const handleAddTransaction = (newTx: any) => {
+        const isExpense = newTx.type === 'Expense';
+        const finalAmount = isExpense ? -Math.abs(Number(newTx.amount)) : Math.abs(Number(newTx.amount));
+
+        const transaction: Transaction = {
+            id: Math.random().toString(36).substr(2, 9),
+            invoiceId: `INV-${Math.floor(Math.random() * 1000)}`,
+            date: newTx.date || new Date().toISOString().split('T')[0],
+            description: newTx.description || 'Manual Entry',
+            category: newTx.category as TransactionCategory || 'Other',
+            amount: finalAmount,
+            method: 'Cash',
+            status: newTx.status || 'Completed'
+        };
+
+        setTransactions(prev => [transaction, ...prev]);
+        toast.success(`${newTx.type} added successfully`);
+
+        // Update KPIs
+        if (isExpense) {
+            setKpiStats(prev => ({
+                ...prev,
+                totalExpenses: prev.totalExpenses + Math.abs(finalAmount),
+                netProfit: prev.netProfit - Math.abs(finalAmount)
+            }));
+        } else {
+            setKpiStats(prev => ({
+                ...prev,
+                totalRevenue: prev.totalRevenue + finalAmount,
+                netProfit: prev.netProfit + finalAmount
+            }));
         }
     };
 
-    const formatCurrency = (value: number) => {
-        return new Intl.NumberFormat('en-IN', {
-            style: 'currency',
-            currency: 'INR',
-            maximumFractionDigits: 0,
-        }).format(Math.abs(value));
-    };
-
-    const netProfit = totalRevenue - totalExpenses;
-
     return (
         <div className="financials-page">
-            {/* Header */}
-            <div className="financials-page__header">
-                <div className="financials-page__title-section">
-                    <h1 className="financials-page__title">Financial Overview</h1>
-                    <span className="financials-page__count">{dateRange}: Nov 1 - Nov 30</span>
+            {/* Header Section with Actions */}
+            <header className="financials-header">
+                <div>
+                    <h1 className="page-title">Financial Overview</h1>
+                    <p className="page-subtitle">Track revenue, expenses, and profitability in real-time.</p>
                 </div>
-                <div className="financials-page__actions">
-                    <Button variant="secondary" icon={
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                            <line x1="16" y1="2" x2="16" y2="6" />
-                            <line x1="8" y1="2" x2="8" y2="6" />
-                            <line x1="3" y1="10" x2="21" y2="10" />
-                        </svg>
-                    }>
-                        Date Range
-                    </Button>
-                    <Button variant="secondary" icon={
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
-                        </svg>
-                    }>
-                        Filter
-                    </Button>
+                <div className="financials-actions">
+                    <button className="btn btn--secondary" onClick={handleExport}>
+                        Export Report
+                    </button>
+                    <button className="btn btn--primary" onClick={() => setIsModalOpen(true)}>
+                        + Add Transaction
+                    </button>
                 </div>
-            </div>
+            </header>
 
-            {/* Revenue vs Expenses Chart */}
-            <Card
-                title="Revenue vs. Expenses"
-                subtitle="Revenue Last 30 Days"
-                className="financials-page__chart"
-            >
-                <div className="chart-container">
-                    {/* Chart Legend */}
-                    <div className="chart-legend">
-                        <span className="chart-legend-item">
-                            <span className="legend-dot legend-dot--revenue"></span>
-                            Revenue {formatCurrency(totalRevenue)}
-                        </span>
-                        <span className="chart-legend-item">
-                            <span className="legend-dot legend-dot--expenses"></span>
-                            Expenses {formatCurrency(totalExpenses)}
-                        </span>
-                    </div>
+            {/* Main Grid Content */}
+            <div className="financials-grid">
+                {/* 1. Money Health (KPI Strip) */}
+                <section className="kpi-section">
+                    <KPIStrip stats={kpiStats} />
+                </section>
 
-                    {/* Profit Indicator */}
-                    <div className="profit-indicator">
-                        <span className="profit-value">{formatCurrency(netProfit)}</span>
-                        <span className="profit-label text-success">Net Profit (+163%)</span>
-                    </div>
+                {/* 2. Main Financial Context & Control (Grid 2:1) */}
+                <div className="financial-context-grid">
+                    {/* Left: Main Chart (Reduced height) */}
+                    <section className="financial-chart-card">
+                        <FinancialChart
+                            data={mockChartData[chartPeriod] || []}
+                            period={chartPeriod}
+                            onPeriodChange={setChartPeriod}
+                        />
+                    </section>
 
-                    {/* Chart Placeholder */}
-                    <div className="chart-visual">
-                        <svg viewBox="0 0 500 150" className="chart-svg">
-                            {/* Grid lines */}
-                            <g className="chart-grid">
-                                {[0, 25, 50, 75, 100].map((y, i) => (
-                                    <line key={i} x1="0" y1={30 + y} x2="500" y2={30 + y} stroke="var(--border-secondary)" strokeWidth="1" />
-                                ))}
-                            </g>
-                            {/* Revenue line (red/crimson) */}
-                            <path
-                                d="M0,120 L50,110 L100,90 L150,95 L200,70 L250,75 L300,55 L350,60 L400,40 L450,35 L500,30"
-                                fill="none"
-                                stroke="var(--color-crimson)"
-                                strokeWidth="2"
-                            />
-                            {/* Expenses line (green) */}
-                            <path
-                                d="M0,130 L50,125 L100,120 L150,122 L200,118 L250,115 L300,112 L350,110 L400,108 L450,105 L500,100"
-                                fill="none"
-                                stroke="var(--color-emerald)"
-                                strokeWidth="2"
-                            />
-                        </svg>
-                    </div>
-                </div>
-            </Card>
-
-            {/* Bottom Grid */}
-            <div className="financials-page__grid">
-                {/* Transaction History */}
-                <Card title="Transaction History" className="financials-page__transactions">
-                    <table className="transactions-table">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Description</th>
-                                <th>Category</th>
-                                <th>Amount</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {transactions.map(tx => (
-                                <tr key={tx.id}>
-                                    <td>{tx.date}</td>
-                                    <td>{tx.description}</td>
-                                    <td>{tx.category}</td>
-                                    <td className={tx.amount >= 0 ? 'text-success' : 'text-error'}>
-                                        {formatCurrency(tx.amount)}
-                                    </td>
-                                    <td>
-                                        <Badge variant={tx.status === 'Completed' ? 'active' : 'pending'}>
-                                            {tx.status}
-                                        </Badge>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </Card>
-
-                {/* Membership Revenue Breakdown */}
-                <Card title="Membership Revenue Breakdown" className="financials-page__breakdown">
-                    <div className="breakdown-content">
-                        {/* Donut Chart */}
-                        <div className="donut-chart">
-                            <svg viewBox="0 0 100 100" className="donut-svg">
-                                <circle cx="50" cy="50" r="40" fill="transparent" stroke="var(--color-amber)" strokeWidth="12" strokeDasharray="100 155" transform="rotate(-90 50 50)" />
-                                <circle cx="50" cy="50" r="40" fill="transparent" stroke="var(--color-emerald)" strokeWidth="12" strokeDasharray="63 192" strokeDashoffset="-100" transform="rotate(-90 50 50)" />
-                                <circle cx="50" cy="50" r="40" fill="transparent" stroke="#9CA3AF" strokeWidth="12" strokeDasharray="50 205" strokeDashoffset="-163" transform="rotate(-90 50 50)" />
-                            </svg>
-                            <div className="donut-center">
-                                <span className="donut-value">{formatCurrency(totalRevenue)}</span>
-                                <span className="donut-label">Total Revenue</span>
-                            </div>
+                    {/* Right: Action Alerts Widget (Filling the void) */}
+                    <section className="alerts-section">
+                        <div className="section-header-compact">
+                            <h3>Action Triggers</h3>
+                            <span className="badge-count">3</span>
                         </div>
+                        <FinancialAlerts />
+                    </section>
+                </div>
 
-                        {/* Legend */}
-                        <div className="breakdown-legend">
-                            {breakdown.map((item, idx) => (
-                                <div key={idx} className="breakdown-item">
-                                    <span className="breakdown-color" style={{ backgroundColor: item.color }} />
-                                    <span className="breakdown-label">{item.label}</span>
-                                    <span className="breakdown-percentage">{item.percentage}%</span>
-                                </div>
-                            ))}
+                {/* 3. Breakdown Compact Row (Grid 1:1) */}
+                <div className="financial-breakdown-row">
+                    <section className="revenue-sources-section compact-card">
+                        <div className="section-header-compact"><h3>Revenue Sources</h3></div>
+                        <RevenueChart onFilter={setFilterCategory} />
+                    </section>
+
+                    <section className="expense-breakdown-section compact-card">
+                        <div className="section-header-compact"><h3>Expense Breakdown</h3></div>
+                        <ExpenseChart onFilter={setFilterCategory} />
+                    </section>
+                </div>
+
+                {/* 4. Transactions Table (Hero) */}
+                <section className="transactions-section">
+                    <div className="section-header-row">
+                        <div className="flex items-center gap-3">
+                            <h3>Recent Transactions</h3>
+                            {filterCategory && (
+                                <span className="bg-primary/10 text-primary px-2 py-1 rounded text-xs font-semibold flex items-center gap-1">
+                                    Filtered: {filterCategory}
+                                    <button
+                                        onClick={() => setFilterCategory(null)}
+                                        className="hover:text-red-500 ml-1"
+                                    >
+                                        ✕
+                                    </button>
+                                </span>
+                            )}
+                        </div>
+                        <div className="table-actions">
+                            <span className="text-secondary text-sm">Showing {filteredTransactions.length} items</span>
                         </div>
                     </div>
-                </Card>
+                    <TransactionTable
+                        transactions={filteredTransactions}
+                        onAction={(action, tx) => toast(`${action} ${tx.invoiceId}`)}
+                    />
+                </section>
             </div>
+
+            {/* Transaction Modal */}
+            <TransactionModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSubmit={handleAddTransaction}
+            />
         </div>
     );
 };

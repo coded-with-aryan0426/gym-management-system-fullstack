@@ -1,11 +1,13 @@
 "use client"
 
 import type React from "react"
-import { useEffect, useState, useMemo, useCallback } from "react"
-import { FiMoreVertical, FiSearch, FiFilter, FiX } from "react-icons/fi"
+import { useEffect, useState, useMemo, useCallback, useRef } from "react"
+import { FiFilter, FiX } from "react-icons/fi"
 import { toast } from "react-hot-toast"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { Button, Badge, getStatusVariant, Avatar, DataTable, CreateUserModal, type Column } from "../../components"
+import { ActionMenuButton, SortButton, StatsBadge } from "../../components/shared"
+import { useClickOutside, useAlphabeticalSort } from "../../hooks"
 import EnhancedMemberActionModal from "../../components/MemberActionModal/EnhancedMemberActionModal"
 import api from "../../services/api"
 import type { User, MemberDTO } from "../../types/user"
@@ -75,6 +77,13 @@ const Members: React.FC = () => {
   // Redesign State
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false)
   const [isSticky, setIsSticky] = useState(false)
+
+  // Shared hooks for unified behavior
+  const filterPanelRef = useRef<HTMLDivElement>(null)
+  const { sortOrder, toggleSort, sortItems } = useAlphabeticalSort<MemberDTO>()
+
+  // Click outside to close filter panel
+  useClickOutside(filterPanelRef as React.RefObject<HTMLElement>, () => setIsFilterPanelOpen(false), isFilterPanelOpen)
 
   // Scroll listener for sticky header
   useEffect(() => {
@@ -164,6 +173,11 @@ const Members: React.FC = () => {
       return matchesSearch && matchesStatus && matchesPlan && matchesMonth && matchesDuration && matchesDate
     })
   }, [members, searchQuery, filters])
+
+  // Apply sorting to filtered members
+  const sortedMembers = useMemo(() => {
+    return sortItems(filteredMembers, (m) => m.fullName)
+  }, [filteredMembers, sortItems])
 
   // Stats Logic: If filters active, show filtered counts. Else show global.
   // Note: activeFilterCount calculation needs to be here or above
@@ -318,12 +332,10 @@ const Members: React.FC = () => {
     {
       key: "actions",
       header: "",
-      width: "80px",
+      width: "60px",
       render: (member) => (
         <div className="member-actions">
-          <button className="action-menu-btn" title="Actions" onClick={() => handleActionClick(member)}>
-            •••
-          </button>
+          <ActionMenuButton onClick={(e) => { e.stopPropagation(); handleActionClick(member); }} />
         </div>
       ),
     },
@@ -341,15 +353,132 @@ const Members: React.FC = () => {
         </div>
 
         <div className="members-page__header-right">
-          {/* Filter Toggle Button */}
-          <button
-            className={`btn-filters ${activeFilterCount > 0 ? 'btn-filters--active' : ''}`}
-            onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
-          >
-            <FiFilter />
-            Filters
-            {activeFilterCount > 0 && ` (${activeFilterCount})`}
-          </button>
+          {/* Active Filter Chips - Before Filter Button */}
+          {activeFilterCount > 0 && (
+            <div className="members-active-filters">
+              {filters.status.length > 0 && (
+                <span className="filter-chip">
+                  Status: {filters.status[0]}
+                  <button onClick={() => setFilters(prev => ({ ...prev, status: [] }))}>×</button>
+                </span>
+              )}
+              {filters.plan.length > 0 && (
+                <span className="filter-chip">
+                  Plan: {filters.plan[0]}
+                  <button onClick={() => setFilters(prev => ({ ...prev, plan: [] }))}>×</button>
+                </span>
+              )}
+              {filters.lastVisit && (
+                <span className="filter-chip">
+                  {filters.lastVisit === 'today' ? 'Today' : filters.lastVisit === 'week' ? 'This Week' : 'This Month'}
+                  <button onClick={() => handleFilterChange('lastVisit', '')}>×</button>
+                </span>
+              )}
+              {filters.planDuration && (
+                <span className="filter-chip">
+                  {filters.planDuration}M
+                  <button onClick={() => handleFilterChange('planDuration', '')}>×</button>
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Filter Button with Dropdown */}
+          <div className="members-filter-container" ref={filterPanelRef}>
+            <button
+              className={`btn-filters ${isFilterPanelOpen ? 'btn-filters--active' : ''} ${activeFilterCount > 0 ? 'btn-filters--has-filters' : ''}`}
+              onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
+            >
+              <FiFilter />
+              Filters
+              {activeFilterCount > 0 && ` (${activeFilterCount})`}
+            </button>
+
+            {/* Filter Dropdown Panel */}
+            {isFilterPanelOpen && (
+              <div className="members-filter-panel">
+                <div className="filter-panel__header">
+                  <span>Filters</span>
+                  {activeFilterCount > 0 && (
+                    <button className="filter-clear-btn" onClick={handleResetFilters}>
+                      Clear all
+                    </button>
+                  )}
+                </div>
+
+                <div className="filter-panel__content">
+                  {/* Status Filter */}
+                  <div className="filter-group">
+                    <label className="filter-label">Status</label>
+                    <select
+                      className="filter-select"
+                      value={filters.status[0] || ""}
+                      onChange={(e) => {
+                        const val = e.target.value
+                        setFilters(prev => ({ ...prev, status: val ? [val] : [] }))
+                      }}
+                    >
+                      <option value="">All Status</option>
+                      <option value="Active">Active</option>
+                      <option value="Expired">Expired</option>
+                    </select>
+                  </div>
+
+                  {/* Plan Filter */}
+                  <div className="filter-group">
+                    <label className="filter-label">Plan</label>
+                    <select
+                      className="filter-select"
+                      value={filters.plan[0] || ""}
+                      onChange={(e) => {
+                        const val = e.target.value
+                        setFilters(prev => ({ ...prev, plan: val ? [val] : [] }))
+                      }}
+                    >
+                      <option value="">All Plans</option>
+                      <option value="Basic">Basic</option>
+                      <option value="Premium">Premium</option>
+                      <option value="Standard">Standard</option>
+                    </select>
+                  </div>
+
+                  {/* Join Date Filter */}
+                  <div className="filter-group">
+                    <label className="filter-label">Join Date</label>
+                    <select
+                      className="filter-select"
+                      value={filters.lastVisit}
+                      onChange={(e) => handleFilterChange('lastVisit', e.target.value)}
+                    >
+                      <option value="">All Dates</option>
+                      <option value="today">Joined Today</option>
+                      <option value="week">Joined This Week</option>
+                      <option value="month">Joined This Month</option>
+                    </select>
+                  </div>
+
+                  {/* Duration Filter */}
+                  <div className="filter-group">
+                    <label className="filter-label">Duration</label>
+                    <select
+                      className="filter-select"
+                      value={filters.planDuration}
+                      onChange={(e) => handleFilterChange('planDuration', e.target.value)}
+                    >
+                      <option value="">All Durations</option>
+                      <option value="1">1 Month</option>
+                      <option value="3">3 Months</option>
+                      <option value="6">6 Months</option>
+                      <option value="12">12 Months</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Sort Button - Unified */}
+          <SortButton sortOrder={sortOrder} onToggle={toggleSort} />
 
           <div className="members-stats-badge">
             <button
@@ -381,77 +510,10 @@ const Members: React.FC = () => {
         </div>
       </div>
 
-      {/* 3. Horizontal Filter Panel – On Demand */}
-      {isFilterPanelOpen && (
-        <div className="members-filter-panel">
-          <div className="members-filter-panel__row">
-            {/* Status Filter */}
-            <select
-              className={`filter-pill filter-select ${filters.status.length > 0 ? 'filter-pill--active' : ''}`}
-              value={filters.status[0] || ""}
-              onChange={(e) => {
-                const val = e.target.value
-                setFilters(prev => ({ ...prev, status: val ? [val] : [] }))
-              }}
-            >
-              <option value="" disabled>Status</option>
-              <option value="Active">Active</option>
-              <option value="Expired">Expired</option>
-            </select>
-
-            {/* Plan Filter */}
-            <select
-              className={`filter-pill filter-select ${filters.plan.length > 0 ? 'filter-pill--active' : ''}`}
-              value={filters.plan[0] || ""}
-              onChange={(e) => {
-                const val = e.target.value
-                setFilters(prev => ({ ...prev, plan: val ? [val] : [] }))
-              }}
-            >
-              <option value="" disabled>Plan</option>
-              <option value="Basic">Basic</option>
-              <option value="Premium">Premium</option>
-              <option value="Standard">Standard</option>
-            </select>
-
-            {/* Join Date Filter */}
-            <select
-              className={`filter-pill filter-select ${filters.lastVisit ? 'filter-pill--active' : ''}`}
-              value={filters.lastVisit}
-              onChange={(e) => handleFilterChange('lastVisit', e.target.value)}
-            >
-              <option value="">Join Date</option>
-              <option value="today">Joined Today</option>
-              <option value="week">Joined This Week</option>
-              <option value="month">Joined This Month</option>
-            </select>
-
-            {/* Duration Filter */}
-            <select
-              className={`filter-pill filter-select ${filters.planDuration ? 'filter-pill--active' : ''}`}
-              value={filters.planDuration}
-              onChange={(e) => handleFilterChange('planDuration', e.target.value)}
-            >
-              <option value="">Duration</option>
-              <option value="1">1 Month</option>
-              <option value="3">3 Months</option>
-              <option value="6">6 Months</option>
-              <option value="12">12 Months</option>
-            </select>
-          </div>
-
-          {activeFilterCount > 0 && (
-            <button className="btn-clear-all" onClick={handleResetFilters}>
-              Clear all
-            </button>
-          )}
-        </div>
-      )}
-
       <div className="members-page__content">
         <div className="members-page__table-container">
           <DataTable
-            data={filteredMembers}
+            data={sortedMembers}
             keyExtractor={(member) => member.userId}
             columns={columns as any}
             loading={loading}

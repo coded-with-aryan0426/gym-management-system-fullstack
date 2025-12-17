@@ -27,7 +27,7 @@
 
 .app-shell__content {
     flex: 1;
-    padding: var(--space-6);
+    padding: 4px 16px 16px 16px;
     overflow-y: auto;
     background-color: var(--bg-primary);
 }

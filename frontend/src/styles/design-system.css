@@ -66,36 +66,45 @@
   --color-info-600: #2563eb;
   --color-info-700: #1d4ed8;
 
-  /* Background Colors - DARK THEME */
-  --color-bg-primary: #0D0D0D;
-  --color-bg-secondary: #1A1A1A;
-  --color-bg-tertiary: #252525;
+  /* Background Colors - DARK THEME (Pure Black System) */
+  --color-bg-primary: #000000;
+  /* Pure Black Base */
+  --color-bg-secondary: #09090b;
+  /* Zinc-950 - Rich Dark Surface */
+  --color-bg-tertiary: #18181b;
+  /* Zinc-900 - Interactive/Hover */
 
   /* Shorthand aliases for components */
-  --bg-primary: #0D0D0D;
-  --bg-secondary: #1A1A1A;
-  --bg-tertiary: #252525;
+  --bg-primary: #000000;
+  --bg-secondary: #09090b;
+  --bg-tertiary: #18181b;
 
   /* Text Colors - DARK THEME */
-  --color-text-primary: #f1f5f9;
+  --color-text-primary: #f8fafc;
+  /* Slate-50 */
   --color-text-secondary: #cbd5e1;
-  --color-text-tertiary: #94a3b8;
-  --color-text-inverse: #0f172a;
+  /* Slate-300 */
+  --color-text-tertiary: #64748b;
+  /* Slate-500 */
+  --color-text-inverse: #000000;
 
   /* Shorthand aliases for components */
-  --text-primary: #f1f5f9;
+  --text-primary: #f8fafc;
   --text-secondary: #cbd5e1;
-  --text-tertiary: #94a3b8;
+  --text-tertiary: #64748b;
 
   /* Border Colors - DARK THEME */
-  --color-border-primary: #334155;
-  --color-border-secondary: #475569;
+  --color-border-primary: #27272a;
+  /* Zinc-800 - Subtle Seperators */
+  --color-border-secondary: #3f3f46;
+  /* Zinc-700 - Stronger Borders */
   --color-border-focus: #DC2626;
-  --color-border-hover: #475569;
+  --color-border-hover: #52525b;
+  /* Zinc-600 */
 
   /* Shorthand aliases for components */
-  --border: #334155;
-  --border-hover: #475569;
+  --border: #27272a;
+  --border-hover: #3f3f46;
 
   /* Accent Colors - Crimson */
   --accent-primary: #DC2626;

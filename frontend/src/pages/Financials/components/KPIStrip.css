@@ -1,0 +1,226 @@
+/* ============================================================================
+   KPI Strip - 2-Tier Professional Layout
+   Tier 1: Urgent/Operational (Cash, Pending) - Larger, Left
+   Tier 2: Analytical (Profit, Burn) - Smaller, Right
+   ============================================================================ */
+
+.kpi-strip-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1.4fr 1fr 1fr;
+    gap: 12px;
+    width: 100%;
+}
+
+/* Base Card */
+.kpi-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+    transition: all 0.15s ease;
+    border: 1px solid var(--border-secondary);
+    background: var(--bg-secondary);
+    border-radius: 8px;
+}
+
+.kpi-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   TIER 1: URGENT - Larger, Bolder, Left Side
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.kpi-card--tier1 {
+    padding: 18px;
+    min-height: 100px;
+}
+
+.kpi-card--hero {
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(16, 185, 129, 0.08) 100%);
+    border-color: var(--color-emerald);
+    border-width: 1px;
+}
+
+.kpi-card--alert {
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(245, 158, 11, 0.08) 100%);
+    border-color: var(--color-amber);
+}
+
+/* Pulse animation for overdue */
+.kpi-card--pulse {
+    animation: urgentPulse 2s ease-in-out infinite;
+}
+
+@keyframes urgentPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.3);
+    }
+
+    50% {
+        box-shadow: 0 0 0 6px rgba(245, 158, 11, 0);
+    }
+}
+
+.kpi-value--tier1 {
+    font-size: 1.875rem;
+    font-weight: 700;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   TIER 2: ANALYTICAL - Smaller, Subdued, Right Side
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.kpi-card--tier2 {
+    padding: 14px;
+    min-height: 80px;
+    background: var(--bg-secondary);
+    border-color: var(--border-primary);
+}
+
+.kpi-card--tier2:hover {
+    background: var(--bg-tertiary);
+}
+
+.kpi-value--tier2 {
+    font-size: 1.375rem;
+    font-weight: 600;
+}
+
+.kpi-label--tier2 {
+    font-size: 0.6875rem;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   MICRO LABELS (Liquidity, Outstanding Risk, Monthly, Run Rate)
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.kpi-micro-label {
+    font-size: 0.5625rem;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: -2px;
+}
+
+.kpi-micro-label--warning {
+    color: var(--color-amber);
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   ICONS
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.kpi-icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.icon-small {
+    width: 32px;
+    height: 32px;
+}
+
+.icon-emerald {
+    color: var(--color-emerald);
+    background: rgba(16, 185, 129, 0.12);
+}
+
+.icon-blue {
+    color: var(--color-blue);
+    background: rgba(59, 130, 246, 0.12);
+}
+
+.icon-amber {
+    color: var(--color-amber);
+    background: rgba(245, 158, 11, 0.12);
+}
+
+.icon-crimson {
+    color: var(--color-crimson);
+    background: rgba(239, 68, 68, 0.12);
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   CONTENT
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.kpi-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.kpi-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.kpi-value-row {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.kpi-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.1;
+}
+
+.kpi-trend {
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.kpi-detail {
+    font-size: 0.6875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.kpi-detail--alert {
+    color: var(--color-amber);
+    font-weight: 600;
+}
+
+.text-emerald {
+    color: var(--color-emerald);
+}
+
+.text-crimson {
+    color: var(--color-crimson);
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ════════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 1200px) {
+    .kpi-strip-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .kpi-card--tier2 {
+        min-height: auto;
+    }
+}
+
+@media (max-width: 640px) {
+    .kpi-strip-grid {
+        grid-template-columns: 1fr;
+    }
+}

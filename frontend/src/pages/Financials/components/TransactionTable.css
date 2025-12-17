@@ -1,0 +1,225 @@
+/* Dense Layout & Filters - VISUAL ANCHOR */
+.transaction-table-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: #0a0a0a;
+    font-family: 'Inter', sans-serif;
+    border: 1px solid var(--border-primary);
+    border-radius: 8px;
+}
+
+/* Filter Bar */
+.tx-filters-dense {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--border-secondary);
+    background: #111111;
+    gap: 12px;
+    height: 44px;
+}
+
+.search-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 200px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 8px;
+    font-size: 12px;
+    color: var(--text-tertiary);
+}
+
+.tx-search-dense {
+    width: 100%;
+    padding: 6px 8px 6px 28px;
+    font-size: 0.75rem;
+    border: 1px solid var(--border-secondary);
+    border-radius: 4px;
+    /* Tighter radius */
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    height: 28px;
+}
+
+.filter-group {
+    display: flex;
+    gap: 8px;
+}
+
+.tx-select-dense {
+    padding: 0 24px 0 8px;
+    font-size: 0.75rem;
+    border: 1px solid var(--border-secondary);
+    border-radius: 4px;
+    background: var(--bg-primary);
+    color: var(--text-secondary);
+    height: 28px;
+}
+
+/* Scrollable Table Area */
+.tx-table-scroll-area {
+    overflow-y: auto;
+    flex: 1;
+    /* Take remaining height */
+    position: relative;
+    background: var(--bg-secondary);
+}
+
+/* Table Row Density Override */
+/* Target the table cells directly if possible, or use generic td */
+
+.tx-table-scroll-area table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tx-table-scroll-area th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--bg-secondary);
+    padding: 8px 16px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    border-bottom: 1px solid var(--border-secondary);
+    text-align: left;
+}
+
+.tx-table-scroll-area td {
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--border-secondary);
+    font-size: 0.8125rem;
+    vertical-align: middle;
+}
+
+/* Cell Content - Strict Typography */
+.tx-date-cell,
+.tx-desc-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    /* Tight gap */
+    line-height: normal;
+}
+
+.tx-date {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+.tx-id {
+    font-size: 0.7rem;
+    /* Force small */
+    color: var(--text-tertiary);
+    font-family: monospace;
+    line-height: 1;
+    margin-top: 2px;
+}
+
+.tx-main {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+.tx-sub {
+    font-size: 0.75rem;
+    /* Force small */
+    color: var(--text-secondary);
+    line-height: 1;
+    margin-top: 2px;
+}
+
+.tx-category-badge {
+    /* inline-block */
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-secondary);
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.tx-amount {
+    font-family: monospace;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+/* Actions */
+.tx-actions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.tx-action-btn {
+    border: 1px solid var(--border-secondary);
+    background: transparent;
+    padding: 2px 8px;
+    /* Smaller button padding */
+    border-radius: 4px;
+    font-size: 0.7rem;
+    height: 24px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.tx-action-btn:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border-color: var(--text-tertiary);
+}
+
+.primary-text {
+    color: var(--color-emerald) !important;
+    border-color: rgba(16, 185, 129, 0.2);
+}
+
+.tx-action-btn.primary-text:hover {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: var(--color-emerald);
+}
+
+/* Trust Label - Source of Truth */
+.tx-trust-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: #0d0d0d;
+    border-top: 1px solid var(--border-secondary);
+    font-size: 0.6875rem;
+    color: var(--text-tertiary);
+    font-weight: 500;
+}
+
+.trust-icon {
+    color: var(--color-blue);
+    font-size: 0.5rem;
+}
+
+/* Amount Colors */
+.text-emerald {
+    color: var(--color-emerald);
+}
+
+.text-crimson {
+    color: var(--color-crimson);
+}

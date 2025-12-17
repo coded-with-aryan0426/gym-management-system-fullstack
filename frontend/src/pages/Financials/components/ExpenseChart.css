@@ -1,0 +1,73 @@
+/* Expense Chart Container */
+.expense-chart-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.expense-chart-container .chart-area {
+    flex: 1;
+    min-height: 160px;
+}
+
+/* Expense Threshold Evaluation */
+.expense-evaluation {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    margin-top: 8px;
+    flex-wrap: wrap;
+}
+
+.expense-evaluation--healthy {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.expense-evaluation--critical {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.expense-indicator {
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.expense-evaluation--healthy .expense-indicator {
+    color: var(--color-emerald);
+}
+
+.expense-evaluation--critical .expense-indicator {
+    color: var(--color-crimson);
+}
+
+.expense-text {
+    color: var(--text-secondary);
+}
+
+.expense-text strong {
+    color: var(--text-primary);
+}
+
+.expense-status {
+    margin-left: 4px;
+    font-weight: 500;
+}
+
+.expense-evaluation--healthy .expense-status {
+    color: var(--color-emerald);
+}
+
+.expense-evaluation--critical .expense-status {
+    color: var(--color-crimson);
+}
+
+.expense-top {
+    color: var(--text-tertiary);
+    font-size: 0.6875rem;
+    margin-left: auto;
+}

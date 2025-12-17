@@ -1,0 +1,62 @@
+/* Revenue Chart Container */
+.revenue-chart-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.chart-area {
+    flex: 1;
+    min-height: 160px;
+}
+
+/* Health Evaluation Strip */
+.chart-evaluation {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    margin-top: 8px;
+}
+
+.chart-evaluation--healthy {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.chart-evaluation--warning {
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.evaluation-indicator {
+    font-size: 0.625rem;
+}
+
+.chart-evaluation--healthy .evaluation-indicator {
+    color: var(--color-emerald);
+}
+
+.chart-evaluation--warning .evaluation-indicator {
+    color: var(--color-amber);
+}
+
+.evaluation-text {
+    color: var(--text-secondary);
+}
+
+.evaluation-text strong {
+    color: var(--text-primary);
+}
+
+.evaluation-status {
+    color: var(--color-emerald);
+    margin-left: 4px;
+    font-weight: 500;
+}
+
+.chart-evaluation--warning .evaluation-status {
+    color: var(--color-amber);
+}

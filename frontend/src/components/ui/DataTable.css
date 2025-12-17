@@ -113,7 +113,7 @@
 }
 
 .data-table__action-btn:hover {
-    background-color: var(--bg-elevated);
+    background-color: var(--bg-tertiary);
     color: var(--text-primary);
 }
 

@@ -1,5 +1,5 @@
 .pt-sessions {
-  padding: var(--spacing-6);
+  padding: 4px 12px 12px 12px;
   max-width: 1400px;
   margin: 0 auto;
 }
@@ -223,6 +223,7 @@
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);

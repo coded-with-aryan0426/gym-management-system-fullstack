@@ -77,8 +77,8 @@ const icons = {
 const navItems = [
   { path: "/dashboard", label: "Dashboard", icon: icons.dashboard },
   { path: "/members", label: "Members", icon: icons.members },
-  { path: "/classes", label: "Classes", icon: icons.classes },
   { path: "/staff", label: "Staff", icon: icons.staff },
+  { path: "/classes", label: "Classes", icon: icons.classes },
   { path: "/financials", label: "Financials", icon: icons.financials },
   { path: "/reports", label: "Reports", icon: icons.reports },
 ]
