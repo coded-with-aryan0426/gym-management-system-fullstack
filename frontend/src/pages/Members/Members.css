@@ -5,41 +5,38 @@
 .members-page {
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
+  gap: var(--space-3);
 }
 
-/* Header - Redesigned Compact Version */
+/* Header - Compact Enterprise Style */
 .members-page__header {
   display: flex;
-  align-items: flex-end;
-  /* Align bottom for better typography baseline */
+  align-items: center;
   justify-content: space-between;
-  gap: var(--space-4);
-  padding: 0 var(--space-2) var(--space-4) var(--space-2);
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-2);
   border-bottom: 1px solid var(--border-secondary);
-  height: 60px;
-  /* Specific height for consistency */
+  min-height: 48px;
 }
 
 .members-page__title-section {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 0;
 }
 
 .members-page__title {
-  font-size: 1.5rem;
-  /* Reduced from 2xl */
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: 600;
   color: var(--text-primary);
   margin: 0;
-  line-height: 1.2;
+  line-height: 1.3;
 }
 
 .members-page__subtitle {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   color: var(--text-tertiary);
-  font-weight: 500;
+  font-weight: 400;
 }
 
 .members-page__header-right {
@@ -51,20 +48,24 @@
 .members-stats-badge {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  padding: 6px 12px;
+  gap: var(--space-2);
+  padding: 4px 10px;
   background: var(--bg-secondary);
   border: 1px solid var(--border-secondary);
-  border-radius: 20px;
+  border-radius: 16px;
 }
 
 .stat-pill {
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 0.6875rem;
+  font-weight: 500;
   color: var(--text-secondary);
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
 }
 
 .stat-pill--active {
@@ -92,21 +93,21 @@
   background: var(--border-secondary);
 }
 
-/* Filters Button */
+/* Filters Button - Compact */
 .btn-filters {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   background: var(--bg-secondary);
   border: 1px solid var(--border-secondary);
   color: var(--text-primary);
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 0.875rem;
-  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 0.75rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
-  height: 38px;
+  transition: all 0.15s;
+  height: 32px;
 }
 
 .btn-filters:hover {
@@ -120,22 +121,22 @@
   color: var(--color-emerald);
 }
 
-/* Horizontal Filter Panel (On-Demand) */
+/* Horizontal Filter Panel - Compact */
 .members-filter-panel {
   background: var(--bg-secondary);
   border-bottom: 1px solid var(--border-secondary);
-  padding: var(--space-4);
+  padding: var(--space-2) var(--space-3);
   display: flex;
   align-items: center;
-  gap: var(--space-4);
-  animation: slideDown 0.2s ease-out;
+  gap: var(--space-2);
+  animation: slideDown 0.15s ease-out;
   flex-wrap: wrap;
 }
 
 .members-filter-panel__row {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-2);
   flex: 1;
 }
 
@@ -143,14 +144,15 @@
   appearance: none;
   background: var(--bg-primary);
   border: 1px solid var(--border-primary);
-  padding: 6px 16px;
-  border-radius: 20px;
-  font-size: 0.875rem;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 0.75rem;
   font-weight: 500;
   color: var(--text-secondary);
+  height: 28px;
   cursor: pointer;
-  transition: all 0.2s;
-  min-width: 120px;
+  transition: all 0.15s;
+  min-width: 100px;
 }
 
 .filter-pill:hover {

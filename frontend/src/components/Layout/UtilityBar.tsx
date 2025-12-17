@@ -7,6 +7,8 @@ import { CreateUserModal } from "../index"
 import api from "../../services/api"
 import type { User } from "../../types/user"
 import { useMembers } from '../../contexts/MembersContext'
+import { useStaff } from '../../contexts/StaffContext'
+import { useNavbar } from '../../contexts/NavbarContext'
 import "./UtilityBar.css"
 
 interface Notification {
@@ -36,6 +38,40 @@ const UtilityBar: React.FC = () => {
   const notificationRef = useRef<HTMLDivElement>(null)
   const searchRef = useRef<HTMLDivElement>(null)
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Get navbar configuration based on current route
+  const { config } = useNavbar()
+
+  // Get data from contexts
+  const { stats: memberStats } = useMembers()
+  const { stats: staffStats } = useStaff()
+
+  // Get the appropriate stats based on metric type
+  const getMetricValue = (key: string): string | number => {
+    switch (config.metricType) {
+      case 'members':
+        return (memberStats as Record<string, number>)[key] ?? 0
+      case 'staff':
+        return (staffStats as Record<string, number>)[key] ?? 0
+      case 'financial':
+        // Placeholder for financial stats - would come from FinancialContext
+        const financialPlaceholders: Record<string, string> = {
+          todayRevenue: '₹12,450',
+          pending: '3',
+          monthlyRevenue: '₹2.4L',
+        }
+        return financialPlaceholders[key] ?? '0'
+      case 'sessions':
+        // Placeholder for PT sessions stats
+        const sessionPlaceholders: Record<string, number> = {
+          todaySessions: 8,
+          activeSessions: 3,
+        }
+        return sessionPlaceholders[key] ?? 0
+      default:
+        return 0
+    }
+  }
 
   const [notifications] = useState<Notification[]>([
     { id: 1, type: "member", title: "New Member", message: "John Doe signed up.", time: "2 months ago", read: false },
@@ -199,10 +235,6 @@ const UtilityBar: React.FC = () => {
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [])
 
-  // Fetch quick stats for navbar
-  // Use real-time stats from MembersContext
-  const { stats: quickStats } = useMembers()
-
   const unreadCount = notifications.filter((n) => !n.read).length
 
   return (
@@ -268,21 +300,19 @@ const UtilityBar: React.FC = () => {
         )}
       </div>
 
-      {/* Center Quick Stats */}
-      <div className="utility-bar__stats">
-        <div className="utility-stat">
-          <span className="utility-stat__value">{quickStats.total}</span>
-          <span className="utility-stat__label">Total Members</span>
+      {/* Dynamic Stats - Only show if metrics exist for this route */}
+      {config.metrics.length > 0 && (
+        <div className="utility-bar__stats utility-bar__stats--animated">
+          {config.metrics.map((metric) => (
+            <div key={metric.key} className="utility-stat">
+              <span className="utility-stat__value">
+                {metric.prefix || ''}{getMetricValue(metric.key)}
+              </span>
+              <span className="utility-stat__label">{metric.label}</span>
+            </div>
+          ))}
         </div>
-        <div className="utility-stat">
-          <span className="utility-stat__value">{quickStats.active}</span>
-          <span className="utility-stat__label">Active</span>
-        </div>
-        <div className="utility-stat">
-          <span className="utility-stat__value">+{quickStats.todaysJoins}</span>
-          <span className="utility-stat__label">Today's Joins</span>
-        </div>
-      </div>
+      )}
 
       {/* Actions */}
       <div className="utility-bar__actions">

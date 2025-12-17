@@ -4,6 +4,8 @@ import { lazy, Suspense } from 'react';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { CurrencyProvider } from './contexts/CurrencyContext';
 import { MembersProvider } from './contexts/MembersContext';
+import { StaffProvider } from './contexts/StaffContext';
+import { NavbarProvider } from './contexts/NavbarContext';
 import { AppShell } from './components/Layout';
 
 // Import new design system
@@ -46,19 +48,23 @@ function App() {
                 path="/*"
                 element={
                   <MembersProvider>
-                    <AppShell>
-                      <Routes>
-                        <Route path="/dashboard" element={<Dashboard />} />
-                        <Route path="/staff" element={<Staff />} />
-                        <Route path="/members" element={<Members />} />
-                        <Route path="/classes" element={<Classes />} />
-                        <Route path="/financials" element={<Financials />} />
-                        <Route path="/pt-sessions" element={<PTSessions />} />
-                        <Route path="/reports" element={<Reports />} />
-                        <Route path="/settings" element={<Settings />} />
-                        <Route path="*" element={<Navigate to="/dashboard" replace />} />
-                      </Routes>
-                    </AppShell>
+                    <StaffProvider>
+                      <NavbarProvider>
+                        <AppShell>
+                          <Routes>
+                            <Route path="/dashboard" element={<Dashboard />} />
+                            <Route path="/staff" element={<Staff />} />
+                            <Route path="/members" element={<Members />} />
+                            <Route path="/classes" element={<Classes />} />
+                            <Route path="/financials" element={<Financials />} />
+                            <Route path="/pt-sessions" element={<PTSessions />} />
+                            <Route path="/reports" element={<Reports />} />
+                            <Route path="/settings" element={<Settings />} />
+                            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                          </Routes>
+                        </AppShell>
+                      </NavbarProvider>
+                    </StaffProvider>
                   </MembersProvider>
                 }
               />
