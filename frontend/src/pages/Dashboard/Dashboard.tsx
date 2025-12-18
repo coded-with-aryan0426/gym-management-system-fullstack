@@ -3,10 +3,7 @@
 import type React from "react"
 import { useEffect, useState, useCallback } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
-import { MetricCard, Card, Avatar } from "../../components/ui"
 import {
-  LineChart,
-  Line,
   AreaChart,
   Area,
   BarChart,
@@ -19,129 +16,181 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Legend
+  Legend,
+  Line
 } from 'recharts'
+import {
+  DollarSign,
+  TrendingUp,
+  TrendingDown,
+  Users,
+  UserPlus,
+  UserMinus,
+  AlertTriangle,
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  Activity,
+  Target,
+  Award,
+  Calendar,
+  RefreshCw,
+  X,
+  Zap,
+  ShoppingBag,
+  CreditCard,
+  BarChart3,
+  PieChart as PieChartIcon,
+  Dumbbell,
+  MapPin,
+  Info,
+  ArrowUpRight,
+  ArrowDownRight
+} from 'lucide-react'
 import api from "../../services/api"
 import "./Dashboard.css"
 
-interface DashboardMetrics {
+interface FinancialMetrics {
   todayRevenue: number
   revenueChange: number
-  liveCheckIns: number
-  newSignups: number
-  signupsGoal: number
-  criticalTasks: number
-  totalMembers: number
-  activeMembers: number
   monthlyRevenue: number
-  averageSessionDuration: number
+  monthlyTarget: number
+  netProfit: number
+  profitMargin: number
+  outstandingDues: number
+  duesCount: number
+  ptRevenue: number
+  ptChange: number
 }
 
-interface FloorStatus {
-  memberId: number
-  memberName: string
-  timeIn: string
-  status: "check-in" | "access denied" | "status"
-  duration?: string
-  membershipType?: string
-}
-
-interface ClassManifest {
-  time: string
-  name: string
-  trainer: string
-  capacity: number
-  enrolled: number
-  status: "upcoming" | "in-progress" | "completed"
-}
-
-interface Alert {
-  id: number
-  type: "warning" | "danger" | "info" | "success"
-  title: string
-  time: string
-  description?: string
-}
-
-interface RevenueData {
-  date: string
-  memberships: number
-  retail: number
-  ptSessions: number
-  total: number
+interface MembershipMetrics {
+  totalActive: number
+  newSignups: number
+  renewals: number
+  churned: number
+  frozen: number
+  churnRate: number
+  conversionRate: number
 }
 
 interface MembershipDistribution {
   name: string
   value: number
+  count: number
   color: string
-  [key: string]: any // Allow additional properties for chart compatibility
 }
 
-interface HourlyActivity {
-  hour: string
-  checkIns: number
-  checkOuts: number
-}
-
-interface PerformanceMetric {
+interface TrainerData {
   name: string
-  current: number
-  target: number
-  trend: 'up' | 'down' | 'neutral'
-  percentage: number
+  role: string
+  revenue: number
+  sessions: number
+  retention: number
 }
 
-interface RealtimeStats {
+interface FloorMember {
+  id: number
+  name: string
+  type: string
+  checkIn: string
+  duration: string
+  status: 'active' | 'denied'
+}
+
+interface ClassData {
+  time: string
+  name: string
+  trainer: string
+  enrolled: number
+  capacity: number
+  status: 'in-progress' | 'upcoming'
+}
+
+interface Alert {
+  id: number
+  type: 'critical' | 'warning' | 'info' | 'success'
+  title: string
+  description: string
+  time: string
+}
+
+interface Insight {
+  type: 'critical' | 'warning' | 'opportunity' | 'info'
+  category: string
+  title: string
+  description: string
+}
+
+interface RevenueData {
+  date: string
+  memberships: number
+  ptSessions: number
+  retail: number
+  total: number
+}
+
+interface GymStatus {
   currentOccupancy: number
   maxCapacity: number
   peakHour: string
-  averageStayTime: number
-  equipmentUtilization: number
+  avgStayTime: number
+  equipmentUtil: number
+}
+
+interface RetailProduct {
+  name: string
+  sold: number
+  revenue: number
 }
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
 
-  // Banner state for membership status
   const [showBanner, setShowBanner] = useState(false)
   const [bannerMessage, setBannerMessage] = useState("")
-  const [bannerType, setBannerType] = useState<"info" | "warning">("info")
+  const [loading, setLoading] = useState(true)
+  const [selectedTimeRange, setSelectedTimeRange] = useState<'24H' | '7D' | '30D'>('30D')
 
-  // Enhanced dashboard state
-  const [metrics, setMetrics] = useState<DashboardMetrics>({
+  const [financial, setFinancial] = useState<FinancialMetrics>({
     todayRevenue: 0,
     revenueChange: 0,
-    liveCheckIns: 0,
-    newSignups: 0,
-    signupsGoal: 150,
-    criticalTasks: 0,
-    totalMembers: 0,
-    activeMembers: 0,
     monthlyRevenue: 0,
-    averageSessionDuration: 0,
+    monthlyTarget: 200000,
+    netProfit: 0,
+    profitMargin: 0,
+    outstandingDues: 0,
+    duesCount: 0,
+    ptRevenue: 0,
+    ptChange: 0
   })
 
-  const [floorStatus, setFloorStatus] = useState<FloorStatus[]>([])
-  const [classManifest, setClassManifest] = useState<ClassManifest[]>([])
+  const [membership, setMembership] = useState<MembershipMetrics>({
+    totalActive: 0,
+    newSignups: 0,
+    renewals: 0,
+    churned: 0,
+    frozen: 0,
+    churnRate: 0,
+    conversionRate: 0
+  })
+
+  const [distribution, setDistribution] = useState<MembershipDistribution[]>([])
+  const [trainers, setTrainers] = useState<TrainerData[]>([])
+  const [floorMembers, setFloorMembers] = useState<FloorMember[]>([])
+  const [classes, setClasses] = useState<ClassData[]>([])
   const [alerts, setAlerts] = useState<Alert[]>([])
+  const [insights, setInsights] = useState<Insight[]>([])
   const [revenueData, setRevenueData] = useState<RevenueData[]>([])
-  const [membershipDistribution, setMembershipDistribution] = useState<MembershipDistribution[]>([])
-  const [hourlyActivity, setHourlyActivity] = useState<HourlyActivity[]>([])
-  const [performanceMetrics, setPerformanceMetrics] = useState<PerformanceMetric[]>([])
-  const [realtimeStats, setRealtimeStats] = useState<RealtimeStats>({
+  const [gymStatus, setGymStatus] = useState<GymStatus>({
     currentOccupancy: 0,
     maxCapacity: 100,
     peakHour: '6:00 PM',
-    averageStayTime: 65,
-    equipmentUtilization: 78
+    avgStayTime: 65,
+    equipmentUtil: 78
   })
-  const [loading, setLoading] = useState(true)
-  const [refreshInterval, setRefreshInterval] = useState<number | null>(null)
-  const [selectedTimeRange, setSelectedTimeRange] = useState<'24H' | '7D' | '30D'>('30D')
+  const [retailProducts, setRetailProducts] = useState<RetailProduct[]>([])
 
-  // V1: No gym checks needed - show banner only for pending membership status
   useEffect(() => {
     const userStr = localStorage.getItem("user")
     if (userStr) {
@@ -149,8 +198,7 @@ const Dashboard: React.FC = () => {
         const user = JSON.parse(userStr)
         if (user.membershipStatus === "PENDING") {
           setShowBanner(true)
-          setBannerMessage("⏳ Your membership is pending approval.")
-          setBannerType("warning")
+          setBannerMessage("Your membership is pending approval.")
         }
       } catch (e) {
         console.error("Error parsing user data:", e)
@@ -161,233 +209,141 @@ const Dashboard: React.FC = () => {
   const loadDashboardData = useCallback(async () => {
     setLoading(true)
     try {
-      // V1: Load data directly for all users (no gym checks)
-
-      // Try to fetch real data from backend with enhanced analytics
-      const [statsData, floorData, alertsData, transactionsData, metricsData, membersData, sessionsData] = await Promise.allSettled([
+      const [statsData, membersData] = await Promise.allSettled([
         api.getStats(),
-        api.getFloorStatus(),
-        api.getDashboardAlerts(),
-        api.getDashboardTransactions(),
-        api.getDashboardMetrics(),
-        api.getUsers('CUSTOMER'), // Get members for analytics
-        api.getStats(), // Get additional stats for analytics
+        api.getUsers('CUSTOMER')
       ])
 
-      // Update metrics with real-time calculations
-      if (statsData.status === "fulfilled") {
-        const stats = statsData.value
-
-        // Calculate real-time metrics from actual data
-        let realTimeRevenue = 2450.0
-        let realTimeMembers = 450
-        let realTimeActive = 38
-
-        // If we have members data, calculate real metrics
-        if (membersData.status === "fulfilled" && Array.isArray(membersData.value)) {
-          const members = membersData.value
-          realTimeMembers = members.length
-          realTimeActive = members.filter((m: any) => m.status === 'ACTIVE').length
-
-          // Calculate revenue based on membership types (mock calculation)
-          realTimeRevenue = members.reduce((total: number, member: any) => {
-            const membershipValue = member.membershipType === 'GOLD' ? 150 :
-              member.membershipType === 'SILVER' ? 100 :
-                member.membershipType === 'PLATINUM' ? 200 : 50
-            return total + membershipValue
-          }, 0)
-        }
-
-        setMetrics(prev => ({
-          ...prev,
-          todayRevenue: realTimeRevenue,
-          revenueChange: 12.5,
-          liveCheckIns: realTimeActive,
-          newSignups: Math.floor(realTimeMembers * 0.1), // 10% new this month
-          signupsGoal: 150,
-          criticalTasks: stats.pendingSessions || 2,
-          totalMembers: realTimeMembers,
-          activeMembers: realTimeActive,
-          monthlyRevenue: realTimeRevenue * 30, // Monthly projection
-          averageSessionDuration: 65, // Mock value for now
-        }))
+      let memberCount = 450
+      let activeCount = 420
+      if (membersData.status === "fulfilled" && Array.isArray(membersData.value)) {
+        memberCount = membersData.value.length
+        activeCount = membersData.value.filter((m: any) => m.status === 'ACTIVE').length
       }
 
-      // Generate enhanced floor status data
-      if (floorData.status === "fulfilled" && Array.isArray(floorData.value)) {
-        const mappedFloor: FloorStatus[] = floorData.value.map((item: any, idx: number) => ({
-          memberId: item.userId || idx,
-          memberName: item.memberName || item.fullName || `Member ${idx + 1}`,
-          timeIn: item.checkInTime || new Date(Date.now() - Math.random() * 3600000).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-          status: (item.status === "CHECKED_IN" ? "check-in" : item.status === "DENIED" ? "access denied" : "check-in") as FloorStatus["status"],
-          duration: `${Math.floor(Math.random() * 120 + 15)}m`,
-          membershipType: ['Gold', 'Silver', 'Platinum', 'Basic'][Math.floor(Math.random() * 4)]
-        }))
-        setFloorStatus(mappedFloor.length > 0 ? mappedFloor : generateMockFloorData())
-      } else {
-        setFloorStatus(generateMockFloorData())
-      }
+      setFinancial({
+        todayRevenue: 5150,
+        revenueChange: 12.5,
+        monthlyRevenue: 154500,
+        monthlyTarget: 200000,
+        netProfit: 42350,
+        profitMargin: 27.4,
+        outstandingDues: 18500,
+        duesCount: 12,
+        ptRevenue: 45200,
+        ptChange: 8.3
+      })
 
-      // Generate enhanced alerts
-      if (alertsData.status === "fulfilled" && Array.isArray(alertsData.value)) {
-        const mappedAlerts: Alert[] = alertsData.value.map((item: any, idx: number) => ({
-          id: item.id || idx,
-          type: (item.severity === "HIGH" ? "danger" : item.severity === "MEDIUM" ? "warning" : "info") as Alert["type"],
-          title: item.message || item.title || "System Alert",
-          time: item.createdAt || "Recently",
-          description: item.description
-        }))
-        setAlerts(mappedAlerts.length > 0 ? mappedAlerts : generateMockAlerts())
-      } else {
-        setAlerts(generateMockAlerts())
-      }
+      setMembership({
+        totalActive: activeCount,
+        newSignups: 28,
+        renewals: 45,
+        churned: 8,
+        frozen: 15,
+        churnRate: 1.9,
+        conversionRate: 68
+      })
 
-      // Generate enhanced analytics data
+      setDistribution([
+        { name: 'Platinum', value: 22, count: 92, color: '#a855f7' },
+        { name: 'Gold', value: 35, count: 147, color: '#f59e0b' },
+        { name: 'Silver', value: 28, count: 118, color: '#64748b' },
+        { name: 'Basic', value: 15, count: 63, color: '#3b82f6' }
+      ])
+
+      setTrainers([
+        { name: 'Rahul Sharma', role: 'Senior Trainer', revenue: 82500, sessions: 156, retention: 94 },
+        { name: 'Priya Patel', role: 'PT Specialist', revenue: 67200, sessions: 128, retention: 91 },
+        { name: 'Amit Kumar', role: 'Fitness Coach', revenue: 54800, sessions: 112, retention: 88 },
+        { name: 'Sneha Gupta', role: 'Yoga Instructor', revenue: 42100, sessions: 98, retention: 92 }
+      ])
+
+      setFloorMembers([
+        { id: 1, name: 'Arjun Mehta', type: 'Platinum', checkIn: '03:18 PM', duration: '45m', status: 'active' },
+        { id: 2, name: 'Kavita Singh', type: 'Gold', checkIn: '03:56 PM', duration: '38m', status: 'active' },
+        { id: 3, name: 'Raj Patel', type: 'Basic', checkIn: '04:09 PM', duration: '15m', status: 'active' },
+        { id: 4, name: 'Meera Joshi', type: 'Silver', checkIn: '03:31 PM', duration: '52m', status: 'denied' },
+        { id: 5, name: 'Vikram Rao', type: 'Gold', checkIn: '03:47 PM', duration: '42m', status: 'active' }
+      ])
+
+      setClasses([
+        { time: '9:00 AM', name: 'HIIT Burn', trainer: 'Rahul Sharma', enrolled: 18, capacity: 20, status: 'in-progress' },
+        { time: '11:00 AM', name: 'Yoga Flow', trainer: 'Sneha Gupta', enrolled: 12, capacity: 15, status: 'upcoming' },
+        { time: '2:00 PM', name: 'Strength Training', trainer: 'Amit Kumar', enrolled: 22, capacity: 25, status: 'upcoming' },
+        { time: '6:00 PM', name: 'Cardio Blast', trainer: 'Priya Patel', enrolled: 28, capacity: 30, status: 'upcoming' }
+      ])
+
+      setAlerts([
+        { id: 1, type: 'critical', title: 'Churn Risk Detected', description: '5 high-value members showing low engagement', time: '10 min ago' },
+        { id: 2, type: 'warning', title: 'Equipment Maintenance Due', description: 'Treadmill #3 requires scheduled maintenance', time: '25 min ago' },
+        { id: 3, type: 'info', title: '12 Memberships Expiring', description: 'Members need renewal reminders this week', time: '1 hour ago' },
+        { id: 4, type: 'success', title: 'Revenue Target 77% Complete', description: 'On track to exceed monthly goal', time: '2 hours ago' }
+      ])
+
+      setInsights([
+        { type: 'critical', category: 'Retention', title: 'Churn spike in Silver tier', description: '3x higher churn than last month. Consider targeted retention offers.' },
+        { type: 'warning', category: 'Revenue', title: '9 AM classes underperforming', description: 'Move popular classes to 7 AM slot based on traffic patterns.' },
+        { type: 'opportunity', category: 'Upsell', title: '45 members ready for PT upgrade', description: 'High engagement members likely to convert to PT packages.' },
+        { type: 'info', category: 'Operations', title: 'Peak hour shifting earlier', description: 'Evening rush now starts at 5 PM instead of 6 PM.' }
+      ])
+
       setRevenueData(generateRevenueData(selectedTimeRange))
-      setMembershipDistribution(generateMembershipDistribution())
-      setHourlyActivity(generateHourlyActivity())
-      setClassManifest(generateClassManifest())
-      setPerformanceMetrics(generatePerformanceMetrics())
-      setRealtimeStats(generateRealtimeStats())
+
+      setGymStatus({
+        currentOccupancy: Math.floor(Math.random() * 30 + 35),
+        maxCapacity: 100,
+        peakHour: '6:00 PM',
+        avgStayTime: 71,
+        equipmentUtil: 73
+      })
+
+      setRetailProducts([
+        { name: 'Whey Protein', sold: 45, revenue: 67500 },
+        { name: 'Creatine', sold: 32, revenue: 25600 },
+        { name: 'Energy Bars', sold: 128, revenue: 12800 },
+        { name: 'BCAA', sold: 28, revenue: 22400 }
+      ])
 
     } catch (err) {
-      console.log("[Dashboard] Using demo data - backend may not be running")
-      // Load demo data
-      loadDemoData()
-      setPerformanceMetrics(generatePerformanceMetrics())
-      setRealtimeStats(generateRealtimeStats())
+      console.log("[Dashboard] Using demo data")
     } finally {
       setLoading(false)
     }
-  }, [])
-
-  // Generate mock data functions
-  const generateMockFloorData = (): FloorStatus[] => {
-    const names = ['John Smith', 'Sarah Wilson', 'Mike Johnson', 'Emily Davis', 'Alex Chen', 'Lisa Brown', 'David Miller', 'Jessica Taylor']
-    return names.slice(0, 6).map((name, idx) => ({
-      memberId: idx + 1,
-      memberName: name,
-      timeIn: new Date(Date.now() - Math.random() * 3600000).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-      status: Math.random() > 0.1 ? "check-in" : "access denied" as FloorStatus["status"],
-      duration: `${Math.floor(Math.random() * 120 + 15)}m`,
-      membershipType: ['Gold', 'Silver', 'Platinum', 'Basic'][Math.floor(Math.random() * 4)]
-    }))
-  }
-
-  const generateMockAlerts = (): Alert[] => [
-    { id: 1, type: "warning", title: "Equipment Maintenance Due", time: "15 min ago", description: "Treadmill #3 requires scheduled maintenance" },
-    { id: 2, type: "info", title: "New Member Registration", time: "32 min ago", description: "Sarah Connor joined with Gold membership" },
-    { id: 3, type: "success", title: "Monthly Target Achieved", time: "1 hour ago", description: "Revenue target for December reached" },
-    { id: 4, type: "danger", title: "Payment Failed", time: "2 hours ago", description: "Auto-renewal failed for 3 members" }
-  ]
+  }, [selectedTimeRange])
 
   const generateRevenueData = (timeRange: '24H' | '7D' | '30D'): RevenueData[] => {
     const data = []
-    const days = timeRange === '24H' ? 1 : timeRange === '7D' ? 7 : 30
-
+    const days = timeRange === '24H' ? 24 : timeRange === '7D' ? 7 : 30
+    
     for (let i = days - 1; i >= 0; i--) {
       const date = new Date()
-      date.setDate(date.getDate() - i)
-
-      // Generate more realistic data with trends
-      const baseMultiplier = timeRange === '24H' ? 0.1 : 1
-      const weekendBoost = date.getDay() === 0 || date.getDay() === 6 ? 1.3 : 1
-
+      if (timeRange === '24H') {
+        date.setHours(date.getHours() - i)
+      } else {
+        date.setDate(date.getDate() - i)
+      }
+      
+      const mult = timeRange === '24H' ? 0.1 : 1
+      const weekend = date.getDay() === 0 || date.getDay() === 6 ? 1.3 : 1
+      
       data.push({
         date: timeRange === '24H'
           ? date.toLocaleTimeString('en-US', { hour: 'numeric' })
           : date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        memberships: Math.floor((Math.random() * 2000 + 1000) * baseMultiplier * weekendBoost),
-        retail: Math.floor((Math.random() * 500 + 200) * baseMultiplier * weekendBoost),
-        ptSessions: Math.floor((Math.random() * 800 + 300) * baseMultiplier * weekendBoost),
+        memberships: Math.floor((Math.random() * 3000 + 2000) * mult * weekend),
+        ptSessions: Math.floor((Math.random() * 1500 + 800) * mult * weekend),
+        retail: Math.floor((Math.random() * 800 + 300) * mult * weekend),
         total: 0
       })
     }
-    return data.map(item => ({ ...item, total: item.memberships + item.retail + item.ptSessions }))
-  }
-
-  const generatePerformanceMetrics = (): PerformanceMetric[] => [
-    { name: 'Member Retention', current: 92, target: 95, trend: 'up', percentage: 3.2 },
-    { name: 'Equipment Uptime', current: 98, target: 99, trend: 'up', percentage: 1.5 },
-    { name: 'Class Attendance', current: 85, target: 90, trend: 'down', percentage: -2.1 },
-    { name: 'Revenue Growth', current: 112, target: 110, trend: 'up', percentage: 8.7 },
-  ]
-
-  const generateRealtimeStats = (): RealtimeStats => ({
-    currentOccupancy: Math.floor(Math.random() * 80 + 20),
-    maxCapacity: 100,
-    peakHour: ['6:00 PM', '7:00 AM', '12:00 PM', '8:00 PM'][Math.floor(Math.random() * 4)],
-    averageStayTime: Math.floor(Math.random() * 30 + 45),
-    equipmentUtilization: Math.floor(Math.random() * 20 + 70)
-  })
-
-  const generateMembershipDistribution = (): MembershipDistribution[] => [
-    { name: 'Gold', value: 35, color: '#DC2626' },
-    { name: 'Silver', value: 28, color: '#F59E0B' },
-    { name: 'Platinum', value: 22, color: '#10B981' },
-    { name: 'Basic', value: 15, color: '#3B82F6' }
-  ]
-
-  const generateHourlyActivity = (): HourlyActivity[] => {
-    const hours = ['6AM', '8AM', '10AM', '12PM', '2PM', '4PM', '6PM', '8PM', '10PM']
-    return hours.map(hour => ({
-      hour,
-      checkIns: Math.floor(Math.random() * 15 + 5),
-      checkOuts: Math.floor(Math.random() * 12 + 3)
-    }))
-  }
-
-  const generateClassManifest = (): ClassManifest[] => [
-    { time: "9:00 AM", name: "HIIT Burn", trainer: "Sarah Wilson", capacity: 20, enrolled: 18, status: "in-progress" },
-    { time: "11:00 AM", name: "Yoga Flow", trainer: "Mike Johnson", capacity: 15, enrolled: 12, status: "upcoming" },
-    { time: "2:00 PM", name: "Strength Training", trainer: "Emily Davis", capacity: 25, enrolled: 22, status: "upcoming" },
-    { time: "6:00 PM", name: "Cardio Blast", trainer: "Alex Chen", capacity: 30, enrolled: 28, status: "upcoming" }
-  ]
-
-  const loadDemoData = () => {
-    setMetrics({
-      todayRevenue: 2450,
-      revenueChange: 12.5,
-      liveCheckIns: 38,
-      newSignups: 127,
-      signupsGoal: 150,
-      criticalTasks: 2,
-      totalMembers: 450,
-      activeMembers: 38,
-      monthlyRevenue: 45000,
-      averageSessionDuration: 65,
-    })
-    setFloorStatus(generateMockFloorData())
-    setAlerts(generateMockAlerts())
-    setRevenueData(generateRevenueData('30D'))
-    setMembershipDistribution(generateMembershipDistribution())
-    setHourlyActivity(generateHourlyActivity())
-    setClassManifest(generateClassManifest())
-    setPerformanceMetrics(generatePerformanceMetrics())
-    setRealtimeStats(generateRealtimeStats())
+    return data.map(item => ({ ...item, total: item.memberships + item.ptSessions + item.retail }))
   }
 
   useEffect(() => {
     loadDashboardData()
-
-    // Set up real-time updates every 15 seconds for more responsive data
-    const interval = setInterval(() => {
-      loadDashboardData()
-    }, 15000)
-
-    setRefreshInterval(interval)
-
-    return () => {
-      if (interval) clearInterval(interval)
-    }
-  }, [loadDashboardData, selectedTimeRange])
-
-  // Cleanup interval on unmount
-  useEffect(() => {
-    return () => {
-      if (refreshInterval) clearInterval(refreshInterval)
-    }
-  }, [refreshInterval])
+    const interval = setInterval(loadDashboardData, 30000)
+    return () => clearInterval(interval)
+  }, [loadDashboardData])
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("en-IN", {
@@ -397,63 +353,46 @@ const Dashboard: React.FC = () => {
     }).format(value)
   }
 
-  const getCapacityPercent = (enrolled: number, capacity: number) => {
-    return Math.round((enrolled / capacity) * 100)
+  const getCapacityColor = (percent: number) => {
+    if (percent >= 90) return "#ef4444"
+    if (percent >= 70) return "#f59e0b"
+    return "#00ff88"
   }
 
-  const getCapacityColor = (percent: number) => {
-    if (percent >= 90) return "var(--color-crimson)"
-    if (percent >= 70) return "var(--color-amber)"
-    return "var(--color-emerald)"
+  const getOccupancyColor = (current: number, max: number) => {
+    const pct = (current / max) * 100
+    if (pct > 80) return '#ef4444'
+    if (pct > 60) return '#f59e0b'
+    return '#00ff88'
+  }
+
+  const dismissAlert = (id: number) => {
+    setAlerts(prev => prev.filter(a => a.id !== id))
   }
 
   const getAlertIcon = (type: string) => {
     switch (type) {
-      case "warning":
-        return (
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2L1 21h22L12 2zm0 3.83L19.53 19H4.47L12 5.83zM11 10v4h2v-4h-2zm0 6v2h2v-2h-2z" />
-          </svg>
-        )
-      case "danger":
-        return (
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-            <circle cx="12" cy="7" r="4" />
-          </svg>
-        )
-      default:
-        return (
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-            <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-            <line x1="12" y1="22.08" x2="12" y2="12" />
-          </svg>
-        )
+      case 'critical': return <AlertCircle />
+      case 'warning': return <AlertTriangle />
+      case 'success': return <CheckCircle />
+      default: return <Info />
     }
   }
 
-  // Get user role for RBAC
-  const getUserRole = () => {
-    try {
-      const userStr = localStorage.getItem('user');
-      if (!userStr) return null;
-      const user = JSON.parse(userStr);
-      // V1 Pivot: Only handle STAFF context
-      if (user.context === 'STAFF') return user.staffRole || 'TRAINER';
-      return 'TRAINER'; // Default
-    } catch (e) { return 'TRAINER'; }
-  };
-  const role = getUserRole();
-  const isOwner = role === 'OWNER';
-  const isStaff = true; // Always true for V1 Dashboard access
+  const getInsightIcon = (type: string) => {
+    switch (type) {
+      case 'critical': return <AlertCircle />
+      case 'warning': return <AlertTriangle />
+      case 'opportunity': return <TrendingUp />
+      default: return <Info />
+    }
+  }
 
   return (
     <div className="dashboard">
-      {/* Page Header with Real-time Indicator */}
       <div className="dashboard__header">
         <div className="dashboard__title-section">
-          <h1 className="dashboard__title">Analytics Dashboard</h1>
+          <h1 className="dashboard__title">Business Dashboard</h1>
           <div className="dashboard__live-indicator">
             <span className="live-dot"></span>
             <span className="live-text">Live Data</span>
@@ -465,397 +404,425 @@ const Dashboard: React.FC = () => {
           onClick={() => loadDashboardData()}
           disabled={loading}
         >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            className={loading ? 'spinning' : ''}
-          >
-            <polyline points="23 4 23 10 17 10"></polyline>
-            <polyline points="1 20 1 14 7 14"></polyline>
-            <path d="m3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-          </svg>
+          <RefreshCw className={loading ? 'spinning' : ''} />
           {loading ? 'Refreshing...' : 'Refresh'}
         </button>
       </div>
 
-      {/* Membership Status Banner */}
       {showBanner && (
         <div className="dashboard__banner">
           <span>{bannerMessage}</span>
-          {bannerType === "info" && (
-            <button onClick={() => navigate("/gyms")} className="banner-action-btn">
-              Find Gyms
-            </button>
-          )}
+          <button onClick={() => navigate("/gyms")} className="banner-action-btn">
+            Find Gyms
+          </button>
         </div>
       )}
 
-      {/* Enhanced Metrics Row */}
-      <div className="dashboard__metrics">
-        {isOwner && (
-          <>
-            <MetricCard
-              title="Today's Revenue"
-              value={formatCurrency(metrics.todayRevenue)}
-              trend={{ value: `${metrics.revenueChange}% vs yesterday`, direction: "up" }}
-            />
-            <MetricCard
-              title="Monthly Revenue"
-              value={formatCurrency(metrics.monthlyRevenue)}
-              subtitle="December 2024"
-            />
-          </>
-        )}
+      <div className="financial-strip">
+        <div className="financial-card financial-card--revenue">
+          <div className="financial-icon">
+            <DollarSign />
+          </div>
+          <div className="financial-content">
+            <span className="financial-label">Today's Revenue</span>
+            <span className="financial-value">{formatCurrency(financial.todayRevenue)}</span>
+            <span className={`financial-change ${financial.revenueChange >= 0 ? 'positive' : 'negative'}`}>
+              {financial.revenueChange >= 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+              {Math.abs(financial.revenueChange)}% vs yesterday
+            </span>
+          </div>
+        </div>
 
-        {isStaff && (
-          <>
-            <MetricCard
-              title="Live Check-ins"
-              value={metrics.liveCheckIns}
-              subtitle="Currently active"
-              trend={{ value: `${metrics.activeMembers} total active`, direction: "neutral" }}
-            />
-            <MetricCard
-              title="New Signups (MTD)"
-              value={metrics.newSignups}
-              subtitle={`Goal: ${metrics.signupsGoal}`}
-              progress={{ current: metrics.newSignups, goal: metrics.signupsGoal }}
-            />
-            <MetricCard
-              title="Avg Session Duration"
-              value={`${metrics.averageSessionDuration}m`}
-              subtitle="This month"
-              trend={{ value: "+5m vs last month", direction: "up" }}
-            />
-          </>
-        )}
+        <div className="financial-card financial-card--monthly">
+          <div className="financial-icon">
+            <BarChart3 />
+          </div>
+          <div className="financial-content">
+            <span className="financial-label">Monthly Revenue</span>
+            <span className="financial-value">{formatCurrency(financial.monthlyRevenue)}</span>
+            <span className="financial-sub">{Math.round((financial.monthlyRevenue / financial.monthlyTarget) * 100)}% of target</span>
+          </div>
+        </div>
+
+        <div className="financial-card financial-card--profit">
+          <div className="financial-icon">
+            <TrendingUp />
+          </div>
+          <div className="financial-content">
+            <span className="financial-label">Net Profit</span>
+            <span className="financial-value">{formatCurrency(financial.netProfit)}</span>
+            <span className="financial-change positive">
+              <ArrowUpRight size={14} /> {financial.profitMargin}% margin
+            </span>
+          </div>
+        </div>
+
+        <div className="financial-card financial-card--dues">
+          <div className="financial-icon">
+            <CreditCard />
+          </div>
+          <div className="financial-content">
+            <span className="financial-label">Outstanding Dues</span>
+            <span className="financial-value">{formatCurrency(financial.outstandingDues)}</span>
+            <span className="financial-sub">{financial.duesCount} members pending</span>
+          </div>
+        </div>
+
+        <div className="financial-card financial-card--pt">
+          <div className="financial-icon">
+            <Dumbbell />
+          </div>
+          <div className="financial-content">
+            <span className="financial-label">PT Revenue</span>
+            <span className="financial-value">{formatCurrency(financial.ptRevenue)}</span>
+            <span className={`financial-change ${financial.ptChange >= 0 ? 'positive' : 'negative'}`}>
+              {financial.ptChange >= 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+              {Math.abs(financial.ptChange)}% this month
+            </span>
+          </div>
+        </div>
       </div>
 
-      {/* Real-time Performance Metrics */}
-      {isStaff && (
-        <Card
-          title="Real-time Performance"
-          className="dashboard__performance-metrics"
-        >
-          <div className="performance-grid">
-            {performanceMetrics.map((metric, index) => (
-              <div key={index} className="performance-card">
-                <div className="performance-header">
-                  <span className="performance-name">{metric.name}</span>
-                  <span className={`performance-trend performance-trend--${metric.trend}`}>
-                    {metric.trend === 'up' ? '↗' : metric.trend === 'down' ? '↘' : '→'} {metric.percentage}%
-                  </span>
-                </div>
-                <div className="performance-value">
-                  {metric.current}%
-                </div>
-                <div className="performance-progress">
-                  <div
-                    className="performance-progress-fill"
-                    style={{ width: `${(metric.current / metric.target) * 100}%` }}
-                  />
-                </div>
-                <div className="performance-target">Target: {metric.target}%</div>
+      <div className="insights-strip">
+        {insights.map((insight, idx) => (
+          <div key={idx} className={`insight-card insight-card--${insight.type}`}>
+            <div className="insight-card__header">
+              <div className="insight-card__icon">
+                {getInsightIcon(insight.type)}
               </div>
-            ))}
+              <span className="insight-card__category">{insight.category}</span>
+            </div>
+            <div className="insight-card__title">{insight.title}</div>
+            <div className="insight-card__desc">{insight.description}</div>
           </div>
-        </Card>
-      )}
+        ))}
+      </div>
 
-      {/* Real-time Occupancy Widget */}
-      {isStaff && (
-        <Card
-          title="Live Gym Status"
-          className="dashboard__occupancy-widget"
-        >
-          <div className="occupancy-display">
-            <div className="occupancy-main">
-              <div className="occupancy-number">{realtimeStats.currentOccupancy}</div>
+      <div className="dashboard__grid">
+        <div className="dash-card">
+          <div className="dash-card__header">
+            <div className="dash-card__title">
+              <Activity size={18} />
+              Live Gym Status
+            </div>
+            <span className="dash-card__badge">{gymStatus.currentOccupancy} Active</span>
+          </div>
+          <div className="gym-status">
+            <div className="occupancy-display">
+              <div className="occupancy-number" style={{ color: getOccupancyColor(gymStatus.currentOccupancy, gymStatus.maxCapacity) }}>
+                {gymStatus.currentOccupancy}
+              </div>
               <div className="occupancy-label">Current Occupancy</div>
-            </div>
-            <div className="occupancy-stats">
-              <div className="occupancy-stat">
-                <span className="stat-label">Capacity</span>
-                <span className="stat-value">{realtimeStats.maxCapacity}</span>
-              </div>
-              <div className="occupancy-stat">
-                <span className="stat-label">Peak Hour</span>
-                <span className="stat-value">{realtimeStats.peakHour}</span>
-              </div>
-              <div className="occupancy-stat">
-                <span className="stat-label">Avg Stay</span>
-                <span className="stat-value">{realtimeStats.averageStayTime}m</span>
-              </div>
-              <div className="occupancy-stat">
-                <span className="stat-label">Equipment</span>
-                <span className="stat-value">{realtimeStats.equipmentUtilization}%</span>
+              <div className="occupancy-bar">
+                <div
+                  className="occupancy-fill"
+                  style={{
+                    width: `${(gymStatus.currentOccupancy / gymStatus.maxCapacity) * 100}%`,
+                    backgroundColor: getOccupancyColor(gymStatus.currentOccupancy, gymStatus.maxCapacity)
+                  }}
+                />
               </div>
             </div>
-            <div className="occupancy-bar">
-              <div
-                className="occupancy-fill"
-                style={{
-                  width: `${(realtimeStats.currentOccupancy / realtimeStats.maxCapacity) * 100}%`,
-                  backgroundColor: realtimeStats.currentOccupancy > 80 ? '#DC2626' :
-                    realtimeStats.currentOccupancy > 60 ? '#F59E0B' : '#10B981'
-                }}
-              />
+            <div className="gym-stats">
+              <div className="gym-stat">
+                <div className="gym-stat__value">{gymStatus.maxCapacity}</div>
+                <div className="gym-stat__label">Capacity</div>
+              </div>
+              <div className="gym-stat">
+                <div className="gym-stat__value">{gymStatus.peakHour}</div>
+                <div className="gym-stat__label">Peak Hour</div>
+              </div>
+              <div className="gym-stat">
+                <div className="gym-stat__value">{gymStatus.avgStayTime}m</div>
+                <div className="gym-stat__label">Avg Stay</div>
+              </div>
+              <div className="gym-stat">
+                <div className="gym-stat__value">{gymStatus.equipmentUtil}%</div>
+                <div className="gym-stat__label">Equipment</div>
+              </div>
             </div>
           </div>
-        </Card>
-      )}
+        </div>
 
-      {/* Enhanced Main Content Grid */}
-      <div className="dashboard__enhanced-grid">
-        {/* Revenue Analytics Chart - OWNER ONLY */}
-        {isOwner && (
-          <Card
-            title="Revenue Analytics"
-            action={
-              <div className="chart-controls">
-                <button
-                  className={`chart-control-btn ${selectedTimeRange === '30D' ? 'active' : ''}`}
-                  onClick={() => setSelectedTimeRange('30D')}
-                >
-                  30D
-                </button>
-                <button
-                  className={`chart-control-btn ${selectedTimeRange === '7D' ? 'active' : ''}`}
-                  onClick={() => setSelectedTimeRange('7D')}
-                >
-                  7D
-                </button>
-                <button
-                  className={`chart-control-btn ${selectedTimeRange === '24H' ? 'active' : ''}`}
-                  onClick={() => setSelectedTimeRange('24H')}
-                >
-                  24H
-                </button>
+        <div className="dash-card">
+          <div className="dash-card__header">
+            <div className="dash-card__title">
+              <Users size={18} />
+              Membership Performance
+            </div>
+          </div>
+          <div className="membership-grid">
+            <div className="membership-stat membership-stat--active">
+              <div className="membership-stat__value">{membership.totalActive}</div>
+              <div className="membership-stat__label">Active Members</div>
+              <div className="membership-stat__change positive">
+                <ArrowUpRight size={12} /> {membership.conversionRate}% conversion
               </div>
-            }
-            className="dashboard__revenue-chart"
-          >
-            <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={revenueData}>
-                <defs>
-                  <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#DC2626" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#DC2626" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-secondary)" />
-                <XAxis
-                  dataKey="date"
-                  stroke="var(--text-tertiary)"
-                  fontSize={12}
-                />
-                <YAxis
-                  stroke="var(--text-tertiary)"
-                  fontSize={12}
-                  tickFormatter={(value) => `₹${value}`}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'var(--bg-secondary)',
-                    border: '1px solid var(--border-primary)',
-                    borderRadius: '8px',
-                    color: 'var(--text-primary)'
-                  }}
-                  formatter={(value: number, name: string) => [`₹${value}`, name]}
-                />
-                <Legend />
-                <Area
-                  type="monotone"
-                  dataKey="total"
-                  stroke="#DC2626"
-                  fillOpacity={1}
-                  fill="url(#colorTotal)"
-                  name="Total Revenue"
-                />
-                <Line type="monotone" dataKey="memberships" stroke="#10B981" name="Memberships" />
-                <Line type="monotone" dataKey="ptSessions" stroke="#F59E0B" name="PT Sessions" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </Card>
-        )}
-
-        {/* Membership Distribution - OWNER ONLY */}
-        {isOwner && (
-          <Card
-            title="Membership Distribution"
-            className="dashboard__membership-pie"
-          >
-            <ResponsiveContainer width="100%" height={250}>
-              <PieChart>
-                <Pie
-                  data={membershipDistribution}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={100}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {membershipDistribution.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'var(--bg-secondary)',
-                    border: '1px solid var(--border-primary)',
-                    borderRadius: '8px',
-                    color: 'var(--text-primary)'
-                  }}
-                  formatter={(value: number) => [`${value}%`, 'Share']}
-                />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </Card>
-        )}
-
-        {/* Hourly Activity Chart - STAFF ONLY */}
-        {isStaff && (
-          <Card
-            title="Today's Activity Pattern"
-            className="dashboard__activity-chart"
-          >
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={hourlyActivity}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-secondary)" />
-                <XAxis
-                  dataKey="hour"
-                  stroke="var(--text-tertiary)"
-                  fontSize={12}
-                />
-                <YAxis
-                  stroke="var(--text-tertiary)"
-                  fontSize={12}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'var(--bg-secondary)',
-                    border: '1px solid var(--border-primary)',
-                    borderRadius: '8px',
-                    color: 'var(--text-primary)'
-                  }}
-                />
-                <Legend />
-                <Bar dataKey="checkIns" fill="#10B981" name="Check-ins" />
-                <Bar dataKey="checkOuts" fill="#F59E0B" name="Check-outs" />
-              </BarChart>
-            </ResponsiveContainer>
-          </Card>
-        )}
-
-        {/* Enhanced Live Floor Status - STAFF ONLY */}
-        {isStaff && (
-          <Card
-            title="Live Floor Status"
-            action={
-              <div className="floor-status-controls">
-                <span className="active-count">{floorStatus.length} Active</span>
-                <button className="card-action-btn">•••</button>
+            </div>
+            <div className="membership-stat membership-stat--new">
+              <div className="membership-stat__value">{membership.newSignups}</div>
+              <div className="membership-stat__label">New Signups</div>
+              <div className="membership-stat__change positive">This month</div>
+            </div>
+            <div className="membership-stat membership-stat--churn">
+              <div className="membership-stat__value">{membership.churned}</div>
+              <div className="membership-stat__label">Churned</div>
+              <div className="membership-stat__change negative">
+                <ArrowDownRight size={12} /> {membership.churnRate}% rate
               </div>
-            }
-            className="dashboard__floor-status"
-          >
-            <div className="floor-status-enhanced">
-              {floorStatus.map((item) => (
-                <div key={item.memberId} className="floor-member-card">
-                  <div className="member-info">
-                    <Avatar name={item.memberName} size="sm" />
-                    <div className="member-details">
-                      <span className="member-name">{item.memberName}</span>
-                      <span className="member-type">{item.membershipType}</span>
-                    </div>
-                  </div>
-                  <div className="member-activity">
-                    <span className="check-in-time">{item.timeIn}</span>
-                    <span className="duration">{item.duration}</span>
-                  </div>
-                  <span className={`member-status member-status--${item.status.replace(" ", "-")}`}>
-                    <span className="status-dot"></span>
-                    {item.status}
-                  </span>
+            </div>
+            <div className="membership-stat membership-stat--freeze">
+              <div className="membership-stat__value">{membership.frozen}</div>
+              <div className="membership-stat__label">Frozen</div>
+              <div className="membership-stat__change">Active freezes</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="dash-card dash-card--span2">
+          <div className="dash-card__header">
+            <div className="dash-card__title">
+              <TrendingUp size={18} />
+              Revenue Analytics
+            </div>
+            <div className="chart-controls">
+              <button className={`chart-btn ${selectedTimeRange === '30D' ? 'chart-btn--active' : ''}`} onClick={() => setSelectedTimeRange('30D')}>30D</button>
+              <button className={`chart-btn ${selectedTimeRange === '7D' ? 'chart-btn--active' : ''}`} onClick={() => setSelectedTimeRange('7D')}>7D</button>
+              <button className={`chart-btn ${selectedTimeRange === '24H' ? 'chart-btn--active' : ''}`} onClick={() => setSelectedTimeRange('24H')}>24H</button>
+            </div>
+          </div>
+          <ResponsiveContainer width="100%" height={280}>
+            <AreaChart data={revenueData}>
+              <defs>
+                <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#00ff88" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#00ff88" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" />
+              <XAxis dataKey="date" stroke="#666" fontSize={11} />
+              <YAxis stroke="#666" fontSize={11} tickFormatter={(value) => `₹${value / 1000}k`} />
+              <Tooltip
+                contentStyle={{ backgroundColor: '#0d0d0d', border: '1px solid #1a1a1a', borderRadius: '10px', color: '#fff' }}
+                formatter={(value: number, name: string) => [formatCurrency(value), name]}
+              />
+              <Legend />
+              <Area type="monotone" dataKey="total" stroke="#00ff88" fillOpacity={1} fill="url(#colorTotal)" name="Total Revenue" />
+              <Line type="monotone" dataKey="memberships" stroke="#3b82f6" name="Memberships" strokeWidth={2} dot={false} />
+              <Line type="monotone" dataKey="ptSessions" stroke="#a855f7" name="PT Sessions" strokeWidth={2} dot={false} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="dash-card">
+          <div className="dash-card__header">
+            <div className="dash-card__title">
+              <PieChartIcon size={18} />
+              Membership Distribution
+            </div>
+          </div>
+          <div className="distribution-chart">
+            <div className="pie-container">
+              <ResponsiveContainer width="100%" height={160}>
+                <PieChart>
+                  <Pie
+                    data={distribution}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={45}
+                    outerRadius={75}
+                    paddingAngle={3}
+                    dataKey="value"
+                  >
+                    {distribution.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{ backgroundColor: '#0d0d0d', border: '1px solid #1a1a1a', borderRadius: '10px', color: '#fff' }}
+                    formatter={(value: number) => [`${value}%`, 'Share']}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="distribution-legend">
+              {distribution.map((item, idx) => (
+                <div key={idx} className="legend-row">
+                  <div className="legend-dot" style={{ backgroundColor: item.color }} />
+                  <span className="legend-name">{item.name}</span>
+                  <span className="legend-value">{item.count}</span>
+                  <span className="legend-percent">{item.value}%</span>
                 </div>
               ))}
             </div>
-          </Card>
-        )}
+          </div>
+        </div>
 
-        {/* Enhanced Class Schedule */}
-        <Card
-          title="Today's Classes"
-          action={<button className="card-action-btn">View All</button>}
-          className="dashboard__class-schedule"
-        >
-          <div className="class-schedule-enhanced">
-            {classManifest.map((cls, index) => (
-              <div key={index} className={`class-card class-card--${cls.status}`}>
-                <div className="class-header">
-                  <div className="class-time-info">
-                    <span className="class-time">{cls.time}</span>
-                    <span className={`class-status-badge class-status-badge--${cls.status}`}>
-                      {cls.status.replace('-', ' ')}
+        <div className="dash-card">
+          <div className="dash-card__header">
+            <div className="dash-card__title">
+              <Award size={18} />
+              Trainer Leaderboard
+            </div>
+          </div>
+          <div className="trainer-list">
+            {trainers.map((trainer, idx) => (
+              <div key={idx} className={`trainer-row ${idx === 0 ? 'trainer-row--gold' : idx === 1 ? 'trainer-row--silver' : idx === 2 ? 'trainer-row--bronze' : ''}`}>
+                <div className="trainer-rank">{idx + 1}</div>
+                <div className="trainer-info">
+                  <span className="trainer-name">{trainer.name}</span>
+                  <span className="trainer-role">{trainer.role}</span>
+                </div>
+                <div className="trainer-metrics">
+                  <div className="trainer-metric">
+                    <span className="trainer-metric__value revenue">{formatCurrency(trainer.revenue)}</span>
+                    <span className="trainer-metric__label">Revenue</span>
+                  </div>
+                  <div className="trainer-metric">
+                    <span className="trainer-metric__value sessions">{trainer.sessions}</span>
+                    <span className="trainer-metric__label">Sessions</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="dash-card">
+          <div className="dash-card__header">
+            <div className="dash-card__title">
+              <MapPin size={18} />
+              Live Floor Status
+            </div>
+            <span className="dash-card__badge">{floorMembers.filter(m => m.status === 'active').length} Active</span>
+          </div>
+          <div className="floor-list">
+            {floorMembers.map((member) => (
+              <div key={member.id} className="floor-member">
+                <div className="floor-member__info">
+                  <div className="floor-member__avatar">
+                    {member.name.split(' ').map(n => n[0]).join('')}
+                  </div>
+                  <div className="floor-member__details">
+                    <span className="floor-member__name">{member.name}</span>
+                    <span className="floor-member__type">{member.type}</span>
+                  </div>
+                </div>
+                <div className="floor-member__time">
+                  <span className="floor-member__checkin">{member.checkIn}</span>
+                  <span className="floor-member__duration">{member.duration}</span>
+                </div>
+                <div className={`floor-member__status floor-member__status--${member.status}`}>
+                  <span className="status-dot" />
+                  {member.status === 'active' ? 'check-in' : 'denied'}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="dash-card">
+          <div className="dash-card__header">
+            <div className="dash-card__title">
+              <Calendar size={18} />
+              Today's Classes
+            </div>
+            <button className="dash-card__action">View All</button>
+          </div>
+          <div className="classes-list">
+            {classes.map((cls, idx) => (
+              <div key={idx} className={`class-item class-item--${cls.status === 'in-progress' ? 'progress' : 'upcoming'}`}>
+                <div className="class-item__header">
+                  <div className="class-item__time-section">
+                    <span className="class-item__time">{cls.time}</span>
+                    <span className={`class-item__badge class-item__badge--${cls.status === 'in-progress' ? 'progress' : 'upcoming'}`}>
+                      {cls.status === 'in-progress' ? 'In Progress' : 'Upcoming'}
                     </span>
                   </div>
-                  <div className="class-capacity-info">
-                    <span className="capacity-text">{cls.enrolled}/{cls.capacity}</span>
+                  <div className="class-item__capacity">
+                    <span className="class-item__count">{cls.enrolled}/{cls.capacity}</span>
                     <div className="capacity-bar">
                       <div
                         className="capacity-fill"
                         style={{
-                          width: `${getCapacityPercent(cls.enrolled, cls.capacity)}%`,
-                          backgroundColor: getCapacityColor(getCapacityPercent(cls.enrolled, cls.capacity))
+                          width: `${(cls.enrolled / cls.capacity) * 100}%`,
+                          backgroundColor: getCapacityColor((cls.enrolled / cls.capacity) * 100)
                         }}
                       />
                     </div>
                   </div>
                 </div>
-                <div className="class-details">
-                  <h4 className="class-name">{cls.name}</h4>
-                  <span className="class-trainer">with {cls.trainer}</span>
+                <div className="class-item__details">
+                  <span className="class-item__name">{cls.name}</span>
+                  <span className="class-item__trainer">with {cls.trainer}</span>
                 </div>
               </div>
             ))}
           </div>
-        </Card>
+        </div>
 
-        {/* Enhanced Alerts & Notifications */}
-        <Card
-          title="System Alerts"
-          action={
-            <div className="alerts-controls">
-              <span className="alert-count">{alerts.filter(a => a.type === 'danger' || a.type === 'warning').length} Active</span>
-              <button className="card-action-btn">•••</button>
+        <div className="dash-card">
+          <div className="dash-card__header">
+            <div className="alerts-header">
+              <div className="dash-card__title">
+                <AlertTriangle size={18} />
+                System Alerts
+              </div>
+              <span className="alerts-count">{alerts.filter(a => a.type === 'critical' || a.type === 'warning').length}</span>
             </div>
-          }
-          className="dashboard__alerts-enhanced"
-        >
-          <div className="alerts-enhanced">
+          </div>
+          <div className="alerts-list">
             {alerts.map((alert) => (
-              <div key={alert.id} className={`alert-card alert-card--${alert.type}`}>
-                <div className="alert-header">
-                  <span className="alert-icon">{getAlertIcon(alert.type)}</span>
-                  <div className="alert-info">
-                    <span className="alert-title">{alert.title}</span>
-                    <span className="alert-time">{alert.time}</span>
+              <div key={alert.id} className={`alert-item alert-item--${alert.type}`}>
+                <div className="alert-item__header">
+                  <div className="alert-item__icon">
+                    {getAlertIcon(alert.type)}
                   </div>
-                  <button className="alert-dismiss">×</button>
+                  <div className="alert-item__content">
+                    <div className="alert-item__title">{alert.title}</div>
+                    <div className="alert-item__desc">{alert.description}</div>
+                    <div className="alert-item__time">{alert.time}</div>
+                  </div>
+                  <button className="alert-item__dismiss" onClick={() => dismissAlert(alert.id)}>
+                    <X size={14} />
+                  </button>
                 </div>
-                {alert.description && (
-                  <p className="alert-description">{alert.description}</p>
-                )}
               </div>
             ))}
           </div>
-        </Card>
+        </div>
+
+        <div className="dash-card">
+          <div className="dash-card__header">
+            <div className="dash-card__title">
+              <ShoppingBag size={18} />
+              Supplement Sales
+            </div>
+          </div>
+          <div className="retail-stats">
+            <div className="retail-stat">
+              <div className="retail-stat__value">{formatCurrency(retailProducts.reduce((sum, p) => sum + p.revenue, 0))}</div>
+              <div className="retail-stat__label">Total Revenue</div>
+            </div>
+            <div className="retail-stat">
+              <div className="retail-stat__value">{retailProducts.reduce((sum, p) => sum + p.sold, 0)}</div>
+              <div className="retail-stat__label">Units Sold</div>
+            </div>
+            <div className="retail-stat">
+              <div className="retail-stat__value">{retailProducts.length}</div>
+              <div className="retail-stat__label">Products</div>
+            </div>
+          </div>
+          <div className="retail-products">
+            {retailProducts.map((product, idx) => (
+              <div key={idx} className="retail-product">
+                <span className="retail-product__name">{product.name}</span>
+                <span className="retail-product__sold">{product.sold} sold</span>
+                <span className="retail-product__revenue">{formatCurrency(product.revenue)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   )
