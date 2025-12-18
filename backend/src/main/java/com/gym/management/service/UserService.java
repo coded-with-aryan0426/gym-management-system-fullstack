@@ -9,16 +9,11 @@ import com.gym.management.model.MembershipStatus;
 import com.gym.management.repository.RoleRepository;
 import com.gym.management.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -131,10 +126,6 @@ public class UserService {
             dto.setEmail(user.getEmail());
             dto.setPhone(user.getPhone());
             dto.setCreatedAt(user.getCreatedAt());
-
-            // Set createdToday flag for sorting
-            boolean createdToday = user.getCreatedAt() != null &&
-                    user.getCreatedAt().toLocalDate().equals(today);
 
             // Fetch membership
             List<Membership> memberships = membershipRepository.findByUserUserId(user.getUserId());

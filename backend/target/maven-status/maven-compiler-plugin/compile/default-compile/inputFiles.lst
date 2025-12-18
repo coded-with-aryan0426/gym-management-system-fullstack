@@ -15,6 +15,7 @@
 /Users/aryan/Intership/backend/src/main/java/com/gym/management/config/DataMigrationConfig.java
 /Users/aryan/Intership/backend/src/main/java/com/gym/management/repository/PTSessionRepository.java
 /Users/aryan/Intership/backend/src/main/java/com/gym/management/model/StaffRole.java
+/Users/aryan/Intership/backend/src/main/java/com/gym/management/dto/PageResponse.java
 /Users/aryan/Intership/backend/src/main/java/com/gym/management/dto/BlackoutDayDTO.java
 /Users/aryan/Intership/backend/src/main/java/com/gym/management/controller/MembershipController.java
 /Users/aryan/Intership/backend/src/main/java/com/gym/management/dto/PTSessionDTO.java
