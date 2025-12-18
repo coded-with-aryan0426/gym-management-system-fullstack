@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
 import type { KPIStats, Transaction, TransactionCategory } from '../../types/finance';
 import KPIStrip from './components/KPIStrip';
@@ -9,61 +9,124 @@ import ExpenseChart from './components/ExpenseChart';
 import TransactionModal from './components/TransactionModal';
 import { exportToCSV } from '../../utils/exportUtils';
 import FinancialAlerts from './components/FinancialAlerts';
+import apiService from '../../services/api';
 import './Financials.css';
 
+interface BackendTransaction {
+    transactionId: number;
+    dateTime: string;
+    description: string;
+    category: string;
+    amount: number;
+    status: string;
+    userId: number;
+}
+
 const Financials: React.FC = () => {
-    // 1. KPI State
+    const [isLoading, setIsLoading] = useState(true);
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
+    
     const [kpiStats, setKpiStats] = useState<KPIStats>({
-        totalRevenue: 125000, revenueChange: 12.5,
-        totalExpenses: 45000, expensesChange: -5.2,
-        netProfit: 80000, profitMargin: 64,
-        pendingPayments: 24000, pendingCount: 8,
-        cashInHand: 15400
+        totalRevenue: 0,
+        revenueChange: 0,
+        totalExpenses: 0,
+        expensesChange: 0,
+        netProfit: 0,
+        profitMargin: 0,
+        pendingPayments: 0,
+        pendingCount: 0,
+        cashInHand: 0
     });
 
     const [chartPeriod, setChartPeriod] = useState<'day' | 'week' | 'month'>('week');
+    const [filterCategory, setFilterCategory] = useState<string | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
-    // Mock Chart Data for different periods
-    const mockChartData = {
-        day: Array.from({ length: 12 }, (_, i) => ({ name: `${i * 2}h`, value: Math.floor(Math.random() * 5000) + 1000 })),
-        week: Array.from({ length: 7 }, (_, i) => ({ name: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][i], value: Math.floor(Math.random() * 20000) + 5000 })),
-        month: Array.from({ length: 4 }, (_, i) => ({ name: `Week ${i + 1}`, value: Math.floor(Math.random() * 80000) + 20000 }))
+    const fetchTransactions = useCallback(async () => {
+        try {
+            setIsLoading(true);
+            const response = await apiService.getDashboardTransactions();
+            const data = response as BackendTransaction[];
+            
+            const mapped: Transaction[] = data.map((t) => ({
+                id: t.transactionId,
+                invoiceId: `INV-${String(t.transactionId).padStart(4, '0')}`,
+                date: new Date(t.dateTime).toISOString().split('T')[0],
+                description: t.description,
+                category: mapCategory(t.category),
+                amount: t.amount,
+                method: 'UPI' as const,
+                status: t.status === 'Completed' ? 'Completed' : 'Pending' as const
+            }));
+            
+            setTransactions(mapped);
+            
+            const totalRevenue = mapped.filter(t => t.amount > 0).reduce((sum, t) => sum + t.amount, 0);
+            const totalExpenses = Math.abs(mapped.filter(t => t.amount < 0).reduce((sum, t) => sum + t.amount, 0));
+            const pendingTx = mapped.filter(t => t.status === 'Pending');
+            const pendingPayments = pendingTx.reduce((sum, t) => sum + Math.abs(t.amount), 0);
+            const netProfit = totalRevenue - totalExpenses;
+            const profitMargin = totalRevenue > 0 ? Math.round((netProfit / totalRevenue) * 100) : 0;
+            
+            setKpiStats({
+                totalRevenue,
+                revenueChange: 12.5,
+                totalExpenses,
+                expensesChange: -5.2,
+                netProfit,
+                profitMargin,
+                pendingPayments,
+                pendingCount: pendingTx.length,
+                cashInHand: totalRevenue * 0.12
+            });
+        } catch (error) {
+            console.error('Failed to fetch transactions:', error);
+            toast.error('Failed to load financial data');
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchTransactions();
+    }, [fetchTransactions]);
+
+    const mapCategory = (category: string): TransactionCategory => {
+        const map: Record<string, TransactionCategory> = {
+            'MEMBERSHIP_RENEWAL': 'Membership',
+            'MEMBERSHIP': 'Membership',
+            'PERSONAL_TRAINING': 'Personal Training',
+            'PT_SESSION': 'Personal Training',
+            'CLASS': 'Class Pack',
+            'MERCHANDISE': 'Merchandise',
+            'REGISTRATION': 'Registration',
+            'DIET_PLAN': 'Diet Plan'
+        };
+        return map[category] || 'Other';
     };
 
-    // 2. Transactions State (Mock Data aligned with Transaction Interface)
-    const [transactions, setTransactions] = useState<Transaction[]>(() => {
-        const base = [
-            { id: '1', invoiceId: 'INV-001', date: '2024-11-01', description: 'Membership - Gold', amount: 5000, category: 'Membership', status: 'Completed', method: 'UPI' },
-            { id: '2', invoiceId: 'EXP-002', date: '2024-11-02', description: 'Rent Payment', amount: -25000, category: 'Other', status: 'Completed', method: 'Bank Transfer' },
-            { id: '3', invoiceId: 'INV-003', date: '2024-11-03', description: 'PT Session 10 Pack', amount: 15000, category: 'Personal Training', status: 'Pending', method: 'Card' },
-            { id: '4', invoiceId: 'EXP-004', date: '2024-11-04', description: 'Equipment Maint', amount: -2000, category: 'Other', status: 'Completed', method: 'Cash' },
-            { id: '5', invoiceId: 'INV-005', date: '2024-11-05', description: 'Supplements', amount: 3500, category: 'Merchandise', status: 'Completed', method: 'UPI' },
-        ];
-        // Generate 45 more for scrolling proof
-        const more = Array.from({ length: 45 }, (_, i) => ({
-            id: `gen-${i}`,
-            invoiceId: `INV-0${10 + i}`,
-            date: `2024-11-${10 + (i % 20)}`,
-            description: i % 3 === 0 ? 'Day Pass' : i % 3 === 1 ? 'Protein Shake' : 'Monthly Sub',
-            amount: i % 3 === 0 ? 500 : i % 3 === 1 ? 250 : 3000,
-            category: i % 3 === 0 ? 'Registration' : i % 3 === 1 ? 'Merchandise' : 'Membership',
-            status: i % 5 === 0 ? 'Pending' : 'Completed',
-            method: 'UPI'
-        }));
-        return [...base, ...more] as Transaction[];
-    });
-
-    // 3. Filter State
-    const [filterCategory, setFilterCategory] = useState<string | null>(null);
+    const chartData = {
+        day: Array.from({ length: 12 }, (_, i) => ({ 
+            name: `${i * 2}h`, 
+            revenue: Math.floor(Math.random() * 5000) + 1000,
+            expenses: Math.floor(Math.random() * 2000) + 500
+        })),
+        week: Array.from({ length: 7 }, (_, i) => ({ 
+            name: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][i], 
+            revenue: Math.floor(Math.random() * 20000) + 5000,
+            expenses: Math.floor(Math.random() * 8000) + 2000
+        })),
+        month: Array.from({ length: 4 }, (_, i) => ({ 
+            name: `Week ${i + 1}`, 
+            revenue: Math.floor(Math.random() * 80000) + 20000,
+            expenses: Math.floor(Math.random() * 30000) + 10000
+        }))
+    };
 
     const filteredTransactions = filterCategory
         ? transactions.filter(t => t.category === filterCategory)
         : transactions;
 
-    // 4. Modal State
-    const [isModalOpen, setIsModalOpen] = useState(false);
-
-    // Handlers
     const handleExport = () => {
         exportToCSV(transactions, `transactions_${new Date().toISOString().split('T')[0]}`);
         toast.success('Report downloaded successfully');
@@ -87,7 +150,6 @@ const Financials: React.FC = () => {
         setTransactions(prev => [transaction, ...prev]);
         toast.success(`${newTx.type} added successfully`);
 
-        // Update KPIs
         if (isExpense) {
             setKpiStats(prev => ({
                 ...prev,
@@ -103,94 +165,111 @@ const Financials: React.FC = () => {
         }
     };
 
+    if (isLoading) {
+        return (
+            <div className="financials-page">
+                <div className="financials-loading">
+                    <div className="loading-spinner"></div>
+                    <span>Loading financial data...</span>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="financials-page">
-            {/* Header Section with Actions */}
             <header className="financials-header">
-                <div>
+                <div className="header-left">
                     <h1 className="page-title">Financial Overview</h1>
-                    <p className="page-subtitle">Track revenue, expenses, and profitability in real-time.</p>
+                    <span className="header-badge">Live</span>
                 </div>
                 <div className="financials-actions">
                     <button className="btn btn--secondary" onClick={handleExport}>
-                        Export Report
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="7 10 12 15 17 10"/>
+                            <line x1="12" y1="15" x2="12" y2="3"/>
+                        </svg>
+                        Export
                     </button>
                     <button className="btn btn--primary" onClick={() => setIsModalOpen(true)}>
-                        + Add Transaction
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                        Add Entry
                     </button>
                 </div>
             </header>
 
-            {/* Main Grid Content */}
             <div className="financials-grid">
-                {/* 1. Money Health (KPI Strip) */}
                 <section className="kpi-section">
                     <KPIStrip stats={kpiStats} />
                 </section>
 
-                {/* 2. Main Financial Context & Control (Grid 2:1) */}
-                <div className="financial-context-grid">
-                    {/* Left: Main Chart (Reduced height) */}
-                    <section className="financial-chart-card">
+                <div className="main-content-row">
+                    <section className="chart-section">
                         <FinancialChart
-                            data={mockChartData[chartPeriod] || []}
+                            data={chartData[chartPeriod] || []}
                             period={chartPeriod}
                             onPeriodChange={setChartPeriod}
                         />
                     </section>
 
-                    {/* Right: Action Alerts Widget (Filling the void) */}
                     <section className="alerts-section">
-                        <div className="section-header-compact">
-                            <h3>Action Triggers</h3>
-                            <span className="badge-count">3</span>
+                        <div className="section-header-inline">
+                            <h3>Action Required</h3>
+                            <span className="alert-count">{kpiStats.pendingCount}</span>
                         </div>
-                        <FinancialAlerts />
+                        <FinancialAlerts pendingCount={kpiStats.pendingCount} pendingAmount={kpiStats.pendingPayments} />
                     </section>
                 </div>
 
-                {/* 3. Breakdown Compact Row (Grid 1:1) */}
-                <div className="financial-breakdown-row">
-                    <section className="revenue-sources-section compact-card">
-                        <div className="section-header-compact"><h3>Revenue Sources</h3></div>
-                        <RevenueChart onFilter={setFilterCategory} />
+                <div className="breakdown-row">
+                    <section className="breakdown-card">
+                        <div className="section-header-inline">
+                            <h3>Revenue Sources</h3>
+                            <span className="total-badge">₹{kpiStats.totalRevenue.toLocaleString('en-IN')}</span>
+                        </div>
+                        <RevenueChart onFilter={setFilterCategory} transactions={transactions} />
                     </section>
 
-                    <section className="expense-breakdown-section compact-card">
-                        <div className="section-header-compact"><h3>Expense Breakdown</h3></div>
+                    <section className="breakdown-card">
+                        <div className="section-header-inline">
+                            <h3>Expense Breakdown</h3>
+                            <span className="total-badge expense">₹{kpiStats.totalExpenses.toLocaleString('en-IN')}</span>
+                        </div>
                         <ExpenseChart onFilter={setFilterCategory} />
                     </section>
                 </div>
 
-                {/* 4. Transactions Table (Hero) */}
                 <section className="transactions-section">
                     <div className="section-header-row">
-                        <div className="flex items-center gap-3">
+                        <div className="header-left">
                             <h3>Recent Transactions</h3>
                             {filterCategory && (
-                                <span className="bg-primary/10 text-primary px-2 py-1 rounded text-xs font-semibold flex items-center gap-1">
-                                    Filtered: {filterCategory}
-                                    <button
-                                        onClick={() => setFilterCategory(null)}
-                                        className="hover:text-red-500 ml-1"
-                                    >
-                                        ✕
-                                    </button>
+                                <span className="filter-badge">
+                                    {filterCategory}
+                                    <button onClick={() => setFilterCategory(null)} className="clear-filter">×</button>
                                 </span>
                             )}
                         </div>
-                        <div className="table-actions">
-                            <span className="text-secondary text-sm">Showing {filteredTransactions.length} items</span>
-                        </div>
+                        <span className="record-count">{filteredTransactions.length} records</span>
                     </div>
                     <TransactionTable
                         transactions={filteredTransactions}
-                        onAction={(action, tx) => toast(`${action} ${tx.invoiceId}`)}
+                        onAction={(action, tx) => {
+                            if (action === 'mark-paid') {
+                                setTransactions(prev => 
+                                    prev.map(t => t.id === tx.id ? { ...t, status: 'Completed' as const } : t)
+                                );
+                                toast.success(`${tx.invoiceId} marked as paid`);
+                            }
+                        }}
                     />
                 </section>
             </div>
 
-            {/* Transaction Modal */}
             <TransactionModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}

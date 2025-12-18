@@ -1,5 +1,4 @@
-import React from 'react';
-import { Card, Badge, DataTable } from '../../../components/ui';
+import React, { useState, useMemo } from 'react';
 import type { Transaction } from '../../../types/finance';
 import './TransactionTable.css';
 
@@ -9,116 +8,127 @@ interface TransactionTableProps {
 }
 
 const TransactionTable: React.FC<TransactionTableProps> = ({ transactions, onAction }) => {
+    const [search, setSearch] = useState('');
+    const [statusFilter, setStatusFilter] = useState<string>('all');
 
-    const getInlineActions = (tx: Transaction) => {
-        if (tx.status === 'Pending') {
-            return (
-                <div className="tx-actions">
-                    <button className="tx-action-btn primary-text" title="Mark Paid" onClick={(e) => { e.stopPropagation(); onAction?.('mark-paid', tx); }}>
-                        ✓ Paid
-                    </button>
-                    <button className="tx-action-btn" title="View Options" onClick={(e) => { e.stopPropagation(); onAction?.('view', tx); }}>
-                        ⋮
-                    </button>
-                </div>
-            )
-        }
-        return (
-            <div className="tx-actions">
-                <button className="tx-action-btn" title="View Details" onClick={(e) => { e.stopPropagation(); onAction?.('view', tx); }}>
-                    View
-                </button>
-            </div>
-        )
+    const filtered = useMemo(() => {
+        return transactions.filter(tx => {
+            const matchSearch = !search || 
+                tx.description.toLowerCase().includes(search.toLowerCase()) ||
+                tx.invoiceId.toLowerCase().includes(search.toLowerCase());
+            const matchStatus = statusFilter === 'all' || tx.status === statusFilter;
+            return matchSearch && matchStatus;
+        });
+    }, [transactions, search, statusFilter]);
+
+    const formatDate = (dateStr: string) => {
+        const d = new Date(dateStr);
+        return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
     };
 
-    const columns = [
-        {
-            key: 'date',
-            header: 'Date',
-            width: '120px',
-            render: (tx: Transaction) => (
-                <div className="tx-date-cell">
-                    <span className="tx-date font-mono">{tx.date}</span>
-                    <span className="tx-id text-secondary text-xs">#{tx.invoiceId}</span>
-                </div>
-            )
-        },
-        {
-            key: 'description',
-            header: 'Description',
-            render: (tx: Transaction) => (
-                <div className="tx-desc-cell">
-                    <div className="tx-main font-medium">{tx.description}</div>
-                    <div className="tx-sub text-xs text-secondary">{tx.relatedUserName || 'General'}</div>
-                </div>
-            )
-        },
-        {
-            key: 'category',
-            header: 'Category',
-            width: '140px',
-            render: (tx: Transaction) => <span className="tx-category-badge text-xs">{tx.category}</span>
-        },
-        {
-            key: 'amount',
-            header: 'Amount',
-            width: '120px',
-            render: (tx: Transaction) => (
-                <span className={`tx-amount font-mono font-bold ${tx.amount > 0 ? 'text-emerald' : 'text-crimson'}`}>
-                    {new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(tx.amount)}
-                </span>
-            )
-        },
-        {
-            key: 'status',
-            header: 'Status',
-            width: '100px',
-            render: (tx: Transaction) => (
-                <Badge variant={
-                    tx.status === 'Completed' ? 'active' :
-                        tx.status === 'Pending' ? 'pending' : 'expired'
-                }>
-                    {tx.status}
-                </Badge>
-            )
-        },
-        {
-            key: 'actions',
-            header: 'Actions',
-            width: '120px',
-            render: getInlineActions
-        }
-    ];
+    const formatAmount = (amount: number) => {
+        const formatted = new Intl.NumberFormat('en-IN', {
+            style: 'currency',
+            currency: 'INR',
+            maximumFractionDigits: 0
+        }).format(Math.abs(amount));
+        return amount >= 0 ? `+${formatted}` : `-${formatted}`;
+    };
 
     return (
-        <div className="transaction-table-container">
-            {/* Filters Row - Dense */}
-            <div className="tx-filters-dense">
-                <div className="search-wrapper">
-                    <span className="search-icon">🔍</span>
-                    <input type="text" placeholder="Search..." className="tx-search-dense" />
+        <div className="tx-table-wrapper">
+            <div className="tx-filters">
+                <div className="search-box">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="M21 21l-4.35-4.35"/>
+                    </svg>
+                    <input
+                        type="text"
+                        placeholder="Search transactions..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                    />
                 </div>
-                <div className="filter-group">
-                    <select className="tx-select-dense"><option>Status: All</option><option>Pending</option></select>
-                    <select className="tx-select-dense"><option>Type: All</option><option>Income</option></select>
-                </div>
+                <select 
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="status-select"
+                >
+                    <option value="all">All Status</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Pending">Pending</option>
+                </select>
             </div>
 
-            {/* Table Area */}
-            <div className="tx-table-scroll-area">
-                <DataTable
-                    data={transactions}
-                    columns={columns}
-                    keyExtractor={(tx) => tx.id}
-                    onRowClick={(tx) => onAction?.('view', tx)}
-                />
+            <div className="tx-table-scroll">
+                <table className="tx-table">
+                    <thead>
+                        <tr>
+                            <th className="col-date">Date</th>
+                            <th className="col-desc">Description</th>
+                            <th className="col-cat">Category</th>
+                            <th className="col-amount">Amount</th>
+                            <th className="col-status">Status</th>
+                            <th className="col-actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {filtered.map((tx, i) => (
+                            <tr 
+                                key={tx.id} 
+                                className={i % 2 === 0 ? 'even' : 'odd'}
+                                onClick={() => onAction?.('view', tx)}
+                            >
+                                <td className="col-date">
+                                    <span className="date-text">{formatDate(tx.date)}</span>
+                                    <span className="invoice-id">{tx.invoiceId}</span>
+                                </td>
+                                <td className="col-desc">
+                                    <span className="desc-text">{tx.description}</span>
+                                </td>
+                                <td className="col-cat">
+                                    <span className="category-badge">{tx.category}</span>
+                                </td>
+                                <td className={`col-amount ${tx.amount >= 0 ? 'positive' : 'negative'}`}>
+                                    {formatAmount(tx.amount)}
+                                </td>
+                                <td className="col-status">
+                                    <span className={`status-badge status-badge--${tx.status.toLowerCase()}`}>
+                                        {tx.status}
+                                    </span>
+                                </td>
+                                <td className="col-actions">
+                                    {tx.status === 'Pending' ? (
+                                        <button 
+                                            className="action-btn action-btn--primary"
+                                            onClick={(e) => { e.stopPropagation(); onAction?.('mark-paid', tx); }}
+                                        >
+                                            Mark Paid
+                                        </button>
+                                    ) : (
+                                        <button 
+                                            className="action-btn"
+                                            onClick={(e) => { e.stopPropagation(); onAction?.('view', tx); }}
+                                        >
+                                            View
+                                        </button>
+                                    )}
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+                
+                {filtered.length === 0 && (
+                    <div className="tx-empty">
+                        <span>No transactions found</span>
+                    </div>
+                )}
             </div>
 
-            {/* Trust Label - This is the source of truth */}
-            <div className="tx-trust-label">
-                <span className="trust-icon">◉</span>
-                <span>This table drives all calculations above</span>
+            <div className="tx-footer">
+                <span className="footer-info">Showing {filtered.length} of {transactions.length} transactions</span>
             </div>
         </div>
     );

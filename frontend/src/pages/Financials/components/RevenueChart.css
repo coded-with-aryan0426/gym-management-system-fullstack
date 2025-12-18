@@ -1,62 +1,129 @@
-/* Revenue Chart Container */
-.revenue-chart-container {
+.revenue-chart {
     display: flex;
     flex-direction: column;
     height: 100%;
+    flex: 1;
+}
+
+.revenue-chart-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--text-tertiary);
+    font-size: 0.8125rem;
 }
 
 .chart-area {
+    display: flex;
+    align-items: center;
     flex: 1;
-    min-height: 160px;
+    min-height: 140px;
+    height: 140px;
 }
 
-/* Health Evaluation Strip */
-.chart-evaluation {
+.chart-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-left: 8px;
+}
+
+.legend-item {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 8px 12px;
+    background: none;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-align: left;
+}
+
+.legend-item:hover {
+    background: var(--bg-tertiary);
+}
+
+.legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+.legend-name {
+    font-size: 0.6875rem;
+    color: var(--text-secondary);
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 80px;
+}
+
+.legend-percent {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    font-variant-numeric: tabular-nums;
+}
+
+.chart-insight {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
     border-radius: 6px;
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
     margin-top: 8px;
 }
 
-.chart-evaluation--healthy {
-    background: rgba(16, 185, 129, 0.1);
+.chart-insight.healthy {
+    background: rgba(16, 185, 129, 0.08);
     border: 1px solid rgba(16, 185, 129, 0.2);
 }
 
-.chart-evaluation--warning {
-    background: rgba(245, 158, 11, 0.1);
-    border: 1px solid rgba(245, 158, 11, 0.2);
+.insight-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-emerald);
 }
 
-.evaluation-indicator {
-    font-size: 0.625rem;
-}
-
-.chart-evaluation--healthy .evaluation-indicator {
-    color: var(--color-emerald);
-}
-
-.chart-evaluation--warning .evaluation-indicator {
-    color: var(--color-amber);
-}
-
-.evaluation-text {
+.insight-text {
     color: var(--text-secondary);
 }
 
-.evaluation-text strong {
+.insight-text strong {
     color: var(--text-primary);
 }
 
-.evaluation-status {
-    color: var(--color-emerald);
-    margin-left: 4px;
-    font-weight: 500;
+.revenue-tooltip {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    background: rgba(9, 9, 11, 0.95);
+    border: 1px solid var(--border-secondary);
+    border-radius: 6px;
+    padding: 8px 10px;
 }
 
-.chart-evaluation--warning .evaluation-status {
-    color: var(--color-amber);
+.tooltip-name {
+    font-size: 0.6875rem;
+    color: var(--text-tertiary);
+}
+
+.tooltip-value {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+.tooltip-percent {
+    font-size: 0.625rem;
+    font-weight: 600;
+    color: var(--color-emerald);
 }

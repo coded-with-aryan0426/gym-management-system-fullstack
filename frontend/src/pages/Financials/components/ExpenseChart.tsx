@@ -2,72 +2,79 @@ import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import './ExpenseChart.css';
 
-const data = [
-    { name: 'Salaries', value: 65000, color: '#F59E0B', percentOfRevenue: 34 },
-    { name: 'Rent', value: 45000, color: '#EF4444', percentOfRevenue: 23 },
-    { name: 'Utilities', value: 12000, color: '#3B82F6', percentOfRevenue: 6 },
-    { name: 'Equipment', value: 8500, color: '#10B981', percentOfRevenue: 4 },
-    { name: 'Maintenance', value: 5000, color: '#8B5CF6', percentOfRevenue: 3 },
+const mockData = [
+    { name: 'Salaries', value: 65000, percent: 48, color: '#F59E0B' },
+    { name: 'Rent', value: 35000, percent: 26, color: '#EF4444' },
+    { name: 'Utilities', value: 15000, percent: 11, color: '#3B82F6' },
+    { name: 'Equipment', value: 12000, percent: 9, color: '#10B981' },
+    { name: 'Other', value: 8000, percent: 6, color: '#8B5CF6' },
 ];
-
-const totalExpensePercent = data.reduce((sum, d) => sum + d.percentOfRevenue, 0);
-const isHealthy = totalExpensePercent <= 70; // Healthy if expenses <= 70% of revenue
-
-// Find highest expense category
-const topExpense = data.reduce((max, d) => d.value > max.value ? d : max, data[0]);
 
 interface ExpenseChartProps {
     onFilter?: (category: string) => void;
 }
 
 const ExpenseChart: React.FC<ExpenseChartProps> = ({ onFilter }) => {
+    const total = mockData.reduce((sum, d) => sum + d.value, 0);
+    const topExpense = mockData[0];
+
+    const CustomTooltip = ({ active, payload }: any) => {
+        if (!active || !payload?.length) return null;
+        const data = payload[0].payload;
+        return (
+            <div className="expense-tooltip">
+                <span className="tooltip-name">{data.name}</span>
+                <span className="tooltip-value">₹{data.value.toLocaleString('en-IN')}</span>
+                <span className="tooltip-percent">{data.percent}% of total</span>
+            </div>
+        );
+    };
+
     return (
-        <div className="expense-chart-container">
+        <div className="expense-chart">
             <div className="chart-area">
                 <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                         layout="vertical"
-                        data={data}
-                        margin={{ top: 5, right: 20, left: 5, bottom: 5 }}
-                        onClick={() => onFilter?.('Other')}
-                        style={{ cursor: 'pointer' }}
+                        data={mockData}
+                        margin={{ top: 0, right: 16, left: 0, bottom: 0 }}
                     >
                         <XAxis type="number" hide />
                         <YAxis
                             dataKey="name"
                             type="category"
-                            width={70}
-                            tick={{ fill: '#9ca3af', fontSize: 11 }}
+                            width={65}
                             axisLine={false}
                             tickLine={false}
+                            tick={{ fill: '#a1a1aa', fontSize: 10 }}
                         />
-                        <Tooltip
-                            contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', color: '#fff' }}
-                            cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-                            formatter={(value: number) => [`₹${value.toLocaleString()}`, 'Cost']}
-                        />
-                        <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={16}>
-                            {data.map((entry, index) => (
-                                <Cell
-                                    key={`cell-${index}`}
-                                    fill={entry.percentOfRevenue > 30 ? '#EF4444' : entry.color}
-                                />
+                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
+                        <Bar
+                            dataKey="value"
+                            radius={[0, 4, 4, 0]}
+                            barSize={14}
+                            style={{ cursor: 'pointer' }}
+                            onClick={(data) => onFilter?.('Other')}
+                        >
+                            {mockData.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={entry.color} />
                             ))}
                         </Bar>
                     </BarChart>
                 </ResponsiveContainer>
             </div>
 
-            {/* Expense Threshold Evaluation */}
-            <div className={`expense-evaluation ${isHealthy ? 'expense-evaluation--healthy' : 'expense-evaluation--critical'}`}>
-                <span className="expense-indicator">{isHealthy ? '✓' : '⚠'}</span>
-                <span className="expense-text">
-                    Total: <strong>{totalExpensePercent}%</strong> of revenue
-                    <span className="expense-status">{isHealthy ? '(Within budget)' : '(Over threshold)'}</span>
-                </span>
-                <span className="expense-top">
-                    Top: {topExpense.name} ({topExpense.percentOfRevenue}%)
-                </span>
+            <div className="expense-summary">
+                <div className="summary-row">
+                    <span className="summary-label">Total Expenses</span>
+                    <span className="summary-value">₹{total.toLocaleString('en-IN')}</span>
+                </div>
+                <div className="summary-insight">
+                    <span className="insight-indicator warning">!</span>
+                    <span className="insight-text">
+                        <strong>{topExpense.name}</strong> is {topExpense.percent}% of costs
+                    </span>
+                </div>
             </div>
         </div>
     );

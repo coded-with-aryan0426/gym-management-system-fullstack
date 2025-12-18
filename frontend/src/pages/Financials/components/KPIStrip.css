@@ -1,177 +1,110 @@
-/* ============================================================================
-   KPI Strip - 2-Tier Professional Layout
-   Tier 1: Urgent/Operational (Cash, Pending) - Larger, Left
-   Tier 2: Analytical (Profit, Burn) - Smaller, Right
-   ============================================================================ */
-
-.kpi-strip-grid {
+.kpi-strip {
     display: grid;
-    grid-template-columns: 1.4fr 1.4fr 1fr 1fr;
-    gap: 12px;
-    width: 100%;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
 }
 
-/* Base Card */
 .kpi-card {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 10px;
-    padding: 12px;
-    transition: all 0.15s ease;
-    border: 1px solid var(--border-secondary);
-    background: var(--bg-secondary);
-    border-radius: 6px;
+    padding: 12px 14px;
+    background: #0a0a0a;
+    border: 1px solid var(--border-primary);
+    border-radius: 8px;
+    transition: all 0.2s ease;
 }
 
 .kpi-card:hover {
+    border-color: var(--border-secondary);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-/* ════════════════════════════════════════════════════════════════════════════
-   TIER 1: URGENT - Larger, Bolder, Left Side
-   ════════════════════════════════════════════════════════════════════════════ */
-
-.kpi-card--tier1 {
-    padding: 14px;
-    min-height: 70px;
+.kpi-card--emerald {
+    border-left: 3px solid var(--color-emerald);
 }
 
-.kpi-card--hero {
-    background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(16, 185, 129, 0.08) 100%);
-    border-color: var(--color-emerald);
-    border-width: 1px;
+.kpi-card--crimson {
+    border-left: 3px solid var(--color-crimson);
 }
 
-.kpi-card--alert {
-    background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(245, 158, 11, 0.08) 100%);
-    border-color: var(--color-amber);
+.kpi-card--blue {
+    border-left: 3px solid var(--color-blue);
 }
 
-/* Pulse animation for overdue */
+.kpi-card--amber {
+    border-left: 3px solid var(--color-amber);
+}
+
+.kpi-card--zinc {
+    border-left: 3px solid var(--text-tertiary);
+}
+
 .kpi-card--pulse {
-    animation: urgentPulse 2s ease-in-out infinite;
+    animation: pulse 2s ease-in-out infinite;
 }
 
-@keyframes urgentPulse {
-
-    0%,
-    100% {
-        box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.3);
-    }
-
-    50% {
-        box-shadow: 0 0 0 6px rgba(245, 158, 11, 0);
-    }
+@keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.3); }
+    50% { box-shadow: 0 0 0 4px rgba(245, 158, 11, 0); }
 }
 
-.kpi-value--tier1 {
-    font-size: 1.875rem;
-    font-weight: 700;
-}
-
-/* ════════════════════════════════════════════════════════════════════════════
-   TIER 2: ANALYTICAL - Smaller, Subdued, Right Side
-   ════════════════════════════════════════════════════════════════════════════ */
-
-.kpi-card--tier2 {
-    padding: 10px;
-    min-height: 60px;
-    background: var(--bg-secondary);
-    border-color: var(--border-primary);
-}
-
-.kpi-card--tier2:hover {
-    background: var(--bg-tertiary);
-}
-
-.kpi-value--tier2 {
-    font-size: 1.125rem;
-    font-weight: 600;
-}
-
-.kpi-label--tier2 {
-    font-size: 0.6875rem;
-}
-
-/* ════════════════════════════════════════════════════════════════════════════
-   MICRO LABELS (Liquidity, Outstanding Risk, Monthly, Run Rate)
-   ════════════════════════════════════════════════════════════════════════════ */
-
-.kpi-micro-label {
-    font-size: 0.5625rem;
-    font-weight: 600;
-    color: var(--text-tertiary);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: -2px;
-}
-
-.kpi-micro-label--warning {
-    color: var(--color-amber);
-}
-
-/* ════════════════════════════════════════════════════════════════════════════
-   ICONS
-   ════════════════════════════════════════════════════════════════════════════ */
-
-.kpi-icon-wrapper {
+.kpi-icon {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border-radius: 8px;
     flex-shrink: 0;
 }
 
-.icon-small {
-    width: 32px;
-    height: 32px;
-}
-
-.icon-emerald {
-    color: var(--color-emerald);
+.kpi-icon--emerald {
     background: rgba(16, 185, 129, 0.12);
+    color: var(--color-emerald);
 }
 
-.icon-blue {
-    color: var(--color-blue);
-    background: rgba(59, 130, 246, 0.12);
-}
-
-.icon-amber {
-    color: var(--color-amber);
-    background: rgba(245, 158, 11, 0.12);
-}
-
-.icon-crimson {
-    color: var(--color-crimson);
+.kpi-icon--crimson {
     background: rgba(239, 68, 68, 0.12);
+    color: var(--color-crimson);
 }
 
-/* ════════════════════════════════════════════════════════════════════════════
-   CONTENT
-   ════════════════════════════════════════════════════════════════════════════ */
+.kpi-icon--blue {
+    background: rgba(59, 130, 246, 0.12);
+    color: var(--color-blue);
+}
 
-.kpi-content {
+.kpi-icon--amber {
+    background: rgba(245, 158, 11, 0.12);
+    color: var(--color-amber);
+}
+
+.kpi-icon--zinc {
+    background: rgba(161, 161, 170, 0.12);
+    color: var(--text-tertiary);
+}
+
+.kpi-data {
     display: flex;
     flex-direction: column;
     gap: 2px;
+    min-width: 0;
+    flex: 1;
 }
 
 .kpi-label {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--text-secondary);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    color: var(--text-tertiary);
     text-transform: uppercase;
     letter-spacing: 0.04em;
 }
 
 .kpi-value-row {
     display: flex;
-    flex-direction: column;
-    gap: 2px;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
 .kpi-value {
@@ -179,48 +112,52 @@
     font-weight: 700;
     color: var(--text-primary);
     line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
 }
 
-.kpi-trend {
-    font-size: 0.75rem;
-    font-weight: 500;
-}
-
-.kpi-detail {
+.kpi-change {
     font-size: 0.6875rem;
-    font-weight: 500;
-    color: var(--text-secondary);
-}
-
-.kpi-detail--alert {
-    color: var(--color-amber);
     font-weight: 600;
+    padding: 1px 5px;
+    border-radius: 4px;
 }
 
-.text-emerald {
+.kpi-change.positive {
     color: var(--color-emerald);
+    background: rgba(16, 185, 129, 0.12);
 }
 
-.text-crimson {
+.kpi-change.negative {
     color: var(--color-crimson);
+    background: rgba(239, 68, 68, 0.12);
 }
 
-/* ════════════════════════════════════════════════════════════════════════════
-   RESPONSIVE
-   ════════════════════════════════════════════════════════════════════════════ */
+.kpi-badge {
+    font-size: 0.625rem;
+    font-weight: 600;
+    color: var(--color-amber);
+    background: rgba(245, 158, 11, 0.15);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
 
-@media (max-width: 1200px) {
-    .kpi-strip-grid {
-        grid-template-columns: 1fr 1fr;
-    }
-
-    .kpi-card--tier2 {
-        min-height: auto;
+@media (max-width: 1100px) {
+    .kpi-strip {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
-@media (max-width: 640px) {
-    .kpi-strip-grid {
+@media (max-width: 500px) {
+    .kpi-strip {
         grid-template-columns: 1fr;
+    }
+    
+    .kpi-card {
+        padding: 10px 12px;
+    }
+    
+    .kpi-value {
+        font-size: 1.125rem;
     }
 }

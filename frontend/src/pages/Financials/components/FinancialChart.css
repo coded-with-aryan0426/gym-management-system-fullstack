@@ -1,222 +1,208 @@
-.financial-chart-card {
-    grid-column: span 2;
-    min-height: 350px;
+.financial-chart {
     display: flex;
     flex-direction: column;
-    padding: 0 !important;
-    /* Override Card padding */
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-primary);
-    overflow: visible;
+    height: 100%;
+    background: #0a0a0a;
 }
 
-.financial-chart__header {
+.chart-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    padding: 20px 24px;
+    align-items: flex-start;
+    padding: 14px 16px;
     border-bottom: 1px solid var(--border-primary);
+    flex-shrink: 0;
 }
 
-.financial-chart__title {
-    font-size: 1rem;
+.chart-title-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.chart-title {
+    font-size: 0.875rem;
     font-weight: 600;
     color: var(--text-primary);
     margin: 0;
 }
 
-.financial-chart__subtitle {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-}
-
-.period-toggle {
-    display: flex;
-    background: var(--bg-tertiary);
-    padding: 4px;
-    border-radius: 8px;
-    border: 1px solid var(--border-primary);
-}
-
-.period-btn {
-    padding: 6px 16px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: var(--text-secondary);
-    background: transparent;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.period-btn:hover {
-    color: var(--text-primary);
-}
-
-.period-btn.active {
-    background: var(--bg-secondary);
-    color: var(--text-primary);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-    font-weight: 600;
-}
-
-.financial-chart__visual {
-    flex: 1;
-    position: relative;
-    padding: 20px;
-    min-height: 250px;
-}
-
-.chart-svg {
-    width: 100%;
-    height: 100%;
-    overflow: visible;
-}
-
-.chart-point {
-    cursor: pointer;
-    transition: r 0.2s;
-}
-
-.chart-point:hover {
-    r: 8;
-    fill: var(--color-emerald);
-}
-
-.chart-tooltip {
-    position: absolute;
-    background: rgba(9, 9, 11, 0.95);
-    /* Zinc-950 opacity */
-    border: 1px solid var(--border-primary);
-    border-radius: 8px;
-    padding: 12px;
-    pointer-events: none;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    min-width: 160px;
-    z-index: 10;
-    transform: translate(-50%, -100%);
-    margin-top: -10px;
-}
-
-.tooltip-date {
-    font-size: 0.75rem;
-    color: var(--text-tertiary);
-    margin-bottom: 8px;
-    border-bottom: 1px solid var(--border-secondary);
-    padding-bottom: 4px;
-}
-
-.tooltip-row {
+.chart-summary {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 0.8125rem;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.summary-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.75rem;
     color: var(--text-secondary);
-    margin-bottom: 4px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
 }
 
-.tooltip-profit {
-    margin-top: 6px;
-    font-weight: 600;
-    font-size: 0.875rem;
-    text-align: right;
-    border-top: 1px solid var(--border-secondary);
-    padding-top: 4px;
-}
-
-.dot {
+.summary-dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
 }
 
-.dot.revenue {
+.summary-dot.emerald {
     background: var(--color-emerald);
 }
 
-.dot.expense {
+.summary-dot.crimson {
     background: var(--color-crimson);
 }
 
-/* Decision Banner - Actionable Insight Strip */
-.chart-decision-banner {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 10px 20px;
-    background: linear-gradient(90deg, rgba(16, 185, 129, 0.08) 0%, var(--bg-tertiary) 30%);
-    border-top: 1px solid var(--border-primary);
-    font-size: 0.8125rem;
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
+.summary-profit {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--color-emerald);
+    background: rgba(16, 185, 129, 0.12);
+    padding: 2px 6px;
+    border-radius: 4px;
 }
 
-.decision-insight {
+.period-toggle {
+    display: flex;
+    background: var(--bg-tertiary);
+    padding: 3px;
+    border-radius: 6px;
+    border: 1px solid var(--border-primary);
+}
+
+.period-btn {
+    padding: 4px 12px;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    color: var(--text-tertiary);
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.period-btn:hover {
+    color: var(--text-secondary);
+}
+
+.period-btn.active {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.chart-container {
+    flex: 1;
+    min-height: 180px;
+    height: 180px;
+    padding: 12px 8px 8px 0;
+}
+
+.chart-tooltip {
+    background: rgba(9, 9, 11, 0.95);
+    border: 1px solid var(--border-secondary);
+    border-radius: 8px;
+    padding: 10px 12px;
+    min-width: 150px;
+}
+
+.tooltip-header {
+    font-size: 0.6875rem;
+    color: var(--text-tertiary);
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border-secondary);
+    font-weight: 500;
+}
+
+.tooltip-row {
     display: flex;
     align-items: center;
     gap: 6px;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    padding: 3px 0;
 }
 
-.decision-indicator {
-    display: inline-flex;
+.tooltip-row .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.tooltip-row .dot.emerald {
+    background: var(--color-emerald);
+}
+
+.tooltip-row .dot.crimson {
+    background: var(--color-crimson);
+}
+
+.tooltip-value {
+    margin-left: auto;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+.tooltip-value.emerald {
+    color: var(--color-emerald);
+}
+
+.tooltip-divider {
+    height: 1px;
+    background: var(--border-secondary);
+    margin: 6px 0;
+}
+
+.tooltip-row.profit {
+    font-weight: 600;
+}
+
+.chart-insight {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: linear-gradient(90deg, rgba(16, 185, 129, 0.08) 0%, transparent 50%);
+    border-top: 1px solid var(--border-primary);
+    font-size: 0.75rem;
+    flex-shrink: 0;
+}
+
+.insight-icon {
+    display: flex;
     align-items: center;
     justify-content: center;
     width: 18px;
     height: 18px;
     border-radius: 50%;
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--color-emerald);
     font-size: 0.625rem;
     font-weight: 700;
 }
 
-.decision-indicator--positive {
-    background: rgba(16, 185, 129, 0.2);
-    color: var(--color-emerald);
-}
-
-.decision-indicator--negative {
-    background: rgba(239, 68, 68, 0.2);
-    color: var(--color-crimson);
-}
-
-.decision-text {
-    color: var(--text-primary);
-    font-weight: 500;
-}
-
-.decision-text strong {
-    color: var(--color-emerald);
-}
-
-.decision-divider {
-    width: 1px;
-    height: 20px;
-    background: var(--border-secondary);
-}
-
-.decision-driver,
-.decision-action {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.decision-label {
-    color: var(--text-tertiary);
-    font-size: 0.75rem;
-}
-
-.decision-value {
+.insight-text {
     color: var(--text-secondary);
-    font-weight: 500;
 }
 
-.decision-value--action {
-    color: var(--color-blue);
-    font-weight: 600;
-}
-
-.text-emerald {
+.insight-text strong.positive {
     color: var(--color-emerald);
-    font-weight: 600;
+}
+
+.insight-divider {
+    color: var(--border-secondary);
+}
+
+.insight-action {
+    color: var(--text-tertiary);
+    font-size: 0.6875rem;
 }

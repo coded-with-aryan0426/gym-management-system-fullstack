@@ -1,72 +1,110 @@
-import React from 'react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import React, { useMemo } from 'react';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import type { Transaction } from '../../../types/finance';
 import './RevenueChart.css';
-
-const data = [
-    { name: 'Memberships', value: 125000, color: '#10B981', percent: 65 },
-    { name: 'PT Sessions', value: 45000, color: '#3B82F6', percent: 23 },
-    { name: 'Merchandise', value: 15000, color: '#F59E0B', percent: 8 },
-    { name: 'Day Passes', value: 8500, color: '#8B5CF6', percent: 4 },
-];
-
-// Calculate health status
-const topSource = data[0];
-const isHealthy = topSource.percent >= 50; // Healthy if top source > 50%
 
 interface RevenueChartProps {
     onFilter?: (category: string) => void;
+    transactions?: Transaction[];
 }
 
-const RevenueChart: React.FC<RevenueChartProps> = ({ onFilter }) => {
+const COLORS = ['#10B981', '#3B82F6', '#F59E0B', '#8B5CF6', '#EC4899'];
+
+const RevenueChart: React.FC<RevenueChartProps> = ({ onFilter, transactions = [] }) => {
+    const chartData = useMemo(() => {
+        const income = transactions.filter(t => t.amount > 0);
+        const categoryTotals: Record<string, number> = {};
+        
+        income.forEach(t => {
+            categoryTotals[t.category] = (categoryTotals[t.category] || 0) + t.amount;
+        });
+
+        const total = Object.values(categoryTotals).reduce((sum, v) => sum + v, 0);
+        
+        return Object.entries(categoryTotals)
+            .map(([name, value], i) => ({
+                name,
+                value,
+                percent: total > 0 ? Math.round((value / total) * 100) : 0,
+                color: COLORS[i % COLORS.length]
+            }))
+            .sort((a, b) => b.value - a.value)
+            .slice(0, 5);
+    }, [transactions]);
+
+    const topSource = chartData[0];
+
+    const CustomTooltip = ({ active, payload }: any) => {
+        if (!active || !payload?.length) return null;
+        const data = payload[0].payload;
+        return (
+            <div className="revenue-tooltip">
+                <span className="tooltip-name">{data.name}</span>
+                <span className="tooltip-value">₹{data.value.toLocaleString('en-IN')}</span>
+                <span className="tooltip-percent">{data.percent}%</span>
+            </div>
+        );
+    };
+
+    if (chartData.length === 0) {
+        return (
+            <div className="revenue-chart-empty">
+                <span>No revenue data available</span>
+            </div>
+        );
+    }
+
     return (
-        <div className="revenue-chart-container">
+        <div className="revenue-chart">
             <div className="chart-area">
                 <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                         <Pie
-                            data={data}
-                            cx="50%"
+                            data={chartData}
+                            cx="35%"
                             cy="50%"
-                            innerRadius={50}
-                            outerRadius={70}
-                            paddingAngle={4}
+                            innerRadius={45}
+                            outerRadius={65}
+                            paddingAngle={3}
                             dataKey="value"
-                            style={{ cursor: 'pointer' }}
+                            stroke="none"
                         >
-                            {data.map((entry, index) => (
+                            {chartData.map((entry, index) => (
                                 <Cell
                                     key={`cell-${index}`}
                                     fill={entry.color}
-                                    stroke="rgba(0,0,0,0.1)"
-                                    onClick={() => onFilter?.(entry.name === 'Memberships' ? 'Membership' : entry.name === 'PT Sessions' ? 'Personal Training' : 'Merchandise')}
+                                    style={{ cursor: 'pointer' }}
+                                    onClick={() => onFilter?.(entry.name)}
                                 />
                             ))}
                         </Pie>
-                        <Tooltip
-                            contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', color: '#fff' }}
-                            itemStyle={{ color: '#fff' }}
-                            formatter={(value: number) => [`₹${value.toLocaleString()}`, 'Revenue']}
-                        />
-                        <Legend
-                            verticalAlign="middle"
-                            align="right"
-                            layout="vertical"
-                            iconType="circle"
-                            iconSize={8}
-                            wrapperStyle={{ fontSize: '11px', paddingLeft: '8px' }}
-                        />
+                        <Tooltip content={<CustomTooltip />} />
                     </PieChart>
                 </ResponsiveContainer>
+                
+                <div className="chart-legend">
+                    {chartData.map((item, i) => (
+                        <button
+                            key={i}
+                            className="legend-item"
+                            onClick={() => onFilter?.(item.name)}
+                        >
+                            <span className="legend-dot" style={{ background: item.color }}></span>
+                            <span className="legend-name">{item.name}</span>
+                            <span className="legend-percent">{item.percent}%</span>
+                        </button>
+                    ))}
+                </div>
             </div>
 
-            {/* Health Evaluation Strip */}
-            <div className={`chart-evaluation ${isHealthy ? 'chart-evaluation--healthy' : 'chart-evaluation--warning'}`}>
-                <span className="evaluation-indicator">{isHealthy ? '●' : '⚠'}</span>
-                <span className="evaluation-text">
-                    <strong>{topSource.name}</strong>: {topSource.percent}% of revenue
-                    <span className="evaluation-status">{isHealthy ? '(Healthy)' : '(Review needed)'}</span>
-                </span>
-            </div>
+            {topSource && (
+                <div className="chart-insight healthy">
+                    <span className="insight-dot"></span>
+                    <span className="insight-text">
+                        <strong>{topSource.name}</strong> leads with {topSource.percent}%
+                    </span>
+                </div>
+            )}
         </div>
     );
 };
