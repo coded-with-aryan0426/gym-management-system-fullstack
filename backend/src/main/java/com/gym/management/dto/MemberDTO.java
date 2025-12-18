@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -20,6 +21,7 @@ public class MemberDTO {
     private LocalDate startDate;
     private LocalDate endDate;
     private LocalDate joinDate;
+    private LocalDateTime createdAt; // For "today first" sorting
 
     // Status color helper for frontend (optional, but keeping it clean in backend)
     public String getStatusColor() {

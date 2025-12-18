@@ -35,6 +35,37 @@ public class UserController {
         }
     }
 
+    @GetMapping("/members/paginated")
+    public ResponseEntity<?> getMembersPaginated(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String plan) {
+        try {
+            return ResponseEntity.ok(userService.getMembersPaginated(page, size, search, status, plan));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500)
+                    .body(java.util.Map.of("error", e.getMessage(), "type", e.getClass().getName()));
+        }
+    }
+
+    @GetMapping("/staff/paginated")
+    public ResponseEntity<?> getStaffPaginated(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String role) {
+        try {
+            return ResponseEntity.ok(userService.getStaffPaginated(page, size, search, role));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500)
+                    .body(java.util.Map.of("error", e.getMessage(), "type", e.getClass().getName()));
+        }
+    }
+
     @GetMapping("/search")
     public List<User> searchUsers(
             @RequestParam String role,

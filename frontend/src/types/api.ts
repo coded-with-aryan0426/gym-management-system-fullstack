@@ -17,3 +17,13 @@ export interface ApiError {
   message: string;
   status: number;
 }
+
+// Generic paginated response type
+export interface PageResponse<T> {
+  content: T[];
+  currentPage: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+  sortType: 'alphabetical' | 'newest';
+}

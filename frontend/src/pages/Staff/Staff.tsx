@@ -16,6 +16,10 @@ const Staff: React.FC = () => {
   const [isActionModalOpen, setIsActionModalOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+
   const filterRef = useRef<HTMLDivElement>(null);
 
   // Shared hooks for unified behavior
@@ -46,6 +50,22 @@ const Staff: React.FC = () => {
   const sortedStaff = useMemo(() => {
     return sortItems(filteredStaff, (m) => m.fullName);
   }, [filteredStaff, sortItems]);
+
+  // Client-side pagination
+  const paginatedStaff = useMemo(() => {
+    const start = currentPage * pageSize;
+    const end = start + pageSize;
+    return sortedStaff.slice(start, end);
+  }, [sortedStaff, currentPage, pageSize]);
+
+  const totalPages = useMemo(() => {
+    return Math.ceil(sortedStaff.length / pageSize);
+  }, [sortedStaff.length, pageSize]);
+
+  // Reset to page 0 when filters change
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [filters]);
 
   const activeFilterCount = [filters.role, filters.status].filter(Boolean).length;
 
@@ -322,14 +342,24 @@ const Staff: React.FC = () => {
 
 
 
-      {/* Staff Table */}
       <div className="staff-page__table">
         <DataTable
           columns={columns}
-          data={sortedStaff}
+          data={paginatedStaff}
           keyExtractor={(s) => s.userId}
           loading={loading}
           emptyMessage="No staff found"
+          pagination={{
+            currentPage,
+            totalPages,
+            totalCount: sortedStaff.length,
+            pageSize,
+            onPageChange: setCurrentPage,
+            onPageSizeChange: (size) => {
+              setPageSize(size);
+              setCurrentPage(0);
+            },
+          }}
         />
       </div>
 

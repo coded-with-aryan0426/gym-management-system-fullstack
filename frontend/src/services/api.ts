@@ -1,7 +1,8 @@
 import axios, { type AxiosInstance, type AxiosError } from 'axios';
 import type { User, CreateUserDto, UpdateUserDto, MemberDTO } from '../types/user';
 import type { GymSettings, UpdateSettingsDto } from '../types/settings';
-import type { DashboardStats } from '../types/api';
+import type { DashboardStats, PageResponse } from '../types/api';
+
 
 const BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -46,8 +47,39 @@ const api = {
     return response.data;
   },
 
+  // Paginated Members
+  async getMembersPaginated(
+    page: number = 0,
+    size: number = 10,
+    search?: string,
+    status?: string,
+    plan?: string
+  ): Promise<PageResponse<MemberDTO>> {
+    const params: Record<string, unknown> = { page, size };
+    if (search) params.search = search;
+    if (status) params.status = status;
+    if (plan) params.plan = plan;
+    const response = await apiClient.get<PageResponse<MemberDTO>>('/users/members/paginated', { params });
+    return response.data;
+  },
+
+  // Paginated Staff
+  async getStaffPaginated(
+    page: number = 0,
+    size: number = 10,
+    search?: string,
+    role?: string
+  ): Promise<PageResponse<User>> {
+    const params: Record<string, unknown> = { page, size };
+    if (search) params.search = search;
+    if (role) params.role = role;
+    const response = await apiClient.get<PageResponse<User>>('/users/staff/paginated', { params });
+    return response.data;
+  },
+
   async searchUsers(role: string, query: string): Promise<User[]> {
     const response = await apiClient.get<User[]>('/users/search', { params: { role, q: query } });
+
     return response.data;
   },
 

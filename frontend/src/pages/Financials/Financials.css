@@ -5,9 +5,9 @@
 .financials-page {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    padding: 0;
-    max-width: 1600px;
+    gap: 16px;
+    padding: 0 16px 24px 16px;
+    max-width: 1400px;
     margin: 0 auto;
 }
 
@@ -84,8 +84,8 @@
 .financial-context-grid {
     display: grid;
     grid-template-columns: 2.5fr 1fr;
-    gap: 12px;
-    height: 280px;
+    gap: 16px;
+    min-height: 320px;
 }
 
 .financial-chart-card {
@@ -114,8 +114,8 @@
 .financial-breakdown-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    height: 240px;
+    gap: 16px;
+    min-height: 280px;
 }
 
 .compact-card {
@@ -191,18 +191,43 @@
     color: var(--text-tertiary);
 }
 
-/* Responsive */
-@media (max-width: 1024px) {
+@media (max-width: 1200px) {
+    .financial-context-grid {
+        grid-template-columns: 1fr;
+        min-height: auto;
+    }
+}
 
-    .financial-context-grid,
+@media (max-width: 1024px) {
     .financial-breakdown-row {
         grid-template-columns: 1fr;
-        height: auto;
+        min-height: auto;
     }
 
     .financial-chart-card,
     .alerts-section,
     .compact-card {
-        min-height: 220px;
+        min-height: 240px;
+    }
+
+    .transactions-section {
+        max-height: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .financials-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        padding-bottom: 16px;
+    }
+
+    .financials-actions {
+        width: 100%;
+    }
+
+    .financials-actions .btn {
+        flex: 1;
     }
 }

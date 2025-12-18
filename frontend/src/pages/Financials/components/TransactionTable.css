@@ -94,9 +94,9 @@
 }
 
 .tx-table-scroll-area td {
-    padding: 8px 16px;
+    padding: 4px 16px;
     border-bottom: 1px solid var(--border-secondary);
-    font-size: 0.8125rem;
+    font-size: 0.75rem;
     vertical-align: middle;
 }
 
@@ -105,9 +105,9 @@
 .tx-desc-cell {
     display: flex;
     flex-direction: column;
-    gap: 2px;
-    /* Tight gap */
-    line-height: normal;
+    gap: 1px;
+    /* Ultra-tight gap */
+    line-height: 1.1;
 }
 
 .tx-date {
@@ -127,35 +127,41 @@
 }
 
 .tx-main {
-    font-size: 0.875rem;
-    font-weight: 500;
+    font-size: 0.8125rem;
+    font-weight: 600;
     color: var(--text-primary);
     line-height: 1.2;
 }
 
 .tx-sub {
-    font-size: 0.75rem;
-    /* Force small */
-    color: var(--text-secondary);
+    font-size: 0.6875rem;
+    color: var(--text-tertiary);
     line-height: 1;
-    margin-top: 2px;
+    margin-top: 1px;
 }
 
 .tx-category-badge {
-    /* inline-block */
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 0.7rem;
-    background: var(--bg-tertiary);
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    /* Pill style */
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--border-secondary);
     color: var(--text-secondary);
     white-space: nowrap;
 }
 
 .tx-amount {
-    font-family: monospace;
-    font-weight: 600;
-    font-size: 0.875rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 0.8125rem;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
 }
 
 /* Actions */

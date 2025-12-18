@@ -34,6 +34,10 @@ const Members: React.FC = () => {
   const [isActionModalOpen, setIsActionModalOpen] = useState(false)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
 
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(0)
+  const [pageSize, setPageSize] = useState(10)
+
   const handleActionClick = (member: MemberDTO) => {
     setSelectedMember(member)
     setIsActionModalOpen(true)
@@ -179,6 +183,22 @@ const Members: React.FC = () => {
     return sortItems(filteredMembers, (m) => m.fullName)
   }, [filteredMembers, sortItems])
 
+  // Client-side pagination of sorted members
+  const paginatedMembers = useMemo(() => {
+    const start = currentPage * pageSize
+    const end = start + pageSize
+    return sortedMembers.slice(start, end)
+  }, [sortedMembers, currentPage, pageSize])
+
+  const totalPages = useMemo(() => {
+    return Math.ceil(sortedMembers.length / pageSize)
+  }, [sortedMembers.length, pageSize])
+
+  // Reset to page 0 when filters or search change
+  useEffect(() => {
+    setCurrentPage(0)
+  }, [searchQuery, filters])
+
   // Stats Logic: If filters active, show filtered counts. Else show global.
   // Note: activeFilterCount calculation needs to be here or above
   const activeFilterCount = useMemo(() => {
@@ -287,7 +307,7 @@ const Members: React.FC = () => {
       key: "index",
       header: "#",
       width: "50px",
-      render: (_, index) => <span className="member-index" style={{ color: 'var(--text-tertiary)', fontSize: '0.875rem' }}>{index + 1}</span>,
+      render: (_, index) => <span className="member-index" style={{ color: 'var(--text-tertiary)', fontSize: '0.875rem' }}>{currentPage * pageSize + index + 1}</span>,
     },
     {
       key: "fullName",
@@ -513,7 +533,7 @@ const Members: React.FC = () => {
       <div className="members-page__content">
         <div className="members-page__table-container">
           <DataTable
-            data={sortedMembers}
+            data={paginatedMembers}
             keyExtractor={(member) => member.userId}
             columns={columns as any}
             loading={loading}
@@ -523,6 +543,17 @@ const Members: React.FC = () => {
                 ? "No members match your filters"
                 : "No members found. Add your first member!"
             }
+            pagination={{
+              currentPage,
+              totalPages,
+              totalCount: sortedMembers.length,
+              pageSize,
+              onPageChange: setCurrentPage,
+              onPageSizeChange: (size) => {
+                setPageSize(size)
+                setCurrentPage(0)
+              },
+            }}
           />
         </div>
       </div>
