@@ -60,20 +60,23 @@ const MembershipPoliciesSection: React.FC = () => {
     const fetchMembershipPolicies = async () => {
         try {
             setLoading(true)
-            const response = await api.get('/settings')
+            const response = await api.get('/api/gym-settings')
             if (response.data) {
                 const settings = response.data
                 const membershipSettings: MembershipPolicy = {
-                    allowGuestPasses: settings.allowGuestPasses === 'true',
-                    requireWaiver: settings.requireWaiver === 'true',
-                    allowFreezing: settings.allowFreezing === 'true',
-                    maxFreezeDays: parseInt(settings.maxFreezeDays) || 30,
-                    freezeFee: parseInt(settings.freezeFee) || 0,
-                    guestPassLimit: parseInt(settings.guestPassLimit) || 3,
-                    referralDiscount: parseInt(settings.referralDiscount) || 10,
-                    allowPlanUpgrade: settings.allowPlanUpgrade === 'true',
-                    membershipApprovalRequired: settings.membershipApprovalRequired === 'true',
-                    minimumAge: parseInt(settings.minimumAge) || 16,
+                    freezeAllowanceDays: parseInt(settings.freezeAllowanceDays) || 30,
+                    maxFreezesPerYear: parseInt(settings.maxFreezesPerYear) || 2,
+                    allowTransfer: settings.allowTransfer === 'true' || settings.allowTransfer === true,
+                    transferFee: parseInt(settings.transferFee) || 500,
+                    cancellationNoticeDays: parseInt(settings.cancellationNoticeDays) || 7,
+                    cancellationFee: parseInt(settings.cancellationFee) || 500,
+                    defaultDurationMonths: parseInt(settings.defaultDurationMonths) || 1,
+                    expiryReminderDays: Array.isArray(settings.expiryReminderDays) 
+                        ? settings.expiryReminderDays 
+                        : (settings.expiryReminderDays ? settings.expiryReminderDays.split(',').map(Number) : [7, 3, 1]),
+                    allowUpgrade: settings.allowUpgrade === 'true' || settings.allowUpgrade === true,
+                    allowDowngrade: settings.allowDowngrade === 'true' || settings.allowDowngrade === true,
+                    prorateUpgrades: settings.prorateUpgrades === 'true' || settings.prorateUpgrades === true,
                 }
                 setPolicies(membershipSettings)
                 setOriginalPolicies(membershipSettings)
@@ -96,23 +99,16 @@ const MembershipPoliciesSection: React.FC = () => {
     const handleSave = async () => {
         try {
             setSaving(true)
-            await api.put('/settings', policies)
+            await api.put('/api/gym-settings', policies)
             setOriginalPolicies(policies)
             setHasChanges(false)
             toast.success("Membership policies saved successfully")
         } catch (error) {
-            console.error('Failed to fetch membership policies:', error)
+            toast.error("Failed to save membership policies")
+            console.error('Save error:', error)
         } finally {
-            setLoading(false)
+            setSaving(false)
         }
-    }
-
-    const updatePolicy = <K extends keyof MembershipPolicy>(key: K, value: MembershipPolicy[K]) => {
-        setPolicies(prev => {
-            const updated = { ...prev, [key]: value }
-            setHasChanges(JSON.stringify(updated) !== JSON.stringify(originalPolicies))
-            return updated
-        })
     }
 
     const addReminderDay = () => {
@@ -126,21 +122,6 @@ const MembershipPoliciesSection: React.FC = () => {
 
     const removeReminderDay = (day: number) => {
         updatePolicy('expiryReminderDays', policies.expiryReminderDays.filter(d => d !== day))
-    }
-
-    const handleSave = async () => {
-        try {
-            setSaving(true)
-            await api.put('/api/gym-settings', policies)
-            setOriginalPolicies(policies)
-            setHasChanges(false)
-            toast.success("Membership policies saved successfully")
-        } catch (error) {
-            toast.error("Failed to save membership policies")
-            console.error('Save error:', error)
-        } finally {
-            setSaving(false)
-        }
     }
 
     if (loading) {

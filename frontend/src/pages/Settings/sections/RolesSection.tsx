@@ -10,11 +10,13 @@ import {
     Minus, 
     Save, 
     Loader2,
-    Users,
     Lock,
-    Unlock,
+    ShieldCheck,
     UserCircle,
-    ShieldCheck
+    Eye,
+    Settings,
+    Database,
+    CreditCard
 } from "lucide-react"
 import api from "../../../services/api"
 
@@ -22,6 +24,7 @@ interface Permission {
     key: string
     label: string
     description: string
+    icon: React.ReactNode
 }
 
 interface RolePermissions {
@@ -31,17 +34,14 @@ interface RolePermissions {
 }
 
 const permissions: Permission[] = [
-    { key: 'createMembers', label: 'Create Members', description: 'Add new members to the system' },
-    { key: 'editMembers', label: 'Edit Members', description: 'Modify member profiles and plans' },
-    { key: 'deleteMembers', label: 'Delete Members', description: 'Remove members from the system' },
-    { key: 'editPlans', label: 'Edit Plans', description: 'Create and modify membership plans' },
-    { key: 'markCashPayments', label: 'Mark Cash Payments', description: 'Record cash transactions' },
-    { key: 'applyDiscounts', label: 'Apply Discounts', description: 'Give discounts on memberships' },
-    { key: 'viewRevenue', label: 'View Revenue', description: 'Access financial reports' },
-    { key: 'manageStaff', label: 'Manage Staff', description: 'Add, edit, or remove staff accounts' },
-    { key: 'viewOwnProfile', label: 'View Own Profile', description: 'View personal membership details' },
-    { key: 'bookSessions', label: 'Book Sessions', description: 'Schedule PT sessions and classes' },
-    { key: 'viewSchedule', label: 'View Schedule', description: 'See class schedules and bookings' },
+    { key: 'createMembers', label: 'Create Members', description: 'Add new members to the system', icon: <UserCircle size={14} /> },
+    { key: 'editMembers', label: 'Edit Members', description: 'Modify member profiles and plans', icon: <Settings size={14} /> },
+    { key: 'deleteMembers', label: 'Delete Members', description: 'Remove members from the system', icon: <Shield size={14} /> },
+    { key: 'editPlans', label: 'Edit Plans', description: 'Create and modify membership plans', icon: <Database size={14} /> },
+    { key: 'markCashPayments', label: 'Mark Cash Payments', description: 'Record cash transactions', icon: <CreditCard size={14} /> },
+    { key: 'applyDiscounts', label: 'Apply Discounts', description: 'Give discounts on memberships', icon: <CreditCard size={14} /> },
+    { key: 'viewRevenue', label: 'View Revenue', description: 'Access financial reports', icon: <Eye size={14} /> },
+    { key: 'manageStaff', label: 'Manage Staff', description: 'Add, edit, or remove staff accounts', icon: <ShieldCheck size={14} /> },
 ]
 
 const roles = ['Owner', 'Manager', 'Staff', 'Trainer', 'Member']
@@ -51,37 +51,53 @@ const RolesSection: React.FC = () => {
         Owner: {
             createMembers: true, editMembers: true, deleteMembers: true, editPlans: true,
             markCashPayments: true, applyDiscounts: true, viewRevenue: true, manageStaff: true,
-            viewOwnProfile: true, bookSessions: true, viewSchedule: true,
         },
         Manager: {
             createMembers: true, editMembers: true, deleteMembers: true, editPlans: true,
             markCashPayments: true, applyDiscounts: true, viewRevenue: true, manageStaff: false,
-            viewOwnProfile: true, bookSessions: true, viewSchedule: true,
         },
         Staff: {
             createMembers: true, editMembers: true, deleteMembers: false, editPlans: false,
             markCashPayments: false, applyDiscounts: false, viewRevenue: false, manageStaff: false,
-            viewOwnProfile: true, bookSessions: true, viewSchedule: true,
         },
         Trainer: {
             createMembers: false, editMembers: false, deleteMembers: false, editPlans: false,
             markCashPayments: false, applyDiscounts: false, viewRevenue: false, manageStaff: false,
-            viewOwnProfile: true, bookSessions: true, viewSchedule: true,
         },
         Member: {
             createMembers: false, editMembers: false, deleteMembers: false, editPlans: false,
             markCashPayments: false, applyDiscounts: false, viewRevenue: false, manageStaff: false,
-            viewOwnProfile: true, bookSessions: true, viewSchedule: true,
         },
     })
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
     const [hasChanges, setHasChanges] = useState(false)
     const [originalPermissions, setOriginalPermissions] = useState<RolePermissions | null>(null)
 
     useEffect(() => {
-        setOriginalPermissions(JSON.parse(JSON.stringify(rolePermissions)))
+        fetchPermissions()
     }, [])
+
+    const fetchPermissions = async () => {
+        try {
+            setLoading(true)
+            const response = await api.get('/api/gym-settings')
+            if (response.data && response.data.rolesAndPermissions) {
+                const fetched = typeof response.data.rolesAndPermissions === 'string' 
+                    ? JSON.parse(response.data.rolesAndPermissions)
+                    : response.data.rolesAndPermissions
+                setRolePermissions(fetched)
+                setOriginalPermissions(fetched)
+            } else {
+                setOriginalPermissions(JSON.parse(JSON.stringify(rolePermissions)))
+            }
+        } catch (error) {
+            console.error('Failed to fetch permissions:', error)
+            setOriginalPermissions(JSON.parse(JSON.stringify(rolePermissions)))
+        } finally {
+            setLoading(false)
+        }
+    }
 
     const togglePermission = (role: string, permission: string) => {
         if (role === 'Owner') {
@@ -105,17 +121,26 @@ const RolesSection: React.FC = () => {
     const handleSave = async () => {
         try {
             setSaving(true)
-            // In a real app, we'd send this to the backend
-            await api.put('/settings', { rolesAndPermissions: rolePermissions })
+            await api.put('/api/gym-settings', { rolesAndPermissions: JSON.stringify(rolePermissions) })
             setOriginalPermissions(JSON.parse(JSON.stringify(rolePermissions)))
             setHasChanges(false)
-            toast.success("Role permissions updated successfully")
+            toast.success("Role permissions saved successfully")
         } catch (error) {
-            console.error('Failed to save permissions:', error)
             toast.error("Failed to save permissions")
         } finally {
             setSaving(false)
         }
+    }
+
+    if (loading) {
+        return (
+            <div className="settings-section">
+                <div className="settings-loading">
+                    <Loader2 className="settings-loading__spinner" />
+                    <span>Loading permissions matrix...</span>
+                </div>
+            </div>
+        )
     }
 
     return (
@@ -128,7 +153,7 @@ const RolesSection: React.FC = () => {
                     <div>
                         <h2 className="settings-section__title">Roles & Permissions</h2>
                         <p className="settings-section__description">
-                            Manage access control and feature visibility for each role
+                            Access control matrix for different user roles
                         </p>
                     </div>
                 </div>
@@ -148,8 +173,10 @@ const RolesSection: React.FC = () => {
                 <div className="permissions-matrix">
                     <div className="permissions-matrix__header">
                         <div className="permissions-matrix__cell permissions-matrix__cell--label">
-                            <ShieldCheck size={16} style={{ marginRight: '8px', color: 'var(--settings-accent-green)' }} />
-                            Feature / Permission
+                            <span className="permissions-matrix__permission-name" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <ShieldCheck size={16} color="var(--settings-accent-green)" />
+                                System Capabilities
+                            </span>
                         </div>
                         {roles.map(role => (
                             <div key={role} className="permissions-matrix__cell permissions-matrix__cell--role">
@@ -162,18 +189,21 @@ const RolesSection: React.FC = () => {
                     {permissions.map(permission => (
                         <div key={permission.key} className="permissions-matrix__row">
                             <div className="permissions-matrix__cell permissions-matrix__cell--label">
-                                <span className="permissions-matrix__permission-name">{permission.label}</span>
-                                <span className="permissions-matrix__permission-desc">{permission.description}</span>
+                                <span className="permissions-matrix__permission-name">
+                                    {permission.label}
+                                </span>
+                                <span className="permissions-matrix__permission-desc">
+                                    {permission.description}
+                                </span>
                             </div>
                             {roles.map(role => (
                                 <div key={role} className="permissions-matrix__cell">
                                     <button
-                                        className={`permissions-matrix__toggle ${rolePermissions[role][permission.key] ? 'permissions-matrix__toggle--active' : ''}`}
+                                        className={`permissions-matrix__toggle ${rolePermissions[role]?.[permission.key] ? 'permissions-matrix__toggle--active' : ''}`}
                                         onClick={() => togglePermission(role, permission.key)}
                                         disabled={role === 'Owner'}
-                                        title={role === 'Owner' ? 'Owner permissions are locked' : `Toggle ${permission.label} for ${role}`}
                                     >
-                                        {rolePermissions[role][permission.key] ? <Check size={16} /> : <Minus size={14} />}
+                                        {rolePermissions[role]?.[permission.key] ? <Check size={16} /> : <Minus size={14} />}
                                     </button>
                                 </div>
                             ))}
@@ -181,10 +211,17 @@ const RolesSection: React.FC = () => {
                     ))}
                 </div>
 
-                <div className="policy-note">
-                    <div className="policy-note__icon"><Info size={16} /></div>
-                    <div className="policy-note__text">
-                        <p><strong>Security Note:</strong> Permissions for the <strong>Owner</strong> role are hardcoded for security and cannot be modified. Any changes to other roles will take effect upon next user login.</p>
+                <div className="policy-toggle-row" style={{ background: 'rgba(59, 130, 246, 0.05)', borderColor: 'rgba(59, 130, 246, 0.1)' }}>
+                    <div className="policy-toggle-row__info">
+                        <div className="policy-toggle-row__icon">
+                            <Info size={16} color="var(--settings-accent-blue)" />
+                        </div>
+                        <div className="policy-toggle-row__text">
+                            <span className="policy-toggle-row__label">Security Enforcement</span>
+                            <span className="policy-toggle-row__hint">
+                                Permissions for the <strong>Owner</strong> role are hardcoded and cannot be modified.
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>

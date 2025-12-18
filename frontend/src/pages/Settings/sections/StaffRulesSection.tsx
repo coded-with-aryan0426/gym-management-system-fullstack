@@ -4,80 +4,84 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { toast } from "react-hot-toast"
 import { 
-    UserCog, 
+    Users, 
+    Save, 
+    Loader2, 
+    Clock, 
     Calendar, 
-    Eye, 
-    Users,
-    Clock,
-    Save,
-    Loader2,
-    Shuffle,
-    CalendarClock,
-    UserCheck
+    ShieldCheck, 
+    AlertCircle,
+    CheckCircle2,
+    XCircle,
+    UserPlus,
+    Lock
 } from "lucide-react"
 import api from "../../../services/api"
 
-interface StaffPolicy {
-    maxSessionsPerDay: number
-    minBreakBetweenSessions: number
-    canTrainerReschedule: boolean
-    canTrainerCancelSession: boolean
-    trainerVisibility: 'own' | 'all'
-    autoAssignNewMembers: boolean
-    requireSessionNotes: boolean
-    sessionDurationMinutes: number
+interface StaffRules {
+    allowStaffLogin: boolean
+    requireTwoFactor: boolean
+    maxLoginAttempts: number
+    sessionTimeoutMinutes: number
+    allowTrainerSelfBooking: boolean
+    autoAssignLeads: boolean
+    staffRegistrationCode: string
+    requireAttendanceApproval: boolean
+    maxOvertimeHours: number
 }
 
 const StaffRulesSection: React.FC = () => {
-    const [policies, setPolicies] = useState<StaffPolicy>({
-        maxSessionsPerDay: 8,
-        minBreakBetweenSessions: 15,
-        canTrainerReschedule: true,
-        canTrainerCancelSession: false,
-        trainerVisibility: 'own',
-        autoAssignNewMembers: false,
-        requireSessionNotes: false,
-        sessionDurationMinutes: 60,
+    const [rules, setRules] = useState<StaffRules>({
+        allowStaffLogin: true,
+        requireTwoFactor: false,
+        maxLoginAttempts: 5,
+        sessionTimeoutMinutes: 60,
+        allowTrainerSelfBooking: true,
+        autoAssignLeads: false,
+        staffRegistrationCode: 'GYM-STAFF-2024',
+        requireAttendanceApproval: true,
+        maxOvertimeHours: 10,
     })
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
     const [hasChanges, setHasChanges] = useState(false)
-    const [originalPolicies, setOriginalPolicies] = useState<StaffPolicy | null>(null)
+    const [originalRules, setOriginalRules] = useState<StaffRules | null>(null)
 
     useEffect(() => {
-        fetchStaffPolicies()
+        fetchStaffRules()
     }, [])
 
-    const fetchStaffPolicies = async () => {
+    const fetchStaffRules = async () => {
         try {
             setLoading(true)
-            const response = await api.get('/settings')
+            const response = await api.get('/api/gym-settings')
             if (response.data) {
-                const settings = response.data
-                const staffSettings: StaffPolicy = {
-                    maxSessionsPerDay: parseInt(settings.maxSessionsPerDay) || 8,
-                    minBreakBetweenSessions: parseInt(settings.minBreakBetweenSessions) || 15,
-                    canTrainerReschedule: settings.canTrainerReschedule === 'true',
-                    canTrainerCancelSession: settings.canTrainerCancelSession === 'true',
-                    trainerVisibility: (settings.trainerVisibility as 'own' | 'all') || 'own',
-                    autoAssignNewMembers: settings.autoAssignNewMembers === 'true',
-                    requireSessionNotes: settings.requireSessionNotes === 'true',
-                    sessionDurationMinutes: parseInt(settings.sessionDurationMinutes) || 60,
+                const fetched = response.data
+                const staffRules: StaffRules = {
+                    allowStaffLogin: fetched.allowStaffLogin === 'true' || fetched.allowStaffLogin === true,
+                    requireTwoFactor: fetched.requireTwoFactor === 'true' || fetched.requireTwoFactor === true,
+                    maxLoginAttempts: parseInt(fetched.maxLoginAttempts) || 5,
+                    sessionTimeoutMinutes: parseInt(fetched.sessionTimeoutMinutes) || 60,
+                    allowTrainerSelfBooking: fetched.allowTrainerSelfBooking === 'true' || fetched.allowTrainerSelfBooking === true,
+                    autoAssignLeads: fetched.autoAssignLeads === 'true' || fetched.autoAssignLeads === true,
+                    staffRegistrationCode: fetched.staffRegistrationCode || 'GYM-STAFF-2024',
+                    requireAttendanceApproval: fetched.requireAttendanceApproval === 'true' || fetched.requireAttendanceApproval === true,
+                    maxOvertimeHours: parseInt(fetched.maxOvertimeHours) || 10,
                 }
-                setPolicies(staffSettings)
-                setOriginalPolicies(staffSettings)
+                setRules(staffRules)
+                setOriginalRules(staffRules)
             }
         } catch (error) {
-            console.error('Failed to fetch staff policies:', error)
+            console.error('Failed to fetch staff rules:', error)
         } finally {
             setLoading(false)
         }
     }
 
-    const updatePolicy = <K extends keyof StaffPolicy>(key: K, value: StaffPolicy[K]) => {
-        setPolicies(prev => {
+    const updateRule = <K extends keyof StaffRules>(key: K, value: StaffRules[K]) => {
+        setRules(prev => {
             const updated = { ...prev, [key]: value }
-            setHasChanges(JSON.stringify(updated) !== JSON.stringify(originalPolicies))
+            setHasChanges(JSON.stringify(updated) !== JSON.stringify(originalRules))
             return updated
         })
     }
@@ -85,13 +89,12 @@ const StaffRulesSection: React.FC = () => {
     const handleSave = async () => {
         try {
             setSaving(true)
-            await api.put('/settings', policies)
-            setOriginalPolicies(policies)
+            await api.put('/api/gym-settings', rules)
+            setOriginalRules(rules)
             setHasChanges(false)
-            toast.success("Staff policies saved successfully")
+            toast.success("Staff rules saved successfully")
         } catch (error) {
-            console.error('Failed to save staff policies:', error)
-            toast.error("Failed to save staff policies")
+            toast.error("Failed to save staff rules")
         } finally {
             setSaving(false)
         }
@@ -102,7 +105,7 @@ const StaffRulesSection: React.FC = () => {
             <div className="settings-section">
                 <div className="settings-loading">
                     <Loader2 className="settings-loading__spinner" />
-                    <span>Loading staff policies...</span>
+                    <span>Loading staff configurations...</span>
                 </div>
             </div>
         )
@@ -113,12 +116,12 @@ const StaffRulesSection: React.FC = () => {
             <div className="settings-section__header">
                 <div className="settings-section__title-group">
                     <div className="settings-section__icon">
-                        <UserCog size={20} />
+                        <Users size={20} />
                     </div>
                     <div>
                         <h2 className="settings-section__title">Staff & Trainer Rules</h2>
                         <p className="settings-section__description">
-                            Workload, scheduling, and visibility permissions
+                            Manage access control, attendance policies, and registrations
                         </p>
                     </div>
                 </div>
@@ -137,80 +140,138 @@ const StaffRulesSection: React.FC = () => {
             <div className="settings-section__content">
                 <div className="form-group">
                     <div className="form-group__header">
-                        <Clock size={16} />
-                        <h4 className="form-group__title">Session Settings</h4>
-                    </div>
-
-                    <div className="form-grid">
-                        <div className="field-wrapper">
-                            <label className="field-label">
-                                <Calendar size={14} />
-                                Max Sessions / Day
-                            </label>
-                            <input
-                                type="number"
-                                className="dense-input"
-                                value={policies.maxSessionsPerDay}
-                                onChange={(e) => updatePolicy('maxSessionsPerDay', parseInt(e.target.value) || 1)}
-                                min={1}
-                                max={20}
-                            />
-                        </div>
-
-                        <div className="field-wrapper">
-                            <label className="field-label">
-                                <Clock size={14} />
-                                Session Duration (mins)
-                            </label>
-                            <select
-                                className="dense-input"
-                                value={policies.sessionDurationMinutes}
-                                onChange={(e) => updatePolicy('sessionDurationMinutes', parseInt(e.target.value))}
-                            >
-                                <option value={30}>30 minutes</option>
-                                <option value={45}>45 minutes</option>
-                                <option value={60}>60 minutes</option>
-                                <option value={90}>90 minutes</option>
-                            </select>
-                        </div>
-
-                        <div className="field-wrapper">
-                            <label className="field-label">
-                                <Clock size={14} />
-                                Break Between Sessions (mins)
-                            </label>
-                            <input
-                                type="number"
-                                className="dense-input"
-                                value={policies.minBreakBetweenSessions}
-                                onChange={(e) => updatePolicy('minBreakBetweenSessions', parseInt(e.target.value) || 0)}
-                                min={0}
-                                max={60}
-                            />
-                        </div>
+                        <ShieldCheck size={16} />
+                        <h4 className="form-group__title">Access & Security</h4>
                     </div>
 
                     <div className="policy-toggle-row">
                         <div className="policy-toggle-row__info">
                             <div className="policy-toggle-row__icon">
-                                <UserCheck size={16} />
+                                <CheckCircle2 size={16} />
                             </div>
                             <div className="policy-toggle-row__text">
-                                <span className="policy-toggle-row__label">Require Session Notes</span>
-                                <span className="policy-toggle-row__hint">Trainers must add notes after each session</span>
+                                <span className="policy-toggle-row__label">Allow Staff Login</span>
+                                <span className="policy-toggle-row__hint">Enable login access for employees and trainers</span>
                             </div>
                         </div>
                         <button
-                            className={`policy-toggle ${policies.requireSessionNotes ? 'policy-toggle--active' : ''}`}
-                            onClick={() => updatePolicy('requireSessionNotes', !policies.requireSessionNotes)}
+                            className={`policy-toggle ${rules.allowStaffLogin ? 'policy-toggle--active' : ''}`}
+                            onClick={() => updateRule('allowStaffLogin', !rules.allowStaffLogin)}
                         />
+                    </div>
+
+                    <div className="policy-toggle-row">
+                        <div className="policy-toggle-row__info">
+                            <div className="policy-toggle-row__icon">
+                                <Lock size={16} />
+                            </div>
+                            <div className="policy-toggle-row__text">
+                                <span className="policy-toggle-row__label">Require Two-Factor Auth</span>
+                                <span className="policy-toggle-row__hint">Staff must use MFA to access the dashboard</span>
+                            </div>
+                        </div>
+                        <button
+                            className={`policy-toggle ${rules.requireTwoFactor ? 'policy-toggle--active' : ''}`}
+                            onClick={() => updateRule('requireTwoFactor', !rules.requireTwoFactor)}
+                        />
+                    </div>
+
+                    <div className="form-grid">
+                        <div className="field-wrapper">
+                            <label className="field-label">Max Login Attempts</label>
+                            <input
+                                type="number"
+                                className="dense-input"
+                                value={rules.maxLoginAttempts}
+                                onChange={(e) => updateRule('maxLoginAttempts', parseInt(e.target.value) || 0)}
+                                min={1}
+                                max={10}
+                            />
+                        </div>
+                        <div className="field-wrapper">
+                            <label className="field-label">Session Timeout (Minutes)</label>
+                            <input
+                                type="number"
+                                className="dense-input"
+                                value={rules.sessionTimeoutMinutes}
+                                onChange={(e) => updateRule('sessionTimeoutMinutes', parseInt(e.target.value) || 0)}
+                                min={15}
+                                max={1440}
+                            />
+                        </div>
                     </div>
                 </div>
 
                 <div className="form-group">
                     <div className="form-group__header">
-                        <Shuffle size={16} />
-                        <h4 className="form-group__title">Assignment Rules</h4>
+                        <Calendar size={16} />
+                        <h4 className="form-group__title">Operations & Attendance</h4>
+                    </div>
+
+                    <div className="policy-toggle-row">
+                        <div className="policy-toggle-row__info">
+                            <div className="policy-toggle-row__icon">
+                                <Clock size={16} />
+                            </div>
+                            <div className="policy-toggle-row__text">
+                                <span className="policy-toggle-row__label">Trainer Self-Booking</span>
+                                <span className="policy-toggle-row__hint">Allow trainers to schedule their own PT sessions</span>
+                            </div>
+                        </div>
+                        <button
+                            className={`policy-toggle ${rules.allowTrainerSelfBooking ? 'policy-toggle--active' : ''}`}
+                            onClick={() => updateRule('allowTrainerSelfBooking', !rules.allowTrainerSelfBooking)}
+                        />
+                    </div>
+
+                    <div className="policy-toggle-row">
+                        <div className="policy-toggle-row__info">
+                            <div className="policy-toggle-row__icon">
+                                <AlertCircle size={16} />
+                            </div>
+                            <div className="policy-toggle-row__text">
+                                <span className="policy-toggle-row__label">Require Attendance Approval</span>
+                                <span className="policy-toggle-row__hint">Owner must approve staff clock-in/out records</span>
+                            </div>
+                        </div>
+                        <button
+                            className={`policy-toggle ${rules.requireAttendanceApproval ? 'policy-toggle--active' : ''}`}
+                            onClick={() => updateRule('requireAttendanceApproval', !rules.requireAttendanceApproval)}
+                        />
+                    </div>
+
+                    <div className="form-grid">
+                        <div className="field-wrapper">
+                            <label className="field-label">Max Monthly Overtime (Hours)</label>
+                            <input
+                                type="number"
+                                className="dense-input"
+                                value={rules.maxOvertimeHours}
+                                onChange={(e) => updateRule('maxOvertimeHours', parseInt(e.target.value) || 0)}
+                                min={0}
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <div className="form-group">
+                    <div className="form-group__header">
+                        <UserPlus size={16} />
+                        <h4 className="form-group__title">Registration</h4>
+                    </div>
+
+                    <div className="field-wrapper">
+                        <label className="field-label">Staff Registration Code</label>
+                        <div className="reminder-input-row">
+                            <input
+                                type="text"
+                                className="dense-input"
+                                value={rules.staffRegistrationCode}
+                                onChange={(e) => updateRule('staffRegistrationCode', e.target.value)}
+                                placeholder="Enter code"
+                            />
+                        </div>
+                        <span className="field-helper">Required for new staff to create their account</span>
                     </div>
 
                     <div className="policy-toggle-row">
@@ -219,103 +280,14 @@ const StaffRulesSection: React.FC = () => {
                                 <Users size={16} />
                             </div>
                             <div className="policy-toggle-row__text">
-                                <span className="policy-toggle-row__label">Auto-assign New Members</span>
-                                <span className="policy-toggle-row__hint">Distribute new members among trainers based on workload</span>
+                                <span className="policy-toggle-row__label">Auto-Assign Leads</span>
+                                <span className="policy-toggle-row__hint">Round-robin assignment of new leads to sales staff</span>
                             </div>
                         </div>
                         <button
-                            className={`policy-toggle ${policies.autoAssignNewMembers ? 'policy-toggle--active' : ''}`}
-                            onClick={() => updatePolicy('autoAssignNewMembers', !policies.autoAssignNewMembers)}
+                            className={`policy-toggle ${rules.autoAssignLeads ? 'policy-toggle--active' : ''}`}
+                            onClick={() => updateRule('autoAssignLeads', !rules.autoAssignLeads)}
                         />
-                    </div>
-                </div>
-
-                <div className="form-group">
-                    <div className="form-group__header">
-                        <CalendarClock size={16} />
-                        <h4 className="form-group__title">Scheduling Permissions</h4>
-                    </div>
-
-                    <div className="policy-toggle-row">
-                        <div className="policy-toggle-row__info">
-                            <div className="policy-toggle-row__icon">
-                                <Calendar size={16} />
-                            </div>
-                            <div className="policy-toggle-row__text">
-                                <span className="policy-toggle-row__label">Allow Trainer Rescheduling</span>
-                                <span className="policy-toggle-row__hint">Trainers can move their own sessions</span>
-                            </div>
-                        </div>
-                        <button
-                            className={`policy-toggle ${policies.canTrainerReschedule ? 'policy-toggle--active' : ''}`}
-                            onClick={() => updatePolicy('canTrainerReschedule', !policies.canTrainerReschedule)}
-                        />
-                    </div>
-
-                    <div className="policy-toggle-row">
-                        <div className="policy-toggle-row__info">
-                            <div className="policy-toggle-row__icon">
-                                <Calendar size={16} />
-                            </div>
-                            <div className="policy-toggle-row__text">
-                                <span className="policy-toggle-row__label">Allow Trainer Cancellation</span>
-                                <span className="policy-toggle-row__hint">Trainers can cancel their own sessions</span>
-                            </div>
-                        </div>
-                        <button
-                            className={`policy-toggle ${policies.canTrainerCancelSession ? 'policy-toggle--active' : ''}`}
-                            onClick={() => updatePolicy('canTrainerCancelSession', !policies.canTrainerCancelSession)}
-                        />
-                    </div>
-                </div>
-
-                <div className="form-group">
-                    <div className="form-group__header">
-                        <Eye size={16} />
-                        <h4 className="form-group__title">Member Visibility</h4>
-                    </div>
-
-                    <div className="field-wrapper">
-                        <label className="field-label" style={{ marginBottom: '12px' }}>
-                            Trainers can view:
-                        </label>
-                        <div className="visibility-options">
-                            <label 
-                                className={`visibility-option ${policies.trainerVisibility === 'own' ? 'visibility-option--active' : ''}`}
-                            >
-                                <input
-                                    type="radio"
-                                    name="visibility"
-                                    checked={policies.trainerVisibility === 'own'}
-                                    onChange={() => updatePolicy('trainerVisibility', 'own')}
-                                />
-                                <div className="visibility-option__content">
-                                    <Users size={20} />
-                                    <div>
-                                        <span className="visibility-option__label">Own Members Only</span>
-                                        <span className="visibility-option__hint">Members assigned directly to them</span>
-                                    </div>
-                                </div>
-                            </label>
-
-                            <label 
-                                className={`visibility-option ${policies.trainerVisibility === 'all' ? 'visibility-option--active' : ''}`}
-                            >
-                                <input
-                                    type="radio"
-                                    name="visibility"
-                                    checked={policies.trainerVisibility === 'all'}
-                                    onChange={() => updatePolicy('trainerVisibility', 'all')}
-                                />
-                                <div className="visibility-option__content">
-                                    <Eye size={20} />
-                                    <div>
-                                        <span className="visibility-option__label">All Members</span>
-                                        <span className="visibility-option__hint">Entire gym member database</span>
-                                    </div>
-                                </div>
-                            </label>
-                        </div>
                     </div>
                 </div>
             </div>

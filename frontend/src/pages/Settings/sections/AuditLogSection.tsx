@@ -5,37 +5,36 @@ import { useState, useEffect } from "react"
 import { 
     History, 
     Search, 
-    Filter, 
     Download, 
+    Filter, 
     ChevronLeft, 
     ChevronRight,
+    Loader2,
+    Calendar,
     User,
     Activity,
-    Clock,
-    Shield,
-    Loader2
+    Info
 } from "lucide-react"
 import api from "../../../services/api"
 
-interface AuditLog {
+interface AuditLogEntry {
     id: string
     timestamp: string
     userId: string
     userName: string
-    userRole: string
-    action: string
-    target: string
+    action: 'CREATE' | 'UPDATE' | 'DELETE' | 'LOGIN' | 'LOGOUT'
+    entity: string
     details: string
-    status: 'success' | 'failure' | 'warning'
+    ipAddress: string
 }
 
 const AuditLogSection: React.FC = () => {
-    const [logs, setLogs] = useState<AuditLog[]>([])
+    const [logs, setLogs] = useState<AuditLogEntry[]>([])
     const [loading, setLoading] = useState(true)
     const [searchTerm, setSearchTerm] = useState('')
-    const [filter, setFilter] = useState<'all' | 'success' | 'failure'>('all')
+    const [filter, setFilter] = useState<'ALL' | 'CREATE' | 'UPDATE' | 'DELETE'>('ALL')
     const [page, setPage] = useState(1)
-    const logsPerPage = 10
+    const itemsPerPage = 10
 
     useEffect(() => {
         fetchAuditLogs()
@@ -44,73 +43,72 @@ const AuditLogSection: React.FC = () => {
     const fetchAuditLogs = async () => {
         try {
             setLoading(true)
-            // In a real app, this would be a separate endpoint, but for now we'll simulate
-            // using the settings endpoint or just use mock data if not available
-            const response = await api.get('/settings')
-            
-            // Mock data for production feel if backend doesn't have logs yet
-            const mockLogs: AuditLog[] = [
-                {
-                    id: '1',
-                    timestamp: new Date().toISOString(),
-                    userId: 'admin_1',
-                    userName: 'Aryan Kumar',
-                    userRole: 'Owner',
-                    action: 'UPDATE_BILLING_POLICY',
-                    target: 'Billing Rules',
-                    details: 'Changed grace period from 7 to 10 days',
-                    status: 'success'
-                },
-                {
-                    id: '2',
-                    timestamp: new Date(Date.now() - 3600000).toISOString(),
-                    userId: 'mgr_2',
-                    userName: 'John Doe',
-                    userRole: 'Manager',
-                    action: 'DELETE_MEMBER',
-                    target: 'Member #1024',
-                    details: 'Account removed due to inactivity',
-                    status: 'success'
-                },
-                {
-                    id: '3',
-                    timestamp: new Date(Date.now() - 7200000).toISOString(),
-                    userId: 'sys_bot',
-                    userName: 'System',
-                    userRole: 'System',
-                    action: 'AUTO_LOCK',
-                    target: 'Member #892',
-                    details: 'Account locked due to overdue payment',
-                    status: 'warning'
-                }
-            ]
-            setLogs(mockLogs)
+            // Mocking audit logs for now as there's no dedicated endpoint yet
+            // In a real app: const response = await api.get('/api/audit-logs')
+            setTimeout(() => {
+                const mockLogs: AuditLogEntry[] = [
+                    { id: '1', timestamp: '2024-03-18 10:45:22', userId: 'admin', userName: 'John Doe', action: 'UPDATE', entity: 'Gym Settings', details: 'Updated Billing Rules', ipAddress: '192.168.1.1' },
+                    { id: '2', timestamp: '2024-03-18 09:30:15', userId: 'manager', userName: 'Sarah Smith', action: 'CREATE', entity: 'Member', details: 'Added Mike Johnson', ipAddress: '192.168.1.5' },
+                    { id: '3', timestamp: '2024-03-17 16:20:00', userId: 'admin', userName: 'John Doe', action: 'DELETE', entity: 'Plan', details: 'Removed Gold Package', ipAddress: '192.168.1.1' },
+                    { id: '4', timestamp: '2024-03-17 14:15:33', userId: 'staff', userName: 'Alex Brown', action: 'UPDATE', entity: 'Member', details: 'Renewed membership for Jane Doe', ipAddress: '192.168.1.12' },
+                    { id: '5', timestamp: '2024-03-17 08:00:05', userId: 'admin', userName: 'John Doe', action: 'UPDATE', entity: 'Roles', details: 'Modified Manager permissions', ipAddress: '192.168.1.1' },
+                ]
+                setLogs(mockLogs)
+                setLoading(false)
+            }, 800)
         } catch (error) {
             console.error('Failed to fetch audit logs:', error)
-        } finally {
             setLoading(false)
         }
     }
 
     const filteredLogs = logs.filter(log => {
-        const matchesSearch = 
-            log.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            log.target.toLowerCase().includes(searchTerm.toLowerCase())
-        
-        const matchesFilter = filter === 'all' || log.status === filter
+        const matchesSearch = log.details.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                             log.userName.toLowerCase().includes(searchTerm.toLowerCase())
+        const matchesFilter = filter === 'ALL' || log.action === filter
         return matchesSearch && matchesFilter
     })
 
-    const totalPages = Math.ceil(filteredLogs.length / logsPerPage)
-    const currentLogs = filteredLogs.slice((page - 1) * logsPerPage, page * logsPerPage)
+    const totalPages = Math.ceil(filteredLogs.length / itemsPerPage)
+    const paginatedLogs = filteredLogs.slice((page - 1) * itemsPerPage, page * itemsPerPage)
+
+    const getActionBadgeClass = (action: string) => {
+        switch (action) {
+            case 'CREATE': return 'audit-badge--create'
+            case 'UPDATE': return 'audit-badge--update'
+            case 'DELETE': return 'audit-badge--delete'
+            default: return ''
+        }
+    }
+
+    const exportToCSV = () => {
+        const headers = ['Timestamp', 'User', 'Action', 'Entity', 'Details', 'IP Address']
+        const csvContent = [
+            headers.join(','),
+            ...filteredLogs.map(log => [
+                log.timestamp,
+                log.userName,
+                log.action,
+                log.entity,
+                `"${log.details}"`,
+                log.ipAddress
+            ].join(','))
+        ].join('\n')
+
+        const blob = new Blob([csvContent], { type: 'text/csv' })
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `audit-log-${new Date().toISOString().split('T')[0]}.csv`
+        a.click()
+    }
 
     if (loading) {
         return (
             <div className="settings-section">
                 <div className="settings-loading">
                     <Loader2 className="settings-loading__spinner" />
-                    <span>Loading activity logs...</span>
+                    <span>Analyzing system logs...</span>
                 </div>
             </div>
         )
@@ -124,122 +122,134 @@ const AuditLogSection: React.FC = () => {
                         <History size={20} />
                     </div>
                     <div>
-                        <h2 className="settings-section__title">Audit Log</h2>
+                        <h2 className="settings-section__title">System Audit Log</h2>
                         <p className="settings-section__description">
-                            Track all administrative actions and system changes
+                            Track all administrative actions and security events
                         </p>
                     </div>
                 </div>
-                <button className="policy-action-btn" onClick={() => toast.success("Exporting logs to CSV...")}>
-                    <Download size={14} style={{ marginRight: '6px' }} />
+                <button 
+                    className="settings-save-btn" 
+                    style={{ background: 'transparent', border: '1px solid var(--settings-border)', color: 'var(--settings-text-secondary)' }}
+                    onClick={exportToCSV}
+                >
+                    <Download size={16} />
                     Export CSV
                 </button>
             </div>
 
             <div className="settings-section__content">
-                <div className="audit-controls">
-                    <div className="audit-search">
-                        <input 
-                            type="text" 
-                            className="audit-search__input" 
-                            placeholder="Search by user, action or target..." 
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
-                    <div className="audit-filter">
-                        <button 
-                            className={`audit-filter__btn ${filter === 'all' ? 'audit-filter__btn--active' : ''}`}
-                            onClick={() => setFilter('all')}
-                        >
-                            All
-                        </button>
-                        <button 
-                            className={`audit-filter__btn ${filter === 'success' ? 'audit-filter__btn--active' : ''}`}
-                            onClick={() => setFilter('success')}
-                        >
-                            Success
-                        </button>
-                        <button 
-                            className={`audit-filter__btn ${filter === 'failure' ? 'audit-filter__btn--active' : ''}`}
-                            onClick={() => setFilter('failure')}
-                        >
-                            Failure
-                        </button>
+                <div className="audit-controls" style={{ display: 'flex', gap: '16px', marginBottom: '8px' }}>
+                    <div className="field-wrapper" style={{ flex: 1 }}>
+                        <div className="reminder-input-row">
+                            <div style={{ position: 'relative', flex: 1 }}>
+                                <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--settings-text-tertiary)' }} />
+                                <input
+                                    type="text"
+                                    className="dense-input"
+                                    placeholder="Search logs by user or activity..."
+                                    style={{ paddingLeft: '40px' }}
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                            </div>
+                            <select 
+                                className="dense-input" 
+                                style={{ width: '160px' }}
+                                value={filter}
+                                onChange={(e) => setFilter(e.target.value as any)}
+                            >
+                                <option value="ALL">All Actions</option>
+                                <option value="CREATE">Create</option>
+                                <option value="UPDATE">Update</option>
+                                <option value="DELETE">Delete</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
-                <div className="audit-table-container">
+                <div style={{ overflowX: 'auto', borderRadius: '12px', border: '1px solid var(--settings-border)' }}>
                     <table className="audit-table">
                         <thead>
                             <tr>
                                 <th>Timestamp</th>
                                 <th>User</th>
                                 <th>Action</th>
-                                <th>Target</th>
-                                <th>Status</th>
+                                <th>Entity</th>
+                                <th>Details</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {currentLogs.map(log => (
+                            {paginatedLogs.length > 0 ? paginatedLogs.map(log => (
                                 <tr key={log.id}>
-                                    <td>
-                                        <div className="audit-time">
-                                            {new Date(log.timestamp).toLocaleDateString()}<br/>
-                                            {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    <td style={{ whiteSpace: 'nowrap' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <Calendar size={14} color="var(--settings-text-tertiary)" />
+                                            {log.timestamp}
                                         </div>
                                     </td>
                                     <td>
-                                        <div className="flex flex-col">
-                                            <span className="font-semibold text-white">{log.userName}</span>
-                                            <span className="audit-role">{log.userRole}</span>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <User size={14} color="var(--settings-accent-blue)" />
+                                            {log.userName}
                                         </div>
                                     </td>
                                     <td>
-                                        <div className="flex flex-col">
-                                            <span className="audit-target">{log.action}</span>
-                                            <span className="audit-details">{log.details}</span>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <span className="audit-target">{log.target}</span>
-                                    </td>
-                                    <td>
-                                        <span className={`audit-action audit-action--${log.status === 'success' ? 'success' : log.status === 'warning' ? 'warning' : 'danger'}`}>
-                                            {log.status.toUpperCase()}
+                                        <span className={`audit-badge ${getActionBadgeClass(log.action)}`}>
+                                            {log.action}
                                         </span>
                                     </td>
+                                    <td>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <Activity size={14} color="var(--settings-text-tertiary)" />
+                                            {log.entity}
+                                        </div>
+                                    </td>
+                                    <td>{log.details}</td>
                                 </tr>
-                            ))}
+                            )) : (
+                                <tr>
+                                    <td colSpan={5} style={{ textAlign: 'center', padding: '40px', color: 'var(--settings-text-tertiary)' }}>
+                                        No logs found matching your criteria.
+                                    </td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
+                </div>
 
-                    {currentLogs.length === 0 && (
-                        <div className="audit-empty">
-                            <Activity size={32} />
-                            <p>No activity logs found matching your criteria</p>
-                        </div>
-                    )}
+                <div className="audit-pagination" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0' }}>
+                    <span style={{ fontSize: '13px', color: 'var(--settings-text-tertiary)' }}>
+                        Showing {paginatedLogs.length} of {filteredLogs.length} entries
+                    </span>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        <button 
+                            className="reminder-add-btn" 
+                            disabled={page === 1}
+                            onClick={() => setPage(p => p - 1)}
+                        >
+                            <ChevronLeft size={16} />
+                        </button>
+                        <button 
+                            className="reminder-add-btn"
+                            disabled={page === totalPages}
+                            onClick={() => setPage(p => p + 1)}
+                        >
+                            <ChevronRight size={16} />
+                        </button>
+                    </div>
+                </div>
 
-                    <div className="audit-pagination">
-                        <div className="audit-pagination__info">
-                            Showing {(page-1)*logsPerPage + 1} to {Math.min(page*logsPerPage, filteredLogs.length)} of {filteredLogs.length} entries
+                <div className="policy-toggle-row" style={{ background: 'rgba(255, 255, 255, 0.03)', borderStyle: 'dashed' }}>
+                    <div className="policy-toggle-row__info">
+                        <div className="policy-toggle-row__icon">
+                            <Info size={16} />
                         </div>
-                        <div className="audit-pagination__buttons">
-                            <button 
-                                className="audit-pagination__btn"
-                                onClick={() => setPage(p => Math.max(1, p - 1))}
-                                disabled={page === 1}
-                            >
-                                <ChevronLeft size={16} />
-                            </button>
-                            <button 
-                                className="audit-pagination__btn"
-                                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                                disabled={page === totalPages || totalPages === 0}
-                            >
-                                <ChevronRight size={16} />
-                            </button>
+                        <div className="policy-toggle-row__text">
+                            <span className="policy-toggle-row__label">Data Retention</span>
+                            <span className="policy-toggle-row__hint">
+                                Audit logs are kept for 90 days. Contact system administrator for older records.
+                            </span>
                         </div>
                     </div>
                 </div>

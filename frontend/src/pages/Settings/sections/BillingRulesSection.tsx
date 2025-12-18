@@ -5,88 +5,88 @@ import { useState, useEffect } from "react"
 import { toast } from "react-hot-toast"
 import { 
     CreditCard, 
-    DollarSign, 
-    Clock, 
-    Lock, 
-    RefreshCw, 
-    AlertTriangle,
-    Info,
-    Save,
-    Loader2,
-    Percent,
-    Banknote,
+    Save, 
+    Loader2, 
+    Info, 
+    Receipt, 
+    Ban, 
+    Percent, 
+    Clock,
+    DollarSign,
     Calendar,
-    ShieldAlert
+    Bell
 } from "lucide-react"
 import api from "../../../services/api"
 
-interface BillingPolicy {
-    allowCashPayments: boolean
-    allowPartialPayments: boolean
-    gracePeriodDays: number
-    autoLockOverdue: boolean
-    autoRenewMemberships: boolean
+interface BillingSettings {
+    currency: string
+    taxEnabled: boolean
+    taxPercentage: number
     lateFeeEnabled: boolean
     lateFeeAmount: number
-    lateFeeType: 'fixed' | 'percentage'
-    minimumPaymentPercent: number
-    paymentReminderDays: number
+    gracePeriodDays: number
+    invoicePrefix: string
+    autoInvoiceEnabled: boolean
+    paymentReminderDays: number[]
+    allowPartialPayments: boolean
 }
 
 const BillingRulesSection: React.FC = () => {
-    const [policies, setPolicies] = useState<BillingPolicy>({
-        allowCashPayments: true,
-        allowPartialPayments: false,
-        gracePeriodDays: 7,
-        autoLockOverdue: true,
-        autoRenewMemberships: false,
+    const [settings, setSettings] = useState<BillingSettings>({
+        currency: 'INR',
+        taxEnabled: true,
+        taxPercentage: 18,
         lateFeeEnabled: false,
-        lateFeeAmount: 100,
-        lateFeeType: 'fixed',
-        minimumPaymentPercent: 50,
-        paymentReminderDays: 3,
+        lateFeeAmount: 50,
+        gracePeriodDays: 3,
+        invoicePrefix: 'GYM-',
+        autoInvoiceEnabled: true,
+        paymentReminderDays: [3, 1],
+        allowPartialPayments: false,
     })
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
     const [hasChanges, setHasChanges] = useState(false)
-    const [originalPolicies, setOriginalPolicies] = useState<BillingPolicy | null>(null)
+    const [originalSettings, setOriginalSettings] = useState<BillingSettings | null>(null)
 
     useEffect(() => {
-        fetchBillingPolicies()
+        fetchBillingSettings()
     }, [])
 
-    const fetchBillingPolicies = async () => {
+    const fetchBillingSettings = async () => {
         try {
             setLoading(true)
-            const response = await api.get('/settings')
+            const response = await api.get('/api/gym-settings')
             if (response.data) {
-                const settings = response.data
-                const billingSettings: BillingPolicy = {
-                    allowCashPayments: settings.allowCashPayments === 'true',
-                    allowPartialPayments: settings.allowPartialPayments === 'true',
-                    gracePeriodDays: parseInt(settings.gracePeriodDays) || 7,
-                    autoLockOverdue: settings.autoLockOverdue === 'true',
-                    autoRenewMemberships: settings.autoRenewMemberships === 'true',
-                    lateFeeEnabled: settings.lateFeeEnabled === 'true',
-                    lateFeeAmount: parseInt(settings.lateFeeAmount) || 100,
-                    lateFeeType: (settings.lateFeeType as 'fixed' | 'percentage') || 'fixed',
-                    minimumPaymentPercent: parseInt(settings.minimumPaymentPercent) || 50,
-                    paymentReminderDays: parseInt(settings.paymentReminderDays) || 3,
+                const fetched = response.data
+                const billingSettings: BillingSettings = {
+                    currency: fetched.currency || 'INR',
+                    taxEnabled: fetched.taxEnabled === 'true' || fetched.taxEnabled === true,
+                    taxPercentage: parseInt(fetched.taxPercentage) || 18,
+                    lateFeeEnabled: fetched.lateFeeEnabled === 'true' || fetched.lateFeeEnabled === true,
+                    lateFeeAmount: parseInt(fetched.lateFeeAmount) || 50,
+                    gracePeriodDays: parseInt(fetched.gracePeriodDays) || 3,
+                    invoicePrefix: fetched.invoicePrefix || 'GYM-',
+                    autoInvoiceEnabled: fetched.autoInvoiceEnabled === 'true' || fetched.autoInvoiceEnabled === true,
+                    paymentReminderDays: Array.isArray(fetched.paymentReminderDays) 
+                        ? fetched.paymentReminderDays 
+                        : (fetched.paymentReminderDays ? fetched.paymentReminderDays.split(',').map(Number) : [3, 1]),
+                    allowPartialPayments: fetched.allowPartialPayments === 'true' || fetched.allowPartialPayments === true,
                 }
-                setPolicies(billingSettings)
-                setOriginalPolicies(billingSettings)
+                setSettings(billingSettings)
+                setOriginalSettings(billingSettings)
             }
         } catch (error) {
-            console.error('Failed to fetch billing policies:', error)
+            console.error('Failed to fetch billing settings:', error)
         } finally {
             setLoading(false)
         }
     }
 
-    const updatePolicy = <K extends keyof BillingPolicy>(key: K, value: BillingPolicy[K]) => {
-        setPolicies(prev => {
+    const updateSetting = <K extends keyof BillingSettings>(key: K, value: BillingSettings[K]) => {
+        setSettings(prev => {
             const updated = { ...prev, [key]: value }
-            setHasChanges(JSON.stringify(updated) !== JSON.stringify(originalPolicies))
+            setHasChanges(JSON.stringify(updated) !== JSON.stringify(originalSettings))
             return updated
         })
     }
@@ -94,13 +94,12 @@ const BillingRulesSection: React.FC = () => {
     const handleSave = async () => {
         try {
             setSaving(true)
-            await api.put('/settings', policies)
-            setOriginalPolicies(policies)
+            await api.put('/api/gym-settings', settings)
+            setOriginalSettings(settings)
             setHasChanges(false)
-            toast.success("Billing policies saved successfully")
+            toast.success("Billing settings saved successfully")
         } catch (error) {
-            toast.error("Failed to save billing policies")
-            console.error('Save error:', error)
+            toast.error("Failed to save billing settings")
         } finally {
             setSaving(false)
         }
@@ -111,7 +110,7 @@ const BillingRulesSection: React.FC = () => {
             <div className="settings-section">
                 <div className="settings-loading">
                     <Loader2 className="settings-loading__spinner" />
-                    <span>Loading billing settings...</span>
+                    <span>Loading billing configuration...</span>
                 </div>
             </div>
         )
@@ -127,7 +126,7 @@ const BillingRulesSection: React.FC = () => {
                     <div>
                         <h2 className="settings-section__title">Billing & Payment Rules</h2>
                         <p className="settings-section__description">
-                            Control how payments are collected and processed
+                            Configure taxes, late fees, and invoicing preferences
                         </p>
                     </div>
                 </div>
@@ -146,23 +145,139 @@ const BillingRulesSection: React.FC = () => {
             <div className="settings-section__content">
                 <div className="form-group">
                     <div className="form-group__header">
-                        <Banknote size={16} />
-                        <h4 className="form-group__title">Payment Methods</h4>
+                        <DollarSign size={16} />
+                        <h4 className="form-group__title">Currency & Tax</h4>
+                    </div>
+
+                    <div className="form-grid">
+                        <div className="field-wrapper">
+                            <label className="field-label">System Currency</label>
+                            <select
+                                className="dense-input"
+                                value={settings.currency}
+                                onChange={(e) => updateSetting('currency', e.target.value)}
+                            >
+                                <option value="INR">INR (₹) - Indian Rupee</option>
+                                <option value="USD">USD ($) - US Dollar</option>
+                                <option value="GBP">GBP (£) - British Pound</option>
+                                <option value="EUR">EUR (€) - Euro</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div className="policy-toggle-row">
                         <div className="policy-toggle-row__info">
                             <div className="policy-toggle-row__icon">
-                                <DollarSign size={16} />
+                                <Percent size={16} />
                             </div>
                             <div className="policy-toggle-row__text">
-                                <span className="policy-toggle-row__label">Allow Cash Payments</span>
-                                <span className="policy-toggle-row__hint">Staff can record cash payments manually</span>
+                                <span className="policy-toggle-row__label">Enable Tax (GST/VAT)</span>
+                                <span className="policy-toggle-row__hint">Automatically apply tax to all membership fees</span>
                             </div>
                         </div>
                         <button
-                            className={`policy-toggle ${policies.allowCashPayments ? 'policy-toggle--active' : ''}`}
-                            onClick={() => updatePolicy('allowCashPayments', !policies.allowCashPayments)}
+                            className={`policy-toggle ${settings.taxEnabled ? 'policy-toggle--active' : ''}`}
+                            onClick={() => updateSetting('taxEnabled', !settings.taxEnabled)}
+                        />
+                    </div>
+
+                    {settings.taxEnabled && (
+                        <div className="form-grid" style={{ marginLeft: '40px' }}>
+                            <div className="field-wrapper">
+                                <label className="field-label">Tax Percentage (%)</label>
+                                <input
+                                    type="number"
+                                    className="dense-input"
+                                    value={settings.taxPercentage}
+                                    onChange={(e) => updateSetting('taxPercentage', parseInt(e.target.value) || 0)}
+                                    min={0}
+                                    max={100}
+                                />
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                <div className="form-group">
+                    <div className="form-group__header">
+                        <Clock size={16} />
+                        <h4 className="form-group__title">Late Fees & Grace Period</h4>
+                    </div>
+
+                    <div className="policy-toggle-row">
+                        <div className="policy-toggle-row__info">
+                            <div className="policy-toggle-row__icon">
+                                <Ban size={16} />
+                            </div>
+                            <div className="policy-toggle-row__text">
+                                <span className="policy-toggle-row__label">Apply Late Fees</span>
+                                <span className="policy-toggle-row__hint">Charge members for overdue payments</span>
+                            </div>
+                        </div>
+                        <button
+                            className={`policy-toggle ${settings.lateFeeEnabled ? 'policy-toggle--active' : ''}`}
+                            onClick={() => updateSetting('lateFeeEnabled', !settings.lateFeeEnabled)}
+                        />
+                    </div>
+
+                    {settings.lateFeeEnabled && (
+                        <div className="form-grid" style={{ marginLeft: '40px' }}>
+                            <div className="field-wrapper">
+                                <label className="field-label">Late Fee Amount (₹)</label>
+                                <input
+                                    type="number"
+                                    className="dense-input"
+                                    value={settings.lateFeeAmount}
+                                    onChange={(e) => updateSetting('lateFeeAmount', parseInt(e.target.value) || 0)}
+                                    min={0}
+                                />
+                            </div>
+                            <div className="field-wrapper">
+                                <label className="field-label">Grace Period (Days)</label>
+                                <input
+                                    type="number"
+                                    className="dense-input"
+                                    value={settings.gracePeriodDays}
+                                    onChange={(e) => updateSetting('gracePeriodDays', parseInt(e.target.value) || 0)}
+                                    min={0}
+                                />
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                <div className="form-group">
+                    <div className="form-group__header">
+                        <Receipt size={16} />
+                        <h4 className="form-group__title">Invoicing Preferences</h4>
+                    </div>
+
+                    <div className="form-grid">
+                        <div className="field-wrapper">
+                            <label className="field-label">Invoice Prefix</label>
+                            <input
+                                type="text"
+                                className="dense-input"
+                                value={settings.invoicePrefix}
+                                onChange={(e) => updateSetting('invoicePrefix', e.target.value)}
+                                placeholder="e.g. GYM-"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="policy-toggle-row">
+                        <div className="policy-toggle-row__info">
+                            <div className="policy-toggle-row__icon">
+                                <Calendar size={16} />
+                            </div>
+                            <div className="policy-toggle-row__text">
+                                <span className="policy-toggle-row__label">Auto-Generate Invoices</span>
+                                <span className="policy-toggle-row__hint">Generate invoice PDF when payment is recorded</span>
+                            </div>
+                        </div>
+                        <button
+                            className={`policy-toggle ${settings.autoInvoiceEnabled ? 'policy-toggle--active' : ''}`}
+                            onClick={() => updateSetting('autoInvoiceEnabled', !settings.autoInvoiceEnabled)}
                         />
                     </div>
 
@@ -173,157 +288,35 @@ const BillingRulesSection: React.FC = () => {
                             </div>
                             <div className="policy-toggle-row__text">
                                 <span className="policy-toggle-row__label">Allow Partial Payments</span>
-                                <span className="policy-toggle-row__hint">Members can pay in installments</span>
+                                <span className="policy-toggle-row__hint">Members can pay fees in installments</span>
                             </div>
                         </div>
                         <button
-                            className={`policy-toggle ${policies.allowPartialPayments ? 'policy-toggle--active' : ''}`}
-                            onClick={() => updatePolicy('allowPartialPayments', !policies.allowPartialPayments)}
-                        />
-                    </div>
-
-                    {policies.allowPartialPayments && (
-                        <div className="form-grid" style={{ marginTop: '12px', marginLeft: '40px' }}>
-                            <div className="field-wrapper">
-                                <label className="field-label">
-                                    Minimum Payment (%)
-                                    <div className="info-tooltip" title="Minimum percentage required for partial payment">
-                                        <Info size={14} />
-                                    </div>
-                                </label>
-                                <input
-                                    type="number"
-                                    className="dense-input"
-                                    value={policies.minimumPaymentPercent}
-                                    onChange={(e) => updatePolicy('minimumPaymentPercent', parseInt(e.target.value) || 0)}
-                                    min={10}
-                                    max={90}
-                                />
-                            </div>
-                        </div>
-                    )}
-                </div>
-
-                <div className="form-group">
-                    <div className="form-group__header">
-                        <ShieldAlert size={16} />
-                        <h4 className="form-group__title">Overdue Policy</h4>
-                    </div>
-
-                    <div className="form-grid">
-                        <div className="field-wrapper">
-                            <label className="field-label">
-                                <Clock size={14} />
-                                Grace Period (Days)
-                            </label>
-                            <input
-                                type="number"
-                                className="dense-input"
-                                value={policies.gracePeriodDays}
-                                onChange={(e) => updatePolicy('gracePeriodDays', parseInt(e.target.value) || 0)}
-                                min={0}
-                                max={30}
-                            />
-                        </div>
-
-                        <div className="field-wrapper">
-                            <label className="field-label">
-                                <Calendar size={14} />
-                                Reminder Before (Days)
-                            </label>
-                            <input
-                                type="number"
-                                className="dense-input"
-                                value={policies.paymentReminderDays}
-                                onChange={(e) => updatePolicy('paymentReminderDays', parseInt(e.target.value) || 0)}
-                                min={1}
-                                max={14}
-                            />
-                        </div>
-                    </div>
-
-                    <div className="policy-toggle-row">
-                        <div className="policy-toggle-row__info">
-                            <div className="policy-toggle-row__icon">
-                                <Lock size={16} />
-                            </div>
-                            <div className="policy-toggle-row__text">
-                                <span className="policy-toggle-row__label">Auto-lock Overdue Accounts</span>
-                                <span className="policy-toggle-row__hint">Restrict gym access after grace period ends</span>
-                            </div>
-                        </div>
-                        <button
-                            className={`policy-toggle ${policies.autoLockOverdue ? 'policy-toggle--active' : ''}`}
-                            onClick={() => updatePolicy('autoLockOverdue', !policies.autoLockOverdue)}
+                            className={`policy-toggle ${settings.allowPartialPayments ? 'policy-toggle--active' : ''}`}
+                            onClick={() => updateSetting('allowPartialPayments', !settings.allowPartialPayments)}
                         />
                     </div>
                 </div>
 
                 <div className="form-group">
                     <div className="form-group__header">
-                        <RefreshCw size={16} />
-                        <h4 className="form-group__title">Renewal & Fees</h4>
+                        <Bell size={16} />
+                        <h4 className="form-group__title">Payment Notifications</h4>
                     </div>
 
-                    <div className="policy-toggle-row">
+                    <div className="policy-toggle-row" style={{ background: 'rgba(245, 158, 11, 0.05)', borderColor: 'rgba(245, 158, 11, 0.1)' }}>
                         <div className="policy-toggle-row__info">
                             <div className="policy-toggle-row__icon">
-                                <RefreshCw size={16} />
+                                <Info size={16} color="var(--settings-accent-amber)" />
                             </div>
                             <div className="policy-toggle-row__text">
-                                <span className="policy-toggle-row__label">Auto-Renew Memberships</span>
-                                <span className="policy-toggle-row__hint">Automatically charge on expiry</span>
+                                <span className="policy-toggle-row__label">Global Billing Alerts</span>
+                                <span className="policy-toggle-row__hint">
+                                    Reminder intervals are managed in the <strong>Notifications</strong> section.
+                                </span>
                             </div>
                         </div>
-                        <button
-                            className={`policy-toggle ${policies.autoRenewMemberships ? 'policy-toggle--active' : ''}`}
-                            onClick={() => updatePolicy('autoRenewMemberships', !policies.autoRenewMemberships)}
-                        />
                     </div>
-
-                    <div className="policy-toggle-row">
-                        <div className="policy-toggle-row__info">
-                            <div className="policy-toggle-row__icon">
-                                <AlertTriangle size={16} />
-                            </div>
-                            <div className="policy-toggle-row__text">
-                                <span className="policy-toggle-row__label">Enable Late Fees</span>
-                                <span className="policy-toggle-row__hint">Charge additional fee for overdue payments</span>
-                            </div>
-                        </div>
-                        <button
-                            className={`policy-toggle ${policies.lateFeeEnabled ? 'policy-toggle--active' : ''}`}
-                            onClick={() => updatePolicy('lateFeeEnabled', !policies.lateFeeEnabled)}
-                        />
-                    </div>
-
-                    {policies.lateFeeEnabled && (
-                        <div className="form-grid" style={{ marginTop: '12px', marginLeft: '40px' }}>
-                            <div className="field-wrapper">
-                                <label className="field-label">Fee Type</label>
-                                <select
-                                    className="dense-input"
-                                    value={policies.lateFeeType}
-                                    onChange={(e) => updatePolicy('lateFeeType', e.target.value as 'fixed' | 'percentage')}
-                                >
-                                    <option value="fixed">Fixed Amount (₹)</option>
-                                    <option value="percentage">Percentage (%)</option>
-                                </select>
-                            </div>
-                            <div className="field-wrapper">
-                                <label className="field-label">
-                                    {policies.lateFeeType === 'fixed' ? 'Amount (₹)' : 'Percentage (%)'}
-                                </label>
-                                <input
-                                    type="number"
-                                    className="dense-input"
-                                    value={policies.lateFeeAmount}
-                                    onChange={(e) => updatePolicy('lateFeeAmount', parseInt(e.target.value) || 0)}
-                                    min={0}
-                                />
-                            </div>
-                        </div>
-                    )}
                 </div>
             </div>
         </div>
