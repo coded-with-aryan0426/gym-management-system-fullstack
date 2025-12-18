@@ -58,20 +58,20 @@ const BillingRulesSection: React.FC = () => {
     const fetchBillingPolicies = async () => {
         try {
             setLoading(true)
-            const response = await api.get('/api/gym-settings')
+            const response = await api.get('/settings')
             if (response.data) {
                 const settings = response.data
                 const billingSettings: BillingPolicy = {
-                    allowCashPayments: settings.allowCashPayments ?? true,
-                    allowPartialPayments: settings.allowPartialPayments ?? false,
-                    gracePeriodDays: settings.gracePeriodDays ?? 7,
-                    autoLockOverdue: settings.autoLockOverdue ?? true,
-                    autoRenewMemberships: settings.autoRenewMemberships ?? false,
-                    lateFeeEnabled: settings.lateFeeEnabled ?? false,
-                    lateFeeAmount: settings.lateFeeAmount ?? 100,
-                    lateFeeType: settings.lateFeeType ?? 'fixed',
-                    minimumPaymentPercent: settings.minimumPaymentPercent ?? 50,
-                    paymentReminderDays: settings.paymentReminderDays ?? 3,
+                    allowCashPayments: settings.allowCashPayments === 'true',
+                    allowPartialPayments: settings.allowPartialPayments === 'true',
+                    gracePeriodDays: parseInt(settings.gracePeriodDays) || 7,
+                    autoLockOverdue: settings.autoLockOverdue === 'true',
+                    autoRenewMemberships: settings.autoRenewMemberships === 'true',
+                    lateFeeEnabled: settings.lateFeeEnabled === 'true',
+                    lateFeeAmount: parseInt(settings.lateFeeAmount) || 100,
+                    lateFeeType: (settings.lateFeeType as 'fixed' | 'percentage') || 'fixed',
+                    minimumPaymentPercent: parseInt(settings.minimumPaymentPercent) || 50,
+                    paymentReminderDays: parseInt(settings.paymentReminderDays) || 3,
                 }
                 setPolicies(billingSettings)
                 setOriginalPolicies(billingSettings)
@@ -94,7 +94,7 @@ const BillingRulesSection: React.FC = () => {
     const handleSave = async () => {
         try {
             setSaving(true)
-            await api.put('/api/gym-settings', policies)
+            await api.put('/settings', policies)
             setOriginalPolicies(policies)
             setHasChanges(false)
             toast.success("Billing policies saved successfully")

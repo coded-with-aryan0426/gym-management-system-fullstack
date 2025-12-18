@@ -51,18 +51,18 @@ const StaffRulesSection: React.FC = () => {
     const fetchStaffPolicies = async () => {
         try {
             setLoading(true)
-            const response = await api.get('/api/gym-settings')
+            const response = await api.get('/settings')
             if (response.data) {
                 const settings = response.data
                 const staffSettings: StaffPolicy = {
-                    maxSessionsPerDay: settings.maxSessionsPerDay ?? 8,
-                    minBreakBetweenSessions: settings.minBreakBetweenSessions ?? 15,
-                    canTrainerReschedule: settings.canTrainerReschedule ?? true,
-                    canTrainerCancelSession: settings.canTrainerCancelSession ?? false,
-                    trainerVisibility: settings.trainerVisibility ?? 'own',
-                    autoAssignNewMembers: settings.autoAssignNewMembers ?? false,
-                    requireSessionNotes: settings.requireSessionNotes ?? false,
-                    sessionDurationMinutes: settings.sessionDurationMinutes ?? 60,
+                    maxSessionsPerDay: parseInt(settings.maxSessionsPerDay) || 8,
+                    minBreakBetweenSessions: parseInt(settings.minBreakBetweenSessions) || 15,
+                    canTrainerReschedule: settings.canTrainerReschedule === 'true',
+                    canTrainerCancelSession: settings.canTrainerCancelSession === 'true',
+                    trainerVisibility: (settings.trainerVisibility as 'own' | 'all') || 'own',
+                    autoAssignNewMembers: settings.autoAssignNewMembers === 'true',
+                    requireSessionNotes: settings.requireSessionNotes === 'true',
+                    sessionDurationMinutes: parseInt(settings.sessionDurationMinutes) || 60,
                 }
                 setPolicies(staffSettings)
                 setOriginalPolicies(staffSettings)
@@ -85,13 +85,13 @@ const StaffRulesSection: React.FC = () => {
     const handleSave = async () => {
         try {
             setSaving(true)
-            await api.put('/api/gym-settings', policies)
+            await api.put('/settings', policies)
             setOriginalPolicies(policies)
             setHasChanges(false)
             toast.success("Staff policies saved successfully")
         } catch (error) {
+            console.error('Failed to save staff policies:', error)
             toast.error("Failed to save staff policies")
-            console.error('Save error:', error)
         } finally {
             setSaving(false)
         }

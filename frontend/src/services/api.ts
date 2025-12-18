@@ -243,8 +243,15 @@ const api = {
       return false; // Assume email doesn't exist if check fails
     }
   },
+
+// Generic methods to allow direct apiClient usage through the api object
+  get: (url: string, config?: any) => apiClient.get(url, config),
+  post: (url: string, data?: any, config?: any) => apiClient.post(url, data, config),
+  put: (url: string, data?: any, config?: any) => apiClient.put(url, data, config),
+  delete: (url: string, config?: any) => apiClient.delete(url, config),
 };
 
+export { apiClient };
 export default api;
 
 // PT Session endpoints

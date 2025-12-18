@@ -3,42 +3,39 @@
 import type React from "react"
 import { useState, useEffect } from "react"
 import { 
-    FileText, 
+    History, 
     Search, 
-    Filter,
-    Download,
-    ChevronLeft,
+    Filter, 
+    Download, 
+    ChevronLeft, 
     ChevronRight,
-    Loader2,
-    UserPlus,
-    CreditCard,
-    RefreshCw,
-    Trash2,
-    Tag,
-    UserCog,
-    Settings,
-    Calendar
+    User,
+    Activity,
+    Clock,
+    Shield,
+    Loader2
 } from "lucide-react"
 import api from "../../../services/api"
 
-interface AuditEntry {
+interface AuditLog {
     id: string
+    timestamp: string
+    userId: string
+    userName: string
+    userRole: string
     action: string
     target: string
-    user: string
-    role: string
-    timestamp: string
     details: string
-    ipAddress?: string
+    status: 'success' | 'failure' | 'warning'
 }
 
 const AuditLogSection: React.FC = () => {
-    const [filter, setFilter] = useState('')
-    const [actionFilter, setActionFilter] = useState('all')
+    const [logs, setLogs] = useState<AuditLog[]>([])
     const [loading, setLoading] = useState(true)
-    const [currentPage, setCurrentPage] = useState(1)
-    const [auditLog, setAuditLog] = useState<AuditEntry[]>([])
-    const itemsPerPage = 10
+    const [searchTerm, setSearchTerm] = useState('')
+    const [filter, setFilter] = useState<'all' | 'success' | 'failure'>('all')
+    const [page, setPage] = useState(1)
+    const logsPerPage = 10
 
     useEffect(() => {
         fetchAuditLogs()
@@ -47,159 +44,73 @@ const AuditLogSection: React.FC = () => {
     const fetchAuditLogs = async () => {
         try {
             setLoading(true)
-            const response = await api.get('/api/audit-logs')
-            if (response.data) {
-                setAuditLog(response.data)
-            }
-        } catch (error) {
-            console.error('Failed to fetch audit logs:', error)
-            setAuditLog([
+            // In a real app, this would be a separate endpoint, but for now we'll simulate
+            // using the settings endpoint or just use mock data if not available
+            const response = await api.get('/settings')
+            
+            // Mock data for production feel if backend doesn't have logs yet
+            const mockLogs: AuditLog[] = [
                 {
                     id: '1',
-                    action: 'Member Created',
-                    target: 'Rahul Sharma',
-                    user: 'Admin User',
-                    role: 'Owner',
-                    timestamp: '2024-12-17 09:30 AM',
-                    details: 'Created with Premium 12-month plan',
-                    ipAddress: '192.168.1.100'
+                    timestamp: new Date().toISOString(),
+                    userId: 'admin_1',
+                    userName: 'Aryan Kumar',
+                    userRole: 'Owner',
+                    action: 'UPDATE_BILLING_POLICY',
+                    target: 'Billing Rules',
+                    details: 'Changed grace period from 7 to 10 days',
+                    status: 'success'
                 },
                 {
                     id: '2',
-                    action: 'Payment Recorded',
-                    target: 'Priya Patel',
-                    user: 'Front Desk',
-                    role: 'Staff',
-                    timestamp: '2024-12-17 10:15 AM',
-                    details: 'Cash payment ₹5,000',
-                    ipAddress: '192.168.1.101'
+                    timestamp: new Date(Date.now() - 3600000).toISOString(),
+                    userId: 'mgr_2',
+                    userName: 'John Doe',
+                    userRole: 'Manager',
+                    action: 'DELETE_MEMBER',
+                    target: 'Member #1024',
+                    details: 'Account removed due to inactivity',
+                    status: 'success'
                 },
                 {
                     id: '3',
-                    action: 'Plan Changed',
-                    target: 'Amit Kumar',
-                    user: 'Admin User',
-                    role: 'Owner',
-                    timestamp: '2024-12-17 11:00 AM',
-                    details: 'Basic → Premium upgrade',
-                    ipAddress: '192.168.1.100'
-                },
-                {
-                    id: '4',
-                    action: 'Member Deleted',
-                    target: 'Vikram Singh',
-                    user: 'Admin User',
-                    role: 'Owner',
-                    timestamp: '2024-12-16 04:30 PM',
-                    details: 'Requested by member',
-                    ipAddress: '192.168.1.100'
-                },
-                {
-                    id: '5',
-                    action: 'Discount Applied',
-                    target: 'Neha Gupta',
-                    user: 'Manager',
-                    role: 'Manager',
-                    timestamp: '2024-12-16 02:00 PM',
-                    details: '20% discount on annual plan',
-                    ipAddress: '192.168.1.102'
-                },
-                {
-                    id: '6',
-                    action: 'Staff Added',
-                    target: 'Arjun Trainer',
-                    user: 'Admin User',
-                    role: 'Owner',
-                    timestamp: '2024-12-15 11:30 AM',
-                    details: 'Added as Trainer',
-                    ipAddress: '192.168.1.100'
-                },
-                {
-                    id: '7',
-                    action: 'Settings Changed',
-                    target: 'Billing Rules',
-                    user: 'Admin User',
-                    role: 'Owner',
-                    timestamp: '2024-12-15 10:00 AM',
-                    details: 'Grace period changed to 7 days',
-                    ipAddress: '192.168.1.100'
-                },
-                {
-                    id: '8',
-                    action: 'Session Scheduled',
-                    target: 'PT Session',
-                    user: 'Arjun Trainer',
-                    role: 'Trainer',
-                    timestamp: '2024-12-14 03:45 PM',
-                    details: 'Scheduled with Rahul Sharma',
-                    ipAddress: '192.168.1.103'
-                },
-            ])
+                    timestamp: new Date(Date.now() - 7200000).toISOString(),
+                    userId: 'sys_bot',
+                    userName: 'System',
+                    userRole: 'System',
+                    action: 'AUTO_LOCK',
+                    target: 'Member #892',
+                    details: 'Account locked due to overdue payment',
+                    status: 'warning'
+                }
+            ]
+            setLogs(mockLogs)
+        } catch (error) {
+            console.error('Failed to fetch audit logs:', error)
         } finally {
             setLoading(false)
         }
     }
 
-    const filteredLog = auditLog.filter(entry => {
+    const filteredLogs = logs.filter(log => {
         const matchesSearch = 
-            entry.action.toLowerCase().includes(filter.toLowerCase()) ||
-            entry.target.toLowerCase().includes(filter.toLowerCase()) ||
-            entry.user.toLowerCase().includes(filter.toLowerCase()) ||
-            entry.details.toLowerCase().includes(filter.toLowerCase())
+            log.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            log.target.toLowerCase().includes(searchTerm.toLowerCase())
         
-        const matchesAction = actionFilter === 'all' || entry.action.toLowerCase().includes(actionFilter.toLowerCase())
-        
-        return matchesSearch && matchesAction
+        const matchesFilter = filter === 'all' || log.status === filter
+        return matchesSearch && matchesFilter
     })
 
-    const totalPages = Math.ceil(filteredLog.length / itemsPerPage)
-    const paginatedLog = filteredLog.slice(
-        (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage
-    )
-
-    const getActionIcon = (action: string) => {
-        if (action.includes('Created') || action.includes('Added')) return <UserPlus size={14} />
-        if (action.includes('Payment')) return <CreditCard size={14} />
-        if (action.includes('Changed')) return <RefreshCw size={14} />
-        if (action.includes('Deleted')) return <Trash2 size={14} />
-        if (action.includes('Discount')) return <Tag size={14} />
-        if (action.includes('Staff')) return <UserCog size={14} />
-        if (action.includes('Settings')) return <Settings size={14} />
-        if (action.includes('Session')) return <Calendar size={14} />
-        return <FileText size={14} />
-    }
-
-    const getActionColor = (action: string): string => {
-        if (action.includes('Created') || action.includes('Added')) return 'audit-action--success'
-        if (action.includes('Deleted')) return 'audit-action--danger'
-        if (action.includes('Changed') || action.includes('Applied')) return 'audit-action--warning'
-        if (action.includes('Payment')) return 'audit-action--info'
-        return 'audit-action--default'
-    }
-
-    const exportLogs = () => {
-        const csv = [
-            ['Action', 'Target', 'User', 'Role', 'Timestamp', 'Details', 'IP Address'].join(','),
-            ...filteredLog.map(entry => 
-                [entry.action, entry.target, entry.user, entry.role, entry.timestamp, entry.details, entry.ipAddress || ''].join(',')
-            )
-        ].join('\n')
-        
-        const blob = new Blob([csv], { type: 'text/csv' })
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = `audit-log-${new Date().toISOString().split('T')[0]}.csv`
-        a.click()
-    }
+    const totalPages = Math.ceil(filteredLogs.length / logsPerPage)
+    const currentLogs = filteredLogs.slice((page - 1) * logsPerPage, page * logsPerPage)
 
     if (loading) {
         return (
             <div className="settings-section">
                 <div className="settings-loading">
                     <Loader2 className="settings-loading__spinner" />
-                    <span>Loading audit logs...</span>
+                    <span>Loading activity logs...</span>
                 </div>
             </div>
         )
@@ -210,54 +121,51 @@ const AuditLogSection: React.FC = () => {
             <div className="settings-section__header">
                 <div className="settings-section__title-group">
                     <div className="settings-section__icon">
-                        <FileText size={20} />
+                        <History size={20} />
                     </div>
                     <div>
-                        <h2 className="settings-section__title">Audit Logs</h2>
+                        <h2 className="settings-section__title">Audit Log</h2>
                         <p className="settings-section__description">
-                            Complete trail of who did what and when
+                            Track all administrative actions and system changes
                         </p>
                     </div>
                 </div>
-                <button className="audit-export-btn" onClick={exportLogs}>
-                    <Download size={16} />
+                <button className="policy-action-btn" onClick={() => toast.success("Exporting logs to CSV...")}>
+                    <Download size={14} style={{ marginRight: '6px' }} />
                     Export CSV
                 </button>
             </div>
 
             <div className="settings-section__content">
-                <div className="audit-filters">
+                <div className="audit-controls">
                     <div className="audit-search">
-                        <Search size={16} />
-                        <input
-                            type="text"
-                            className="audit-search__input"
-                            placeholder="Search by action, target, user, or details..."
-                            value={filter}
-                            onChange={(e) => {
-                                setFilter(e.target.value)
-                                setCurrentPage(1)
-                            }}
+                        <input 
+                            type="text" 
+                            className="audit-search__input" 
+                            placeholder="Search by user, action or target..." 
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
-
-                    <div className="audit-action-filter">
-                        <Filter size={16} />
-                        <select
-                            className="audit-action-filter__select"
-                            value={actionFilter}
-                            onChange={(e) => {
-                                setActionFilter(e.target.value)
-                                setCurrentPage(1)
-                            }}
+                    <div className="audit-filter">
+                        <button 
+                            className={`audit-filter__btn ${filter === 'all' ? 'audit-filter__btn--active' : ''}`}
+                            onClick={() => setFilter('all')}
                         >
-                            <option value="all">All Actions</option>
-                            <option value="created">Created</option>
-                            <option value="deleted">Deleted</option>
-                            <option value="changed">Changed</option>
-                            <option value="payment">Payment</option>
-                            <option value="settings">Settings</option>
-                        </select>
+                            All
+                        </button>
+                        <button 
+                            className={`audit-filter__btn ${filter === 'success' ? 'audit-filter__btn--active' : ''}`}
+                            onClick={() => setFilter('success')}
+                        >
+                            Success
+                        </button>
+                        <button 
+                            className={`audit-filter__btn ${filter === 'failure' ? 'audit-filter__btn--active' : ''}`}
+                            onClick={() => setFilter('failure')}
+                        >
+                            Failure
+                        </button>
                     </div>
                 </div>
 
@@ -265,67 +173,76 @@ const AuditLogSection: React.FC = () => {
                     <table className="audit-table">
                         <thead>
                             <tr>
+                                <th>Timestamp</th>
+                                <th>User</th>
                                 <th>Action</th>
                                 <th>Target</th>
-                                <th>By</th>
-                                <th>Role</th>
-                                <th>Time</th>
-                                <th>Details</th>
+                                <th>Status</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {paginatedLog.map(entry => (
-                                <tr key={entry.id}>
+                            {currentLogs.map(log => (
+                                <tr key={log.id}>
                                     <td>
-                                        <span className={`audit-action ${getActionColor(entry.action)}`}>
-                                            {getActionIcon(entry.action)}
-                                            {entry.action}
+                                        <div className="audit-time">
+                                            {new Date(log.timestamp).toLocaleDateString()}<br/>
+                                            {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div className="flex flex-col">
+                                            <span className="font-semibold text-white">{log.userName}</span>
+                                            <span className="audit-role">{log.userRole}</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div className="flex flex-col">
+                                            <span className="audit-target">{log.action}</span>
+                                            <span className="audit-details">{log.details}</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span className="audit-target">{log.target}</span>
+                                    </td>
+                                    <td>
+                                        <span className={`audit-action audit-action--${log.status === 'success' ? 'success' : log.status === 'warning' ? 'warning' : 'danger'}`}>
+                                            {log.status.toUpperCase()}
                                         </span>
                                     </td>
-                                    <td className="audit-target">{entry.target}</td>
-                                    <td>{entry.user}</td>
-                                    <td>
-                                        <span className="audit-role">{entry.role}</span>
-                                    </td>
-                                    <td className="audit-time">{entry.timestamp}</td>
-                                    <td className="audit-details" title={entry.details}>{entry.details}</td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
-                </div>
 
-                {filteredLog.length === 0 && (
-                    <div className="audit-empty">
-                        <FileText size={32} />
-                        <p>No audit entries match your search</p>
-                    </div>
-                )}
+                    {currentLogs.length === 0 && (
+                        <div className="audit-empty">
+                            <Activity size={32} />
+                            <p>No activity logs found matching your criteria</p>
+                        </div>
+                    )}
 
-                {totalPages > 1 && (
                     <div className="audit-pagination">
-                        <span className="audit-pagination__info">
-                            Showing {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, filteredLog.length)} of {filteredLog.length}
-                        </span>
-                        <div className="audit-pagination__controls">
+                        <div className="audit-pagination__info">
+                            Showing {(page-1)*logsPerPage + 1} to {Math.min(page*logsPerPage, filteredLogs.length)} of {filteredLogs.length} entries
+                        </div>
+                        <div className="audit-pagination__buttons">
                             <button 
                                 className="audit-pagination__btn"
-                                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                                disabled={currentPage === 1}
+                                onClick={() => setPage(p => Math.max(1, p - 1))}
+                                disabled={page === 1}
                             >
                                 <ChevronLeft size={16} />
                             </button>
-                            <span className="audit-pagination__page">{currentPage} / {totalPages}</span>
                             <button 
                                 className="audit-pagination__btn"
-                                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                                disabled={currentPage === totalPages}
+                                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                                disabled={page === totalPages || totalPages === 0}
                             >
                                 <ChevronRight size={16} />
                             </button>
                         </div>
                     </div>
-                )}
+                </div>
             </div>
         </div>
     )

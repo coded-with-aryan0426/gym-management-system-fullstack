@@ -60,25 +60,46 @@ const MembershipPoliciesSection: React.FC = () => {
     const fetchMembershipPolicies = async () => {
         try {
             setLoading(true)
-            const response = await api.get('/api/gym-settings')
+            const response = await api.get('/settings')
             if (response.data) {
                 const settings = response.data
                 const membershipSettings: MembershipPolicy = {
-                    freezeAllowanceDays: settings.freezeAllowanceDays ?? 30,
-                    maxFreezesPerYear: settings.maxFreezesPerYear ?? 2,
-                    allowTransfer: settings.allowTransfer ?? false,
-                    transferFee: settings.transferFee ?? 500,
-                    cancellationNoticeDays: settings.cancellationNoticeDays ?? 7,
-                    cancellationFee: settings.cancellationFee ?? 500,
-                    defaultDurationMonths: settings.defaultDurationMonths ?? 1,
-                    expiryReminderDays: settings.expiryReminderDays ?? [7, 3, 1],
-                    allowUpgrade: settings.allowUpgrade ?? true,
-                    allowDowngrade: settings.allowDowngrade ?? false,
-                    prorateUpgrades: settings.prorateUpgrades ?? true,
+                    allowGuestPasses: settings.allowGuestPasses === 'true',
+                    requireWaiver: settings.requireWaiver === 'true',
+                    allowFreezing: settings.allowFreezing === 'true',
+                    maxFreezeDays: parseInt(settings.maxFreezeDays) || 30,
+                    freezeFee: parseInt(settings.freezeFee) || 0,
+                    guestPassLimit: parseInt(settings.guestPassLimit) || 3,
+                    referralDiscount: parseInt(settings.referralDiscount) || 10,
+                    allowPlanUpgrade: settings.allowPlanUpgrade === 'true',
+                    membershipApprovalRequired: settings.membershipApprovalRequired === 'true',
+                    minimumAge: parseInt(settings.minimumAge) || 16,
                 }
                 setPolicies(membershipSettings)
                 setOriginalPolicies(membershipSettings)
             }
+        } catch (error) {
+            console.error('Failed to fetch membership policies:', error)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const updatePolicy = <K extends keyof MembershipPolicy>(key: K, value: MembershipPolicy[K]) => {
+        setPolicies(prev => {
+            const updated = { ...prev, [key]: value }
+            setHasChanges(JSON.stringify(updated) !== JSON.stringify(originalPolicies))
+            return updated
+        })
+    }
+
+    const handleSave = async () => {
+        try {
+            setSaving(true)
+            await api.put('/settings', policies)
+            setOriginalPolicies(policies)
+            setHasChanges(false)
+            toast.success("Membership policies saved successfully")
         } catch (error) {
             console.error('Failed to fetch membership policies:', error)
         } finally {

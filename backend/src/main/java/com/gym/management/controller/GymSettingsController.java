@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/settings")
@@ -21,6 +22,17 @@ public class GymSettingsController {
 
     @Autowired
     private GymSettingsService gymSettingsService;
+
+    @GetMapping("")
+    public ResponseEntity<Map<String, String>> getAllSettings() {
+        return ResponseEntity.ok(gymSettingsService.getAllSettings());
+    }
+
+    @PutMapping("")
+    public ResponseEntity<Void> updateAllSettings(@RequestBody Map<String, Object> settings) {
+        gymSettingsService.updateAllSettings(settings);
+        return ResponseEntity.ok().build();
+    }
 
     @GetMapping("/gym-hours")
     public ResponseEntity<List<GymHoursDTO>> getGymHours() {

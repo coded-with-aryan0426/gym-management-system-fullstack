@@ -100,6 +100,21 @@ public class GymSettingsService {
         blackoutDayRepository.deleteByDate(date);
     }
 
+    public Map<String, String> getAllSettings() {
+        List<GymSettings> allSettings = gymSettingsRepository.findAll();
+        Map<String, String> settingsMap = new HashMap<>();
+        for (GymSettings setting : allSettings) {
+            settingsMap.put(setting.getSettingKey(), setting.getSettingValue());
+        }
+        return settingsMap;
+    }
+
+    public void updateAllSettings(Map<String, Object> settings) {
+        for (Map.Entry<String, Object> entry : settings.entrySet()) {
+            saveSetting(entry.getKey(), entry.getValue() != null ? entry.getValue().toString() : null, "GENERAL");
+        }
+    }
+
     private void saveSetting(String key, String value, String type) {
         GymSettings setting = gymSettingsRepository.findBySettingKey(key)
                 .orElse(new GymSettings());
