@@ -31,7 +31,11 @@ public class Transaction {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USER_ID")
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private User user;
+
+    @Column(name = "USER_ID", insertable = false, updatable = false)
+    private Long userId;
 
     // Constructors
     public Transaction() {
@@ -106,5 +110,13 @@ public class Transaction {
 
     public void complete() {
         this.status = "Completed";
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 }
