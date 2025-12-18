@@ -161,7 +161,7 @@ const Staff: React.FC = () => {
     {
       key: 'role',
       header: 'Role',
-      width: '120px',
+      width: '100px',
       render: (member) => (
         <span className="staff-role-badge">{member.roles?.[0]?.roleName || 'TRAINER'}</span>
       ),

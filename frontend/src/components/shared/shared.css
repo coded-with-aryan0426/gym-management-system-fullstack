@@ -14,21 +14,28 @@
     width: 32px;
     height: 32px;
     padding: 0;
-    background: transparent;
-    border: 1px solid transparent;
-    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 8px;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .action-menu-btn:hover {
-    background: var(--bg-tertiary);
-    border-color: var(--border-primary);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.12);
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.action-menu-btn:active {
+    transform: scale(0.98);
 }
 
 .action-menu-btn:focus {
     outline: none;
     border-color: var(--color-crimson);
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
 }
 
 .action-dot {
@@ -36,7 +43,7 @@
     height: 4px;
     background: var(--text-tertiary);
     border-radius: 50%;
-    transition: all 0.2s;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .action-menu-btn:hover .action-dot {
@@ -45,10 +52,17 @@
 
 .action-menu-btn:hover .action-dot:nth-child(1) {
     transform: translateY(-2px);
+    transition-delay: 0ms;
+}
+
+.action-menu-btn:hover .action-dot:nth-child(2) {
+    transform: scale(1.2);
+    transition-delay: 50ms;
 }
 
 .action-menu-btn:hover .action-dot:nth-child(3) {
     transform: translateY(2px);
+    transition-delay: 100ms;
 }
 
 /* ============================================================================

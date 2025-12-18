@@ -193,7 +193,8 @@ const Members: React.FC = () => {
     },
     {
       key: "fullName",
-      header: "Name",
+      header: "Member",
+      width: "auto",
       render: (member) => (
         <div
           className="member-cell"
@@ -201,32 +202,42 @@ const Members: React.FC = () => {
           style={{ cursor: 'pointer' }}
         >
           <Avatar name={member.fullName} size="md" />
-          <span className="member-name">{member.fullName}</span>
+          <div className="member-cell__info">
+            <span className="member-name">{member.fullName}</span>
+            <span className="member-email">{member.email}</span>
+          </div>
         </div>
       ),
     },
     {
       key: "planName",
       header: "Plan",
+      width: "120px",
       render: (member) => <span className="member-plan">{member.planName}</span>,
     },
     {
       key: "planDuration",
       header: "Duration",
+      width: "100px",
       render: (member) => <span className="member-plan-duration">{member.planDuration || "-"}</span>,
     },
     {
       key: "joinDate",
-      header: "Join Date",
-      render: (member) => (
-        <span className="member-date">
-          {member.startDate ? new Date(member.startDate).toLocaleDateString() : "-"}
-        </span>
-      ),
+      header: "Joined",
+      width: "100px",
+      render: (member) => {
+        const date = member.startDate ? new Date(member.startDate) : null
+        return (
+          <span className="member-date">
+            {date ? date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : "-"}
+          </span>
+        )
+      },
     },
     {
       key: "status",
       header: "Status",
+      width: "100px",
       render: (member) => {
         return <Badge variant={getStatusVariant(member.status)}>{member.status}</Badge>
       },
