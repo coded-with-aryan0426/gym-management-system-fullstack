@@ -1,52 +1,151 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { toast } from "react-hot-toast"
-import { Info } from "lucide-react"
+import { 
+    UserCog, 
+    Calendar, 
+    Eye, 
+    Users,
+    Clock,
+    Save,
+    Loader2,
+    Shuffle,
+    CalendarClock,
+    UserCheck
+} from "lucide-react"
+import api from "../../../services/api"
 
 interface StaffPolicy {
     maxSessionsPerDay: number
+    minBreakBetweenSessions: number
     canTrainerReschedule: boolean
+    canTrainerCancelSession: boolean
     trainerVisibility: 'own' | 'all'
     autoAssignNewMembers: boolean
+    requireSessionNotes: boolean
+    sessionDurationMinutes: number
 }
 
 const StaffRulesSection: React.FC = () => {
     const [policies, setPolicies] = useState<StaffPolicy>({
         maxSessionsPerDay: 8,
+        minBreakBetweenSessions: 15,
         canTrainerReschedule: true,
+        canTrainerCancelSession: false,
         trainerVisibility: 'own',
         autoAssignNewMembers: false,
+        requireSessionNotes: false,
+        sessionDurationMinutes: 60,
     })
+    const [loading, setLoading] = useState(true)
+    const [saving, setSaving] = useState(false)
+    const [hasChanges, setHasChanges] = useState(false)
+    const [originalPolicies, setOriginalPolicies] = useState<StaffPolicy | null>(null)
+
+    useEffect(() => {
+        fetchStaffPolicies()
+    }, [])
+
+    const fetchStaffPolicies = async () => {
+        try {
+            setLoading(true)
+            const response = await api.get('/api/gym-settings')
+            if (response.data) {
+                const settings = response.data
+                const staffSettings: StaffPolicy = {
+                    maxSessionsPerDay: settings.maxSessionsPerDay ?? 8,
+                    minBreakBetweenSessions: settings.minBreakBetweenSessions ?? 15,
+                    canTrainerReschedule: settings.canTrainerReschedule ?? true,
+                    canTrainerCancelSession: settings.canTrainerCancelSession ?? false,
+                    trainerVisibility: settings.trainerVisibility ?? 'own',
+                    autoAssignNewMembers: settings.autoAssignNewMembers ?? false,
+                    requireSessionNotes: settings.requireSessionNotes ?? false,
+                    sessionDurationMinutes: settings.sessionDurationMinutes ?? 60,
+                }
+                setPolicies(staffSettings)
+                setOriginalPolicies(staffSettings)
+            }
+        } catch (error) {
+            console.error('Failed to fetch staff policies:', error)
+        } finally {
+            setLoading(false)
+        }
+    }
 
     const updatePolicy = <K extends keyof StaffPolicy>(key: K, value: StaffPolicy[K]) => {
-        setPolicies(prev => ({ ...prev, [key]: value }))
-        toast.success("Policy updated")
+        setPolicies(prev => {
+            const updated = { ...prev, [key]: value }
+            setHasChanges(JSON.stringify(updated) !== JSON.stringify(originalPolicies))
+            return updated
+        })
+    }
+
+    const handleSave = async () => {
+        try {
+            setSaving(true)
+            await api.put('/api/gym-settings', policies)
+            setOriginalPolicies(policies)
+            setHasChanges(false)
+            toast.success("Staff policies saved successfully")
+        } catch (error) {
+            toast.error("Failed to save staff policies")
+            console.error('Save error:', error)
+        } finally {
+            setSaving(false)
+        }
+    }
+
+    if (loading) {
+        return (
+            <div className="settings-section">
+                <div className="settings-loading">
+                    <Loader2 className="settings-loading__spinner" />
+                    <span>Loading staff policies...</span>
+                </div>
+            </div>
+        )
     }
 
     return (
         <div className="settings-section">
             <div className="settings-section__header">
                 <div className="settings-section__title-group">
-                    <h2 className="settings-section__title">Staff & Trainer Rules</h2>
-                    <p className="settings-section__description">
-                        Workload, scheduling, and visibility permissions
-                    </p>
+                    <div className="settings-section__icon">
+                        <UserCog size={20} />
+                    </div>
+                    <div>
+                        <h2 className="settings-section__title">Staff & Trainer Rules</h2>
+                        <p className="settings-section__description">
+                            Workload, scheduling, and visibility permissions
+                        </p>
+                    </div>
                 </div>
+                {hasChanges && (
+                    <button 
+                        className="settings-save-btn"
+                        onClick={handleSave}
+                        disabled={saving}
+                    >
+                        {saving ? <Loader2 size={16} className="spin" /> : <Save size={16} />}
+                        {saving ? 'Saving...' : 'Save Changes'}
+                    </button>
+                )}
             </div>
 
             <div className="settings-section__content">
-                {/* Workload Group */}
                 <div className="form-group">
-                    <h4 className="form-group__title">Workload & Assignment</h4>
+                    <div className="form-group__header">
+                        <Clock size={16} />
+                        <h4 className="form-group__title">Session Settings</h4>
+                    </div>
+
                     <div className="form-grid">
                         <div className="field-wrapper">
                             <label className="field-label">
+                                <Calendar size={14} />
                                 Max Sessions / Day
-                                <div className="info-icon" data-tooltip="Prevents trainer burnout. System blocks over-booking.">
-                                    <Info />
-                                </div>
                             </label>
                             <input
                                 type="number"
@@ -58,79 +157,162 @@ const StaffRulesSection: React.FC = () => {
                             />
                         </div>
 
-                        <div className="field-wrapper" style={{ justifyContent: 'flex-end' }}>
-                            <div className="policy-toggle-row" style={{ border: 'none', padding: 0 }}>
-                                <div className="policy-toggle-row__info">
-                                    <span className="policy-toggle-row__label">
-                                        Auto-assign Members
-                                        <div className="info-icon" data-tooltip="Distribute new members among trainers based on workload">
-                                            <Info />
-                                        </div>
-                                    </span>
-                                </div>
-                                <button
-                                    className={`policy-toggle ${policies.autoAssignNewMembers ? 'policy-toggle--active' : ''}`}
-                                    onClick={() => updatePolicy('autoAssignNewMembers', !policies.autoAssignNewMembers)}
-                                />
-                            </div>
+                        <div className="field-wrapper">
+                            <label className="field-label">
+                                <Clock size={14} />
+                                Session Duration (mins)
+                            </label>
+                            <select
+                                className="dense-input"
+                                value={policies.sessionDurationMinutes}
+                                onChange={(e) => updatePolicy('sessionDurationMinutes', parseInt(e.target.value))}
+                            >
+                                <option value={30}>30 minutes</option>
+                                <option value={45}>45 minutes</option>
+                                <option value={60}>60 minutes</option>
+                                <option value={90}>90 minutes</option>
+                            </select>
+                        </div>
+
+                        <div className="field-wrapper">
+                            <label className="field-label">
+                                <Clock size={14} />
+                                Break Between Sessions (mins)
+                            </label>
+                            <input
+                                type="number"
+                                className="dense-input"
+                                value={policies.minBreakBetweenSessions}
+                                onChange={(e) => updatePolicy('minBreakBetweenSessions', parseInt(e.target.value) || 0)}
+                                min={0}
+                                max={60}
+                            />
                         </div>
                     </div>
-                </div>
-
-                {/* Permissions Group */}
-                <div className="form-group">
-                    <h4 className="form-group__title">Trainer Permissions</h4>
 
                     <div className="policy-toggle-row">
                         <div className="policy-toggle-row__info">
-                            <span className="policy-toggle-row__label">
-                                Allow Rescheduling
-                                <div className="info-icon" data-tooltip="Trainers can move their own sessions. If disabled, only managers can.">
-                                    <Info />
-                                </div>
-                            </span>
+                            <div className="policy-toggle-row__icon">
+                                <UserCheck size={16} />
+                            </div>
+                            <div className="policy-toggle-row__text">
+                                <span className="policy-toggle-row__label">Require Session Notes</span>
+                                <span className="policy-toggle-row__hint">Trainers must add notes after each session</span>
+                            </div>
+                        </div>
+                        <button
+                            className={`policy-toggle ${policies.requireSessionNotes ? 'policy-toggle--active' : ''}`}
+                            onClick={() => updatePolicy('requireSessionNotes', !policies.requireSessionNotes)}
+                        />
+                    </div>
+                </div>
+
+                <div className="form-group">
+                    <div className="form-group__header">
+                        <Shuffle size={16} />
+                        <h4 className="form-group__title">Assignment Rules</h4>
+                    </div>
+
+                    <div className="policy-toggle-row">
+                        <div className="policy-toggle-row__info">
+                            <div className="policy-toggle-row__icon">
+                                <Users size={16} />
+                            </div>
+                            <div className="policy-toggle-row__text">
+                                <span className="policy-toggle-row__label">Auto-assign New Members</span>
+                                <span className="policy-toggle-row__hint">Distribute new members among trainers based on workload</span>
+                            </div>
+                        </div>
+                        <button
+                            className={`policy-toggle ${policies.autoAssignNewMembers ? 'policy-toggle--active' : ''}`}
+                            onClick={() => updatePolicy('autoAssignNewMembers', !policies.autoAssignNewMembers)}
+                        />
+                    </div>
+                </div>
+
+                <div className="form-group">
+                    <div className="form-group__header">
+                        <CalendarClock size={16} />
+                        <h4 className="form-group__title">Scheduling Permissions</h4>
+                    </div>
+
+                    <div className="policy-toggle-row">
+                        <div className="policy-toggle-row__info">
+                            <div className="policy-toggle-row__icon">
+                                <Calendar size={16} />
+                            </div>
+                            <div className="policy-toggle-row__text">
+                                <span className="policy-toggle-row__label">Allow Trainer Rescheduling</span>
+                                <span className="policy-toggle-row__hint">Trainers can move their own sessions</span>
+                            </div>
                         </div>
                         <button
                             className={`policy-toggle ${policies.canTrainerReschedule ? 'policy-toggle--active' : ''}`}
                             onClick={() => updatePolicy('canTrainerReschedule', !policies.canTrainerReschedule)}
                         />
                     </div>
+
+                    <div className="policy-toggle-row">
+                        <div className="policy-toggle-row__info">
+                            <div className="policy-toggle-row__icon">
+                                <Calendar size={16} />
+                            </div>
+                            <div className="policy-toggle-row__text">
+                                <span className="policy-toggle-row__label">Allow Trainer Cancellation</span>
+                                <span className="policy-toggle-row__hint">Trainers can cancel their own sessions</span>
+                            </div>
+                        </div>
+                        <button
+                            className={`policy-toggle ${policies.canTrainerCancelSession ? 'policy-toggle--active' : ''}`}
+                            onClick={() => updatePolicy('canTrainerCancelSession', !policies.canTrainerCancelSession)}
+                        />
+                    </div>
                 </div>
 
-                {/* Visibility Group */}
                 <div className="form-group">
-                    <h4 className="form-group__title">Member Visibility</h4>
+                    <div className="form-group__header">
+                        <Eye size={16} />
+                        <h4 className="form-group__title">Member Visibility</h4>
+                    </div>
+
                     <div className="field-wrapper">
-                        <label className="field-label" style={{ marginBottom: '8px' }}>
+                        <label className="field-label" style={{ marginBottom: '12px' }}>
                             Trainers can view:
-                            <div className="info-icon" data-tooltip="Control which members a trainer can view in their dashboard">
-                                <Info />
-                            </div>
                         </label>
-                        <div className="form-grid">
-                            <label className={`policy-radio ${policies.trainerVisibility === 'own' ? 'policy-radio--active' : ''}`} style={{ flexDirection: 'row', alignItems: 'center', gap: '10px', height: 'auto', padding: '10px' }}>
+                        <div className="visibility-options">
+                            <label 
+                                className={`visibility-option ${policies.trainerVisibility === 'own' ? 'visibility-option--active' : ''}`}
+                            >
                                 <input
                                     type="radio"
                                     name="visibility"
                                     checked={policies.trainerVisibility === 'own'}
                                     onChange={() => updatePolicy('trainerVisibility', 'own')}
                                 />
-                                <div>
-                                    <span className="policy-radio__label" style={{ fontSize: '0.8125rem' }}>Own members only</span>
-                                    <p className="policy-radio__description" style={{ fontSize: '0.75rem', margin: 0 }}>Assigned directly</p>
+                                <div className="visibility-option__content">
+                                    <Users size={20} />
+                                    <div>
+                                        <span className="visibility-option__label">Own Members Only</span>
+                                        <span className="visibility-option__hint">Members assigned directly to them</span>
+                                    </div>
                                 </div>
                             </label>
 
-                            <label className={`policy-radio ${policies.trainerVisibility === 'all' ? 'policy-radio--active' : ''}`} style={{ flexDirection: 'row', alignItems: 'center', gap: '10px', height: 'auto', padding: '10px' }}>
+                            <label 
+                                className={`visibility-option ${policies.trainerVisibility === 'all' ? 'visibility-option--active' : ''}`}
+                            >
                                 <input
                                     type="radio"
                                     name="visibility"
                                     checked={policies.trainerVisibility === 'all'}
                                     onChange={() => updatePolicy('trainerVisibility', 'all')}
                                 />
-                                <div>
-                                    <span className="policy-radio__label" style={{ fontSize: '0.8125rem' }}>All members</span>
-                                    <p className="policy-radio__description" style={{ fontSize: '0.75rem', margin: 0 }}>Entire gym database</p>
+                                <div className="visibility-option__content">
+                                    <Eye size={20} />
+                                    <div>
+                                        <span className="visibility-option__label">All Members</span>
+                                        <span className="visibility-option__hint">Entire gym member database</span>
+                                    </div>
                                 </div>
                             </label>
                         </div>
