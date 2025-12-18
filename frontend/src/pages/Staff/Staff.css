@@ -1,12 +1,12 @@
 /* ============================================================================
-   Staff Directory Page - Premium Redesign V2
+   Staff Directory Page - Premium Redesign V3
    Clean, consistent, and modern SaaS aesthetics
    ============================================================================ */
 
 .staff-page {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
 }
 
 /* ============================================
@@ -16,19 +16,19 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
-  padding-bottom: 14px;
+  gap: 16px;
+  padding-bottom: 16px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .staff-page__title-section {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .staff-page__title {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
@@ -36,7 +36,7 @@
 }
 
 .staff-page__subtitle {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-tertiary);
   font-weight: 400;
 }
@@ -50,11 +50,11 @@
 .sort-badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 10px;
+  gap: 5px;
+  font-size: 11px;
   font-weight: 500;
-  padding: 3px 8px;
-  border-radius: 4px;
+  padding: 4px 10px;
+  border-radius: 6px;
 }
 
 .sort-badge--newest {
@@ -74,7 +74,7 @@
 .staff-page__header-right {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 /* ============================================
@@ -83,25 +83,25 @@
 .staff-stats-badge {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 5px 10px;
+  gap: 8px;
+  padding: 6px 12px;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 16px;
+  border-radius: 20px;
 }
 
 .stat-pill {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
   color: var(--text-tertiary);
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   padding: 0;
   border: none;
   background: transparent;
   cursor: pointer;
-  transition: color 0.12s ease;
+  transition: color 0.15s ease;
 }
 
 .stat-pill:hover {
@@ -117,8 +117,8 @@
 }
 
 .stat-dot {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
 }
 
@@ -132,7 +132,7 @@
 
 .stat-divider {
   width: 1px;
-  height: 10px;
+  height: 12px;
   background: rgba(255, 255, 255, 0.06);
 }
 
@@ -142,17 +142,17 @@
 .btn-filters {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.06);
   color: var(--text-secondary);
-  padding: 0 10px;
-  border-radius: 6px;
-  font-size: 11px;
+  padding: 0 12px;
+  border-radius: 8px;
+  font-size: 12px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.12s ease;
-  height: 28px;
+  transition: all 0.15s ease;
+  height: 32px;
 }
 
 .btn-filters:hover {
@@ -162,14 +162,14 @@
 }
 
 .btn-filters--active {
-  background: rgba(220, 38, 38, 0.08);
-  border-color: rgba(220, 38, 38, 0.25);
+  background: rgba(220, 38, 38, 0.1);
+  border-color: rgba(220, 38, 38, 0.3);
   color: var(--color-crimson);
 }
 
 .btn-filters--has-filters {
-  background: rgba(16, 185, 129, 0.08);
-  border-color: rgba(16, 185, 129, 0.25);
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.3);
   color: var(--color-emerald);
 }
 
@@ -182,22 +182,22 @@
 
 .staff-filter-panel {
   position: absolute;
-  top: calc(100% + 6px);
+  top: calc(100% + 8px);
   left: 0;
-  background: #121212;
+  background: #0f0f0f;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
-  padding: 14px;
-  min-width: 220px;
+  border-radius: 12px;
+  padding: 16px;
+  min-width: 240px;
   z-index: 100;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-  animation: filterSlideDown 0.12s ease-out;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  animation: filterSlideDown 0.15s ease-out;
 }
 
 @keyframes filterSlideDown {
   from {
     opacity: 0;
-    transform: translateY(-6px);
+    transform: translateY(-8px);
   }
   to {
     opacity: 1;
@@ -209,11 +209,11 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 10px;
+  padding-bottom: 12px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-  margin-bottom: 12px;
+  margin-bottom: 14px;
   font-weight: 600;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-primary);
 }
 
@@ -221,10 +221,10 @@
   background: none;
   border: none;
   color: var(--color-crimson);
-  font-size: 10px;
+  font-size: 11px;
   cursor: pointer;
   font-weight: 500;
-  transition: opacity 0.12s ease;
+  transition: opacity 0.15s ease;
 }
 
 .filter-clear-btn:hover {
@@ -234,17 +234,17 @@
 .filter-panel__content {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 
 .filter-group {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px;
 }
 
 .filter-label {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   color: var(--text-tertiary);
   text-transform: uppercase;
@@ -256,12 +256,12 @@
   appearance: none;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.06);
-  padding: 7px 10px;
-  border-radius: 6px;
-  font-size: 11px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
   color: var(--text-primary);
   cursor: pointer;
-  transition: all 0.12s ease;
+  transition: all 0.15s ease;
 }
 
 .filter-select:hover,
@@ -273,6 +273,7 @@
 .staff-filter-panel .filter-select:focus {
   outline: none;
   border-color: var(--color-crimson);
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.1);
 }
 
 /* ============================================
@@ -281,20 +282,20 @@
 .staff-active-filters {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   flex-wrap: wrap;
 }
 
 .filter-chip {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  background: rgba(16, 185, 129, 0.08);
-  border: 1px solid rgba(16, 185, 129, 0.25);
+  gap: 6px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
   color: var(--color-emerald);
-  padding: 3px 8px;
-  border-radius: 5px;
-  font-size: 10px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
   font-weight: 500;
 }
 
@@ -303,11 +304,11 @@
   border: none;
   color: var(--color-emerald);
   cursor: pointer;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1;
   padding: 0;
   margin-left: 2px;
-  transition: color 0.12s ease;
+  transition: color 0.15s ease;
 }
 
 .filter-chip button:hover {
@@ -319,8 +320,8 @@
    ============================================ */
 .staff-page__table {
   background: rgba(255, 255, 255, 0.015);
-  border: 1px solid rgba(255, 255, 255, 0.03);
-  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
   overflow: hidden;
 }
 
@@ -330,27 +331,27 @@
 .staff-cell {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .staff-cell__info {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 2px;
   min-width: 0;
 }
 
 .staff-name {
   font-weight: 500;
   color: var(--text-primary);
-  font-size: 12.5px;
+  font-size: 13px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .staff-email {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--text-tertiary);
   white-space: nowrap;
   overflow: hidden;
@@ -358,7 +359,7 @@
 }
 
 .staff-id {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--text-secondary);
   font-family: var(--font-mono);
@@ -366,17 +367,17 @@
 
 .staff-index {
   color: var(--text-tertiary);
-  font-size: 11px;
+  font-size: 12px;
   font-feature-settings: 'tnum' 1;
 }
 
 .staff-role-badge {
   display: inline-block;
-  padding: 3px 8px;
+  padding: 4px 10px;
   background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 5px;
-  font-size: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  font-size: 10px;
   font-weight: 600;
   color: var(--text-secondary);
   text-transform: uppercase;
@@ -384,7 +385,7 @@
 }
 
 .staff-date {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-tertiary);
 }
 
@@ -401,19 +402,19 @@
   align-items: center;
   justify-content: center;
   gap: 2px;
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
   padding: 0;
   background: transparent;
   border: 1px solid transparent;
-  border-radius: 5px;
+  border-radius: 6px;
   cursor: pointer;
-  transition: all 0.12s ease;
+  transition: all 0.15s ease;
 }
 
 .action-menu-btn:hover {
   background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
 .action-menu-btn:hover .action-dot {
@@ -430,7 +431,7 @@
   height: 3px;
   background: var(--text-tertiary);
   border-radius: 50%;
-  transition: all 0.12s ease;
+  transition: all 0.15s ease;
 }
 
 /* ============================================
@@ -450,7 +451,7 @@
   .staff-page__header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 10px;
+    gap: 12px;
   }
   
   .staff-page__header-right {
