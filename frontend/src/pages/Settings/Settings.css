@@ -186,6 +186,57 @@
   cursor: not-allowed;
 }
 
+.settings-section__actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.settings-section__cancel-btn {
+  background: transparent;
+  border: 1px solid var(--settings-border);
+  color: var(--settings-text-secondary);
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.settings-section__cancel-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--settings-text-tertiary);
+  color: var(--settings-text-primary);
+}
+
+.unsaved-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--settings-accent-amber);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.unsaved-indicator__dot {
+  width: 8px;
+  height: 8px;
+  background: var(--settings-accent-amber);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--settings-accent-amber);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.4; }
+  100% { opacity: 1; }
+}
+
 .settings-section__content {
   padding: 24px;
   display: flex;

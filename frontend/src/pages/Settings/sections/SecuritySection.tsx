@@ -202,10 +202,15 @@ const SecuritySection: React.FC = () => {
     <div className="settings-section">
       <div className="settings-section__header">
         <div className="settings-section__title-group">
-          <h2 className="settings-section__title">Security & Access</h2>
-          <p className="settings-section__description">
-            Control password, authentication, and active sessions
-          </p>
+          <div className="settings-section__icon">
+            <Shield size={20} />
+          </div>
+          <div>
+            <h2 className="settings-section__title">Security & Access</h2>
+            <p className="settings-section__description">
+              Control password, authentication, and active sessions
+            </p>
+          </div>
         </div>
         <div className="settings-section__actions">
           {hasChanges() && (
@@ -219,7 +224,7 @@ const SecuritySection: React.FC = () => {
                 Cancel
               </button>
               <button 
-                className="settings-section__save-btn" 
+                className="settings-save-btn" 
                 onClick={handleSave}
                 disabled={isSaving}
               >
@@ -232,20 +237,22 @@ const SecuritySection: React.FC = () => {
 
       <div className="settings-section__content">
         <div className="form-group">
-          <h4 className="form-group__title">
-            <Shield size={14} className="form-group__title-icon" />
-            Authentication Policies
-          </h4>
+          <div className="form-group__header">
+            <Shield size={16} />
+            <h4 className="form-group__title">Authentication Policies</h4>
+          </div>
 
           <div className="policy-toggle-row">
             <div className="policy-toggle-row__info">
-              <span className="policy-toggle-row__label">
+              <div className="policy-toggle-row__icon">
                 <Lock size={16} />
-                Enforce 2FA for all staff
-              </span>
-              <p className="policy-toggle-row__description">
-                Require all staff to enable two-factor authentication before accessing the system
-              </p>
+              </div>
+              <div className="policy-toggle-row__text">
+                <span className="policy-toggle-row__label">Enforce 2FA for all staff</span>
+                <p className="policy-toggle-row__hint">
+                  Require all staff to enable two-factor authentication before accessing the system
+                </p>
+              </div>
             </div>
             <button
               className={`policy-toggle ${settings.enforce2FA ? 'policy-toggle--active' : ''}`}
@@ -255,13 +262,15 @@ const SecuritySection: React.FC = () => {
 
           <div className="policy-toggle-row">
             <div className="policy-toggle-row__info">
-              <span className="policy-toggle-row__label">
+              <div className="policy-toggle-row__icon">
                 <Key size={16} />
-                Require Strong Passwords
-              </span>
-              <p className="policy-toggle-row__description">
-                Enforce uppercase, lowercase, numbers, and special characters
-              </p>
+              </div>
+              <div className="policy-toggle-row__text">
+                <span className="policy-toggle-row__label">Require Strong Passwords</span>
+                <p className="policy-toggle-row__hint">
+                  Enforce uppercase, lowercase, numbers, and special characters
+                </p>
+              </div>
             </div>
             <button
               className={`policy-toggle ${settings.requireStrongPassword ? 'policy-toggle--active' : ''}`}
@@ -331,21 +340,27 @@ const SecuritySection: React.FC = () => {
         </div>
 
         <div className="form-group">
-          <h4 className="form-group__title">
-            <Key size={14} className="form-group__title-icon" />
-            Password Management
-          </h4>
+          <div className="form-group__header">
+            <Key size={16} />
+            <h4 className="form-group__title">Password Management</h4>
+          </div>
 
           <div className="policy-toggle-row">
             <div className="policy-toggle-row__info">
-              <span className="policy-toggle-row__label">Account Password</span>
-              <p className="policy-toggle-row__description">
-                Last changed 45 days ago
-              </p>
+              <div className="policy-toggle-row__icon">
+                <Key size={16} />
+              </div>
+              <div className="policy-toggle-row__text">
+                <span className="policy-toggle-row__label">Account Password</span>
+                <p className="policy-toggle-row__hint">
+                  Last changed 45 days ago
+                </p>
+              </div>
             </div>
             <button
-              className="policy-action-btn"
+              className="settings-section__cancel-btn"
               onClick={() => setShowPasswordModal(true)}
+              style={{ width: 'auto' }}
             >
               Change Password
             </button>
@@ -353,11 +368,11 @@ const SecuritySection: React.FC = () => {
         </div>
 
         <div className="form-group">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--settings-border-subtle)', paddingBottom: '12px', marginBottom: '16px' }}>
-            <h4 style={{ margin: 0, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--settings-text-tertiary)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Monitor size={14} className="form-group__title-icon" />
-              Active Sessions
-            </h4>
+          <div className="form-group__header" style={{ justifyContent: 'space-between', width: '100%' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Monitor size={16} />
+              <h4 className="form-group__title">Active Sessions</h4>
+            </div>
             <button className="policy-text-btn" onClick={handleLogoutAll}>
               Logout All Others
             </button>
@@ -395,10 +410,10 @@ const SecuritySection: React.FC = () => {
         </div>
 
         <div className="form-group">
-          <h4 className="form-group__title">
-            <AlertTriangle size={14} className="form-group__title-icon" />
-            Login History
-          </h4>
+          <div className="form-group__header">
+            <AlertTriangle size={16} />
+            <h4 className="form-group__title">Login History</h4>
+          </div>
           <div className="login-history">
             {loginHistory.map(entry => (
               <div key={entry.id} className={`login-history__item ${!entry.success ? 'login-history__item--failed' : ''}`}>

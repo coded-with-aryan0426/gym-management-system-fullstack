@@ -230,10 +230,15 @@ const OwnerProfileSection: React.FC = () => {
     <div className="settings-section">
       <div className="settings-section__header">
         <div className="settings-section__title-group">
-          <h2 className="settings-section__title">Owner Profile</h2>
-          <p className="settings-section__description">
-            Legal identity for billing, data ownership, and accountability
-          </p>
+          <div className="settings-section__icon">
+            <User size={20} />
+          </div>
+          <div>
+            <h2 className="settings-section__title">Owner Profile</h2>
+            <p className="settings-section__description">
+              Legal identity for billing, data ownership, and accountability
+            </p>
+          </div>
         </div>
         <div className="settings-section__actions">
           {hasChanges() && (
@@ -250,7 +255,7 @@ const OwnerProfileSection: React.FC = () => {
                 Cancel
               </button>
               <button
-                className="settings-section__save-btn"
+                className="settings-save-btn"
                 onClick={handleSave}
                 disabled={isSaving || !isValid()}
               >
@@ -270,10 +275,10 @@ const OwnerProfileSection: React.FC = () => {
 
       <div className="settings-section__content">
         <div className="form-group">
-          <h4 className="form-group__title">
-            <User size={14} className="form-group__title-icon" />
-            Identity
-          </h4>
+          <div className="form-group__header">
+            <User size={16} />
+            <h4 className="form-group__title">Identity</h4>
+          </div>
           <div className="form-grid">
             <div className="field-wrapper">
               <label className="field-label">
