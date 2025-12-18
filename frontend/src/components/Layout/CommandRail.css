@@ -1,6 +1,6 @@
 /* ============================================================================
-   CommandRail - Left Sidebar with Static Padding Stability
-   Icons maintain fixed position for zero-movement transition
+   CommandRail - Premium Sidebar Navigation
+   Redesigned for clarity, consistency, and modern SaaS aesthetics
    ============================================================================ */
 
 .command-rail {
@@ -9,13 +9,13 @@
   top: 0;
   bottom: 0;
   width: var(--sidebar-width);
-  background-color: var(--bg-secondary);
-  border-right: 1px solid var(--border-secondary);
+  background: linear-gradient(180deg, #141414 0%, #0D0D0D 100%);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
   display: flex;
   flex-direction: column;
   z-index: var(--z-sticky);
   overflow: hidden;
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .command-rail--collapsed {
@@ -23,60 +23,36 @@
 }
 
 /* ============================================
-     LOGO SECTION - Updated for AthlonX
+   LOGO SECTION
    ============================================ */
 .command-rail__logo {
   display: flex;
   align-items: center;
   gap: 12px;
-  height: var(--utility-bar-height);
-  padding-left: 16px;
-  padding-right: 16px;
-  border-bottom: 1px solid var(--border-secondary);
+  height: 56px;
+  padding: 0 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   flex-shrink: 0;
   white-space: nowrap;
   overflow: hidden;
 }
 
-.command-rail__logo-icon {
-  width: 32px;
-  height: 32px;
-  min-width: 32px;
-  background: linear-gradient(135deg, var(--color-crimson), #991b1b);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: var(--font-bold);
-  font-size: var(--text-lg);
-  color: white;
-  flex-shrink: 0;
-}
-
-.command-rail__logo-text {
-  font-size: var(--text-md);
-  font-weight: var(--font-semibold);
-  color: var(--text-primary);
-  opacity: 1;
-  transition: opacity 0.15s ease;
-}
-
-.command-rail--collapsed .command-rail__logo-text {
-  opacity: 0;
-  pointer-events: none;
-}
-
 /* ============================================
-   NAVIGATION
+   NAVIGATION - Core Improvement
    ============================================ */
 .command-rail__nav {
   flex: 1;
-  padding: var(--space-3) 8px;
+  padding: 12px 8px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   overflow-y: auto;
   overflow-x: hidden;
+}
+
+/* Hide scrollbar but keep functionality */
+.command-rail__nav::-webkit-scrollbar {
+  width: 0;
 }
 
 .command-rail__link {
@@ -84,40 +60,44 @@
   align-items: center;
   gap: 12px;
   height: 40px;
-  padding-left: 14px;
-  border-radius: var(--button-radius);
-  color: var(--text-secondary);
+  padding: 0 12px;
+  border-radius: 8px;
+  color: var(--text-tertiary);
   text-decoration: none;
   overflow: hidden;
   white-space: nowrap;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition: all 0.15s ease;
+  position: relative;
 }
 
 .command-rail__link:hover {
-  background-color: var(--bg-tertiary);
-  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-secondary);
 }
 
-/* Active state with left border accent like reference */
+/* Active State - Clean, Modern */
 .command-rail__link--active {
-  background-color: var(--color-crimson);
-  color: white;
-  position: relative;
+  background: linear-gradient(135deg, rgba(220, 38, 38, 0.15) 0%, rgba(220, 38, 38, 0.08) 100%);
+  color: #fff;
 }
 
 .command-rail__link--active::before {
   content: "";
   position: absolute;
   left: 0;
-  top: 0;
-  bottom: 0;
+  top: 8px;
+  bottom: 8px;
   width: 3px;
-  background-color: white;
-  border-radius: 0 2px 2px 0;
+  background: var(--color-crimson);
+  border-radius: 0 3px 3px 0;
 }
 
 .command-rail__link--active:hover {
-  background-color: var(--color-crimson-hover);
+  background: linear-gradient(135deg, rgba(220, 38, 38, 0.2) 0%, rgba(220, 38, 38, 0.1) 100%);
+}
+
+.command-rail__link--active .command-rail__icon {
+  color: var(--color-crimson);
 }
 
 .command-rail__icon {
@@ -127,14 +107,15 @@
   width: 20px;
   height: 20px;
   flex-shrink: 0;
+  transition: color 0.15s ease;
 }
 
 .command-rail__label {
-  margin-left: 0;
-  font-size: var(--text-sm);
-  font-weight: var(--font-medium);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
   opacity: 1;
-  transition: opacity 0.15s ease;
+  transition: opacity 0.2s ease;
 }
 
 .command-rail--collapsed .command-rail__label {
@@ -143,11 +124,11 @@
 }
 
 /* ============================================
-   FOOTER
+   FOOTER - Settings & Toggle
    ============================================ */
 .command-rail__footer {
   padding: 8px;
-  border-top: 1px solid var(--border-secondary);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -157,22 +138,22 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  height: 32px;
-  padding-left: 16px;
-  border-radius: var(--button-radius);
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 8px;
   background: transparent;
-  border: 1px solid var(--border-primary);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   color: var(--text-tertiary);
   cursor: pointer;
   overflow: hidden;
   white-space: nowrap;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition: all 0.15s ease;
 }
 
 .command-rail__toggle:hover {
-  background-color: var(--bg-tertiary);
-  color: var(--text-primary);
-  border-color: var(--border-hover);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-secondary);
+  border-color: rgba(255, 255, 255, 0.12);
 }
 
 .command-rail__toggle-icon {
@@ -190,7 +171,8 @@
 }
 
 .command-rail__toggle .command-rail__label {
-  font-size: 11px;
+  font-size: 12px;
+  font-weight: 500;
 }
 
 .command-rail--collapsed .command-rail__toggle .command-rail__label {
@@ -198,32 +180,32 @@
 }
 
 /* ============================================
-   TOOLTIPS
+   TOOLTIPS - Collapsed State
    ============================================ */
 .command-rail--collapsed .command-rail__link[title]:hover::after,
 .command-rail--collapsed .command-rail__toggle[title]:hover::after {
   content: attr(title);
   position: fixed;
   left: calc(var(--sidebar-collapsed) + 8px);
-  padding: 6px 10px;
-  background-color: var(--bg-elevated);
-  border: 1px solid var(--border-primary);
-  border-radius: var(--button-radius);
+  padding: 8px 12px;
+  background: var(--bg-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
   font-size: 12px;
+  font-weight: 500;
   color: var(--text-primary);
   white-space: nowrap;
   z-index: 9999;
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
   pointer-events: none;
-  animation: fadeIn 0.15s ease;
+  animation: tooltipFadeIn 0.15s ease;
 }
 
-@keyframes fadeIn {
+@keyframes tooltipFadeIn {
   from {
     opacity: 0;
     transform: translateX(-4px);
   }
-
   to {
     opacity: 1;
     transform: translateX(0);
@@ -231,7 +213,16 @@
 }
 
 /* ============================================
-   RESPONSIVE
+   SECTION DIVIDER (Optional Enhancement)
+   ============================================ */
+.command-rail__divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.06);
+  margin: 8px 12px;
+}
+
+/* ============================================
+   RESPONSIVE - Mobile Hide
    ============================================ */
 @media (max-width: 768px) {
   .command-rail {

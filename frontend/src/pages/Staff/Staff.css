@@ -1,41 +1,42 @@
 /* ============================================================================
-   Staff Directory Page Styles - Enhanced
+   Staff Directory Page - Premium Redesign
+   Clean, consistent, and modern SaaS aesthetics
    ============================================================================ */
 
 .staff-page {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
-  padding: 1px 1px 1px 1px;
+  gap: 16px;
 }
 
-/* Header - Compact Enterprise Style */
+/* ============================================
+   HEADER
+   ============================================ */
 .staff-page__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-2);
-  padding: var(--space-2) 0;
-  border-bottom: 1px solid var(--border-secondary);
-  min-height: 10px;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .staff-page__title-section {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 2px;
 }
 
 .staff-page__title {
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 20px;
+  font-weight: 700;
   color: var(--text-primary);
   margin: 0;
-  line-height: 1.3;
+  letter-spacing: -0.02em;
 }
 
 .staff-page__subtitle {
-  font-size: 0.75rem;
+  font-size: 12px;
   color: var(--text-tertiary);
   font-weight: 400;
 }
@@ -43,32 +44,38 @@
 .staff-page__header-right {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
+  gap: 12px;
 }
 
-/* Stats Badge - Matching Members */
+/* ============================================
+   STATS BADGE
+   ============================================ */
 .staff-stats-badge {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  padding: 4px 10px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-secondary);
-  border-radius: 16px;
+  gap: 8px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 20px;
 }
 
-/* Stat Pill - Matching Members */
 .stat-pill {
-  font-size: 0.6875rem;
+  font-size: 11px;
   font-weight: 500;
-  color: var(--text-secondary);
+  color: var(--text-tertiary);
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   padding: 0;
   border: none;
   background: transparent;
   cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.stat-pill:hover {
+  color: var(--text-secondary);
 }
 
 .stat-pill--active {
@@ -76,142 +83,88 @@
 }
 
 .stat-dot {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  display: inline-block;
 }
 
 .stat-dot.active {
-  background-color: var(--color-emerald);
+  background: var(--color-emerald);
 }
 
 .stat-dot.inactive {
-  background-color: var(--text-tertiary);
+  background: var(--text-tertiary);
 }
 
 .stat-divider {
   width: 1px;
   height: 12px;
-  background: var(--border-secondary);
+  background: rgba(255, 255, 255, 0.08);
 }
 
-/* Filters Button - Matching Members */
+/* ============================================
+   FILTER BUTTON
+   ============================================ */
 .btn-filters {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-secondary);
-  color: var(--text-primary);
-  padding: 6px 12px;
-  border-radius: 16px;
-  font-size: 0.75rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+  padding: 0 12px;
+  border-radius: 8px;
+  font-size: 12px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all 0.15s ease;
   height: 32px;
 }
 
 .btn-filters:hover {
-  background: var(--bg-tertiary);
-  border-color: var(--text-tertiary);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: var(--text-primary);
 }
 
 .btn-filters--active {
+  background: rgba(220, 38, 38, 0.1);
+  border-color: rgba(220, 38, 38, 0.3);
+  color: var(--color-crimson);
+}
+
+.btn-filters--has-filters {
   background: rgba(16, 185, 129, 0.1);
-  border-color: var(--color-emerald);
+  border-color: rgba(16, 185, 129, 0.3);
   color: var(--color-emerald);
 }
 
-/* Filter Container for dropdown positioning */
+/* ============================================
+   FILTER CONTAINER & PANEL
+   ============================================ */
 .staff-filter-container {
   position: relative;
 }
 
-/* ============================================================================
-   Toolbar - Filter + Sort
-   ============================================================================ */
-
-.staff-toolbar {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) 0;
-  flex-wrap: wrap;
-}
-
-/* Filter Container (for dropdown positioning) */
-.staff-filter-container {
-  position: relative;
-}
-
-/* Filter Button */
-.staff-filter-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-primary);
-  border-radius: 8px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.staff-filter-btn:hover {
-  background: var(--bg-tertiary);
-  border-color: var(--text-tertiary);
-  color: var(--text-primary);
-}
-
-.staff-filter-btn--active {
-  background: var(--bg-tertiary);
-  border-color: var(--color-crimson);
-  color: var(--text-primary);
-}
-
-.staff-filter-btn--has-filters {
-  border-color: var(--color-emerald);
-}
-
-.filter-count {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
-  background: var(--color-emerald);
-  color: white;
-  font-size: 0.625rem;
-  font-weight: 600;
-  border-radius: 9px;
-}
-
-/* Filter Panel Dropdown */
 .staff-filter-panel {
   position: absolute;
   top: calc(100% + 8px);
   left: 0;
-  width: 280px;
-  background: var(--bg-primary);
-  border: 1px solid var(--border-primary);
+  background: var(--bg-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  padding: 16px;
+  min-width: 240px;
   z-index: 100;
-  animation: filterPanelIn 0.15s ease-out;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  animation: filterSlideDown 0.15s ease-out;
 }
 
-@keyframes filterPanelIn {
+@keyframes filterSlideDown {
   from {
     opacity: 0;
     transform: translateY(-8px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
@@ -220,24 +173,24 @@
 
 .filter-panel__header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border-secondary);
-  font-size: 0.75rem;
+  align-items: center;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 16px;
   font-weight: 600;
+  font-size: 13px;
   color: var(--text-primary);
 }
 
 .filter-clear-btn {
-  padding: 4px 8px;
-  background: transparent;
+  background: none;
   border: none;
   color: var(--color-crimson);
-  font-size: 0.6875rem;
-  font-weight: 500;
+  font-size: 11px;
   cursor: pointer;
-  transition: opacity 0.15s;
+  font-weight: 500;
+  transition: opacity 0.15s ease;
 }
 
 .filter-clear-btn:hover {
@@ -245,79 +198,52 @@
 }
 
 .filter-panel__content {
-  padding: 12px 16px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 
 .filter-group {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .filter-label {
-  font-size: 0.6875rem;
-  font-weight: 500;
+  font-size: 11px;
+  font-weight: 600;
   color: var(--text-tertiary);
   text-transform: uppercase;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.5px;
 }
 
+.filter-select,
 .staff-filter-panel .filter-select {
-  padding: 8px 32px 8px 12px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-primary);
-  border-radius: 6px;
-  font-size: 0.75rem;
+  appearance: none;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
   color: var(--text-primary);
   cursor: pointer;
-  transition: border-color 0.15s;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
+  transition: all 0.15s ease;
 }
 
+.filter-select:hover,
 .staff-filter-panel .filter-select:hover {
-  border-color: var(--text-tertiary);
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
+.filter-select:focus,
 .staff-filter-panel .filter-select:focus {
   outline: none;
   border-color: var(--color-crimson);
 }
 
-/* Sort Button */
-.staff-sort-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-primary);
-  border-radius: 8px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.staff-sort-btn:hover {
-  background: var(--bg-tertiary);
-  border-color: var(--text-tertiary);
-  color: var(--text-primary);
-}
-
-.staff-sort-btn--active {
-  background: rgba(16, 185, 129, 0.1);
-  border-color: var(--color-emerald);
-  color: var(--color-emerald);
-}
-
-/* Active Filter Chips */
+/* ============================================
+   ACTIVE FILTER CHIPS
+   ============================================ */
 .staff-active-filters {
   display: flex;
   align-items: center;
@@ -329,52 +255,48 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 8px 4px 10px;
   background: rgba(16, 185, 129, 0.1);
-  border: 1px solid var(--color-emerald);
-  border-radius: 14px;
-  font-size: 0.6875rem;
-  font-weight: 500;
+  border: 1px solid rgba(16, 185, 129, 0.3);
   color: var(--color-emerald);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
 }
 
 .filter-chip button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 14px;
-  height: 14px;
-  padding: 0;
-  background: transparent;
+  background: none;
   border: none;
   color: var(--color-emerald);
-  font-size: 0.875rem;
   cursor: pointer;
-  opacity: 0.7;
-  transition: opacity 0.15s;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0;
+  margin-left: 2px;
+  transition: color 0.15s ease;
 }
 
 .filter-chip button:hover {
-  opacity: 1;
+  color: var(--color-crimson);
 }
 
-/* ============================================================================
-   Staff Table
-   ============================================================================ */
-
+/* ============================================
+   TABLE
+   ============================================ */
 .staff-page__table {
-  background: transparent;
-  /* Was var(--bg-secondary) */
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
   border-radius: 12px;
   overflow: hidden;
-  border: 1px solid var(--border-secondary);
 }
 
-/* Staff Cell - Enhanced */
+/* ============================================
+   STAFF CELLS
+   ============================================ */
 .staff-cell {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: 10px;
 }
 
 .staff-cell__info {
@@ -387,14 +309,14 @@
 .staff-name {
   font-weight: 500;
   color: var(--text-primary);
-  font-size: 0.8125rem;
+  font-size: 13px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .staff-email {
-  font-size: 0.6875rem;
+  font-size: 11px;
   color: var(--text-tertiary);
   white-space: nowrap;
   overflow: hidden;
@@ -402,33 +324,33 @@
 }
 
 .staff-id {
-  font-size: 0.75rem;
+  font-size: 12px;
   font-weight: 500;
   color: var(--text-secondary);
-  font-family: monospace;
+  font-family: var(--font-mono);
 }
 
 .staff-role-badge {
   display: inline-block;
-  padding: 4px 8px;
-  background: var(--bg-tertiary);
-  border-radius: 4px;
-  font-size: 0.6875rem;
-  font-weight: 500;
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 600;
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.3px;
 }
 
 .staff-date {
-  font-size: 0.75rem;
+  font-size: 12px;
   color: var(--text-tertiary);
 }
 
-/* ============================================================================
-   Action Button - Animated
-   ============================================================================ */
-
+/* ============================================
+   ACTION BUTTONS
+   ============================================ */
 .staff-actions {
   display: flex;
   justify-content: center;
@@ -439,19 +361,19 @@
   align-items: center;
   justify-content: center;
   gap: 3px;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   padding: 0;
   background: transparent;
   border: 1px solid transparent;
   border-radius: 6px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.15s ease;
 }
 
 .action-menu-btn:hover {
-  background: var(--bg-tertiary);
-  border-color: var(--border-primary);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
 .action-menu-btn:hover .action-dot {
@@ -464,54 +386,45 @@
 }
 
 .action-dot {
-  width: 4px;
-  height: 4px;
+  width: 3px;
+  height: 3px;
   background: var(--text-tertiary);
   border-radius: 50%;
-  transition: all 0.2s;
+  transition: all 0.15s ease;
 }
 
-.action-menu-btn:hover .action-dot:nth-child(1) {
-  transform: translateY(-2px);
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 1024px) {
+  .staff-page__header {
+    flex-wrap: wrap;
+  }
+  
+  .staff-page__header-right {
+    flex-wrap: wrap;
+  }
 }
-
-.action-menu-btn:hover .action-dot:nth-child(3) {
-  transform: translateY(2px);
-}
-
-/* ============================================================================
-   Responsive
-   ============================================================================ */
 
 @media (max-width: 768px) {
   .staff-page__header {
     flex-direction: column;
     align-items: flex-start;
-    gap: var(--space-2);
+    gap: 12px;
   }
-
-  .staff-toolbar {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .staff-filter-container {
+  
+  .staff-page__header-right {
     width: 100%;
+    justify-content: flex-start;
   }
-
-  .staff-filter-btn,
-  .staff-sort-btn {
-    width: 100%;
-    justify-content: center;
+  
+  .staff-stats-badge {
+    display: none;
   }
-
+  
   .staff-filter-panel {
     width: 100%;
     left: 0;
     right: 0;
-  }
-
-  .staff-active-filters {
-    width: 100%;
   }
 }
