@@ -11,6 +11,28 @@ import type {
   MonthlyTrend,
   MemberRevenueInsight
 } from "../../types/analytics"
+import {
+  Users,
+  Calendar,
+  Star,
+  TrendingUp,
+  TrendingDown,
+  AlertTriangle,
+  AlertCircle,
+  Activity,
+  Clock,
+  Lightbulb,
+  ArrowUpRight,
+  ArrowDownRight,
+  Check,
+  X,
+  Minus,
+  Flame,
+  Snowflake,
+  BarChart3,
+  Target,
+  Zap
+} from "lucide-react"
 import "./Reports.css"
 
 const formatCurrency = (value: number) =>
@@ -139,45 +161,35 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ insights, membershipMovement,
       <section className="kpi-strip">
         <div className="kpi-card kpi-card--retention">
           <div className="kpi-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-              <circle cx="9" cy="7" r="4" />
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-            </svg>
+            <Users size={24} />
           </div>
           <div className="kpi-content">
             <span className="kpi-label">Retention Rate</span>
             <span className="kpi-value">{formatPercent(performanceSummary.retentionRate)}</span>
             <span className={`kpi-change ${performanceSummary.retentionChange >= 0 ? "positive" : "negative"}`}>
-              {performanceSummary.retentionChange >= 0 ? "↑" : "↓"} {Math.abs(performanceSummary.retentionChange)}%
+              {performanceSummary.retentionChange >= 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
+              {Math.abs(performanceSummary.retentionChange)}%
             </span>
           </div>
         </div>
 
         <div className="kpi-card kpi-card--utilization">
           <div className="kpi-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-              <line x1="16" y1="2" x2="16" y2="6" />
-              <line x1="8" y1="2" x2="8" y2="6" />
-              <line x1="3" y1="10" x2="21" y2="10" />
-            </svg>
+            <Calendar size={24} />
           </div>
           <div className="kpi-content">
             <span className="kpi-label">Class Utilization</span>
             <span className="kpi-value">{formatPercent(performanceSummary.classUtilization)}</span>
             <span className={`kpi-change ${performanceSummary.utilizationChange >= 0 ? "positive" : "negative"}`}>
-              {performanceSummary.utilizationChange >= 0 ? "↑" : "↓"} {Math.abs(performanceSummary.utilizationChange)}%
+              {performanceSummary.utilizationChange >= 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
+              {Math.abs(performanceSummary.utilizationChange)}%
             </span>
           </div>
         </div>
 
         <div className="kpi-card kpi-card--nps">
           <div className="kpi-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-            </svg>
+            <Star size={24} />
           </div>
           <div className="kpi-content">
             <span className="kpi-label">Trainer NPS</span>
@@ -188,10 +200,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ insights, membershipMovement,
 
         <div className="kpi-card kpi-card--growth">
           <div className="kpi-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-              <polyline points="17 6 23 6 23 12" />
-            </svg>
+            <TrendingUp size={24} />
           </div>
           <div className="kpi-content">
             <span className="kpi-label">Net Member Growth</span>
@@ -209,10 +218,10 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ insights, membershipMovement,
           </div>
           <div className="movement-bars">
             {[
-              { label: "New Joins", value: membershipMovement.newJoins, change: membershipMovement.newJoinsChange, color: "var(--color-emerald)" },
-              { label: "Renewals", value: membershipMovement.renewals, change: membershipMovement.renewalsChange, color: "var(--color-blue)" },
-              { label: "Reactivations", value: membershipMovement.reactivations, change: membershipMovement.reactivationsChange, color: "var(--color-amber)" },
-              { label: "Churned", value: -membershipMovement.churned, change: membershipMovement.churnedChange, color: "var(--color-crimson)" }
+              { label: "New Joins", value: membershipMovement.newJoins, change: membershipMovement.newJoinsChange, color: "var(--reports-neon-green)" },
+              { label: "Renewals", value: membershipMovement.renewals, change: membershipMovement.renewalsChange, color: "var(--reports-neon-blue)" },
+              { label: "Reactivations", value: membershipMovement.reactivations, change: membershipMovement.reactivationsChange, color: "var(--reports-amber)" },
+              { label: "Churned", value: -membershipMovement.churned, change: membershipMovement.churnedChange, color: "var(--reports-red)" }
             ].map((item, idx) => (
               <div key={idx} className="movement-row">
                 <div className="movement-label">
@@ -233,7 +242,8 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ insights, membershipMovement,
                     {item.value > 0 ? "+" : ""}{item.value}
                   </span>
                   <span className={`movement-change ${item.change >= 0 ? "positive" : "negative"}`}>
-                    {item.change >= 0 ? "↑" : "↓"}{Math.abs(item.change)}
+                    {item.change >= 0 ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
+                    {Math.abs(item.change)}
                   </span>
                 </div>
               </div>
@@ -282,7 +292,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ insights, membershipMovement,
           <div className="pattern-summary">
             <span className="pattern-item"><span className="pattern-icon hot" /> Peak: {trafficHeatmap.peakTime}</span>
             <span className="pattern-item"><span className="pattern-icon cold" /> Low: {trafficHeatmap.lowUtilizationTime}</span>
-            <span className="pattern-item"><span className="pattern-icon" /> Weekend: {trafficHeatmap.weekendPattern}</span>
+            <span className="pattern-item"><Flame size={14} /> Weekend: {trafficHeatmap.weekendPattern}</span>
           </div>
         </div>
         <div className="heatmap-container">
@@ -582,7 +592,9 @@ const InsightsTab: React.FC<InsightsTabProps> = ({ insights }) => {
       <section className="insights-section">
         <div className="insights-category">
           <div className="category-header category-header--critical">
-            <span className="category-icon">!</span>
+            <span className="category-icon">
+              <AlertCircle size={18} />
+            </span>
             <h3>Critical Actions Required</h3>
           </div>
           <div className="insights-list">
@@ -597,7 +609,9 @@ const InsightsTab: React.FC<InsightsTabProps> = ({ insights }) => {
 
         <div className="insights-category">
           <div className="category-header category-header--warning">
-            <span className="category-icon">⚠</span>
+            <span className="category-icon">
+              <AlertTriangle size={18} />
+            </span>
             <h3>Warnings & Attention</h3>
           </div>
           <div className="insights-list">
@@ -609,7 +623,9 @@ const InsightsTab: React.FC<InsightsTabProps> = ({ insights }) => {
 
         <div className="insights-category">
           <div className="category-header category-header--opportunity">
-            <span className="category-icon">↗</span>
+            <span className="category-icon">
+              <Zap size={18} />
+            </span>
             <h3>Growth Opportunities</h3>
           </div>
           <div className="insights-list">
@@ -629,25 +645,38 @@ interface InsightCardProps {
 }
 
 const InsightCard: React.FC<InsightCardProps> = ({ insight, compact }) => {
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "critical": return "var(--color-crimson)"
-      case "warning": return "var(--color-amber)"
-      case "opportunity": return "var(--color-emerald)"
-      default: return "var(--color-blue)"
+  const getInsightIcon = (icon: string, priority: string) => {
+    const color = priority === "critical" 
+      ? "var(--reports-red)" 
+      : priority === "warning" 
+        ? "var(--reports-amber)" 
+        : "var(--reports-neon-green)"
+    
+    switch (icon) {
+      case "warning":
+        return <AlertTriangle size={18} color={color} />
+      case "activity":
+        return <Activity size={18} color={color} />
+      case "trending-up":
+        return <TrendingUp size={18} color={color} />
+      case "star":
+        return <Star size={18} color={color} />
+      case "clock":
+        return <Clock size={18} color={color} />
+      case "target":
+        return <Target size={18} color={color} />
+      case "bar-chart":
+        return <BarChart3 size={18} color={color} />
+      default:
+        return <Lightbulb size={18} color={color} />
     }
   }
 
   if (compact) {
     return (
       <div className={`insight-card insight-card--compact insight-card--${insight.priority}`}>
-        <div className="insight-icon" style={{ color: getPriorityColor(insight.priority) }}>
-          {insight.icon === "warning" && "⚠"}
-          {insight.icon === "activity" && "📊"}
-          {insight.icon === "trending-up" && "↗"}
-          {insight.icon === "star" && "⭐"}
-          {insight.icon === "clock" && "⏰"}
-          {!["warning", "activity", "trending-up", "star", "clock"].includes(insight.icon) && "💡"}
+        <div className="insight-icon">
+          {getInsightIcon(insight.icon, insight.priority)}
         </div>
         <div className="insight-content">
           <span className="insight-title">{insight.title}</span>
@@ -681,9 +710,9 @@ interface MemberSpenderRowProps {
 
 const MemberSpenderRow: React.FC<MemberSpenderRowProps> = ({ member }) => {
   const getProbabilityColor = (prob: number) => {
-    if (prob >= 0.7) return "var(--color-emerald)"
-    if (prob >= 0.4) return "var(--color-amber)"
-    return "var(--color-slate)"
+    if (prob >= 0.7) return "var(--reports-neon-green)"
+    if (prob >= 0.4) return "var(--reports-amber)"
+    return "var(--reports-text-muted)"
   }
 
   return (
@@ -732,10 +761,10 @@ const AttendanceRow: React.FC<AttendanceRowProps> = ({ staff }) => {
           className={`day-cell ${day.status} ${day.isToday ? "today" : ""}`}
           title={`${day.status}${day.lateMinutes > 0 ? ` (+${day.lateMinutes}min)` : ""}`}
         >
-          {day.status === "present" && "✓"}
+          {day.status === "present" && <Check size={14} />}
           {day.status === "late" && "L"}
-          {day.status === "absent" && "✗"}
-          {day.status === "leave" && "—"}
+          {day.status === "absent" && <X size={14} />}
+          {day.status === "leave" && <Minus size={14} />}
           {day.status === "weekend" && ""}
         </td>
       ))}
@@ -774,12 +803,12 @@ const DonutChart: React.FC<DonutChartProps> = ({ data }) => {
             key={idx}
             d={`M 50 50 L ${x1} ${y1} A 40 40 0 ${largeArc} 1 ${x2} ${y2} Z`}
             fill={getProductColor(idx)}
-            stroke="var(--bg-primary)"
+            stroke="var(--reports-bg-primary)"
             strokeWidth="1"
           />
         )
       })}
-      <circle cx="50" cy="50" r="25" fill="var(--bg-primary)" />
+      <circle cx="50" cy="50" r="25" fill="var(--reports-bg-primary)" />
       <text x="50" y="48" textAnchor="middle" className="donut-total-label">Total</text>
       <text x="50" y="58" textAnchor="middle" className="donut-total-value">
         {formatCurrency(data.reduce((sum, d) => sum + d.revenue, 0))}
@@ -795,16 +824,14 @@ interface TrendChartProps {
 const TrendChart: React.FC<TrendChartProps> = ({ data }) => {
   const maxRevenue = Math.max(...data.map(d => d.revenue))
   const chartHeight = 200
-  const chartWidth = 100
-  const barWidth = chartWidth / data.length - 2
 
   return (
     <div className="trend-chart-container">
       <div className="trend-bars">
         {data.map((item, idx) => {
-          const totalHeight = (item.revenue / maxRevenue) * chartHeight
           const ptHeight = (item.ptRevenue / maxRevenue) * chartHeight
           const suppHeight = (item.supplementRevenue / maxRevenue) * chartHeight
+          const otherHeight = ((item.revenue - item.ptRevenue - item.supplementRevenue) / maxRevenue) * chartHeight
 
           return (
             <div key={idx} className="trend-bar-group">
@@ -821,8 +848,8 @@ const TrendChart: React.FC<TrendChartProps> = ({ data }) => {
                 />
                 <div
                   className="trend-bar trend-bar--other"
-                  style={{ height: `${totalHeight - ptHeight - suppHeight}px` }}
-                  title={`Other: ${formatCurrency(item.revenue - item.ptRevenue - item.supplementRevenue)}`}
+                  style={{ height: `${Math.max(0, otherHeight)}px` }}
+                  title={`Other: ${formatCurrency(Math.max(0, item.revenue - item.ptRevenue - item.supplementRevenue))}`}
                 />
               </div>
               <span className="trend-label">{item.month.split(" ")[0]}</span>
@@ -840,23 +867,23 @@ const TrendChart: React.FC<TrendChartProps> = ({ data }) => {
 }
 
 function getHeatColor(value: number): string {
-  if (value < 20) return "rgba(59, 130, 246, 0.1)"
-  if (value < 40) return "rgba(59, 130, 246, 0.25)"
-  if (value < 60) return "rgba(245, 158, 11, 0.4)"
-  if (value < 80) return "rgba(245, 158, 11, 0.6)"
-  return "rgba(239, 68, 68, 0.7)"
+  if (value < 20) return "rgba(20, 184, 166, 0.15)"
+  if (value < 40) return "rgba(20, 184, 166, 0.35)"
+  if (value < 60) return "rgba(245, 158, 11, 0.5)"
+  if (value < 80) return "rgba(245, 158, 11, 0.7)"
+  return "rgba(239, 68, 68, 0.8)"
 }
 
 function getProductColor(index: number): string {
   const colors = [
-    "var(--color-emerald)",
-    "var(--color-blue)",
-    "var(--color-amber)",
-    "var(--color-crimson)",
-    "#8b5cf6",
-    "#ec4899",
-    "#06b6d4",
-    "#84cc16"
+    "var(--reports-neon-green)",
+    "var(--reports-neon-blue)",
+    "var(--reports-amber)",
+    "var(--reports-red)",
+    "var(--reports-neon-purple)",
+    "var(--reports-neon-cyan)",
+    "var(--reports-neon-teal)",
+    "var(--reports-orange)"
   ]
   return colors[index % colors.length]
 }
