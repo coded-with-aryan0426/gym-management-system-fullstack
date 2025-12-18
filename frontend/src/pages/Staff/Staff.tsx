@@ -1,9 +1,9 @@
-import React, { useEffect, useState, useMemo, useRef } from 'react';
+import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { Badge, getStatusVariant, Avatar, DataTable, type Column } from '../../components/ui';
-import { ActionMenuButton, SortButton, StatsBadge } from '../../components/shared';
-import { useClickOutside, useAlphabeticalSort } from '../../hooks';
+import { ActionMenuButton } from '../../components/shared';
+import { useClickOutside } from '../../hooks';
 import EnhancedStaffActionModal from '../../components/StaffActionModal/EnhancedStaffActionModal';
 import api from '../../services/api';
 import type { User } from '../../types/user';
@@ -16,19 +16,18 @@ const Staff: React.FC = () => {
   const [isActionModalOpen, setIsActionModalOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  // Pagination State
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
+  const [totalCount, setTotalCount] = useState(0);
+  const [sortType, setSortType] = useState<'newest' | 'alphabetical'>('newest');
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
 
   const filterRef = useRef<HTMLDivElement>(null);
 
-  // Shared hooks for unified behavior
-  const { sortOrder, toggleSort, sortItems } = useAlphabeticalSort<User>();
-
-  // Click outside to close filter panel
   useClickOutside(filterRef as React.RefObject<HTMLElement>, () => setIsFilterOpen(false), isFilterOpen);
 
-  // Deep linking for Global Search
   const [searchParams] = useSearchParams();
 
   const [filters, setFilters] = useState({
@@ -36,36 +35,46 @@ const Staff: React.FC = () => {
     status: ""
   });
 
-  // Filter staff
-  const filteredStaff = useMemo(() => {
-    return staff.filter(member => {
-      const roleName = member.roles?.[0]?.roleName || member.role || 'TRAINER';
-      const matchesRole = filters.role === "" || roleName === filters.role;
-      const matchesStatus = filters.status === "" || "Active" === filters.status;
-      return matchesRole && matchesStatus;
-    });
-  }, [staff, filters]);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery)
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [searchQuery])
 
-  // Apply sorting using shared hook
-  const sortedStaff = useMemo(() => {
-    return sortItems(filteredStaff, (m) => m.fullName);
-  }, [filteredStaff, sortItems]);
+  const loadStaffPaginated = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await api.getStaffPaginated(
+        currentPage,
+        pageSize,
+        debouncedSearch || undefined,
+        filters.role || undefined
+      );
+      
+      setStaff(response.content);
+      setTotalCount(response.totalCount);
+      setSortType(response.sortType as 'newest' | 'alphabetical');
+    } catch (err) {
+      console.error('[Staff] Failed to load paginated staff:', err);
+      toast.error('Failed to load staff');
+      setStaff([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [currentPage, pageSize, debouncedSearch, filters.role]);
 
-  // Client-side pagination
-  const paginatedStaff = useMemo(() => {
-    const start = currentPage * pageSize;
-    const end = start + pageSize;
-    return sortedStaff.slice(start, end);
-  }, [sortedStaff, currentPage, pageSize]);
+  useEffect(() => {
+    loadStaffPaginated();
+  }, [loadStaffPaginated]);
 
-  const totalPages = useMemo(() => {
-    return Math.ceil(sortedStaff.length / pageSize);
-  }, [sortedStaff.length, pageSize]);
-
-  // Reset to page 0 when filters change
   useEffect(() => {
     setCurrentPage(0);
-  }, [filters]);
+  }, [debouncedSearch, filters]);
+
+  const totalPages = useMemo(() => {
+    return Math.ceil(totalCount / pageSize);
+  }, [totalCount, pageSize]);
 
   const activeFilterCount = [filters.role, filters.status].filter(Boolean).length;
 
@@ -78,11 +87,6 @@ const Staff: React.FC = () => {
   };
 
   useEffect(() => {
-    loadStaff();
-  }, []);
-
-  // Handle Search Param Navigation
-  useEffect(() => {
     const userId = searchParams.get('userId');
     if (userId && staff.length > 0) {
       const member = staff.find(s => s.userId.toString() === userId);
@@ -91,20 +95,6 @@ const Staff: React.FC = () => {
       }
     }
   }, [searchParams, staff]);
-
-  const loadStaff = async () => {
-    setLoading(true);
-    try {
-      const data = await api.getUsers('TRAINER');
-      setStaff(data);
-    } catch (err) {
-      console.error('[Beta] Failed to load staff:', err);
-      toast.error('Failed to load staff');
-      setStaff([]);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleActionClick = (member: User) => {
     setSelectedStaff(member);
@@ -124,7 +114,7 @@ const Staff: React.FC = () => {
         phoneNumber: member.phoneNumber,
       });
       toast.success(`Profile updated for ${member.fullName}`);
-      loadStaff();
+      loadStaffPaginated();
       handleCloseActionModal();
     } catch (err) {
       console.error('Failed to update staff profile:', err);
@@ -133,30 +123,15 @@ const Staff: React.FC = () => {
     }
   };
 
-  const handleScheduleSession = async (member: User) => {
-    try {
-      await api.createPTSession({
-        trainerId: member.userId,
-        date: new Date().toISOString().split('T')[0],
-        time: '10:00',
-        duration: 60,
-        notes: 'Scheduled session',
-      });
-      toast.success(`Session scheduled with ${member.fullName}`);
-      handleCloseActionModal();
-    } catch (err) {
-      console.error('Failed to schedule session:', err);
-      toast.error('Failed to schedule session');
-      handleCloseActionModal();
-    }
-  };
-
-  const handleMessageStaff = async (member: User) => {
-    toast.success(`Message sent to ${member.fullName}`);
-    handleCloseActionModal();
-  };
-
   const columns: Column<User>[] = [
+    {
+      key: 'index',
+      header: '#',
+      width: '50px',
+      render: (_, index) => (
+        <span className="staff-index">{currentPage * pageSize + index + 1}</span>
+      ),
+    },
     {
       key: 'member',
       header: 'Staff Member',
@@ -223,15 +198,30 @@ const Staff: React.FC = () => {
 
   return (
     <div className="staff-page">
-      {/* Header - Matching Members Layout */}
       <div className="staff-page__header">
         <div className="staff-page__title-section">
           <h1 className="staff-page__title">Staff Directory</h1>
-          <span className="staff-page__subtitle">Manage your team members</span>
+          <div className="staff-page__sort-indicator">
+            {sortType === 'newest' ? (
+              <span className="sort-badge sort-badge--newest">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                New First
+              </span>
+            ) : (
+              <span className="sort-badge sort-badge--alpha">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M3 6h18M3 12h12M3 18h6"/>
+                </svg>
+                A → Z
+              </span>
+            )}
+          </div>
         </div>
 
         <div className="staff-page__header-right">
-          {/* Active Filter Chips - Before Filter Button */}
           {activeFilterCount > 0 && (
             <div className="staff-active-filters">
               {filters.role && (
@@ -249,20 +239,18 @@ const Staff: React.FC = () => {
             </div>
           )}
 
-          {/* Filter Button with Dropdown */}
           <div className="staff-filter-container" ref={filterRef}>
             <button
               className={`btn-filters ${isFilterOpen ? 'btn-filters--active' : ''} ${activeFilterCount > 0 ? 'btn-filters--has-filters' : ''}`}
               onClick={() => setIsFilterOpen(!isFilterOpen)}
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
               </svg>
               Filters
               {activeFilterCount > 0 && ` (${activeFilterCount})`}
             </button>
 
-            {/* Filter Dropdown Panel */}
             {isFilterOpen && (
               <div className="staff-filter-panel">
                 <div className="filter-panel__header">
@@ -306,24 +294,18 @@ const Staff: React.FC = () => {
             )}
           </div>
 
-          {/* Sort Button - Unified */}
-          <SortButton sortOrder={sortOrder} onToggle={toggleSort} />
-
-          {/* Stats Badge - Matching Members Style */}
           <div className="staff-stats-badge">
             <button
               className={`stat-pill stat-pill--active ${filters.status === 'Active' ? 'selected' : ''}`}
               onClick={() => handleFilterChange('status', 'Active')}
-              style={{ cursor: 'pointer', border: 'none', background: 'transparent' }}
             >
               <span className="stat-dot active"></span>
-              <span>{sortedStaff.length} Active</span>
+              <span>{totalCount} Active</span>
             </button>
             <div className="stat-divider"></div>
             <button
               className={`stat-pill ${filters.status === 'Inactive' ? 'selected' : ''}`}
               onClick={() => handleFilterChange('status', 'Inactive')}
-              style={{ cursor: 'pointer', border: 'none', background: 'transparent' }}
             >
               <span className="stat-dot inactive"></span>
               <span>0 Inactive</span>
@@ -332,27 +314,24 @@ const Staff: React.FC = () => {
             <button
               className={`stat-pill ${filters.status === '' ? 'selected' : ''}`}
               onClick={() => handleFilterChange('status', '')}
-              style={{ cursor: 'pointer', border: 'none', background: 'transparent' }}
             >
-              <span>{staff.length} Total</span>
+              <span>{totalCount} Total</span>
             </button>
           </div>
         </div>
       </div>
 
-
-
       <div className="staff-page__table">
         <DataTable
           columns={columns}
-          data={paginatedStaff}
+          data={staff}
           keyExtractor={(s) => s.userId}
           loading={loading}
           emptyMessage="No staff found"
           pagination={{
             currentPage,
             totalPages,
-            totalCount: sortedStaff.length,
+            totalCount,
             pageSize,
             onPageChange: setCurrentPage,
             onPageSizeChange: (size) => {
@@ -363,13 +342,12 @@ const Staff: React.FC = () => {
         />
       </div>
 
-      {/* Staff Action Modal */}
       <EnhancedStaffActionModal
         isOpen={isActionModalOpen}
         onClose={handleCloseActionModal}
         staff={selectedStaff}
         onEditProfile={handleEditProfile}
-        onUpdate={loadStaff}
+        onUpdate={loadStaffPaginated}
       />
     </div>
   );

@@ -1,5 +1,5 @@
 /* ============================================================================
-   DataTable Component - Premium Design
+   DataTable Component - Premium Design V2
    Clean, consistent, and modern SaaS aesthetics
    ============================================================================ */
 
@@ -19,7 +19,7 @@
 }
 
 .data-table__th {
-  padding: 12px 16px;
+  padding: 10px 14px;
   text-align: left;
   font-size: 10px;
   font-weight: 600;
@@ -27,7 +27,7 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   white-space: nowrap;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 /* Body */
@@ -36,7 +36,7 @@
 }
 
 .data-table__row {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
   transition: background-color 0.1s ease;
 }
 
@@ -45,7 +45,7 @@
 }
 
 .data-table__row:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .data-table__row--clickable {
@@ -53,11 +53,20 @@
 }
 
 .data-table__td {
-  padding: 12px 16px;
-  font-size: 13px;
+  padding: 10px 14px;
+  font-size: 12.5px;
   color: var(--text-primary);
   vertical-align: middle;
   line-height: 1.4;
+}
+
+/* Alternating rows */
+.data-table__row:nth-child(even) {
+  background: rgba(255, 255, 255, 0.01);
+}
+
+.data-table__row:nth-child(even):hover {
+  background: rgba(255, 255, 255, 0.03);
 }
 
 /* Loading State */
@@ -66,18 +75,18 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  padding: 48px;
+  gap: 10px;
+  padding: 40px;
   color: var(--text-tertiary);
 }
 
 .data-table__spinner {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   border: 2px solid rgba(255, 255, 255, 0.1);
   border-top-color: var(--color-crimson);
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  animation: spin 0.7s linear infinite;
 }
 
 @keyframes spin {
@@ -88,28 +97,28 @@
 .data-table__empty,
 .data-table__empty-cell {
   text-align: center;
-  padding: 48px;
+  padding: 40px;
   color: var(--text-tertiary);
-  font-size: 13px;
+  font-size: 12px;
 }
 
 /* Action Cell */
 .data-table__actions {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   justify-content: flex-end;
 }
 
 .data-table__action-btn {
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 6px;
+  border-radius: 5px;
   color: var(--text-tertiary);
-  transition: all 0.15s ease;
+  transition: all 0.12s ease;
   background: transparent;
   border: none;
   cursor: pointer;
@@ -121,24 +130,25 @@
 }
 
 /* ============================================================================
-   Pagination Controls
+   Pagination Controls - Compact Design
    ============================================================================ */
 
 .data-table__pagination {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-  background: rgba(255, 255, 255, 0.02);
-  gap: 16px;
+  padding: 10px 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.015);
+  gap: 12px;
   flex-wrap: wrap;
 }
 
 .pagination__info {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-secondary);
   white-space: nowrap;
+  font-feature-settings: 'tnum' 1;
 }
 
 .pagination__controls {
@@ -148,30 +158,30 @@
 }
 
 .pagination__btn {
-  min-width: 32px;
-  height: 32px;
+  min-width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 8px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 6px;
+  padding: 0 6px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 5px;
   background: rgba(255, 255, 255, 0.02);
   color: var(--text-secondary);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.12s ease;
 }
 
 .pagination__btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.05);
   color: var(--text-primary);
-  border-color: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .pagination__btn:disabled {
-  opacity: 0.4;
+  opacity: 0.35;
   cursor: not-allowed;
 }
 
@@ -188,16 +198,16 @@
 }
 
 .pagination__ellipsis {
-  padding: 0 8px;
+  padding: 0 6px;
   color: var(--text-tertiary);
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .pagination__size {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 12px;
+  gap: 6px;
+  font-size: 11px;
   color: var(--text-secondary);
 }
 
@@ -206,18 +216,18 @@
 }
 
 .pagination__size select {
-  padding: 4px 8px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.04);
+  padding: 4px 6px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.03);
   color: var(--text-primary);
-  font-size: 12px;
+  font-size: 11px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.12s ease;
 }
 
 .pagination__size select:hover {
-  border-color: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.12);
 }
 
 .pagination__size select:focus {
@@ -225,18 +235,39 @@
   border-color: var(--color-crimson);
 }
 
+/* ============================================================================
+   Sort Indicator
+   ============================================================================ */
+
+.data-table__sort-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 9px;
+  color: var(--color-emerald);
+  padding: 2px 6px;
+  background: rgba(16, 185, 129, 0.1);
+  border-radius: 4px;
+  margin-left: 8px;
+}
+
+.data-table__sort-indicator--newest {
+  color: var(--color-ocean);
+  background: rgba(59, 130, 246, 0.1);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .data-table__th,
   .data-table__td {
-    padding: 10px 12px;
+    padding: 8px 10px;
   }
 }
 
 @media (max-width: 640px) {
   .data-table__pagination {
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
   }
 
   .pagination__controls {

@@ -1,5 +1,5 @@
 /* ============================================================================
-   UtilityBar - Premium Top Navigation Bar
+   UtilityBar - Premium Top Navigation Bar V2
    Redesigned for clarity, consistency, and modern SaaS aesthetics
    ============================================================================ */
 
@@ -7,12 +7,12 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 20px;
-  background: linear-gradient(180deg, rgba(20, 20, 20, 0.95) 0%, rgba(13, 13, 13, 0.95) 100%);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  height: 56px;
+  padding: 0 16px;
+  background: linear-gradient(180deg, rgba(15, 15, 15, 0.98) 0%, rgba(10, 10, 10, 0.98) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  height: 52px;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -23,32 +23,32 @@
    ============================================ */
 .utility-bar__search-container {
   position: relative;
-  width: 280px;
+  width: 260px;
   flex-shrink: 0;
 }
 
 .utility-bar__search {
   display: flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
-  padding: 0 12px;
-  height: 36px;
-  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  padding: 0 10px;
+  height: 32px;
+  transition: all 0.15s ease;
 }
 
 .utility-bar__search:focus-within {
   border-color: var(--color-crimson);
-  background: rgba(255, 255, 255, 0.06);
-  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.1);
 }
 
 .utility-bar__search-icon {
   color: var(--text-tertiary);
   flex-shrink: 0;
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
 }
 
 .utility-bar__search-input {
@@ -56,9 +56,9 @@
   border: none;
   color: var(--text-primary);
   width: 100%;
-  margin-left: 10px;
+  margin-left: 8px;
   outline: none;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 400;
 }
 
@@ -68,12 +68,12 @@
 
 .utility-bar__spinner {
   display: block;
-  width: 14px;
-  height: 14px;
-  border: 2px solid rgba(255, 255, 255, 0.1);
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
   border-radius: 50%;
   border-top-color: var(--color-crimson);
-  animation: spin 0.8s linear infinite;
+  animation: spin 0.7s linear infinite;
   flex-shrink: 0;
 }
 
@@ -86,69 +86,69 @@
    ============================================ */
 .utility-bar__search-results {
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 6px);
   left: 0;
   right: 0;
-  background: var(--bg-secondary);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  background: #121212;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
   z-index: var(--z-dropdown);
-  max-height: 400px;
+  max-height: 340px;
   overflow-y: auto;
   overflow-x: hidden;
 }
 
 .search-results__empty,
 .search-results__header {
-  padding: 12px 16px;
+  padding: 10px 12px;
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .search-results__header {
   font-weight: 600;
   background: rgba(255, 255, 255, 0.02);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
   color: var(--text-primary);
 }
 
 .search-results__item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 16px;
+  gap: 10px;
+  padding: 8px 12px;
   cursor: pointer;
   width: 100%;
   text-align: left;
   background: none;
   border: none;
-  transition: background-color 0.15s ease;
+  transition: background-color 0.12s ease;
 }
 
 .search-results__item:hover {
-  background: rgba(220, 38, 38, 0.08);
+  background: rgba(220, 38, 38, 0.06);
 }
 
 .search-results__badge {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 600;
-  font-size: 12px;
+  font-size: 11px;
   flex-shrink: 0;
 }
 
 .search-results__badge--member {
-  background: rgba(16, 185, 129, 0.15);
+  background: rgba(16, 185, 129, 0.12);
   color: var(--color-emerald);
 }
 
 .search-results__badge--staff {
-  background: rgba(59, 130, 246, 0.15);
+  background: rgba(59, 130, 246, 0.12);
   color: var(--color-ocean);
 }
 
@@ -160,14 +160,14 @@
 .search-results__name {
   display: block;
   color: var(--text-primary);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
 }
 
 .search-results__email {
   display: block;
   color: var(--text-tertiary);
-  font-size: 11px;
+  font-size: 10px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -181,7 +181,7 @@
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: 24px;
+  gap: 20px;
   align-items: center;
 }
 
@@ -189,11 +189,11 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 1px;
 }
 
 .utility-stat__value {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text-primary);
   line-height: 1;
@@ -201,7 +201,7 @@
 }
 
 .utility-stat__label {
-  font-size: 10px;
+  font-size: 9px;
   color: var(--text-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -209,17 +209,17 @@
 }
 
 .utility-bar__stats--animated {
-  animation: statsSlideIn 0.3s ease-out;
+  animation: statsSlideIn 0.25s ease-out;
 }
 
 .utility-bar__stats--animated .utility-stat {
-  animation: statFadeIn 0.3s ease-out both;
+  animation: statFadeIn 0.25s ease-out both;
 }
 
 .utility-bar__stats--animated .utility-stat:nth-child(1) { animation-delay: 0ms; }
-.utility-bar__stats--animated .utility-stat:nth-child(2) { animation-delay: 50ms; }
-.utility-bar__stats--animated .utility-stat:nth-child(3) { animation-delay: 100ms; }
-.utility-bar__stats--animated .utility-stat:nth-child(4) { animation-delay: 150ms; }
+.utility-bar__stats--animated .utility-stat:nth-child(2) { animation-delay: 40ms; }
+.utility-bar__stats--animated .utility-stat:nth-child(3) { animation-delay: 80ms; }
+.utility-bar__stats--animated .utility-stat:nth-child(4) { animation-delay: 120ms; }
 
 @keyframes statsSlideIn {
   from { opacity: 0; }
@@ -229,7 +229,7 @@
 @keyframes statFadeIn {
   from {
     opacity: 0;
-    transform: translateY(-6px);
+    transform: translateY(-4px);
   }
   to {
     opacity: 1;
@@ -249,30 +249,30 @@
 .utility-bar__actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 /* Create Button - Primary CTA */
 .utility-bar__create-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 0 14px;
-  height: 34px;
+  gap: 5px;
+  padding: 0 12px;
+  height: 30px;
   background: var(--color-crimson);
   color: white;
   border: none;
-  border-radius: 8px;
-  font-size: 13px;
+  border-radius: 6px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.12s ease;
 }
 
 .utility-bar__create-btn:hover {
   background: var(--color-crimson-hover);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+  box-shadow: 0 4px 10px rgba(220, 38, 38, 0.25);
 }
 
 .utility-bar__create-btn:active {
@@ -280,8 +280,8 @@
 }
 
 .utility-bar__create-btn svg {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
 }
 
 /* Dropdown Container */
@@ -296,36 +296,36 @@
   border: none;
   color: var(--text-tertiary);
   cursor: pointer;
-  padding: 8px;
-  border-radius: 8px;
-  transition: all 0.15s ease;
+  padding: 6px;
+  border-radius: 6px;
+  transition: all 0.12s ease;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .utility-bar__icon-btn:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.05);
   color: var(--text-primary);
 }
 
 .utility-bar__icon-btn svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
 }
 
 /* Notification Badge */
 .utility-bar__badge {
   position: absolute;
-  top: 2px;
-  right: 2px;
-  min-width: 16px;
-  height: 16px;
-  padding: 0 4px;
+  top: 1px;
+  right: 1px;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 3px;
   background: var(--color-crimson);
   color: white;
-  border-radius: 8px;
-  font-size: 10px;
+  border-radius: 7px;
+  font-size: 9px;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -336,13 +336,13 @@
 /* Dropdown Menu */
 .utility-bar__dropdown-menu {
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 6px);
   right: 0;
-  width: 320px;
-  background: var(--bg-secondary);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  width: 300px;
+  background: #121212;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
   z-index: var(--z-dropdown);
   overflow: hidden;
 }
@@ -351,8 +351,8 @@
    NOTIFICATIONS PANEL
    ============================================ */
 .notifications-panel__header {
-  padding: 14px 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -360,22 +360,22 @@
 
 .notifications-panel__header h3 {
   margin: 0;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text-primary);
 }
 
 .notifications-panel__list {
-  max-height: 360px;
+  max-height: 320px;
   overflow-y: auto;
 }
 
 .notification-item {
   display: flex;
-  gap: 12px;
-  padding: 12px 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-  transition: background-color 0.15s ease;
+  gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  transition: background-color 0.12s ease;
 }
 
 .notification-item:last-child {
@@ -387,11 +387,11 @@
 }
 
 .notification-item--unread {
-  background: rgba(220, 38, 38, 0.04);
+  background: rgba(220, 38, 38, 0.03);
 }
 
 .notification-item--unread:hover {
-  background: rgba(220, 38, 38, 0.06);
+  background: rgba(220, 38, 38, 0.05);
 }
 
 .notification-item__content {
@@ -400,8 +400,8 @@
 }
 
 .notification-item__title {
-  font-size: 13px;
-  margin: 0 0 4px 0;
+  font-size: 12px;
+  margin: 0 0 3px 0;
   color: var(--text-primary);
   line-height: 1.4;
 }
@@ -411,7 +411,7 @@
 }
 
 .notification-item__time {
-  font-size: 11px;
+  font-size: 10px;
   color: var(--text-tertiary);
 }
 
@@ -420,29 +420,29 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
   flex-shrink: 0;
 }
 
 .notification-icon--success {
-  background: rgba(16, 185, 129, 0.15);
+  background: rgba(16, 185, 129, 0.12);
   color: var(--color-emerald);
 }
 
 .notification-icon--danger {
-  background: rgba(220, 38, 38, 0.15);
+  background: rgba(220, 38, 38, 0.12);
   color: var(--color-crimson);
 }
 
 .notification-icon--warning {
-  background: rgba(245, 158, 11, 0.15);
+  background: rgba(245, 158, 11, 0.12);
   color: var(--color-amber);
 }
 
 .notification-icon--info {
-  background: rgba(59, 130, 246, 0.15);
+  background: rgba(59, 130, 246, 0.12);
   color: var(--color-ocean);
 }
 
@@ -451,14 +451,14 @@
    ============================================ */
 .utility-bar__avatar {
   background: none;
-  border: 2px solid transparent;
+  border: 1.5px solid transparent;
   padding: 0;
   cursor: pointer;
-  width: 34px;
-  height: 34px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   overflow: hidden;
-  transition: all 0.15s ease;
+  transition: all 0.12s ease;
 }
 
 .utility-bar__avatar:hover {
@@ -481,7 +481,7 @@
   }
   
   .utility-bar__search-container {
-    width: 200px;
+    width: 180px;
   }
   
   .utility-bar__create-btn span {
@@ -489,7 +489,7 @@
   }
   
   .utility-bar__create-btn {
-    width: 34px;
+    width: 30px;
     padding: 0;
     justify-content: center;
   }
@@ -497,6 +497,6 @@
 
 @media (max-width: 480px) {
   .utility-bar__search-container {
-    width: 160px;
+    width: 140px;
   }
 }

@@ -1,5 +1,5 @@
 /* ============================================================================
-   CommandRail - Premium Sidebar Navigation
+   CommandRail - Premium Sidebar Navigation V2
    Redesigned for clarity, consistency, and modern SaaS aesthetics
    ============================================================================ */
 
@@ -9,13 +9,13 @@
   top: 0;
   bottom: 0;
   width: var(--sidebar-width);
-  background: linear-gradient(180deg, #141414 0%, #0D0D0D 100%);
-  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  background: linear-gradient(180deg, #0f0f0f 0%, #080808 100%);
+  border-right: 1px solid rgba(255, 255, 255, 0.04);
   display: flex;
   flex-direction: column;
   z-index: var(--z-sticky);
   overflow: hidden;
-  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .command-rail--collapsed {
@@ -28,24 +28,24 @@
 .command-rail__logo {
   display: flex;
   align-items: center;
-  gap: 12px;
-  height: 56px;
-  padding: 0 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  gap: 10px;
+  height: 52px;
+  padding: 0 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
   flex-shrink: 0;
   white-space: nowrap;
   overflow: hidden;
 }
 
 /* ============================================
-   NAVIGATION - Core Improvement
+   NAVIGATION - Improved Spacing & Hierarchy
    ============================================ */
 .command-rail__nav {
   flex: 1;
-  padding: 12px 8px;
+  padding: 8px 6px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -58,15 +58,15 @@
 .command-rail__link {
   display: flex;
   align-items: center;
-  gap: 12px;
-  height: 40px;
-  padding: 0 12px;
-  border-radius: 8px;
+  gap: 10px;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 6px;
   color: var(--text-tertiary);
   text-decoration: none;
   overflow: hidden;
   white-space: nowrap;
-  transition: all 0.15s ease;
+  transition: all 0.12s ease;
   position: relative;
 }
 
@@ -77,7 +77,7 @@
 
 /* Active State - Clean, Modern */
 .command-rail__link--active {
-  background: linear-gradient(135deg, rgba(220, 38, 38, 0.15) 0%, rgba(220, 38, 38, 0.08) 100%);
+  background: linear-gradient(90deg, rgba(220, 38, 38, 0.12) 0%, rgba(220, 38, 38, 0.04) 100%);
   color: #fff;
 }
 
@@ -85,15 +85,15 @@
   content: "";
   position: absolute;
   left: 0;
-  top: 8px;
-  bottom: 8px;
-  width: 3px;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
   background: var(--color-crimson);
-  border-radius: 0 3px 3px 0;
+  border-radius: 0 2px 2px 0;
 }
 
 .command-rail__link--active:hover {
-  background: linear-gradient(135deg, rgba(220, 38, 38, 0.2) 0%, rgba(220, 38, 38, 0.1) 100%);
+  background: linear-gradient(90deg, rgba(220, 38, 38, 0.16) 0%, rgba(220, 38, 38, 0.06) 100%);
 }
 
 .command-rail__link--active .command-rail__icon {
@@ -104,18 +104,23 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   flex-shrink: 0;
-  transition: color 0.15s ease;
+  transition: color 0.12s ease;
+}
+
+.command-rail__icon svg {
+  width: 18px;
+  height: 18px;
 }
 
 .command-rail__label {
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 500;
   letter-spacing: -0.01em;
   opacity: 1;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.15s ease;
 }
 
 .command-rail--collapsed .command-rail__label {
@@ -124,54 +129,71 @@
 }
 
 /* ============================================
+   SECTION DIVIDER
+   ============================================ */
+.command-rail__section-label {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-tertiary);
+  padding: 16px 12px 6px;
+  opacity: 0.6;
+}
+
+.command-rail--collapsed .command-rail__section-label {
+  opacity: 0;
+}
+
+/* ============================================
    FOOTER - Settings & Toggle
    ============================================ */
 .command-rail__footer {
-  padding: 8px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 .command-rail__toggle {
   display: flex;
   align-items: center;
-  gap: 10px;
-  height: 36px;
-  padding: 0 12px;
-  border-radius: 8px;
+  gap: 8px;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 6px;
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   color: var(--text-tertiary);
   cursor: pointer;
   overflow: hidden;
   white-space: nowrap;
-  transition: all 0.15s ease;
+  transition: all 0.12s ease;
 }
 
 .command-rail__toggle:hover {
   background: rgba(255, 255, 255, 0.04);
   color: var(--text-secondary);
-  border-color: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .command-rail__toggle-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   flex-shrink: 0;
 }
 
 .command-rail__toggle-icon svg {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
 }
 
 .command-rail__toggle .command-rail__label {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
 }
 
@@ -186,19 +208,19 @@
 .command-rail--collapsed .command-rail__toggle[title]:hover::after {
   content: attr(title);
   position: fixed;
-  left: calc(var(--sidebar-collapsed) + 8px);
-  padding: 8px 12px;
+  left: calc(var(--sidebar-collapsed) + 6px);
+  padding: 6px 10px;
   background: var(--bg-secondary);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  font-size: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  font-size: 11px;
   font-weight: 500;
   color: var(--text-primary);
   white-space: nowrap;
   z-index: 9999;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
   pointer-events: none;
-  animation: tooltipFadeIn 0.15s ease;
+  animation: tooltipFadeIn 0.12s ease;
 }
 
 @keyframes tooltipFadeIn {
@@ -210,15 +232,6 @@
     opacity: 1;
     transform: translateX(0);
   }
-}
-
-/* ============================================
-   SECTION DIVIDER (Optional Enhancement)
-   ============================================ */
-.command-rail__divider {
-  height: 1px;
-  background: rgba(255, 255, 255, 0.06);
-  margin: 8px 12px;
 }
 
 /* ============================================
