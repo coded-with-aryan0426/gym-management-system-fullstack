@@ -4,5 +4,7 @@
   "startupCommands": [
     "cd frontend && npm install && npm run dev",
     "cd backend && mvn spring-boot:run"
-  ]
+  ],
+  "vercelProjectId": "prj_Zi3E2gBsg9Y5I9jVNuLrynQ9uqe5",
+  "deployedWithUserToken": false
 }
