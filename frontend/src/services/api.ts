@@ -414,5 +414,68 @@ const membershipPackageApi = {
   },
 };
 
+// Analytics API
+import type { 
+  FullAnalyticsDashboard, 
+  PTRevenueAnalytics, 
+  StaffAttendanceAnalytics, 
+  InsightsPanel,
+  TrafficHeatmapData,
+  MembershipMovement,
+  TrainerPerformanceInsight,
+  DateRange 
+} from '../types/analytics';
+
+const analyticsApi = {
+  async getFullDashboard(period: DateRange = '30d'): Promise<FullAnalyticsDashboard> {
+    const response = await apiClient.get<FullAnalyticsDashboard>('/analytics/dashboard', {
+      params: { period }
+    });
+    return response.data;
+  },
+
+  async getPTRevenueAnalytics(period: DateRange = '30d'): Promise<PTRevenueAnalytics> {
+    const response = await apiClient.get<PTRevenueAnalytics>('/analytics/pt-revenue', {
+      params: { period }
+    });
+    return response.data;
+  },
+
+  async getStaffAttendanceAnalytics(month?: string): Promise<StaffAttendanceAnalytics> {
+    const response = await apiClient.get<StaffAttendanceAnalytics>('/analytics/staff-attendance', {
+      params: month ? { month } : {}
+    });
+    return response.data;
+  },
+
+  async getInsightsPanel(period: DateRange = '30d'): Promise<InsightsPanel> {
+    const response = await apiClient.get<InsightsPanel>('/analytics/insights', {
+      params: { period }
+    });
+    return response.data;
+  },
+
+  async getTrafficHeatmap(period: DateRange = '30d'): Promise<TrafficHeatmapData> {
+    const response = await apiClient.get<TrafficHeatmapData>('/analytics/traffic-heatmap', {
+      params: { period }
+    });
+    return response.data;
+  },
+
+  async getMembershipMovement(period: DateRange = '30d'): Promise<MembershipMovement> {
+    const response = await apiClient.get<MembershipMovement>('/analytics/membership-movement', {
+      params: { period }
+    });
+    return response.data;
+  },
+
+  async getTrainerPerformance(period: DateRange = '30d'): Promise<TrainerPerformanceInsight[]> {
+    const response = await apiClient.get<TrainerPerformanceInsight[]>('/analytics/trainer-performance', {
+      params: { period }
+    });
+    return response.data;
+  }
+};
+
 // Export all APIs
-export { ptSessionApi, staffPerformanceApi, gymSettingsApi, membershipPackageApi };
+export { ptSessionApi, staffPerformanceApi, gymSettingsApi, membershipPackageApi, analyticsApi };
