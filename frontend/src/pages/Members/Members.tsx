@@ -221,19 +221,21 @@ const Members: React.FC = () => {
       width: "100px",
       render: (member) => <span className="member-plan-duration">{member.planDuration || "-"}</span>,
     },
-    {
-      key: "joinDate",
-      header: "Joined",
-      width: "100px",
-      render: (member) => {
-        const date = member.startDate ? new Date(member.startDate) : null
-        return (
-          <span className="member-date">
-            {date ? date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : "-"}
-          </span>
-        )
+      {
+        key: "joinDate",
+        header: "Joined",
+        width: "130px",
+        render: (member) => {
+          const date = member.startDate ? new Date(member.startDate) : null
+          if (!date) return <span className="member-date">-</span>
+          const day = date.getDate().toString().padStart(2, '0')
+          const month = date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()
+          const year = date.getFullYear()
+          return (
+            <span className="member-date">{day} {month} {year}</span>
+          )
+        },
       },
-    },
     {
       key: "status",
       header: "Status",
@@ -383,33 +385,72 @@ const Members: React.FC = () => {
         </div>
       </div>
 
-      <div className="members-page__content">
-        <div className="members-page__table-container">
-          <DataTable
-            data={members}
-            keyExtractor={(member) => member.userId}
-            columns={columns as Column<MemberDTO>[]}
-            loading={loading}
-            onRowClick={handleActionClick}
-            emptyMessage={
-              debouncedSearch || activeFilterCount > 0
-                ? "No members match your filters"
-                : "No members found. Add your first member!"
-            }
-            pagination={{
-              currentPage,
-              totalPages,
-              totalCount,
-              pageSize,
-              onPageChange: setCurrentPage,
-              onPageSizeChange: (size) => {
-                setPageSize(size)
-                setCurrentPage(0)
-              },
-            }}
-          />
+        <div className="members-page__content">
+          <div className="members-page__table-container">
+            <DataTable
+              data={members}
+              keyExtractor={(member) => member.userId}
+              columns={columns as Column<MemberDTO>[]}
+              loading={loading}
+              onRowClick={handleActionClick}
+              emptyMessage={
+                debouncedSearch || activeFilterCount > 0
+                  ? "No members match your filters"
+                  : "No members found. Add your first member!"
+              }
+              pagination={{
+                currentPage,
+                totalPages,
+                totalCount,
+                pageSize,
+                onPageChange: setCurrentPage,
+                onPageSizeChange: (size) => {
+                  setPageSize(size)
+                  setCurrentPage(0)
+                },
+              }}
+              mobileCardRender={(member, index) => {
+                const date = member.startDate ? new Date(member.startDate) : null
+                const dateStr = date 
+                  ? `${date.getDate().toString().padStart(2, '0')} ${date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()} ${date.getFullYear()}`
+                  : '-'
+                return (
+                  <div className="mobile-card">
+                    <div className="mobile-card__header">
+                      <div className="mobile-card__user">
+                        <Avatar name={member.fullName} size="md" />
+                        <div className="mobile-card__info">
+                          <span className="mobile-card__name">{member.fullName}</span>
+                          <span className="mobile-card__email">{member.email}</span>
+                        </div>
+                      </div>
+                      <div className="mobile-card__status">
+                        <Badge variant={getStatusVariant(member.status)}>{member.status}</Badge>
+                      </div>
+                    </div>
+                    <div className="mobile-card__details">
+                      <div className="mobile-card__detail">
+                        <span className="mobile-card__detail-label">Plan</span>
+                        <span className="mobile-card__detail-value">{member.planName || '-'}</span>
+                      </div>
+                      <div className="mobile-card__detail">
+                        <span className="mobile-card__detail-label">Duration</span>
+                        <span className="mobile-card__detail-value">{member.planDuration || '-'}</span>
+                      </div>
+                      <div className="mobile-card__detail">
+                        <span className="mobile-card__detail-label">Joined</span>
+                        <span className="mobile-card__detail-value">{dateStr}</span>
+                      </div>
+                    </div>
+                    <div className="mobile-card__actions">
+                      <ActionMenuButton onClick={(e) => { e.stopPropagation(); handleActionClick(member); }} />
+                    </div>
+                  </div>
+                )
+              }}
+            />
+          </div>
         </div>
-      </div>
 
       {isActionModalOpen && selectedMember && (
         <EnhancedMemberActionModal

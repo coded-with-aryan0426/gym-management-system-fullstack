@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './DataTable.css';
 
 export interface Column<T> {
     key: string;
     header: string;
     width?: string;
+    hideOnMobile?: boolean;
+    mobileOrder?: number;
     render?: (item: T, index: number) => React.ReactNode;
 }
 
@@ -27,6 +29,7 @@ interface DataTableProps<T> {
     emptyMessage?: string;
     className?: string;
     pagination?: PaginationProps;
+    mobileCardRender?: (item: T, index: number) => React.ReactNode;
 }
 
 function DataTable<T>({
@@ -38,7 +41,17 @@ function DataTable<T>({
     emptyMessage = 'No data available',
     className = '',
     pagination,
+    mobileCardRender,
 }: DataTableProps<T>) {
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 768);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
     if (loading) {
         return (
             <div className={`data-table ${className}`}>
@@ -57,6 +70,10 @@ function DataTable<T>({
             </div>
         );
     }
+
+    const visibleColumns = isMobile 
+        ? columns.filter(col => !col.hideOnMobile)
+        : columns;
 
     // Generate page numbers to display
     const getPageNumbers = () => {
@@ -85,48 +102,66 @@ function DataTable<T>({
     const endItem = pagination ? Math.min(startItem + pagination.pageSize - 1, pagination.totalCount) : data.length;
 
     return (
-        <div className={`data-table ${className}`}>
-            <table className="data-table__table">
-                <thead className="data-table__head">
-                    <tr>
-                        {columns.map((col) => (
-                            <th
-                                key={col.key}
-                                className="data-table__th"
-                                style={{ width: col.width }}
-                            >
-                                {col.header}
-                            </th>
-                        ))}
-                    </tr>
-                </thead>
-                <tbody className="data-table__body">
+        <div className={`data-table ${className} ${isMobile ? 'data-table--mobile' : ''}`}>
+            {isMobile && mobileCardRender ? (
+                <div className="data-table__cards">
                     {data.length === 0 ? (
-                        <tr>
-                            <td colSpan={columns.length} className="data-table__empty-cell">
-                                {emptyMessage}
-                            </td>
-                        </tr>
+                        <div className="data-table__empty">{emptyMessage}</div>
                     ) : (
                         data.map((item, index) => (
-                            <tr
+                            <div
                                 key={keyExtractor(item)}
-                                className={`data-table__row ${onRowClick ? 'data-table__row--clickable' : ''}`}
+                                className={`data-table__card ${onRowClick ? 'data-table__card--clickable' : ''}`}
                                 onClick={() => onRowClick?.(item)}
                             >
-                                {columns.map((col) => (
-                                    <td key={col.key} className="data-table__td">
-                                        {col.render
-                                            ? col.render(item, index)
-                                            : (item as Record<string, unknown>)[col.key] as React.ReactNode
-                                        }
-                                    </td>
-                                ))}
-                            </tr>
+                                {mobileCardRender(item, index)}
+                            </div>
                         ))
                     )}
-                </tbody>
-            </table>
+                </div>
+            ) : (
+                <table className="data-table__table">
+                    <thead className="data-table__head">
+                        <tr>
+                            {visibleColumns.map((col) => (
+                                <th
+                                    key={col.key}
+                                    className="data-table__th"
+                                    style={{ width: col.width }}
+                                >
+                                    {col.header}
+                                </th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody className="data-table__body">
+                        {data.length === 0 ? (
+                            <tr>
+                                <td colSpan={visibleColumns.length} className="data-table__empty-cell">
+                                    {emptyMessage}
+                                </td>
+                            </tr>
+                        ) : (
+                            data.map((item, index) => (
+                                <tr
+                                    key={keyExtractor(item)}
+                                    className={`data-table__row ${onRowClick ? 'data-table__row--clickable' : ''}`}
+                                    onClick={() => onRowClick?.(item)}
+                                >
+                                    {visibleColumns.map((col) => (
+                                        <td key={col.key} className="data-table__td">
+                                            {col.render
+                                                ? col.render(item, index)
+                                                : (item as Record<string, unknown>)[col.key] as React.ReactNode
+                                            }
+                                        </td>
+                                    ))}
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
+            )}
 
             {/* Pagination Controls */}
             {pagination && pagination.totalPages > 0 && (
