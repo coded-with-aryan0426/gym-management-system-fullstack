@@ -145,6 +145,16 @@ const Members: React.FC = () => {
     toast.success(`Message sent to ${member.fullName}`)
   }
 
+  const handleActionClick = (member: MemberDTO) => {
+    setSelectedMember(member)
+    setIsActionModalOpen(true)
+  }
+
+  const handleCloseActionModal = () => {
+    setIsActionModalOpen(false)
+    setSelectedMember(null)
+  }
+
   const handleResetFilters = () => {
     setFilters({
       status: [],

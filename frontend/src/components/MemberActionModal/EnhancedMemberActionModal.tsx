@@ -629,11 +629,11 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
                             ))}
                           </select>
                         </div>
-                        <div className="form-actions">
-                          <button className="btn btn--primary" onClick={handleRenewAndPay}>Renew Now</button>
-                        </div>
-                      </motion.div>
-                    )}
+                          <div className="form-actions">
+                            <button className="btn btn--primary" onClick={handleRenewAndPay}>Renew Now</button>
+                          </div>
+                        </motion.div>
+                      )}
 
                     {/* Trainers Tab */}
                     {activeTab === "trainers" && (
@@ -655,6 +655,47 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
                         <button className="add-trainer-btn" style={{ marginTop: '10px' }} onClick={() => setShowTrainerSearch(!showTrainerSearch)}>
                           Assign Trainer
                         </button>
+                      </motion.div>
+                    )}
+
+                    {/* Delete Panel */}
+                    {activeTab === "delete" && (
+                      <motion.div
+                        key="delete"
+                        className="content-panel"
+                        initial={{ opacity: 0, x: 10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -10 }}
+                      >
+                        <div className="delete-warning">
+                          <svg className="delete-warning__icon" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ margin: '0 auto 12px', display: 'block' }}>
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                            <line x1="12" y1="9" x2="12" y2="13" />
+                            <line x1="12" y1="17" x2="12.01" y2="17" />
+                          </svg>
+                          <h5 style={{ textAlign: 'center', marginBottom: '8px', color: '#fff' }}>Delete Member Account?</h5>
+                          <p style={{ textAlign: 'center', fontSize: '13px', color: '#94a3b8' }}>All data related to <strong>{localMember.fullName}</strong> will be permanently removed.</p>
+                          <p style={{ textAlign: 'center', fontSize: '13px', color: '#ef4444', fontWeight: 'bold' }}>This action cannot be undone.</p>
+                          
+                          <div className="delete-actions" style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginTop: '20px' }}>
+                             <button 
+                               className="btn btn--danger" 
+                               onClick={handleDeleteMember} 
+                               disabled={isDeleting}
+                               style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer' }}
+                             >
+                               {isDeleting ? 'Deleting...' : 'Yes, Delete Account'}
+                             </button>
+                             <button 
+                               className="btn btn--secondary" 
+                               onClick={() => setActiveTab("profile")} 
+                               disabled={isDeleting}
+                               style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer' }}
+                             >
+                               Cancel
+                             </button>
+                          </div>
+                        </div>
                       </motion.div>
                     )}
                   </AnimatePresence>
