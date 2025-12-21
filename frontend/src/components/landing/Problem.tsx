@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Box, Typography, Card, Grid, Container, Chip, Stack } from '@mui/material';
+import { Box, Typography, Card, Grid, Container, Chip, Stack, Avatar } from '@mui/material';
 import { TrendingDown, Calendar, Frown, Quote, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -287,10 +287,10 @@ export default function Problem() {
              </Typography>
              
              <Stack direction="row" spacing={3} alignItems="center" justifyContent="center">
-                <Avatar 
-                  src="/images/founder-avatar.png" 
-                  sx={{ width: 64, height: 64, border: '2px solid var(--color-crimson)', boxShadow: '0 0 20px rgba(220, 38, 38, 0.3)' }} 
-                />
+                  <Avatar 
+                    src="https://ui-avatars.com/api/?name=Aryan+Suthar&background=DC2626&color=fff" 
+                    sx={{ width: 64, height: 64, border: '2px solid var(--color-crimson)', boxShadow: '0 0 20px rgba(220, 38, 38, 0.3)' }} 
+                  />
                 <Box sx={{ textAlign: 'left' }}>
                   <Typography sx={{ fontWeight: 800, color: 'white', fontSize: '20px' }}>
                     Aryan Suthar

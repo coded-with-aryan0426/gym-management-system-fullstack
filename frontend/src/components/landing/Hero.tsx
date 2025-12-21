@@ -6,19 +6,19 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 
 const GradientText = ({ children, className }: { children: React.ReactNode, className?: string }) => (
-  <Box
-    component="motion.span"
+  <motion.span
     initial={{ backgroundPosition: '0% 50%' }}
     animate={{ backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }}
     transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
     className={className || "text-gradient-primary"}
-    sx={{
+    style={{
       fontWeight: 900,
       backgroundSize: '200% auto',
+      display: 'inline-block'
     }}
   >
     {children}
-  </Box>
+  </motion.span>
 );
 
 const containerVariants = {
