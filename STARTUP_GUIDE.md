@@ -32,7 +32,8 @@ mvn spring-boot:run
 ```
 Wait for: `Started GymManagementApplication in X seconds`
 
-Backend runs on: **http://localhost:8080**
+Backend runs on: **http://localhost:8081**
+_Note: Ensure JAVA_HOME is set to Java 17._
 
 ---
 
