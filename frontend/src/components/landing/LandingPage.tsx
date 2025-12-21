@@ -27,30 +27,22 @@ export default function LandingPage() {
     return (
         <Box 
             component="main" 
-            data-theme="dark"
-            className="dark-mode"
             sx={{ 
-                backgroundColor: '#000000', 
-                color: '#ffffff',
+                backgroundColor: 'var(--bg-primary)', 
+                color: 'var(--text-primary)',
                 minHeight: '100vh', 
                 overflowX: 'hidden', 
                 position: 'relative',
-                '--bg-primary': '#000000',
-                '--text-primary': '#ffffff',
-                '--text-secondary': '#cbd5e1',
-                '--border-subtle': 'rgba(255, 255, 255, 0.08)',
+                backgroundImage: 'var(--bg-mesh-gradient)',
+                backgroundAttachment: 'fixed',
             }}
         >
             <AnimatedBackground />
             <Box sx={{ position: 'relative', zIndex: 1 }}>
                 <Header />
-                {/* Hero and SecondaryCTA now handle navigation internally if no prop is passed, or we can explicitly pass navigation if needed. 
-            For now, removing the onSignupClick prop will let them default to navigate('/signup') as per my Hero change. 
-            Actually, let's keep the prop API flexible but for this request, I will remove it so they go to the real signup page.
-        */}
-        <Hero />
-        <QuickMetrics />
-        <Problem />
+                <Hero />
+                <QuickMetrics />
+                <Problem />
                 <ValueStack />
                 <SocialProof />
                 <Transformation />
