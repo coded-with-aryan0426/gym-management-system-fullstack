@@ -3,8 +3,10 @@ com/gym/management/model/StaffStatus.class
 com/gym/management/dto/AnalyticsDTO$DailyAttendance.class
 com/gym/management/dto/AnalyticsDTO$PTRevenueAnalytics.class
 com/gym/management/dto/StaffPerformanceDTO.class
+com/gym/management/dto/PageResponse.class
 com/gym/management/repository/AlertRepository.class
 com/gym/management/security/CustomUserDetailsService.class
+com/gym/management/controller/MembershipController.class
 com/gym/management/model/StaffRole.class
 com/gym/management/dto/StaffShiftDTO.class
 com/gym/management/repository/MembershipRepository.class
@@ -56,6 +58,7 @@ com/gym/management/dto/AnalyticsDTO$TrainerPerformanceInsight.class
 com/gym/management/dto/PTSessionDTO.class
 com/gym/management/service/MembershipPackageService.class
 com/gym/management/repository/CheckInRepository.class
+com/gym/management/config/DataMigrationConfig.class
 com/gym/management/controller/AnalyticsController.class
 com/gym/management/dto/AnalyticsDTO$InsightsPanel.class
 com/gym/management/dto/AnalyticsDTO$InsightsPanel$InsightsPanelBuilder.class
@@ -75,10 +78,13 @@ com/gym/management/dto/AnalyticsDTO$FullAnalyticsDashboard$FullAnalyticsDashboar
 com/gym/management/repository/StaffShiftRepository.class
 com/gym/management/dto/MemberDTO.class
 com/gym/management/repository/BlackoutDayRepository.class
+com/gym/management/service/TransactionService.class
 com/gym/management/dto/GymSettingsDTO.class
+com/gym/management/dto/RenewMembershipRequest.class
 com/gym/management/config/DataInitializer.class
 com/gym/management/repository/PTSessionRepository.class
 com/gym/management/model/PTSession.class
+com/gym/management/service/MembershipService.class
 com/gym/management/dto/AnalyticsDTO$TopLateEmployee.class
 com/gym/management/GymManagementApplication.class
 com/gym/management/model/MembershipStatus.class
@@ -110,6 +116,7 @@ com/gym/management/service/StaffShiftService.class
 com/gym/management/repository/TransactionRepository.class
 com/gym/management/security/JwtTokenProvider.class
 com/gym/management/model/Gym.class
+com/gym/management/controller/TransactionController.class
 com/gym/management/model/RecurringFrequency.class
 com/gym/management/repository/GymStaffRepository.class
 com/gym/management/dto/AnalyticsDTO$MemberRevenueInsight.class
