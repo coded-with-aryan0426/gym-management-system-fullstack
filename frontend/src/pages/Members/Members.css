@@ -669,7 +669,97 @@
   border: 1px solid var(--color-crimson);
 }
 
-.btn.btn--danger:hover {
-  background: var(--color-crimson-hover, #b91c1c);
-  border-color: var(--color-crimson-hover, #b91c1c);
+/* ============================================
+   TABLE REFINEMENTS (V4)
+   ============================================ */
+.members-page__table-container {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
+
+.members-page__table-container table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+}
+
+.members-page__table-container th {
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text-tertiary);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+  text-align: left;
+}
+
+.members-page__table-container td {
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
+  height: 60px;
+}
+
+.members-page__table-container tr:last-child td {
+  border-bottom: none;
+}
+
+.member-cell {
+  display: flex !important;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.member-cell__info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.member-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.member-email {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Status Column Alignment */
+.status-cell {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* Equal Column Width Logic (Default) */
+.col-name { width: 30%; }
+.col-plan { width: 25%; }
+.col-date { width: 20%; }
+.col-status { width: 15%; }
+.col-actions { width: 10%; }
+
+/* Responsive adjustments for columns */
+@media (max-width: 1024px) {
+  .col-plan { display: none; }
+  .col-name { width: 50%; }
+  .col-date { width: 30%; }
+}
+
