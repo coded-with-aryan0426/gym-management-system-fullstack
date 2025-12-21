@@ -83,9 +83,9 @@
   --font-family-display: 'Outfit', 'Inter', sans-serif;
 
   /* Premium Font Sizes */
-  --font-size-hero: 3.5rem;
-  --font-size-display: 2.5rem;
-  --font-size-headline: 1.875rem;
+  --font-size-hero: 3rem;
+  --font-size-display: 2rem;
+  --font-size-headline: 1.5rem;
 
   /* Letter Spacing */
   --letter-spacing-tight: -0.02em;

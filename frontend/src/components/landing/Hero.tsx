@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { Box, Typography, Button, Container, Chip, Paper, Avatar, useTheme, useMediaQuery } from '@mui/material';
-import { Sparkles, ArrowRight, Play, Star, Trophy, ShieldCheck, Zap, UserPlus } from 'lucide-react';
+import { Box, Typography, Button, Container, Chip, Paper, useTheme, useMediaQuery } from '@mui/material';
+import { Sparkles, ArrowRight, Play, Trophy, ShieldCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 
@@ -26,18 +26,18 @@ const containerVariants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.15,
+      staggerChildren: 0.1,
       delayChildren: 0.2,
     },
   },
 };
 
 const itemVariants = {
-  hidden: { y: 30, opacity: 0 },
+  hidden: { y: 20, opacity: 0 },
   visible: {
     y: 0,
     opacity: 1,
-    transition: { duration: 0.8, cubicBezier: [0.16, 1, 0.3, 1] },
+    transition: { duration: 0.6, cubicBezier: [0.16, 1, 0.3, 1] },
   },
 };
 
@@ -62,13 +62,13 @@ export default function Hero({ onSignupClick }: HeroProps) {
     <Box
       sx={{
         position: 'relative',
-        minHeight: '100vh',
+        minHeight: '80vh',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        paddingTop: { xs: '120px', md: '140px' },
-        paddingBottom: '80px',
+        paddingTop: { xs: '100px', md: '120px' },
+        paddingBottom: '60px',
         overflow: 'hidden',
         background: 'transparent',
       }}
@@ -76,12 +76,12 @@ export default function Hero({ onSignupClick }: HeroProps) {
       {/* Dynamic Background Elements */}
       <Box sx={{
         position: 'absolute',
-        top: '15%',
+        top: '10%',
         left: '50%',
         transform: 'translateX(-50%)',
-        width: '60vw',
-        height: '60vw',
-        background: 'radial-gradient(circle, rgba(220, 38, 38, 0.08) 0%, transparent 70%)',
+        width: '50vw',
+        height: '50vw',
+        background: 'radial-gradient(circle, rgba(220, 38, 38, 0.05) 0%, transparent 70%)',
         filter: 'blur(100px)',
         zIndex: 0,
         pointerEvents: 'none',
@@ -103,21 +103,21 @@ export default function Hero({ onSignupClick }: HeroProps) {
           {/* Badge */}
           <motion.div variants={itemVariants}>
             <Chip
-              icon={<Sparkles size={14} />}
+              icon={<Sparkles size={12} />}
               label="The Elite Gym Operating System"
               className="glass-effect"
               sx={{
                 color: 'var(--color-crimson)',
-                fontSize: { xs: '11px', md: '13px' },
+                fontSize: { xs: '10px', md: '11px' },
                 fontWeight: 800,
-                height: 36,
-                paddingX: 2,
+                height: 28,
+                paddingX: 1.5,
                 letterSpacing: '0.1em',
                 textTransform: 'uppercase',
-                marginBottom: 4,
+                marginBottom: 2.5,
                 borderRadius: 'var(--radius-full)',
                 border: '1px solid rgba(220, 38, 38, 0.3)',
-                boxShadow: '0 0 20px rgba(220, 38, 38, 0.15)',
+                boxShadow: '0 0 20px rgba(220, 38, 38, 0.1)',
                 '& .MuiChip-icon': { color: 'var(--color-crimson)' }
               }}
             />
@@ -129,14 +129,14 @@ export default function Hero({ onSignupClick }: HeroProps) {
             component={motion.h1}
             variants={itemVariants}
             sx={{
-              fontSize: { xs: '48px', sm: '64px', md: '84px', lg: '96px' },
+              fontSize: { xs: '36px', sm: '48px', md: '64px', lg: '72px' },
               fontWeight: 900,
               fontFamily: 'var(--font-family-display)',
               lineHeight: { xs: 1.1, md: 1.05 },
-              letterSpacing: '-0.05em',
+              letterSpacing: '-0.04em',
               color: 'var(--text-primary)',
-              marginBottom: 3,
-              maxWidth: 960,
+              marginBottom: 2,
+              maxWidth: 800,
               textShadow: '0 10px 30px rgba(0,0,0,0.5)',
             }}
           >
@@ -150,13 +150,13 @@ export default function Hero({ onSignupClick }: HeroProps) {
             component={motion.p}
             variants={itemVariants}
             sx={{
-              fontSize: { xs: '18px', md: '22px' },
+              fontSize: { xs: '15px', md: '17px' },
               fontWeight: 400,
               fontFamily: 'var(--font-family-premium)',
-              lineHeight: 1.6,
+              lineHeight: 1.5,
               color: 'var(--text-secondary)',
-              marginBottom: 6,
-              maxWidth: 680,
+              marginBottom: 4,
+              maxWidth: 580,
               opacity: 0.9,
             }}
           >
@@ -171,22 +171,22 @@ export default function Hero({ onSignupClick }: HeroProps) {
             sx={{ 
               display: 'flex', 
               flexDirection: { xs: 'column', sm: 'row' }, 
-              gap: 3, 
+              gap: 2, 
               alignItems: 'center',
-              marginBottom: 8 
+              marginBottom: 6 
             }}
           >
             <Button
               variant="contained"
               className="btn-premium btn-premium-primary"
               sx={{
-                height: 64,
-                width: { xs: '100%', sm: 260 },
-                fontSize: '18px',
+                height: 50,
+                padding: '0 32px',
+                fontSize: '15px',
                 fontWeight: 700,
                 boxShadow: '0 10px 40px rgba(220, 38, 38, 0.3)',
               }}
-              endIcon={<ArrowRight size={20} />}
+              endIcon={<ArrowRight size={18} />}
               onClick={handleCtaClick}
             >
               Start Free Trial
@@ -196,9 +196,9 @@ export default function Hero({ onSignupClick }: HeroProps) {
               variant="outlined"
               className="glass-effect"
               sx={{
-                height: 64,
-                width: { xs: '100%', sm: 260 },
-                fontSize: '18px',
+                height: 50,
+                padding: '0 32px',
+                fontSize: '15px',
                 fontWeight: 700,
                 color: 'white',
                 border: '1px solid rgba(255,255,255,0.1)',
@@ -208,7 +208,7 @@ export default function Hero({ onSignupClick }: HeroProps) {
                   background: 'rgba(255,255,255,0.05)',
                 }
               }}
-              startIcon={<Play size={20} />}
+              startIcon={<Play size={18} />}
             >
               Watch Demo
             </Button>
@@ -217,24 +217,24 @@ export default function Hero({ onSignupClick }: HeroProps) {
           {/* Dashboard Preview Section with 3D Reveal */}
           <Box
             component={motion.div}
-            initial={{ opacity: 0, y: 100, rotateX: 20 }}
+            initial={{ opacity: 0, y: 40, rotateX: 10 }}
             animate={{ opacity: 1, y: 0, rotateX: 0 }}
-            transition={{ duration: 1.5, delay: 0.5, cubicBezier: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 1, delay: 0.3, cubicBezier: [0.16, 1, 0.3, 1] }}
             sx={{
               width: '100%',
-              maxWidth: 1080,
+              maxWidth: 880,
               position: 'relative',
               perspective: '2000px',
               '&::before': {
                 content: '""',
                 position: 'absolute',
-                top: '-20px',
-                left: '10%',
-                right: '10%',
-                height: '40px',
+                top: '-15px',
+                left: '20%',
+                right: '20%',
+                height: '30px',
                 background: 'var(--color-crimson)',
-                filter: 'blur(80px)',
-                opacity: 0.2,
+                filter: 'blur(60px)',
+                opacity: 0.15,
                 zIndex: -1,
               }
             }}
@@ -242,10 +242,10 @@ export default function Hero({ onSignupClick }: HeroProps) {
             <Box
               sx={{
                 position: 'relative',
-                borderRadius: '24px',
+                borderRadius: '16px',
                 overflow: 'hidden',
                 border: '1px solid rgba(255,255,255,0.1)',
-                boxShadow: '0 40px 100px rgba(0,0,0,0.8)',
+                boxShadow: '0 30px 80px rgba(0,0,0,0.8)',
                 background: '#0a0a0a',
                 lineHeight: 0,
               }}
@@ -268,7 +268,7 @@ export default function Hero({ onSignupClick }: HeroProps) {
                 bottom: 0,
                 left: 0,
                 right: 0,
-                height: '40%',
+                height: '35%',
                 background: 'linear-gradient(to top, #000, transparent)',
                 zIndex: 1,
               }} />
@@ -280,22 +280,22 @@ export default function Hero({ onSignupClick }: HeroProps) {
               className="glass-effect-heavy"
               sx={{
                 position: 'absolute',
-                top: '15%',
-                right: '-20px',
+                top: '10%',
+                right: '-10px',
                 display: { xs: 'none', lg: 'flex' },
                 alignItems: 'center',
-                gap: 1.5,
-                padding: '12px 20px',
-                borderRadius: '16px',
+                gap: 1,
+                padding: '8px 14px',
+                borderRadius: '12px',
                 border: '1px solid rgba(255,255,255,0.1)',
                 zIndex: 2,
                 transform: 'rotate(2deg)',
               }}
             >
-              <Box sx={{ bgcolor: 'rgba(220, 38, 38, 0.1)', p: 1, borderRadius: '10px' }}>
-                <Trophy size={20} color="var(--color-accent-gold)" />
+              <Box sx={{ bgcolor: 'rgba(220, 38, 38, 0.1)', p: 0.6, borderRadius: '6px' }}>
+                <Trophy size={14} color="var(--color-accent-gold)" />
               </Box>
-              <Typography sx={{ fontWeight: 700, fontSize: '14px', color: 'white' }}>
+              <Typography sx={{ fontWeight: 700, fontSize: '12px', color: 'white' }}>
                 #1 Gym Solution 2024
               </Typography>
             </Paper>
@@ -305,22 +305,22 @@ export default function Hero({ onSignupClick }: HeroProps) {
               className="glass-effect-heavy"
               sx={{
                 position: 'absolute',
-                bottom: '20%',
-                left: '-30px',
+                bottom: '18%',
+                left: '-15px',
                 display: { xs: 'none', lg: 'flex' },
                 alignItems: 'center',
-                gap: 1.5,
-                padding: '12px 20px',
-                borderRadius: '16px',
+                gap: 1,
+                padding: '8px 14px',
+                borderRadius: '12px',
                 border: '1px solid rgba(255,255,255,0.1)',
                 zIndex: 2,
                 transform: 'rotate(-3deg)',
               }}
             >
-              <Box sx={{ bgcolor: 'rgba(16, 185, 129, 0.1)', p: 1, borderRadius: '10px' }}>
-                <ShieldCheck size={20} color="var(--color-accent-emerald)" />
+              <Box sx={{ bgcolor: 'rgba(16, 185, 129, 0.1)', p: 0.6, borderRadius: '8px' }}>
+                <ShieldCheck size={14} color="var(--color-accent-emerald)" />
               </Box>
-              <Typography sx={{ fontWeight: 700, fontSize: '14px', color: 'white' }}>
+              <Typography sx={{ fontWeight: 700, fontSize: '12px', color: 'white' }}>
                 ISO Certified Security
               </Typography>
             </Paper>

@@ -14,31 +14,31 @@ export default function Header() {
     <AppBar
       position="fixed"
       elevation={0}
-      sx={{
-        height: trigger ? 70 : 90,
-        backgroundColor: trigger ? 'rgba(13, 13, 13, 0.8)' : 'transparent',
-        backdropFilter: trigger ? 'blur(20px)' : 'none',
-        borderBottom: trigger ? '1px solid rgba(255,255,255,0.08)' : 'none',
-        padding: { xs: '0 var(--space-4)', md: '0 var(--space-10)' },
-        transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-        zIndex: 1000,
-      }}
-    >
-      <Toolbar sx={{ height: '100%', justifyContent: 'space-between' }}>
-        {/* Logo */}
-        <Box 
-          component={motion.div}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }} 
-          onClick={() => navigate('/')}
-        >
-          <Box
-            component="img"
-            src="/images/logo.png"
-            alt="AthlonX"
-            sx={{
-              height: trigger ? 40 : 48,
+    sx={{
+      height: trigger ? 60 : 80,
+      backgroundColor: trigger ? 'rgba(13, 13, 13, 0.85)' : 'transparent',
+      backdropFilter: trigger ? 'blur(16px)' : 'none',
+      borderBottom: trigger ? '1px solid rgba(255,255,255,0.08)' : 'none',
+      padding: { xs: '0 var(--space-4)', md: '0 var(--space-8)' },
+      transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+      zIndex: 1000,
+    }}
+  >
+    <Toolbar sx={{ height: '100%', justifyContent: 'space-between' }}>
+      {/* Logo */}
+      <Box 
+        component={motion.div}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }} 
+        onClick={() => navigate('/')}
+      >
+        <Box
+          component="img"
+          src="/images/logo.png"
+          alt="AthlonX"
+          sx={{
+            height: trigger ? 32 : 40,
               width: 'auto',
               objectFit: 'contain',
               transition: 'height 0.4s ease',
