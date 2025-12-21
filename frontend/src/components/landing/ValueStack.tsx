@@ -1,7 +1,6 @@
 
-import { Box, Typography, Card, List, ListItem, ListItemIcon, ListItemText, Paper, Button, Grid, Container } from '@mui/material';
+import { Box, Typography, Card, List, ListItem, ListItemIcon, ListItemText, Paper, Button, Grid, Container, Chip } from '@mui/material';
 import { Crown, Target, Smartphone, Settings, Check, ArrowRight, Lock, Zap, TrendingUp } from 'lucide-react';
-import { motion } from 'framer-motion';
 
 const valueTiers = [
   {
@@ -66,23 +65,6 @@ const valueTiers = [
   },
 ];
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1 },
-  },
-};
-
-const itemVariants = {
-  hidden: { y: 20, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
-  },
-};
-
 export default function ValueStack() {
   return (
     <Box
@@ -96,12 +78,6 @@ export default function ValueStack() {
       <Container maxWidth="lg">
         {/* Section Header */}
         <Box sx={{ textAlign: 'center', marginBottom: { xs: 6, md: 8 }, maxWidth: 800, marginX: 'auto' }}>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
             <Typography
               sx={{
                 fontSize: '11px',
@@ -144,24 +120,16 @@ export default function ValueStack() {
             >
               Don't just buy software. Buy a complete business transformation system optimized for high-performance gyms.
             </Typography>
-          </motion.div>
         </Box>
 
         {/* Value Tiers Grid - 2x2 Grid */}
         <Grid 
           container 
           spacing={3}
-          component={motion.div}
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-50px" }}
         >
           {valueTiers.map((tier) => (
             <Grid item xs={12} sm={6} md={3} key={tier.id}>
               <Card
-                component={motion.div}
-                variants={itemVariants}
                 className="premium-card"
                 sx={{
                   padding: 3,
@@ -246,12 +214,6 @@ export default function ValueStack() {
 
         {/* Pricing Card - Compact */}
         <Box sx={{ marginTop: { xs: 8, md: 12 }, position: 'relative' }}>
-          <motion.div
-            initial={{ opacity: 0, scale: 0.98 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-          >
             <Paper
               sx={{
                 maxWidth: 600,
@@ -315,7 +277,6 @@ export default function ValueStack() {
                 Get Started Now
               </Button>
             </Paper>
-          </motion.div>
         </Box>
       </Container>
     </Box>

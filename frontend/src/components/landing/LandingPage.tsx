@@ -9,16 +9,8 @@ import ValueStack from './ValueStack';
 import SocialProof from './SocialProof';
 import SecondaryCTA from './SecondaryCTA';
 import Footer from './Footer';
-import { motion, useScroll, useSpring } from 'framer-motion';
 
 export default function LandingPage() {
-  const { scrollYProgress } = useScroll();
-  const scaleX = useSpring(scrollYProgress, {
-    stiffness: 100,
-    damping: 30,
-    restDelta: 0.001
-  });
-
   return (
     <Box sx={{ 
       backgroundColor: 'var(--bg-primary)',
@@ -28,23 +20,6 @@ export default function LandingPage() {
       overflowX: 'hidden',
       position: 'relative'
     }}>
-      {/* Premium Progress Bar */}
-      <motion.div
-        className="progress-bar"
-        style={{ 
-          scaleX,
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: '3px',
-          background: 'var(--color-crimson)',
-          transformOrigin: '0%',
-          zIndex: 2000,
-          boxShadow: '0 0 10px var(--color-crimson)'
-        }}
-      />
-
       <Header />
       
       <main>
