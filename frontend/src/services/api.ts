@@ -53,12 +53,16 @@ const api = {
     size: number = 10,
     search?: string,
     status?: string,
-    plan?: string
+    plan?: string,
+    duration?: string,
+    date?: string
   ): Promise<PageResponse<MemberDTO>> {
     const params: Record<string, unknown> = { page, size };
     if (search) params.search = search;
     if (status) params.status = status;
     if (plan) params.plan = plan;
+    if (duration) params.duration = duration;
+    if (date) params.date = date;
     const response = await apiClient.get<PageResponse<MemberDTO>>('/users/members/paginated', { params });
     return response.data;
   },
@@ -68,11 +72,15 @@ const api = {
     page: number = 0,
     size: number = 10,
     search?: string,
-    role?: string
+    role?: string,
+    status?: string,
+    date?: string
   ): Promise<PageResponse<User>> {
     const params: Record<string, unknown> = { page, size };
     if (search) params.search = search;
     if (role) params.role = role;
+    if (status) params.status = status;
+    if (date) params.date = date;
     const response = await apiClient.get<PageResponse<User>>('/users/staff/paginated', { params });
     return response.data;
   },

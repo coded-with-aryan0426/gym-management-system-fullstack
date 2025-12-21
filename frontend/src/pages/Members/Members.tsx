@@ -17,8 +17,8 @@ import "./Members.css"
 interface FilterState {
   status: string[]
   plan: string[]
-  lastVisit: string
-  planDuration: string
+  duration: string
+  date: string
 }
 
 const Members: React.FC = () => {
@@ -31,44 +31,18 @@ const Members: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(0)
   const [pageSize, setPageSize] = useState(10)
   const [totalCount, setTotalCount] = useState(0)
-  const [sortType, setSortType] = useState<'newest' | 'alphabetical'>('newest')
+  const [sortType, setSortType] = useState<'advanced' | 'alphabetical'>('advanced')
   
   const [members, setMembers] = useState<MemberDTO[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
 
-  const handleActionClick = (member: MemberDTO) => {
-    setSelectedMember(member)
-    setIsActionModalOpen(true)
-  }
-
-  const handleCloseActionModal = () => {
-    setIsActionModalOpen(false)
-    setSelectedMember(null)
-  }
-
-  const [searchParams, setSearchParams] = useSearchParams()
-
-  useEffect(() => {
-    if (searchParams.get('action') === 'create') {
-      setIsCreateModalOpen(true)
-    }
-
-    const userId = searchParams.get('userId')
-    if (userId && members.length > 0) {
-      const member = members.find(m => m.userId.toString() === userId)
-      if (member) {
-        handleActionClick(member)
-      }
-    }
-  }, [searchParams, members])
-
   const [filters, setFilters] = useState<FilterState>({
     status: [],
     plan: [],
-    lastVisit: "",
-    planDuration: "",
+    duration: "",
+    date: "",
   })
 
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false)
@@ -94,12 +68,14 @@ const Members: React.FC = () => {
         pageSize,
         debouncedSearch || undefined,
         statusFilter,
-        planFilter
+        planFilter,
+        filters.duration || undefined,
+        filters.date || undefined
       )
       
       setMembers(response.content)
       setTotalCount(response.totalCount)
-      setSortType(response.sortType as 'newest' | 'alphabetical')
+      setSortType(response.sortType as any)
     } catch (err) {
       console.error('[Members] Failed to load paginated members:', err)
       toast.error('Failed to load members')
@@ -107,7 +83,7 @@ const Members: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }, [currentPage, pageSize, debouncedSearch, filters.status, filters.plan])
+  }, [currentPage, pageSize, debouncedSearch, filters])
 
   useEffect(() => {
     loadMembersPaginated()

@@ -22,6 +22,7 @@ public class MemberDTO {
     private LocalDate endDate;
     private LocalDate joinDate;
     private LocalDateTime createdAt; // For "today first" sorting
+    private Integer durationMonths; // For internal filtering
 
     // Status color helper for frontend (optional, but keeping it clean in backend)
     public String getStatusColor() {
