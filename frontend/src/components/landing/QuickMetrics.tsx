@@ -1,13 +1,36 @@
-import React from 'react';
+
+import React, { useEffect, useState } from 'react';
 import { Box, Typography, Container, Grid, Paper, Divider } from '@mui/material';
 import { Users, TrendingUp, Calendar, Zap, ArrowUpRight, Activity, Shield } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, useSpring, useTransform, animate } from 'framer-motion';
+
+function Counter({ value, prefix = "", suffix = "" }: { value: string, prefix?: string, suffix?: string }) {
+  const numericValue = parseInt(value.replace(/[^0-9]/g, ''));
+  const [displayValue, setDisplayValue] = useState(0);
+
+  useEffect(() => {
+    const controls = animate(0, numericValue, {
+      duration: 2,
+      onUpdate: (value) => setDisplayValue(Math.floor(value)),
+      ease: "easeOut"
+    });
+    return () => controls.stop();
+  }, [numericValue]);
+
+  return (
+    <span>
+      {prefix}
+      {displayValue.toLocaleString()}
+      {suffix}
+    </span>
+  );
+}
 
 const metrics = [
   {
     id: 1,
     label: 'Total Members',
-    value: '8,432',
+    value: '8432',
     change: '+12.5%',
     trend: 'up',
     icon: Users,
@@ -16,7 +39,8 @@ const metrics = [
   {
     id: 2,
     label: 'Monthly Revenue',
-    value: '₹42,85,000',
+    value: '4285000',
+    prefix: '₹',
     change: '+18.2%',
     trend: 'up',
     icon: TrendingUp,
@@ -24,8 +48,9 @@ const metrics = [
   },
   {
     id: 3,
-    label: 'Average Attendance',
-    value: '85%',
+    label: 'Attendance Rate',
+    value: '85',
+    suffix: '%',
     change: '+5.4%',
     trend: 'up',
     icon: Calendar,
@@ -69,7 +94,7 @@ export default function QuickMetrics() {
         paddingBottom: { xs: '80px', md: '120px' },
         position: 'relative',
         zIndex: 2,
-        marginTop: '-100px', 
+        marginTop: { xs: '-60px', md: '-100px' }, 
       }}
     >
       <Container maxWidth="lg">
@@ -86,49 +111,51 @@ export default function QuickMetrics() {
                   <Paper
                     className="premium-card"
                     sx={{
-                      padding: 3,
+                      padding: 4,
                       height: '100%',
                       display: 'flex',
                       flexDirection: 'column',
-                      gap: 2,
+                      gap: 2.5,
                       position: 'relative',
                       overflow: 'hidden',
-                      background: 'rgba(26, 26, 26, 0.6) !important', // Explicitly dark
-                      backdropFilter: 'blur(10px)',
+                      background: 'rgba(20, 20, 20, 0.8) !important',
+                      backdropFilter: 'blur(15px)',
                       border: '1px solid rgba(255, 255, 255, 0.05)',
-                      borderRadius: '20px',
+                      borderRadius: '24px',
+                      boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
                     }}
                   >
                     {/* Header */}
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <Box
                         sx={{
-                          width: 44,
-                          height: 44,
-                          borderRadius: '12px',
-                          backgroundColor: `${metric.color}20`,
+                          width: 48,
+                          height: 48,
+                          borderRadius: '14px',
+                          backgroundColor: `${metric.color}15`,
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          border: `1px solid ${metric.color}40`,
+                          border: `1px solid ${metric.color}30`,
                         }}
                       >
-                        <metric.icon size={22} color={metric.color} />
+                        <metric.icon size={24} color={metric.color} />
                       </Box>
                       <Box
                         sx={{
                           display: 'flex',
                           alignItems: 'center',
                           gap: 0.5,
-                          padding: '4px 8px',
-                          borderRadius: '8px',
-                          backgroundColor: metric.trend === 'up' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(220, 38, 38, 0.1)',
+                          padding: '6px 10px',
+                          borderRadius: '10px',
+                          backgroundColor: metric.trend === 'up' ? 'rgba(16, 185, 129, 0.08)' : 'rgba(220, 38, 38, 0.08)',
+                          border: `1px solid ${metric.trend === 'up' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(220, 38, 38, 0.15)'}`,
                         }}
                       >
                         <Typography
                           sx={{
-                            fontSize: '12px',
-                            fontWeight: 700,
+                            fontSize: '13px',
+                            fontWeight: 800,
                             color: metric.trend === 'up' ? '#10b981' : '#DC2626',
                           }}
                         >
@@ -136,48 +163,55 @@ export default function QuickMetrics() {
                         </Typography>
                         <ArrowUpRight 
                           size={14} 
+                          strokeWidth={3}
                           color={metric.trend === 'up' ? '#10b981' : '#DC2626'}
                           style={{ transform: metric.trend === 'down' ? 'rotate(90deg)' : 'none' }}
                         />
                       </Box>
                     </Box>
-
+  
                     {/* Content */}
                     <Box>
                       <Typography
                         sx={{
                           fontSize: '13px',
-                          fontWeight: 600,
-                          color: 'rgba(255, 255, 255, 0.5)',
+                          fontWeight: 700,
+                          color: 'var(--text-tertiary)',
                           textTransform: 'uppercase',
-                          letterSpacing: '0.05em',
-                          marginBottom: 0.5,
+                          letterSpacing: '0.1em',
+                          marginBottom: 1,
                         }}
                       >
                         {metric.label}
                       </Typography>
                       <Typography
                         sx={{
-                          fontSize: '32px',
-                          fontWeight: 900,
+                          fontSize: '36px',
+                          fontWeight: 950,
                           color: '#ffffff',
                           letterSpacing: '-0.02em',
+                          fontFamily: 'var(--font-family-display)',
                         }}
                       >
-                        {metric.value}
+                        <Counter value={metric.value} prefix={metric.prefix} suffix={metric.suffix} />
                       </Typography>
                     </Box>
-
-                    {/* Mini Graph Placeholder */}
-                    <Box sx={{ height: 40, width: '100%', marginTop: 'auto', opacity: 0.3 }}>
-                       <svg width="100%" height="40" viewBox="0 0 100 40">
-                          <path 
+  
+                    {/* Animated Waveform placeholder */}
+                    <Box sx={{ height: 30, width: '100%', marginTop: 'auto', opacity: 0.4 }}>
+                       <svg width="100%" height="30" viewBox="0 0 100 30" preserveAspectRatio="none">
+                          <motion.path 
+                            initial={{ pathLength: 0, opacity: 0 }}
+                            whileInView={{ pathLength: 1, opacity: 1 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 1.5, delay: 0.5 }}
                             d={metric.trend === 'up' 
-                              ? "M0 35 Q 25 30, 40 20 T 70 15 T 100 5" 
-                              : "M0 5 Q 25 10, 40 20 T 70 25 T 100 35"} 
+                              ? "M0 25 Q 20 20, 40 15 T 60 10 T 80 5 T 100 0" 
+                              : "M0 5 Q 20 10, 40 15 T 60 20 T 80 25 T 100 30"} 
                             fill="none" 
                             stroke={metric.color} 
-                            strokeWidth="2" 
+                            strokeWidth="3" 
+                            strokeLinecap="round"
                           />
                        </svg>
                     </Box>
@@ -187,47 +221,68 @@ export default function QuickMetrics() {
             ))}
           </Grid>
         </motion.div>
-
+  
         {/* Dynamic Activity Indicators */}
         <motion.div
            initial={{ opacity: 0 }}
            whileInView={{ opacity: 1 }}
            viewport={{ once: true }}
-           transition={{ delay: 0.5, duration: 1 }}
+           transition={{ delay: 0.8, duration: 1 }}
         >
           <Box
             sx={{
-              marginTop: 6,
+              marginTop: 8,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 4,
+              gap: { xs: 3, md: 6 },
               flexWrap: 'wrap',
+              padding: '20px',
+              borderRadius: '24px',
+              backgroundColor: 'rgba(255,255,255,0.02)',
+              border: '1px solid rgba(255,255,255,0.05)',
             }}
           >
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <Box className="animate-pulse" sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#10b981', boxShadow: '0 0 10px #10b981' }} />
-              <Typography sx={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.7)' }}>
-                System Status: <Box component="span" sx={{ color: '#ffffff' }}>Optimal</Box>
+              <Box 
+                sx={{ 
+                  width: 10, 
+                  height: 10, 
+                  borderRadius: '50%', 
+                  backgroundColor: '#10b981', 
+                  boxShadow: '0 0 15px #10b981',
+                  animation: 'pulse 2s infinite'
+                }} 
+              />
+              <Typography sx={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                Status: <span style={{ color: 'white' }}>Mission Ready</span>
               </Typography>
             </Box>
-            <Divider orientation="vertical" flexItem sx={{ borderColor: 'rgba(255, 255, 255, 0.1)', height: 20, display: { xs: 'none', sm: 'block' } }} />
+            
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <Zap size={14} color="#fbbf24" />
-              <Typography sx={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.7)' }}>
-                Sync Latency: <Box component="span" sx={{ color: '#ffffff' }}>14ms</Box>
+              <Zap size={16} color="#fbbf24" fill="#fbbf2433" />
+              <Typography sx={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                Latency: <span style={{ color: 'white' }}>12ms</span>
               </Typography>
             </Box>
-            <Divider orientation="vertical" flexItem sx={{ borderColor: 'rgba(255, 255, 255, 0.1)', height: 20, display: { xs: 'none', sm: 'block' } }} />
+            
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <Shield size={14} color="#06b6d4" />
-              <Typography sx={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.7)' }}>
-                Security Tier: <Box component="span" sx={{ color: '#ffffff' }}>Enterprise</Box>
+              <Shield size={16} color="#DC2626" fill="#DC262633" />
+              <Typography sx={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                Security: <span style={{ color: 'white' }}>Military Grade</span>
               </Typography>
             </Box>
           </Box>
         </motion.div>
       </Container>
+
+      <style>{`
+        @keyframes pulse {
+          0% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.5); opacity: 0.5; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+      `}</style>
     </Box>
   );
 }

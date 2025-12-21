@@ -152,6 +152,13 @@ body {
 /* ========== PREMIUM UTILITY CLASSES ========== */
 
 /* Text Gradients */
+.text-gradient {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
 .text-gradient-primary {
   background: var(--gradient-primary);
   -webkit-background-clip: text;
