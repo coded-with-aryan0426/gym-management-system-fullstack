@@ -144,7 +144,7 @@ html {
 }
 
 body {
-  background: var(--color-bg-primary);
+  background: var(--bg-primary);
   background-image: var(--bg-mesh-gradient);
   background-attachment: fixed;
 }
