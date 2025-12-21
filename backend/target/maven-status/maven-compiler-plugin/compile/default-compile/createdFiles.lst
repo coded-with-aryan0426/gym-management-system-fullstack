@@ -11,7 +11,6 @@ com/gym/management/model/StaffRole.class
 com/gym/management/dto/StaffShiftDTO.class
 com/gym/management/repository/MembershipRepository.class
 com/gym/management/dto/AnalyticsDTO$DailyAttendance$DailyAttendanceBuilder.class
-com/gym/management/model/StaffPerformance.class
 com/gym/management/dto/AnalyticsDTO$ProductRevenue.class
 com/gym/management/model/Alert.class
 com/gym/management/dto/AnalyticsDTO$AttendanceDay.class
@@ -66,7 +65,6 @@ com/gym/management/dto/MembershipPackageDTO.class
 com/gym/management/dto/AnalyticsDTO$StaffAttendanceRecord$StaffAttendanceRecordBuilder.class
 com/gym/management/controller/PTSessionController.class
 com/gym/management/model/ShiftStatus.class
-com/gym/management/model/GymSettings.class
 com/gym/management/dto/StaffSignupRequest.class
 com/gym/management/model/CheckIn.class
 com/gym/management/dto/AnalyticsDTO$TrainerPerformanceInsight$TrainerPerformanceInsightBuilder.class
@@ -92,7 +90,6 @@ com/gym/management/dto/AuthRequest.class
 com/gym/management/dto/MemberSignupRequest.class
 com/gym/management/dto/AnalyticsDTO$StaffAttendanceRecord.class
 com/gym/management/dto/BlackoutDayDTO.class
-com/gym/management/repository/StaffPerformanceRepository.class
 com/gym/management/controller/MembershipPackageController.class
 com/gym/management/dto/AnalyticsDTO$StaffAttendanceAnalytics.class
 com/gym/management/controller/StaffPerformanceController.class
@@ -102,7 +99,6 @@ com/gym/management/dto/AnalyticsDTO$DailyPattern$DailyPatternBuilder.class
 com/gym/management/dto/AnalyticsDTO$TrafficHeatmapData.class
 com/gym/management/service/DashboardService.class
 com/gym/management/controller/UserController.class
-com/gym/management/dto/CompleteSessionRequest.class
 com/gym/management/dto/AuthResponse$GymAssociation.class
 com/gym/management/dto/StaffSummaryDTO.class
 com/gym/management/controller/GymController.class

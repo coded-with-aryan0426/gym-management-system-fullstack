@@ -513,206 +513,520 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
               </svg>
             </button>
 
-              <motion.div
-                className="member-action-modal member-action-modal--redesigned"
-                onClick={(e) => e.stopPropagation()}
-                initial={{ opacity: 0, y: 24 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 24 }}
-                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              >
-                {/* Modal Header */}
-                <div className="member-action-modal__header">
-                  <h2>Member Actions</h2>
-                  <button className="member-action-modal__close" onClick={onClose}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                      <line x1="18" y1="6" x2="6" y2="18" />
-                      <line x1="6" y1="6" x2="18" y2="18" />
-                    </svg>
-                  </button>
+            <motion.div
+              className="member-action-modal member-action-modal--redesigned"
+              onClick={(e) => e.stopPropagation()}
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 24 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            >
+              {/* Member Info Header - Compact with Stats */}
+              <div className="member-action-modal__profile-header">
+                <div className="profile-header__avatar">
+                  <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${localMember.fullName}`} alt={localMember.fullName} />
                 </div>
-
-                {/* Member Info Header - Compact */}
-                <div className="member-action-modal__info">
-                  <div className="profile-header__avatar">
-                    <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${localMember.fullName}`} alt={localMember.fullName} />
-                  </div>
-                  <div className="profile-header__info">
-                    <h3 className="profile-header__name">{localMember.fullName}</h3>
-                    <div className="profile-header__meta">
-                      <span className="plan-badge">{getPlanForMember()}</span>
-                    </div>
+                <div className="profile-header__info">
+                  <h2 className="profile-header__name">{localMember.fullName}</h2>
+                  <div className="profile-header__meta">
+                    <span className="plan-badge plan-badge--member">{getPlanForMember()}</span>
+                    <span className={`status-badge status-badge--${getStatusForMember().toLowerCase()}`}>
+                      <span className="status-dot"></span>
+                      {getStatusForMember()}
+                    </span>
                   </div>
                 </div>
+                <div className="profile-header__stats">
+                  <div className="stat-item">
+                    <span className="stat-value">{assignedTrainers.length}</span>
+                    <span className="stat-label">Trainers</span>
+                  </div>
+                  <div className="stat-item">
+                    <span className="stat-value">{daysRemaining !== null ? daysRemaining : '—'}</span>
+                    <span className="stat-label">Days Left</span>
+                  </div>
+                </div>
+              </div>
 
-                {/* Quick Actions Grid */}
-                <div className="member-action-modal__actions">
-                  <div className="quick-actions-grid">
-                    <button className="quick-action-btn" onClick={() => setActiveTab("profile")}>
+              {/* Two-Column Content Layout with Dynamic Panels */}
+              <div className="member-action-modal__content-grid">
+                {/* Left Column: Tab Navigation */}
+                <div className="member-action-modal__nav-column">
+                  <nav className="side-panel-nav">
+                    <button
+                      className={`side-panel-nav__item ${activeTab === "profile" ? "side-panel-nav__item--active" : ""}`}
+                      onClick={() => setActiveTab("profile")}
+                    >
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                       </svg>
-                      <span>Profile</span>
+                      <span>Edit Profile</span>
                     </button>
-                    <button className="quick-action-btn" onClick={() => setActiveTab("renew")}>
+
+                    <button
+                      className={`side-panel-nav__item ${activeTab === "renew" ? "side-panel-nav__item--active" : ""}`}
+                      onClick={() => setActiveTab("renew")}
+                    >
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
                       </svg>
-                      <span>Renew</span>
+                      <span>Renew Plan</span>
                     </button>
-                    <button className="quick-action-btn" onClick={() => setActiveTab("trainers")}>
+
+                    <button
+                      className={`side-panel-nav__item ${activeTab === "message" ? "side-panel-nav__item--active" : ""}`}
+                      onClick={() => setActiveTab("message")}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                        <polyline points="22,6 12,13 2,6" />
+                      </svg>
+                      <span>Message Member</span>
+                    </button>
+
+                    <button
+                      className={`side-panel-nav__item ${activeTab === "trainers" ? "side-panel-nav__item--active" : ""}`}
+                      onClick={() => setActiveTab("trainers")}
+                    >
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                         <circle cx="9" cy="7" r="4" />
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                       </svg>
-                      <span>Trainers</span>
+                      <span>Assigned Trainers</span>
+                      <span className="nav-badge">{assignedTrainers.length}</span>
                     </button>
-                  </div>
+
+                    <button
+                      className={`side-panel-nav__item side-panel-nav__item--danger ${activeTab === "delete" ? "side-panel-nav__item--active" : ""}`}
+                      onClick={() => setActiveTab("delete")}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <polyline points="3 6 5 6 21 6" />
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                        <line x1="10" y1="11" x2="10" y2="17" />
+                        <line x1="14" y1="11" x2="14" y2="17" />
+                      </svg>
+                      <span>Delete Profile</span>
+                    </button>
+                  </nav>
                 </div>
 
-                {/* Dynamic Content Area */}
+                {/* Right Column: Dynamic Content Panel */}
                 <div className="member-action-modal__content-panel">
                   <AnimatePresence mode="wait">
-                    {/* Simplified Profile Edit Panel */}
+                    {/* Profile Edit Panel */}
                     {activeTab === "profile" && (
                       <motion.div
                         key="profile"
-                        className="content-panel"
-                        initial={{ opacity: 0, x: 10 }}
+                        className="content-panel content-panel--constrained"
+                        initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -10 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        transition={{ duration: 0.2 }}
                       >
-                        <div className="form-group">
-                          <label>Full Name</label>
-                          <input
-                            type="text"
-                            value={editForm.fullName}
-                            onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })}
-                            className="form-input"
-                          />
-                        </div>
-                        <div className="form-group">
-                          <label>Email</label>
-                          <input
-                            type="email"
-                            value={editForm.email}
-                            onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                            className="form-input"
-                          />
+                        <h4 className="content-panel__title">Edit Profile</h4>
+                        <div className="content-panel__body">
+                          <div className="form-row-2-col">
+                            <div className="form-group" style={{ marginBottom: 0 }}>
+                              <label>Full Name</label>
+                              <div className="input-with-validation">
+                                <input
+                                  type="text"
+                                  value={editForm.fullName}
+                                  onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })}
+                                  onKeyDown={(e) => e.key === 'Enter' && isEditFormValid() && handleSaveProfile()}
+                                  className={`form-input ${editForm.fullName.length > 0 ? (isValidFullName(editForm.fullName) ? 'input--valid' : 'input--invalid') : ''}`}
+                                />
+                                <ValidationIcon show={editForm.fullName.length > 0} isValid={isValidFullName(editForm.fullName)} />
+                              </div>
+                            </div>
+                            <div className="form-group" style={{ marginBottom: 0 }}>
+                              <label>Email</label>
+                              <div className="input-with-validation">
+                                <input
+                                  type="email"
+                                  value={editForm.email}
+                                  onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                                  onKeyDown={(e) => e.key === 'Enter' && isEditFormValid() && handleSaveProfile()}
+                                  className={`form-input ${editForm.email.length > 0 ? (isValidEmail(editForm.email) ? 'input--valid' : 'input--invalid') : ''}`}
+                                />
+                                <ValidationIcon show={editForm.email.length > 0} isValid={isValidEmail(editForm.email)} />
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="form-row-2-col">
+                            <div className="form-group" style={{ marginBottom: 0 }}>
+                              <label>Phone</label>
+                              <div className="input-with-validation">
+                                <input
+                                  type="text"
+                                  value={editForm.phone}
+                                  onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                                  onKeyDown={(e) => e.key === 'Enter' && isEditFormValid() && handleSaveProfile()}
+                                  className={`form-input ${editForm.phone.length > 0 ? (isValidPhone(editForm.phone) ? 'input--valid' : 'input--invalid') : ''}`}
+                                />
+                                <ValidationIcon show={editForm.phone.length > 0} isValid={isValidPhone(editForm.phone)} />
+                              </div>
+                            </div>
+                            <div className="form-group" style={{ marginBottom: 0 }}>
+                              <label>Join Date</label>
+                              <input
+                                type="date"
+                                value={editForm.joinDate}
+                                onChange={(e) => setEditForm({ ...editForm, joinDate: e.target.value })}
+                                className="form-input"
+                              />
+                            </div>
+                          </div>
                         </div>
                         <div className="form-actions">
-                          <button className="btn btn--primary" onClick={handleSaveProfile}>Save</button>
+                          <button
+                            className="btn btn--primary"
+                            onClick={handleSaveProfile}
+                            disabled={!isEditFormValid()}
+                          >
+                            Save Changes
+                          </button>
                         </div>
                       </motion.div>
                     )}
 
-                    {/* Simplified Renew Panel */}
+                    {/* Renew Plan Panel */}
                     {activeTab === "renew" && (
                       <motion.div
                         key="renew"
-                        className="content-panel"
-                        initial={{ opacity: 0, x: 10 }}
+                        className="content-panel content-panel--constrained"
+                        initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -10 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        transition={{ duration: 0.2 }}
                       >
-                        <div className="form-group">
-                          <label>Select Plan</label>
-                          <select
-                            value={renewForm.packageId}
-                            onChange={(e) => setRenewForm(prev => ({ ...prev, packageId: Number(e.target.value) }))}
-                            className="form-select"
-                          >
-                            <option value={0}>Select...</option>
-                            {availablePackages.map(pkg => (
-                              <option key={pkg.packageId} value={pkg.packageId}>{pkg.packageName || pkg.name}</option>
-                            ))}
-                          </select>
-                        </div>
-                          <div className="form-actions">
-                            <button className="btn btn--primary" onClick={handleRenewAndPay}>Renew Now</button>
+                        <h4 className="content-panel__title">Renew Plan</h4>
+                        <div className="content-panel__body">
+                          <div className="current-plan-info">
+                            <span className="current-plan-label">Current Plan</span>
+                            <span className="current-plan-name">{getPlanForMember()}</span>
                           </div>
-                        </motion.div>
-                      )}
 
-                    {/* Trainers Tab */}
+                          <div className="form-row-2-col">
+                            <div className="form-group">
+                              <label>Select New Plan</label>
+                              <select
+                                value={renewForm.packageId}
+                                onChange={(e) => {
+                                  const pid = Number(e.target.value)
+                                  const pkg = availablePackages.find(p => p.packageId === pid)
+                                  const duration = renewForm.customDuration || "1"
+                                  const basePrice = pkg ? Number(pkg.price) : 0
+                                  const months = Number(duration)
+                                  let discount = 1
+                                  if (months >= 12) discount = 0.85
+                                  else if (months >= 6) discount = 0.90
+                                  else if (months >= 3) discount = 0.95
+                                  const finalPrice = Math.round(basePrice * months * discount)
+                                  setRenewForm(prev => ({ ...prev, packageId: pid, amount: String(finalPrice) }))
+                                }}
+                                className="form-select"
+                              >
+                                <option value={0} disabled>Select a plan</option>
+                                {availablePackages.map(pkg => (
+                                  <option key={pkg.packageId} value={pkg.packageId}>
+                                    {pkg.packageName || pkg.name} - ₹{pkg.price}/month
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+
+                            <div className="form-group">
+                              <label>Duration</label>
+                              <select
+                                className="form-select"
+                                value={renewForm.customDuration}
+                                onChange={(e) => {
+                                  const duration = e.target.value
+                                  const pkg = availablePackages.find(p => p.packageId === renewForm.packageId)
+                                  const monthlyPrice = pkg ? Number(pkg.price) : 0
+                                  const months = Number(duration)
+                                  let discount = 1
+                                  if (months >= 12) discount = 0.85
+                                  else if (months >= 6) discount = 0.90
+                                  else if (months >= 3) discount = 0.95
+                                  const finalPrice = Math.round(monthlyPrice * months * discount)
+                                  setRenewForm(prev => ({ ...prev, customDuration: duration, amount: String(finalPrice) }))
+                                }}
+                              >
+                                {[1, 2, 3, 6, 8, 12, 24, 36].map(month => (
+                                  <option key={month} value={month}>{month} Month{month > 1 ? 's' : ''}</option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+
+                          <div className="renew-action-container">
+                            <label className="renew-total-label">Total Amount</label>
+                            <div className="renew-amount-wrapper">
+                              <span className="renew-amount-value">
+                                ₹{renewForm.amount || '0'}
+                              </span>
+                              {renewForm.packageId > 0 && Number(renewForm.customDuration) >= 3 && (
+                                <span className="renew-discount-badge">
+                                  {Number(renewForm.customDuration) >= 12 ? '15% OFF' :
+                                    Number(renewForm.customDuration) >= 6 ? '10% OFF' : '5% OFF'}
+                                </span>
+                              )}
+                            </div>
+                            <button
+                              className="btn btn--primary btn-renew-wide"
+                              onClick={handleRenewAndPay}
+                              disabled={!renewForm.packageId || renewForm.packageId === 0}
+                            >
+                              Renew Plan
+                            </button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {/* Message Panel */}
+                    {activeTab === "message" && (
+                      <motion.div
+                        key="message"
+                        className="content-panel content-panel--constrained"
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <h4 className="content-panel__title">Send Message</h4>
+                        <div className="content-panel__body">
+                          <div className="form-group">
+                            <label>Subject</label>
+                            <input
+                              type="text"
+                              value={messageForm.subject}
+                              onChange={(e) => setMessageForm({ ...messageForm, subject: e.target.value })}
+                              onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                              className="form-input"
+                              placeholder="Enter subject..."
+                            />
+                          </div>
+                          <div className="form-group">
+                            <label>Message <span className="hint-text">(Ctrl+Enter to send)</span></label>
+                            <textarea
+                              value={messageForm.body}
+                              onChange={(e) => setMessageForm({ ...messageForm, body: e.target.value })}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                                  e.preventDefault()
+                                  handleSendMessage()
+                                }
+                              }}
+                              className="form-textarea"
+                              placeholder="Type your message..."
+                              rows={5}
+                            />
+                          </div>
+                          <button className="btn btn--primary" onClick={handleSendMessage}>
+                            Send Message
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {/* Assigned Trainers Panel */}
                     {activeTab === "trainers" && (
                       <motion.div
                         key="trainers"
                         className="content-panel"
-                        initial={{ opacity: 0, x: 10 }}
+                        initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -10 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        transition={{ duration: 0.2 }}
                       >
-                        <div className="trainers-list" style={{ maxHeight: '150px', overflowY: 'auto' }}>
-                          {assignedTrainers.map(t => (
-                            <div key={t.userId} className="customer-item">
-                              <span>{t.fullName}</span>
-                              <button className="customer-item__remove" onClick={() => handleRemoveTrainer(t.userId)}>Remove</button>
-                            </div>
-                          ))}
+                        {/* Header Row: Title + Add Button */}
+                        <div className="trainers-header">
+                          <h4 className="trainers-header__title">
+                            Assigned Trainers
+                            <span className="trainers-count">{assignedTrainers.length}</span>
+                          </h4>
+                          <div className="trainers-header__action">
+                            <button
+                              className={`add-trainer-btn ${showTrainerSearch ? 'add-trainer-btn--active' : ''}`}
+                              onClick={() => setShowTrainerSearch(!showTrainerSearch)}
+                            >
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                <line x1="12" y1="5" x2="12" y2="19" />
+                                <line x1="5" y1="12" x2="19" y2="12" />
+                              </svg>
+                              Add Trainer
+                            </button>
+
+                            {/* Floating Popover Panel */}
+                            <AnimatePresence>
+                              {showTrainerSearch && (
+                                <motion.div
+                                  className="trainer-popover"
+                                  initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                                  exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                                  transition={{ duration: 0.15 }}
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <div className="trainer-popover__header">
+                                    <span>Search Trainers</span>
+                                    <button
+                                      className="trainer-popover__close"
+                                      onClick={() => setShowTrainerSearch(false)}
+                                    >
+                                      ×
+                                    </button>
+                                  </div>
+                                  <input
+                                    type="text"
+                                    className="trainer-popover__input"
+                                    placeholder="Type trainer name..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Escape' && setShowTrainerSearch(false)}
+                                    autoFocus
+                                  />
+                                  <div className="trainer-popover__results">
+                                    {isSearching && (
+                                      <div className="trainer-popover__loading">Searching...</div>
+                                    )}
+
+                                    {!isSearching && (() => {
+                                      // MEMOIZED FILTERING: Filter out trainers that are already assigned
+                                      // Using useMemo here would be ideal if this block was its own component, 
+                                      // but for now we rely on the fact that this is fast enough for <1000 items.
+                                      // The LAG issue is likely mostly due to re-renders.
+
+                                      const unassignedTrainers = availableTrainers.filter(
+                                        trainer => !assignedTrainers.some(assigned => assigned.userId === trainer.userId)
+                                      );
+
+                                      if (unassignedTrainers.length === 0) {
+                                        if (availableTrainers.length > 0) {
+                                          return <div className="trainer-popover__empty">All matching trainers are already assigned.</div>;
+                                        } else if (searchQuery.length > 0) {
+                                          return <div className="trainer-popover__empty">No trainers found</div>;
+                                        }
+                                        return null;
+                                      }
+
+                                      return unassignedTrainers.map((trainer) => (
+                                        <div
+                                          key={trainer.userId}
+                                          className="trainer-popover__item"
+                                          onClick={() => {
+                                            handleAddTrainer(trainer)
+                                            // Close immediately - optimistically handled
+                                          }}
+                                        >
+                                          <div className="trainer-popover__avatar">
+                                            {trainer.fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                                          </div>
+                                          <div className="trainer-popover__info">
+                                            <span className="trainer-popover__name">{trainer.fullName}</span>
+                                            <span className="trainer-popover__email">{trainer.email}</span>
+                                          </div>
+                                        </div>
+                                      ));
+                                    })()}
+                                  </div>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
                         </div>
-                        <button className="add-trainer-btn" style={{ marginTop: '10px' }} onClick={() => setShowTrainerSearch(!showTrainerSearch)}>
-                          Assign Trainer
-                        </button>
+
+                        {/* Scrollable Trainers List */}
+                        <div className="content-panel__body">
+                          <div className="trainers-list">
+                            {assignedTrainers.length === 0 ? (
+                              <div className="empty-state">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                                  <circle cx="9" cy="7" r="4" />
+                                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                                </svg>
+                                <p>No trainers assigned yet</p>
+                                <span>Click "Add Trainer" to assign one</span>
+                              </div>
+                            ) : (
+                              assignedTrainers.map((trainer) => (
+                                <div key={trainer.userId} className="trainer-item">
+                                  <div className="trainer-item__info">
+                                    <div className="trainer-item__avatar">
+                                      {trainer.fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                                    </div>
+                                    <div>
+                                      <span className="trainer-item__name">{trainer.fullName}</span>
+                                      <span className="trainer-item__role">Personal Trainer</span>
+                                    </div>
+                                  </div>
+                                  <button
+                                    className="trainer-item__remove"
+                                    onClick={() => handleRemoveTrainer(trainer.userId)}
+                                  >
+                                    Remove
+                                  </button>
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        </div>
                       </motion.div>
                     )}
 
-                    {/* Delete Panel */}
+                    {/* Delete Profile Panel */}
                     {activeTab === "delete" && (
                       <motion.div
                         key="delete"
-                        className="content-panel"
-                        initial={{ opacity: 0, x: 10 }}
+                        className="content-panel content-panel--constrained content-panel--danger"
+                        initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -10 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        transition={{ duration: 0.2 }}
                       >
-                        <div className="delete-warning">
-                          <svg className="delete-warning__icon" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ margin: '0 auto 12px', display: 'block' }}>
-                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                            <line x1="12" y1="9" x2="12" y2="13" />
-                            <line x1="12" y1="17" x2="12.01" y2="17" />
-                          </svg>
-                          <h5 style={{ textAlign: 'center', marginBottom: '8px', color: '#fff' }}>Delete Member Account?</h5>
-                          <p style={{ textAlign: 'center', fontSize: '13px', color: '#94a3b8' }}>All data related to <strong>{localMember.fullName}</strong> will be permanently removed.</p>
-                          <p style={{ textAlign: 'center', fontSize: '13px', color: '#ef4444', fontWeight: 'bold' }}>This action cannot be undone.</p>
-                          
-                          <div className="delete-actions" style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginTop: '20px' }}>
-                             <button 
-                               className="btn btn--danger" 
-                               onClick={handleDeleteMember} 
-                               disabled={isDeleting}
-                               style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer' }}
-                             >
-                               {isDeleting ? 'Deleting...' : 'Yes, Delete Account'}
-                             </button>
-                             <button 
-                               className="btn btn--secondary" 
-                               onClick={() => setActiveTab("profile")} 
-                               disabled={isDeleting}
-                               style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer' }}
-                             >
-                               Cancel
-                             </button>
+                        <h4 className="content-panel__title content-panel__title--danger">Delete Profile</h4>
+                        <div className="content-panel__body">
+                          <div className="delete-warning">
+                            <div className="delete-warning__icon">
+                              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <circle cx="12" cy="12" r="10" />
+                                <line x1="12" y1="8" x2="12" y2="12" />
+                                <line x1="12" y1="16" x2="12.01" y2="16" />
+                              </svg>
+                            </div>
+                            <h5>Are you sure?</h5>
+                            <p>You are about to permanently delete <strong>{localMember.fullName}</strong>.</p>
+                            <p className="delete-warning__note">This action cannot be undone.</p>
+                          </div>
+                          <div className="delete-actions">
+                            <button className="btn btn--secondary" onClick={() => setActiveTab("profile")}>
+                              Cancel
+                            </button>
+                            <button
+                              className="btn btn--danger"
+                              onClick={handleDeleteMember}
+                              disabled={isDeleting}
+                            >
+                              {isDeleting ? 'Deleting...' : 'Delete Member'}
+                            </button>
                           </div>
                         </div>
                       </motion.div>
                     )}
                   </AnimatePresence>
                 </div>
-
-                {/* Footer with Delete on Left and Close on Right */}
-                <div className="member-action-modal__footer">
-                  <button 
-                    className="btn btn--secondary" 
-                    style={{ color: '#ef4444', marginRight: 'auto' }}
-                    onClick={() => setActiveTab("delete")}
-                  >
-                    Delete Member
-                  </button>
-                  <button className="btn btn--secondary" onClick={onClose}>Done</button>
-                </div>
-              </motion.div>
+              </div>
+            </motion.div>
 
             {/* Sub-modals remain the same but with loading states */}
             {/* Edit Profile Sub-Modal */}
