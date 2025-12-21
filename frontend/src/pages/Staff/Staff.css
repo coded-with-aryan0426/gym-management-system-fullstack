@@ -136,288 +136,144 @@
   background: rgba(255, 255, 255, 0.06);
 }
 
-/* Filter Button Improvements */
+/* ============================================
+   FILTER BUTTON
+   ============================================ */
 .btn-filters {
-  display: flex !important;
+  display: flex;
   align-items: center;
-  gap: 8px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   color: var(--text-secondary);
-  padding: 0 14px;
+  padding: 0 12px;
   border-radius: 8px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  height: 36px;
-  position: relative;
+  transition: all 0.15s ease;
+  height: 32px;
 }
 
 .btn-filters:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
   color: var(--text-primary);
-  transform: translateY(-1px);
 }
 
 .btn-filters--active {
-  background: rgba(219, 251, 62, 0.1);
-  border-color: rgba(219, 251, 62, 0.3);
-  color: #dbfb3e;
+  background: rgba(220, 38, 38, 0.1);
+  border-color: rgba(220, 38, 38, 0.3);
+  color: var(--color-crimson);
 }
 
 .btn-filters--has-filters {
-  background: rgba(219, 251, 62, 0.15) !important;
-  border-color: rgba(219, 251, 62, 0.4) !important;
-  color: #dbfb3e !important;
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: var(--color-emerald);
 }
 
-.filter-count-badge {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #dbfb3e;
-  color: black;
-  font-size: 10px;
-  font-weight: 700;
-  min-width: 16px;
-  height: 16px;
-  border-radius: 10px;
-  margin-left: 2px;
+/* ============================================
+   FILTER CONTAINER & PANEL
+   ============================================ */
+.staff-filter-container {
+  position: relative;
 }
 
-/* Filter Panel Improvements */
 .staff-filter-panel {
   position: absolute;
-  top: calc(100% + 12px);
-  right: 0;
-  background: #141414;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  top: calc(100% + 8px);
+  left: 0;
+  background: #0f0f0f;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
-  padding: 0;
-  min-width: 320px;
-  z-index: 1000;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
-  overflow: hidden;
+  padding: 16px;
+  min-width: 240px;
+  z-index: 100;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  animation: filterSlideDown 0.15s ease-out;
 }
 
-.animate-in {
-  animation: filterReveal 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@keyframes filterReveal {
+@keyframes filterSlideDown {
   from {
     opacity: 0;
-    transform: translateY(10px) scale(0.95);
+    transform: translateY(-8px);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
 }
 
 .filter-panel__header {
-  display: flex !important;
+  display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
-  background: rgba(255, 255, 255, 0.02);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.filter-panel__header h3 {
-  font-size: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  margin-bottom: 14px;
   font-weight: 600;
-  margin: 0;
+  font-size: 13px;
   color: var(--text-primary);
 }
 
-.filter-panel__content {
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  max-height: 400px;
-  overflow-y: auto;
-}
-
-.filter-section {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.filter-section__title {
+.filter-clear-btn {
+  background: none;
+  border: none;
+  color: var(--color-crimson);
   font-size: 11px;
-  font-weight: 700;
-  color: var(--text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: opacity 0.15s ease;
+}
+
+.filter-clear-btn:hover {
+  opacity: 0.8;
+}
+
+.filter-panel__content {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
 .filter-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .filter-label {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--text-secondary);
-}
-
-.filter-select, .filter-input {
-  width: 100%;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
-  padding: 10px 12px;
-  font-size: 13px;
-  color: var(--text-primary);
-  transition: all 0.2s ease;
-}
-
-.filter-select:hover, .filter-input:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.15);
-}
-
-.filter-select:focus, .filter-input:focus {
-  outline: none;
-  border-color: #dbfb3e;
-  background: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 0 0 3px rgba(219, 251, 62, 0.1);
-}
-
-/* Applied Filters Bar */
-.applied-filters-bar {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  padding: 12px 16px;
-  background: rgba(219, 251, 62, 0.03);
-  border: 1px solid rgba(219, 251, 62, 0.1);
-  border-radius: 8px;
-  margin-bottom: 20px;
-}
-
-.applied-filters-label {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
-  color: var(--text-secondary);
-}
-
-.filter-tag {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 12px;
-  color: var(--text-primary);
-}
-
-.filter-tag button {
-  background: none;
-  border: none;
   color: var(--text-tertiary);
-  cursor: pointer;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  transition: color 0.2s ease;
-}
-
-.filter-tag button:hover {
-  color: var(--color-crimson);
-}
-
-.clear-all-link {
-  background: none;
-  border: none;
-  color: var(--color-crimson);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  margin-left: auto;
-  padding: 4px 8px;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-}
-
-.clear-all-link:hover {
-  background: rgba(220, 38, 38, 0.05);
-  text-decoration: underline;
-}
-
-.sort-badge--advanced {
-  background: rgba(219, 251, 62, 0.1);
-  color: #dbfb3e;
-}
-
-/* Table Column Widths & Layout */
-.staff-page__table .data-table {
-  table-layout: fixed;
-  width: 100%;
-}
-
-.staff-page__table th,
-.staff-page__table td {
-  padding: 12px 16px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.status-badge--compact {
-  font-size: 10px !important;
-  padding: 2px 8px !important;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-.staff-cell {
-  cursor: pointer;
-  display: flex !important;
-  align-items: center;
-  gap: 12px;
-  max-width: 100%;
-}
-
-.staff-cell__info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.staff-name {
-  font-weight: 600;
-  color: var(--text-primary);
-  font-size: 14px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.staff-email {
+.filter-select,
+.staff-filter-panel .filter-select {
+  appearance: none;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 8px 12px;
+  border-radius: 8px;
   font-size: 12px;
-  color: var(--text-tertiary);
-  overflow: hidden;
-  text-overflow: ellipsis;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.15s ease;
 }
 
-/* Responsive Overrides */
-@media (max-width: 768px) {
-  .staff-filter-panel {
-    min-width: 280px;
-  }
+.filter-select:hover,
+.staff-filter-panel .filter-select:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.filter-select:focus,
+.staff-filter-panel .filter-select:focus {
+  outline: none;
+  border-color: var(--color-crimson);
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.1);
 }
 
 /* ============================================
@@ -668,95 +524,23 @@
   }
 }
 
-/* ============================================
-   TABLE REFINEMENTS (V4)
-   ============================================ */
-.staff-page__table {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.staff-page__table table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  table-layout: fixed;
-}
-
-.staff-page__table th {
-  background: rgba(255, 255, 255, 0.02);
-  color: var(--text-tertiary);
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border-color);
-  text-align: left;
-}
-
-.staff-page__table td {
-  padding: 8px 16px;
-  border-bottom: 1px solid var(--border-color);
-  vertical-align: middle;
-  height: 60px;
-}
-
-.staff-page__table tr:last-child td {
-  border-bottom: none;
-}
-
-.staff-cell {
-  display: flex !important;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-}
-
-.staff-cell__info {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  min-width: 0;
-  overflow: hidden;
-}
-
-.staff-name {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-primary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.staff-email {
-  font-size: 11px;
-  color: var(--text-tertiary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Status Column Alignment */
-.status-cell {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-}
-
-/* Equal Column Width Logic STAFF */
-.col-staff-name { width: 35%; }
-.col-staff-role { width: 25%; }
-.col-staff-date { width: 25%; }
-.col-staff-actions { width: 15%; }
-
-/* Responsive adjustments for columns */
-@media (max-width: 1024px) {
-  .col-staff-role { display: none; }
-  .col-staff-name { width: 60%; }
-  .col-staff-date { width: 30%; }
+@media (max-width: 480px) {
+  .staff-page__title {
+    font-size: 16px;
+  }
+  
+  .sort-badge {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+  
+  .btn-filters {
+    padding: 0 10px;
+    font-size: 11px;
+  }
+  
+  .filter-chip {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
 }

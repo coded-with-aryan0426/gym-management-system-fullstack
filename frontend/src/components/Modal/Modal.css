@@ -5,82 +5,34 @@
 
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.75);
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
-  z-index: 9999;
-  backdrop-filter: blur(4px);
-}
-
-.modal-content {
-  background-color: #1a1a1a;
-  color: white;
-  padding: 0;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 500px;
-  max-height: 85vh;
-  overflow-y: auto;
-  position: relative;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  display: flex;
-  flex-direction: column;
-}
-
-.modal-close {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  background: rgba(255, 255, 255, 0.05);
-  border: none;
-  color: #94a3b8;
-  font-size: 20px;
-  cursor: pointer;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
-  z-index: 10;
+  z-index: 9999;
+  padding: 20px;
 }
-
-.modal-close:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-}
-
-@media (max-width: 640px) {
-  .modal-content {
-    width: 95%;
-    max-height: 90vh;
-  }
-}
-
 
 .modal {
   /* Layout and Sizing */
   position: relative;
-  width: 90%;
-  max-width: 500px;
+  width: 72vw;
+  max-width: 960px;
   min-width: 320px;
-  max-height: 85vh;
+  min-height: 60vh;
+  max-height: 92vh;
   display: flex;
   flex-direction: column;
 
   /* Base Appearance */
-  background: #1a1a1a;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-  color: #f8fafc;
+  background: var(--card-glass-bg, #1e293b);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  box-shadow: var(--elevation-3, 0 25px 50px -12px rgba(0, 0, 0, 0.5));
+  color: var(--text-primary);
 
   /* Animation */
   animation: modalAppear 0.3s cubic-bezier(0.16, 1, 0.3, 1);

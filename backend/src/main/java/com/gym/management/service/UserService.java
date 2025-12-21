@@ -99,11 +99,13 @@ public class UserService {
     }
 
     /**
-     * Paginated Members with advanced filtering and exhaustive sorting.
+     * Paginated Members with "today first" sorting.
+     * Members created today appear at the top (sorted by createdAt DESC),
+     * followed by older members sorted alphabetically (fullName ASC).
      */
     @Transactional(readOnly = true)
-    public PageResponse<MemberDTO> getMembersPaginated(int page, int size, String search, String status, String plan, String duration, String dateFilter) {
-        // Get all customers first
+    public PageResponse<MemberDTO> getMembersPaginated(int page, int size, String search, String status, String plan) {
+        // Get all customers first (we'll do in-memory pagination with custom sorting)
         List<User> allCustomers = userRepository.findByRoleName("CUSTOMER");
 
         // Apply search filter
@@ -115,7 +117,7 @@ public class UserService {
                     .collect(Collectors.toList());
         }
 
-        // Convert to MemberDTO and populate fields
+        // Convert to MemberDTO and apply additional filters
         LocalDate today = LocalDate.now();
         List<MemberDTO> allMembers = allCustomers.stream().map(user -> {
             MemberDTO dto = new MemberDTO();
@@ -125,6 +127,7 @@ public class UserService {
             dto.setPhone(user.getPhone());
             dto.setCreatedAt(user.getCreatedAt());
 
+            // Fetch membership
             List<Membership> memberships = membershipRepository.findByUserUserId(user.getUserId());
             if (!memberships.isEmpty()) {
                 Membership activeMembership = memberships.stream()
@@ -137,17 +140,11 @@ public class UserService {
                 if (activeMembership.getMembershipPackage() != null) {
                     dto.setPlanName(activeMembership.getMembershipPackage().getPackageName());
                     Integer months = activeMembership.getMembershipPackage().getDurationMonths();
-                    if (months != null) {
-                        dto.setPlanDuration(months + (months == 1 ? " Month" : " Months"));
-                        dto.setDurationMonths(months);
-                    } else {
-                        dto.setPlanDuration(activeMembership.getMembershipPackage().getDurationDays() + " Days");
-                        dto.setDurationMonths(0);
-                    }
+                    dto.setPlanDuration(months != null ? months + (months == 1 ? " Month" : " Months")
+                            : activeMembership.getMembershipPackage().getDurationDays() + " Days");
                 } else {
                     dto.setPlanName("Unknown Plan");
                     dto.setPlanDuration("-");
-                    dto.setDurationMonths(0);
                 }
 
                 dto.setStartDate(activeMembership.getStartDate());
@@ -158,68 +155,38 @@ public class UserService {
             } else {
                 dto.setStatus("Inactive");
                 dto.setPlanName("No Plan");
-                dto.setDurationMonths(0);
             }
             return dto;
         }).collect(Collectors.toList());
 
-        // Apply advanced filters
-        
-        // 1. Status Filter
+        // Apply status filter
         if (status != null && !status.trim().isEmpty()) {
             allMembers = allMembers.stream()
                     .filter(m -> m.getStatus() != null && m.getStatus().equalsIgnoreCase(status))
                     .collect(Collectors.toList());
         }
 
-        // 2. Plan Filter
+        // Apply plan filter
         if (plan != null && !plan.trim().isEmpty()) {
             allMembers = allMembers.stream()
                     .filter(m -> m.getPlanName() != null && m.getPlanName().toLowerCase().contains(plan.toLowerCase()))
                     .collect(Collectors.toList());
         }
 
-        // 3. Duration Filter
-        if (duration != null && !duration.trim().isEmpty()) {
-            if (duration.equalsIgnoreCase("Expired")) {
-                allMembers = allMembers.stream()
-                        .filter(m -> "EXPIRED".equalsIgnoreCase(m.getStatus()))
-                        .collect(Collectors.toList());
-            } else if (duration.toLowerCase().contains("month")) {
-                try {
-                    int months = Integer.parseInt(duration.replaceAll("[^0-9]", ""));
-                    allMembers = allMembers.stream()
-                            .filter(m -> m.getDurationMonths() != null && m.getDurationMonths() == months)
-                            .collect(Collectors.toList());
-                } catch (Exception ignored) {}
-            }
-        }
-
-        // 4. Date Filter (YYYY, MM/YYYY, DD/MM/YYYY)
-        if (dateFilter != null && !dateFilter.trim().isEmpty()) {
-            allMembers = allMembers.stream()
-                    .filter(m -> matchesDate(m.getJoinDate(), dateFilter))
-                    .collect(Collectors.toList());
-        }
-
-        // Sorting Logic:
-        // 1️⃣ Newest entries (by createdAt DESC)
-        // 2️⃣ Alphabetical (by fullName ASC)
-        // 3️⃣ Status category (Expired entries drop to bottom)
+        // Sort: today's entries first (by createdAt DESC), then alphabetically
         allMembers.sort((a, b) -> {
-            // Priority 3: Status (Expired at bottom)
-            boolean aExpired = "EXPIRED".equalsIgnoreCase(a.getStatus());
-            boolean bExpired = "EXPIRED".equalsIgnoreCase(b.getStatus());
-            if (aExpired && !bExpired) return 1;
-            if (!aExpired && bExpired) return -1;
+            boolean aToday = a.getCreatedAt() != null && a.getCreatedAt().toLocalDate().equals(today);
+            boolean bToday = b.getCreatedAt() != null && b.getCreatedAt().toLocalDate().equals(today);
 
-            // Priority 1: Newest First
-            if (a.getCreatedAt() != null && b.getCreatedAt() != null) {
-                int dateCompare = b.getCreatedAt().compareTo(a.getCreatedAt());
-                if (dateCompare != 0) return dateCompare;
+            if (aToday && !bToday)
+                return -1;
+            if (!aToday && bToday)
+                return 1;
+            if (aToday && bToday) {
+                // Both today: sort by createdAt DESC (newest first)
+                return b.getCreatedAt().compareTo(a.getCreatedAt());
             }
-
-            // Priority 2: Alphabetical
+            // Neither today: sort alphabetically
             String nameA = a.getFullName() != null ? a.getFullName() : "";
             String nameB = b.getFullName() != null ? b.getFullName() : "";
             return nameA.compareToIgnoreCase(nameB);
@@ -232,27 +199,18 @@ public class UserService {
         List<MemberDTO> pageContent = start < allMembers.size() ? allMembers.subList(start, end)
                 : Collections.emptyList();
 
-        return new PageResponse<>(pageContent, page, size, totalCount, "advanced");
+        return new PageResponse<>(pageContent, page, size, totalCount, "newest");
     }
 
     /**
-     * Paginated Staff with filters and exhaustive sorting.
+     * Paginated Staff with "today first" sorting.
      */
     @Transactional(readOnly = true)
-    public PageResponse<User> getStaffPaginated(int page, int size, String search, String role, String status, String dateFilter) {
-        String targetRole = (role != null && !role.trim().isEmpty()) ? role.toUpperCase() : null;
-        List<User> allStaff;
-        if (targetRole != null) {
-            allStaff = userRepository.findByRoleName(targetRole);
-        } else {
-            // If no role specified, include TRAINER, ADMIN, MANAGER
-            allStaff = userRepository.findAll().stream()
-                .filter(u -> u.getRoles().stream().anyMatch(r -> 
-                    Arrays.asList("TRAINER", "ADMIN", "MANAGER").contains(r.getRoleName())))
-                .collect(Collectors.toList());
-        }
+    public PageResponse<User> getStaffPaginated(int page, int size, String search, String role) {
+        String targetRole = (role != null && !role.trim().isEmpty()) ? role.toUpperCase() : "TRAINER";
+        List<User> allStaff = userRepository.findByRoleName(targetRole);
 
-        // Apply filters
+        // Apply search filter
         if (search != null && !search.trim().isEmpty()) {
             String searchLower = search.toLowerCase();
             allStaff = allStaff.stream()
@@ -261,24 +219,18 @@ public class UserService {
                     .collect(Collectors.toList());
         }
 
-        if (status != null && !status.trim().isEmpty()) {
-            // Simplistic: all staff considered Active for now unless logic added to User model
-            if ("Inactive".equalsIgnoreCase(status)) {
-                allStaff = Collections.emptyList();
-            }
-        }
-
-        if (dateFilter != null && !dateFilter.trim().isEmpty()) {
-            allStaff = allStaff.stream()
-                    .filter(u -> u.getCreatedAt() != null && matchesDate(u.getCreatedAt().toLocalDate(), dateFilter))
-                    .collect(Collectors.toList());
-        }
-
-        // Sort: Newest First, then Alphabetical
+        // Sort: today's entries first (by createdAt DESC), then alphabetically
+        LocalDate today = LocalDate.now();
         allStaff.sort((a, b) -> {
-            if (a.getCreatedAt() != null && b.getCreatedAt() != null) {
-                int dateCompare = b.getCreatedAt().compareTo(a.getCreatedAt());
-                if (dateCompare != 0) return dateCompare;
+            boolean aToday = a.getCreatedAt() != null && a.getCreatedAt().toLocalDate().equals(today);
+            boolean bToday = b.getCreatedAt() != null && b.getCreatedAt().toLocalDate().equals(today);
+
+            if (aToday && !bToday)
+                return -1;
+            if (!aToday && bToday)
+                return 1;
+            if (aToday && bToday) {
+                return b.getCreatedAt().compareTo(a.getCreatedAt());
             }
             String nameA = a.getFullName() != null ? a.getFullName() : "";
             String nameB = b.getFullName() != null ? b.getFullName() : "";
@@ -291,36 +243,7 @@ public class UserService {
         int end = Math.min(start + size, allStaff.size());
         List<User> pageContent = start < allStaff.size() ? allStaff.subList(start, end) : Collections.emptyList();
 
-        return new PageResponse<>(pageContent, page, size, totalCount, "advanced");
-    }
-
-    private boolean matchesDate(LocalDate date, String filter) {
-        if (date == null || filter == null) return false;
-        filter = filter.trim();
-        
-        // YYYY
-        if (filter.matches("^\\d{4}$")) {
-            return String.valueOf(date.getYear()).equals(filter);
-        }
-        
-        // MM/YYYY
-        if (filter.matches("^\\d{2}/\\d{4}$")) {
-            String[] parts = filter.split("/");
-            int m = Integer.parseInt(parts[0]);
-            int y = Integer.parseInt(parts[1]);
-            return date.getMonthValue() == m && date.getYear() == y;
-        }
-        
-        // DD/MM/YYYY
-        if (filter.matches("^\\d{2}/\\d{2}/\\d{4}$")) {
-            String[] parts = filter.split("/");
-            int d = Integer.parseInt(parts[0]);
-            int m = Integer.parseInt(parts[1]);
-            int y = Integer.parseInt(parts[2]);
-            return date.getDayOfMonth() == d && date.getMonthValue() == m && date.getYear() == y;
-        }
-        
-        return false;
+        return new PageResponse<>(pageContent, page, size, totalCount, "newest");
     }
 
     public User getUserById(Long id) {

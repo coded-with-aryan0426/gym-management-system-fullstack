@@ -17,8 +17,8 @@ import "./Members.css"
 interface FilterState {
   status: string[]
   plan: string[]
-  duration: string
-  date: string
+  lastVisit: string
+  planDuration: string
 }
 
 const Members: React.FC = () => {
@@ -31,18 +31,44 @@ const Members: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(0)
   const [pageSize, setPageSize] = useState(10)
   const [totalCount, setTotalCount] = useState(0)
-  const [sortType, setSortType] = useState<'advanced' | 'alphabetical'>('advanced')
+  const [sortType, setSortType] = useState<'newest' | 'alphabetical'>('newest')
   
   const [members, setMembers] = useState<MemberDTO[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
 
+  const handleActionClick = (member: MemberDTO) => {
+    setSelectedMember(member)
+    setIsActionModalOpen(true)
+  }
+
+  const handleCloseActionModal = () => {
+    setIsActionModalOpen(false)
+    setSelectedMember(null)
+  }
+
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  useEffect(() => {
+    if (searchParams.get('action') === 'create') {
+      setIsCreateModalOpen(true)
+    }
+
+    const userId = searchParams.get('userId')
+    if (userId && members.length > 0) {
+      const member = members.find(m => m.userId.toString() === userId)
+      if (member) {
+        handleActionClick(member)
+      }
+    }
+  }, [searchParams, members])
+
   const [filters, setFilters] = useState<FilterState>({
     status: [],
     plan: [],
-    duration: "",
-    date: "",
+    lastVisit: "",
+    planDuration: "",
   })
 
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false)
@@ -68,14 +94,12 @@ const Members: React.FC = () => {
         pageSize,
         debouncedSearch || undefined,
         statusFilter,
-        planFilter,
-        filters.duration || undefined,
-        filters.date || undefined
+        planFilter
       )
       
       setMembers(response.content)
       setTotalCount(response.totalCount)
-      setSortType(response.sortType as any)
+      setSortType(response.sortType as 'newest' | 'alphabetical')
     } catch (err) {
       console.error('[Members] Failed to load paginated members:', err)
       toast.error('Failed to load members')
@@ -83,7 +107,7 @@ const Members: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }, [currentPage, pageSize, debouncedSearch, filters])
+  }, [currentPage, pageSize, debouncedSearch, filters.status, filters.plan])
 
   useEffect(() => {
     loadMembersPaginated()
@@ -101,8 +125,8 @@ const Members: React.FC = () => {
     let count = 0
     if (filters.status.length > 0) count++
     if (filters.plan.length > 0) count++
-    if (filters.duration) count++
-    if (filters.date) count++
+    if (filters.lastVisit) count++
+    if (filters.planDuration) count++
     return count
   }, [filters])
 
@@ -145,22 +169,16 @@ const Members: React.FC = () => {
     toast.success(`Message sent to ${member.fullName}`)
   }
 
-  const handleActionClick = (member: MemberDTO) => {
-    setSelectedMember(member)
-    setIsActionModalOpen(true)
-  }
-
-  const handleCloseActionModal = () => {
-    setIsActionModalOpen(false)
-    setSelectedMember(null)
+  const handleFilterChange = (key: keyof FilterState, value: string) => {
+    setFilters((prev) => ({ ...prev, [key]: value }))
   }
 
   const handleResetFilters = () => {
     setFilters({
       status: [],
       plan: [],
-      duration: "",
-      date: "",
+      lastVisit: "",
+      planDuration: "",
     })
   }
 
@@ -175,7 +193,7 @@ const Members: React.FC = () => {
     },
     {
       key: "fullName",
-      header: "Member Name",
+      header: "Member",
       width: "auto",
       render: (member) => (
         <div
@@ -200,18 +218,18 @@ const Members: React.FC = () => {
     {
       key: "planDuration",
       header: "Duration",
-      width: "120px",
+      width: "100px",
       render: (member) => <span className="member-plan-duration">{member.planDuration || "-"}</span>,
     },
       {
         key: "joinDate",
-        header: "Join Date",
-        width: "140px",
+        header: "Joined",
+        width: "130px",
         render: (member) => {
-          const date = member.createdAt ? new Date(member.createdAt) : null
+          const date = member.startDate ? new Date(member.startDate) : null
           if (!date) return <span className="member-date">-</span>
           const day = date.getDate().toString().padStart(2, '0')
-          const month = date.toLocaleDateString('en-US', { month: 'short' })
+          const month = date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()
           const year = date.getFullYear()
           return (
             <span className="member-date">{day} {month} {year}</span>
@@ -221,9 +239,9 @@ const Members: React.FC = () => {
     {
       key: "status",
       header: "Status",
-      width: "110px",
+      width: "100px",
       render: (member) => {
-        return <Badge variant={getStatusVariant(member.status)} className="status-badge--compact">{member.status}</Badge>
+        return <Badge variant={getStatusVariant(member.status)}>{member.status}</Badge>
       },
     },
     {
@@ -244,104 +262,96 @@ const Members: React.FC = () => {
         <div className="members-page__title-section">
           <h1 className="members-page__title">Members</h1>
           <div className="members-page__sort-indicator">
-            <span className="sort-badge sort-badge--advanced">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <circle cx="12" cy="12" r="10"/>
-                <polyline points="12 6 12 12 16 14"/>
-              </svg>
-              Auto-Sorted
-            </span>
+            {sortType === 'newest' ? (
+              <span className="sort-badge sort-badge--newest">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                New First
+              </span>
+            ) : (
+              <span className="sort-badge sort-badge--alpha">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M3 6h18M3 12h12M3 18h6"/>
+                </svg>
+                A → Z
+              </span>
+            )}
           </div>
         </div>
 
         <div className="members-page__header-right">
+          {activeFilterCount > 0 && (
+            <div className="members-active-filters">
+              {filters.status.length > 0 && (
+                <span className="filter-chip">
+                  Status: {filters.status[0]}
+                  <button onClick={() => setFilters(prev => ({ ...prev, status: [] }))}>×</button>
+                </span>
+              )}
+              {filters.plan.length > 0 && (
+                <span className="filter-chip">
+                  Plan: {filters.plan[0]}
+                  <button onClick={() => setFilters(prev => ({ ...prev, plan: [] }))}>×</button>
+                </span>
+              )}
+            </div>
+          )}
+
           <div className="members-filter-container" ref={filterPanelRef}>
             <button
               className={`btn-filters ${isFilterPanelOpen ? 'btn-filters--active' : ''} ${activeFilterCount > 0 ? 'btn-filters--has-filters' : ''}`}
               onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
             >
-              <FiFilter size={14} />
-              Filter
-              {activeFilterCount > 0 && <span className="filter-count-badge">{activeFilterCount}</span>}
+              <FiFilter size={12} />
+              Filters
+              {activeFilterCount > 0 && ` (${activeFilterCount})`}
             </button>
 
             {isFilterPanelOpen && (
-              <div className="members-filter-panel animate-in">
+              <div className="members-filter-panel">
                 <div className="filter-panel__header">
-                  <h3>Filters</h3>
+                  <span>Filters</span>
                   {activeFilterCount > 0 && (
                     <button className="filter-clear-btn" onClick={handleResetFilters}>
-                      Clear Filter
+                      Clear all
                     </button>
                   )}
                 </div>
 
                 <div className="filter-panel__content">
-                  <div className="filter-section">
-                    <span className="filter-section__title">Membership</span>
-                    <div className="filter-group">
-                      <label className="filter-label">Status</label>
-                      <select
-                        className="filter-select"
-                        value={filters.status[0] || ""}
-                        onChange={(e) => {
-                          const val = e.target.value
-                          setFilters(prev => ({ ...prev, status: val ? [val] : [] }))
-                        }}
-                      >
-                        <option value="">All Status</option>
-                        <option value="Active">Active</option>
-                        <option value="Expired">Expired</option>
-                        <option value="Inactive">Inactive</option>
-                      </select>
-                    </div>
-
-                    <div className="filter-group">
-                      <label className="filter-label">Plan Type</label>
-                      <select
-                        className="filter-select"
-                        value={filters.plan[0] || ""}
-                        onChange={(e) => {
-                          const val = e.target.value
-                          setFilters(prev => ({ ...prev, plan: val ? [val] : [] }))
-                        }}
-                      >
-                        <option value="">All Plans</option>
-                        <option value="Basic">Basic</option>
-                        <option value="Premium">Premium</option>
-                        <option value="Standard">Standard</option>
-                      </select>
-                    </div>
+                  <div className="filter-group">
+                    <label className="filter-label">Status</label>
+                    <select
+                      className="filter-select"
+                      value={filters.status[0] || ""}
+                      onChange={(e) => {
+                        const val = e.target.value
+                        setFilters(prev => ({ ...prev, status: val ? [val] : [] }))
+                      }}
+                    >
+                      <option value="">All Status</option>
+                      <option value="Active">Active</option>
+                      <option value="Expired">Expired</option>
+                    </select>
                   </div>
 
-                  <div className="filter-section">
-                    <span className="filter-section__title">Duration & Date</span>
-                    <div className="filter-group">
-                      <label className="filter-label">Duration</label>
-                      <select
-                        className="filter-select"
-                        value={filters.duration}
-                        onChange={(e) => setFilters(prev => ({ ...prev, duration: e.target.value }))}
-                      >
-                        <option value="">All Durations</option>
-                        <option value="1 Month">1 Month</option>
-                        <option value="3 Months">3 Months</option>
-                        <option value="6 Months">6 Months</option>
-                        <option value="12 Months">12 Months</option>
-                        <option value="Expired">Expired</option>
-                      </select>
-                    </div>
-
-                    <div className="filter-group">
-                      <label className="filter-label">Join Date (DD/MM/YYYY)</label>
-                      <input
-                        type="text"
-                        className="filter-input"
-                        placeholder="e.g. 2025 or 03/2025"
-                        value={filters.date}
-                        onChange={(e) => setFilters(prev => ({ ...prev, date: e.target.value }))}
-                      />
-                    </div>
+                  <div className="filter-group">
+                    <label className="filter-label">Plan</label>
+                    <select
+                      className="filter-select"
+                      value={filters.plan[0] || ""}
+                      onChange={(e) => {
+                        const val = e.target.value
+                        setFilters(prev => ({ ...prev, plan: val ? [val] : [] }))
+                      }}
+                    >
+                      <option value="">All Plans</option>
+                      <option value="Basic">Basic</option>
+                      <option value="Premium">Premium</option>
+                      <option value="Standard">Standard</option>
+                    </select>
                   </div>
                 </div>
               </div>
@@ -375,39 +385,8 @@ const Members: React.FC = () => {
         </div>
       </div>
 
-      <div className="members-page__content">
-        {activeFilterCount > 0 && (
-          <div className="applied-filters-bar">
-            <span className="applied-filters-label">Applied Filters:</span>
-            {filters.status.length > 0 && (
-              <span className="filter-tag">
-                Status: {filters.status[0]}
-                <button onClick={() => setFilters(prev => ({ ...prev, status: [] }))}>×</button>
-              </span>
-            )}
-            {filters.plan.length > 0 && (
-              <span className="filter-tag">
-                Plan: {filters.plan[0]}
-                <button onClick={() => setFilters(prev => ({ ...prev, plan: [] }))}>×</button>
-              </span>
-            )}
-            {filters.duration && (
-              <span className="filter-tag">
-                Duration: {filters.duration}
-                <button onClick={() => setFilters(prev => ({ ...prev, duration: "" }))}>×</button>
-              </span>
-            )}
-            {filters.date && (
-              <span className="filter-tag">
-                Date: {filters.date}
-                <button onClick={() => setFilters(prev => ({ ...prev, date: "" }))}>×</button>
-              </span>
-            )}
-            <button className="clear-all-link" onClick={handleResetFilters}>Clear all</button>
-          </div>
-        )}
-
-        <div className="members-page__table-container">
+        <div className="members-page__content">
+          <div className="members-page__table-container">
             <DataTable
               data={members}
               keyExtractor={(member) => member.userId}
