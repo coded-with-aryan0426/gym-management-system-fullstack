@@ -55,14 +55,25 @@ const cardVariants = {
 
 export default function Problem() {
   return (
-    <Box
-      sx={{
-        backgroundColor: 'var(--bg-primary)',
-        paddingY: { xs: '100px', md: '160px' },
-        position: 'relative',
-        overflow: 'hidden',
-      }}
-    >
+      <Box
+        sx={{
+          backgroundColor: 'transparent',
+          paddingY: { xs: '100px', md: '160px' },
+          position: 'relative',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '100%',
+            height: '100%',
+            background: 'radial-gradient(circle at 50% 50%, rgba(220, 38, 38, 0.05) 0%, transparent 70%)',
+            zIndex: 0,
+          }
+        }}
+      >
       {/* Background Decorative Element */}
       <Box sx={{
         position: 'absolute',

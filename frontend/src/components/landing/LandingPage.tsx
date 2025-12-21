@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Box } from '@mui/material';
 import Header from './Header';
 import Hero from './Hero';
+import QuickMetrics from './QuickMetrics';
 import Problem from './Problem';
 import ValueStack from './ValueStack';
 import SocialProof from './SocialProof';
@@ -24,7 +25,22 @@ export default function LandingPage() {
     };
 
     return (
-        <Box component="main" sx={{ backgroundColor: 'var(--bg-primary)', minHeight: '100vh', overflowX: 'hidden', position: 'relative' }}>
+        <Box 
+            component="main" 
+            data-theme="dark"
+            className="dark-mode"
+            sx={{ 
+                backgroundColor: '#000000', 
+                color: '#ffffff',
+                minHeight: '100vh', 
+                overflowX: 'hidden', 
+                position: 'relative',
+                '--bg-primary': '#000000',
+                '--text-primary': '#ffffff',
+                '--text-secondary': '#cbd5e1',
+                '--border-subtle': 'rgba(255, 255, 255, 0.08)',
+            }}
+        >
             <AnimatedBackground />
             <Box sx={{ position: 'relative', zIndex: 1 }}>
                 <Header />
@@ -32,8 +48,9 @@ export default function LandingPage() {
             For now, removing the onSignupClick prop will let them default to navigate('/signup') as per my Hero change. 
             Actually, let's keep the prop API flexible but for this request, I will remove it so they go to the real signup page.
         */}
-                <Hero />
-                <Problem />
+        <Hero />
+        <QuickMetrics />
+        <Problem />
                 <ValueStack />
                 <SocialProof />
                 <Transformation />

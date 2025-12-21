@@ -93,9 +93,10 @@ export default function ValueStack() {
   return (
     <Box
       sx={{
-        backgroundColor: 'var(--bg-primary)',
+        backgroundColor: 'transparent',
         paddingY: { xs: '100px', md: '160px' },
         position: 'relative',
+        zIndex: 1,
         '&::before': {
           content: '""',
           position: 'absolute',

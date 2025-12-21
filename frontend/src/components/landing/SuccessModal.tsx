@@ -15,14 +15,16 @@ export default function SuccessModal({ open, onClose }: SuccessModalProps) {
       open={open}
       onClose={onClose}
       PaperProps={{
-        sx: {
-          borderRadius: 'var(--radius-xl)',
-          padding: 0,
-          maxWidth: 500,
-          backgroundColor: 'var(--color-white)',
-          overflow: 'hidden',
-          boxShadow: 'var(--shadow-2xl)',
-        },
+          sx: {
+            borderRadius: 'var(--radius-xl)',
+            padding: 0,
+            maxWidth: 500,
+            backgroundColor: 'var(--bg-secondary)',
+            backgroundImage: 'var(--bg-mesh-gradient)',
+            overflow: 'hidden',
+            boxShadow: 'var(--shadow-premium-xl)',
+            border: '1px solid var(--border-subtle)',
+          },
       }}
     >
       <Box sx={{ position: 'relative', padding: 4 }}>
@@ -76,96 +78,98 @@ export default function SuccessModal({ open, onClose }: SuccessModalProps) {
            </Box>
           </motion.div>
           
-          <Typography
-            variant="h4"
+            <Typography
+              variant="h4"
+              sx={{
+                fontSize: 'var(--text-2xl)',
+                fontWeight: 800,
+                fontFamily: 'var(--font-heading)',
+                color: 'white',
+                textAlign: 'center',
+                marginBottom: 1,
+              }}
+            >
+              Welcome to the Empire!
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: 'var(--text-sm)',
+                color: 'var(--text-secondary)',
+                textAlign: 'center',
+              }}
+            >
+              Your account has been successfully created.
+            </Typography>
+          </Box>
+  
+          {/* Deliverables */}
+          <Box
             sx={{
-              fontSize: 'var(--text-2xl)',
-              fontWeight: 800,
-              fontFamily: 'var(--font-heading)',
-              color: 'var(--color-gray-900)',
-              textAlign: 'center',
-              marginBottom: 1,
+              backgroundColor: 'rgba(255,255,255,0.03)',
+              borderRadius: 'var(--radius-lg)',
+              padding: 3,
+              marginBottom: 4,
+              border: '1px solid var(--border-subtle)',
             }}
           >
-            Welcome to the Empire!
-          </Typography>
-          <Typography
-            sx={{
-              fontSize: 'var(--text-sm)',
-              color: 'var(--color-gray-500)',
-              textAlign: 'center',
-            }}
+            <Typography
+              sx={{
+                fontSize: 'var(--text-xs)',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                color: 'var(--color-crimson)',
+                marginBottom: 2,
+                letterSpacing: 'var(--tracking-wide)',
+              }}
+            >
+              What happens next:
+            </Typography>
+            <List dense disablePadding>
+              {[
+                'Instant access to your Admin Dashboard',
+                'Welcome email with setup guide sent',
+                '14-Day Free Trial activated',
+              ].map((text, index) => (
+                <ListItem key={index} disableGutters sx={{ paddingY: 0.5 }}>
+                  <ListItemIcon sx={{ minWidth: 28 }}>
+                    <Check size={16} color="var(--color-accent-emerald)" />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={text}
+                    primaryTypographyProps={{
+                      fontSize: 'var(--text-sm)',
+                      color: 'var(--text-secondary)',
+                      fontWeight: 500,
+                    }}
+                  />
+                </ListItem>
+              ))}
+            </List>
+          </Box>
+  
+          {/* CTA */}
+          <Button
+              fullWidth
+              variant="contained"
+              onClick={onClose} 
+              sx={{
+                  height: 56,
+                  background: 'var(--gradient-primary)',
+                  borderRadius: 'var(--radius-lg)',
+                  fontSize: 'var(--text-base)',
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  color: 'white',
+                  boxShadow: 'var(--shadow-primary)',
+                  '&:hover': {
+                      background: 'var(--gradient-primary-hover)',
+                      transform: 'translateY(-2px)',
+                  }
+              }}
+              endIcon={<ArrowRight size={20} />}
           >
-            Your account has been successfully created.
-          </Typography>
-        </Box>
-
-        {/* Deliverables */}
-        <Box
-          sx={{
-            backgroundColor: 'var(--color-gray-50)',
-            borderRadius: 'var(--radius-lg)',
-            padding: 3,
-            marginBottom: 4,
-          }}
-        >
-          <Typography
-            sx={{
-              fontSize: 'var(--text-xs)',
-              fontWeight: 700,
-              textTransform: 'uppercase',
-              color: 'var(--color-gray-500)',
-              marginBottom: 2,
-              letterSpacing: 'var(--tracking-wide)',
-            }}
-          >
-            What happens next:
-          </Typography>
-          <List dense disablePadding>
-            {[
-              'Instant access to your Admin Dashboard',
-              'Welcome email with setup guide sent',
-              '14-Day Free Trial activated',
-            ].map((text, index) => (
-              <ListItem key={index} disableGutters sx={{ paddingY: 0.5 }}>
-                <ListItemIcon sx={{ minWidth: 28 }}>
-                  <Check size={16} color="var(--color-success)" />
-                </ListItemIcon>
-                <ListItemText
-                  primary={text}
-                  primaryTypographyProps={{
-                    fontSize: 'var(--text-sm)',
-                    color: 'var(--color-gray-700)',
-                    fontWeight: 500,
-                  }}
-                />
-              </ListItem>
-            ))}
-          </List>
-        </Box>
-
-        {/* CTA */}
-        <Button
-            fullWidth
-            variant="contained"
-            onClick={onClose} 
-            sx={{
-                height: 56,
-                background: 'var(--gradient-cta)',
-                borderRadius: 'var(--radius-lg)',
-                fontSize: 'var(--text-base)',
-                fontWeight: 600,
-                textTransform: 'none',
-                color: 'var(--color-primary-900)',
-                boxShadow: 'var(--shadow-glow-green)',
-                '&:hover': {
-                    filter: 'brightness(1.05)',
-                }
-            }}
-            endIcon={<ArrowRight size={20} />}
-        >
-            Go to Dashboard
-        </Button>
+              Go to Dashboard
+          </Button>
       </Box>
     </Dialog>
   );

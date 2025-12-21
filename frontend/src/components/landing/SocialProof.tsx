@@ -68,9 +68,20 @@ export default function SocialProof() {
   return (
     <Box
       sx={{
-        backgroundColor: 'var(--bg-primary)',
+        backgroundColor: 'transparent',
         paddingY: { xs: '100px', md: '160px' },
         position: 'relative',
+        zIndex: 1,
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '100%',
+          background: 'radial-gradient(circle at 10% 50%, rgba(6, 182, 212, 0.03) 0%, transparent 60%)',
+          zIndex: -1,
+        },
         '&::after': {
           content: '""',
           position: 'absolute',
