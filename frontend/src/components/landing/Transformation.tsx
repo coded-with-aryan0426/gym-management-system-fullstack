@@ -7,227 +7,220 @@ import { motion } from 'framer-motion';
 const transformationStages = [
   {
     id: 1,
-    stage: 'Stage 1',
+    stage: 'Week 1',
     icon: Zap,
+    color: 'var(--color-accent-cyan)',
     headline: 'Instant Clarity',
-    description: 'Import your members. Automate your first payment run. See your real numbers for the first time.',
-    outcome: 'Stop drowning in spreadsheets',
-    timeline: 'Week 1',
+    description: 'Import members. Automate your first payment run. See your real numbers for the first time.',
+    outcome: 'Eliminate Sheet-Stress',
   },
   {
     id: 2,
-    stage: 'Stage 2',
+    stage: 'Month 1',
     icon: TrendingUp,
-    headline: 'Systems Working FOR You',
-    description: 'Members booking themselves. Trainers managing their own schedules. Payments collecting automatically.',
-    outcome: '10+ hours/week saved on admin',
-    timeline: 'Month 1',
+    color: 'var(--color-accent-emerald)',
+    headline: 'Operational Flow',
+    description: 'Automated booking and trainer management. Staff and members sync effortlessly.',
+    outcome: '10+ Hours/wk Saved',
   },
   {
     id: 3,
-    stage: 'Stage 3',
+    stage: 'Month 3',
     icon: Target,
-    headline: 'Competitive Edge',
-    description: 'Your member experience rivals big chains. Retention is up. Referrals are flowing. Trainers are happier.',
-    outcome: '15% increase in member retention',
-    timeline: 'Month 3',
+    color: 'var(--color-accent-gold)',
+    headline: 'Conversion Edge',
+    description: 'Member experience rivals big chains. Retention is up. Referrals are flowing.',
+    outcome: '15% Churn Reduction',
   },
   {
     id: 4,
-    stage: 'Stage 4',
+    stage: 'Month 6+',
     icon: Rocket,
-    headline: 'Scale Mode Unlocked',
-    description: 'Open location #2. Or #3. Your systems scale with you. What felt impossible now feels inevitable.',
-    outcome: 'Ready for multi-location expansion',
-    timeline: 'Month 6+',
+    color: 'var(--color-crimson)',
+    headline: 'Scale Mode',
+    description: 'Open location #2. Multi-location systems scale with you. Inevitable growth.',
+    outcome: 'Multi-Gym Ready',
   },
 ];
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.2 },
+  },
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] },
+  },
+};
 
 export default function Transformation() {
   return (
     <Box
       sx={{
-        background: 'var(--gradient-hero)',
-        paddingY: { xs: '80px', md: '120px' },
+        backgroundColor: 'var(--bg-primary)',
+        paddingY: { xs: '100px', md: '160px' },
+        position: 'relative',
+        overflow: 'hidden',
       }}
     >
       <Container maxWidth="lg">
         {/* Section Header */}
-        <Box sx={{ textAlign: 'center', marginBottom: 10 }}>
-          <Typography
-            sx={{
-              fontSize: '14px',
-              fontWeight: 600,
-              textTransform: 'uppercase',
-              letterSpacing: 'var(--tracking-wide)',
-              color: 'var(--color-accent-green)',
-              marginBottom: 2,
-            }}
+        <Box sx={{ textAlign: 'center', marginBottom: 12 }}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
           >
-            The Journey
-          </Typography>
-          <Typography
-            variant="h2"
-            sx={{
-              fontSize: { xs: '32px', md: '48px' },
-              fontWeight: 700,
-              fontFamily: 'var(--font-heading)',
-              color: 'white',
-            }}
-          >
-            From Chaos to Empire in 6 Months
-          </Typography>
+            <Typography
+              sx={{
+                fontSize: '14px',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '0.15em',
+                color: 'var(--color-crimson)',
+                marginBottom: 2.5,
+              }}
+            >
+              The Evolution
+            </Typography>
+            <Typography
+              variant="h2"
+              sx={{
+                fontSize: { xs: '36px', md: '56px' },
+                fontWeight: 900,
+                fontFamily: 'var(--font-family-display)',
+                color: 'white',
+                lineHeight: 1.1,
+                letterSpacing: '-0.02em',
+              }}
+            >
+              From Chaos to <span style={{ color: 'var(--text-tertiary)' }}>Empire.</span>
+            </Typography>
+          </motion.div>
         </Box>
 
-        {/* Timeline Container */}
-        <Box sx={{ position: 'relative', maxWidth: 1000, margin: '0 auto' }}>
-          {/* Connector Line (Desktop) */}
+        {/* Stages Container */}
+        <Box sx={{ position: 'relative', maxWidth: 1100, margin: '0 auto' }}>
+          {/* Timeline Linker (Desktop) */}
           <Box
             sx={{
               position: 'absolute',
-              top: 'calc(100% - 40px)', 
+              top: '50px',
               left: '10%',
               right: '10%',
-              height: 2,
-              background: 'rgba(255,255,255,0.1)',
+              height: '1px',
+              background: 'linear-gradient(90deg, transparent, var(--border-subtle), transparent)',
               display: { xs: 'none', md: 'block' },
+              zIndex: 0,
             }}
           />
 
-          <Grid container spacing={4}>
-            {transformationStages.map((item, index) => (
-              <Grid item xs={12} md={3} key={item.id}>
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.2 }}
+          <Grid 
+            container 
+            spacing={4}
+            component={motion.div}
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+          >
+            {transformationStages.map((item) => (
+              <Grid item xs={12} sm={6} md={3} key={item.id}>
+                <Box
+                  component={motion.div}
+                  variants={itemVariants}
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    position: 'relative',
+                    zIndex: 1,
+                  }}
                 >
+                  {/* Icon Circle */}
                   <Box
                     sx={{
+                      width: 80,
+                      height: 80,
+                      borderRadius: '24px',
+                      background: 'rgba(255,255,255,0.02)',
                       display: 'flex',
-                      flexDirection: 'column',
                       alignItems: 'center',
+                      justifyContent: 'center',
+                      marginBottom: 4,
+                      border: '1px solid var(--border-subtle)',
+                      transition: 'all 0.4s ease',
+                      '&:hover': {
+                         borderColor: item.color,
+                         transform: 'scale(1.1) rotate(5deg)',
+                         backgroundColor: 'rgba(255,255,255,0.05)',
+                      }
                     }}
                   >
-                    {/* Stage Card */}
-                    <Paper
-                      sx={{
-                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                        backdropFilter: 'blur(10px)',
-                        border: '1px solid rgba(255, 255, 255, 0.1)',
-                        borderRadius: 'var(--radius-xl)',
-                        padding: 3,
-                        marginBottom: 3,
-                        textAlign: 'center',
-                        transition: 'var(--transition-base)',
-                        maxWidth: 260,
-                        '&:hover': {
-                          backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                          transform: 'translateY(-8px)',
-                        },
-                      }}
-                    >
-                      {/* Icon */}
-                      <Box
-                        sx={{
-                          width: 64,
-                          height: 64,
-                          borderRadius: 'var(--radius-full)',
-                          background: 'var(--gradient-cta)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          margin: '0 auto 16px',
-                        }}
-                      >
-                        <item.icon size={28} color="var(--color-primary-900)" />
-                      </Box>
-                      
-                      {/* Stage Label */}
-                      <Typography
-                        sx={{
-                          fontSize: 'var(--text-xs)',
-                          fontWeight: 600,
-                          color: 'var(--color-accent-green)',
-                          textTransform: 'uppercase',
-                          letterSpacing: 'var(--tracking-wide)',
-                          marginBottom: 1,
-                        }}
-                      >
-                        {item.stage}
-                      </Typography>
-                      
-                      {/* Headline */}
-                      <Typography
-                        variant="h6"
-                        sx={{
-                          fontSize: 'var(--text-lg)',
-                          fontWeight: 700,
-                          fontFamily: 'var(--font-heading)',
-                          color: 'var(--color-white)',
-                          marginBottom: 1.5,
-                        }}
-                      >
-                        {item.headline}
-                      </Typography>
-                      
-                      {/* Description */}
-                      <Typography
-                        sx={{
-                          fontSize: 'var(--text-sm)',
-                          color: 'var(--color-gray-400)',
-                          lineHeight: 'var(--leading-relaxed)',
-                          marginBottom: 2,
-                        }}
-                      >
-                        {item.description}
-                      </Typography>
-                      
-                      {/* Outcome */}
-                      <Chip
-                        label={item.outcome}
-                        size="small"
-                        sx={{
-                          backgroundColor: 'rgba(0, 245, 160, 0.15)',
-                          color: 'var(--color-accent-green)',
-                          fontSize: 'var(--text-xs)',
-                          fontWeight: 500,
-                          height: 'auto',
-                          padding: '4px 0',
-                          '& .MuiChip-label': {
-                            whiteSpace: 'normal',
-                          }
-                        }}
-                      />
-                    </Paper>
-                    
-                    {/* Timeline Node */}
-                    <Box
-                      sx={{
-                        width: 24,
-                        height: 24,
-                        borderRadius: 'var(--radius-full)',
-                        background: 'var(--gradient-cta)',
-                        boxShadow: 'var(--shadow-glow-green)',
-                        position: 'relative',
-                        marginBottom: 1.5,
-                        zIndex: 2,
-                      }}
-                    />
-                    
-                    {/* Timeline Label */}
-                    <Typography
-                      sx={{
-                        fontSize: 'var(--text-sm)',
-                        fontWeight: 600,
-                        color: 'var(--color-white)',
-                      }}
-                    >
-                      {item.timeline}
-                    </Typography>
+                    <item.icon size={32} color={item.color} />
                   </Box>
-                </motion.div>
+                  
+                  <Typography
+                    sx={{
+                      fontSize: '13px',
+                      fontWeight: 700,
+                      color: 'var(--text-tertiary)',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.1em',
+                      marginBottom: 2,
+                    }}
+                  >
+                    {item.stage}
+                  </Typography>
+                  
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontSize: '20px',
+                      fontWeight: 800,
+                      fontFamily: 'var(--font-family-display)',
+                      color: 'white',
+                      marginBottom: 1.5,
+                      textAlign: 'center',
+                    }}
+                  >
+                    {item.headline}
+                  </Typography>
+                  
+                  <Typography
+                    sx={{
+                      fontSize: '14px',
+                      color: 'var(--text-secondary)',
+                      lineHeight: 1.6,
+                      marginBottom: 3,
+                      textAlign: 'center',
+                      maxWidth: 240,
+                    }}
+                  >
+                    {item.description}
+                  </Typography>
+                  
+                  <Chip
+                    label={item.outcome}
+                    sx={{
+                      backgroundColor: 'rgba(255,255,255,0.03)',
+                      color: 'white',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      height: 28,
+                      border: '1px solid var(--border-subtle)',
+                      borderRadius: '8px',
+                      '& .MuiChip-label': { paddingX: 1.5 }
+                    }}
+                  />
+                </Box>
               </Grid>
             ))}
           </Grid>

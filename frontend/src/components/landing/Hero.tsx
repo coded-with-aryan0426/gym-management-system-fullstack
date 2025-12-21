@@ -2,16 +2,15 @@
 import React from 'react';
 import { Box, Typography, Button, TextField, InputAdornment, Chip, Paper, Avatar } from '@mui/material';
 import { Sparkles, ArrowRight, Play, Star, Trophy, Shield, Zap, UserPlus, Mail } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 
-const GradientText = ({ children }: { children: React.ReactNode }) => (
+const GradientText = ({ children, className }: { children: React.ReactNode, className?: string }) => (
   <Box
     component="span"
+    className={className || "text-gradient-primary"}
     sx={{
-      background: 'var(--gradient-cta)',
-      WebkitBackgroundClip: 'text',
-      WebkitTextFillColor: 'transparent',
+      fontWeight: 900,
     }}
   >
     {children}
@@ -19,11 +18,31 @@ const GradientText = ({ children }: { children: React.ReactNode }) => (
 );
 
 const trustSignals = [
-  { id: 1, icon: Star, text: '4.9/5 from 2,847 reviews' },
-  { id: 2, icon: Trophy, text: 'Best Gym Software 2024' },
-  { id: 3, icon: Shield, text: 'Bank-Level Security' },
-  { id: 4, icon: Zap, text: 'Setup in 15 Minutes' },
+  { id: 1, icon: Star, text: '4.9/5 from 2,847 reviews', color: 'var(--color-accent-gold)' },
+  { id: 2, icon: Trophy, text: 'Best Gym Software 2024', color: 'var(--color-accent-gold)' },
+  { id: 3, icon: Shield, text: 'Bank-Level Security', color: 'var(--color-accent-cyan)' },
+  { id: 4, icon: Zap, text: 'Setup in 15 Minutes', color: 'var(--color-accent-orange)' },
 ];
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.3,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: { duration: 0.8, cubicBezier: [0.16, 1, 0.3, 1] },
+  },
+};
 
 interface HeroProps {
   onSignupClick?: () => void;
@@ -45,108 +64,133 @@ export default function Hero({ onSignupClick }: HeroProps) {
       sx={{
         position: 'relative',
         minHeight: '100vh',
-        paddingTop: { xs: '96px', md: '120px' },
-        paddingBottom: '80px',
+        paddingTop: { xs: '120px', md: '160px' },
+        paddingBottom: '100px',
         overflow: 'hidden',
-        background: 'var(--gradient-hero)',
+        background: 'var(--bg-mesh-gradient)',
         display: 'flex',
         alignItems: 'center',
       }}
     >
+      {/* Background Glows */}
+      <Box sx={{
+        position: 'absolute',
+        top: '10%',
+        left: '5%',
+        width: '40vw',
+        height: '40vw',
+        background: 'radial-gradient(circle, rgba(220, 38, 38, 0.1) 0%, transparent 70%)',
+        filter: 'blur(80px)',
+        zIndex: 0,
+      }} />
+      <Box sx={{
+        position: 'absolute',
+        bottom: '10%',
+        right: '5%',
+        width: '30vw',
+        height: '30vw',
+        background: 'radial-gradient(circle, rgba(16, 185, 129, 0.05) 0%, transparent 70%)',
+        filter: 'blur(80px)',
+        zIndex: 0,
+      }} />
+
       <Box
+        component={motion.div}
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
         sx={{
           maxWidth: 'lg',
           margin: '0 auto',
-          padding: { xs: '0 var(--space-4)', md: '0 var(--space-10)' },
+          padding: { xs: '0 var(--space-6)', md: '0 var(--space-10)' },
           display: 'flex',
           flexDirection: { xs: 'column', lg: 'row' },
-          gap: { xs: '64px', lg: '64px' },
+          gap: { xs: '80px', lg: '64px' },
           alignItems: 'center',
           width: '100%',
+          position: 'relative',
+          zIndex: 1,
         }}
       >
         {/* Content Side */}
-        <Box sx={{ flex: 1, color: 'white' }}>
-          <Chip
-            icon={<Sparkles size={14} color="#EF4444" />}
-            label="Trusted by 5,000+ Gyms Across India"
-            sx={{
-              backgroundColor: 'rgba(239, 68, 68, 0.1)', // Red bg
-              color: '#EF4444', // Red text
-              fontSize: 'var(--text-sm)',
-              fontWeight: 500,
-              height: 32,
-              paddingX: 1,
-              marginBottom: 3,
-              borderRadius: 'var(--radius-full)',
-              border: '1px solid rgba(239, 68, 68, 0.2)',
-              '& .MuiChip-icon': { color: '#EF4444' }
-            }}
-          />
+        <Box sx={{ flex: 1.2, color: 'white' }}>
+          <motion.div variants={itemVariants}>
+            <Chip
+              icon={<Sparkles size={14} />}
+              label="The Future of Gym Management"
+              className="glass-effect"
+              sx={{
+                color: 'var(--color-crimson)',
+                fontSize: '12px',
+                fontWeight: 700,
+                height: 32,
+                paddingX: 1.5,
+                letterSpacing: '0.05em',
+                textTransform: 'uppercase',
+                marginBottom: 4,
+                borderRadius: 'var(--radius-full)',
+                border: '1px solid rgba(220, 38, 38, 0.2)',
+                '& .MuiChip-icon': { color: 'var(--color-crimson)' }
+              }}
+            />
+          </motion.div>
 
           <Typography
             variant="h1"
+            component={motion.h1}
+            variants={itemVariants}
             sx={{
-              fontSize: { xs: '36px', md: '48px', lg: '60px' },
-              fontWeight: 800,
-              fontFamily: 'var(--font-heading)',
-              lineHeight: 'var(--leading-tight)',
-              letterSpacing: 'var(--tracking-tight)',
-              color: 'var(--color-white)',
+              fontSize: { xs: '42px', md: '56px', lg: '72px' },
+              fontWeight: 900,
+              fontFamily: 'var(--font-family-display)',
+              lineHeight: 1.1,
+              letterSpacing: '-0.04em',
+              color: 'var(--text-primary)',
               marginBottom: 3,
-              maxWidth: 600,
+              maxWidth: 700,
             }}
           >
-            Run Your Gym Like a <GradientText>Machine</GradientText>. Not a Mess.
+            Run Your Gym Like a <GradientText>Machine</GradientText>.
           </Typography>
 
           <Typography
             variant="body1"
+            component={motion.p}
+            variants={itemVariants}
             sx={{
-              fontSize: { xs: '18px', md: '20px' },
+              fontSize: { xs: '18px', md: '21px' },
               fontWeight: 400,
-              fontFamily: 'var(--font-inter)',
-              lineHeight: 'var(--leading-relaxed)',
-              color: 'var(--color-gray-300)',
-              marginBottom: 5,
-              maxWidth: 520,
+              fontFamily: 'var(--font-family-premium)',
+              lineHeight: 1.6,
+              color: 'var(--text-secondary)',
+              marginBottom: 6,
+              maxWidth: 540,
             }}
           >
-            Whether you're an owner tracking revenue, a trainer managing clients,
-            or a member booking classes — everything syncs in real-time.
+            Stop drowning in spreadsheets. AthlonX is the elite operating system for precision-driven gym owners and trainers.
           </Typography>
 
           {/* CTA Section */}
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, marginBottom: 6 }}>
-            <Box sx={{ display: 'flex', gap: 1.5, maxWidth: 480, flexDirection: { xs: 'column', sm: 'row' } }}>
+          <Box component={motion.div} variants={itemVariants} sx={{ display: 'flex', flexDirection: 'column', gap: 3, marginBottom: 8 }}>
+            <Box sx={{ display: 'flex', gap: 2, maxWidth: 520, flexDirection: { xs: 'column', sm: 'row' } }}>
               <TextField
-                placeholder="Enter your gym email..."
+                placeholder="Enter your work email..."
                 variant="outlined"
                 fullWidth
+                className="input-premium"
                 sx={{
                   '& .MuiOutlinedInput-root': {
-                    height: 56,
-                    backgroundColor: 'rgba(255,255,255,0.05)',
-                    borderRadius: 'var(--radius-lg)',
-                    fontSize: 'var(--text-base)',
-                    color: 'var(--color-white)',
-                    '& fieldset': {
-                      borderColor: 'rgba(255,255,255,0.1)',
-                      borderWidth: 1,
-                    },
-                    '&:hover fieldset': {
-                      borderColor: 'rgba(255,255,255,0.2)',
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: 'var(--color-accent-blue)', // Focused red
-                      borderWidth: 2,
-                    },
+                    height: 60,
+                    backgroundColor: 'rgba(255,255,255,0.03)',
+                    borderRadius: 'var(--radius-premium-md)',
+                    fontSize: '16px',
+                    '& fieldset': { border: 'none' },
                   },
                 }}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <Mail size={20} color="var(--color-gray-400)" />
+                      <Mail size={20} color="var(--text-muted)" />
                     </InputAdornment>
                   ),
                 }}
@@ -154,22 +198,11 @@ export default function Hero({ onSignupClick }: HeroProps) {
 
               <Button
                 variant="contained"
+                className="btn-premium btn-premium-primary"
                 sx={{
-                  height: 56,
+                  height: 60,
                   minWidth: 200,
-                  background: 'var(--gradient-cta)',
-                  borderRadius: 'var(--radius-lg)',
-                  fontSize: 'var(--text-base)',
-                  fontWeight: 600,
-                  fontFamily: 'var(--font-heading)',
-                  textTransform: 'none',
-                  color: 'white', // White text on red CTA
-                  boxShadow: 'var(--shadow-glow-blue)', // Red glow (remapped to blue variable name but value is red)
-                  transition: 'var(--transition-base)',
-                  '&:hover': {
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 0 30px rgba(220, 38, 38, 0.6)',
-                  },
+                  fontSize: '16px',
                 }}
                 endIcon={<ArrowRight size={20} />}
                 onClick={handleCtaClick}
@@ -180,34 +213,38 @@ export default function Hero({ onSignupClick }: HeroProps) {
 
             <Button
               variant="text"
-              startIcon={<Play size={18} />}
+              startIcon={<Play size={20} />}
               sx={{
-                color: 'var(--color-gray-300)',
-                fontSize: 'var(--text-sm)',
-                fontWeight: 500,
+                color: 'var(--text-secondary)',
+                fontSize: '15px',
+                fontWeight: 600,
                 textTransform: 'none',
                 padding: 0,
                 justifyContent: 'flex-start',
                 width: 'fit-content',
+                transition: 'all 0.3s ease',
                 '&:hover': {
-                  color: 'var(--color-white)',
+                  color: 'var(--color-crimson)',
                   backgroundColor: 'transparent',
+                  transform: 'translateX(5px)',
                 },
               }}
             >
-              Watch 2-Min Demo
+              Watch the Platform Tour
             </Button>
           </Box>
 
           {/* Trust Signals */}
           <Box
+            component={motion.div}
+            variants={itemVariants}
             sx={{
               display: 'flex',
               alignItems: 'center',
-              gap: { xs: 2, md: 4 },
+              gap: { xs: 3, md: 5 },
               flexWrap: 'wrap',
-              paddingTop: 4,
-              borderTop: '1px solid rgba(255,255,255,0.1)',
+              paddingTop: 5,
+              borderTop: '1px solid var(--border-subtle)',
             }}
           >
             {trustSignals.map((signal) => (
@@ -216,18 +253,29 @@ export default function Hero({ onSignupClick }: HeroProps) {
                 sx={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 1,
+                  gap: 1.5,
                 }}
               >
-                <signal.icon
-                  size={18}
-                  color="var(--color-accent-green)"
-                />
+                <Box sx={{ 
+                  width: 32, 
+                  height: 32, 
+                  borderRadius: '10px', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  backgroundColor: 'rgba(255,255,255,0.03)',
+                  border: '1px solid rgba(255,255,255,0.05)'
+                }}>
+                  <signal.icon
+                    size={16}
+                    color={signal.color}
+                  />
+                </Box>
                 <Typography
                   sx={{
-                    fontSize: 'var(--text-sm)',
+                    fontSize: '14px',
                     fontWeight: 500,
-                    color: 'var(--color-gray-300)',
+                    color: 'var(--text-secondary)',
                   }}
                 >
                   {signal.text}
@@ -243,101 +291,120 @@ export default function Hero({ onSignupClick }: HeroProps) {
             flex: 1,
             position: 'relative',
             width: '100%',
-            maxWidth: 600,
+            maxWidth: 640,
             display: { xs: 'none', lg: 'block' }
           }}
         >
-          {/* Main Dashboard Image */}
+          {/* Main Dashboard Preview with floating effect */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8 }}
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 1.2, cubicBezier: [0.16, 1, 0.3, 1] }}
           >
             <Box
-              component="img"
-              src="/images/dashboard-red.png"
-              alt="Gym Management Dashboard"
               sx={{
-                width: '100%',
-                height: 'auto',
-                borderRadius: 'var(--radius-xl)',
-                boxShadow: 'var(--shadow-xl)',
-                border: '1px solid rgba(255,255,255,0.1)',
+                position: 'relative',
+                '&::before': {
+                  content: '""',
+                  position: 'absolute',
+                  inset: '-2px',
+                  background: 'var(--gradient-primary)',
+                  borderRadius: '30px',
+                  zIndex: -1,
+                  opacity: 0.3,
+                  filter: 'blur(10px)',
+                }
               }}
-            />
+            >
+              <Box
+                component="img"
+                src="/images/dashboard-red.png"
+                alt="AthlonX Dashboard"
+                className="animate-float"
+                sx={{
+                  width: '100%',
+                  height: 'auto',
+                  borderRadius: '28px',
+                  boxShadow: 'var(--shadow-premium-xl)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  display: 'block',
+                }}
+              />
+            </Box>
           </motion.div>
 
-          {/* Floating Notification Cards */}
+          {/* Floating Metrics Card */}
           <Paper
             elevation={0}
             component={motion.div}
-            animate={{ y: [-10, 10, -10] }}
-            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: [0, -15, 0] }}
+            transition={{ 
+              opacity: { duration: 0.5, delay: 0.8 },
+              y: { duration: 6, repeat: Infinity, ease: "easeInOut" } 
+            }}
+            className="glass-effect-heavy"
             sx={{
               position: 'absolute',
-              top: -20,
-              right: -20,
-              padding: 2,
-              backgroundColor: 'rgba(15, 23, 42, 0.95)',
-              backdropFilter: 'blur(12px)',
-              border: '1px solid rgba(220, 38, 38, 0.2)', // Red border
-              borderRadius: 'var(--radius-lg)',
-              boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
+              top: '10%',
+              right: '-40px',
+              padding: 2.5,
+              borderRadius: '20px',
               display: 'flex',
               alignItems: 'center',
-              gap: 1.5,
-              zIndex: 2,
+              gap: 2,
+              zIndex: 10,
+              boxShadow: 'var(--shadow-premium-lg)',
             }}
           >
-            <Avatar sx={{ bgcolor: 'var(--color-primary-600)', width: 40, height: 40 }}>
-              <UserPlus size={20} color="white" />
+            <Avatar sx={{ bgcolor: 'rgba(220, 38, 38, 0.1)', width: 44, height: 44, border: '1px solid rgba(220, 38, 38, 0.2)' }}>
+              <UserPlus size={22} color="var(--color-crimson)" />
             </Avatar>
             <Box>
-              <Typography sx={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'white' }}>
-                New Member Joined
+              <Typography sx={{ fontSize: '14px', fontWeight: 700, color: 'white' }}>
+                Active Members
               </Typography>
-              <Typography sx={{ fontSize: 'var(--text-xs)', color: 'var(--color-gray-400)' }}>
-                Just now
+              <Typography sx={{ fontSize: '18px', fontWeight: 800, color: 'var(--color-crimson)' }}>
+                1,284
               </Typography>
             </Box>
           </Paper>
 
-          {/* Revenue Card */}
+          {/* Floating Revenue Card */}
           <Paper
             elevation={0}
             component={motion.div}
-            animate={{ y: [10, -10, 10] }}
-            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: [0, 15, 0] }}
+            transition={{ 
+              opacity: { duration: 0.5, delay: 1 },
+              y: { duration: 7, repeat: Infinity, ease: "easeInOut", delay: 0.5 } 
+            }}
+            className="premium-card"
             sx={{
               position: 'absolute',
-              bottom: 40,
-              left: -40,
-              padding: 2,
-              backgroundColor: 'rgba(15, 23, 42, 0.9)',
-              backdropFilter: 'blur(12px)',
-              border: '1px solid rgba(220, 38, 38, 0.2)', // Red border
-              borderRadius: 'var(--radius-lg)',
-              boxShadow: '0 20px 40px rgba(220, 38, 38, 0.1)', // Red shadow
-              zIndex: 2,
+              bottom: '5%',
+              left: '-60px',
+              padding: 3,
+              zIndex: 10,
+              minWidth: 200,
             }}
           >
-            <Typography sx={{ fontSize: 'var(--text-xs)', color: 'var(--color-gray-400)', marginBottom: 0.5 }}>
-              Today's Revenue
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 1 }}>
+              <Typography sx={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase' }}>
+                Monthly Revenue
+              </Typography>
+              <Zap size={16} color="var(--color-accent-gold)" />
+            </Box>
+            <Typography sx={{ fontSize: '28px', fontWeight: 900, color: 'white', marginBottom: 1 }}>
+              ₹8.4L
             </Typography>
-            <Typography sx={{ fontSize: 'var(--text-2xl)', fontWeight: 700, color: 'white' }}>
-              ₹2,45,000
-            </Typography>
-            <Chip
-              label="+23% from yesterday"
-              size="small"
-              sx={{
-                backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                color: 'var(--color-success)',
-                fontSize: 'var(--text-xs)',
-                height: 24,
-                marginTop: 1,
-              }}
-            />
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: 'var(--color-accent-emerald)', boxShadow: '0 0 10px var(--color-accent-emerald)' }} />
+              <Typography sx={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-accent-emerald)' }}>
+                +14% vs last month
+              </Typography>
+            </Box>
           </Paper>
         </Box>
       </Box>

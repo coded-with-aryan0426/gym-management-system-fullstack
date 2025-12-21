@@ -1,194 +1,275 @@
 
 import React from 'react';
-import { Box, Typography, Card, Chip, Grid, Container } from '@mui/material';
-import { TrendingDown, Calendar, Frown } from 'lucide-react';
+import { Box, Typography, Card, Grid, Container, Chip } from '@mui/material';
+import { TrendingDown, Calendar, Frown, Quote } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const problems = [
   {
     id: 1,
-    target: 'For Gym Owners',
+    target: 'Gym Owners',
     icon: TrendingDown,
-    iconBg: 'rgba(239, 68, 68, 0.1)',
-    iconColor: 'var(--color-error)',
-    headline: 'Revenue Leaking Through the Cracks',
-    agitation: "Missed payments. Manual invoicing. No idea which membership tier actually makes money. You're working IN your gym instead of ON your gym.",
+    color: 'var(--color-crimson)',
+    bg: 'rgba(220, 38, 38, 0.05)',
+    headline: 'Revenue Leaking Everywhere',
+    agitation: "Missed payments. Manual invoicing. No idea which tier actually makes money. You're working IN your gym instead of ON your gym.",
   },
   {
     id: 2,
-    target: 'For Trainers',
+    target: 'Trainers',
     icon: Calendar,
-    iconBg: 'rgba(245, 158, 11, 0.1)',
-    iconColor: 'var(--color-warning)',
-    headline: 'Clients Ghosting. Schedule Chaos.',
-    agitation: 'Texting back and forth to book sessions. No-shows killing your income. Zero visibility into client progress. You became a trainer, not an admin.',
+    color: 'var(--color-accent-gold)',
+    bg: 'rgba(251, 191, 36, 0.05)',
+    headline: 'Client Ghosting & Chaos',
+    agitation: 'Texting back and forth to book sessions. No-shows killing your income. Zero progress visibility. You became a trainer, not an admin.',
   },
   {
     id: 3,
-    target: 'For Members',
+    target: 'Members',
     icon: Frown,
-    iconBg: 'rgba(139, 92, 246, 0.1)',
-    iconColor: '#8B5CF6',
-    headline: "Booking Shouldn't Feel Like a Workout",
-    agitation: "Outdated apps. Can't see trainer availability. Payments failing. Progress tracking scattered across 5 different apps.",
+    color: 'var(--color-accent-cyan)',
+    bg: 'rgba(6, 182, 212, 0.05)',
+    headline: 'Friction-Heavy Experience',
+    agitation: "Outdated apps. Can't see availability. Payments failing. Progress tracking scattered across 5 different apps.",
   },
 ];
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.15,
+    },
+  },
+};
+
+const cardVariants = {
+  hidden: { y: 30, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] },
+  },
+};
 
 export default function Problem() {
   return (
     <Box
       sx={{
-        backgroundColor: 'var(--color-primary-900)',
-        paddingY: { xs: '80px', md: '120px' },
+        backgroundColor: 'var(--bg-primary)',
+        paddingY: { xs: '100px', md: '160px' },
+        position: 'relative',
+        overflow: 'hidden',
       }}
     >
-      <Container maxWidth="lg">
+      {/* Background Decorative Element */}
+      <Box sx={{
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: '80%',
+        height: '80%',
+        background: 'radial-gradient(circle, rgba(220, 38, 38, 0.03) 0%, transparent 70%)',
+        zIndex: 0,
+        pointerEvents: 'none',
+      }} />
+
+      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
         {/* Section Header */}
-        <Box sx={{ textAlign: 'center', marginBottom: 8 }}>
-          <Typography
-            sx={{
-              fontSize: '14px',
-              fontWeight: 600,
-              textTransform: 'uppercase',
-              letterSpacing: 'var(--tracking-wide)',
-              color: 'var(--color-error)',
-              marginBottom: 2,
-            }}
+        <Box sx={{ textAlign: 'center', marginBottom: 10 }}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
           >
-            The Hard Truth
-          </Typography>
-          <Typography
-            variant="h2"
-            sx={{
-              fontSize: { xs: '32px', md: '48px' },
-              fontWeight: 700,
-              fontFamily: 'var(--font-heading)',
-              color: 'white',
-              maxWidth: 700,
-              margin: '0 auto',
-            }}
-          >
-            Is Your Gym Running You, Or Are You Running Your Gym?
-          </Typography>
+            <Typography
+              sx={{
+                fontSize: '14px',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '0.15em',
+                color: 'var(--color-crimson)',
+                marginBottom: 2.5,
+              }}
+            >
+              The Friction
+            </Typography>
+            <Typography
+              variant="h2"
+              sx={{
+                fontSize: { xs: '36px', md: '56px' },
+                fontWeight: 900,
+                fontFamily: 'var(--font-family-display)',
+                letterSpacing: '-0.03em',
+                color: 'white',
+                maxWidth: 800,
+                margin: '0 auto',
+                lineHeight: 1.1,
+              }}
+            >
+              Is Your Gym Running You, <br />
+              <Box component="span" sx={{ color: 'var(--text-tertiary)' }}>Or Are You Running Your Gym?</Box>
+            </Typography>
+          </motion.div>
         </Box>
 
         {/* Problem Cards */}
-        <Grid container spacing={4}>
-          {problems.map((item, index) => (
-            <Grid size={{ xs: 12, md: 4 }} key={item.id}>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
+        <Grid 
+          container 
+          spacing={4} 
+          component={motion.div}
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+        >
+          {problems.map((item) => (
+            <Grid item xs={12} md={4} key={item.id}>
+              <Card
+                component={motion.div}
+                variants={cardVariants}
+                className="premium-card"
+                sx={{
+                  padding: { xs: 4, md: 5 },
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  '&::after': {
+                    content: '""',
+                    position: 'absolute',
+                    top: 0,
+                    right: 0,
+                    width: '100px',
+                    height: '100px',
+                    background: `radial-gradient(circle at top right, ${item.bg}, transparent 70%)`,
+                    opacity: 0.5,
+                  }
+                }}
               >
-                <Card
+                {/* Icon Container */}
+                <Box
                   sx={{
-                    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                    border: '1px solid rgba(255, 255, 255, 0.08)',
-                    borderRadius: 'var(--radius-xl)',
-                    padding: 4,
-                    height: '100%',
-                    transition: 'var(--transition-base)',
-                    '&:hover': {
-                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                      borderColor: 'var(--color-accent-orange)',
-                      transform: 'translateY(-4px)',
-                    },
+                    width: 60,
+                    height: 60,
+                    borderRadius: '16px',
+                    backgroundColor: 'rgba(255,255,255,0.03)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: 4,
+                    border: '1px solid rgba(255,255,255,0.05)',
                   }}
                 >
-                  {/* Icon Container */}
-                  <Box
-                    sx={{
-                      width: 64,
-                      height: 64,
-                      borderRadius: 'var(--radius-lg)',
-                      backgroundColor: item.iconBg,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      marginBottom: 3,
-                    }}
-                  >
-                    <item.icon size={28} color={item.iconColor} />
-                  </Box>
+                  <item.icon size={28} color={item.color} />
+                </Box>
 
-                  {/* Badge */}
-                  <Chip
-                    label={item.target}
-                    size="small"
-                    sx={{
-                      backgroundColor: 'rgba(255, 107, 53, 0.15)',
-                      color: 'var(--color-accent-orange)',
-                      fontSize: 'var(--text-xs)',
-                      fontWeight: 600,
-                      marginBottom: 2,
-                      height: 24,
-                    }}
-                  />
+                <Chip 
+                  label={item.target}
+                  sx={{
+                    width: 'fit-content',
+                    backgroundColor: item.bg,
+                    color: item.color,
+                    fontWeight: 700,
+                    fontSize: '11px',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    marginBottom: 3,
+                    height: 24,
+                    border: `1px solid ${item.bg}`,
+                  }}
+                />
 
-                  {/* Headline */}
-                  <Typography
-                    variant="h5"
-                    sx={{
-                      fontSize: 'var(--text-xl)',
-                      fontWeight: 700,
-                      fontFamily: 'var(--font-heading)',
-                      color: 'var(--color-white)',
-                      marginBottom: 2,
-                    }}
-                  >
-                    {item.headline}
-                  </Typography>
+                <Typography
+                  variant="h5"
+                  sx={{
+                    fontSize: '22px',
+                    fontWeight: 800,
+                    fontFamily: 'var(--font-family-display)',
+                    color: 'var(--text-primary)',
+                    marginBottom: 2,
+                    lineHeight: 1.3,
+                  }}
+                >
+                  {item.headline}
+                </Typography>
 
-                  {/* Agitation Text */}
-                  <Typography
-                    sx={{
-                      fontSize: 'var(--text-base)',
-                      fontWeight: 400,
-                      lineHeight: 'var(--leading-relaxed)',
-                      color: 'var(--color-gray-400)',
-                    }}
-                  >
-                    {item.id === 1 ? (
-                      <>
-                        Missed payments. Manual invoicing. No idea which membership tier actually makes money. You're working <Box component="span" sx={{ color: 'var(--color-error)', fontWeight: 600 }}>IN</Box> your gym instead of <Box component="span" sx={{ color: 'var(--color-success)', fontWeight: 600 }}>ON</Box> your gym.
-                        </>
-                    ) : (
-                      item.agitation
-                    )}
-                  </Typography>
-                </Card>
-              </motion.div>
+                <Typography
+                  sx={{
+                    fontSize: '16px',
+                    fontWeight: 400,
+                    lineHeight: 1.6,
+                    color: 'var(--text-secondary)',
+                  }}
+                >
+                  {item.agitation}
+                </Typography>
+              </Card>
             </Grid>
           ))}
         </Grid>
 
-        {/* Transition Statement */}
-        <Box
-          sx={{
-            maxWidth: 800,
-            margin: '64px auto 0',
-            padding: 4,
-            backgroundColor: 'rgba(255,255,255,0.03)',
-            borderLeft: '4px solid var(--color-accent-orange)',
-            borderRadius: '0 var(--radius-lg) var(--radius-lg) 0',
-          }}
+        {/* Founder Quote */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.2 }}
         >
-           <Typography
+          <Box
             sx={{
-              fontSize: 'var(--text-lg)',
-              fontStyle: 'italic',
-              color: 'var(--color-gray-300)',
-              lineHeight: 'var(--leading-relaxed)',
+              maxWidth: 860,
+              margin: '100px auto 0',
+              padding: { xs: 4, md: 6 },
+              backgroundColor: 'rgba(255,255,255,0.02)',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: '32px',
+              textAlign: 'center',
+              position: 'relative',
             }}
-           >
-            "I built AthlonX because I was tired of using 5 different softwares just to keep my gym open. I wanted one dashboard that told me the truth about my business."
-            <Box component="span" sx={{ display: 'block', marginTop: 2, fontStyle: 'normal', fontWeight: 600, color: 'white' }}>
-              — Aryan, Founder of AthlonX
-            </Box>
-           </Typography>
-        </Box>
+          >
+            <Quote 
+              size={48} 
+              color="var(--color-crimson)" 
+              style={{ opacity: 0.1, position: 'absolute', top: 20, left: 30 }} 
+            />
+            
+             <Typography
+              sx={{
+                fontSize: { xs: '18px', md: '22px' },
+                fontWeight: 500,
+                fontStyle: 'italic',
+                color: 'var(--text-primary)',
+                lineHeight: 1.6,
+                position: 'relative',
+                zIndex: 1,
+              }}
+             >
+              "I built AthlonX because I was tired of using 5 different softwares just to keep my gym open. I wanted one dashboard that told me the truth about my business."
+             </Typography>
+             
+             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, marginTop: 4 }}>
+                <Box 
+                  component="img" 
+                  src="/images/founder-avatar.png" 
+                  onError={(e: any) => e.target.src = "https://ui-avatars.com/api/?name=Aryan&background=DC2626&color=fff"}
+                  sx={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--color-crimson)' }} 
+                />
+                <Box sx={{ textAlign: 'left' }}>
+                  <Typography sx={{ fontWeight: 700, color: 'white', fontSize: '16px' }}>
+                    Aryan Suthar
+                  </Typography>
+                  <Typography sx={{ fontSize: '13px', color: 'var(--text-tertiary)', fontWeight: 500 }}>
+                    Founder & CEO, AthlonX
+                  </Typography>
+                </Box>
+             </Box>
+          </Box>
+        </motion.div>
       </Container>
     </Box>
   );

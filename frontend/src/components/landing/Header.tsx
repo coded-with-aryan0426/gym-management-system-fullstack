@@ -1,13 +1,13 @@
 
 import { AppBar, Toolbar, Button, Box, useScrollTrigger } from '@mui/material';
-import { AthlonXLogo } from '../ui/AthlonXLogo';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 export default function Header() {
   const navigate = useNavigate();
   const trigger = useScrollTrigger({
     disableHysteresis: true,
-    threshold: 0,
+    threshold: 20,
   });
 
   return (
@@ -15,42 +15,54 @@ export default function Header() {
       position="fixed"
       elevation={0}
       sx={{
-        height: 90, // Increased height
-        backgroundColor: trigger ? 'rgba(10, 10, 10, 0.95)' : 'transparent',
-        backdropFilter: 'blur(12px)',
-        borderBottom: trigger ? '1px solid rgba(255,255,255,0.05)' : 'none',
+        height: trigger ? 70 : 90,
+        backgroundColor: trigger ? 'rgba(13, 13, 13, 0.8)' : 'transparent',
+        backdropFilter: trigger ? 'blur(20px)' : 'none',
+        borderBottom: trigger ? '1px solid rgba(255,255,255,0.08)' : 'none',
         padding: { xs: '0 var(--space-4)', md: '0 var(--space-10)' },
-        transition: 'all 0.3s ease',
-        zIndex: 50,
+        transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+        zIndex: 1000,
       }}
     >
       <Toolbar sx={{ height: '100%', justifyContent: 'space-between' }}>
         {/* Logo */}
-        <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }} onClick={() => navigate('/')}>
+        <Box 
+          component={motion.div}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }} 
+          onClick={() => navigate('/')}
+        >
           <Box
             component="img"
             src="/images/logo.png"
             alt="AthlonX"
             sx={{
-              height: 48, // Adjusted size for header
+              height: trigger ? 40 : 48,
               width: 'auto',
-              objectFit: 'contain'
+              objectFit: 'contain',
+              transition: 'height 0.4s ease',
             }}
           />
         </Box>
 
         {/* Nav Links - Desktop */}
-        <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 4 }}>
+        <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1 }}>
           {['Features', 'Testimonials', 'Pricing'].map((item) => (
             <Button
               key={item}
               variant="text"
               sx={{
-                color: 'var(--color-gray-300)',
-                fontSize: 15,
+                color: 'var(--text-secondary)',
+                fontSize: 14,
                 fontWeight: 500,
                 textTransform: 'none',
-                '&:hover': { color: 'white' }
+                padding: '8px 16px',
+                borderRadius: 'var(--radius-premium-md)',
+                '&:hover': { 
+                  color: 'white',
+                  backgroundColor: 'rgba(255,255,255,0.05)'
+                }
               }}
             >
               {item}
@@ -58,17 +70,21 @@ export default function Header() {
           ))}
         </Box>
 
-        {/* CTA Button */}
-        <Box sx={{ display: 'flex', gap: 2 }}>
+        {/* CTA Buttons */}
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
           <Button
             variant="text"
             onClick={() => navigate('/login')}
             sx={{
-              display: { xs: 'none', sm: 'block' },
-              color: 'white',
+              display: { xs: 'none', sm: 'inline-flex' },
+              color: 'var(--text-primary)',
               textTransform: 'none',
               fontWeight: 500,
-              '&:hover': { color: 'var(--color-accent-blue)' }
+              fontSize: 14,
+              '&:hover': { 
+                color: 'var(--color-crimson)',
+                backgroundColor: 'transparent'
+              }
             }}
           >
             Log In
@@ -76,17 +92,19 @@ export default function Header() {
           <Button
             variant="contained"
             onClick={() => navigate('/signup')}
+            className="btn-premium btn-premium-primary"
             sx={{
               height: 44,
               padding: '0 24px',
-              backgroundColor: 'var(--color-accent-blue)',
-              borderRadius: 'var(--radius-lg)',
+              backgroundColor: 'var(--color-crimson)',
+              borderRadius: 'var(--radius-premium-md)',
               textTransform: 'none',
               fontWeight: 600,
-              boxShadow: '0 0 20px rgba(220, 38, 38, 0.3)',
+              fontSize: 14,
+              boxShadow: 'var(--shadow-primary)',
               '&:hover': {
-                backgroundColor: 'var(--color-accent-blue-hover)',
-                boxShadow: '0 0 30px rgba(220, 38, 38, 0.5)',
+                backgroundColor: 'var(--color-crimson-hover)',
+                boxShadow: 'var(--shadow-glow-primary)',
               }
             }}
           >

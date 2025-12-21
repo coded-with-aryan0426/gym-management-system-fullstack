@@ -24,7 +24,7 @@ export default function LandingPage() {
     };
 
     return (
-        <Box component="main" sx={{ backgroundColor: 'var(--color-primary-900)', minHeight: '100vh', overflowX: 'hidden', position: 'relative' }}>
+        <Box component="main" sx={{ backgroundColor: 'var(--bg-primary)', minHeight: '100vh', overflowX: 'hidden', position: 'relative' }}>
             <AnimatedBackground />
             <Box sx={{ position: 'relative', zIndex: 1 }}>
                 <Header />

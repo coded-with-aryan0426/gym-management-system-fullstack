@@ -12,7 +12,7 @@ export default function AnimatedBackground() {
         height: '100vh',
         zIndex: 0,
         overflow: 'hidden',
-        background: '#0a0a0a', // Very dark base
+        background: 'var(--bg-primary)',
         pointerEvents: 'none',
       }}
     >
@@ -23,7 +23,7 @@ export default function AnimatedBackground() {
           x: [-100, 100, -100],
           y: [-100, 50, -100],
           scale: [1, 1.2, 1],
-          opacity: [0.3, 0.5, 0.3],
+          opacity: [0.2, 0.4, 0.2],
         }}
         transition={{
           duration: 15,
@@ -37,7 +37,7 @@ export default function AnimatedBackground() {
           width: '50vw',
           height: '50vw',
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(220, 38, 38, 0.15) 0%, rgba(0,0,0,0) 70%)',
+          background: 'radial-gradient(circle, rgba(220, 38, 38, 0.12) 0%, rgba(0,0,0,0) 70%)',
           filter: 'blur(60px)',
         }}
       />
@@ -49,7 +49,7 @@ export default function AnimatedBackground() {
           x: [100, -100, 100],
           y: [100, -50, 100],
           scale: [1, 1.3, 1],
-          opacity: [0.2, 0.4, 0.2],
+          opacity: [0.15, 0.35, 0.15],
         }}
         transition={{
           duration: 20,
@@ -64,7 +64,7 @@ export default function AnimatedBackground() {
           width: '60vw',
           height: '60vw',
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(153, 27, 27, 0.1) 0%, rgba(0,0,0,0) 70%)',
+          background: 'radial-gradient(circle, rgba(153, 27, 27, 0.08) 0%, rgba(0,0,0,0) 70%)',
           filter: 'blur(80px)',
         }}
       />
@@ -77,10 +77,10 @@ export default function AnimatedBackground() {
           left: 0,
           width: '100%',
           height: '100%',
-          backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px)`,
-          backgroundSize: '100px 100px',
-          opacity: 0.5,
+          backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px)`,
+          backgroundSize: '80px 80px',
+          opacity: 0.4,
         }}
       />
     </Box>
