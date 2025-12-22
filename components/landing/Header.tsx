@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AppBar, Toolbar, Button, Box, useScrollTrigger, Typography, IconButton, Drawer, List, ListItem, ListItemButton, ListItemText, Divider } from '@mui/material';
 import { Menu, X } from 'lucide-react';
+import { Logo } from '../ui/Logo';
 
 const navItems = [
   { label: 'Features', id: 'features' },
@@ -13,11 +14,18 @@ const navItems = [
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
-  const trigger = useScrollTrigger({
-    disableHysteresis: true,
-    threshold: 0,
-  });
+  // Custom scroll listener for smoother control
+  useEffect(() => {
+    const handleScroll = () => {
+      const isScrolled = window.scrollY > 50;
+      setScrolled(isScrolled);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
@@ -38,41 +46,30 @@ export default function Header() {
         elevation={0}
         sx={{
           height: { xs: 64, md: 72 },
-          backgroundColor: trigger ? 'rgba(10, 10, 10, 0.95)' : 'transparent',
-          backdropFilter: 'blur(12px)',
-          borderBottom: trigger ? '1px solid rgba(255,255,255,0.05)' : 'none',
-          padding: { xs: '0 16px', sm: '0 24px', md: '0 40px' },
+          // Floating Dock Logic
+          width: scrolled ? 'calc(100% - 40px)' : '100%',
+          top: scrolled ? '20px' : '0',
+          left: scrolled ? '20px' : '0',
+          right: scrolled ? '20px' : '0',
+          borderRadius: scrolled ? '16px' : '0',
+          backgroundColor: scrolled ? 'rgba(10, 10, 10, 0.85)' : 'transparent',
+          backdropFilter: 'blur(16px)',
+          border: scrolled ? '1px solid rgba(255,255,255,0.1)' : 'none',
+          borderBottom: !scrolled ? 'none' : '1px solid rgba(255,255,255,0.1)',
+          boxShadow: scrolled ? '0 10px 30px rgba(0,0,0,0.5)' : 'none',
+
+          // Transitions
           transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+          padding: { xs: '0 16px', sm: '0 24px', md: '0 40px' },
           zIndex: 1200,
+          margin: '0 auto', // Center it when floating
+          maxWidth: scrolled ? '1400px' : '100%', // Optional: Limit animation width on ultra-wide screens
         }}
       >
         <Toolbar sx={{ height: '100%', justifyContent: 'space-between', minHeight: 'unset !important', padding: '0 !important' }}>
           {/* Logo */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, md: 1.5 } }}>
-            <Box
-              sx={{
-                width: { xs: 32, md: 36 },
-                height: { xs: 32, md: 36 },
-                background: 'var(--gradient-cta)',
-                borderRadius: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 0 20px rgba(230, 57, 70, 0.3)',
-                flexShrink: 0,
-              }}
-            >
-              <Box component="span" sx={{ color: 'white', fontWeight: 800, fontSize: { xs: 16, md: 20 } }}>A</Box>
-            </Box>
-            <Typography sx={{
-              fontSize: { xs: 18, md: 22 },
-              fontWeight: 700,
-              color: 'white',
-              fontFamily: 'var(--font-heading)',
-              letterSpacing: '-0.5px'
-            }}>
-              AthlonX
-            </Typography>
+            <Logo size={40} />
           </Box>
 
           {/* Nav Links - Desktop Only */}
@@ -105,6 +102,7 @@ export default function Header() {
             {/* Login - Hidden on xs */}
             <Button
               variant="text"
+              href="/login"
               sx={{
                 display: { xs: 'none', sm: 'flex' },
                 color: 'white',
@@ -124,6 +122,7 @@ export default function Header() {
             {/* CTA Button - Always visible but smaller on mobile */}
             <Button
               variant="contained"
+              href="/signup"
               sx={{
                 height: { xs: 40, sm: 44, md: 48 },
                 padding: { xs: '0 16px', sm: '0 20px', md: '0 28px' },
@@ -188,22 +187,7 @@ export default function Header() {
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Box
-              sx={{
-                width: 32,
-                height: 32,
-                background: 'var(--gradient-cta)',
-                borderRadius: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <Box component="span" sx={{ color: 'white', fontWeight: 800, fontSize: 16 }}>A</Box>
-            </Box>
-            <Typography sx={{ fontSize: 18, fontWeight: 700, color: 'white' }}>
-              AthlonX
-            </Typography>
+            <Logo size={40} />
           </Box>
           <IconButton
             onClick={() => setMobileMenuOpen(false)}
@@ -256,6 +240,7 @@ export default function Header() {
           <Button
             fullWidth
             variant="outlined"
+            href="/login"
             sx={{
               height: 52,
               borderColor: 'rgba(255,255,255,0.2)',
@@ -278,6 +263,7 @@ export default function Header() {
           <Button
             fullWidth
             variant="contained"
+            href="/signup"
             sx={{
               height: 52,
               background: 'var(--gradient-cta)',

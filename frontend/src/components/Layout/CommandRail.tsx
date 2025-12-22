@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { NavLink } from "react-router-dom"
-import { AthlonXLogo } from "../ui/AthlonXLogo"
+import { Logo } from "../ui/Logo"
 import "./CommandRail.css"
 
 // Icons as inline SVGs for better performance
@@ -122,7 +122,7 @@ const CommandRail: React.FC<CommandRailProps> = ({ isCollapsed = false, onToggle
   return (
     <aside className={`command-rail ${isCollapsed ? "command-rail--collapsed" : ""}`}>
       <div className="command-rail__logo">
-        <AthlonXLogo size={isCollapsed ? "sm" : "md"} showText={!isCollapsed} />
+        <Logo size={isCollapsed ? 24 : 32} showText={!isCollapsed} />
       </div>
 
       {/* Navigation */}

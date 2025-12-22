@@ -3,6 +3,7 @@
 import React from 'react';
 import { Box, Typography, Grid, Container, Link, IconButton } from '@mui/material';
 import { Facebook, Twitter, Instagram, Linkedin, Youtube, Star, Shield, Zap } from 'lucide-react';
+import { Logo } from '../ui/Logo';
 
 export default function Footer() {
   return (
@@ -23,23 +24,7 @@ export default function Footer() {
             <Box sx={{ maxWidth: 300 }}>
               {/* Logo */}
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, marginBottom: 3 }}>
-                <Box
-                  sx={{
-                    width: 36,
-                    height: 36,
-                    background: 'var(--gradient-cta)',
-                    borderRadius: '8px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 0 20px rgba(230, 57, 70, 0.3)',
-                  }}
-                >
-                  <Box component="span" sx={{ color: 'white', fontWeight: 800, fontSize: 20 }}>A</Box>
-                </Box>
-                <Box component="span" sx={{ fontSize: 24, fontWeight: 700, color: 'white', fontFamily: 'var(--font-heading)', letterSpacing: '-0.5px' }}>
-                  AthlonX
-                </Box>
+                <Logo size={48} showText={true} />
               </Box>
 
               <Typography

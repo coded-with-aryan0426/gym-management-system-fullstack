@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import GymSelector from '../components/GymSelector/GymSelector';
-import { AthlonXLogo } from '../components/ui/AthlonXLogo';
+import { Logo } from '../components/ui/Logo';
 
 const colors = {
     bgPrimary: "#0D0D0D",
@@ -195,7 +195,7 @@ export default function LoginPage() {
                     left: 60,
                     maxWidth: 480,
                 }}>
-                    <AthlonXLogo size="xl" showText={false} />
+                    <Logo size={48} showText={false} />
                     <h1 style={{ fontSize: 42, fontWeight: 800, marginBottom: 16, lineHeight: 1.1, marginTop: 24 }}>
                         Welcome to <span style={{ color: colors.crimson }}>AthlonX</span>
                     </h1>

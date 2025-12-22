@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
-import { AthlonXLogo } from '../components/ui/AthlonXLogo';
+import { Logo } from '../components/ui/Logo';
 
 const colors = {
     bgPrimary: "#0D0D0D",
@@ -196,7 +196,7 @@ export default function SignupPage() {
                 <div style={{ position: "absolute", inset: 0, backgroundImage: "url('/login-sidebar.png')", backgroundSize: "cover", backgroundPosition: "center" }} />
                 <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to top, ${colors.bgPrimary} 0%, rgba(13,13,13,0.6) 50%, rgba(13,13,13,0.4) 100%)` }} />
                 <div style={{ position: "absolute", bottom: 60, left: 60, maxWidth: 480 }}>
-                    <AthlonXLogo size="xl" showText={false} />
+                    <Logo size={48} showText={false} />
                     <h1 style={{ fontSize: 42, fontWeight: 800, marginBottom: 16, lineHeight: 1.1, marginTop: 24 }}>Join <span style={{ color: colors.crimson }}>AthlonX</span></h1>
                     <p style={{ fontSize: 18, color: "rgba(255,255,255,0.8)", lineHeight: 1.6 }}>Start your fitness journey with the most powerful gym management platform.</p>
                 </div>

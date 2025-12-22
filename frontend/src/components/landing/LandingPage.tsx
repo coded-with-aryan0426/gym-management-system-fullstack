@@ -12,6 +12,7 @@ import Transformation from './Transformation';
 import SecondaryCTA from './SecondaryCTA';
 import Footer from './Footer';
 import SuccessModal from './SuccessModal';
+import ScrollToTop from './ScrollToTop';
 import { Box } from '@mui/material';
 
 export default function LandingPage() {
@@ -57,6 +58,7 @@ export default function LandingPage() {
         </section>
       </main>
       <Footer />
+      <ScrollToTop />
       <SuccessModal open={showSuccess} onClose={handleCloseSuccess} />
     </Box>
   );
