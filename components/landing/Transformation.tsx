@@ -58,22 +58,24 @@ export default function Transformation() {
           <Typography
             sx={{
               fontSize: '14px',
-              fontWeight: 600,
+              fontWeight: 700,
               textTransform: 'uppercase',
-              letterSpacing: 'var(--tracking-wide)',
-              color: 'var(--color-accent-green)',
+              letterSpacing: '2px',
+              color: '#E63946',
               marginBottom: 2,
             }}
           >
-            The Journey
+            THE JOURNEY
           </Typography>
           <Typography
             variant="h2"
             sx={{
-              fontSize: { xs: '32px', md: '48px' },
-              fontWeight: 700,
+              fontSize: { xs: '36px', md: '56px' },
+              fontWeight: 900,
               fontFamily: 'var(--font-heading)',
               color: 'white',
+              lineHeight: 1.1,
+              letterSpacing: '-1px'
             }}
           >
             From Chaos to Empire in 6 Months
@@ -90,7 +92,7 @@ export default function Transformation() {
               left: '10%',
               right: '10%',
               height: 2,
-              background: 'rgba(255,255,255,0.1)',
+              background: 'rgba(230, 57, 70, 0.1)',
               display: { xs: 'none', md: 'block' },
             }}
           />
@@ -114,17 +116,18 @@ export default function Transformation() {
                     {/* Stage Card */}
                     <Paper
                       sx={{
-                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        backgroundColor: 'rgba(255, 255, 255, 0.02)',
                         backdropFilter: 'blur(10px)',
-                        border: '1px solid rgba(255, 255, 255, 0.1)',
-                        borderRadius: 'var(--radius-xl)',
+                        border: '1px solid rgba(255, 255, 255, 0.05)',
+                        borderRadius: '24px',
                         padding: 3,
                         marginBottom: 3,
                         textAlign: 'center',
                         transition: 'var(--transition-base)',
                         maxWidth: 260,
                         '&:hover': {
-                          backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                          backgroundColor: 'rgba(230, 57, 70, 0.05)',
+                          borderColor: 'rgba(230, 57, 70, 0.3)',
                           transform: 'translateY(-8px)',
                         },
                       }}
@@ -134,25 +137,26 @@ export default function Transformation() {
                         sx={{
                           width: 64,
                           height: 64,
-                          borderRadius: 'var(--radius-full)',
+                          borderRadius: '16px',
                           background: 'var(--gradient-cta)',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                           margin: '0 auto 16px',
+                          boxShadow: '0 0 20px rgba(230, 57, 70, 0.2)'
                         }}
                       >
-                        <item.icon size={28} color="var(--color-primary-900)" />
+                        <item.icon size={28} color="white" />
                       </Box>
 
                       {/* Stage Label */}
                       <Typography
                         sx={{
-                          fontSize: 'var(--text-xs)',
-                          fontWeight: 600,
-                          color: 'var(--color-accent-green)',
+                          fontSize: '11px',
+                          fontWeight: 800,
+                          color: '#E63946',
                           textTransform: 'uppercase',
-                          letterSpacing: 'var(--tracking-wide)',
+                          letterSpacing: '1px',
                           marginBottom: 1,
                         }}
                       >
@@ -163,10 +167,10 @@ export default function Transformation() {
                       <Typography
                         variant="h6"
                         sx={{
-                          fontSize: 'var(--text-lg)',
+                          fontSize: '18px',
                           fontWeight: 700,
                           fontFamily: 'var(--font-heading)',
-                          color: 'var(--color-white)',
+                          color: 'white',
                           marginBottom: 1.5,
                         }}
                       >
@@ -176,9 +180,9 @@ export default function Transformation() {
                       {/* Description */}
                       <Typography
                         sx={{
-                          fontSize: 'var(--text-sm)',
-                          color: 'var(--color-gray-400)',
-                          lineHeight: 'var(--leading-relaxed)',
+                          fontSize: '14px',
+                          color: 'var(--color-gray-500)',
+                          lineHeight: 1.5,
                           marginBottom: 2,
                         }}
                       >
@@ -190,12 +194,13 @@ export default function Transformation() {
                         label={item.outcome}
                         size="small"
                         sx={{
-                          backgroundColor: 'rgba(0, 245, 160, 0.15)',
-                          color: 'var(--color-accent-green)',
-                          fontSize: 'var(--text-xs)',
-                          fontWeight: 500,
+                          backgroundColor: 'rgba(230, 57, 70, 0.1)',
+                          color: '#E63946',
+                          fontSize: '11px',
+                          fontWeight: 700,
                           height: 'auto',
                           padding: '4px 0',
+                          borderRadius: '6px',
                           '& .MuiChip-label': {
                             whiteSpace: 'normal',
                           }
@@ -206,11 +211,11 @@ export default function Transformation() {
                     {/* Timeline Node */}
                     <Box
                       sx={{
-                        width: 24,
-                        height: 24,
-                        borderRadius: 'var(--radius-full)',
-                        background: 'var(--gradient-cta)',
-                        boxShadow: 'var(--shadow-glow-green)',
+                        width: 16,
+                        height: 16,
+                        borderRadius: 'full',
+                        background: '#E63946',
+                        boxShadow: '0 0 15px rgba(230, 57, 70, 0.5)',
                         position: 'relative',
                         marginBottom: 1.5,
                         zIndex: 2,
@@ -220,9 +225,9 @@ export default function Transformation() {
                     {/* Timeline Label */}
                     <Typography
                       sx={{
-                        fontSize: 'var(--text-sm)',
-                        fontWeight: 600,
-                        color: 'var(--color-white)',
+                        fontSize: '13px',
+                        fontWeight: 700,
+                        color: 'white',
                       }}
                     >
                       {item.timeline}

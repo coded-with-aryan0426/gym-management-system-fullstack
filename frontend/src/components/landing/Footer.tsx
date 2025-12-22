@@ -1,146 +1,187 @@
+"use client";
+
 import React from 'react';
-import { Box, Container, Grid, Typography, Link, IconButton, Stack, Divider } from '@mui/material';
-import { 
-  Instagram, 
-  Twitter, 
-  LinkedIn, 
-  Facebook,
-  Mail,
-  Phone,
-  LocationOn
-} from '@mui/icons-material';
-import { motion } from 'framer-motion';
-
-const footerLinks = {
-  Product: [
-    { name: 'Features', href: '#features' },
-    { name: 'Pricing', href: '#pricing' },
-    { name: 'Testimonials', href: '#testimonials' },
-    { name: 'Integration', href: '#integration' }
-  ],
-  Company: [
-    { name: 'About Us', href: '/about' },
-    { name: 'Careers', href: '/careers' },
-    { name: 'Contact', href: '/contact' },
-    { name: 'Blog', href: '/blog' }
-  ],
-  Legal: [
-    { name: 'Privacy Policy', href: '/privacy' },
-    { name: 'Terms of Service', href: '/terms' },
-    { name: 'Cookie Policy', href: '/cookies' },
-    { name: 'Security', href: '/security' }
-  ]
-};
-
-const socialLinks = [
-  { icon: <Facebook fontSize="small" />, href: '#', label: 'Facebook' },
-  { icon: <Twitter fontSize="small" />, href: '#', label: 'Twitter' },
-  { icon: <Instagram fontSize="small" />, href: '#', label: 'Instagram' },
-  { icon: <LinkedIn fontSize="small" />, href: '#', label: 'LinkedIn' }
-];
+import { Box, Typography, Grid, Container, Link, IconButton } from '@mui/material';
+import { Facebook, Twitter, Instagram, Linkedin, Youtube, Star, Shield, Zap } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <Box 
-      component="footer" 
-      sx={{ 
-        bgcolor: 'background.paper',
-        pt: { xs: 6, md: 8 },
-        pb: 4,
-        borderTop: '1px solid',
-        borderColor: 'divider',
-        position: 'relative'
+    <Box
+      component="footer"
+      sx={{
+        backgroundColor: 'var(--color-primary-900)',
+        paddingTop: 'var(--space-20)',
+        paddingBottom: 'var(--space-8)',
+        color: 'white',
       }}
     >
-      <Container maxWidth="lg">
-        <Grid container spacing={4}>
-          <Grid item xs={12} md={4}>
-            <Stack spacing={2}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+      <Container maxWidth="xl">
+        {/* Main Footer Grid */}
+        <Grid container spacing={{ xs: 5, md: 6 }} sx={{ marginBottom: 8 }}>
+          {/* Brand Column */}
+          <Grid size={{ xs: 12, md: 4 }}>
+            <Box sx={{ maxWidth: 300 }}>
+              {/* Logo */}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, marginBottom: 3 }}>
                 <Box
-                  component="img"
-                  src="/images/logo.png"
-                  alt="GymFlow"
-                  sx={{ height: 32, width: 'auto' }}
-                />
-                <Typography variant="h6" fontWeight="700" color="text.primary">
-                  GymFlow
-                </Typography>
+                  sx={{
+                    width: 36,
+                    height: 36,
+                    background: 'var(--gradient-cta)',
+                    borderRadius: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 0 20px rgba(230, 57, 70, 0.3)',
+                  }}
+                >
+                  <Box component="span" sx={{ color: 'white', fontWeight: 800, fontSize: 20 }}>A</Box>
+                </Box>
+                <Box component="span" sx={{ fontSize: 24, fontWeight: 700, color: 'white', fontFamily: 'var(--font-heading)', letterSpacing: '-0.5px' }}>
+                  AthlonX
+                </Box>
               </Box>
-              <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 300, lineHeight: 1.6 }}>
-                Revolutionizing fitness management with AI-driven insights and premium tools for growth-minded gym owners.
+
+              <Typography
+                sx={{
+                  fontSize: '14px',
+                  color: 'var(--color-gray-400)',
+                  lineHeight: 1.6,
+                  marginBottom: 3,
+                }}
+              >
+                The most powerful, all-in-one management platform for gym owners who demand absolute control and growth.
               </Typography>
-              <Stack direction="row" spacing={1}>
-                {socialLinks.map((social) => (
+
+              {/* Social Icons */}
+              <Box sx={{ display: 'flex', gap: 2 }}>
+                {[Facebook, Twitter, Instagram, Linkedin].map((Icon, idx) => (
                   <IconButton
-                    key={social.label}
+                    key={idx}
                     size="small"
-                    component={motion.a}
-                    whileHover={{ y: -2 }}
-                    href={social.href}
-                    sx={{ 
-                      color: 'text.secondary',
-                      '&:hover': { color: 'primary.main', bgcolor: 'primary.main + 10' }
+                    sx={{
+                      color: 'var(--color-gray-600)',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        color: '#E63946',
+                        transform: 'translateY(-3px)'
+                      }
                     }}
                   >
-                    {social.icon}
+                    <Icon size={20} />
                   </IconButton>
                 ))}
-              </Stack>
-            </Stack>
+              </Box>
+            </Box>
           </Grid>
 
-          <Grid item xs={12} md={8}>
-            <Grid container spacing={3}>
-              {Object.entries(footerLinks).map(([category, links]) => (
-                <Grid item xs={6} sm={4} key={category}>
-                  <Typography variant="subtitle2" fontWeight="600" mb={2} color="text.primary">
-                    {category}
-                  </Typography>
-                  <Stack spacing={1}>
-                    {links.map((link) => (
-                      <Link
-                        key={link.name}
-                        href={link.href}
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{ 
-                          textDecoration: 'none',
-                          transition: 'color 0.2s',
-                          '&:hover': { color: 'primary.main' }
-                        }}
-                      >
-                        {link.name}
-                      </Link>
-                    ))}
-                  </Stack>
-                </Grid>
-              ))}
+          {/* Links Columns */}
+          {[
+            {
+              title: 'Product',
+              links: ['Features', 'Pricing', 'Member App', 'Updates']
+            },
+            {
+              title: 'Company',
+              links: ['About Us', 'Contact', 'Blog']
+            },
+            {
+              title: 'Legal',
+              links: ['Privacy Policy', 'Terms of Service', 'Security']
+            }
+          ].map((column) => (
+            <Grid size={{ xs: 6, md: 2 }} key={column.title}>
+              <Typography
+                sx={{
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  color: 'white',
+                  marginBottom: 3,
+                  fontFamily: 'var(--font-heading)',
+                  letterSpacing: '1px'
+                }}
+              >
+                {column.title}
+              </Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {column.links.map(link => (
+                  <Link
+                    key={link}
+                    href="#"
+                    underline="none"
+                    sx={{
+                      fontSize: '14px',
+                      color: 'var(--color-gray-500)',
+                      transition: 'all 0.2s',
+                      '&:hover': { color: '#E63946' }
+                    }}
+                  >
+                    {link}
+                  </Link>
+                ))}
+              </Box>
             </Grid>
-          </Grid>
+          ))}
         </Grid>
 
-        <Divider sx={{ my: 4, opacity: 0.1 }} />
-
-        <Grid container spacing={2} alignItems="center" justifyContent="space-between">
-          <Grid item xs={12} sm="auto">
-            <Typography variant="caption" color="text.secondary">
-              © {new Date().getFullYear()} GymFlow Technologies Inc. All rights reserved.
+        {/* Trust Badges Row */}
+        <Box
+          sx={{
+            paddingY: 4,
+            borderTop: '1px solid rgba(255,255,255,0.05)',
+            borderBottom: '1px solid rgba(255,255,255,0.05)',
+            display: 'flex',
+            gap: 6,
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Star size={16} color="#E63946" strokeWidth={3} />
+            <Typography sx={{ fontSize: '13px', color: 'var(--color-gray-400)', fontWeight: 600 }}>
+              4.9/5 RATING
             </Typography>
-          </Grid>
-          <Grid item xs={12} sm="auto">
-            <Stack direction="row" spacing={3}>
-              <Stack direction="row" spacing={0.5} alignItems="center">
-                <Mail sx={{ fontSize: 14, color: 'text.secondary' }} />
-                <Typography variant="caption" color="text.secondary">hello@gymflow.io</Typography>
-              </Stack>
-              <Stack direction="row" spacing={0.5} alignItems="center">
-                <LocationOn sx={{ fontSize: 14, color: 'text.secondary' }} />
-                <Typography variant="caption" color="text.secondary">San Francisco, CA</Typography>
-              </Stack>
-            </Stack>
-          </Grid>
-        </Grid>
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Shield size={16} color="#E63946" strokeWidth={3} />
+            <Typography sx={{ fontSize: '13px', color: 'var(--color-gray-400)', fontWeight: 600 }}>
+              MILITARY GRADE SECURITY
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Zap size={16} color="#E63946" strokeWidth={3} />
+            <Typography sx={{ fontSize: '13px', color: 'var(--color-gray-400)', fontWeight: 600 }}>
+              99.9% UPTIME GUARANTEE
+            </Typography>
+          </Box>
+        </Box>
+
+        {/* Bottom Bar */}
+        <Box
+          sx={{
+            paddingTop: 4,
+            display: 'flex',
+            flexDirection: { xs: 'column', md: 'row' },
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: 2,
+          }}
+        >
+          <Typography sx={{ fontSize: '14px', color: 'var(--color-gray-500)' }}>
+            &copy; {new Date().getFullYear()} AthlonX Gym Management. All rights reserved.
+          </Typography>
+
+          <Box sx={{ display: 'flex', gap: 3 }}>
+            <Typography sx={{ fontSize: '14px', color: 'var(--color-gray-500)', cursor: 'pointer', '&:hover': { color: 'white' } }}>
+              English (India)
+            </Typography>
+            <Typography sx={{ fontSize: '14px', color: 'var(--color-gray-500)', cursor: 'pointer', '&:hover': { color: 'white' } }}>
+              INR (₹)
+            </Typography>
+          </Box>
+        </Box>
       </Container>
     </Box>
   );

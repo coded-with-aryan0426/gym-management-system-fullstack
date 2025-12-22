@@ -1,4 +1,4 @@
-/* Import Design System */
+@import "tailwindcss";
 @import './styles/design-system.css';
 @import './styles/premium-design-system.css';
 @import './styles/performance.css';

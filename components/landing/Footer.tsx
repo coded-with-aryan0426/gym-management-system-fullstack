@@ -22,42 +22,52 @@ export default function Footer() {
           <Grid size={{ xs: 12, md: 4 }}>
             <Box sx={{ maxWidth: 300 }}>
               {/* Logo */}
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, marginBottom: 3 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, marginBottom: 3 }}>
                 <Box
                   sx={{
-                    width: 32,
-                    height: 32,
-                    bgcolor: 'var(--color-accent-orange)',
-                    borderRadius: 1,
+                    width: 36,
+                    height: 36,
+                    background: 'var(--gradient-cta)',
+                    borderRadius: '8px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: 'white',
-                    fontWeight: 800
+                    boxShadow: '0 0 20px rgba(230, 57, 70, 0.3)',
                   }}
                 >
-                  A
+                  <Box component="span" sx={{ color: 'white', fontWeight: 800, fontSize: 20 }}>A</Box>
                 </Box>
-                <Box component="span" sx={{ fontSize: 24, fontWeight: 700, color: 'white', fontFamily: 'var(--font-heading)' }}>
+                <Box component="span" sx={{ fontSize: 24, fontWeight: 700, color: 'white', fontFamily: 'var(--font-heading)', letterSpacing: '-0.5px' }}>
                   AthlonX
                 </Box>
               </Box>
 
               <Typography
                 sx={{
-                  fontSize: 'var(--text-sm)',
+                  fontSize: '14px',
                   color: 'var(--color-gray-400)',
-                  lineHeight: 'var(--leading-relaxed)',
+                  lineHeight: 1.6,
                   marginBottom: 3,
                 }}
               >
-                Power every rep. Track every rupee. The all-in-one platform for modern Indian gyms.
+                The most powerful, all-in-one management platform for gym owners who demand absolute control and growth.
               </Typography>
 
               {/* Social Icons */}
               <Box sx={{ display: 'flex', gap: 2 }}>
                 {[Facebook, Twitter, Instagram, Linkedin].map((Icon, idx) => (
-                  <IconButton key={idx} size="small" sx={{ color: 'var(--color-gray-400)', '&:hover': { color: 'white' } }}>
+                  <IconButton
+                    key={idx}
+                    size="small"
+                    sx={{
+                      color: 'var(--color-gray-600)',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        color: '#E63946',
+                        transform: 'translateY(-3px)'
+                      }
+                    }}
+                  >
                     <Icon size={20} />
                   </IconButton>
                 ))}
@@ -69,45 +79,42 @@ export default function Footer() {
           {[
             {
               title: 'Product',
-              links: ['Features', 'Pricing', 'Member App', 'Changelog', 'Roadmap']
+              links: ['Features', 'Pricing', 'Member App', 'Updates']
             },
             {
               title: 'Company',
-              links: ['About Us', 'Careers', 'Blog', 'Contact', 'Partners']
-            },
-            {
-              title: 'Resources',
-              links: ['Help Center', 'API Documentation', 'Community', 'Gym Success Guide']
+              links: ['About Us', 'Contact', 'Blog']
             },
             {
               title: 'Legal',
-              links: ['Privacy Policy', 'Terms of Service', 'Cookie Policy', 'Security']
+              links: ['Privacy Policy', 'Terms of Service', 'Security']
             }
           ].map((column) => (
-            <Grid size={{ xs: 6, sm: 3, md: 2 }} key={column.title}>
+            <Grid size={{ xs: 6, md: 2 }} key={column.title}>
               <Typography
                 sx={{
-                  fontSize: '14px',
-                  fontWeight: 600,
+                  fontSize: '13px',
+                  fontWeight: 700,
                   textTransform: 'uppercase',
-                  color: 'var(--color-white)',
+                  color: 'white',
                   marginBottom: 3,
-                  fontFamily: 'var(--font-heading)'
+                  fontFamily: 'var(--font-heading)',
+                  letterSpacing: '1px'
                 }}
               >
                 {column.title}
               </Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 {column.links.map(link => (
                   <Link
                     key={link}
                     href="#"
                     underline="none"
                     sx={{
-                      fontSize: '15px',
-                      color: 'var(--color-gray-400)',
-                      transition: 'color 0.2s',
-                      '&:hover': { color: 'var(--color-accent-blue)' }
+                      fontSize: '14px',
+                      color: 'var(--color-gray-500)',
+                      transition: 'all 0.2s',
+                      '&:hover': { color: '#E63946' }
                     }}
                   >
                     {link}
@@ -121,30 +128,32 @@ export default function Footer() {
         {/* Trust Badges Row */}
         <Box
           sx={{
-            paddingBottom: 5,
-            borderBottom: '1px solid rgba(255,255,255,0.1)',
+            paddingY: 4,
+            borderTop: '1px solid rgba(255,255,255,0.05)',
+            borderBottom: '1px solid rgba(255,255,255,0.05)',
             display: 'flex',
-            gap: 4,
+            gap: 6,
             flexWrap: 'wrap',
-            alignItems: 'center'
+            alignItems: 'center',
+            justifyContent: 'center'
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Star size={16} fill="var(--color-warning)" color="var(--color-warning)" />
-            <Typography sx={{ fontSize: '14px', color: 'var(--color-gray-300)' }}>
-              <strong>4.9/5</strong> Rating
+            <Star size={16} color="#E63946" strokeWidth={3} />
+            <Typography sx={{ fontSize: '13px', color: 'var(--color-gray-400)', fontWeight: 600 }}>
+              4.9/5 RATING
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Shield size={16} color="var(--color-success)" />
-            <Typography sx={{ fontSize: '14px', color: 'var(--color-gray-300)' }}>
-              ISO 27001 Certified
+            <Shield size={16} color="#E63946" strokeWidth={3} />
+            <Typography sx={{ fontSize: '13px', color: 'var(--color-gray-400)', fontWeight: 600 }}>
+              MILITARY GRADE SECURITY
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Zap size={16} color="var(--color-accent-blue)" />
-            <Typography sx={{ fontSize: '14px', color: 'var(--color-gray-300)' }}>
-              99.99% Uptime SLA
+            <Zap size={16} color="#E63946" strokeWidth={3} />
+            <Typography sx={{ fontSize: '13px', color: 'var(--color-gray-400)', fontWeight: 600 }}>
+              99.9% UPTIME GUARANTEE
             </Typography>
           </Box>
         </Box>

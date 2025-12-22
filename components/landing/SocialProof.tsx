@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { Box, Typography, Card, Chip, Grid, Container, Avatar } from '@mui/material';
+import { Box, Typography, Card, Grid, Container, Avatar } from '@mui/material';
 import { Quote, Star, TrendingUp, Clock, Award } from 'lucide-react';
 
 const testimonials = [
@@ -44,8 +44,10 @@ export default function SocialProof() {
     return (
         <Box
             sx={{
-                backgroundColor: 'var(--color-white)',
+                backgroundColor: '#0A0A0A',
                 paddingY: { xs: '80px', md: '120px' },
+                borderTop: '1px solid rgba(255,255,255,0.05)',
+                borderBottom: '1px solid rgba(255,255,255,0.05)',
             }}
         >
             <Container maxWidth="lg">
@@ -54,25 +56,27 @@ export default function SocialProof() {
                     <Typography
                         sx={{
                             fontSize: '14px',
-                            fontWeight: 600,
+                            fontWeight: 700,
                             textTransform: 'uppercase',
-                            letterSpacing: 'var(--tracking-wide)',
-                            color: 'var(--color-accent-blue)',
+                            letterSpacing: '2px',
+                            color: '#E63946',
                             marginBottom: 2,
                         }}
                     >
-                        Don't Just Take Our Word For It
+                        THE PROOF
                     </Typography>
                     <Typography
                         variant="h2"
                         sx={{
-                            fontSize: { xs: '32px', md: '48px' },
-                            fontWeight: 700,
+                            fontSize: { xs: '36px', md: '56px' },
+                            fontWeight: 900,
                             fontFamily: 'var(--font-heading)',
-                            color: 'var(--color-gray-900)',
+                            color: 'white',
+                            lineHeight: 1.1,
+                            letterSpacing: '-1px'
                         }}
                     >
-                        Trusted by the Best in the Business
+                        Trusted by High-Performance Gyms
                     </Typography>
                 </Box>
 
@@ -82,15 +86,20 @@ export default function SocialProof() {
                         <Grid size={{ xs: 12, md: 4 }} key={testimonial.id}>
                             <Card
                                 sx={{
-                                    backgroundColor: 'var(--color-gray-50)',
-                                    border: '1px solid var(--color-gray-200)',
-                                    borderRadius: 'var(--radius-xl)',
+                                    backgroundColor: 'rgba(255,255,255,0.02)',
+                                    border: '1px solid rgba(255,255,255,0.05)',
+                                    borderRadius: '24px',
                                     padding: 4,
                                     height: '100%',
                                     display: 'flex',
                                     flexDirection: 'column',
                                     position: 'relative',
-                                    boxShadow: 'none',
+                                    transition: 'all 0.3s ease',
+                                    '&:hover': {
+                                        borderColor: 'rgba(230, 57, 70, 0.3)',
+                                        transform: 'translateY(-10px)',
+                                        backgroundColor: 'rgba(255,255,255,0.03)',
+                                    }
                                 }}
                             >
                                 {/* Quote Icon */}
@@ -99,28 +108,29 @@ export default function SocialProof() {
                                         position: 'absolute',
                                         top: 24,
                                         right: 24,
-                                        opacity: 0.1,
+                                        opacity: 0.05,
                                     }}
                                 >
-                                    <Quote size={48} color="var(--color-primary-900)" />
+                                    <Quote size={48} color="#E63946" />
                                 </Box>
 
                                 {/* Star Rating */}
                                 <Box sx={{ display: 'flex', gap: 0.5, marginBottom: 3 }}>
                                     {[1, 2, 3, 4, 5].map((star) => (
-                                        <Star key={star} size={18} fill="#F59E0B" color="#F59E0B" />
+                                        <Star key={star} size={16} fill="#E63946" color="#E63946" />
                                     ))}
                                 </Box>
 
                                 {/* Quote Text */}
                                 <Typography
                                     sx={{
-                                        fontSize: 'var(--text-base)',
+                                        fontSize: '16px',
                                         fontWeight: 400,
-                                        lineHeight: 'var(--leading-relaxed)',
-                                        color: 'var(--color-gray-700)',
-                                        marginBottom: 3,
+                                        lineHeight: 1.6,
+                                        color: 'var(--color-gray-400)',
+                                        marginBottom: 4,
                                         flex: 1,
+                                        fontStyle: 'italic'
                                     }}
                                 >
                                     "{testimonial.quote}"
@@ -129,22 +139,23 @@ export default function SocialProof() {
                                 {/* Metric Highlight */}
                                 <Box
                                     sx={{
-                                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                                        borderRadius: 'var(--radius-md)',
-                                        padding: '8px 16px',
-                                        marginBottom: 3,
+                                        backgroundColor: 'rgba(230, 57, 70, 0.1)',
+                                        borderRadius: '8px',
+                                        padding: '10px 16px',
+                                        marginBottom: 4,
                                         display: 'inline-flex',
                                         alignItems: 'center',
-                                        gap: 1,
+                                        gap: 1.5,
                                         alignSelf: 'flex-start',
+                                        border: '1px solid rgba(230, 57, 70, 0.2)'
                                     }}
                                 >
-                                    <testimonial.metricIcon size={16} color="var(--color-success)" />
+                                    <testimonial.metricIcon size={16} color="#E63946" />
                                     <Typography
                                         sx={{
-                                            fontSize: 'var(--text-sm)',
-                                            fontWeight: 600,
-                                            color: 'var(--color-success)',
+                                            fontSize: '14px',
+                                            fontWeight: 700,
+                                            color: '#E63946',
                                         }}
                                     >
                                         {testimonial.metric}
@@ -156,33 +167,26 @@ export default function SocialProof() {
                                     <Avatar
                                         src={testimonial.avatar}
                                         alt={testimonial.name}
-                                        sx={{ width: 56, height: 56 }}
+                                        sx={{ width: 56, height: 56, border: '2px solid rgba(230, 57, 70, 0.3)' }}
                                     />
                                     <Box>
                                         <Typography
                                             sx={{
-                                                fontSize: 'var(--text-base)',
-                                                fontWeight: 600,
-                                                color: 'var(--color-gray-900)',
+                                                fontSize: '16px',
+                                                fontWeight: 700,
+                                                color: 'white',
                                             }}
                                         >
                                             {testimonial.name}
                                         </Typography>
                                         <Typography
                                             sx={{
-                                                fontSize: 'var(--text-sm)',
+                                                fontSize: '13px',
                                                 color: 'var(--color-gray-500)',
+                                                fontWeight: 500
                                             }}
                                         >
                                             {testimonial.role}
-                                        </Typography>
-                                        <Typography
-                                            sx={{
-                                                fontSize: 'var(--text-xs)',
-                                                color: 'var(--color-gray-400)',
-                                            }}
-                                        >
-                                            {testimonial.location}
                                         </Typography>
                                     </Box>
                                 </Box>
@@ -198,19 +202,22 @@ export default function SocialProof() {
                         justifyContent: 'center',
                         alignItems: 'center',
                         flexWrap: 'wrap',
-                        gap: { xs: 3, md: 6 },
-                        marginTop: 8,
+                        gap: 6,
+                        marginTop: 10,
+                        padding: 4,
+                        backgroundColor: 'rgba(255,255,255,0.02)',
+                        borderRadius: '24px',
+                        border: '1px solid rgba(255,255,255,0.05)'
                     }}
                 >
-                    {/* Rating Badge */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                         <Box sx={{ display: 'flex', gap: 0.5 }}>
                             {[1, 2, 3, 4, 5].map((star) => (
-                                <Star key={star} size={20} fill="#F59E0B" color="#F59E0B" />
+                                <Star key={star} size={20} fill="#E63946" color="#E63946" />
                             ))}
                         </Box>
-                        <Typography sx={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--color-gray-700)' }}>
-                            4.9/5 from 2,847 reviews
+                        <Typography sx={{ fontSize: '15px', fontWeight: 600, color: 'white' }}>
+                            4.9/5 Average Rating across 2,847 gyms
                         </Typography>
                     </Box>
                 </Box>

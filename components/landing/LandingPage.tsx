@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import Header from './Header';
 import Hero from './Hero';
 import Problem from './Problem';
+import PresentStruggle from './PresentStruggle';
+import EmpoweredFuture from './EmpoweredFuture';
 import ValueStack from './ValueStack';
 import SocialProof from './SocialProof';
 import Transformation from './Transformation';
@@ -15,19 +17,45 @@ import { Box } from '@mui/material';
 export default function LandingPage() {
   const [showSuccess, setShowSuccess] = useState(false);
 
-  // Example trigger - could be passed down to Hero/CTA later
   const handleOpenSuccess = () => setShowSuccess(true);
   const handleCloseSuccess = () => setShowSuccess(false);
 
   return (
-    <Box component="main" sx={{ backgroundColor: 'var(--color-primary-900)', minHeight: '100vh', overflowX: 'hidden' }}>
+    <Box component="div" sx={{ backgroundColor: '#0A0A0A', minHeight: '100vh', overflowX: 'hidden' }}>
       <Header />
-      <Hero onSignupClick={handleOpenSuccess} />
-      <Problem />
-      <ValueStack />
-      <SocialProof />
-      <Transformation />
-      <SecondaryCTA onSignupClick={handleOpenSuccess} />
+      <main>
+        <section id="hero">
+          <Hero onSignupClick={handleOpenSuccess} />
+        </section>
+
+        <section id="problems">
+          <Problem />
+        </section>
+
+        <section id="present">
+          <PresentStruggle />
+        </section>
+
+        <section id="future">
+          <EmpoweredFuture />
+        </section>
+
+        <section id="social">
+          <SocialProof />
+        </section>
+
+        <section id="transformation">
+          <Transformation />
+        </section>
+
+        <section id="value">
+          <ValueStack />
+        </section>
+
+        <section id="cta">
+          <SecondaryCTA onSignupClick={handleOpenSuccess} />
+        </section>
+      </main>
       <Footer />
       <SuccessModal open={showSuccess} onClose={handleCloseSuccess} />
     </Box>

@@ -71,32 +71,48 @@ export default function ValueStack() {
   return (
     <Box
       sx={{
-        backgroundColor: 'var(--color-gray-50)',
+        backgroundColor: '#0A0A0A',
         paddingY: { xs: '80px', md: '120px' },
+        borderTop: '1px solid rgba(255,255,255,0.05)',
       }}
     >
       <Container maxWidth="lg">
         {/* Section Header */}
-        <Box sx={{ textAlign: 'center', marginBottom: 8, maxWidth: 700, marginX: 'auto' }}>
+        <Box sx={{ textAlign: 'center', marginBottom: 8, maxWidth: 800, marginX: 'auto' }}>
           <Typography
-            variant="h2"
             sx={{
-              fontSize: { xs: '32px', md: '48px' },
-              fontWeight: 800,
-              fontFamily: 'var(--font-heading)',
-              color: 'var(--color-primary-900)',
+              fontSize: '14px',
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '2px',
+              color: '#E63946',
               marginBottom: 2,
             }}
           >
-            The Value Stack That Makes Saying "No" Feel Stupid
+            THE VALUE
+          </Typography>
+          <Typography
+            variant="h2"
+            sx={{
+              fontSize: { xs: '36px', md: '56px' },
+              fontWeight: 900,
+              fontFamily: 'var(--font-heading)',
+              color: 'white',
+              lineHeight: 1.1,
+              letterSpacing: '-1px',
+              marginBottom: 3
+            }}
+          >
+            Everything You Need to Dominate
           </Typography>
           <Typography
             sx={{
-              fontSize: 'var(--text-lg)',
+              fontSize: '18px',
               color: 'var(--color-gray-500)',
+              lineHeight: 1.6
             }}
           >
-            Don't just buy software. Buy a complete business transformation system.
+            Don't just buy software. Buy the complete operating system for your gym's future.
           </Typography>
         </Box>
 
@@ -106,40 +122,41 @@ export default function ValueStack() {
             <Grid size={{ xs: 12, md: 6 }} key={tier.id}>
               <Card
                 sx={{
-                  backgroundColor: 'var(--color-white)',
-                  borderRadius: 'var(--radius-xl)',
+                  backgroundColor: 'rgba(255,255,255,0.02)',
+                  borderRadius: '24px',
                   padding: 4,
-                  boxShadow: 'var(--shadow-md)',
-                  border: '1px solid var(--color-gray-200)',
+                  border: '1px solid rgba(255,255,255,0.05)',
                   height: '100%',
-                  transition: 'var(--transition-base)',
+                  transition: 'all 0.3s ease',
                   '&:hover': {
-                    boxShadow: 'var(--shadow-lg)',
+                    borderColor: 'rgba(230, 57, 70, 0.3)',
                     transform: 'translateY(-4px)',
+                    backgroundColor: 'rgba(255,255,255,0.03)',
                   },
                 }}
               >
                 {/* Header Row */}
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 3 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
                   <Box
                     sx={{
                       width: 56,
                       height: 56,
-                      borderRadius: 'var(--radius-lg)',
+                      borderRadius: '16px',
                       background: 'var(--gradient-cta)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
+                      boxShadow: '0 0 20px rgba(230, 57, 70, 0.2)'
                     }}
                   >
-                    <tier.icon size={28} color="var(--color-primary-900)" />
+                    <tier.icon size={28} color="white" />
                   </Box>
 
                   <Typography
                     sx={{
-                      fontSize: 'var(--text-lg)',
+                      fontSize: '16px',
                       fontWeight: 700,
-                      color: 'var(--color-gray-400)',
+                      color: 'var(--color-gray-600)',
                       textDecoration: 'line-through',
                     }}
                   >
@@ -151,10 +168,10 @@ export default function ValueStack() {
                 <Typography
                   variant="h5"
                   sx={{
-                    fontSize: 'var(--text-xl)',
-                    fontWeight: 700,
+                    fontSize: '22px',
+                    fontWeight: 800,
                     fontFamily: 'var(--font-heading)',
-                    color: 'var(--color-gray-900)',
+                    color: 'white',
                     marginBottom: 1,
                   }}
                 >
@@ -163,9 +180,10 @@ export default function ValueStack() {
 
                 <Typography
                   sx={{
-                    fontSize: 'var(--text-sm)',
+                    fontSize: '14px',
                     color: 'var(--color-gray-500)',
-                    marginBottom: 3,
+                    marginBottom: 4,
+                    fontWeight: 500
                   }}
                 >
                   {tier.subtitle}
@@ -182,13 +200,14 @@ export default function ValueStack() {
                       }}
                     >
                       <ListItemIcon sx={{ minWidth: 32 }}>
-                        <Check size={18} color="var(--color-success)" />
+                        <Check size={18} color="#E63946" />
                       </ListItemIcon>
                       <ListItemText
                         primary={feature}
                         primaryTypographyProps={{
-                          fontSize: 'var(--text-sm)',
-                          color: 'var(--color-gray-700)',
+                          fontSize: '15px',
+                          color: 'var(--color-gray-400)',
+                          fontWeight: 400
                         }}
                       />
                     </ListItem>
@@ -202,36 +221,26 @@ export default function ValueStack() {
         {/* Price Summary Card */}
         <Paper
           sx={{
-            maxWidth: 480,
+            maxWidth: 540,
             margin: '0 auto',
-            marginTop: 8,
+            marginTop: 10,
             padding: 5,
-            backgroundColor: 'var(--color-primary-800)',
-            borderRadius: 'var(--radius-2xl)',
+            backgroundColor: 'rgba(255,255,255,0.02)',
+            borderRadius: '32px',
             textAlign: 'center',
             position: 'relative',
             overflow: 'hidden',
-            boxShadow: 'var(--shadow-xl)',
+            border: '1px solid rgba(230, 57, 70, 0.3)',
+            boxShadow: '0 0 40px rgba(230, 57, 70, 0.1)',
           }}
         >
-          {/* Background Gradient Decoration */}
-          <Box
-            sx={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              height: 4,
-              background: 'var(--gradient-cta)',
-            }}
-          />
-
           <Typography
             sx={{
-              fontSize: 'var(--text-lg)',
-              color: 'var(--color-gray-400)',
+              fontSize: '16px',
+              color: 'var(--color-gray-500)',
               textDecoration: 'line-through',
               marginBottom: 1,
+              fontWeight: 600
             }}
           >
             Total Value: ₹5,82,500
@@ -239,33 +248,34 @@ export default function ValueStack() {
 
           <Typography
             sx={{
-              fontSize: 'var(--text-sm)',
-              color: 'var(--color-gray-300)',
+              fontSize: '13px',
+              color: '#E63946',
               textTransform: 'uppercase',
-              letterSpacing: 'var(--tracking-wide)',
+              letterSpacing: '2px',
+              fontWeight: 800,
               marginBottom: 1,
             }}
           >
-            Your Investment
+            YOUR INVESTMENT
           </Typography>
 
           <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 1, marginBottom: 1 }}>
             <Typography
               sx={{
-                fontSize: 'var(--text-5xl)',
-                fontWeight: 800,
+                fontSize: '64px',
+                fontWeight: 900,
                 fontFamily: 'var(--font-heading)',
-                background: 'var(--gradient-cta)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
+                color: 'white',
+                letterSpacing: '-2px'
               }}
             >
               ₹4,999
             </Typography>
             <Typography
               sx={{
-                fontSize: 'var(--text-xl)',
-                color: 'var(--color-gray-400)',
+                fontSize: '20px',
+                color: 'var(--color-gray-500)',
+                fontWeight: 600
               }}
             >
               /month
@@ -274,30 +284,31 @@ export default function ValueStack() {
 
           <Typography
             sx={{
-              fontSize: 'var(--text-sm)',
-              color: 'var(--color-gray-400)',
+              fontSize: '14px',
+              color: 'var(--color-gray-500)',
               marginBottom: 4,
             }}
           >
-            That's ₹166/day — less than a protein shake
+            That's ₹166/day — less than a single personal training session
           </Typography>
 
           <Box
             sx={{
-              backgroundColor: 'rgba(0, 245, 160, 0.1)',
-              borderRadius: 'var(--radius-lg)',
-              padding: 2,
+              backgroundColor: 'rgba(230, 57, 70, 0.1)',
+              borderRadius: '12px',
+              padding: 2.5,
               marginBottom: 4,
+              border: '1px solid rgba(230, 57, 70, 0.2)'
             }}
           >
             <Typography
               sx={{
-                fontSize: 'var(--text-sm)',
-                fontWeight: 500,
-                color: 'var(--color-accent-green)',
+                fontSize: '14px',
+                fontWeight: 600,
+                color: '#E63946',
               }}
             >
-              The cost of just 2 members who don't churn pays for an entire year
+              One late payment collected pays for your entire year.
             </Typography>
           </Box>
 
@@ -305,33 +316,38 @@ export default function ValueStack() {
             fullWidth
             variant="contained"
             sx={{
-              height: 56,
+              height: 64,
               background: 'var(--gradient-cta)',
-              borderRadius: 'var(--radius-lg)',
-              fontSize: 'var(--text-base)',
-              fontWeight: 600,
+              borderRadius: '16px',
+              fontSize: '18px',
+              fontWeight: 800,
               textTransform: 'none',
-              color: 'var(--color-primary-900)',
-              boxShadow: 'var(--shadow-glow-green)',
-              marginBottom: 2
+              color: 'white',
+              boxShadow: '0 10px 30px rgba(230, 57, 70, 0.4)',
+              marginBottom: 2.5,
+              '&:hover': {
+                transform: 'translateY(-2px)',
+                boxShadow: '0 15px 40px rgba(230, 57, 70, 0.6)',
+              }
             }}
-            endIcon={<ArrowRight size={20} />}
+            endIcon={<ArrowRight size={22} />}
           >
-            Start Free 14-Day Trial
+            Start Your 14-Day Free Trial
           </Button>
 
           <Typography
             sx={{
-              fontSize: 'var(--text-xs)',
+              fontSize: '14px',
               color: 'var(--color-gray-500)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 1,
+              gap: 1.5,
+              fontWeight: 500
             }}
           >
-            <Lock size={14} />
-            No credit card required • Cancel anytime
+            <Lock size={16} color="#E63946" />
+            No credit card required. Cancel anytime.
           </Typography>
         </Paper>
       </Container>

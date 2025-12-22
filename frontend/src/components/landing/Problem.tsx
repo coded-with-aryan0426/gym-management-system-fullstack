@@ -1,279 +1,278 @@
+"use client";
 
 import React from 'react';
-import { Box, Typography, Card, Grid, Container, Chip, Stack, Avatar } from '@mui/material';
-import { TrendingDown, Calendar, Frown, AlertCircle } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Box, Typography, Card, Chip, Grid, Container } from '@mui/material';
+import { FileText, Grid as GridIcon, PhoneOff, AlertCircle } from 'lucide-react';
+import { motion, useScroll, useTransform } from 'framer-motion';
 
 const problems = [
-  {
-    id: 1,
-    target: 'Gym Owners',
-    icon: TrendingDown,
-    color: 'var(--color-crimson)',
-    bg: 'rgba(220, 38, 38, 0.1)',
-    headline: 'Revenue Leaking',
-    agitation: "Missed payments. Manual invoicing. No idea which tier actually makes money.",
-  },
-  {
-    id: 2,
-    target: 'Trainers',
-    icon: Calendar,
-    color: 'var(--color-amber)',
-    bg: 'rgba(245, 158, 11, 0.1)',
-    headline: 'Client Chaos',
-    agitation: 'Texting to book sessions. No-shows killing income. Zero progress visibility.',
-  },
-  {
-    id: 3,
-    target: 'Members',
-    icon: Frown,
-    color: 'var(--color-ocean)',
-    bg: 'rgba(59, 130, 246, 0.1)',
-    headline: 'Friction-Heavy',
-    agitation: "Outdated apps. Payments failing. Progress tracking scattered everywhere.",
-  },
+    {
+        id: 1,
+        target: 'Paper Chaos',
+        icon: FileText,
+        iconBg: 'rgba(230, 57, 70, 0.1)',
+        iconColor: '#E63946',
+        headline: 'Lost in Paper Mountains',
+        agitation: 'Remember spending hours updating member registers by hand? Missing payment records? Lost contact information when that notebook disappeared?',
+        stat: 'Average 8 hours/week wasted on manual entry'
+    },
+    {
+        id: 2,
+        target: 'Excel Hell',
+        icon: GridIcon,
+        iconBg: 'rgba(230, 57, 70, 0.1)',
+        iconColor: '#E63946',
+        headline: 'Excel Nightmares',
+        agitation: 'Crashed spreadsheets right before month-end reports. Formula errors in billing calculations. Unable to access data when away from the office.',
+        stat: '73% of gym owners report billing errors'
+    },
+    {
+        id: 3,
+        target: 'Member Disconnect',
+        icon: PhoneOff,
+        iconBg: 'rgba(230, 57, 70, 0.1)',
+        iconColor: '#E63946',
+        headline: 'Chasing Payments',
+        agitation: 'Manually calling members about renewals. Forgetting to follow up with leads. No way to track who attended classes or used the facilities.',
+        stat: 'Average 30% revenue loss from missed renewals'
+    },
 ];
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
-
-const cardVariants = {
-  hidden: { y: 20, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: { duration: 0.6, cubicBezier: [0.16, 1, 0.3, 1] },
-  },
-};
-
 export default function Problem() {
-  return (
-    <Box
-      sx={{
-        backgroundColor: '#050505',
-        paddingY: { xs: '80px', md: '120px' },
-        position: 'relative',
-        overflow: 'hidden',
-      }}
-    >
-      {/* Dark Ambient Glow */}
-      <Box sx={{
-        position: 'absolute',
-        top: '20%',
-        right: '-10%',
-        width: '50vw',
-        height: '50vw',
-        background: 'radial-gradient(circle, rgba(220, 38, 38, 0.03) 0%, transparent 70%)',
-        filter: 'blur(120px)',
-        zIndex: 0,
-        pointerEvents: 'none',
-      }} />
+    const containerRef = React.useRef(null);
+    const { scrollYProgress } = useScroll({
+        target: containerRef,
+        offset: ["start center", "end center"]
+    });
 
-      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
-        {/* Section Header */}
-        <Box sx={{ textAlign: 'center', marginBottom: { xs: 6, md: 8 } }}>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <Chip
-              label="The Friction"
-              sx={{
-                backgroundColor: 'rgba(220, 38, 38, 0.1)',
-                color: 'var(--color-crimson)',
-                fontWeight: 800,
-                fontSize: '10px',
-                textTransform: 'uppercase',
-                letterSpacing: '0.15em',
-                marginBottom: 2,
-                height: 26,
-                border: '1px solid rgba(220, 38, 38, 0.2)',
-              }}
-            />
-            <Typography
-              variant="h2"
-              sx={{
-                fontSize: { xs: '32px', md: '48px' },
-                fontWeight: 900,
-                fontFamily: 'var(--font-family-display)',
-                letterSpacing: '-0.03em',
-                color: 'white',
-                maxWidth: 800,
-                margin: '0 auto',
-                lineHeight: 1.1,
-              }}
-            >
-              Is Your Gym Running You, <br />
-              <Box component="span" sx={{ opacity: 0.3 }}>Or Are You Running Your Gym?</Box>
-            </Typography>
-          </motion.div>
-        </Box>
+    const height = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
 
-        {/* Problem Cards - Compact Grid */}
-        <Grid 
-          container 
-          spacing={3}
-          component={motion.div}
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-50px" }}
-        >
-          {problems.map((item, index) => (
-            <Grid item xs={12} md={4} key={item.id}>
-              <Card
-                component={motion.div}
-                variants={cardVariants}
-                sx={{
-                  height: '100%',
-                  backgroundColor: '#0a0a0a',
-                  borderRadius: '24px',
-                  padding: { xs: 3, md: 4 },
-                  border: '1px solid rgba(255,255,255,0.05)',
-                  position: 'relative',
-                  overflow: 'hidden',
-                  transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-                  '&:hover': {
-                    borderColor: 'rgba(220, 38, 38, 0.2)',
-                    transform: 'translateY(-8px)',
-                    boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
-                    '& .problem-icon': {
-                      color: 'var(--color-crimson)',
-                      transform: 'scale(1.1)',
-                    }
-                  }
-                }}
-              >
-                <Box
-                  sx={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: '12px',
-                    backgroundColor: 'rgba(255,255,255,0.03)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginBottom: 3,
-                    border: '1px solid rgba(255,255,255,0.05)',
-                  }}
-                >
-                  <item.icon className="problem-icon" size={24} color={item.color} style={{ transition: 'all 0.3s ease' }} />
-                </Box>
-                
-                <Typography
-                  variant="h4"
-                  sx={{
-                    fontSize: '22px',
-                    fontWeight: 900,
-                    fontFamily: 'var(--font-family-display)',
-                    color: 'var(--text-primary)',
-                    marginBottom: 1.5,
-                    letterSpacing: '-0.01em',
-                  }}
-                >
-                  {item.headline}
-                </Typography>
-                
-                <Typography
-                  sx={{
-                    fontSize: '15px',
-                    fontWeight: 400,
-                    lineHeight: 1.5,
-                    color: 'var(--text-secondary)',
-                    marginBottom: 3,
-                  }}
-                >
-                  {item.agitation}
-                </Typography>
-
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'var(--color-crimson)', opacity: 0.6 }}>
-                  <AlertCircle size={14} />
-                  <Typography sx={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                    Systemic Failure
-                  </Typography>
-                </Box>
-
-                {/* Decorative index */}
-                <Typography
-                  sx={{
-                    position: 'absolute',
-                    top: 10,
-                    right: 20,
-                    fontSize: '64px',
-                    fontWeight: 900,
-                    color: 'white',
-                    opacity: 0.03,
-                    zIndex: 0,
-                    pointerEvents: 'none',
-                    fontFamily: 'var(--font-family-display)',
-                  }}
-                >
-                  0{index + 1}
-                </Typography>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-
-        {/* Founder Quote - Optimized and Compact */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-        >
-          <Box
+    return (
+        <Box
+            ref={containerRef}
             sx={{
-              maxWidth: 800,
-              margin: '80px auto 0',
-              padding: { xs: 4, md: 6 },
-              background: 'linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0) 100%)',
-              border: '1px solid rgba(255,255,255,0.05)',
-              borderRadius: '32px',
-              textAlign: 'center',
-              position: 'relative',
+                backgroundColor: '#0A0A0A',
+                paddingY: { xs: '60px', sm: '80px', md: '100px', lg: '120px' },
+                paddingX: { xs: '16px', sm: '24px', md: '0' },
+                position: 'relative',
+                overflow: 'hidden'
             }}
-          >
-             <Typography
+        >
+            {/* Background Glow */}
+            <Box
                 sx={{
-                  fontSize: { xs: '18px', md: '24px' },
-                  fontWeight: 600,
-                  fontStyle: 'italic',
-                  color: 'white',
-                  lineHeight: 1.4,
-                  marginBottom: 4,
-                  letterSpacing: '-0.01em',
+                    position: 'absolute',
+                    top: '20%',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    width: '600px',
+                    height: '600px',
+                    background: 'radial-gradient(circle, rgba(230, 57, 70, 0.05) 0%, transparent 70%)',
+                    zIndex: 0,
+                    pointerEvents: 'none'
                 }}
-             >
-              "I built AthlonX because I was tired of using 5 different softwares just to keep my gym open. I wanted one dashboard that told me the truth about my business."
-             </Typography>
-             
-             <Stack direction="row" spacing={2} alignItems="center" justifyContent="center">
-                <Avatar 
-                  src="https://ui-avatars.com/api/?name=Aryan+Suthar&background=DC2626&color=fff" 
-                  sx={{ width: 48, height: 48, border: '1px solid var(--color-crimson)' }} 
-                />
-                <Box sx={{ textAlign: 'left' }}>
-                  <Typography sx={{ fontWeight: 800, color: 'white', fontSize: '16px' }}>
-                    Aryan Suthar
-                  </Typography>
-                  <Typography sx={{ fontSize: '12px', color: 'var(--color-crimson)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                    Founder & CEO, AthlonX
-                  </Typography>
+            />
+
+            <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
+                {/* Section Header */}
+                <Box sx={{ textAlign: 'center', marginBottom: { xs: 6, md: 8, lg: 10 } }}>
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                    >
+                        <Typography
+                            sx={{
+                                fontSize: '14px',
+                                fontWeight: 600,
+                                textTransform: 'uppercase',
+                                letterSpacing: '2px',
+                                color: '#E63946',
+                                marginBottom: 2,
+                            }}
+                        >
+                            The Days of Struggle
+                        </Typography>
+                        <Typography
+                            variant="h2"
+                            sx={{
+                                fontSize: { xs: '36px', md: '56px' },
+                                fontWeight: 800,
+                                fontFamily: 'var(--font-heading)',
+                                color: 'white',
+                                maxWidth: 800,
+                                margin: '0 auto',
+                                lineHeight: 1.1,
+                                letterSpacing: '-1px'
+                            }}
+                        >
+                            Remember These Days? <Box component="span" sx={{ color: '#E63946' }}>Chaotic.</Box>
+                        </Typography>
+                    </motion.div>
                 </Box>
-             </Stack>
-          </Box>
-        </motion.div>
-      </Container>
-    </Box>
-  );
+
+                {/* Cards Container with Vertical Line */}
+                <Box sx={{ position: 'relative' }}>
+                    {/* Animated Vertical Line (Desktop) */}
+                    <Box
+                        sx={{
+                            position: 'absolute',
+                            left: '50%',
+                            top: 0,
+                            bottom: 0,
+                            width: '2px',
+                            background: 'rgba(255,255,255,0.05)',
+                            display: { xs: 'none', md: 'block' },
+                            transform: 'translateX(-50%)',
+                        }}
+                    >
+                        <motion.div
+                            style={{
+                                height,
+                                width: '100%',
+                                background: 'linear-gradient(to bottom, #E63946, #FF495C, #C1121F)',
+                                originY: 0
+                            }}
+                        />
+                    </Box>
+
+                    <Grid container spacing={6}>
+                        {problems.map((item, index) => (
+                            <Grid size={{ xs: 12, md: 4 }} key={item.id}>
+                                <motion.div
+                                    initial={{ opacity: 0, y: 30 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: index * 0.2, duration: 0.8 }}
+                                >
+                                    <Card
+                                        sx={{
+                                            backgroundColor: '#1A1A1A',
+                                            borderLeft: '4px solid #E63946',
+                                            borderTop: '1px solid rgba(255,255,255,0.05)',
+                                            borderRight: '1px solid rgba(255,255,255,0.05)',
+                                            borderBottom: '1px solid rgba(255,255,255,0.05)',
+                                            borderRadius: '16px',
+                                            padding: 4,
+                                            height: '100%',
+                                            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                                            position: 'relative',
+                                            overflow: 'hidden',
+                                            '&:hover': {
+                                                backgroundColor: '#222222',
+                                                transform: 'translateY(-8px)',
+                                                boxShadow: '0 20px 40px rgba(0,0,0,0.4), 0 0 20px rgba(230, 57, 70, 0.1)',
+                                                '& .icon-glow': {
+                                                    boxShadow: '0 0 30px rgba(230, 57, 70, 0.4)',
+                                                }
+                                            },
+                                        }}
+                                    >
+                                        {/* Icon Container */}
+                                        <Box
+                                            className="icon-glow"
+                                            sx={{
+                                                width: 64,
+                                                height: 64,
+                                                borderRadius: '12px',
+                                                backgroundColor: item.iconBg,
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                marginBottom: 3,
+                                                transition: 'all 0.3s ease',
+                                            }}
+                                        >
+                                            <item.icon size={32} color={item.iconColor} />
+                                        </Box>
+
+                                        {/* Headline */}
+                                        <Typography
+                                            variant="h4"
+                                            sx={{
+                                                fontSize: '24px',
+                                                fontWeight: 700,
+                                                fontFamily: 'var(--font-heading)',
+                                                color: 'white',
+                                                marginBottom: 2,
+                                            }}
+                                        >
+                                            {item.headline}
+                                        </Typography>
+
+                                        {/* Agitation Text */}
+                                        <Typography
+                                            sx={{
+                                                fontSize: '16px',
+                                                lineHeight: 1.6,
+                                                color: 'var(--color-gray-300)',
+                                                marginBottom: 4,
+                                            }}
+                                        >
+                                            {item.agitation}
+                                        </Typography>
+
+                                        {/* Pain point stat badge */}
+                                        <Box
+                                            sx={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: 1,
+                                                fontSize: '13px',
+                                                fontWeight: 600,
+                                                color: '#E63946',
+                                                backgroundColor: 'rgba(230, 57, 70, 0.1)',
+                                                padding: '8px 16px',
+                                                borderRadius: '8px',
+                                                border: '1px solid rgba(230, 57, 70, 0.2)',
+                                                width: 'fit-content'
+                                            }}
+                                        >
+                                            <AlertCircle size={14} />
+                                            {item.stat}
+                                        </Box>
+                                    </Card>
+                                </motion.div>
+                            </Grid>
+                        ))}
+                    </Grid>
+                </Box>
+
+                {/* Transition Statement */}
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.6 }}
+                >
+                    <Box
+                        sx={{
+                            maxWidth: 800,
+                            margin: '96px auto 0',
+                            padding: 6,
+                            backgroundColor: 'rgba(255,255,255,0.02)',
+                            borderLeft: '4px solid #E63946',
+                            borderRadius: '0 24px 24px 0',
+                            textAlign: 'center'
+                        }}
+                    >
+                        <Typography
+                            sx={{
+                                fontSize: '20px',
+                                fontStyle: 'italic',
+                                color: 'var(--color-gray-300)',
+                                lineHeight: 1.8,
+                                fontWeight: 400
+                            }}
+                        >
+                            "I built AthlonX because I was tired of using 5 different softwares just to keep my gym open. I wanted one dashboard that told me the truth about my business."
+                            <Box component="span" sx={{ display: 'block', marginTop: 3, fontStyle: 'normal', fontWeight: 700, color: 'white', fontSize: '18px', letterSpacing: '0.5px' }}>
+                                — ARYAN, FOUNDER OF ATHLONX
+                            </Box>
+                        </Typography>
+                    </Box>
+                </motion.div>
+            </Container>
+        </Box>
+    );
 }

@@ -1,66 +1,68 @@
+"use client";
 
-import { Box, Typography, Card, List, ListItem, ListItemIcon, ListItemText, Paper, Button, Grid, Container, Chip } from '@mui/material';
-import { Crown, Target, Smartphone, Settings, Check, ArrowRight, Lock, Zap, TrendingUp } from 'lucide-react';
+import React from 'react';
+import { Box, Typography, Card, List, ListItem, ListItemIcon, ListItemText, Paper, Button, Grid, Container } from '@mui/material';
+import { Crown, Target, Smartphone, Settings, Check, ArrowRight, Lock } from 'lucide-react';
 
 const valueTiers = [
   {
     id: 1,
     icon: Crown,
-    color: 'var(--color-accent-gold)',
     title: 'Owner Command Center',
-    subtitle: 'Business Intelligence',
+    subtitle: 'Complete business intelligence suite',
     value: '₹2,49,750',
-    description: 'Lead with real-time data and automated multi-location reporting.',
     features: [
       'Real-time revenue dashboard',
       'Multi-location management',
-      'Financial projections',
-      'Automated billing',
+      'Staff payroll & commission tracking',
+      'Financial reports & projections',
+      'Automated billing & dunning',
+      'Business analytics & insights',
     ],
   },
   {
     id: 2,
     icon: Target,
-    color: 'var(--color-accent-cyan)',
     title: 'Trainer Toolkit',
-    subtitle: 'Management Powerhouse',
+    subtitle: 'Client management powerhouse',
     value: '₹1,24,750',
-    description: 'Empower staff with client tracking and workout orchestration.',
     features: [
-      'Workout plan builder',
+      'Client management system',
+      'Workout plan builder (drag & drop)',
       'Progress photo comparisons',
-      'Session reminders',
-      'In-app messaging',
+      'Session scheduling & reminders',
+      'Commission tracking',
+      'In-app client messaging',
     ],
   },
   {
     id: 3,
     icon: Smartphone,
-    color: 'var(--color-accent-pink)',
     title: 'Member Experience',
-    subtitle: 'Mobile App',
+    subtitle: 'White-labeled mobile app',
     value: '₹83,250',
-    description: 'A seamless interaction layer that keeps members coming back.',
     features: [
-      'Branded mobile app',
+      'Branded mobile app (YOUR logo)',
       'Easy class booking',
-      'Workout history',
-      'In-app payments',
+      'Personal progress tracking',
+      'Workout history & PRs',
+      'In-app payments (UPI, Cards)',
+      'Push notification engagement',
     ],
   },
   {
     id: 4,
     icon: Settings,
-    color: 'var(--color-accent-emerald)',
     title: 'Operations Engine',
-    subtitle: 'Automation',
+    subtitle: 'Automate your entire gym',
     value: '₹1,24,750',
-    description: 'The digital nervous system of your facility. Zero manual errors.',
     features: [
-      'QR Check-in system',
-      'Inventory management',
+      'Check-in system (QR/biometric)',
+      'Equipment maintenance tracking',
+      'Class capacity management',
       'Staff scheduling',
-      'Auto-communications',
+      'Inventory management',
+      'Automated member communications',
     ],
   },
 ];
@@ -69,111 +71,106 @@ export default function ValueStack() {
   return (
     <Box
       sx={{
-        backgroundColor: 'transparent',
+        backgroundColor: '#0A0A0A',
         paddingY: { xs: '80px', md: '120px' },
-        position: 'relative',
-        zIndex: 1,
+        borderTop: '1px solid rgba(255,255,255,0.05)',
       }}
     >
       <Container maxWidth="lg">
         {/* Section Header */}
-        <Box sx={{ textAlign: 'center', marginBottom: { xs: 6, md: 8 }, maxWidth: 800, marginX: 'auto' }}>
-            <Typography
-              sx={{
-                fontSize: '11px',
-                fontWeight: 800,
-                textTransform: 'uppercase',
-                letterSpacing: '0.2em',
-                color: 'var(--color-crimson)',
-                marginBottom: 2,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 1.5,
-              }}
-            >
-              The Full Stack
-            </Typography>
-            <Typography
-              variant="h2"
-              sx={{
-                fontSize: { xs: '32px', md: '48px' },
-                fontWeight: 900,
-                fontFamily: 'var(--font-family-display)',
-                color: 'white',
-                marginBottom: 2.5,
-                lineHeight: 1.1,
-                letterSpacing: '-0.03em',
-              }}
-            >
-              Saying "No" Should Feel <br />
-              <span className="text-gradient">Physically Impossible.</span>
-            </Typography>
-            <Typography
-              sx={{
-                fontSize: { xs: '15px', md: '17px' },
-                color: 'var(--text-secondary)',
-                maxWidth: 600,
-                margin: '0 auto',
-                lineHeight: 1.5,
-              }}
-            >
-              Don't just buy software. Buy a complete business transformation system optimized for high-performance gyms.
-            </Typography>
+        <Box sx={{ textAlign: 'center', marginBottom: 8, maxWidth: 800, marginX: 'auto' }}>
+          <Typography
+            sx={{
+              fontSize: '14px',
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '2px',
+              color: '#E63946',
+              marginBottom: 2,
+            }}
+          >
+            THE VALUE
+          </Typography>
+          <Typography
+            variant="h2"
+            sx={{
+              fontSize: { xs: '36px', md: '56px' },
+              fontWeight: 900,
+              fontFamily: 'var(--font-heading)',
+              color: 'white',
+              lineHeight: 1.1,
+              letterSpacing: '-1px',
+              marginBottom: 3
+            }}
+          >
+            Everything You Need to Dominate
+          </Typography>
+          <Typography
+            sx={{
+              fontSize: '18px',
+              color: 'var(--color-gray-500)',
+              lineHeight: 1.6
+            }}
+          >
+            Don't just buy software. Buy the complete operating system for your gym's future.
+          </Typography>
         </Box>
 
-        {/* Value Tiers Grid - 2x2 Grid */}
-        <Grid 
-          container 
-          spacing={3}
-        >
+        {/* Value Tiers Grid */}
+        <Grid container spacing={3}>
           {valueTiers.map((tier) => (
-            <Grid item xs={12} sm={6} md={3} key={tier.id}>
+            <Grid size={{ xs: 12, md: 6 }} key={tier.id}>
               <Card
-                className="premium-card"
                 sx={{
-                  padding: 3,
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  background: 'rgba(255,255,255,0.015)',
+                  backgroundColor: 'rgba(255,255,255,0.02)',
+                  borderRadius: '24px',
+                  padding: 4,
                   border: '1px solid rgba(255,255,255,0.05)',
+                  height: '100%',
+                  transition: 'all 0.3s ease',
                   '&:hover': {
-                    borderColor: tier.color,
-                    background: 'rgba(255,255,255,0.03)',
-                  }
+                    borderColor: 'rgba(230, 57, 70, 0.3)',
+                    transform: 'translateY(-4px)',
+                    backgroundColor: 'rgba(255,255,255,0.03)',
+                  },
                 }}
               >
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
+                {/* Header Row */}
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
                   <Box
                     sx={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: '10px',
-                      background: 'rgba(255,255,255,0.03)',
+                      width: 56,
+                      height: 56,
+                      borderRadius: '16px',
+                      background: 'var(--gradient-cta)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      border: '1px solid rgba(255,255,255,0.05)',
+                      boxShadow: '0 0 20px rgba(230, 57, 70, 0.2)'
                     }}
                   >
-                    <tier.icon size={20} color={tier.color} />
+                    <tier.icon size={28} color="white" />
                   </Box>
-                  <Box sx={{ textAlign: 'right' }}>
-                    <Typography sx={{ fontSize: '10px', fontWeight: 800, color: tier.color, textTransform: 'uppercase' }}>
-                      Market Value
-                    </Typography>
-                    <Typography sx={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-tertiary)', opacity: 0.6 }}>
-                      {tier.value}
-                    </Typography>
-                  </Box>
+
+                  <Typography
+                    sx={{
+                      fontSize: '16px',
+                      fontWeight: 700,
+                      color: 'var(--color-gray-600)',
+                      textDecoration: 'line-through',
+                    }}
+                  >
+                    {tier.value} value
+                  </Typography>
                 </Box>
 
+                {/* Title */}
                 <Typography
+                  variant="h5"
                   sx={{
-                    fontSize: '18px',
-                    fontWeight: 900,
-                    fontFamily: 'var(--font-family-display)',
+                    fontSize: '22px',
+                    fontWeight: 800,
+                    fontFamily: 'var(--font-heading)',
                     color: 'white',
                     marginBottom: 1,
                   }}
@@ -184,100 +181,175 @@ export default function ValueStack() {
                 <Typography
                   sx={{
                     fontSize: '14px',
-                    color: 'var(--text-secondary)',
-                    marginBottom: 3,
-                    lineHeight: 1.4,
+                    color: 'var(--color-gray-500)',
+                    marginBottom: 4,
+                    fontWeight: 500
                   }}
                 >
-                  {tier.description}
+                  {tier.subtitle}
                 </Typography>
 
-                <Box sx={{ marginTop: 'auto' }}>
-                  <List sx={{ padding: 0 }}>
-                    {tier.features.map((feature) => (
-                      <ListItem key={feature} sx={{ padding: '2px 0' }}>
-                        <ListItemIcon sx={{ minWidth: 24 }}>
-                          <Check size={14} color="var(--color-accent-emerald)" />
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={feature}
-                          primaryTypographyProps={{ fontSize: '13px', color: 'var(--text-secondary)' }}
-                        />
-                      </ListItem>
-                    ))}
-                  </List>
-                </Box>
+                {/* Feature List */}
+                <List sx={{ padding: 0 }}>
+                  {tier.features.map((feature) => (
+                    <ListItem
+                      key={feature}
+                      sx={{
+                        paddingY: 1,
+                        paddingX: 0,
+                      }}
+                    >
+                      <ListItemIcon sx={{ minWidth: 32 }}>
+                        <Check size={18} color="#E63946" />
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={feature}
+                        primaryTypographyProps={{
+                          fontSize: '15px',
+                          color: 'var(--color-gray-400)',
+                          fontWeight: 400
+                        }}
+                      />
+                    </ListItem>
+                  ))}
+                </List>
               </Card>
             </Grid>
           ))}
         </Grid>
 
-        {/* Pricing Card - Compact */}
-        <Box sx={{ marginTop: { xs: 8, md: 12 }, position: 'relative' }}>
-            <Paper
+        {/* Price Summary Card */}
+        <Paper
+          sx={{
+            maxWidth: 540,
+            margin: '0 auto',
+            marginTop: 10,
+            padding: 5,
+            backgroundColor: 'rgba(255,255,255,0.02)',
+            borderRadius: '32px',
+            textAlign: 'center',
+            position: 'relative',
+            overflow: 'hidden',
+            border: '1px solid rgba(230, 57, 70, 0.3)',
+            boxShadow: '0 0 40px rgba(230, 57, 70, 0.1)',
+          }}
+        >
+          <Typography
+            sx={{
+              fontSize: '16px',
+              color: 'var(--color-gray-500)',
+              textDecoration: 'line-through',
+              marginBottom: 1,
+              fontWeight: 600
+            }}
+          >
+            Total Value: ₹5,82,500
+          </Typography>
+
+          <Typography
+            sx={{
+              fontSize: '13px',
+              color: '#E63946',
+              textTransform: 'uppercase',
+              letterSpacing: '2px',
+              fontWeight: 800,
+              marginBottom: 1,
+            }}
+          >
+            YOUR INVESTMENT
+          </Typography>
+
+          <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 1, marginBottom: 1 }}>
+            <Typography
               sx={{
-                maxWidth: 600,
-                margin: '0 auto',
-                padding: { xs: 4, md: 6 },
-                borderRadius: '32px',
-                textAlign: 'center',
-                background: 'rgba(10,10,10,0.8)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(220, 38, 38, 0.3)',
+                fontSize: '64px',
+                fontWeight: 900,
+                fontFamily: 'var(--font-heading)',
+                color: 'white',
+                letterSpacing: '-2px'
               }}
             >
-              <Chip
-                label="Limited Beta"
-                sx={{
-                  height: 24,
-                  fontSize: '10px',
-                  fontWeight: 800,
-                  backgroundColor: 'rgba(220, 38, 38, 0.1)',
-                  color: 'white',
-                  marginBottom: 2.5,
-                }}
-              />
-              <Typography
-                sx={{
-                  fontSize: { xs: '28px', md: '36px' },
-                  fontWeight: 900,
-                  fontFamily: 'var(--font-family-display)',
-                  color: 'white',
-                  marginBottom: 2,
-                }}
-              >
-                 One System. <span style={{ color: 'var(--color-crimson)' }}>Zero Limits.</span>
-              </Typography>
+              ₹4,999
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: '20px',
+                color: 'var(--color-gray-500)',
+                fontWeight: 600
+              }}
+            >
+              /month
+            </Typography>
+          </Box>
 
-              <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 1, marginBottom: 3 }}>
-                <Typography sx={{ fontSize: { xs: '64px', md: '80px' }, fontWeight: 950, color: 'white' }}>
-                  ₹4,999
-                </Typography>
-                <Typography sx={{ fontSize: '20px', color: 'var(--text-tertiary)', fontWeight: 700 }}>
-                  /mo
-                </Typography>
-              </Box>
+          <Typography
+            sx={{
+              fontSize: '14px',
+              color: 'var(--color-gray-500)',
+              marginBottom: 4,
+            }}
+          >
+            That's ₹166/day — less than a single personal training session
+          </Typography>
 
-              <Typography sx={{ fontSize: '15px', color: 'var(--text-secondary)', marginBottom: 4 }}>
-                Replace all tools and save 40+ hours. Cancel anytime.
-              </Typography>
+          <Box
+            sx={{
+              backgroundColor: 'rgba(230, 57, 70, 0.1)',
+              borderRadius: '12px',
+              padding: 2.5,
+              marginBottom: 4,
+              border: '1px solid rgba(230, 57, 70, 0.2)'
+            }}
+          >
+            <Typography
+              sx={{
+                fontSize: '14px',
+                fontWeight: 600,
+                color: '#E63946',
+              }}
+            >
+              One late payment collected pays for your entire year.
+            </Typography>
+          </Box>
 
-              <Button
-                fullWidth
-                variant="contained"
-                className="btn-premium btn-premium-primary"
-                sx={{
-                  height: 56,
-                  fontSize: '18px',
-                  fontWeight: 800,
-                  borderRadius: '16px',
-                }}
-                endIcon={<ArrowRight size={20} />}
-              >
-                Get Started Now
-              </Button>
-            </Paper>
-        </Box>
+          <Button
+            fullWidth
+            variant="contained"
+            sx={{
+              height: 64,
+              background: 'var(--gradient-cta)',
+              borderRadius: '16px',
+              fontSize: '18px',
+              fontWeight: 800,
+              textTransform: 'none',
+              color: 'white',
+              boxShadow: '0 10px 30px rgba(230, 57, 70, 0.4)',
+              marginBottom: 2.5,
+              '&:hover': {
+                transform: 'translateY(-2px)',
+                boxShadow: '0 15px 40px rgba(230, 57, 70, 0.6)',
+              }
+            }}
+            endIcon={<ArrowRight size={22} />}
+          >
+            Start Your 14-Day Free Trial
+          </Button>
+
+          <Typography
+            sx={{
+              fontSize: '14px',
+              color: 'var(--color-gray-500)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 1.5,
+              fontWeight: 500
+            }}
+          >
+            <Lock size={16} color="#E63946" />
+            No credit card required. Cancel anytime.
+          </Typography>
+        </Paper>
       </Container>
     </Box>
   );

@@ -1,193 +1,248 @@
+"use client";
 
 import React from 'react';
-import { Box, Typography, Button, Container, Avatar } from '@mui/material';
-import { ArrowRight, CheckCircle, Shield } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { Box, Typography, Button, Container, Avatar, AvatarGroup } from '@mui/material';
+import { ArrowRight, Calendar, Lock, Zap, Target, Clock } from 'lucide-react';
+
+const GradientText = ({ children }: { children: React.ReactNode }) => (
+    <Box
+        component="span"
+        sx={{
+            background: 'var(--gradient-cta)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+        }}
+    >
+        {children}
+    </Box>
+);
+
+const objectionHandlers = [
+    { icon: Lock, text: 'No credit card required' },
+    { icon: Zap, text: 'Setup in 15 minutes' },
+    { icon: Target, text: 'Cancel anytime' },
+];
 
 const avatars = [
-  'https://ui-avatars.com/api/?name=User+1&background=DC2626&color=fff',
-  'https://ui-avatars.com/api/?name=User+2&background=DC2626&color=fff',
-  'https://ui-avatars.com/api/?name=User+3&background=DC2626&color=fff',
-  'https://ui-avatars.com/api/?name=User+4&background=DC2626&color=fff',
+    { src: '/images/testimonial-1.jpg', alt: 'User 1' },
+    { src: '/images/testimonial-2.jpg', alt: 'User 2' },
+    { src: '/images/testimonial-3.jpg', alt: 'User 3' },
 ];
 
 interface SecondaryCTAProps {
-  onSignupClick?: () => void;
+    onSignupClick: () => void;
 }
 
 export default function SecondaryCTA({ onSignupClick }: SecondaryCTAProps) {
-  const navigate = useNavigate();
-
-  const handleClick = () => {
-    if (onSignupClick) {
-      onSignupClick();
-    } else {
-      navigate('/signup');
-    }
-  };
-
-  return (
-    <Box
-      sx={{
-        position: 'relative',
-        paddingY: { xs: '120px', md: '180px' },
-        background: 'var(--bg-primary)',
-        overflow: 'hidden',
-        borderTop: '1px solid var(--border-subtle)',
-      }}
-    >
-      {/* Dynamic Background Glows */}
-      <Box
-        component={motion.div}
-        animate={{
-          opacity: [0.3, 0.6, 0.3],
-          scale: [1, 1.2, 1],
-        }}
-        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        sx={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: '800px',
-          height: '800px',
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(220, 38, 38, 0.08) 0%, transparent 70%)',
-          zIndex: 0,
-        }}
-      />
-
-      <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>
-        <motion.div
-           initial={{ opacity: 0, y: 30 }}
-           whileInView={{ opacity: 1, y: 0 }}
-           viewport={{ once: true }}
-           transition={{ duration: 0.8 }}
+    return (
+        <Box
+            sx={{
+                backgroundColor: '#0A0A0A',
+                paddingY: { xs: '80px', md: '140px' },
+                position: 'relative',
+                overflow: 'hidden',
+                borderTop: '1px solid rgba(255,255,255,0.05)',
+            }}
         >
-          <Typography
-            variant="h2"
-            sx={{
-              fontSize: { xs: '38px', md: '64px' },
-              fontWeight: 900,
-              fontFamily: 'var(--font-family-display)',
-              color: 'white',
-              marginBottom: 3,
-              lineHeight: 1.1,
-              letterSpacing: '-0.03em',
-            }}
-          >
-            Stop Playing Gym Owner.<br />
-            Start Being a <span className="text-gradient-primary">CEO.</span>
-          </Typography>
+            {/* Background Glow */}
+            <Box
+                sx={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: '600px',
+                    height: '600px',
+                    background: 'radial-gradient(circle, rgba(230, 57, 70, 0.05) 0%, transparent 70%)',
+                    zIndex: 0,
+                }}
+            />
 
-          <Typography
-            sx={{
-              fontSize: { xs: '18px', md: '22px' },
-              color: 'var(--text-secondary)',
-              marginBottom: 8,
-              maxWidth: 700,
-              marginX: 'auto',
-              lineHeight: 1.6,
-            }}
-          >
-            Join the elite circle of 5,000+ gyms that transformed their operations with AthlonX. Precision is just 15 minutes away.
-          </Typography>
+            <Container maxWidth="md" sx={{ textAlign: 'center', position: 'relative', zIndex: 1 }}>
+                {/* Avatar Stack */}
+                <Box sx={{ display: 'flex', justifyContent: 'center', marginBottom: 3 }}>
+                    <AvatarGroup
+                        max={6}
+                        sx={{
+                            justifyContent: 'center',
+                            '& .MuiAvatar-root': {
+                                width: 48,
+                                height: 48,
+                                border: '3px solid #0A0A0A',
+                                marginLeft: '-12px',
+                            },
+                        }}
+                    >
+                        {avatars.map((avatar, index) => (
+                            <Avatar key={index} src={avatar.src} alt={avatar.alt} />
+                        ))}
+                        <Avatar sx={{ backgroundColor: '#E63946', color: 'white', fontWeight: 700, fontSize: '14px' }}>
+                            +2k
+                        </Avatar>
+                    </AvatarGroup>
+                </Box>
 
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 3,
-              marginBottom: 8,
-            }}
-          >
-            <Button
-              variant="contained"
-              className="btn-premium btn-premium-primary animate-pulse-glow"
-              sx={{
-                height: 72,
-                minWidth: 320,
-                paddingX: 6,
-                fontSize: '20px',
-              }}
-              endIcon={<ArrowRight size={24} />}
-              onClick={handleClick}
-            >
-              Yes, Transform My Gym
-            </Button>
-            
-            <Typography
-              sx={{
-                fontSize: '14px',
-                color: 'var(--text-tertiary)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1.5,
-                fontWeight: 600,
-              }}
-            >
-              <Shield size={16} color="var(--color-accent-emerald)" />
-              14-Day Performance Guarantee • Cancel Anytime
-            </Typography>
-          </Box>
+                <Typography
+                    sx={{
+                        fontSize: '14px',
+                        fontWeight: 700,
+                        color: '#E63946',
+                        marginBottom: 3,
+                        textTransform: 'uppercase',
+                        letterSpacing: '2px'
+                    }}
+                >
+                    JOIN THE ELITE
+                </Typography>
 
-          {/* Social Proof Mini */}
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 2.5,
-            }}
-          >
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              {avatars.map((src, index) => (
-                <Avatar
-                  key={index}
-                  src={src}
-                  sx={{
-                    width: 44,
-                    height: 44,
-                    border: '3px solid var(--bg-primary)',
-                    marginLeft: index > 0 ? -1.5 : 0,
-                    boxShadow: '0 0 20px rgba(0,0,0,0.5)',
-                  }}
-                />
-              ))}
-              <Box sx={{ 
-                width: 44, 
-                height: 44, 
-                borderRadius: '50%', 
-                backgroundColor: 'var(--bg-tertiary)', 
-                border: '3px solid var(--bg-primary)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginLeft: -1.5,
-                zIndex: 1,
-              }}>
-                <Typography sx={{ fontSize: '14px', fontWeight: 800, color: 'white' }}>+5k</Typography>
-              </Box>
-            </Box>
-            <Box sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: 1.5,
-              backgroundColor: 'rgba(255,255,255,0.03)',
-              padding: '10px 20px',
-              borderRadius: 'var(--radius-full)',
-              border: '1px solid var(--border-subtle)',
-            }}>
-              <CheckCircle size={18} color="var(--color-accent-emerald)" />
-              <Typography sx={{ fontSize: '14px', color: 'white', fontWeight: 600 }}>
-                12 gyms launched with AthlonX today
-              </Typography>
-            </Box>
-          </Box>
-        </motion.div>
-      </Container>
-    </Box>
-  );
+                {/* Question Headline */}
+                <Typography
+                    variant="h2"
+                    sx={{
+                        fontSize: { xs: '36px', md: '56px' },
+                        fontWeight: 900,
+                        fontFamily: 'var(--font-heading)',
+                        color: 'white',
+                        marginBottom: 3,
+                        lineHeight: 1.1,
+                        letterSpacing: '-1.5px'
+                    }}
+                >
+                    Ready to Turn Your Gym Into a <GradientText>Machine</GradientText>?
+                </Typography>
+
+                {/* Supporting Copy */}
+                <Typography
+                    sx={{
+                        fontSize: '18px',
+                        color: 'var(--color-gray-400)',
+                        marginBottom: 6,
+                        maxWidth: 600,
+                        margin: '0 auto 48px',
+                        lineHeight: 1.6
+                    }}
+                >
+                    Stop fighting fires. Start building an empire. Join 5,000+ gym owners who dominated their market with AthlonX.
+                </Typography>
+
+                {/* CTA Buttons */}
+                <Box
+                    sx={{
+                        display: 'flex',
+                        flexDirection: { xs: 'column', sm: 'row' },
+                        gap: 2.5,
+                        justifyContent: 'center',
+                        marginBottom: 6,
+                    }}
+                >
+                    <Button
+                        variant="contained"
+                        size="large"
+                        sx={{
+                            height: 64,
+                            paddingX: 5,
+                            background: 'var(--gradient-cta)',
+                            color: 'white',
+                            fontSize: '18px',
+                            fontWeight: 800,
+                            textTransform: 'none',
+                            borderRadius: '16px',
+                            boxShadow: '0 10px 30px rgba(230, 57, 70, 0.3)',
+                            transition: 'all 0.3s ease',
+                            '&:hover': {
+                                transform: 'translateY(-3px)',
+                                boxShadow: '0 15px 40px rgba(230, 57, 70, 0.5)',
+                            },
+                        }}
+                        endIcon={<ArrowRight size={22} />}
+                        onClick={onSignupClick}
+                    >
+                        Claim Your Free Trial
+                    </Button>
+
+                    <Button
+                        variant="outlined"
+                        size="large"
+                        sx={{
+                            height: 64,
+                            paddingX: 5,
+                            borderColor: 'rgba(255,255,255,0.1)',
+                            color: 'white',
+                            fontSize: '18px',
+                            fontWeight: 700,
+                            textTransform: 'none',
+                            borderRadius: '16px',
+                            backdropFilter: 'blur(10px)',
+                            '&:hover': {
+                                borderColor: 'white',
+                                backgroundColor: 'rgba(255,255,255,0.05)',
+                                transform: 'translateY(-3px)',
+                            },
+                        }}
+                        startIcon={<Calendar size={22} />}
+                    >
+                        Book Strategy Call
+                    </Button>
+                </Box>
+
+                {/* Objection Handler */}
+                <Box
+                    sx={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        justifyContent: 'center',
+                        gap: 4,
+                    }}
+                >
+                    {objectionHandlers.map((item) => (
+                        <Box
+                            key={item.text}
+                            sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 1.5,
+                            }}
+                        >
+                            <item.icon size={18} color="#E63946" />
+                            <Typography
+                                sx={{
+                                    fontSize: '15px',
+                                    color: 'var(--color-gray-500)',
+                                    fontWeight: 500
+                                }}
+                            >
+                                {item.text}
+                            </Typography>
+                        </Box>
+                    ))}
+                </Box>
+
+                {/* Urgency Element */}
+                <Box
+                    sx={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 1.5,
+                        backgroundColor: 'rgba(230, 57, 70, 0.1)',
+                        border: '1px solid rgba(230, 57, 70, 0.2)',
+                        paddingX: 3,
+                        paddingY: 1.5,
+                        borderRadius: '12px',
+                        marginTop: 6,
+                    }}
+                >
+                    <Clock size={18} color="#E63946" />
+                    <Typography
+                        sx={{
+                            fontSize: '14px',
+                            fontWeight: 700,
+                            color: '#E63946',
+                        }}
+                    >
+                        LIMITED TIME: Get 3 Months for the price of 1
+                    </Typography>
+                </Box>
+            </Container>
+        </Box>
+    );
 }

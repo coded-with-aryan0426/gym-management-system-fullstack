@@ -1,176 +1,113 @@
+"use client";
 
 import React from 'react';
-import { Dialog, Box, Typography, Button, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
-import { Check, ArrowRight, X } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Box, Typography, Button, Dialog, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
+import { Check } from 'lucide-react';
+// Lottie animation removed to specific request/compatibility
+// import dynamic from 'next/dynamic';
+// const Lottie = dynamic(() => import('lottie-react'), { ssr: false });
+// import checkmarkAnimation from '../../public/animations/checkmark.json'; 
+
+const deliverables = [
+    'Full platform access for 14 days',
+    'Free onboarding call with gym specialist',
+    'Member app white-labeled with YOUR branding',
+    'Import up to 1,000 members free',
+    '24/7 priority support',
+    'No credit card required',
+];
 
 interface SuccessModalProps {
-  open: boolean;
-  onClose: () => void;
+    open: boolean;
+    onClose: () => void;
 }
 
 export default function SuccessModal({ open, onClose }: SuccessModalProps) {
-  return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      PaperProps={{
-          sx: {
-            borderRadius: 'var(--radius-xl)',
-            padding: 0,
-            maxWidth: 500,
-            backgroundColor: 'var(--bg-secondary)',
-            backgroundImage: 'var(--bg-mesh-gradient)',
-            overflow: 'hidden',
-            boxShadow: 'var(--shadow-premium-xl)',
-            border: '1px solid var(--border-subtle)',
-          },
-      }}
-    >
-      <Box sx={{ position: 'relative', padding: 4 }}>
-        {/* Close Button */}
-        <Button
-            onClick={onClose}
-            sx={{
-                position: 'absolute',
-                top: 16,
-                right: 16,
-                minWidth: 'auto',
-                padding: 1,
-                borderRadius: '50%',
-                color: 'var(--color-gray-400)',
-                '&:hover': {
-                    backgroundColor: 'var(--color-gray-50)',
-                    color: 'var(--color-gray-600)',
-                }
+    return (
+        <Dialog
+            open={open}
+            onClose={onClose}
+            maxWidth="sm"
+            PaperProps={{
+                sx: {
+                    borderRadius: 'var(--radius-2xl)',
+                    padding: { xs: 4, md: 6 },
+                    maxWidth: 560,
+                    textAlign: 'center',
+                    backgroundColor: 'var(--color-white)',
+                    boxShadow: 'var(--shadow-xl)',
+                },
             }}
         >
-            <X size={20} />
-        </Button>
+            {/* Lottie Checkmark Placeholder - Since we don't have the file, using a static icon fallback if Lottie fails or just the icon for now to ensure stability */}
+            <Box sx={{ width: 80, height: 80, margin: '0 auto 24px', display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'rgba(16, 185, 129, 0.1)', borderRadius: '50%' }}>
+                <Check size={40} color="var(--color-success)" />
+            </Box>
 
-        {/* Header Animation Canvas */}
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            marginBottom: 3,
-          }}
-        >
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", stiffness: 260, damping: 20 }}
-          >
-           <Box 
-            sx={{ 
-                width: 80, 
-                height: 80, 
-                borderRadius: '50%', 
-                backgroundColor: 'rgba(16, 185, 129, 0.1)', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                marginBottom: 2
-            }}
-           >
-             <Check size={40} color="var(--color-success)" />
-           </Box>
-          </motion.div>
-          
             <Typography
-              variant="h4"
-              sx={{
-                fontSize: 'var(--text-2xl)',
-                fontWeight: 800,
-                fontFamily: 'var(--font-heading)',
-                color: 'white',
-                textAlign: 'center',
-                marginBottom: 1,
-              }}
+                variant="h4"
+                sx={{
+                    fontSize: 'var(--text-3xl)',
+                    fontWeight: 700,
+                    fontFamily: 'var(--font-heading)',
+                    color: 'var(--color-gray-900)',
+                    marginBottom: 2,
+                }}
             >
-              Welcome to the Empire!
+                You're In! Welcome to the Revolution
             </Typography>
+
             <Typography
-              sx={{
-                fontSize: 'var(--text-sm)',
-                color: 'var(--text-secondary)',
-                textAlign: 'center',
-              }}
+                sx={{
+                    fontSize: 'var(--text-base)',
+                    color: 'var(--color-gray-600)',
+                    marginBottom: 4,
+                }}
             >
-              Your account has been successfully created.
+                Check your inbox for instant access credentials
             </Typography>
-          </Box>
-  
-          {/* Deliverables */}
-          <Box
-            sx={{
-              backgroundColor: 'rgba(255,255,255,0.03)',
-              borderRadius: 'var(--radius-lg)',
-              padding: 3,
-              marginBottom: 4,
-              border: '1px solid var(--border-subtle)',
-            }}
-          >
-            <Typography
-              sx={{
-                fontSize: 'var(--text-xs)',
-                fontWeight: 700,
-                textTransform: 'uppercase',
-                color: 'var(--color-crimson)',
-                marginBottom: 2,
-                letterSpacing: 'var(--tracking-wide)',
-              }}
-            >
-              What happens next:
-            </Typography>
-            <List dense disablePadding>
-              {[
-                'Instant access to your Admin Dashboard',
-                'Welcome email with setup guide sent',
-                '14-Day Free Trial activated',
-              ].map((text, index) => (
-                <ListItem key={index} disableGutters sx={{ paddingY: 0.5 }}>
-                  <ListItemIcon sx={{ minWidth: 28 }}>
-                    <Check size={16} color="var(--color-accent-emerald)" />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={text}
-                    primaryTypographyProps={{
-                      fontSize: 'var(--text-sm)',
-                      color: 'var(--text-secondary)',
-                      fontWeight: 500,
-                    }}
-                  />
-                </ListItem>
-              ))}
+
+            <List sx={{ textAlign: 'left', marginBottom: 4 }}>
+                {deliverables.map((item) => (
+                    <ListItem
+                        key={item}
+                        sx={{
+                            paddingY: 1,
+                            paddingX: 0,
+                        }}
+                    >
+                        <ListItemIcon sx={{ minWidth: 36 }}>
+                            <Check size={20} color="var(--color-success)" />
+                        </ListItemIcon>
+                        <ListItemText
+                            primary={item}
+                            primaryTypographyProps={{
+                                fontSize: 'var(--text-sm)',
+                                fontWeight: 500,
+                                color: 'var(--color-gray-700)',
+                            }}
+                        />
+                    </ListItem>
+                ))}
             </List>
-          </Box>
-  
-          {/* CTA */}
-          <Button
-              fullWidth
-              variant="contained"
-              onClick={onClose} 
-              sx={{
-                  height: 56,
-                  background: 'var(--gradient-primary)',
-                  borderRadius: 'var(--radius-lg)',
-                  fontSize: 'var(--text-base)',
-                  fontWeight: 600,
-                  textTransform: 'none',
-                  color: 'white',
-                  boxShadow: 'var(--shadow-primary)',
-                  '&:hover': {
-                      background: 'var(--gradient-primary-hover)',
-                      transform: 'translateY(-2px)',
-                  }
-              }}
-              endIcon={<ArrowRight size={20} />}
-          >
-              Go to Dashboard
-          </Button>
-      </Box>
-    </Dialog>
-  );
+
+            <Button
+                fullWidth
+                variant="contained"
+                onClick={onClose}
+                sx={{
+                    height: 52,
+                    background: 'var(--gradient-cta)',
+                    borderRadius: 'var(--radius-lg)',
+                    fontSize: 'var(--text-base)',
+                    fontWeight: 600,
+                    textTransform: 'none',
+                    color: 'var(--color-primary-900)',
+                    boxShadow: 'var(--shadow-glow-green)',
+                }}
+            >
+                Continue to Dashboard
+            </Button>
+        </Dialog>
+    );
 }
