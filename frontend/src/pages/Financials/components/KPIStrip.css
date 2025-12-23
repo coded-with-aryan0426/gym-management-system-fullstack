@@ -9,7 +9,7 @@
     align-items: center;
     gap: 10px;
     padding: 12px 14px;
-    background: #0a0a0a;
+    background: var(--bg-tertiary);
     border: 1px solid var(--border-primary);
     border-radius: 8px;
     transition: all 0.2s ease;
@@ -45,8 +45,15 @@
 }
 
 @keyframes pulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.3); }
-    50% { box-shadow: 0 0 0 4px rgba(245, 158, 11, 0); }
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.3);
+    }
+
+    50% {
+        box-shadow: 0 0 0 4px rgba(245, 158, 11, 0);
+    }
 }
 
 .kpi-icon {
@@ -152,11 +159,11 @@
     .kpi-strip {
         grid-template-columns: 1fr;
     }
-    
+
     .kpi-card {
         padding: 10px 12px;
     }
-    
+
     .kpi-value {
         font-size: 1.125rem;
     }

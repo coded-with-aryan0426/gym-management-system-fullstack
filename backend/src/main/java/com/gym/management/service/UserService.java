@@ -372,8 +372,50 @@ public class UserService {
         return null;
     }
 
+    @Autowired
+    private com.gym.management.repository.PTSessionRepository ptSessionRepository;
+
+    @Transactional
     public void deleteUser(Long id) {
         Objects.requireNonNull(id, "User ID must not be null");
+        User user = userRepository.findById(id).orElse(null);
+        if (user == null) {
+            return; // Or throw exception
+        }
+
+        // 1. Clear ManyToMany relationships (Trainer <-> Customer)
+        // We need to remove this user from others' lists to avoid FK constraint issues
+        // in bridging tables
+
+        // Remove as customer from all trainers
+        for (User trainer : user.getTrainers()) {
+            trainer.getCustomers().remove(user);
+            userRepository.save(trainer);
+        }
+        user.getTrainers().clear();
+
+        // Remove as trainer from all customers
+        for (User customer : user.getCustomers()) {
+            customer.getTrainers().remove(user);
+            userRepository.save(customer);
+        }
+        user.getCustomers().clear();
+
+        // Save to update join tables
+        userRepository.save(user);
+
+        // 2. Delete Memberships
+        List<Membership> memberships = membershipRepository.findByUserUserId(id);
+        membershipRepository.deleteAll(memberships);
+
+        // 3. Delete PT Sessions (as member or trainer)
+        List<com.gym.management.model.PTSession> sessionsAsMember = ptSessionRepository.findByMemberId(id);
+        ptSessionRepository.deleteAll(sessionsAsMember);
+
+        List<com.gym.management.model.PTSession> sessionsAsTrainer = ptSessionRepository.findByTrainerId(id);
+        ptSessionRepository.deleteAll(sessionsAsTrainer);
+
+        // 4. Finally Delete User
         userRepository.deleteById(id);
     }
 

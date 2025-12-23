@@ -3,14 +3,14 @@
    ============================================================================ */
 
 .user-detail {
-  --modal-bg: #1A1A1A;
-  --modal-header-bg: #0D0D0D;
-  --card-bg: #252525;
-  --card-hover: #2D2D2D;
-  --accent-blue: #DC2626;
-  --text-primary: #ffffff;
-  --text-secondary: #9CA3AF;
-  --border-color: #374151;
+  --modal-bg: var(--bg-secondary);
+  --modal-header-bg: var(--bg-tertiary);
+  --card-bg: var(--bg-primary);
+  --card-hover: var(--bg-elevated);
+  --accent-blue: var(--color-crimson);
+  --text-primary: var(--text-primary);
+  --text-secondary: var(--text-secondary);
+  --border-color: var(--border-subtle);
 
   padding: 0;
   font-family: 'Inter', system-ui, sans-serif;
@@ -336,6 +336,7 @@
   width: 14px;
   height: 14px;
 }
+
 /* ============================================================================
    Enhanced User Detail Modal - Advanced Features
    ============================================================================ */
@@ -659,6 +660,7 @@
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -670,6 +672,7 @@
     opacity: 0;
     transform: translateX(20px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -719,9 +722,19 @@
 }
 
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-2px); }
-  75% { transform: translateX(2px); }
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-2px);
+  }
+
+  75% {
+    transform: translateX(2px);
+  }
 }
 
 /* Responsive enhancements */
@@ -729,27 +742,27 @@
   .edit-profile-form {
     gap: 6px;
   }
-  
+
   .edit-actions {
     flex-direction: column;
     gap: 4px;
   }
-  
+
   .audit-entry__header {
     flex-direction: column;
     align-items: flex-start;
     gap: 4px;
   }
-  
+
   .audit-entry__details {
     flex-direction: column;
     gap: 4px;
   }
-  
+
   .conflicts-section {
     padding: 8px;
   }
-  
+
   .connection-indicator {
     font-size: 10px;
     padding: 2px 6px;
@@ -761,11 +774,11 @@
   .edit-input {
     border-width: 2px;
   }
-  
+
   .audit-entry {
     border-width: 2px;
   }
-  
+
   .conflicts-section {
     border-width: 2px;
   }
@@ -773,20 +786,21 @@
 
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
+
   .loading-spinner-small,
   .search-spinner {
     animation: none;
   }
-  
+
   .connection-dot {
     animation: none;
   }
-  
+
   .user-detail__user-card,
   .audit-entry {
     animation: none;
   }
-  
+
   .user-detail__user-card.error {
     animation: none;
   }

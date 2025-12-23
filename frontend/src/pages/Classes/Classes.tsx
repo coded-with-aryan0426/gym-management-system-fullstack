@@ -2,126 +2,101 @@
 
 import React, { useEffect, useState, useMemo, useRef } from "react"
 import { toast } from "react-hot-toast"
-import { ptSessionApi } from "../../services/api"
-import { ScheduleHeader, ScheduleFilters, DaySection, ClassFormDrawer, type ClassData } from "./components"
+import api, { ptSessionApi } from "../../services/api"
+import { ScheduleHeader, ScheduleFilters, WeeklyCalendar, AddClassModal, type ClassData } from "./components"
 import "./Classes.css"
+import type { User } from "../../types/user"
 
 // Class types for filtering
 const CLASS_TYPES = ["Yoga", "HIIT", "Cardio", "Strength", "Pilates", "CrossFit"]
-
-// Mock data generator for demo
-const generateMockClasses = (): ClassData[] => {
-  const trainers = ["Sarah Miller", "John Davis", "Emma Wilson", "Mike Chen", "Lisa Park"]
-  const rooms = ["Studio A", "Studio B", "Main Hall", "Gym Floor"]
-  const statuses: ("Available" | "Full" | "Cancelled")[] = ["Available", "Available", "Available", "Full", "Cancelled"]
-
-  const classes: ClassData[] = []
-  const today = new Date()
-
-  // Generate classes for the next 7 days
-  for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
-    const date = new Date(today)
-    date.setDate(today.getDate() + dayOffset)
-    const dateStr = date.toISOString().split('T')[0]
-
-    // Generate 3-6 classes per day
-    const numClasses = Math.floor(Math.random() * 4) + 3
-    const usedTimes = new Set<string>()
-
-    for (let i = 0; i < numClasses; i++) {
-      let startHour = Math.floor(Math.random() * 12) + 6 // 6am to 6pm
-      while (usedTimes.has(String(startHour))) {
-        startHour = Math.floor(Math.random() * 12) + 6
-      }
-      usedTimes.add(String(startHour))
-
-      const startTime = `${String(startHour).padStart(2, '0')}:00`
-      const endTime = `${String(startHour + 1).padStart(2, '0')}:00`
-      const type = CLASS_TYPES[Math.floor(Math.random() * CLASS_TYPES.length)]
-      const capacity = Math.floor(Math.random() * 15) + 8
-      const enrolled = Math.floor(Math.random() * capacity)
-      const status = enrolled >= capacity ? "Full" : statuses[Math.floor(Math.random() * statuses.length)]
-
-      classes.push({
-        id: dayOffset * 10 + i + 1,
-        name: `${type} Class`,
-        trainer: trainers[Math.floor(Math.random() * trainers.length)],
-        startTime,
-        endTime,
-        date: dateStr,
-        capacity,
-        enrolled: status === "Full" ? capacity : enrolled,
-        status: status === "Cancelled" ? "Cancelled" : (enrolled >= capacity ? "Full" : "Available"),
-        room: rooms[Math.floor(Math.random() * rooms.length)],
-        type,
-      })
-    }
-  }
-
-  return classes.sort((a, b) => {
-    if (a.date !== b.date) return a.date.localeCompare(b.date)
-    return a.startTime.localeCompare(b.startTime)
-  })
-}
 
 const Classes: React.FC = () => {
   const [classes, setClasses] = useState<ClassData[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedDay, setSelectedDay] = useState<'today' | 'week' | 'custom'>('week')
+  const [currentDate, setCurrentDate] = useState(new Date())
   const [filter, setFilter] = useState({
     type: "All",
     trainer: "All",
     status: "All",
   })
+  const [availableTrainers, setAvailableTrainers] = useState<User[]>([])
 
-  // Drawer state
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  // Drawer/Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingClass, setEditingClass] = useState<ClassData | null>(null)
 
-  // Use ref to store mock data so it doesn't regenerate on re-renders
-  const mockDataRef = useRef<ClassData[] | null>(null)
-
-  // Fetch classes
+  // Fetch Trainers
   useEffect(() => {
-    const fetchClasses = async () => {
-      setLoading(true)
+    const fetchTrainers = async () => {
       try {
-        // Try to fetch from API
-        const data = await ptSessionApi.getAllSessions()
-        if (data && data.length > 0) {
-          // Transform API data to ClassData format
-          const transformed: ClassData[] = data.map((session: any) => ({
-            id: session.sessionId || session.id,
-            name: session.sessionType || session.name || "Class",
-            trainer: session.trainerName || session.trainer || "Unknown",
-            startTime: session.startTime || "09:00",
-            endTime: session.endTime || "10:00",
-            date: session.sessionDate || new Date().toISOString().split('T')[0],
-            capacity: session.capacity || 15,
-            enrolled: session.enrolled || 0,
-            status: session.status || "Available",
-            room: session.location || session.room || "Studio A",
-            type: session.sessionType || session.type || "General",
-          }))
-          setClasses(transformed)
-        } else {
-          // Use mock data if no API data
-          setClasses(generateMockClasses())
-        }
+        const users = await api.getUsers('TRAINER')
+        setAvailableTrainers(users)
       } catch (error) {
-        console.log("Using mock class data")
-        setClasses(generateMockClasses())
-      } finally {
-        setLoading(false)
+        console.error("Failed to fetch trainers", error)
       }
     }
-    fetchClasses()
+    fetchTrainers()
   }, [])
 
-  // Get unique trainers from classes
-  const trainers = useMemo(() => {
-    return Array.from(new Set(classes.map(c => c.trainer)))
-  }, [classes])
+  // Fetch classes
+  const fetchClasses = async () => {
+    setLoading(true)
+    try {
+      const data = await ptSessionApi.getAllSessions()
+
+      if (data && data.length > 0) {
+        const transformed: ClassData[] = data.map((session: any) => {
+          // Try to parse metadata from notes if it exists
+          let meta: any = {}
+          try {
+            if (session.progressNotes && session.progressNotes.startsWith('{')) {
+              meta = JSON.parse(session.progressNotes)
+            }
+          } catch (e) {
+            // Ignore parse errors
+          }
+
+          const dateObj = new Date(session.sessionDate);
+          const localsDateStr = dateObj.toLocaleDateString('en-CA');
+
+          const startH = String(dateObj.getHours()).padStart(2, '0');
+          const startM = String(dateObj.getMinutes()).padStart(2, '0');
+
+          // Calculate end time
+          const endObj = new Date(dateObj.getTime() + (session.durationMinutes * 60000));
+          const endH = String(endObj.getHours()).padStart(2, '0');
+          const endM = String(endObj.getMinutes()).padStart(2, '0');
+
+          return {
+            id: session.sessionId || session.id,
+            name: meta.name || session.sessionType || "PT Session",
+            trainer: session.trainerName || "Unknown",
+            startTime: `${startH}:${startM}`,
+            endTime: `${endH}:${endM}`,
+            date: localsDateStr,
+            capacity: meta.capacity || 1,
+            enrolled: meta.enrolled || (session.memberId ? 1 : 0),
+            status: session.status === 'SCHEDULED' ? 'Available' : session.status,
+            room: meta.room || "Gym Floor",
+            type: meta.type || "General",
+          }
+        })
+        setClasses(transformed)
+      } else {
+        setClasses([])
+      }
+    } catch (error: any) {
+      console.error("Error fetching classes:", error)
+      toast.error("Failed to sync with database.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchClasses()
+  }, [])
 
   // Filter classes
   const filteredClasses = useMemo(() => {
@@ -132,31 +107,6 @@ const Classes: React.FC = () => {
       return true
     })
   }, [classes, filter])
-
-  // Group classes by date
-  const groupedByDate = useMemo(() => {
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-
-    const groups: Map<string, ClassData[]> = new Map()
-
-    filteredClasses.forEach(cls => {
-      const dateKey = cls.date
-      if (!groups.has(dateKey)) {
-        groups.set(dateKey, [])
-      }
-      groups.get(dateKey)!.push(cls)
-    })
-
-    // Filter based on selected day
-    if (selectedDay === 'today') {
-      const todayStr = today.toISOString().split('T')[0]
-      const todayClasses = groups.get(todayStr) || []
-      return new Map([[todayStr, todayClasses]])
-    }
-
-    return groups
-  }, [filteredClasses, selectedDay])
 
   // Calculate stats
   const stats = useMemo(() => {
@@ -169,82 +119,170 @@ const Classes: React.FC = () => {
 
   // Get date range string
   const getDateRange = () => {
-    const today = new Date()
-    const endDate = new Date(today)
-    endDate.setDate(today.getDate() + 6)
+    const start = new Date(currentDate)
+    const day = start.getDay()
+    const diff = start.getDate() - day + (day === 0 ? -6 : 1) // adjust when day is sunday
+    const monday = new Date(start.setDate(diff))
+
+    const end = new Date(monday)
+    end.setDate(monday.getDate() + 6)
 
     const formatDate = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-    return `${formatDate(today)} – ${formatDate(endDate)}`
+    return `${formatDate(monday)} – ${formatDate(end)}`
   }
 
   const handleClassClick = (classData: ClassData) => {
-    // Open edit drawer
     setEditingClass(classData)
-    setIsDrawerOpen(true)
+    setIsModalOpen(true)
   }
 
-  const handleAddClass = () => {
-    setEditingClass(null)
-    setIsDrawerOpen(true)
-  }
+  const handleTimeSlotClick = (date: Date, hour: number) => {
+    const newClassDate = date.toLocaleDateString('en-CA');
 
-  const handleEditClass = (classData: ClassData) => {
-    setEditingClass(classData)
-    setIsDrawerOpen(true)
-  }
+    // Safety check for past dates on click
+    const now = new Date();
+    const clickedDate = new Date(date);
+    clickedDate.setHours(hour, 0, 0, 0);
 
-  const handleCancelClass = (classData: ClassData) => {
-    // Mark class as cancelled
-    setClasses(prev => prev.map(cls =>
-      cls.id === classData.id
-        ? { ...cls, status: 'Cancelled' as const }
-        : cls
-    ))
-    toast.success(`${classData.name} has been cancelled`)
-  }
-
-  const handleSaveClass = (classData: Partial<ClassData>) => {
-    if (editingClass) {
-      // Update existing class
-      setClasses(prev => prev.map(cls =>
-        cls.id === editingClass.id
-          ? { ...cls, ...classData } as ClassData
-          : cls
-      ))
-      toast.success('Class updated successfully')
-    } else {
-      // Add new class
-      const newClass: ClassData = {
-        id: Date.now(),
-        name: classData.name || 'New Class',
-        trainer: classData.trainer || 'Unknown',
-        startTime: classData.startTime || '09:00',
-        endTime: classData.endTime || '10:00',
-        date: classData.date || new Date().toISOString().split('T')[0],
-        capacity: classData.capacity || 15,
-        enrolled: 0,
-        status: 'Available',
-        room: classData.room || 'Studio A',
-        type: classData.type || 'General',
-      }
-      setClasses(prev => [...prev, newClass])
-      toast.success('Class created successfully')
+    if (clickedDate < now) {
+      toast.error("Cannot schedule in the past");
+      return;
     }
-    setIsDrawerOpen(false)
+
+    const startTime = `${String(hour).padStart(2, '0')}:00`;
+    const endTime = `${String(hour + 1).padStart(2, '0')}:00`;
+
+    setEditingClass({
+      id: 0,
+      name: '',
+      trainer: '',
+      startTime,
+      endTime,
+      date: newClassDate,
+      capacity: 15,
+      enrolled: 0,
+      status: 'Available',
+      room: 'Studio A',
+      type: 'General'
+    } as ClassData);
+    setIsModalOpen(true);
+  }
+
+  const handleSaveClass = async (classData: Partial<ClassData>) => {
+    try {
+      const targetDate = classData.date || new Date().toLocaleDateString('en-CA');
+      const startParts = (classData.startTime || "09:00").split(':').map(Number);
+
+      // 1. Validate Future Date (Backend Constraint)
+      const sessionDateTime = new Date(`${targetDate}T${classData.startTime || "09:00"}:00`);
+      if (sessionDateTime < new Date()) {
+        toast.error("Cannot schedule classes in the past. Please select a future time.");
+        return;
+      }
+
+      // 2. Conflict Detection
+      const endParts = (classData.endTime || "10:00").split(':').map(Number);
+      const newStartMinutes = startParts[0] * 60 + startParts[1];
+      const newEndMinutes = endParts[0] * 60 + endParts[1];
+
+      const hasConflict = classes.some(cls => {
+        // Skip self when editing
+        if (editingClass && cls.id === editingClass.id) return false;
+
+        // Check Room and Date (Exact match)
+        if (cls.room !== classData.room || cls.date !== targetDate) return false;
+
+        // Check Time Overlap
+        const [clsStartH, clsStartM] = cls.startTime.split(':').map(Number);
+        const [clsEndH, clsEndM] = cls.endTime.split(':').map(Number);
+        const clsStartMinutes = clsStartH * 60 + clsStartM;
+        const clsEndMinutes = clsEndH * 60 + clsEndM;
+
+        // Conflict formula: Overlaps if (StartA < EndB) and (EndA > StartB)
+        return (newStartMinutes < clsEndMinutes && newEndMinutes > clsStartMinutes);
+      });
+
+      if (hasConflict) {
+        toast.error(`Room ${classData.room} is fully booked at this time!`);
+        return;
+      }
+
+      // Find trainer ID
+      const selectedTrainer = availableTrainers.find(t => t.fullName === classData.trainer);
+      const trainerId = selectedTrainer ? selectedTrainer.userId : 2;
+
+      // Calculate duration
+      const durationMinutes = newEndMinutes - newStartMinutes;
+
+      // Metadata to store in notes
+      const metadata = {
+        name: classData.name,
+        type: classData.type,
+        room: classData.room,
+        capacity: classData.capacity,
+        enrolled: classData.enrolled || 0
+      };
+
+      const payload = {
+        trainerId,
+        memberId: 1,
+        sessionDate: `${targetDate}T${classData.startTime || "09:00"}:00`,
+        durationMinutes: durationMinutes > 0 ? durationMinutes : 60,
+        status: 'SCHEDULED',
+        progressNotes: JSON.stringify(metadata)
+      };
+
+      if (editingClass && editingClass.id && editingClass.id !== 0) {
+        // Update
+        await ptSessionApi.updateSession(Number(editingClass.id), payload as any);
+        toast.success('Class updated successfully');
+      } else {
+        // Create
+        await ptSessionApi.createSession(payload as any);
+        toast.success('Class created successfully');
+      }
+
+      setIsModalOpen(false);
+      setEditingClass(null);
+      fetchClasses(); // Refresh data
+
+    } catch (error: any) {
+      console.error("Failed to save class:", error);
+      const msg = error.response?.data?.message || "Failed to save class. Ensure time is valid.";
+      toast.error(msg);
+    }
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
     setEditingClass(null)
   }
 
-  const handleCloseDrawer = () => {
-    setIsDrawerOpen(false)
-    setEditingClass(null)
+  const handlePrevWeek = () => {
+    const newDate = new Date(currentDate)
+    newDate.setDate(currentDate.getDate() - 7)
+    setCurrentDate(newDate)
+    setSelectedDay('week')
   }
 
-  if (loading) {
+  const handleNextWeek = () => {
+    const newDate = new Date(currentDate)
+    newDate.setDate(currentDate.getDate() + 7)
+    setCurrentDate(newDate)
+    setSelectedDay('week')
+  }
+
+  const handleDateSelect = (date: Date) => {
+    setCurrentDate(date)
+    setSelectedDay('week')
+  }
+
+  if (loading && classes.length === 0) {
     return (
       <div className="classes-page">
         <div className="classes-page__loading">
           <div className="loading-spinner" />
-          <span>Loading schedule...</span>
+          <span>Syncing with database...</span>
         </div>
       </div>
     )
@@ -252,14 +290,15 @@ const Classes: React.FC = () => {
 
   return (
     <div className="classes-page">
-      {/* Header */}
       <ScheduleHeader
-        totalClasses={stats.total}
+        totalClasses={filteredClasses.length}
         capacityPercent={stats.capacityPercent}
         dateRange={getDateRange()}
+        onPrevWeek={handlePrevWeek}
+        onNextWeek={handleNextWeek}
+        onDateSelect={handleDateSelect}
       />
 
-      {/* Filters */}
       <ScheduleFilters
         selectedDay={selectedDay}
         onDayChange={setSelectedDay}
@@ -270,52 +309,28 @@ const Classes: React.FC = () => {
         status={filter.status}
         onStatusChange={(status) => setFilter(prev => ({ ...prev, status }))}
         classTypes={CLASS_TYPES}
-        trainers={trainers}
-        onAddClass={handleAddClass}
+        trainers={availableTrainers.map(t => t.fullName)}
+        onAddClass={() => {
+          setEditingClass(null)
+          setIsModalOpen(true)
+        }}
       />
 
-      {/* Agenda View - Classes grouped by day */}
       <div className="classes-page__content">
-        {groupedByDate.size > 0 ? (
-          Array.from(groupedByDate.entries()).map(([dateStr, dayClasses]) => {
-            const date = new Date(dateStr)
-            const today = new Date()
-            today.setHours(0, 0, 0, 0)
-            const isToday = date.toDateString() === today.toDateString()
-
-            return (
-              <DaySection
-                key={dateStr}
-                date={date}
-                classes={dayClasses}
-                isToday={isToday}
-                onClassClick={handleClassClick}
-                onEdit={handleEditClass}
-                onCancel={handleCancelClass}
-              />
-            )
-          })
-        ) : (
-          <div className="classes-page__empty">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-              <line x1="16" y1="2" x2="16" y2="6" />
-              <line x1="8" y1="2" x2="8" y2="6" />
-              <line x1="3" y1="10" x2="21" y2="10" />
-            </svg>
-            <h3>No classes found</h3>
-            <p>Try adjusting your filters or add a new class.</p>
-          </div>
-        )}
+        <WeeklyCalendar
+          currentDate={currentDate}
+          classes={filteredClasses}
+          onClassClick={handleClassClick}
+          onTimeSlotClick={handleTimeSlotClick}
+        />
       </div>
 
-      {/* Add/Edit Class Drawer */}
-      <ClassFormDrawer
-        isOpen={isDrawerOpen}
-        onClose={handleCloseDrawer}
+      <AddClassModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
         onSave={handleSaveClass}
         classData={editingClass}
-        trainers={trainers}
+        trainers={availableTrainers.map(t => t.fullName)}
         classTypes={CLASS_TYPES}
       />
     </div>

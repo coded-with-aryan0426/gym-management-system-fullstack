@@ -1,9 +1,9 @@
 "use client"
 
 import type React from "react"
-import { useState, useRef, useEffect, useCallback } from "react"
+import { useState, useRef, useEffect, useCallback, Fragment } from "react"
 import { useNavigate } from "react-router-dom"
-import { CreateUserModal } from "../index"
+import CreateActionModal from "../CreateActionModal/CreateActionModal"
 import api from "../../services/api"
 import type { User } from "../../types/user"
 import { useMembers } from '../../contexts/MembersContext'
@@ -300,16 +300,23 @@ const UtilityBar: React.FC = () => {
         )}
       </div>
 
-      {/* Dynamic Stats - Only show if metrics exist for this route */}
+      {/* Dynamic Stats - Pill Style */}
       {config.metrics.length > 0 && (
         <div className="utility-bar__stats utility-bar__stats--animated">
-          {config.metrics.map((metric) => (
-            <div key={metric.key} className="utility-stat">
-              <span className="utility-stat__value">
-                {metric.prefix || ''}{getMetricValue(metric.key)}
-              </span>
-              <span className="utility-stat__label">{metric.label}</span>
-            </div>
+          {config.metrics.map((metric, index) => (
+            <Fragment key={metric.key}>
+              <div className="utility-stat">
+                {metric.key === 'active' && <span className="utility-stat__dot utility-stat__dot--active" />}
+                {metric.key === 'inactive' && <span className="utility-stat__dot utility-stat__dot--inactive" />}
+                <span className="utility-stat__value">
+                  {metric.prefix || ''}{getMetricValue(metric.key)}
+                </span>
+                <span className="utility-stat__label">{metric.label}</span>
+              </div>
+              {index < config.metrics.length - 1 && (
+                <div className="utility-stat__divider" />
+              )}
+            </Fragment>
           ))}
         </div>
       )}
@@ -368,7 +375,7 @@ const UtilityBar: React.FC = () => {
           <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Admin" alt="User" />
         </button>
       </div>
-      <CreateUserModal
+      <CreateActionModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
       />

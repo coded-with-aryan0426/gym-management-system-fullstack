@@ -1,37 +1,37 @@
 /* ============================================
-   ANALYTICS PAGE - PURE BLACK THEME
-   Premium dark data visualization dashboard
+   ANALYTICS PAGE - THEME-AWARE
+   Premium data visualization dashboard
    ============================================ */
 
 /* === CSS Variables for Reports Page === */
 .analytics-page {
-  --reports-bg-primary: #000000;
-  --reports-bg-secondary: #0a0a0a;
-  --reports-bg-tertiary: #111111;
-  --reports-bg-card: #0d0d0d;
-  --reports-bg-elevated: #141414;
-  
-  --reports-border: #1a1a1a;
-  --reports-border-subtle: #151515;
+  --reports-bg-primary: var(--bg-primary, #000000);
+  --reports-bg-secondary: var(--bg-secondary, #0a0a0a);
+  --reports-bg-tertiary: var(--bg-tertiary, #111111);
+  --reports-bg-card: var(--bg-secondary, #0d0d0d);
+  --reports-bg-elevated: var(--bg-elevated, #141414);
+
+  --reports-border: var(--border-primary, #1a1a1a);
+  --reports-border-subtle: var(--border-subtle, #151515);
   --reports-border-accent: #252525;
-  
-  --reports-text-primary: #ffffff;
-  --reports-text-secondary: #a0a0a0;
-  --reports-text-tertiary: #666666;
-  --reports-text-muted: #444444;
-  
+
+  --reports-text-primary: var(--text-primary, #ffffff);
+  --reports-text-secondary: var(--text-secondary, #a0a0a0);
+  --reports-text-tertiary: var(--text-tertiary, #666666);
+  --reports-text-muted: var(--text-muted, #444444);
+
   /* Neon accent colors */
   --reports-neon-green: #00ff88;
-  --reports-neon-emerald: #10b981;
+  --reports-neon-emerald: var(--color-emerald, #10b981);
   --reports-neon-teal: #14b8a6;
   --reports-neon-cyan: #22d3ee;
-  --reports-neon-blue: #3b82f6;
+  --reports-neon-blue: var(--color-ocean, #3b82f6);
   --reports-neon-purple: #a855f7;
-  --reports-amber: #f59e0b;
+  --reports-amber: var(--color-amber, #f59e0b);
   --reports-orange: #f97316;
   --reports-red: #ef4444;
-  --reports-crimson: #dc2626;
-  
+  --reports-crimson: var(--color-crimson, #dc2626);
+
   /* Gradients */
   --reports-gradient-primary: linear-gradient(135deg, #00ff88 0%, #14b8a6 100%);
   --reports-gradient-blue: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
@@ -64,13 +64,15 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* === Header === */
 .analytics-header {
   padding: 28px 0 24px;
-  border-bottom: 1px solid var(--reports-border);
+  border-bottom: none;
   margin-bottom: 28px;
 }
 
@@ -267,8 +269,13 @@
   gap: 4px;
 }
 
-.kpi-change.positive { color: var(--reports-neon-green); }
-.kpi-change.negative { color: var(--reports-red); }
+.kpi-change.positive {
+  color: var(--reports-neon-green);
+}
+
+.kpi-change.negative {
+  color: var(--reports-red);
+}
 
 .kpi-subtext {
   font-size: 11px;
@@ -386,8 +393,13 @@
   gap: 2px;
 }
 
-.movement-change.positive { color: var(--reports-neon-green); }
-.movement-change.negative { color: var(--reports-red); }
+.movement-change.positive {
+  color: var(--reports-neon-green);
+}
+
+.movement-change.negative {
+  color: var(--reports-red);
+}
 
 /* === Trainer List === */
 .trainer-list {
@@ -412,9 +424,17 @@
   background: var(--reports-bg-elevated);
 }
 
-.trainer-row--high { border-left-color: var(--reports-neon-green); }
-.trainer-row--medium { border-left-color: var(--reports-amber); }
-.trainer-row--growing { border-left-color: var(--reports-neon-blue); }
+.trainer-row--high {
+  border-left-color: var(--reports-neon-green);
+}
+
+.trainer-row--medium {
+  border-left-color: var(--reports-amber);
+}
+
+.trainer-row--growing {
+  border-left-color: var(--reports-neon-blue);
+}
 
 .trainer-rank {
   width: 32px;
@@ -492,8 +512,13 @@
   letter-spacing: 0.5px;
 }
 
-.text-emerald { color: var(--reports-neon-green); }
-.text-blue { color: var(--reports-neon-blue); }
+.text-emerald {
+  color: var(--reports-neon-green);
+}
+
+.text-blue {
+  color: var(--reports-neon-blue);
+}
 
 /* === Traffic Heatmap - IMPROVED === */
 .traffic-heatmap-card {
@@ -520,8 +545,13 @@
   background: var(--reports-bg-tertiary);
 }
 
-.pattern-icon.hot { background: var(--reports-red); }
-.pattern-icon.cold { background: rgba(59, 130, 246, 0.4); }
+.pattern-icon.hot {
+  background: var(--reports-red);
+}
+
+.pattern-icon.cold {
+  background: rgba(59, 130, 246, 0.4);
+}
 
 .heatmap-container {
   overflow-x: auto;
@@ -607,12 +637,11 @@
   width: 180px;
   height: 12px;
   border-radius: 6px;
-  background: linear-gradient(90deg, 
-    rgba(20, 184, 166, 0.15), 
-    rgba(20, 184, 166, 0.35), 
-    rgba(245, 158, 11, 0.55), 
-    rgba(239, 68, 68, 0.8)
-  );
+  background: linear-gradient(90deg,
+      rgba(20, 184, 166, 0.15),
+      rgba(20, 184, 166, 0.35),
+      rgba(245, 158, 11, 0.55),
+      rgba(239, 68, 68, 0.8));
 }
 
 /* === Quick Insights === */
@@ -638,10 +667,21 @@
   background: var(--reports-bg-elevated);
 }
 
-.insight-card--critical { border-left-color: var(--reports-red); }
-.insight-card--warning { border-left-color: var(--reports-amber); }
-.insight-card--opportunity { border-left-color: var(--reports-neon-green); }
-.insight-card--info { border-left-color: var(--reports-neon-blue); }
+.insight-card--critical {
+  border-left-color: var(--reports-red);
+}
+
+.insight-card--warning {
+  border-left-color: var(--reports-amber);
+}
+
+.insight-card--opportunity {
+  border-left-color: var(--reports-neon-green);
+}
+
+.insight-card--info {
+  border-left-color: var(--reports-neon-blue);
+}
 
 .insight-card--compact {
   display: flex;
@@ -847,8 +887,13 @@
   font-weight: 600;
 }
 
-.legend-growth.positive { color: var(--reports-neon-green); }
-.legend-growth.negative { color: var(--reports-red); }
+.legend-growth.positive {
+  color: var(--reports-neon-green);
+}
+
+.legend-growth.negative {
+  color: var(--reports-red);
+}
 
 /* === Spenders Table === */
 .spenders-table {
@@ -1003,9 +1048,17 @@
   transition: height 0.4s ease;
 }
 
-.trend-bar--pt { background: var(--reports-neon-blue); }
-.trend-bar--supp { background: var(--reports-neon-green); }
-.trend-bar--other { background: var(--reports-amber); }
+.trend-bar--pt {
+  background: var(--reports-neon-blue);
+}
+
+.trend-bar--supp {
+  background: var(--reports-neon-green);
+}
+
+.trend-bar--other {
+  background: var(--reports-amber);
+}
 
 .trend-label {
   font-size: 12px;
@@ -1033,9 +1086,17 @@
   border-radius: 4px;
 }
 
-.legend-box.pt { background: var(--reports-neon-blue); }
-.legend-box.supp { background: var(--reports-neon-green); }
-.legend-box.other { background: var(--reports-amber); }
+.legend-box.pt {
+  background: var(--reports-neon-blue);
+}
+
+.legend-box.supp {
+  background: var(--reports-neon-green);
+}
+
+.legend-box.other {
+  background: var(--reports-amber);
+}
 
 /* === Age Analysis === */
 .age-analysis-card {
@@ -1136,10 +1197,21 @@
   letter-spacing: -0.5px;
 }
 
-.att-stat--present .att-stat-value { color: var(--reports-neon-green); }
-.att-stat--late .att-stat-value { color: var(--reports-amber); }
-.att-stat--absent .att-stat-value { color: var(--reports-red); }
-.att-stat--overtime .att-stat-value { color: var(--reports-neon-blue); }
+.att-stat--present .att-stat-value {
+  color: var(--reports-neon-green);
+}
+
+.att-stat--late .att-stat-value {
+  color: var(--reports-amber);
+}
+
+.att-stat--absent .att-stat-value {
+  color: var(--reports-red);
+}
+
+.att-stat--overtime .att-stat-value {
+  color: var(--reports-neon-blue);
+}
 
 .att-stat-label {
   font-size: 11px;
@@ -1189,10 +1261,22 @@
   border-radius: 4px;
 }
 
-.legend-box.present { background: var(--reports-neon-green); }
-.legend-box.late { background: var(--reports-amber); }
-.legend-box.absent { background: var(--reports-red); }
-.legend-box.weekend { background: var(--reports-bg-tertiary); border: 1px solid var(--reports-border); }
+.legend-box.present {
+  background: var(--reports-neon-green);
+}
+
+.legend-box.late {
+  background: var(--reports-amber);
+}
+
+.legend-box.absent {
+  background: var(--reports-red);
+}
+
+.legend-box.weekend {
+  background: var(--reports-bg-tertiary);
+  border: 1px solid var(--reports-border);
+}
 
 .attendance-table-wrapper {
   overflow-x: auto;
@@ -1320,9 +1404,20 @@
   font-size: 12px;
 }
 
-.score.good { background: rgba(0, 255, 136, 0.1); color: var(--reports-neon-green); }
-.score.medium { background: rgba(245, 158, 11, 0.15); color: var(--reports-amber); }
-.score.poor { background: rgba(239, 68, 68, 0.15); color: var(--reports-red); }
+.score.good {
+  background: rgba(0, 255, 136, 0.1);
+  color: var(--reports-neon-green);
+}
+
+.score.medium {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--reports-amber);
+}
+
+.score.poor {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--reports-red);
+}
 
 /* === Late Employees & Summary === */
 .late-employees-card,

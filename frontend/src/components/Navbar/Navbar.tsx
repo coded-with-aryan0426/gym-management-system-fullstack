@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { NavLink, useNavigate } from 'react-router-dom';
+import CreateActionModal from '../CreateActionModal/CreateActionModal';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard,
@@ -301,36 +302,11 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
               <span>Create</span>
             </motion.button>
 
-            {/* Create Dropdown */}
-            {createMenuOpen && createPortal(
-              <AnimatePresence>
-                <motion.div
-                  className="dropdown-portal dropdown-portal--create"
-                  initial={{ opacity: 0, y: 8, scale: 0.96 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 8, scale: 0.96 }}
-                  transition={{ duration: 0.15 }}
-                >
-                  <div className="dropdown-portal__item" onClick={() => { navigate('/members?action=create'); setCreateMenuOpen(false); }}>
-                    <UserPlus size={16} />
-                    <span>Add Member</span>
-                  </div>
-                  <div className="dropdown-portal__item" onClick={() => { navigate('/staff?action=create'); setCreateMenuOpen(false); }}>
-                    <UserCheck size={16} />
-                    <span>Add Staff</span>
-                  </div>
-                  <div className="dropdown-portal__item" onClick={() => { navigate('/settings?tab=packages'); setCreateMenuOpen(false); }}>
-                    <ClipboardList size={16} />
-                    <span>Create Plan</span>
-                  </div>
-                  <div className="dropdown-portal__item" onClick={() => { navigate('/classes?action=create'); setCreateMenuOpen(false); }}>
-                    <CalendarPlus size={16} />
-                    <span>Schedule Class</span>
-                  </div>
-                </motion.div>
-              </AnimatePresence>,
-              document.body
-            )}
+            {/* Create Actions Modal */}
+            <CreateActionModal
+              isOpen={createMenuOpen}
+              onClose={() => setCreateMenuOpen(false)}
+            />
           </div>
 
           {/* Global Search Button */}
@@ -487,7 +463,7 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
             <Menu size={24} />
           </motion.button>
         </div>
-      </motion.nav>
+      </motion.nav >
 
       {/* Global Search Modal - Rendered via Portal */}
       {

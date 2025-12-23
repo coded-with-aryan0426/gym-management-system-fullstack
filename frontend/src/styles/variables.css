@@ -159,3 +159,55 @@
     --z-modal: 400;
     --z-toast: 500;
 }
+
+/* ============================================================================
+   LIGHT THEME OVERRIDES
+   Activated when html.theme-light is present
+   ============================================================================ */
+
+:root.theme-light,
+[data-theme="light"] {
+    /* Backgrounds - Clean whites and grays */
+    --bg-primary: #F8FAFC;
+    --bg-secondary: #FFFFFF;
+    --bg-tertiary: #F1F5F9;
+    --bg-elevated: #FFFFFF;
+
+    /* Brand Colors - More vibrant for light bg */
+    --color-crimson: #DC2626;
+    --color-crimson-hover: #B91C1C;
+    --color-crimson-light: rgba(220, 38, 38, 0.12);
+
+    --color-emerald: #059669;
+    --color-emerald-hover: #047857;
+    --color-emerald-light: rgba(5, 150, 105, 0.12);
+
+    --color-amber: #D97706;
+    --color-amber-hover: #B45309;
+    --color-amber-light: rgba(217, 119, 6, 0.12);
+
+    --color-ocean: #2563EB;
+    --color-ocean-hover: #1D4ED8;
+    --color-ocean-light: rgba(37, 99, 235, 0.12);
+
+    /* Text Colors - Dark for readability */
+    --text-primary: #0F172A;
+    --text-secondary: #334155;
+    --text-tertiary: #64748B;
+    --text-muted: #94A3B8;
+
+    /* Border & Dividers - Stronger for visibility ("bording out") */
+    --border-primary: #CBD5E1;
+    --border-secondary: #E2E8F0;
+    --border-subtle: #F1F5F9;
+
+    /* Shadows - Softer for light mode */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+
+    /* Glow Effects */
+    --glow-crimson: 0 0 20px rgba(220, 38, 38, 0.2);
+    --glow-emerald: 0 0 20px rgba(5, 150, 105, 0.2);
+}

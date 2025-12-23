@@ -12,8 +12,7 @@ import {
     Briefcase,
     Bell,
     FileText,
-    Settings as SettingsIcon,
-    ChevronRight
+    Palette
 } from "lucide-react"
 import "./Settings.css"
 
@@ -25,9 +24,11 @@ import MembershipPoliciesSection from "./sections/MembershipPoliciesSection"
 import StaffRulesSection from "./sections/StaffRulesSection"
 import NotificationsSection from "./sections/NotificationsSection"
 import AuditLogSection from "./sections/AuditLogSection"
+import ThemeSection from "./sections/ThemeSection"
 
 const settingsCategories = [
     { id: 'profile', label: 'Owner Profile', icon: User, desc: 'Personal & Gym details' },
+    { id: 'appearance', label: 'Appearance', icon: Palette, desc: 'Theme & Display' },
     { id: 'security', label: 'Security & Access', icon: Shield, desc: 'Login & Data safety' },
     { id: 'roles', label: 'Roles & Permissions', icon: Users, desc: 'Access control matrix' },
     { id: 'billing', label: 'Billing Rules', icon: CreditCard, desc: 'Taxes & Late fees' },
@@ -43,6 +44,7 @@ const Settings: React.FC = () => {
     const renderSection = () => {
         switch (activeSection) {
             case 'profile': return <OwnerProfileSection />
+            case 'appearance': return <ThemeSection />
             case 'security': return <SecuritySection />
             case 'roles': return <RolesSection />
             case 'billing': return <BillingRulesSection />
@@ -56,15 +58,6 @@ const Settings: React.FC = () => {
 
     return (
         <div className="settings-page">
-            <header className="settings-header">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-                    <SettingsIcon size={24} color="var(--settings-accent-green)" />
-                    <h1 className="settings-header__title">Control Center</h1>
-                </div>
-                <p className="settings-header__subtitle">
-                    Manage your gym's operations, security policies, and administrative configurations
-                </p>
-            </header>
 
             <div className="settings-layout">
                 <aside className="settings-sidebar">
@@ -72,20 +65,22 @@ const Settings: React.FC = () => {
                         const Icon = category.icon
                         const isActive = activeSection === category.id
                         return (
-                            <button
+                            <motion.button
                                 key={category.id}
                                 className={`settings-nav-item ${isActive ? 'settings-nav-item--active' : ''}`}
                                 onClick={() => setActiveSection(category.id)}
+                                whileHover={{ scale: 1.01 }}
+                                whileTap={{ scale: 0.99 }}
+                                transition={{ type: "spring", stiffness: 400, damping: 25 }}
                             >
                                 <div className="settings-nav-item__icon">
                                     <Icon size={18} />
                                 </div>
-                                <div style={{ flex: 1 }}>
-                                    <div style={{ fontSize: '14px', fontWeight: isActive ? '600' : '500' }}>{category.label}</div>
-                                    <div style={{ fontSize: '11px', opacity: 0.5, marginTop: '2px' }}>{category.desc}</div>
+                                <div className="settings-nav-item__text">
+                                    <div className="settings-nav-item__label">{category.label}</div>
+                                    <div className="settings-nav-item__desc">{category.desc}</div>
                                 </div>
-                                {isActive && <ChevronRight size={14} />}
-                            </button>
+                            </motion.button>
                         )
                     })}
                 </aside>
@@ -94,10 +89,14 @@ const Settings: React.FC = () => {
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={activeSection}
-                            initial={{ opacity: 0, x: 10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -10 }}
-                            transition={{ duration: 0.2 }}
+                            initial={{ opacity: 0, y: 12 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -12 }}
+                            transition={{
+                                type: "spring",
+                                stiffness: 300,
+                                damping: 30
+                            }}
                         >
                             {renderSection()}
                         </motion.div>

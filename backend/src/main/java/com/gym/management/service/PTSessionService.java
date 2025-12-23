@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
  */
 @Service
 @Transactional
-@SuppressWarnings("null")
 public class PTSessionService {
 
     private static final Logger logger = LoggerFactory.getLogger(PTSessionService.class);

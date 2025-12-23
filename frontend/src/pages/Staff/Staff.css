@@ -6,7 +6,8 @@
 .staff-page {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
+  padding: 16px 20px;
 }
 
 /* ============================================
@@ -16,15 +17,15 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .staff-page__title-section {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .staff-page__title {
@@ -85,8 +86,8 @@
   align-items: center;
   gap: 8px;
   padding: 6px 12px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
   border-radius: 20px;
 }
 
@@ -133,7 +134,7 @@
 .stat-divider {
   width: 1px;
   height: 12px;
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--border-secondary);
 }
 
 /* ============================================
@@ -143,8 +144,8 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
   color: var(--text-secondary);
   padding: 0 12px;
   border-radius: 8px;
@@ -156,8 +157,8 @@
 }
 
 .btn-filters:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.1);
+  background: var(--bg-elevated);
+  border-color: var(--border-primary);
   color: var(--text-primary);
 }
 
@@ -183,13 +184,15 @@
 .staff-filter-panel {
   position: absolute;
   top: calc(100% + 8px);
-  left: 0;
-  background: #0f0f0f;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  right: 0;
+  left: auto;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-primary);
   border-radius: 12px;
   padding: 16px;
-  min-width: 240px;
-  z-index: 100;
+  min-width: 280px;
+  max-width: 320px;
+  z-index: 200;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
   animation: filterSlideDown 0.15s ease-out;
 }
@@ -199,6 +202,7 @@
     opacity: 0;
     transform: translateY(-8px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -210,7 +214,7 @@
   justify-content: space-between;
   align-items: center;
   padding-bottom: 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid var(--border-subtle);
   margin-bottom: 14px;
   font-weight: 600;
   font-size: 13px;
@@ -254,19 +258,20 @@
 .filter-select,
 .staff-filter-panel .filter-select {
   appearance: none;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-secondary);
   padding: 8px 12px;
   border-radius: 8px;
   font-size: 12px;
   color: var(--text-primary);
   cursor: pointer;
   transition: all 0.15s ease;
+  width: 100%;
 }
 
 .filter-select:hover,
 .staff-filter-panel .filter-select:hover {
-  border-color: rgba(255, 255, 255, 0.12);
+  border-color: var(--border-primary);
 }
 
 .filter-select:focus,
@@ -274,6 +279,34 @@
   outline: none;
   border-color: var(--color-crimson);
   box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.1);
+}
+
+/* Light Mode - Filter Panel */
+:root.theme-light .staff-filter-panel,
+[data-theme="light"] .staff-filter-panel,
+body.light-mode .staff-filter-panel {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+}
+
+:root.theme-light .staff-filter-panel .filter-select,
+[data-theme="light"] .staff-filter-panel .filter-select,
+body.light-mode .staff-filter-panel .filter-select {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+:root.theme-light .staff-filter-panel .filter-select:hover,
+[data-theme="light"] .staff-filter-panel .filter-select:hover,
+body.light-mode .staff-filter-panel .filter-select:hover {
+  border-color: #cbd5e1;
+}
+
+:root.theme-light .staff-filter-panel .filter-panel__header,
+[data-theme="light"] .staff-filter-panel .filter-panel__header,
+body.light-mode .staff-filter-panel .filter-panel__header {
+  border-bottom-color: #e2e8f0;
 }
 
 /* ============================================
@@ -319,8 +352,8 @@
    TABLE
    ============================================ */
 .staff-page__table {
-  background: rgba(255, 255, 255, 0.015);
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-secondary);
   border-radius: 12px;
   overflow: hidden;
 }
@@ -374,8 +407,8 @@
 .staff-role-badge {
   display: inline-block;
   padding: 4px 10px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
   border-radius: 6px;
   font-size: 10px;
   font-weight: 600;
@@ -413,7 +446,7 @@
 }
 
 .action-menu-btn:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--bg-elevated);
   border-color: rgba(255, 255, 255, 0.08);
 }
 
@@ -445,6 +478,11 @@
   letter-spacing: 0.3px;
 }
 
+.staff-date--left {
+  color: var(--color-crimson, #DC2626);
+  font-weight: 500;
+}
+
 /* ============================================
    RESPONSIVE
    ============================================ */
@@ -452,7 +490,7 @@
   .staff-page__header {
     flex-wrap: wrap;
   }
-  
+
   .staff-page__header-right {
     flex-wrap: wrap;
     gap: 10px;
@@ -464,12 +502,12 @@
     flex-wrap: wrap;
     gap: 12px;
   }
-  
+
   .staff-page__header-right {
     flex-wrap: wrap;
     gap: 8px;
   }
-  
+
   .staff-page__sort-indicator {
     order: -1;
   }
@@ -479,36 +517,36 @@
   .staff-page {
     gap: 12px;
   }
-  
+
   .staff-page__header {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
     padding-bottom: 12px;
   }
-  
+
   .staff-page__title-section {
     width: 100%;
     justify-content: space-between;
   }
-  
+
   .staff-page__title {
     font-size: 18px;
   }
-  
+
   .staff-page__header-right {
     width: 100%;
     justify-content: flex-start;
   }
-  
+
   .staff-stats-badge {
     display: none;
   }
-  
+
   .staff-active-filters {
     flex-wrap: wrap;
   }
-  
+
   .staff-filter-panel {
     position: fixed;
     top: 50%;
@@ -518,7 +556,7 @@
     max-width: 320px;
     z-index: 200;
   }
-  
+
   .staff-page__table {
     border-radius: 8px;
   }
@@ -528,17 +566,17 @@
   .staff-page__title {
     font-size: 16px;
   }
-  
+
   .sort-badge {
     font-size: 10px;
     padding: 3px 8px;
   }
-  
+
   .btn-filters {
     padding: 0 10px;
     font-size: 11px;
   }
-  
+
   .filter-chip {
     font-size: 10px;
     padding: 3px 8px;

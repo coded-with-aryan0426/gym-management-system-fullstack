@@ -145,8 +145,8 @@ html {
 
 body {
   background: var(--bg-primary);
-  background-image: var(--bg-mesh-gradient);
-  background-attachment: fixed;
+  /* background-image: var(--bg-mesh-gradient); Removed for pure black theme */
+  /* background-attachment: fixed; */
 }
 
 /* ========== PREMIUM UTILITY CLASSES ========== */
@@ -410,7 +410,7 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-bg-secondary);
+  background: var(--bg-secondary);
   border-radius: 4px;
 }
 
@@ -498,7 +498,7 @@ body {
   top: calc(100% + 8px);
   right: 0;
   min-width: 220px;
-  background: var(--glass-bg-dark);
+  background: var(--bg-elevated);
   backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-premium-md);

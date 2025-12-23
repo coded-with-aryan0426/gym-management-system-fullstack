@@ -2,7 +2,9 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    background: #0a0a0a;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
 }
 
 .tx-filters {
@@ -11,7 +13,7 @@
     gap: 10px;
     padding: 10px 14px;
     border-bottom: 1px solid var(--border-secondary);
-    background: #111111;
+    background: var(--bg-secondary);
 }
 
 .search-box {
@@ -79,7 +81,7 @@
 }
 
 .tx-table th {
-    background: #0d0d0d;
+    background: var(--bg-secondary);
     padding: 10px 14px;
     text-align: left;
     font-size: 0.65rem;
@@ -102,15 +104,15 @@
 }
 
 .tx-table tbody tr.even {
-    background: #0a0a0a;
+    background: var(--bg-tertiary);
 }
 
 .tx-table tbody tr.odd {
-    background: #0d0d0d;
+    background: var(--bg-secondary);
 }
 
 .tx-table tbody tr:hover {
-    background: #141414;
+    background: var(--bg-elevated);
 }
 
 .tx-table td {
@@ -247,7 +249,7 @@
     display: flex;
     align-items: center;
     padding: 8px 14px;
-    background: #0d0d0d;
+    background: var(--bg-secondary);
     border-top: 1px solid var(--border-secondary);
 }
 

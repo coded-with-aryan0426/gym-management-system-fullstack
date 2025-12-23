@@ -35,7 +35,7 @@ const navbarConfigs: Record<string, NavbarConfig> = {
         metrics: [
             { key: 'total', label: 'Total Members' },
             { key: 'active', label: 'Active' },
-            { key: 'inactive', label: 'Inactive' },
+            { key: 'inactive', label: 'Expired' },
             { key: 'todaysJoins', label: "Today's Joins", prefix: '+' },
         ],
     },

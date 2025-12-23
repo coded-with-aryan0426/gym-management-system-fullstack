@@ -139,6 +139,11 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClose, onSu
 
   const handleBack = () => {
     if (step === "FORM") {
+      // If user entered via initialRole (e.g., Add Member button), close modal instead of showing internal steps
+      if (initialRole) {
+        onClose()
+        return
+      }
       setStep("ROLE")
     } else if (step === "ROLE") {
       setStep("CATEGORY")
@@ -424,7 +429,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClose, onSu
 
             <div className="create-user-modal__footer">
               <div>
-                {step !== "CATEGORY" && !initialRole && (
+                {step !== "CATEGORY" && (
                   <Button variant="secondary" onClick={handleBack} disabled={loading}>Back</Button>
                 )}
               </div>

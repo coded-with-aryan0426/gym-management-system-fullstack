@@ -54,7 +54,7 @@ export const Logo = ({ size = 32, color = "#E63946", showText = true }: LogoProp
                 sx={{
                     fontSize: Math.max(16, size * 0.7),
                     fontWeight: 800,
-                    color: 'white',
+                    color: 'var(--text-primary)',
                     fontFamily: 'var(--font-heading)',
                     letterSpacing: '-0.5px',
                     lineHeight: 1,

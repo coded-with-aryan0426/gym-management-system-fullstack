@@ -300,29 +300,18 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
         >
-          {/* External Close Button */}
-          <button
-            className="staff-action-modal__close-external"
-            onClick={onClose}
-            aria-label="Close modal"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
-
+          {/* Modal Content Wrapper */}
           <motion.div
             className="staff-action-modal staff-action-modal--redesigned"
             onClick={(e) => e.stopPropagation()}
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 24 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
           >
             {/* ============================================================
-                Profile Header
-               ============================================================ */}
+                  Profile Header
+                 ============================================================ */}
             <div className="staff-action-modal__profile-header">
               <div className="profile-header__avatar">
                 <img
@@ -349,6 +338,14 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
                   <span className="stat-label">Members</span>
                 </div>
               </div>
+
+              {/* Inline Close Button */}
+              <button className="staff-action-modal__close-inline" onClick={onClose}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
             </div>
 
             {/* ============================================================

@@ -14,8 +14,8 @@
   top: 0;
   bottom: 0;
   width: var(--sidebar-width);
-  background: linear-gradient(180deg, #0a0a0a 0%, #050505 100%);
-  border-right: 1px solid rgba(255, 255, 255, 0.04);
+  background: var(--bg-primary);
+  border-right: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
   z-index: 1000;
@@ -40,6 +40,13 @@
   flex-shrink: 0;
   white-space: nowrap;
   overflow: hidden;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.command-rail__logo:hover {
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .command-rail--collapsed .command-rail__logo {
@@ -86,14 +93,21 @@
 }
 
 .command-rail__link:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--bg-tertiary);
   color: var(--text-secondary);
 }
 
 /* Active State - Clean, Modern with Crimson Accent */
+/* Active State - Clean, Modern with Dynamic Accent */
 .command-rail__link--active {
-  background: linear-gradient(90deg, rgba(220, 38, 38, 0.15) 0%, rgba(220, 38, 38, 0.05) 100%);
-  color: #fff;
+  /* Use --nav-accent if defined, fallback to crimson */
+  --accent: var(--nav-accent, var(--color-crimson));
+
+  /* Create a low-opacity background of the accent color */
+  background: linear-gradient(90deg,
+      color-mix(in srgb, var(--accent) 15%, transparent) 0%,
+      color-mix(in srgb, var(--accent) 5%, transparent) 100%);
+  color: var(--text-primary);
 }
 
 .command-rail__link--active::before {
@@ -103,7 +117,7 @@
   top: 8px;
   bottom: 8px;
   width: 3px;
-  background: var(--color-crimson);
+  background: var(--nav-accent, var(--color-crimson));
   border-radius: 0 3px 3px 0;
 }
 
@@ -112,11 +126,13 @@
 }
 
 .command-rail__link--active:hover {
-  background: linear-gradient(90deg, rgba(220, 38, 38, 0.18) 0%, rgba(220, 38, 38, 0.08) 100%);
+  background: linear-gradient(90deg,
+      color-mix(in srgb, var(--nav-accent, var(--color-crimson)) 18%, transparent) 0%,
+      color-mix(in srgb, var(--nav-accent, var(--color-crimson)) 8%, transparent) 100%);
 }
 
 .command-rail__link--active .command-rail__icon {
-  color: var(--color-crimson);
+  color: var(--nav-accent, var(--color-crimson));
 }
 
 .command-rail__icon {
@@ -207,6 +223,22 @@
   border-color: rgba(255, 255, 255, 0.1);
 }
 
+/* Logout Button */
+.command-rail__logout {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.command-rail__logout:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.command-rail__logout:hover .command-rail__icon {
+  color: #ef4444;
+}
+
 .command-rail__toggle-icon {
   display: flex;
   align-items: center;
@@ -258,6 +290,7 @@
     opacity: 0;
     transform: translateX(-6px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -271,4 +304,96 @@
   .command-rail {
     display: none;
   }
+}
+
+/* ============================================
+   LIGHT MODE OVERRIDES
+   ============================================ */
+:root.theme-light .command-rail,
+[data-theme="light"] .command-rail,
+body.light-mode .command-rail {
+  /* Distinct sidebar boundary - clear separation from content */
+  border-right: 1px solid var(--border-primary, #CBD5E1);
+  background: var(--bg-secondary, #ffffff);
+}
+
+/* Improve inactive icon/label contrast (10-15% darker) */
+:root.theme-light .command-rail__link,
+[data-theme="light"] .command-rail__link,
+body.light-mode .command-rail__link {
+  color: #475569;
+  /* Darker than --text-tertiary for legibility */
+}
+
+:root.theme-light .command-rail__link:hover,
+[data-theme="light"] .command-rail__link:hover,
+body.light-mode .command-rail__link:hover {
+  background: rgba(0, 0, 0, 0.04);
+  color: #1e293b;
+  /* Near black on hover */
+}
+
+/* Active state - bold and dark instead of colored */
+:root.theme-light .command-rail__link--active,
+[data-theme="light"] .command-rail__link--active,
+body.light-mode .command-rail__link--active {
+  background: rgba(220, 38, 38, 0.08);
+  color: #0f172a;
+  /* Dark text, not red */
+  font-weight: 600;
+}
+
+:root.theme-light .command-rail__link--active:hover,
+[data-theme="light"] .command-rail__link--active:hover,
+body.light-mode .command-rail__link--active:hover {
+  background: rgba(220, 38, 38, 0.12);
+}
+
+/* Keep accent bar colored */
+:root.theme-light .command-rail__link--active::before,
+[data-theme="light"] .command-rail__link--active::before,
+body.light-mode .command-rail__link--active::before {
+  background: var(--color-crimson, #DC2626);
+}
+
+/* Footer & toggle - theme-aware borders */
+:root.theme-light .command-rail__footer,
+[data-theme="light"] .command-rail__footer,
+body.light-mode .command-rail__footer {
+  border-top: 1px solid var(--border-secondary, #E2E8F0);
+}
+
+:root.theme-light .command-rail__toggle,
+[data-theme="light"] .command-rail__toggle,
+body.light-mode .command-rail__toggle {
+  border: 1px solid var(--border-secondary, #E2E8F0);
+  color: #475569;
+}
+
+:root.theme-light .command-rail__toggle:hover,
+[data-theme="light"] .command-rail__toggle:hover,
+body.light-mode .command-rail__toggle:hover {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: var(--border-primary, #CBD5E1);
+  color: #1e293b;
+}
+
+/* Logo section border - theme-aware */
+:root.theme-light .command-rail__logo,
+[data-theme="light"] .command-rail__logo,
+body.light-mode .command-rail__logo {
+  border-bottom: 1px solid var(--border-secondary, #E2E8F0);
+}
+
+:root.theme-light .command-rail__logo:hover,
+[data-theme="light"] .command-rail__logo:hover,
+body.light-mode .command-rail__logo:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+/* Section labels - darker in light mode */
+:root.theme-light .command-rail__section-label,
+[data-theme="light"] .command-rail__section-label,
+body.light-mode .command-rail__section-label {
+  color: #64748b;
 }

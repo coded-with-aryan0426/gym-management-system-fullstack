@@ -28,7 +28,7 @@
   flex-direction: column;
 
   /* Base Appearance */
-  background: var(--card-glass-bg, #1e293b);
+  background: var(--bg-secondary);
   border: 1px solid var(--glass-border);
   border-radius: 20px;
   box-shadow: var(--elevation-3, 0 25px 50px -12px rgba(0, 0, 0, 0.5));
@@ -70,7 +70,7 @@
   padding: 12px 24px;
   /* Reduced vertical padding */
   border-bottom: 1px solid var(--glass-border);
-  background: var(--glass-bg-light, rgba(255, 255, 255, 0.05));
+  background: var(--bg-tertiary);
   border-radius: 20px 20px 0 0;
   flex-shrink: 0;
 }

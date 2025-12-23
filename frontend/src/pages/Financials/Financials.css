@@ -29,7 +29,9 @@
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .financials-header {
@@ -131,7 +133,7 @@
 }
 
 .chart-section {
-    background: #0a0a0a;
+    background: transparent;
     border: 1px solid var(--border-primary);
     border-radius: 8px;
     overflow: hidden;
@@ -139,7 +141,7 @@
 }
 
 .alerts-section {
-    background: #0a0a0a;
+    background: transparent;
     border: 1px solid var(--border-primary);
     border-radius: 8px;
     padding: 12px;
@@ -194,7 +196,7 @@
 }
 
 .breakdown-card {
-    background: #0a0a0a;
+    background: transparent;
     border: 1px solid var(--border-primary);
     border-radius: 8px;
     padding: 12px;
@@ -204,7 +206,7 @@
 }
 
 .transactions-section {
-    background: #0a0a0a;
+    background: transparent;
     border: 1px solid var(--border-primary);
     border-radius: 8px;
     overflow: hidden;
@@ -218,7 +220,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 10px 14px;
-    background: #111111;
+    background: transparent;
     border-bottom: 1px solid var(--border-secondary);
     flex-shrink: 0;
 }

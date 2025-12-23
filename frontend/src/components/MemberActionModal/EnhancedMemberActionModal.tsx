@@ -10,6 +10,7 @@ import api from "../../services/api"
 import { relationshipFilterService, enhancedApi } from "../../services"
 import { useRealTimeData, useOptimisticUpdates, useMicroInteractions } from "../../hooks"
 import { showToast } from "../../utils/toast"
+import Avatar from "../ui/Avatar"
 import "./MemberActionModal.css"
 
 interface Trainer {
@@ -505,14 +506,7 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
           >
-            {/* External Close Button - Outside Modal */}
-            <button className="member-action-modal__close-external" onClick={onClose}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            </button>
-
+            {/* Modal Content Wrapper */}
             <motion.div
               className="member-action-modal member-action-modal--redesigned"
               onClick={(e) => e.stopPropagation()}
@@ -523,19 +517,20 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
             >
               {/* Member Info Header - Compact with Stats */}
               <div className="member-action-modal__profile-header">
-                <div className="profile-header__avatar">
-                  <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${localMember.fullName}`} alt={localMember.fullName} />
-                </div>
+                <Avatar name={localMember.fullName} size="lg" className="profile-header__avatar-component" />
                 <div className="profile-header__info">
                   <h2 className="profile-header__name">{localMember.fullName}</h2>
-                  <div className="profile-header__meta">
-                    <span className="plan-badge plan-badge--member">{getPlanForMember()}</span>
-                    <span className={`status-badge status-badge--${getStatusForMember().toLowerCase()}`}>
-                      <span className="status-dot"></span>
-                      {getStatusForMember()}
-                    </span>
-                  </div>
+                  <p className="profile-header__email">{localMember.email}</p>
                 </div>
+
+                <div className="profile-header__meta">
+                  <span className="plan-badge plan-badge--member">{getPlanForMember()}</span>
+                  <span className={`status-badge status-badge--${getStatusForMember().toLowerCase()}`}>
+                    <span className="status-dot"></span>
+                    {getStatusForMember()}
+                  </span>
+                </div>
+
                 <div className="profile-header__stats">
                   <div className="stat-item">
                     <span className="stat-value">{assignedTrainers.length}</span>
@@ -546,6 +541,14 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
                     <span className="stat-label">Days Left</span>
                   </div>
                 </div>
+
+                {/* Inline Close Button */}
+                <button className="member-action-modal__close-inline" onClick={onClose}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
               </div>
 
               {/* Two-Column Content Layout with Dynamic Panels */}
@@ -621,7 +624,7 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
                     {activeTab === "profile" && (
                       <motion.div
                         key="profile"
-                        className="content-panel content-panel--constrained"
+                        className="content-panel"
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -20 }}
@@ -699,7 +702,7 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
                     {activeTab === "renew" && (
                       <motion.div
                         key="renew"
-                        className="content-panel content-panel--constrained"
+                        className="content-panel"
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -20 }}
@@ -779,14 +782,16 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
                                 </span>
                               )}
                             </div>
-                            <button
-                              className="btn btn--primary btn-renew-wide"
-                              onClick={handleRenewAndPay}
-                              disabled={!renewForm.packageId || renewForm.packageId === 0}
-                            >
-                              Renew Plan
-                            </button>
                           </div>
+                        </div>
+                        <div className="form-actions">
+                          <button
+                            className="btn btn--primary btn-renew-wide"
+                            onClick={handleRenewAndPay}
+                            disabled={!renewForm.packageId || renewForm.packageId === 0}
+                          >
+                            Renew Plan
+                          </button>
                         </div>
                       </motion.div>
                     )}
@@ -795,27 +800,40 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
                     {activeTab === "message" && (
                       <motion.div
                         key="message"
-                        className="content-panel content-panel--constrained"
+                        className="content-panel"
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -20 }}
                         transition={{ duration: 0.2 }}
                       >
                         <h4 className="content-panel__title">Send Message</h4>
-                        <div className="content-panel__body">
-                          <div className="form-group">
-                            <label>Subject</label>
+                        <div className="message-compose">
+                          {/* Recipient Row - macOS Mail style */}
+                          <div className="message-compose__row">
+                            <span className="message-compose__label">To:</span>
+                            <div className="message-compose__recipient">
+                              <span className="recipient-tag">
+                                {localMember.fullName}
+                                <span className="recipient-email">&lt;{localMember.email}&gt;</span>
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Subject Row */}
+                          <div className="message-compose__row">
+                            <span className="message-compose__label">Subject:</span>
                             <input
                               type="text"
                               value={messageForm.subject}
                               onChange={(e) => setMessageForm({ ...messageForm, subject: e.target.value })}
                               onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                              className="form-input"
+                              className="message-compose__input"
                               placeholder="Enter subject..."
                             />
                           </div>
-                          <div className="form-group">
-                            <label>Message <span className="hint-text">(Ctrl+Enter to send)</span></label>
+
+                          {/* Message Body */}
+                          <div className="message-compose__body">
                             <textarea
                               value={messageForm.body}
                               onChange={(e) => setMessageForm({ ...messageForm, body: e.target.value })}
@@ -825,13 +843,19 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
                                   handleSendMessage()
                                 }
                               }}
-                              className="form-textarea"
-                              placeholder="Type your message..."
-                              rows={5}
+                              className="message-compose__textarea"
+                              placeholder="Write your message here..."
                             />
+                            <span className="message-compose__hint">⌘ + Enter to send</span>
                           </div>
+                        </div>
+                        <div className="form-actions">
                           <button className="btn btn--primary" onClick={handleSendMessage}>
-                            Send Message
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <line x1="22" y1="2" x2="11" y2="13" />
+                              <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                            </svg>
+                            Send
                           </button>
                         </div>
                       </motion.div>
@@ -988,7 +1012,7 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
                     {activeTab === "delete" && (
                       <motion.div
                         key="delete"
-                        className="content-panel content-panel--constrained content-panel--danger"
+                        className="content-panel content-panel--danger"
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -20 }}

@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { Badge, getStatusVariant, Avatar, DataTable, type Column } from '../../components/ui';
+import { CreateUserModal } from '../../components';
 import { ActionMenuButton } from '../../components/shared';
 import { useClickOutside } from '../../hooks';
 import EnhancedStaffActionModal from '../../components/StaffActionModal/EnhancedStaffActionModal';
@@ -28,7 +29,15 @@ const Staff: React.FC = () => {
 
   useClickOutside(filterRef as React.RefObject<HTMLElement>, () => setIsFilterOpen(false), isFilterOpen);
 
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get('action') === 'create') {
+      setIsCreateModalOpen(true);
+    }
+  }, [searchParams]);
 
   const [filters, setFilters] = useState({
     role: "",
@@ -51,7 +60,7 @@ const Staff: React.FC = () => {
         debouncedSearch || undefined,
         filters.role || undefined
       );
-      
+
       setStaff(response.content);
       setTotalCount(response.totalCount);
       setSortType(response.sortType as 'newest' | 'alphabetical');
@@ -166,24 +175,42 @@ const Staff: React.FC = () => {
         <span className="staff-role-badge">{member.roles?.[0]?.roleName || 'TRAINER'}</span>
       ),
     },
-      {
-        key: 'joinDate',
-        header: 'Joined',
-        width: '130px',
-        render: (member) => {
-          const date = member.createdAt ? new Date(member.createdAt) : new Date();
-          const day = date.getDate().toString().padStart(2, '0');
-          const month = date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
-          const year = date.getFullYear();
-          return <span className="staff-date">{day} {month} {year}</span>;
-        },
+    {
+      key: 'joinDate',
+      header: 'Joined',
+      width: '110px',
+      render: (member) => {
+        const date = member.createdAt ? new Date(member.createdAt) : new Date();
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
+        const year = date.getFullYear();
+        return <span className="staff-date">{day} {month} {year}</span>;
       },
+    },
+    {
+      key: 'leftDate',
+      header: 'Left',
+      width: '110px',
+      render: (member) => {
+        // Check for leftDate or departureDate field
+        const leftDate = (member as any).leftDate || (member as any).departureDate || (member as any).terminationDate;
+        if (!leftDate) return <span className="staff-date">-</span>;
+
+        const date = new Date(leftDate);
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
+        const year = date.getFullYear();
+        return <span className="staff-date staff-date--left">{day} {month} {year}</span>;
+      },
+    },
     {
       key: 'status',
       header: 'Status',
       width: '100px',
-      render: () => {
-        const status = 'Active';
+      render: (member) => {
+        // Check if staff has left
+        const leftDate = (member as any).leftDate || (member as any).departureDate || (member as any).terminationDate;
+        const status = leftDate ? 'Inactive' : 'Active';
         return <Badge variant={getStatusVariant(status)}>{status}</Badge>;
       },
     },
@@ -208,15 +235,15 @@ const Staff: React.FC = () => {
             {sortType === 'newest' ? (
               <span className="sort-badge sort-badge--newest">
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <circle cx="12" cy="12" r="10"/>
-                  <polyline points="12 6 12 12 16 14"/>
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
                 </svg>
                 New First
               </span>
             ) : (
               <span className="sort-badge sort-badge--alpha">
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <path d="M3 6h18M3 12h12M3 18h6"/>
+                  <path d="M3 6h18M3 12h12M3 18h6" />
                 </svg>
                 A → Z
               </span>
@@ -296,100 +323,92 @@ const Staff: React.FC = () => {
               </div>
             )}
           </div>
-
-          <div className="staff-stats-badge">
-            <button
-              className={`stat-pill stat-pill--active ${filters.status === 'Active' ? 'selected' : ''}`}
-              onClick={() => handleFilterChange('status', 'Active')}
-            >
-              <span className="stat-dot active"></span>
-              <span>{totalCount} Active</span>
-            </button>
-            <div className="stat-divider"></div>
-            <button
-              className={`stat-pill ${filters.status === 'Inactive' ? 'selected' : ''}`}
-              onClick={() => handleFilterChange('status', 'Inactive')}
-            >
-              <span className="stat-dot inactive"></span>
-              <span>0 Inactive</span>
-            </button>
-            <div className="stat-divider"></div>
-            <button
-              className={`stat-pill ${filters.status === '' ? 'selected' : ''}`}
-              onClick={() => handleFilterChange('status', '')}
-            >
-              <span>{totalCount} Total</span>
-            </button>
-          </div>
         </div>
       </div>
 
-        <div className="staff-page__table">
-          <DataTable
-            columns={columns}
-            data={staff}
-            keyExtractor={(s) => s.userId}
-            loading={loading}
-            emptyMessage="No staff found"
-            onRowClick={handleActionClick}
-            pagination={{
-              currentPage,
-              totalPages,
-              totalCount,
-              pageSize,
-              onPageChange: setCurrentPage,
-              onPageSizeChange: (size) => {
-                setPageSize(size);
-                setCurrentPage(0);
-              },
-            }}
-            mobileCardRender={(member, index) => {
-              const date = member.createdAt ? new Date(member.createdAt) : new Date();
-              const dateStr = `${date.getDate().toString().padStart(2, '0')} ${date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()} ${date.getFullYear()}`;
-              const role = member.roles?.[0]?.roleName || 'TRAINER';
-              return (
-                <div className="mobile-card">
-                  <div className="mobile-card__header">
-                    <div className="mobile-card__user">
-                      <Avatar name={member.fullName} size="md" />
-                      <div className="mobile-card__info">
-                        <span className="mobile-card__name">{member.fullName}</span>
-                        <span className="mobile-card__email">{member.email}</span>
-                      </div>
-                    </div>
-                    <div className="mobile-card__status">
-                      <Badge variant={getStatusVariant('Active')}>Active</Badge>
+      <div className="staff-page__table">
+        <DataTable
+          columns={columns}
+          data={staff}
+          keyExtractor={(s) => s.userId}
+          loading={loading}
+          emptyMessage="No staff found"
+          onRowClick={handleActionClick}
+          pagination={{
+            currentPage,
+            totalPages,
+            totalCount,
+            pageSize,
+            onPageChange: setCurrentPage,
+            onPageSizeChange: (size) => {
+              setPageSize(size);
+              setCurrentPage(0);
+            },
+          }}
+          mobileCardRender={(member, index) => {
+            const date = member.createdAt ? new Date(member.createdAt) : new Date();
+            const dateStr = `${date.getDate().toString().padStart(2, '0')} ${date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()} ${date.getFullYear()}`;
+            const role = member.roles?.[0]?.roleName || 'TRAINER';
+            return (
+              <div className="mobile-card">
+                <div className="mobile-card__header">
+                  <div className="mobile-card__user">
+                    <Avatar name={member.fullName} size="md" />
+                    <div className="mobile-card__info">
+                      <span className="mobile-card__name">{member.fullName}</span>
+                      <span className="mobile-card__email">{member.email}</span>
                     </div>
                   </div>
-                  <div className="mobile-card__details">
-                    <div className="mobile-card__detail">
-                      <span className="mobile-card__detail-label">Role</span>
-                      <span className="mobile-card__detail-value">{role}</span>
-                    </div>
-                    <div className="mobile-card__detail">
-                      <span className="mobile-card__detail-label">Employee ID</span>
-                      <span className="mobile-card__detail-value">#{member.userId.toString().padStart(4, '0')}</span>
-                    </div>
-                    <div className="mobile-card__detail">
-                      <span className="mobile-card__detail-label">Joined</span>
-                      <span className="mobile-card__detail-value">{dateStr}</span>
-                    </div>
-                  </div>
-                  <div className="mobile-card__actions">
-                    <ActionMenuButton onClick={(e) => { e.stopPropagation(); handleActionClick(member); }} />
+                  <div className="mobile-card__status">
+                    <Badge variant={getStatusVariant('Active')}>Active</Badge>
                   </div>
                 </div>
-              )
-            }}
-          />
-        </div>
+                <div className="mobile-card__details">
+                  <div className="mobile-card__detail">
+                    <span className="mobile-card__detail-label">Role</span>
+                    <span className="mobile-card__detail-value">{role}</span>
+                  </div>
+                  <div className="mobile-card__detail">
+                    <span className="mobile-card__detail-label">Employee ID</span>
+                    <span className="mobile-card__detail-value">#{member.userId.toString().padStart(4, '0')}</span>
+                  </div>
+                  <div className="mobile-card__detail">
+                    <span className="mobile-card__detail-label">Joined</span>
+                    <span className="mobile-card__detail-value">{dateStr}</span>
+                  </div>
+                </div>
+                <div className="mobile-card__actions">
+                  <ActionMenuButton onClick={(e) => { e.stopPropagation(); handleActionClick(member); }} />
+                </div>
+              </div>
+            )
+          }}
+        />
+      </div>
 
       <EnhancedStaffActionModal
         isOpen={isActionModalOpen}
         onClose={handleCloseActionModal}
-        staff={selectedStaff}
+        staff={selectedStaff as unknown as User}
         onEditProfile={handleEditProfile}
         onUpdate={loadStaffPaginated}
+      />
+
+      <CreateUserModal
+        isOpen={isCreateModalOpen}
+        initialRole="TRAINER"
+        onClose={() => {
+          setIsCreateModalOpen(false)
+          setSearchParams(prev => {
+            const newParams = new URLSearchParams(prev)
+            newParams.delete('action')
+            return newParams
+          })
+        }}
+        onSuccess={() => {
+          loadStaffPaginated()
+          toast.success("Staff member added successfully")
+        }}
       />
     </div>
   );

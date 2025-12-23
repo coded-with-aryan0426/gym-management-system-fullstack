@@ -1,48 +1,98 @@
+"use client"
+
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 
-type Theme = 'dark' | 'light';
+export type ThemeMode = 'system' | 'light' | 'dark';
+export type ResolvedTheme = 'light' | 'dark';
 
 interface ThemeContextType {
-    theme: Theme;
-    toggleTheme: () => void;
+    themeMode: ThemeMode;
+    resolvedTheme: ResolvedTheme;
+    setThemeMode: (mode: ThemeMode) => void;
     isDarkMode: boolean;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+const THEME_STORAGE_KEY = 'athlon-theme-mode';
+
+// Get system preference
+const getSystemTheme = (): ResolvedTheme => {
+    if (typeof window !== 'undefined' && window.matchMedia) {
+        return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    }
+    return 'dark';
+};
+
+// Resolve theme based on mode
+const resolveTheme = (mode: ThemeMode): ResolvedTheme => {
+    if (mode === 'system') {
+        return getSystemTheme();
+    }
+    return mode;
+};
+
 export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const [theme, setTheme] = useState<Theme>(() => {
+    const [themeMode, setThemeModeState] = useState<ThemeMode>(() => {
         // Check localStorage first
-        const saved = localStorage.getItem('theme');
-        if (saved === 'light' || saved === 'dark') {
-            return saved;
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem(THEME_STORAGE_KEY) as ThemeMode | null;
+            if (saved && ['system', 'light', 'dark'].includes(saved)) {
+                return saved;
+            }
         }
         // Default to dark mode
         return 'dark';
     });
 
-    useEffect(() => {
-        // Apply theme to document
-        document.documentElement.setAttribute('data-theme', theme);
-        document.body.setAttribute('data-theme', theme);
-        localStorage.setItem('theme', theme);
-
-        // Also add/remove class for easy CSS targeting
-        if (theme === 'light') {
-            document.body.classList.add('light-mode');
-            document.body.classList.remove('dark-mode');
-        } else {
-            document.body.classList.add('dark-mode');
-            document.body.classList.remove('light-mode');
+    const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(() => {
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem(THEME_STORAGE_KEY) as ThemeMode | null;
+            if (saved && ['system', 'light', 'dark'].includes(saved)) {
+                return resolveTheme(saved);
+            }
         }
-    }, [theme]);
+        return 'dark';
+    });
 
-    const toggleTheme = () => {
-        setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+    // Apply theme class to document
+    useEffect(() => {
+        const root = document.documentElement;
+        root.classList.remove('theme-light', 'theme-dark');
+        root.classList.add(`theme-${resolvedTheme}`);
+        root.setAttribute('data-theme', resolvedTheme);
+
+        // Also apply to body for compatibility
+        document.body.classList.remove('light-mode', 'dark-mode');
+        document.body.classList.add(resolvedTheme === 'light' ? 'light-mode' : 'dark-mode');
+    }, [resolvedTheme]);
+
+    // Listen for system theme changes
+    useEffect(() => {
+        if (themeMode !== 'system') return;
+
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: light)');
+        const handleChange = () => {
+            setResolvedTheme(getSystemTheme());
+        };
+
+        mediaQuery.addEventListener('change', handleChange);
+        return () => mediaQuery.removeEventListener('change', handleChange);
+    }, [themeMode]);
+
+    const setThemeMode = (mode: ThemeMode) => {
+        setThemeModeState(mode);
+        setResolvedTheme(resolveTheme(mode));
+        localStorage.setItem(THEME_STORAGE_KEY, mode);
     };
 
     return (
-        <ThemeContext.Provider value={{ theme, toggleTheme, isDarkMode: theme === 'dark' }}>
+        <ThemeContext.Provider value={{
+            themeMode,
+            resolvedTheme,
+            setThemeMode,
+            isDarkMode: resolvedTheme === 'dark'
+        }}>
             {children}
         </ThemeContext.Provider>
     );

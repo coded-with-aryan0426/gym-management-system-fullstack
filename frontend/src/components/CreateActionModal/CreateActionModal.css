@@ -1,0 +1,417 @@
+/* ============================================================================
+   Create Action Modal - Pure Black Theme
+   ============================================================================ */
+
+/* Overlay: Lighter background */
+.create-action-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 16px;
+}
+
+/* Modal: Larger, Glassmorphic, Lighter Black */
+.create-action-modal {
+    width: 100%;
+    max-width: 850px;
+    /* Much wider */
+    background: var(--bg-secondary);
+    /* Lighter, transparent black */
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--border-subtle);
+    border-radius: 20px;
+    box-shadow: var(--shadow-xl);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+.create-action-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 32px;
+    /* More padding */
+    padding-bottom: 0;
+}
+
+.create-action-title {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.create-action-title h3 {
+    font-size: 22px;
+    /* Larger title */
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.create-action-back {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.create-action-back:hover {
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    border-color: var(--border-primary);
+}
+
+.create-action-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: transparent;
+    border: none;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.create-action-close:hover {
+    color: var(--text-primary);
+    transform: rotate(90deg);
+}
+
+/* Body */
+.create-action-body {
+    padding: 32px;
+    /* More padding */
+}
+
+.create-action-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    /* Larger gap */
+}
+
+.create-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 24px;
+    background: var(--bg-tertiary);
+    /* Card bg using theme variable */
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    height: 280px;
+    /* Taller cards */
+    position: relative;
+    overflow: hidden;
+}
+
+.create-card:hover {
+    background: var(--bg-elevated);
+    border-color: var(--border-primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+/* Hover Accent Borders */
+.create-card:hover::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    border: 2px solid var(--border-secondary);
+    pointer-events: none;
+}
+
+.create-card__icon {
+    margin-bottom: 20px;
+    color: var(--text-tertiary);
+    transition: all 0.2s;
+}
+
+.create-card:hover .create-card__icon {
+    color: var(--text-primary);
+    transform: scale(1.1);
+}
+
+.create-card__icon--blue {
+    color: #3b82f6;
+}
+
+.create-card__icon--orange {
+    color: #f97316;
+}
+
+.create-card__icon--purple {
+    color: #a855f7;
+}
+
+.create-card__icon--green {
+    color: #10b981;
+}
+
+.create-card__content h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 8px 0;
+}
+
+.create-card__content p {
+    font-size: 13px;
+    color: var(--text-tertiary);
+    margin: 0;
+    line-height: 1.4;
+    max-width: 140px;
+}
+
+.create-card:hover .create-card__content p {
+    color: var(--text-secondary);
+}
+
+/* Footer */
+.create-action-footer {
+    padding: 16px 32px 32px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.btn-cancel {
+    padding: 10px 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    color: #bbb;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-cancel:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.btn-cancel:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-submit {
+    padding: 10px 24px;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-submit:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+}
+
+.btn-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Form Styles */
+.create-action-modal--form {
+    max-width: 700px;
+}
+
+.create-action-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-row {
+    display: flex;
+    gap: 20px;
+}
+
+.form-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #888;
+}
+
+.form-input {
+    width: 100%;
+    padding: 12px 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    color: #fff;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.form-input:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.05);
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.form-input::placeholder {
+    color: #555;
+}
+
+.form-input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .create-action-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-row {
+        flex-direction: column;
+    }
+
+    .create-card {
+        height: 180px;
+    }
+}
+
+/* ============================================================================
+   LIGHT MODE OVERRIDES
+   ============================================================================ */
+:root.theme-light .create-action-modal,
+[data-theme="light"] .create-action-modal,
+body.light-mode .create-action-modal {
+    background: var(--bg-secondary, #ffffff);
+    border: 1px solid var(--border-primary, #CBD5E1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+:root.theme-light .create-action-overlay,
+[data-theme="light"] .create-action-overlay,
+body.light-mode .create-action-overlay {
+    background: rgba(0, 0, 0, 0.4);
+}
+
+/* Form Labels - Darker for visibility */
+:root.theme-light .form-group label,
+[data-theme="light"] .form-group label,
+body.light-mode .form-group label {
+    color: #334155;
+    /* Dark slate */
+    font-weight: 500;
+}
+
+/* Form Inputs - Visible borders and backgrounds */
+:root.theme-light .form-input,
+[data-theme="light"] .form-input,
+body.light-mode .form-input {
+    background: #ffffff;
+    border: 1px solid var(--border-primary, #CBD5E1);
+    color: var(--text-primary, #0f172a);
+}
+
+:root.theme-light .form-input:focus,
+[data-theme="light"] .form-input:focus,
+body.light-mode .form-input:focus {
+    background: #ffffff;
+    border-color: var(--color-crimson, #DC2626);
+    border-width: 2px;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+:root.theme-light .form-input::placeholder,
+[data-theme="light"] .form-input::placeholder,
+body.light-mode .form-input::placeholder {
+    color: #64748b;
+    /* WCAG compliant */
+}
+
+/* Cards - Visible in light mode */
+:root.theme-light .create-card,
+[data-theme="light"] .create-card,
+body.light-mode .create-card {
+    background: var(--bg-tertiary, #f1f5f9);
+    border: 1px solid var(--border-primary, #CBD5E1);
+}
+
+:root.theme-light .create-card:hover,
+[data-theme="light"] .create-card:hover,
+body.light-mode .create-card:hover {
+    background: #ffffff;
+    border-color: var(--color-crimson, #DC2626);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* Back Button */
+:root.theme-light .create-action-back,
+[data-theme="light"] .create-action-back,
+body.light-mode .create-action-back {
+    background: var(--bg-tertiary, #f1f5f9);
+    border: 1px solid var(--border-primary, #CBD5E1);
+    color: #475569;
+}
+
+:root.theme-light .create-action-back:hover,
+[data-theme="light"] .create-action-back:hover,
+body.light-mode .create-action-back:hover {
+    background: #ffffff;
+    color: #0f172a;
+}
+
+/* Cancel Button */
+:root.theme-light .btn-cancel,
+[data-theme="light"] .btn-cancel,
+body.light-mode .btn-cancel {
+    background: var(--bg-tertiary, #f1f5f9);
+    border: 1px solid var(--border-primary, #CBD5E1);
+    color: #475569;
+}
+
+:root.theme-light .btn-cancel:hover,
+[data-theme="light"] .btn-cancel:hover,
+body.light-mode .btn-cancel:hover {
+    background: #ffffff;
+    border-color: var(--border-secondary, #94a3b8);
+    color: #0f172a;
+}
