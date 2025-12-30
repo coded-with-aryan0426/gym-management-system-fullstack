@@ -40,6 +40,7 @@ const MemberLayout = lazy(() => import('./pages/member/MemberLayout'));
 const MemberDashboard = lazy(() => import('./pages/member/MemberDashboard'));
 const MemberProfile = lazy(() => import('./pages/member/MemberProfile'));
 const MyMembership = lazy(() => import('./pages/member/MyMembership'));
+const MyProgress = lazy(() => import('./pages/member/MyProgress'));
 const MyTrainer = lazy(() => import('./pages/member/MyTrainer'));
 const MyBookings = lazy(() => import('./pages/member/MyBookings'));
 const AvailableClasses = lazy(() => import('./pages/member/AvailableClasses'));
@@ -95,6 +96,7 @@ function App() {
                         <Route index element={<MemberDashboard />} />
                         <Route path="profile" element={<MemberProfile />} />
                         <Route path="membership" element={<MyMembership />} />
+                        <Route path="progress" element={<MyProgress />} />
                         <Route path="classes" element={<AvailableClasses />} />
                         <Route path="trainer" element={<MyTrainer />} />
                         <Route path="bookings" element={<MyBookings />} />
