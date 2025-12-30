@@ -116,20 +116,10 @@ const Staff: React.FC = () => {
   };
 
   const handleEditProfile = async (member: User) => {
-    try {
-      await api.updateUser(member.userId, {
-        fullName: member.fullName,
-        email: member.email,
-        phoneNumber: member.phoneNumber,
-      });
-      toast.success(`Profile updated for ${member.fullName}`);
-      loadStaffPaginated();
-      handleCloseActionModal();
-    } catch (err) {
-      console.error('Failed to update staff profile:', err);
-      toast.error('Failed to update profile');
-      handleCloseActionModal();
-    }
+    // Modal already called the API - just refresh the list
+    // Do NOT close modal - let user close manually
+    toast.success(`Profile updated for ${member.fullName}`);
+    loadStaffPaginated();
   };
 
   const columns: Column<User>[] = [
