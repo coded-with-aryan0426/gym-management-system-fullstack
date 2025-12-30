@@ -1,9 +1,0 @@
-{
-  "projectId": "13b5398c-b010-49c0-b614-257a0883c22b",
-  "createdAt": 1766039173972,
-  "startupCommands": [
-    "cd frontend && npm install && npm run dev",
-    "cd backend && mvn spring-boot:run"
-  ],
-  "vercelProjectId": "prj_Zi3E2gBsg9Y5I9jVNuLrynQ9uqe5"
-}

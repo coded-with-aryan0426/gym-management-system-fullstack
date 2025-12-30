@@ -1,11 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import PageHeader from '../../components/shared/PageHeader';
 import ContentCard from '../../components/shared/ContentCard';
-import { User, Lock, Bell, Save, Activity } from 'lucide-react';
+import { User, Lock, Bell, Save, Activity, Upload, AlertTriangle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import './MemberProfile.css';
+
+interface ProfileData {
+    fullName: string;
+    email: string;
+    phoneNumber: string;
+    createdAt?: string;
+    avatarUrl?: string; // Future proofing
+}
 
 const MemberProfile: React.FC = () => {
-    const [profile, setProfile] = useState<any>(null);
+    const [profile, setProfile] = useState<ProfileData | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [activeTab, setActiveTab] = useState<'profile' | 'security'>('profile');
@@ -70,9 +79,17 @@ const MemberProfile: React.FC = () => {
         }
     };
 
+    const handleAvatarClick = () => {
+        toast.success("Avatar upload coming soon!");
+    };
+
     if (loading) {
         return <div className="p-8 text-zinc-400">Loading profile...</div>;
     }
+
+    const memberInitials = formData.fullName
+        ? formData.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
+        : 'M';
 
     return (
         <div className="space-y-6 fade-in">
@@ -81,31 +98,25 @@ const MemberProfile: React.FC = () => {
                 subtitle="Manage your personal information and membership preferences."
             />
 
-            <div className="flex flex-col lg:flex-row gap-6">
+            <div className="member-profile-layout">
                 {/* Settings Sidebar */}
-                <div className="w-full lg:w-64 space-y-2">
+                <div className="profile-sidebar">
                     <button
                         onClick={() => setActiveTab('profile')}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === 'profile'
-                            ? 'bg-red-600 text-white'
-                            : 'bg-zinc-900/50 text-zinc-400 hover:text-white hover:bg-zinc-800'
-                            }`}
+                        className={`profile-nav-item ${activeTab === 'profile' ? 'profile-nav-item--active' : ''}`}
                     >
                         <User size={18} />
                         Personal Info
                     </button>
                     <button
                         onClick={() => setActiveTab('security')}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === 'security'
-                            ? 'bg-red-600 text-white'
-                            : 'bg-zinc-900/50 text-zinc-400 hover:text-white hover:bg-zinc-800'
-                            }`}
+                        className={`profile-nav-item ${activeTab === 'security' ? 'profile-nav-item--active' : ''}`}
                     >
                         <Lock size={18} />
                         Security
                     </button>
                     <button
-                        className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors bg-zinc-900/50 text-zinc-400 hover:text-white hover:bg-zinc-800 opacity-50 cursor-not-allowed"
+                        className="profile-nav-item profile-nav-item--disabled"
                         title="Coming soon"
                     >
                         <Activity size={18} />
@@ -114,57 +125,75 @@ const MemberProfile: React.FC = () => {
                 </div>
 
                 {/* Main Content */}
-                <div className="flex-1">
+                <div className="profile-content">
                     {activeTab === 'profile' ? (
                         <ContentCard title="Personal Information" padded>
-                            <form onSubmit={handleSubmit} className="space-y-6">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium text-zinc-400">Full Name</label>
+                            {/* Avatar Section */}
+                            <div className="avatar-section">
+                                <div className="avatar-preview">
+                                    {memberInitials}
+                                </div>
+                                <div className="avatar-actions">
+                                    <h4 className="avatar-title">Profile Photo</h4>
+                                    <p className="avatar-subtitle">Update your profile picture.</p>
+                                    <button
+                                        type="button"
+                                        onClick={handleAvatarClick}
+                                        className="avatar-btn"
+                                    >
+                                        Upload New Photo
+                                    </button>
+                                </div>
+                            </div>
+
+                            <form onSubmit={handleSubmit} className="profile-form">
+                                <div className="form-grid">
+                                    <div className="form-group">
+                                        <label className="form-label">Full Name</label>
                                         <input
                                             type="text"
                                             value={formData.fullName}
                                             onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                                            className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-red-500 transition-colors"
+                                            className="form-input"
                                             required
                                         />
                                     </div>
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium text-zinc-400">Phone Number</label>
+                                    <div className="form-group">
+                                        <label className="form-label">Phone Number</label>
                                         <input
                                             type="tel"
                                             value={formData.phoneNumber}
                                             onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                                            className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-red-500 transition-colors"
+                                            className="form-input"
                                             placeholder="+1 234 567 890"
                                         />
                                     </div>
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium text-zinc-400">Email Address</label>
+                                    <div className="form-group">
+                                        <label className="form-label">Email Address</label>
                                         <input
                                             type="email"
                                             value={profile?.email || ''}
                                             disabled
-                                            className="w-full bg-zinc-900/50 border border-zinc-800/50 rounded-lg px-4 py-2.5 text-zinc-500 cursor-not-allowed"
+                                            className="form-input"
                                         />
-                                        <p className="text-xs text-zinc-500">Contact trainer to update email address.</p>
+                                        <p className="form-hint">Contact trainer to update email address.</p>
                                     </div>
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium text-zinc-400">Member Since</label>
+                                    <div className="form-group">
+                                        <label className="form-label">Member Since</label>
                                         <input
                                             type="text"
                                             value={profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString() : 'N/A'}
                                             disabled
-                                            className="w-full bg-zinc-900/50 border border-zinc-800/50 rounded-lg px-4 py-2.5 text-zinc-500 cursor-not-allowed"
+                                            className="form-input"
                                         />
                                     </div>
                                 </div>
 
-                                <div className="pt-4 border-t border-zinc-800 flex justify-end">
+                                <div className="form-actions">
                                     <button
                                         type="submit"
                                         disabled={saving}
-                                        className="flex items-center gap-2 px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="btn-primary"
                                     >
                                         <Save size={18} />
                                         {saving ? 'Saving...' : 'Save Changes'}
@@ -175,12 +204,25 @@ const MemberProfile: React.FC = () => {
                     ) : (
                         <ContentCard title="Security Settings" padded>
                             <div className="space-y-6">
-                                <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-                                    <h3 className="text-yellow-500 font-medium mb-1">Change Password</h3>
-                                    <p className="text-sm text-yellow-500/80">
+                                <div className="security-alert">
+                                    <div className="flex items-center gap-2 security-alert__title">
+                                        <AlertTriangle size={18} />
+                                        <h3>Change Password</h3>
+                                    </div>
+                                    <p className="security-alert__text">
                                         To change your password, please contact your administrator or use the "Forgot Password" link on the login page.
                                         Self-service password change is coming soon.
                                     </p>
+                                </div>
+
+                                <div className="form-group">
+                                    <label className="form-label">Current Password</label>
+                                    <input
+                                        type="password"
+                                        value="**********"
+                                        disabled
+                                        className="form-input"
+                                    />
                                 </div>
                             </div>
                         </ContentCard>
