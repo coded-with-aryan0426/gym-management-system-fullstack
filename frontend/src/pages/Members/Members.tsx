@@ -308,7 +308,12 @@ const Members: React.FC = () => {
           onClick={(e) => { e.stopPropagation(); handleActionClick(member) }}
           style={{ cursor: 'pointer' }}
         >
-          <Avatar name={member.fullName} size="md" />
+          <Avatar
+            name={member.fullName}
+            size="md"
+            avatarId={localStorage.getItem(`avatar_${member.userId}`) || (member as any).avatarId}
+            userId={member.userId}
+          />
           <div className="member-cell__info">
             <span className="member-name">{member.fullName}</span>
             <span className="member-email">{member.email}</span>

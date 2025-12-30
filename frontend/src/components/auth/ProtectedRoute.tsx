@@ -20,8 +20,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles, children 
     try {
         const user = JSON.parse(userStr);
 
-        // Get user role (handle 'role', 'userRole', and 'staffRole' fields)
-        const userRole = (user.role || user.userRole || user.staffRole || '').toUpperCase();
+        // Get user role (handle 'role', 'userRole', 'staffRole' fields, AND nested 'roles' array)
+        let userRole = (user.role || user.userRole || user.staffRole || '').toUpperCase();
+
+        // Handle nested roles array (e.g. from Spring Security / JWT) which UtilityBar uses
+        if (!userRole && user.roles && Array.isArray(user.roles) && user.roles.length > 0) {
+            userRole = (user.roles[0].roleName || user.roles[0].name || '').toUpperCase();
+        }
 
         // Check if user's role is allowed
         const isAllowed = allowedRoles.some(role =>

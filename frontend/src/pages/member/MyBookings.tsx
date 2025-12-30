@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import { Calendar, X } from 'lucide-react';
+import ContentCard from '../../components/shared/ContentCard';
+import PageHeader from '../../components/shared/PageHeader';
 import './Member.css';
 
 interface Booking {
@@ -80,92 +83,63 @@ const MyBookings: React.FC = () => {
     };
 
     if (loading) {
-        return (
-            <div className="member-dashboard">
-                <h1 className="member-page-title">My Bookings</h1>
-                <p style={{ color: 'var(--text-secondary)' }}>Loading...</p>
-            </div>
-        );
+        return <div className="p-8">Loading bookings...</div>;
     }
 
     return (
-        <div className="member-dashboard">
-            <h1 className="member-page-title">My Bookings ({bookings.length})</h1>
+        <div className="fade-in">
+            <PageHeader
+                title={`My Bookings (${bookings.length})`}
+                subtitle="Manage your class schedules and history."
+            />
 
             {bookings.length === 0 ? (
-                <div className="member-empty-state">
-                    <div className="member-empty-state__icon">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                            <line x1="16" y1="2" x2="16" y2="6" />
-                            <line x1="8" y1="2" x2="8" y2="6" />
-                            <line x1="3" y1="10" x2="21" y2="10" />
-                        </svg>
+                <ContentCard padded>
+                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                        <div className="w-16 h-16 rounded-full bg-zinc-800 flex items-center justify-center mb-4">
+                            <Calendar size={32} className="text-zinc-500" />
+                        </div>
+                        <h3 className="text-xl font-medium text-white mb-2">No Bookings Yet</h3>
+                        <p className="text-zinc-400 max-w-md">
+                            You haven't booked any classes yet. Check out available classes to get started!
+                        </p>
                     </div>
-                    <h3 className="member-empty-state__title">No Bookings Yet</h3>
-                    <p className="member-empty-state__text">
-                        You haven't booked any classes yet. Check out available classes to get started!
-                    </p>
-                </div>
+                </ContentCard>
             ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <ContentCard padded className="space-y-4">
                     {bookings.map(booking => {
                         const statusStyle = getStatusStyle(booking.status);
                         return (
-                            <div key={booking.id} style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                padding: '16px 20px',
-                                background: 'var(--bg-secondary)',
-                                border: '1px solid var(--border-primary)',
-                                borderRadius: '12px',
-                            }}>
+                            <div key={booking.id} className="flex items-center justify-between p-4 bg-zinc-900/50 border border-zinc-800 rounded-xl hover:border-zinc-700 transition-colors">
                                 <div>
-                                    <div style={{
-                                        fontWeight: 600,
-                                        color: 'var(--text-primary)',
-                                        marginBottom: '4px'
-                                    }}>
+                                    <div className="font-semibold text-white mb-1">
                                         Class #{booking.classId}
                                     </div>
-                                    <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+                                    <div className="text-sm text-zinc-400">
                                         Booked: {formatDate(booking.bookingDate)}
                                     </div>
                                 </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                    <span style={{
-                                        padding: '4px 12px',
-                                        borderRadius: '20px',
-                                        fontSize: '12px',
-                                        fontWeight: 600,
-                                        background: statusStyle.bg,
-                                        color: statusStyle.color,
-                                    }}>
+                                <div className="flex items-center gap-3">
+                                    <span
+                                        className="px-3 py-1 rounded-full text-xs font-semibold"
+                                        style={{ background: statusStyle.bg, color: statusStyle.color }}
+                                    >
                                         {booking.status}
                                     </span>
                                     {booking.status === 'BOOKED' && (
                                         <button
                                             onClick={() => handleCancel(booking.id)}
-                                            style={{
-                                                padding: '6px 12px',
-                                                background: 'transparent',
-                                                border: '1px solid rgba(220, 38, 38, 0.5)',
-                                                borderRadius: '8px',
-                                                color: '#DC2626',
-                                                fontSize: '12px',
-                                                fontWeight: 500,
-                                                cursor: 'pointer',
-                                            }}
+                                            className="p-2 text-zinc-400 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                                            title="Cancel Booking"
                                         >
-                                            Cancel
+                                            <X size={18} />
                                         </button>
                                     )}
                                 </div>
                             </div>
                         );
                     })}
-                </div>
+                </ContentCard>
             )}
         </div>
     );

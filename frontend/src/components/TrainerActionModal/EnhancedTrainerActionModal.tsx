@@ -129,7 +129,7 @@ const EnhancedTrainerActionModal: React.FC<EnhancedTrainerActionModalProps> = ({
       setEditForm({
         fullName: trainer.fullName || "",
         email: trainer.email || "",
-        phone: trainer.phoneNumber || "",
+        phone: trainer.phoneNumber || (trainer as any).phone || "",
         role: trainer.roles?.[0]?.roleName || "TRAINER",
         specialization: [],
         joinDate: trainer.createdAt ? new Date(trainer.createdAt).toISOString().split('T')[0] : "",

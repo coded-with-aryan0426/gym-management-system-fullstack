@@ -69,6 +69,18 @@ export default function LoginPage() {
             return;
         }
 
+        // Validate Email or Phone
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const phoneRegex = /^\d{10}$/;
+
+        const isEmail = emailRegex.test(email);
+        const isPhone = phoneRegex.test(email);
+
+        if (!isEmail && !isPhone) {
+            setError("Please enter a valid email address or a 10-digit phone number");
+            return;
+        }
+
         setIsLoading(true);
 
         try {

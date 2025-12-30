@@ -56,7 +56,7 @@ const icons = {
   ),
 }
 
-const navItems = [
+const defaultNavItems = [
   { path: "/dashboard", label: "Dashboard", icon: icons.dashboard, color: "#dc2626" },
   { path: "/members", label: "Members", icon: icons.members, color: "#dc2626" },
   { path: "/trainers", label: "Trainers", icon: icons.staff, color: "#dc2626" },
@@ -65,12 +65,20 @@ const navItems = [
   { path: "/reports", label: "Reports", icon: icons.reports, color: "#dc2626" },
 ]
 
+export interface NavItem {
+  path: string;
+  label: string;
+  icon?: React.ReactNode; // Allow custom icons
+  color?: string;
+}
+
 interface CommandRailProps {
   isCollapsed?: boolean
   onToggle?: () => void
+  navItems?: NavItem[]
 }
 
-const CommandRail: React.FC<CommandRailProps> = ({ isCollapsed = false, onToggle }) => {
+const CommandRail: React.FC<CommandRailProps> = ({ isCollapsed = false, onToggle, navItems = defaultNavItems }) => {
   // Get user role from storage
   const getUserRole = () => {
     try {
@@ -92,14 +100,19 @@ const CommandRail: React.FC<CommandRailProps> = ({ isCollapsed = false, onToggle
   const role = getUserRole();
 
   // Filter items based on role
-  const filteredNavItems = navItems.filter(item => {
+  // Filter items based on role (only if using default items, or apply same logic if needed)
+  // If custom navItems are passed, we assume they are already filtered/correct for the context
+  const itemsToRender = navItems === defaultNavItems ? navItems.filter(item => {
     // 1. Owner sees everything
     if (role === 'OWNER') return true;
 
     // 2. Trainer (Staff) sees Operations but NOT Financials/Reports
     const restricted = ['/financials', '/reports'];
     return !restricted.includes(item.path);
-  });
+  }) : navItems;
+
+  const filteredNavItems = itemsToRender; // Re-assign for clarity in map below
+
 
   const handleLogout = () => {
     localStorage.removeItem('user');

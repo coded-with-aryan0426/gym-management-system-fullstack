@@ -11,6 +11,8 @@ import { relationshipFilterService, enhancedApi } from "../../services"
 import { useRealTimeData, useOptimisticUpdates, useMicroInteractions } from "../../hooks"
 import { showToast } from "../../utils/toast"
 import Avatar from "../ui/Avatar"
+import AvatarPicker from "../ui/AvatarPicker"
+import { getAvatarUrl } from "../ui/Avatar"
 import "./MemberActionModal.css"
 
 interface Trainer {
@@ -119,7 +121,11 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
     phone: "",
     joinDate: "",
     notes: "",
+    avatarId: null as string | null,
   })
+
+  // Avatar Picker Popup
+  const [showAvatarPicker, setShowAvatarPicker] = useState(false)
 
   const [renewForm, setRenewForm] = useState({
     packageId: 0,
@@ -216,6 +222,7 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
         phone: member.phoneNumber || "+91 98765 43210",
         joinDate: (member.joinDate || member.createdAt || "").split('T')[0],
         notes: "",
+        avatarId: member.userId ? (localStorage.getItem(`avatar_${member.userId}`) || (member as any).avatarId || null) : null,
       })
     }
   }, [isOpen, member?.userId, loadAssignedTrainers])
@@ -279,6 +286,7 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
         phone: member.phoneNumber || "+91 98765 43210",
         joinDate: (member.joinDate || member.createdAt || "").split('T')[0],
         notes: "",
+        avatarId: member.userId ? (localStorage.getItem(`avatar_${member.userId}`) || (member as any).avatarId || null) : null,
       })
     }
     setActiveSubModal("edit")
@@ -302,6 +310,13 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
 
       // Remove frontend-only fields
       delete updatedMember.phoneNumber;
+
+      // Persist avatar to localStorage
+      if (editForm.avatarId) {
+        localStorage.setItem(`avatar_${localMember.userId}`, editForm.avatarId)
+      } else {
+        localStorage.removeItem(`avatar_${localMember.userId}`)
+      }
 
       console.log('Sending update payload:', updatedMember)
       const savedUser = await api.updateUser(localMember.userId, updatedMember)
@@ -517,7 +532,13 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
             >
               {/* Member Info Header - Compact with Stats */}
               <div className="member-action-modal__profile-header">
-                <Avatar name={localMember.fullName} size="lg" className="profile-header__avatar-component" />
+                <Avatar
+                  name={localMember.fullName}
+                  size="lg"
+                  className="profile-header__avatar-component"
+                  avatarId={editForm.avatarId}
+                  userId={localMember.userId}
+                />
                 <div className="profile-header__info">
                   <h2 className="profile-header__name">{localMember.fullName}</h2>
                   <p className="profile-header__email">{localMember.email}</p>
@@ -630,7 +651,62 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
                         exit={{ opacity: 0, x: -20 }}
                         transition={{ duration: 0.2 }}
                       >
-                        <h4 className="content-panel__title">Edit Profile</h4>
+                        <div className="content-panel__header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                          <h4 className="content-panel__title" style={{ margin: 0 }}>Edit Profile</h4>
+                          <button
+                            type="button"
+                            className="btn btn--secondary btn--sm"
+                            onClick={() => setShowAvatarPicker(true)}
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                              <circle cx="12" cy="7" r="4" />
+                            </svg>
+                            Choose Avatar
+                          </button>
+                        </div>
+
+                        {/* Avatar Picker Popup Modal */}
+                        <AnimatePresence>
+                          {showAvatarPicker && (
+                            <motion.div
+                              className="member-action-overlay" /* reusing existing overlay class but z-index might need handling or just use nested div */
+                              style={{ zIndex: 1100, backgroundColor: 'rgba(0,0,0,0.5)' }}
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
+                              onClick={() => setShowAvatarPicker(false)}
+                            >
+                              <motion.div
+                                className="avatar-picker-modal"
+                                initial={{ scale: 0.9, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                exit={{ scale: 0.9, opacity: 0 }}
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <div className="avatar-picker-modal__header">
+                                  <h5>Choose Member Avatar</h5>
+                                  <button
+                                    className="avatar-picker-modal__close"
+                                    onClick={() => setShowAvatarPicker(false)}
+                                  >
+                                    ×
+                                  </button>
+                                </div>
+                                <AvatarPicker
+                                  selectedId={editForm.avatarId}
+                                  userId={localMember?.userId}
+                                  variant="member"
+                                  onSelect={(id) => {
+                                    setEditForm(prev => ({ ...prev, avatarId: id }))
+                                    setShowAvatarPicker(false)
+                                    showToast.success("Avatar selected!")
+                                  }}
+                                />
+                              </motion.div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                         <div className="content-panel__body">
                           <div className="form-row-2-col">
                             <div className="form-group" style={{ marginBottom: 0 }}>

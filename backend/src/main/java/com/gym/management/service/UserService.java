@@ -267,6 +267,11 @@ public class UserService {
             user.setPhone(user.getPhoneNumber());
         }
 
+        // Map joinDate to createdAt if provided (for backdating/start date)
+        if (user.getJoinDate() != null) {
+            user.setCreatedAt(user.getJoinDate().atStartOfDay());
+        }
+
         // Look up actual Role entities from the database based on role names
         boolean isCustomer = false;
         if (user.getRoles() != null && !user.getRoles().isEmpty()) {

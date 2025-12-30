@@ -73,17 +73,23 @@ function App() {
                 path="/trainer/*"
                 element={
                   <ProtectedRoute allowedRoles={['TRAINER']}>
-                    <TrainerLayout>
-                      <Routes>
-                        <Route index element={<TrainerDashboard />} />
-                        <Route path="profile" element={<TrainerProfile />} />
-                        <Route path="members" element={<MyMembers />} />
-                        <Route path="classes" element={<MyClasses />} />
-                        <Route path="schedule" element={<MySchedule />} />
-                        <Route path="notifications" element={<TrainerNotifications />} />
-                        <Route path="*" element={<Navigate to="/trainer" replace />} />
-                      </Routes>
-                    </TrainerLayout>
+                    <MembersProvider>
+                      <TrainerProvider>
+                        <NavbarProvider>
+                          <TrainerLayout>
+                            <Routes>
+                              <Route index element={<TrainerDashboard />} />
+                              <Route path="profile" element={<TrainerProfile />} />
+                              <Route path="members" element={<MyMembers />} />
+                              <Route path="classes" element={<MyClasses />} />
+                              <Route path="schedule" element={<MySchedule />} />
+                              <Route path="notifications" element={<TrainerNotifications />} />
+                              <Route path="*" element={<Navigate to="/trainer" replace />} />
+                            </Routes>
+                          </TrainerLayout>
+                        </NavbarProvider>
+                      </TrainerProvider>
+                    </MembersProvider>
                   </ProtectedRoute>
                 }
               />
@@ -93,19 +99,25 @@ function App() {
                 path="/member/*"
                 element={
                   <ProtectedRoute allowedRoles={['CUSTOMER', 'MEMBER']}>
-                    <MemberLayout>
-                      <Routes>
-                        <Route index element={<MemberDashboard />} />
-                        <Route path="profile" element={<MemberProfile />} />
-                        <Route path="membership" element={<MyMembership />} />
-                        <Route path="progress" element={<MyProgress />} />
-                        <Route path="classes" element={<AvailableClasses />} />
-                        <Route path="trainer" element={<MyTrainer />} />
-                        <Route path="bookings" element={<MyBookings />} />
-                        <Route path="notifications" element={<MemberNotifications />} />
-                        <Route path="*" element={<Navigate to="/member" replace />} />
-                      </Routes>
-                    </MemberLayout>
+                    <MembersProvider>
+                      <TrainerProvider>
+                        <NavbarProvider>
+                          <MemberLayout>
+                            <Routes>
+                              <Route index element={<MemberDashboard />} />
+                              <Route path="profile" element={<MemberProfile />} />
+                              <Route path="membership" element={<MyMembership />} />
+                              <Route path="progress" element={<MyProgress />} />
+                              <Route path="classes" element={<AvailableClasses />} />
+                              <Route path="trainer" element={<MyTrainer />} />
+                              <Route path="bookings" element={<MyBookings />} />
+                              <Route path="notifications" element={<MemberNotifications />} />
+                              <Route path="*" element={<Navigate to="/member" replace />} />
+                            </Routes>
+                          </MemberLayout>
+                        </NavbarProvider>
+                      </TrainerProvider>
+                    </MembersProvider>
                   </ProtectedRoute>
                 }
               />

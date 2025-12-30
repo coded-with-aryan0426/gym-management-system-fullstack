@@ -116,6 +116,11 @@ const UtilityBar: React.FC = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
+  // Get user info for role-based access
+  const userStr = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
+  const currentUser = userStr ? JSON.parse(userStr) : null;
+  const userRole = currentUser?.roles?.[0]?.roleName || 'MEMBER'; // Default to lowest privilege
+
   // Debounced search function
   const performSearch = useCallback(async (query: string) => {
     if (!query.trim()) {
@@ -126,16 +131,40 @@ const UtilityBar: React.FC = () => {
 
     setIsSearching(true)
     try {
-      // Search both members and staff
-      const [members, staff] = await Promise.all([
-        api.searchUsers("CUSTOMER", query).catch(() => []),
-        api.searchUsers("TRAINER", query).catch(() => []),
-      ])
+      let results: SearchResult[] = [];
 
-      const results: SearchResult[] = [
-        ...members.map((m: User) => ({ id: m.userId, name: m.fullName, email: m.email, type: "member" as const })),
-        ...staff.map((s: User) => ({ id: s.userId, name: s.fullName, email: s.email, type: "staff" as const })),
-      ]
+      if (userRole === 'TRAINER') {
+        // Restricted Search: Only assigned members
+        // Fetch all assigned customers and filter client-side
+        // Note: Ideally backend should support search param, but filtering 20-50 users is fine
+        const assignedMembers = await api.getTrainerCustomers(currentUser.id).catch(() => []);
+
+        const lowerQuery = query.toLowerCase();
+        const filtered = assignedMembers.filter(m =>
+          m.fullName.toLowerCase().includes(lowerQuery) ||
+          m.email.toLowerCase().includes(lowerQuery)
+        );
+
+        results = filtered.map(m => ({
+          id: m.userId,
+          name: m.fullName,
+          email: m.email,
+          type: "member" as const
+        }));
+
+      } else if (userRole === 'OWNER' || userRole === 'ADMIN') {
+        // Full Search: Both members and staff
+        const [members, staff] = await Promise.all([
+          api.searchUsers("CUSTOMER", query).catch(() => []),
+          api.searchUsers("TRAINER", query).catch(() => []),
+        ])
+
+        results = [
+          ...members.map((m: User) => ({ id: m.userId, name: m.fullName, email: m.email, type: "member" as const })),
+          ...staff.map((s: User) => ({ id: s.userId, name: s.fullName, email: s.email, type: "staff" as const })),
+        ]
+      }
+      // Members get no results (search bar should be hidden)
 
       setSearchResults(results.slice(0, 10)) // Limit to 10 results
       setShowSearchResults(true)
@@ -145,7 +174,7 @@ const UtilityBar: React.FC = () => {
     } finally {
       setIsSearching(false)
     }
-  }, [])
+  }, [userRole, currentUser?.id])
 
   // Handle search input change with debounce
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -241,31 +270,34 @@ const UtilityBar: React.FC = () => {
     <header className="utility-bar">
       {/* Search */}
       <div className="utility-bar__search-container" ref={searchRef}>
-        <form className="utility-bar__search" onSubmit={handleSearchSubmit}>
-          <svg
-            className="utility-bar__search-icon"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <circle cx="11" cy="11" r="8" />
-            <path d="m21 21-4.35-4.35" />
-          </svg>
-          <input
-            type="text"
-            className="utility-bar__search-input"
-            placeholder="Search (Cmd + K)"
-            value={searchQuery}
-            onChange={handleSearchChange}
-            onFocus={() => searchQuery.trim() && setShowSearchResults(true)}
-          />
-          {isSearching && (
-            <span className="utility-bar__spinner" />
-          )}
-        </form>
+        {/* Hide search for regular members */}
+        {(userRole === 'ADMIN' || userRole === 'OWNER' || userRole === 'TRAINER') && (
+          <form className="utility-bar__search" onSubmit={handleSearchSubmit}>
+            <svg
+              className="utility-bar__search-icon"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.35-4.35" />
+            </svg>
+            <input
+              type="text"
+              className="utility-bar__search-input"
+              placeholder="Search (Cmd + K)"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              onFocus={() => searchQuery.trim() && setShowSearchResults(true)}
+            />
+            {isSearching && (
+              <span className="utility-bar__spinner" />
+            )}
+          </form>
+        )}
 
         {/* Search Results Dropdown */}
         {showSearchResults && (
@@ -371,7 +403,15 @@ const UtilityBar: React.FC = () => {
         </div>
 
         {/* User Avatar */}
-        <button className="utility-bar__avatar" title="Profile" onClick={() => navigate("/settings")}>
+        <button
+          className="utility-bar__avatar"
+          title="Profile & Settings"
+          onClick={() => {
+            if (userRole === 'TRAINER') navigate('/trainer/profile');
+            else if (userRole === 'MEMBER' || userRole === 'CUSTOMER') navigate('/member/profile');
+            else navigate('/settings');
+          }}
+        >
           <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Admin" alt="User" />
         </button>
       </div>

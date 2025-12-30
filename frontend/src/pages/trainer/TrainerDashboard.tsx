@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import './Trainer.css';
+import { useNavigate } from 'react-router-dom';
+import { Users, Calendar, Clock, Bell } from 'lucide-react';
+import StatCard from '../../components/shared/StatCard';
+import ContentCard from '../../components/shared/ContentCard';
+import PageHeader from '../../components/shared/PageHeader';
+import './Trainer.css'; // Keep for any specific styles not covered by shared (though we should minimize this)
 
 interface DashboardData {
     trainerId: number;
@@ -11,6 +16,7 @@ interface DashboardData {
 }
 
 const TrainerDashboard: React.FC = () => {
+    const navigate = useNavigate();
     const [dashboard, setDashboard] = useState<DashboardData | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -38,97 +44,89 @@ const TrainerDashboard: React.FC = () => {
     }, [user?.id]);
 
     if (loading) {
-        return (
-            <div className="trainer-dashboard">
-                <div className="trainer-dashboard__header">
-                    <h1 className="trainer-dashboard__welcome">Loading...</h1>
-                </div>
-            </div>
-        );
+        return <div className="p-8">Loading dashboard...</div>;
     }
 
+    const trainerName = dashboard?.trainerName || user?.fullName || 'Trainer';
+
     return (
-        <div className="trainer-dashboard">
-            <div className="trainer-dashboard__header">
-                <h1 className="trainer-dashboard__welcome">
-                    Welcome back, {dashboard?.trainerName || user?.fullName || 'Trainer'}! 👋
-                </h1>
-                <p className="trainer-dashboard__subtitle">
-                    Here's what's happening with your members today.
-                </p>
+        <div className="trainer-dashboard fade-in">
+            <PageHeader
+                title={`Welcome back, ${trainerName}! 👋`}
+                subtitle="Here's what's happening with your members today."
+            />
+
+            {/* Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <StatCard
+                    label="Assigned Members"
+                    value={dashboard?.assignedMembersCount || 0}
+                    icon={<Users size={24} />}
+                    color="crimson"
+                    onClick={() => navigate('/trainer/members')}
+                />
+                <StatCard
+                    label="Today's Sessions"
+                    value={dashboard?.todaysSessionsCount || 0}
+                    icon={<Calendar size={24} />}
+                    color="amber"
+                    onClick={() => navigate('/trainer/schedule')}
+                />
+                <StatCard
+                    label="Upcoming Sessions"
+                    value={dashboard?.upcomingSessionsCount || 0}
+                    icon={<Clock size={24} />}
+                    color="emerald"
+                    onClick={() => navigate('/trainer/schedule')}
+                />
+                <StatCard
+                    label="Notifications"
+                    value={dashboard?.unreadNotificationsCount || 0}
+                    icon={<Bell size={24} />}
+                    color="ocean"
+                    onClick={() => navigate('/trainer/notifications')}
+                />
             </div>
 
-            {/* Stats Cards */}
-            <div className="trainer-stats-grid">
-                <div className="trainer-stat-card">
-                    <div className="trainer-stat-card__icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                            <circle cx="9" cy="7" r="4" />
-                            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                        </svg>
-                    </div>
-                    <div className="trainer-stat-card__content">
-                        <div className="trainer-stat-card__value">{dashboard?.assignedMembersCount || 0}</div>
-                        <div className="trainer-stat-card__label">Assigned Members</div>
-                    </div>
+            {/* Content Sections */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Left Column - Main Content */}
+                <div className="lg:col-span-2 space-y-8">
+                    <ContentCard
+                        title="Quick Actions"
+                        padded
+                    >
+                        <div className="flex flex-wrap gap-3">
+                            <button
+                                onClick={() => navigate('/trainer/members')}
+                                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
+                            >
+                                View My Members
+                            </button>
+                            <button
+                                onClick={() => navigate('/trainer/schedule')}
+                                className="px-4 py-2 bg-zinc-800 text-white rounded-lg hover:bg-zinc-700 transition-colors font-medium border border-zinc-700"
+                            >
+                                Check Schedule
+                            </button>
+                            <button
+                                onClick={() => navigate('/trainer/classes')}
+                                className="px-4 py-2 bg-zinc-800 text-white rounded-lg hover:bg-zinc-700 transition-colors font-medium border border-zinc-700"
+                            >
+                                Manage Classes
+                            </button>
+                        </div>
+                    </ContentCard>
                 </div>
 
-                <div className="trainer-stat-card">
-                    <div className="trainer-stat-card__icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                            <line x1="16" y1="2" x2="16" y2="6" />
-                            <line x1="8" y1="2" x2="8" y2="6" />
-                            <line x1="3" y1="10" x2="21" y2="10" />
-                        </svg>
-                    </div>
-                    <div className="trainer-stat-card__content">
-                        <div className="trainer-stat-card__value">{dashboard?.todaysSessionsCount || 0}</div>
-                        <div className="trainer-stat-card__label">Today's Sessions</div>
-                    </div>
-                </div>
-
-                <div className="trainer-stat-card">
-                    <div className="trainer-stat-card__icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <circle cx="12" cy="12" r="10" />
-                            <polyline points="12 6 12 12 16 14" />
-                        </svg>
-                    </div>
-                    <div className="trainer-stat-card__content">
-                        <div className="trainer-stat-card__value">{dashboard?.upcomingSessionsCount || 0}</div>
-                        <div className="trainer-stat-card__label">Upcoming Sessions</div>
-                    </div>
-                </div>
-
-                <div className="trainer-stat-card">
-                    <div className="trainer-stat-card__icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-                        </svg>
-                    </div>
-                    <div className="trainer-stat-card__content">
-                        <div className="trainer-stat-card__value">{dashboard?.unreadNotificationsCount || 0}</div>
-                        <div className="trainer-stat-card__label">Notifications</div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Quick Actions */}
-            <div className="trainer-section">
-                <div className="trainer-section__header">
-                    <h2 className="trainer-section__title">Quick Actions</h2>
-                </div>
-                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                    <a href="/trainer/members" className="trainer-btn trainer-btn--primary" style={{ textDecoration: 'none' }}>
-                        View My Members
-                    </a>
-                    <a href="/trainer/schedule" className="trainer-btn trainer-btn--primary" style={{ textDecoration: 'none' }}>
-                        Check Schedule
-                    </a>
+                {/* Right Column - Secondary Content */}
+                <div className="space-y-8">
+                    {/* Placeholder for Recent Activity or similar */}
+                    <ContentCard title="Recent Activity" padded>
+                        <div className="text-zinc-500 text-sm">
+                            No recent activity found.
+                        </div>
+                    </ContentCard>
                 </div>
             </div>
         </div>

@@ -15,7 +15,7 @@
 }
 
 /* Overlay - Account for sidebar offset */
-.staff-action-overlay {
+.trainer-action-overlay {
   position: fixed;
   inset: 0;
   background-color: rgba(0, 0, 0, 0.8);
@@ -28,7 +28,7 @@
 }
 
 /* Modal Container - Compact and centered */
-.staff-action-modal {
+.trainer-action-modal {
   background-color: var(--bg-secondary);
   border: 1px solid var(--border-primary);
   border-radius: 20px;
@@ -58,7 +58,7 @@
 }
 
 /* Inline Close Button - Flex Item */
-.staff-action-modal__close-inline {
+.trainer-action-modal__close-inline {
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -74,7 +74,7 @@
   margin-left: 12px;
 }
 
-.staff-action-modal__close-inline:hover {
+.trainer-action-modal__close-inline:hover {
   background-color: var(--color-crimson);
   border-color: var(--color-crimson);
   color: var(--text-on-accent, white);
@@ -82,7 +82,7 @@
 }
 
 /* Profile Header - Compact (matching Member modal) */
-.staff-action-modal__profile-header {
+.trainer-action-modal__profile-header {
   display: flex;
   align-items: center;
   gap: 16px;
@@ -235,7 +235,7 @@
 }
 
 /* Main Content Grid */
-.staff-action-modal__content-grid {
+.trainer-action-modal__content-grid {
   display: grid;
   grid-template-columns: var(--modal-nav-width) 1fr;
   flex: 1;
@@ -244,7 +244,7 @@
 }
 
 /* Sidebar Navigation */
-.staff-action-modal__nav-column {
+.trainer-action-modal__nav-column {
   padding: 12px 8px;
   border-right: 1px solid var(--border-secondary);
   background-color: var(--bg-secondary);
@@ -314,7 +314,7 @@
 }
 
 /* Right Content Panel */
-.staff-action-modal__content-panel {
+.trainer-action-modal__content-panel {
   flex: 1;
   padding: 24px 40px;
   /* Match Member modal padding */
@@ -1692,7 +1692,7 @@ body.light-mode .recipient-tag {
     --sidebar-offset: 56px;
   }
 
-  .staff-action-modal {
+  .trainer-action-modal {
     width: 95vw;
     height: auto;
     max-height: 90vh;
@@ -1704,12 +1704,12 @@ body.light-mode .recipient-tag {
     --sidebar-offset: 0px;
   }
 
-  .staff-action-overlay {
+  .trainer-action-overlay {
     padding: 16px;
     padding-left: 16px;
   }
 
-  .staff-action-modal {
+  .trainer-action-modal {
     width: 100%;
     max-width: 100%;
     height: auto;
@@ -1717,11 +1717,11 @@ body.light-mode .recipient-tag {
     border-radius: 16px;
   }
 
-  .staff-action-modal__content-grid {
+  .trainer-action-modal__content-grid {
     grid-template-columns: 1fr;
   }
 
-  .staff-action-modal__nav-column {
+  .trainer-action-modal__nav-column {
     display: flex;
     overflow-x: auto;
     padding: 8px 12px;
@@ -1755,7 +1755,7 @@ body.light-mode .recipient-tag {
     display: none;
   }
 
-  .staff-action-modal__profile-header {
+  .trainer-action-modal__profile-header {
     padding: 12px 16px;
     gap: 12px;
   }
@@ -1774,7 +1774,7 @@ body.light-mode .recipient-tag {
     gap: 12px;
   }
 
-  .staff-action-modal__content-panel {
+  .trainer-action-modal__content-panel {
     padding: 16px;
   }
 
@@ -1798,7 +1798,7 @@ body.light-mode .recipient-tag {
 }
 
 @media (max-width: 480px) {
-  .staff-action-modal__close-external {
+  .trainer-action-modal__close-external {
     top: -44px;
     width: 36px;
     height: 36px;

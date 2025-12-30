@@ -157,8 +157,16 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClose, onSu
 
     if (!role) return
 
-    // V1 Pivot: Auto-generate credentials for Members
+    // V1 Pivot: Auto-generate credentials for Members AND Trainers
     let effectiveFormData = { ...formData };
+
+    // Default password for non-admin users if not provided
+    if (role === "CUSTOMER" || role === "TRAINER") {
+      if (!effectiveFormData.password) {
+        effectiveFormData.password = "12345678";
+      }
+    }
+
     if (role === "CUSTOMER") {
       // Validate phone: exactly 10 digits
       if (!effectiveFormData.phoneNumber || effectiveFormData.phoneNumber.length !== 10) {
@@ -170,11 +178,18 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClose, onSu
         toast.error("Email is required");
         return;
       }
-      // Use Phone as Username and Password (or some default)
+      // Use Phone as Username
       effectiveFormData.username = effectiveFormData.phoneNumber;
-      effectiveFormData.password = "12345678"; // Default password since they don't login
+    } else if (role === "TRAINER") {
+      // Trainer specific validation
+      if (!effectiveFormData.email) {
+        toast.error("Email is required for Trainer");
+        return;
+      }
+      // Auto-set username to email
+      effectiveFormData.username = effectiveFormData.email;
     } else {
-      // Staff validation
+      // Other Staff validation
       // Auto-set username to email if not provided (since there's no username field for staff)
       if (!effectiveFormData.username && effectiveFormData.email) {
         effectiveFormData.username = effectiveFormData.email;
@@ -196,11 +211,13 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClose, onSu
       const payload: Record<string, unknown> = {
         ...effectiveFormData,
         roles: [{ roleId: 0, roleName: role }],
+        // Map startDate to joinDate for backend
+        joinDate: effectiveFormData.startDate
       }
 
       // Add customer-specific fields
       if (role === "CUSTOMER") {
-        payload.startDate = effectiveFormData.startDate;
+        payload.startDate = effectiveFormData.startDate; // Active membership start date
         payload.duration = parseInt(effectiveFormData.duration);
       }
 
@@ -309,7 +326,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClose, onSu
                         <circle cx="12" cy="7" r="4" />
                       </svg>
                     </div>
-                    <span className="selection-card__label">New Member</span>
+                    <span className="selection-card__label">Add Member</span>
                     <span className="selection-card__desc">Add a gym member</span>
                   </div>
                   <div className="selection-card" onClick={() => handleRoleSelect("TRAINER")}>
@@ -321,7 +338,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClose, onSu
                         <line x1="22" y1="11" x2="16" y2="11" />
                       </svg>
                     </div>
-                    <span className="selection-card__label">New Trainer</span>
+                    <span className="selection-card__label">Add Trainer</span>
                     <span className="selection-card__desc">Add a new trainer</span>
                   </div>
                 </div>
@@ -380,16 +397,16 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClose, onSu
                     </div>
                   </div>
 
-                  {/* Start Date beside Email for Members */}
-                  {role === "CUSTOMER" && (
+                  {/* Start Date: Now available for both Customer AND Trainer */}
+                  {(role === "CUSTOMER" || role === "TRAINER") && (
                     <div className="form-group">
                       <label>Start Date</label>
                       <input type="date" name="startDate" value={formData.startDate} onChange={handleChange} className="form-input" />
                     </div>
                   )}
 
-                  {/* V1: Staff/Trainer still needs credentials */}
-                  {role !== "CUSTOMER" && (
+                  {/* Password: Only required for Admin/Owner/Staff (not Customer or Trainer who get defaults) */}
+                  {role !== "CUSTOMER" && role !== "TRAINER" && (
                     <div className="form-group">
                       <label>Password * (min 6 chars)</label>
                       <div className="input-with-validation">

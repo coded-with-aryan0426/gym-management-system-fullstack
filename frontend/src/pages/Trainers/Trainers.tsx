@@ -327,64 +327,66 @@ const Trainers: React.FC = () => {
         </div>
       </div>
 
-      <div className="trainer-page__table">
-        <DataTable
-          columns={columns}
-          data={trainers}
-          keyExtractor={(t) => t.userId}
-          loading={loading}
-          emptyMessage="No trainers found"
-          onRowClick={handleActionClick}
-          pagination={{
-            currentPage,
-            totalPages,
-            totalCount,
-            pageSize,
-            onPageChange: setCurrentPage,
-            onPageSizeChange: (size) => {
-              setPageSize(size);
-              setCurrentPage(0);
-            },
-          }}
-          mobileCardRender={(member, index) => {
-            const date = member.createdAt ? new Date(member.createdAt) : new Date();
-            const dateStr = `${date.getDate().toString().padStart(2, '0')} ${date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()} ${date.getFullYear()}`;
-            const role = member.roles?.[0]?.roleName || 'TRAINER';
-            return (
-              <div className="mobile-card">
-                <div className="mobile-card__header">
-                  <div className="mobile-card__user">
-                    <Avatar name={member.fullName} size="md" />
-                    <div className="mobile-card__info">
-                      <span className="mobile-card__name">{member.fullName}</span>
-                      <span className="mobile-card__email">{member.email}</span>
+      <div className="staff-page__content">
+        <div className="staff-page__table">
+          <DataTable
+            columns={columns}
+            data={trainers}
+            keyExtractor={(t) => t.userId}
+            loading={loading}
+            emptyMessage="No trainers found"
+            onRowClick={handleActionClick}
+            pagination={{
+              currentPage,
+              totalPages,
+              totalCount,
+              pageSize,
+              onPageChange: setCurrentPage,
+              onPageSizeChange: (size) => {
+                setPageSize(size);
+                setCurrentPage(0);
+              },
+            }}
+            mobileCardRender={(member, index) => {
+              const date = member.createdAt ? new Date(member.createdAt) : new Date();
+              const dateStr = `${date.getDate().toString().padStart(2, '0')} ${date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()} ${date.getFullYear()}`;
+              const role = member.roles?.[0]?.roleName || 'TRAINER';
+              return (
+                <div className="mobile-card">
+                  <div className="mobile-card__header">
+                    <div className="mobile-card__user">
+                      <Avatar name={member.fullName} size="md" />
+                      <div className="mobile-card__info">
+                        <span className="mobile-card__name">{member.fullName}</span>
+                        <span className="mobile-card__email">{member.email}</span>
+                      </div>
+                    </div>
+                    <div className="mobile-card__status">
+                      <Badge variant={getStatusVariant('Active')}>Active</Badge>
                     </div>
                   </div>
-                  <div className="mobile-card__status">
-                    <Badge variant={getStatusVariant('Active')}>Active</Badge>
+                  <div className="mobile-card__details">
+                    <div className="mobile-card__detail">
+                      <span className="mobile-card__detail-label">Role</span>
+                      <span className="mobile-card__detail-value">{role}</span>
+                    </div>
+                    <div className="mobile-card__detail">
+                      <span className="mobile-card__detail-label">Employee ID</span>
+                      <span className="mobile-card__detail-value">#{member.userId.toString().padStart(4, '0')}</span>
+                    </div>
+                    <div className="mobile-card__detail">
+                      <span className="mobile-card__detail-label">Joined</span>
+                      <span className="mobile-card__detail-value">{dateStr}</span>
+                    </div>
+                  </div>
+                  <div className="mobile-card__actions">
+                    <ActionMenuButton onClick={(e) => { e.stopPropagation(); handleActionClick(member); }} />
                   </div>
                 </div>
-                <div className="mobile-card__details">
-                  <div className="mobile-card__detail">
-                    <span className="mobile-card__detail-label">Role</span>
-                    <span className="mobile-card__detail-value">{role}</span>
-                  </div>
-                  <div className="mobile-card__detail">
-                    <span className="mobile-card__detail-label">Employee ID</span>
-                    <span className="mobile-card__detail-value">#{member.userId.toString().padStart(4, '0')}</span>
-                  </div>
-                  <div className="mobile-card__detail">
-                    <span className="mobile-card__detail-label">Joined</span>
-                    <span className="mobile-card__detail-value">{dateStr}</span>
-                  </div>
-                </div>
-                <div className="mobile-card__actions">
-                  <ActionMenuButton onClick={(e) => { e.stopPropagation(); handleActionClick(member); }} />
-                </div>
-              </div>
-            )
-          }}
-        />
+              )
+            }}
+          />
+        </div>
       </div>
 
       <EnhancedTrainerActionModal

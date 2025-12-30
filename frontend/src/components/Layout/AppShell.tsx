@@ -19,9 +19,11 @@ export const useSidebar = () => useContext(SidebarContext);
 
 interface AppShellProps {
     children?: React.ReactNode;
+    navItems?: any[]; // Using any[] to avoid circular dependency for now, or import NavItem
+    showUtilityBar?: boolean;
 }
 
-const AppShell: React.FC<AppShellProps> = ({ children }) => {
+const AppShell: React.FC<AppShellProps> = ({ children, navItems, showUtilityBar = true }) => {
     // Persist sidebar collapsed state across refreshes
     const [isCollapsed, setIsCollapsed] = useState(() => {
         try {
@@ -44,9 +46,9 @@ const AppShell: React.FC<AppShellProps> = ({ children }) => {
     return (
         <SidebarContext.Provider value={{ isCollapsed, toggleCollapsed }}>
             <div className={`app-shell ${isCollapsed ? 'app-shell--collapsed' : ''}`}>
-                <CommandRail isCollapsed={isCollapsed} onToggle={toggleCollapsed} />
+                <CommandRail isCollapsed={isCollapsed} onToggle={toggleCollapsed} navItems={navItems} />
                 <div className="app-shell__main">
-                    <UtilityBar />
+                    {showUtilityBar && <UtilityBar />}
                     <main className="app-shell__content">
                         {children || <Outlet />}
                     </main>
