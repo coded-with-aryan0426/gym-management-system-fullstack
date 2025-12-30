@@ -33,6 +33,7 @@ const TrainerProfile = lazy(() => import('./pages/trainer/TrainerProfile'));
 const MyMembers = lazy(() => import('./pages/trainer/MyMembers'));
 const MySchedule = lazy(() => import('./pages/trainer/MySchedule'));
 const MyClasses = lazy(() => import('./pages/trainer/MyClasses'));
+const TrainerNotifications = lazy(() => import('./pages/trainer/TrainerNotifications'));
 
 // Member Dashboard Pages
 const MemberLayout = lazy(() => import('./pages/member/MemberLayout'));
@@ -42,6 +43,7 @@ const MyMembership = lazy(() => import('./pages/member/MyMembership'));
 const MyTrainer = lazy(() => import('./pages/member/MyTrainer'));
 const MyBookings = lazy(() => import('./pages/member/MyBookings'));
 const AvailableClasses = lazy(() => import('./pages/member/AvailableClasses'));
+const MemberNotifications = lazy(() => import('./pages/member/MemberNotifications'));
 
 // Loading spinner for page transitions
 const PageLoader = () => (
@@ -75,6 +77,7 @@ function App() {
                         <Route path="members" element={<MyMembers />} />
                         <Route path="classes" element={<MyClasses />} />
                         <Route path="schedule" element={<MySchedule />} />
+                        <Route path="notifications" element={<TrainerNotifications />} />
                         <Route path="*" element={<Navigate to="/trainer" replace />} />
                       </Routes>
                     </TrainerLayout>
@@ -95,6 +98,7 @@ function App() {
                         <Route path="classes" element={<AvailableClasses />} />
                         <Route path="trainer" element={<MyTrainer />} />
                         <Route path="bookings" element={<MyBookings />} />
+                        <Route path="notifications" element={<MemberNotifications />} />
                         <Route path="*" element={<Navigate to="/member" replace />} />
                       </Routes>
                     </MemberLayout>
