@@ -7,7 +7,7 @@ import CreateActionModal from "../CreateActionModal/CreateActionModal"
 import api from "../../services/api"
 import type { User } from "../../types/user"
 import { useMembers } from '../../contexts/MembersContext'
-import { useStaff } from '../../contexts/StaffContext'
+import { useTrainers } from '../../contexts/TrainerContext'
 import { useNavbar } from '../../contexts/NavbarContext'
 import "./UtilityBar.css"
 
@@ -44,7 +44,7 @@ const UtilityBar: React.FC = () => {
 
   // Get data from contexts
   const { stats: memberStats } = useMembers()
-  const { stats: staffStats } = useStaff()
+  const { stats: staffStats } = useTrainers()
 
   // Get the appropriate stats based on metric type
   const getMetricValue = (key: string): string | number => {

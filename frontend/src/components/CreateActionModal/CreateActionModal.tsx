@@ -9,7 +9,7 @@ import { Users, UserPlus, UserCheck, Calendar, CalendarPlus, Package, X, Chevron
 import api, { membershipPackageApi } from "../../services/api"
 import type { MembershipPackageDTO } from "../../types/membershipPackage"
 import { useMembers } from "../../contexts/MembersContext"
-import { useStaff } from "../../contexts/StaffContext"
+import { useTrainers } from "../../contexts/TrainerContext"
 import "./CreateActionModal.css"
 
 interface CreateActionModalProps {
@@ -39,7 +39,7 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose }
 
     // Get refresh functions from contexts
     const { refreshMembers } = useMembers()
-    const { refreshStaff } = useStaff()
+    const { refreshStaff } = useTrainers()
 
     // Reset when modal opens
     useEffect(() => {
