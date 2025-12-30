@@ -7,6 +7,7 @@ import { MembersProvider } from './contexts/MembersContext';
 import { TrainerProvider } from './contexts/TrainerContext';
 import { NavbarProvider } from './contexts/NavbarContext';
 import { AppShell } from './components/Layout';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 
 // Import new design system
 import './styles/global.css';
@@ -23,6 +24,22 @@ const Settings = lazy(() => import('./pages/Settings/Settings'));
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const SignupPage = lazy(() => import('./pages/SignupPage'));
+const UnauthorizedPage = lazy(() => import('./pages/UnauthorizedPage'));
+
+// Trainer Dashboard Pages
+const TrainerLayout = lazy(() => import('./pages/trainer/TrainerLayout'));
+const TrainerDashboard = lazy(() => import('./pages/trainer/TrainerDashboard'));
+const TrainerProfile = lazy(() => import('./pages/trainer/TrainerProfile'));
+const MyMembers = lazy(() => import('./pages/trainer/MyMembers'));
+const MySchedule = lazy(() => import('./pages/trainer/MySchedule'));
+
+// Member Dashboard Pages
+const MemberLayout = lazy(() => import('./pages/member/MemberLayout'));
+const MemberDashboard = lazy(() => import('./pages/member/MemberDashboard'));
+const MemberProfile = lazy(() => import('./pages/member/MemberProfile'));
+const MyMembership = lazy(() => import('./pages/member/MyMembership'));
+const MyTrainer = lazy(() => import('./pages/member/MyTrainer'));
+const MyBookings = lazy(() => import('./pages/member/MyBookings'));
 
 // Loading spinner for page transitions
 const PageLoader = () => (
@@ -42,30 +59,70 @@ function App() {
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignupPage />} />
+              <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
-              {/* Protected Routes */}
+              {/* Trainer Dashboard Routes */}
+              <Route
+                path="/trainer/*"
+                element={
+                  <ProtectedRoute allowedRoles={['TRAINER']}>
+                    <TrainerLayout>
+                      <Routes>
+                        <Route index element={<TrainerDashboard />} />
+                        <Route path="profile" element={<TrainerProfile />} />
+                        <Route path="members" element={<MyMembers />} />
+                        <Route path="schedule" element={<MySchedule />} />
+                        <Route path="*" element={<Navigate to="/trainer" replace />} />
+                      </Routes>
+                    </TrainerLayout>
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Member Dashboard Routes */}
+              <Route
+                path="/member/*"
+                element={
+                  <ProtectedRoute allowedRoles={['CUSTOMER', 'MEMBER']}>
+                    <MemberLayout>
+                      <Routes>
+                        <Route index element={<MemberDashboard />} />
+                        <Route path="profile" element={<MemberProfile />} />
+                        <Route path="membership" element={<MyMembership />} />
+                        <Route path="trainer" element={<MyTrainer />} />
+                        <Route path="bookings" element={<MyBookings />} />
+                        <Route path="*" element={<Navigate to="/member" replace />} />
+                      </Routes>
+                    </MemberLayout>
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Admin/Owner Dashboard Routes */}
               <Route
                 path="/*"
                 element={
-                  <MembersProvider>
-                    <TrainerProvider>
-                      <NavbarProvider>
-                        <AppShell>
-                          <Routes>
-                            <Route path="/dashboard" element={<Dashboard />} />
-                            <Route path="/trainers" element={<Trainers />} />
-                            <Route path="/members" element={<Members />} />
-                            <Route path="/classes" element={<Classes />} />
-                            <Route path="/financials" element={<Financials />} />
-                            <Route path="/pt-sessions" element={<PTSessions />} />
-                            <Route path="/reports" element={<Reports />} />
-                            <Route path="/settings" element={<Settings />} />
-                            <Route path="*" element={<Navigate to="/dashboard" replace />} />
-                          </Routes>
-                        </AppShell>
-                      </NavbarProvider>
-                    </TrainerProvider>
-                  </MembersProvider>
+                  <ProtectedRoute allowedRoles={['OWNER', 'ADMIN']}>
+                    <MembersProvider>
+                      <TrainerProvider>
+                        <NavbarProvider>
+                          <AppShell>
+                            <Routes>
+                              <Route path="/dashboard" element={<Dashboard />} />
+                              <Route path="/trainers" element={<Trainers />} />
+                              <Route path="/members" element={<Members />} />
+                              <Route path="/classes" element={<Classes />} />
+                              <Route path="/financials" element={<Financials />} />
+                              <Route path="/pt-sessions" element={<PTSessions />} />
+                              <Route path="/reports" element={<Reports />} />
+                              <Route path="/settings" element={<Settings />} />
+                              <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                            </Routes>
+                          </AppShell>
+                        </NavbarProvider>
+                      </TrainerProvider>
+                    </MembersProvider>
+                  </ProtectedRoute>
                 }
               />
             </Routes>
@@ -76,7 +133,7 @@ function App() {
               duration: 4000,
               className: 'modern-toast',
               style: {
-                background: '#1e1e24', // Darker cleaner background
+                background: '#1e1e24',
                 color: '#fff',
                 borderRadius: '12px',
                 border: '1px solid rgba(255,255,255,0.08)',
@@ -88,26 +145,26 @@ function App() {
               },
               success: {
                 iconTheme: {
-                  primary: '#22c55e', // Emerald 500
+                  primary: '#22c55e',
                   secondary: '#fff',
                 },
                 style: {
-                  border: '1px solid rgba(34, 197, 94, 0.2)', // Subtle green border
+                  border: '1px solid rgba(34, 197, 94, 0.2)',
                 },
               },
               error: {
                 duration: 5000,
                 iconTheme: {
-                  primary: '#ef4444', // Red 500
+                  primary: '#ef4444',
                   secondary: '#fff',
                 },
                 style: {
-                  border: '1px solid rgba(239, 68, 68, 0.2)', // Subtle red border
+                  border: '1px solid rgba(239, 68, 68, 0.2)',
                 },
               },
               loading: {
                 style: {
-                  border: '1px solid rgba(59, 130, 246, 0.2)', // Subtle blue border
+                  border: '1px solid rgba(59, 130, 246, 0.2)',
                 },
               }
             }}

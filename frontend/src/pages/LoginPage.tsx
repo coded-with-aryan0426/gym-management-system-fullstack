@@ -106,9 +106,20 @@ export default function LoginPage() {
                     setGymAssociations(data.gymAssociations);
                     setShowGymSelector(true);
                 } else {
-                    // Direct login
+                    // Direct login with role-based redirect
                     localStorage.setItem('user', JSON.stringify(data));
-                    navigate('/dashboard');
+
+                    // Redirect based on user role
+                    const role = (data.role || data.userRole || '').toUpperCase();
+                    if (role === 'OWNER' || role === 'ADMIN') {
+                        navigate('/dashboard');
+                    } else if (role === 'TRAINER') {
+                        navigate('/trainer');
+                    } else if (role === 'CUSTOMER' || role === 'MEMBER') {
+                        navigate('/member');
+                    } else {
+                        navigate('/dashboard'); // Fallback for staff
+                    }
                 }
             } else {
                 const errorData = await response.json();
