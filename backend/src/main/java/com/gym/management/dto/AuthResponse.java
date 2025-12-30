@@ -36,6 +36,9 @@ public class AuthResponse {
     // Membership status for members (APPROVED, PENDING, REJECTED, or null)
     private String membershipStatus;
 
+    private boolean otpSent;
+    private boolean isFirstLogin;
+
     @Data
     @AllArgsConstructor
     @NoArgsConstructor

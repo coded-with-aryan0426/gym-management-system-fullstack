@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { Logo } from '../components/ui/Logo';
+import OtpInput from '../components/auth/OtpInput';
 
 const colors = {
     bgPrimary: "#0D0D0D",
@@ -32,37 +33,29 @@ const getPasswordStrength = (password: string) => {
 export default function SignupPage() {
     const navigate = useNavigate();
 
-    // 1. Role Selection
-    const [selectedRole, setSelectedRole] = useState<'OWNER' | 'TRAINER' | null>(null);
+    // Steps: 'DETAILS' | 'OTP'
+    const [step, setStep] = useState<'DETAILS' | 'OTP'>('DETAILS');
 
-    // 2. Base Form Data
+    // Base Form Data - Only Gym Owner for now
     const [formData, setFormData] = useState({
         fullName: "",
         email: "",
         phone: "",
         password: "",
         confirmPassword: "",
-    });
-
-    // 3. Staff Specific Data
-    const [staffData, setStaffData] = useState({
-        gymName: "",
+        gymName: "", // Owners need to create a gym
         gymAddress: "",
         gymCity: "",
-        gymPhone: "",
-        inviteCode: "",
+        gymPhone: ""
     });
 
-    // 4. Member Specific Data
-    const [memberData, setMemberData] = useState({
-        inviteCode: "",
-    });
-
+    const [otp, setOtp] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [apiError, setApiError] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
 
     const passwordStrength = getPasswordStrength(formData.password);
 
@@ -91,86 +84,70 @@ export default function SignupPage() {
             else delete newErrors.confirmPassword;
         }
 
-        // TEMPORARILY DISABLED: Add New Gym feature
-        // if (selectedRole === 'OWNER') {
-        //     if (name === 'gymName') !value ? newErrors.gymName = "Required" : delete newErrors.gymName;
-        //     if (name === 'gymAddress') !value ? newErrors.gymAddress = "Required" : delete newErrors.gymAddress;
-        //     if (name === 'gymCity') !value ? newErrors.gymCity = "Required" : delete newErrors.gymCity;
-        // } else if (selectedRole === 'TRAINER') {
-        //     if (name === 'inviteCodeStaff') !value ? newErrors.inviteCodeStaff = "Required" : delete newErrors.inviteCodeStaff;
-        // }
-        // Trainer validation (standalone since OWNER is disabled)
-        if (selectedRole === 'TRAINER') {
-            if (name === 'inviteCodeStaff') !value ? newErrors.inviteCodeStaff = "Required" : delete newErrors.inviteCodeStaff;
-        }
+        // Gym details
+        if (name === 'gymName') !value ? newErrors.gymName = "Required" : delete newErrors.gymName;
 
         setErrors(newErrors);
     };
 
-    const handleBaseChange = (name: string, value: string) => {
+    const handleChange = (name: string, value: string) => {
         setFormData({ ...formData, [name]: value });
         validateField(name, value);
     };
 
-    const handleStaffChange = (name: string, value: string) => {
-        setStaffData({ ...staffData, [name]: value });
-        validateField(name, value);
-    };
-
-    const handleMemberChange = (name: string, value: string) => {
-        setMemberData({ ...memberData, [name]: value });
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSendOtp = async (e: React.FormEvent) => {
         e.preventDefault();
         setApiError("");
 
-        if (!selectedRole) {
-            setApiError("Please select a role");
+        if (Object.keys(errors).length > 0) return;
+        if (!formData.fullName || !formData.email || !formData.password || !formData.gymName) {
+            setApiError("Please fill all required fields");
             return;
         }
-
-        if (Object.keys(errors).length > 0) return;
-        if (!formData.fullName || !formData.email || !formData.password) return;
 
         setIsLoading(true);
 
         try {
-            let response;
-            if (selectedRole === 'OWNER' || selectedRole === 'TRAINER') {
-                // V1: Simple signup with role, no gym logic
-                const payload = {
-                    ...formData,
-                    role: selectedRole, // V1: Include role in payload
-                };
-                response = await api.signupStaff(payload);
-            } else {
-                const payload = {
-                    ...formData,
-                };
-                response = await api.signupMember(payload);
-            }
+            await api.sendOtp(formData.email, 'SIGNUP');
+            setStep('OTP');
+            setSuccessMessage(`Verification code sent to ${formData.email}`);
+        } catch (err: any) {
+            console.error("Send OTP error:", err);
+            setApiError(err.response?.data?.error || "Failed to send verification code");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleRegister = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setApiError("");
+
+        if (otp.length !== 6) {
+            setApiError("Please enter a valid 6-digit code");
+            return;
+        }
+
+        setIsLoading(true);
+
+        try {
+            const response = await api.ownerRegister({
+                ...formData,
+                ownerName: formData.fullName,
+                otp: otp
+            });
 
             if (response && response.token) {
-                // AUTO-LOGIN: Store token and user data 
                 localStorage.setItem('user', JSON.stringify(response));
                 localStorage.setItem('token', response.token);
-
-                // V1: Direct redirect to dashboard (no gym checks)
                 navigate('/dashboard');
+            } else {
+                // Should not happen if successful, but fallback
+                navigate('/login?signup=success');
             }
         } catch (err: any) {
             console.error("Signup error:", err);
-            if (err.response) {
-                // Server responded with a status code outside 2xx
-                setApiError(err.response.data?.error || `Server error: ${err.response.status}`);
-            } else if (err.request) {
-                // Request made but no response received
-                setApiError("Unable to reach server. Please check your connection.");
-            } else {
-                // Something else happened
-                setApiError(err.message || "An unexpected error occurred.");
-            }
+            setApiError(err.response?.data?.error || "Registration failed. Please check OTP.");
         } finally {
             setIsLoading(false);
         }
@@ -208,7 +185,6 @@ export default function SignupPage() {
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                // Changed from justify-content: center to flex-start with top spacing to prevent layout "explosion"
                 padding: "40px",
                 paddingTop: "60px",
                 background: colors.bgPrimary,
@@ -220,30 +196,12 @@ export default function SignupPage() {
                     <button onClick={() => navigate('/')} style={{ position: "absolute", top: 30, right: 30, background: "transparent", border: "none", color: colors.textSecondary, cursor: "pointer", fontSize: 13, zIndex: 10 }}>Back to Home</button>
 
                     <div style={{ marginBottom: 24, textAlign: 'center' }}>
-                        <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>Create Account</h2>
-                        <p style={{ color: colors.textSecondary, fontSize: 14 }}>Start your fitness journey today</p>
-                    </div>
-
-                    {/* V1 Explicit Role Selection */}
-                    <div style={{ marginBottom: 24 }}>
-                        <div style={{ display: "flex", gap: 10, background: colors.bgTertiary, padding: 4, borderRadius: 14 }}>
-                            <RoleButton
-                                active={selectedRole === 'OWNER'}
-                                onClick={() => setSelectedRole('OWNER')}
-                                icon={<GymIcon />}
-                                title="Gym Owner"
-                                color={colors.crimson}
-                            />
-                            {/* Note: Gym Details form is disabled - Owner signup will use invite code like Trainer */}
-                            <RoleButton
-                                active={selectedRole === 'TRAINER'}
-                                onClick={() => setSelectedRole('TRAINER')}
-                                icon={<TrainerIcon />}
-                                title="Trainer"
-                                color="#D97706"
-                            />
-                        </div>
-                        {!selectedRole && <p style={{ textAlign: "center", fontSize: 12, color: colors.textSecondary, marginTop: 8 }}>Select a role to proceed</p>}
+                        <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>
+                            {step === 'OTP' ? 'Verification' : 'Register Gym'}
+                        </h2>
+                        <p style={{ color: colors.textSecondary, fontSize: 14 }}>
+                            {step === 'OTP' ? `Enter the code sent to ${formData.email}` : 'Create your account and gym workspace'}
+                        </p>
                     </div>
 
                     {apiError && (
@@ -252,144 +210,173 @@ export default function SignupPage() {
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                        {/* Common Fields - Compact Grid */}
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                            <div style={{ gridColumn: "span 2" }}>
+                    {successMessage && (
+                        <div style={{ padding: "10px", background: "rgba(16, 185, 129, 0.1)", border: `1px solid ${colors.emerald}`, borderRadius: 8, color: colors.emerald, marginBottom: 16, fontSize: 13, textAlign: 'center' }}>
+                            ✓ {successMessage}
+                        </div>
+                    )}
+
+                    {step === 'DETAILS' ? (
+                        <form onSubmit={handleSendOtp} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                            {/* Personal Details */}
+                            <h4 style={{ fontSize: 12, fontWeight: 700, color: colors.textSecondary, textTransform: 'uppercase', marginTop: 8 }}>Personal Details</h4>
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                                <div style={{ gridColumn: "span 2" }}>
+                                    <InputField
+                                        label="Full Name"
+                                        value={formData.fullName}
+                                        onChange={(val: string) => handleChange('fullName', val)}
+                                        error={errors.fullName}
+                                        placeholder="John Doe"
+                                    />
+                                </div>
+
                                 <InputField
-                                    label="Full Name"
-                                    value={formData.fullName}
-                                    onChange={(val: string) => handleBaseChange('fullName', val)}
-                                    error={errors.fullName}
-                                    placeholder="John Doe"
+                                    label="Email"
+                                    type="email"
+                                    value={formData.email}
+                                    onChange={(val: string) => handleChange('email', val)}
+                                    error={errors.email}
+                                    placeholder="name@company.com"
+                                    isValid={isValidEmail(formData.email)}
+                                />
+
+                                <InputField
+                                    label="Phone"
+                                    type="tel"
+                                    value={formData.phone}
+                                    onChange={(val: string) => handleChange('phone', val)}
+                                    error={errors.phone}
+                                    placeholder="9876543210"
+                                    maxLength={10}
+                                    isValid={isValidIndianPhone(formData.phone)}
                                 />
                             </div>
 
-                            <InputField
-                                label="Email"
-                                type="email"
-                                value={formData.email}
-                                onChange={(val: string) => handleBaseChange('email', val)}
-                                error={errors.email}
-                                placeholder="name@company.com"
-                                isValid={isValidEmail(formData.email)}
-                            />
+                            {/* Gym Details */}
+                            <h4 style={{ fontSize: 12, fontWeight: 700, color: colors.textSecondary, textTransform: 'uppercase', marginTop: 16 }}>Gym Details</h4>
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 12 }}>
+                                <InputField
+                                    label="Gym Name"
+                                    value={formData.gymName}
+                                    onChange={(val: string) => handleChange('gymName', val)}
+                                    error={errors.gymName}
+                                    placeholder="My awesome gym"
+                                />
+                            </div>
 
-                            <InputField
-                                label="Phone"
-                                type="tel"
-                                value={formData.phone}
-                                onChange={(val: string) => handleBaseChange('phone', val)}
-                                error={errors.phone}
-                                placeholder="9876543210"
-                                maxLength={10}
-                                isValid={isValidIndianPhone(formData.phone)}
-                            />
-                        </div>
+                            {/* Passwords */}
+                            <h4 style={{ fontSize: 12, fontWeight: 700, color: colors.textSecondary, textTransform: 'uppercase', marginTop: 16 }}>Security</h4>
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                                <PasswordField
+                                    label="Password"
+                                    value={formData.password}
+                                    onChange={(val: string) => handleChange('password', val)}
+                                    error={errors.password}
+                                    show={showPassword}
+                                    onToggle={() => setShowPassword(!showPassword)}
+                                />
+                                <PasswordField
+                                    label="Confirm"
+                                    value={formData.confirmPassword}
+                                    onChange={(val: string) => handleChange('confirmPassword', val)}
+                                    error={errors.confirmPassword}
+                                    show={showConfirmPassword}
+                                    onToggle={() => setShowConfirmPassword(!showConfirmPassword)}
+                                />
+                            </div>
 
-                        {/* Expandable Sections */}
-                        <div style={{
-                            maxHeight: selectedRole ? '500px' : '0',
-                            overflow: 'hidden',
-                            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                            opacity: selectedRole ? 1 : 0,
-                            marginBottom: selectedRole ? 12 : 0
-                        }}>
-                            {/* TEMPORARILY DISABLED: Gym Owner form fields - Add New Gym feature
-                            {selectedRole === 'OWNER' && (
-                                <div style={{ padding: 16, background: "rgba(220, 38, 38, 0.05)", borderRadius: 12, border: `1px solid ${colors.crimson}40`, marginTop: 4 }}>
-                                    <h4 style={{ fontSize: 12, color: colors.crimson, marginBottom: 12, fontWeight: 700, textTransform: 'uppercase' }}>Gym Details</h4>
-                                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                                        <div style={{ gridColumn: "span 2" }}>
-                                            <InputField label="Gym Name" value={staffData.gymName} onChange={(val: string) => handleStaffChange('gymName', val)} error={errors.gymName} placeholder="Apex Fitness" />
-                                        </div>
-                                        <InputField label="City" value={staffData.gymCity} onChange={(val: string) => handleStaffChange('gymCity', val)} error={errors.gymCity} placeholder="Mumbai" />
-                                        <InputField label="Phone (Opt)" value={staffData.gymPhone} onChange={(val: string) => handleStaffChange('gymPhone', val)} placeholder="9876543210" maxLength={10} />
-                                        <div style={{ gridColumn: "span 2" }}>
-                                            <InputField label="Address" value={staffData.gymAddress} onChange={(val: string) => handleStaffChange('gymAddress', val)} error={errors.gymAddress} placeholder="123 Main St" />
-                                        </div>
+                            {/* Strength Meter (Compact) */}
+                            {formData.password && (
+                                <div style={{ display: "flex", alignItems: 'center', gap: 8, marginTop: -4 }}>
+                                    <div style={{ display: "flex", gap: 2, flex: 1, height: 3 }}>
+                                        {[1, 2, 3, 4].map(i => (
+                                            <div key={i} style={{ flex: 1, borderRadius: 2, background: i <= passwordStrength ? (passwordStrength < 3 ? colors.crimson : colors.emerald) : colors.bgTertiary }} />
+                                        ))}
+                                    </div>
+                                    <div style={{ fontSize: 10, color: colors.textTertiary, whiteSpace: 'nowrap' }}>
+                                        {passwordStrength === 4 ? "Strong" : "Weak"}
                                     </div>
                                 </div>
                             )}
-                            */}
 
-                            {/* TEMPORARILY DISABLED: Trainer Join Workspace form fields
-                            {selectedRole === 'TRAINER' && (
-                                <div style={{ padding: 16, background: "rgba(217, 119, 6, 0.05)", borderRadius: 12, border: `1px solid #D9770640`, marginTop: 4 }}>
-                                    <h4 style={{ fontSize: 12, color: "#D97706", marginBottom: 12, fontWeight: 700, textTransform: 'uppercase' }}>Join a Workspace</h4>
-                                    <InputField
-                                        label="Gym Invite Code"
-                                        value={staffData.inviteCode}
-                                        onChange={(val: string) => handleStaffChange('inviteCode', val)}
-                                        error={errors.inviteCode}
-                                        placeholder="Enter code from your manager"
-                                    />
-                                </div>
-                            )}
-                            */}
+                            <button
+                                type="submit"
+                                disabled={isLoading}
+                                style={{
+                                    width: "100%",
+                                    padding: "14px",
+                                    marginTop: 12,
+                                    background: `linear-gradient(to right, ${colors.crimson}, ${colors.crimsonHover})`,
+                                    border: "none",
+                                    borderRadius: 12,
+                                    color: "#fff",
+                                    fontSize: 15,
+                                    fontWeight: 600,
+                                    cursor: isLoading ? "not-allowed" : "pointer",
+                                    opacity: isLoading ? 0.7 : 1,
+                                    transition: "all 0.2s"
+                                }}
+                            >
+                                {isLoading ? "Sending Code..." : "Next: Verify Email"}
+                            </button>
 
-                        </div>
+                            <p style={{ textAlign: "center", marginTop: 12, color: colors.textSecondary, fontSize: 13 }}>
+                                Already have an account? <span onClick={() => navigate('/login')} style={{ color: colors.crimson, cursor: "pointer", textDecoration: "underline" }}>Login</span>
+                            </p>
 
-                        {/* Passwords */}
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                            <PasswordField
-                                label="Password"
-                                value={formData.password}
-                                onChange={(val: string) => handleBaseChange('password', val)}
-                                error={errors.password}
-                                show={showPassword}
-                                onToggle={() => setShowPassword(!showPassword)}
-                            />
-                            <PasswordField
-                                label="Confirm"
-                                value={formData.confirmPassword}
-                                onChange={(val: string) => handleBaseChange('confirmPassword', val)}
-                                error={errors.confirmPassword}
-                                show={showConfirmPassword}
-                                onToggle={() => setShowConfirmPassword(!showConfirmPassword)}
-                            />
-                        </div>
-
-                        {/* Strength Meter (Compact) */}
-                        {formData.password && (
-                            <div style={{ display: "flex", alignItems: 'center', gap: 8, marginTop: -4 }}>
-                                <div style={{ display: "flex", gap: 2, flex: 1, height: 3 }}>
-                                    {[1, 2, 3, 4].map(i => (
-                                        <div key={i} style={{ flex: 1, borderRadius: 2, background: i <= passwordStrength ? (passwordStrength < 3 ? colors.crimson : colors.emerald) : colors.bgTertiary }} />
-                                    ))}
-                                </div>
-                                <div style={{ fontSize: 10, color: colors.textTertiary, whiteSpace: 'nowrap' }}>
-                                    {passwordStrength === 4 ? "Strong" : "Weak"}
-                                </div>
+                        </form>
+                    ) : (
+                        <form onSubmit={handleRegister}>
+                            <div style={{ marginBottom: 32 }}>
+                                <OtpInput
+                                    value={otp}
+                                    onChange={setOtp}
+                                    length={6}
+                                    disabled={isLoading}
+                                />
                             </div>
-                        )}
 
-                        <button
-                            type="submit"
-                            disabled={isLoading || !selectedRole}
-                            style={{
-                                width: "100%",
-                                padding: "14px",
-                                marginTop: 12,
-                                background: selectedRole ? (selectedRole === 'TRAINER' ? '#D97706' : colors.crimson) : colors.bgTertiary,
-                                border: "none",
-                                borderRadius: 12,
-                                color: selectedRole ? "#fff" : colors.textTertiary,
-                                fontSize: 15,
-                                fontWeight: 600,
-                                cursor: isLoading || !selectedRole ? "not-allowed" : "pointer",
-                                opacity: isLoading ? 0.7 : 1,
-                                transition: "all 0.2s"
-                            }}
-                        >
-                            {isLoading ? "Creating..." : /* selectedRole === 'OWNER' ? "Create Gym & Account" : */ "Create Account"}
-                        </button>
+                            <button
+                                type="submit"
+                                disabled={isLoading || otp.length !== 6}
+                                style={{
+                                    width: "100%",
+                                    padding: "16px",
+                                    background: `linear-gradient(to right, ${colors.crimson}, ${colors.crimsonHover})`,
+                                    border: "none",
+                                    borderRadius: 12,
+                                    color: "#fff",
+                                    fontSize: 16,
+                                    fontWeight: 600,
+                                    cursor: isLoading || otp.length !== 6 ? "not-allowed" : "pointer",
+                                    opacity: isLoading || otp.length !== 6 ? 0.7 : 1,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    gap: 12,
+                                }}
+                            >
+                                {isLoading ? "Creating Account..." : "Verify & Register"}
+                            </button>
 
-                        <p style={{ textAlign: "center", marginTop: 12, color: colors.textSecondary, fontSize: 13 }}>
-                            Already have an account? <span onClick={() => navigate('/login')} style={{ color: colors.crimson, cursor: "pointer", textDecoration: "underline" }}>Login</span>
-                        </p>
-
-                    </form>
+                            <div style={{ textAlign: 'center', marginTop: 16 }}>
+                                <button
+                                    type="button"
+                                    onClick={() => setStep('DETAILS')}
+                                    style={{
+                                        background: 'none',
+                                        border: 'none',
+                                        color: colors.textSecondary,
+                                        fontSize: 13,
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                    )}
                 </div>
                 {/* Copyright pushed to bottom with margin auto top if needed, 
                     but here sticking it to normal flow to avoid overlapping content on small screens */}
@@ -413,47 +400,6 @@ export default function SignupPage() {
 }
 
 // Components
-const RoleButton = ({ active, onClick, icon, title, color }: any) => (
-    <button
-        type="button"
-        onClick={onClick}
-        style={{
-            flex: 1,
-            padding: "10px 4px",
-            background: active ? color : "transparent",
-            borderRadius: 10,
-            border: "none",
-            color: active ? "#fff" : colors.textSecondary,
-            cursor: "pointer",
-            fontWeight: 600,
-            fontSize: 12,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 6,
-            transition: "all 0.2s"
-        }}
-    >
-        {icon}
-        {title}
-    </button>
-);
-
-const RadioOption = ({ checked, onChange, label }: any) => (
-    <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-        <div style={{
-            width: 16, height: 16, borderRadius: '50%', border: `2px solid ${checked ? colors.crimson : colors.textTertiary}`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center'
-        }}>
-            {checked && <div style={{ width: 8, height: 8, borderRadius: '50%', background: colors.crimson }} />}
-        </div>
-        <span style={{ fontSize: 13, color: checked ? colors.textPrimary : colors.textSecondary, fontWeight: 500 }}>{label}</span>
-        {/* Hidden native input for accessibility if needed, but managing via div for style */}
-        <input type="radio" checked={checked} onChange={onChange} style={{ display: 'none' }} />
-    </label>
-);
-
 const InputField = ({ label, type = "text", value, onChange, error, placeholder, isValid, maxLength }: any) => (
     <div style={{ width: "100%" }}>
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
@@ -510,8 +456,3 @@ const PasswordField = ({ label, value, onChange, error, show, onToggle }: any) =
         {error && <div style={{ color: colors.crimson, fontSize: 10, marginTop: 2 }}>{error}</div>}
     </div>
 );
-
-// Icons
-const GymIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 21h18M5 21V7l8-4 8 4v14M9 21v-6h6v6" /></svg>;
-const UserIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" /></svg>;
-const TrainerIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><line x1="19" y1="8" x2="19" y2="14" /><line x1="22" y1="11" x2="16" y2="11" /></svg>;

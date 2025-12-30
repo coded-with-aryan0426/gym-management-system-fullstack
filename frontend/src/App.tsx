@@ -25,6 +25,7 @@ const LandingPage = lazy(() => import('./pages/LandingPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const SignupPage = lazy(() => import('./pages/SignupPage'));
 const UnauthorizedPage = lazy(() => import('./pages/UnauthorizedPage'));
+const ChangePasswordFirst = lazy(() => import('./pages/ChangePasswordFirst'));
 
 // Trainer Dashboard Pages
 const TrainerLayout = lazy(() => import('./pages/trainer/TrainerLayout'));
@@ -65,6 +66,7 @@ function App() {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignupPage />} />
               <Route path="/unauthorized" element={<UnauthorizedPage />} />
+              <Route path="/change-password" element={<ChangePasswordFirst />} />
 
               {/* Trainer Dashboard Routes */}
               <Route

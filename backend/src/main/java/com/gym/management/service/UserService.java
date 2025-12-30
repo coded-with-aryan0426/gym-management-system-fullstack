@@ -26,6 +26,9 @@ public class UserService {
     @Autowired
     private RoleRepository roleRepository;
 
+    @Autowired
+    private EmailService emailService;
+
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -292,8 +295,25 @@ public class UserService {
             }
         }
 
+        // Generate password if not provided (for automated creation of
+        // trainers/members)
+        String generatedPassword = null;
+        if ((user.getPassword() == null || user.getPassword().isEmpty()) &&
+                (user.getRoles().size() == 1 && (user.getRoles().iterator().next().getRoleName().equals("TRAINER")
+                        || user.getRoles().iterator().next().getRoleName().equals("CUSTOMER")))) {
+            generatedPassword = generateSecurePassword();
+            user.setPassword(generatedPassword);
+            user.setIsFirstLogin(true);
+        }
+
         // Save user with roles
         User savedUser = userRepository.save(user);
+
+        // Send Welcome Email if password was generated
+        if (generatedPassword != null) {
+            String roleName = user.getRoles().iterator().next().getRoleName();
+            emailService.sendWelcomeCredentials(user.getEmail(), user.getFullName(), generatedPassword, roleName);
+        }
 
         // Create Membership if this is a CUSTOMER with packageId
         if (isCustomer && user.getPackageId() != null) {
@@ -336,6 +356,16 @@ public class UserService {
         }
 
         return savedUser;
+    }
+
+    private String generateSecurePassword() {
+        String chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%";
+        StringBuilder password = new StringBuilder();
+        java.security.SecureRandom random = new java.security.SecureRandom();
+        for (int i = 0; i < 10; i++) {
+            password.append(chars.charAt(random.nextInt(chars.length())));
+        }
+        return password.toString();
     }
 
     public User updateUser(Long id, User user) {

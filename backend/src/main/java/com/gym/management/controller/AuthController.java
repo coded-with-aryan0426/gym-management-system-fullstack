@@ -4,6 +4,7 @@ import com.gym.management.dto.*;
 import com.gym.management.model.*;
 import com.gym.management.repository.*;
 import com.gym.management.security.JwtTokenProvider;
+import com.gym.management.service.OtpService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,16 +34,68 @@ public class AuthController {
     @Autowired
     private JwtTokenProvider tokenProvider;
 
+    @Autowired
+    private OtpService otpService;
+
     /**
      * V1 Simplified Login - No gym dependency
      * User authenticates and gets access based on their roles
      */
+    @PostMapping("/send-otp")
+    public ResponseEntity<?> sendOtp(@RequestBody OtpRequest request) {
+        OtpPurpose purpose = OtpPurpose.valueOf(request.getPurpose());
+        otpService.generateAndSendOtp(request.getEmail(), purpose);
+        return ResponseEntity.ok(Map.of("message", "OTP sent successfully"));
+    }
+
+    @PostMapping("/verify-otp")
+    public ResponseEntity<?> verifyOtp(@RequestBody VerifyOtpRequest request) {
+        OtpPurpose purpose = OtpPurpose.valueOf(request.getPurpose());
+        boolean isValid = otpService.verifyOtp(request.getEmail(), request.getOtp(), purpose);
+        if (isValid) {
+            return ResponseEntity.ok(Map.of("valid", true));
+        }
+        return ResponseEntity.badRequest().body(Map.of("valid", false, "error", "Invalid or expired OTP"));
+    }
+
+    @PostMapping("/owner/register")
+    public ResponseEntity<?> ownerRegister(@RequestBody OwnerRegisterRequest request) {
+        // Verify OTP first
+        boolean isOtpValid = otpService.verifyOtp(request.getEmail(), request.getOtp(), OtpPurpose.SIGNUP);
+        if (!isOtpValid) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Invalid or expired OTP"));
+        }
+
+        if (userRepository.existsByUsername(request.getEmail())) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Email already registered"));
+        }
+
+        User user = new User();
+        user.setUsername(request.getEmail());
+        user.setEmail(request.getEmail());
+        user.setPassword(request.getPassword());
+        user.setFullName(request.getOwnerName());
+        user.setPhone(request.getPhone());
+        user.setIsFirstLogin(false); // Owner sets own password
+
+        // Assign OWNER role
+        Role ownerRole = roleRepository.findByRoleName("OWNER");
+        if (ownerRole != null) {
+            user.setRoles(new HashSet<>(Collections.singletonList(ownerRole)));
+        }
+
+        userRepository.save(user);
+
+        // Auto-login (generate token) or redirect?
+        // Let's return success and let them login
+        return ResponseEntity.ok(Map.of("message", "Registration successful. Please login."));
+    }
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequest request) {
         Optional<User> userOpt = userRepository.findByUsername(request.getUsername());
 
         if (userOpt.isEmpty()) {
-            // Try finding by email as username
             userOpt = userRepository.findByEmail(request.getUsername());
         }
 
@@ -52,13 +105,49 @@ public class AuthController {
 
         User user = userOpt.get();
 
-        // In production, use password encoder
         if (!user.getPassword().equals(request.getPassword())) {
             return ResponseEntity.status(401).body(Map.of("error", "Invalid password"));
         }
 
-        // V1: Determine role from user's roles (no gym context needed)
-        String userRole = "CUSTOMER"; // Default
+        // Credentials correct. Generate OTP and send it.
+        otpService.generateAndSendOtp(user.getEmail(), OtpPurpose.LOGIN);
+
+        AuthResponse response = new AuthResponse();
+        response.setOtpSent(true);
+        response.setEmail(user.getEmail());
+        // Do not send token yet
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/login/verify-otp")
+    public ResponseEntity<?> verifyLogin(@RequestBody VerifyOtpRequest request) {
+        boolean isValid = otpService.verifyOtp(request.getEmail(), request.getOtp(), OtpPurpose.LOGIN);
+        if (!isValid) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Invalid or expired OTP"));
+        }
+
+        Optional<User> userOpt = userRepository.findByEmail(request.getEmail());
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "User not found"));
+        }
+        User user = userOpt.get();
+
+        // Check if first login
+        if (Boolean.TRUE.equals(user.getIsFirstLogin())) {
+            AuthResponse response = new AuthResponse();
+            response.setFirstLogin(true);
+            response.setEmail(user.getEmail());
+            // Need a temp token or rely on email identification for password change?
+            // Better to issue a limited token or just handle it in change-password endpoint
+            // with email check?
+            // Ideally use a PRE_AUTH token. For simplicity, we return isFirstLogin=true and
+            // NO full access token yet.
+            // Actually, we can issue a token but frontend will redirect to Change Password
+            // page.
+        }
+
+        // Determine Role Context
+        String userRole = "CUSTOMER";
         if (user.getRoles() != null) {
             for (Role role : user.getRoles()) {
                 String roleName = role.getRoleName();
@@ -71,22 +160,45 @@ public class AuthController {
             }
         }
 
-        // Build simple response
         AuthResponse response = new AuthResponse();
         response.setId(user.getUserId());
         response.setUsername(user.getUsername());
         response.setFullName(user.getFullName());
         response.setEmail(user.getEmail());
-        response.setContext("STAFF"); // V1: everyone is effectively staff for dashboard access
+        response.setContext("STAFF");
         response.setStaffRole(userRole);
         response.setHasStaffAccess(true);
         response.setHasMemberAccess(true);
+        response.setFirstLogin(Boolean.TRUE.equals(user.getIsFirstLogin()));
 
-        // V1: Generate token without gym context
         String token = tokenProvider.generateTokenFromUser(user, "STAFF", null, userRole, null);
         response.setToken(token);
 
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/change-password-first-login")
+    public ResponseEntity<?> changePasswordFirstLogin(@RequestBody ChangePasswordRequest request) {
+        Optional<User> userOpt = userRepository.findByEmail(request.getEmail());
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "User not found"));
+        }
+        User user = userOpt.get();
+
+        if (!Boolean.TRUE.equals(user.getIsFirstLogin())) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Not first login"));
+        }
+
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Passwords do not match"));
+        }
+
+        user.setPassword(request.getNewPassword());
+        user.setIsFirstLogin(false);
+        user.setPasswordChangedAt(java.time.LocalDateTime.now());
+        userRepository.save(user);
+
+        return ResponseEntity.ok(Map.of("message", "Password changed successfully. Please login again."));
     }
 
     /**

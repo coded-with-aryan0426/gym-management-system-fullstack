@@ -20,8 +20,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles, children 
     try {
         const user = JSON.parse(userStr);
 
-        // Get user role (handle both 'role' and 'userRole' fields)
-        const userRole = (user.role || user.userRole || '').toUpperCase();
+        // Get user role (handle 'role', 'userRole', and 'staffRole' fields)
+        const userRole = (user.role || user.userRole || user.staffRole || '').toUpperCase();
 
         // Check if user's role is allowed
         const isAllowed = allowedRoles.some(role =>

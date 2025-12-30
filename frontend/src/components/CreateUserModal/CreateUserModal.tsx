@@ -175,7 +175,12 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClose, onSu
       effectiveFormData.password = "12345678"; // Default password since they don't login
     } else {
       // Staff validation
-      if (!formData.username || !formData.password || !formData.email) {
+      // Auto-set username to email if not provided (since there's no username field for staff)
+      if (!effectiveFormData.username && effectiveFormData.email) {
+        effectiveFormData.username = effectiveFormData.email;
+      }
+
+      if (!effectiveFormData.username || !effectiveFormData.password || !effectiveFormData.email) {
         toast.error("Please fill in all required fields");
         return;
       }
@@ -204,7 +209,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClose, onSu
       }
 
       await api.createUser(payload as any)
-      toast.success(`${role === "CUSTOMER" ? "Member" : "Staff"} created successfully`)
+      toast.success(`${role === "CUSTOMER" ? "Member" : "Trainer"} created successfully`)
       if (onSuccess) onSuccess()
       onClose()
     } catch (err: any) {
@@ -221,7 +226,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClose, onSu
     switch (step) {
       case "CATEGORY": return "Create New..."
       case "ROLE": return "Select User Type"
-      case "FORM": return `Add New ${role === "CUSTOMER" ? "Member" : "Staff"}`
+      case "FORM": return `Add New ${role === "CUSTOMER" ? "Member" : "Trainer"}`
       case "SCHEDULE_PLACEHOLDER": return "Schedule Event"
     }
   }
@@ -276,7 +281,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClose, onSu
                       </svg>
                     </div>
                     <span className="selection-card__label">New User</span>
-                    <span className="selection-card__desc">Create a member or staff account</span>
+                    <span className="selection-card__desc">Create a member or trainer account</span>
                   </div>
                   <div className="selection-card" onClick={() => handleCategorySelect("SCHEDULE")}>
                     <div className="selection-card__icon">
@@ -316,8 +321,8 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClose, onSu
                         <line x1="22" y1="11" x2="16" y2="11" />
                       </svg>
                     </div>
-                    <span className="selection-card__label">New Staff</span>
-                    <span className="selection-card__desc">Add a trainer or staff</span>
+                    <span className="selection-card__label">New Trainer</span>
+                    <span className="selection-card__desc">Add a new trainer</span>
                   </div>
                 </div>
               </div>

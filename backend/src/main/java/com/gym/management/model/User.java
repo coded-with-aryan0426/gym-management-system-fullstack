@@ -160,6 +160,39 @@ public class User {
         this.status = status;
     }
 
+    @Column(name = "is_first_login")
+    private Boolean isFirstLogin = true;
+
+    @Column(name = "password_changed_at")
+    private LocalDateTime passwordChangedAt;
+
+    @Column(name = "created_by")
+    private Long createdBy;
+
+    public Boolean getIsFirstLogin() {
+        return isFirstLogin;
+    }
+
+    public void setIsFirstLogin(Boolean isFirstLogin) {
+        this.isFirstLogin = isFirstLogin;
+    }
+
+    public LocalDateTime getPasswordChangedAt() {
+        return passwordChangedAt;
+    }
+
+    public void setPasswordChangedAt(LocalDateTime passwordChangedAt) {
+        this.passwordChangedAt = passwordChangedAt;
+    }
+
+    public Long getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(Long createdBy) {
+        this.createdBy = createdBy;
+    }
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_role_map", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();

@@ -118,6 +118,31 @@ const api = {
     return response.data;
   },
 
+  async sendOtp(email: string, purpose: 'SIGNUP' | 'LOGIN' | 'PASSWORD_RESET'): Promise<any> {
+    const response = await apiClient.post('/auth/send-otp', { email, purpose });
+    return response.data;
+  },
+
+  async verifyOtp(email: string, otp: string, purpose: 'SIGNUP' | 'LOGIN' | 'PASSWORD_RESET'): Promise<any> {
+    const response = await apiClient.post('/auth/verify-otp', { email, otp, purpose });
+    return response.data;
+  },
+
+  async verifyLogin(email: string, otp: string): Promise<any> {
+    const response = await apiClient.post('/auth/login/verify-otp', { email, otp, purpose: 'LOGIN' });
+    return response.data;
+  },
+
+  async changePasswordFirstLogin(data: any): Promise<any> {
+    const response = await apiClient.post('/auth/change-password-first-login', data);
+    return response.data;
+  },
+
+  async ownerRegister(data: any): Promise<any> {
+    const response = await apiClient.post('/auth/owner/register', data);
+    return response.data;
+  },
+
   async setActiveGym(data: { userId: number, gymId: number, context: string }): Promise<any> {
     const response = await apiClient.post('/auth/set-active-gym', data);
     return response.data;
