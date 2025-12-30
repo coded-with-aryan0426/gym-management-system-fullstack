@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import './Member.css';
+import PageHeader from '../../components/shared/PageHeader';
+import { Search, Calendar, List, Clock, User, Filter, MapPin } from 'lucide-react';
+import { toast } from 'react-hot-toast';
+import './AvailableClasses.css';
 
 interface ClassSession {
     id: number;
@@ -14,12 +17,20 @@ interface ClassSession {
         userId: number;
         fullName: string;
     };
+    // Mock fields for UI enhancement since backend might not provide them yet
+    type?: string;
+    difficulty?: 'Beginner' | 'Intermediate' | 'Advanced';
+    location?: string;
+    spotsLeft?: number;
 }
 
 const AvailableClasses: React.FC = () => {
     const [classes, setClasses] = useState<ClassSession[]>([]);
     const [loading, setLoading] = useState(true);
     const [booking, setBooking] = useState<number | null>(null);
+    const [view, setView] = useState<'list' | 'calendar'>('list');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedTrainer, setSelectedTrainer] = useState('All');
 
     const userStr = localStorage.getItem('user');
     const user = userStr ? JSON.parse(userStr) : null;
@@ -27,19 +38,29 @@ const AvailableClasses: React.FC = () => {
     useEffect(() => {
         const fetchClasses = async () => {
             try {
-                // Get all PT sessions (available classes)
                 const response = await fetch('/api/pt-sessions');
                 if (response.ok) {
                     const data = await response.json();
-                    // Filter to show only scheduled sessions that the member is not already in
-                    const available = data.filter((s: ClassSession) =>
-                        s.status?.toUpperCase() === 'SCHEDULED' &&
-                        (!s.member || s.member.userId !== user?.id)
-                    );
+
+                    // Filter and Enhance Data
+                    const available = data
+                        .filter((s: ClassSession) =>
+                            s.status?.toUpperCase() === 'SCHEDULED' &&
+                            (!s.member || s.member.userId !== user?.id)
+                        )
+                        .map((s: ClassSession) => ({
+                            ...s,
+                            type: 'Personal Training', // Default since api is pt-sessions
+                            difficulty: 'Intermediate',
+                            location: 'Main Gym Floor',
+                            spotsLeft: 1
+                        }));
+
                     setClasses(available);
                 }
             } catch (error) {
                 console.error('Failed to fetch classes:', error);
+                toast.error("Failed to load classes");
             } finally {
                 setLoading(false);
             }
@@ -47,17 +68,6 @@ const AvailableClasses: React.FC = () => {
 
         fetchClasses();
     }, [user?.id]);
-
-    const formatDate = (dateStr: string) => {
-        const date = new Date(dateStr);
-        return date.toLocaleDateString('en-US', {
-            weekday: 'short',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    };
 
     const handleBook = async (classId: number) => {
         if (!user?.id) return;
@@ -72,116 +82,189 @@ const AvailableClasses: React.FC = () => {
 
             if (response.ok) {
                 setClasses(prev => prev.filter(c => c.id !== classId));
-                alert('Class booked successfully!');
+                toast.success('Class booked successfully!');
             } else {
                 const error = await response.json();
-                alert(error.error || 'Failed to book class');
+                toast.error(error.error || 'Failed to book class');
             }
         } catch (error) {
             console.error('Failed to book:', error);
-            alert('Failed to book class');
+            toast.error('Failed to book class');
         } finally {
             setBooking(null);
         }
     };
 
-    if (loading) {
-        return (
-            <div className="member-dashboard">
-                <h1 className="member-page-title">Available Classes</h1>
-                <p style={{ color: 'var(--text-secondary)' }}>Loading...</p>
-            </div>
-        );
-    }
+    // Filtering Logic
+    const filteredClasses = classes.filter(cls => {
+        const matchesSearch = cls.trainer?.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            cls.type?.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesTrainer = selectedTrainer === 'All' || cls.trainer?.fullName === selectedTrainer;
+        return matchesSearch && matchesTrainer;
+    });
+
+    // Calendar Helper
+    const getWeekDays = () => {
+        const today = new Date();
+        const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay())); // Sunday
+        return Array.from({ length: 7 }, (_, i) => {
+            const d = new Date(startOfWeek);
+            d.setDate(d.getDate() + i);
+            return d;
+        });
+    };
+
+    const weekDays = getWeekDays();
+
+    const getClassesForDay = (date: Date) => {
+        return filteredClasses.filter(cls => {
+            const clsDate = new Date(cls.sessionDate);
+            return clsDate.getDate() === date.getDate() &&
+                clsDate.getMonth() === date.getMonth() &&
+                clsDate.getFullYear() === date.getFullYear();
+        });
+    };
+
+    if (loading) return <div className="p-8 text-zinc-400">Loading schedule...</div>;
+
+    // Extract unique trainers for filter
+    const trainers = ['All', ...Array.from(new Set(classes.map(c => c.trainer?.fullName).filter(Boolean)))];
 
     return (
-        <div className="member-dashboard">
-            <h1 className="member-page-title">Available Classes ({classes.length})</h1>
+        <div className="space-y-8 fade-in">
+            <PageHeader
+                title="Class Schedule"
+                subtitle="Browse and book upcoming training sessions and classes."
+            />
 
-            {classes.length === 0 ? (
-                <div className="member-empty-state">
-                    <div className="member-empty-state__icon">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                            <line x1="16" y1="2" x2="16" y2="6" />
-                            <line x1="8" y1="2" x2="8" y2="6" />
-                            <line x1="3" y1="10" x2="21" y2="10" />
-                        </svg>
+            {/* Toolbar */}
+            <div className="classes-toolbar">
+                <div className="flex gap-4 flex-1">
+                    <div className="relative flex-1 max-w-md">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
+                        <input
+                            type="text"
+                            placeholder="Search by trainer or class..."
+                            className="w-full bg-zinc-900 border border-zinc-800 rounded-lg pl-10 pr-4 py-2 text-white placeholder-zinc-500 focus:outline-none focus:border-red-600 transition-colors"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
                     </div>
-                    <h3 className="member-empty-state__title">No Classes Available</h3>
-                    <p className="member-empty-state__text">
-                        There are no classes available for booking at the moment. Check back later!
-                    </p>
+                    <div className="relative">
+                        <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={16} />
+                        <select
+                            className="filter-select pl-10"
+                            value={selectedTrainer}
+                            onChange={(e) => setSelectedTrainer(e.target.value)}
+                        >
+                            {trainers.map((t: any) => <option key={t} value={t}>{t}</option>)}
+                        </select>
+                    </div>
+                </div>
+
+                <div className="view-toggle">
+                    <button
+                        className={`view-toggle__btn ${view === 'list' ? 'view-toggle__btn--active' : ''}`}
+                        onClick={() => setView('list')}
+                    >
+                        <List size={18} /> List
+                    </button>
+                    <button
+                        className={`view-toggle__btn ${view === 'calendar' ? 'view-toggle__btn--active' : ''}`}
+                        onClick={() => setView('calendar')}
+                    >
+                        <Calendar size={18} /> Week
+                    </button>
+                </div>
+            </div>
+
+            {/* Content */}
+            {view === 'list' ? (
+                <div className="classes-grid">
+                    {filteredClasses.length === 0 ? (
+                        <div className="col-span-full text-center py-12 text-zinc-500">
+                            No classes found matching your criteria.
+                        </div>
+                    ) : (
+                        filteredClasses.map(cls => (
+                            <div key={cls.id} className="class-card">
+                                <div className="class-card__header">
+                                    <div className="class-card__type">
+                                        <div className="class-card__icon">
+                                            <Clock size={24} />
+                                        </div>
+                                        <div>
+                                            <div className="class-card__title">{cls.type}</div>
+                                            <div className="class-card__subtitle">{cls.trainer?.fullName}</div>
+                                        </div>
+                                    </div>
+                                    <div className="class-card__difficulty">
+                                        {cls.difficulty}
+                                    </div>
+                                </div>
+
+                                <div className="class-card__details">
+                                    <div className="class-detail">
+                                        <Calendar size={16} />
+                                        {new Date(cls.sessionDate).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                                    </div>
+                                    <div className="class-detail">
+                                        <Clock size={16} />
+                                        {new Date(cls.sessionDate).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })} ({cls.durationMinutes} min)
+                                    </div>
+                                    <div className="class-detail">
+                                        <MapPin size={16} />
+                                        {cls.location}
+                                    </div>
+                                </div>
+
+                                <div className="class-card__footer">
+                                    <span className="class-card__spots">
+                                        {cls.spotsLeft} spot left
+                                    </span>
+                                    <button
+                                        className="book-btn"
+                                        onClick={() => handleBook(cls.id)}
+                                        disabled={booking === cls.id}
+                                    >
+                                        {booking === cls.id ? 'Booking...' : 'Book Now'}
+                                    </button>
+                                </div>
+                            </div>
+                        ))
+                    )}
                 </div>
             ) : (
-                <div style={{ display: 'grid', gap: '16px', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))' }}>
-                    {classes.map(cls => (
-                        <div key={cls.id} style={{
-                            background: 'var(--bg-secondary)',
-                            border: '1px solid var(--border-primary)',
-                            borderRadius: '16px',
-                            padding: '20px',
-                            display: 'flex',
-                            flexDirection: 'column',
-                        }}>
-                            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px', marginBottom: '16px' }}>
-                                <div style={{
-                                    width: '56px',
-                                    height: '56px',
-                                    borderRadius: '12px',
-                                    background: 'linear-gradient(135deg, #10B981, #059669)',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    flexShrink: 0,
-                                }}>
-                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                                        <circle cx="8.5" cy="7" r="4" />
-                                        <line x1="20" y1="8" x2="20" y2="14" />
-                                        <line x1="23" y1="11" x2="17" y2="11" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '16px', marginBottom: '4px' }}>
-                                        Training Session
-                                    </div>
-                                    <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-                                        with {cls.trainer?.fullName || 'Trainer'}
-                                    </div>
-                                </div>
+                <div className="calendar-view">
+                    <div className="calendar-header">
+                        {weekDays.map((day, i) => (
+                            <div key={i} className="calendar-day-header">
+                                <div>{day.toLocaleDateString('en-US', { weekday: 'short' })}</div>
+                                <div className="text-2xl font-light text-white">{day.getDate()}</div>
                             </div>
-
-                            <div style={{
-                                background: 'var(--bg-tertiary)',
-                                borderRadius: '10px',
-                                padding: '12px',
-                                marginBottom: '16px',
-                            }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                                    <span style={{ fontSize: '13px', color: 'var(--text-tertiary)' }}>Date & Time</span>
-                                    <span style={{ fontSize: '13px', color: 'var(--text-primary)', fontWeight: 500 }}>
-                                        {formatDate(cls.sessionDate)}
-                                    </span>
+                        ))}
+                    </div>
+                    <div className="calendar-grid">
+                        {weekDays.map((day, i) => {
+                            const dayClasses = getClassesForDay(day);
+                            return (
+                                <div key={i} className="calendar-day-column">
+                                    {dayClasses.map(cls => (
+                                        <div key={cls.id} className="calendar-class" onClick={() => handleBook(cls.id)}>
+                                            <div className="calendar-class__time">
+                                                {new Date(cls.sessionDate).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                                            </div>
+                                            <div className="calendar-class__title">{cls.type}</div>
+                                            <div className="calendar-class__trainer">{cls.trainer?.fullName}</div>
+                                        </div>
+                                    ))}
+                                    {dayClasses.length === 0 && (
+                                        <div className="text-center py-4 text-zinc-700 text-xs">-</div>
+                                    )}
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                    <span style={{ fontSize: '13px', color: 'var(--text-tertiary)' }}>Duration</span>
-                                    <span style={{ fontSize: '13px', color: 'var(--text-primary)', fontWeight: 500 }}>
-                                        {cls.durationMinutes} minutes
-                                    </span>
-                                </div>
-                            </div>
-
-                            <button
-                                onClick={() => handleBook(cls.id)}
-                                disabled={booking === cls.id}
-                                className="member-btn member-btn--primary"
-                                style={{ width: '100%' }}
-                            >
-                                {booking === cls.id ? 'Booking...' : 'Book Now'}
-                            </button>
-                        </div>
-                    ))}
+                            );
+                        })}
+                    </div>
                 </div>
             )}
         </div>

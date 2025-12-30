@@ -1,0 +1,273 @@
+/* ============================================
+   Available Classes Styles
+   ============================================ */
+
+/* Toolbar */
+.classes-toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+@media (min-width: 1024px) {
+    .classes-toolbar {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+}
+
+.classes-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.filter-select {
+    background: var(--bg-secondary, #09090b);
+    border: 1px solid var(--border, #27272a);
+    color: var(--text-primary, #fafafa);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    cursor: pointer;
+    outline: none;
+}
+
+.filter-select:focus {
+    border-color: var(--accent-primary, #dc2626);
+}
+
+.view-toggle {
+    display: flex;
+    background: var(--bg-secondary, #09090b);
+    border: 1px solid var(--border, #27272a);
+    border-radius: 8px;
+    padding: 0.25rem;
+}
+
+.view-toggle__btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    color: var(--text-tertiary, #71717a);
+    transition: all 0.2s;
+}
+
+.view-toggle__btn--active {
+    background: var(--bg-tertiary, #18181b);
+    color: var(--text-primary, #fafafa);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Grid Layout (List View) */
+.classes-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .classes-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1280px) {
+    .classes-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Class Card */
+.class-card {
+    background: var(--bg-secondary, #09090b);
+    border: 1px solid var(--border, #27272a);
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.2s ease;
+}
+
+.class-card:hover {
+    border-color: var(--border-hover, #3f3f46);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.class-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.class-card__type {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.class-card__icon {
+    width: 3rem;
+    height: 3rem;
+    background: linear-gradient(135deg, var(--bg-tertiary, #18181b), #27272a);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary, #fafafa);
+    font-size: 1.25rem;
+}
+
+.class-card__title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary, #fafafa);
+    margin-bottom: 0.125rem;
+}
+
+.class-card__subtitle {
+    font-size: 0.875rem;
+    color: var(--text-tertiary, #71717a);
+}
+
+.class-card__difficulty {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.class-card__details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    flex: 1;
+}
+
+.class-detail {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary, #a1a1aa);
+}
+
+.class-card__footer {
+    padding-top: 1rem;
+    border-top: 1px solid var(--border, #27272a);
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.class-card__spots {
+    font-size: 0.75rem;
+    color: var(--text-tertiary, #71717a);
+    font-weight: 500;
+}
+
+.book-btn {
+    flex: 1;
+    padding: 0.625rem;
+    background: var(--accent-primary, #dc2626);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.book-btn:hover {
+    background: var(--accent-primary-hover, #b91c1c);
+}
+
+.book-btn:disabled {
+    background: var(--bg-tertiary, #18181b);
+    color: var(--text-tertiary, #71717a);
+    cursor: not-allowed;
+}
+
+/* Calendar View */
+.calendar-view {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.calendar-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1rem;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.calendar-day-header {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-tertiary, #71717a);
+    text-transform: uppercase;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1rem;
+}
+
+.calendar-day-column {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.calendar-class {
+    background: var(--bg-secondary, #09090b);
+    border: 1px solid var(--border, #27272a);
+    border-radius: 8px;
+    padding: 0.75rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-left: 3px solid var(--accent-primary, #dc2626);
+}
+
+.calendar-class:hover {
+    background: var(--bg-tertiary, #18181b);
+    transform: translateY(-1px);
+}
+
+.calendar-class__time {
+    color: var(--text-tertiary, #71717a);
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.calendar-class__title {
+    color: var(--text-primary, #fafafa);
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.calendar-class__trainer {
+    color: var(--text-secondary, #a1a1aa);
+}
