@@ -4,7 +4,7 @@ import { lazy, Suspense } from 'react';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { CurrencyProvider } from './contexts/CurrencyContext';
 import { MembersProvider } from './contexts/MembersContext';
-import { StaffProvider } from './contexts/StaffContext';
+import { TrainerProvider } from './contexts/TrainerContext';
 import { NavbarProvider } from './contexts/NavbarContext';
 import { AppShell } from './components/Layout';
 
@@ -13,7 +13,7 @@ import './styles/global.css';
 
 // Lazy load pages for faster initial load
 const Dashboard = lazy(() => import('./pages/Dashboard/Dashboard'));
-const Staff = lazy(() => import('./pages/Staff/Staff'));
+const Trainers = lazy(() => import('./pages/Trainers/Trainers'));
 const Members = lazy(() => import('./pages/Members/Members'));
 const Classes = lazy(() => import('./pages/Classes/Classes'));
 const Financials = lazy(() => import('./pages/Financials/Financials'));
@@ -48,12 +48,12 @@ function App() {
                 path="/*"
                 element={
                   <MembersProvider>
-                    <StaffProvider>
+                    <TrainerProvider>
                       <NavbarProvider>
                         <AppShell>
                           <Routes>
                             <Route path="/dashboard" element={<Dashboard />} />
-                            <Route path="/staff" element={<Staff />} />
+                            <Route path="/trainers" element={<Trainers />} />
                             <Route path="/members" element={<Members />} />
                             <Route path="/classes" element={<Classes />} />
                             <Route path="/financials" element={<Financials />} />
@@ -64,7 +64,7 @@ function App() {
                           </Routes>
                         </AppShell>
                       </NavbarProvider>
-                    </StaffProvider>
+                    </TrainerProvider>
                   </MembersProvider>
                 }
               />

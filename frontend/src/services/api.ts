@@ -63,8 +63,8 @@ const api = {
     return response.data;
   },
 
-  // Paginated Staff
-  async getStaffPaginated(
+  // Paginated Trainers
+  async getTrainersPaginated(
     page: number = 0,
     size: number = 10,
     search?: string,
@@ -73,7 +73,7 @@ const api = {
     const params: Record<string, unknown> = { page, size };
     if (search) params.search = search;
     if (role) params.role = role;
-    const response = await apiClient.get<PageResponse<User>>('/users/staff/paginated', { params });
+    const response = await apiClient.get<PageResponse<User>>('/users/trainers/paginated', { params });
     return response.data;
   },
 
@@ -244,7 +244,7 @@ const api = {
     }
   },
 
-// Generic methods to allow direct apiClient usage through the api object
+  // Generic methods to allow direct apiClient usage through the api object
   get: (url: string, config?: any) => apiClient.get(url, config),
   post: (url: string, data?: any, config?: any) => apiClient.post(url, data, config),
   put: (url: string, data?: any, config?: any) => apiClient.put(url, data, config),
@@ -256,8 +256,8 @@ export default api;
 
 // PT Session endpoints
 import type { PTSessionDTO, RecurringSessionRequest, CompleteSessionRequest, AvailableSlotDTO } from '../types/ptSession';
-import type { StaffPerformanceDTO, AttendanceRecordDTO } from '../types/staffPerformance';
-import type { StaffShiftDTO } from '../types/staffShift';
+import type { TrainerPerformanceDTO, AttendanceRecordDTO } from '../types/trainerPerformance';
+import type { TrainerShiftDTO } from '../types/trainerShift';
 import type { GymHoursDTO, PTConfigDTO, BlackoutDayDTO } from '../types/gymSettings';
 import type { MembershipPackageDTO } from '../types/membershipPackage';
 
@@ -320,39 +320,39 @@ const ptSessionApi = {
   },
 };
 
-// Staff Performance endpoints
-const staffPerformanceApi = {
-  async getPerformance(staffId: number, month?: string): Promise<StaffPerformanceDTO> {
+// Trainer Performance endpoints
+const trainerPerformanceApi = {
+  async getPerformance(trainerId: number, month?: string): Promise<TrainerPerformanceDTO> {
     const params = month ? { month } : {};
-    const response = await apiClient.get<StaffPerformanceDTO>(`/staff/${staffId}/performance`, { params });
+    const response = await apiClient.get<TrainerPerformanceDTO>(`/trainers/${trainerId}/performance`, { params });
     return response.data;
   },
 
-  async getAttendance(staffId: number, month?: string): Promise<StaffPerformanceDTO> {
+  async getAttendance(trainerId: number, month?: string): Promise<TrainerPerformanceDTO> {
     const params = month ? { month } : {};
-    const response = await apiClient.get<StaffPerformanceDTO>(`/staff/${staffId}/attendance`, { params });
+    const response = await apiClient.get<TrainerPerformanceDTO>(`/trainers/${trainerId}/attendance`, { params });
     return response.data;
   },
 
-  async recordAttendance(staffId: number, record: AttendanceRecordDTO): Promise<StaffPerformanceDTO> {
-    const response = await apiClient.post<StaffPerformanceDTO>(`/staff/${staffId}/attendance`, record);
+  async recordAttendance(trainerId: number, record: AttendanceRecordDTO): Promise<TrainerPerformanceDTO> {
+    const response = await apiClient.post<TrainerPerformanceDTO>(`/trainers/${trainerId}/attendance`, record);
     return response.data;
   },
 
-  async getShifts(staffId: number, startDate: string, endDate: string): Promise<StaffShiftDTO[]> {
-    const response = await apiClient.get<StaffShiftDTO[]>(`/staff/${staffId}/shifts`, {
+  async getShifts(trainerId: number, startDate: string, endDate: string): Promise<TrainerShiftDTO[]> {
+    const response = await apiClient.get<TrainerShiftDTO[]>(`/trainers/${trainerId}/shifts`, {
       params: { startDate, endDate }
     });
     return response.data;
   },
 
-  async assignShift(shift: StaffShiftDTO): Promise<StaffShiftDTO> {
-    const response = await apiClient.post<StaffShiftDTO>('/staff/shifts', shift);
+  async assignShift(shift: TrainerShiftDTO): Promise<TrainerShiftDTO> {
+    const response = await apiClient.post<TrainerShiftDTO>('/trainers/shifts', shift);
     return response.data;
   },
 
   async deleteShift(shiftId: number): Promise<void> {
-    await apiClient.delete(`/staff/shifts/${shiftId}`);
+    await apiClient.delete(`/trainers/shifts/${shiftId}`);
   },
 };
 
@@ -422,15 +422,15 @@ const membershipPackageApi = {
 };
 
 // Analytics API
-import type { 
-  FullAnalyticsDashboard, 
-  PTRevenueAnalytics, 
-  StaffAttendanceAnalytics, 
+import type {
+  FullAnalyticsDashboard,
+  PTRevenueAnalytics,
+  StaffAttendanceAnalytics,
   InsightsPanel,
   TrafficHeatmapData,
   MembershipMovement,
   TrainerPerformanceInsight,
-  DateRange 
+  DateRange
 } from '../types/analytics';
 
 const analyticsApi = {
@@ -485,4 +485,4 @@ const analyticsApi = {
 };
 
 // Export all APIs
-export { ptSessionApi, staffPerformanceApi, gymSettingsApi, membershipPackageApi, analyticsApi };
+export { ptSessionApi, trainerPerformanceApi, gymSettingsApi, membershipPackageApi, analyticsApi };

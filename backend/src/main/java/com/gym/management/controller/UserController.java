@@ -51,14 +51,14 @@ public class UserController {
         }
     }
 
-    @GetMapping("/staff/paginated")
-    public ResponseEntity<?> getStaffPaginated(
+    @GetMapping("/trainers/paginated")
+    public ResponseEntity<?> getTrainersPaginated(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String role) {
         try {
-            return ResponseEntity.ok(userService.getStaffPaginated(page, size, search, role));
+            return ResponseEntity.ok(userService.getTrainersPaginated(page, size, search, role));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500)

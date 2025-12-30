@@ -5,15 +5,15 @@ import { Badge, getStatusVariant, Avatar, DataTable, type Column } from '../../c
 import { CreateUserModal } from '../../components';
 import { ActionMenuButton } from '../../components/shared';
 import { useClickOutside } from '../../hooks';
-import EnhancedStaffActionModal from '../../components/StaffActionModal/EnhancedStaffActionModal';
+import EnhancedTrainerActionModal from '../../components/TrainerActionModal/EnhancedTrainerActionModal';
 import api from '../../services/api';
 import type { User } from '../../types/user';
-import './Staff.css';
+import './Trainers.css';
 
-const Staff: React.FC = () => {
-  const [staff, setStaff] = useState<User[]>([]);
+const Trainers: React.FC = () => {
+  const [trainers, setTrainers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedStaff, setSelectedStaff] = useState<User | null>(null);
+  const [selectedTrainer, setSelectedTrainer] = useState<User | null>(null);
   const [isActionModalOpen, setIsActionModalOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
@@ -51,31 +51,31 @@ const Staff: React.FC = () => {
     return () => clearTimeout(timer)
   }, [searchQuery])
 
-  const loadStaffPaginated = useCallback(async () => {
+  const loadTrainersPaginated = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await api.getStaffPaginated(
+      const response = await api.getTrainersPaginated(
         currentPage,
         pageSize,
         debouncedSearch || undefined,
         filters.role || undefined
       );
 
-      setStaff(response.content);
+      setTrainers(response.content);
       setTotalCount(response.totalCount);
       setSortType(response.sortType as 'newest' | 'alphabetical');
     } catch (err) {
-      console.error('[Staff] Failed to load paginated staff:', err);
-      toast.error('Failed to load staff');
-      setStaff([]);
+      console.error('[Trainers] Failed to load paginated trainers:', err);
+      toast.error('Failed to load trainers');
+      setTrainers([]);
     } finally {
       setLoading(false);
     }
   }, [currentPage, pageSize, debouncedSearch, filters.role]);
 
   useEffect(() => {
-    loadStaffPaginated();
-  }, [loadStaffPaginated]);
+    loadTrainersPaginated();
+  }, [loadTrainersPaginated]);
 
   useEffect(() => {
     setCurrentPage(0);
@@ -97,29 +97,29 @@ const Staff: React.FC = () => {
 
   useEffect(() => {
     const userId = searchParams.get('userId');
-    if (userId && staff.length > 0) {
-      const member = staff.find(s => s.userId.toString() === userId);
-      if (member) {
-        handleActionClick(member);
+    if (userId && trainers.length > 0) {
+      const trainer = trainers.find(t => t.userId.toString() === userId);
+      if (trainer) {
+        handleActionClick(trainer);
       }
     }
-  }, [searchParams, staff]);
+  }, [searchParams, trainers]);
 
-  const handleActionClick = (member: User) => {
-    setSelectedStaff(member);
+  const handleActionClick = (trainer: User) => {
+    setSelectedTrainer(trainer);
     setIsActionModalOpen(true);
   };
 
   const handleCloseActionModal = () => {
     setIsActionModalOpen(false);
-    setSelectedStaff(null);
+    setSelectedTrainer(null);
   };
 
-  const handleEditProfile = async (member: User) => {
+  const handleEditProfile = async (trainer: User) => {
     // Modal already called the API - just refresh the list
     // Do NOT close modal - let user close manually
-    toast.success(`Profile updated for ${member.fullName}`);
-    loadStaffPaginated();
+    toast.success(`Profile updated for ${trainer.fullName}`);
+    loadTrainersPaginated();
   };
 
   const columns: Column<User>[] = [
@@ -132,8 +132,8 @@ const Staff: React.FC = () => {
       ),
     },
     {
-      key: 'member',
-      header: 'Staff Member',
+      key: 'trainer',
+      header: 'Trainer',
       width: 'auto',
       render: (member) => {
         // Load avatarId from localStorage as fallback
@@ -231,7 +231,7 @@ const Staff: React.FC = () => {
     <div className="staff-page">
       <div className="staff-page__header">
         <div className="staff-page__title-section">
-          <h1 className="staff-page__title">Staff Directory</h1>
+          <h1 className="trainer-page__title">Trainer Directory</h1>
           <div className="staff-page__sort-indicator">
             {sortType === 'newest' ? (
               <span className="sort-badge sort-badge--newest">
@@ -327,13 +327,13 @@ const Staff: React.FC = () => {
         </div>
       </div>
 
-      <div className="staff-page__table">
+      <div className="trainer-page__table">
         <DataTable
           columns={columns}
-          data={staff}
-          keyExtractor={(s) => s.userId}
+          data={trainers}
+          keyExtractor={(t) => t.userId}
           loading={loading}
-          emptyMessage="No staff found"
+          emptyMessage="No trainers found"
           onRowClick={handleActionClick}
           pagination={{
             currentPage,
@@ -387,12 +387,12 @@ const Staff: React.FC = () => {
         />
       </div>
 
-      <EnhancedStaffActionModal
+      <EnhancedTrainerActionModal
         isOpen={isActionModalOpen}
         onClose={handleCloseActionModal}
-        staff={selectedStaff as unknown as User}
+        trainer={selectedTrainer as unknown as User}
         onEditProfile={handleEditProfile}
-        onUpdate={loadStaffPaginated}
+        onUpdate={loadTrainersPaginated}
       />
 
       <CreateUserModal
@@ -407,12 +407,12 @@ const Staff: React.FC = () => {
           })
         }}
         onSuccess={() => {
-          loadStaffPaginated()
-          toast.success("Staff member added successfully")
+          loadTrainersPaginated()
+          toast.success("Trainer added successfully")
         }}
       />
     </div>
   );
 };
 
-export default Staff;
+export default Trainers;

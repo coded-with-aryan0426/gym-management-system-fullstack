@@ -140,7 +140,7 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
                 type: 'staff' as const,
                 title: name,
                 subtitle: `${user.email} • Trainer`,
-                link: '/staff'
+                link: '/trainers'
               });
             }
           });
@@ -154,8 +154,8 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
                 id: `staff-${user.userId}`,
                 type: 'staff' as const,
                 title: name,
-                subtitle: `${user.email} • Staff`,
-                link: '/staff'
+                subtitle: `${user.email} • Trainers`,
+                link: '/trainers'
               });
             }
           });
@@ -168,7 +168,7 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
           const mockResults = ([
             { id: '1', type: 'member' as const, title: 'John Smith', subtitle: 'Gold Plan • Active', link: '/members' },
             { id: '2', type: 'member' as const, title: 'Sarah Williams', subtitle: 'Silver Plan • Active', link: '/members' },
-            { id: '3', type: 'staff' as const, title: 'Mike Johnson', subtitle: 'Personal Trainer', link: '/staff' },
+            { id: '3', type: 'staff' as const, title: 'Mike Johnson', subtitle: 'Personal Trainer', link: '/trainers' },
             { id: '4', type: 'session' as const, title: 'PT Session #124', subtitle: 'Tomorrow at 10:00 AM', link: '/pt-sessions' },
           ] as SearchResult[]).filter(r =>
             r.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -234,7 +234,7 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
 
   const navLinks = [
     { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/staff', icon: UserCheck, label: 'Staff' },
+    { to: '/trainers', icon: UserCheck, label: 'Trainers' },
     { to: '/members', icon: Users, label: 'Members' },
     { to: '/pt-sessions', icon: Calendar, label: 'PT Sessions' },
     { to: '/settings', icon: Settings, label: 'Settings' },

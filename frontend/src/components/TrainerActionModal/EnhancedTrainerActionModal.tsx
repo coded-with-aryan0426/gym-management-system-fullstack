@@ -9,7 +9,7 @@ import api from "../../services/api"
 import { showToast } from "../../utils/toast"
 import AvatarPicker from "../ui/AvatarPicker"
 import { getAvatarUrl } from "../ui/Avatar"
-import "./StaffActionModal.css"
+import "./TrainerActionModal.css"
 
 // ============================================================================
 // Types
@@ -17,14 +17,14 @@ import "./StaffActionModal.css"
 
 type TabType = "profile" | "members" | "schedule" | "performance" | "message" | "delete"
 
-interface EnhancedStaffActionModalProps {
+interface EnhancedTrainerActionModalProps {
   isOpen: boolean
   onClose: () => void
-  staff: User | null
-  onEditProfile?: (staff: User) => void
-  onScheduleSession?: (staff: User) => void
-  onMessageStaff?: (staff: User) => void
-  onDeleteStaff?: (staffId: number) => void
+  trainer: User | null
+  onEditProfile?: (trainer: User) => void
+  onScheduleSession?: (trainer: User) => void
+  onMessageTrainer?: (trainer: User) => void
+  onDeleteTrainer?: (trainerId: number) => void
   onUpdate?: () => void // Callback to refresh parent data
 }
 
@@ -55,12 +55,12 @@ const ValidationIcon: React.FC<{ isValid: boolean | null }> = ({ isValid }) => {
 // Main Component
 // ============================================================================
 
-const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
+const EnhancedTrainerActionModal: React.FC<EnhancedTrainerActionModalProps> = ({
   isOpen,
   onClose,
-  staff,
+  trainer,
   onEditProfile,
-  onDeleteStaff,
+  onDeleteTrainer,
   onUpdate,
 }) => {
   // ============================================================================
@@ -68,7 +68,7 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
   // ============================================================================
 
   const [activeTab, setActiveTab] = useState<TabType>("profile")
-  const [localStaff, setLocalStaff] = useState<User | null>(null)
+  const [localTrainer, setLocalTrainer] = useState<User | null>(null)
 
   // Edit Profile Form
   const [editForm, setEditForm] = useState({
@@ -78,7 +78,7 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
     role: "TRAINER",
     specialization: [] as string[],
     joinDate: "",
-    leavingDate: "", // When staff leaves the gym
+    leavingDate: "", // When trainer leaves the gym
     status: "Active",
     avatarId: null as string | null,
   })
@@ -117,29 +117,29 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
   // Effects
   // ============================================================================
 
-  // Initialize form when staff changes
+  // Initialize form when trainer changes
   useEffect(() => {
-    if (isOpen && staff) {
-      setLocalStaff(staff)
+    if (isOpen && trainer) {
+      setLocalTrainer(trainer)
       setActiveTab("profile")
 
       // Load avatarId from localStorage as fallback (until DB column is added)
-      const savedAvatarId = localStorage.getItem(`avatar_${staff.userId}`)
+      const savedAvatarId = localStorage.getItem(`avatar_${trainer.userId}`)
 
       setEditForm({
-        fullName: staff.fullName || "",
-        email: staff.email || "",
-        phone: staff.phoneNumber || "",
-        role: staff.roles?.[0]?.roleName || "TRAINER",
+        fullName: trainer.fullName || "",
+        email: trainer.email || "",
+        phone: trainer.phoneNumber || "",
+        role: trainer.roles?.[0]?.roleName || "TRAINER",
         specialization: [],
-        joinDate: staff.createdAt ? new Date(staff.createdAt).toISOString().split('T')[0] : "",
-        leavingDate: (staff as any).leavingDate || "",
+        joinDate: trainer.createdAt ? new Date(trainer.createdAt).toISOString().split('T')[0] : "",
+        leavingDate: (trainer as any).leavingDate || "",
         status: "Active",
-        avatarId: savedAvatarId || (staff as any).avatarId || null,
+        avatarId: savedAvatarId || (trainer as any).avatarId || null,
       })
       loadAssignedMembers()
     }
-  }, [isOpen, staff])
+  }, [isOpen, trainer])
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -157,40 +157,40 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
 
   // Debounced member search
   useEffect(() => {
-    if (!showMemberSearch || !staff) return
+    if (!showMemberSearch || !trainer) return
 
     const timeoutId = setTimeout(() => {
       searchMembers(searchQuery)
     }, 300)
 
     return () => clearTimeout(timeoutId)
-  }, [searchQuery, showMemberSearch, staff])
+  }, [searchQuery, showMemberSearch, trainer])
 
   // ============================================================================
   // API Handlers
   // ============================================================================
 
   const loadAssignedMembers = useCallback(async () => {
-    if (!staff) return
+    if (!trainer) return
 
     try {
-      const members = await api.getTrainerCustomers(staff.userId)
+      const members = await api.getTrainerCustomers(trainer.userId)
       setAssignedMembers(members)
     } catch (error) {
-      console.error('[StaffActionModal] Failed to load assigned members:', error)
+      console.error('[TrainerActionModal] Failed to load assigned members:', error)
       setAssignedMembers([])
     }
-  }, [staff])
+  }, [trainer])
 
   const searchMembers = async (query: string) => {
-    if (!staff) return
+    if (!trainer) return
 
     try {
       setIsSearching(true)
       const members = await api.searchUsers('CUSTOMER', query)
       setAvailableMembers(members)
     } catch (error) {
-      console.error('[StaffActionModal] Search failed:', error)
+      console.error('[TrainerActionModal] Search failed:', error)
       setAvailableMembers([])
     } finally {
       setIsSearching(false)
@@ -198,19 +198,19 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
   }
 
   const handleSaveProfile = async () => {
-    if (!staff || !isFormValid) return
+    if (!trainer || !isFormValid) return
 
     setIsSaving(true)
     try {
       // Save avatar to localStorage as fallback (until DB column is added)
       if (editForm.avatarId !== null) {
-        localStorage.setItem(`avatar_${staff.userId}`, editForm.avatarId)
+        localStorage.setItem(`avatar_${trainer.userId}`, editForm.avatarId)
       } else {
-        localStorage.removeItem(`avatar_${staff.userId}`)
+        localStorage.removeItem(`avatar_${trainer.userId}`)
       }
 
       // Send all editable fields to backend
-      const updatedStaff = await api.updateUser(staff.userId, {
+      const updatedTrainer = await api.updateUser(trainer.userId, {
         fullName: editForm.fullName,
         email: editForm.email,
         phoneNumber: editForm.phone,
@@ -220,10 +220,10 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
       })
 
       // Merge avatarId into response (in case backend doesn't return it yet)
-      const staffWithAvatar = { ...updatedStaff, avatarId: editForm.avatarId }
-      setLocalStaff(prev => prev ? { ...prev, ...staffWithAvatar } : prev)
+      const trainerWithAvatar = { ...updatedTrainer, avatarId: editForm.avatarId }
+      setLocalTrainer(prev => prev ? { ...prev, ...trainerWithAvatar } : prev)
       showToast.success("Profile updated successfully")
-      onEditProfile?.(staffWithAvatar)
+      onEditProfile?.(trainerWithAvatar)
       onUpdate?.()
       // Modal stays open!
     } catch (error: any) {
@@ -234,7 +234,7 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
   }
 
   const handleAddMember = async (member: User) => {
-    if (!staff) return
+    if (!trainer) return
 
     // Check for duplicates
     if (assignedMembers.some(m => m.userId === member.userId)) {
@@ -248,7 +248,7 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
     setSearchQuery("")
 
     try {
-      await api.assignCustomerToTrainer(staff.userId, member.userId)
+      await api.assignCustomerToTrainer(trainer.userId, member.userId)
       showToast.success(`${member.fullName} assigned successfully`)
     } catch (error: any) {
       // Revert on failure
@@ -258,7 +258,7 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
   }
 
   const handleRemoveMember = async (memberId: number) => {
-    if (!staff) return
+    if (!trainer) return
 
     const memberToRemove = assignedMembers.find(m => m.userId === memberId)
     if (!memberToRemove) return
@@ -267,7 +267,7 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
     setAssignedMembers(prev => prev.filter(m => m.userId !== memberId))
 
     try {
-      await api.removeCustomerFromTrainer(staff.userId, memberId)
+      await api.removeCustomerFromTrainer(trainer.userId, memberId)
       showToast.success("Member removed successfully")
     } catch (error: any) {
       // Revert on failure
@@ -277,13 +277,13 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
   }
 
   const handleSendMessage = async () => {
-    if (!staff || !messageForm.subject || !messageForm.body) return
+    if (!trainer || !messageForm.subject || !messageForm.body) return
 
     setIsSendingMessage(true)
     try {
       // Simulate sending (replace with real API)
       await new Promise(resolve => setTimeout(resolve, 500))
-      showToast.success(`Message sent to ${staff.fullName}`)
+      showToast.success(`Message sent to ${trainer.fullName}`)
       setMessageForm({ subject: "", body: "" })
     } catch (error: any) {
       showToast.error(error.message || "Failed to send message")
@@ -292,18 +292,18 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
     }
   }
 
-  const handleDeleteStaff = async () => {
-    if (!staff) return
+  const handleDeleteTrainer = async () => {
+    if (!trainer) return
 
     setIsDeleting(true)
     try {
-      await api.deleteUser(staff.userId)
-      showToast.success(`${staff.fullName} has been deleted`)
-      onDeleteStaff?.(staff.userId)
+      await api.deleteUser(trainer.userId)
+      showToast.success(`${trainer.fullName} has been deleted`)
+      onDeleteTrainer?.(trainer.userId)
       onUpdate?.()
       onClose()
     } catch (error: any) {
-      showToast.error(error.message || "Failed to delete staff member")
+      showToast.error(error.message || "Failed to delete trainer member")
     } finally {
       setIsDeleting(false)
     }
@@ -313,13 +313,13 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
   // Render
   // ============================================================================
 
-  if (!staff || !localStaff) return null
+  if (!trainer || !localTrainer) return null
 
   const modalContent = (
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="staff-action-overlay"
+          className="trainer-action-overlay"
           onClick={onClose}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -328,7 +328,7 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
         >
           {/* Modal Content Wrapper */}
           <motion.div
-            className="staff-action-modal staff-action-modal--redesigned"
+            className="trainer-action-modal trainer-action-modal--redesigned"
             onClick={(e) => e.stopPropagation()}
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
@@ -338,12 +338,12 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
             {/* ============================================================
                   Profile Header - Matching Member Modal Layout
                  ============================================================ */}
-            <div className="staff-action-modal__profile-header">
+            <div className="trainer-action-modal__profile-header">
               <div className="profile-header__avatar">
                 {editForm.avatarId ? (
                   <img
                     src={getAvatarUrl(editForm.avatarId) || ''}
-                    alt={localStaff.fullName}
+                    alt={localTrainer.fullName}
                   />
                 ) : (
                   <div className="avatar-initials" style={{
@@ -352,15 +352,15 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
                     background: 'linear-gradient(135deg, var(--color-crimson), #b91c1c)',
                     color: 'white', fontWeight: 700, fontSize: '18px'
                   }}>
-                    {localStaff.fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                    {localTrainer.fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
                   </div>
                 )}
               </div>
 
               {/* Name + Email (left) */}
               <div className="profile-header__info">
-                <h2 className="profile-header__name">{localStaff.fullName}</h2>
-                <p className="profile-header__email">{localStaff.email}</p>
+                <h2 className="profile-header__name">{localTrainer.fullName}</h2>
+                <p className="profile-header__email">{localTrainer.email}</p>
               </div>
 
               {/* Badges (center) */}
@@ -383,7 +383,7 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
               </div>
 
               {/* Close Button */}
-              <button className="staff-action-modal__close-inline" onClick={onClose}>
+              <button className="trainer-action-modal__close-inline" onClick={onClose}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <line x1="18" y1="6" x2="6" y2="18" />
                   <line x1="6" y1="6" x2="18" y2="18" />
@@ -394,9 +394,9 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
             {/* ============================================================
                 Content Grid (Nav + Panel)
                ============================================================ */}
-            <div className="staff-action-modal__content-grid">
+            <div className="trainer-action-modal__content-grid">
               {/* Left Navigation Column */}
-              <div className="staff-action-modal__nav-column">
+              <div className="trainer-action-modal__nav-column">
                 <nav className="side-panel-nav">
                   <button
                     className={`side-panel-nav__item ${activeTab === "profile" ? "side-panel-nav__item--active" : ""}`}
@@ -467,13 +467,13 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
                       <polyline points="3 6 5 6 21 6" />
                       <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                     </svg>
-                    <span>Delete Staff</span>
+                    <span>Delete Trainer</span>
                   </button>
                 </nav>
               </div>
 
               {/* Right Content Panel */}
-              <div className="staff-action-modal__content-panel">
+              <div className="trainer-action-modal__content-panel">
                 <AnimatePresence mode="wait">
                   {/* ========== Edit Profile Panel ========== */}
                   {activeTab === "profile" && (
@@ -531,7 +531,7 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
                               </div>
                               <AvatarPicker
                                 selectedId={editForm.avatarId}
-                                userId={staff?.userId}
+                                userId={trainer?.userId}
                                 onSelect={(id) => {
                                   setEditForm(prev => ({ ...prev, avatarId: id }))
                                   setShowAvatarPicker(false)
@@ -990,8 +990,8 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
                           <span className="message-compose__label">To:</span>
                           <div className="message-compose__recipient">
                             <span className="recipient-tag">
-                              {localStaff.fullName}
-                              <span className="recipient-email">&lt;{localStaff.email}&gt;</span>
+                              {localTrainer.fullName}
+                              <span className="recipient-email">&lt;{localTrainer.email}&gt;</span>
                             </span>
                           </div>
                         </div>
@@ -1061,12 +1061,12 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
                           <div className="delete-user-preview">
                             <div className="delete-user-preview__avatar">
                               <img
-                                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${localStaff.fullName}`}
-                                alt={localStaff.fullName}
+                                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${localTrainer.fullName}`}
+                                alt={localTrainer.fullName}
                               />
                             </div>
                             <div className="delete-user-preview__info">
-                              <span className="delete-user-preview__name">{localStaff.fullName}</span>
+                              <span className="delete-user-preview__name">{localTrainer.fullName}</span>
                               <span className="delete-user-preview__role">{editForm.role}</span>
                             </div>
                           </div>
@@ -1089,7 +1089,7 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
                           <div className="delete-warning-text">
                             <h5 className="delete-warning-text__title">This action is permanent</h5>
                             <p className="delete-warning-text__desc">
-                              Deleting this staff member will remove all associated data.
+                              Deleting this trainer member will remove all associated data.
                             </p>
                           </div>
 
@@ -1129,7 +1129,7 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
                             </button>
                             <button
                               className="btn btn--danger btn--large"
-                              onClick={handleDeleteStaff}
+                              onClick={handleDeleteTrainer}
                               disabled={isDeleting}
                             >
                               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -1155,4 +1155,4 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
   return ReactDOM.createPortal(modalContent, document.body)
 }
 
-export default EnhancedStaffActionModal
+export default EnhancedTrainerActionModal

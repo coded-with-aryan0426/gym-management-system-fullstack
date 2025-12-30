@@ -1,11 +1,12 @@
 export type ShiftStatus = 'SCHEDULED' | 'COMPLETED' | 'MISSED';
 
-export interface StaffShiftDTO {
+export interface TrainerShiftDTO {
   shiftId?: number;
-  staffId: number;
-  staffName?: string;
+  trainerId: number;
+  trainerName?: string;
   shiftDate: string;
   startTime: string;
   endTime: string;
   status?: ShiftStatus;
 }
+

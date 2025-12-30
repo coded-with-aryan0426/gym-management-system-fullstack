@@ -1,7 +1,7 @@
-export interface StaffPerformanceDTO {
+export interface TrainerPerformanceDTO {
   performanceId?: number;
-  staffId: number;
-  staffName?: string;
+  trainerId: number;
+  trainerName?: string;
   sessionsCompleted: number;
   attendanceRate: number;
   satisfactionScore: number;
@@ -12,17 +12,18 @@ export interface StaffPerformanceDTO {
 }
 
 export interface AttendanceRecordDTO {
-  staffId: number;
+  trainerId: number;
   date: string;
   status: 'PRESENT' | 'ABSENT' | 'LATE';
   notes?: string;
 }
 
-export interface StaffSummaryDTO {
-  totalStaff: number;
+export interface TrainerSummaryDTO {
+  totalTrainers: number;
   activeTrainers: number;
   averageAttendanceRate: number;
   averageSatisfactionScore: number;
   totalSessionsThisMonth: number;
   recordMonth: string;
 }
+

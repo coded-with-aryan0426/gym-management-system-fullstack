@@ -203,17 +203,17 @@ public class UserService {
     }
 
     /**
-     * Paginated Staff with "today first" sorting.
+     * Paginated Trainers with "today first" sorting.
      */
     @Transactional(readOnly = true)
-    public PageResponse<User> getStaffPaginated(int page, int size, String search, String role) {
+    public PageResponse<User> getTrainersPaginated(int page, int size, String search, String role) {
         String targetRole = (role != null && !role.trim().isEmpty()) ? role.toUpperCase() : "TRAINER";
-        List<User> allStaff = userRepository.findByRoleName(targetRole);
+        List<User> allTrainers = userRepository.findByRoleName(targetRole);
 
         // Apply search filter
         if (search != null && !search.trim().isEmpty()) {
             String searchLower = search.toLowerCase();
-            allStaff = allStaff.stream()
+            allTrainers = allTrainers.stream()
                     .filter(u -> (u.getFullName() != null && u.getFullName().toLowerCase().contains(searchLower)) ||
                             (u.getEmail() != null && u.getEmail().toLowerCase().contains(searchLower)))
                     .collect(Collectors.toList());
@@ -221,7 +221,7 @@ public class UserService {
 
         // Sort: today's entries first (by createdAt DESC), then alphabetically
         LocalDate today = LocalDate.now();
-        allStaff.sort((a, b) -> {
+        allTrainers.sort((a, b) -> {
             boolean aToday = a.getCreatedAt() != null && a.getCreatedAt().toLocalDate().equals(today);
             boolean bToday = b.getCreatedAt() != null && b.getCreatedAt().toLocalDate().equals(today);
 
@@ -238,10 +238,10 @@ public class UserService {
         });
 
         // Paginate
-        long totalCount = allStaff.size();
+        long totalCount = allTrainers.size();
         int start = page * size;
-        int end = Math.min(start + size, allStaff.size());
-        List<User> pageContent = start < allStaff.size() ? allStaff.subList(start, end) : Collections.emptyList();
+        int end = Math.min(start + size, allTrainers.size());
+        List<User> pageContent = start < allTrainers.size() ? allTrainers.subList(start, end) : Collections.emptyList();
 
         return new PageResponse<>(pageContent, page, size, totalCount, "newest");
     }

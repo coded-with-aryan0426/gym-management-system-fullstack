@@ -59,7 +59,7 @@ const icons = {
 const navItems = [
   { path: "/dashboard", label: "Dashboard", icon: icons.dashboard, color: "#dc2626" },
   { path: "/members", label: "Members", icon: icons.members, color: "#dc2626" },
-  { path: "/staff", label: "Staff", icon: icons.staff, color: "#dc2626" },
+  { path: "/trainers", label: "Trainers", icon: icons.staff, color: "#dc2626" },
   { path: "/classes", label: "Classes", icon: icons.classes, color: "#dc2626" },
   { path: "/financials", label: "Financials", icon: icons.financials, color: "#dc2626" },
   { path: "/reports", label: "Reports", icon: icons.reports, color: "#dc2626" },
