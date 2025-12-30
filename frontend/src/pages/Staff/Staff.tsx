@@ -204,9 +204,9 @@ const Staff: React.FC = () => {
       header: 'Left',
       width: '110px',
       render: (member) => {
-        // Check for leftDate or departureDate field
-        const leftDate = (member as any).leftDate || (member as any).departureDate || (member as any).terminationDate;
-        if (!leftDate) return <span className="staff-date">-</span>;
+        // Use leavingDate field from backend
+        const leftDate = (member as any).leavingDate;
+        if (!leftDate) return <span className="staff-date staff-date--active">Active</span>;
 
         const date = new Date(leftDate);
         const day = date.getDate().toString().padStart(2, '0');

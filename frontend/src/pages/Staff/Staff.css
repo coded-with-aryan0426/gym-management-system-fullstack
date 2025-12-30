@@ -483,6 +483,12 @@ body.light-mode .staff-filter-panel .filter-panel__header {
   font-weight: 500;
 }
 
+.staff-date--active {
+  color: var(--color-success, #10B981);
+  font-weight: 600;
+  font-size: 11px;
+}
+
 /* ============================================
    RESPONSIVE
    ============================================ */
