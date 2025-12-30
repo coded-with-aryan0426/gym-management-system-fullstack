@@ -1,5 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import './Member.css';
+import PageHeader from '../../components/shared/PageHeader';
+import ContentCard from '../../components/shared/ContentCard';
+import {
+    LineChart,
+    Line,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    ResponsiveContainer,
+    Area,
+    AreaChart
+} from 'recharts';
+import { Scale, Activity, TrendingDown, TrendingUp, Dumbbell, User } from 'lucide-react';
+import { toast } from 'react-hot-toast';
+import './MyProgress.css';
 
 interface ProgressNote {
     id: number;
@@ -31,6 +46,7 @@ const MyProgress: React.FC = () => {
                 }
             } catch (error) {
                 console.error('Failed to fetch progress notes:', error);
+                toast.error("Failed to load progress notes");
             } finally {
                 setLoading(false);
             }
@@ -40,130 +56,219 @@ const MyProgress: React.FC = () => {
     }, [user?.id]);
 
     const formatDate = (dateStr: string) => {
-        const date = new Date(dateStr);
-        return date.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
+        return new Date(dateStr).toLocaleDateString('en-US', {
+            month: 'short',
             day: 'numeric'
         });
     };
 
+    // Mock Chart Data
+    const chartData = [
+        { date: 'Jan 1', weight: 85, bodyFat: 22 },
+        { date: 'Jan 15', weight: 84.2, bodyFat: 21.5 },
+        { date: 'Feb 1', weight: 83.5, bodyFat: 21 },
+        { date: 'Feb 15', weight: 82.8, bodyFat: 20.2 },
+        { date: 'Mar 1', weight: 81.5, bodyFat: 19.5 },
+        { date: 'Mar 15', weight: 79.8, bodyFat: 18.8 },
+        { date: 'Apr 1', weight: 78.0, bodyFat: 18 },
+    ];
+
+    // Mock Active Goals
+    const activeGoals = [
+        { id: 1, title: 'Reach 75kg Weight', current: 78, target: 75, unit: 'kg', progress: 70 },
+        { id: 2, title: 'Attend 20 Classes', current: 12, target: 20, unit: 'classes', progress: 60 },
+    ];
+
     if (loading) {
-        return (
-            <div className="member-dashboard">
-                <h1 className="member-page-title">My Progress</h1>
-                <p style={{ color: 'var(--text-secondary)' }}>Loading...</p>
-            </div>
-        );
+        return <div className="p-8 text-zinc-400">Loading progress...</div>;
     }
 
     return (
-        <div className="member-dashboard">
-            <div style={{ marginBottom: '32px' }}>
-                <h1 className="member-page-title">My Progress</h1>
-                <p style={{ color: 'var(--text-secondary)', marginTop: '8px' }}>
-                    Track your fitness journey and view notes from your trainer.
-                </p>
+        <div className="space-y-8 fade-in">
+            <PageHeader
+                title="My Progress"
+                subtitle="Track your fitness journey, measurements, and trainer notes."
+            />
+
+            {/* Metrics Grid */}
+            <div className="measurements-grid">
+                <div className="measurement-card">
+                    <div className="flex justify-between items-start">
+                        <span className="measurement-label">Current Weight</span>
+                        <Scale size={16} className="text-zinc-500" />
+                    </div>
+                    <div className="measurement-value-group">
+                        <span className="measurement-value">78.0</span>
+                        <span className="measurement-unit">kg</span>
+                    </div>
+                    <div className="measurement-change change-positive">
+                        <TrendingDown size={14} /> 7.0 kg lost
+                    </div>
+                </div>
+
+                <div className="measurement-card">
+                    <div className="flex justify-between items-start">
+                        <span className="measurement-label">Body Fat %</span>
+                        <Activity size={16} className="text-zinc-500" />
+                    </div>
+                    <div className="measurement-value-group">
+                        <span className="measurement-value">18.0</span>
+                        <span className="measurement-unit">%</span>
+                    </div>
+                    <div className="measurement-change change-positive">
+                        <TrendingDown size={14} /> 4.0% lost
+                    </div>
+                </div>
+
+                <div className="measurement-card">
+                    <div className="flex justify-between items-start">
+                        <span className="measurement-label">Muscle Mass</span>
+                        <Dumbbell size={16} className="text-zinc-500" />
+                    </div>
+                    <div className="measurement-value-group">
+                        <span className="measurement-value">62.5</span>
+                        <span className="measurement-unit">kg</span>
+                    </div>
+                    <div className="measurement-change change-positive">
+                        <TrendingUp size={14} /> 1.2 kg gained
+                    </div>
+                </div>
+
+                <div className="measurement-card">
+                    <div className="flex justify-between items-start">
+                        <span className="measurement-label">BMI Score</span>
+                        <Activity size={16} className="text-zinc-500" />
+                    </div>
+                    <div className="measurement-value-group">
+                        <span className="measurement-value">22.4</span>
+                        <span className="measurement-unit">Normal</span>
+                    </div>
+                    <div className="measurement-change change-neutral">
+                        <span className="mx-1">•</span> Healthy
+                    </div>
+                </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)', gap: '24px' }}>
-                {/* Progress Notes Timeline */}
-                <div className="member-card">
-                    <h2 className="member-section-title" style={{ marginBottom: '20px' }}>Trainer Notes</h2>
+            {/* Progress Chart */}
+            <div className="chart-container">
+                <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-lg font-semibold text-white">Weight Progress</h3>
+                    <div className="flex gap-2">
+                        {['1M', '3M', '6M', '1Y'].map(period => (
+                            <button
+                                key={period}
+                                className={`text-xs px-3 py-1 rounded-full ${period === '3M' ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
+                            >
+                                {period}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+                <ResponsiveContainer width="100%" height="85%">
+                    <AreaChart data={chartData}>
+                        <defs>
+                            <linearGradient id="colorWeight" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#dc2626" stopOpacity={0.3} />
+                                <stop offset="95%" stopColor="#dc2626" stopOpacity={0} />
+                            </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
+                        <XAxis
+                            dataKey="date"
+                            stroke="#71717a"
+                            tick={{ fontSize: 12 }}
+                            axisLine={false}
+                            tickLine={false}
+                            dy={10}
+                        />
+                        <YAxis
+                            stroke="#71717a"
+                            tick={{ fontSize: 12 }}
+                            axisLine={false}
+                            tickLine={false}
+                            domain={['dataMin - 1', 'dataMax + 1']}
+                        />
+                        <Tooltip
+                            contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '8px' }}
+                            itemStyle={{ color: '#fafafa' }}
+                        />
+                        <Area
+                            type="monotone"
+                            dataKey="weight"
+                            stroke="#dc2626"
+                            strokeWidth={3}
+                            fillOpacity={1}
+                            fill="url(#colorWeight)"
+                        />
+                    </AreaChart>
+                </ResponsiveContainer>
+            </div>
 
-                    {notes.length === 0 ? (
-                        <div className="member-empty-state" style={{ padding: '32px 0' }}>
-                            <div className="member-empty-state__icon">
-                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                                    <polyline points="14 2 14 8 20 8" />
-                                    <line x1="16" y1="13" x2="8" y2="13" />
-                                    <line x1="16" y1="17" x2="8" y2="17" />
-                                    <polyline points="10 9 9 9 8 9" />
-                                </svg>
+            <div className="progress-container">
+                {/* Left Column: Trainer Notes timeline */}
+                <div>
+                    <ContentCard title="Trainer Notes" padded>
+                        {notes.length === 0 ? (
+                            <div className="py-8 text-center text-zinc-500 text-sm">
+                                <div className="mb-2 bg-zinc-900 w-12 h-12 rounded-full flex items-center justify-center mx-auto text-xl">📝</div>
+                                No notes from your trainer yet.
                             </div>
-                            <h3 className="member-empty-state__title">No Notes Yet</h3>
-                            <p className="member-empty-state__text">
-                                Your trainer hasn't added any progress notes yet.
-                            </p>
-                        </div>
-                    ) : (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                            {notes.map(note => (
-                                <div key={note.id} style={{ display: 'flex', gap: '16px' }}>
-                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                        <div style={{
-                                            width: '40px',
-                                            height: '40px',
-                                            borderRadius: '50%',
-                                            background: 'var(--bg-tertiary)',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            border: '2px solid var(--border-primary)',
-                                            zIndex: 1,
-                                        }}>
-                                            <span style={{ fontSize: '16px' }}>📝</span>
+                        ) : (
+                            <div className="notes-timeline">
+                                {notes.map(note => (
+                                    <div key={note.id} className="note-card">
+                                        <div className="note-avatar">
+                                            {note.trainer.avatarId ? (
+                                                <img src={note.trainer.avatarId} alt="" className="w-full h-full rounded-full object-cover" />
+                                            ) : (
+                                                <User size={20} className="text-zinc-500" />
+                                            )}
                                         </div>
-                                        <div style={{ width: '2px', flex: 1, background: 'var(--border-primary)', marginTop: '8px' }} />
-                                    </div>
-
-                                    <div style={{ flex: 1, paddingBottom: '24px' }}>
-                                        <div style={{
-                                            background: 'var(--bg-tertiary)',
-                                            padding: '20px',
-                                            borderRadius: '16px',
-                                            border: '1px solid var(--border-primary)'
-                                        }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                    <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
-                                                        {note.trainer.fullName}
-                                                    </span>
-                                                    <span style={{
-                                                        fontSize: '11px',
-                                                        padding: '2px 8px',
-                                                        borderRadius: '10px',
-                                                        background: 'rgba(16, 185, 129, 0.1)',
-                                                        color: '#10B981',
-                                                        fontWeight: 600
-                                                    }}>
-                                                        TRAINER
-                                                    </span>
+                                        <div className="note-content">
+                                            <div className="note-header">
+                                                <div className="note-author">
+                                                    {note.trainer.fullName}
+                                                    <span className="note-role-badge">Trainer</span>
                                                 </div>
-                                                <span style={{ fontSize: '13px', color: 'var(--text-tertiary)' }}>
-                                                    {formatDate(note.createdAt)}
-                                                </span>
+                                                <div className="note-date">{formatDate(note.createdAt)}</div>
                                             </div>
-                                            <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6', margin: 0 }}>
-                                                {note.note}
-                                            </p>
+                                            <p className="note-text">{note.note}</p>
                                         </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </ContentCard>
+                </div>
+
+                {/* Right Column: Active Goals */}
+                <div className="space-y-6">
+                    <ContentCard title="Active Goals" padded>
+                        <div className="goals-list">
+                            {activeGoals.map(goal => (
+                                <div key={goal.id} className="goal-item">
+                                    <div className="goal-header">
+                                        <div className="goal-title">{goal.title}</div>
+                                        <div className="goal-status goal-status--active">On Track</div>
+                                    </div>
+                                    <div className="goal-progress">
+                                        <div className="goal-progress-bar" style={{ width: `${goal.progress}%` }}></div>
+                                    </div>
+                                    <div className="goal-stats">
+                                        <span>Current: {goal.current} {goal.unit}</span>
+                                        <span>Target: {goal.target} {goal.unit}</span>
                                     </div>
                                 </div>
                             ))}
                         </div>
-                    )}
-                </div>
+                    </ContentCard>
 
-                {/* Sidebar Stats (Placeholder for future metrics) */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                    <div className="member-card">
-                        <h2 className="member-section-title">Measurements</h2>
-                        <div className="member-empty-state" style={{ padding: '24px 0' }}>
-                            <p className="member-empty-state__text" style={{ fontStyle: 'italic' }}>
-                                Measurement tracking coming soon...
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="member-card">
-                        <h2 className="member-section-title">Goals</h2>
-                        <div className="member-empty-state" style={{ padding: '24px 0' }}>
-                            <p className="member-empty-state__text" style={{ fontStyle: 'italic' }}>
-                                Goal tracking coming soon...
-                            </p>
-                        </div>
+                    <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl text-center">
+                        <h4 className="text-zinc-200 font-semibold mb-2">Want to set new goals?</h4>
+                        <p className="text-zinc-400 text-sm mb-3">Discuss with your trainer to create a personalized plan.</p>
+                        <button className="text-red-500 text-sm font-medium hover:text-red-400 transition-colors">
+                            Contact Trainer
+                        </button>
                     </div>
                 </div>
             </div>
