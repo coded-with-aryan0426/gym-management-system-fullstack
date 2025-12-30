@@ -26,7 +26,7 @@ export const getStatusVariant = (status: string): BadgeVariant => {
     const statusLower = status.toLowerCase();
     if (statusLower === 'active') return 'active';
     if (statusLower === 'pending') return 'pending';
-    if (statusLower === 'expired' || statusLower === 'inactive') return 'expired';
+    if (statusLower === 'expired' || statusLower === 'inactive' || statusLower === 'left') return 'expired';
     if (statusLower === 'on leave' || statusLower === 'on-leave') return 'on-leave';
     return 'default';
 };

@@ -204,9 +204,9 @@ const Staff: React.FC = () => {
       header: 'Left',
       width: '110px',
       render: (member) => {
-        // Use leavingDate field from backend
+        // Use leavingDate from backend
         const leftDate = (member as any).leavingDate;
-        if (!leftDate) return <span className="staff-date staff-date--active">Active</span>;
+        if (!leftDate) return <span className="staff-date">-</span>;
 
         const date = new Date(leftDate);
         const day = date.getDate().toString().padStart(2, '0');
@@ -220,9 +220,8 @@ const Staff: React.FC = () => {
       header: 'Status',
       width: '100px',
       render: (member) => {
-        // Check if staff has left
-        const leftDate = (member as any).leftDate || (member as any).departureDate || (member as any).terminationDate;
-        const status = leftDate ? 'Inactive' : 'Active';
+        // Use status from backend (defaults to 'Active' if not set)
+        const status = (member as any).status || 'Active';
         return <Badge variant={getStatusVariant(status)}>{status}</Badge>;
       },
     },
