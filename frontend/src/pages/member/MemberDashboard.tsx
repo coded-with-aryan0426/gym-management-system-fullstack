@@ -7,6 +7,7 @@ import ProgressSnapshot from '../../components/member/ProgressSnapshot';
 import ActivityTimeline from '../../components/member/ActivityTimeline';
 import { toast } from 'react-hot-toast';
 import './Member.css';
+import '../../components/member/MemberComponents.css';
 
 interface DashboardData {
     memberId: number;
@@ -57,52 +58,44 @@ const MemberDashboard: React.FC = () => {
     }, [user?.id]);
 
     if (loading) {
-        return <div className="p-8 text-zinc-400">Loading dashboard...</div>;
+        return (
+            <div className="member-dashboard" style={{ padding: '2rem', color: 'var(--text-tertiary)' }}>
+                Loading dashboard...
+            </div>
+        );
     }
 
     const memberName = dashboard?.memberName || user?.fullName || 'Member';
 
-    // Mock stats for now (to be connected to backend later)
     const stats = {
         classesThisWeek: 3,
         attendedThisMonth: 18,
         streakDays: 7
     };
 
-    // Mock upcoming classes
     const upcomingClasses = [
         { id: 1, title: 'Yoga Class', time: '9:00 AM', date: 'Tomorrow', location: 'Room A', trainerName: 'Sarah J', type: 'Yoga' },
         { id: 2, title: 'HIIT Training', time: '6:00 PM', date: 'Tue, Mar 26', location: 'Main Studio', trainerName: 'Mike C', type: 'HIIT' },
     ];
 
     return (
-        <div className="member-dashboard fade-in space-y-8">
+        <div className="member-dashboard fade-in" style={{ padding: '1.5rem 2rem' }}>
             <PageHeader
                 title={`Welcome Back, ${memberName}! 👋`}
                 subtitle="Your last visit: Yesterday at 6:00 PM"
             />
 
-            {/* Quick Stats Row */}
             <MemberStatsRow membership={dashboard?.membership || null} stats={stats} />
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Main Content Area (Left 2/3) */}
-                <div className="lg:col-span-2 space-y-6">
-                    {/* Upcoming Classes */}
+            <div className="member-dashboard-grid">
+                <div className="member-dashboard-main">
                     <UpcomingClassesList classes={upcomingClasses} />
-
-                    {/* Recent Activity */}
                     <ActivityTimeline />
                 </div>
 
-                {/* Sidebar Area (Right 1/3) */}
-                <div className="space-y-6">
-                    <div className="h-auto">
-                        <MemberTrainerCard trainer={dashboard?.assignedTrainer || null} />
-                    </div>
-                    <div className="h-auto">
-                        <ProgressSnapshot />
-                    </div>
+                <div className="member-dashboard-sidebar">
+                    <MemberTrainerCard trainer={dashboard?.assignedTrainer || null} />
+                    <ProgressSnapshot />
                 </div>
             </div>
         </div>
