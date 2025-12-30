@@ -32,6 +32,7 @@ const TrainerDashboard = lazy(() => import('./pages/trainer/TrainerDashboard'));
 const TrainerProfile = lazy(() => import('./pages/trainer/TrainerProfile'));
 const MyMembers = lazy(() => import('./pages/trainer/MyMembers'));
 const MySchedule = lazy(() => import('./pages/trainer/MySchedule'));
+const MyClasses = lazy(() => import('./pages/trainer/MyClasses'));
 
 // Member Dashboard Pages
 const MemberLayout = lazy(() => import('./pages/member/MemberLayout'));
@@ -40,6 +41,7 @@ const MemberProfile = lazy(() => import('./pages/member/MemberProfile'));
 const MyMembership = lazy(() => import('./pages/member/MyMembership'));
 const MyTrainer = lazy(() => import('./pages/member/MyTrainer'));
 const MyBookings = lazy(() => import('./pages/member/MyBookings'));
+const AvailableClasses = lazy(() => import('./pages/member/AvailableClasses'));
 
 // Loading spinner for page transitions
 const PageLoader = () => (
@@ -71,6 +73,7 @@ function App() {
                         <Route index element={<TrainerDashboard />} />
                         <Route path="profile" element={<TrainerProfile />} />
                         <Route path="members" element={<MyMembers />} />
+                        <Route path="classes" element={<MyClasses />} />
                         <Route path="schedule" element={<MySchedule />} />
                         <Route path="*" element={<Navigate to="/trainer" replace />} />
                       </Routes>
@@ -89,6 +92,7 @@ function App() {
                         <Route index element={<MemberDashboard />} />
                         <Route path="profile" element={<MemberProfile />} />
                         <Route path="membership" element={<MyMembership />} />
+                        <Route path="classes" element={<AvailableClasses />} />
                         <Route path="trainer" element={<MyTrainer />} />
                         <Route path="bookings" element={<MyBookings />} />
                         <Route path="*" element={<Navigate to="/member" replace />} />
