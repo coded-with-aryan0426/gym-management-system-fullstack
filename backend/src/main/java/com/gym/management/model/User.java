@@ -97,6 +97,10 @@ public class User {
 
     private String phone;
 
+    // Avatar ID for persistent avatar selection (nullable - uses initials if null)
+    @Column(name = "avatar_id")
+    private String avatarId;
+
     public String getPhone() {
         return phone;
     }
@@ -105,12 +109,55 @@ public class User {
         this.phone = phone;
     }
 
+    public String getAvatarId() {
+        return avatarId;
+    }
+
+    public void setAvatarId(String avatarId) {
+        this.avatarId = avatarId;
+    }
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    // Staff leaving date (when they left the gym) - nullable
+    @Column(name = "leaving_date")
+    private java.time.LocalDate leavingDate;
+
+    // Staff status: Active, On Leave, Inactive, Left
+    @Column(name = "status")
+    private String status;
 
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
+        if (status == null) {
+            status = "Active";
+        }
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public java.time.LocalDate getLeavingDate() {
+        return leavingDate;
+    }
+
+    public void setLeavingDate(java.time.LocalDate leavingDate) {
+        this.leavingDate = leavingDate;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     @ManyToMany(fetch = FetchType.EAGER)

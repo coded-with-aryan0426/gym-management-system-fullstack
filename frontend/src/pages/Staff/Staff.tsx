@@ -145,19 +145,31 @@ const Staff: React.FC = () => {
       key: 'member',
       header: 'Staff Member',
       width: 'auto',
-      render: (member) => (
-        <div
-          className="staff-cell"
-          onClick={(e) => { e.stopPropagation(); handleActionClick(member); }}
-          style={{ cursor: 'pointer' }}
-        >
-          <Avatar name={member.fullName} size="md" />
-          <div className="staff-cell__info">
-            <span className="staff-name">{member.fullName}</span>
-            <span className="staff-email">{member.email}</span>
+      render: (member) => {
+        // Load avatarId from localStorage as fallback
+        const savedAvatarId = typeof window !== 'undefined'
+          ? localStorage.getItem(`avatar_${member.userId}`)
+          : null;
+
+        return (
+          <div
+            className="staff-cell"
+            onClick={(e) => { e.stopPropagation(); handleActionClick(member); }}
+            style={{ cursor: 'pointer' }}
+          >
+            <Avatar
+              name={member.fullName}
+              size="md"
+              avatarId={savedAvatarId || member.avatarId}
+              userId={member.userId}
+            />
+            <div className="staff-cell__info">
+              <span className="staff-name">{member.fullName}</span>
+              <span className="staff-email">{member.email}</span>
+            </div>
           </div>
-        </div>
-      ),
+        );
+      },
     },
     {
       key: 'employeeId',

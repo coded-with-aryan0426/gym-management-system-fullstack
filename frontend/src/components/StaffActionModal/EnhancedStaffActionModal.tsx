@@ -7,6 +7,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import type { User } from "../../types/user"
 import api from "../../services/api"
 import { showToast } from "../../utils/toast"
+import AvatarPicker from "../ui/AvatarPicker"
+import { getAvatarUrl } from "../ui/Avatar"
 import "./StaffActionModal.css"
 
 // ============================================================================
@@ -76,7 +78,9 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
     role: "TRAINER",
     specialization: [] as string[],
     joinDate: "",
+    leavingDate: "", // When staff leaves the gym
     status: "Active",
+    avatarId: null as string | null,
   })
   const [isSaving, setIsSaving] = useState(false)
 
@@ -93,6 +97,9 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
 
   // Delete
   const [isDeleting, setIsDeleting] = useState(false)
+
+  // Avatar Picker Popup
+  const [showAvatarPicker, setShowAvatarPicker] = useState(false)
 
   // ============================================================================
   // Derived State & Validation
@@ -115,6 +122,10 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
     if (isOpen && staff) {
       setLocalStaff(staff)
       setActiveTab("profile")
+
+      // Load avatarId from localStorage as fallback (until DB column is added)
+      const savedAvatarId = localStorage.getItem(`avatar_${staff.userId}`)
+
       setEditForm({
         fullName: staff.fullName || "",
         email: staff.email || "",
@@ -122,7 +133,9 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
         role: staff.roles?.[0]?.roleName || "TRAINER",
         specialization: [],
         joinDate: staff.createdAt ? new Date(staff.createdAt).toISOString().split('T')[0] : "",
+        leavingDate: (staff as any).leavingDate || "",
         status: "Active",
+        avatarId: savedAvatarId || (staff as any).avatarId || null,
       })
       loadAssignedMembers()
     }
@@ -189,15 +202,28 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
 
     setIsSaving(true)
     try {
+      // Save avatar to localStorage as fallback (until DB column is added)
+      if (editForm.avatarId !== null) {
+        localStorage.setItem(`avatar_${staff.userId}`, editForm.avatarId)
+      } else {
+        localStorage.removeItem(`avatar_${staff.userId}`)
+      }
+
+      // Send all editable fields to backend
       const updatedStaff = await api.updateUser(staff.userId, {
         fullName: editForm.fullName,
         email: editForm.email,
         phoneNumber: editForm.phone,
+        status: editForm.status,
+        leavingDate: editForm.leavingDate || undefined,
+        avatarId: editForm.avatarId,
       })
 
-      setLocalStaff(prev => prev ? { ...prev, ...updatedStaff } : prev)
+      // Merge avatarId into response (in case backend doesn't return it yet)
+      const staffWithAvatar = { ...updatedStaff, avatarId: editForm.avatarId }
+      setLocalStaff(prev => prev ? { ...prev, ...staffWithAvatar } : prev)
       showToast.success("Profile updated successfully")
-      onEditProfile?.(updatedStaff)
+      onEditProfile?.(staffWithAvatar)
       onUpdate?.()
       // Modal stays open!
     } catch (error: any) {
@@ -310,28 +336,45 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
           >
             {/* ============================================================
-                  Profile Header
+                  Profile Header - Matching Member Modal Layout
                  ============================================================ */}
             <div className="staff-action-modal__profile-header">
               <div className="profile-header__avatar">
-                <img
-                  src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${localStaff.fullName}`}
-                  alt={localStaff.fullName}
-                />
+                {editForm.avatarId ? (
+                  <img
+                    src={getAvatarUrl(editForm.avatarId) || ''}
+                    alt={localStaff.fullName}
+                  />
+                ) : (
+                  <div className="avatar-initials" style={{
+                    width: '100%', height: '100%',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    background: 'linear-gradient(135deg, var(--color-crimson), #b91c1c)',
+                    color: 'white', fontWeight: 700, fontSize: '18px'
+                  }}>
+                    {localStaff.fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                  </div>
+                )}
               </div>
+
+              {/* Name + Email (left) */}
               <div className="profile-header__info">
                 <h2 className="profile-header__name">{localStaff.fullName}</h2>
-                <div className="profile-header__meta">
-                  <span className="role-badge role-badge--trainer">
-                    {editForm.role}
-                  </span>
-                  <span className={`status-badge status-badge--${editForm.status.toLowerCase()}`}>
-                    <span className="status-dot"></span>
-                    {editForm.status}
-                  </span>
-                </div>
                 <p className="profile-header__email">{localStaff.email}</p>
               </div>
+
+              {/* Badges (center) */}
+              <div className="profile-header__meta">
+                <span className="role-badge role-badge--trainer">
+                  {editForm.role}
+                </span>
+                <span className={`status-badge status-badge--${editForm.status.toLowerCase().replace(' ', '-')}`}>
+                  <span className="status-dot"></span>
+                  {editForm.status}
+                </span>
+              </div>
+
+              {/* Stats (right) */}
               <div className="profile-header__stats">
                 <div className="stat-item">
                   <span className="stat-value">{assignedMembers.length}</span>
@@ -339,7 +382,7 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
                 </div>
               </div>
 
-              {/* Inline Close Button */}
+              {/* Close Button */}
               <button className="staff-action-modal__close-inline" onClick={onClose}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <line x1="18" y1="6" x2="6" y2="18" />
@@ -442,7 +485,64 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
                       exit={{ opacity: 0, x: -20 }}
                       transition={{ duration: 0.2 }}
                     >
-                      <h4 className="content-panel__title">Edit Profile</h4>
+                      <div className="content-panel__header">
+                        <h4 className="content-panel__title">Edit Profile</h4>
+                        <button
+                          type="button"
+                          className="btn btn--secondary btn--sm"
+                          onClick={() => setShowAvatarPicker(true)}
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                            <circle cx="12" cy="7" r="4" />
+                          </svg>
+                          Choose Avatar
+                        </button>
+                      </div>
+
+                      {/* Avatar Picker Popup Modal */}
+                      <AnimatePresence>
+                        {showAvatarPicker && (
+                          <motion.div
+                            className="avatar-picker-overlay"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setShowAvatarPicker(false)}
+                          >
+                            <motion.div
+                              className="avatar-picker-modal"
+                              initial={{ scale: 0.9, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              exit={{ scale: 0.9, opacity: 0 }}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <div className="avatar-picker-modal__header">
+                                <h5>Choose Your Avatar</h5>
+                                <button
+                                  className="avatar-picker-modal__close"
+                                  onClick={() => setShowAvatarPicker(false)}
+                                >
+                                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <line x1="18" y1="6" x2="6" y2="18" />
+                                    <line x1="6" y1="6" x2="18" y2="18" />
+                                  </svg>
+                                </button>
+                              </div>
+                              <AvatarPicker
+                                selectedId={editForm.avatarId}
+                                userId={staff?.userId}
+                                onSelect={(id) => {
+                                  setEditForm(prev => ({ ...prev, avatarId: id }))
+                                  setShowAvatarPicker(false)
+                                  showToast.success("Avatar selected!")
+                                }}
+                              />
+                            </motion.div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+
                       <div className="content-panel__body">
                         {/* Row 1: Full Name + Email */}
                         <div className="form-row-2-col">
@@ -504,7 +604,7 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
                           </div>
                         </div>
 
-                        {/* Row 3: Join Date + Status */}
+                        {/* Row 3: Join Date + Leaving Date */}
                         <div className="form-row-2-col">
                           <div className="form-group">
                             <label>Join Date</label>
@@ -517,6 +617,22 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
                             />
                           </div>
                           <div className="form-group">
+                            <label>Leaving Date</label>
+                            <input
+                              type="date"
+                              className="form-input"
+                              value={editForm.leavingDate}
+                              onChange={(e) => setEditForm(prev => ({ ...prev, leavingDate: e.target.value }))}
+                              disabled={isSaving}
+                              placeholder="Leave empty if still active"
+                            />
+                            <span className="form-hint">Leave empty if still active</span>
+                          </div>
+                        </div>
+
+                        {/* Row 4: Status */}
+                        <div className="form-row-1-col">
+                          <div className="form-group">
                             <label>Status</label>
                             <select
                               className="form-select"
@@ -527,6 +643,7 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
                               <option value="Active">Active</option>
                               <option value="On Leave">On Leave</option>
                               <option value="Inactive">Inactive</option>
+                              <option value="Left">Left</option>
                             </select>
                           </div>
                         </div>
@@ -712,30 +829,144 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
                   {activeTab === "performance" && (
                     <motion.div
                       key="performance"
-                      className="content-panel content-panel--constrained"
+                      className="content-panel"
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20 }}
                       transition={{ duration: 0.2 }}
                     >
-                      <h4 className="content-panel__title">Performance & Stats</h4>
+                      <h4 className="content-panel__title">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <line x1="18" y1="20" x2="18" y2="10" />
+                          <line x1="12" y1="20" x2="12" y2="4" />
+                          <line x1="6" y1="20" x2="6" y2="14" />
+                        </svg>
+                        Performance & Stats
+                      </h4>
                       <div className="content-panel__body">
-                        <div className="performance-grid">
-                          <div className="performance-card">
-                            <span className="performance-card__value">{assignedMembers.length}</span>
-                            <span className="performance-card__label">Total Members</span>
+                        {/* Stats Cards - 4 Column Grid */}
+                        <div className="performance-stats-grid">
+                          <div className="perf-stat-card perf-stat-card--primary">
+                            <div className="perf-stat-card__icon">
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                                <circle cx="9" cy="7" r="4" />
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                              </svg>
+                            </div>
+                            <div className="perf-stat-card__content">
+                              <span className="perf-stat-card__value">{assignedMembers.length}</span>
+                              <span className="perf-stat-card__label">Total Members</span>
+                            </div>
                           </div>
-                          <div className="performance-card">
-                            <span className="performance-card__value">{assignedMembers.length}</span>
-                            <span className="performance-card__label">Active Members</span>
+
+                          <div className="perf-stat-card perf-stat-card--success">
+                            <div className="perf-stat-card__icon">
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                <polyline points="22 4 12 14.01 9 11.01" />
+                              </svg>
+                            </div>
+                            <div className="perf-stat-card__content">
+                              <span className="perf-stat-card__value">92%</span>
+                              <span className="perf-stat-card__label">Attendance</span>
+                            </div>
                           </div>
-                          <div className="performance-card">
-                            <span className="performance-card__value">92%</span>
-                            <span className="performance-card__label">Attendance Rate</span>
+
+                          <div className="perf-stat-card perf-stat-card--info">
+                            <div className="perf-stat-card__icon">
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                                <line x1="16" y1="2" x2="16" y2="6" />
+                                <line x1="8" y1="2" x2="8" y2="6" />
+                                <line x1="3" y1="10" x2="21" y2="10" />
+                              </svg>
+                            </div>
+                            <div className="perf-stat-card__content">
+                              <span className="perf-stat-card__value">48</span>
+                              <span className="perf-stat-card__label">Sessions/Mo</span>
+                            </div>
                           </div>
-                          <div className="performance-card">
-                            <span className="performance-card__value">88%</span>
-                            <span className="performance-card__label">Session Completion</span>
+
+                          <div className="perf-stat-card perf-stat-card--warning">
+                            <div className="perf-stat-card__icon">
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                              </svg>
+                            </div>
+                            <div className="perf-stat-card__content">
+                              <span className="perf-stat-card__value">4.8</span>
+                              <span className="perf-stat-card__label">Rating</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Weekly Activity Chart */}
+                        <div className="performance-chart-section">
+                          <div className="performance-chart__header">
+                            <h5 className="performance-chart__title">Weekly Activity</h5>
+                            <span className="performance-chart__period">Last 7 days</span>
+                          </div>
+                          <div className="performance-bar-chart">
+                            {[
+                              { day: 'Mon', sessions: 6, max: 8 },
+                              { day: 'Tue', sessions: 8, max: 8 },
+                              { day: 'Wed', sessions: 5, max: 8 },
+                              { day: 'Thu', sessions: 7, max: 8 },
+                              { day: 'Fri', sessions: 8, max: 8 },
+                              { day: 'Sat', sessions: 4, max: 8 },
+                              { day: 'Sun', sessions: 2, max: 8 },
+                            ].map((item, index) => (
+                              <div key={item.day} className="bar-chart__column">
+                                <div className="bar-chart__bar-container">
+                                  <motion.div
+                                    className="bar-chart__bar"
+                                    initial={{ height: 0 }}
+                                    animate={{ height: `${(item.sessions / item.max) * 100}%` }}
+                                    transition={{ delay: index * 0.05, duration: 0.4, ease: "easeOut" }}
+                                  />
+                                </div>
+                                <span className="bar-chart__value">{item.sessions}</span>
+                                <span className="bar-chart__label">{item.day}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Progress Rings */}
+                        <div className="performance-progress-section">
+                          <div className="progress-ring-card">
+                            <div className="progress-ring" style={{ '--progress': '88' } as React.CSSProperties}>
+                              <svg viewBox="0 0 100 100">
+                                <circle className="progress-ring__bg" cx="50" cy="50" r="40" />
+                                <circle className="progress-ring__fill" cx="50" cy="50" r="40" />
+                              </svg>
+                              <span className="progress-ring__value">88%</span>
+                            </div>
+                            <span className="progress-ring__label">Session Completion</span>
+                          </div>
+
+                          <div className="progress-ring-card">
+                            <div className="progress-ring" style={{ '--progress': '95' } as React.CSSProperties}>
+                              <svg viewBox="0 0 100 100">
+                                <circle className="progress-ring__bg" cx="50" cy="50" r="40" />
+                                <circle className="progress-ring__fill progress-ring__fill--success" cx="50" cy="50" r="40" />
+                              </svg>
+                              <span className="progress-ring__value">95%</span>
+                            </div>
+                            <span className="progress-ring__label">Member Retention</span>
+                          </div>
+
+                          <div className="progress-ring-card">
+                            <div className="progress-ring" style={{ '--progress': '72' } as React.CSSProperties}>
+                              <svg viewBox="0 0 100 100">
+                                <circle className="progress-ring__bg" cx="50" cy="50" r="40" />
+                                <circle className="progress-ring__fill progress-ring__fill--warning" cx="50" cy="50" r="40" />
+                              </svg>
+                              <span className="progress-ring__value">72%</span>
+                            </div>
+                            <span className="progress-ring__label">Goal Progress</span>
                           </div>
                         </div>
                       </div>
@@ -746,51 +977,69 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
                   {activeTab === "message" && (
                     <motion.div
                       key="message"
-                      className="content-panel content-panel--constrained"
+                      className="content-panel"
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20 }}
                       transition={{ duration: 0.2 }}
                     >
-                      <h4 className="content-panel__title">Message Trainer</h4>
-                      <div className="content-panel__body">
-                        <div className="form-group">
-                          <label>Subject</label>
+                      <h4 className="content-panel__title">Send Message</h4>
+                      <div className="message-compose">
+                        {/* Recipient Row - macOS Mail style */}
+                        <div className="message-compose__row">
+                          <span className="message-compose__label">To:</span>
+                          <div className="message-compose__recipient">
+                            <span className="recipient-tag">
+                              {localStaff.fullName}
+                              <span className="recipient-email">&lt;{localStaff.email}&gt;</span>
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Subject Row */}
+                        <div className="message-compose__row">
+                          <span className="message-compose__label">Subject:</span>
                           <input
                             type="text"
-                            className="form-input"
-                            placeholder="Enter subject..."
                             value={messageForm.subject}
-                            onChange={(e) => setMessageForm(prev => ({ ...prev, subject: e.target.value }))}
+                            onChange={(e) => setMessageForm({ ...messageForm, subject: e.target.value })}
+                            onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                            className="message-compose__input"
+                            placeholder="Enter subject..."
                             disabled={isSendingMessage}
                           />
                         </div>
-                        <div className="form-group">
-                          <label>Message</label>
+
+                        {/* Message Body */}
+                        <div className="message-compose__body">
                           <textarea
-                            className="form-textarea"
-                            rows={6}
-                            placeholder="Write your message..."
                             value={messageForm.body}
-                            onChange={(e) => setMessageForm(prev => ({ ...prev, body: e.target.value }))}
-                            disabled={isSendingMessage}
+                            onChange={(e) => setMessageForm({ ...messageForm, body: e.target.value })}
                             onKeyDown={(e) => {
-                              if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                              if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                                e.preventDefault()
                                 handleSendMessage()
                               }
                             }}
+                            className="message-compose__textarea"
+                            placeholder="Write your message here..."
+                            disabled={isSendingMessage}
                           />
-                          <span className="hint-text">Ctrl/Cmd + Enter to send</span>
+                          <span className="message-compose__hint">⌘ + Enter to send</span>
                         </div>
-                        <div className="form-actions">
-                          <button
-                            className="btn btn--primary"
-                            onClick={handleSendMessage}
-                            disabled={isSendingMessage || !messageForm.subject || !messageForm.body}
-                          >
-                            {isSendingMessage ? "Sending..." : "Send Message"}
-                          </button>
-                        </div>
+                      </div>
+                      <div className="form-actions">
+                        <button
+                          className="btn btn--primary"
+                          onClick={handleSendMessage}
+                          disabled={isSendingMessage || !messageForm.subject || !messageForm.body}
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <line x1="22" y1="2" x2="11" y2="13" />
+                            <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                          </svg>
+                          {isSendingMessage ? "Sending..." : "Send"}
+                        </button>
                       </div>
                     </motion.div>
                   )}
@@ -799,37 +1048,97 @@ const EnhancedStaffActionModal: React.FC<EnhancedStaffActionModalProps> = ({
                   {activeTab === "delete" && (
                     <motion.div
                       key="delete"
-                      className="content-panel content-panel--constrained content-panel--danger"
+                      className="content-panel"
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20 }}
                       transition={{ duration: 0.2 }}
                     >
-                      <h4 className="content-panel__title content-panel__title--danger">Delete Staff</h4>
                       <div className="content-panel__body">
-                        <div className="delete-warning">
-                          <div className="delete-warning__icon">
-                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <circle cx="12" cy="12" r="10" />
-                              <line x1="12" y1="8" x2="12" y2="12" />
-                              <line x1="12" y1="16" x2="12.01" y2="16" />
-                            </svg>
+                        {/* Danger Zone Card */}
+                        <div className="delete-zone">
+                          {/* User Preview Card */}
+                          <div className="delete-user-preview">
+                            <div className="delete-user-preview__avatar">
+                              <img
+                                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${localStaff.fullName}`}
+                                alt={localStaff.fullName}
+                              />
+                            </div>
+                            <div className="delete-user-preview__info">
+                              <span className="delete-user-preview__name">{localStaff.fullName}</span>
+                              <span className="delete-user-preview__role">{editForm.role}</span>
+                            </div>
                           </div>
-                          <h5>Are you sure?</h5>
-                          <p>You are about to permanently delete <strong>{localStaff.fullName}</strong>.</p>
-                          <p className="delete-warning__note">This action cannot be undone.</p>
-                        </div>
-                        <div className="delete-actions">
-                          <button className="btn btn--secondary" onClick={() => setActiveTab("profile")}>
-                            Cancel
-                          </button>
-                          <button
-                            className="btn btn--danger"
-                            onClick={handleDeleteStaff}
-                            disabled={isDeleting}
+
+                          {/* Warning Icon */}
+                          <motion.div
+                            className="delete-warning-icon"
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ delay: 0.2, type: "spring", stiffness: 300 }}
                           >
-                            {isDeleting ? 'Deleting...' : 'Delete Staff'}
-                          </button>
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                              <line x1="12" y1="9" x2="12" y2="13" />
+                              <line x1="12" y1="17" x2="12.01" y2="17" />
+                            </svg>
+                          </motion.div>
+
+                          {/* Warning Text */}
+                          <div className="delete-warning-text">
+                            <h5 className="delete-warning-text__title">This action is permanent</h5>
+                            <p className="delete-warning-text__desc">
+                              Deleting this staff member will remove all associated data.
+                            </p>
+                          </div>
+
+                          {/* Consequences List */}
+                          <div className="delete-consequences">
+                            <div className="delete-consequence">
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <polyline points="20 6 9 17 4 12" />
+                              </svg>
+                              <span>Member assignments will be removed</span>
+                            </div>
+                            <div className="delete-consequence">
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <polyline points="20 6 9 17 4 12" />
+                              </svg>
+                              <span>Schedule data will be deleted</span>
+                            </div>
+                            <div className="delete-consequence">
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <polyline points="20 6 9 17 4 12" />
+                              </svg>
+                              <span>Performance history will be lost</span>
+                            </div>
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div className="delete-zone__actions">
+                            <button
+                              className="btn btn--secondary btn--large"
+                              onClick={() => setActiveTab("profile")}
+                            >
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <line x1="19" y1="12" x2="5" y2="12" />
+                                <polyline points="12 19 5 12 12 5" />
+                              </svg>
+                              Go Back
+                            </button>
+                            <button
+                              className="btn btn--danger btn--large"
+                              onClick={handleDeleteStaff}
+                              disabled={isDeleting}
+                            >
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <polyline points="3 6 5 6 21 6" />
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                              </svg>
+                              {isDeleting ? 'Deleting...' : 'Delete Permanently'}
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </motion.div>

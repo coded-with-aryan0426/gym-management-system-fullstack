@@ -1,4 +1,8 @@
-/* Global Classes Page */
+/* ============================================================================
+   Classes Page - Premium macOS Design
+   Full Redesign with Light/Dark Mode Support
+   ============================================================================ */
+
 .classes-page {
   padding: 24px;
   height: calc(100vh - 64px);
@@ -8,7 +12,7 @@
   background-color: var(--bg-primary);
   color: var(--text-primary);
   overflow: hidden;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -22,16 +26,15 @@
   justify-content: center;
   height: 100%;
   gap: 20px;
-  color: rgba(235, 235, 245, 0.6);
+  color: var(--text-tertiary);
 }
 
 .loading-spinner {
   width: 32px;
   height: 32px;
-  border: 4px solid rgba(255, 255, 255, 0.1);
+  border: 3px solid var(--border-subtle);
   border-radius: 50%;
-  border-top-color: #0A84FF;
-  /* System Blue */
+  border-top-color: var(--color-crimson);
   animation: spin 0.8s cubic-bezier(0.4, 0.0, 0.2, 1) infinite;
 }
 
@@ -48,13 +51,13 @@
   flex: 1;
   overflow: hidden;
   position: relative;
-  background-color: transparent;
-  /* System Gray 6 Dark - Removed for pure black theme */
-  border-radius: 18px;
-  border: none;
+  background-color: var(--bg-secondary);
+  border-radius: 16px;
+  border: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
-  box-shadow: none;
+  box-shadow: var(--shadow-sm);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -63,44 +66,53 @@
 .schedule-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 12px;
-  padding: 0 4px;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 4px 0;
+  height: 44px;
+  /* Fixed height for consistency */
 }
 
-.schedule-header__left {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.schedule-header__title {
-  font-size: 34px;
-  font-weight: 700;
-  margin: 0;
-  color: var(--text-primary);
-  letter-spacing: -0.02em;
-}
-
-.schedule-header__controls {
+.header-left-group {
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
+.schedule-header__title {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.divider-vertical {
+  width: 1px;
+  height: 24px;
+  background-color: var(--border-subtle);
+}
+
+.date-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .nav-buttons {
   display: flex;
-  background-color: rgba(118, 118, 128, 0.24);
-  /* System Fill Gray */
+  background-color: var(--bg-tertiary);
   padding: 2px;
   border-radius: 8px;
   gap: 2px;
+  border: 1px solid var(--border-subtle);
 }
 
 .nav-btn {
   background: none;
   border: none;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--text-secondary);
   width: 28px;
   height: 28px;
   border-radius: 6px;
@@ -108,25 +120,20 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+  transition: all 0.2s;
 }
 
 .nav-btn:hover {
-  background-color: rgba(255, 255, 255, 0.15);
+  background-color: var(--bg-elevated);
   color: var(--text-primary);
-}
-
-.date-display {
-  display: flex;
-  align-items: center;
-  gap: 8px;
 }
 
 .schedule-header__date {
-  font-size: 17px;
-  color: var(--text-primary);
+  font-size: 14px;
+  color: var(--text-secondary);
   font-weight: 600;
-  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .date-picker-wrapper {
@@ -136,18 +143,15 @@
   justify-content: center;
   width: 28px;
   height: 28px;
-  border-radius: 50%;
-  background-color: rgba(10, 132, 255, 0.15);
-  transition: background-color 0.2s;
+  border-radius: 6px;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
 .date-picker-wrapper:hover {
-  background-color: rgba(10, 132, 255, 0.25);
-}
-
-.calendar-icon {
-  color: #0A84FF;
-  cursor: pointer;
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
 }
 
 .date-input {
@@ -157,33 +161,9 @@
   cursor: pointer;
 }
 
-.schedule-header__right {
+.header-right-group {
   display: flex;
-  gap: 32px;
-  padding-bottom: 4px;
-}
-
-.schedule-header__stat {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-}
-
-.stat-value {
-  font-size: 24px;
-  font-weight: 600;
-  color: var(--text-primary);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.02em;
-  line-height: 1;
-}
-
-.stat-label {
-  font-size: 13px;
-  color: rgba(235, 235, 245, 0.6);
-  /* Secondary Label */
-  font-weight: 500;
-  margin-top: 4px;
+  align-items: center;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -191,105 +171,258 @@
 /* -------------------------------------------------------------------------- */
 .schedule-filters {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 8px;
 }
 
-.schedule-filters__tabs {
+.filter-wrapper {
+  position: relative;
+}
+
+/* Filter Toggle Button */
+.filter-toggle-btn {
   display: flex;
-  background-color: rgba(118, 118, 128, 0.24);
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-sm);
+}
+
+.filter-toggle-btn:hover,
+.filter-toggle-btn.active {
+  background-color: var(--bg-elevated);
+  color: var(--text-primary);
+  border-color: var(--border-secondary);
+}
+
+.filter-badge {
+  background-color: var(--color-crimson);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 6px;
+  min-width: 18px;
+  text-align: center;
+}
+
+.chevron-icon {
+  transition: transform 0.2s ease;
+  opacity: 0.6;
+}
+
+.chevron-icon.rotate {
+  transform: rotate(180deg);
+}
+
+/* Filter Popover */
+.filter-popover {
+  position: absolute;
+  top: 110%;
+  /* Just below the button */
+  right: 0;
+  /* Align to right edge */
+  left: auto;
+  width: 280px;
+  background-color: var(--bg-secondary);
+  border-radius: 16px;
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-xl), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  /* Deep shadow */
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 16px;
+  z-index: 100;
+  animation: popoverFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: top right;
+}
+
+@keyframes popoverFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.filter-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.filter-section__title {
+  margin: 0;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-tertiary);
+  font-weight: 600;
+}
+
+/* Segmented Control for View (Today/Week) */
+.filter-segment-control {
+  display: flex;
+  background-color: var(--bg-tertiary);
   padding: 3px;
-  border-radius: 9px;
+  border-radius: 10px;
   gap: 2px;
 }
 
-.filter-tab {
-  border: none;
+.segment-btn {
+  flex: 1;
   background: none;
-  color: rgba(235, 235, 245, 0.6);
+  border: none;
+  padding: 6px;
   font-size: 13px;
-  font-family: inherit;
   font-weight: 500;
-  padding: 6px 16px;
+  color: var(--text-tertiary);
   border-radius: 7px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s;
 }
 
-.filter-tab:hover {
-  color: var(--text-primary);
+.segment-btn:hover {
+  color: var(--text-secondary);
 }
 
-.filter-tab--active {
-  background-color: #636366;
-  /* System Gray 3 */
+.segment-btn.active {
+  background-color: var(--bg-primary);
+  /* Card feel */
   color: var(--text-primary);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   font-weight: 600;
 }
 
-.schedule-filters__dropdowns {
-  display: flex;
-  gap: 12px;
-  flex: 1;
+.filter-divider {
+  height: 1px;
+  background-color: var(--border-subtle);
+  margin: 16px 0;
 }
 
-.filter-select {
+/* Filter Groups */
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filter-group label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.select-wrapper select {
+  width: 100%;
   appearance: none;
-  background-color: rgba(44, 44, 46, 0.8);
-  /* System Gray 5 */
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
   color: var(--text-primary);
-  padding: 8px 34px 8px 14px;
+  padding: 8px 32px 8px 12px;
   border-radius: 8px;
   font-size: 13px;
-  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.select-wrapper select:hover {
+  border-color: var(--border-secondary);
+  background-color: var(--bg-elevated);
+}
+
+.select-wrapper select:focus {
+  border-color: var(--color-crimson);
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.1);
+}
+
+.select-arrow {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-tertiary);
+  pointer-events: none;
+}
+
+/* Reset Button */
+.filter-actions {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  justify-content: center;
+}
+
+.reset-btn {
+  background: none;
+  border: none;
+  font-size: 12px;
+  color: var(--color-crimson);
   font-weight: 500;
   cursor: pointer;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
+  padding: 4px 8px;
+  border-radius: 4px;
   transition: all 0.2s;
-  backdrop-filter: blur(10px);
 }
 
-.filter-select:hover {
-  background-color: rgba(58, 58, 60, 0.9);
-  border-color: rgba(255, 255, 255, 0.2);
+.reset-btn:hover {
+  background-color: rgba(220, 38, 38, 0.08);
 }
 
-.filter-select:focus {
-  outline: none;
-  border-color: #0A84FF;
-  box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.2);
-}
-
+/* Add Class Button */
 .schedule-filters__add-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  background-color: #0A84FF;
-  color: white;
+  gap: 8px;
+  background: var(--text-primary);
+  /* Inversed for contrast */
+  color: var(--bg-primary);
   border: none;
-  padding: 8px 16px;
-  border-radius: 8px;
+  padding: 10px 20px;
+  border-radius: 12px;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(10, 132, 255, 0.25);
+  box-shadow: var(--shadow-sm);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .schedule-filters__add-btn:hover {
-  background-color: #0071E3;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(10, 132, 255, 0.35);
+  background-color: var(--text-primary);
+  box-shadow: var(--shadow-md);
+  opacity: 0.95;
 }
 
 .schedule-filters__add-btn:active {
   transform: translateY(0);
+}
+
+.btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -301,34 +434,60 @@
   height: 100%;
 }
 
-.calendar-header {
-  display: flex;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-  background-color: rgba(28, 28, 30, 0.85);
+/* Old calendar-header removed, replaced by sticky headers in columns */
+
+/* Column Headers (Sticky) */
+.sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background-color: var(--bg-secondary);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  z-index: 20;
-  flex-shrink: 0;
-  padding-right: 6px;
-  /* Scrollbar compensation */
+  border-bottom: 1px solid var(--border-subtle);
+  height: 72px;
+  /* Fixed height for headers */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);
 }
 
 .time-column-header {
-  width: 65px;
-  flex-shrink: 0;
-  border-right: 1px solid rgba(255, 255, 255, 0.12);
+  width: 100%;
+  /* Fills time-column width */
+  border-right: 1px solid var(--border-subtle);
+  background: var(--bg-tertiary);
+  /* Distinct background for time corner */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.time-header-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .day-column-header {
   flex: 1;
-  padding: 14px 4px;
+  padding: 12px 4px;
   text-align: center;
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  border-right: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
+  gap: 6px;
   position: relative;
+  transition: background-color 0.2s ease;
+}
+
+.day-column-header:hover {
+  background-color: var(--bg-tertiary);
 }
 
 .day-column-header:last-child {
@@ -336,34 +495,36 @@
 }
 
 .day-column-header .day-name {
-  font-size: 11px;
+  font-size: 12px;
   text-transform: uppercase;
   font-weight: 600;
-  color: rgba(235, 235, 245, 0.6);
+  color: var(--text-tertiary);
   letter-spacing: 0.05em;
 }
 
 .day-column-header .day-number {
-  font-size: 20px;
-  font-weight: 400;
-  width: 36px;
-  height: 36px;
-  line-height: 36px;
+  font-size: 22px;
+  font-weight: 500;
+  width: 38px;
+  height: 38px;
+  line-height: 38px;
   border-radius: 50%;
   color: var(--text-primary);
   transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .day-column-header.today .day-number {
-  background-color: #FF3B30;
-  /* System Red */
+  background-color: var(--color-crimson);
   color: white;
-  font-weight: 600;
-  box-shadow: 0 4px 10px rgba(255, 59, 48, 0.3);
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
 }
 
 .day-column-header.today .day-name {
-  color: #FF3B30;
+  color: var(--color-crimson);
   font-weight: 700;
 }
 
@@ -372,13 +533,22 @@
 /* -------------------------------------------------------------------------- */
 .calendar-grid-container {
   flex: 1;
-  display: flex;
+  /* display: flex; REMOVED to allow simple scrolling block */
+  display: block;
   overflow-y: scroll;
   overflow-x: auto;
   position: relative;
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
-  padding-top: 10px;
+  scrollbar-color: var(--border-secondary) transparent;
+  background: var(--bg-secondary);
+}
+
+.calendar-grid-inner {
+  display: flex;
+  min-width: 100%;
+  /* Ensures it fills width */
+  min-height: max-content;
+  /* Ensures it wraps content even if taller than viewport */
 }
 
 /* Custom Scrollbar */
@@ -387,11 +557,14 @@
   height: 10px;
 }
 
+.calendar-grid-container::-webkit-scrollbar-corner {
+  background: var(--bg-secondary);
+}
+
 .calendar-grid-container::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.15);
+  background-color: var(--border-secondary);
   border-radius: 10px;
-  border: 2px solid #1C1C1E;
-  /* Create padding effect */
+  border: 3px solid var(--bg-secondary);
 }
 
 .calendar-grid-container::-webkit-scrollbar-track {
@@ -399,101 +572,181 @@
 }
 
 .time-column {
-  width: 65px;
+  width: 70px;
   flex-shrink: 0;
-  border-right: 1px solid rgba(255, 255, 255, 0.12);
-  background-color: #1C1C1E;
+  border-right: 1px solid var(--border-subtle);
+  background-color: var(--bg-tertiary);
+  display: flex;
+  flex-direction: column;
+  /* position: sticky; REMOVED - The column itself doesn't stick, only header */
+  z-index: 25;
+  /* Higher than content, lower than header */
   position: sticky;
   left: 0;
-  z-index: 10;
-  margin-top: -10px;
-  padding-top: 10px;
+  z-index: 40;
+  /* Needs to be high */
+  background-color: var(--bg-tertiary);
 }
 
 .time-label {
   height: 60px;
   position: relative;
+  border-top: 1px solid transparent;
+  /* Align with grid lines */
 }
 
 .time-label span {
   position: absolute;
   top: -6px;
-  right: 10px;
+  right: 12px;
   font-size: 11px;
-  color: rgba(235, 235, 245, 0.4);
+  color: var(--text-tertiary);
   font-weight: 500;
   font-variant-numeric: tabular-nums;
 }
 
 .day-column {
   flex: 1;
-  min-width: 0;
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
-  /* More subtle alignment lines */
+  min-width: 140px;
+  /* Ensure min width for days */
+  border-right: 1px solid var(--border-subtle);
   position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.day-slots-container {
+  position: relative;
+  flex: 1;
+  /* Contains grid lines and events */
 }
 
 .grid-cell {
   height: 60px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid var(--border-subtle);
   box-sizing: border-box;
   width: 100%;
   cursor: pointer;
-  transition: background-color 0.15s;
+  transition: background-color 0.1s;
 }
 
 .grid-cell:hover {
-  background-color: rgba(255, 255, 255, 0.03);
+  background-color: var(--bg-tertiary);
 }
 
 /* -------------------------------------------------------------------------- */
 /*                               Calendar Events                              */
 /* -------------------------------------------------------------------------- */
+/* Base Event Card */
 .calendar-event {
   position: absolute;
-  left: 3px;
-  right: 3px;
-  border-radius: 6px;
-  padding: 6px 8px;
+  left: 4px;
+  right: 4px;
+  border-radius: 8px;
+  padding: 8px 10px;
   cursor: pointer;
   overflow: hidden;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
-  border-left: 3px solid currentColor;
-  backdrop-filter: blur(4px);
-  /* Use !important to override inline opacity if necessary, though inline styles usually win */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  /* Softer shadow */
+  border-left: 4px solid currentColor;
+  backdrop-filter: blur(8px);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 10;
+  /* Lower than header */
 }
 
+/* Event Content */
 .event-content {
-  color: white;
+  color: var(--text-primary);
   height: 100%;
   display: flex;
   flex-direction: column;
 }
 
 .event-time {
-  font-size: 10px;
-  opacity: 0.9;
-  margin-bottom: 3px;
-  font-weight: 500;
+  font-size: 11px;
+  opacity: 0.8;
+  margin-bottom: 2px;
+  font-weight: 600;
   letter-spacing: 0.01em;
+  color: inherit;
 }
 
 .event-title {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   line-height: 1.3;
   margin-bottom: 2px;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  color: inherit;
 }
 
 .event-meta {
-  font-size: 10px;
-  opacity: 0.75;
+  font-size: 11px;
+  opacity: 0.7;
   margin-top: auto;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   font-weight: 500;
+  color: inherit;
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                Event Colors                                */
+/* -------------------------------------------------------------------------- */
+/* 
+   We use specific classes generated in JSX: .event-type-{lowercase}
+   These use theme variables for consistent dark/light mode appearance.
+   Fallback is blue.
+*/
+
+/* Default (General/Blue) */
+.calendar-event {
+  background-color: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
+  border-color: #3b82f6;
+}
+
+/* Yoga (Green) */
+.event-type-yoga {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border-color: #10b981;
+}
+
+/* HIIT (Red) */
+.event-type-hiit {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border-color: #ef4444;
+}
+
+/* Cardio (Orange) */
+.event-type-cardio {
+  background-color: rgba(249, 115, 22, 0.15);
+  color: #f97316;
+  border-color: #f97316;
+}
+
+/* Strength (Purple) */
+.event-type-strength {
+  background-color: rgba(168, 85, 247, 0.15);
+  color: #a855f7;
+  border-color: #a855f7;
+}
+
+/* Pilates (Pink) */
+.event-type-pilates {
+  background-color: rgba(236, 72, 153, 0.15);
+  color: #ec4899;
+  border-color: #ec4899;
+}
+
+/* CrossFit (Yellow/Amber) */
+.event-type-crossfit {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border-color: #f59e0b;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -504,10 +757,10 @@
   left: 0;
   right: 0;
   height: 2px;
-  background-color: #FF3B30;
+  background-color: var(--color-crimson);
   pointer-events: none;
   z-index: 30;
-  box-shadow: 0 1px 3px rgba(255, 59, 48, 0.4);
+  box-shadow: 0 1px 4px rgba(220, 38, 38, 0.4);
 }
 
 .time-dot {
@@ -517,16 +770,16 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background-color: #FF3B30;
-  box-shadow: 0 0 0 2px rgba(28, 28, 30, 1);
-  /* Outline to separate from bg */
+  background-color: var(--color-crimson);
+  box-shadow: 0 0 0 2px var(--bg-secondary);
+  /* Dynamic outline */
 }
 
 /* -------------------------------------------------------------------------- */
 /*                               Modal Animation                              */
 /* -------------------------------------------------------------------------- */
 .modal-overlay {
-  animation: fadeIn 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+  animation: fadeIn 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
 @keyframes fadeIn {
@@ -542,6 +795,26 @@
 /* -------------------------------------------------------------------------- */
 /*                           Responsive Layouts                               */
 /* -------------------------------------------------------------------------- */
+@media (max-width: 1024px) {
+  .schedule-filters {
+    padding: 6px;
+  }
+
+  .schedule-filters__left {
+    padding-bottom: 2px;
+    /* Scrollbar space if needed */
+  }
+
+  .filter-select {
+    min-width: 120px;
+  }
+
+  /* Removed old horizontal scroll logic since we use a popover now */
+  .schedule-filters__container {
+    width: auto;
+  }
+}
+
 @media (max-width: 768px) {
   .classes-page {
     padding: 16px;
@@ -554,50 +827,49 @@
 
   /* Schedule Header Stack */
   .schedule-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
+    flex-wrap: wrap;
+    height: auto;
+    gap: 12px;
+    margin-bottom: 12px;
   }
 
-  .schedule-header__right {
+  .header-left-group {
     width: 100%;
     justify-content: space-between;
-    padding-bottom: 0;
   }
 
-  .schedule-header__controls {
+  .divider-vertical {
+    display: none;
+  }
+
+  .header-right-group {
     width: 100%;
-    margin-top: 8px;
-    justify-content: space-between;
+    justify-content: flex-end;
   }
 
-  .nav-buttons {
-    order: 2;
-    /* Move arrows to right */
-  }
+  /* Old controls removed */
 
-  .date-display {
+  .date-controls {
     order: 1;
-    /* Date on left */
+    /* Keep date controls visible */
+  }
+
+  .schedule-header__title {
+    font-size: 28px;
   }
 
   /* Filters */
   .schedule-filters {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
+    gap: 8px;
+    padding: 8px;
   }
 
-  .schedule-filters__dropdowns {
-    overflow-x: auto;
-    padding-bottom: 8px;
-    flex-wrap: nowrap;
-    -webkit-overflow-scrolling: touch;
-    mask-image: linear-gradient(to right, black 90%, transparent 100%);
+  .schedule-filters__add-btn span {
+    display: none;
   }
 
-  .filter-select {
-    flex-shrink: 0;
+  .schedule-filters__add-btn {
+    padding: 8px;
   }
 
   /* Calendar Mobile */
@@ -605,4 +877,127 @@
     min-width: 140px !important;
     /* Force scroll */
   }
+
+  .time-column {
+    width: 50px;
+  }
+
+  .time-label span {
+    right: 6px;
+  }
+}
+
+/* ============================================================================
+   LIGHT MODE SPECIFIC OVERRIDES
+   ============================================================================ */
+/* 
+   Most variables handle this automatically, but specific adjustments 
+   ensure the "Apple Calendar" look in light mode.
+*/
+
+:root.theme-light .classes-page,
+[data-theme="light"] .classes-page,
+body.light-mode .classes-page {
+  background-color: #f5f7fa;
+  /* Slightly darker than pure white for depth */
+}
+
+:root.theme-light .classes-page__content,
+[data-theme="light"] .classes-page__content,
+body.light-mode .classes-page__content {
+  background-color: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+}
+
+:root.theme-light .schedule-filters,
+[data-theme="light"] .schedule-filters,
+body.light-mode .schedule-filters {
+  background-color: rgba(255, 255, 255, 0.8);
+  border-color: #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+}
+
+:root.theme-light .filter-select,
+[data-theme="light"] .filter-select,
+body.light-mode .filter-select {
+  background-color: #f8fafc;
+  border-color: #e2e8f0;
+  color: #475569;
+}
+
+:root.theme-light .filter-select:hover,
+[data-theme="light"] .filter-select:hover,
+body.light-mode .filter-select:hover {
+  background-color: #ffffff;
+}
+
+:root.theme-light .calendar-grid-container,
+[data-theme="light"] .calendar-grid-container,
+body.light-mode .calendar-grid-container {
+  background-color: #ffffff;
+}
+
+:root.theme-light .day-column,
+[data-theme="light"] .day-column,
+body.light-mode .day-column {
+  border-right-color: #f1f5f9;
+}
+
+:root.theme-light .grid-cell,
+[data-theme="light"] .grid-cell,
+body.light-mode .grid-cell {
+  border-bottom-color: #f1f5f9;
+}
+
+:root.theme-light .grid-cell:hover,
+[data-theme="light"] .grid-cell:hover,
+body.light-mode .grid-cell:hover {
+  background-color: #f8fafc;
+}
+
+:root.theme-light .time-column,
+[data-theme="light"] .time-column,
+body.light-mode .time-column {
+  background-color: #ffffff;
+  border-right-color: #f1f5f9;
+}
+
+/* Event Card Light Mode Adjustments - Stronger visuals */
+:root.theme-light .calendar-event,
+[data-theme="light"] .calendar-event,
+body.light-mode .calendar-event {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+:root.theme-light .event-content,
+[data-theme="light"] .event-content,
+body.light-mode .event-content {
+  color: inherit;
+  /* Inherit form the specific type class */
+}
+
+/* Specific Event Colors for Light Mode (More vibrant/readable) */
+:root.theme-light .event-type-yoga,
+[data-theme="light"] .event-type-yoga,
+body.light-mode .event-type-yoga {
+  background-color: rgba(16, 185, 129, 0.12);
+  color: #059669;
+  border-color: #059669;
+}
+
+:root.theme-light .event-type-hiit,
+[data-theme="light"] .event-type-hiit,
+body.light-mode .event-type-hiit {
+  background-color: rgba(239, 68, 68, 0.12);
+  color: #dc2626;
+  border-color: #dc2626;
+}
+
+:root.theme-light .event-type-cardio,
+[data-theme="light"] .event-type-cardio,
+body.light-mode .event-type-cardio {
+  background-color: rgba(249, 115, 22, 0.12);
+  color: #ea580c;
+  border-color: #ea580c;
 }

@@ -57,12 +57,12 @@ const icons = {
 }
 
 const navItems = [
-  { path: "/dashboard", label: "Dashboard", icon: icons.dashboard, color: "#fca5a5" },   // Light Red (Red-300)
-  { path: "/members", label: "Members", icon: icons.members, color: "#f87171" },         // Red-400
-  { path: "/staff", label: "Staff", icon: icons.staff, color: "#ef4444" },               // Red-500
-  { path: "/classes", label: "Classes", icon: icons.classes, color: "#dc2626" },         // Red-600
-  { path: "/financials", label: "Financials", icon: icons.financials, color: "#b91c1c" }, // Red-700
-  { path: "/reports", label: "Reports", icon: icons.reports, color: "#991b1b" },         // Dark Red (Red-800)
+  { path: "/dashboard", label: "Dashboard", icon: icons.dashboard, color: "#dc2626" },
+  { path: "/members", label: "Members", icon: icons.members, color: "#dc2626" },
+  { path: "/staff", label: "Staff", icon: icons.staff, color: "#dc2626" },
+  { path: "/classes", label: "Classes", icon: icons.classes, color: "#dc2626" },
+  { path: "/financials", label: "Financials", icon: icons.financials, color: "#dc2626" },
+  { path: "/reports", label: "Reports", icon: icons.reports, color: "#dc2626" },
 ]
 
 interface CommandRailProps {

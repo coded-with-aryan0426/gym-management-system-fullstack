@@ -359,13 +359,27 @@ public class UserService {
             if (user.getRoles() != null && !user.getRoles().isEmpty()) {
                 existingUser.setRoles(user.getRoles());
             }
-            // Update phone if provided
+            // Update phone if provided (from either phone or phoneNumber transient field)
             if (user.getPhone() != null) {
                 existingUser.setPhone(user.getPhone());
+            } else if (user.getPhoneNumber() != null) {
+                existingUser.setPhone(user.getPhoneNumber());
             }
             // Update join date if provided
             if (user.getJoinDate() != null) {
                 existingUser.setCreatedAt(user.getJoinDate().atStartOfDay());
+            }
+            // Update leaving date if provided
+            if (user.getLeavingDate() != null) {
+                existingUser.setLeavingDate(user.getLeavingDate());
+            }
+            // Update status if provided
+            if (user.getStatus() != null) {
+                existingUser.setStatus(user.getStatus());
+            }
+            // Update avatarId if provided
+            if (user.getAvatarId() != null) {
+                existingUser.setAvatarId(user.getAvatarId());
             }
             return userRepository.save(existingUser);
         }

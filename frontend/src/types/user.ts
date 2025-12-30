@@ -12,8 +12,10 @@ export interface User {
   plan?: string | { name: string };
   status?: string;
   joinDate?: string;
+  leavingDate?: string; // When staff left the gym
   createdAt?: string;
   membershipDaysRemaining?: number; // Calculated field for display
+  avatarId?: string | null; // Persistent avatar selection
 }
 
 export interface MemberDTO {
@@ -62,6 +64,10 @@ export interface UpdateUserDto {
   phone?: string;
   address?: string;
   avatarUrl?: string;
+  avatarId?: string | null; // Persistent avatar selection
   roles?: Role[];
   packageId?: number;
+  status?: string; // Active, On Leave, Inactive, Left
+  joinDate?: string; // YYYY-MM-DD format
+  leavingDate?: string; // YYYY-MM-DD format (when staff left)
 }

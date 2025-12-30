@@ -57,10 +57,22 @@ const Members: React.FC = () => {
     }
 
     const userId = searchParams.get('userId')
-    if (userId && members.length > 0) {
-      const member = members.find(m => m.userId.toString() === userId)
-      if (member) {
-        handleActionClick(member)
+    if (userId) {
+      // 1. Try to find in current list (fastest)
+      const memberInList = members.find(m => m.userId.toString() === userId)
+      if (memberInList) {
+        handleActionClick(memberInList)
+      } else {
+        // 2. Fallback: Fetch explicitly if not in current page
+        api.getUserById(parseInt(userId))
+          .then(user => {
+            // Cast to MemberDTO - assuming API returns compatible structure 
+            // or the Modal handles partial data gracefully
+            handleActionClick(user as unknown as MemberDTO)
+          })
+          .catch(err => {
+            console.error("Failed to load member from URL", err)
+          })
       }
     }
   }, [searchParams, members])
