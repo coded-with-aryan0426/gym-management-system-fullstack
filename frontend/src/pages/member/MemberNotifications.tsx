@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import './Member.css';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+    Bell, CreditCard, Calendar, User, Dumbbell, Trophy,
+    Check, CheckCheck, Trash2, Settings, ChevronRight
+} from 'lucide-react';
+import { toast } from 'react-hot-toast';
+import '../../styles/macos-member.css';
+import './MemberNotifications.css';
 
 interface Notification {
     id: number;
@@ -10,64 +17,55 @@ interface Notification {
     createdAt: string;
 }
 
+type FilterType = 'all' | 'unread';
+
+const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.05 } }
+};
+
+const itemVariants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: { opacity: 1, x: 0 }
+};
+
 const MemberNotifications: React.FC = () => {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [loading, setLoading] = useState(true);
-    const [filter, setFilter] = useState<'all' | 'unread'>('all');
+    const [filter, setFilter] = useState<FilterType>('all');
 
     const userStr = localStorage.getItem('user');
     const user = userStr ? JSON.parse(userStr) : null;
 
     useEffect(() => {
-        const fetchNotifications = async () => {
-            if (!user?.id) return;
-
-            try {
-                const response = await fetch(`/api/notifications/user/${user.id}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    setNotifications(data);
-                }
-            } catch (error) {
-                console.error('Failed to fetch notifications:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchNotifications();
+        // Mock data for development
+        const mockNotifications: Notification[] = [
+            { id: 1, title: 'Class Reminder', message: 'Your Yoga class starts in 1 hour. Room A at 9:00 AM.', type: 'BOOKING', isRead: false, createdAt: new Date().toISOString() },
+            { id: 2, title: 'Payment Successful', message: 'Your monthly membership payment of $99.99 was processed.', type: 'MEMBERSHIP', isRead: false, createdAt: new Date(Date.now() - 3600000).toISOString() },
+            { id: 3, title: 'New Achievement!', message: 'Congratulations! You unlocked the "7 Day Streak" badge. 🔥', type: 'ACHIEVEMENT', isRead: false, createdAt: new Date(Date.now() - 86400000).toISOString() },
+            { id: 4, title: 'Trainer Message', message: 'John Smith: Great progress on your squats today! Keep it up.', type: 'TRAINER', isRead: true, createdAt: new Date(Date.now() - 86400000 * 2).toISOString() },
+            { id: 5, title: 'Membership Expiring Soon', message: 'Your Premium Monthly plan expires in 7 days. Renew now to continue.', type: 'MEMBERSHIP', isRead: true, createdAt: new Date(Date.now() - 86400000 * 3).toISOString() },
+            { id: 6, title: 'Class Cancelled', message: 'HIIT Training on Jan 5 has been cancelled. We apologize for the inconvenience.', type: 'BOOKING', isRead: true, createdAt: new Date(Date.now() - 86400000 * 5).toISOString() }
+        ];
+        setNotifications(mockNotifications);
+        setLoading(false);
     }, [user?.id]);
 
-    const markAsRead = async (notificationId: number) => {
-        try {
-            const response = await fetch(`/api/notifications/${notificationId}/read`, {
-                method: 'PUT',
-            });
-
-            if (response.ok) {
-                setNotifications(prev =>
-                    prev.map(n => n.id === notificationId ? { ...n, isRead: true } : n)
-                );
-            }
-        } catch (error) {
-            console.error('Failed to mark as read:', error);
-        }
+    const markAsRead = (notificationId: number) => {
+        setNotifications(prev =>
+            prev.map(n => n.id === notificationId ? { ...n, isRead: true } : n)
+        );
+        toast.success('Marked as read');
     };
 
-    const markAllAsRead = async () => {
-        if (!user?.id) return;
+    const markAllAsRead = () => {
+        setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+        toast.success('All notifications marked as read');
+    };
 
-        try {
-            const response = await fetch(`/api/notifications/user/${user.id}/read-all`, {
-                method: 'PUT',
-            });
-
-            if (response.ok) {
-                setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
-            }
-        } catch (error) {
-            console.error('Failed to mark all as read:', error);
-        }
+    const deleteNotification = (notificationId: number) => {
+        setNotifications(prev => prev.filter(n => n.id !== notificationId));
+        toast.success('Notification deleted');
     };
 
     const formatDate = (dateStr: string) => {
@@ -78,23 +76,47 @@ const MemberNotifications: React.FC = () => {
         const diffHours = Math.floor(diffMs / 3600000);
         const diffDays = Math.floor(diffMs / 86400000);
 
+        if (diffMins < 5) return 'Just now';
         if (diffMins < 60) return `${diffMins}m ago`;
         if (diffHours < 24) return `${diffHours}h ago`;
         if (diffDays < 7) return `${diffDays}d ago`;
-        return date.toLocaleDateString();
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     };
 
-    const getTypeIcon = (type: string) => {
+    const getTypeInfo = (type: string) => {
         switch (type?.toUpperCase()) {
             case 'MEMBERSHIP':
-                return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="4" width="22" height="16" rx="2" /><line x1="1" y1="10" x2="23" y2="10" /></svg>;
+                return { icon: CreditCard, color: 'var(--macos-accent)', bg: 'rgba(0, 122, 255, 0.12)' };
             case 'BOOKING':
-                return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /></svg>;
+                return { icon: Calendar, color: 'var(--macos-success)', bg: 'rgba(52, 199, 89, 0.12)' };
             case 'TRAINER':
-                return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="8.5" cy="7" r="4" /><line x1="20" y1="8" x2="20" y2="14" /></svg>;
+                return { icon: User, color: 'var(--macos-purple)', bg: 'rgba(175, 82, 222, 0.12)' };
+            case 'ACHIEVEMENT':
+                return { icon: Trophy, color: 'var(--macos-warning)', bg: 'rgba(255, 149, 0, 0.12)' };
+            case 'GYM':
+                return { icon: Dumbbell, color: 'var(--macos-pink)', bg: 'rgba(255, 45, 85, 0.12)' };
             default:
-                return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>;
+                return { icon: Bell, color: 'var(--macos-text-secondary)', bg: 'var(--macos-bg-glass)' };
         }
+    };
+
+    // Group notifications by date
+    const groupByDate = (notifs: Notification[]) => {
+        const groups: { [key: string]: Notification[] } = {};
+        const today = new Date().toDateString();
+        const yesterday = new Date(Date.now() - 86400000).toDateString();
+
+        notifs.forEach(n => {
+            const dateStr = new Date(n.createdAt).toDateString();
+            let label = dateStr;
+            if (dateStr === today) label = 'Today';
+            else if (dateStr === yesterday) label = 'Yesterday';
+            else label = new Date(n.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+
+            if (!groups[label]) groups[label] = [];
+            groups[label].push(n);
+        });
+        return groups;
     };
 
     const filteredNotifications = notifications.filter(n =>
@@ -102,161 +124,151 @@ const MemberNotifications: React.FC = () => {
     );
 
     const unreadCount = notifications.filter(n => !n.isRead).length;
+    const groupedNotifications = groupByDate(filteredNotifications);
 
     if (loading) {
         return (
-            <div className="member-dashboard">
-                <h1 className="member-page-title">Notifications</h1>
-                <p style={{ color: 'var(--text-secondary)' }}>Loading...</p>
+            <div className="macos-page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '80vh' }}>
+                <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}>
+                    <Bell size={32} color="var(--macos-accent)" />
+                </motion.div>
             </div>
         );
     }
 
     return (
-        <div className="member-dashboard">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <motion.div
+            className="macos-page notifications-macos"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+        >
+            {/* Header */}
+            <motion.header className="notifications__header" variants={itemVariants}>
                 <div>
-                    <h1 className="member-page-title" style={{ marginBottom: '4px' }}>
+                    <h1 className="macos-heading-xl">
                         Notifications
                         {unreadCount > 0 && (
-                            <span style={{
-                                marginLeft: '12px',
-                                padding: '4px 10px',
-                                background: '#10B981',
-                                borderRadius: '20px',
-                                fontSize: '14px',
-                                fontWeight: 600,
-                                color: 'white',
-                            }}>
-                                {unreadCount}
-                            </span>
+                            <span className="notifications__badge">{unreadCount}</span>
                         )}
                     </h1>
+                    <p className="macos-text-md">Stay updated on your gym activity</p>
                 </div>
-                <div style={{ display: 'flex', gap: '8px' }}>
+                <button className="macos-btn macos-btn--ghost">
+                    <Settings size={18} />
+                </button>
+            </motion.header>
+
+            {/* Filter Bar */}
+            <motion.div className="notifications__toolbar" variants={itemVariants}>
+                <div className="notifications__filters">
                     <button
+                        className={`notifications__filter-pill ${filter === 'all' ? 'notifications__filter-pill--active' : ''}`}
                         onClick={() => setFilter('all')}
-                        style={{
-                            padding: '8px 16px',
-                            borderRadius: '8px',
-                            border: 'none',
-                            background: filter === 'all' ? '#10B981' : 'var(--bg-tertiary)',
-                            color: filter === 'all' ? 'white' : 'var(--text-secondary)',
-                            fontSize: '13px',
-                            fontWeight: 500,
-                            cursor: 'pointer',
-                        }}
                     >
                         All
                     </button>
                     <button
+                        className={`notifications__filter-pill ${filter === 'unread' ? 'notifications__filter-pill--active' : ''}`}
                         onClick={() => setFilter('unread')}
-                        style={{
-                            padding: '8px 16px',
-                            borderRadius: '8px',
-                            border: 'none',
-                            background: filter === 'unread' ? '#10B981' : 'var(--bg-tertiary)',
-                            color: filter === 'unread' ? 'white' : 'var(--text-secondary)',
-                            fontSize: '13px',
-                            fontWeight: 500,
-                            cursor: 'pointer',
-                        }}
                     >
                         Unread
+                        {unreadCount > 0 && <span className="notifications__filter-count">{unreadCount}</span>}
                     </button>
-                    {unreadCount > 0 && (
-                        <button
-                            onClick={markAllAsRead}
-                            style={{
-                                padding: '8px 16px',
-                                borderRadius: '8px',
-                                border: '1px solid var(--border-primary)',
-                                background: 'transparent',
-                                color: 'var(--text-secondary)',
-                                fontSize: '13px',
-                                fontWeight: 500,
-                                cursor: 'pointer',
-                            }}
-                        >
-                            Mark all read
-                        </button>
-                    )}
                 </div>
-            </div>
+                {unreadCount > 0 && (
+                    <button className="macos-btn macos-btn--secondary macos-btn--sm" onClick={markAllAsRead}>
+                        <CheckCheck size={16} /> Mark all read
+                    </button>
+                )}
+            </motion.div>
 
-            {filteredNotifications.length === 0 ? (
-                <div className="member-empty-state">
-                    <div className="member-empty-state__icon">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-                        </svg>
-                    </div>
-                    <h3 className="member-empty-state__title">No Notifications</h3>
-                    <p className="member-empty-state__text">
-                        {filter === 'unread' ? 'All caught up! No unread notifications.' : 'You have no notifications yet.'}
-                    </p>
-                </div>
-            ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    {filteredNotifications.map(notification => (
-                        <div
-                            key={notification.id}
-                            onClick={() => !notification.isRead && markAsRead(notification.id)}
-                            style={{
-                                display: 'flex',
-                                gap: '16px',
-                                padding: '16px 20px',
-                                background: notification.isRead ? 'var(--bg-secondary)' : 'rgba(16, 185, 129, 0.05)',
-                                border: `1px solid ${notification.isRead ? 'var(--border-primary)' : 'rgba(16, 185, 129, 0.2)'}`,
-                                borderRadius: '12px',
-                                cursor: notification.isRead ? 'default' : 'pointer',
-                                transition: 'all 0.2s ease',
-                            }}
-                        >
-                            <div style={{
-                                width: '40px',
-                                height: '40px',
-                                borderRadius: '10px',
-                                background: notification.isRead ? 'var(--bg-tertiary)' : 'rgba(16, 185, 129, 0.1)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: notification.isRead ? 'var(--text-tertiary)' : '#10B981',
-                                flexShrink: 0,
-                            }}>
-                                {getTypeIcon(notification.type)}
+            {/* Notifications List */}
+            <AnimatePresence mode="wait">
+                {filteredNotifications.length === 0 ? (
+                    <motion.div
+                        key="empty"
+                        className="glass-card glass-card--lg"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                    >
+                        <div className="macos-empty-state">
+                            <div className="macos-empty-state__icon"><Bell size={28} /></div>
+                            <div className="macos-empty-state__title">
+                                {filter === 'unread' ? 'All caught up!' : 'No notifications yet'}
                             </div>
-                            <div style={{ flex: 1 }}>
-                                <div style={{
-                                    fontWeight: notification.isRead ? 500 : 600,
-                                    color: 'var(--text-primary)',
-                                    marginBottom: '4px',
-                                }}>
-                                    {notification.title}
-                                </div>
-                                <div style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '6px' }}>
-                                    {notification.message}
-                                </div>
-                                <div style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>
-                                    {formatDate(notification.createdAt)}
-                                </div>
+                            <div className="macos-empty-state__text">
+                                {filter === 'unread' ? 'You have no unread notifications' : 'When you receive notifications, they will appear here'}
                             </div>
-                            {!notification.isRead && (
-                                <div style={{
-                                    width: '8px',
-                                    height: '8px',
-                                    borderRadius: '50%',
-                                    background: '#10B981',
-                                    flexShrink: 0,
-                                    marginTop: '6px',
-                                }} />
-                            )}
                         </div>
-                    ))}
+                    </motion.div>
+                ) : (
+                    <motion.div key="list" className="notifications__list">
+                        {Object.entries(groupedNotifications).map(([date, notifs]) => (
+                            <div key={date} className="notifications__group">
+                                <div className="notifications__group-label">{date}</div>
+                                {notifs.map((notification, index) => {
+                                    const typeInfo = getTypeInfo(notification.type);
+                                    const Icon = typeInfo.icon;
+
+                                    return (
+                                        <motion.div
+                                            key={notification.id}
+                                            className={`glass-card notifications__item ${!notification.isRead ? 'notifications__item--unread' : ''}`}
+                                            variants={itemVariants}
+                                            whileHover={{ x: 4 }}
+                                            onClick={() => !notification.isRead && markAsRead(notification.id)}
+                                        >
+                                            <div
+                                                className="notifications__item-icon"
+                                                style={{ background: typeInfo.bg, color: typeInfo.color }}
+                                            >
+                                                <Icon size={20} />
+                                            </div>
+
+                                            <div className="notifications__item-content">
+                                                <div className="notifications__item-title">{notification.title}</div>
+                                                <div className="notifications__item-message">{notification.message}</div>
+                                                <div className="notifications__item-time">{formatDate(notification.createdAt)}</div>
+                                            </div>
+
+                                            <div className="notifications__item-actions">
+                                                {!notification.isRead && (
+                                                    <div className="notifications__unread-dot" />
+                                                )}
+                                                <button
+                                                    className="notifications__action-btn"
+                                                    onClick={(e) => { e.stopPropagation(); deleteNotification(notification.id); }}
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
+                                        </motion.div>
+                                    );
+                                })}
+                            </div>
+                        ))}
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Quick Stats */}
+            <motion.div className="notifications__stats glass-card glass-card--md" variants={itemVariants}>
+                <div className="notifications__stat">
+                    <span className="notifications__stat-value">{notifications.length}</span>
+                    <span className="notifications__stat-label">Total</span>
                 </div>
-            )}
-        </div>
+                <div className="notifications__stat">
+                    <span className="notifications__stat-value" style={{ color: 'var(--macos-accent)' }}>{unreadCount}</span>
+                    <span className="notifications__stat-label">Unread</span>
+                </div>
+                <div className="notifications__stat">
+                    <span className="notifications__stat-value" style={{ color: 'var(--macos-success)' }}>{notifications.length - unreadCount}</span>
+                    <span className="notifications__stat-label">Read</span>
+                </div>
+            </motion.div>
+        </motion.div>
     );
 };
 

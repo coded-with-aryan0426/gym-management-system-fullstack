@@ -1,273 +1,297 @@
 /* ============================================
-   Available Classes Styles
+   AvailableClasses - macOS Style Specific Styles
    ============================================ */
 
+.classes-macos {
+    max-width: 100%;
+}
+
+.classes__header {
+    margin-bottom: var(--space-6);
+}
+
 /* Toolbar */
-.classes-toolbar {
+.classes__toolbar {
     display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    margin-bottom: 2rem;
-}
-
-@media (min-width: 1024px) {
-    .classes-toolbar {
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-    }
-}
-
-.classes-filters {
-    display: flex;
+    align-items: center;
+    gap: var(--space-4);
     flex-wrap: wrap;
-    gap: 0.75rem;
+    margin-bottom: var(--space-6);
 }
 
-.filter-select {
-    background: var(--bg-secondary, #09090b);
-    border: 1px solid var(--border, #27272a);
-    color: var(--text-primary, #fafafa);
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    font-size: 0.875rem;
-    cursor: pointer;
+.classes__search {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 10px 14px;
+    background: var(--macos-bg-tertiary);
+    border: 1px solid var(--macos-border);
+    border-radius: var(--radius-md);
+    flex: 1;
+    max-width: 300px;
+}
+
+.classes__search svg {
+    color: var(--macos-text-tertiary);
+    flex-shrink: 0;
+}
+
+.classes__search-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--macos-text-primary);
+    font-size: 14px;
     outline: none;
 }
 
-.filter-select:focus {
-    border-color: var(--accent-primary, #dc2626);
+.classes__search-input::placeholder {
+    color: var(--macos-text-quaternary);
 }
 
-.view-toggle {
+.classes__filters {
     display: flex;
-    background: var(--bg-secondary, #09090b);
-    border: 1px solid var(--border, #27272a);
-    border-radius: 8px;
-    padding: 0.25rem;
+    gap: var(--space-2);
+    flex-wrap: wrap;
 }
 
-.view-toggle__btn {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    font-size: 0.875rem;
+.classes__filter-pill {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
     font-weight: 500;
+    background: var(--macos-bg-glass);
+    border: 1px solid var(--macos-border);
+    color: var(--macos-text-secondary);
     cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.classes__filter-pill:hover {
+    border-color: var(--macos-accent);
+    color: var(--macos-text-primary);
+}
+
+.classes__filter-pill--active {
+    background: rgba(0, 122, 255, 0.15);
+    border-color: var(--macos-accent);
+    color: var(--macos-accent);
+}
+
+.classes__view-toggle {
+    display: flex;
+    gap: 2px;
+    padding: 4px;
+    background: var(--macos-bg-glass);
+    border-radius: var(--radius-md);
+    margin-left: auto;
+}
+
+.classes__view-btn {
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
     background: transparent;
     border: none;
-    color: var(--text-tertiary, #71717a);
-    transition: all 0.2s;
+    color: var(--macos-text-tertiary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
 }
 
-.view-toggle__btn--active {
-    background: var(--bg-tertiary, #18181b);
-    color: var(--text-primary, #fafafa);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+.classes__view-btn:hover {
+    color: var(--macos-text-secondary);
 }
 
-/* Grid Layout (List View) */
-.classes-grid {
+.classes__view-btn--active {
+    background: var(--macos-bg-glass-active);
+    color: var(--macos-text-primary);
+}
+
+/* Class Grid */
+.classes__grid {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-4);
 }
 
-@media (min-width: 768px) {
-    .classes-grid {
-        grid-template-columns: repeat(2, 1fr);
+/* Class Card */
+.classes__card {
+    padding: var(--space-5);
+    display: flex;
+    flex-direction: column;
+}
+
+.classes__card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--space-3);
+}
+
+.classes__card-icon {
+    font-size: 32px;
+}
+
+.classes__card-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--macos-text-primary);
+    margin-bottom: 2px;
+}
+
+.classes__card-trainer {
+    font-size: 13px;
+    color: var(--macos-text-secondary);
+    margin-bottom: var(--space-4);
+}
+
+.classes__card-details {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin-bottom: var(--space-5);
+}
+
+.classes__card-detail {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--macos-text-secondary);
+}
+
+.classes__card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--macos-border);
+    margin-top: auto;
+}
+
+.classes__card-spots {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--macos-text-tertiary);
+}
+
+/* Calendar View */
+.classes__calendar {
+    padding: var(--space-6);
+}
+
+.classes__calendar-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    margin-bottom: var(--space-4);
+}
+
+.classes__calendar-day-header {
+    text-align: center;
+    padding: var(--space-3);
+}
+
+.classes__calendar-weekday {
+    font-size: 12px;
+    color: var(--macos-text-tertiary);
+    text-transform: uppercase;
+    display: block;
+}
+
+.classes__calendar-date {
+    font-size: 24px;
+    font-weight: 300;
+    color: var(--macos-text-primary);
+    display: block;
+    margin-top: 4px;
+}
+
+.classes__calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    min-height: 300px;
+}
+
+.classes__calendar-column {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-2);
+    background: var(--macos-bg-glass);
+    border-radius: var(--radius-md);
+    min-height: 120px;
+}
+
+.classes__calendar-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--space-2);
+    background: rgba(0, 122, 255, 0.1);
+    border-left: 3px solid var(--macos-accent);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.classes__calendar-item:hover {
+    background: rgba(0, 122, 255, 0.2);
+}
+
+.classes__calendar-item-icon {
+    font-size: 16px;
+}
+
+.classes__calendar-item-time {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--macos-text-primary);
+}
+
+.classes__calendar-item-type {
+    font-size: 12px;
+    color: var(--macos-text-secondary);
+}
+
+.classes__calendar-empty {
+    color: var(--macos-text-quaternary);
+    text-align: center;
+    padding: var(--space-4);
+    font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .classes__toolbar {
+        flex-direction: column;
+        align-items: stretch;
     }
-}
 
-@media (min-width: 1280px) {
-    .classes-grid {
+    .classes__search {
+        max-width: none;
+    }
+
+    .classes__view-toggle {
+        margin-left: 0;
+        align-self: flex-end;
+    }
+
+    .classes__calendar-header,
+    .classes__calendar-grid {
         grid-template-columns: repeat(3, 1fr);
     }
 }
 
-/* Class Card */
-.class-card {
-    background: var(--bg-secondary, #09090b);
-    border: 1px solid var(--border, #27272a);
-    border-radius: 16px;
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    transition: all 0.2s ease;
-}
+@media (max-width: 640px) {
+    .classes__grid {
+        grid-template-columns: 1fr;
+    }
 
-.class-card:hover {
-    border-color: var(--border-hover, #3f3f46);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.class-card__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 1rem;
-}
-
-.class-card__type {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.class-card__icon {
-    width: 3rem;
-    height: 3rem;
-    background: linear-gradient(135deg, var(--bg-tertiary, #18181b), #27272a);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-primary, #fafafa);
-    font-size: 1.25rem;
-}
-
-.class-card__title {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--text-primary, #fafafa);
-    margin-bottom: 0.125rem;
-}
-
-.class-card__subtitle {
-    font-size: 0.875rem;
-    color: var(--text-tertiary, #71717a);
-}
-
-.class-card__difficulty {
-    font-size: 0.75rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: 9999px;
-    background: rgba(34, 197, 94, 0.1);
-    color: #22c55e;
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-.class-card__details {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    margin-bottom: 1.5rem;
-    flex: 1;
-}
-
-.class-detail {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.875rem;
-    color: var(--text-secondary, #a1a1aa);
-}
-
-.class-card__footer {
-    padding-top: 1rem;
-    border-top: 1px solid var(--border, #27272a);
-    display: flex;
-    gap: 0.75rem;
-    align-items: center;
-}
-
-.class-card__spots {
-    font-size: 0.75rem;
-    color: var(--text-tertiary, #71717a);
-    font-weight: 500;
-}
-
-.book-btn {
-    flex: 1;
-    padding: 0.625rem;
-    background: var(--accent-primary, #dc2626);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.book-btn:hover {
-    background: var(--accent-primary-hover, #b91c1c);
-}
-
-.book-btn:disabled {
-    background: var(--bg-tertiary, #18181b);
-    color: var(--text-tertiary, #71717a);
-    cursor: not-allowed;
-}
-
-/* Calendar View */
-.calendar-view {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
-.calendar-header {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 1rem;
-    text-align: center;
-    margin-bottom: 1rem;
-}
-
-.calendar-day-header {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--text-tertiary, #71717a);
-    text-transform: uppercase;
-}
-
-.calendar-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 1rem;
-}
-
-.calendar-day-column {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.calendar-class {
-    background: var(--bg-secondary, #09090b);
-    border: 1px solid var(--border, #27272a);
-    border-radius: 8px;
-    padding: 0.75rem;
-    font-size: 0.75rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    border-left: 3px solid var(--accent-primary, #dc2626);
-}
-
-.calendar-class:hover {
-    background: var(--bg-tertiary, #18181b);
-    transform: translateY(-1px);
-}
-
-.calendar-class__time {
-    color: var(--text-tertiary, #71717a);
-    font-weight: 500;
-    margin-bottom: 0.25rem;
-}
-
-.calendar-class__title {
-    color: var(--text-primary, #fafafa);
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.calendar-class__trainer {
-    color: var(--text-secondary, #a1a1aa);
+    .classes__calendar-header,
+    .classes__calendar-grid {
+        grid-template-columns: 1fr;
+    }
 }

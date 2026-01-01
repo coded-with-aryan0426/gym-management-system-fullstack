@@ -1,305 +1,378 @@
 /* ============================================
-   My Membership Styles
+   MyMembership - macOS Style Specific Styles
    ============================================ */
 
-.membership-container {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
+.membership-macos {
+    max-width: 100%;
 }
 
-/* Current Plan Card */
-.current-plan-card {
-    background: linear-gradient(135deg, var(--bg-secondary, #09090b) 0%, var(--bg-tertiary, #18181b) 100%);
-    border: 1px solid var(--border, #27272a);
-    border-radius: 16px;
-    padding: 2rem;
+/* Header */
+.membership__header {
+    margin-bottom: var(--space-6);
+}
+
+/* Hero Card */
+.membership__hero-card {
     position: relative;
+    padding: var(--space-8);
+    border-radius: var(--radius-2xl);
     overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    margin-bottom: var(--space-6);
 }
 
-.current-plan-card::before {
+.membership__hero-bg {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    z-index: 0;
+}
+
+.membership__hero-bg::before {
     content: '';
     position: absolute;
     top: 0;
     right: 0;
-    width: 200px;
-    height: 200px;
-    background: radial-gradient(circle, rgba(220, 38, 38, 0.1) 0%, transparent 70%);
-    border-radius: 50%;
-    transform: translate(30%, -30%);
+    width: 60%;
+    height: 100%;
+    background: radial-gradient(circle at 70% 30%, rgba(0, 122, 255, 0.18) 0%, transparent 60%);
 }
 
-.current-plan__header {
+/* Red gradient trail for depth */
+.membership__hero-bg::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 10%;
+    width: 50%;
+    height: 80%;
+    background: radial-gradient(ellipse at 30% 80%, rgba(220, 38, 38, 0.12) 0%, transparent 55%);
+}
+
+.membership__hero-content {
+    position: relative;
+    z-index: 1;
+}
+
+.membership__hero-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 2rem;
-    position: relative;
-    z-index: 1;
+    margin-bottom: var(--space-6);
 }
 
-.current-plan__title {
-    font-size: 0.875rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--text-tertiary, #71717a);
-    margin-bottom: 0.5rem;
-}
-
-.current-plan__name {
-    font-size: 2.5rem;
-    font-weight: 800;
-    color: var(--text-primary, #fafafa);
-    line-height: 1.1;
-    background: linear-gradient(to right, #fff, #a1a1aa);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.current-plan__price {
-    text-align: right;
-}
-
-.current-plan__amount {
-    font-size: 1.5rem;
+.membership__plan-name {
+    font-size: 28px;
     font-weight: 700;
-    color: var(--text-primary, #fafafa);
+    color: white;
+    margin-top: 4px;
 }
 
-.current-plan__period {
-    font-size: 0.875rem;
-    color: var(--text-tertiary, #71717a);
-}
-
-.current-plan__status-badge {
-    padding: 0.375rem 0.75rem;
-    border-radius: 9999px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    display: flex;
+.membership__status-badge {
+    display: inline-flex;
     align-items: center;
-    gap: 0.375rem;
-}
-
-.status-active {
-    background: rgba(34, 197, 94, 0.15);
-    color: #4ade80;
-    border: 1px solid rgba(34, 197, 94, 0.2);
-}
-
-.status-expired {
-    background: rgba(239, 68, 68, 0.15);
-    color: #f87171;
-    border: 1px solid rgba(239, 68, 68, 0.2);
-}
-
-.current-plan__details {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 2rem;
-    padding-top: 2rem;
-    border-top: 1px solid var(--border, #27272a);
-    position: relative;
-    z-index: 1;
-}
-
-@media (min-width: 768px) {
-    .current-plan__details {
-        grid-template-columns: repeat(4, 1fr);
-    }
-}
-
-.plan-detail__label {
-    font-size: 0.75rem;
-    color: var(--text-tertiary, #71717a);
-    margin-bottom: 0.25rem;
-}
-
-.plan-detail__value {
-    font-size: 1rem;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
     font-weight: 600;
-    color: var(--text-primary, #fafafa);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: rgba(52, 199, 89, 0.2);
+    color: var(--macos-success);
+    border: 1px solid rgba(52, 199, 89, 0.3);
 }
 
-.days-left-highlight {
-    color: #eab308;
+.membership__status-badge--expired {
+    background: rgba(255, 59, 48, 0.2);
+    color: var(--macos-error);
+    border-color: rgba(255, 59, 48, 0.3);
 }
 
-/* Payment History Table */
-.history-table-container {
-    background: var(--bg-secondary, #09090b);
-    border: 1px solid var(--border, #27272a);
-    border-radius: 12px;
+.membership__hero-stats {
+    display: flex;
+    gap: var(--space-10);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-6);
+}
+
+.membership__hero-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.membership__hero-stat-label {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.membership__hero-stat-value {
+    font-size: 17px;
+    font-weight: 600;
+    color: white;
+}
+
+.membership__hero-progress {
+    margin-bottom: var(--space-6);
+}
+
+.membership__progress-bar {
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
     overflow: hidden;
 }
 
-.history-table {
-    width: 100%;
-    border-collapse: collapse;
+.membership__progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--macos-accent), var(--macos-teal));
+    border-radius: 3px;
 }
 
-.history-table th {
-    text-align: left;
-    padding: 1rem 1.5rem;
-    background: var(--bg-tertiary, #18181b);
-    color: var(--text-secondary, #a1a1aa);
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    border-bottom: 1px solid var(--border, #27272a);
+.membership__progress-text {
+    display: block;
+    margin-top: 8px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.6);
 }
 
-.history-table td {
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid var(--border, #27272a);
-    color: var(--text-primary, #fafafa);
-    font-size: 0.875rem;
+.membership__hero-includes {
+    padding-top: var(--space-4);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.history-table tr:last-child td {
-    border-bottom: none;
+.membership__includes-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-2);
 }
 
-.history-table tr:hover {
-    background: rgba(255, 255, 255, 0.02);
-}
-
-.status-paid {
+.membership__includes-item {
     display: inline-flex;
     align-items: center;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    background: rgba(34, 197, 94, 0.1);
-    color: #22c55e;
-    font-size: 0.75rem;
-    font-weight: 600;
+    gap: 4px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.75);
 }
 
-/* Upgrade Plans Grid */
-.upgrade-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
+.membership__includes-item svg {
+    color: var(--macos-success);
 }
 
-@media (min-width: 768px) {
-    .upgrade-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
-
-.plan-card {
-    background: var(--bg-secondary, #09090b);
-    border: 1px solid var(--border, #27272a);
-    border-radius: 16px;
-    padding: 1.5rem;
+/* Quick Actions */
+.membership__action-btn {
     display: flex;
     flex-direction: column;
-    transition: all 0.3s ease;
+    align-items: center;
+    gap: 8px;
+    padding: var(--space-5);
+    background: var(--macos-bg-glass);
+    border: 1px solid var(--macos-border);
+    border-radius: var(--radius-lg);
+    color: var(--macos-text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.membership__action-btn:hover {
+    background: var(--macos-bg-glass-hover);
+    color: var(--macos-accent);
+    border-color: var(--macos-accent);
+}
+
+.membership__action-btn span {
+    font-size: 13px;
+    font-weight: 500;
+}
+
+/* Usage Cards */
+.membership__usage-card {
+    text-align: center;
+}
+
+.membership__usage-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto var(--space-3);
+}
+
+.membership__usage-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--macos-text-primary);
+}
+
+.membership__usage-label {
+    font-size: 13px;
+    color: var(--macos-text-secondary);
+    margin-top: 4px;
+}
+
+/* Plan Cards */
+.membership__plan-card {
+    padding: var(--space-6);
     position: relative;
+    text-align: center;
 }
 
-.plan-card:hover {
-    transform: translateY(-4px);
-    border-color: var(--border-hover, #3f3f46);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+.membership__plan-card--current {
+    border-color: var(--macos-accent);
 }
 
-.plan-card--featured {
-    border-color: var(--accent-primary, #dc2626);
-    background: linear-gradient(180deg, rgba(220, 38, 38, 0.05) 0%, var(--bg-secondary, #09090b) 100%);
+.membership__plan-card--recommended {
+    border-color: var(--macos-accent);
+    background: rgba(0, 122, 255, 0.05);
 }
 
-.plan-card__badge {
+.membership__plan-badge {
     position: absolute;
     top: -10px;
     left: 50%;
     transform: translateX(-50%);
-    background: var(--accent-primary, #dc2626);
+    padding: 4px 12px;
+    background: var(--macos-accent);
     color: white;
-    font-size: 0.75rem;
-    font-weight: 700;
-    padding: 0.25rem 0.75rem;
-    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 20px;
     text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.plan-card__name {
-    font-size: 1.25rem;
+.membership__plan-icon {
+    font-size: 36px;
+    margin-bottom: var(--space-3);
+}
+
+.membership__plan-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--macos-text-primary);
+    margin-bottom: var(--space-2);
+}
+
+.membership__plan-price {
+    margin-bottom: var(--space-4);
+}
+
+.membership__plan-amount {
+    font-size: 32px;
     font-weight: 700;
-    color: var(--text-primary, #fafafa);
-    margin-bottom: 0.5rem;
-    text-align: center;
+    color: var(--macos-text-primary);
 }
 
-.plan-card__price {
-    text-align: center;
-    margin-bottom: 1.5rem;
+.membership__plan-period {
+    font-size: 14px;
+    color: var(--macos-text-tertiary);
 }
 
-.plan-card__amount {
-    font-size: 2rem;
-    font-weight: 800;
-    color: var(--text-primary, #fafafa);
-}
-
-.plan-card__period {
-    color: var(--text-tertiary, #71717a);
-    font-size: 0.875rem;
-}
-
-.plan-card__features {
+.membership__plan-features {
     list-style: none;
     padding: 0;
-    margin: 0 0 2rem 0;
-    flex: 1;
+    margin: 0 0 var(--space-5);
+    text-align: left;
 }
 
-.plan-card__feature {
+.membership__plan-features li {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 0.75rem;
-    font-size: 0.875rem;
-    color: var(--text-secondary, #a1a1aa);
+    gap: 8px;
+    padding: 6px 0;
+    font-size: 13px;
+    color: var(--macos-text-secondary);
 }
 
-.feature-icon {
-    color: var(--accent-primary, #dc2626);
+.membership__plan-features li svg {
+    color: var(--macos-success);
     flex-shrink: 0;
 }
 
-.plan-btn {
+/* Payment History Table */
+.membership__history {
+    overflow-x: auto;
+}
+
+.membership__history-table {
     width: 100%;
-    padding: 0.75rem;
-    border-radius: 8px;
+    border-collapse: collapse;
+}
+
+.membership__history-table th,
+.membership__history-table td {
+    padding: var(--space-3) var(--space-4);
+    text-align: left;
+    border-bottom: 1px solid var(--macos-border);
+}
+
+.membership__history-table th {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--macos-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.membership__history-table td {
+    font-size: 14px;
+    color: var(--macos-text-secondary);
+}
+
+.membership__history-table tr:last-child td {
+    border-bottom: none;
+}
+
+.membership__history-table tr:hover td {
+    background: var(--macos-bg-glass);
+}
+
+.membership__history-id {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--macos-text-primary);
+}
+
+.membership__history-amount {
     font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-align: center;
+    color: var(--macos-text-primary);
 }
 
-.plan-btn--outline {
-    background: transparent;
-    border: 1px solid var(--border, #27272a);
-    color: var(--text-primary, #fafafa);
+/* Responsive */
+@media (max-width: 900px) {
+    .membership__hero-stats {
+        gap: var(--space-6);
+    }
+
+    .bento-grid--4col {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
-.plan-btn--outline:hover {
-    border-color: var(--text-primary, #fafafa);
+@media (max-width: 640px) {
+    .membership__hero-card {
+        padding: var(--space-5);
+    }
+
+    .membership__plan-name {
+        font-size: 22px;
+    }
+
+    .bento-grid--3col {
+        grid-template-columns: 1fr;
+    }
+
+    .bento-grid--4col {
+        grid-template-columns: 1fr;
+    }
 }
 
-.plan-btn--primary {
-    background: var(--accent-primary, #dc2626);
-    border: 1px solid var(--accent-primary, #dc2626);
-    color: white;
-}
-
-.plan-btn--primary:hover {
-    background: var(--accent-primary-hover, #b91c1c);
+/* Section Spacing */
+.membership-macos section {
+    margin-top: var(--space-8);
 }

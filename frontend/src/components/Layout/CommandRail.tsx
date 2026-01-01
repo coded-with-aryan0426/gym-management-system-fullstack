@@ -56,21 +56,23 @@ const icons = {
   ),
 }
 
-const defaultNavItems = [
-  { path: "/dashboard", label: "Dashboard", icon: icons.dashboard, color: "#dc2626" },
+
+export interface NavItem {
+  path: string;
+  label: string;
+  icon?: React.ReactNode;
+  color?: string;
+  end?: boolean;  // For exact path matching
+}
+
+const defaultNavItems: NavItem[] = [
+  { path: "/dashboard", label: "Dashboard", icon: icons.dashboard, color: "#dc2626", end: true },
   { path: "/members", label: "Members", icon: icons.members, color: "#dc2626" },
   { path: "/trainers", label: "Trainers", icon: icons.staff, color: "#dc2626" },
   { path: "/classes", label: "Classes", icon: icons.classes, color: "#dc2626" },
   { path: "/financials", label: "Financials", icon: icons.financials, color: "#dc2626" },
   { path: "/reports", label: "Reports", icon: icons.reports, color: "#dc2626" },
-]
-
-export interface NavItem {
-  path: string;
-  label: string;
-  icon?: React.ReactNode; // Allow custom icons
-  color?: string;
-}
+];
 
 interface CommandRailProps {
   isCollapsed?: boolean
@@ -132,6 +134,7 @@ const CommandRail: React.FC<CommandRailProps> = ({ isCollapsed = false, onToggle
           <NavLink
             key={item.path}
             to={item.path}
+            end={item.end}
             className={({ isActive }) => `command-rail__link ${isActive ? "command-rail__link--active" : ""}`}
             title={isCollapsed ? item.label : undefined}
             style={{ '--nav-accent': item.color } as React.CSSProperties}

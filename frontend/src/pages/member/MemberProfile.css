@@ -1,234 +1,293 @@
 /* ============================================
-   Member Profile Styles
+   MemberProfile - macOS Style Specific Styles
    ============================================ */
 
-.member-profile-layout {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
+.member-profile-macos {
+    max-width: 100%;
 }
 
-@media (min-width: 1024px) {
-    .member-profile-layout {
-        flex-direction: row;
-    }
+/* Header */
+.member-profile__header {
+    margin-bottom: var(--space-6);
 }
 
-/* Sidebar Navigation */
-.profile-sidebar {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+/* Hero / Avatar Section */
+.member-profile__hero {
+    margin-bottom: var(--space-6);
 }
 
-@media (min-width: 1024px) {
-    .profile-sidebar {
-        width: 16rem;
-        /* 256px */
-    }
-}
-
-.profile-nav-item {
-    width: 100%;
+.member-profile__avatar-section {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    transition: all 0.2s ease;
-    border: 1px solid transparent;
-    cursor: pointer;
-    background: transparent;
-    color: var(--text-tertiary, #71717a);
+    gap: var(--space-6);
 }
 
-.profile-nav-item:hover {
-    color: var(--text-primary, #fafafa);
-    background: var(--bg-tertiary, #18181b);
-}
-
-.profile-nav-item--active {
-    background: var(--accent-primary, #dc2626);
-    color: white;
-}
-
-.profile-nav-item--active:hover {
-    background: var(--accent-primary-hover, #b91c1c);
-    color: white;
-}
-
-.profile-nav-item--disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/* Content Area */
-.profile-content {
-    flex: 1;
-}
-
-/* Forms */
-.profile-form {
-    display: grid;
-    gap: 1.5rem;
-}
-
-.form-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-}
-
-@media (min-width: 768px) {
-    .form-grid {
-        grid-template-columns: 1fr 1fr;
-    }
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.form-label {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--text-secondary, #a1a1aa);
-}
-
-.form-input {
-    width: 100%;
-    padding: 0.625rem 1rem;
-    background: var(--bg-secondary, #09090b);
-    border: 1px solid var(--border, #27272a);
-    border-radius: 8px;
-    color: var(--text-primary, #fafafa);
-    font-size: 0.875rem;
-    transition: all 0.2s;
-}
-
-.form-input:focus {
-    outline: none;
-    border-color: var(--accent-primary, #dc2626);
-    box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.1);
-}
-
-.form-input:disabled {
-    background: var(--bg-tertiary, #18181b);
-    color: var(--text-tertiary, #71717a);
-    cursor: not-allowed;
-}
-
-.form-hint {
-    font-size: 0.75rem;
-    color: var(--text-tertiary, #71717a);
-}
-
-.form-actions {
-    display: flex;
-    justify-content: flex-end;
-    padding-top: 1rem;
-    border-top: 1px solid var(--border, #27272a);
-}
-
-.btn-primary {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.625rem 1.5rem;
-    background: var(--accent-primary, #dc2626);
-    color: white;
-    border-radius: 8px;
-    font-weight: 500;
-    font-size: 0.875rem;
-    border: none;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.btn-primary:hover {
-    background: var(--accent-primary-hover, #b91c1c);
-}
-
-.btn-primary:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-}
-
-/* Avatar Section */
-.avatar-section {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    padding-bottom: 2rem;
-    margin-bottom: 2rem;
-    border-bottom: 1px solid var(--border, #27272a);
-}
-
-.avatar-preview {
-    width: 5rem;
-    height: 5rem;
-    background: linear-gradient(135deg, var(--accent-primary, #dc2626), #991b1b);
-    border-radius: 9999px;
+.member-profile__avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: var(--radius-2xl);
+    background: linear-gradient(135deg, var(--macos-accent), var(--macos-purple));
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2rem;
+    font-size: 32px;
     font-weight: 700;
     color: white;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    position: relative;
+    flex-shrink: 0;
 }
 
-.avatar-actions {
+.member-profile__avatar-edit {
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--macos-bg-tertiary);
+    border: 2px solid var(--macos-bg-primary);
+    color: var(--macos-text-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+}
+
+.member-profile__avatar-edit:hover {
+    background: var(--macos-accent);
+    transform: scale(1.1);
+}
+
+.member-profile__user-info {
+    flex: 1;
+}
+
+.member-profile__user-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-top: 6px;
+}
+
+/* Tabs */
+.member-profile__tabs {
+    display: flex;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+    padding: var(--space-2);
+    background: var(--macos-bg-glass);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--macos-border);
+}
+
+.member-profile__tab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--macos-text-secondary);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.member-profile__tab:hover {
+    color: var(--macos-text-primary);
+    background: var(--macos-bg-glass-hover);
+}
+
+.member-profile__tab--active {
+    color: var(--macos-text-primary);
+    background: var(--macos-bg-glass-active);
+}
+
+/* Form */
+.member-profile__content {
+    padding: var(--space-8);
+}
+
+.member-profile__form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-5);
+}
+
+/* Form Elements */
+.macos-form-group {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 6px;
 }
 
-.avatar-title {
-    font-weight: 600;
-    color: var(--text-primary, #fafafa);
+.macos-form-group--full {
+    grid-column: 1 / -1;
 }
 
-.avatar-subtitle {
-    font-size: 0.875rem;
-    color: var(--text-tertiary, #71717a);
-}
-
-.avatar-btn {
-    font-size: 0.875rem;
-    color: var(--accent-primary, #dc2626);
+.macos-form-label {
+    font-size: 13px;
     font-weight: 500;
+    color: var(--macos-text-secondary);
+}
+
+.macos-form-input {
+    width: 100%;
+    padding: 12px 14px;
+    background: var(--macos-bg-tertiary);
+    border: 1px solid var(--macos-border);
+    border-radius: var(--radius-md);
+    color: var(--macos-text-primary);
+    font-size: 15px;
+    font-family: inherit;
+    transition: all var(--transition-fast);
+}
+
+.macos-form-input:focus {
+    outline: none;
+    border-color: var(--macos-accent);
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15);
+}
+
+.macos-form-input--disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.macos-form-input::placeholder {
+    color: var(--macos-text-quaternary);
+}
+
+.macos-form-textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.macos-form-hint {
+    font-size: 12px;
+    color: var(--macos-text-tertiary);
+}
+
+/* Goals Grid */
+.member-profile__goals-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+.member-profile__goal-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    background: var(--macos-bg-glass);
+    border: 1px solid var(--macos-border);
+    color: var(--macos-text-secondary);
     cursor: pointer;
-    background: none;
-    border: none;
-    padding: 0;
-    text-align: left;
+    transition: all var(--transition-fast);
 }
 
-.avatar-btn:hover {
-    text-decoration: underline;
+.member-profile__goal-chip:hover {
+    border-color: var(--macos-accent);
+    color: var(--macos-text-primary);
 }
 
-/* Security Tab Styles */
-.security-alert {
-    background: rgba(234, 179, 8, 0.1);
-    border: 1px solid rgba(234, 179, 8, 0.2);
-    border-radius: 8px;
-    padding: 1rem;
+.member-profile__goal-chip--active {
+    background: rgba(0, 122, 255, 0.15);
+    border-color: var(--macos-accent);
+    color: var(--macos-accent);
 }
 
-.security-alert__title {
-    color: #eab308;
-    font-weight: 600;
-    margin-bottom: 0.25rem;
+/* Emergency Notice */
+.member-profile__emergency-notice {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    background: var(--macos-warning-bg);
+    border: 1px solid rgba(255, 149, 0, 0.2);
+    border-radius: var(--radius-md);
+    color: var(--macos-warning);
 }
 
-.security-alert__text {
-    font-size: 0.875rem;
-    color: rgba(234, 179, 8, 0.8);
+.member-profile__emergency-notice p {
+    font-size: 14px;
+}
+
+/* Security Cards */
+.member-profile__security-card {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-4);
+    background: var(--macos-bg-glass);
+    border: 1px solid var(--macos-border);
+    border-radius: var(--radius-lg);
+}
+
+.member-profile__security-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-md);
+    background: rgba(0, 122, 255, 0.15);
+    color: var(--macos-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.member-profile__security-icon--success {
+    background: var(--macos-success-bg);
+    color: var(--macos-success);
+}
+
+.member-profile__security-card>div:nth-child(2) {
+    flex: 1;
+}
+
+/* Form Actions */
+.member-profile__form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-3);
+    margin-top: var(--space-8);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--macos-border);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .member-profile__avatar-section {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .member-profile__user-meta {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .member-profile__tabs {
+        overflow-x: auto;
+    }
+
+    .member-profile__tab span {
+        display: none;
+    }
+
+    .member-profile__form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .member-profile__content {
+        padding: var(--space-5);
+    }
 }
