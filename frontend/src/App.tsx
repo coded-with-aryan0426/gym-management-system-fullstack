@@ -8,6 +8,7 @@ import { TrainerProvider } from './contexts/TrainerContext';
 import { NavbarProvider } from './contexts/NavbarContext';
 import { AppShell } from './components/Layout';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import DevNavigation from './components/dev/DevNavigation';
 
 // Import new design system
 import './styles/global.css';
@@ -193,6 +194,7 @@ function App() {
               }
             }}
           />
+          <DevNavigation />
         </BrowserRouter>
       </CurrencyProvider>
     </ThemeProvider>
