@@ -133,63 +133,42 @@ const TrainerProfile: React.FC = () => {
                                 <span><MapPin size={12} /> Mumbai</span>
                             </div>
                         </div>
-                        <div className="tp__rating-box">
-                            <div className="tp__rating-stars">
-                                {[1,2,3,4,5].map(i => <Star key={i} size={14} fill="#FBBF24" color="#FBBF24" />)}
+                        
+                        <div className="tp__header-stats">
+                            <div className="tp__header-stat">
+                                <Users size={14} className="tp__header-stat-icon tp__header-stat-icon--blue" />
+                                <span className="tp__header-stat-value">{stats.activeMembers}<small>/{stats.totalMembers}</small></span>
+                                <span className="tp__header-stat-label">Members</span>
                             </div>
-                            <span className="tp__rating-value">{stats.rating}</span>
-                            <span className="tp__rating-count">{stats.reviews} reviews</span>
+                            <div className="tp__header-stat">
+                                <Calendar size={14} className="tp__header-stat-icon tp__header-stat-icon--green" />
+                                <span className="tp__header-stat-value">{stats.sessionsMonth}</span>
+                                <span className="tp__header-stat-label">Sessions</span>
+                            </div>
+                            <div className="tp__header-stat">
+                                <Activity size={14} className="tp__header-stat-icon tp__header-stat-icon--yellow" />
+                                <span className="tp__header-stat-value">{stats.attendance}%</span>
+                                <span className="tp__header-stat-label">Attendance</span>
+                            </div>
+                            <div className="tp__header-stat">
+                                <Star size={14} className="tp__header-stat-icon tp__header-stat-icon--orange" fill="#F59E0B" />
+                                <span className="tp__header-stat-value">{stats.rating}</span>
+                                <span className="tp__header-stat-label">{stats.reviews} reviews</span>
+                            </div>
                         </div>
-                    </div>
-                    <div className="tp__header-actions">
-                        {!isEditing ? (
-                            <button className="tp__btn tp__btn--edit" onClick={() => setIsEditing(true)}>
-                                <Edit3 size={14} /> Edit
-                            </button>
-                        ) : (
-                            <>
-                                <button className="tp__btn tp__btn--cancel" onClick={() => setIsEditing(false)}>Cancel</button>
-                                <button className="tp__btn tp__btn--save" onClick={handleSave}><Save size={14} /> Save</button>
-                            </>
-                        )}
-                    </div>
-                </div>
-            </div>
 
-            <div className="tp__stats-row">
-                <div className="tp__stat">
-                    <Users size={16} className="tp__stat-icon tp__stat-icon--blue" />
-                    <div className="tp__stat-data">
-                        <span className="tp__stat-value">{stats.activeMembers}<small>/{stats.totalMembers}</small></span>
-                        <span className="tp__stat-label">Members</span>
-                    </div>
-                </div>
-                <div className="tp__stat">
-                    <Calendar size={16} className="tp__stat-icon tp__stat-icon--green" />
-                    <div className="tp__stat-data">
-                        <span className="tp__stat-value">{stats.sessionsMonth}</span>
-                        <span className="tp__stat-label">Sessions/Mo</span>
-                    </div>
-                </div>
-                <div className="tp__stat">
-                    <Activity size={16} className="tp__stat-icon tp__stat-icon--yellow" />
-                    <div className="tp__stat-data">
-                        <span className="tp__stat-value">{stats.attendance}%</span>
-                        <span className="tp__stat-label">Attendance</span>
-                    </div>
-                </div>
-                <div className="tp__stat">
-                    <Briefcase size={16} className="tp__stat-icon tp__stat-icon--purple" />
-                    <div className="tp__stat-data">
-                        <span className="tp__stat-value">{stats.experience}</span>
-                        <span className="tp__stat-label">Experience</span>
-                    </div>
-                </div>
-                <div className="tp__stat">
-                    <CreditCard size={16} className="tp__stat-icon tp__stat-icon--red" />
-                    <div className="tp__stat-data">
-                        <span className="tp__stat-value">{stats.earnings}</span>
-                        <span className="tp__stat-label">This Month</span>
+                        <div className="tp__header-actions">
+                            {!isEditing ? (
+                                <button className="tp__btn tp__btn--edit" onClick={() => setIsEditing(true)}>
+                                    <Edit3 size={14} /> Edit
+                                </button>
+                            ) : (
+                                <>
+                                    <button className="tp__btn tp__btn--cancel" onClick={() => setIsEditing(false)}>Cancel</button>
+                                    <button className="tp__btn tp__btn--save" onClick={handleSave}><Save size={14} /> Save</button>
+                                </>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
