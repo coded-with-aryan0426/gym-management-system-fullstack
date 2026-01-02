@@ -1,9 +1,16 @@
-// Shared Directory Components
-export { ActionMenuButton } from './ActionMenuButton'
-export { SortButton } from './SortButton'
-export { StatsBadge } from './StatsBadge'
-export { FilterDropdown, type FilterOption } from './FilterDropdown'
-export { InlineStatsStrip, type InlineStat } from './InlineStatsStrip'
+export { 
+    StatCard, 
+    GlassCard, 
+    SectionHeader, 
+    Avatar, 
+    Badge, 
+    ProgressBar, 
+    ListItem, 
+    EmptyState, 
+    RoleIndicator, 
+    Button 
+} from './UnifiedComponents';
 
-// Import shared styles
-import './shared.css'
+export { DashboardHeader } from './DashboardHeader';
+
+export { default as DashboardLayout } from './DashboardLayout';
