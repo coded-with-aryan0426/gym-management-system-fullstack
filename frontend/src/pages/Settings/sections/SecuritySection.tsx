@@ -2,6 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
 import { toast } from "react-hot-toast"
 import { 
   Info, 
@@ -13,7 +14,8 @@ import {
   Check,
   X,
   AlertTriangle,
-  Lock
+  Lock,
+  Power
 } from "lucide-react"
 
 interface Session {
@@ -44,6 +46,7 @@ interface SecuritySettings {
 }
 
 const SecuritySection: React.FC = () => {
+  const navigate = useNavigate()
   const [settings, setSettings] = useState<SecuritySettings>({
     enforce2FA: false,
     sessionTimeout: 30,
@@ -196,6 +199,13 @@ const SecuritySection: React.FC = () => {
   const handleLogoutAll = () => {
     setSessions(prev => prev.filter(s => s.current))
     toast.success("All other sessions logged out")
+  }
+
+  const handleLogoutAccount = () => {
+    localStorage.removeItem("userRole")
+    localStorage.removeItem("selectedGym")
+    toast.success("Logged out successfully")
+    navigate("/")
   }
 
   return (
@@ -436,6 +446,56 @@ const SecuritySection: React.FC = () => {
                 </span>
               </div>
             ))}
+          </div>
+        </div>
+
+        <div className="form-group">
+          <div className="form-group__header">
+            <Power size={16} />
+            <h4 className="form-group__title">Account Logout</h4>
+          </div>
+
+          <div className="policy-toggle-row">
+            <div className="policy-toggle-row__info">
+              <div className="policy-toggle-row__icon" style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444' }}>
+                <LogOut size={16} />
+              </div>
+              <div className="policy-toggle-row__text">
+                <span className="policy-toggle-row__label">Sign Out of Account</span>
+                <p className="policy-toggle-row__hint">
+                  Log out from your current session and return to the login page
+                </p>
+              </div>
+            </div>
+            <button
+              className="logout-btn"
+              onClick={handleLogoutAccount}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '10px 20px',
+                background: 'rgba(239, 68, 68, 0.1)',
+                color: '#ef4444',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontWeight: 500,
+                fontSize: '14px',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.background = '#ef4444'
+                e.currentTarget.style.color = 'white'
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'
+                e.currentTarget.style.color = '#ef4444'
+              }}
+            >
+              <LogOut size={16} />
+              Logout
+            </button>
           </div>
         </div>
 
