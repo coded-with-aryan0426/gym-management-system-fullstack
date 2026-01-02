@@ -8,7 +8,7 @@
 
 BRANCH="fullstack-beta"
 REMOTE="origin"
-INTERVAL=60
+INTERVAL=300
 
 # Colors
 GREEN='\033[0;32m'
