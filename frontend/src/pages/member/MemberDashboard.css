@@ -288,6 +288,21 @@
     height: 100%;
     background: linear-gradient(90deg, #007AFF, #5AC8FA);
     border-radius: 3px;
+    position: relative;
+}
+
+.membership-card__progress-bar {
+    position: relative;
+}
+
+.membership-card__progress-glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 30%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    border-radius: 3px;
 }
 
 .member-dashboard__quick-actions {
@@ -572,6 +587,19 @@
     white-space: nowrap;
 }
 
+.class-card__play {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #007AFF, #5AC8FA);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    margin-left: 8px;
+    box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
+}
+
 .member-dashboard__grid-2col {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -779,6 +807,21 @@
 .progress-card__progress-fill {
     height: 100%;
     background: linear-gradient(90deg, #34C759, #30D158);
+    border-radius: 4px;
+    position: relative;
+}
+
+.progress-card__progress-bar {
+    position: relative;
+}
+
+.progress-card__progress-shine {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 40%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
     border-radius: 4px;
 }
 
