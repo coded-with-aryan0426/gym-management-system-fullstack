@@ -187,10 +187,10 @@ body.light-mode .form-group__header {
 .settings-layout {
   display: grid;
   grid-template-columns: 220px 1fr;
-  gap: 40px;
+  gap: 24px;
   max-width: 1400px;
   margin: 0 auto;
-  padding: 32px 40px;
+  padding: 16px 20px;
 }
 
 /* =============================================================================
