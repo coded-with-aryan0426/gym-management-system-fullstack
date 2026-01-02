@@ -394,45 +394,45 @@ const PTSessions: React.FC = () => {
                   </div>
                 </div>
               )}
+              </div>
+
+              {hasActiveFilters && (
+                <div className="pt-sessions__active-filters">
+                  {filterStatus !== 'all' && (
+                    <span className="pt-filter-chip">
+                      {filterStatus}
+                      <button onClick={() => setFilterStatus('all')}>×</button>
+                    </span>
+                  )}
+                  {selectedTrainerId && (
+                    <span className="pt-filter-chip">
+                      {trainers.find(t => t.userId === selectedTrainerId)?.fullName}
+                      <button onClick={() => setSelectedTrainerId(null)}>×</button>
+                    </span>
+                  )}
+                  {selectedMemberId && (
+                    <span className="pt-filter-chip">
+                      {members.find(m => m.userId === selectedMemberId)?.fullName}
+                      <button onClick={() => setSelectedMemberId(null)}>×</button>
+                    </span>
+                  )}
+                  {selectedDate && (
+                    <span className="pt-filter-chip">
+                      {selectedDate.toLocaleDateString()}
+                      <button onClick={() => setSelectedDate(null)}>×</button>
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="pt-sessions__toolbar-right">
+              <Button variant="primary" onClick={() => setShowScheduleModal(true)}>
+                <Plus size={16} />
+                <span>Schedule Session</span>
+              </Button>
             </div>
           </div>
-
-          <div className="pt-sessions__toolbar-right">
-            <Button variant="primary" onClick={() => setShowScheduleModal(true)}>
-              <Plus size={16} />
-              <span>Schedule Session</span>
-            </Button>
-          </div>
-        </div>
-
-        {hasActiveFilters && (
-          <div className="pt-sessions__active-filters">
-            {filterStatus !== 'all' && (
-              <span className="pt-filter-chip">
-                Status: {filterStatus}
-                <button onClick={() => setFilterStatus('all')}>×</button>
-              </span>
-            )}
-            {selectedTrainerId && (
-              <span className="pt-filter-chip">
-                Trainer: {trainers.find(t => t.userId === selectedTrainerId)?.fullName}
-                <button onClick={() => setSelectedTrainerId(null)}>×</button>
-              </span>
-            )}
-            {selectedMemberId && (
-              <span className="pt-filter-chip">
-                Member: {members.find(m => m.userId === selectedMemberId)?.fullName}
-                <button onClick={() => setSelectedMemberId(null)}>×</button>
-              </span>
-            )}
-            {selectedDate && (
-              <span className="pt-filter-chip">
-                Date: {selectedDate.toLocaleDateString()}
-                <button onClick={() => setSelectedDate(null)}>×</button>
-              </span>
-            )}
-          </div>
-        )}
 
         <div className="pt-sessions__content-wrapper">
           <div className="pt-sessions__calendar-area">

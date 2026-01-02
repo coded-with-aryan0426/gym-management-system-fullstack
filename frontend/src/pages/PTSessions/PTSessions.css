@@ -116,6 +116,9 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
 }
 
 .pt-sessions__toolbar-right {
@@ -321,33 +324,35 @@
 
 .pt-sessions__active-filters {
   display: flex;
+  align-items: center;
   flex-wrap: wrap;
-  gap: 8px;
-  padding: 0 16px 12px;
+  gap: 6px;
 }
 
 .pt-filter-chip {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
+  gap: 4px;
+  padding: 4px 8px;
   background: var(--color-crimson-light);
   border: 1px solid var(--color-crimson);
-  border-radius: 16px;
-  font-size: 12px;
+  border-radius: 4px;
+  font-size: 11px;
   font-weight: 500;
   color: var(--color-crimson);
+  white-space: nowrap;
 }
 
 .pt-filter-chip button {
   background: none;
   border: none;
   color: var(--color-crimson);
-  font-size: 14px;
+  font-size: 12px;
   cursor: pointer;
   padding: 0;
   line-height: 1;
   opacity: 0.7;
+  margin-left: 2px;
 }
 
 .pt-filter-chip button:hover {
