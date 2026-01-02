@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
     ChevronRight, Moon, Sun, Check, Eye, EyeOff,
     Smartphone, Laptop, Monitor, LogOut, Trash2, Download, Upload,
-    CheckCircle2, AlertCircle, Info
+    CheckCircle2, AlertCircle, Info, X
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -56,7 +56,7 @@ const showToast = (message: string, type: 'success' | 'error' | 'info' = 'succes
             >
                 {icons[type]}
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
                 <span style={{ color: '#fff', fontSize: '14px', fontWeight: 600, letterSpacing: '-0.2px' }}>
                     {message}
                 </span>
@@ -66,6 +66,33 @@ const showToast = (message: string, type: 'success' | 'error' | 'info' = 'succes
                     </span>
                 )}
             </div>
+            <button
+                onClick={() => toast.dismiss(t.id)}
+                style={{
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    border: 'none',
+                    borderRadius: '6px',
+                    width: '24px',
+                    height: '24px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    color: 'rgba(255, 255, 255, 0.6)',
+                    transition: 'all 0.15s ease',
+                    flexShrink: 0,
+                }}
+                onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
+                    e.currentTarget.style.color = '#fff';
+                }}
+                onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                    e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)';
+                }}
+            >
+                <X size={14} />
+            </button>
         </div>
     ), { duration: 1500 });
 };
