@@ -25,11 +25,19 @@ import {
 import api from "../../services/api"
 import "./Dashboard.css"
 
+interface TrainerSlot {
+  time: string
+  status: 'available' | 'limited' | 'booked'
+  memberName?: string
+}
+
 interface TrainerSchedule {
   name: string
-  slots: ('available' | 'limited' | 'booked' | 'empty')[]
+  initials: string
+  slots: TrainerSlot[]
   sessionsToday: number
   totalRevenue: number
+  availableSlots: number
 }
 
 interface ExpiringMember {
@@ -115,9 +123,55 @@ const Dashboard: React.FC = () => {
       setPendingPayments(10500)
 
       setTrainerSchedule([
-        { name: 'Rahul Sharma', slots: ['booked', 'booked', 'limited', 'available', 'available', 'booked', 'booked', 'limited'], sessionsToday: 6, totalRevenue: 82500 },
-        { name: 'Priya Patel', slots: ['available', 'booked', 'booked', 'booked', 'limited', 'available', 'booked', 'booked'], sessionsToday: 5, totalRevenue: 67200 },
-        { name: 'Amit Kumar', slots: ['booked', 'available', 'available', 'booked', 'booked', 'booked', 'limited', 'available'], sessionsToday: 4, totalRevenue: 54800 },
+        { 
+          name: 'Rahul Sharma', 
+          initials: 'RS',
+          slots: [
+            { time: '6:00 AM', status: 'booked', memberName: 'Vikram K.' },
+            { time: '7:00 AM', status: 'booked', memberName: 'Anita M.' },
+            { time: '8:00 AM', status: 'limited' },
+            { time: '9:00 AM', status: 'available' },
+            { time: '10:00 AM', status: 'booked', memberName: 'Raj P.' },
+            { time: '5:00 PM', status: 'booked', memberName: 'Priya S.' },
+            { time: '6:00 PM', status: 'booked', memberName: 'Deepak V.' },
+            { time: '7:00 PM', status: 'limited' },
+          ],
+          sessionsToday: 6, 
+          totalRevenue: 82500,
+          availableSlots: 2
+        },
+        { 
+          name: 'Priya Patel', 
+          initials: 'PP',
+          slots: [
+            { time: '7:00 AM', status: 'booked', memberName: 'Sneha R.' },
+            { time: '8:00 AM', status: 'booked', memberName: 'Amit K.' },
+            { time: '9:00 AM', status: 'booked', memberName: 'Ravi M.' },
+            { time: '10:00 AM', status: 'limited' },
+            { time: '4:00 PM', status: 'available' },
+            { time: '5:00 PM', status: 'booked', memberName: 'Kavita S.' },
+            { time: '6:00 PM', status: 'booked', memberName: 'Arjun M.' },
+          ],
+          sessionsToday: 5, 
+          totalRevenue: 67200,
+          availableSlots: 2
+        },
+        { 
+          name: 'Amit Kumar', 
+          initials: 'AK',
+          slots: [
+            { time: '6:00 AM', status: 'booked', memberName: 'Neha T.' },
+            { time: '8:00 AM', status: 'available' },
+            { time: '9:00 AM', status: 'booked', memberName: 'Sanjay P.' },
+            { time: '10:00 AM', status: 'booked', memberName: 'Meera K.' },
+            { time: '5:00 PM', status: 'booked', memberName: 'Rohit S.' },
+            { time: '6:00 PM', status: 'limited' },
+            { time: '7:00 PM', status: 'available' },
+          ],
+          sessionsToday: 4, 
+          totalRevenue: 54800,
+          availableSlots: 3
+        },
       ])
 
       setExpiringMembers([
@@ -186,8 +240,6 @@ const Dashboard: React.FC = () => {
     if (pct > 60) return 'warning'
     return ''
   }
-
-  const timeSlots = ['6AM', '8AM', '10AM', '12PM', '2PM', '4PM', '6PM', '8PM']
 
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
@@ -323,46 +375,52 @@ const Dashboard: React.FC = () => {
       </section>
 
       <section className="dash-grid">
-        <motion.div className="dash-section dash-section--trainers" variants={itemVariants}>
-          <div className="dash-section__header">
-            <div className="dash-section__title">
-              <Calendar size={18} />
-              <h2>Trainer Schedule Today</h2>
-            </div>
-            <button className="dash-section__link" onClick={() => navigate('/pt-sessions')}>
-              View All <ArrowRight size={14} />
-            </button>
-          </div>
-          <div className="dash-section__content">
-            <div className="trainer-schedule">
-              <div className="trainer-schedule__header">
-                <span className="trainer-schedule__col">Trainer</span>
-                <div className="trainer-schedule__times">
-                  {timeSlots.map((slot, i) => (
-                    <span key={i}>{slot}</span>
-                  ))}
-                </div>
-                <span className="trainer-schedule__col trainer-schedule__col--right">Sessions</span>
+          <motion.div className="dash-section dash-section--trainers" variants={itemVariants}>
+            <div className="dash-section__header">
+              <div className="dash-section__title">
+                <Calendar size={18} />
+                <h2>Trainer Schedule Today</h2>
               </div>
-              {trainerSchedule.map((trainer, idx) => (
-                <div key={idx} className="trainer-schedule__row">
-                  <span className="trainer-schedule__name">{trainer.name}</span>
-                  <div className="trainer-schedule__slots">
-                    {trainer.slots.map((status, i) => (
-                      <div key={i} className={`slot-dot slot-dot--${status}`} />
-                    ))}
+              <button className="dash-section__link" onClick={() => navigate('/pt-sessions')}>
+                View All <ArrowRight size={14} />
+              </button>
+            </div>
+            <div className="dash-section__content">
+              <div className="trainer-cards">
+                {trainerSchedule.map((trainer, idx) => (
+                  <div key={idx} className="trainer-card">
+                    <div className="trainer-card__header">
+                      <div className="trainer-card__avatar">{trainer.initials}</div>
+                      <div className="trainer-card__info">
+                        <span className="trainer-card__name">{trainer.name}</span>
+                        <span className="trainer-card__meta">
+                          {trainer.sessionsToday} sessions · {trainer.availableSlots} slots free
+                        </span>
+                      </div>
+                      <div className="trainer-card__revenue">
+                        {formatCurrency(trainer.totalRevenue)}
+                      </div>
+                    </div>
+                    <div className="trainer-card__slots">
+                      {trainer.slots.map((slot, i) => (
+                        <div key={i} className={`trainer-slot trainer-slot--${slot.status}`}>
+                          <span className="trainer-slot__time">{slot.time}</span>
+                          <span className="trainer-slot__status">
+                            {slot.status === 'booked' ? slot.memberName : slot.status === 'limited' ? '1 Left' : 'Open'}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <span className="trainer-schedule__sessions">{trainer.sessionsToday}</span>
-                </div>
-              ))}
+                ))}
+              </div>
+              <div className="trainer-schedule__legend">
+                <span><span className="legend-dot legend-dot--available" /> Available</span>
+                <span><span className="legend-dot legend-dot--limited" /> 1 Left</span>
+                <span><span className="legend-dot legend-dot--booked" /> Booked</span>
+              </div>
             </div>
-            <div className="trainer-schedule__legend">
-              <span><span className="slot-dot slot-dot--available" /> Available</span>
-              <span><span className="slot-dot slot-dot--limited" /> 1 Left</span>
-              <span><span className="slot-dot slot-dot--booked" /> Booked</span>
-            </div>
-          </div>
-        </motion.div>
+          </motion.div>
 
         <motion.div className="dash-section dash-section--alerts" variants={itemVariants}>
           <div className="dash-section__header">

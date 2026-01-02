@@ -267,79 +267,116 @@
   background: var(--dash-accent-dim);
 }
 
-.trainer-schedule__header {
-  display: grid;
-  grid-template-columns: 120px 1fr 70px;
-  gap: 12px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--dash-border);
-  margin-bottom: 10px;
-}
-
-.trainer-schedule__col {
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--dash-text-muted);
-  text-transform: uppercase;
-}
-
-.trainer-schedule__col--right {
-  text-align: right;
-}
-
-.trainer-schedule__times {
+.trainer-cards {
   display: flex;
-  justify-content: space-between;
-  font-size: 9px;
-  color: var(--dash-text-muted);
+  flex-direction: column;
+  gap: 12px;
 }
 
-.trainer-schedule__row {
-  display: grid;
-  grid-template-columns: 120px 1fr 70px;
-  gap: 12px;
+.trainer-card {
+  background: var(--dash-surface-elevated);
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.trainer-card__header {
+  display: flex;
   align-items: center;
-  padding: 8px 0;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
-.trainer-schedule__name {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--dash-text-primary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.trainer-schedule__slots {
+.trainer-card__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--dash-accent), var(--dash-blue));
+  color: #fff;
   display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.trainer-card__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.trainer-card__name {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dash-text-primary);
+  margin-bottom: 2px;
+}
+
+.trainer-card__meta {
+  font-size: 11px;
+  color: var(--dash-text-muted);
+}
+
+.trainer-card__revenue {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--dash-accent);
+}
+
+.trainer-card__slots {
+  display: flex;
+  flex-wrap: wrap;
   gap: 6px;
 }
 
-.slot-dot {
-  width: 24px;
-  height: 24px;
+.trainer-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
   border-radius: 6px;
-  display: inline-block;
+  min-width: 70px;
 }
 
-.slot-dot--available {
-  background: var(--dash-accent);
+.trainer-slot--available {
+  background: var(--dash-accent-dim);
+  border: 1px solid var(--dash-accent);
 }
 
-.slot-dot--limited {
-  background: var(--dash-warning);
+.trainer-slot--limited {
+  background: var(--dash-warning-dim);
+  border: 1px solid var(--dash-warning);
 }
 
-.slot-dot--booked {
-  background: var(--dash-urgent);
+.trainer-slot--booked {
+  background: var(--dash-surface);
+  border: 1px solid var(--dash-border);
 }
 
-.trainer-schedule__sessions {
-  font-size: 13px;
+.trainer-slot__time {
+  font-size: 10px;
   font-weight: 600;
+  color: var(--dash-text-secondary);
+  margin-bottom: 2px;
+}
+
+.trainer-slot__status {
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.trainer-slot--available .trainer-slot__status {
+  color: var(--dash-accent);
+}
+
+.trainer-slot--limited .trainer-slot__status {
+  color: var(--dash-warning);
+}
+
+.trainer-slot--booked .trainer-slot__status {
   color: var(--dash-text-primary);
-  text-align: right;
 }
 
 .trainer-schedule__legend {
@@ -358,10 +395,23 @@
   color: var(--dash-text-secondary);
 }
 
-.trainer-schedule__legend .slot-dot {
+.legend-dot {
   width: 10px;
   height: 10px;
   border-radius: 3px;
+  display: inline-block;
+}
+
+.legend-dot--available {
+  background: var(--dash-accent);
+}
+
+.legend-dot--limited {
+  background: var(--dash-warning);
+}
+
+.legend-dot--booked {
+  background: var(--dash-text-muted);
 }
 
 .alert-group {
