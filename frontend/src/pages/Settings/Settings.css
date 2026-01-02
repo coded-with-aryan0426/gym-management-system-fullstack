@@ -327,7 +327,11 @@ body.light-mode .theme-option:not(.theme-option--active) .theme-option__icon {
 :root.theme-light select.dense-input,
 [data-theme="light"] select.dense-input,
 body.light-mode select.dense-input {
+  background-color: #F8FAFC;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23334155' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
 }
 
 :root.theme-light select.dense-input option,
@@ -1662,9 +1666,12 @@ body.light-mode .info-icon[data-tooltip]:hover::after {
 /* Select Dropdown Styling */
 select.dense-input {
   appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666666' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 14px center;
+  background-position: right 12px center;
+  background-size: 12px;
   padding-right: 40px;
   cursor: pointer;
 }
