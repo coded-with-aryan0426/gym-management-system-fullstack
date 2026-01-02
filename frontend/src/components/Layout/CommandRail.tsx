@@ -32,6 +32,11 @@ const icons = {
       <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.14 2.26.55 3 1.2 3 2.2 0 1.51-1.15 2.05-2.74 2.05-1.94 0-2.69-1.05-2.76-2.29H5.7c.07 1.96 1.55 3.51 3.51 3.96V21h3v-1.99c1.93-.41 3.48-1.57 3.48-3.66 0-2.36-1.94-3.51-4.89-4.45z" />
     </svg>
   ),
+  ptSessions: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+      <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
+    </svg>
+  ),
   reports: (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none">
       <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" />
@@ -70,6 +75,7 @@ const defaultNavItems: NavItem[] = [
   { path: "/members", label: "Members", icon: icons.members, color: "#dc2626" },
   { path: "/trainers", label: "Trainers", icon: icons.staff, color: "#dc2626" },
   { path: "/classes", label: "Classes", icon: icons.classes, color: "#dc2626" },
+  { path: "/pt-sessions", label: "PT Sessions", icon: icons.ptSessions, color: "#dc2626" },
   { path: "/financials", label: "Financials", icon: icons.financials, color: "#dc2626" },
   { path: "/reports", label: "Reports", icon: icons.reports, color: "#dc2626" },
 ];
@@ -105,8 +111,8 @@ const CommandRail: React.FC<CommandRailProps> = ({ isCollapsed = false, onToggle
   // Filter items based on role (only if using default items, or apply same logic if needed)
   // If custom navItems are passed, we assume they are already filtered/correct for the context
   const itemsToRender = navItems === defaultNavItems ? navItems.filter(item => {
-    // 1. Owner sees everything
-    if (role === 'OWNER') return true;
+    // 1. Owner and Admin see everything
+    if (role === 'OWNER' || role === 'ADMIN') return true;
 
     // 2. Trainer (Staff) sees Operations but NOT Financials/Reports
     const restricted = ['/financials', '/reports'];
@@ -147,8 +153,8 @@ const CommandRail: React.FC<CommandRailProps> = ({ isCollapsed = false, onToggle
 
       {/* Footer with Account Settings, Logout, and Toggle */}
       <div className="command-rail__footer">
-        {/* Only Owner gets "Account Settings" (Gym config) - Members/Trainers get Profile via TopBar or hidden for V1 */}
-        {role === 'OWNER' && (
+        {/* Owner and Admin get "Account Settings" (Gym config) - Members/Trainers get Profile via TopBar or hidden for V1 */}
+        {(role === 'OWNER' || role === 'ADMIN') && (
           <NavLink
             to="/settings"
             className={({ isActive }) => `command-rail__link ${isActive ? "command-rail__link--active" : ""}`}

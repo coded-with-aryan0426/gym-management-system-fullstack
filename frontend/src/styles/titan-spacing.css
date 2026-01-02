@@ -1,0 +1,33 @@
+/* ============================================================================
+   TITAN PROFESSIONAL THEME - SPACING
+   Compact but Breathable
+   ============================================================================ */
+
+:root {
+    /* Base spacing unit: 4px */
+    --space-0: 0;
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-10: 40px;
+    --space-12: 48px;
+    --space-16: 64px;
+
+    /* Component-specific spacing */
+    --page-padding: 24px;
+    --card-padding: 16px;
+    --section-gap: 24px;
+    --element-gap: 12px;
+    --button-padding-x: 12px;
+    --button-padding-y: 8px;
+    --input-padding-x: 12px;
+    --input-padding-y: 8px;
+
+    /* Component Sizes */
+    --sidebar-width: 220px;
+    --header-height: 56px;
+}

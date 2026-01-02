@@ -66,6 +66,7 @@ const DevNavigation: React.FC = () => {
             fullName: `Dev ${role}`,
             email: `dev.${role.toLowerCase()}@gym.local`,
             role: role,
+            context: role === 'MEMBER' ? 'MEMBER' : 'STAFF',
             staffRole: role === 'ADMIN' ? 'OWNER' : role,
             roles: [{ roleName: role }]
         }));

@@ -1,123 +1,123 @@
-import React, { useEffect, useState } from 'react';
-import './Trainer.css';
-
-interface Session {
-    sessionId: number;
-    sessionDate: string;
-    durationMinutes: number;
-    status: string;
-    member?: {
-        fullName: string;
-    };
-}
+import React, { useState } from 'react';
+import { ChevronLeft, ChevronRight, RefreshCw, Filter, Calendar } from 'lucide-react';
 
 const MySchedule: React.FC = () => {
-    const [sessions, setSessions] = useState<Session[]>([]);
-    const [loading, setLoading] = useState(true);
+    // Mock Data
+    const [currentMonth, setCurrentMonth] = useState('March 2024');
 
-    const userStr = localStorage.getItem('user');
-    const user = userStr ? JSON.parse(userStr) : null;
+    // Mock events for Month View
+    const events = [
+        { id: 1, title: 'Yoga Class', date: 25, type: 'class', time: '9:00 AM' },
+        { id: 2, title: 'PT: Sarah', date: 25, type: 'pt', time: '1:00 PM' },
+        { id: 3, title: 'HIIT', date: 27, type: 'class', time: '7:00 AM' },
+        { id: 4, title: 'PT: Mike', date: 28, type: 'pt', time: '2:00 PM' },
+        { id: 5, title: 'Cardio', date: 29, type: 'class', time: '6:00 PM' },
+        { id: 6, title: 'Staff Meeting', date: 30, type: 'meeting', time: '10:00 AM' },
+    ];
 
-    useEffect(() => {
-        const fetchSchedule = async () => {
-            if (!user?.id) return;
+    const daysInMonth = Array.from({ length: 31 }, (_, i) => i + 1);
+    const startDayOffset = 1; // e.g. Monday start
 
-            try {
-                const response = await fetch(`/api/trainer/schedule?trainerId=${user.id}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    setSessions(data);
-                }
-            } catch (error) {
-                console.error('Failed to fetch schedule:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchSchedule();
-    }, [user?.id]);
-
-    const formatDate = (dateStr: string) => {
-        const date = new Date(dateStr);
-        return date.toLocaleDateString('en-US', {
-            weekday: 'short',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    };
-
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'SCHEDULED': return '#10B981';
-            case 'COMPLETED': return '#6B7280';
-            case 'CANCELLED': return '#DC2626';
-            default: return '#9CA3AF';
+    const getEventTypeStyles = (type: string) => {
+        switch (type) {
+            case 'class': return 'bg-indigo-50 text-indigo-700 border-l-2 border-indigo-500';
+            case 'pt': return 'bg-emerald-50 text-emerald-700 border-l-2 border-emerald-500';
+            case 'meeting': return 'bg-amber-50 text-amber-700 border-l-2 border-amber-500';
+            default: return 'bg-gray-50 text-gray-700';
         }
     };
 
-    if (loading) {
-        return (
-            <div className="trainer-dashboard">
-                <h1 className="trainer-page-title">My Schedule</h1>
-                <p style={{ color: 'var(--text-secondary)' }}>Loading...</p>
-            </div>
-        );
-    }
-
     return (
-        <div className="trainer-dashboard">
-            <h1 className="trainer-page-title">My Schedule</h1>
+        <div className="min-h-screen bg-gray-50 flex flex-col">
+            {/* Page Header */}
+            <div className="px-6 py-6 border-b border-gray-200 bg-white mb-6 flex justify-between items-center">
+                <div>
+                    <h1 className="text-[28px] font-bold text-gray-900 mb-1">My Schedule</h1>
+                    <p className="text-sm font-normal text-gray-500">Your weekly training schedule</p>
+                </div>
+                <button className="h-10 px-5 border border-gray-300 rounded-lg bg-white text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors flex items-center gap-2">
+                    <RefreshCw size={16} /> Sync to Calendar
+                </button>
+            </div>
 
-            {sessions.length === 0 ? (
-                <div className="trainer-empty-state">
-                    <div className="trainer-empty-state__icon">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                            <line x1="16" y1="2" x2="16" y2="6" />
-                            <line x1="8" y1="2" x2="8" y2="6" />
-                            <line x1="3" y1="10" x2="21" y2="10" />
-                        </svg>
+            <div className="px-6 pb-8 max-w-[1400px] mx-auto w-full">
+                {/* Calendar Controls */}
+                <div className="bg-white border border-gray-200 rounded-xl p-5 mb-6 flex flex-col md:flex-row justify-between items-center gap-4 shadow-sm">
+                    {/* View Toggle */}
+                    <div className="inline-flex border border-gray-200 rounded-lg overflow-hidden h-9">
+                        <button className="px-4 text-sm font-medium bg-white text-gray-500 hover:bg-gray-50 transition-colors border-r border-gray-200">Day</button>
+                        <button className="px-4 text-sm font-medium bg-white text-gray-500 hover:bg-gray-50 transition-colors border-r border-gray-200">Week</button>
+                        <button className="px-4 text-sm font-medium bg-[#EEF2FF] text-[#4F46E5] font-semibold transition-colors">Month</button>
                     </div>
-                    <h3 className="trainer-empty-state__title">No Sessions Scheduled</h3>
-                    <p className="trainer-empty-state__text">
-                        You don't have any sessions scheduled yet.
-                    </p>
+
+                    {/* Date Navigation */}
+                    <div className="flex items-center gap-4">
+                        <button className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-600 transition-colors">
+                            <ChevronLeft size={20} />
+                        </button>
+                        <span className="text-[18px] font-bold text-gray-900 text-center min-w-[140px]">{currentMonth}</span>
+                        <button className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-600 transition-colors">
+                            <ChevronRight size={20} />
+                        </button>
+                        <button className="px-4 py-1.5 border border-gray-200 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 ml-2">
+                            Today
+                        </button>
+                    </div>
+
+                    {/* Filter */}
+                    <button className="h-9 px-4 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 flex items-center gap-2">
+                        <Filter size={16} /> Filter
+                    </button>
                 </div>
-            ) : (
-                <div className="trainer-members-list">
-                    {sessions.map(session => (
-                        <div key={session.sessionId} className="trainer-member-card">
-                            <div className="trainer-member-card__avatar" style={{ background: 'linear-gradient(135deg, #6366F1, #4F46E5)' }}>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                                    <circle cx="12" cy="12" r="10" />
-                                    <polyline points="12 6 12 12 16 14" />
-                                </svg>
+
+                {/* Month View Calendar */}
+                <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                    {/* Weekday Headers */}
+                    <div className="grid grid-cols-7 border-b border-gray-200 bg-gray-50/50">
+                        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                            <div key={day} className="py-3 text-center text-sm font-semibold text-gray-500 uppercase tracking-wide">
+                                {day}
                             </div>
-                            <div className="trainer-member-card__info">
-                                <div className="trainer-member-card__name">
-                                    {session.member?.fullName || 'Personal Training Session'}
+                        ))}
+                    </div>
+
+                    {/* Days Grid */}
+                    <div className="grid grid-cols-7 auto-rows-[minmax(120px,auto)]">
+                        {/* Empty slots for start offset */}
+                        {Array.from({ length: startDayOffset }).map((_, i) => (
+                            <div key={`empty-${i}`} className="border-b border-r border-gray-100 bg-gray-50/30 p-2 min-h-[120px]"></div>
+                        ))}
+
+                        {/* Actual Days */}
+                        {daysInMonth.map(day => {
+                            const dayEvents = events.filter(e => e.date === day);
+                            return (
+                                <div key={day} className="border-b border-r border-gray-100 p-2 min-h-[120px] relative hover:bg-gray-50/50 transition-colors group">
+                                    <div className={`text-sm font-medium mb-2 ${day === 25 ? 'w-7 h-7 bg-[#4F46E5] text-white rounded-full flex items-center justify-center' : 'text-gray-700 pl-1'}`}>
+                                        {day}
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        {dayEvents.map(event => (
+                                            <div key={event.id} className={`text-xs p-1.5 rounded-md truncate cursor-pointer hover:opacity-80 font-medium ${getEventTypeStyles(event.type)}`}>
+                                                {event.time} {event.title}
+                                            </div>
+                                        ))}
+                                    </div>
+                                    {/* Add Button on Hover */}
+                                    <button className="absolute bottom-2 right-2 w-6 h-6 rounded-full bg-gray-100 text-gray-400 hover:bg-[#4F46E5] hover:text-white items-center justify-center hidden group-hover:flex transition-colors text-lg leading-none pb-0.5">
+                                        +
+                                    </button>
                                 </div>
-                                <div className="trainer-member-card__email">
-                                    {formatDate(session.sessionDate)} • {session.durationMinutes} min
-                                </div>
-                            </div>
-                            <span style={{
-                                padding: '4px 12px',
-                                borderRadius: '20px',
-                                fontSize: '12px',
-                                fontWeight: 600,
-                                background: `${getStatusColor(session.status)}20`,
-                                color: getStatusColor(session.status)
-                            }}>
-                                {session.status}
-                            </span>
-                        </div>
-                    ))}
+                            );
+                        })}
+
+                        {/* Trailing empty slots to complete grid (optional, filling to 35 or 42) */}
+                        {Array.from({ length: 35 - (daysInMonth.length + startDayOffset) }).map((_, i) => (
+                            <div key={`trailing-${i}`} className="border-b border-r border-gray-100 bg-gray-50/30 p-2 min-h-[120px]"></div>
+                        ))}
+                    </div>
                 </div>
-            )}
+            </div>
         </div>
     );
 };

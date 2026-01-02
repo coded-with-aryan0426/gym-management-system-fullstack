@@ -36,6 +36,10 @@ const MyMembers = lazy(() => import('./pages/trainer/MyMembers'));
 const MySchedule = lazy(() => import('./pages/trainer/MySchedule'));
 const MyClasses = lazy(() => import('./pages/trainer/MyClasses'));
 const TrainerNotifications = lazy(() => import('./pages/trainer/TrainerNotifications'));
+const ProgressNotes = lazy(() => import('./pages/trainer/ProgressNotes'));
+const TrainerMessages = lazy(() => import('./pages/trainer/TrainerMessages'));
+const TrainerReports = lazy(() => import('./pages/trainer/TrainerReports'));
+const TrainerSettings = lazy(() => import('./pages/trainer/TrainerSettings'));
 
 // Member Dashboard Pages
 const MemberLayout = lazy(() => import('./pages/member/MemberLayout'));
@@ -85,6 +89,10 @@ function App() {
                               <Route path="classes" element={<MyClasses />} />
                               <Route path="schedule" element={<MySchedule />} />
                               <Route path="notifications" element={<TrainerNotifications />} />
+                              <Route path="progress-notes" element={<ProgressNotes />} />
+                              <Route path="messages" element={<TrainerMessages />} />
+                              <Route path="reports" element={<TrainerReports />} />
+                              <Route path="settings" element={<TrainerSettings />} />
                               <Route path="*" element={<Navigate to="/trainer" replace />} />
                             </Routes>
                           </TrainerLayout>

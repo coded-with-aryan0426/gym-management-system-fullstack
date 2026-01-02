@@ -1,0 +1,84 @@
+/* ============================================================================
+   TITAN PROFESSIONAL THEME - VARIABLES
+   Based on Vercel/Linear Dark Mode
+   ============================================================================ */
+
+:root {
+    /* ────────────────────────────────────────────────────────────
+       BACKGROUND COLORS (Layered - Darkest to Lighter)
+       ──────────────────────────────────────────────────────────── */
+    --bg-primary: #09090B;
+    /* Darkest - Main background */
+    --bg-secondary: #0F0F12;
+    /* Sidebar, cards base */
+    --bg-tertiary: #18181B;
+    /* Elevated cards, modals */
+    --bg-hover: #27272A;
+    /* Hover states */
+    --bg-active: #3F3F46;
+    /* Active/selected states */
+
+    /* ────────────────────────────────────────────────────────────
+       TEXT COLORS (High to Low Emphasis)
+       ──────────────────────────────────────────────────────────── */
+    --text-primary: #FAFAFA;
+    /* Headings, important text */
+    --text-secondary: #A1A1AA;
+    /* Body text, descriptions */
+    --text-muted: #71717A;
+    /* Subtle text, placeholders */
+    --text-disabled: #52525B;
+    /* Disabled states */
+
+    /* ────────────────────────────────────────────────────────────
+       ACCENT COLORS (Use Sparingly)
+       ──────────────────────────────────────────────────────────── */
+    --accent-primary: #6366F1;
+    /* Primary actions, links */
+    --accent-primary-hover: #818CF8;
+    --accent-primary-muted: rgba(99, 102, 241, 0.15);
+
+    /* ────────────────────────────────────────────────────────────
+       SEMANTIC COLORS
+       ──────────────────────────────────────────────────────────── */
+    --success: #22C55E;
+    --success-muted: rgba(34, 197, 94, 0.15);
+
+    --warning: #F59E0B;
+    --warning-muted: rgba(245, 158, 11, 0.15);
+
+    --danger: #EF4444;
+    --danger-muted: rgba(239, 68, 68, 0.15);
+
+    --info: #3B82F6;
+    --info-muted: rgba(59, 130, 246, 0.15);
+
+    /* ────────────────────────────────────────────────────────────
+       BORDER & DIVIDER
+       ──────────────────────────────────────────────────────────── */
+    --border-default: #27272A;
+    /* Standard border */
+    --border-subtle: #1F1F23;
+    /* Subtle separation */
+    --border-strong: #3F3F46;
+    /* Input borders, active states */
+
+    /* ────────────────────────────────────────────────────────────
+       SHADOWS (Subtle in dark theme)
+       ──────────────────────────────────────────────────────────── */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+    /* ────────────────────────────────────────────────────────────
+       BACKWARD COMPATIBILITY ALIASES (Mapping old names to new)
+       ──────────────────────────────────────────────────────────── */
+    --border: var(--border-default);
+    --border-hover: var(--border-strong);
+    --text-tertiary: var(--text-muted);
+
+    --color-primary-500: var(--accent-primary);
+    --color-primary-600: var(--accent-primary-hover);
+
+    --card-bg: var(--bg-tertiary);
+}

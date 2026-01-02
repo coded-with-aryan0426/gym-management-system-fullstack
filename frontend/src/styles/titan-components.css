@@ -1,0 +1,169 @@
+/* ============================================================================
+   TITAN PROFESSIONAL THEME - COMPONENTS
+   Base styles for common elements
+   ============================================================================ */
+
+/* ────────────────────────────────────────────────────────────
+   BUTTONS (3 sizes)
+   ──────────────────────────────────────────────────────────── */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 6px;
+    transition: all 0.15s ease;
+    cursor: pointer;
+    gap: 8px;
+}
+
+.btn-sm {
+    height: 28px;
+    padding: 0 10px;
+    font-size: 12px;
+}
+
+.btn-md {
+    height: 32px;
+    padding: 0 12px;
+    font-size: 13px;
+}
+
+.btn-lg {
+    height: 36px;
+    padding: 0 16px;
+    font-size: 14px;
+}
+
+/* Button Variants */
+.btn-primary {
+    background: var(--accent-primary);
+    color: white;
+    border: none;
+}
+
+.btn-primary:hover {
+    background: var(--accent-primary-hover);
+}
+
+.btn-secondary {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-default);
+}
+
+.btn-secondary:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+    border-color: var(--border-strong);
+}
+
+.btn-ghost {
+    background: transparent;
+    color: var(--text-secondary);
+    border: none;
+}
+
+.btn-ghost:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+/* ────────────────────────────────────────────────────────────
+   INPUTS
+   ──────────────────────────────────────────────────────────── */
+
+.input {
+    height: 32px;
+    padding: 0 12px;
+    font-size: 13px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-default);
+    border-radius: 6px;
+    color: var(--text-primary);
+    transition: border-color 0.15s ease;
+    width: 100%;
+}
+
+.input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px var(--accent-primary-muted);
+}
+
+.input::placeholder {
+    color: var(--text-muted);
+}
+
+/* ────────────────────────────────────────────────────────────
+   CARDS
+   ──────────────────────────────────────────────────────────── */
+
+.card {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.card-header {
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-subtle);
+    margin-bottom: 12px;
+}
+
+.card-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* ────────────────────────────────────────────────────────────
+   STAT CARDS (Compact)
+   ──────────────────────────────────────────────────────────── */
+
+.stat-card {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-card-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.stat-card-value {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+.stat-card-change {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+/* ────────────────────────────────────────────────────────────
+   SHARED STYLES
+   ──────────────────────────────────────────────────────────── */
+
+.page-container {
+    padding: var(--page-padding);
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+.section-gap {
+    gap: var(--section-gap);
+}
