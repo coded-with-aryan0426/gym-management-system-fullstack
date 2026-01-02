@@ -44,7 +44,7 @@
 .utility-bar__search:focus-within {
   background: rgba(255, 255, 255, 0.08);
   border: 2px solid #DC2626;
-  box-shadow: none;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.3);
 }
 
 .utility-bar__search-icon {
