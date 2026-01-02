@@ -1,0 +1,603 @@
+/* ============================================================================
+   Trainer Profile - Premium Design with Light/Dark Mode
+   ============================================================================ */
+
+.trainer-profile {
+  min-height: 100%;
+  background-color: var(--bg-primary, #0c0c0e);
+}
+
+/* ============================================
+   HEADER BANNER
+   ============================================ */
+.trainer-profile__header-banner {
+  background: linear-gradient(135deg, #4F46E5 0%, #6366F1 100%);
+  padding: 32px 40px;
+  position: relative;
+}
+
+.trainer-profile__header-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.trainer-profile__avatar-section {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.trainer-profile__avatar {
+  position: relative;
+  width: 128px;
+  height: 128px;
+}
+
+.trainer-profile__avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 4px solid #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  object-fit: cover;
+}
+
+.trainer-profile__avatar-edit {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 32px;
+  height: 32px;
+  background: #fff;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4F46E5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: transform 0.15s ease;
+}
+
+.trainer-profile__avatar-edit:hover {
+  transform: scale(1.1);
+}
+
+.trainer-profile__info h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 8px 0;
+}
+
+.trainer-profile__role {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0 0 8px 0;
+}
+
+.trainer-profile__rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.trainer-profile__rating span {
+  margin-left: 8px;
+}
+
+/* Header Actions */
+.trainer-profile__header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.trainer-profile__edit-btn,
+.trainer-profile__cancel-btn,
+.trainer-profile__save-btn {
+  height: 40px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.15s ease;
+}
+
+.trainer-profile__edit-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+  backdrop-filter: blur(8px);
+}
+
+.trainer-profile__edit-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.trainer-profile__edit-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.trainer-profile__cancel-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+}
+
+.trainer-profile__save-btn {
+  background: #fff;
+  border: none;
+  color: #4F46E5;
+}
+
+.trainer-profile__save-btn:hover {
+  background: #f0f0f0;
+}
+
+/* ============================================
+   STATS ROW
+   ============================================ */
+.trainer-profile__stats-row {
+  max-width: 1400px;
+  margin: -40px auto 0;
+  padding: 0 40px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  position: relative;
+  z-index: 10;
+}
+
+@media (max-width: 768px) {
+  .trainer-profile__stats-row {
+    grid-template-columns: repeat(2, 1fr);
+    padding: 0 20px;
+  }
+}
+
+.trainer-profile__stat {
+  background: var(--bg-secondary, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  backdrop-filter: blur(10px);
+}
+
+.trainer-profile__stat-value {
+  display: block;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-primary, #fff);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.trainer-profile__stat-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+  margin-bottom: 2px;
+}
+
+.trainer-profile__stat-sub {
+  display: block;
+  font-size: 12px;
+  color: var(--text-tertiary, rgba(255, 255, 255, 0.5));
+}
+
+/* ============================================
+   CONTENT AREA
+   ============================================ */
+.trainer-profile__content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 32px 40px;
+}
+
+@media (max-width: 768px) {
+  .trainer-profile__content {
+    padding: 24px 20px;
+  }
+}
+
+/* ============================================
+   TABS
+   ============================================ */
+.trainer-profile__tabs {
+  display: flex;
+  gap: 32px;
+  border-bottom: 2px solid var(--border-color, rgba(255, 255, 255, 0.06));
+  margin-bottom: 32px;
+}
+
+.trainer-profile__tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 4px;
+  background: none;
+  border: none;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-tertiary, rgba(255, 255, 255, 0.5));
+  cursor: pointer;
+  position: relative;
+  transition: color 0.2s ease;
+}
+
+.trainer-profile__tab:hover {
+  color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+}
+
+.trainer-profile__tab--active {
+  color: #4F46E5;
+  font-weight: 600;
+}
+
+.trainer-profile__tab--active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: #4F46E5;
+  border-radius: 2px 2px 0 0;
+}
+
+/* ============================================
+   TAB CONTENT
+   ============================================ */
+.trainer-profile__tab-content {
+  background: var(--bg-secondary, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+  border-radius: 12px;
+  padding: 32px;
+}
+
+/* ============================================
+   FORM
+   ============================================ */
+.trainer-profile__form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.trainer-profile__form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px 20px;
+}
+
+@media (max-width: 640px) {
+  .trainer-profile__form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.trainer-profile__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.trainer-profile__field--full {
+  grid-column: 1 / -1;
+}
+
+.trainer-profile__field label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.trainer-profile__field input,
+.trainer-profile__field select,
+.trainer-profile__field textarea {
+  width: 100%;
+  height: 44px;
+  padding: 10px 16px;
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+  border-radius: 8px;
+  font-size: 15px;
+  color: var(--text-primary, #fff);
+  background: var(--bg-primary, rgba(0, 0, 0, 0.2));
+  transition: all 0.2s ease;
+}
+
+.trainer-profile__field textarea {
+  height: auto;
+  min-height: 120px;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.trainer-profile__field input:focus,
+.trainer-profile__field select:focus,
+.trainer-profile__field textarea:focus {
+  outline: none;
+  border-color: #4F46E5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.trainer-profile__field input:disabled,
+.trainer-profile__field select:disabled,
+.trainer-profile__field textarea:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.trainer-profile__field--readonly input {
+  background: var(--bg-secondary, rgba(255, 255, 255, 0.02));
+  color: var(--text-tertiary, rgba(255, 255, 255, 0.5));
+}
+
+/* ============================================
+   BADGES
+   ============================================ */
+.trainer-profile__badges {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.trainer-profile__badges label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+}
+
+.trainer-profile__badges-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.trainer-profile__badge {
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.trainer-profile__badge--primary {
+  background: rgba(79, 70, 229, 0.15);
+  color: #4F46E5;
+}
+
+.trainer-profile__badge--warning {
+  background: rgba(245, 158, 11, 0.15);
+  color: #F59E0B;
+}
+
+.trainer-profile__badge--success {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10B981;
+}
+
+/* ============================================
+   SECURITY
+   ============================================ */
+.trainer-profile__security {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.trainer-profile__security-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: var(--bg-primary, rgba(0, 0, 0, 0.2));
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+  border-radius: 10px;
+}
+
+.trainer-profile__security-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(79, 70, 229, 0.1);
+  color: #4F46E5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.trainer-profile__security-icon--success {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10B981;
+}
+
+.trainer-profile__security-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.trainer-profile__security-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary, #fff);
+}
+
+.trainer-profile__security-sub {
+  font-size: 12px;
+  color: var(--text-tertiary, rgba(255, 255, 255, 0.5));
+}
+
+.trainer-profile__security-sub--success {
+  color: #10B981;
+}
+
+.trainer-profile__security-btn {
+  height: 32px;
+  padding: 6px 16px;
+  background: transparent;
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.trainer-profile__security-btn:hover {
+  background: var(--bg-secondary, rgba(255, 255, 255, 0.04));
+  border-color: var(--border-hover, rgba(255, 255, 255, 0.15));
+}
+
+/* ============================================
+   LIGHT MODE
+   ============================================ */
+:root.theme-light .trainer-profile {
+  background-color: #f8fafc;
+}
+
+:root.theme-light .trainer-profile__stat {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+:root.theme-light .trainer-profile__stat-value {
+  color: #111827;
+}
+
+:root.theme-light .trainer-profile__stat-label {
+  color: #374151;
+}
+
+:root.theme-light .trainer-profile__stat-sub {
+  color: #6B7280;
+}
+
+:root.theme-light .trainer-profile__tabs {
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+:root.theme-light .trainer-profile__tab {
+  color: #6B7280;
+}
+
+:root.theme-light .trainer-profile__tab:hover {
+  color: #374151;
+}
+
+:root.theme-light .trainer-profile__tab-content {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+:root.theme-light .trainer-profile__field label {
+  color: #374151;
+}
+
+:root.theme-light .trainer-profile__field input,
+:root.theme-light .trainer-profile__field select,
+:root.theme-light .trainer-profile__field textarea {
+  background: #fff;
+  border-color: #D1D5DB;
+  color: #111827;
+}
+
+:root.theme-light .trainer-profile__field--readonly input {
+  background: #F9FAFB;
+  color: #9CA3AF;
+}
+
+:root.theme-light .trainer-profile__security-item {
+  background: #F9FAFB;
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+:root.theme-light .trainer-profile__security-title {
+  color: #111827;
+}
+
+:root.theme-light .trainer-profile__security-sub {
+  color: #6B7280;
+}
+
+:root.theme-light .trainer-profile__security-btn {
+  border-color: #D1D5DB;
+  color: #374151;
+}
+
+:root.theme-light .trainer-profile__security-btn:hover {
+  background: #F3F4F6;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+  .trainer-profile__header-banner {
+    padding: 24px 20px;
+  }
+
+  .trainer-profile__header-content {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .trainer-profile__avatar-section {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .trainer-profile__info {
+    text-align: center;
+  }
+
+  .trainer-profile__avatar {
+    width: 100px;
+    height: 100px;
+  }
+
+  .trainer-profile__info h1 {
+    font-size: 24px;
+  }
+
+  .trainer-profile__header-actions {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .trainer-profile__tabs {
+    gap: 16px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+
+  .trainer-profile__tab {
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  .trainer-profile__tab-content {
+    padding: 20px;
+  }
+}
