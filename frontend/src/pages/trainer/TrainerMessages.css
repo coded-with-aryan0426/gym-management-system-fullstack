@@ -1,5 +1,5 @@
 /* ============================================================================
-   Trainer Messages - Chat UI with Light/Dark Mode
+   Trainer Messages - Professional Chat System Design
    ============================================================================ */
 
 @import './TrainerTheme.css';
@@ -8,6 +8,7 @@
   display: flex;
   height: calc(100vh - 60px);
   background-color: var(--bg-primary, #0a0a0a);
+  overflow: hidden;
 }
 
 /* ============================================
@@ -19,51 +20,76 @@
   display: flex;
   flex-direction: column;
   background: var(--bg-secondary, rgba(12, 12, 14, 0.95));
+  flex-shrink: 0;
+  transition: width 0.2s ease;
+}
+
+.trainer-messages__sidebar--collapsed {
+  width: 280px;
 }
 
 .trainer-messages__sidebar-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
+  padding: 16px 20px;
   border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
 }
 
+.trainer-messages__sidebar-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .trainer-messages__sidebar-header h2 {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
   color: var(--text-primary, #fff);
   margin: 0;
 }
 
-.trainer-messages__filter-btn {
+.trainer-messages__total-unread {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  background: #DC2626;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.trainer-messages__new-chat-btn {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #DC2626, #B91C1C);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  background: transparent;
-  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
-  border-radius: 6px;
-  color: var(--text-secondary, rgba(255, 255, 255, 0.7));
-  font-size: 13px;
-  cursor: pointer;
+  justify-content: center;
   transition: all 0.15s ease;
 }
 
-.trainer-messages__filter-btn:hover {
-  background: var(--bg-primary, rgba(255, 255, 255, 0.04));
+.trainer-messages__new-chat-btn:hover {
+  transform: scale(1.05);
 }
 
 .trainer-messages__search {
   position: relative;
-  padding: 0 16px 16px;
+  padding: 0 16px 12px;
 }
 
 .trainer-messages__search svg {
   position: absolute;
   left: 28px;
-  top: 50%;
-  transform: translateY(-50%);
+  top: 12px;
   color: var(--text-tertiary, rgba(255, 255, 255, 0.4));
 }
 
@@ -73,8 +99,8 @@
   padding: 10px 16px 10px 40px;
   background: var(--bg-primary, rgba(0, 0, 0, 0.2));
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
-  border-radius: 8px;
-  font-size: 14px;
+  border-radius: 10px;
+  font-size: 13px;
   color: var(--text-primary, #fff);
 }
 
@@ -88,6 +114,57 @@
 }
 
 /* ============================================
+   FILTER TABS
+   ============================================ */
+.trainer-messages__filter-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 0 16px 12px;
+}
+
+.trainer-messages__filter-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 8px 12px;
+  background: transparent;
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-tertiary, rgba(255, 255, 255, 0.5));
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.trainer-messages__filter-tab:hover {
+  background: var(--bg-primary, rgba(255, 255, 255, 0.03));
+  color: var(--text-secondary);
+}
+
+.trainer-messages__filter-tab.active {
+  background: rgba(220, 38, 38, 0.15);
+  border-color: rgba(220, 38, 38, 0.3);
+  color: #DC2626;
+}
+
+.trainer-messages__filter-tab span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  background: #DC2626;
+  color: #fff;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+/* ============================================
    CONVERSATIONS LIST
    ============================================ */
 .trainer-messages__conversations {
@@ -97,10 +174,10 @@
 
 .trainer-messages__conversation {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
   width: 100%;
-  padding: 16px 20px;
+  padding: 14px 16px;
   background: transparent;
   border: none;
   border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.04));
@@ -123,14 +200,15 @@
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #DC2626, #EF4444);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-size: 14px;
-  font-weight: 600;
   flex-shrink: 0;
+  overflow: visible;
+}
+
+.trainer-messages__avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
 }
 
 .trainer-messages__avatar--large {
@@ -149,6 +227,13 @@
   border-radius: 50%;
 }
 
+.trainer-messages__online-dot--large {
+  width: 14px;
+  height: 14px;
+  bottom: 0;
+  right: 0;
+}
+
 .trainer-messages__conv-info {
   flex: 1;
   min-width: 0;
@@ -162,13 +247,25 @@
 }
 
 .trainer-messages__conv-name {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-size: 14px;
   font-weight: 600;
   color: var(--text-primary, #fff);
 }
 
+.trainer-messages__pin-icon {
+  color: #F59E0B;
+}
+
+.trainer-messages__muted-icon {
+  color: var(--text-tertiary);
+  margin-left: 2px;
+}
+
 .trainer-messages__conv-time {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-tertiary, rgba(255, 255, 255, 0.5));
 }
 
@@ -184,7 +281,35 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 180px;
+  max-width: 200px;
+}
+
+.trainer-messages__typing {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: #10B981;
+}
+
+.trainer-messages__typing span {
+  width: 4px;
+  height: 4px;
+  background: #10B981;
+  border-radius: 50%;
+  animation: typing 1.4s ease-in-out infinite;
+}
+
+.trainer-messages__typing span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.trainer-messages__typing span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typing {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+  30% { transform: translateY(-4px); opacity: 1; }
 }
 
 .trainer-messages__unread-badge {
@@ -201,6 +326,41 @@
   justify-content: center;
 }
 
+.trainer-messages__conv-tags {
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.trainer-messages__conv-tag {
+  padding: 2px 6px;
+  background: var(--bg-primary, rgba(255, 255, 255, 0.05));
+  border-radius: 4px;
+  font-size: 10px;
+  color: var(--text-tertiary);
+}
+
+.trainer-messages__no-results {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.trainer-messages__no-results svg {
+  color: var(--text-tertiary);
+  opacity: 0.5;
+  margin-bottom: 8px;
+}
+
+.trainer-messages__no-results p {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  margin: 0;
+}
+
 /* ============================================
    CHAT AREA
    ============================================ */
@@ -209,13 +369,14 @@
   display: flex;
   flex-direction: column;
   background: var(--bg-primary, #0a0a0a);
+  min-width: 0;
 }
 
 .trainer-messages__chat-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 24px;
+  padding: 12px 20px;
   border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
   background: var(--bg-secondary, rgba(12, 12, 14, 0.95));
 }
@@ -224,31 +385,43 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 8px;
+  transition: background 0.15s ease;
+}
+
+.trainer-messages__chat-user:hover {
+  background: var(--bg-primary, rgba(255, 255, 255, 0.03));
 }
 
 .trainer-messages__user-info h3 {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--text-primary, #fff);
   margin: 0 0 2px 0;
 }
 
 .trainer-messages__user-info span {
-  font-size: 13px;
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.trainer-messages__user-info span.online {
   color: #10B981;
 }
 
 .trainer-messages__chat-actions {
   display: flex;
-  gap: 8px;
+  gap: 6px;
 }
 
 .trainer-messages__action-btn {
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   background: transparent;
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
-  border-radius: 8px;
+  border-radius: 10px;
   color: var(--text-secondary, rgba(255, 255, 255, 0.7));
   cursor: pointer;
   display: flex;
@@ -257,9 +430,11 @@
   transition: all 0.15s ease;
 }
 
-.trainer-messages__action-btn:hover {
+.trainer-messages__action-btn:hover,
+.trainer-messages__action-btn.active {
   background: var(--bg-primary, rgba(255, 255, 255, 0.04));
   color: var(--text-primary, #fff);
+  border-color: rgba(220, 38, 38, 0.3);
 }
 
 /* ============================================
@@ -268,15 +443,31 @@
 .trainer-messages__chat-body {
   flex: 1;
   overflow-y: auto;
-  padding: 24px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
+}
+
+.trainer-messages__date-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 0;
+}
+
+.trainer-messages__date-divider span {
+  padding: 4px 12px;
+  background: var(--bg-secondary, rgba(255, 255, 255, 0.05));
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-tertiary);
 }
 
 .trainer-messages__message {
   display: flex;
-  max-width: 70%;
+  max-width: 75%;
 }
 
 .trainer-messages__message--me {
@@ -288,12 +479,19 @@
 }
 
 .trainer-messages__message-content {
+  position: relative;
   padding: 12px 16px;
   border-radius: 16px;
 }
 
+.trainer-messages__message-content > p {
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+}
+
 .trainer-messages__message--me .trainer-messages__message-content {
-  background: #DC2626;
+  background: linear-gradient(135deg, #DC2626, #B91C1C);
   border-bottom-right-radius: 4px;
 }
 
@@ -303,17 +501,11 @@
   border-bottom-left-radius: 4px;
 }
 
-.trainer-messages__message-content p {
-  font-size: 14px;
-  line-height: 1.5;
-  margin: 0 0 6px 0;
-}
-
-.trainer-messages__message--me .trainer-messages__message-content p {
+.trainer-messages__message--me .trainer-messages__message-content > p {
   color: #fff;
 }
 
-.trainer-messages__message--them .trainer-messages__message-content p {
+.trainer-messages__message--them .trainer-messages__message-content > p {
   color: var(--text-primary, #fff);
 }
 
@@ -322,7 +514,8 @@
   align-items: center;
   justify-content: flex-end;
   gap: 6px;
-  font-size: 11px;
+  margin-top: 6px;
+  font-size: 10px;
 }
 
 .trainer-messages__message--me .trainer-messages__message-meta {
@@ -338,41 +531,347 @@
   align-items: center;
 }
 
+.trainer-messages__message-status--read {
+  color: #60A5FA;
+}
+
+.trainer-messages__message-status--delivered {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.trainer-messages__message-status--sending {
+  opacity: 0.5;
+}
+
+.trainer-messages__edited {
+  font-style: italic;
+  opacity: 0.7;
+}
+
+.trainer-messages__reactions {
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.trainer-messages__reaction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 6px;
+  background: var(--bg-primary, rgba(0, 0, 0, 0.3));
+  border-radius: 10px;
+  font-size: 12px;
+}
+
+/* ============================================
+   SPECIAL MESSAGE CARDS
+   ============================================ */
+.trainer-messages__special-message {
+  background: var(--bg-primary, rgba(0, 0, 0, 0.3));
+  border-radius: 12px;
+  padding: 14px;
+  min-width: 260px;
+}
+
+.trainer-messages__message--me .trainer-messages__special-message {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.trainer-messages__message--them .trainer-messages__special-message {
+  background: var(--bg-primary, rgba(0, 0, 0, 0.3));
+}
+
+.trainer-messages__workout-card .trainer-messages__workout-header,
+.trainer-messages__meal-card .trainer-messages__meal-header,
+.trainer-messages__progress-card .trainer-messages__progress-header,
+.trainer-messages__session-card .trainer-messages__session-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.trainer-messages__workout-header { color: #8B5CF6; }
+.trainer-messages__meal-header { color: #10B981; }
+.trainer-messages__progress-header { color: #3B82F6; }
+.trainer-messages__session-header { color: #F59E0B; }
+
+.trainer-messages__meal-icon {
+  font-size: 14px;
+}
+
+.trainer-messages__special-message h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary, #fff);
+  margin: 0 0 10px 0;
+}
+
+.trainer-messages__workout-details,
+.trainer-messages__session-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.trainer-messages__workout-details span,
+.trainer-messages__session-details span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.trainer-messages__workout-actions,
+.trainer-messages__session-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.trainer-messages__workout-btn,
+.trainer-messages__session-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  background: transparent;
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+  color: var(--text-secondary);
+}
+
+.trainer-messages__workout-btn:hover,
+.trainer-messages__session-btn:hover {
+  background: var(--bg-secondary, rgba(255, 255, 255, 0.05));
+}
+
+.trainer-messages__workout-btn--primary {
+  background: #8B5CF6 !important;
+  border-color: #8B5CF6 !important;
+  color: #fff !important;
+}
+
+.trainer-messages__session-btn--accept {
+  background: #10B981 !important;
+  border-color: #10B981 !important;
+  color: #fff !important;
+}
+
+.trainer-messages__session-btn--decline {
+  background: transparent;
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #EF4444;
+}
+
+.trainer-messages__session-status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  padding: 6px 10px;
+  background: var(--bg-secondary, rgba(255, 255, 255, 0.05));
+  border-radius: 6px;
+}
+
+.trainer-messages__meal-details {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.trainer-messages__meal-stat {
+  text-align: center;
+}
+
+.trainer-messages__meal-stat-value {
+  display: block;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.trainer-messages__meal-stat-label {
+  display: block;
+  font-size: 10px;
+  color: var(--text-tertiary);
+}
+
+.trainer-messages__meal-btn,
+.trainer-messages__progress-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 8px 12px;
+  background: transparent;
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.trainer-messages__meal-btn:hover,
+.trainer-messages__progress-btn:hover {
+  background: var(--bg-secondary, rgba(255, 255, 255, 0.05));
+}
+
+.trainer-messages__progress-stats {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.trainer-messages__progress-stat {
+  text-align: center;
+  flex: 1;
+}
+
+.trainer-messages__progress-value {
+  display: block;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.trainer-messages__progress-label {
+  display: block;
+  font-size: 10px;
+  color: var(--text-tertiary);
+  margin-bottom: 2px;
+}
+
+.trainer-messages__progress-change {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.trainer-messages__progress-change--positive {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10B981;
+}
+
 /* ============================================
    CHAT INPUT
    ============================================ */
+.trainer-messages__chat-input-container {
+  position: relative;
+  border-top: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+  background: var(--bg-secondary, rgba(12, 12, 14, 0.95));
+}
+
+.trainer-messages__attach-menu {
+  position: absolute;
+  bottom: 100%;
+  left: 16px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 16px;
+  background: var(--bg-secondary, #18181b);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+  border-radius: 16px;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.3);
+  margin-bottom: 8px;
+  z-index: 10;
+}
+
+.trainer-messages__attach-menu button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 8px;
+  background: transparent;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.trainer-messages__attach-menu button:hover {
+  background: var(--bg-primary, rgba(255, 255, 255, 0.05));
+}
+
+.trainer-messages__attach-menu button span {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.trainer-messages__attach-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+.trainer-messages__attach-icon--workout { background: #8B5CF6; }
+.trainer-messages__attach-icon--meal { background: #10B981; font-size: 18px; }
+.trainer-messages__attach-icon--session { background: #F59E0B; }
+.trainer-messages__attach-icon--progress { background: #3B82F6; }
+.trainer-messages__attach-icon--image { background: #EC4899; }
+.trainer-messages__attach-icon--file { background: #6B7280; }
+
 .trainer-messages__chat-input {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 16px 24px;
-  border-top: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
-  background: var(--bg-secondary, rgba(12, 12, 14, 0.95));
+  gap: 10px;
+  padding: 12px 16px;
 }
 
 .trainer-messages__attach-btn {
   width: 40px;
   height: 40px;
   background: transparent;
-  border: none;
-  border-radius: 8px;
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: 12px;
   color: var(--text-tertiary, rgba(255, 255, 255, 0.5));
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.15s ease;
+  flex-shrink: 0;
 }
 
-.trainer-messages__attach-btn:hover {
-  background: var(--bg-primary, rgba(255, 255, 255, 0.04));
-  color: var(--text-primary, #fff);
+.trainer-messages__attach-btn:hover,
+.trainer-messages__attach-btn.active {
+  background: #DC2626;
+  border-color: #DC2626;
+  color: #fff;
 }
 
-.trainer-messages__chat-input input {
+.trainer-messages__input-wrapper {
   flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.trainer-messages__input-wrapper input {
+  width: 100%;
   height: 44px;
-  padding: 12px 16px;
+  padding: 12px 44px 12px 16px;
   background: var(--bg-primary, rgba(0, 0, 0, 0.2));
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
   border-radius: 22px;
@@ -380,19 +879,40 @@
   color: var(--text-primary, #fff);
 }
 
-.trainer-messages__chat-input input::placeholder {
+.trainer-messages__input-wrapper input::placeholder {
   color: var(--text-tertiary, rgba(255, 255, 255, 0.4));
 }
 
-.trainer-messages__chat-input input:focus {
+.trainer-messages__input-wrapper input:focus {
   outline: none;
-  border-color: #DC2626;
+  border-color: rgba(220, 38, 38, 0.5);
 }
 
-.trainer-messages__send-btn {
+.trainer-messages__emoji-btn {
+  position: absolute;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.trainer-messages__emoji-btn:hover {
+  color: var(--text-primary);
+}
+
+.trainer-messages__send-btn,
+.trainer-messages__voice-btn {
   width: 44px;
   height: 44px;
-  background: #DC2626;
+  background: linear-gradient(135deg, #DC2626, #B91C1C);
   border: none;
   border-radius: 50%;
   color: #fff;
@@ -401,16 +921,506 @@
   align-items: center;
   justify-content: center;
   transition: all 0.15s ease;
+  flex-shrink: 0;
 }
 
-.trainer-messages__send-btn:hover:not(:disabled) {
-  background: #B91C1C;
+.trainer-messages__send-btn:hover,
+.trainer-messages__voice-btn:hover {
   transform: scale(1.05);
 }
 
-.trainer-messages__send-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.trainer-messages__voice-btn {
+  background: transparent;
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  color: var(--text-secondary);
+}
+
+.trainer-messages__voice-btn:hover {
+  background: var(--bg-primary, rgba(255, 255, 255, 0.04));
+}
+
+.trainer-messages__voice-btn.recording {
+  background: #DC2626;
+  border-color: #DC2626;
+  color: #fff;
+  animation: pulse 1.5s ease infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
+  50% { box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); }
+}
+
+.trainer-messages__no-chat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px;
+}
+
+.trainer-messages__no-chat svg {
+  color: var(--text-tertiary);
+  opacity: 0.3;
+  margin-bottom: 16px;
+}
+
+.trainer-messages__no-chat h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 6px 0;
+}
+
+.trainer-messages__no-chat p {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  margin: 0;
+}
+
+/* ============================================
+   MEMBER INFO PANEL
+   ============================================ */
+.trainer-messages__member-panel {
+  width: 300px;
+  border-left: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+  background: var(--bg-secondary, rgba(12, 12, 14, 0.95));
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.trainer-messages__member-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+}
+
+.trainer-messages__member-header h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.trainer-messages__member-header button {
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.trainer-messages__member-header button:hover {
+  background: var(--bg-primary, rgba(255, 255, 255, 0.05));
+  color: var(--text-primary);
+}
+
+.trainer-messages__member-profile {
+  padding: 24px 16px;
+  text-align: center;
+  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+}
+
+.trainer-messages__member-avatar {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 12px;
+}
+
+.trainer-messages__member-avatar img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.trainer-messages__member-profile h2 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 4px 0;
+}
+
+.trainer-messages__member-status {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.trainer-messages__member-status.online {
+  color: #10B981;
+}
+
+.trainer-messages__member-actions {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.trainer-messages__member-actions button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 14px;
+  background: var(--bg-primary, rgba(0, 0, 0, 0.2));
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.trainer-messages__member-actions button:hover {
+  background: var(--bg-secondary, rgba(255, 255, 255, 0.05));
+  border-color: rgba(220, 38, 38, 0.3);
+}
+
+.trainer-messages__member-details {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+}
+
+.trainer-messages__member-detail {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.trainer-messages__member-detail--highlight {
+  padding: 10px 12px;
+  background: rgba(220, 38, 38, 0.1);
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+.trainer-messages__detail-label {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.trainer-messages__detail-value {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.trainer-messages__member-quick-actions {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+}
+
+.trainer-messages__member-quick-actions h4 {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 10px 0;
+}
+
+.trainer-messages__member-quick-actions button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.trainer-messages__member-quick-actions button:hover {
+  background: var(--bg-primary, rgba(255, 255, 255, 0.04));
+  color: var(--text-primary);
+}
+
+.trainer-messages__member-media {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+}
+
+.trainer-messages__member-media h4 {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 10px 0;
+}
+
+.trainer-messages__media-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+}
+
+.trainer-messages__media-item {
+  aspect-ratio: 1;
+  background: var(--bg-primary, rgba(255, 255, 255, 0.05));
+  border-radius: 6px;
+}
+
+.trainer-messages__media-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  background: var(--bg-primary, rgba(255, 255, 255, 0.08));
+}
+
+.trainer-messages__member-settings {
+  padding: 16px;
+}
+
+.trainer-messages__member-settings button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.trainer-messages__member-settings button:hover {
+  background: var(--bg-primary, rgba(255, 255, 255, 0.04));
+}
+
+.trainer-messages__member-settings button.danger {
+  color: #EF4444;
+}
+
+.trainer-messages__member-settings button.danger:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* ============================================
+   WORKOUT MODAL
+   ============================================ */
+.trainer-messages__modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1000;
+}
+
+.trainer-messages__workout-modal {
+  width: 100%;
+  max-width: 520px;
+  background: var(--bg-secondary, #18181b);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+}
+
+.trainer-messages__workout-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+}
+
+.trainer-messages__workout-modal-header h2 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.trainer-messages__workout-modal-header button {
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.trainer-messages__workout-modal-header button:hover {
+  background: var(--bg-primary, rgba(255, 255, 255, 0.05));
+  color: var(--text-primary);
+}
+
+.trainer-messages__workout-modal-body {
+  padding: 20px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.trainer-messages__workout-templates {
+  margin-bottom: 20px;
+}
+
+.trainer-messages__workout-templates h4 {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin: 0 0 10px 0;
+}
+
+.trainer-messages__template-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.trainer-messages__template-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 16px 8px;
+  background: var(--bg-primary, rgba(0, 0, 0, 0.2));
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  color: var(--text-tertiary);
+}
+
+.trainer-messages__template-card:hover {
+  border-color: rgba(220, 38, 38, 0.3);
+  color: #DC2626;
+}
+
+.trainer-messages__template-card span {
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.trainer-messages__workout-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.trainer-messages__form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.trainer-messages__form-field label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.trainer-messages__form-field input,
+.trainer-messages__form-field select,
+.trainer-messages__form-field textarea {
+  height: 40px;
+  padding: 10px 14px;
+  background: var(--bg-primary, rgba(0, 0, 0, 0.2));
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.trainer-messages__form-field textarea {
+  height: auto;
+  min-height: 80px;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.trainer-messages__form-field input:focus,
+.trainer-messages__form-field select:focus,
+.trainer-messages__form-field textarea:focus {
+  outline: none;
+  border-color: #DC2626;
+}
+
+.trainer-messages__form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.trainer-messages__workout-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+  background: var(--bg-primary, rgba(0, 0, 0, 0.2));
+}
+
+.trainer-messages__modal-cancel {
+  height: 38px;
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.trainer-messages__modal-cancel:hover {
+  background: var(--bg-secondary, rgba(255, 255, 255, 0.04));
+}
+
+.trainer-messages__modal-send {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 8px 18px;
+  background: #DC2626;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.trainer-messages__modal-send:hover {
+  background: #B91C1C;
 }
 
 /* ============================================
@@ -426,22 +1436,22 @@
 }
 
 :root.theme-light .trainer-messages__sidebar-header h2 {
-  color: #111111;
-}
-
-:root.theme-light .trainer-messages__filter-btn {
-  border-color: #D1D5DB;
-  color: #4a4a4a;
+  color: #111;
 }
 
 :root.theme-light .trainer-messages__search input {
-  background: #F9FAFB;
-  border-color: #D1D5DB;
-  color: #111111;
+  background: #f9fafb;
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #111;
+}
+
+:root.theme-light .trainer-messages__filter-tab {
+  border-color: rgba(0, 0, 0, 0.06);
+  color: #666;
 }
 
 :root.theme-light .trainer-messages__conversation:hover {
-  background: #F9FAFB;
+  background: #f9fafb;
 }
 
 :root.theme-light .trainer-messages__conversation--active {
@@ -449,12 +1459,7 @@
 }
 
 :root.theme-light .trainer-messages__conv-name {
-  color: #111111;
-}
-
-:root.theme-light .trainer-messages__conv-time,
-:root.theme-light .trainer-messages__conv-message {
-  color: #6b6b6b;
+  color: #111;
 }
 
 :root.theme-light .trainer-messages__online-dot {
@@ -462,7 +1467,7 @@
 }
 
 :root.theme-light .trainer-messages__chat {
-  background: #ffffff;
+  background: #fff;
 }
 
 :root.theme-light .trainer-messages__chat-header {
@@ -471,56 +1476,170 @@
 }
 
 :root.theme-light .trainer-messages__user-info h3 {
-  color: #111111;
+  color: #111;
 }
 
 :root.theme-light .trainer-messages__action-btn {
-  border-color: #D1D5DB;
-  color: #6b6b6b;
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #666;
 }
 
 :root.theme-light .trainer-messages__action-btn:hover {
-  background: #F9FAFB;
-  color: #111111;
+  background: #f9fafb;
+  color: #111;
+}
+
+:root.theme-light .trainer-messages__date-divider span {
+  background: #f9fafb;
 }
 
 :root.theme-light .trainer-messages__message--them .trainer-messages__message-content {
+  background: #f9fafb;
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+:root.theme-light .trainer-messages__message--them .trainer-messages__message-content > p {
+  color: #111;
+}
+
+:root.theme-light .trainer-messages__special-message {
+  background: #f9fafb;
+}
+
+:root.theme-light .trainer-messages__special-message h4 {
+  color: #111;
+}
+
+:root.theme-light .trainer-messages__chat-input-container {
   background: #fff;
   border-color: rgba(0, 0, 0, 0.06);
 }
 
-:root.theme-light .trainer-messages__message--them .trainer-messages__message-content p {
-  color: #111111;
+:root.theme-light .trainer-messages__attach-menu {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.1);
 }
 
-:root.theme-light .trainer-messages__chat-input {
+:root.theme-light .trainer-messages__attach-menu button:hover {
+  background: #f9fafb;
+}
+
+:root.theme-light .trainer-messages__attach-btn {
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+:root.theme-light .trainer-messages__input-wrapper input {
+  background: #f9fafb;
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #111;
+}
+
+:root.theme-light .trainer-messages__voice-btn {
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #666;
+}
+
+:root.theme-light .trainer-messages__member-panel {
   background: #fff;
   border-color: rgba(0, 0, 0, 0.06);
 }
 
-:root.theme-light .trainer-messages__chat-input input {
-  background: #F9FAFB;
-  border-color: #D1D5DB;
-  color: #111111;
+:root.theme-light .trainer-messages__member-header {
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+:root.theme-light .trainer-messages__member-header h3 {
+  color: #111;
+}
+
+:root.theme-light .trainer-messages__member-profile h2 {
+  color: #111;
+}
+
+:root.theme-light .trainer-messages__detail-value {
+  color: #111;
+}
+
+:root.theme-light .trainer-messages__workout-modal {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+:root.theme-light .trainer-messages__workout-modal-header {
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+:root.theme-light .trainer-messages__workout-modal-header h2 {
+  color: #111;
+}
+
+:root.theme-light .trainer-messages__template-card {
+  background: #f9fafb;
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+:root.theme-light .trainer-messages__form-field input,
+:root.theme-light .trainer-messages__form-field select,
+:root.theme-light .trainer-messages__form-field textarea {
+  background: #f9fafb;
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #111;
+}
+
+:root.theme-light .trainer-messages__workout-modal-footer {
+  background: #f9fafb;
+  border-color: rgba(0, 0, 0, 0.06);
 }
 
 /* ============================================
    RESPONSIVE
    ============================================ */
+@media (max-width: 1024px) {
+  .trainer-messages__member-panel {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 100;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.3);
+  }
+}
+
 @media (max-width: 768px) {
   .trainer-messages__sidebar {
     width: 100%;
+    position: absolute;
+    inset: 0;
+    z-index: 50;
     display: none;
   }
 
   .trainer-messages__sidebar.show {
     display: flex;
-    position: absolute;
-    inset: 0;
-    z-index: 100;
   }
 
   .trainer-messages__chat {
     width: 100%;
+  }
+
+  .trainer-messages__member-panel {
+    width: 100%;
+  }
+
+  .trainer-messages__chat-actions {
+    gap: 4px;
+  }
+
+  .trainer-messages__action-btn {
+    width: 34px;
+    height: 34px;
+  }
+
+  .trainer-messages__template-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .trainer-messages__form-row {
+    grid-template-columns: 1fr;
   }
 }
