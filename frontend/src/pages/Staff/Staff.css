@@ -1,0 +1,546 @@
+/* ============================================================================
+   Staff Directory Page - Premium Redesign V3
+   Clean, consistent, and modern SaaS aesthetics
+   ============================================================================ */
+
+.staff-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ============================================
+   HEADER
+   ============================================ */
+.staff-page__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.staff-page__title-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.staff-page__title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.staff-page__subtitle {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  font-weight: 400;
+}
+
+/* Sort Indicator Badge */
+.staff-page__sort-indicator {
+  display: flex;
+  align-items: center;
+}
+
+.sort-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.sort-badge--newest {
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--color-ocean);
+}
+
+.sort-badge--alpha {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--color-emerald);
+}
+
+.sort-badge svg {
+  flex-shrink: 0;
+}
+
+.staff-page__header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ============================================
+   STATS BADGE
+   ============================================ */
+.staff-stats-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+}
+
+.stat-pill {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.stat-pill:hover {
+  color: var(--text-secondary);
+}
+
+.stat-pill--active {
+  color: var(--color-emerald);
+}
+
+.stat-pill.selected {
+  color: var(--text-primary);
+}
+
+.stat-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.stat-dot.active {
+  background: var(--color-emerald);
+}
+
+.stat-dot.inactive {
+  background: var(--text-tertiary);
+}
+
+.stat-divider {
+  width: 1px;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* ============================================
+   FILTER BUTTON
+   ============================================ */
+.btn-filters {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: var(--text-secondary);
+  padding: 0 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  height: 32px;
+}
+
+.btn-filters:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+.btn-filters--active {
+  background: rgba(220, 38, 38, 0.1);
+  border-color: rgba(220, 38, 38, 0.3);
+  color: var(--color-crimson);
+}
+
+.btn-filters--has-filters {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: var(--color-emerald);
+}
+
+/* ============================================
+   FILTER CONTAINER & PANEL
+   ============================================ */
+.staff-filter-container {
+  position: relative;
+}
+
+.staff-filter-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  background: #0f0f0f;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 16px;
+  min-width: 240px;
+  z-index: 100;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  animation: filterSlideDown 0.15s ease-out;
+}
+
+@keyframes filterSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.filter-panel__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  margin-bottom: 14px;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.filter-clear-btn {
+  background: none;
+  border: none;
+  color: var(--color-crimson);
+  font-size: 11px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: opacity 0.15s ease;
+}
+
+.filter-clear-btn:hover {
+  opacity: 0.8;
+}
+
+.filter-panel__content {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filter-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.filter-select,
+.staff-filter-panel .filter-select {
+  appearance: none;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.filter-select:hover,
+.staff-filter-panel .filter-select:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.filter-select:focus,
+.staff-filter-panel .filter-select:focus {
+  outline: none;
+  border-color: var(--color-crimson);
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.1);
+}
+
+/* ============================================
+   ACTIVE FILTER CHIPS
+   ============================================ */
+.staff-active-filters {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: var(--color-emerald);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.filter-chip button {
+  background: none;
+  border: none;
+  color: var(--color-emerald);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0;
+  margin-left: 2px;
+  transition: color 0.15s ease;
+}
+
+.filter-chip button:hover {
+  color: var(--color-crimson);
+}
+
+/* ============================================
+   TABLE
+   ============================================ */
+.staff-page__table {
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* ============================================
+   STAFF CELLS
+   ============================================ */
+.staff-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.staff-cell__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.staff-name {
+  font-weight: 500;
+  color: var(--text-primary);
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.staff-email {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.staff-id {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+}
+
+.staff-index {
+  color: var(--text-tertiary);
+  font-size: 12px;
+  font-feature-settings: 'tnum' 1;
+}
+
+.staff-role-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.staff-date {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+/* ============================================
+   ACTION BUTTONS
+   ============================================ */
+.staff-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.action-menu-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.action-menu-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.action-menu-btn:hover .action-dot {
+  background: var(--text-primary);
+}
+
+.action-menu-btn:focus {
+  outline: none;
+  border-color: var(--color-crimson);
+}
+
+.action-dot {
+  width: 3px;
+  height: 3px;
+  background: var(--text-tertiary);
+  border-radius: 50%;
+  transition: all 0.15s ease;
+}
+
+/* ============================================
+   DATE FORMAT STYLING
+   ============================================ */
+.staff-date {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-feature-settings: 'tnum' 1;
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 1200px) {
+  .staff-page__header {
+    flex-wrap: wrap;
+  }
+  
+  .staff-page__header-right {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .staff-page__header {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  
+  .staff-page__header-right {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .staff-page__sort-indicator {
+    order: -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .staff-page {
+    gap: 12px;
+  }
+  
+  .staff-page__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding-bottom: 12px;
+  }
+  
+  .staff-page__title-section {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .staff-page__title {
+    font-size: 18px;
+  }
+  
+  .staff-page__header-right {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  
+  .staff-stats-badge {
+    display: none;
+  }
+  
+  .staff-active-filters {
+    flex-wrap: wrap;
+  }
+  
+  .staff-filter-panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 320px;
+    z-index: 200;
+  }
+  
+  .staff-page__table {
+    border-radius: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .staff-page__title {
+    font-size: 16px;
+  }
+  
+  .sort-badge {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+  
+  .btn-filters {
+    padding: 0 10px;
+    font-size: 11px;
+  }
+  
+  .filter-chip {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+}
