@@ -54,18 +54,38 @@ const Trainers: React.FC = () => {
   const loadTrainersPaginated = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await api.getTrainersPaginated(
-        currentPage,
-        pageSize,
-        debouncedSearch || undefined,
-        filters.role || undefined
-      );
-
-      setTrainers(response.content);
-      setTotalCount(response.totalCount);
-      setSortType(response.sortType as 'newest' | 'alphabetical');
+      try {
+        const response = await api.getTrainersPaginated(
+          currentPage,
+          pageSize,
+          debouncedSearch || undefined,
+          filters.role || undefined
+        );
+        setTrainers(response.content);
+        setTotalCount(response.totalCount);
+        setSortType(response.sortType as 'newest' | 'alphabetical');
+      } catch {
+        const allTrainers = await api.getUsers('TRAINER');
+        let filtered = allTrainers;
+        if (debouncedSearch) {
+          const q = debouncedSearch.toLowerCase();
+          filtered = filtered.filter(t => 
+            t.fullName?.toLowerCase().includes(q) || 
+            t.email?.toLowerCase().includes(q)
+          );
+        }
+        if (filters.role) {
+          filtered = filtered.filter(t => 
+            t.roles?.some(r => r.roleName === filters.role)
+          );
+        }
+        const start = currentPage * pageSize;
+        const paged = filtered.slice(start, start + pageSize);
+        setTrainers(paged);
+        setTotalCount(filtered.length);
+      }
     } catch (err) {
-      console.error('[Trainers] Failed to load paginated trainers:', err);
+      console.error('[Trainers] Failed to load trainers:', err);
       toast.error('Failed to load trainers');
       setTrainers([]);
     } finally {
