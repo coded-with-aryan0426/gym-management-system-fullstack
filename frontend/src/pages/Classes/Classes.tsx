@@ -378,7 +378,22 @@ const Classes: React.FC = () => {
         onNextWeek={handleNextWeek}
         onDateSelect={handleDateSelect}
       >
-
+        <ScheduleFilters
+          selectedDay={selectedDay}
+          onDayChange={setSelectedDay}
+          classType={filter.type}
+          onClassTypeChange={(type) => setFilter(prev => ({ ...prev, type }))}
+          trainer={filter.trainer}
+          onTrainerChange={(trainer) => setFilter(prev => ({ ...prev, trainer }))}
+          status={filter.status}
+          onStatusChange={(status) => setFilter(prev => ({ ...prev, status }))}
+          classTypes={CLASS_TYPES}
+          trainers={availableTrainers.map(t => t.fullName)}
+          onAddClass={() => {
+            setEditingClass(null)
+            setIsModalOpen(true)
+          }}
+        />
       </ScheduleHeader>
 
       <div className="classes-page__content">
