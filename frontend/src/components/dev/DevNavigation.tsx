@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -8,7 +8,10 @@ import {
     Users,
     Dumbbell,
     LayoutDashboard,
-    ChevronRight
+    ChevronRight,
+    GripVertical,
+    Minimize2,
+    Maximize2
 } from 'lucide-react';
 import './DevNavigation.css';
 
@@ -19,47 +22,118 @@ interface DashboardOption {
     icon: React.ReactNode;
     color: string;
     description: string;
+    subPages: { name: string; path: string }[];
 }
 
 const dashboards: DashboardOption[] = [
     {
         role: 'ADMIN',
-        label: 'Admin Dashboard',
+        label: 'Admin',
         path: '/dashboard',
-        icon: <Shield size={22} />,
+        icon: <Shield size={18} />,
         color: '#f59e0b',
-        description: 'Full system access - Dashboard, Members, Trainers, Financials, Reports, Settings'
+        description: 'Full system access',
+        subPages: [
+            { name: 'Dashboard', path: '/dashboard' },
+            { name: 'Members', path: '/members' },
+            { name: 'Trainers', path: '/trainers' },
+            { name: 'Classes', path: '/classes' },
+            { name: 'PT Sessions', path: '/pt-sessions' },
+            { name: 'Financials', path: '/financials' },
+            { name: 'Reports', path: '/reports' },
+            { name: 'Settings', path: '/settings' }
+        ]
     },
     {
         role: 'TRAINER',
-        label: 'Trainer Dashboard',
+        label: 'Trainer',
         path: '/trainer',
-        icon: <Dumbbell size={22} />,
+        icon: <Dumbbell size={18} />,
         color: '#22c55e',
-        description: 'Trainer view - My Schedule, My Members, Classes, Profile'
+        description: 'Trainer portal',
+        subPages: [
+            { name: 'Dashboard', path: '/trainer' },
+            { name: 'Schedule', path: '/trainer/schedule' },
+            { name: 'Members', path: '/trainer/members' },
+            { name: 'Classes', path: '/trainer/classes' },
+            { name: 'Messages', path: '/trainer/messages' },
+            { name: 'Profile', path: '/trainer/profile' }
+        ]
     },
     {
         role: 'MEMBER',
-        label: 'Member Dashboard',
+        label: 'Member',
         path: '/member',
-        icon: <Users size={22} />,
+        icon: <Users size={18} />,
         color: '#3b82f6',
-        description: 'Member portal - Membership, Progress, Bookings, Classes'
+        description: 'Member portal',
+        subPages: [
+            { name: 'Dashboard', path: '/member' },
+            { name: 'Membership', path: '/member/membership' },
+            { name: 'Progress', path: '/member/progress' },
+            { name: 'Bookings', path: '/member/bookings' },
+            { name: 'Classes', path: '/member/classes' },
+            { name: 'Messages', path: '/member/messages' },
+            { name: 'Profile', path: '/member/profile' }
+        ]
     }
 ];
 
-/**
- * DEV MODE Navigation Panel
- * Floating button that opens a panel to switch between different dashboards
- * without authentication. For development purposes only.
- */
 const DevNavigation: React.FC = () => {
     const [isOpen, setIsOpen] = useState(false);
+    const [isCompact, setIsCompact] = useState(false);
+    const [expandedRole, setExpandedRole] = useState<string | null>(null);
+    const [position, setPosition] = useState(() => {
+        const saved = localStorage.getItem('devNavPosition');
+        return saved ? JSON.parse(saved) : { x: window.innerWidth - 100, y: window.innerHeight - 80 };
+    });
+    const [isDragging, setIsDragging] = useState(false);
+    const dragRef = useRef<{ startX: number; startY: number; startPosX: number; startPosY: number } | null>(null);
     const navigate = useNavigate();
     const location = useLocation();
 
+    useEffect(() => {
+        localStorage.setItem('devNavPosition', JSON.stringify(position));
+    }, [position]);
+
+    const handleMouseDown = (e: React.MouseEvent) => {
+        e.preventDefault();
+        setIsDragging(true);
+        dragRef.current = {
+            startX: e.clientX,
+            startY: e.clientY,
+            startPosX: position.x,
+            startPosY: position.y
+        };
+    };
+
+    useEffect(() => {
+        const handleMouseMove = (e: MouseEvent) => {
+            if (!isDragging || !dragRef.current) return;
+            const dx = e.clientX - dragRef.current.startX;
+            const dy = e.clientY - dragRef.current.startY;
+            const newX = Math.max(60, Math.min(window.innerWidth - 60, dragRef.current.startPosX + dx));
+            const newY = Math.max(40, Math.min(window.innerHeight - 40, dragRef.current.startPosY + dy));
+            setPosition({ x: newX, y: newY });
+        };
+
+        const handleMouseUp = () => {
+            setIsDragging(false);
+            dragRef.current = null;
+        };
+
+        if (isDragging) {
+            window.addEventListener('mousemove', handleMouseMove);
+            window.addEventListener('mouseup', handleMouseUp);
+        }
+
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('mouseup', handleMouseUp);
+        };
+    }, [isDragging]);
+
     const handleNavigate = (path: string, role: string) => {
-        // Set mock user in localStorage for any components that might need it
         localStorage.setItem('user', JSON.stringify({
             id: 1,
             username: `dev_${role.toLowerCase()}`,
@@ -71,9 +145,7 @@ const DevNavigation: React.FC = () => {
             roles: [{ roleName: role }]
         }));
         localStorage.setItem('token', 'dev-mode-token');
-
         navigate(path);
-        setIsOpen(false);
     };
 
     const getCurrentDashboard = () => {
@@ -89,23 +161,46 @@ const DevNavigation: React.FC = () => {
 
     const currentDashboard = getCurrentDashboard();
 
+    const getPanelPosition = () => {
+        const panelWidth = isCompact ? 280 : 340;
+        const panelHeight = isCompact ? 200 : 420;
+        let left = position.x + 20;
+        let top = position.y - panelHeight / 2;
+
+        if (left + panelWidth > window.innerWidth - 10) {
+            left = position.x - panelWidth - 20;
+        }
+        if (top < 10) top = 10;
+        if (top + panelHeight > window.innerHeight - 10) {
+            top = window.innerHeight - panelHeight - 10;
+        }
+        return { left, top };
+    };
+
+    const panelPos = getPanelPosition();
+
     return (
         <>
-            {/* Floating Dev Button */}
-            <motion.button
-                className="dev-nav-trigger"
-                onClick={() => setIsOpen(true)}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
+            <div
+                className={`dev-nav-trigger ${isDragging ? 'dragging' : ''}`}
+                style={{ left: position.x, top: position.y, transform: 'translate(-50%, -50%)' }}
             >
-                <LayoutDashboard size={20} />
-                <span>DEV</span>
-            </motion.button>
+                <div
+                    className="dev-nav-drag-handle"
+                    onMouseDown={handleMouseDown}
+                    title="Drag to move"
+                >
+                    <GripVertical size={14} />
+                </div>
+                <button
+                    className="dev-nav-btn"
+                    onClick={() => !isDragging && setIsOpen(true)}
+                >
+                    <LayoutDashboard size={16} />
+                    <span>DEV</span>
+                </button>
+            </div>
 
-            {/* Panel Overlay */}
             <AnimatePresence>
                 {isOpen && (
                     <>
@@ -117,50 +212,89 @@ const DevNavigation: React.FC = () => {
                             onClick={() => setIsOpen(false)}
                         />
                         <motion.div
-                            className="dev-nav-panel"
-                            initial={{ opacity: 0, x: 100, scale: 0.95 }}
-                            animate={{ opacity: 1, x: 0, scale: 1 }}
-                            exit={{ opacity: 0, x: 100, scale: 0.95 }}
-                            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                            className={`dev-nav-panel ${isCompact ? 'compact' : ''}`}
+                            style={{ left: panelPos.left, top: panelPos.top }}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            transition={{ type: 'spring', damping: 25, stiffness: 400 }}
                         >
                             <div className="dev-nav-header">
                                 <div className="dev-nav-title">
-                                    <Settings className="spin-slow" size={18} />
-                                    <span>Dev Mode</span>
+                                    <Settings className="spin-slow" size={14} />
+                                    <span>Dev Navigation</span>
                                 </div>
-                                <button className="dev-nav-close" onClick={() => setIsOpen(false)}>
-                                    <X size={18} />
-                                </button>
+                                <div className="dev-nav-header-actions">
+                                    <button
+                                        className="dev-nav-action-btn"
+                                        onClick={() => setIsCompact(!isCompact)}
+                                        title={isCompact ? 'Expand' : 'Compact'}
+                                    >
+                                        {isCompact ? <Maximize2 size={14} /> : <Minimize2 size={14} />}
+                                    </button>
+                                    <button className="dev-nav-close" onClick={() => setIsOpen(false)}>
+                                        <X size={14} />
+                                    </button>
+                                </div>
                             </div>
-
-                            <p className="dev-nav-subtitle">
-                                Authentication bypassed. Select a dashboard to view:
-                            </p>
 
                             <div className="dev-nav-options">
                                 {dashboards.map((dashboard) => (
-                                    <motion.button
-                                        key={dashboard.role}
-                                        className={`dev-nav-option ${currentDashboard === dashboard.role ? 'active' : ''}`}
-                                        onClick={() => handleNavigate(dashboard.path, dashboard.role)}
-                                        whileHover={{ x: 4 }}
-                                        style={{ '--accent-color': dashboard.color } as React.CSSProperties}
-                                    >
-                                        <div className="dev-nav-option-icon" style={{ backgroundColor: dashboard.color + '20', color: dashboard.color }}>
-                                            {dashboard.icon}
-                                        </div>
-                                        <div className="dev-nav-option-content">
-                                            <span className="dev-nav-option-label">{dashboard.label}</span>
-                                            <span className="dev-nav-option-desc">{dashboard.description}</span>
-                                        </div>
-                                        <ChevronRight size={16} className="dev-nav-option-arrow" />
-                                    </motion.button>
+                                    <div key={dashboard.role} className="dev-nav-group">
+                                        <button
+                                            className={`dev-nav-option ${currentDashboard === dashboard.role ? 'active' : ''}`}
+                                            onClick={() => {
+                                                if (isCompact) {
+                                                    handleNavigate(dashboard.path, dashboard.role);
+                                                    setIsOpen(false);
+                                                } else {
+                                                    setExpandedRole(expandedRole === dashboard.role ? null : dashboard.role);
+                                                }
+                                            }}
+                                            style={{ '--accent-color': dashboard.color } as React.CSSProperties}
+                                        >
+                                            <div className="dev-nav-option-icon" style={{ backgroundColor: dashboard.color + '20', color: dashboard.color }}>
+                                                {dashboard.icon}
+                                            </div>
+                                            <div className="dev-nav-option-content">
+                                                <span className="dev-nav-option-label">{dashboard.label}</span>
+                                                {!isCompact && <span className="dev-nav-option-desc">{dashboard.description}</span>}
+                                            </div>
+                                            {!isCompact && (
+                                                <ChevronRight
+                                                    size={14}
+                                                    className={`dev-nav-option-arrow ${expandedRole === dashboard.role ? 'expanded' : ''}`}
+                                                />
+                                            )}
+                                        </button>
+                                        {!isCompact && expandedRole === dashboard.role && (
+                                            <motion.div
+                                                className="dev-nav-subpages"
+                                                initial={{ height: 0, opacity: 0 }}
+                                                animate={{ height: 'auto', opacity: 1 }}
+                                                exit={{ height: 0, opacity: 0 }}
+                                            >
+                                                {dashboard.subPages.map((page) => (
+                                                    <button
+                                                        key={page.path}
+                                                        className={`dev-nav-subpage ${location.pathname === page.path ? 'active' : ''}`}
+                                                        onClick={() => {
+                                                            handleNavigate(page.path, dashboard.role);
+                                                            setIsOpen(false);
+                                                        }}
+                                                        style={{ '--accent-color': dashboard.color } as React.CSSProperties}
+                                                    >
+                                                        {page.name}
+                                                    </button>
+                                                ))}
+                                            </motion.div>
+                                        )}
+                                    </div>
                                 ))}
                             </div>
 
                             <div className="dev-nav-footer">
-                                <span className="dev-nav-warning">⚠️ For development only</span>
-                                <span className="dev-nav-note">Re-enable auth before production</span>
+                                <span className="dev-nav-warning">⚠️ Dev only</span>
                             </div>
                         </motion.div>
                     </>
