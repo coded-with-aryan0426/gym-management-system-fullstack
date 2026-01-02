@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useEffect, useState, useMemo, useCallback, useRef } from "react"
-import { FiFilter } from "react-icons/fi"
+import { FiFilter, FiSearch, FiUsers, FiUserCheck, FiUserX, FiAlertTriangle, FiTrendingUp, FiCalendar, FiClock } from "react-icons/fi"
 import { toast } from "react-hot-toast"
 import { useSearchParams } from "react-router-dom"
 import { Button, Badge, getStatusVariant, Avatar, DataTable, CreateUserModal, type Column } from "../../components"
@@ -58,16 +58,12 @@ const Members: React.FC = () => {
 
     const userId = searchParams.get('userId')
     if (userId) {
-      // 1. Try to find in current list (fastest)
       const memberInList = members.find(m => m.userId.toString() === userId)
       if (memberInList) {
         handleActionClick(memberInList)
       } else {
-        // 2. Fallback: Fetch explicitly if not in current page
         api.getUserById(parseInt(userId))
           .then(user => {
-            // Cast to MemberDTO - assuming API returns compatible structure 
-            // or the Modal handles partial data gracefully
             handleActionClick(user as unknown as MemberDTO)
           })
           .catch(err => {
@@ -97,7 +93,6 @@ const Members: React.FC = () => {
     return () => clearTimeout(timer)
   }, [searchQuery])
 
-  // Check if client-side filters are active
   const hasClientSideFilters = filters.planDuration || filters.expiryStatus || filters.joinedPeriod
 
   const loadMembersPaginated = useCallback(async () => {
@@ -106,7 +101,6 @@ const Members: React.FC = () => {
       const statusFilter = filters.status.length > 0 ? filters.status[0] : undefined
       const planFilter = filters.plan.length > 0 ? filters.plan[0] : undefined
 
-      // When client-side filters are active, fetch more data to filter from
       const fetchSize = hasClientSideFilters ? 500 : pageSize
       const fetchPage = hasClientSideFilters ? 0 : currentPage
 
@@ -138,10 +132,8 @@ const Members: React.FC = () => {
     setCurrentPage(0)
   }, [debouncedSearch, filters])
 
-  // Calculate totalPages based on filtered data when client-side filters are active
   const totalPages = useMemo(() => {
     if (hasClientSideFilters) {
-      // Will be recalculated after filtering
       return 1
     }
     return Math.ceil(totalCount / pageSize)
@@ -157,24 +149,61 @@ const Members: React.FC = () => {
     return count
   }, [filters])
 
-  const stats = useMemo(() => {
+  const calculatedStats = useMemo(() => {
+    const now = new Date()
+    let expiringSoon = 0
+    let newThisMonth = 0
+    let expired = 0
+
+    members.forEach(m => {
+      if (m.startDate && m.planDuration) {
+        const startDate = new Date(m.startDate)
+        const durationStr = m.planDuration.toLowerCase()
+        let expiryDate = new Date(startDate)
+
+        if (durationStr.includes('year')) {
+          const years = parseInt(durationStr) || 1
+          expiryDate.setMonth(expiryDate.getMonth() + years * 12)
+        } else if (durationStr.includes('month')) {
+          const months = parseInt(durationStr) || 1
+          expiryDate.setMonth(expiryDate.getMonth() + months)
+        } else if (durationStr.includes('day')) {
+          const days = parseInt(durationStr) || 30
+          expiryDate.setDate(expiryDate.getDate() + days)
+        }
+
+        const daysUntilExpiry = Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+        
+        if (daysUntilExpiry < 0) {
+          expired++
+        } else if (daysUntilExpiry <= 7) {
+          expiringSoon++
+        }
+
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+        if (startDate >= monthStart) {
+          newThisMonth++
+        }
+      }
+    })
+
     return {
       total: globalStats.total,
       active: globalStats.active,
-      inactive: globalStats.inactive || (globalStats.total - globalStats.active)
+      inactive: globalStats.inactive || (globalStats.total - globalStats.active),
+      expiringSoon,
+      newThisMonth,
+      expired
     }
-  }, [globalStats])
+  }, [globalStats, members])
 
-  // Client-side filtering for additional filters
   const filteredMembers = useMemo(() => {
     let result = members
 
-    // Filter by plan duration
     if (filters.planDuration) {
       result = result.filter(m => m.planDuration === filters.planDuration)
     }
 
-    // Filter by expiry status
     if (filters.expiryStatus) {
       const now = new Date()
       result = result.filter(m => {
@@ -210,7 +239,6 @@ const Members: React.FC = () => {
       })
     }
 
-    // Filter by joined period
     if (filters.joinedPeriod) {
       const now = new Date()
       const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate())
@@ -289,6 +317,31 @@ const Members: React.FC = () => {
     })
   }
 
+  const getExpiryInfo = (member: MemberDTO) => {
+    const startDate = member.startDate ? new Date(member.startDate) : null
+    if (!startDate || !member.planDuration) return { date: null, daysLeft: null, isExpired: false }
+
+    const durationStr = member.planDuration.toLowerCase()
+    let expiryDate = new Date(startDate)
+
+    if (durationStr.includes('year')) {
+      const years = parseInt(durationStr) || 1
+      expiryDate.setMonth(expiryDate.getMonth() + years * 12)
+    } else if (durationStr.includes('month')) {
+      const months = parseInt(durationStr) || 1
+      expiryDate.setMonth(expiryDate.getMonth() + months)
+    } else if (durationStr.includes('day')) {
+      const days = parseInt(durationStr) || 30
+      expiryDate.setDate(expiryDate.getDate() + days)
+    }
+
+    const now = new Date()
+    const daysLeft = Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+    const isExpired = daysLeft < 0
+
+    return { date: expiryDate, daysLeft, isExpired }
+  }
+
   const columns: Column<MemberDTO>[] = [
     {
       key: "index",
@@ -324,19 +377,23 @@ const Members: React.FC = () => {
     {
       key: "planName",
       header: "Plan",
-      width: "120px",
-      render: (member) => <span className="member-plan">{member.planName}</span>,
-    },
-    {
-      key: "planDuration",
-      header: "Duration",
-      width: "100px",
-      render: (member) => <span className="member-plan-duration">{member.planDuration || "-"}</span>,
+      width: "140px",
+      render: (member) => {
+        const planClass = member.planName?.toLowerCase() === 'premium' ? 'member-plan--premium' 
+          : member.planName?.toLowerCase() === 'standard' ? 'member-plan--standard' 
+          : 'member-plan--basic'
+        return (
+          <div className="member-plan-cell">
+            <span className={`member-plan-badge ${planClass}`}>{member.planName}</span>
+            <span className="member-plan-duration">{member.planDuration || "-"}</span>
+          </div>
+        )
+      },
     },
     {
       key: "joinDate",
       header: "Joined",
-      width: "110px",
+      width: "100px",
       render: (member) => {
         const date = member.startDate ? new Date(member.startDate) : null
         if (!date) return <span className="member-date">-</span>
@@ -351,47 +408,26 @@ const Members: React.FC = () => {
     {
       key: "expiryDate",
       header: "Expires",
-      width: "110px",
+      width: "140px",
       render: (member) => {
-        const startDate = member.startDate ? new Date(member.startDate) : null
-        if (!startDate || !member.planDuration) return <span className="member-date">-</span>
+        const { date, daysLeft, isExpired } = getExpiryInfo(member)
+        if (!date) return <span className="member-date">-</span>
 
-        // Parse duration like "1 Month", "3 Months", "6 Months", "1 Year"
-        const durationStr = member.planDuration.toLowerCase()
-        let monthsToAdd = 0
+        const day = date.getDate().toString().padStart(2, '0')
+        const month = date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()
+        const year = date.getFullYear()
 
-        if (durationStr.includes('year')) {
-          const years = parseInt(durationStr) || 1
-          monthsToAdd = years * 12
-        } else if (durationStr.includes('month')) {
-          monthsToAdd = parseInt(durationStr) || 1
-        } else if (durationStr.includes('day')) {
-          const days = parseInt(durationStr) || 30
-          const expiryDate = new Date(startDate)
-          expiryDate.setDate(expiryDate.getDate() + days)
-          const day = expiryDate.getDate().toString().padStart(2, '0')
-          const month = expiryDate.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()
-          const year = expiryDate.getFullYear()
-          const isExpired = expiryDate < new Date()
-          return (
+        return (
+          <div className="member-expiry-cell">
             <span className={`member-date ${isExpired ? 'member-date--expired' : ''}`}>
               {day} {month} {year}
             </span>
-          )
-        }
-
-        const expiryDate = new Date(startDate)
-        expiryDate.setMonth(expiryDate.getMonth() + monthsToAdd)
-
-        const day = expiryDate.getDate().toString().padStart(2, '0')
-        const month = expiryDate.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()
-        const year = expiryDate.getFullYear()
-        const isExpired = expiryDate < new Date()
-
-        return (
-          <span className={`member-date ${isExpired ? 'member-date--expired' : ''}`}>
-            {day} {month} {year}
-          </span>
+            {daysLeft !== null && (
+              <span className={`member-days-left ${isExpired ? 'member-days-left--expired' : daysLeft <= 7 ? 'member-days-left--warning' : ''}`}>
+                {isExpired ? `${Math.abs(daysLeft)}d overdue` : `${daysLeft}d left`}
+              </span>
+            )}
+          </div>
         )
       },
     },
@@ -441,41 +477,6 @@ const Members: React.FC = () => {
         </div>
 
         <div className="members-page__header-right">
-          {activeFilterCount > 0 && (
-            <div className="members-active-filters">
-              {filters.status.length > 0 && (
-                <span className="filter-chip">
-                  Status: {filters.status[0]}
-                  <button onClick={() => setFilters(prev => ({ ...prev, status: [] }))}>×</button>
-                </span>
-              )}
-              {filters.plan.length > 0 && (
-                <span className="filter-chip">
-                  Plan: {filters.plan[0]}
-                  <button onClick={() => setFilters(prev => ({ ...prev, plan: [] }))}>×</button>
-                </span>
-              )}
-              {filters.planDuration && (
-                <span className="filter-chip">
-                  Duration: {filters.planDuration}
-                  <button onClick={() => setFilters(prev => ({ ...prev, planDuration: "" }))}>×</button>
-                </span>
-              )}
-              {filters.expiryStatus && (
-                <span className="filter-chip">
-                  Expiry: {filters.expiryStatus.replace(/-/g, ' ')}
-                  <button onClick={() => setFilters(prev => ({ ...prev, expiryStatus: "" }))}>×</button>
-                </span>
-              )}
-              {filters.joinedPeriod && (
-                <span className="filter-chip">
-                  Joined: {filters.joinedPeriod.replace(/-/g, ' ')}
-                  <button onClick={() => setFilters(prev => ({ ...prev, joinedPeriod: "" }))}>×</button>
-                </span>
-              )}
-            </div>
-          )}
-
           <div className="members-filter-container" ref={filterPanelRef}>
             <button
               className={`btn-filters ${isFilterPanelOpen ? 'btn-filters--active' : ''} ${activeFilterCount > 0 ? 'btn-filters--has-filters' : ''}`}
@@ -581,6 +582,98 @@ const Members: React.FC = () => {
         </div>
       </div>
 
+      <div className="members-stats-row">
+        <div className="member-stat-card member-stat-card--total">
+          <div className="member-stat-card__icon">
+            <FiUsers />
+          </div>
+          <div className="member-stat-card__content">
+            <span className="member-stat-card__value">{calculatedStats.total}</span>
+            <span className="member-stat-card__label">Total Members</span>
+          </div>
+        </div>
+
+        <div className="member-stat-card member-stat-card--active">
+          <div className="member-stat-card__icon">
+            <FiUserCheck />
+          </div>
+          <div className="member-stat-card__content">
+            <span className="member-stat-card__value">{calculatedStats.active}</span>
+            <span className="member-stat-card__label">Active</span>
+          </div>
+          <div className="member-stat-card__percent">
+            {calculatedStats.total > 0 ? Math.round((calculatedStats.active / calculatedStats.total) * 100) : 0}%
+          </div>
+        </div>
+
+        <div className="member-stat-card member-stat-card--expiring" onClick={() => setFilters(prev => ({ ...prev, expiryStatus: 'expiring-soon' }))}>
+          <div className="member-stat-card__icon">
+            <FiAlertTriangle />
+          </div>
+          <div className="member-stat-card__content">
+            <span className="member-stat-card__value">{calculatedStats.expiringSoon}</span>
+            <span className="member-stat-card__label">Expiring Soon</span>
+          </div>
+          <span className="member-stat-card__hint">Next 7 days</span>
+        </div>
+
+        <div className="member-stat-card member-stat-card--new" onClick={() => setFilters(prev => ({ ...prev, joinedPeriod: 'this-month' }))}>
+          <div className="member-stat-card__icon">
+            <FiTrendingUp />
+          </div>
+          <div className="member-stat-card__content">
+            <span className="member-stat-card__value">{calculatedStats.newThisMonth}</span>
+            <span className="member-stat-card__label">New This Month</span>
+          </div>
+        </div>
+
+        <div className="member-stat-card member-stat-card--expired" onClick={() => setFilters(prev => ({ ...prev, expiryStatus: 'already-expired' }))}>
+          <div className="member-stat-card__icon">
+            <FiUserX />
+          </div>
+          <div className="member-stat-card__content">
+            <span className="member-stat-card__value">{calculatedStats.expired}</span>
+            <span className="member-stat-card__label">Expired</span>
+          </div>
+        </div>
+      </div>
+
+      {activeFilterCount > 0 && (
+        <div className="members-active-filters">
+          {filters.status.length > 0 && (
+            <span className="filter-chip">
+              Status: {filters.status[0]}
+              <button onClick={() => setFilters(prev => ({ ...prev, status: [] }))}>×</button>
+            </span>
+          )}
+          {filters.plan.length > 0 && (
+            <span className="filter-chip">
+              Plan: {filters.plan[0]}
+              <button onClick={() => setFilters(prev => ({ ...prev, plan: [] }))}>×</button>
+            </span>
+          )}
+          {filters.planDuration && (
+            <span className="filter-chip">
+              Duration: {filters.planDuration}
+              <button onClick={() => setFilters(prev => ({ ...prev, planDuration: "" }))}>×</button>
+            </span>
+          )}
+          {filters.expiryStatus && (
+            <span className="filter-chip">
+              Expiry: {filters.expiryStatus.replace(/-/g, ' ')}
+              <button onClick={() => setFilters(prev => ({ ...prev, expiryStatus: "" }))}>×</button>
+            </span>
+          )}
+          {filters.joinedPeriod && (
+            <span className="filter-chip">
+              Joined: {filters.joinedPeriod.replace(/-/g, ' ')}
+              <button onClick={() => setFilters(prev => ({ ...prev, joinedPeriod: "" }))}>×</button>
+            </span>
+          )}
+          <button className="filter-clear-all" onClick={handleResetFilters}>Clear All</button>
+        </div>
+      )}
+
       <div className="members-page__content">
         <div className="members-page__table-container">
           <DataTable
@@ -610,6 +703,7 @@ const Members: React.FC = () => {
               const dateStr = date
                 ? `${date.getDate().toString().padStart(2, '0')} ${date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()} ${date.getFullYear()}`
                 : '-'
+              const { daysLeft, isExpired } = getExpiryInfo(member)
               return (
                 <div className="mobile-card">
                   <div className="mobile-card__header">
@@ -637,6 +731,14 @@ const Members: React.FC = () => {
                       <span className="mobile-card__detail-label">Joined</span>
                       <span className="mobile-card__detail-value">{dateStr}</span>
                     </div>
+                    {daysLeft !== null && (
+                      <div className="mobile-card__detail">
+                        <span className="mobile-card__detail-label">Expires</span>
+                        <span className={`mobile-card__detail-value ${isExpired ? 'text-red' : daysLeft <= 7 ? 'text-warning' : ''}`}>
+                          {isExpired ? `${Math.abs(daysLeft)}d overdue` : `${daysLeft}d left`}
+                        </span>
+                      </div>
+                    )}
                   </div>
                   <div className="mobile-card__actions">
                     <ActionMenuButton onClick={(e) => { e.stopPropagation(); handleActionClick(member); }} />
