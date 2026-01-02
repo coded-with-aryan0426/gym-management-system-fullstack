@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, RefreshCw, Filter, Calendar } from 'lucide-react';
+import { ChevronLeft, ChevronRight, RefreshCw, Filter, Plus } from 'lucide-react';
+import './TrainerSchedule.css';
 
 const MySchedule: React.FC = () => {
-    // Mock Data
-    const [currentMonth, setCurrentMonth] = useState('March 2024');
+    const [currentMonth] = useState('March 2024');
+    const [viewMode, setViewMode] = useState<'day' | 'week' | 'month'>('month');
 
-    // Mock events for Month View
     const events = [
         { id: 1, title: 'Yoga Class', date: 25, type: 'class', time: '9:00 AM' },
         { id: 2, title: 'PT: Sarah', date: 25, type: 'pt', time: '1:00 PM' },
@@ -16,105 +16,128 @@ const MySchedule: React.FC = () => {
     ];
 
     const daysInMonth = Array.from({ length: 31 }, (_, i) => i + 1);
-    const startDayOffset = 1; // e.g. Monday start
+    const startDayOffset = 5;
 
-    const getEventTypeStyles = (type: string) => {
+    const getEventTypeClass = (type: string) => {
         switch (type) {
-            case 'class': return 'bg-indigo-50 text-indigo-700 border-l-2 border-indigo-500';
-            case 'pt': return 'bg-emerald-50 text-emerald-700 border-l-2 border-emerald-500';
-            case 'meeting': return 'bg-amber-50 text-amber-700 border-l-2 border-amber-500';
-            default: return 'bg-gray-50 text-gray-700';
+            case 'class': return 'trainer-schedule__event--class';
+            case 'pt': return 'trainer-schedule__event--pt';
+            case 'meeting': return 'trainer-schedule__event--meeting';
+            default: return '';
         }
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col">
-            {/* Page Header */}
-            <div className="px-6 py-6 border-b border-gray-200 bg-white mb-6 flex justify-between items-center">
-                <div>
-                    <h1 className="text-[28px] font-bold text-gray-900 mb-1">My Schedule</h1>
-                    <p className="text-sm font-normal text-gray-500">Your weekly training schedule</p>
+        <div className="trainer-schedule">
+            <div className="trainer-schedule__header">
+                <div className="trainer-schedule__header-content">
+                    <div className="trainer-schedule__title-section">
+                        <h1>My Schedule</h1>
+                        <p>Your training schedule and appointments</p>
+                    </div>
+                    <button className="trainer-schedule__sync-btn">
+                        <RefreshCw size={16} />
+                        Sync to Calendar
+                    </button>
                 </div>
-                <button className="h-10 px-5 border border-gray-300 rounded-lg bg-white text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors flex items-center gap-2">
-                    <RefreshCw size={16} /> Sync to Calendar
-                </button>
             </div>
 
-            <div className="px-6 pb-8 max-w-[1400px] mx-auto w-full">
-                {/* Calendar Controls */}
-                <div className="bg-white border border-gray-200 rounded-xl p-5 mb-6 flex flex-col md:flex-row justify-between items-center gap-4 shadow-sm">
-                    {/* View Toggle */}
-                    <div className="inline-flex border border-gray-200 rounded-lg overflow-hidden h-9">
-                        <button className="px-4 text-sm font-medium bg-white text-gray-500 hover:bg-gray-50 transition-colors border-r border-gray-200">Day</button>
-                        <button className="px-4 text-sm font-medium bg-white text-gray-500 hover:bg-gray-50 transition-colors border-r border-gray-200">Week</button>
-                        <button className="px-4 text-sm font-medium bg-[#EEF2FF] text-[#4F46E5] font-semibold transition-colors">Month</button>
+            <div className="trainer-schedule__content">
+                <div className="trainer-schedule__toolbar">
+                    <div className="trainer-schedule__view-toggle">
+                        <button 
+                            className={viewMode === 'day' ? 'active' : ''}
+                            onClick={() => setViewMode('day')}
+                        >
+                            Day
+                        </button>
+                        <button 
+                            className={viewMode === 'week' ? 'active' : ''}
+                            onClick={() => setViewMode('week')}
+                        >
+                            Week
+                        </button>
+                        <button 
+                            className={viewMode === 'month' ? 'active' : ''}
+                            onClick={() => setViewMode('month')}
+                        >
+                            Month
+                        </button>
                     </div>
 
-                    {/* Date Navigation */}
-                    <div className="flex items-center gap-4">
-                        <button className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-600 transition-colors">
-                            <ChevronLeft size={20} />
+                    <div className="trainer-schedule__date-nav">
+                        <button className="trainer-schedule__nav-btn">
+                            <ChevronLeft size={18} />
                         </button>
-                        <span className="text-[18px] font-bold text-gray-900 text-center min-w-[140px]">{currentMonth}</span>
-                        <button className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-600 transition-colors">
-                            <ChevronRight size={20} />
+                        <span className="trainer-schedule__date-text">{currentMonth}</span>
+                        <button className="trainer-schedule__nav-btn">
+                            <ChevronRight size={18} />
                         </button>
-                        <button className="px-4 py-1.5 border border-gray-200 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 ml-2">
-                            Today
-                        </button>
+                        <button className="trainer-schedule__today-btn">Today</button>
                     </div>
 
-                    {/* Filter */}
-                    <button className="h-9 px-4 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 flex items-center gap-2">
-                        <Filter size={16} /> Filter
+                    <button className="trainer-schedule__filter-btn">
+                        <Filter size={16} />
+                        Filter
                     </button>
                 </div>
 
-                {/* Month View Calendar */}
-                <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-                    {/* Weekday Headers */}
-                    <div className="grid grid-cols-7 border-b border-gray-200 bg-gray-50/50">
+                <div className="trainer-schedule__calendar">
+                    <div className="trainer-schedule__weekdays">
                         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                            <div key={day} className="py-3 text-center text-sm font-semibold text-gray-500 uppercase tracking-wide">
-                                {day}
-                            </div>
+                            <div key={day} className="trainer-schedule__weekday">{day}</div>
                         ))}
                     </div>
 
-                    {/* Days Grid */}
-                    <div className="grid grid-cols-7 auto-rows-[minmax(120px,auto)]">
-                        {/* Empty slots for start offset */}
+                    <div className="trainer-schedule__days">
                         {Array.from({ length: startDayOffset }).map((_, i) => (
-                            <div key={`empty-${i}`} className="border-b border-r border-gray-100 bg-gray-50/30 p-2 min-h-[120px]"></div>
+                            <div key={`empty-${i}`} className="trainer-schedule__day trainer-schedule__day--empty" />
                         ))}
 
-                        {/* Actual Days */}
                         {daysInMonth.map(day => {
                             const dayEvents = events.filter(e => e.date === day);
+                            const isToday = day === 25;
+                            
                             return (
-                                <div key={day} className="border-b border-r border-gray-100 p-2 min-h-[120px] relative hover:bg-gray-50/50 transition-colors group">
-                                    <div className={`text-sm font-medium mb-2 ${day === 25 ? 'w-7 h-7 bg-[#4F46E5] text-white rounded-full flex items-center justify-center' : 'text-gray-700 pl-1'}`}>
+                                <div key={day} className="trainer-schedule__day">
+                                    <div className={`trainer-schedule__day-number ${isToday ? 'trainer-schedule__day-number--today' : ''}`}>
                                         {day}
                                     </div>
-                                    <div className="space-y-1.5">
+                                    <div className="trainer-schedule__day-events">
                                         {dayEvents.map(event => (
-                                            <div key={event.id} className={`text-xs p-1.5 rounded-md truncate cursor-pointer hover:opacity-80 font-medium ${getEventTypeStyles(event.type)}`}>
+                                            <div 
+                                                key={event.id} 
+                                                className={`trainer-schedule__event ${getEventTypeClass(event.type)}`}
+                                            >
                                                 {event.time} {event.title}
                                             </div>
                                         ))}
                                     </div>
-                                    {/* Add Button on Hover */}
-                                    <button className="absolute bottom-2 right-2 w-6 h-6 rounded-full bg-gray-100 text-gray-400 hover:bg-[#4F46E5] hover:text-white items-center justify-center hidden group-hover:flex transition-colors text-lg leading-none pb-0.5">
-                                        +
+                                    <button className="trainer-schedule__add-btn">
+                                        <Plus size={14} />
                                     </button>
                                 </div>
                             );
                         })}
 
-                        {/* Trailing empty slots to complete grid (optional, filling to 35 or 42) */}
-                        {Array.from({ length: 35 - (daysInMonth.length + startDayOffset) }).map((_, i) => (
-                            <div key={`trailing-${i}`} className="border-b border-r border-gray-100 bg-gray-50/30 p-2 min-h-[120px]"></div>
+                        {Array.from({ length: Math.max(0, 35 - (daysInMonth.length + startDayOffset)) }).map((_, i) => (
+                            <div key={`trailing-${i}`} className="trainer-schedule__day trainer-schedule__day--empty" />
                         ))}
+                    </div>
+                </div>
+
+                <div className="trainer-schedule__legend">
+                    <div className="trainer-schedule__legend-item">
+                        <span className="trainer-schedule__legend-dot trainer-schedule__legend-dot--class" />
+                        Classes
+                    </div>
+                    <div className="trainer-schedule__legend-item">
+                        <span className="trainer-schedule__legend-dot trainer-schedule__legend-dot--pt" />
+                        Personal Training
+                    </div>
+                    <div className="trainer-schedule__legend-item">
+                        <span className="trainer-schedule__legend-dot trainer-schedule__legend-dot--meeting" />
+                        Meetings
                     </div>
                 </div>
             </div>

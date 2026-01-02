@@ -1,178 +1,326 @@
 import React, { useState } from 'react';
-import { Bell, Moon, Sun, Smartphone, Calendar, Globe, Mail, ChevronRight, LogOut, HelpCircle, Activity } from 'lucide-react';
+import { 
+    User, Bell, Lock, Palette, Globe, Shield, 
+    ChevronRight, Moon, Sun, Save
+} from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import './TrainerSettings.css';
 
 const TrainerSettings: React.FC = () => {
-    const [emailNotifs, setEmailNotifs] = useState(true);
-    const [pushNotifs, setPushNotifs] = useState(false);
-    const [calendarSync, setCalendarSync] = useState(true);
-    const [darkMode, setDarkMode] = useState(false); // Default to false (Light) given the new spec direction
+    const [activeSection, setActiveSection] = useState('profile');
+    const [darkMode, setDarkMode] = useState(true);
+    const [notifications, setNotifications] = useState({
+        email: true,
+        push: true,
+        bookings: true,
+        reminders: true,
+        marketing: false,
+    });
 
-    const handleToggle = (setter: React.Dispatch<React.SetStateAction<boolean>>, value: boolean, label: string) => {
-        setter(!value);
-        toast.success(`${label} ${!value ? 'enabled' : 'disabled'}`);
+    const sections = [
+        { id: 'profile', label: 'Profile Settings', icon: User },
+        { id: 'notifications', label: 'Notifications', icon: Bell },
+        { id: 'appearance', label: 'Appearance', icon: Palette },
+        { id: 'security', label: 'Security', icon: Lock },
+        { id: 'language', label: 'Language & Region', icon: Globe },
+        { id: 'privacy', label: 'Privacy', icon: Shield },
+    ];
+
+    const handleSave = () => {
+        toast.success('Settings saved successfully');
+    };
+
+    const toggleTheme = () => {
+        setDarkMode(!darkMode);
+        document.documentElement.classList.toggle('theme-light', darkMode);
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col">
-            {/* Page Header */}
-            <div className="px-6 py-6 border-b border-gray-200 bg-white mb-6">
-                <h1 className="text-[28px] font-bold text-gray-900 mb-1">Settings</h1>
-                <p className="text-sm font-normal text-gray-500">Manage your app preferences and integrations</p>
+        <div className="trainer-settings">
+            <div className="trainer-settings__header">
+                <div className="trainer-settings__header-content">
+                    <h1>Settings</h1>
+                    <p>Manage your account preferences</p>
+                </div>
             </div>
 
-            <div className="px-6 pb-8 max-w-[1400px] mx-auto w-full space-y-6">
-
-                {/* Visual Section */}
-                <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                    <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
-                        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-2">
-                            <Moon size={14} />
-                            Appearance
-                        </h3>
-                    </div>
-                    <div className="p-6">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                                <div className={`p-3 rounded-full ${darkMode ? 'bg-indigo-100 text-indigo-600' : 'bg-amber-100 text-amber-600'}`}>
-                                    {darkMode ? <Moon size={24} /> : <Sun size={24} />}
-                                </div>
-                                <div>
-                                    <h4 className="text-base font-bold text-gray-900">Dark Mode</h4>
-                                    <p className="text-sm text-gray-500">Switch between dark and light themes</p>
-                                </div>
-                            </div>
-                            <button
-                                onClick={() => handleToggle(setDarkMode, darkMode, 'Dark Mode')}
-                                className={`w-12 h-6 rounded-full p-1 transition-colors ${darkMode ? 'bg-indigo-600' : 'bg-gray-200'}`}
-                            >
-                                <div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${darkMode ? 'translate-x-6' : 'translate-x-0'}`}></div>
-                            </button>
-                        </div>
-                    </div>
+            <div className="trainer-settings__content">
+                <div className="trainer-settings__sidebar">
+                    {sections.map((section) => (
+                        <button
+                            key={section.id}
+                            onClick={() => setActiveSection(section.id)}
+                            className={`trainer-settings__nav-item ${activeSection === section.id ? 'trainer-settings__nav-item--active' : ''}`}
+                        >
+                            <section.icon size={18} />
+                            <span>{section.label}</span>
+                            <ChevronRight size={16} />
+                        </button>
+                    ))}
                 </div>
 
-                {/* Notifications Section */}
-                <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                    <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
-                        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-2">
-                            <Bell size={14} />
-                            Notifications
-                        </h3>
-                    </div>
-                    <div className="divide-y divide-gray-100">
-                        <div className="p-6 flex items-center justify-between hover:bg-gray-50 transition-colors">
-                            <div className="flex items-center gap-4">
-                                <div className="p-2 rounded-lg bg-gray-100 text-gray-500">
-                                    <Mail size={20} />
+                <div className="trainer-settings__main">
+                    {activeSection === 'profile' && (
+                        <div className="trainer-settings__section">
+                            <h2>Profile Settings</h2>
+                            <p className="trainer-settings__section-desc">Update your personal information</p>
+                            
+                            <div className="trainer-settings__form">
+                                <div className="trainer-settings__form-row">
+                                    <div className="trainer-settings__field">
+                                        <label>First Name</label>
+                                        <input type="text" defaultValue="John" />
+                                    </div>
+                                    <div className="trainer-settings__field">
+                                        <label>Last Name</label>
+                                        <input type="text" defaultValue="Smith" />
+                                    </div>
                                 </div>
-                                <div>
-                                    <h4 className="text-base font-medium text-gray-900">Email Notifications</h4>
-                                    <p className="text-sm text-gray-500">Receive daily summaries and important alerts</p>
+                                <div className="trainer-settings__field">
+                                    <label>Email Address</label>
+                                    <input type="email" defaultValue="john.smith@athlonx.com" />
+                                </div>
+                                <div className="trainer-settings__field">
+                                    <label>Phone Number</label>
+                                    <input type="tel" defaultValue="+91 98765 43210" />
+                                </div>
+                                <div className="trainer-settings__field">
+                                    <label>Bio</label>
+                                    <textarea rows={4} defaultValue="Certified personal trainer with 8 years experience..." />
                                 </div>
                             </div>
-                            <button
-                                onClick={() => handleToggle(setEmailNotifs, emailNotifs, 'Email Notifications')}
-                                className={`w-12 h-6 rounded-full p-1 transition-colors ${emailNotifs ? 'bg-[#4F46E5]' : 'bg-gray-200'}`}
-                            >
-                                <div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${emailNotifs ? 'translate-x-6' : 'translate-x-0'}`}></div>
+
+                            <button className="trainer-settings__save-btn" onClick={handleSave}>
+                                <Save size={16} />
+                                Save Changes
                             </button>
                         </div>
-                        <div className="p-6 flex items-center justify-between hover:bg-gray-50 transition-colors">
-                            <div className="flex items-center gap-4">
-                                <div className="p-2 rounded-lg bg-gray-100 text-gray-500">
-                                    <Smartphone size={20} />
+                    )}
+
+                    {activeSection === 'notifications' && (
+                        <div className="trainer-settings__section">
+                            <h2>Notification Preferences</h2>
+                            <p className="trainer-settings__section-desc">Choose how you want to be notified</p>
+
+                            <div className="trainer-settings__toggles">
+                                <div className="trainer-settings__toggle-item">
+                                    <div className="trainer-settings__toggle-info">
+                                        <span className="trainer-settings__toggle-label">Email Notifications</span>
+                                        <span className="trainer-settings__toggle-desc">Receive notifications via email</span>
+                                    </div>
+                                    <label className="trainer-settings__switch">
+                                        <input 
+                                            type="checkbox" 
+                                            checked={notifications.email}
+                                            onChange={(e) => setNotifications({...notifications, email: e.target.checked})}
+                                        />
+                                        <span className="trainer-settings__slider" />
+                                    </label>
                                 </div>
-                                <div>
-                                    <h4 className="text-base font-medium text-gray-900">Push Notifications</h4>
-                                    <p className="text-sm text-gray-500">Get real-time updates on your device</p>
+
+                                <div className="trainer-settings__toggle-item">
+                                    <div className="trainer-settings__toggle-info">
+                                        <span className="trainer-settings__toggle-label">Push Notifications</span>
+                                        <span className="trainer-settings__toggle-desc">Receive push notifications on your device</span>
+                                    </div>
+                                    <label className="trainer-settings__switch">
+                                        <input 
+                                            type="checkbox" 
+                                            checked={notifications.push}
+                                            onChange={(e) => setNotifications({...notifications, push: e.target.checked})}
+                                        />
+                                        <span className="trainer-settings__slider" />
+                                    </label>
+                                </div>
+
+                                <div className="trainer-settings__toggle-item">
+                                    <div className="trainer-settings__toggle-info">
+                                        <span className="trainer-settings__toggle-label">Booking Alerts</span>
+                                        <span className="trainer-settings__toggle-desc">Get notified when someone books your class</span>
+                                    </div>
+                                    <label className="trainer-settings__switch">
+                                        <input 
+                                            type="checkbox" 
+                                            checked={notifications.bookings}
+                                            onChange={(e) => setNotifications({...notifications, bookings: e.target.checked})}
+                                        />
+                                        <span className="trainer-settings__slider" />
+                                    </label>
+                                </div>
+
+                                <div className="trainer-settings__toggle-item">
+                                    <div className="trainer-settings__toggle-info">
+                                        <span className="trainer-settings__toggle-label">Session Reminders</span>
+                                        <span className="trainer-settings__toggle-desc">Receive reminders before sessions</span>
+                                    </div>
+                                    <label className="trainer-settings__switch">
+                                        <input 
+                                            type="checkbox" 
+                                            checked={notifications.reminders}
+                                            onChange={(e) => setNotifications({...notifications, reminders: e.target.checked})}
+                                        />
+                                        <span className="trainer-settings__slider" />
+                                    </label>
+                                </div>
+
+                                <div className="trainer-settings__toggle-item">
+                                    <div className="trainer-settings__toggle-info">
+                                        <span className="trainer-settings__toggle-label">Marketing Emails</span>
+                                        <span className="trainer-settings__toggle-desc">Receive updates and promotional content</span>
+                                    </div>
+                                    <label className="trainer-settings__switch">
+                                        <input 
+                                            type="checkbox" 
+                                            checked={notifications.marketing}
+                                            onChange={(e) => setNotifications({...notifications, marketing: e.target.checked})}
+                                        />
+                                        <span className="trainer-settings__slider" />
+                                    </label>
                                 </div>
                             </div>
-                            <button
-                                onClick={() => handleToggle(setPushNotifs, pushNotifs, 'Push Notifications')}
-                                className={`w-12 h-6 rounded-full p-1 transition-colors ${pushNotifs ? 'bg-[#4F46E5]' : 'bg-gray-200'}`}
-                            >
-                                <div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${pushNotifs ? 'translate-x-6' : 'translate-x-0'}`}></div>
+                        </div>
+                    )}
+
+                    {activeSection === 'appearance' && (
+                        <div className="trainer-settings__section">
+                            <h2>Appearance</h2>
+                            <p className="trainer-settings__section-desc">Customize how the app looks</p>
+
+                            <div className="trainer-settings__theme-selector">
+                                <button 
+                                    className={`trainer-settings__theme-option ${darkMode ? 'trainer-settings__theme-option--active' : ''}`}
+                                    onClick={() => { setDarkMode(true); document.documentElement.classList.remove('theme-light'); }}
+                                >
+                                    <Moon size={24} />
+                                    <span>Dark Mode</span>
+                                </button>
+                                <button 
+                                    className={`trainer-settings__theme-option ${!darkMode ? 'trainer-settings__theme-option--active' : ''}`}
+                                    onClick={() => { setDarkMode(false); document.documentElement.classList.add('theme-light'); }}
+                                >
+                                    <Sun size={24} />
+                                    <span>Light Mode</span>
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeSection === 'security' && (
+                        <div className="trainer-settings__section">
+                            <h2>Security</h2>
+                            <p className="trainer-settings__section-desc">Manage your account security</p>
+
+                            <div className="trainer-settings__security-items">
+                                <div className="trainer-settings__security-item">
+                                    <div className="trainer-settings__security-info">
+                                        <span className="trainer-settings__security-label">Change Password</span>
+                                        <span className="trainer-settings__security-desc">Last changed 30 days ago</span>
+                                    </div>
+                                    <button className="trainer-settings__security-btn">Update</button>
+                                </div>
+
+                                <div className="trainer-settings__security-item">
+                                    <div className="trainer-settings__security-info">
+                                        <span className="trainer-settings__security-label">Two-Factor Authentication</span>
+                                        <span className="trainer-settings__security-desc trainer-settings__security-desc--success">Enabled</span>
+                                    </div>
+                                    <button className="trainer-settings__security-btn">Manage</button>
+                                </div>
+
+                                <div className="trainer-settings__security-item">
+                                    <div className="trainer-settings__security-info">
+                                        <span className="trainer-settings__security-label">Active Sessions</span>
+                                        <span className="trainer-settings__security-desc">2 devices currently logged in</span>
+                                    </div>
+                                    <button className="trainer-settings__security-btn">View All</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeSection === 'language' && (
+                        <div className="trainer-settings__section">
+                            <h2>Language & Region</h2>
+                            <p className="trainer-settings__section-desc">Set your language and regional preferences</p>
+
+                            <div className="trainer-settings__form">
+                                <div className="trainer-settings__field">
+                                    <label>Language</label>
+                                    <select defaultValue="en">
+                                        <option value="en">English</option>
+                                        <option value="es">Spanish</option>
+                                        <option value="fr">French</option>
+                                        <option value="de">German</option>
+                                        <option value="hi">Hindi</option>
+                                    </select>
+                                </div>
+                                <div className="trainer-settings__field">
+                                    <label>Time Zone</label>
+                                    <select defaultValue="ist">
+                                        <option value="ist">IST (UTC+5:30)</option>
+                                        <option value="pst">PST (UTC-8)</option>
+                                        <option value="est">EST (UTC-5)</option>
+                                        <option value="utc">UTC</option>
+                                    </select>
+                                </div>
+                                <div className="trainer-settings__field">
+                                    <label>Date Format</label>
+                                    <select defaultValue="dd/mm/yyyy">
+                                        <option value="dd/mm/yyyy">DD/MM/YYYY</option>
+                                        <option value="mm/dd/yyyy">MM/DD/YYYY</option>
+                                        <option value="yyyy-mm-dd">YYYY-MM-DD</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <button className="trainer-settings__save-btn" onClick={handleSave}>
+                                <Save size={16} />
+                                Save Changes
                             </button>
                         </div>
-                    </div>
-                </div>
+                    )}
 
-                {/* Integrations Section */}
-                <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                    <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
-                        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-2">
-                            <Globe size={14} />
-                            Integrations
-                        </h3>
-                    </div>
-                    <div className="p-6 space-y-6">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                                <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
-                                    <Calendar size={20} />
-                                </div>
-                                <div>
-                                    <h4 className="text-base font-bold text-gray-900">Google Calendar</h4>
-                                    <p className="text-sm text-gray-500">Sync your sessions automatically</p>
-                                </div>
-                            </div>
-                            <button
-                                onClick={() => handleToggle(setCalendarSync, calendarSync, 'Calendar Sync')}
-                                className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${calendarSync ? 'bg-transparent border-red-200 text-red-600 hover:bg-red-50' : 'bg-gray-900 border-gray-900 text-white hover:bg-gray-800'}`}
-                            >
-                                {calendarSync ? 'Disconnect' : 'Connect'}
-                            </button>
-                        </div>
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                                <div className="w-10 h-10 rounded-lg bg-pink-50 flex items-center justify-center text-pink-600">
-                                    <Activity size={20} />
-                                </div>
-                                <div>
-                                    <h4 className="text-base font-bold text-gray-900">Apple Health</h4>
-                                    <p className="text-sm text-gray-500">Import step count and activity data</p>
-                                </div>
-                            </div>
-                            <button className="px-4 py-2 rounded-lg text-sm font-medium bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
-                                Connect
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                    {activeSection === 'privacy' && (
+                        <div className="trainer-settings__section">
+                            <h2>Privacy</h2>
+                            <p className="trainer-settings__section-desc">Control your privacy settings</p>
 
-                {/* Support & Danger Zone */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <button className="bg-white border border-gray-200 rounded-xl p-6 flex items-center justify-between group hover:border-[#4F46E5] hover:shadow-md transition-all shadow-sm">
-                        <div className="flex items-center gap-4">
-                            <div className="p-3 bg-indigo-50 rounded-lg text-indigo-600 group-hover:bg-indigo-100 transition-colors">
-                                <HelpCircle size={24} />
-                            </div>
-                            <div className="text-left">
-                                <h4 className="text-base font-bold text-gray-900 group-hover:text-[#4F46E5] transition-colors">Help & Support</h4>
-                                <p className="text-sm text-gray-500">FAQs and Contact</p>
+                            <div className="trainer-settings__toggles">
+                                <div className="trainer-settings__toggle-item">
+                                    <div className="trainer-settings__toggle-info">
+                                        <span className="trainer-settings__toggle-label">Profile Visibility</span>
+                                        <span className="trainer-settings__toggle-desc">Allow members to view your profile</span>
+                                    </div>
+                                    <label className="trainer-settings__switch">
+                                        <input type="checkbox" defaultChecked />
+                                        <span className="trainer-settings__slider" />
+                                    </label>
+                                </div>
+
+                                <div className="trainer-settings__toggle-item">
+                                    <div className="trainer-settings__toggle-info">
+                                        <span className="trainer-settings__toggle-label">Show Activity Status</span>
+                                        <span className="trainer-settings__toggle-desc">Let others see when you're online</span>
+                                    </div>
+                                    <label className="trainer-settings__switch">
+                                        <input type="checkbox" defaultChecked />
+                                        <span className="trainer-settings__slider" />
+                                    </label>
+                                </div>
+
+                                <div className="trainer-settings__toggle-item">
+                                    <div className="trainer-settings__toggle-info">
+                                        <span className="trainer-settings__toggle-label">Data Analytics</span>
+                                        <span className="trainer-settings__toggle-desc">Help improve the app by sharing usage data</span>
+                                    </div>
+                                    <label className="trainer-settings__switch">
+                                        <input type="checkbox" />
+                                        <span className="trainer-settings__slider" />
+                                    </label>
+                                </div>
                             </div>
                         </div>
-                        <ChevronRight className="text-gray-400 group-hover:text-[#4F46E5] transition-colors" />
-                    </button>
-
-                    <button className="bg-white border border-gray-200 rounded-xl p-6 flex items-center justify-between group hover:border-red-500 hover:shadow-md transition-all shadow-sm">
-                        <div className="flex items-center gap-4">
-                            <div className="p-3 bg-red-50 rounded-lg text-red-500 group-hover:bg-red-100 transition-colors">
-                                <LogOut size={24} />
-                            </div>
-                            <div className="text-left">
-                                <h4 className="text-base font-bold text-gray-900 group-hover:text-red-600 transition-colors">Log Out</h4>
-                                <p className="text-sm text-gray-500">End your session</p>
-                            </div>
-                        </div>
-                        <ChevronRight className="text-gray-400 group-hover:text-red-500 transition-colors" />
-                    </button>
-                </div>
-
-                <div className="text-center pt-8 text-xs text-gray-400">
-                    <p>Gym Management System v2.4.0</p>
-                    <p>&copy; 2024 Titan Fitness. All rights reserved.</p>
+                    )}
                 </div>
             </div>
         </div>
