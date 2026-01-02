@@ -4,7 +4,7 @@ import React, { createContext, useContext, useMemo, type ReactNode } from 'react
 import { useLocation } from 'react-router-dom'
 
 // Types for navbar configuration
-export type MetricType = 'members' | 'staff' | 'financial' | 'sessions' | 'none'
+export type MetricType = 'members' | 'staff' | 'financial' | 'sessions' | 'classes' | 'none'
 
 export interface NavbarMetric {
     key: string
@@ -61,8 +61,16 @@ const navbarConfigs: Record<string, NavbarConfig> = {
     },
     '/classes': {
         pageTitle: 'Classes',
-        metricType: 'none',
-        metrics: [], // Minimal navbar - no stats
+        metricType: 'classes',
+        metrics: [
+            { key: 'todayTotal', label: 'Today' },
+            { key: 'weekTotal', label: 'This Week' },
+            { key: 'occupancyRate', label: 'Occupancy' },
+            { key: 'availableSpots', label: 'Spots Open' },
+            { key: 'fullClasses', label: 'Full Classes' },
+            { key: 'uniqueTrainers', label: 'Trainers' },
+            { key: 'mostPopularType', label: 'Top Class' },
+        ],
     },
     '/financials': {
         pageTitle: 'Financials',

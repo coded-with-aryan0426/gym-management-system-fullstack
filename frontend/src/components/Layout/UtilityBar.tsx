@@ -3,12 +3,13 @@
 import type React from "react"
 import { useState, useRef, useEffect, useCallback, Fragment } from "react"
 import { useNavigate } from "react-router-dom"
-import { Sun, Moon } from "lucide-react"
+import { Sun, Moon, Clock, Calendar, Users, UserPlus, TrendingUp, Dumbbell, Zap } from "lucide-react"
 import CreateActionModal from "../CreateActionModal/CreateActionModal"
 import api from "../../services/api"
 import type { User } from "../../types/user"
 import { useMembers } from '../../contexts/MembersContext'
 import { useTrainers } from '../../contexts/TrainerContext'
+import { useClasses } from '../../contexts/ClassesContext'
 import { useNavbar } from '../../contexts/NavbarContext'
 import { useTheme } from '../../contexts/ThemeContext'
 import "./UtilityBar.css"
@@ -42,33 +43,38 @@ const UtilityBar: React.FC = () => {
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   
   const { theme, toggleTheme } = useTheme()
-  const { config } = useNavbar()
-  const { stats: memberStats } = useMembers()
-  const { stats: staffStats } = useTrainers()
+    const { config } = useNavbar()
+    const { stats: memberStats } = useMembers()
+    const { stats: staffStats } = useTrainers()
+    const { stats: classStats } = useClasses()
 
-      const getMetricValue = (key: string): string | number => {
-        switch (config.metricType) {
-          case 'members':
-            return (memberStats as Record<string, number>)[key] ?? 0
-          case 'staff':
-            return (staffStats as Record<string, number>)[key] ?? 0
-          case 'financial':
-            const financialPlaceholders: Record<string, string> = {
-              todayRevenue: '₹12,450',
-              pending: '3',
-              monthlyRevenue: '₹2.4L',
-            }
-            return financialPlaceholders[key] ?? '0'
-          case 'sessions':
-            const sessionPlaceholders: Record<string, number> = {
-              todaySessions: 8,
-              activeSessions: 3,
-            }
-            return sessionPlaceholders[key] ?? 0
-          default:
-            return 0
+        const getMetricValue = (key: string): string | number => {
+          switch (config.metricType) {
+            case 'members':
+              return (memberStats as Record<string, number>)[key] ?? 0
+            case 'staff':
+              return (staffStats as Record<string, number>)[key] ?? 0
+            case 'classes':
+              const val = (classStats as Record<string, string | number>)[key]
+              if (key === 'occupancyRate') return `${val}%`
+              return val ?? 0
+            case 'financial':
+              const financialPlaceholders: Record<string, string> = {
+                todayRevenue: '₹12,450',
+                pending: '3',
+                monthlyRevenue: '₹2.4L',
+              }
+              return financialPlaceholders[key] ?? '0'
+            case 'sessions':
+              const sessionPlaceholders: Record<string, number> = {
+                todaySessions: 8,
+                activeSessions: 3,
+              }
+              return sessionPlaceholders[key] ?? 0
+            default:
+              return 0
+          }
         }
-      }
 
       const getMetricClass = (key: string): string => {
         switch (key) {
@@ -311,28 +317,114 @@ const UtilityBar: React.FC = () => {
       </div>
 
         {config.metrics.length > 0 && (config.metricType === 'members' || config.metricType === 'staff') && (
-          <div className={`utility-bar__stats-enhanced ${config.metricType === 'staff' ? 'utility-bar__stats-enhanced--staff' : ''}`}>
-            <div className="utility-metrics-strip">
-              {config.metrics.map((metric, index) => (
-                <div key={metric.key} className={`utility-metric ${getMetricClass(metric.key)}`}>
-                  <span className="utility-metric__value">{getMetricValue(metric.key)}</span>
-                  <span className="utility-metric__label">{metric.label}</span>
-                </div>
-              ))}
-            </div>
-            <div className="utility-bar__progress">
-              <div className="utility-progress__bar">
-                <div 
-                  className="utility-progress__fill" 
-                  style={{ width: `${getActivePercent()}%` }}
-                />
+            <div className={`utility-bar__stats-enhanced ${config.metricType === 'staff' ? 'utility-bar__stats-enhanced--staff' : ''}`}>
+              <div className="utility-metrics-strip">
+                {config.metrics.map((metric, index) => (
+                  <div key={metric.key} className={`utility-metric ${getMetricClass(metric.key)}`}>
+                    <span className="utility-metric__value">{getMetricValue(metric.key)}</span>
+                    <span className="utility-metric__label">{metric.label}</span>
+                  </div>
+                ))}
               </div>
-              <span className="utility-progress__text">{getActivePercent()}% active</span>
+              <div className="utility-bar__progress">
+                <div className="utility-progress__bar">
+                  <div 
+                    className="utility-progress__fill" 
+                    style={{ width: `${getActivePercent()}%` }}
+                  />
+                </div>
+                <span className="utility-progress__text">{getActivePercent()}% active</span>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {config.metrics.length > 0 && config.metricType !== 'members' && config.metricType !== 'staff' && (
+          {config.metrics.length > 0 && config.metricType === 'classes' && (
+            <div className="utility-bar__classes-stats">
+              <div className="classes-stat">
+                <div className="classes-stat__icon classes-stat__icon--emerald">
+                  <Clock size={14} />
+                </div>
+                <div className="classes-stat__content">
+                  <span className="classes-stat__value">{classStats.todayTotal}</span>
+                  <span className="classes-stat__label">Today</span>
+                </div>
+              </div>
+
+              <div className="classes-stat-divider" />
+
+              <div className="classes-stat">
+                <div className="classes-stat__icon classes-stat__icon--blue">
+                  <Calendar size={14} />
+                </div>
+                <div className="classes-stat__content">
+                  <span className="classes-stat__value">{classStats.weekTotal}</span>
+                  <span className="classes-stat__label">This Week</span>
+                </div>
+              </div>
+
+              <div className="classes-stat-divider" />
+
+              <div className="classes-stat">
+                <div className="classes-stat__icon classes-stat__icon--violet">
+                  <Users size={14} />
+                </div>
+                <div className="classes-stat__content">
+                  <span className="classes-stat__value">{classStats.occupancyRate}%</span>
+                  <span className="classes-stat__label">Occupancy</span>
+                </div>
+              </div>
+
+              <div className="classes-stat-divider" />
+
+              <div className="classes-stat">
+                <div className="classes-stat__icon classes-stat__icon--amber">
+                  <UserPlus size={14} />
+                </div>
+                <div className="classes-stat__content">
+                  <span className="classes-stat__value">{classStats.availableSpots}</span>
+                  <span className="classes-stat__label">Spots Open</span>
+                </div>
+              </div>
+
+              <div className="classes-stat-divider" />
+
+              <div className="classes-stat">
+                <div className="classes-stat__icon classes-stat__icon--rose">
+                  <TrendingUp size={14} />
+                </div>
+                <div className="classes-stat__content">
+                  <span className="classes-stat__value">{classStats.fullClasses}</span>
+                  <span className="classes-stat__label">Full Classes</span>
+                </div>
+              </div>
+
+              <div className="classes-stat-divider" />
+
+              <div className="classes-stat">
+                <div className="classes-stat__icon classes-stat__icon--cyan">
+                  <Dumbbell size={14} />
+                </div>
+                <div className="classes-stat__content">
+                  <span className="classes-stat__value">{classStats.uniqueTrainers}</span>
+                  <span className="classes-stat__label">Trainers</span>
+                </div>
+              </div>
+
+              <div className="classes-stat-divider" />
+
+              <div className="classes-stat">
+                <div className="classes-stat__icon classes-stat__icon--indigo">
+                  <Zap size={14} />
+                </div>
+                <div className="classes-stat__content">
+                  <span className="classes-stat__value classes-stat__value--text">{classStats.mostPopularType}</span>
+                  <span className="classes-stat__label">Top Class</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {config.metrics.length > 0 && config.metricType !== 'members' && config.metricType !== 'staff' && config.metricType !== 'classes' && (
           <div className="utility-bar__stats utility-bar__stats--animated">
             {config.metrics.map((metric, index) => (
               <Fragment key={metric.key}>

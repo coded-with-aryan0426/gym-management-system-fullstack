@@ -1,23 +1,6 @@
 import React, { useState, useRef } from 'react'
-import { Filter, ChevronDown, Clock, Calendar, Users, UserPlus, TrendingUp, Dumbbell, Zap } from 'lucide-react'
+import { Filter, ChevronDown } from 'lucide-react'
 import { useClickOutside } from '../../../hooks'
-
-export interface ClassStats {
-    todayTotal: number
-    todayEnrolled: number
-    todayCapacity: number
-    todayOccupancy: number
-    weekTotal: number
-    weekEnrolled: number
-    weekCapacity: number
-    occupancyRate: number
-    upcomingToday: number
-    inProgressNow: number
-    availableSpots: number
-    fullClasses: number
-    uniqueTrainers: number
-    mostPopularType: string
-}
 
 interface ScheduleFiltersProps {
     selectedDay: 'today' | 'week' | 'custom'
@@ -31,7 +14,6 @@ interface ScheduleFiltersProps {
     classTypes: string[]
     trainers: string[]
     onAddClass?: () => void
-    stats?: ClassStats
 }
 
 const ScheduleFilters: React.FC<ScheduleFiltersProps> = ({
@@ -46,7 +28,6 @@ const ScheduleFilters: React.FC<ScheduleFiltersProps> = ({
     classTypes,
     trainers,
     onAddClass,
-    stats,
 }) => {
     const [isOpen, setIsOpen] = useState(false)
     const popoverRef = useRef<HTMLDivElement>(null)
@@ -61,104 +42,6 @@ const ScheduleFilters: React.FC<ScheduleFiltersProps> = ({
 
     return (
         <div className="schedule-filters">
-            {stats && (
-                <div className="utility-stats-bar">
-                    <div className="utility-stat utility-stat--live">
-                        <div className="utility-stat__icon-wrap utility-stat__icon-wrap--emerald">
-                            <Clock size={14} />
-                        </div>
-                        <div className="utility-stat__content">
-                            <span className="utility-stat__value">{stats.todayTotal}</span>
-                            <span className="utility-stat__label">Today</span>
-                        </div>
-                        {stats.inProgressNow > 0 && (
-                            <div className="utility-stat__badge utility-stat__badge--live">
-                                <span className="live-dot"></span>
-                                {stats.inProgressNow} Live
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="utility-stat-divider" />
-
-                    <div className="utility-stat">
-                        <div className="utility-stat__icon-wrap utility-stat__icon-wrap--blue">
-                            <Calendar size={14} />
-                        </div>
-                        <div className="utility-stat__content">
-                            <span className="utility-stat__value">{stats.weekTotal}</span>
-                            <span className="utility-stat__label">This Week</span>
-                        </div>
-                    </div>
-
-                    <div className="utility-stat-divider" />
-
-                    <div className="utility-stat">
-                        <div className="utility-stat__icon-wrap utility-stat__icon-wrap--violet">
-                            <Users size={14} />
-                        </div>
-                        <div className="utility-stat__content">
-                            <span className="utility-stat__value">{stats.occupancyRate}%</span>
-                            <span className="utility-stat__label">Occupancy</span>
-                        </div>
-                        <div className="utility-stat__progress">
-                            <div 
-                                className="utility-stat__progress-fill utility-stat__progress-fill--violet" 
-                                style={{ width: `${Math.min(stats.occupancyRate, 100)}%` }}
-                            />
-                        </div>
-                    </div>
-
-                    <div className="utility-stat-divider" />
-
-                    <div className="utility-stat">
-                        <div className="utility-stat__icon-wrap utility-stat__icon-wrap--amber">
-                            <UserPlus size={14} />
-                        </div>
-                        <div className="utility-stat__content">
-                            <span className="utility-stat__value">{stats.availableSpots}</span>
-                            <span className="utility-stat__label">Spots Open</span>
-                        </div>
-                    </div>
-
-                    <div className="utility-stat-divider" />
-
-                    <div className="utility-stat">
-                        <div className="utility-stat__icon-wrap utility-stat__icon-wrap--rose">
-                            <TrendingUp size={14} />
-                        </div>
-                        <div className="utility-stat__content">
-                            <span className="utility-stat__value">{stats.fullClasses}</span>
-                            <span className="utility-stat__label">Full Classes</span>
-                        </div>
-                    </div>
-
-                    <div className="utility-stat-divider" />
-
-                    <div className="utility-stat">
-                        <div className="utility-stat__icon-wrap utility-stat__icon-wrap--cyan">
-                            <Dumbbell size={14} />
-                        </div>
-                        <div className="utility-stat__content">
-                            <span className="utility-stat__value">{stats.uniqueTrainers}</span>
-                            <span className="utility-stat__label">Trainers</span>
-                        </div>
-                    </div>
-
-                    <div className="utility-stat-divider" />
-
-                    <div className="utility-stat">
-                        <div className="utility-stat__icon-wrap utility-stat__icon-wrap--indigo">
-                            <Zap size={14} />
-                        </div>
-                        <div className="utility-stat__content">
-                            <span className="utility-stat__value utility-stat__value--text">{stats.mostPopularType}</span>
-                            <span className="utility-stat__label">Top Class</span>
-                        </div>
-                    </div>
-                </div>
-            )}
-
             <div className="schedule-filters__container">
                 <div className="filter-wrapper" ref={popoverRef}>
                     <button

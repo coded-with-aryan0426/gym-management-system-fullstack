@@ -5,6 +5,7 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { CurrencyProvider } from './contexts/CurrencyContext';
 import { MembersProvider } from './contexts/MembersContext';
 import { TrainerProvider } from './contexts/TrainerContext';
+import { ClassesProvider } from './contexts/ClassesContext';
 import { NavbarProvider } from './contexts/NavbarContext';
 import { AppShell } from './components/Layout';
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -131,33 +132,35 @@ function App() {
                 }
               />
 
-              {/* Admin/Owner Dashboard Routes */}
-              <Route
-                path="/*"
-                element={
-                  <ProtectedRoute allowedRoles={['OWNER', 'ADMIN']}>
-                    <MembersProvider>
-                      <TrainerProvider>
-                        <NavbarProvider>
-                          <AppShell>
-                            <Routes>
-                              <Route path="/dashboard" element={<Dashboard />} />
-                              <Route path="/trainers" element={<Trainers />} />
-                              <Route path="/members" element={<Members />} />
-                              <Route path="/classes" element={<Classes />} />
-                              <Route path="/financials" element={<Financials />} />
-                              <Route path="/pt-sessions" element={<PTSessions />} />
-                              <Route path="/reports" element={<Reports />} />
-                              <Route path="/settings" element={<Settings />} />
-                              <Route path="*" element={<Navigate to="/dashboard" replace />} />
-                            </Routes>
-                          </AppShell>
-                        </NavbarProvider>
-                      </TrainerProvider>
-                    </MembersProvider>
-                  </ProtectedRoute>
-                }
-              />
+                {/* Admin/Owner Dashboard Routes */}
+                <Route
+                  path="/*"
+                  element={
+                    <ProtectedRoute allowedRoles={['OWNER', 'ADMIN']}>
+                      <MembersProvider>
+                        <TrainerProvider>
+                          <ClassesProvider>
+                            <NavbarProvider>
+                              <AppShell>
+                                <Routes>
+                                  <Route path="/dashboard" element={<Dashboard />} />
+                                  <Route path="/trainers" element={<Trainers />} />
+                                  <Route path="/members" element={<Members />} />
+                                  <Route path="/classes" element={<Classes />} />
+                                  <Route path="/financials" element={<Financials />} />
+                                  <Route path="/pt-sessions" element={<PTSessions />} />
+                                  <Route path="/reports" element={<Reports />} />
+                                  <Route path="/settings" element={<Settings />} />
+                                  <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                                </Routes>
+                              </AppShell>
+                            </NavbarProvider>
+                          </ClassesProvider>
+                        </TrainerProvider>
+                      </MembersProvider>
+                    </ProtectedRoute>
+                  }
+                />
             </Routes>
           </Suspense>
           <Toaster

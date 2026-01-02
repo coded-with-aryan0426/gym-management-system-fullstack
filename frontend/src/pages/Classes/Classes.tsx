@@ -4,6 +4,7 @@ import React, { useEffect, useState, useMemo, useRef } from "react"
 import { toast } from "react-hot-toast"
 import api, { ptSessionApi } from "../../services/api"
 import { ScheduleHeader, ScheduleFilters, WeeklyCalendar, AddClassModal, type ClassData } from "./components"
+import { useClasses } from "../../contexts/ClassesContext"
 import "./Classes.css"
 import type { User } from "../../types/user"
 import { format, isToday, isTomorrow, startOfWeek, addDays, isSameDay } from 'date-fns'
@@ -31,6 +32,7 @@ const Classes: React.FC = () => {
     status: "All",
   })
   const [availableTrainers, setAvailableTrainers] = useState<User[]>([])
+  const { setStats } = useClasses()
 
   // Drawer/Modal state
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -191,6 +193,11 @@ const Classes: React.FC = () => {
       uniqueTrainers: [...new Set(weekClasses.map(c => c.trainer))].length,
     }
   }, [classes, currentDate])
+
+  // Update context with stats
+  useEffect(() => {
+    setStats(enhancedStats)
+  }, [enhancedStats, setStats])
 
   // Get date range string
   const getDateRange = () => {
@@ -386,7 +393,6 @@ const Classes: React.FC = () => {
             setEditingClass(null)
             setIsModalOpen(true)
           }}
-          stats={enhancedStats}
         />
       </ScheduleHeader>
 
