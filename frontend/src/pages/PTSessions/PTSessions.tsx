@@ -310,48 +310,6 @@ const PTSessions: React.FC = () => {
 
   return (
     <div className="pt-sessions">
-      <div className="pt-sessions__stats-grid">
-        <div className="pt-stat-card pt-stat-card--primary">
-          <div className="pt-stat-card__icon">
-            <Calendar size={20} />
-          </div>
-          <div className="pt-stat-card__content">
-            <span className="pt-stat-card__value">{stats.today}</span>
-            <span className="pt-stat-card__label">Today's Sessions</span>
-          </div>
-        </div>
-
-        <div className="pt-stat-card pt-stat-card--info">
-          <div className="pt-stat-card__icon">
-            <Clock size={20} />
-          </div>
-          <div className="pt-stat-card__content">
-            <span className="pt-stat-card__value">{stats.scheduled}</span>
-            <span className="pt-stat-card__label">Scheduled</span>
-          </div>
-        </div>
-
-        <div className="pt-stat-card pt-stat-card--success">
-          <div className="pt-stat-card__icon">
-            <CheckCircle size={20} />
-          </div>
-          <div className="pt-stat-card__content">
-            <span className="pt-stat-card__value">{stats.completed}</span>
-            <span className="pt-stat-card__label">Completed</span>
-          </div>
-        </div>
-
-        <div className="pt-stat-card pt-stat-card--warning">
-          <div className="pt-stat-card__icon">
-            <TrendingUp size={20} />
-          </div>
-          <div className="pt-stat-card__content">
-            <span className="pt-stat-card__value">{stats.completionRate}%</span>
-            <span className="pt-stat-card__label">Completion Rate</span>
-          </div>
-        </div>
-      </div>
-
       <div className="pt-sessions__main">
         <div className="pt-sessions__toolbar">
           <div className="pt-sessions__toolbar-left">
@@ -477,192 +435,256 @@ const PTSessions: React.FC = () => {
         )}
 
         <div className="pt-sessions__content-wrapper">
-          {viewMode === 'calendar' ? (
-            <div className="pt-calendar">
-              <div className="pt-calendar__header">
-                <div className="pt-calendar__nav">
-                  <button className="pt-calendar__nav-btn" onClick={() => navigateMonth('prev')}>
-                    <ChevronLeft size={20} />
+          <div className="pt-sessions__calendar-area">
+            {viewMode === 'calendar' ? (
+              <div className="pt-calendar">
+                <div className="pt-calendar__header">
+                  <div className="pt-calendar__nav">
+                    <button className="pt-calendar__nav-btn" onClick={() => navigateMonth('prev')}>
+                      <ChevronLeft size={20} />
+                    </button>
+                    <h3 className="pt-calendar__title">
+                      {MONTHS[currentDate.getMonth()]} {currentDate.getFullYear()}
+                    </h3>
+                    <button className="pt-calendar__nav-btn" onClick={() => navigateMonth('next')}>
+                      <ChevronRight size={20} />
+                    </button>
+                  </div>
+                  <button className="pt-calendar__today-btn" onClick={goToToday}>
+                    Today
                   </button>
-                  <h3 className="pt-calendar__title">
-                    {MONTHS[currentDate.getMonth()]} {currentDate.getFullYear()}
-                  </h3>
-                  <button className="pt-calendar__nav-btn" onClick={() => navigateMonth('next')}>
-                    <ChevronRight size={20} />
-                  </button>
-                </div>
-                <button className="pt-calendar__today-btn" onClick={goToToday}>
-                  Today
-                </button>
-              </div>
-
-              <div className="pt-calendar__grid">
-                <div className="pt-calendar__weekdays">
-                  {DAYS.map(day => (
-                    <div key={day} className="pt-calendar__weekday">{day}</div>
-                  ))}
                 </div>
 
-                <div className="pt-calendar__days">
-                  {calendarDays.map((day, index) => (
-                    <div
-                      key={index}
-                      className={`pt-calendar__day ${!day.isCurrentMonth ? 'pt-calendar__day--other' : ''} ${isToday(day.date) ? 'pt-calendar__day--today' : ''} ${selectedDate && day.date.toDateString() === selectedDate.toDateString() ? 'pt-calendar__day--selected' : ''} ${day.sessions.length > 0 ? 'pt-calendar__day--has-sessions' : ''}`}
-                      onClick={() => handleDateClick(day.date)}
-                    >
-                      <span className="pt-calendar__day-number">{day.date.getDate()}</span>
-                      {day.sessions.length > 0 && (
-                        <div className="pt-calendar__day-sessions">
-                          {day.sessions.slice(0, 3).map((session, i) => (
-                            <div 
-                              key={session.sessionId} 
-                              className={`pt-calendar__session-dot pt-calendar__session-dot--${session.status.toLowerCase()}`}
-                              title={`${session.trainerName} - ${session.memberName}`}
-                            />
-                          ))}
-                          {day.sessions.length > 3 && (
-                            <span className="pt-calendar__more">+{day.sessions.length - 3}</span>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
+                <div className="pt-calendar__grid">
+                  <div className="pt-calendar__weekdays">
+                    {DAYS.map(day => (
+                      <div key={day} className="pt-calendar__weekday">{day}</div>
+                    ))}
+                  </div>
 
-              {selectedDate && (
-                <div className="pt-calendar__day-detail">
-                  <h4 className="pt-calendar__day-detail-title">
-                    {selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-                  </h4>
-                  {filteredSessions.length === 0 ? (
-                    <p className="pt-calendar__no-sessions">No sessions scheduled</p>
-                  ) : (
-                    <div className="pt-calendar__day-sessions-list">
-                      {filteredSessions.map(session => (
-                        <div 
-                          key={session.sessionId} 
-                          className="pt-mini-session"
-                          onClick={() => handleSessionClick(session)}
-                        >
-                          <div className="pt-mini-session__time">
-                            {new Date(session.sessionDate).toLocaleTimeString('en-US', {
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
+                  <div className="pt-calendar__days">
+                    {calendarDays.map((day, index) => (
+                      <div
+                        key={index}
+                        className={`pt-calendar__day ${!day.isCurrentMonth ? 'pt-calendar__day--other' : ''} ${isToday(day.date) ? 'pt-calendar__day--today' : ''} ${selectedDate && day.date.toDateString() === selectedDate.toDateString() ? 'pt-calendar__day--selected' : ''} ${day.sessions.length > 0 ? 'pt-calendar__day--has-sessions' : ''}`}
+                        onClick={() => handleDateClick(day.date)}
+                      >
+                        <span className="pt-calendar__day-number">{day.date.getDate()}</span>
+                        {day.sessions.length > 0 && (
+                          <div className="pt-calendar__day-sessions">
+                            {day.sessions.slice(0, 3).map((session, i) => (
+                              <div 
+                                key={session.sessionId} 
+                                className={`pt-calendar__session-dot pt-calendar__session-dot--${session.status.toLowerCase()}`}
+                                title={`${session.trainerName} - ${session.memberName}`}
+                              />
+                            ))}
+                            {day.sessions.length > 3 && (
+                              <span className="pt-calendar__more">+{day.sessions.length - 3}</span>
+                            )}
                           </div>
-                          <div className="pt-mini-session__info">
-                            <span className="pt-mini-session__trainer">
-                              <Dumbbell size={12} /> {session.trainerName}
-                            </span>
-                            <span className="pt-mini-session__member">
-                              <User size={12} /> {session.memberName}
-                            </span>
-                          </div>
-                          <Badge variant={getStatusColor(session.status) as any} size="sm">
-                            {getStatusIcon(session.status)}
-                            {session.status}
-                          </Badge>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              )}
-            </div>
-          ) : (
-            <div className="pt-sessions__list">
-              {filteredSessions.length === 0 ? (
-                <EmptyState
-                  icon={<Calendar size={48} />}
-                  title="No sessions found"
-                  description={hasActiveFilters ? "No sessions match your filters" : "Schedule your first PT session to get started"}
-                  action={
-                    <Button variant="primary" onClick={() => setShowScheduleModal(true)}>
-                      <Plus size={18} />
-                      Schedule Session
-                    </Button>
-                  }
-                />
-              ) : (
-                <div className="pt-sessions__table-wrapper">
-                  <table className="pt-sessions__table">
-                    <thead>
-                      <tr>
-                        <th>Date & Time</th>
-                        <th>Trainer</th>
-                        <th>Member</th>
-                        <th>Duration</th>
-                        <th>Status</th>
-                        <th>Type</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredSessions.map(session => (
-                        <tr 
-                          key={session.sessionId} 
-                          onClick={() => handleSessionClick(session)}
-                          className="pt-sessions__table-row"
-                        >
-                          <td>
-                            <div className="pt-session-datetime">
-                              <span className="pt-session-date">
-                                {new Date(session.sessionDate).toLocaleDateString('en-US', {
-                                  month: 'short',
-                                  day: 'numeric'
-                                })}
+
+                {selectedDate && (
+                  <div className="pt-calendar__day-detail">
+                    <h4 className="pt-calendar__day-detail-title">
+                      {selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                    </h4>
+                    {filteredSessions.length === 0 ? (
+                      <p className="pt-calendar__no-sessions">No sessions scheduled</p>
+                    ) : (
+                      <div className="pt-calendar__day-sessions-list">
+                        {filteredSessions.map(session => (
+                          <div 
+                            key={session.sessionId} 
+                            className="pt-mini-session"
+                            onClick={() => handleSessionClick(session)}
+                          >
+                            <div className="pt-mini-session__time">
+                              {new Date(session.sessionDate).toLocaleTimeString('en-US', {
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </div>
+                            <div className="pt-mini-session__info">
+                              <span className="pt-mini-session__trainer">
+                                <Dumbbell size={12} /> {session.trainerName}
                               </span>
-                              <span className="pt-session-time">
-                                {new Date(session.sessionDate).toLocaleTimeString('en-US', {
-                                  hour: '2-digit',
-                                  minute: '2-digit'
-                                })}
+                              <span className="pt-mini-session__member">
+                                <User size={12} /> {session.memberName}
                               </span>
                             </div>
-                          </td>
-                          <td>
-                            <div className="pt-session-person">
-                              <div className="pt-session-avatar pt-session-avatar--trainer">
-                                {session.trainerName?.charAt(0) || 'T'}
-                              </div>
-                              <span>{session.trainerName}</span>
-                            </div>
-                          </td>
-                          <td>
-                            <div className="pt-session-person">
-                              <div className="pt-session-avatar pt-session-avatar--member">
-                                {session.memberName?.charAt(0) || 'M'}
-                              </div>
-                              <span>{session.memberName}</span>
-                            </div>
-                          </td>
-                          <td>
-                            <span className="pt-session-duration">{session.durationMinutes} min</span>
-                          </td>
-                          <td>
-                            <Badge variant={getStatusColor(session.status) as any}>
+                            <Badge variant={getStatusColor(session.status) as any} size="sm">
                               {getStatusIcon(session.status)}
                               {session.status}
                             </Badge>
-                          </td>
-                          <td>
-                            {session.isRecurring ? (
-                              <span className="pt-session-recurring">
-                                <Repeat size={14} />
-                                {session.recurringFrequency}
-                              </span>
-                            ) : (
-                              <span className="pt-session-single">One-time</span>
-                            )}
-                          </td>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="pt-sessions__list">
+                {filteredSessions.length === 0 ? (
+                  <EmptyState
+                    icon={<Calendar size={48} />}
+                    title="No sessions found"
+                    description={hasActiveFilters ? "No sessions match your filters" : "Schedule your first PT session to get started"}
+                    action={
+                      <Button variant="primary" onClick={() => setShowScheduleModal(true)}>
+                        <Plus size={18} />
+                        Schedule Session
+                      </Button>
+                    }
+                  />
+                ) : (
+                  <div className="pt-sessions__table-wrapper">
+                    <table className="pt-sessions__table">
+                      <thead>
+                        <tr>
+                          <th>Date & Time</th>
+                          <th>Trainer</th>
+                          <th>Member</th>
+                          <th>Duration</th>
+                          <th>Status</th>
+                          <th>Type</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+                      </thead>
+                      <tbody>
+                        {filteredSessions.map(session => (
+                          <tr 
+                            key={session.sessionId} 
+                            onClick={() => handleSessionClick(session)}
+                            className="pt-sessions__table-row"
+                          >
+                            <td>
+                              <div className="pt-session-datetime">
+                                <span className="pt-session-date">
+                                  {new Date(session.sessionDate).toLocaleDateString('en-US', {
+                                    month: 'short',
+                                    day: 'numeric'
+                                  })}
+                                </span>
+                                <span className="pt-session-time">
+                                  {new Date(session.sessionDate).toLocaleTimeString('en-US', {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })}
+                                </span>
+                              </div>
+                            </td>
+                            <td>
+                              <div className="pt-session-person">
+                                <div className="pt-session-avatar pt-session-avatar--trainer">
+                                  {session.trainerName?.charAt(0) || 'T'}
+                                </div>
+                                <span>{session.trainerName}</span>
+                              </div>
+                            </td>
+                            <td>
+                              <div className="pt-session-person">
+                                <div className="pt-session-avatar pt-session-avatar--member">
+                                  {session.memberName?.charAt(0) || 'M'}
+                                </div>
+                                <span>{session.memberName}</span>
+                              </div>
+                            </td>
+                            <td>
+                              <span className="pt-session-duration">{session.durationMinutes} min</span>
+                            </td>
+                            <td>
+                              <Badge variant={getStatusColor(session.status) as any}>
+                                {getStatusIcon(session.status)}
+                                {session.status}
+                              </Badge>
+                            </td>
+                            <td>
+                              {session.isRecurring ? (
+                                <span className="pt-session-recurring">
+                                  <Repeat size={14} />
+                                  {session.recurringFrequency}
+                                </span>
+                              ) : (
+                                <span className="pt-session-single">One-time</span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div className="pt-sessions__stats-sidebar">
+            <div className="pt-stat-card pt-stat-card--primary">
+              <div className="pt-stat-card__icon">
+                <Calendar size={18} />
+              </div>
+              <div className="pt-stat-card__content">
+                <span className="pt-stat-card__value">{stats.today}</span>
+                <span className="pt-stat-card__label">Today</span>
+              </div>
             </div>
-          )}
+
+            <div className="pt-stat-card pt-stat-card--info">
+              <div className="pt-stat-card__icon">
+                <Clock size={18} />
+              </div>
+              <div className="pt-stat-card__content">
+                <span className="pt-stat-card__value">{stats.scheduled}</span>
+                <span className="pt-stat-card__label">Scheduled</span>
+              </div>
+            </div>
+
+            <div className="pt-stat-card pt-stat-card--success">
+              <div className="pt-stat-card__icon">
+                <CheckCircle size={18} />
+              </div>
+              <div className="pt-stat-card__content">
+                <span className="pt-stat-card__value">{stats.completed}</span>
+                <span className="pt-stat-card__label">Completed</span>
+              </div>
+            </div>
+
+            <div className="pt-stat-card pt-stat-card--warning">
+              <div className="pt-stat-card__icon">
+                <TrendingUp size={18} />
+              </div>
+              <div className="pt-stat-card__content">
+                <span className="pt-stat-card__value">{stats.completionRate}%</span>
+                <span className="pt-stat-card__label">Rate</span>
+              </div>
+            </div>
+
+            <div className="pt-stat-card pt-stat-card--missed">
+              <div className="pt-stat-card__icon">
+                <AlertCircle size={18} />
+              </div>
+              <div className="pt-stat-card__content">
+                <span className="pt-stat-card__value">{stats.missed}</span>
+                <span className="pt-stat-card__label">Missed</span>
+              </div>
+            </div>
+
+            <div className="pt-stat-card pt-stat-card--cancelled">
+              <div className="pt-stat-card__icon">
+                <XCircle size={18} />
+              </div>
+              <div className="pt-stat-card__content">
+                <span className="pt-stat-card__value">{stats.cancelled}</span>
+                <span className="pt-stat-card__label">Cancelled</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
