@@ -10,6 +10,8 @@ interface TrainerContextType {
     stats: {
         total: number
         active: number
+        inactive: number
+        newThisMonth: number
         assignedToday: number
     }
     refreshTrainers: () => Promise<void>
@@ -18,7 +20,7 @@ interface TrainerContextType {
 const TrainerContext = createContext<TrainerContextType>({
     trainers: [],
     loading: true,
-    stats: { total: 0, active: 0, assignedToday: 0 },
+    stats: { total: 0, active: 0, inactive: 0, newThisMonth: 0, assignedToday: 0 },
     refreshTrainers: async () => { },
 })
 
@@ -54,21 +56,28 @@ export const TrainerProvider: React.FC<TrainerProviderProps> = ({ children }) =>
         fetchTrainers()
     }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-    // Calculate stats from trainers array
     const stats = useMemo(() => {
         const total = trainers.length
 
-        // Consider trainer "active" if not marked inactive
         const active = trainers.filter(t => {
-            const status = t.status?.toLowerCase() || 'active'
-            return status !== 'inactive' && status !== 'expired'
+            const status = (t.status || 'active').toLowerCase()
+            return status === 'active'
         }).length
 
-        // For assignedToday, we'll count all active trainers as a placeholder
-        // In production, this would query assignment timestamps from backend
+        const inactive = total - active
+
+        const now = new Date()
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+        
+        const newThisMonth = trainers.filter(t => {
+            if (!t.createdAt) return false
+            const joinDate = new Date(t.createdAt)
+            return joinDate >= monthStart
+        }).length
+
         const assignedToday = active
 
-        return { total, active, assignedToday }
+        return { total, active, inactive, newThisMonth, assignedToday }
     }, [trainers])
 
     const value = useMemo(() => ({

@@ -322,6 +322,194 @@
 }
 
 /* ============================================
+   PREMIUM TRAINER CELLS
+   ============================================ */
+.trainer-index {
+  color: var(--text-tertiary);
+  font-size: 11px;
+  font-feature-settings: 'tnum' 1;
+  font-weight: 500;
+}
+
+.trainer-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.trainer-cell__avatar-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.trainer-cell__status-dot {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 2px solid var(--bg-primary);
+}
+
+.trainer-cell__status-dot--active {
+  background: #10B981;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.5);
+}
+
+.trainer-cell__status-dot--inactive {
+  background: #EF4444;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.5);
+}
+
+.trainer-cell__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.trainer-cell__name {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.01em;
+}
+
+.trainer-cell__email {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.trainer-id-cell {
+  display: flex;
+  align-items: center;
+}
+
+.trainer-id {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-family: var(--font-mono, 'SF Mono', monospace);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.trainer-role {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.trainer-role--trainer {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, rgba(59, 130, 246, 0.06) 100%);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  color: #3B82F6;
+}
+
+.trainer-role--admin {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.12) 0%, rgba(139, 92, 246, 0.06) 100%);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  color: #8B5CF6;
+}
+
+.trainer-role--manager {
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.12) 0%, rgba(236, 72, 153, 0.06) 100%);
+  border: 1px solid rgba(236, 72, 153, 0.2);
+  color: #EC4899;
+}
+
+.trainer-tenure {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.trainer-tenure__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.8;
+}
+
+.trainer-tenure__text {
+  font-feature-settings: 'tnum' 1;
+  white-space: nowrap;
+}
+
+.trainer-tenure--new {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: #10B981;
+}
+
+.trainer-tenure--regular {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  color: #3B82F6;
+}
+
+.trainer-tenure--experienced {
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  color: #8B5CF6;
+}
+
+.trainer-tenure--veteran {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(245, 158, 11, 0.06) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  color: #F59E0B;
+}
+
+.trainer-tenure--veteran::before {
+  content: '★';
+  font-size: 8px;
+  margin-right: 2px;
+}
+
+.trainer-date {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.trainer-date__main {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-feature-settings: 'tnum' 1;
+}
+
+.trainer-date__year {
+  font-size: 9px;
+  color: var(--text-tertiary);
+  font-feature-settings: 'tnum' 1;
+}
+
+.trainer-actions {
+  display: flex;
+  justify-content: center;
+}
+
+/* ============================================
    ACTION BUTTONS
    ============================================ */
 .staff-actions {
@@ -386,6 +574,15 @@
 
 :root.theme-light .btn-filters:hover {
   background: rgba(0, 0, 0, 0.05);
+}
+
+:root.theme-light .trainer-id {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+:root.theme-light .trainer-cell__status-dot {
+  border-color: #fff;
 }
 
 /* ============================================

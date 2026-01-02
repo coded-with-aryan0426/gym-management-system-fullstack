@@ -302,6 +302,19 @@
   white-space: nowrap;
 }
 
+.utility-bar__stats-enhanced--staff {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(139, 92, 246, 0.06) 100%);
+  border-color: rgba(59, 130, 246, 0.12);
+}
+
+.utility-bar__stats-enhanced--staff .utility-progress__fill {
+  background: linear-gradient(90deg, #3B82F6, #60A5FA);
+}
+
+.utility-bar__stats-enhanced--staff .utility-progress__text {
+  color: #3B82F6;
+}
+
 .utility-stat {
   display: flex;
   align-items: center;

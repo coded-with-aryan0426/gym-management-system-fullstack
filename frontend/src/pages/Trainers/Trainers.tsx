@@ -128,7 +128,7 @@ const Trainers: React.FC = () => {
       header: '#',
       width: '50px',
       render: (_, index) => (
-        <span className="staff-index">{currentPage * pageSize + index + 1}</span>
+        <span className="trainer-index">{currentPage * pageSize + index + 1}</span>
       ),
     },
     {
@@ -136,26 +136,30 @@ const Trainers: React.FC = () => {
       header: 'Trainer',
       width: 'auto',
       render: (member) => {
-        // Load avatarId from localStorage as fallback
         const savedAvatarId = typeof window !== 'undefined'
           ? localStorage.getItem(`avatar_${member.userId}`)
           : null;
+        const status = ((member as any).status || 'Active').toLowerCase();
+        const isActive = status === 'active';
 
         return (
           <div
-            className="staff-cell"
+            className="trainer-cell"
             onClick={(e) => { e.stopPropagation(); handleActionClick(member); }}
             style={{ cursor: 'pointer' }}
           >
-            <Avatar
-              name={member.fullName}
-              size="md"
-              avatarId={savedAvatarId || member.avatarId}
-              userId={member.userId}
-            />
-            <div className="staff-cell__info">
-              <span className="staff-name">{member.fullName}</span>
-              <span className="staff-email">{member.email}</span>
+            <div className="trainer-cell__avatar-wrapper">
+              <Avatar
+                name={member.fullName}
+                size="md"
+                avatarId={savedAvatarId || member.avatarId}
+                userId={member.userId}
+              />
+              <span className={`trainer-cell__status-dot ${isActive ? 'trainer-cell__status-dot--active' : 'trainer-cell__status-dot--inactive'}`} />
+            </div>
+            <div className="trainer-cell__info">
+              <span className="trainer-cell__name">{member.fullName}</span>
+              <span className="trainer-cell__email">{member.email}</span>
             </div>
           </div>
         );
@@ -163,19 +167,65 @@ const Trainers: React.FC = () => {
     },
     {
       key: 'employeeId',
-      header: 'Employee ID',
-      width: '120px',
+      header: 'ID',
+      width: '90px',
       render: (member) => (
-        <span className="staff-id">#{member.userId.toString().padStart(4, '0')}</span>
+        <div className="trainer-id-cell">
+          <span className="trainer-id">#{member.userId.toString().padStart(4, '0')}</span>
+        </div>
       ),
     },
     {
       key: 'role',
       header: 'Role',
+      width: '110px',
+      render: (member) => {
+        const role = member.roles?.[0]?.roleName || 'TRAINER';
+        const roleClass = role.toLowerCase() === 'admin' ? 'trainer-role--admin' : 
+                          role.toLowerCase() === 'manager' ? 'trainer-role--manager' : 'trainer-role--trainer';
+        return (
+          <span className={`trainer-role ${roleClass}`}>{role}</span>
+        );
+      },
+    },
+    {
+      key: 'tenure',
+      header: 'Tenure',
       width: '100px',
-      render: (member) => (
-        <span className="staff-role-badge">{member.roles?.[0]?.roleName || 'TRAINER'}</span>
-      ),
+      render: (member) => {
+        const joinDate = member.createdAt ? new Date(member.createdAt) : new Date();
+        const now = new Date();
+        const diffMs = now.getTime() - joinDate.getTime();
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        const diffMonths = Math.floor(diffDays / 30);
+        const diffYears = Math.floor(diffDays / 365);
+        
+        let tenureText = '';
+        let tenureClass = 'trainer-tenure--new';
+        
+        if (diffYears >= 1) {
+          tenureText = `${diffYears}y ${Math.floor((diffDays % 365) / 30)}m`;
+          tenureClass = 'trainer-tenure--veteran';
+        } else if (diffMonths >= 1) {
+          tenureText = `${diffMonths} month${diffMonths > 1 ? 's' : ''}`;
+          tenureClass = diffMonths >= 6 ? 'trainer-tenure--experienced' : 'trainer-tenure--regular';
+        } else {
+          tenureText = `${diffDays} day${diffDays !== 1 ? 's' : ''}`;
+          tenureClass = 'trainer-tenure--new';
+        }
+        
+        return (
+          <div className={`trainer-tenure ${tenureClass}`}>
+            <span className="trainer-tenure__icon">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+            </span>
+            <span className="trainer-tenure__text">{tenureText}</span>
+          </div>
+        );
+      },
     },
     {
       key: 'joinDate',
@@ -186,23 +236,12 @@ const Trainers: React.FC = () => {
         const day = date.getDate().toString().padStart(2, '0');
         const month = date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
         const year = date.getFullYear();
-        return <span className="staff-date">{day} {month} {year}</span>;
-      },
-    },
-    {
-      key: 'leftDate',
-      header: 'Left',
-      width: '110px',
-      render: (member) => {
-        // Use leavingDate from backend
-        const leftDate = (member as any).leavingDate;
-        if (!leftDate) return <span className="staff-date">-</span>;
-
-        const date = new Date(leftDate);
-        const day = date.getDate().toString().padStart(2, '0');
-        const month = date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
-        const year = date.getFullYear();
-        return <span className="staff-date staff-date--left">{day} {month} {year}</span>;
+        return (
+          <div className="trainer-date">
+            <span className="trainer-date__main">{day} {month}</span>
+            <span className="trainer-date__year">{year}</span>
+          </div>
+        );
       },
     },
     {
@@ -210,7 +249,6 @@ const Trainers: React.FC = () => {
       header: 'Status',
       width: '100px',
       render: (member) => {
-        // Use status from backend (defaults to 'Active' if not set)
         const status = (member as any).status || 'Active';
         return <Badge variant={getStatusVariant(status)}>{status}</Badge>;
       },
@@ -220,7 +258,7 @@ const Trainers: React.FC = () => {
       header: '',
       width: '60px',
       render: (member) => (
-        <div className="staff-actions">
+        <div className="trainer-actions">
           <ActionMenuButton onClick={(e) => { e.stopPropagation(); handleActionClick(member); }} />
         </div>
       ),

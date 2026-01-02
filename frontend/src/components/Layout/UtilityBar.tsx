@@ -46,45 +46,53 @@ const UtilityBar: React.FC = () => {
   const { stats: memberStats } = useMembers()
   const { stats: staffStats } = useTrainers()
 
-    const getMetricValue = (key: string): string | number => {
-      switch (config.metricType) {
-        case 'members':
-          return (memberStats as Record<string, number>)[key] ?? 0
-        case 'staff':
-          return (staffStats as Record<string, number>)[key] ?? 0
-        case 'financial':
-          const financialPlaceholders: Record<string, string> = {
-            todayRevenue: '₹12,450',
-            pending: '3',
-            monthlyRevenue: '₹2.4L',
-          }
-          return financialPlaceholders[key] ?? '0'
-        case 'sessions':
-          const sessionPlaceholders: Record<string, number> = {
-            todaySessions: 8,
-            activeSessions: 3,
-          }
-          return sessionPlaceholders[key] ?? 0
-        default:
-          return 0
+      const getMetricValue = (key: string): string | number => {
+        switch (config.metricType) {
+          case 'members':
+            return (memberStats as Record<string, number>)[key] ?? 0
+          case 'staff':
+            return (staffStats as Record<string, number>)[key] ?? 0
+          case 'financial':
+            const financialPlaceholders: Record<string, string> = {
+              todayRevenue: '₹12,450',
+              pending: '3',
+              monthlyRevenue: '₹2.4L',
+            }
+            return financialPlaceholders[key] ?? '0'
+          case 'sessions':
+            const sessionPlaceholders: Record<string, number> = {
+              todaySessions: 8,
+              activeSessions: 3,
+            }
+            return sessionPlaceholders[key] ?? 0
+          default:
+            return 0
+        }
       }
-    }
 
-    const getMetricClass = (key: string): string => {
-      switch (key) {
-        case 'active': return 'utility-metric--active'
-        case 'inactive': return 'utility-metric--expired'
-        case 'expiringSoon': return 'utility-metric--warning'
-        case 'newThisMonth': return 'utility-metric--new'
-        default: return ''
+      const getMetricClass = (key: string): string => {
+        switch (key) {
+          case 'active': return 'utility-metric--active'
+          case 'inactive': return 'utility-metric--expired'
+          case 'expiringSoon': return 'utility-metric--warning'
+          case 'newThisMonth': return 'utility-metric--new'
+          default: return ''
+        }
       }
-    }
 
-    const getActivePercent = (): number => {
-      const total = memberStats.total || 0
-      const active = memberStats.active || 0
-      return total > 0 ? Math.round((active / total) * 100) : 0
-    }
+      const getActivePercent = (): number => {
+        if (config.metricType === 'members') {
+          const total = memberStats.total || 0
+          const active = memberStats.active || 0
+          return total > 0 ? Math.round((active / total) * 100) : 0
+        }
+        if (config.metricType === 'staff') {
+          const total = staffStats.total || 0
+          const active = staffStats.active || 0
+          return total > 0 ? Math.round((active / total) * 100) : 0
+        }
+        return 0
+      }
 
   const [notifications] = useState<Notification[]>([
     { id: 1, type: "member", title: "New Member", message: "John Doe signed up.", time: "2 months ago", read: false },
@@ -302,8 +310,8 @@ const UtilityBar: React.FC = () => {
         )}
       </div>
 
-        {config.metrics.length > 0 && config.metricType === 'members' && (
-          <div className="utility-bar__stats-enhanced">
+        {config.metrics.length > 0 && (config.metricType === 'members' || config.metricType === 'staff') && (
+          <div className={`utility-bar__stats-enhanced ${config.metricType === 'staff' ? 'utility-bar__stats-enhanced--staff' : ''}`}>
             <div className="utility-metrics-strip">
               {config.metrics.map((metric, index) => (
                 <div key={metric.key} className={`utility-metric ${getMetricClass(metric.key)}`}>
@@ -324,7 +332,7 @@ const UtilityBar: React.FC = () => {
           </div>
         )}
 
-        {config.metrics.length > 0 && config.metricType !== 'members' && (
+        {config.metrics.length > 0 && config.metricType !== 'members' && config.metricType !== 'staff' && (
           <div className="utility-bar__stats utility-bar__stats--animated">
             {config.metrics.map((metric, index) => (
               <Fragment key={metric.key}>

@@ -53,9 +53,10 @@ const navbarConfigs: Record<string, NavbarConfig> = {
         pageTitle: 'Trainers',
         metricType: 'staff',
         metrics: [
-            { key: 'total', label: 'Total Trainers' },
+            { key: 'total', label: 'Total' },
             { key: 'active', label: 'Active' },
-            { key: 'assignedToday', label: 'Assigned Today' },
+            { key: 'inactive', label: 'Inactive' },
+            { key: 'newThisMonth', label: 'New' },
         ],
     },
     '/classes': {
