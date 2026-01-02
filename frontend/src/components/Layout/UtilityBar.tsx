@@ -306,77 +306,79 @@ const UtilityBar: React.FC = () => {
         </div>
       )}
 
-      <div className="utility-bar__actions">
-        <button className="utility-bar__create-btn" onClick={() => setIsCreateModalOpen(true)}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <line x1="12" y1="5" x2="12" y2="19" />
-            <line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-          <span className="utility-bar__create-text">Create</span>
-        </button>
-
-        <div className="utility-bar__dropdown" ref={notificationRef}>
-          <button
-            className="utility-bar__icon-btn"
-            title="Notifications"
-            onClick={() => setShowNotifications(!showNotifications)}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+        <div className="utility-bar__actions">
+          <button className="utility-bar__create-btn" onClick={() => setIsCreateModalOpen(true)}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
             </svg>
-            {unreadCount > 0 && <span className="utility-bar__badge">{unreadCount}</span>}
+            <span className="utility-bar__create-text">Create</span>
           </button>
-          {showNotifications && (
-            <div className="utility-bar__dropdown-menu notifications-panel">
-              <div className="notifications-panel__header">
-                <h3>Notifications</h3>
-              </div>
-              <div className="notifications-panel__list">
-                {notifications.map((notification) => (
-                  <div
-                    key={notification.id}
-                    className={`notification-item ${!notification.read ? "notification-item--unread" : ""}`}
-                  >
-                    {getNotificationIcon(notification.type)}
-                    <div className="notification-item__content">
-                      <p className="notification-item__title">
-                        <strong>{notification.title}:</strong> {notification.message}
-                      </p>
-                      <span className="notification-item__time">{notification.time}</span>
+
+          <div className="utility-bar__dropdown" ref={notificationRef}>
+            <button
+              className="utility-bar__icon-btn"
+              title="Notifications"
+              onClick={() => setShowNotifications(!showNotifications)}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+              </svg>
+              {unreadCount > 0 && <span className="utility-bar__badge">{unreadCount}</span>}
+            </button>
+            {showNotifications && (
+              <div className="utility-bar__dropdown-menu notifications-panel">
+                <div className="notifications-panel__header">
+                  <h3>Notifications</h3>
+                </div>
+                <div className="notifications-panel__list">
+                  {notifications.map((notification) => (
+                    <div
+                      key={notification.id}
+                      className={`notification-item ${!notification.read ? "notification-item--unread" : ""}`}
+                    >
+                      {getNotificationIcon(notification.type)}
+                      <div className="notification-item__content">
+                        <p className="notification-item__title">
+                          <strong>{notification.title}:</strong> {notification.message}
+                        </p>
+                        <span className="notification-item__time">{notification.time}</span>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
+          </div>
+
+          {(userRole === 'TRAINER' || userRole === 'MEMBER' || userRole === 'CUSTOMER') && (
+            <>
+              <button
+                className="utility-bar__theme-toggle"
+                onClick={toggleTheme}
+                title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              >
+                <div className="theme-toggle__track">
+                  <Sun size={12} className="theme-toggle__icon theme-toggle__icon--sun" />
+                  <Moon size={12} className="theme-toggle__icon theme-toggle__icon--moon" />
+                  <div className={`theme-toggle__thumb ${theme === 'light' ? 'theme-toggle__thumb--light' : ''}`} />
+                </div>
+              </button>
+
+              <button
+                className="utility-bar__avatar"
+                title="Profile & Settings"
+                onClick={() => {
+                  if (userRole === 'TRAINER') navigate('/trainer/profile');
+                  else navigate('/member/profile');
+                }}
+              >
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Admin" alt="User" />
+              </button>
+            </>
           )}
         </div>
-
-        {/* Theme Toggle */}
-        <button
-          className="utility-bar__theme-toggle"
-          onClick={toggleTheme}
-          title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-        >
-          <div className="theme-toggle__track">
-            <Sun size={12} className="theme-toggle__icon theme-toggle__icon--sun" />
-            <Moon size={12} className="theme-toggle__icon theme-toggle__icon--moon" />
-            <div className={`theme-toggle__thumb ${theme === 'light' ? 'theme-toggle__thumb--light' : ''}`} />
-          </div>
-        </button>
-
-        <button
-          className="utility-bar__avatar"
-          title="Profile & Settings"
-          onClick={() => {
-            if (userRole === 'TRAINER') navigate('/trainer/profile');
-            else if (userRole === 'MEMBER' || userRole === 'CUSTOMER') navigate('/member/profile');
-            else navigate('/settings');
-          }}
-        >
-          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Admin" alt="User" />
-        </button>
-      </div>
       <CreateActionModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
