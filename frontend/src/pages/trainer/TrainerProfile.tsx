@@ -3,8 +3,9 @@ import {
     Camera, Save, User, Phone, Mail, MapPin, Award, Shield, Key,
     Star, Calendar, Users, Edit3, Clock, TrendingUp, Target,
     Briefcase, FileText, CheckCircle, AlertCircle, Upload,
-    Instagram, Linkedin, Twitter, Globe, X, Dumbbell, Heart,
-    Activity, Zap, Medal, BadgeCheck, CreditCard, History
+    Instagram, Linkedin, Globe, Dumbbell, Heart,
+    Activity, Zap, Medal, BadgeCheck, CreditCard, History,
+    ChevronRight, Eye, Download, Lock, Smartphone
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import './TrainerProfile.css';
@@ -12,367 +13,315 @@ import './TrainerProfile.css';
 const TrainerProfile: React.FC = () => {
     const [activeTab, setActiveTab] = useState('overview');
     const [isEditing, setIsEditing] = useState(false);
-    const [showAvatarModal, setShowAvatarModal] = useState(false);
-    const [formData, setFormData] = useState({
-        fullName: 'John Smith',
+
+    const trainer = {
+        name: 'John Smith',
+        role: 'Senior Personal Trainer',
+        employeeId: 'TR-00123',
         email: 'john.smith@athlonx.com',
         phone: '+91 98765 43210',
-        alternatePhone: '+91 98765 43211',
-        dob: '1990-01-15',
+        altPhone: '+91 98765 43211',
+        dob: '15 Jan 1990',
         gender: 'Male',
         bloodType: 'O+',
-        address: '123 Fitness Street, Andheri West',
-        city: 'Mumbai',
-        state: 'Maharashtra',
-        pincode: '400058',
-        employeeId: 'TR-00123',
-        joiningDate: '2020-01-15',
+        address: '123 Fitness Street, Andheri West, Mumbai - 400058',
+        joiningDate: 'Jan 2020',
         department: 'Personal Training',
-        reportingTo: 'Sarah Johnson (Head Trainer)',
-        workShift: 'Morning (6 AM - 2 PM)',
-        specializations: ['Strength Training', 'HIIT', 'Functional Fitness', 'Weight Loss'],
-        certifications: [
-            { name: 'ACE Certified Personal Trainer', issuer: 'ACE Fitness', date: '2018', valid: true },
-            { name: 'CrossFit Level 2', issuer: 'CrossFit Inc.', date: '2019', valid: true },
-            { name: 'First Aid & CPR', issuer: 'Red Cross', date: '2023', valid: true },
-            { name: 'Sports Nutrition', issuer: 'ISSA', date: '2020', valid: true },
-        ],
-        bio: 'Certified personal trainer with 8 years experience specializing in functional training and rehabilitation. Passionate about helping clients achieve their fitness goals through personalized programs.',
+        reportingTo: 'Sarah Johnson',
+        shift: 'Morning (6AM-2PM)',
         languages: ['English', 'Hindi', 'Marathi'],
+        specializations: ['Strength Training', 'HIIT', 'Functional Fitness', 'Weight Loss', 'Rehabilitation'],
+        bio: 'Certified personal trainer with 8+ years experience specializing in functional training and rehabilitation.',
         instagram: '@johnsmith_fitness',
         linkedin: 'johnsmith-trainer',
-        emergencyContact: 'Jane Smith',
+        emergencyName: 'Jane Smith (Spouse)',
         emergencyPhone: '+91 98765 43299',
-        emergencyRelation: 'Spouse',
         bankName: 'HDFC Bank',
-        accountNumber: '****4567',
-        ifscCode: 'HDFC0001234',
-    });
+        accountNo: '****4567',
+        ifsc: 'HDFC0001234',
+    };
+
+    const stats = {
+        activeMembers: 24,
+        totalMembers: 28,
+        sessionsMonth: 86,
+        attendance: 94,
+        rating: 4.9,
+        reviews: 127,
+        experience: '8 Yrs',
+        earnings: '₹48,500',
+    };
+
+    const certifications = [
+        { name: 'ACE Certified Personal Trainer', issuer: 'ACE Fitness', year: '2018', valid: true, expires: 'Dec 2025' },
+        { name: 'CrossFit Level 2', issuer: 'CrossFit Inc.', year: '2019', valid: true, expires: 'Mar 2025' },
+        { name: 'First Aid & CPR', issuer: 'Red Cross', year: '2023', valid: true, expires: 'Jun 2025' },
+        { name: 'Sports Nutrition Specialist', issuer: 'ISSA', year: '2020', valid: true, expires: 'Aug 2025' },
+        { name: 'Kettlebell Certification', issuer: 'RKC', year: '2021', valid: true, expires: 'Sep 2024' },
+    ];
+
+    const schedule = [
+        { day: 'Mon', hours: '6AM-2PM', sessions: 5 },
+        { day: 'Tue', hours: '6AM-2PM', sessions: 6 },
+        { day: 'Wed', hours: '6AM-2PM', sessions: 4 },
+        { day: 'Thu', hours: '6AM-2PM', sessions: 5 },
+        { day: 'Fri', hours: '6AM-2PM', sessions: 6 },
+        { day: 'Sat', hours: '8AM-12PM', sessions: 3 },
+        { day: 'Sun', hours: 'Off', sessions: 0 },
+    ];
+
+    const performance = [
+        { label: 'Client Retention', value: 96, target: 90 },
+        { label: 'Session Completion', value: 98, target: 95 },
+        { label: 'Client Satisfaction', value: 94, target: 90 },
+        { label: 'Goal Achievement', value: 87, target: 80 },
+    ];
+
+    const achievements = [
+        { icon: Medal, title: 'Top Trainer Dec 2024', desc: 'Highest retention' },
+        { icon: Target, title: '100 Sessions Milestone', desc: 'Nov 2024' },
+        { icon: Star, title: '5-Star Streak', desc: '30 days perfect rating' },
+        { icon: Heart, title: 'Client Favorite', desc: 'Most requested trainer' },
+    ];
+
+    const recentActivity = [
+        { action: 'Completed PT session', with: 'Emma Davis', time: '2h ago', type: 'session' },
+        { action: 'Progress note added', with: 'Mike Chen', time: '3h ago', type: 'note' },
+        { action: 'New client assigned', with: 'Sarah Wilson', time: 'Yesterday', type: 'new' },
+        { action: 'Certification renewed', with: 'First Aid & CPR', time: '2 days ago', type: 'cert' },
+    ];
+
+    const documents = [
+        { name: 'ID Proof (Aadhar)', type: 'id', verified: true },
+        { name: 'Address Proof', type: 'address', verified: true },
+        { name: 'Education Certificate', type: 'education', verified: true },
+        { name: 'PAN Card', type: 'pan', verified: true },
+    ];
 
     const handleSave = () => {
-        toast.success('Profile updated successfully');
+        toast.success('Profile updated');
         setIsEditing(false);
     };
 
     const tabs = [
         { id: 'overview', label: 'Overview', icon: User },
-        { id: 'professional', label: 'Professional', icon: Briefcase },
-        { id: 'certifications', label: 'Certifications', icon: Award },
-        { id: 'schedule', label: 'Work Schedule', icon: Clock },
-        { id: 'performance', label: 'Performance', icon: TrendingUp },
-        { id: 'documents', label: 'Documents', icon: FileText },
+        { id: 'professional', label: 'Work', icon: Briefcase },
+        { id: 'performance', label: 'Stats', icon: TrendingUp },
         { id: 'security', label: 'Security', icon: Shield },
     ];
 
-    const stats = [
-        { label: 'Active Members', value: '24', icon: Users, color: '#3B82F6', trend: '+3 this month' },
-        { label: 'Sessions This Month', value: '86', icon: Calendar, color: '#10B981', trend: '94% attendance' },
-        { label: 'Avg. Rating', value: '4.9', icon: Star, color: '#F59E0B', trend: '127 reviews' },
-        { label: 'Experience', value: '8 Yrs', icon: Briefcase, color: '#8B5CF6', trend: 'Since 2016' },
-    ];
-
-    const achievements = [
-        { title: 'Top Trainer', description: 'Highest client retention rate', icon: Medal, date: 'Dec 2024' },
-        { title: '100 Sessions', description: 'Completed 100 PT sessions', icon: Target, date: 'Nov 2024' },
-        { title: 'Perfect Rating', description: '5-star streak for 30 days', icon: Star, date: 'Oct 2024' },
-    ];
-
-    const recentActivity = [
-        { action: 'Completed PT session', client: 'Emma Davis', time: '2 hours ago', type: 'session' },
-        { action: 'Added progress note', client: 'Mike Chen', time: '3 hours ago', type: 'note' },
-        { action: 'New client assigned', client: 'Sarah Wilson', time: 'Yesterday', type: 'new' },
-        { action: 'Certification renewed', client: 'First Aid & CPR', time: '2 days ago', type: 'cert' },
-    ];
-
-    const weeklySchedule = [
-        { day: 'Monday', shift: '6:00 AM - 2:00 PM', sessions: 5, status: 'active' },
-        { day: 'Tuesday', shift: '6:00 AM - 2:00 PM', sessions: 6, status: 'active' },
-        { day: 'Wednesday', shift: '6:00 AM - 2:00 PM', sessions: 4, status: 'active' },
-        { day: 'Thursday', shift: '6:00 AM - 2:00 PM', sessions: 5, status: 'active' },
-        { day: 'Friday', shift: '6:00 AM - 2:00 PM', sessions: 6, status: 'active' },
-        { day: 'Saturday', shift: '8:00 AM - 12:00 PM', sessions: 3, status: 'active' },
-        { day: 'Sunday', shift: 'Off', sessions: 0, status: 'off' },
-    ];
-
-    const performanceMetrics = [
-        { label: 'Client Retention', value: 96, target: 90, unit: '%' },
-        { label: 'Session Completion', value: 98, target: 95, unit: '%' },
-        { label: 'Client Satisfaction', value: 94, target: 90, unit: '%' },
-        { label: 'Goal Achievement', value: 87, target: 80, unit: '%' },
-    ];
-
     return (
-        <div className="trainer-profile-v2">
-            <div className="trainer-profile-v2__header">
-                <div className="trainer-profile-v2__header-bg" />
-                <div className="trainer-profile-v2__header-content">
-                    <div className="trainer-profile-v2__avatar-section">
-                        <div className="trainer-profile-v2__avatar">
-                            <img 
-                                src="https://ui-avatars.com/api/?name=John+Smith&background=DC2626&color=fff&size=128" 
-                                alt="John Smith"
-                            />
-                            <button 
-                                className="trainer-profile-v2__avatar-edit"
-                                onClick={() => setShowAvatarModal(true)}
-                            >
-                                <Camera size={14} />
-                            </button>
-                            <div className="trainer-profile-v2__avatar-status" />
+        <div className="tp">
+            <div className="tp__header">
+                <div className="tp__header-bg" />
+                <div className="tp__header-content">
+                    <div className="tp__profile-row">
+                        <div className="tp__avatar">
+                            <img src="https://ui-avatars.com/api/?name=John+Smith&background=DC2626&color=fff&size=96" alt="" />
+                            <button className="tp__avatar-btn"><Camera size={12} /></button>
+                            <span className="tp__avatar-status" />
                         </div>
-                        <div className="trainer-profile-v2__info">
-                            <div className="trainer-profile-v2__name-row">
-                                <h1>{formData.fullName}</h1>
-                                <span className="trainer-profile-v2__verified">
-                                    <BadgeCheck size={18} />
-                                    Verified
-                                </span>
+                        <div className="tp__profile-info">
+                            <div className="tp__name-row">
+                                <h1>{trainer.name}</h1>
+                                <span className="tp__badge tp__badge--verified"><BadgeCheck size={12} /> Verified</span>
                             </div>
-                            <p className="trainer-profile-v2__role">Senior Personal Trainer</p>
-                            <div className="trainer-profile-v2__meta">
-                                <span><Briefcase size={14} /> {formData.department}</span>
-                                <span><MapPin size={14} /> {formData.city}</span>
-                                <span><Calendar size={14} /> Joined {new Date(formData.joiningDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</span>
+                            <p className="tp__role">{trainer.role} • {trainer.department}</p>
+                            <div className="tp__meta">
+                                <span><Mail size={12} /> {trainer.email}</span>
+                                <span><Phone size={12} /> {trainer.phone}</span>
+                                <span><MapPin size={12} /> Mumbai</span>
                             </div>
-                            <div className="trainer-profile-v2__rating">
-                                <div className="trainer-profile-v2__stars">
-                                    {[1,2,3,4,5].map(i => (
-                                        <Star key={i} size={16} fill="#FBBF24" color="#FBBF24" />
-                                    ))}
-                                </div>
-                                <span className="trainer-profile-v2__rating-text">4.9/5.0</span>
-                                <span className="trainer-profile-v2__rating-count">(127 reviews)</span>
+                        </div>
+                        <div className="tp__rating-box">
+                            <div className="tp__rating-stars">
+                                {[1,2,3,4,5].map(i => <Star key={i} size={14} fill="#FBBF24" color="#FBBF24" />)}
                             </div>
+                            <span className="tp__rating-value">{stats.rating}</span>
+                            <span className="tp__rating-count">{stats.reviews} reviews</span>
                         </div>
                     </div>
-
-                    <div className="trainer-profile-v2__header-actions">
+                    <div className="tp__header-actions">
                         {!isEditing ? (
-                            <button 
-                                className="trainer-profile-v2__edit-btn"
-                                onClick={() => setIsEditing(true)}
-                            >
-                                <Edit3 size={16} />
-                                Edit Profile
+                            <button className="tp__btn tp__btn--edit" onClick={() => setIsEditing(true)}>
+                                <Edit3 size={14} /> Edit
                             </button>
                         ) : (
-                            <div className="trainer-profile-v2__edit-actions">
-                                <button 
-                                    className="trainer-profile-v2__cancel-btn"
-                                    onClick={() => setIsEditing(false)}
-                                >
-                                    Cancel
-                                </button>
-                                <button 
-                                    className="trainer-profile-v2__save-btn"
-                                    onClick={handleSave}
-                                >
-                                    <Save size={16} />
-                                    Save Changes
-                                </button>
-                            </div>
+                            <>
+                                <button className="tp__btn tp__btn--cancel" onClick={() => setIsEditing(false)}>Cancel</button>
+                                <button className="tp__btn tp__btn--save" onClick={handleSave}><Save size={14} /> Save</button>
+                            </>
                         )}
                     </div>
                 </div>
             </div>
 
-            <div className="trainer-profile-v2__stats">
-                {stats.map((stat, idx) => (
-                    <div key={idx} className="trainer-profile-v2__stat-card">
-                        <div className="trainer-profile-v2__stat-icon" style={{ background: `${stat.color}15`, color: stat.color }}>
-                            <stat.icon size={20} />
-                        </div>
-                        <div className="trainer-profile-v2__stat-content">
-                            <span className="trainer-profile-v2__stat-value">{stat.value}</span>
-                            <span className="trainer-profile-v2__stat-label">{stat.label}</span>
-                            <span className="trainer-profile-v2__stat-trend">{stat.trend}</span>
-                        </div>
-                    </div>
-                ))}
-            </div>
-
-            <div className="trainer-profile-v2__body">
-                <div className="trainer-profile-v2__tabs-wrapper">
-                    <div className="trainer-profile-v2__tabs">
-                        {tabs.map((tab) => (
-                            <button
-                                key={tab.id}
-                                onClick={() => setActiveTab(tab.id)}
-                                className={`trainer-profile-v2__tab ${activeTab === tab.id ? 'trainer-profile-v2__tab--active' : ''}`}
-                            >
-                                <tab.icon size={16} />
-                                <span>{tab.label}</span>
-                            </button>
-                        ))}
+            <div className="tp__stats-row">
+                <div className="tp__stat">
+                    <Users size={16} className="tp__stat-icon tp__stat-icon--blue" />
+                    <div className="tp__stat-data">
+                        <span className="tp__stat-value">{stats.activeMembers}<small>/{stats.totalMembers}</small></span>
+                        <span className="tp__stat-label">Members</span>
                     </div>
                 </div>
+                <div className="tp__stat">
+                    <Calendar size={16} className="tp__stat-icon tp__stat-icon--green" />
+                    <div className="tp__stat-data">
+                        <span className="tp__stat-value">{stats.sessionsMonth}</span>
+                        <span className="tp__stat-label">Sessions/Mo</span>
+                    </div>
+                </div>
+                <div className="tp__stat">
+                    <Activity size={16} className="tp__stat-icon tp__stat-icon--yellow" />
+                    <div className="tp__stat-data">
+                        <span className="tp__stat-value">{stats.attendance}%</span>
+                        <span className="tp__stat-label">Attendance</span>
+                    </div>
+                </div>
+                <div className="tp__stat">
+                    <Briefcase size={16} className="tp__stat-icon tp__stat-icon--purple" />
+                    <div className="tp__stat-data">
+                        <span className="tp__stat-value">{stats.experience}</span>
+                        <span className="tp__stat-label">Experience</span>
+                    </div>
+                </div>
+                <div className="tp__stat">
+                    <CreditCard size={16} className="tp__stat-icon tp__stat-icon--red" />
+                    <div className="tp__stat-data">
+                        <span className="tp__stat-value">{stats.earnings}</span>
+                        <span className="tp__stat-label">This Month</span>
+                    </div>
+                </div>
+            </div>
 
-                <div className="trainer-profile-v2__content">
+            <div className="tp__body">
+                <div className="tp__tabs">
+                    {tabs.map(tab => (
+                        <button
+                            key={tab.id}
+                            className={`tp__tab ${activeTab === tab.id ? 'tp__tab--active' : ''}`}
+                            onClick={() => setActiveTab(tab.id)}
+                        >
+                            <tab.icon size={14} />
+                            <span>{tab.label}</span>
+                        </button>
+                    ))}
+                </div>
+
+                <div className="tp__content">
                     {activeTab === 'overview' && (
-                        <div className="trainer-profile-v2__overview">
-                            <div className="trainer-profile-v2__overview-main">
-                                <div className="profile-card">
-                                    <div className="profile-card__header">
-                                        <h3><User size={18} /> Personal Information</h3>
+                        <div className="tp__grid tp__grid--overview">
+                            <div className="tp__col tp__col--main">
+                                <div className="tp__card">
+                                    <h3 className="tp__card-title"><User size={14} /> Personal Details</h3>
+                                    <div className="tp__info-grid tp__info-grid--3">
+                                        <div className="tp__info"><label>Employee ID</label><span>{trainer.employeeId}</span></div>
+                                        <div className="tp__info"><label>Date of Birth</label><span>{trainer.dob}</span></div>
+                                        <div className="tp__info"><label>Gender</label><span>{trainer.gender}</span></div>
+                                        <div className="tp__info"><label>Blood Type</label><span className="tp__badge tp__badge--red">{trainer.bloodType}</span></div>
+                                        <div className="tp__info"><label>Languages</label><span>{trainer.languages.join(', ')}</span></div>
+                                        <div className="tp__info"><label>Alt. Phone</label><span>{trainer.altPhone}</span></div>
                                     </div>
-                                    <div className="profile-card__body">
-                                        <div className="profile-info-grid">
-                                            <div className="profile-info-item">
-                                                <label>Full Name</label>
-                                                <span>{formData.fullName}</span>
-                                            </div>
-                                            <div className="profile-info-item">
-                                                <label>Employee ID</label>
-                                                <span>{formData.employeeId}</span>
-                                            </div>
-                                            <div className="profile-info-item">
-                                                <label>Date of Birth</label>
-                                                <span>{new Date(formData.dob).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
-                                            </div>
-                                            <div className="profile-info-item">
-                                                <label>Gender</label>
-                                                <span>{formData.gender}</span>
-                                            </div>
-                                            <div className="profile-info-item">
-                                                <label>Blood Type</label>
-                                                <span className="profile-info-item__badge">{formData.bloodType}</span>
-                                            </div>
-                                            <div className="profile-info-item">
-                                                <label>Languages</label>
-                                                <span>{formData.languages.join(', ')}</span>
-                                            </div>
-                                        </div>
+                                    <div className="tp__info tp__info--full">
+                                        <label>Address</label><span>{trainer.address}</span>
                                     </div>
                                 </div>
 
-                                <div className="profile-card">
-                                    <div className="profile-card__header">
-                                        <h3><Phone size={18} /> Contact Information</h3>
-                                    </div>
-                                    <div className="profile-card__body">
-                                        <div className="profile-info-grid">
-                                            <div className="profile-info-item">
-                                                <label><Mail size={14} /> Email</label>
-                                                <span>{formData.email}</span>
-                                            </div>
-                                            <div className="profile-info-item">
-                                                <label><Phone size={14} /> Phone</label>
-                                                <span>{formData.phone}</span>
-                                            </div>
-                                            <div className="profile-info-item profile-info-item--full">
-                                                <label><MapPin size={14} /> Address</label>
-                                                <span>{formData.address}, {formData.city}, {formData.state} - {formData.pincode}</span>
-                                            </div>
-                                        </div>
-                                        <div className="profile-card__divider" />
-                                        <h4 className="profile-card__subtitle">Emergency Contact</h4>
-                                        <div className="profile-info-grid">
-                                            <div className="profile-info-item">
-                                                <label>Name</label>
-                                                <span>{formData.emergencyContact} ({formData.emergencyRelation})</span>
-                                            </div>
-                                            <div className="profile-info-item">
-                                                <label>Phone</label>
-                                                <span>{formData.emergencyPhone}</span>
-                                            </div>
-                                        </div>
+                                <div className="tp__card">
+                                    <h3 className="tp__card-title"><Heart size={14} /> Emergency Contact</h3>
+                                    <div className="tp__info-grid tp__info-grid--2">
+                                        <div className="tp__info"><label>Contact</label><span>{trainer.emergencyName}</span></div>
+                                        <div className="tp__info"><label>Phone</label><span>{trainer.emergencyPhone}</span></div>
                                     </div>
                                 </div>
 
-                                <div className="profile-card">
-                                    <div className="profile-card__header">
-                                        <h3><FileText size={18} /> Bio</h3>
+                                <div className="tp__card">
+                                    <h3 className="tp__card-title"><Dumbbell size={14} /> Specializations</h3>
+                                    <div className="tp__tags">
+                                        {trainer.specializations.map((s, i) => (
+                                            <span key={i} className="tp__tag">{s}</span>
+                                        ))}
                                     </div>
-                                    <div className="profile-card__body">
-                                        <p className="profile-bio">{formData.bio}</p>
-                                        <div className="profile-specializations">
-                                            <label>Specializations</label>
-                                            <div className="profile-tags">
-                                                {formData.specializations.map((spec, idx) => (
-                                                    <span key={idx} className="profile-tag">{spec}</span>
-                                                ))}
+                                    <p className="tp__bio">{trainer.bio}</p>
+                                    <div className="tp__social">
+                                        <a href="#" className="tp__social-link"><Instagram size={14} /> {trainer.instagram}</a>
+                                        <a href="#" className="tp__social-link"><Linkedin size={14} /> {trainer.linkedin}</a>
+                                    </div>
+                                </div>
+
+                                <div className="tp__card">
+                                    <div className="tp__card-header">
+                                        <h3 className="tp__card-title"><Award size={14} /> Certifications</h3>
+                                        <button className="tp__link-btn">Add <Upload size={12} /></button>
+                                    </div>
+                                    <div className="tp__certs">
+                                        {certifications.map((cert, i) => (
+                                            <div key={i} className="tp__cert">
+                                                <div className="tp__cert-icon"><Award size={14} /></div>
+                                                <div className="tp__cert-info">
+                                                    <span className="tp__cert-name">{cert.name}</span>
+                                                    <span className="tp__cert-meta">{cert.issuer} • {cert.year}</span>
+                                                </div>
+                                                <div className="tp__cert-status">
+                                                    <span className={`tp__badge tp__badge--${cert.valid ? 'green' : 'red'}`}>
+                                                        {cert.valid ? <><CheckCircle size={10} /> Valid</> : <><AlertCircle size={10} /> Expired</>}
+                                                    </span>
+                                                    <span className="tp__cert-exp">Exp: {cert.expires}</span>
+                                                </div>
+                                                <button className="tp__icon-btn"><Eye size={12} /></button>
                                             </div>
-                                        </div>
-                                        <div className="profile-social">
-                                            <label>Social Profiles</label>
-                                            <div className="profile-social__links">
-                                                {formData.instagram && (
-                                                    <a href="#" className="profile-social__link">
-                                                        <Instagram size={16} />
-                                                        {formData.instagram}
-                                                    </a>
-                                                )}
-                                                {formData.linkedin && (
-                                                    <a href="#" className="profile-social__link">
-                                                        <Linkedin size={16} />
-                                                        {formData.linkedin}
-                                                    </a>
-                                                )}
-                                            </div>
-                                        </div>
+                                        ))}
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="trainer-profile-v2__overview-sidebar">
-                                <div className="profile-card profile-card--compact">
-                                    <div className="profile-card__header">
-                                        <h3><Medal size={18} /> Recent Achievements</h3>
-                                    </div>
-                                    <div className="profile-card__body">
-                                        <div className="achievements-list">
-                                            {achievements.map((achievement, idx) => (
-                                                <div key={idx} className="achievement-item">
-                                                    <div className="achievement-item__icon">
-                                                        <achievement.icon size={16} />
-                                                    </div>
-                                                    <div className="achievement-item__content">
-                                                        <span className="achievement-item__title">{achievement.title}</span>
-                                                        <span className="achievement-item__desc">{achievement.description}</span>
-                                                    </div>
-                                                    <span className="achievement-item__date">{achievement.date}</span>
+                            <div className="tp__col tp__col--side">
+                                <div className="tp__card tp__card--compact">
+                                    <h3 className="tp__card-title"><Medal size={14} /> Achievements</h3>
+                                    <div className="tp__achievements">
+                                        {achievements.map((a, i) => (
+                                            <div key={i} className="tp__achievement">
+                                                <a.icon size={14} className="tp__achievement-icon" />
+                                                <div>
+                                                    <span className="tp__achievement-title">{a.title}</span>
+                                                    <span className="tp__achievement-desc">{a.desc}</span>
                                                 </div>
-                                            ))}
-                                        </div>
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
 
-                                <div className="profile-card profile-card--compact">
-                                    <div className="profile-card__header">
-                                        <h3><History size={18} /> Recent Activity</h3>
-                                    </div>
-                                    <div className="profile-card__body">
-                                        <div className="activity-list">
-                                            {recentActivity.map((item, idx) => (
-                                                <div key={idx} className="activity-item">
-                                                    <div className={`activity-item__dot activity-item__dot--${item.type}`} />
-                                                    <div className="activity-item__content">
-                                                        <span className="activity-item__action">{item.action}</span>
-                                                        <span className="activity-item__client">{item.client}</span>
-                                                    </div>
-                                                    <span className="activity-item__time">{item.time}</span>
+                                <div className="tp__card tp__card--compact">
+                                    <h3 className="tp__card-title"><History size={14} /> Recent Activity</h3>
+                                    <div className="tp__activities">
+                                        {recentActivity.map((a, i) => (
+                                            <div key={i} className="tp__activity">
+                                                <span className={`tp__activity-dot tp__activity-dot--${a.type}`} />
+                                                <div>
+                                                    <span className="tp__activity-action">{a.action}</span>
+                                                    <span className="tp__activity-with">{a.with}</span>
                                                 </div>
-                                            ))}
-                                        </div>
+                                                <span className="tp__activity-time">{a.time}</span>
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
 
-                                <div className="profile-card profile-card--compact">
-                                    <div className="profile-card__header">
-                                        <h3><Award size={18} /> Top Certifications</h3>
+                                <div className="tp__card tp__card--compact">
+                                    <h3 className="tp__card-title"><Clock size={14} /> Weekly Schedule</h3>
+                                    <div className="tp__schedule">
+                                        {schedule.map((s, i) => (
+                                            <div key={i} className={`tp__schedule-day ${s.sessions === 0 ? 'tp__schedule-day--off' : ''}`}>
+                                                <span className="tp__schedule-name">{s.day}</span>
+                                                <span className="tp__schedule-hours">{s.hours}</span>
+                                                <span className="tp__schedule-sessions">{s.sessions > 0 ? `${s.sessions}s` : '-'}</span>
+                                            </div>
+                                        ))}
                                     </div>
-                                    <div className="profile-card__body">
-                                        <div className="cert-preview-list">
-                                            {formData.certifications.slice(0, 3).map((cert, idx) => (
-                                                <div key={idx} className="cert-preview-item">
-                                                    <CheckCircle size={14} className="cert-preview-item__icon" />
-                                                    <span className="cert-preview-item__name">{cert.name}</span>
-                                                </div>
-                                            ))}
-                                            <button className="cert-preview-more" onClick={() => setActiveTab('certifications')}>
-                                                View all certifications
-                                            </button>
-                                        </div>
+                                    <div className="tp__schedule-summary">
+                                        <span>48 hrs/week</span>
+                                        <span>29 sessions</span>
+                                        <span>6 days</span>
                                     </div>
                                 </div>
                             </div>
@@ -380,312 +329,155 @@ const TrainerProfile: React.FC = () => {
                     )}
 
                     {activeTab === 'professional' && (
-                        <div className="trainer-profile-v2__professional">
-                            <div className="profile-card">
-                                <div className="profile-card__header">
-                                    <h3><Briefcase size={18} /> Employment Details</h3>
-                                </div>
-                                <div className="profile-card__body">
-                                    <div className="profile-info-grid profile-info-grid--3col">
-                                        <div className="profile-info-item">
-                                            <label>Employee ID</label>
-                                            <span>{formData.employeeId}</span>
-                                        </div>
-                                        <div className="profile-info-item">
-                                            <label>Department</label>
-                                            <span>{formData.department}</span>
-                                        </div>
-                                        <div className="profile-info-item">
-                                            <label>Designation</label>
-                                            <span>Senior Personal Trainer</span>
-                                        </div>
-                                        <div className="profile-info-item">
-                                            <label>Joining Date</label>
-                                            <span>{new Date(formData.joiningDate).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
-                                        </div>
-                                        <div className="profile-info-item">
-                                            <label>Reporting To</label>
-                                            <span>{formData.reportingTo}</span>
-                                        </div>
-                                        <div className="profile-info-item">
-                                            <label>Work Shift</label>
-                                            <span>{formData.workShift}</span>
-                                        </div>
-                                    </div>
+                        <div className="tp__grid tp__grid--2col">
+                            <div className="tp__card">
+                                <h3 className="tp__card-title"><Briefcase size={14} /> Employment Details</h3>
+                                <div className="tp__info-grid tp__info-grid--2">
+                                    <div className="tp__info"><label>Employee ID</label><span>{trainer.employeeId}</span></div>
+                                    <div className="tp__info"><label>Department</label><span>{trainer.department}</span></div>
+                                    <div className="tp__info"><label>Designation</label><span>{trainer.role}</span></div>
+                                    <div className="tp__info"><label>Joining Date</label><span>{trainer.joiningDate}</span></div>
+                                    <div className="tp__info"><label>Reporting To</label><span>{trainer.reportingTo}</span></div>
+                                    <div className="tp__info"><label>Work Shift</label><span>{trainer.shift}</span></div>
                                 </div>
                             </div>
 
-                            <div className="profile-card">
-                                <div className="profile-card__header">
-                                    <h3><Dumbbell size={18} /> Specializations & Skills</h3>
-                                </div>
-                                <div className="profile-card__body">
-                                    <div className="specializations-grid">
-                                        {formData.specializations.map((spec, idx) => (
-                                            <div key={idx} className="specialization-card">
-                                                <Zap size={16} />
-                                                <span>{spec}</span>
-                                            </div>
-                                        ))}
-                                    </div>
+                            <div className="tp__card">
+                                <h3 className="tp__card-title"><CreditCard size={14} /> Payment Details</h3>
+                                <div className="tp__info-grid tp__info-grid--2">
+                                    <div className="tp__info"><label>Bank</label><span>{trainer.bankName}</span></div>
+                                    <div className="tp__info"><label>Account</label><span>{trainer.accountNo}</span></div>
+                                    <div className="tp__info"><label>IFSC</label><span>{trainer.ifsc}</span></div>
+                                    <div className="tp__info"><label>Monthly Earnings</label><span className="tp__value--highlight">{stats.earnings}</span></div>
                                 </div>
                             </div>
 
-                            <div className="profile-card">
-                                <div className="profile-card__header">
-                                    <h3><CreditCard size={18} /> Payment Information</h3>
+                            <div className="tp__card tp__card--full">
+                                <div className="tp__card-header">
+                                    <h3 className="tp__card-title"><FileText size={14} /> Documents</h3>
+                                    <button className="tp__link-btn">Upload <Upload size={12} /></button>
                                 </div>
-                                <div className="profile-card__body">
-                                    <div className="profile-info-grid profile-info-grid--3col">
-                                        <div className="profile-info-item">
-                                            <label>Bank Name</label>
-                                            <span>{formData.bankName}</span>
+                                <div className="tp__docs">
+                                    {documents.map((doc, i) => (
+                                        <div key={i} className="tp__doc">
+                                            <FileText size={14} className="tp__doc-icon" />
+                                            <span className="tp__doc-name">{doc.name}</span>
+                                            <span className="tp__badge tp__badge--green"><CheckCircle size={10} /> Verified</span>
+                                            <button className="tp__icon-btn"><Download size={12} /></button>
                                         </div>
-                                        <div className="profile-info-item">
-                                            <label>Account Number</label>
-                                            <span>{formData.accountNumber}</span>
-                                        </div>
-                                        <div className="profile-info-item">
-                                            <label>IFSC Code</label>
-                                            <span>{formData.ifscCode}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {activeTab === 'certifications' && (
-                        <div className="trainer-profile-v2__certifications">
-                            <div className="certifications-header">
-                                <h3>My Certifications</h3>
-                                <button className="certifications-add-btn">
-                                    <Upload size={16} />
-                                    Add Certificate
-                                </button>
-                            </div>
-                            <div className="certifications-grid">
-                                {formData.certifications.map((cert, idx) => (
-                                    <div key={idx} className="certification-card">
-                                        <div className="certification-card__header">
-                                            <div className="certification-card__icon">
-                                                <Award size={24} />
-                                            </div>
-                                            <div className={`certification-card__status ${cert.valid ? 'certification-card__status--valid' : 'certification-card__status--expired'}`}>
-                                                {cert.valid ? (
-                                                    <><CheckCircle size={12} /> Valid</>
-                                                ) : (
-                                                    <><AlertCircle size={12} /> Expired</>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <div className="certification-card__body">
-                                            <h4>{cert.name}</h4>
-                                            <p className="certification-card__issuer">{cert.issuer}</p>
-                                            <p className="certification-card__date">Issued: {cert.date}</p>
-                                        </div>
-                                        <div className="certification-card__actions">
-                                            <button className="certification-card__btn">View</button>
-                                            <button className="certification-card__btn">Download</button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    {activeTab === 'schedule' && (
-                        <div className="trainer-profile-v2__schedule">
-                            <div className="profile-card">
-                                <div className="profile-card__header">
-                                    <h3><Clock size={18} /> Weekly Schedule</h3>
-                                </div>
-                                <div className="profile-card__body">
-                                    <div className="schedule-table">
-                                        <div className="schedule-table__header">
-                                            <span>Day</span>
-                                            <span>Shift</span>
-                                            <span>Sessions</span>
-                                            <span>Status</span>
-                                        </div>
-                                        {weeklySchedule.map((day, idx) => (
-                                            <div key={idx} className={`schedule-table__row ${day.status === 'off' ? 'schedule-table__row--off' : ''}`}>
-                                                <span className="schedule-table__day">{day.day}</span>
-                                                <span className="schedule-table__shift">{day.shift}</span>
-                                                <span className="schedule-table__sessions">
-                                                    {day.sessions > 0 ? `${day.sessions} sessions` : '-'}
-                                                </span>
-                                                <span className={`schedule-table__status schedule-table__status--${day.status}`}>
-                                                    {day.status === 'active' ? 'Working' : 'Day Off'}
-                                                </span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="schedule-summary">
-                                <div className="schedule-summary__item">
-                                    <span className="schedule-summary__value">48</span>
-                                    <span className="schedule-summary__label">Hours/Week</span>
-                                </div>
-                                <div className="schedule-summary__item">
-                                    <span className="schedule-summary__value">29</span>
-                                    <span className="schedule-summary__label">Sessions/Week</span>
-                                </div>
-                                <div className="schedule-summary__item">
-                                    <span className="schedule-summary__value">6</span>
-                                    <span className="schedule-summary__label">Working Days</span>
+                                    ))}
                                 </div>
                             </div>
                         </div>
                     )}
 
                     {activeTab === 'performance' && (
-                        <div className="trainer-profile-v2__performance">
-                            <div className="performance-metrics-grid">
-                                {performanceMetrics.map((metric, idx) => (
-                                    <div key={idx} className="performance-metric-card">
-                                        <div className="performance-metric-card__header">
-                                            <span className="performance-metric-card__label">{metric.label}</span>
-                                            <span className={`performance-metric-card__value ${metric.value >= metric.target ? 'performance-metric-card__value--good' : ''}`}>
-                                                {metric.value}{metric.unit}
-                                            </span>
+                        <div className="tp__grid tp__grid--2col">
+                            <div className="tp__card">
+                                <h3 className="tp__card-title"><Target size={14} /> Performance Metrics</h3>
+                                <div className="tp__metrics">
+                                    {performance.map((p, i) => (
+                                        <div key={i} className="tp__metric">
+                                            <div className="tp__metric-header">
+                                                <span className="tp__metric-label">{p.label}</span>
+                                                <span className={`tp__metric-value ${p.value >= p.target ? 'tp__metric-value--good' : ''}`}>{p.value}%</span>
+                                            </div>
+                                            <div className="tp__metric-bar">
+                                                <div className={`tp__metric-fill ${p.value >= p.target ? 'tp__metric-fill--good' : ''}`} style={{ width: `${p.value}%` }} />
+                                                <div className="tp__metric-target" style={{ left: `${p.target}%` }} />
+                                            </div>
+                                            <span className="tp__metric-target-text">Target: {p.target}%</span>
                                         </div>
-                                        <div className="performance-metric-card__bar">
-                                            <div 
-                                                className={`performance-metric-card__fill ${metric.value >= metric.target ? 'performance-metric-card__fill--good' : ''}`}
-                                                style={{ width: `${Math.min(metric.value, 100)}%` }}
-                                            />
-                                            <div 
-                                                className="performance-metric-card__target" 
-                                                style={{ left: `${metric.target}%` }}
-                                            />
-                                        </div>
-                                        <span className="performance-metric-card__target-label">Target: {metric.target}{metric.unit}</span>
-                                    </div>
-                                ))}
-                            </div>
-
-                            <div className="profile-card">
-                                <div className="profile-card__header">
-                                    <h3><TrendingUp size={18} /> Monthly Summary</h3>
-                                </div>
-                                <div className="profile-card__body">
-                                    <div className="monthly-summary-grid">
-                                        <div className="monthly-summary-item">
-                                            <span className="monthly-summary-item__value">86</span>
-                                            <span className="monthly-summary-item__label">Total Sessions</span>
-                                        </div>
-                                        <div className="monthly-summary-item">
-                                            <span className="monthly-summary-item__value">₹48,500</span>
-                                            <span className="monthly-summary-item__label">Earnings</span>
-                                        </div>
-                                        <div className="monthly-summary-item">
-                                            <span className="monthly-summary-item__value">24</span>
-                                            <span className="monthly-summary-item__label">Active Clients</span>
-                                        </div>
-                                        <div className="monthly-summary-item">
-                                            <span className="monthly-summary-item__value">3</span>
-                                            <span className="monthly-summary-item__label">New Clients</span>
-                                        </div>
-                                    </div>
+                                    ))}
                                 </div>
                             </div>
-                        </div>
-                    )}
 
-                    {activeTab === 'documents' && (
-                        <div className="trainer-profile-v2__documents">
-                            <div className="documents-grid">
-                                <div className="document-card">
-                                    <div className="document-card__icon document-card__icon--id">
-                                        <User size={24} />
+                            <div className="tp__card">
+                                <h3 className="tp__card-title"><TrendingUp size={14} /> Monthly Summary</h3>
+                                <div className="tp__summary-grid">
+                                    <div className="tp__summary-item">
+                                        <span className="tp__summary-value">86</span>
+                                        <span className="tp__summary-label">Total Sessions</span>
                                     </div>
-                                    <div className="document-card__info">
-                                        <h4>ID Proof</h4>
-                                        <p>Aadhar Card</p>
+                                    <div className="tp__summary-item">
+                                        <span className="tp__summary-value">{stats.earnings}</span>
+                                        <span className="tp__summary-label">Earnings</span>
                                     </div>
-                                    <span className="document-card__status document-card__status--verified">
-                                        <CheckCircle size={14} /> Verified
-                                    </span>
+                                    <div className="tp__summary-item">
+                                        <span className="tp__summary-value">{stats.activeMembers}</span>
+                                        <span className="tp__summary-label">Active Clients</span>
+                                    </div>
+                                    <div className="tp__summary-item">
+                                        <span className="tp__summary-value">3</span>
+                                        <span className="tp__summary-label">New Clients</span>
+                                    </div>
+                                    <div className="tp__summary-item">
+                                        <span className="tp__summary-value">4.9</span>
+                                        <span className="tp__summary-label">Avg Rating</span>
+                                    </div>
+                                    <div className="tp__summary-item">
+                                        <span className="tp__summary-value">12</span>
+                                        <span className="tp__summary-label">New Reviews</span>
+                                    </div>
                                 </div>
-                                <div className="document-card">
-                                    <div className="document-card__icon document-card__icon--address">
-                                        <MapPin size={24} />
-                                    </div>
-                                    <div className="document-card__info">
-                                        <h4>Address Proof</h4>
-                                        <p>Utility Bill</p>
-                                    </div>
-                                    <span className="document-card__status document-card__status--verified">
-                                        <CheckCircle size={14} /> Verified
-                                    </span>
-                                </div>
-                                <div className="document-card">
-                                    <div className="document-card__icon document-card__icon--education">
-                                        <Award size={24} />
-                                    </div>
-                                    <div className="document-card__info">
-                                        <h4>Education Certificate</h4>
-                                        <p>Sports Science Degree</p>
-                                    </div>
-                                    <span className="document-card__status document-card__status--verified">
-                                        <CheckCircle size={14} /> Verified
-                                    </span>
-                                </div>
-                                <div className="document-card document-card--upload">
-                                    <Upload size={24} />
-                                    <span>Upload Document</span>
+                            </div>
+
+                            <div className="tp__card tp__card--full">
+                                <h3 className="tp__card-title"><Medal size={14} /> All Achievements</h3>
+                                <div className="tp__achievements-grid">
+                                    {achievements.map((a, i) => (
+                                        <div key={i} className="tp__achievement-card">
+                                            <a.icon size={20} className="tp__achievement-card-icon" />
+                                            <span className="tp__achievement-card-title">{a.title}</span>
+                                            <span className="tp__achievement-card-desc">{a.desc}</span>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         </div>
                     )}
 
                     {activeTab === 'security' && (
-                        <div className="trainer-profile-v2__security">
-                            <div className="security-item">
-                                <div className="security-item__icon">
-                                    <Key size={20} />
-                                </div>
-                                <div className="security-item__content">
+                        <div className="tp__security">
+                            <div className="tp__security-item">
+                                <div className="tp__security-icon"><Key size={16} /></div>
+                                <div className="tp__security-content">
                                     <h4>Password</h4>
                                     <p>Last changed 30 days ago</p>
                                 </div>
-                                <button className="security-item__btn">Change Password</button>
+                                <button className="tp__btn tp__btn--outline">Change</button>
                             </div>
-
-                            <div className="security-item">
-                                <div className="security-item__icon security-item__icon--success">
-                                    <Shield size={20} />
-                                </div>
-                                <div className="security-item__content">
+                            <div className="tp__security-item tp__security-item--success">
+                                <div className="tp__security-icon tp__security-icon--green"><Shield size={16} /></div>
+                                <div className="tp__security-content">
                                     <h4>Two-Factor Authentication</h4>
-                                    <p className="security-item__status--success">Enabled via Authenticator App</p>
+                                    <p className="tp__text--green">Enabled via Authenticator App</p>
                                 </div>
-                                <button className="security-item__btn">Manage</button>
+                                <button className="tp__btn tp__btn--outline">Manage</button>
                             </div>
-
-                            <div className="security-item">
-                                <div className="security-item__icon">
-                                    <Activity size={20} />
+                            <div className="tp__security-item">
+                                <div className="tp__security-icon"><Smartphone size={16} /></div>
+                                <div className="tp__security-content">
+                                    <h4>Active Sessions</h4>
+                                    <p>2 devices logged in</p>
                                 </div>
-                                <div className="security-item__content">
+                                <button className="tp__btn tp__btn--outline tp__btn--danger">Sign Out All</button>
+                            </div>
+                            <div className="tp__security-item">
+                                <div className="tp__security-icon"><Activity size={16} /></div>
+                                <div className="tp__security-content">
                                     <h4>Login Activity</h4>
                                     <p>Last login: Today at 6:15 AM from Mumbai</p>
                                 </div>
-                                <button className="security-item__btn">View History</button>
+                                <button className="tp__btn tp__btn--outline">View History</button>
                             </div>
-
-                            <div className="security-item">
-                                <div className="security-item__icon">
-                                    <Globe size={20} />
+                            <div className="tp__security-item">
+                                <div className="tp__security-icon"><Lock size={16} /></div>
+                                <div className="tp__security-content">
+                                    <h4>Privacy Settings</h4>
+                                    <p>Profile visible to gym management only</p>
                                 </div>
-                                <div className="security-item__content">
-                                    <h4>Active Sessions</h4>
-                                    <p>2 devices currently logged in</p>
-                                </div>
-                                <button className="security-item__btn security-item__btn--danger">Sign Out All</button>
+                                <button className="tp__btn tp__btn--outline">Configure</button>
                             </div>
                         </div>
                     )}
