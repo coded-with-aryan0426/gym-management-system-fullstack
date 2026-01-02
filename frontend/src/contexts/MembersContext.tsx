@@ -11,6 +11,8 @@ interface MembersContextType {
         active: number;
         inactive: number;
         todaysJoins: number;
+        expiringSoon: number;
+        newThisMonth: number;
     };
 }
 
@@ -44,13 +46,9 @@ export const MembersProvider: React.FC<{ children: ReactNode }> = ({ children })
 
     const stats = useMemo(() => {
         const total = members.length;
-        // Ensure case-insensitive or standardized check if needed. 
-        // Assuming backend returns "Active" or "ACTIVE". We check "Active" based on typical frontend enum.
-        // Robust Case-Insensitive Check
         const active = members.filter(m => (m.status || '').toUpperCase() === 'ACTIVE').length;
         const inactive = total - active;
 
-        // Calculate Today's Joins
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const todaysJoins = members.filter(m => {
@@ -64,7 +62,42 @@ export const MembersProvider: React.FC<{ children: ReactNode }> = ({ children })
             } catch (e) { return false; }
         }).length;
 
-        return { total, active, inactive, todaysJoins };
+        const now = new Date();
+        let expiringSoon = 0;
+        let newThisMonth = 0;
+
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+        members.forEach(m => {
+            if (m.startDate && m.planDuration) {
+                const startDate = new Date(m.startDate);
+                const durationStr = m.planDuration.toLowerCase();
+                let expiryDate = new Date(startDate);
+
+                if (durationStr.includes('year')) {
+                    const years = parseInt(durationStr) || 1;
+                    expiryDate.setMonth(expiryDate.getMonth() + years * 12);
+                } else if (durationStr.includes('month')) {
+                    const months = parseInt(durationStr) || 1;
+                    expiryDate.setMonth(expiryDate.getMonth() + months);
+                } else if (durationStr.includes('day')) {
+                    const days = parseInt(durationStr) || 30;
+                    expiryDate.setDate(expiryDate.getDate() + days);
+                }
+
+                const daysUntilExpiry = Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+                
+                if (daysUntilExpiry > 0 && daysUntilExpiry <= 7) {
+                    expiringSoon++;
+                }
+
+                if (startDate >= monthStart) {
+                    newThisMonth++;
+                }
+            }
+        });
+
+        return { total, active, inactive, todaysJoins, expiringSoon, newThisMonth };
     }, [members]);
 
     return (

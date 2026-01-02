@@ -713,3 +713,29 @@
 :root.theme-light .utility-stat__divider {
   background: rgba(0, 0, 0, 0.08);
 }
+
+/* ============================================
+   ENHANCED STATS RESPONSIVE
+   ============================================ */
+@media (max-width: 1024px) {
+  .utility-bar__stats-enhanced {
+    display: none;
+  }
+}
+
+:root.theme-light .utility-bar__stats-enhanced {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.06) 0%, rgba(16, 185, 129, 0.04) 100%);
+  border-color: rgba(99, 102, 241, 0.1);
+}
+
+:root.theme-light .utility-bar__progress {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+:root.theme-light .utility-progress__bar {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+:root.theme-light .utility-metric:hover {
+  background: rgba(0, 0, 0, 0.04);
+}

@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useEffect, useState, useMemo, useCallback, useRef } from "react"
-import { FiFilter, FiSearch, FiUsers, FiUserCheck, FiUserX, FiAlertTriangle, FiTrendingUp, FiCalendar, FiClock } from "react-icons/fi"
+import { FiFilter } from "react-icons/fi"
 import { toast } from "react-hot-toast"
 import { useSearchParams } from "react-router-dom"
 import { Button, Badge, getStatusVariant, Avatar, DataTable, CreateUserModal, type Column } from "../../components"
@@ -147,55 +147,7 @@ const Members: React.FC = () => {
     if (filters.expiryStatus) count++
     if (filters.joinedPeriod) count++
     return count
-  }, [filters])
-
-  const calculatedStats = useMemo(() => {
-    const now = new Date()
-    let expiringSoon = 0
-    let newThisMonth = 0
-    let expired = 0
-
-    members.forEach(m => {
-      if (m.startDate && m.planDuration) {
-        const startDate = new Date(m.startDate)
-        const durationStr = m.planDuration.toLowerCase()
-        let expiryDate = new Date(startDate)
-
-        if (durationStr.includes('year')) {
-          const years = parseInt(durationStr) || 1
-          expiryDate.setMonth(expiryDate.getMonth() + years * 12)
-        } else if (durationStr.includes('month')) {
-          const months = parseInt(durationStr) || 1
-          expiryDate.setMonth(expiryDate.getMonth() + months)
-        } else if (durationStr.includes('day')) {
-          const days = parseInt(durationStr) || 30
-          expiryDate.setDate(expiryDate.getDate() + days)
-        }
-
-        const daysUntilExpiry = Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-        
-        if (daysUntilExpiry < 0) {
-          expired++
-        } else if (daysUntilExpiry <= 7) {
-          expiringSoon++
-        }
-
-        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
-        if (startDate >= monthStart) {
-          newThisMonth++
-        }
-      }
-    })
-
-    return {
-      total: globalStats.total,
-      active: globalStats.active,
-      inactive: globalStats.inactive || (globalStats.total - globalStats.active),
-      expiringSoon,
-      newThisMonth,
-      expired
-    }
-  }, [globalStats, members])
+    }, [filters])
 
   const filteredMembers = useMemo(() => {
     let result = members
@@ -582,61 +534,7 @@ const Members: React.FC = () => {
         </div>
       </div>
 
-      <div className="members-stats-row">
-        <div className="member-stat-card member-stat-card--total">
-          <div className="member-stat-card__icon">
-            <FiUsers />
-          </div>
-          <div className="member-stat-card__content">
-            <span className="member-stat-card__value">{calculatedStats.total}</span>
-            <span className="member-stat-card__label">Total Members</span>
-          </div>
-        </div>
 
-        <div className="member-stat-card member-stat-card--active">
-          <div className="member-stat-card__icon">
-            <FiUserCheck />
-          </div>
-          <div className="member-stat-card__content">
-            <span className="member-stat-card__value">{calculatedStats.active}</span>
-            <span className="member-stat-card__label">Active</span>
-          </div>
-          <div className="member-stat-card__percent">
-            {calculatedStats.total > 0 ? Math.round((calculatedStats.active / calculatedStats.total) * 100) : 0}%
-          </div>
-        </div>
-
-        <div className="member-stat-card member-stat-card--expiring" onClick={() => setFilters(prev => ({ ...prev, expiryStatus: 'expiring-soon' }))}>
-          <div className="member-stat-card__icon">
-            <FiAlertTriangle />
-          </div>
-          <div className="member-stat-card__content">
-            <span className="member-stat-card__value">{calculatedStats.expiringSoon}</span>
-            <span className="member-stat-card__label">Expiring Soon</span>
-          </div>
-          <span className="member-stat-card__hint">Next 7 days</span>
-        </div>
-
-        <div className="member-stat-card member-stat-card--new" onClick={() => setFilters(prev => ({ ...prev, joinedPeriod: 'this-month' }))}>
-          <div className="member-stat-card__icon">
-            <FiTrendingUp />
-          </div>
-          <div className="member-stat-card__content">
-            <span className="member-stat-card__value">{calculatedStats.newThisMonth}</span>
-            <span className="member-stat-card__label">New This Month</span>
-          </div>
-        </div>
-
-        <div className="member-stat-card member-stat-card--expired" onClick={() => setFilters(prev => ({ ...prev, expiryStatus: 'already-expired' }))}>
-          <div className="member-stat-card__icon">
-            <FiUserX />
-          </div>
-          <div className="member-stat-card__content">
-            <span className="member-stat-card__value">{calculatedStats.expired}</span>
-            <span className="member-stat-card__label">Expired</span>
-          </div>
-        </div>
-      </div>
 
       {activeFilterCount > 0 && (
         <div className="members-active-filters">
