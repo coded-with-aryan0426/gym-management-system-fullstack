@@ -4,7 +4,7 @@
    ============================================================================ */
 
 :root {
-  --sidebar-width: 180px;
+  --sidebar-width: 120px;
   --sidebar-collapsed: 56px;
   --utility-bar-height: 48px;
 }
