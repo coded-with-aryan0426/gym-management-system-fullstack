@@ -205,17 +205,32 @@
   padding: 8px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 6px;
   border-top: 1px solid var(--sidebar-border);
+}
+
+/* Settings link in footer - uniform button style */
+.command-rail__footer .command-rail__link {
+  height: 40px;
+  width: 100%;
+  padding: 0;
+  justify-content: center;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--sidebar-border);
+}
+
+.command-rail__footer .command-rail__link:hover {
+  background: var(--sidebar-hover);
 }
 
 .command-rail__toggle {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  height: 36px;
-  padding: 0 10px;
+  height: 40px;
+  width: 100%;
+  padding: 0;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid var(--sidebar-border);
@@ -225,12 +240,10 @@
   white-space: nowrap;
   transition: all 0.25s ease;
   font-size: 12px;
-  width: 100%;
 }
 
+.command-rail--collapsed .command-rail__footer .command-rail__link,
 .command-rail--collapsed .command-rail__toggle {
-  justify-content: center;
-  padding: 0;
   width: 40px;
   height: 40px;
   margin: 0 auto;
@@ -250,10 +263,6 @@
 
 .command-rail--collapsed .command-rail__toggle-icon {
   transform: rotate(0deg);
-}
-
-.command-rail__toggle .command-rail__label {
-  font-size: 12px;
 }
 
 .command-rail__logout {
