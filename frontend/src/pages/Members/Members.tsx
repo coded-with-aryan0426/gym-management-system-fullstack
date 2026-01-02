@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useEffect, useState, useMemo, useCallback, useRef } from "react"
-import { FiFilter } from "react-icons/fi"
+import { FiFilter, FiSearch, FiPlus, FiDownload, FiUsers, FiUserCheck, FiAlertCircle, FiUserPlus } from "react-icons/fi"
 import { toast } from "react-hot-toast"
 import { useSearchParams } from "react-router-dom"
 import { Button, Badge, getStatusVariant, Avatar, DataTable, CreateUserModal, type Column } from "../../components"
@@ -28,6 +28,48 @@ const Members: React.FC = () => {
   const [selectedMember, setSelectedMember] = useState<MemberDTO | null>(null)
   const [isActionModalOpen, setIsActionModalOpen] = useState(false)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+
+  const quickStats = useMemo(() => {
+    const now = new Date()
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    
+    const activeCount = members.filter(m => m.status === 'Active').length
+    const expiringSoon = members.filter(m => {
+      const { daysLeft, isExpired } = getExpiryInfo(m)
+      return !isExpired && daysLeft !== null && daysLeft <= 7
+    }).length
+    const newToday = members.filter(m => {
+      if (!m.startDate) return false
+      return new Date(m.startDate) >= todayStart
+    }).length
+    
+    return { total: globalStats?.total || members.length, activeCount, expiringSoon, newToday }
+  }, [members, globalStats])
+
+  const getExpiryInfo = (member: MemberDTO) => {
+    const startDate = member.startDate ? new Date(member.startDate) : null
+    if (!startDate || !member.planDuration) return { date: null, daysLeft: null, isExpired: false }
+
+    const durationStr = member.planDuration.toLowerCase()
+    let expiryDate = new Date(startDate)
+
+    if (durationStr.includes('year')) {
+      const years = parseInt(durationStr) || 1
+      expiryDate.setMonth(expiryDate.getMonth() + years * 12)
+    } else if (durationStr.includes('month')) {
+      const months = parseInt(durationStr) || 1
+      expiryDate.setMonth(expiryDate.getMonth() + months)
+    } else if (durationStr.includes('day')) {
+      const days = parseInt(durationStr) || 30
+      expiryDate.setDate(expiryDate.getDate() + days)
+    }
+
+    const now = new Date()
+    const daysLeft = Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+    const isExpired = daysLeft < 0
+
+    return { date: expiryDate, daysLeft, isExpired }
+  }
 
   const [currentPage, setCurrentPage] = useState(0)
   const [pageSize, setPageSize] = useState(10)
@@ -267,31 +309,6 @@ const Members: React.FC = () => {
       expiryStatus: "",
       joinedPeriod: "",
     })
-  }
-
-  const getExpiryInfo = (member: MemberDTO) => {
-    const startDate = member.startDate ? new Date(member.startDate) : null
-    if (!startDate || !member.planDuration) return { date: null, daysLeft: null, isExpired: false }
-
-    const durationStr = member.planDuration.toLowerCase()
-    let expiryDate = new Date(startDate)
-
-    if (durationStr.includes('year')) {
-      const years = parseInt(durationStr) || 1
-      expiryDate.setMonth(expiryDate.getMonth() + years * 12)
-    } else if (durationStr.includes('month')) {
-      const months = parseInt(durationStr) || 1
-      expiryDate.setMonth(expiryDate.getMonth() + months)
-    } else if (durationStr.includes('day')) {
-      const days = parseInt(durationStr) || 30
-      expiryDate.setDate(expiryDate.getDate() + days)
-    }
-
-    const now = new Date()
-    const daysLeft = Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-    const isExpired = daysLeft < 0
-
-    return { date: expiryDate, daysLeft, isExpired }
   }
 
   const columns: Column<MemberDTO>[] = [
