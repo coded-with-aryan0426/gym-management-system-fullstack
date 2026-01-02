@@ -1,5 +1,5 @@
 /* ============================================================================
-   My Members - Compact Design System (Matching Admin Sidebar Style)
+   My Members - Trainer Premium Design
    ============================================================================ */
 
 @import './TrainerTheme.css';
@@ -8,20 +8,18 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 12px 16px;
+  padding: 16px 20px;
   min-height: 100%;
 }
 
 /* ============================================
-   HEADER - Compact
+   HEADER - Inline Layout
    ============================================ */
 .my-members__header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 12px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--sidebar-border, rgba(255, 255, 255, 0.06));
+  flex-wrap: wrap;
 }
 
 .my-members__title-section {
@@ -31,15 +29,11 @@
 }
 
 .my-members__title-section h1 {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 20px;
+  font-weight: 700;
   color: var(--text-primary);
   margin: 0;
   letter-spacing: -0.02em;
-}
-
-.my-members__title-section p {
-  display: none;
 }
 
 .my-members__count-badge {
@@ -48,70 +42,81 @@
   gap: 4px;
   font-size: 10px;
   font-weight: 600;
-  padding: 3px 8px;
-  border-radius: 4px;
+  padding: 4px 10px;
+  border-radius: 6px;
   background: rgba(220, 38, 38, 0.1);
   color: #DC2626;
 }
 
-.my-members__export-btn {
+/* ============================================
+   QUICK FILTERS - Inline Buttons
+   ============================================ */
+.my-members__quick-filters {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.my-members__quick-btn {
   display: flex;
   align-items: center;
   gap: 5px;
+  padding: 6px 12px;
   background: var(--sidebar-bg, rgba(12, 12, 14, 0.95));
   border: 1px solid var(--sidebar-border, rgba(255, 255, 255, 0.06));
+  border-radius: 8px;
   color: var(--text-secondary);
-  padding: 0 10px;
-  border-radius: 6px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.15s ease;
-  height: 30px;
+  white-space: nowrap;
 }
 
-.my-members__export-btn:hover {
+.my-members__quick-btn:hover {
   background: var(--sidebar-hover, rgba(255, 255, 255, 0.06));
   color: var(--text-primary);
 }
 
-/* ============================================
-   CONTENT
-   ============================================ */
-.my-members__content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+.my-members__quick-btn--active {
+  background: rgba(220, 38, 38, 0.1);
+  border-color: rgba(220, 38, 38, 0.3);
+  color: #DC2626;
 }
 
-/* ============================================
-   FILTER BAR - Compact Inline
-   ============================================ */
-.my-members__filter-bar {
-  display: flex;
+.my-members__quick-count {
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 10px 12px;
-  background: var(--sidebar-bg, rgba(12, 12, 14, 0.95));
-  border: 1px solid var(--sidebar-border, rgba(255, 255, 255, 0.06));
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  background: rgba(220, 38, 38, 0.15);
+  color: #DC2626;
   border-radius: 8px;
+  font-size: 10px;
+  font-weight: 600;
 }
 
-.my-members__filters-left {
+.my-members__quick-count--warning {
+  background: rgba(245, 158, 11, 0.15);
+  color: #F59E0B;
+}
+
+/* ============================================
+   SEARCH SECTION - Right Aligned
+   ============================================ */
+.my-members__search-section {
   display: flex;
   align-items: center;
   gap: 8px;
-  flex: 1;
+  margin-left: auto;
 }
 
 .my-members__search {
   position: relative;
   display: flex;
   align-items: center;
-  flex: 1;
-  max-width: 280px;
 }
 
 .my-members__search svg {
@@ -121,13 +126,13 @@
 }
 
 .my-members__search input {
-  width: 100%;
-  height: 32px;
+  width: 200px;
+  height: 36px;
   padding: 6px 12px 6px 32px;
-  background: var(--bg-primary, rgba(0, 0, 0, 0.2));
+  background: var(--sidebar-bg, rgba(12, 12, 14, 0.95));
   border: 1px solid var(--sidebar-border, rgba(255, 255, 255, 0.08));
-  border-radius: 6px;
-  font-size: 12px;
+  border-radius: 10px;
+  font-size: 13px;
   color: var(--text-primary, #fff);
   transition: all 0.15s ease;
 }
@@ -139,7 +144,7 @@
 .my-members__search input:focus {
   outline: none;
   border-color: #DC2626;
-  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.15);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
 }
 
 .my-members__filter-dropdown {
@@ -150,12 +155,12 @@
 
 .my-members__filter-dropdown select {
   appearance: none;
-  height: 32px;
-  padding: 6px 28px 6px 10px;
-  background: var(--bg-primary, rgba(0, 0, 0, 0.2));
+  height: 36px;
+  padding: 6px 28px 6px 12px;
+  background: var(--sidebar-bg, rgba(12, 12, 14, 0.95));
   border: 1px solid var(--sidebar-border, rgba(255, 255, 255, 0.08));
-  border-radius: 6px;
-  font-size: 11px;
+  border-radius: 10px;
+  font-size: 12px;
   color: var(--text-primary, #fff);
   cursor: pointer;
   transition: all 0.15s ease;
@@ -168,32 +173,26 @@
 .my-members__filter-dropdown select:focus {
   outline: none;
   border-color: #DC2626;
-  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.15);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
 }
 
 .my-members__filter-dropdown svg {
   position: absolute;
-  right: 8px;
+  right: 10px;
   pointer-events: none;
   color: var(--text-tertiary, rgba(255, 255, 255, 0.4));
-}
-
-.my-members__filters-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
 }
 
 .my-members__view-toggle {
   display: inline-flex;
   border: 1px solid var(--sidebar-border, rgba(255, 255, 255, 0.08));
-  border-radius: 6px;
+  border-radius: 10px;
   overflow: hidden;
 }
 
 .my-members__view-toggle button {
-  width: 32px;
-  height: 30px;
+  width: 36px;
+  height: 34px;
   padding: 0;
   background: transparent;
   border: none;
@@ -219,8 +218,39 @@
   color: #DC2626;
 }
 
+.my-members__export-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--sidebar-bg, rgba(12, 12, 14, 0.95));
+  border: 1px solid var(--sidebar-border, rgba(255, 255, 255, 0.06));
+  color: var(--text-secondary);
+  padding: 0 14px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  height: 36px;
+}
+
+.my-members__export-btn:hover {
+  background: var(--sidebar-hover, rgba(255, 255, 255, 0.06));
+  color: var(--text-primary);
+}
+
 /* ============================================
-   GRID VIEW - Compact Cards
+   CONTENT
+   ============================================ */
+.my-members__content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ============================================
+   GRID VIEW - Premium Cards
    ============================================ */
 .my-members__grid {
   display: grid;
@@ -231,16 +261,16 @@
 .member-card {
   background: var(--sidebar-bg, rgba(12, 12, 14, 0.95));
   border: 1px solid var(--sidebar-border, rgba(255, 255, 255, 0.06));
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 16px;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
   cursor: pointer;
 }
 
 .member-card:hover {
   transform: translateY(-2px);
   border-color: rgba(220, 38, 38, 0.3);
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.1);
+  box-shadow: 0 8px 24px rgba(220, 38, 38, 0.12);
 }
 
 .member-card__header {
@@ -265,8 +295,8 @@
 }
 
 .member-card__status {
-  padding: 3px 8px;
-  border-radius: 4px;
+  padding: 4px 10px;
+  border-radius: 6px;
   font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
@@ -284,20 +314,43 @@
 }
 
 .member-card__info {
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .member-card__info h3 {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--text-primary, #fff);
   margin: 0 0 2px 0;
 }
 
 .member-card__info p {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-tertiary, rgba(255, 255, 255, 0.5));
   margin: 0;
+}
+
+.member-card__meta {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.member-card__goal,
+.member-card__last-session {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text-tertiary, rgba(255, 255, 255, 0.5));
+  padding: 3px 8px;
+  background: var(--bg-primary, rgba(0, 0, 0, 0.2));
+  border-radius: 5px;
+}
+
+.member-card__goal svg,
+.member-card__last-session svg {
+  color: #DC2626;
 }
 
 .member-card__divider {
@@ -316,14 +369,14 @@
 .member-card__stat {
   text-align: center;
   flex: 1;
-  padding: 6px;
+  padding: 8px;
   background: var(--bg-primary, rgba(0, 0, 0, 0.2));
-  border-radius: 6px;
+  border-radius: 8px;
 }
 
 .member-card__stat-value {
   display: block;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--text-primary, #fff);
   line-height: 1.2;
@@ -335,7 +388,7 @@
   color: var(--text-tertiary, rgba(255, 255, 255, 0.5));
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-top: 1px;
+  margin-top: 2px;
 }
 
 .member-card__actions {
@@ -344,10 +397,10 @@
 }
 
 .member-card__btn {
-  height: 30px;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 11px;
+  height: 32px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 12px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -355,17 +408,19 @@
 
 .member-card__btn--primary {
   flex: 1;
-  background: #DC2626;
+  background: linear-gradient(135deg, #DC2626, #B91C1C);
   border: none;
   color: #fff;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.25);
 }
 
 .member-card__btn--primary:hover {
-  background: #B91C1C;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
 }
 
 .member-card__btn--icon {
-  width: 30px;
+  width: 32px;
   padding: 0;
   background: transparent;
   border: 1px solid var(--sidebar-border, rgba(255, 255, 255, 0.1));
@@ -382,23 +437,23 @@
 }
 
 /* ============================================
-   LIST VIEW - Compact Rows
+   LIST VIEW - Premium Rows
    ============================================ */
 .my-members__list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .member-list-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
+  gap: 14px;
+  padding: 12px 16px;
   background: var(--sidebar-bg, rgba(12, 12, 14, 0.95));
   border: 1px solid var(--sidebar-border, rgba(255, 255, 255, 0.06));
-  border-radius: 8px;
-  transition: all 0.12s ease;
+  border-radius: 10px;
+  transition: all 0.15s ease;
   cursor: pointer;
 }
 
@@ -408,8 +463,8 @@
 }
 
 .member-list-item__avatar {
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
@@ -428,14 +483,14 @@
 }
 
 .member-list-item__info h3 {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--text-primary, #fff);
   margin: 0 0 2px 0;
 }
 
 .member-list-item__info p {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-tertiary, rgba(255, 255, 255, 0.5));
   margin: 0;
   white-space: nowrap;
@@ -443,10 +498,32 @@
   text-overflow: ellipsis;
 }
 
-.member-list-item__status {
+.member-list-item__meta {
+  display: flex;
+  gap: 8px;
+}
+
+.member-list-item__goal,
+.member-list-item__last-session {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text-tertiary, rgba(255, 255, 255, 0.5));
   padding: 3px 8px;
-  border-radius: 4px;
-  font-size: 9px;
+  background: var(--bg-primary, rgba(0, 0, 0, 0.2));
+  border-radius: 5px;
+}
+
+.member-list-item__goal svg,
+.member-list-item__last-session svg {
+  color: #DC2626;
+}
+
+.member-list-item__status {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -465,7 +542,7 @@
 .member-list-item__stats {
   display: flex;
   gap: 16px;
-  padding: 0 12px;
+  padding: 0 14px;
   border-left: 1px solid var(--sidebar-border, rgba(255, 255, 255, 0.06));
   border-right: 1px solid var(--sidebar-border, rgba(255, 255, 255, 0.06));
 }
@@ -476,7 +553,7 @@
 
 .member-list-item__stat-value {
   display: block;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--text-primary, #fff);
   line-height: 1.2;
@@ -496,27 +573,29 @@
 }
 
 .member-list-item__btn {
-  height: 28px;
-  padding: 5px 12px;
-  border-radius: 5px;
-  font-size: 11px;
+  height: 30px;
+  padding: 5px 14px;
+  border-radius: 8px;
+  font-size: 12px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.12s ease;
+  transition: all 0.15s ease;
 }
 
 .member-list-item__btn--primary {
-  background: #DC2626;
+  background: linear-gradient(135deg, #DC2626, #B91C1C);
   border: none;
   color: #fff;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.25);
 }
 
 .member-list-item__btn--primary:hover {
-  background: #B91C1C;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
 }
 
 .member-list-item__btn--icon {
-  width: 28px;
+  width: 30px;
   padding: 0;
   background: transparent;
   border: 1px solid var(--sidebar-border, rgba(255, 255, 255, 0.1));
@@ -539,11 +618,11 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 48px 24px;
+  padding: 60px 24px;
   text-align: center;
   background: var(--sidebar-bg, rgba(12, 12, 14, 0.95));
   border: 1px solid var(--sidebar-border, rgba(255, 255, 255, 0.06));
-  border-radius: 10px;
+  border-radius: 12px;
 }
 
 .my-members__empty svg {
@@ -553,7 +632,7 @@
 }
 
 .my-members__empty p {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-secondary);
   margin: 0;
 }
@@ -561,10 +640,6 @@
 /* ============================================
    LIGHT MODE
    ============================================ */
-:root.theme-light .my-members__header {
-  border-color: rgba(0, 0, 0, 0.06);
-}
-
 :root.theme-light .my-members__title-section h1 {
   color: #111;
 }
@@ -573,28 +648,28 @@
   background: rgba(220, 38, 38, 0.08);
 }
 
-:root.theme-light .my-members__export-btn {
-  background: rgba(0, 0, 0, 0.03);
-  border-color: rgba(0, 0, 0, 0.06);
+:root.theme-light .my-members__quick-btn {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(0, 0, 0, 0.08);
 }
 
-:root.theme-light .my-members__export-btn:hover {
-  background: rgba(0, 0, 0, 0.05);
+:root.theme-light .my-members__quick-btn:hover {
+  background: #fff;
 }
 
-:root.theme-light .my-members__filter-bar {
-  background: rgba(255, 255, 255, 0.6);
-  border-color: rgba(0, 0, 0, 0.06);
+:root.theme-light .my-members__quick-btn--active {
+  background: rgba(220, 38, 38, 0.08);
+  border-color: rgba(220, 38, 38, 0.2);
 }
 
 :root.theme-light .my-members__search input {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.9);
   border-color: rgba(0, 0, 0, 0.08);
   color: #111;
 }
 
 :root.theme-light .my-members__filter-dropdown select {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.9);
   border-color: rgba(0, 0, 0, 0.08);
   color: #111;
 }
@@ -608,14 +683,19 @@
   color: #666;
 }
 
+:root.theme-light .my-members__export-btn {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
 :root.theme-light .member-card {
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.9);
   border-color: rgba(0, 0, 0, 0.06);
 }
 
 :root.theme-light .member-card:hover {
   border-color: rgba(220, 38, 38, 0.3);
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.08);
+  box-shadow: 0 8px 24px rgba(220, 38, 38, 0.08);
 }
 
 :root.theme-light .member-card__avatar {
@@ -627,6 +707,12 @@
 }
 
 :root.theme-light .member-card__info p {
+  color: #666;
+}
+
+:root.theme-light .member-card__goal,
+:root.theme-light .member-card__last-session {
+  background: rgba(0, 0, 0, 0.04);
   color: #666;
 }
 
@@ -652,7 +738,7 @@
 }
 
 :root.theme-light .member-list-item {
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.9);
   border-color: rgba(0, 0, 0, 0.06);
 }
 
@@ -673,6 +759,11 @@
   color: #666;
 }
 
+:root.theme-light .member-list-item__meta span {
+  background: rgba(0, 0, 0, 0.04);
+  color: #666;
+}
+
 :root.theme-light .member-list-item__stats {
   border-color: rgba(0, 0, 0, 0.06);
 }
@@ -687,17 +778,41 @@
 }
 
 :root.theme-light .my-members__empty {
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.9);
   border-color: rgba(0, 0, 0, 0.06);
 }
 
 /* ============================================
    RESPONSIVE
    ============================================ */
+@media (max-width: 1024px) {
+  .my-members__header {
+    flex-wrap: wrap;
+  }
+
+  .my-members__quick-filters {
+    order: 3;
+    width: 100%;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+  }
+
+  .my-members__search-section {
+    margin-left: 0;
+    flex-wrap: wrap;
+  }
+}
+
 @media (max-width: 768px) {
   .my-members {
-    padding: 10px 12px;
+    padding: 12px 14px;
     gap: 10px;
+  }
+
+  .my-members__title-section h1 {
+    font-size: 18px;
   }
 
   .my-members__header {
@@ -706,30 +821,45 @@
     gap: 10px;
   }
 
-  .my-members__filter-bar {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
+  .my-members__title-section {
+    width: 100%;
+    justify-content: space-between;
   }
 
-  .my-members__filters-left {
-    flex-direction: column;
-    gap: 8px;
+  .my-members__quick-filters {
+    width: 100%;
+    padding-bottom: 4px;
+  }
+
+  .my-members__quick-btn {
+    flex-shrink: 0;
+    padding: 5px 10px;
+    font-size: 11px;
+  }
+
+  .my-members__search-section {
+    width: 100%;
   }
 
   .my-members__search {
-    max-width: none;
+    flex: 1;
   }
 
-  .my-members__filter-dropdown select {
+  .my-members__search input {
     width: 100%;
+    min-width: 120px;
   }
 
   .my-members__grid {
     grid-template-columns: 1fr;
   }
 
-  .member-list-item__stats {
+  .member-card__meta {
+    flex-wrap: wrap;
+  }
+
+  .member-list-item__stats,
+  .member-list-item__meta {
     display: none;
   }
 }
