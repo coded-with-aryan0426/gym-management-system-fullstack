@@ -62,19 +62,15 @@ body.light-mode .settings-nav-item {
 :root.theme-light .settings-nav-item:hover,
 [data-theme="light"] .settings-nav-item:hover,
 body.light-mode .settings-nav-item:hover {
-  background: linear-gradient(135deg, rgba(254, 226, 226, 0.6) 0%, rgba(252, 165, 165, 0.3) 100%);
-  color: #dc2626;
-  transform: translateX(6px);
-  box-shadow: 0 2px 12px rgba(220, 38, 38, 0.12);
+  background: var(--settings-nav-hover-bg);
+  color: var(--settings-text-primary);
+  transform: translateX(4px);
 }
 
 :root.theme-light .settings-nav-item:hover .settings-nav-item__icon,
 [data-theme="light"] .settings-nav-item:hover .settings-nav-item__icon,
 body.light-mode .settings-nav-item:hover .settings-nav-item__icon {
-  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-  color: white;
-  transform: scale(1.1) rotate(-3deg);
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
+  transform: scale(1.1);
 }
 
 :root.theme-light .settings-nav-item--active,
@@ -89,16 +85,16 @@ body.light-mode .settings-nav-item--active {
 :root.theme-light .settings-nav-item__icon,
 [data-theme="light"] .settings-nav-item__icon,
 body.light-mode .settings-nav-item__icon {
-  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(0, 0, 0, 0.06);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 :root.theme-light .settings-nav-item--active .settings-nav-item__icon,
 [data-theme="light"] .settings-nav-item--active .settings-nav-item__icon,
 body.light-mode .settings-nav-item--active .settings-nav-item__icon {
-  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  background: linear-gradient(135deg, var(--settings-accent-red) 0%, #c1121f 100%);
   color: white;
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+  box-shadow: 0 3px 10px rgba(230, 57, 70, 0.35);
   transform: scale(1.1);
 }
 
