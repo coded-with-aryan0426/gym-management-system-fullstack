@@ -233,22 +233,38 @@ const TrainerDashboard: React.FC = () => {
                     <div className="trainer-dashboard-v2__greeting">
                         <h1>Good {currentTime.getHours() < 12 ? 'Morning' : currentTime.getHours() < 17 ? 'Afternoon' : 'Evening'}, {data.trainerName}!</h1>
                         <p className="trainer-dashboard-v2__date">
-                            {format(currentTime, 'EEEE, MMMM d')} • <span className="live-time">{format(currentTime, 'h:mm:ss a')}</span>
+                            {format(currentTime, 'EEE, MMM d')} • <span className="live-time">{format(currentTime, 'h:mm a')}</span>
                         </p>
                     </div>
                 </div>
-                <div className="trainer-dashboard-v2__header-right">
-                    <div className="trainer-dashboard-v2__day-progress">
-                        <div className="day-progress__info">
-                            <span className="day-progress__label">Today's Progress</span>
-                            <span className="day-progress__value">{data.completedToday}/{data.totalToday} Sessions</span>
+                <div className="trainer-dashboard-v2__header-stats">
+                    <div className="header-stat">
+                        <span className="header-stat__value">₹{data.todayEarnings.toLocaleString()}</span>
+                        <span className="header-stat__label">Today</span>
+                    </div>
+                    <div className="header-stat">
+                        <span className="header-stat__value">{data.activeMembers}/{data.assignedMembers}</span>
+                        <span className="header-stat__label">Members</span>
+                    </div>
+                    <div className="header-stat">
+                        <span className="header-stat__value">{data.attendanceRate}%</span>
+                        <span className="header-stat__label">Attendance</span>
+                    </div>
+                    <div className="header-stat header-stat--progress">
+                        <div className="header-stat__progress-ring">
+                            <svg viewBox="0 0 36 36">
+                                <circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="3" />
+                                <circle 
+                                    cx="18" cy="18" r="15.9" fill="none" 
+                                    stroke="#10B981" strokeWidth="3"
+                                    strokeDasharray={`${(data.completedToday / data.totalToday) * 100} ${100 - (data.completedToday / data.totalToday) * 100}`}
+                                    strokeDashoffset="25"
+                                    strokeLinecap="round"
+                                />
+                            </svg>
+                            <span className="header-stat__progress-text">{data.completedToday}/{data.totalToday}</span>
                         </div>
-                        <div className="day-progress__bar">
-                            <div 
-                                className="day-progress__fill" 
-                                style={{ width: `${(data.completedToday / data.totalToday) * 100}%` }}
-                            />
-                        </div>
+                        <span className="header-stat__label">Sessions</span>
                     </div>
                 </div>
             </div>
@@ -293,67 +309,6 @@ const TrainerDashboard: React.FC = () => {
                         </div>
                     </div>
                 )}
-
-                <div className="trainer-dashboard-v2__quick-stats">
-                    <div className="quick-stat quick-stat--earnings">
-                        <div className="quick-stat__icon">
-                            <DollarSign size={20} />
-                        </div>
-                        <div className="quick-stat__content">
-                            <span className="quick-stat__value">₹{data.todayEarnings.toLocaleString()}</span>
-                            <span className="quick-stat__label">Today's Earnings</span>
-                        </div>
-                        <div className="quick-stat__trend quick-stat__trend--up">
-                            <TrendingUp size={14} />
-                            <span>+12%</span>
-                        </div>
-                    </div>
-                    <div className="quick-stat quick-stat--members">
-                        <div className="quick-stat__icon">
-                            <Users size={20} />
-                        </div>
-                        <div className="quick-stat__content">
-                            <span className="quick-stat__value">{data.activeMembers}/{data.assignedMembers}</span>
-                            <span className="quick-stat__label">Active Members</span>
-                        </div>
-                        <button className="quick-stat__action" onClick={() => navigate('/trainer/members')}>
-                            <ArrowRight size={16} />
-                        </button>
-                    </div>
-                    <div className="quick-stat quick-stat--attendance">
-                        <div className="quick-stat__icon">
-                            <Target size={20} />
-                        </div>
-                        <div className="quick-stat__content">
-                            <span className="quick-stat__value">{data.attendanceRate}%</span>
-                            <span className="quick-stat__label">Attendance Rate</span>
-                        </div>
-                        <div className="quick-stat__mini-chart">
-                            <svg viewBox="0 0 36 36">
-                                <circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="3" />
-                                <circle 
-                                    cx="18" cy="18" r="15.9" fill="none" 
-                                    stroke="#10B981" strokeWidth="3"
-                                    strokeDasharray={`${data.attendanceRate} ${100 - data.attendanceRate}`}
-                                    strokeDashoffset="25"
-                                    strokeLinecap="round"
-                                />
-                            </svg>
-                        </div>
-                    </div>
-                    <div className="quick-stat quick-stat--sessions">
-                        <div className="quick-stat__icon">
-                            <Calendar size={20} />
-                        </div>
-                        <div className="quick-stat__content">
-                            <span className="quick-stat__value">{upcomingSessions.length}</span>
-                            <span className="quick-stat__label">Remaining Today</span>
-                        </div>
-                        <button className="quick-stat__action" onClick={() => navigate('/trainer/schedule')}>
-                            <ArrowRight size={16} />
-                        </button>
-                    </div>
-                </div>
 
                 <div className="trainer-dashboard-v2__main-grid">
                     <div className="trainer-dashboard-v2__schedule-section">
