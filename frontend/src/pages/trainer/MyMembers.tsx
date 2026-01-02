@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
     Search, Grid, List, Download, MoreVertical, MessageSquare, 
-    ChevronDown, User
+    ChevronDown, Users
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import './MyMembers.css';
@@ -28,26 +28,25 @@ const MyMembers: React.FC = () => {
 
     return (
         <div className="my-members">
-            {/* Page Header */}
             <div className="my-members__header">
-                <div className="my-members__header-content">
-                    <div className="my-members__title-section">
-                        <h1>My Assigned Members ({members.length})</h1>
-                        <p>Track progress and communicate with your members</p>
-                    </div>
-                    <button className="my-members__export-btn">
-                        <Download size={14} />
-                        Export CSV
-                    </button>
+                <div className="my-members__title-section">
+                    <h1>My Members</h1>
+                    <span className="my-members__count-badge">
+                        <Users size={10} />
+                        {members.length}
+                    </span>
                 </div>
+                <button className="my-members__export-btn">
+                    <Download size={12} />
+                    Export
+                </button>
             </div>
 
             <div className="my-members__content">
-                {/* Filter Bar */}
                 <div className="my-members__filter-bar">
                     <div className="my-members__filters-left">
                         <div className="my-members__search">
-                            <Search size={16} />
+                            <Search size={14} />
                             <input
                                 type="text"
                                 placeholder="Search members..."
@@ -61,7 +60,7 @@ const MyMembers: React.FC = () => {
                                 <option>Active</option>
                                 <option>Inactive</option>
                             </select>
-                            <ChevronDown size={14} />
+                            <ChevronDown size={12} />
                         </div>
                     </div>
                     <div className="my-members__filters-right">
@@ -70,19 +69,18 @@ const MyMembers: React.FC = () => {
                                 className={viewMode === 'grid' ? 'active' : ''} 
                                 onClick={() => setViewMode('grid')}
                             >
-                                <Grid size={16} />
+                                <Grid size={14} />
                             </button>
                             <button 
                                 className={viewMode === 'list' ? 'active' : ''} 
                                 onClick={() => setViewMode('list')}
                             >
-                                <List size={16} />
+                                <List size={14} />
                             </button>
                         </div>
                     </div>
                 </div>
 
-                {/* Grid View */}
                 {viewMode === 'grid' && (
                     <div className="my-members__grid">
                         {filteredMembers.map(member => (
@@ -90,7 +88,7 @@ const MyMembers: React.FC = () => {
                                 <div className="member-card__header">
                                     <div className="member-card__avatar">
                                         <img 
-                                            src={`https://ui-avatars.com/api/?name=${member.name}&background=4F46E5&color=fff&size=64`}
+                                            src={`https://ui-avatars.com/api/?name=${member.name}&background=DC2626&color=fff&size=48`}
                                             alt={member.name}
                                         />
                                     </div>
@@ -100,7 +98,7 @@ const MyMembers: React.FC = () => {
                                 </div>
                                 <div className="member-card__info">
                                     <h3>{member.name}</h3>
-                                    <p>{member.plan} • {member.daysLeft} days left</p>
+                                    <p>{member.plan} • {member.daysLeft > 0 ? `${member.daysLeft}d left` : 'Expired'}</p>
                                 </div>
                                 <div className="member-card__divider" />
                                 <div className="member-card__stats">
@@ -120,7 +118,7 @@ const MyMembers: React.FC = () => {
                                 <div className="member-card__actions">
                                     <button className="member-card__btn member-card__btn--primary">View Profile</button>
                                     <button className="member-card__btn member-card__btn--icon">
-                                        <MessageSquare size={14} />
+                                        <MessageSquare size={12} />
                                     </button>
                                 </div>
                             </div>
@@ -128,14 +126,13 @@ const MyMembers: React.FC = () => {
                     </div>
                 )}
 
-                {/* List View */}
                 {viewMode === 'list' && (
                     <div className="my-members__list">
                         {filteredMembers.map(member => (
                             <div key={member.id} className="member-list-item">
                                 <div className="member-list-item__avatar">
                                     <img 
-                                        src={`https://ui-avatars.com/api/?name=${member.name}&background=4F46E5&color=fff&size=56`}
+                                        src={`https://ui-avatars.com/api/?name=${member.name}&background=DC2626&color=fff&size=40`}
                                         alt={member.name}
                                     />
                                 </div>
@@ -143,6 +140,9 @@ const MyMembers: React.FC = () => {
                                     <h3>{member.name}</h3>
                                     <p>{member.email} • {member.phone}</p>
                                 </div>
+                                <span className={`member-list-item__status member-list-item__status--${member.status.toLowerCase()}`}>
+                                    {member.status}
+                                </span>
                                 <div className="member-list-item__stats">
                                     <div className="member-list-item__stat">
                                         <span className="member-list-item__stat-value">{member.stats.classes}</span>
@@ -156,11 +156,18 @@ const MyMembers: React.FC = () => {
                                 <div className="member-list-item__actions">
                                     <button className="member-list-item__btn member-list-item__btn--primary">View</button>
                                     <button className="member-list-item__btn member-list-item__btn--icon">
-                                        <MoreVertical size={16} />
+                                        <MoreVertical size={14} />
                                     </button>
                                 </div>
                             </div>
                         ))}
+                    </div>
+                )}
+
+                {filteredMembers.length === 0 && (
+                    <div className="my-members__empty">
+                        <Users size={32} />
+                        <p>No members found</p>
                     </div>
                 )}
             </div>
