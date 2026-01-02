@@ -203,6 +203,105 @@
   background: rgba(255, 255, 255, 0.05);
 }
 
+/* ============================================
+   ENHANCED STATS - Members Page Creative Strip
+   ============================================ */
+.utility-bar__stats-enhanced {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 6px 4px 8px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(16, 185, 129, 0.06) 100%);
+  border: 1px solid rgba(99, 102, 241, 0.12);
+  border-radius: 10px;
+  margin: 0 auto;
+  flex-shrink: 1;
+}
+
+.utility-metrics-strip {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.utility-metric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+  cursor: default;
+  min-width: 44px;
+}
+
+.utility-metric:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.utility-metric__value {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-feature-settings: 'tnum' 1;
+  line-height: 1.2;
+}
+
+.utility-metric__label {
+  font-size: 8px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.utility-metric--active .utility-metric__value {
+  color: #10B981;
+}
+
+.utility-metric--expired .utility-metric__value {
+  color: #EF4444;
+}
+
+.utility-metric--warning .utility-metric__value {
+  color: #F59E0B;
+}
+
+.utility-metric--new .utility-metric__value {
+  color: #3B82F6;
+}
+
+.utility-bar__progress {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+}
+
+.utility-progress__bar {
+  width: 48px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.utility-progress__fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10B981, #34D399);
+  border-radius: 2px;
+  transition: width 0.5s ease;
+}
+
+.utility-progress__text {
+  font-size: 9px;
+  font-weight: 600;
+  color: #10B981;
+  white-space: nowrap;
+}
+
 .utility-stat {
   display: flex;
   align-items: center;
