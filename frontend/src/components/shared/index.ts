@@ -14,3 +14,5 @@ export {
 export { DashboardHeader } from './DashboardHeader';
 
 export { default as DashboardLayout } from './DashboardLayout';
+
+export { default as ActionMenuButton } from './ActionMenuButton';

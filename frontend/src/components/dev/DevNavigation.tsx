@@ -74,6 +74,8 @@ const dashboards: DashboardOption[] = [
             { name: 'Bookings', path: '/member/bookings' },
             { name: 'Classes', path: '/member/classes' },
             { name: 'Messages', path: '/member/messages' },
+            { name: 'Notifications', path: '/member/notifications' },
+            { name: 'Settings', path: '/member/settings' },
             { name: 'Profile', path: '/member/profile' }
         ]
     }
