@@ -1,15 +1,31 @@
 /* ============================================================================
-   CommandRail - macOS Style Sidebar V4
-   Glassmorphism, Pill Navigation, and "Floating" Feel
+   CommandRail - Ultra Compact Sidebar (Linear/Vercel Style)
+   Default: Icon-only collapsed (56px) | Expanded: 180px max
    ============================================================================ */
 
 :root {
-  --sidebar-width: 220px;
-  /* Reduced by ~5% */
-  --sidebar-collapsed: 68px;
-  --macos-glass-bg: rgba(20, 20, 20, 0.65);
-  --macos-glass-border: rgba(255, 255, 255, 0.08);
-  --macos-glass-blur: 25px;
+  --sidebar-width: 180px;
+  --sidebar-collapsed: 56px;
+  --sidebar-transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Dark theme (default) */
+  --sidebar-bg: rgba(12, 12, 14, 0.95);
+  --sidebar-border: rgba(255, 255, 255, 0.06);
+  --sidebar-hover: rgba(255, 255, 255, 0.06);
+  --sidebar-active-bg: var(--nav-accent, #4F46E5);
+  --sidebar-text: rgba(255, 255, 255, 0.6);
+  --sidebar-text-hover: rgba(255, 255, 255, 0.9);
+  --sidebar-icon: rgba(255, 255, 255, 0.5);
+}
+
+/* Light theme */
+:root.theme-light {
+  --sidebar-bg: rgba(250, 250, 252, 0.98);
+  --sidebar-border: rgba(0, 0, 0, 0.08);
+  --sidebar-hover: rgba(0, 0, 0, 0.04);
+  --sidebar-text: rgba(0, 0, 0, 0.55);
+  --sidebar-text-hover: rgba(0, 0, 0, 0.85);
+  --sidebar-icon: rgba(0, 0, 0, 0.45);
 }
 
 .command-rail {
@@ -18,15 +34,14 @@
   top: 0;
   bottom: 0;
   width: var(--sidebar-width);
-  background: var(--macos-glass-bg);
-  backdrop-filter: blur(var(--macos-glass-blur));
-  -webkit-backdrop-filter: blur(var(--macos-glass-blur));
-  border-right: 1px solid var(--macos-glass-border);
+  background: var(--sidebar-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-right: 1px solid var(--sidebar-border);
   display: flex;
   flex-direction: column;
   z-index: 1000;
-  transition: width 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-  box-shadow: 1px 0 20px rgba(0, 0, 0, 0.2);
+  transition: width var(--sidebar-transition);
 }
 
 .command-rail--collapsed {
@@ -34,41 +49,39 @@
 }
 
 /* ============================================
-   LOGO SECTION
+   LOGO SECTION - Compact
    ============================================ */
 .command-rail__logo {
   display: flex;
   align-items: center;
-  gap: 12px;
-  height: 64px;
-  /* Taller header */
-  padding: 0 20px;
-  margin-bottom: 8px;
+  gap: 10px;
+  height: 48px;
+  padding: 0 14px;
+  margin-bottom: 4px;
   flex-shrink: 0;
   text-decoration: none;
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: opacity 0.15s;
 }
 
 .command-rail__logo:hover {
-  opacity: 0.8;
+  opacity: 0.75;
 }
 
 .command-rail--collapsed .command-rail__logo {
-  padding: 0 20px;
+  padding: 0;
   justify-content: center;
 }
 
 /* ============================================
-   NAVIGATION - "Finder" Style Pills
+   NAVIGATION - Ultra Compact Pills
    ============================================ */
 .command-rail__nav {
   flex: 1;
-  padding: 0 12px;
-  /* Horizontal padding for floating pills */
+  padding: 0 8px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -80,16 +93,15 @@
 .command-rail__link {
   display: flex;
   align-items: center;
-  gap: 12px;
-  height: 40px;
-  padding: 0 12px;
+  gap: 10px;
+  height: 36px;
+  padding: 0 10px;
   border-radius: 8px;
-  /* Smooth rounded corners */
-  color: var(--text-tertiary);
+  color: var(--sidebar-text);
   text-decoration: none;
   overflow: hidden;
   white-space: nowrap;
-  transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+  transition: all 0.15s ease;
   position: relative;
   font-weight: 500;
 }
@@ -97,68 +109,56 @@
 .command-rail--collapsed .command-rail__link {
   padding: 0;
   justify-content: center;
-  border-radius: 12px;
-  /* Icon shape when collapsed */
-  height: 44px;
-  margin-bottom: 4px;
+  height: 40px;
+  margin-bottom: 2px;
   gap: 0;
-  /* Fix centering: Remove gap so hidden label doesn't push icon left */
 }
 
 .command-rail__link:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text-primary);
+  background: var(--sidebar-hover);
+  color: var(--sidebar-text-hover);
 }
 
-/* Active State - Floating Pill */
+/* Active State */
 .command-rail__link--active {
-  background: var(--nav-accent, var(--color-crimson)) !important;
+  background: var(--sidebar-active-bg) !important;
   color: #fff !important;
-  /* Always white text on colored pill */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-  /* Lifted effect */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .command-rail__link--active::before {
   display: none;
-  /* Remove old vertical bar */
-}
-
-/* If the accent is too bright, we might want to darken the background slightly or use a gradient */
-.command-rail__link--active {
-  background: linear-gradient(135deg, var(--nav-accent), color-mix(in srgb, var(--nav-accent) 80%, black)) !important;
 }
 
 .command-rail__link--active:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .command-rail__link--active .command-rail__icon {
   color: #fff !important;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 }
 
 .command-rail__icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   flex-shrink: 0;
-  transition: transform 0.2s ease;
+  color: var(--sidebar-icon);
+  transition: transform 0.15s ease, color 0.15s ease;
 }
 
 .command-rail__link:hover .command-rail__icon {
-  transform: scale(1.1);
+  color: var(--sidebar-text-hover);
 }
 
 .command-rail__label {
-  font-size: 13.5px;
-  /* Slightly larger for readability */
+  font-size: 13px;
   letter-spacing: -0.01em;
   opacity: 1;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.15s ease;
 }
 
 .command-rail--collapsed .command-rail__label {
@@ -171,35 +171,39 @@
    FOOTER - Settings & Toggle
    ============================================ */
 .command-rail__footer {
-  padding: 16px 12px;
+  padding: 8px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.2), transparent);
-  /* Subtle fade at bottom */
+  gap: 2px;
+  border-top: 1px solid var(--sidebar-border);
 }
 
 .command-rail__toggle {
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Centered icon/text */
-  gap: 10px;
-  height: 36px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  color: var(--text-tertiary);
+  gap: 8px;
+  height: 32px;
+  border-radius: 6px;
+  background: transparent;
+  border: 1px solid var(--sidebar-border);
+  color: var(--sidebar-text);
   cursor: pointer;
   overflow: hidden;
   white-space: nowrap;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
+  font-size: 12px;
 }
 
 .command-rail__toggle:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text-primary);
-  border-color: rgba(255, 255, 255, 0.1);
+  background: var(--sidebar-hover);
+  color: var(--sidebar-text-hover);
+}
+
+.command-rail__toggle-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .command-rail__logout {
@@ -209,45 +213,43 @@
 }
 
 .command-rail__logout:hover {
-  background: rgba(239, 68, 68, 0.15);
+  background: rgba(239, 68, 68, 0.1);
   color: #ef4444;
 }
 
 /* ============================================
-   TOOLTIPS
+   TOOLTIPS - Sleek Design
    ============================================ */
 .command-rail--collapsed .command-rail__link[title]:hover::after {
   content: attr(title);
   position: fixed;
-  left: calc(var(--sidebar-collapsed) + 12px);
-  padding: 6px 12px;
-  background: rgba(30, 30, 30, 0.9);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  left: calc(var(--sidebar-collapsed) + 8px);
+  padding: 6px 10px;
+  background: var(--sidebar-bg);
+  border: 1px solid var(--sidebar-border);
   border-radius: 6px;
   font-size: 12px;
   font-weight: 500;
-  color: #fff;
+  color: var(--sidebar-text-hover);
   white-space: nowrap;
   z-index: 9999;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-  animation: slideRight 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  animation: tooltipIn 0.15s ease;
 }
 
-@keyframes slideRight {
+@keyframes tooltipIn {
   from {
     opacity: 0;
-    transform: translateX(-10px) scale(0.95);
+    transform: translateX(-4px);
   }
-
   to {
     opacity: 1;
-    transform: translateX(0) scale(1);
+    transform: translateX(0);
   }
 }
 
 /* ============================================
-   RESPONSIVE
+   RESPONSIVE - Hide on mobile
    ============================================ */
 @media (max-width: 768px) {
   .command-rail {
@@ -256,40 +258,12 @@
 }
 
 /* ============================================
-   LIGHT MODE OVERRIDES - macOS Light
+   LIGHT MODE SPECIFIC
    ============================================ */
-:root.theme-light {
-  --macos-glass-bg: rgba(245, 245, 247, 0.75);
-  /* macOS Window Background */
-  --macos-glass-border: rgba(0, 0, 0, 0.06);
-}
-
-:root.theme-light .command-rail {
-  background: var(--macos-glass-bg);
-  border-right: 1px solid var(--macos-glass-border);
-  box-shadow: 1px 0 20px rgba(0, 0, 0, 0.05);
-}
-
-:root.theme-light .command-rail__link:hover {
-  background: rgba(0, 0, 0, 0.05);
-  color: #000;
-}
-
-/* Light Mode Active State */
 :root.theme-light .command-rail__link--active {
-  /* Use the color as background, but simpler gradient */
-  background: var(--nav-accent, #007AFF) !important;
-  color: white !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-:root.theme-light .command-rail__toggle {
-  background: rgba(0, 0, 0, 0.03);
-  border-color: rgba(0, 0, 0, 0.06);
-  color: #555;
-}
-
-:root.theme-light .command-rail__toggle:hover {
-  background: rgba(0, 0, 0, 0.06);
-  color: #000;
+:root.theme-light .command-rail__logout:hover {
+  background: rgba(239, 68, 68, 0.08);
 }

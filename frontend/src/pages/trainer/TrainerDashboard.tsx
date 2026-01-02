@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Users, Calendar, Clock, Activity, Bell, FileText, MessageSquare, TrendingUp, ChevronRight } from 'lucide-react';
+import { Users, Calendar, Clock, Activity, Bell, FileText, MessageSquare, TrendingUp, ChevronRight, Plus, MoreHorizontal } from 'lucide-react';
 
 interface DashboardData {
     trainerName: string;
@@ -15,7 +15,6 @@ const TrainerDashboard: React.FC = () => {
     const [data, setData] = useState<DashboardData | null>(null);
 
     useEffect(() => {
-        // Mock data matching spec context
         setData({
             trainerName: 'John',
             assignedMembers: 12,
@@ -25,194 +24,234 @@ const TrainerDashboard: React.FC = () => {
         });
     }, []);
 
-    if (!data) return <div className="p-8">Loading...</div>;
+    if (!data) return <div className="p-4 text-sm text-gray-500">Loading...</div>;
+
+    const stats = [
+        { label: 'Members', value: data.assignedMembers, change: '+2', icon: Users, color: '#4F46E5', onClick: () => navigate('/trainer/members') },
+        { label: 'Classes', value: data.todaysClasses, sub: 'Next: 9:00 AM', icon: Calendar, color: '#10B981', onClick: () => navigate('/trainer/classes') },
+        { label: 'Sessions', value: data.upcomingSessions, sub: 'This Week', icon: Clock, color: '#F59E0B', onClick: () => navigate('/trainer/schedule') },
+        { label: 'Attendance', value: `${data.attendanceRate}%`, change: '+3%', icon: Activity, color: '#EF4444', onClick: () => navigate('/trainer/reports') },
+    ];
+
+    const schedule = [
+        { time: '9:00 AM', title: 'Yoga Class', room: 'Room A', enrolled: 8 },
+        { time: '11:00 AM', title: 'HIIT Session', room: 'Studio 2', enrolled: 12 },
+        { time: '2:00 PM', title: 'Personal Training', room: 'Gym Floor', enrolled: 1 },
+    ];
+
+    const activities = [
+        { text: 'Sarah Wilson booked Yoga class', time: '2h ago', type: 'success' },
+        { text: 'Mike Johnson cancelled session', time: '4h ago', type: 'danger' },
+        { text: 'Progress note added for David Lee', time: 'Yesterday', type: 'info' },
+    ];
+
+    const quickActions = [
+        { icon: Bell, label: 'Notification', color: '#4F46E5', path: '/trainer/notifications' },
+        { icon: FileText, label: 'Progress Note', color: '#10B981', path: '/trainer/progress-notes' },
+        { icon: Calendar, label: 'Schedule', color: '#F59E0B', path: '/trainer/schedule' },
+        { icon: MessageSquare, label: 'Message', color: '#3B82F6', path: '/trainer/messages' },
+    ];
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col">
-            {/* Page Header - Height 80px, Padding 24px, Border Bottom */}
-            <div className="h-[80px] px-6 flex flex-col justify-center border-b border-gray-200 bg-white mb-6">
-                <h1 className="text-[28px] font-bold text-gray-900 leading-[1.2] mb-1">
-                    Welcome back, {data.trainerName}! 👋
-                </h1>
-                <p className="text-sm font-normal text-gray-500">
-                    Here's what's happening with your members today
-                </p>
+        <div className="min-h-screen bg-[var(--bg-primary)]">
+            {/* Compact Header */}
+            <div className="px-4 py-3 border-b border-[var(--sidebar-border)] bg-[var(--sidebar-bg)]">
+                <div className="flex items-center justify-between max-w-[1200px] mx-auto">
+                    <div>
+                        <h1 className="text-lg font-semibold text-[var(--text-primary)]">
+                            Welcome back, {data.trainerName}
+                        </h1>
+                        <p className="text-xs text-[var(--text-tertiary)]">
+                            Here's your overview for today
+                        </p>
+                    </div>
+                    <button 
+                        onClick={() => navigate('/trainer/schedule')}
+                        className="h-8 px-3 bg-[#4F46E5] text-white rounded-md text-xs font-medium hover:bg-[#4338CA] transition-colors flex items-center gap-1.5"
+                    >
+                        <Plus size={14} />
+                        New Session
+                    </button>
+                </div>
             </div>
 
-            <div className="px-6 pb-6 max-w-[1400px] mx-auto w-full">
-                {/* Stats Grid - 4 Columns, Gap 20px */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-                    {/* Card 1: Assigned Members */}
-                    <div className="h-[136px] bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all cursor-pointer" onClick={() => navigate('/trainer/members')}>
-                        <div className="flex flex-col h-full justify-between">
-                            <div className="w-12 h-12 rounded-[10px] bg-[#EEF2FF] flex items-center justify-center mb-3">
-                                <Users size={24} className="text-[#4F46E5]" />
-                            </div>
-                            <div>
-                                <div className="text-[32px] font-bold text-gray-900 leading-none mb-1">
-                                    {data.assignedMembers}
+            <div className="p-4 max-w-[1200px] mx-auto">
+                {/* Stats Grid - 4 Column Compact */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+                    {stats.map((stat, idx) => (
+                        <button
+                            key={idx}
+                            onClick={stat.onClick}
+                            className="bg-[var(--sidebar-bg)] border border-[var(--sidebar-border)] rounded-lg p-3 text-left hover:border-[var(--sidebar-hover)] transition-all group"
+                        >
+                            <div className="flex items-center justify-between mb-2">
+                                <div 
+                                    className="w-8 h-8 rounded-md flex items-center justify-center"
+                                    style={{ background: `${stat.color}15` }}
+                                >
+                                    <stat.icon size={16} style={{ color: stat.color }} />
                                 </div>
-                                <div className="text-sm font-medium text-gray-500 flex items-center gap-1">
-                                    Assigned Members
-                                    <span className="text-xs text-emerald-500 font-medium ml-1 flex items-center">
-                                        +2 this week
+                                {stat.change && (
+                                    <span className="text-[10px] font-semibold text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded">
+                                        {stat.change}
                                     </span>
-                                </div>
+                                )}
                             </div>
-                        </div>
-                    </div>
-
-                    {/* Card 2: Today's Classes */}
-                    <div className="h-[136px] bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all cursor-pointer" onClick={() => navigate('/trainer/classes')}>
-                        <div className="flex flex-col h-full justify-between">
-                            <div className="w-12 h-12 rounded-[10px] bg-[#EEF2FF] flex items-center justify-center mb-3">
-                                <Calendar size={24} className="text-[#4F46E5]" />
+                            <div className="text-xl font-bold text-[var(--text-primary)] leading-none mb-0.5">
+                                {stat.value}
                             </div>
-                            <div>
-                                <div className="text-[32px] font-bold text-gray-900 leading-none mb-1">
-                                    {data.todaysClasses}
-                                </div>
-                                <div className="text-sm font-medium text-gray-500">
-                                    Today's Classes <span className="text-xs text-gray-400 ml-1">Next: 9:00 AM</span>
-                                </div>
+                            <div className="text-[11px] text-[var(--text-tertiary)] flex items-center gap-1">
+                                {stat.label}
+                                {stat.sub && <span className="opacity-60">• {stat.sub}</span>}
                             </div>
-                        </div>
-                    </div>
-
-                    {/* Card 3: Upcoming Sessions */}
-                    <div className="h-[136px] bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all cursor-pointer" onClick={() => navigate('/trainer/schedule')}>
-                        <div className="flex flex-col h-full justify-between">
-                            <div className="w-12 h-12 rounded-[10px] bg-[#EEF2FF] flex items-center justify-center mb-3">
-                                <Clock size={24} className="text-[#4F46E5]" />
-                            </div>
-                            <div>
-                                <div className="text-[32px] font-bold text-gray-900 leading-none mb-1">
-                                    {data.upcomingSessions}
-                                </div>
-                                <div className="text-sm font-medium text-gray-500">
-                                    Upcoming Sessions <span className="text-xs text-gray-400 ml-1">This Week</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Card 4: Attendance Rate */}
-                    <div className="h-[136px] bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all cursor-pointer" onClick={() => navigate('/trainer/reports')}>
-                        <div className="flex flex-col h-full justify-between">
-                            <div className="w-12 h-12 rounded-[10px] bg-[#EEF2FF] flex items-center justify-center mb-3">
-                                <Activity size={24} className="text-[#4F46E5]" />
-                            </div>
-                            <div>
-                                <div className="text-[32px] font-bold text-gray-900 leading-none mb-1">
-                                    {data.attendanceRate}%
-                                </div>
-                                <div className="text-sm font-medium text-gray-500 flex items-center gap-1">
-                                    Attendance Rate
-                                    <span className="text-xs text-emerald-500 font-medium ml-1">
-                                        +3%
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                        </button>
+                    ))}
                 </div>
 
-                {/* Today's Schedule Section */}
-                <div className="mb-8">
-                    <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-[20px] font-semibold text-gray-900">Today's Schedule</h2>
-                        <button
-                            onClick={() => navigate('/trainer/schedule')}
-                            className="text-sm font-medium text-[#4F46E5] hover:underline"
-                        >
-                            View All &gt;
-                        </button>
-                    </div>
-                    <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-                        {[
-                            { time: '9:00 AM', title: 'Yoga Class', room: 'Room A', enrolled: 8, icon: '🧘' },
-                            { time: '11:00 AM', title: 'HIIT Session', room: 'Studio 2', enrolled: 12, icon: '💪' },
-                            { time: '2:00 PM', title: 'Personal Training', room: 'Gym Floor', enrolled: 1, icon: '🏋️' }
-                        ].map((item, index) => (
-                            <div key={index} className="p-4 border-b border-gray-100 last:border-0 flex items-center justify-between min-h-[80px]">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-full bg-[#EEF2FF] flex items-center justify-center text-xl">
-                                        {item.icon}
-                                    </div>
-                                    <div>
-                                        <div className="text-base font-semibold text-gray-900">
-                                            {item.time} - {item.title}
-                                        </div>
-                                        <div className="text-sm text-gray-500 mt-1">
-                                            {item.room} • {item.enrolled} members joined
-                                        </div>
-                                    </div>
-                                </div>
-                                <button className="h-9 px-4 border border-gray-200 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                                    View Details
+                {/* Main Content - 2 Column Layout */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    {/* Left Column - Schedule & Activity */}
+                    <div className="lg:col-span-2 space-y-4">
+                        {/* Today's Schedule */}
+                        <div className="bg-[var(--sidebar-bg)] border border-[var(--sidebar-border)] rounded-lg overflow-hidden">
+                            <div className="flex items-center justify-between px-3 py-2 border-b border-[var(--sidebar-border)]">
+                                <h2 className="text-xs font-semibold text-[var(--text-primary)] uppercase tracking-wide">
+                                    Today's Schedule
+                                </h2>
+                                <button 
+                                    onClick={() => navigate('/trainer/schedule')}
+                                    className="text-[11px] font-medium text-[#4F46E5] hover:underline flex items-center gap-0.5"
+                                >
+                                    View All <ChevronRight size={12} />
                                 </button>
                             </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Bottom Section: Recent Activity & Quick Actions */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Recent Activity */}
-                    <div className="lg:col-span-2">
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-[20px] font-semibold text-gray-900">Recent Activity</h2>
-                        </div>
-                        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-                            {/* Activity List to handle in future updates or reuse existing logic if robust */}
-                            <div className="space-y-6 relative pl-2">
-                                <div className="absolute left-[19px] top-2 bottom-2 w-0.5 bg-gray-200"></div>
-                                {[
-                                    { text: 'Sarah Wilson booked your Yoga class', time: '2 hours ago', icon: '✅' },
-                                    { text: 'Mike Johnson cancelled session', time: '4 hours ago', icon: '❌' },
-                                    { text: 'Added progress note for David Lee', time: 'Yesterday', icon: '📝' }
-                                ].map((activity, i) => (
-                                    <div key={i} className="relative flex gap-4 items-start">
-                                        <div className="relative z-10 w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center text-sm shadow-sm">
-                                            {activity.icon}
+                            <div className="divide-y divide-[var(--sidebar-border)]">
+                                {schedule.map((item, idx) => (
+                                    <div key={idx} className="flex items-center justify-between px-3 py-2.5 hover:bg-[var(--sidebar-hover)] transition-colors">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-md bg-[#4F46E5]/10 flex items-center justify-center text-lg">
+                                                {idx === 0 ? '🧘' : idx === 1 ? '💪' : '🏋️'}
+                                            </div>
+                                            <div>
+                                                <div className="text-sm font-medium text-[var(--text-primary)]">
+                                                    {item.time} - {item.title}
+                                                </div>
+                                                <div className="text-[11px] text-[var(--text-tertiary)]">
+                                                    {item.room} • {item.enrolled} joined
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <p className="text-gray-900 font-medium text-sm">{activity.text}</p>
-                                            <p className="text-gray-500 text-xs mt-0.5">{activity.time}</p>
-                                        </div>
+                                        <button className="h-7 px-2.5 text-[11px] font-medium text-[var(--text-secondary)] border border-[var(--sidebar-border)] rounded hover:bg-[var(--sidebar-hover)] transition-colors">
+                                            Details
+                                        </button>
                                     </div>
                                 ))}
                             </div>
                         </div>
+
+                        {/* Recent Activity */}
+                        <div className="bg-[var(--sidebar-bg)] border border-[var(--sidebar-border)] rounded-lg overflow-hidden">
+                            <div className="px-3 py-2 border-b border-[var(--sidebar-border)]">
+                                <h2 className="text-xs font-semibold text-[var(--text-primary)] uppercase tracking-wide">
+                                    Recent Activity
+                                </h2>
+                            </div>
+                            <div className="p-3">
+                                <div className="relative pl-4">
+                                    <div className="absolute left-[7px] top-1 bottom-1 w-px bg-[var(--sidebar-border)]" />
+                                    <div className="space-y-3">
+                                        {activities.map((activity, idx) => (
+                                            <div key={idx} className="relative flex gap-3 items-start">
+                                                <div 
+                                                    className={`absolute -left-[4px] w-2.5 h-2.5 rounded-full border-2 border-[var(--sidebar-bg)] ${
+                                                        activity.type === 'success' ? 'bg-emerald-500' : 
+                                                        activity.type === 'danger' ? 'bg-red-500' : 'bg-blue-500'
+                                                    }`} 
+                                                />
+                                                <div className="ml-3 flex-1 min-w-0">
+                                                    <p className="text-xs text-[var(--text-primary)]">{activity.text}</p>
+                                                    <p className="text-[10px] text-[var(--text-tertiary)]">{activity.time}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    {/* Quick Actions */}
-                    <div>
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-[20px] font-semibold text-gray-900">Quick Actions</h2>
+                    {/* Right Column - Quick Actions */}
+                    <div className="space-y-4">
+                        {/* Quick Actions Grid */}
+                        <div className="bg-[var(--sidebar-bg)] border border-[var(--sidebar-border)] rounded-lg overflow-hidden">
+                            <div className="px-3 py-2 border-b border-[var(--sidebar-border)]">
+                                <h2 className="text-xs font-semibold text-[var(--text-primary)] uppercase tracking-wide">
+                                    Quick Actions
+                                </h2>
+                            </div>
+                            <div className="p-2 grid grid-cols-2 gap-1.5">
+                                {quickActions.map((action, idx) => (
+                                    <button
+                                        key={idx}
+                                        onClick={() => navigate(action.path)}
+                                        className="flex flex-col items-center gap-1.5 p-3 rounded-md hover:bg-[var(--sidebar-hover)] transition-colors group"
+                                    >
+                                        <div 
+                                            className="w-9 h-9 rounded-lg flex items-center justify-center transition-transform group-hover:scale-105"
+                                            style={{ background: `${action.color}15` }}
+                                        >
+                                            <action.icon size={18} style={{ color: action.color }} />
+                                        </div>
+                                        <span className="text-[11px] font-medium text-[var(--text-secondary)]">
+                                            {action.label}
+                                        </span>
+                                    </button>
+                                ))}
+                            </div>
                         </div>
-                        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 space-y-3">
-                            <button onClick={() => navigate('/trainer/notifications')} className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors text-left group">
-                                <Bell size={20} className="text-[#4F46E5] group-hover:scale-110 transition-transform" />
-                                <span className="text-gray-700 font-medium text-sm">Send Notification</span>
-                            </button>
-                            <button onClick={() => navigate('/trainer/progress-notes')} className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors text-left group">
-                                <FileText size={20} className="text-emerald-500 group-hover:scale-110 transition-transform" />
-                                <span className="text-gray-700 font-medium text-sm">Add Progress Note</span>
-                            </button>
-                            <button onClick={() => navigate('/trainer/schedule')} className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors text-left group">
-                                <Calendar size={20} className="text-amber-500 group-hover:scale-110 transition-transform" />
-                                <span className="text-gray-700 font-medium text-sm">Schedule Session</span>
-                            </button>
-                            <button onClick={() => navigate('/trainer/reports')} className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors text-left group">
-                                <TrendingUp size={20} className="text-purple-500 group-hover:scale-110 transition-transform" />
-                                <span className="text-gray-700 font-medium text-sm">View Reports</span>
-                            </button>
-                            <button onClick={() => navigate('/trainer/messages')} className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors text-left group">
-                                <MessageSquare size={20} className="text-blue-500 group-hover:scale-110 transition-transform" />
-                                <span className="text-gray-700 font-medium text-sm">Message Member</span>
-                            </button>
+
+                        {/* Performance Summary */}
+                        <div className="bg-[var(--sidebar-bg)] border border-[var(--sidebar-border)] rounded-lg overflow-hidden">
+                            <div className="px-3 py-2 border-b border-[var(--sidebar-border)]">
+                                <h2 className="text-xs font-semibold text-[var(--text-primary)] uppercase tracking-wide">
+                                    This Week
+                                </h2>
+                            </div>
+                            <div className="p-3 space-y-2.5">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-xs text-[var(--text-tertiary)]">Sessions Completed</span>
+                                    <span className="text-xs font-semibold text-[var(--text-primary)]">18/20</span>
+                                </div>
+                                <div className="h-1.5 bg-[var(--sidebar-border)] rounded-full overflow-hidden">
+                                    <div className="h-full w-[90%] bg-gradient-to-r from-[#4F46E5] to-[#6366F1] rounded-full" />
+                                </div>
+                                <div className="flex items-center justify-between pt-1">
+                                    <span className="text-xs text-[var(--text-tertiary)]">Client Retention</span>
+                                    <span className="text-xs font-semibold text-emerald-500">96%</span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <span className="text-xs text-[var(--text-tertiary)]">Avg. Rating</span>
+                                    <span className="text-xs font-semibold text-amber-500">4.9 ⭐</span>
+                                </div>
+                            </div>
                         </div>
+
+                        {/* Reports Link */}
+                        <button
+                            onClick={() => navigate('/trainer/reports')}
+                            className="w-full flex items-center justify-between p-3 bg-[var(--sidebar-bg)] border border-[var(--sidebar-border)] rounded-lg hover:border-[#4F46E5]/30 transition-colors group"
+                        >
+                            <div className="flex items-center gap-2.5">
+                                <div className="w-8 h-8 rounded-md bg-[#4F46E5]/10 flex items-center justify-center">
+                                    <TrendingUp size={16} className="text-[#4F46E5]" />
+                                </div>
+                                <div className="text-left">
+                                    <div className="text-xs font-medium text-[var(--text-primary)]">View Reports</div>
+                                    <div className="text-[10px] text-[var(--text-tertiary)]">Detailed analytics</div>
+                                </div>
+                            </div>
+                            <ChevronRight size={16} className="text-[var(--text-tertiary)] group-hover:text-[#4F46E5] transition-colors" />
+                        </button>
                     </div>
                 </div>
             </div>

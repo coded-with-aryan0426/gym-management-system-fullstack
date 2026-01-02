@@ -4,14 +4,13 @@ import CommandRail from './CommandRail';
 import UtilityBar from './UtilityBar';
 import './AppShell.css';
 
-// Create context for sidebar state
 interface SidebarContextType {
     isCollapsed: boolean;
     toggleCollapsed: () => void;
 }
 
 const SidebarContext = createContext<SidebarContextType>({
-    isCollapsed: false,
+    isCollapsed: true,
     toggleCollapsed: () => { },
 });
 
@@ -19,17 +18,17 @@ export const useSidebar = () => useContext(SidebarContext);
 
 interface AppShellProps {
     children?: React.ReactNode;
-    navItems?: any[]; // Using any[] to avoid circular dependency for now, or import NavItem
+    navItems?: any[];
     showUtilityBar?: boolean;
 }
 
 const AppShell: React.FC<AppShellProps> = ({ children, navItems, showUtilityBar = true }) => {
-    // Persist sidebar collapsed state across refreshes
     const [isCollapsed, setIsCollapsed] = useState(() => {
         try {
-            return localStorage.getItem('sidebar-collapsed') === 'true';
+            const stored = localStorage.getItem('sidebar-collapsed');
+            return stored === null ? true : stored === 'true';
         } catch {
-            return false;
+            return true;
         }
     });
 

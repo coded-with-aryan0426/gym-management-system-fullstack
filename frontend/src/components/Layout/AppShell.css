@@ -1,12 +1,12 @@
 /* ============================================================================
-   AppShell - Main Application Layout V3
-   Premium layout with smooth transitions and consistent spacing
+   AppShell - Main Application Layout (Ultra Compact)
+   Optimized for maximum screen real estate
    ============================================================================ */
 
 :root {
-  --sidebar-width: 220px;
+  --sidebar-width: 180px;
   --sidebar-collapsed: 56px;
-  --utility-bar-height: 56px;
+  --utility-bar-height: 48px;
 }
 
 .app-shell {
@@ -38,7 +38,6 @@
   background-color: var(--bg-primary);
 }
 
-/* Scrollbar Styling for Content Area */
 .app-shell__content::-webkit-scrollbar {
   width: 6px;
 }
@@ -56,13 +55,13 @@
   background: rgba(255, 255, 255, 0.12);
 }
 
-/* ============================================
-   RESPONSIVE
-   ============================================ */
-@media (max-width: 1200px) {
-  .app-shell__content {
-    padding: 0;
-  }
+/* Light theme scrollbar */
+:root.theme-light .app-shell__content::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+:root.theme-light .app-shell__content::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.12);
 }
 
 @media (max-width: 768px) {
@@ -72,15 +71,5 @@
 
   .app-shell--collapsed .app-shell__main {
     margin-left: 0;
-  }
-
-  .app-shell__content {
-    padding: 0;
-  }
-}
-
-@media (max-width: 480px) {
-  .app-shell__content {
-    padding: 0;
   }
 }
