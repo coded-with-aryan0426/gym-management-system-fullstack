@@ -43,6 +43,7 @@
 
 .utility-bar__search:focus-within {
   background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.3);
 }
 
 .utility-bar__search-icon {
@@ -58,8 +59,15 @@
   width: 100%;
   margin-left: 8px;
   outline: none;
+  box-shadow: none;
   font-size: 12px;
   font-weight: 400;
+}
+
+.utility-bar__search-input:focus {
+  outline: none;
+  border: none;
+  box-shadow: none;
 }
 
 .utility-bar__search-input::placeholder {
@@ -541,6 +549,7 @@
 
 :root.theme-light .utility-bar__search:focus-within {
   background: white;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.25);
 }
 
 :root.theme-light .utility-bar__stats {
