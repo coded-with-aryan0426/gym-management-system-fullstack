@@ -3,11 +3,72 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
     ChevronRight, Moon, Sun, Check, Eye, EyeOff,
-    Smartphone, Laptop, Monitor, LogOut, Trash2, Download, Upload
+    Smartphone, Laptop, Monitor, LogOut, Trash2, Download, Upload,
+    CheckCircle2, AlertCircle, Info
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useTheme } from '../../contexts/ThemeContext';
 import './TrainerSettings.css';
+
+const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success', description?: string) => {
+    const icons = {
+        success: <CheckCircle2 size={20} />,
+        error: <AlertCircle size={20} />,
+        info: <Info size={20} />
+    };
+    const colors = {
+        success: { bg: 'linear-gradient(135deg, #10B981, #059669)', border: 'rgba(16, 185, 129, 0.3)' },
+        error: { bg: 'linear-gradient(135deg, #EF4444, #DC2626)', border: 'rgba(239, 68, 68, 0.3)' },
+        info: { bg: 'linear-gradient(135deg, #3B82F6, #2563EB)', border: 'rgba(59, 130, 246, 0.3)' }
+    };
+    
+    toast.custom((t) => (
+        <div
+            style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '14px 20px',
+                background: 'rgba(20, 20, 24, 0.95)',
+                backdropFilter: 'blur(20px)',
+                borderRadius: '14px',
+                border: `1px solid ${colors[type].border}`,
+                boxShadow: '0 20px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05)',
+                maxWidth: '360px',
+                opacity: t.visible ? 1 : 0,
+                transform: t.visible ? 'translateY(0) scale(1)' : 'translateY(-8px) scale(0.96)',
+                transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+            }}
+        >
+            <div
+                style={{
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '10px',
+                    background: colors[type].bg,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#fff',
+                    flexShrink: 0,
+                    boxShadow: `0 4px 12px ${type === 'success' ? 'rgba(16, 185, 129, 0.4)' : type === 'error' ? 'rgba(239, 68, 68, 0.4)' : 'rgba(59, 130, 246, 0.4)'}`,
+                }}
+            >
+                {icons[type]}
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                <span style={{ color: '#fff', fontSize: '14px', fontWeight: 600, letterSpacing: '-0.2px' }}>
+                    {message}
+                </span>
+                {description && (
+                    <span style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '12px' }}>
+                        {description}
+                    </span>
+                )}
+            </div>
+        </div>
+    ), { duration: 1500 });
+};
 
 const TrainerSettings: React.FC = () => {
     const navigate = useNavigate();
@@ -57,22 +118,22 @@ const TrainerSettings: React.FC = () => {
 
     const darkMode = theme === 'dark';
 
-    const handleSave = () => toast.success('Settings saved successfully');
+    const handleSave = () => showToast('Settings Saved', 'success', 'Your changes have been applied');
 
     const toggleTheme = (isDark: boolean) => {
         setTheme(isDark ? 'dark' : 'light');
-        toast.success(`${isDark ? 'Dark' : 'Light'} mode enabled`);
+        showToast(`${isDark ? 'Dark' : 'Light'} Mode`, 'success', 'Theme updated successfully');
     };
 
-    const handleLogoutDevice = () => toast.success('Device logged out successfully');
+    const handleLogoutDevice = () => showToast('Device Removed', 'success', 'Session terminated securely');
 
     const handleLogout = () => {
         localStorage.removeItem('authToken');
         localStorage.removeItem('user');
         localStorage.removeItem('userRole');
         sessionStorage.clear();
-        toast.success('Logged out successfully');
-        navigate('/login');
+        showToast('Signed Out', 'info', 'See you next time!');
+        setTimeout(() => navigate('/login'), 800);
     };
 
     const renderSectionContent = () => {
