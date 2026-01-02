@@ -95,11 +95,11 @@ const UtilityBar: React.FC = () => {
       }
 
   const [notifications] = useState<Notification[]>([
-    { id: 1, type: "member", title: "New Member", message: "John Doe signed up.", time: "2 months ago", read: false },
-    { id: 2, type: "payment", title: "Payment Failed", message: "Sarah Connor's renewal.", time: "7 months ago", read: false },
-    { id: 3, type: "class", title: "Class Reminder", message: "HIIT Burn starts in 15m.", time: "2 months ago", read: false },
-    { id: 4, type: "staff", title: "Staff Alert", message: "Trainer John called in sick.", time: "2 months ago", read: true },
-    { id: 5, type: "staff", title: "Low inventory", message: "Protein Bars", time: "2 month ago", read: true },
+    { id: 1, type: "member", title: "New Member", message: "John Doe signed up.", time: "2 min ago", read: false },
+    { id: 2, type: "payment", title: "Payment Failed", message: "Sarah Connor's renewal.", time: "15 min ago", read: false },
+    { id: 3, type: "class", title: "Class Reminder", message: "HIIT Burn starts in 15m.", time: "1 hour ago", read: false },
+    { id: 4, type: "staff", title: "Staff Alert", message: "Trainer John called in sick.", time: "3 hours ago", read: true },
+    { id: 5, type: "staff", title: "Low inventory", message: "Protein Bars running low.", time: "Yesterday", read: true },
   ])
 
   useEffect(() => {
@@ -362,41 +362,73 @@ const UtilityBar: React.FC = () => {
           </button>
 
           <div className="utility-bar__dropdown" ref={notificationRef}>
-            <button
-              className="utility-bar__icon-btn"
-              title="Notifications"
-              onClick={() => setShowNotifications(!showNotifications)}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-              </svg>
-              {unreadCount > 0 && <span className="utility-bar__badge">{unreadCount}</span>}
-            </button>
-            {showNotifications && (
-              <div className="utility-bar__dropdown-menu notifications-panel">
-                <div className="notifications-panel__header">
-                  <h3>Notifications</h3>
-                </div>
-                <div className="notifications-panel__list">
-                  {notifications.map((notification) => (
-                    <div
-                      key={notification.id}
-                      className={`notification-item ${!notification.read ? "notification-item--unread" : ""}`}
-                    >
-                      {getNotificationIcon(notification.type)}
-                      <div className="notification-item__content">
-                        <p className="notification-item__title">
-                          <strong>{notification.title}:</strong> {notification.message}
-                        </p>
-                        <span className="notification-item__time">{notification.time}</span>
-                      </div>
+              <button
+                className={`utility-bar__icon-btn ${unreadCount > 0 ? 'utility-bar__icon-btn--has-notifications' : ''}`}
+                title="Notifications"
+                onClick={() => setShowNotifications(!showNotifications)}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                </svg>
+                {unreadCount > 0 && <span className="utility-bar__badge utility-bar__badge--pulse">{unreadCount}</span>}
+              </button>
+              {showNotifications && (
+                <div className="utility-bar__dropdown-menu notifications-panel notifications-panel--premium">
+                  <div className="notifications-panel__header">
+                    <div className="notifications-panel__header-content">
+                      <h3>Notifications</h3>
+                      <span className="notifications-panel__count">{unreadCount} new</span>
                     </div>
-                  ))}
+                    <button className="notifications-panel__mark-all">Mark all read</button>
+                  </div>
+                  <div className="notifications-panel__list">
+                    {notifications.map((notification) => (
+                      <div
+                        key={notification.id}
+                        className={`notification-item notification-item--premium ${!notification.read ? "notification-item--unread" : ""}`}
+                      >
+                        <div className="notification-item__icon-wrapper">
+                          {getNotificationIcon(notification.type)}
+                          {!notification.read && <span className="notification-item__unread-dot" />}
+                        </div>
+                        <div className="notification-item__content">
+                          <p className="notification-item__title">
+                            <span className="notification-item__category">{notification.title}</span>
+                            <span className="notification-item__message">{notification.message}</span>
+                          </p>
+                          <div className="notification-item__meta">
+                            <span className="notification-item__time">
+                              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <circle cx="12" cy="12" r="10" />
+                                <polyline points="12 6 12 12 16 14" />
+                              </svg>
+                              {notification.time}
+                            </span>
+                            <span className={`notification-item__type notification-item__type--${notification.type}`}>
+                              {notification.type}
+                            </span>
+                          </div>
+                        </div>
+                        <button className="notification-item__action">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <polyline points="9 18 15 12 9 6" />
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="notifications-panel__footer">
+                    <button className="notifications-panel__view-all">
+                      View All Notifications
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <polyline points="9 18 15 12 9 6" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
 
           {(userRole === 'TRAINER' || userRole === 'MEMBER' || userRole === 'CUSTOMER') && (
             <>
