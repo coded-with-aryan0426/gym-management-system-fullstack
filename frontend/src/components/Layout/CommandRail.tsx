@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { NavLink } from "react-router-dom"
+import { NavLink, useNavigate } from "react-router-dom"
 import { Logo } from "../ui/Logo"
 import "./CommandRail.css"
 
