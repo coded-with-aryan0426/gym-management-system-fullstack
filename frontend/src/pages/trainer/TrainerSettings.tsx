@@ -1,21 +1,16 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
     ChevronRight, Moon, Sun, Check, Eye, EyeOff,
     Smartphone, Laptop, Monitor, LogOut, Trash2, Download, Upload
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { useTheme } from '../../contexts/ThemeContext';
 import './TrainerSettings.css';
 
-const THEME_KEY = 'trainer-theme';
-
 const TrainerSettings: React.FC = () => {
+    const { theme, setTheme } = useTheme();
     const [activeSection, setActiveSection] = useState<string | null>(null);
-    const [darkMode, setDarkMode] = useState(() => {
-        const saved = localStorage.getItem(THEME_KEY);
-        if (saved) return saved === 'dark';
-        return !document.documentElement.classList.contains('theme-light');
-    });
     const [showPassword, setShowPassword] = useState(false);
     const [notifications, setNotifications] = useState({
         email: true,
@@ -58,33 +53,12 @@ const TrainerSettings: React.FC = () => {
         { id: 3, device: 'Chrome on Windows', location: 'Delhi, India', lastActive: '3 days ago', icon: Monitor, current: false },
     ];
 
-    const applyTheme = useCallback((isDark: boolean) => {
-        if (isDark) {
-            document.documentElement.classList.remove('theme-light');
-        } else {
-            document.documentElement.classList.add('theme-light');
-        }
-        localStorage.setItem(THEME_KEY, isDark ? 'dark' : 'light');
-    }, []);
-
-    useEffect(() => {
-        applyTheme(darkMode);
-    }, [darkMode, applyTheme]);
-
-    useEffect(() => {
-        const saved = localStorage.getItem(THEME_KEY);
-        if (saved) {
-            const isDark = saved === 'dark';
-            setDarkMode(isDark);
-            applyTheme(isDark);
-        }
-    }, [applyTheme]);
+    const darkMode = theme === 'dark';
 
     const handleSave = () => toast.success('Settings saved successfully');
 
     const toggleTheme = (isDark: boolean) => {
-        setDarkMode(isDark);
-        applyTheme(isDark);
+        setTheme(isDark ? 'dark' : 'light');
         toast.success(`${isDark ? 'Dark' : 'Light'} mode enabled`);
     };
 
