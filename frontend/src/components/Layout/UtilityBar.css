@@ -543,8 +543,8 @@
 
 :root.theme-light .utility-bar__search:focus-within {
   background: white;
-  border-color: rgba(0, 0, 0, 0.1);
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+  border-color: #DC2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
 }
 
 :root.theme-light .utility-bar__stats {
