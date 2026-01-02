@@ -256,21 +256,51 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 0 12px;
-  height: 30px;
-  background: #4F46E5;
+  padding: 0 14px;
+  height: 32px;
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.utility-bar__create-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 50%);
+  opacity: 0;
+  transition: opacity 0.25s ease;
 }
 
 .utility-bar__create-btn:hover {
-  background: #4338CA;
-  transform: translateY(-1px);
+  background: linear-gradient(135deg, #F87171 0%, #EF4444 100%);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+}
+
+.utility-bar__create-btn:hover::before {
+  opacity: 1;
+}
+
+.utility-bar__create-btn:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
+}
+
+.utility-bar__create-btn svg {
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.utility-bar__create-btn:hover svg {
+  transform: rotate(90deg);
 }
 
 .utility-bar__create-text {
