@@ -18,12 +18,12 @@ const TrainerSettings: React.FC = () => {
     });
 
     const sections = [
-        { id: 'profile', label: 'Profile Settings', icon: User },
-        { id: 'notifications', label: 'Notifications', icon: Bell },
-        { id: 'appearance', label: 'Appearance', icon: Palette },
-        { id: 'security', label: 'Security', icon: Lock },
-        { id: 'language', label: 'Language & Region', icon: Globe },
-        { id: 'privacy', label: 'Privacy', icon: Shield },
+        { id: 'profile', label: 'Profile Settings', icon: User, color: '#3B82F6' },
+        { id: 'notifications', label: 'Notifications', icon: Bell, color: '#F59E0B' },
+        { id: 'appearance', label: 'Appearance', icon: Palette, color: '#8B5CF6' },
+        { id: 'security', label: 'Security', icon: Lock, color: '#10B981' },
+        { id: 'language', label: 'Language & Region', icon: Globe, color: '#06B6D4' },
+        { id: 'privacy', label: 'Privacy', icon: Shield, color: '#EC4899' },
     ];
 
     const handleSave = () => {
@@ -52,7 +52,7 @@ const TrainerSettings: React.FC = () => {
                             onClick={() => setActiveSection(section.id)}
                             className={`trainer-settings__nav-item ${activeSection === section.id ? 'trainer-settings__nav-item--active' : ''}`}
                         >
-                            <section.icon size={18} />
+                            <section.icon size={18} style={{ color: activeSection === section.id ? section.color : undefined }} />
                             <span>{section.label}</span>
                             <ChevronRight size={16} />
                         </button>

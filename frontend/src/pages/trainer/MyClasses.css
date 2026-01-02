@@ -294,9 +294,9 @@
 }
 
 .my-classes__event--upcoming {
-  background: rgba(220, 38, 38, 0.15);
-  border-left-color: #DC2626;
-  color: #DC2626;
+  background: rgba(59, 130, 246, 0.15);
+  border-left-color: #3B82F6;
+  color: #3B82F6;
 }
 
 .my-classes__event--progress {
@@ -411,7 +411,7 @@
 }
 
 .my-classes__list-item:hover .my-classes__list-info h3 {
-  color: #DC2626;
+  color: #3B82F6;
 }
 
 .my-classes__list-meta {
@@ -442,8 +442,8 @@
 }
 
 .my-classes__status--upcoming {
-  background: rgba(220, 38, 38, 0.15);
-  color: #DC2626;
+  background: rgba(59, 130, 246, 0.15);
+  color: #3B82F6;
 }
 
 .my-classes__status--completed {

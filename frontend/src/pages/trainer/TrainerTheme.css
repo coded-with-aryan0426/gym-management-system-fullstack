@@ -1,60 +1,25 @@
 /* ============================================================================
-   Trainer Theme - Red & Black (Dark) / Red & White (Light)
-   Shared theme variables for all trainer pages
+   Trainer Theme - Red Primary with Colorful Accents
+   Dark Mode: Red & Black | Light Mode: Red & White
    ============================================================================ */
 
-/* Primary Red Color Palette */
 :root {
+  /* Primary Red Accent */
   --trainer-primary: #DC2626;
   --trainer-primary-hover: #B91C1C;
   --trainer-primary-light: rgba(220, 38, 38, 0.15);
-  --trainer-primary-dark: #991B1B;
-  --trainer-accent: #EF4444;
-  --trainer-accent-light: rgba(239, 68, 68, 0.1);
-}
-
-/* ============================================
-   DARK MODE (Red & Black) - Default
-   ============================================ */
-.trainer-dashboard,
-.trainer-profile,
-.my-members,
-.my-classes,
-.progress-notes,
-.trainer-schedule,
-.trainer-messages,
-.trainer-notif,
-.trainer-reports,
-.trainer-settings {
-  --bg-primary: #0a0a0a;
-  --bg-secondary: #141414;
-  --bg-tertiary: #1a1a1a;
-  --border-color: rgba(255, 255, 255, 0.08);
-  --border-hover: rgba(220, 38, 38, 0.3);
-  --text-primary: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.7);
-  --text-tertiary: rgba(255, 255, 255, 0.5);
-}
-
-/* ============================================
-   LIGHT MODE (Red & White)
-   ============================================ */
-:root.theme-light .trainer-dashboard,
-:root.theme-light .trainer-profile,
-:root.theme-light .my-members,
-:root.theme-light .my-classes,
-:root.theme-light .progress-notes,
-:root.theme-light .trainer-schedule,
-:root.theme-light .trainer-messages,
-:root.theme-light .trainer-notif,
-:root.theme-light .trainer-reports,
-:root.theme-light .trainer-settings {
-  --bg-primary: #ffffff;
-  --bg-secondary: #fafafa;
-  --bg-tertiary: #f5f5f5;
-  --border-color: rgba(0, 0, 0, 0.08);
-  --border-hover: rgba(220, 38, 38, 0.3);
-  --text-primary: #111111;
-  --text-secondary: #4a4a4a;
-  --text-tertiary: #6b6b6b;
+  
+  /* Secondary Colors for variety */
+  --trainer-blue: #3B82F6;
+  --trainer-blue-light: rgba(59, 130, 246, 0.15);
+  --trainer-green: #10B981;
+  --trainer-green-light: rgba(16, 185, 129, 0.15);
+  --trainer-purple: #8B5CF6;
+  --trainer-purple-light: rgba(139, 92, 246, 0.15);
+  --trainer-orange: #F59E0B;
+  --trainer-orange-light: rgba(245, 158, 11, 0.15);
+  --trainer-pink: #EC4899;
+  --trainer-pink-light: rgba(236, 72, 153, 0.15);
+  --trainer-cyan: #06B6D4;
+  --trainer-cyan-light: rgba(6, 182, 212, 0.15);
 }

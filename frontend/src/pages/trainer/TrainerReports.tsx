@@ -9,10 +9,10 @@ const TrainerReports: React.FC = () => {
     const [period, setPeriod] = useState('This Month');
 
     const stats = [
-        { label: 'Total Sessions', value: '156', change: '+12%', changeType: 'positive', icon: Calendar },
-        { label: 'Active Members', value: '24', change: '+3', changeType: 'positive', icon: Users },
-        { label: 'Avg. Attendance', value: '94%', change: '+5%', changeType: 'positive', icon: Activity },
-        { label: 'Client Rating', value: '4.9', change: 'Excellent', changeType: 'neutral', icon: Award },
+        { label: 'Total Sessions', value: '156', change: '+12%', changeType: 'positive', icon: Calendar, color: '#8B5CF6' },
+        { label: 'Active Members', value: '24', change: '+3', changeType: 'positive', icon: Users, color: '#3B82F6' },
+        { label: 'Avg. Attendance', value: '94%', change: '+5%', changeType: 'positive', icon: Activity, color: '#10B981' },
+        { label: 'Client Rating', value: '4.9', change: 'Excellent', changeType: 'neutral', icon: Award, color: '#F59E0B' },
     ];
 
     const performanceData = [
@@ -66,7 +66,10 @@ const TrainerReports: React.FC = () => {
                 <div className="trainer-reports__stats">
                     {stats.map((stat, idx) => (
                         <div key={idx} className="trainer-reports__stat-card">
-                            <div className="trainer-reports__stat-icon">
+                            <div 
+                                className="trainer-reports__stat-icon"
+                                style={{ backgroundColor: `${stat.color}15`, color: stat.color }}
+                            >
                                 <stat.icon size={20} />
                             </div>
                             <div className="trainer-reports__stat-value">{stat.value}</div>
