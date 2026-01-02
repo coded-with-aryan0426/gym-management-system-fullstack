@@ -53,9 +53,9 @@ body.light-mode .settings-section {
 :root.theme-light .settings-sidebar,
 [data-theme="light"] .settings-sidebar,
 body.light-mode .settings-sidebar {
-  border: 1px solid rgba(203, 213, 225, 0.6);
+  border: 2px solid #CBD5E1;
   background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 /* Light Mode - Nav Items */
@@ -491,8 +491,9 @@ body.light-mode .info-icon[data-tooltip]:hover::after {
   height: fit-content;
   padding: 4px;
   background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 2px solid rgba(255, 255, 255, 0.15);
   border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .settings-nav-item {
