@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
     ChevronRight, Moon, Sun, Check, Eye, EyeOff,
@@ -9,6 +10,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import './TrainerSettings.css';
 
 const TrainerSettings: React.FC = () => {
+    const navigate = useNavigate();
     const { theme, setTheme } = useTheme();
     const [activeSection, setActiveSection] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(false);
@@ -63,6 +65,15 @@ const TrainerSettings: React.FC = () => {
     };
 
     const handleLogoutDevice = () => toast.success('Device logged out successfully');
+
+    const handleLogout = () => {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('user');
+        localStorage.removeItem('userRole');
+        sessionStorage.clear();
+        toast.success('Logged out successfully');
+        navigate('/login');
+    };
 
     const renderSectionContent = () => {
         switch (activeSection) {
@@ -603,9 +614,9 @@ const TrainerSettings: React.FC = () => {
                                 </motion.button>
                             ))}
                         </div>
-                        <div className="ts-footer">
-                            <button className="ts-logout-btn"><LogOut size={16} /><span>Log Out</span></button>
-                        </div>
+<div className="ts-footer">
+                              <button className="ts-logout-btn" onClick={handleLogout}><LogOut size={16} /><span>Log Out</span></button>
+                          </div>
                     </motion.div>
                 )}
             </AnimatePresence>
