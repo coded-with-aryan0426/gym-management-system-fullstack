@@ -584,21 +584,18 @@
   background-color: var(--bg-secondary);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 2px solid var(--border-secondary);
   height: 72px;
-  /* Fixed height for headers */
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 .time-column-header {
   width: 100%;
-  /* Fills time-column width */
-  border-right: 1px solid var(--border-subtle);
+  border-right: 2px solid var(--border-secondary);
   background: var(--bg-tertiary);
-  /* Distinct background for time corner */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -616,7 +613,7 @@
   flex: 1;
   padding: 12px 4px;
   text-align: center;
-  border-right: 1px solid var(--border-subtle);
+  border-right: 1px solid var(--border-secondary);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -714,64 +711,87 @@
 .time-column {
   width: 70px;
   flex-shrink: 0;
-  border-right: 1px solid var(--border-subtle);
+  border-right: 2px solid var(--border-secondary);
   background-color: var(--bg-tertiary);
   display: flex;
   flex-direction: column;
-  /* position: sticky; REMOVED - The column itself doesn't stick, only header */
-  z-index: 25;
-  /* Higher than content, lower than header */
   position: sticky;
   left: 0;
   z-index: 40;
-  /* Needs to be high */
-  background-color: var(--bg-tertiary);
 }
 
 .time-label {
   height: 60px;
   position: relative;
-  border-top: 1px solid transparent;
-  /* Align with grid lines */
+  border-top: 1px solid var(--border-secondary);
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding-right: 10px;
+  padding-top: 4px;
+}
+
+.time-label:first-of-type {
+  padding-top: 8px;
 }
 
 .time-label span {
-  position: absolute;
-  top: -6px;
-  right: 12px;
   font-size: 11px;
-  color: var(--text-tertiary);
-  font-weight: 500;
+  color: var(--text-secondary);
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
+  background: var(--bg-tertiary);
+  padding: 2px 4px;
+  border-radius: 4px;
+  white-space: nowrap;
 }
 
 .day-column {
   flex: 1;
   min-width: 140px;
-  /* Ensure min width for days */
-  border-right: 1px solid var(--border-subtle);
+  border-right: 1px solid var(--border-secondary);
   position: relative;
   display: flex;
   flex-direction: column;
 }
 
+.day-column:last-child {
+  border-right: none;
+}
+
 .day-slots-container {
   position: relative;
   flex: 1;
-  /* Contains grid lines and events */
 }
 
 .grid-cell {
   height: 60px;
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-secondary);
+  border-right: 1px solid var(--border-subtle);
   box-sizing: border-box;
   width: 100%;
   cursor: pointer;
-  transition: background-color 0.1s;
+  transition: background-color 0.15s ease;
+  position: relative;
+}
+
+.grid-cell::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: var(--border-subtle);
+  opacity: 0.5;
 }
 
 .grid-cell:hover {
-  background-color: var(--bg-tertiary);
+  background-color: rgba(99, 102, 241, 0.05);
+}
+
+.grid-cell:nth-child(even) {
+  background-color: rgba(0, 0, 0, 0.02);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1665,4 +1685,52 @@ body.light-mode .event-type-cardio {
 :root.theme-light .calendar-event--premium .capacity-bar__fill,
 [data-theme="light"] .calendar-event--premium .capacity-bar__fill {
   background: rgba(0, 0, 0, 0.4);
+}
+
+/* Light mode grid improvements */
+:root.theme-light .grid-cell,
+[data-theme="light"] .grid-cell {
+  border-bottom-color: #e2e8f0;
+  border-right-color: #f1f5f9;
+}
+
+:root.theme-light .grid-cell::before,
+[data-theme="light"] .grid-cell::before {
+  background: #e2e8f0;
+  opacity: 0.4;
+}
+
+:root.theme-light .grid-cell:nth-child(even),
+[data-theme="light"] .grid-cell:nth-child(even) {
+  background-color: rgba(0, 0, 0, 0.015);
+}
+
+:root.theme-light .time-column,
+[data-theme="light"] .time-column {
+  border-right-color: #cbd5e1;
+}
+
+:root.theme-light .time-label,
+[data-theme="light"] .time-label {
+  border-top-color: #e2e8f0;
+}
+
+:root.theme-light .day-column,
+[data-theme="light"] .day-column {
+  border-right-color: #e2e8f0;
+}
+
+:root.theme-light .sticky-header,
+[data-theme="light"] .sticky-header {
+  border-bottom-color: #cbd5e1;
+}
+
+:root.theme-light .time-column-header,
+[data-theme="light"] .time-column-header {
+  border-right-color: #cbd5e1;
+}
+
+:root.theme-light .day-column-header,
+[data-theme="light"] .day-column-header {
+  border-right-color: #e2e8f0;
 }
