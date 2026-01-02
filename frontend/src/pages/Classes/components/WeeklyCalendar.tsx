@@ -46,7 +46,7 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
             <div className="calendar-grid-container">
                 <div className="calendar-grid-inner">
                     <div className="time-column">
-                        <div className="time-column-header sticky-header">
+                        <div className="time-column-header">
                             <span className="time-header-label">Time</span>
                         </div>
                         {timeSlots.map(hour => (
@@ -64,7 +64,7 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 
                         return (
                             <div key={day.toString()} className={`day-column ${isPast ? 'day-column--past' : ''}`}>
-                                <div className={`day-column-header sticky-header ${isToday ? 'today' : ''}`}>
+                                <div className={`day-column-header ${isToday ? 'today' : ''}`}>
                                     <div className="day-name">{format(day, 'EEE')}</div>
                                     <div className="day-number">{format(day, 'd')}</div>
                                     {dayClasses.length > 0 && (

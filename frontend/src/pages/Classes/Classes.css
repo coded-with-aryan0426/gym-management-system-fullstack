@@ -793,28 +793,20 @@
 /* Old calendar-header removed, replaced by sticky headers in columns */
 
 /* Column Headers (Sticky) */
-.sticky-header {
+.time-column-header {
   position: sticky;
   top: 0;
   z-index: 50;
-  background-color: var(--bg-secondary);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 2px solid var(--border-secondary);
-  height: 72px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-}
-
-.time-column-header {
   width: 100%;
   border-right: 2px solid var(--border-secondary);
+  border-bottom: 2px solid var(--border-secondary);
   background: var(--bg-tertiary);
   display: flex;
   align-items: center;
   justify-content: center;
+  height: 72px;
+  flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .time-header-label {
@@ -826,17 +818,26 @@
 }
 
 .day-column-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
   flex: 1;
-  padding: 12px 4px;
+  padding: 8px 4px;
   text-align: center;
   border-right: 1px solid var(--border-secondary);
+  border-bottom: 2px solid var(--border-secondary);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  position: relative;
+  gap: 4px;
   transition: background-color 0.2s ease;
+  height: 72px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  background-color: var(--bg-secondary);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .day-column-header:hover {
@@ -939,16 +940,12 @@
 .time-label {
   height: 60px;
   position: relative;
-  border-top: 1px solid var(--border-secondary);
+  border-bottom: 1px solid var(--border-secondary);
   display: flex;
   align-items: flex-start;
   justify-content: flex-end;
   padding-right: 10px;
-  padding-top: 4px;
-}
-
-.time-label:first-of-type {
-  padding-top: 8px;
+  box-sizing: border-box;
 }
 
 .time-label span {
@@ -960,6 +957,14 @@
   padding: 2px 4px;
   border-radius: 4px;
   white-space: nowrap;
+  transform: translateY(-50%);
+  position: relative;
+  top: 0;
+}
+
+.time-label:first-of-type span {
+  transform: translateY(0);
+  top: 4px;
 }
 
 .day-column {
@@ -983,7 +988,6 @@
 .grid-cell {
   height: 60px;
   border-bottom: 1px solid var(--border-secondary);
-  border-right: 1px solid var(--border-subtle);
   box-sizing: border-box;
   width: 100%;
   cursor: pointer;
