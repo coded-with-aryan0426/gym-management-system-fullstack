@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import DashboardLayout from '../../components/shared/DashboardLayout';
-import { Home, User, CreditCard, Activity, BookOpen, UserCheck, Calendar, Bell } from 'lucide-react';
+import { Home, User, CreditCard, Activity, BookOpen, UserCheck, Calendar, Bell, MessageSquare } from 'lucide-react';
 import type { NavItem } from '../../components/Layout/CommandRail';
 import '../../styles/unified-design-system.css';
 
@@ -25,6 +25,7 @@ const MemberLayout: React.FC<MemberLayoutProps> = ({ children }) => {
         { path: '/member/classes', icon: <BookOpen size={20} />, label: 'Available Classes', color: '#007AFF' },
         { path: '/member/trainer', icon: <UserCheck size={20} />, label: 'My Trainer', color: '#007AFF' },
         { path: '/member/bookings', icon: <Calendar size={20} />, label: 'My Bookings', color: '#007AFF' },
+        { path: '/member/messages', icon: <MessageSquare size={20} />, label: 'Messages', color: '#007AFF' },
         { path: '/member/notifications', icon: <Bell size={20} />, label: 'Notifications', color: '#007AFF' },
     ];
 

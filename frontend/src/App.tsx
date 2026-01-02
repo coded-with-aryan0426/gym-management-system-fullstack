@@ -52,6 +52,7 @@ const MyTrainer = lazy(() => import('./pages/member/MyTrainer'));
 const MyBookings = lazy(() => import('./pages/member/MyBookings'));
 const AvailableClasses = lazy(() => import('./pages/member/AvailableClasses'));
 const MemberNotifications = lazy(() => import('./pages/member/MemberNotifications'));
+const MemberMessages = lazy(() => import('./pages/member/MemberMessages'));
 
 // Loading spinner for page transitions
 const PageLoader = () => (
@@ -121,8 +122,9 @@ function App() {
                               <Route path="classes" element={<AvailableClasses />} />
                               <Route path="trainer" element={<MyTrainer />} />
                               <Route path="bookings" element={<MyBookings />} />
-                              <Route path="notifications" element={<MemberNotifications />} />
-                              <Route path="*" element={<Navigate to="/member" replace />} />
+                            <Route path="notifications" element={<MemberNotifications />} />
+                                <Route path="messages" element={<MemberMessages />} />
+                                <Route path="*" element={<Navigate to="/member" replace />} />
                             </Routes>
                           </MemberLayout>
                         </NavbarProvider>
