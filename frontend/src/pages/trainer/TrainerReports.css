@@ -1,5 +1,5 @@
 /* ============================================================================
-   Trainer Reports - Analytics Dashboard with Light/Dark Mode
+   Trainer Reports - Comprehensive Analytics Dashboard
    ============================================================================ */
 
 @import './TrainerTheme.css';
@@ -13,7 +13,7 @@
    HEADER
    ============================================ */
 .trainer-reports__header {
-  padding: 24px;
+  padding: 20px 24px;
   border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
   background: var(--bg-secondary, rgba(12, 12, 14, 0.95));
 }
@@ -29,14 +29,15 @@
 }
 
 .trainer-reports__title-section h1 {
-  font-size: 28px;
+  font-size: 22px;
   font-weight: 700;
   color: var(--text-primary, #fff);
-  margin: 0 0 8px 0;
+  margin: 0 0 4px 0;
+  letter-spacing: -0.02em;
 }
 
 .trainer-reports__title-section p {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text-tertiary, rgba(255, 255, 255, 0.5));
   margin: 0;
 }
@@ -44,7 +45,7 @@
 .trainer-reports__header-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .trainer-reports__period-select {
@@ -53,36 +54,62 @@
   align-items: center;
 }
 
+.trainer-reports__period-select > svg:first-child {
+  position: absolute;
+  left: 12px;
+  color: var(--text-tertiary);
+  pointer-events: none;
+}
+
 .trainer-reports__period-select select {
-  height: 40px;
-  padding: 10px 36px 10px 16px;
+  height: 38px;
+  padding: 9px 32px 9px 34px;
   background: var(--bg-primary, rgba(0, 0, 0, 0.2));
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text-primary, #fff);
   cursor: pointer;
   appearance: none;
 }
 
-.trainer-reports__period-select svg {
+.trainer-reports__period-select > svg:last-child {
   position: absolute;
-  right: 12px;
+  right: 10px;
   pointer-events: none;
   color: var(--text-tertiary, rgba(255, 255, 255, 0.4));
+}
+
+.trainer-reports__refresh-btn {
+  width: 38px;
+  height: 38px;
+  background: transparent;
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: 8px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.trainer-reports__refresh-btn:hover {
+  background: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 .trainer-reports__export-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
-  height: 40px;
-  padding: 10px 20px;
+  gap: 6px;
+  height: 38px;
+  padding: 9px 16px;
   background: #DC2626;
   border: none;
   border-radius: 8px;
   color: #fff;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s ease;
@@ -93,12 +120,50 @@
 }
 
 /* ============================================
+   TABS
+   ============================================ */
+.trainer-reports__tabs {
+  display: flex;
+  gap: 4px;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+  background: var(--bg-secondary, rgba(12, 12, 14, 0.95));
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.trainer-reports__tabs button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: var(--text-tertiary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.trainer-reports__tabs button:hover {
+  background: var(--bg-primary, rgba(255, 255, 255, 0.03));
+  color: var(--text-secondary);
+}
+
+.trainer-reports__tabs button.active {
+  background: rgba(220, 38, 38, 0.15);
+  color: #DC2626;
+}
+
+/* ============================================
    CONTENT
    ============================================ */
 .trainer-reports__content {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 24px;
+  padding: 20px 24px;
 }
 
 /* ============================================
@@ -107,8 +172,8 @@
 .trainer-reports__stats {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
-  margin-bottom: 24px;
+  gap: 16px;
+  margin-bottom: 20px;
 }
 
 @media (max-width: 1200px) {
@@ -127,22 +192,52 @@
   background: var(--bg-secondary, rgba(255, 255, 255, 0.03));
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
   border-radius: 12px;
-  padding: 20px;
-  text-align: center;
+  padding: 16px 18px;
+}
+
+.trainer-reports__stat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
 }
 
 .trainer-reports__stat-icon {
-  width: 44px;
-  height: 44px;
-  margin: 0 auto 12px;
+  width: 38px;
+  height: 38px;
   border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
+.trainer-reports__stat-trend {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.trainer-reports__stat-trend--positive {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10B981;
+}
+
+.trainer-reports__stat-trend--negative {
+  background: rgba(239, 68, 68, 0.15);
+  color: #EF4444;
+}
+
+.trainer-reports__stat-trend--neutral {
+  background: rgba(245, 158, 11, 0.15);
+  color: #F59E0B;
+}
+
 .trainer-reports__stat-value {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 700;
   color: var(--text-primary, #fff);
   line-height: 1;
@@ -150,25 +245,14 @@
 }
 
 .trainer-reports__stat-label {
-  font-size: 14px;
-  color: var(--text-tertiary, rgba(255, 255, 255, 0.5));
-  margin-bottom: 8px;
+  font-size: 13px;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+  margin-bottom: 4px;
 }
 
-.trainer-reports__stat-change {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.trainer-reports__stat-change--positive {
-  color: #10B981;
-}
-
-.trainer-reports__stat-change--neutral {
-  color: #F59E0B;
+.trainer-reports__stat-subtext {
+  font-size: 11px;
+  color: var(--text-tertiary, rgba(255, 255, 255, 0.4));
 }
 
 /* ============================================
@@ -176,8 +260,8 @@
    ============================================ */
 .trainer-reports__grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
 }
 
 @media (max-width: 1024px) {
@@ -193,7 +277,7 @@
   overflow: hidden;
 }
 
-.trainer-reports__card--sessions {
+.trainer-reports__card--full {
   grid-column: 1 / -1;
 }
 
@@ -201,15 +285,15 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 24px;
+  padding: 14px 18px;
   border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
 }
 
 .trainer-reports__card-header h2 {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 16px;
+  gap: 8px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--text-primary, #fff);
   margin: 0;
@@ -219,21 +303,235 @@
   color: #DC2626;
 }
 
+.trainer-reports__chart-legend {
+  display: flex;
+  gap: 12px;
+}
+
+.trainer-reports__chart-legend span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.trainer-reports__legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.trainer-reports__legend-dot--actual {
+  background: #DC2626;
+}
+
+.trainer-reports__legend-dot--target {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.trainer-reports__info-btn {
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.trainer-reports__info-btn:hover {
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+}
+
+.trainer-reports__card-content {
+  padding: 18px;
+}
+
 .trainer-reports__view-all {
   background: none;
   border: none;
   color: #DC2626;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   cursor: pointer;
 }
 
-.trainer-reports__view-all:hover {
-  text-decoration: underline;
+/* ============================================
+   BAR CHART
+   ============================================ */
+.trainer-reports__bar-chart {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  height: 160px;
+  gap: 8px;
+  padding-bottom: 24px;
+  margin-bottom: 16px;
 }
 
-.trainer-reports__card-content {
-  padding: 24px;
+.trainer-reports__bar-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+}
+
+.trainer-reports__bar-container {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 4px;
+  position: relative;
+}
+
+.trainer-reports__bar {
+  width: 14px;
+  border-radius: 4px 4px 0 0;
+  transition: height 0.3s ease;
+}
+
+.trainer-reports__bar--target {
+  background: var(--border-color, rgba(255, 255, 255, 0.1));
+}
+
+.trainer-reports__bar--actual {
+  background: linear-gradient(180deg, #DC2626, #B91C1C);
+  position: relative;
+}
+
+.trainer-reports__bar-value {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.trainer-reports__bar-label {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-top: 8px;
+}
+
+.trainer-reports__chart-summary {
+  display: flex;
+  justify-content: space-around;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+}
+
+.trainer-reports__summary-item {
+  text-align: center;
+}
+
+.trainer-reports__summary-value {
+  display: block;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.trainer-reports__summary-value--positive {
+  color: #10B981;
+}
+
+.trainer-reports__summary-label {
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+/* ============================================
+   DONUT CHART
+   ============================================ */
+.trainer-reports__donut-chart {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.trainer-reports__donut {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  flex-shrink: 0;
+}
+
+.trainer-reports__donut svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.trainer-reports__donut-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.trainer-reports__donut-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.trainer-reports__donut-label {
+  font-size: 10px;
+  color: var(--text-tertiary);
+}
+
+.trainer-reports__breakdown-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.trainer-reports__breakdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.trainer-reports__breakdown-color {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.trainer-reports__breakdown-type {
+  flex: 1;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.trainer-reports__breakdown-count {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 24px;
+}
+
+.trainer-reports__breakdown-percent {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  min-width: 32px;
+  text-align: right;
 }
 
 /* ============================================
@@ -242,13 +540,13 @@
 .trainer-reports__metrics {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 14px;
 }
 
 .trainer-reports__metric {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .trainer-reports__metric-header {
@@ -257,121 +555,163 @@
   align-items: center;
 }
 
+.trainer-reports__metric-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .trainer-reports__metric-label {
-  font-size: 14px;
+  font-size: 12px;
   color: var(--text-secondary, rgba(255, 255, 255, 0.7));
 }
 
 .trainer-reports__metric-value {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-primary, #fff);
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .trainer-reports__metric-bar {
-  height: 8px;
+  height: 6px;
   background: var(--border-color, rgba(255, 255, 255, 0.08));
-  border-radius: 4px;
+  border-radius: 3px;
   overflow: hidden;
 }
 
 .trainer-reports__metric-progress {
   height: 100%;
-  background: linear-gradient(90deg, #DC2626, #EF4444);
-  border-radius: 4px;
+  border-radius: 3px;
   transition: width 0.3s ease;
 }
 
 /* ============================================
-   TOP MEMBERS
+   ACHIEVEMENTS
    ============================================ */
-.trainer-reports__top-members {
+.trainer-reports__achievements {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-}
-
-.trainer-reports__member {
-  display: flex;
-  align-items: center;
   gap: 12px;
 }
 
-.trainer-reports__member-rank {
-  width: 24px;
-  height: 24px;
-  border-radius: 6px;
-  background: rgba(220, 38, 38, 0.15);
-  color: #DC2626;
-  font-size: 12px;
-  font-weight: 700;
+.trainer-reports__achievement {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  background: var(--bg-primary, rgba(0, 0, 0, 0.2));
+  border-radius: 8px;
+}
+
+.trainer-reports__achievement-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
-.trainer-reports__member-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #DC2626, #EF4444);
-  color: #fff;
-  font-size: 12px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.trainer-reports__member-info {
-  flex: 1;
+.trainer-reports__achievement-info {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
-.trainer-reports__member-name {
-  font-size: 14px;
+.trainer-reports__achievement-label {
+  font-size: 13px;
   font-weight: 500;
-  color: var(--text-primary, #fff);
+  color: var(--text-primary);
 }
 
-.trainer-reports__member-sessions {
-  font-size: 12px;
-  color: var(--text-tertiary, rgba(255, 255, 255, 0.5));
-}
-
-.trainer-reports__member-progress {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
-  min-width: 80px;
-}
-
-.trainer-reports__member-progress > span {
-  font-size: 14px;
-  font-weight: 600;
-  color: #10B981;
-}
-
-.trainer-reports__mini-bar {
-  width: 80px;
-  height: 4px;
-  background: var(--border-color, rgba(255, 255, 255, 0.08));
-  border-radius: 2px;
-  overflow: hidden;
-}
-
-.trainer-reports__mini-bar div {
-  height: 100%;
-  background: #10B981;
-  border-radius: 2px;
+.trainer-reports__achievement-date {
+  font-size: 11px;
+  color: var(--text-tertiary);
 }
 
 /* ============================================
-   SESSIONS TABLE
+   SESSIONS TAB
    ============================================ */
+.trainer-reports__session-stats {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.trainer-reports__session-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 14px 24px;
+  background: var(--bg-secondary, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+  border-radius: 10px;
+  min-width: 100px;
+}
+
+.trainer-reports__session-stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.trainer-reports__session-stat-label {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-top: 4px;
+}
+
+.trainer-reports__session-stat--completed .trainer-reports__session-stat-value {
+  color: #10B981;
+}
+
+.trainer-reports__session-stat--cancelled .trainer-reports__session-stat-value {
+  color: #EF4444;
+}
+
+.trainer-reports__session-stat--no-show .trainer-reports__session-stat-value {
+  color: #F59E0B;
+}
+
+.trainer-reports__sessions-toolbar {
+  margin-bottom: 16px;
+}
+
+.trainer-reports__sessions-filter {
+  display: inline-flex;
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.trainer-reports__sessions-filter button {
+  padding: 8px 16px;
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  color: var(--text-tertiary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.trainer-reports__sessions-filter button:last-child {
+  border-right: none;
+}
+
+.trainer-reports__sessions-filter button:hover {
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+}
+
+.trainer-reports__sessions-filter button.active {
+  background: rgba(220, 38, 38, 0.15);
+  color: #DC2626;
+}
+
 .trainer-reports__sessions-table {
   display: flex;
   flex-direction: column;
@@ -380,9 +720,9 @@
 .trainer-reports__table-header,
 .trainer-reports__table-row {
   display: grid;
-  grid-template-columns: 2fr 2fr 1fr 1fr 1fr;
-  gap: 16px;
-  padding: 12px 0;
+  grid-template-columns: 2fr 1.5fr 1fr 0.8fr 0.8fr 1.2fr 0.8fr;
+  gap: 12px;
+  padding: 12px 16px;
   align-items: center;
 }
 
@@ -391,36 +731,64 @@
 }
 
 .trainer-reports__table-header span {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
-  color: var(--text-tertiary, rgba(255, 255, 255, 0.5));
+  color: var(--text-tertiary);
   text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .trainer-reports__table-row {
   border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.04));
+  transition: background 0.15s ease;
+}
+
+.trainer-reports__table-row:hover {
+  background: var(--bg-primary, rgba(255, 255, 255, 0.02));
 }
 
 .trainer-reports__table-row:last-child {
   border-bottom: none;
 }
 
-.trainer-reports__table-row span {
-  font-size: 14px;
-  color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+.trainer-reports__table-row > span {
+  font-size: 13px;
+  color: var(--text-secondary);
 }
 
 .trainer-reports__session-member {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.trainer-reports__member-avatar-small {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #DC2626, #B91C1C);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.trainer-reports__session-member span {
   font-weight: 500;
-  color: var(--text-primary, #fff) !important;
+  color: var(--text-primary) !important;
 }
 
 .trainer-reports__session-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 12px;
+  border-radius: 6px;
+  font-size: 11px;
   font-weight: 600;
-  text-align: center;
 }
 
 .trainer-reports__session-status--completed {
@@ -431,6 +799,353 @@
 .trainer-reports__session-status--cancelled {
   background: rgba(239, 68, 68, 0.15);
   color: #EF4444;
+}
+
+.trainer-reports__session-status--no-show {
+  background: rgba(245, 158, 11, 0.15);
+  color: #F59E0B;
+}
+
+.trainer-reports__session-status--rescheduled {
+  background: rgba(99, 102, 241, 0.15);
+  color: #6366F1;
+}
+
+.trainer-reports__session-rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 500;
+  color: #F59E0B !important;
+}
+
+/* ============================================
+   MEMBERS TAB
+   ============================================ */
+.trainer-reports__members-header {
+  margin-bottom: 20px;
+}
+
+.trainer-reports__members-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 4px 0;
+}
+
+.trainer-reports__members-header p {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  margin: 0;
+}
+
+.trainer-reports__members-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.trainer-reports__member-card {
+  background: var(--bg-secondary, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.trainer-reports__member-card-header {
+  position: relative;
+  padding: 20px 16px;
+  text-align: center;
+  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+}
+
+.trainer-reports__member-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.trainer-reports__member-badge--1 {
+  background: rgba(245, 158, 11, 0.15);
+  color: #F59E0B;
+}
+
+.trainer-reports__member-badge--2 {
+  background: rgba(156, 163, 175, 0.15);
+  color: #9CA3AF;
+}
+
+.trainer-reports__member-badge--3 {
+  background: rgba(180, 83, 9, 0.15);
+  color: #B45309;
+}
+
+.trainer-reports__member-avatar-large {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  margin: 0 auto 12px;
+  object-fit: cover;
+}
+
+.trainer-reports__member-card-header h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 4px 0;
+}
+
+.trainer-reports__member-goal {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  background: var(--bg-primary, rgba(0, 0, 0, 0.2));
+  padding: 3px 10px;
+  border-radius: 10px;
+  display: inline-block;
+}
+
+.trainer-reports__member-stats {
+  display: flex;
+  justify-content: space-around;
+  padding: 14px 12px;
+}
+
+.trainer-reports__member-stat {
+  text-align: center;
+}
+
+.trainer-reports__member-stat-value {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.trainer-reports__member-stat-value--up {
+  color: #10B981;
+}
+
+.trainer-reports__member-stat-value--down {
+  color: #EF4444;
+}
+
+.trainer-reports__member-stat-label {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  margin-top: 3px;
+}
+
+.trainer-reports__member-progress-bar {
+  padding: 0 16px 14px;
+}
+
+.trainer-reports__member-progress-track {
+  height: 6px;
+  background: var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.trainer-reports__member-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #DC2626, #EF4444);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.trainer-reports__member-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: var(--bg-primary, rgba(0, 0, 0, 0.2));
+}
+
+.trainer-reports__member-footer > span {
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.trainer-reports__view-member-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  background: transparent;
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.trainer-reports__view-member-btn:hover {
+  background: var(--bg-secondary);
+  border-color: rgba(220, 38, 38, 0.3);
+  color: #DC2626;
+}
+
+/* ============================================
+   EARNINGS TAB
+   ============================================ */
+.trainer-reports__earnings-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  background: linear-gradient(135deg, rgba(220, 38, 38, 0.15), rgba(139, 92, 246, 0.15));
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.trainer-reports__earnings-total {
+  display: flex;
+  flex-direction: column;
+}
+
+.trainer-reports__earnings-label {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin-bottom: 4px;
+}
+
+.trainer-reports__earnings-value {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.trainer-reports__earnings-period {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 6px;
+}
+
+.trainer-reports__earnings-trend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: rgba(16, 185, 129, 0.15);
+  border-radius: 8px;
+  color: #10B981;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.trainer-reports__earnings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 900px) {
+  .trainer-reports__earnings-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.trainer-reports__earnings-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.trainer-reports__earnings-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.trainer-reports__earnings-item-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.trainer-reports__earnings-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.trainer-reports__earnings-category {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.trainer-reports__earnings-item-details {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.trainer-reports__earnings-amount {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.trainer-reports__earnings-sessions {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.trainer-reports__earnings-bar {
+  height: 6px;
+  background: var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.trainer-reports__earnings-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.trainer-reports__rate-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.trainer-reports__rate-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+  background: var(--bg-primary, rgba(0, 0, 0, 0.2));
+  border-radius: 10px;
+  text-align: center;
+}
+
+.trainer-reports__rate-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.trainer-reports__rate-label {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-top: 6px;
 }
 
 /* ============================================
@@ -446,17 +1161,27 @@
 }
 
 :root.theme-light .trainer-reports__title-section h1 {
-  color: #111111;
+  color: #111;
 }
 
-:root.theme-light .trainer-reports__title-section p {
-  color: #6b6b6b;
+:root.theme-light .trainer-reports__tabs {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+:root.theme-light .trainer-reports__tabs button:hover {
+  background: #f9fafb;
 }
 
 :root.theme-light .trainer-reports__period-select select {
-  background: #F9FAFB;
-  border-color: #D1D5DB;
-  color: #111111;
+  background: #f9fafb;
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #111;
+}
+
+:root.theme-light .trainer-reports__refresh-btn {
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #666;
 }
 
 :root.theme-light .trainer-reports__stat-card {
@@ -465,11 +1190,7 @@
 }
 
 :root.theme-light .trainer-reports__stat-value {
-  color: #111111;
-}
-
-:root.theme-light .trainer-reports__stat-label {
-  color: #6b6b6b;
+  color: #111;
 }
 
 :root.theme-light .trainer-reports__card {
@@ -482,31 +1203,123 @@
 }
 
 :root.theme-light .trainer-reports__card-header h2 {
-  color: #111111;
+  color: #111;
 }
 
-:root.theme-light .trainer-reports__metric-label {
-  color: #6b6b6b;
+:root.theme-light .trainer-reports__bar--target {
+  background: rgba(0, 0, 0, 0.08);
 }
 
-:root.theme-light .trainer-reports__metric-value {
-  color: #111111;
+:root.theme-light .trainer-reports__donut-value {
+  color: #111;
+}
+
+:root.theme-light .trainer-reports__summary-value {
+  color: #111;
 }
 
 :root.theme-light .trainer-reports__metric-bar {
   background: rgba(0, 0, 0, 0.06);
 }
 
-:root.theme-light .trainer-reports__member-name {
-  color: #111111;
+:root.theme-light .trainer-reports__achievement {
+  background: #f9fafb;
 }
 
-:root.theme-light .trainer-reports__table-row span {
-  color: #6b6b6b;
+:root.theme-light .trainer-reports__achievement-label {
+  color: #111;
 }
 
-:root.theme-light .trainer-reports__session-member {
-  color: #111111 !important;
+:root.theme-light .trainer-reports__session-stat {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+:root.theme-light .trainer-reports__sessions-filter {
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+:root.theme-light .trainer-reports__sessions-filter button {
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #666;
+}
+
+:root.theme-light .trainer-reports__table-header {
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+:root.theme-light .trainer-reports__table-row {
+  border-color: rgba(0, 0, 0, 0.04);
+}
+
+:root.theme-light .trainer-reports__table-row:hover {
+  background: #f9fafb;
+}
+
+:root.theme-light .trainer-reports__session-member span {
+  color: #111 !important;
+}
+
+:root.theme-light .trainer-reports__members-header h2 {
+  color: #111;
+}
+
+:root.theme-light .trainer-reports__member-card {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+:root.theme-light .trainer-reports__member-card-header {
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+:root.theme-light .trainer-reports__member-card-header h3 {
+  color: #111;
+}
+
+:root.theme-light .trainer-reports__member-goal {
+  background: #f9fafb;
+}
+
+:root.theme-light .trainer-reports__member-stat-value {
+  color: #111;
+}
+
+:root.theme-light .trainer-reports__member-progress-track {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+:root.theme-light .trainer-reports__member-footer {
+  background: #f9fafb;
+}
+
+:root.theme-light .trainer-reports__view-member-btn {
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #666;
+}
+
+:root.theme-light .trainer-reports__earnings-summary {
+  background: linear-gradient(135deg, rgba(220, 38, 38, 0.08), rgba(139, 92, 246, 0.08));
+}
+
+:root.theme-light .trainer-reports__earnings-value {
+  color: #111;
+}
+
+:root.theme-light .trainer-reports__earnings-amount {
+  color: #111;
+}
+
+:root.theme-light .trainer-reports__earnings-bar {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+:root.theme-light .trainer-reports__rate-card {
+  background: #f9fafb;
+}
+
+:root.theme-light .trainer-reports__rate-value {
+  color: #111;
 }
 
 /* ============================================
@@ -523,15 +1336,42 @@
     justify-content: space-between;
   }
 
-  .trainer-reports__table-header,
-  .trainer-reports__table-row {
-    grid-template-columns: 2fr 1fr 1fr;
+  .trainer-reports__tabs {
+    overflow-x: auto;
+    padding-bottom: 8px;
   }
 
-  .trainer-reports__table-header span:nth-child(2),
+  .trainer-reports__tabs button {
+    white-space: nowrap;
+  }
+
+  .trainer-reports__table-header,
+  .trainer-reports__table-row {
+    grid-template-columns: 2fr 1.5fr 1fr 1fr;
+  }
+
   .trainer-reports__table-header span:nth-child(4),
-  .trainer-reports__table-row span:nth-child(2),
-  .trainer-reports__table-row span:nth-child(4) {
+  .trainer-reports__table-header span:nth-child(5),
+  .trainer-reports__table-row span:nth-child(4),
+  .trainer-reports__table-row span:nth-child(5) {
     display: none;
+  }
+
+  .trainer-reports__earnings-summary {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+  }
+
+  .trainer-reports__earnings-total {
+    align-items: center;
+  }
+
+  .trainer-reports__rate-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .trainer-reports__donut-chart {
+    flex-direction: column;
   }
 }
