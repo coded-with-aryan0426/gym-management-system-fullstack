@@ -147,16 +147,20 @@ const CommandRail: React.FC<CommandRailProps> = ({ isCollapsed = false, onToggle
       {/* Footer with Account Settings, Logout, and Toggle */}
       <div className="command-rail__footer">
         {/* Owner and Admin get "Account Settings" (Gym config) - Members/Trainers get Profile via TopBar or hidden for V1 */}
-        {(role === 'OWNER' || role === 'ADMIN') && (
-          <NavLink
-            to="/settings"
-            className={({ isActive }) => `command-rail__link ${isActive ? "command-rail__link--active" : ""}`}
-            title={isCollapsed ? "Account Settings" : undefined}
-          >
-            <span className="command-rail__icon">{icons.settings}</span>
-            <span className="command-rail__label">Account Settings</span>
-          </NavLink>
-        )}
+          {(role === 'OWNER' || role === 'ADMIN') && (
+            <NavLink
+              to="/settings"
+              className={({ isActive }) => `command-rail__link ${isActive ? "command-rail__link--active" : ""}`}
+              title={isCollapsed ? "Settings" : undefined}
+            >
+              <span className="command-rail__icon command-rail__avatar">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
+                </svg>
+              </span>
+              <span className="command-rail__label">Settings</span>
+            </NavLink>
+          )}
 
           {/* Collapse Toggle Button */}
         <button
