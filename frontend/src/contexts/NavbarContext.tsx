@@ -48,6 +48,15 @@ const navbarConfigs: Record<string, NavbarConfig> = {
             { key: 'assignedToday', label: 'Assigned Today' },
         ],
     },
+    '/trainers': {
+        pageTitle: 'Trainers',
+        metricType: 'staff',
+        metrics: [
+            { key: 'total', label: 'Total Trainers' },
+            { key: 'active', label: 'Active' },
+            { key: 'assignedToday', label: 'Assigned Today' },
+        ],
+    },
     '/classes': {
         pageTitle: 'Classes',
         metricType: 'none',

@@ -1,6 +1,5 @@
 /* ============================================================================
-   UtilityBar - Compact Top Navigation (Linear/Vercel Style)
-   Ultra-compact with theme toggle
+   UtilityBar - Compact Top Navigation (Fully Responsive)
    ============================================================================ */
 
 .utility-bar {
@@ -22,12 +21,13 @@
 }
 
 /* ============================================
-   SEARCH - Compact Spotlight
+   SEARCH
    ============================================ */
 .utility-bar__search-container {
   position: relative;
   width: 240px;
-  flex-shrink: 0;
+  flex-shrink: 1;
+  min-width: 120px;
 }
 
 .utility-bar__search {
@@ -196,6 +196,7 @@
   border: 1px solid rgba(255, 255, 255, 0.04);
   border-radius: 100px;
   margin: 0 auto;
+  flex-shrink: 1;
 }
 
 .utility-bar__stats:hover {
@@ -243,12 +244,6 @@
   background: rgba(255, 255, 255, 0.08);
 }
 
-@media (max-width: 900px) {
-  .utility-bar__stats {
-    display: none;
-  }
-}
-
 /* ============================================
    ACTIONS - Right Side
    ============================================ */
@@ -256,6 +251,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 .utility-bar__create-btn {
@@ -313,12 +309,6 @@
   display: none;
 }
 
-@media (min-width: 640px) {
-  .utility-bar__create-text {
-    display: inline;
-  }
-}
-
 .utility-bar__dropdown {
   position: relative;
 }
@@ -366,6 +356,7 @@
   top: calc(100% + 8px);
   right: 0;
   width: 300px;
+  max-width: calc(100vw - 32px);
   background: var(--sidebar-bg);
   backdrop-filter: blur(20px);
   border: 1px solid var(--sidebar-border);
@@ -453,7 +444,7 @@
 }
 
 /* ============================================
-   THEME TOGGLE - Sun/Moon Switch
+   THEME TOGGLE
    ============================================ */
 .utility-bar__theme-toggle {
   background: transparent;
@@ -522,6 +513,7 @@
   border-radius: 50%;
   overflow: hidden;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  flex-shrink: 0;
 }
 
 .utility-bar__avatar img {
@@ -533,6 +525,136 @@
 .utility-bar__avatar:hover {
   border-color: #4F46E5;
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+/* ============================================
+   TABLET BREAKPOINT (768px - 1024px)
+   ============================================ */
+@media (max-width: 1024px) {
+  .utility-bar__stats {
+    display: none;
+  }
+
+  .utility-bar__search-container {
+    width: 200px;
+  }
+}
+
+/* ============================================
+   MOBILE BREAKPOINT (<768px)
+   ============================================ */
+@media (max-width: 768px) {
+  .utility-bar {
+    padding: 0 12px;
+    gap: 8px;
+    height: 52px;
+  }
+
+  .utility-bar__search-container {
+    flex: 1;
+    width: auto;
+    min-width: 0;
+  }
+
+  .utility-bar__stats {
+    display: none;
+  }
+
+  .utility-bar__actions {
+    gap: 4px;
+  }
+
+  .utility-bar__create-btn {
+    padding: 0 10px;
+    height: 32px;
+  }
+
+  .utility-bar__dropdown-menu {
+    position: fixed;
+    top: auto;
+    bottom: calc(var(--mobile-nav-height, 64px) + 8px);
+    right: 8px;
+    left: 8px;
+    width: auto;
+    max-width: none;
+  }
+
+  .utility-bar__search-results {
+    position: fixed;
+    top: 60px;
+    left: 8px;
+    right: 8px;
+    max-height: calc(100vh - 200px);
+  }
+}
+
+/* ============================================
+   SMALL MOBILE (<480px)
+   ============================================ */
+@media (max-width: 480px) {
+  .utility-bar {
+    padding: 0 8px;
+    gap: 6px;
+  }
+
+  .utility-bar__search {
+    padding: 0 8px;
+    height: 32px;
+  }
+
+  .utility-bar__search-input {
+    font-size: 14px;
+  }
+
+  .utility-bar__icon-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .utility-bar__create-btn {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    justify-content: center;
+  }
+
+  .utility-bar__create-text {
+    display: none !important;
+  }
+
+  .theme-toggle__track {
+    width: 40px;
+    height: 20px;
+  }
+
+  .theme-toggle__thumb {
+    width: 16px;
+    height: 16px;
+  }
+
+  .theme-toggle__thumb--light {
+    transform: translateX(20px);
+  }
+
+  .utility-bar__avatar {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/* ============================================
+   LARGE SCREENS (>1200px)
+   ============================================ */
+@media (min-width: 640px) {
+  .utility-bar__create-text {
+    display: inline;
+  }
+}
+
+@media (min-width: 1200px) {
+  .utility-bar__search-container {
+    width: 280px;
+  }
 }
 
 /* ============================================
