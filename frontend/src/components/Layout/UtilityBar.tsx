@@ -46,29 +46,45 @@ const UtilityBar: React.FC = () => {
   const { stats: memberStats } = useMembers()
   const { stats: staffStats } = useTrainers()
 
-  const getMetricValue = (key: string): string | number => {
-    switch (config.metricType) {
-      case 'members':
-        return (memberStats as Record<string, number>)[key] ?? 0
-      case 'staff':
-        return (staffStats as Record<string, number>)[key] ?? 0
-      case 'financial':
-        const financialPlaceholders: Record<string, string> = {
-          todayRevenue: '₹12,450',
-          pending: '3',
-          monthlyRevenue: '₹2.4L',
-        }
-        return financialPlaceholders[key] ?? '0'
-      case 'sessions':
-        const sessionPlaceholders: Record<string, number> = {
-          todaySessions: 8,
-          activeSessions: 3,
-        }
-        return sessionPlaceholders[key] ?? 0
-      default:
-        return 0
+    const getMetricValue = (key: string): string | number => {
+      switch (config.metricType) {
+        case 'members':
+          return (memberStats as Record<string, number>)[key] ?? 0
+        case 'staff':
+          return (staffStats as Record<string, number>)[key] ?? 0
+        case 'financial':
+          const financialPlaceholders: Record<string, string> = {
+            todayRevenue: '₹12,450',
+            pending: '3',
+            monthlyRevenue: '₹2.4L',
+          }
+          return financialPlaceholders[key] ?? '0'
+        case 'sessions':
+          const sessionPlaceholders: Record<string, number> = {
+            todaySessions: 8,
+            activeSessions: 3,
+          }
+          return sessionPlaceholders[key] ?? 0
+        default:
+          return 0
+      }
     }
-  }
+
+    const getMetricClass = (key: string): string => {
+      switch (key) {
+        case 'active': return 'utility-metric--active'
+        case 'inactive': return 'utility-metric--expired'
+        case 'expiringSoon': return 'utility-metric--warning'
+        case 'newThisMonth': return 'utility-metric--new'
+        default: return ''
+      }
+    }
+
+    const getActivePercent = (): number => {
+      const total = memberStats.total || 0
+      const active = memberStats.active || 0
+      return total > 0 ? Math.round((active / total) * 100) : 0
+    }
 
   const [notifications] = useState<Notification[]>([
     { id: 1, type: "member", title: "New Member", message: "John Doe signed up.", time: "2 months ago", read: false },
@@ -286,25 +302,47 @@ const UtilityBar: React.FC = () => {
         )}
       </div>
 
-      {config.metrics.length > 0 && (
-        <div className="utility-bar__stats utility-bar__stats--animated">
-          {config.metrics.map((metric, index) => (
-            <Fragment key={metric.key}>
-              <div className="utility-stat">
-                {metric.key === 'active' && <span className="utility-stat__dot utility-stat__dot--active" />}
-                {metric.key === 'inactive' && <span className="utility-stat__dot utility-stat__dot--inactive" />}
-                <span className="utility-stat__value">
-                  {metric.prefix || ''}{getMetricValue(metric.key)}
-                </span>
-                <span className="utility-stat__label">{metric.label}</span>
+        {config.metrics.length > 0 && config.metricType === 'members' && (
+          <div className="utility-bar__stats-enhanced">
+            <div className="utility-metrics-strip">
+              {config.metrics.map((metric, index) => (
+                <div key={metric.key} className={`utility-metric ${getMetricClass(metric.key)}`}>
+                  <span className="utility-metric__value">{getMetricValue(metric.key)}</span>
+                  <span className="utility-metric__label">{metric.label}</span>
+                </div>
+              ))}
+            </div>
+            <div className="utility-bar__progress">
+              <div className="utility-progress__bar">
+                <div 
+                  className="utility-progress__fill" 
+                  style={{ width: `${getActivePercent()}%` }}
+                />
               </div>
-              {index < config.metrics.length - 1 && (
-                <div className="utility-stat__divider" />
-              )}
-            </Fragment>
-          ))}
-        </div>
-      )}
+              <span className="utility-progress__text">{getActivePercent()}% active</span>
+            </div>
+          </div>
+        )}
+
+        {config.metrics.length > 0 && config.metricType !== 'members' && (
+          <div className="utility-bar__stats utility-bar__stats--animated">
+            {config.metrics.map((metric, index) => (
+              <Fragment key={metric.key}>
+                <div className="utility-stat">
+                  {metric.key === 'active' && <span className="utility-stat__dot utility-stat__dot--active" />}
+                  {metric.key === 'inactive' && <span className="utility-stat__dot utility-stat__dot--inactive" />}
+                  <span className="utility-stat__value">
+                    {metric.prefix || ''}{getMetricValue(metric.key)}
+                  </span>
+                  <span className="utility-stat__label">{metric.label}</span>
+                </div>
+                {index < config.metrics.length - 1 && (
+                  <div className="utility-stat__divider" />
+                )}
+              </Fragment>
+            ))}
+          </div>
+        )}
 
         <div className="utility-bar__actions">
           <button className="utility-bar__create-btn" onClick={() => setIsCreateModalOpen(true)}>

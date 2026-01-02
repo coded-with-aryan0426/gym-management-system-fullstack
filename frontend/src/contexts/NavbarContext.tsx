@@ -33,10 +33,11 @@ const navbarConfigs: Record<string, NavbarConfig> = {
         pageTitle: 'Members',
         metricType: 'members',
         metrics: [
-            { key: 'total', label: 'Total Members' },
+            { key: 'total', label: 'Total' },
             { key: 'active', label: 'Active' },
             { key: 'inactive', label: 'Expired' },
-            { key: 'todaysJoins', label: "Today's Joins", prefix: '+' },
+            { key: 'expiringSoon', label: 'Expiring' },
+            { key: 'newThisMonth', label: 'New' },
         ],
     },
     '/staff': {
