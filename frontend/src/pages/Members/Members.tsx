@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useEffect, useState, useMemo, useCallback, useRef } from "react"
-import { FiFilter, FiSearch, FiUserPlus, FiDownload, FiCalendar, FiUsers, FiAlertCircle, FiTrendingUp, FiGift, FiClock, FiRefreshCw } from "react-icons/fi"
+import { FiFilter, FiSearch, FiUserPlus, FiCalendar, FiClock, FiRefreshCw } from "react-icons/fi"
 import { toast } from "react-hot-toast"
 import { useSearchParams } from "react-router-dom"
 import { Button, Badge, getStatusVariant, Avatar, DataTable, CreateUserModal, type Column } from "../../components"
@@ -431,38 +431,6 @@ const Members: React.FC = () => {
 
   return (
     <div className="members-page">
-      {/* Premium Stats Row */}
-      <div className="members-stats-row">
-        <div className="members-stat members-stat--total">
-          <div className="members-stat__icon"><FiUsers /></div>
-          <div className="members-stat__content">
-            <span className="members-stat__value">{stats.total}</span>
-            <span className="members-stat__label">Total Members</span>
-          </div>
-        </div>
-        <div className="members-stat members-stat--active">
-          <div className="members-stat__icon"><FiTrendingUp /></div>
-          <div className="members-stat__content">
-            <span className="members-stat__value">{stats.activeCount}</span>
-            <span className="members-stat__label">Active</span>
-          </div>
-        </div>
-        <div className="members-stat members-stat--expiring">
-          <div className="members-stat__icon"><FiAlertCircle /></div>
-          <div className="members-stat__content">
-            <span className="members-stat__value">{stats.expiringSoon}</span>
-            <span className="members-stat__label">Expiring Soon</span>
-          </div>
-        </div>
-        <div className="members-stat members-stat--new">
-          <div className="members-stat__icon"><FiCalendar /></div>
-          <div className="members-stat__content">
-            <span className="members-stat__value">{stats.newThisMonth}</span>
-            <span className="members-stat__label">New This Month</span>
-          </div>
-        </div>
-      </div>
-
       {/* Header with Search and Actions */}
       <div className="members-page__header">
         <div className="members-page__title-section">
@@ -485,6 +453,43 @@ const Members: React.FC = () => {
               </span>
             )}
           </div>
+        </div>
+
+        {/* Quick Actions - Moved here between title and search */}
+        <div className="members-quick-actions">
+          <button 
+            className={`members-quick-btn ${filters.expiryStatus === 'expiring-soon' ? 'members-quick-btn--active' : ''}`}
+            onClick={() => setFilters(prev => ({ 
+              ...prev, 
+              expiryStatus: prev.expiryStatus === 'expiring-soon' ? '' : 'expiring-soon' 
+            }))}
+          >
+            <FiClock size={13} />
+            <span>Expiring Soon</span>
+            {stats.expiringSoon > 0 && <span className="members-quick-btn__count">{stats.expiringSoon}</span>}
+          </button>
+          <button 
+            className={`members-quick-btn ${filters.joinedPeriod === 'today' ? 'members-quick-btn--active' : ''}`}
+            onClick={() => setFilters(prev => ({ 
+              ...prev, 
+              joinedPeriod: prev.joinedPeriod === 'today' ? '' : 'today' 
+            }))}
+          >
+            <FiCalendar size={13} />
+            <span>Joined Today</span>
+            {stats.todayJoined > 0 && <span className="members-quick-btn__count">{stats.todayJoined}</span>}
+          </button>
+          <button 
+            className={`members-quick-btn ${filters.status[0] === 'Expired' ? 'members-quick-btn--active' : ''}`}
+            onClick={() => setFilters(prev => ({ 
+              ...prev, 
+              status: prev.status[0] === 'Expired' ? [] : ['Expired']
+            }))}
+          >
+            <FiRefreshCw size={13} />
+            <span>Need Renewal</span>
+            {stats.expiredCount > 0 && <span className="members-quick-btn__count members-quick-btn__count--warning">{stats.expiredCount}</span>}
+          </button>
         </div>
 
         <div className="members-page__search-actions">
@@ -609,43 +614,6 @@ const Members: React.FC = () => {
             </button>
           </div>
         </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="members-quick-actions">
-        <button 
-          className={`members-quick-btn ${filters.expiryStatus === 'expiring-soon' ? 'members-quick-btn--active' : ''}`}
-          onClick={() => setFilters(prev => ({ 
-            ...prev, 
-            expiryStatus: prev.expiryStatus === 'expiring-soon' ? '' : 'expiring-soon' 
-          }))}
-        >
-          <FiClock size={13} />
-          <span>Expiring Soon</span>
-          {stats.expiringSoon > 0 && <span className="members-quick-btn__count">{stats.expiringSoon}</span>}
-        </button>
-        <button 
-          className={`members-quick-btn ${filters.joinedPeriod === 'today' ? 'members-quick-btn--active' : ''}`}
-          onClick={() => setFilters(prev => ({ 
-            ...prev, 
-            joinedPeriod: prev.joinedPeriod === 'today' ? '' : 'today' 
-          }))}
-        >
-          <FiCalendar size={13} />
-          <span>Joined Today</span>
-          {stats.todayJoined > 0 && <span className="members-quick-btn__count">{stats.todayJoined}</span>}
-        </button>
-        <button 
-          className={`members-quick-btn ${filters.status[0] === 'Expired' ? 'members-quick-btn--active' : ''}`}
-          onClick={() => setFilters(prev => ({ 
-            ...prev, 
-            status: prev.status[0] === 'Expired' ? [] : ['Expired']
-          }))}
-        >
-          <FiRefreshCw size={13} />
-          <span>Need Renewal</span>
-          {stats.expiredCount > 0 && <span className="members-quick-btn__count members-quick-btn__count--warning">{stats.expiredCount}</span>}
-        </button>
       </div>
 
 
