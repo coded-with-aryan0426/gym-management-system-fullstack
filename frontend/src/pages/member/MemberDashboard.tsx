@@ -5,11 +5,9 @@ import {
     Calendar,
     Flame,
     CheckCircle2,
-    CreditCard,
     ChevronRight,
     Clock,
     MapPin,
-    User,
     Activity,
     Trophy,
     MessageSquare,
@@ -19,9 +17,13 @@ import {
     Heart,
     Target,
     TrendingUp,
-    Sparkles
+    Sparkles,
+    Bell,
+    ArrowUpRight,
+    Play,
+    Star,
+    Award
 } from 'lucide-react';
-import { toast } from 'react-hot-toast';
 import '../../styles/macos-member.css';
 import './MemberDashboard.css';
 
@@ -45,46 +47,55 @@ interface DashboardData {
     unreadNotificationsCount: number;
 }
 
-// Animation variants
 const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
         opacity: 1,
-        transition: { staggerChildren: 0.08 }
+        transition: { staggerChildren: 0.06, delayChildren: 0.1 }
     }
 };
 
 const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 }
+    hidden: { opacity: 0, y: 16, scale: 0.98 },
+    visible: { 
+        opacity: 1, 
+        y: 0, 
+        scale: 1,
+        transition: { type: 'spring', stiffness: 300, damping: 24 }
+    }
 };
 
-// Class type icons mapping
 const classTypeIcons: Record<string, React.ReactNode> = {
-    yoga: <Heart size={20} />,
-    hiit: <Zap size={20} />,
-    strength: <Dumbbell size={20} />,
-    spin: <Activity size={20} />,
-    pilates: <Sparkles size={20} />,
-    boxing: <Target size={20} />
+    yoga: <Heart size={18} />,
+    hiit: <Zap size={18} />,
+    strength: <Dumbbell size={18} />,
+    spin: <Activity size={18} />,
+    pilates: <Sparkles size={18} />,
+    boxing: <Target size={18} />
 };
 
-const classTypeColors: Record<string, string> = {
-    yoga: 'rgba(52, 199, 89, 0.15)',
-    hiit: 'rgba(255, 59, 48, 0.15)',
-    strength: 'rgba(0, 122, 255, 0.15)',
-    spin: 'rgba(175, 82, 222, 0.15)',
-    pilates: 'rgba(90, 200, 250, 0.15)',
-    boxing: 'rgba(255, 149, 0, 0.15)'
+const classTypeGradients: Record<string, string> = {
+    yoga: 'linear-gradient(135deg, #34C759, #30D158)',
+    hiit: 'linear-gradient(135deg, #FF3B30, #FF6B6B)',
+    strength: 'linear-gradient(135deg, #007AFF, #5AC8FA)',
+    spin: 'linear-gradient(135deg, #AF52DE, #BF5AF2)',
+    pilates: 'linear-gradient(135deg, #5AC8FA, #64D2FF)',
+    boxing: 'linear-gradient(135deg, #FF9500, #FFCC00)'
 };
 
 const MemberDashboard: React.FC = () => {
     const navigate = useNavigate();
     const [dashboard, setDashboard] = useState<DashboardData | null>(null);
     const [loading, setLoading] = useState(true);
+    const [currentTime, setCurrentTime] = useState(new Date());
 
     const userStr = localStorage.getItem('user');
     const user = userStr ? JSON.parse(userStr) : null;
+
+    useEffect(() => {
+        const timer = setInterval(() => setCurrentTime(new Date()), 60000);
+        return () => clearInterval(timer);
+    }, []);
 
     useEffect(() => {
         const fetchDashboard = async () => {
@@ -109,9 +120,8 @@ const MemberDashboard: React.FC = () => {
         fetchDashboard();
     }, [user?.id]);
 
-    // Get greeting based on time of day
     const getGreeting = () => {
-        const hour = new Date().getHours();
+        const hour = currentTime.getHours();
         if (hour < 12) return 'Good Morning';
         if (hour < 17) return 'Good Afternoon';
         return 'Good Evening';
@@ -120,11 +130,11 @@ const MemberDashboard: React.FC = () => {
     const memberName = dashboard?.memberName || user?.fullName || 'Member';
     const firstName = memberName.split(' ')[0];
 
-    // Mock data for demo (replace with real data)
     const stats = {
         classesThisWeek: 3,
         attendedThisMonth: 18,
-        streakDays: 7
+        streakDays: 7,
+        achievements: 4
     };
 
     const membership = dashboard?.membership || {
@@ -135,23 +145,23 @@ const MemberDashboard: React.FC = () => {
     };
 
     const upcomingClasses = [
-        { id: 1, title: 'Yoga Class', time: '9:00 AM', date: 'Tomorrow', location: 'Room A', trainer: 'Sarah J', type: 'yoga' },
-        { id: 2, title: 'HIIT Training', time: '6:00 PM', date: 'Tue, Jan 2', location: 'Main Studio', trainer: 'Mike C', type: 'hiit' },
-        { id: 3, title: 'Strength Training', time: '10:00 AM', date: 'Fri, Jan 5', location: 'Weight Room', trainer: 'John S', type: 'strength' }
+        { id: 1, title: 'Morning Yoga', time: '9:00 AM', date: 'Tomorrow', location: 'Studio A', trainer: 'Sarah Johnson', type: 'yoga', spots: 3 },
+        { id: 2, title: 'HIIT Burn', time: '6:00 PM', date: 'Tue, Jan 2', location: 'Main Floor', trainer: 'Mike Chen', type: 'hiit', spots: 8 },
+        { id: 3, title: 'Power Lifting', time: '10:00 AM', date: 'Fri, Jan 5', location: 'Weight Room', trainer: 'John Smith', type: 'strength', spots: 5 }
     ];
 
     const trainer = dashboard?.assignedTrainer || {
         id: 1,
         fullName: 'John Smith',
-        specialization: 'Weight Training & Nutrition',
+        specialization: 'Strength & Conditioning',
         nextSession: 'Friday, 10:00 AM'
     };
 
-    const recentActivity = [
-        { id: 1, text: 'Attended Yoga Class', time: 'Today 9:00 AM', type: 'attendance', color: 'green' },
-        { id: 2, text: 'Booked HIIT Training', time: 'Yesterday', type: 'booking', color: 'blue' },
-        { id: 3, text: 'Weight updated to 78kg', time: '2 days ago', type: 'progress', color: 'purple' },
-        { id: 4, text: 'Completed 10 classes milestone', time: '5 days ago', type: 'achievement', color: 'orange' }
+    const quickActions = [
+        { icon: <Calendar size={20} />, label: 'Book Class', path: '/member/classes', color: '#007AFF' },
+        { icon: <Activity size={20} />, label: 'My Progress', path: '/member/progress', color: '#34C759' },
+        { icon: <MessageSquare size={20} />, label: 'Messages', path: '/member/trainer', color: '#AF52DE' },
+        { icon: <Bell size={20} />, label: 'Notifications', path: '/member/notifications', color: '#FF9500' }
     ];
 
     const progressStats = {
@@ -169,12 +179,13 @@ const MemberDashboard: React.FC = () => {
 
     if (loading) {
         return (
-            <div className="macos-page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '80vh' }}>
+            <div className="member-dashboard-loading">
                 <motion.div
+                    className="member-dashboard-loading__spinner"
                     animate={{ rotate: 360 }}
                     transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                 >
-                    <Dumbbell size={32} color="var(--macos-accent)" />
+                    <Dumbbell size={32} />
                 </motion.div>
             </div>
         );
@@ -182,269 +193,284 @@ const MemberDashboard: React.FC = () => {
 
     return (
         <motion.div
-            className="macos-page member-dashboard-macos"
+            className="member-dashboard"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
         >
-            {/* Welcome Header */}
-            <motion.header className="member-dashboard__header" variants={itemVariants}>
-                <div>
-                    <h1 className="macos-heading-xl">
-                        {getGreeting()}, {firstName}!
-                    </h1>
-                    <p className="macos-text-md" style={{ marginTop: '4px' }}>
-                        Your last visit: Yesterday at 6:00 PM
+            <motion.header className="member-dashboard__hero" variants={itemVariants}>
+                <div className="member-dashboard__hero-content">
+                    <span className="member-dashboard__hero-greeting">{getGreeting()}</span>
+                    <h1 className="member-dashboard__hero-name">{firstName}</h1>
+                    <p className="member-dashboard__hero-subtitle">
+                        You're on a <span className="highlight">{stats.streakDays}-day streak</span> — keep it up!
                     </p>
+                </div>
+                <div className="member-dashboard__hero-avatar">
+                    <div className="member-dashboard__avatar-ring">
+                        <div className="member-dashboard__avatar">
+                            {firstName.charAt(0)}
+                        </div>
+                    </div>
+                    <div className="member-dashboard__streak-badge">
+                        <Flame size={12} />
+                        {stats.streakDays}
+                    </div>
                 </div>
             </motion.header>
 
-            {/* Membership Hero Card */}
-            <motion.div className="macos-membership-card" variants={itemVariants}>
-                <div className="macos-membership-card__header">
-                    <div>
-                        <span className="macos-text-xs" style={{ color: 'rgba(255,255,255,0.5)', display: 'block', marginBottom: '4px' }}>
-                            Current Plan
+            <motion.div className="member-dashboard__membership-card" variants={itemVariants}>
+                <div className="membership-card__glow" />
+                <div className="membership-card__pattern" />
+                <div className="membership-card__content">
+                    <div className="membership-card__header">
+                        <div className="membership-card__plan-info">
+                            <span className="membership-card__label">Current Plan</span>
+                            <h2 className="membership-card__plan-name">
+                                <Gem size={20} />
+                                {membership.packageName}
+                            </h2>
+                        </div>
+                        <span className={`membership-card__status membership-card__status--${membership.status?.toLowerCase()}`}>
+                            <span className="status-dot" />
+                            {membership.status}
                         </span>
-                        <h2 className="macos-membership-card__plan">
-                            <Gem size={24} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'middle' }} />
-                            {membership.packageName}
-                        </h2>
                     </div>
-                    <span className={`macos-membership-card__badge macos-membership-card__badge--${membership.status?.toLowerCase() || 'active'}`}>
-                        {membership.status}
-                    </span>
-                </div>
+                    
+                    <div className="membership-card__stats">
+                        <div className="membership-card__stat">
+                            <span className="membership-card__stat-value">{membership.daysRemaining}</span>
+                            <span className="membership-card__stat-label">Days Left</span>
+                        </div>
+                        <div className="membership-card__stat-divider" />
+                        <div className="membership-card__stat">
+                            <span className="membership-card__stat-value">{membership.endDate}</span>
+                            <span className="membership-card__stat-label">Expires On</span>
+                        </div>
+                        <div className="membership-card__stat-divider" />
+                        <div className="membership-card__stat">
+                            <span className="membership-card__stat-value">Monthly</span>
+                            <span className="membership-card__stat-label">Billing Cycle</span>
+                        </div>
+                    </div>
 
-                <div className="macos-membership-card__stats">
-                    <div className="macos-membership-card__stat">
-                        <span className="macos-membership-card__stat-label">Days Remaining</span>
-                        <span className="macos-membership-card__stat-value">{membership.daysRemaining}</span>
+                    <div className="membership-card__progress">
+                        <div className="membership-card__progress-bar">
+                            <motion.div 
+                                className="membership-card__progress-fill"
+                                initial={{ width: 0 }}
+                                animate={{ width: `${Math.max(0, (membership.daysRemaining || 0) / 30 * 100)}%` }}
+                                transition={{ duration: 1, delay: 0.5 }}
+                            />
+                        </div>
                     </div>
-                    <div className="macos-membership-card__stat">
-                        <span className="macos-membership-card__stat-label">Expires</span>
-                        <span className="macos-membership-card__stat-value">{membership.endDate}</span>
-                    </div>
-                    <div className="macos-membership-card__stat">
-                        <span className="macos-membership-card__stat-label">Plan Type</span>
-                        <span className="macos-membership-card__stat-value">Monthly</span>
-                    </div>
-                </div>
-
-                <div className="macos-membership-card__progress">
-                    <div className="macos-membership-card__progress-bar">
-                        <div
-                            className="macos-membership-card__progress-fill"
-                            style={{ width: `${Math.max(0, (membership.daysRemaining || 0) / 30 * 100)}%` }}
-                        />
-                    </div>
-                    <p className="macos-membership-card__progress-text">
-                        {membership.daysRemaining} days of membership remaining
-                    </p>
                 </div>
             </motion.div>
 
-            {/* Quick Stats Grid */}
-            <motion.div className="bento-grid bento-grid--4col" variants={itemVariants}>
-                <motion.div className="glass-card glass-card--md macos-stat-card" whileHover={{ y: -2 }}>
-                    <div className="macos-stat-card__icon macos-stat-card__icon--blue">
-                        <Calendar size={22} />
+            <motion.div className="member-dashboard__quick-actions" variants={itemVariants}>
+                {quickActions.map((action, index) => (
+                    <motion.button
+                        key={action.label}
+                        className="quick-action"
+                        onClick={() => navigate(action.path)}
+                        whileHover={{ y: -4, scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05 + 0.3 }}
+                    >
+                        <div className="quick-action__icon" style={{ background: `${action.color}20`, color: action.color }}>
+                            {action.icon}
+                        </div>
+                        <span className="quick-action__label">{action.label}</span>
+                    </motion.button>
+                ))}
+            </motion.div>
+
+            <motion.div className="member-dashboard__stats-grid" variants={itemVariants}>
+                <motion.div className="stat-card stat-card--blue" whileHover={{ y: -2 }}>
+                    <div className="stat-card__icon">
+                        <Calendar size={20} />
                     </div>
-                    <div className="macos-stat-card__value">{stats.classesThisWeek}</div>
-                    <div className="macos-stat-card__label">Classes This Week</div>
-                    <span className="macos-stat-card__trend macos-stat-card__trend--up">
-                        +2 more scheduled
-                    </span>
+                    <div className="stat-card__content">
+                        <span className="stat-card__value">{stats.classesThisWeek}</span>
+                        <span className="stat-card__label">Classes This Week</span>
+                    </div>
+                    <div className="stat-card__trend stat-card__trend--up">
+                        <TrendingUp size={14} />
+                        +2
+                    </div>
                 </motion.div>
 
-                <motion.div className="glass-card glass-card--md macos-stat-card" whileHover={{ y: -2 }}>
-                    <div className="macos-stat-card__icon macos-stat-card__icon--green">
-                        <CheckCircle2 size={22} />
+                <motion.div className="stat-card stat-card--green" whileHover={{ y: -2 }}>
+                    <div className="stat-card__icon">
+                        <CheckCircle2 size={20} />
                     </div>
-                    <div className="macos-stat-card__value">{stats.attendedThisMonth}</div>
-                    <div className="macos-stat-card__label">Attended This Month</div>
-                    <span className="macos-stat-card__trend macos-stat-card__trend--up">
-                        <TrendingUp size={12} /> +3 from last month
-                    </span>
+                    <div className="stat-card__content">
+                        <span className="stat-card__value">{stats.attendedThisMonth}</span>
+                        <span className="stat-card__label">Attended This Month</span>
+                    </div>
+                    <div className="stat-card__trend stat-card__trend--up">
+                        <TrendingUp size={14} />
+                        +3
+                    </div>
                 </motion.div>
 
-                <motion.div className="glass-card glass-card--md macos-stat-card" whileHover={{ y: -2 }}>
-                    <div className="macos-stat-card__icon macos-stat-card__icon--orange">
-                        <Flame size={22} />
+                <motion.div className="stat-card stat-card--orange" whileHover={{ y: -2 }}>
+                    <div className="stat-card__icon">
+                        <Flame size={20} />
                     </div>
-                    <div className="macos-stat-card__value">{stats.streakDays}</div>
-                    <div className="macos-stat-card__label">Day Streak</div>
-                    <span className="macos-badge macos-badge--orange">
-                        <Flame size={12} /> Keep it up!
-                    </span>
+                    <div className="stat-card__content">
+                        <span className="stat-card__value">{stats.streakDays}</span>
+                        <span className="stat-card__label">Day Streak</span>
+                    </div>
+                    <div className="stat-card__badge">
+                        <Star size={12} /> Best!
+                    </div>
                 </motion.div>
 
-                <motion.div className="glass-card glass-card--md macos-stat-card" whileHover={{ y: -2 }}>
-                    <div className="macos-stat-card__icon macos-stat-card__icon--purple">
-                        <Trophy size={22} />
+                <motion.div className="stat-card stat-card--purple" whileHover={{ y: -2 }}>
+                    <div className="stat-card__icon">
+                        <Trophy size={20} />
                     </div>
-                    <div className="macos-stat-card__value">4</div>
-                    <div className="macos-stat-card__label">Achievements</div>
-                    <span className="macos-badge macos-badge--purple">New unlocked!</span>
+                    <div className="stat-card__content">
+                        <span className="stat-card__value">{stats.achievements}</span>
+                        <span className="stat-card__label">Achievements</span>
+                    </div>
+                    <div className="stat-card__badge stat-card__badge--new">
+                        <Award size={12} /> New!
+                    </div>
                 </motion.div>
             </motion.div>
 
-            {/* Upcoming Classes Section */}
             <motion.section className="member-dashboard__section" variants={itemVariants}>
-                <div className="macos-section-header">
-                    <h2 className="macos-section-title">Upcoming Classes</h2>
-                    <button className="macos-section-link" onClick={() => navigate('/member/bookings')}>
-                        View All <ChevronRight size={16} style={{ display: 'inline', verticalAlign: 'middle' }} />
+                <div className="section-header">
+                    <h2 className="section-header__title">
+                        <Calendar size={20} />
+                        Upcoming Classes
+                    </h2>
+                    <button className="section-header__link" onClick={() => navigate('/member/bookings')}>
+                        View All <ChevronRight size={16} />
                     </button>
                 </div>
 
-                <div className="member-dashboard__classes-list">
+                <div className="classes-list">
                     {upcomingClasses.map((cls, index) => (
                         <motion.div
                             key={cls.id}
-                            className="macos-list-item"
-                            whileHover={{ x: 6 }}
+                            className="class-card"
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: index * 0.1 }}
+                            transition={{ delay: index * 0.08 + 0.4 }}
+                            whileHover={{ x: 4 }}
                         >
-                            <div
-                                className="macos-list-item__icon"
-                                style={{
-                                    background: classTypeColors[cls.type] || 'rgba(0, 122, 255, 0.15)',
-                                    color: cls.type === 'yoga' ? 'var(--macos-success)' :
-                                        cls.type === 'hiit' ? 'var(--macos-error)' :
-                                            'var(--macos-accent)'
-                                }}
+                            <div 
+                                className="class-card__icon"
+                                style={{ background: classTypeGradients[cls.type] }}
                             >
-                                {classTypeIcons[cls.type] || <Calendar size={20} />}
+                                {classTypeIcons[cls.type]}
                             </div>
-                            <div className="macos-list-item__content">
-                                <div className="macos-list-item__title">{cls.title}</div>
-                                <div className="macos-list-item__subtitle">
-                                    <MapPin size={12} style={{ display: 'inline', marginRight: '4px' }} />
+                            <div className="class-card__content">
+                                <h3 className="class-card__title">{cls.title}</h3>
+                                <p className="class-card__meta">
+                                    <MapPin size={12} />
                                     {cls.location} • {cls.trainer}
-                                </div>
+                                </p>
                             </div>
-                            <div className="macos-list-item__meta">
-                                <div className="macos-list-item__time">{cls.time}</div>
-                                <div className="macos-list-item__date">{cls.date}</div>
+                            <div className="class-card__time">
+                                <span className="class-card__time-value">{cls.time}</span>
+                                <span className="class-card__time-date">{cls.date}</span>
+                            </div>
+                            <div className="class-card__spots">
+                                {cls.spots} spots
                             </div>
                         </motion.div>
                     ))}
                 </div>
             </motion.section>
 
-            {/* Two Column Grid - Trainer & Progress */}
-            <motion.div className="bento-grid bento-grid--2col" variants={itemVariants}>
-                {/* Trainer Card */}
-                <motion.div className="glass-card glass-card--lg" whileHover={{ scale: 1.01 }}>
-                    <div className="macos-section-header" style={{ marginBottom: 'var(--space-5)' }}>
-                        <h3 className="macos-heading-md">
-                            <Dumbbell size={18} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'middle' }} />
+            <motion.div className="member-dashboard__grid-2col" variants={itemVariants}>
+                <motion.div className="trainer-card" whileHover={{ scale: 1.01 }}>
+                    <div className="trainer-card__header">
+                        <h3 className="trainer-card__title">
+                            <Dumbbell size={18} />
                             My Trainer
                         </h3>
+                        <button className="trainer-card__action" onClick={() => navigate('/member/trainer')}>
+                            <ArrowUpRight size={16} />
+                        </button>
                     </div>
-
-                    <div className="macos-trainer-card">
-                        <div className="macos-trainer-card__avatar">
+                    
+                    <div className="trainer-card__profile">
+                        <div className="trainer-card__avatar">
                             {trainer.fullName.split(' ').map(n => n[0]).join('')}
                         </div>
-                        <div className="macos-trainer-card__info">
-                            <div className="macos-trainer-card__name">{trainer.fullName}</div>
-                            <div className="macos-trainer-card__role">{trainer.specialization}</div>
-                            <div className="macos-trainer-card__session">
+                        <div className="trainer-card__info">
+                            <h4 className="trainer-card__name">{trainer.fullName}</h4>
+                            <p className="trainer-card__specialty">{trainer.specialization}</p>
+                            <div className="trainer-card__next-session">
                                 <Clock size={14} />
-                                Next: {trainer.nextSession}
+                                <span>Next: {trainer.nextSession}</span>
                             </div>
                         </div>
                     </div>
 
-                    <div className="macos-trainer-card__actions">
-                        <button className="macos-btn macos-btn--secondary macos-btn--sm">
-                            <MessageSquare size={14} /> Message
+                    <div className="trainer-card__actions">
+                        <button className="btn btn--secondary btn--sm">
+                            <MessageSquare size={14} />
+                            Message
                         </button>
-                        <button
-                            className="macos-btn macos-btn--ghost macos-btn--sm"
-                            onClick={() => navigate('/member/trainer')}
-                        >
+                        <button className="btn btn--ghost btn--sm" onClick={() => navigate('/member/trainer')}>
                             View Profile
                         </button>
                     </div>
                 </motion.div>
 
-                {/* Progress Snapshot */}
-                <motion.div className="glass-card glass-card--lg" whileHover={{ scale: 1.01 }}>
-                    <div className="macos-section-header" style={{ marginBottom: 'var(--space-5)' }}>
-                        <h3 className="macos-heading-md">
-                            <Activity size={18} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'middle' }} />
+                <motion.div className="progress-card" whileHover={{ scale: 1.01 }}>
+                    <div className="progress-card__header">
+                        <h3 className="progress-card__title">
+                            <Activity size={18} />
                             Progress Snapshot
                         </h3>
-                        <button className="macos-section-link" onClick={() => navigate('/member/progress')}>
-                            View All
+                        <button className="progress-card__action" onClick={() => navigate('/member/progress')}>
+                            <ArrowUpRight size={16} />
                         </button>
                     </div>
 
-                    <div className="member-dashboard__progress-stats">
-                        <div className="member-dashboard__progress-weight">
-                            <span className="macos-text-xs">Weight Progress</span>
-                            <div className="member-dashboard__progress-values">
-                                <span className="macos-text-md">{progressStats.startWeight}kg</span>
-                                <span className="macos-heading-lg" style={{ color: 'var(--macos-success)' }}>
-                                    {progressStats.currentWeight}kg
-                                </span>
-                                <span className="macos-text-md">{progressStats.goalWeight}kg</span>
-                            </div>
-                            <div className="macos-progress" style={{ marginTop: '8px' }}>
-                                <div
-                                    className="macos-progress__fill macos-progress__fill--green"
-                                    style={{ width: `${progressPercentage}%` }}
-                                />
-                            </div>
-                            <span className="macos-text-sm" style={{ marginTop: '4px', display: 'block' }}>
-                                {progressPercentage}% to goal
-                            </span>
+                    <div className="progress-card__weight">
+                        <div className="progress-card__weight-labels">
+                            <span className="weight-label">Start</span>
+                            <span className="weight-label weight-label--current">Current</span>
+                            <span className="weight-label">Goal</span>
                         </div>
+                        <div className="progress-card__weight-values">
+                            <span className="weight-value">{progressStats.startWeight}kg</span>
+                            <span className="weight-value weight-value--current">{progressStats.currentWeight}kg</span>
+                            <span className="weight-value">{progressStats.goalWeight}kg</span>
+                        </div>
+                        <div className="progress-card__progress-bar">
+                            <motion.div 
+                                className="progress-card__progress-fill"
+                                initial={{ width: 0 }}
+                                animate={{ width: `${progressPercentage}%` }}
+                                transition={{ duration: 1, delay: 0.6 }}
+                            />
+                        </div>
+                        <span className="progress-card__percentage">{progressPercentage}% to goal</span>
+                    </div>
 
-                        <div className="macos-divider" />
-
-                        <div className="member-dashboard__progress-quick">
-                            <div className="member-dashboard__progress-item">
-                                <span className="macos-text-tertiary">Workouts</span>
-                                <span className="macos-heading-sm">{progressStats.workoutsThisMonth}</span>
-                            </div>
-                            <div className="member-dashboard__progress-item">
-                                <span className="macos-text-tertiary">Calories</span>
-                                <span className="macos-heading-sm">{progressStats.caloriesBurned.toLocaleString()}</span>
-                            </div>
+                    <div className="progress-card__stats">
+                        <div className="progress-card__stat">
+                            <span className="progress-card__stat-label">Workouts</span>
+                            <span className="progress-card__stat-value">{progressStats.workoutsThisMonth}</span>
+                        </div>
+                        <div className="progress-card__stat">
+                            <span className="progress-card__stat-label">Calories Burned</span>
+                            <span className="progress-card__stat-value">{progressStats.caloriesBurned.toLocaleString()}</span>
                         </div>
                     </div>
                 </motion.div>
             </motion.div>
-
-            {/* Recent Activity */}
-            <motion.section className="member-dashboard__section" variants={itemVariants}>
-                <div className="macos-section-header">
-                    <h2 className="macos-section-title">Recent Activity</h2>
-                    <button className="macos-section-link">
-                        View All <ChevronRight size={16} style={{ display: 'inline', verticalAlign: 'middle' }} />
-                    </button>
-                </div>
-
-                <div className="glass-card glass-card--md">
-                    <div className="macos-timeline">
-                        {recentActivity.map((activity) => (
-                            <div key={activity.id} className="macos-timeline-item">
-                                <div className={`macos-timeline-item__dot macos-timeline-item__dot--${activity.color}`} />
-                                <div className="macos-timeline-item__content">
-                                    <div className="macos-timeline-item__text">{activity.text}</div>
-                                    <div className="macos-timeline-item__time">{activity.time}</div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </motion.section>
         </motion.div>
     );
 };
