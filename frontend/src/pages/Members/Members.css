@@ -11,6 +11,82 @@
 }
 
 /* ============================================
+   PREMIUM STATS ROW
+   ============================================ */
+.members-stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.members-stat {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--sidebar-bg);
+  border: 1px solid var(--sidebar-border);
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.members-stat:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.members-stat__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  font-size: 18px;
+}
+
+.members-stat--total .members-stat__icon {
+  background: rgba(79, 70, 229, 0.15);
+  color: #4F46E5;
+}
+
+.members-stat--active .members-stat__icon {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10B981;
+}
+
+.members-stat--expiring .members-stat__icon {
+  background: rgba(245, 158, 11, 0.15);
+  color: #F59E0B;
+}
+
+.members-stat--new .members-stat__icon {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3B82F6;
+}
+
+.members-stat__content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.members-stat__value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.members-stat__label {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-weight: 500;
+}
+
+/* ============================================
    HEADER - Clean & Professional
    ============================================ */
 .members-page__header {
@@ -18,6 +94,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 .members-page__title-section {
@@ -32,6 +109,133 @@
   color: var(--text-primary);
   margin: 0;
   letter-spacing: -0.02em;
+}
+
+.members-page__search-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+/* ============================================
+   SEARCH BOX - Premium
+   ============================================ */
+.members-search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--sidebar-bg);
+  border: 1px solid var(--sidebar-border);
+  border-radius: 10px;
+  padding: 0 12px;
+  height: 38px;
+  min-width: 220px;
+  transition: all 0.15s ease;
+}
+
+.members-search-box:focus-within {
+  border-color: #4F46E5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.members-search-box__icon {
+  color: var(--text-tertiary);
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.members-search-box__input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.members-search-box__input::placeholder {
+  color: var(--text-tertiary);
+}
+
+/* ============================================
+   ACTION BUTTON - Premium
+   ============================================ */
+.members-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #DC2626, #B91C1C);
+  border: none;
+  color: #fff;
+  padding: 0 16px;
+  height: 38px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.25);
+}
+
+.members-action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
+}
+
+/* ============================================
+   QUICK ACTIONS - Daily Use Buttons
+   ============================================ */
+.members-quick-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.members-quick-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--sidebar-bg);
+  border: 1px solid var(--sidebar-border);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.members-quick-btn:hover {
+  background: var(--sidebar-hover);
+  color: var(--text-primary);
+}
+
+.members-quick-btn--active {
+  background: rgba(79, 70, 229, 0.1);
+  border-color: rgba(79, 70, 229, 0.3);
+  color: #4F46E5;
+}
+
+.members-quick-btn__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background: rgba(79, 70, 229, 0.15);
+  color: #4F46E5;
+  border-radius: 9px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.members-quick-btn__count--warning {
+  background: rgba(239, 68, 68, 0.15);
+  color: #EF4444;
 }
 
 /* Sort Badge */
@@ -444,13 +648,57 @@
   background: rgba(0, 0, 0, 0.05);
 }
 
+:root.theme-light .members-stat {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+:root.theme-light .members-stat:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+:root.theme-light .members-search-box {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+:root.theme-light .members-quick-btn {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
 /* ============================================
    RESPONSIVE
    ============================================ */
+@media (max-width: 1024px) {
+  .members-stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 768px) {
   .members-page {
     padding: 12px 14px;
     gap: 12px;
+  }
+
+  .members-stats-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .members-stat {
+    padding: 12px;
+  }
+
+  .members-stat__icon {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+
+  .members-stat__value {
+    font-size: 18px;
   }
 
   .members-page__header {
@@ -468,9 +716,32 @@
     font-size: 18px;
   }
 
+  .members-page__search-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .members-search-box {
+    flex: 1;
+    min-width: 140px;
+  }
+
   .members-page__header-right {
     width: 100%;
     justify-content: flex-start;
+  }
+
+  .members-quick-actions {
+    width: 100%;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .members-quick-btn {
+    flex-shrink: 0;
+    white-space: nowrap;
   }
 
   .members-filter-panel {

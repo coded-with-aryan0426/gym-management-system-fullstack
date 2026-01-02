@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useEffect, useState, useMemo, useCallback, useRef } from "react"
-import { FiFilter, FiSearch, FiPlus, FiDownload, FiUsers, FiUserCheck, FiAlertCircle, FiUserPlus } from "react-icons/fi"
+import { FiFilter, FiSearch, FiUserPlus, FiDownload, FiCalendar, FiUsers, FiAlertCircle, FiTrendingUp, FiGift, FiClock, FiRefreshCw } from "react-icons/fi"
 import { toast } from "react-hot-toast"
 import { useSearchParams } from "react-router-dom"
 import { Button, Badge, getStatusVariant, Avatar, DataTable, CreateUserModal, type Column } from "../../components"
@@ -28,48 +28,6 @@ const Members: React.FC = () => {
   const [selectedMember, setSelectedMember] = useState<MemberDTO | null>(null)
   const [isActionModalOpen, setIsActionModalOpen] = useState(false)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-
-  const quickStats = useMemo(() => {
-    const now = new Date()
-    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-    
-    const activeCount = members.filter(m => m.status === 'Active').length
-    const expiringSoon = members.filter(m => {
-      const { daysLeft, isExpired } = getExpiryInfo(m)
-      return !isExpired && daysLeft !== null && daysLeft <= 7
-    }).length
-    const newToday = members.filter(m => {
-      if (!m.startDate) return false
-      return new Date(m.startDate) >= todayStart
-    }).length
-    
-    return { total: globalStats?.total || members.length, activeCount, expiringSoon, newToday }
-  }, [members, globalStats])
-
-  const getExpiryInfo = (member: MemberDTO) => {
-    const startDate = member.startDate ? new Date(member.startDate) : null
-    if (!startDate || !member.planDuration) return { date: null, daysLeft: null, isExpired: false }
-
-    const durationStr = member.planDuration.toLowerCase()
-    let expiryDate = new Date(startDate)
-
-    if (durationStr.includes('year')) {
-      const years = parseInt(durationStr) || 1
-      expiryDate.setMonth(expiryDate.getMonth() + years * 12)
-    } else if (durationStr.includes('month')) {
-      const months = parseInt(durationStr) || 1
-      expiryDate.setMonth(expiryDate.getMonth() + months)
-    } else if (durationStr.includes('day')) {
-      const days = parseInt(durationStr) || 30
-      expiryDate.setDate(expiryDate.getDate() + days)
-    }
-
-    const now = new Date()
-    const daysLeft = Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-    const isExpired = daysLeft < 0
-
-    return { date: expiryDate, daysLeft, isExpired }
-  }
 
   const [currentPage, setCurrentPage] = useState(0)
   const [pageSize, setPageSize] = useState(10)
@@ -311,6 +269,57 @@ const Members: React.FC = () => {
     })
   }
 
+  const getExpiryInfo = (member: MemberDTO) => {
+    const startDate = member.startDate ? new Date(member.startDate) : null
+    if (!startDate || !member.planDuration) return { date: null, daysLeft: null, isExpired: false }
+
+    const durationStr = member.planDuration.toLowerCase()
+    let expiryDate = new Date(startDate)
+
+    if (durationStr.includes('year')) {
+      const years = parseInt(durationStr) || 1
+      expiryDate.setMonth(expiryDate.getMonth() + years * 12)
+    } else if (durationStr.includes('month')) {
+      const months = parseInt(durationStr) || 1
+      expiryDate.setMonth(expiryDate.getMonth() + months)
+    } else if (durationStr.includes('day')) {
+      const days = parseInt(durationStr) || 30
+      expiryDate.setDate(expiryDate.getDate() + days)
+    }
+
+    const now = new Date()
+    const daysLeft = Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+    const isExpired = daysLeft < 0
+
+    return { date: expiryDate, daysLeft, isExpired }
+  }
+
+  const stats = useMemo(() => {
+    const now = new Date()
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    
+    const activeCount = members.filter(m => m.status === 'Active').length
+    const expiredCount = members.filter(m => m.status === 'Expired').length
+    
+    const expiringSoon = members.filter(m => {
+      const { daysLeft, isExpired } = getExpiryInfo(m)
+      return !isExpired && daysLeft !== null && daysLeft <= 7 && daysLeft > 0
+    }).length
+    
+    const newThisMonth = members.filter(m => {
+      if (!m.startDate) return false
+      return new Date(m.startDate) >= startOfMonth
+    }).length
+    
+    const todayJoined = members.filter(m => {
+      if (!m.startDate) return false
+      return new Date(m.startDate) >= startOfToday
+    }).length
+
+    return { activeCount, expiredCount, expiringSoon, newThisMonth, todayJoined, total: members.length }
+  }, [members])
+
   const columns: Column<MemberDTO>[] = [
     {
       key: "index",
@@ -422,6 +431,39 @@ const Members: React.FC = () => {
 
   return (
     <div className="members-page">
+      {/* Premium Stats Row */}
+      <div className="members-stats-row">
+        <div className="members-stat members-stat--total">
+          <div className="members-stat__icon"><FiUsers /></div>
+          <div className="members-stat__content">
+            <span className="members-stat__value">{stats.total}</span>
+            <span className="members-stat__label">Total Members</span>
+          </div>
+        </div>
+        <div className="members-stat members-stat--active">
+          <div className="members-stat__icon"><FiTrendingUp /></div>
+          <div className="members-stat__content">
+            <span className="members-stat__value">{stats.activeCount}</span>
+            <span className="members-stat__label">Active</span>
+          </div>
+        </div>
+        <div className="members-stat members-stat--expiring">
+          <div className="members-stat__icon"><FiAlertCircle /></div>
+          <div className="members-stat__content">
+            <span className="members-stat__value">{stats.expiringSoon}</span>
+            <span className="members-stat__label">Expiring Soon</span>
+          </div>
+        </div>
+        <div className="members-stat members-stat--new">
+          <div className="members-stat__icon"><FiCalendar /></div>
+          <div className="members-stat__content">
+            <span className="members-stat__value">{stats.newThisMonth}</span>
+            <span className="members-stat__label">New This Month</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Header with Search and Actions */}
       <div className="members-page__header">
         <div className="members-page__title-section">
           <h1 className="members-page__title">Members</h1>
@@ -445,110 +487,165 @@ const Members: React.FC = () => {
           </div>
         </div>
 
-        <div className="members-page__header-right">
-          <div className="members-filter-container" ref={filterPanelRef}>
-            <button
-              className={`btn-filters ${isFilterPanelOpen ? 'btn-filters--active' : ''} ${activeFilterCount > 0 ? 'btn-filters--has-filters' : ''}`}
-              onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
-            >
-              <FiFilter size={12} />
-              Filters
-              {activeFilterCount > 0 && ` (${activeFilterCount})`}
+        <div className="members-page__search-actions">
+          <div className="members-search-box">
+            <FiSearch className="members-search-box__icon" />
+            <input
+              type="text"
+              placeholder="Search members..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="members-search-box__input"
+            />
+          </div>
+
+          <div className="members-page__header-right">
+            <div className="members-filter-container" ref={filterPanelRef}>
+              <button
+                className={`btn-filters ${isFilterPanelOpen ? 'btn-filters--active' : ''} ${activeFilterCount > 0 ? 'btn-filters--has-filters' : ''}`}
+                onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
+              >
+                <FiFilter size={12} />
+                Filters
+                {activeFilterCount > 0 && ` (${activeFilterCount})`}
+              </button>
+
+              {isFilterPanelOpen && (
+                <div className="members-filter-panel">
+                  <div className="filter-panel__header">
+                    <span>Filters</span>
+                    {activeFilterCount > 0 && (
+                      <button className="filter-clear-btn" onClick={handleResetFilters}>
+                        Clear all
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="filter-panel__content">
+                    <div className="filter-group">
+                      <label className="filter-label">Status</label>
+                      <select
+                        className="filter-select"
+                        value={filters.status[0] || ""}
+                        onChange={(e) => {
+                          const val = e.target.value
+                          setFilters(prev => ({ ...prev, status: val ? [val] : [] }))
+                        }}
+                      >
+                        <option value="">All Status</option>
+                        <option value="Active">Active</option>
+                        <option value="Expired">Expired</option>
+                      </select>
+                    </div>
+
+                    <div className="filter-group">
+                      <label className="filter-label">Plan</label>
+                      <select
+                        className="filter-select"
+                        value={filters.plan[0] || ""}
+                        onChange={(e) => {
+                          const val = e.target.value
+                          setFilters(prev => ({ ...prev, plan: val ? [val] : [] }))
+                        }}
+                      >
+                        <option value="">All Plans</option>
+                        <option value="Basic">Basic</option>
+                        <option value="Premium">Premium</option>
+                        <option value="Standard">Standard</option>
+                      </select>
+                    </div>
+
+                    <div className="filter-group">
+                      <label className="filter-label">Plan Duration</label>
+                      <select
+                        className="filter-select"
+                        value={filters.planDuration}
+                        onChange={(e) => setFilters(prev => ({ ...prev, planDuration: e.target.value }))}
+                      >
+                        <option value="">All Durations</option>
+                        <option value="1 Month">1 Month</option>
+                        <option value="3 Months">3 Months</option>
+                        <option value="6 Months">6 Months</option>
+                        <option value="12 Months">12 Months</option>
+                      </select>
+                    </div>
+
+                    <div className="filter-group">
+                      <label className="filter-label">Expiry Status</label>
+                      <select
+                        className="filter-select"
+                        value={filters.expiryStatus}
+                        onChange={(e) => setFilters(prev => ({ ...prev, expiryStatus: e.target.value }))}
+                      >
+                        <option value="">All</option>
+                        <option value="expiring-soon">Expiring Soon (7 days)</option>
+                        <option value="expiring-month">Expiring This Month</option>
+                        <option value="already-expired">Already Expired</option>
+                      </select>
+                    </div>
+
+                    <div className="filter-group">
+                      <label className="filter-label">Joined</label>
+                      <select
+                        className="filter-select"
+                        value={filters.joinedPeriod}
+                        onChange={(e) => setFilters(prev => ({ ...prev, joinedPeriod: e.target.value }))}
+                      >
+                        <option value="">All Time</option>
+                        <option value="today">Today</option>
+                        <option value="this-week">This Week</option>
+                        <option value="this-month">This Month</option>
+                        <option value="last-3-months">Last 3 Months</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <button className="members-action-btn" onClick={() => setIsCreateModalOpen(true)}>
+              <FiUserPlus size={14} />
+              <span>Add Member</span>
             </button>
-
-            {isFilterPanelOpen && (
-              <div className="members-filter-panel">
-                <div className="filter-panel__header">
-                  <span>Filters</span>
-                  {activeFilterCount > 0 && (
-                    <button className="filter-clear-btn" onClick={handleResetFilters}>
-                      Clear all
-                    </button>
-                  )}
-                </div>
-
-                <div className="filter-panel__content">
-                  <div className="filter-group">
-                    <label className="filter-label">Status</label>
-                    <select
-                      className="filter-select"
-                      value={filters.status[0] || ""}
-                      onChange={(e) => {
-                        const val = e.target.value
-                        setFilters(prev => ({ ...prev, status: val ? [val] : [] }))
-                      }}
-                    >
-                      <option value="">All Status</option>
-                      <option value="Active">Active</option>
-                      <option value="Expired">Expired</option>
-                    </select>
-                  </div>
-
-                  <div className="filter-group">
-                    <label className="filter-label">Plan</label>
-                    <select
-                      className="filter-select"
-                      value={filters.plan[0] || ""}
-                      onChange={(e) => {
-                        const val = e.target.value
-                        setFilters(prev => ({ ...prev, plan: val ? [val] : [] }))
-                      }}
-                    >
-                      <option value="">All Plans</option>
-                      <option value="Basic">Basic</option>
-                      <option value="Premium">Premium</option>
-                      <option value="Standard">Standard</option>
-                    </select>
-                  </div>
-
-                  <div className="filter-group">
-                    <label className="filter-label">Plan Duration</label>
-                    <select
-                      className="filter-select"
-                      value={filters.planDuration}
-                      onChange={(e) => setFilters(prev => ({ ...prev, planDuration: e.target.value }))}
-                    >
-                      <option value="">All Durations</option>
-                      <option value="1 Month">1 Month</option>
-                      <option value="3 Months">3 Months</option>
-                      <option value="6 Months">6 Months</option>
-                      <option value="12 Months">12 Months</option>
-                    </select>
-                  </div>
-
-                  <div className="filter-group">
-                    <label className="filter-label">Expiry Status</label>
-                    <select
-                      className="filter-select"
-                      value={filters.expiryStatus}
-                      onChange={(e) => setFilters(prev => ({ ...prev, expiryStatus: e.target.value }))}
-                    >
-                      <option value="">All</option>
-                      <option value="expiring-soon">Expiring Soon (7 days)</option>
-                      <option value="expiring-month">Expiring This Month</option>
-                      <option value="already-expired">Already Expired</option>
-                    </select>
-                  </div>
-
-                  <div className="filter-group">
-                    <label className="filter-label">Joined</label>
-                    <select
-                      className="filter-select"
-                      value={filters.joinedPeriod}
-                      onChange={(e) => setFilters(prev => ({ ...prev, joinedPeriod: e.target.value }))}
-                    >
-                      <option value="">All Time</option>
-                      <option value="today">Today</option>
-                      <option value="this-week">This Week</option>
-                      <option value="this-month">This Month</option>
-                      <option value="last-3-months">Last 3 Months</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="members-quick-actions">
+        <button 
+          className={`members-quick-btn ${filters.expiryStatus === 'expiring-soon' ? 'members-quick-btn--active' : ''}`}
+          onClick={() => setFilters(prev => ({ 
+            ...prev, 
+            expiryStatus: prev.expiryStatus === 'expiring-soon' ? '' : 'expiring-soon' 
+          }))}
+        >
+          <FiClock size={13} />
+          <span>Expiring Soon</span>
+          {stats.expiringSoon > 0 && <span className="members-quick-btn__count">{stats.expiringSoon}</span>}
+        </button>
+        <button 
+          className={`members-quick-btn ${filters.joinedPeriod === 'today' ? 'members-quick-btn--active' : ''}`}
+          onClick={() => setFilters(prev => ({ 
+            ...prev, 
+            joinedPeriod: prev.joinedPeriod === 'today' ? '' : 'today' 
+          }))}
+        >
+          <FiCalendar size={13} />
+          <span>Joined Today</span>
+          {stats.todayJoined > 0 && <span className="members-quick-btn__count">{stats.todayJoined}</span>}
+        </button>
+        <button 
+          className={`members-quick-btn ${filters.status[0] === 'Expired' ? 'members-quick-btn--active' : ''}`}
+          onClick={() => setFilters(prev => ({ 
+            ...prev, 
+            status: prev.status[0] === 'Expired' ? [] : ['Expired']
+          }))}
+        >
+          <FiRefreshCw size={13} />
+          <span>Need Renewal</span>
+          {stats.expiredCount > 0 && <span className="members-quick-btn__count members-quick-btn__count--warning">{stats.expiredCount}</span>}
+        </button>
       </div>
 
 
