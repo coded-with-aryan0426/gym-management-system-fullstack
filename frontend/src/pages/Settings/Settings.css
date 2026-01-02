@@ -28,8 +28,16 @@
 :root.theme-light,
 [data-theme="light"],
 body.light-mode {
+  --settings-bg: var(--bg-primary, #F8FAFC);
+  --settings-card-bg: var(--bg-secondary, #FFFFFF);
+  --settings-card-bg-hover: var(--bg-tertiary, #F1F5F9);
+  --settings-border: var(--border-primary, #CBD5E1);
+  --settings-border-subtle: var(--border-secondary, #E2E8F0);
+  --settings-text-primary: var(--text-primary, #0F172A);
+  --settings-text-secondary: var(--text-secondary, #334155);
+  --settings-text-tertiary: var(--text-tertiary, #64748B);
   --settings-nav-hover-bg: rgba(0, 0, 0, 0.04);
-  --settings-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.08);
+  --settings-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
   --settings-nav-active-bg: rgba(220, 38, 38, 0.08);
 }
 
@@ -144,10 +152,240 @@ body.light-mode .dense-textarea:focus {
 [data-theme="light"] .form-group__header,
 body.light-mode .form-group__header {
   color: #334155;
-  /* Darker header text */
   border-bottom: 1px solid var(--border-primary, #CBD5E1);
   padding-bottom: 12px;
   margin-bottom: 16px;
+}
+
+/* Light Mode - Input Hover States */
+:root.theme-light .dense-input:hover:not(:focus),
+[data-theme="light"] .dense-input:hover:not(:focus),
+body.light-mode .dense-input:hover:not(:focus),
+:root.theme-light .dense-select:hover:not(:focus),
+[data-theme="light"] .dense-select:hover:not(:focus),
+body.light-mode .dense-select:hover:not(:focus),
+:root.theme-light .dense-textarea:hover:not(:focus),
+[data-theme="light"] .dense-textarea:hover:not(:focus),
+body.light-mode .dense-textarea:hover:not(:focus) {
+  border-color: #94A3B8;
+  background: #F8FAFC;
+}
+
+/* Light Mode - Policy Toggle Rows */
+:root.theme-light .policy-toggle-row,
+[data-theme="light"] .policy-toggle-row,
+body.light-mode .policy-toggle-row {
+  background: #F8FAFC;
+  border-color: var(--border-primary, #CBD5E1);
+}
+
+:root.theme-light .policy-toggle-row:hover,
+[data-theme="light"] .policy-toggle-row:hover,
+body.light-mode .policy-toggle-row:hover {
+  background: #F1F5F9;
+}
+
+:root.theme-light .policy-toggle-row__icon,
+[data-theme="light"] .policy-toggle-row__icon,
+body.light-mode .policy-toggle-row__icon {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+/* Light Mode - Toggle Switch */
+:root.theme-light .policy-toggle,
+[data-theme="light"] .policy-toggle,
+body.light-mode .policy-toggle {
+  background: #CBD5E1;
+}
+
+/* Light Mode - Radio Cards */
+:root.theme-light .policy-radio-card,
+[data-theme="light"] .policy-radio-card,
+body.light-mode .policy-radio-card {
+  background: #F8FAFC;
+  border-color: var(--border-primary, #CBD5E1);
+}
+
+:root.theme-light .policy-radio-card:hover,
+[data-theme="light"] .policy-radio-card:hover,
+body.light-mode .policy-radio-card:hover {
+  background: #F1F5F9;
+}
+
+/* Light Mode - Permissions Matrix */
+:root.theme-light .permissions-matrix,
+[data-theme="light"] .permissions-matrix,
+body.light-mode .permissions-matrix {
+  background: #FFFFFF;
+}
+
+:root.theme-light .permissions-matrix__header,
+[data-theme="light"] .permissions-matrix__header,
+body.light-mode .permissions-matrix__header {
+  background: #F8FAFC;
+}
+
+:root.theme-light .permissions-matrix__row:hover,
+[data-theme="light"] .permissions-matrix__row:hover,
+body.light-mode .permissions-matrix__row:hover {
+  background: #F8FAFC;
+}
+
+:root.theme-light .permissions-matrix__cell--label,
+[data-theme="light"] .permissions-matrix__cell--label,
+body.light-mode .permissions-matrix__cell--label {
+  background: #F1F5F9;
+}
+
+:root.theme-light .permissions-matrix__toggle,
+[data-theme="light"] .permissions-matrix__toggle,
+body.light-mode .permissions-matrix__toggle {
+  background: #F8FAFC;
+  border-color: var(--border-primary, #CBD5E1);
+}
+
+/* Light Mode - Notification Channels */
+:root.theme-light .notification-channel,
+[data-theme="light"] .notification-channel,
+body.light-mode .notification-channel {
+  background: #F8FAFC;
+  border-color: var(--border-primary, #CBD5E1);
+}
+
+:root.theme-light .notification-channel:hover,
+[data-theme="light"] .notification-channel:hover,
+body.light-mode .notification-channel:hover {
+  background: #F1F5F9;
+}
+
+/* Light Mode - Session Items */
+:root.theme-light .session-item,
+[data-theme="light"] .session-item,
+body.light-mode .session-item {
+  background: #F8FAFC;
+  border-color: var(--border-primary, #CBD5E1);
+}
+
+:root.theme-light .session-item:hover,
+[data-theme="light"] .session-item:hover,
+body.light-mode .session-item:hover {
+  background: #F1F5F9;
+}
+
+/* Light Mode - Login History */
+:root.theme-light .login-history__item,
+[data-theme="light"] .login-history__item,
+body.light-mode .login-history__item {
+  background: #F8FAFC;
+  border-color: var(--border-primary, #CBD5E1);
+}
+
+:root.theme-light .login-history__item:hover,
+[data-theme="light"] .login-history__item:hover,
+body.light-mode .login-history__item:hover {
+  background: #F1F5F9;
+}
+
+/* Light Mode - Policy Note */
+:root.theme-light .policy-note,
+[data-theme="light"] .policy-note,
+body.light-mode .policy-note {
+  background: #F8FAFC;
+  border-color: var(--border-primary, #CBD5E1);
+}
+
+/* Light Mode - Modal */
+:root.theme-light .settings-modal,
+[data-theme="light"] .settings-modal,
+body.light-mode .settings-modal {
+  background: #FFFFFF;
+  border-color: var(--border-primary, #CBD5E1);
+}
+
+/* Light Mode - Theme Options */
+:root.theme-light .theme-option,
+[data-theme="light"] .theme-option,
+body.light-mode .theme-option {
+  background: #F8FAFC;
+  border-color: var(--border-primary, #CBD5E1);
+}
+
+:root.theme-light .theme-option:hover,
+[data-theme="light"] .theme-option:hover,
+body.light-mode .theme-option:hover {
+  background: #F1F5F9;
+}
+
+:root.theme-light .theme-option:not(.theme-option--active) .theme-option__icon,
+[data-theme="light"] .theme-option:not(.theme-option--active) .theme-option__icon,
+body.light-mode .theme-option:not(.theme-option--active) .theme-option__icon {
+  background: #E2E8F0;
+  color: #64748B;
+}
+
+/* Light Mode - Select Dropdown */
+:root.theme-light select.dense-input,
+[data-theme="light"] select.dense-input,
+body.light-mode select.dense-input {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23334155' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+}
+
+:root.theme-light select.dense-input option,
+[data-theme="light"] select.dense-input option,
+body.light-mode select.dense-input option {
+  background: #FFFFFF;
+  color: #0F172A;
+}
+
+/* Light Mode - Audit Table */
+:root.theme-light .audit-table th,
+[data-theme="light"] .audit-table th,
+body.light-mode .audit-table th {
+  background: #F8FAFC;
+}
+
+:root.theme-light .audit-table tr:hover,
+[data-theme="light"] .audit-table tr:hover,
+body.light-mode .audit-table tr:hover {
+  background: #F8FAFC;
+}
+
+/* Light Mode - Form Group Title */
+:root.theme-light .form-group__title,
+[data-theme="light"] .form-group__title,
+body.light-mode .form-group__title {
+  color: #334155;
+  border-bottom-color: var(--border-primary, #CBD5E1);
+}
+
+/* Light Mode - Section Hover */
+:root.theme-light .settings-section:hover,
+[data-theme="light"] .settings-section:hover,
+body.light-mode .settings-section:hover {
+  border-color: #94A3B8;
+}
+
+/* Light Mode - Cancel Button */
+:root.theme-light .settings-section__cancel-btn:hover,
+[data-theme="light"] .settings-section__cancel-btn:hover,
+body.light-mode .settings-section__cancel-btn:hover {
+  background: #F1F5F9;
+}
+
+/* Light Mode - Modal Buttons */
+:root.theme-light .modal-btn--secondary:hover,
+[data-theme="light"] .modal-btn--secondary:hover,
+body.light-mode .modal-btn--secondary:hover {
+  background: #F1F5F9;
+}
+
+/* Light Mode - Info Icon Tooltip */
+:root.theme-light .info-icon[data-tooltip]:hover::after,
+[data-theme="light"] .info-icon[data-tooltip]:hover::after,
+body.light-mode .info-icon[data-tooltip]:hover::after {
+  background: #FFFFFF;
+  border-color: var(--border-primary, #CBD5E1);
+  color: #0F172A;
 }
 
 /* =============================================================================
