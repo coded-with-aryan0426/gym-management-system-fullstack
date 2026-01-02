@@ -1,17 +1,19 @@
 /* ============================================================================
-   Trainer Profile - Premium Design with Light/Dark Mode
+   Trainer Profile - Red & Black Theme (Dark) / Red & White Theme (Light)
    ============================================================================ */
+
+@import './TrainerTheme.css';
 
 .trainer-profile {
   min-height: 100%;
-  background-color: var(--bg-primary, #0c0c0e);
+  background-color: var(--bg-primary, #0a0a0a);
 }
 
 /* ============================================
    HEADER BANNER
    ============================================ */
 .trainer-profile__header-banner {
-  background: linear-gradient(135deg, #4F46E5 0%, #6366F1 100%);
+  background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%);
   padding: 32px 40px;
   position: relative;
 }
@@ -58,7 +60,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #4F46E5;
+  color: #DC2626;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   transition: transform 0.15s ease;
 }
@@ -138,7 +140,7 @@
 .trainer-profile__save-btn {
   background: #fff;
   border: none;
-  color: #4F46E5;
+  color: #DC2626;
 }
 
 .trainer-profile__save-btn:hover {
@@ -167,7 +169,7 @@
 }
 
 .trainer-profile__stat {
-  background: var(--bg-secondary, rgba(255, 255, 255, 0.03));
+  background: var(--bg-secondary, #141414);
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
   border-radius: 12px;
   padding: 20px;
@@ -243,7 +245,7 @@
 }
 
 .trainer-profile__tab--active {
-  color: #4F46E5;
+  color: #DC2626;
   font-weight: 600;
 }
 
@@ -254,7 +256,7 @@
   left: 0;
   width: 100%;
   height: 2px;
-  background: #4F46E5;
+  background: #DC2626;
   border-radius: 2px 2px 0 0;
 }
 
@@ -262,7 +264,7 @@
    TAB CONTENT
    ============================================ */
 .trainer-profile__tab-content {
-  background: var(--bg-secondary, rgba(255, 255, 255, 0.03));
+  background: var(--bg-secondary, #141414);
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
   border-radius: 12px;
   padding: 32px;
@@ -318,7 +320,7 @@
   border-radius: 8px;
   font-size: 15px;
   color: var(--text-primary, #fff);
-  background: var(--bg-primary, rgba(0, 0, 0, 0.2));
+  background: var(--bg-primary, #0a0a0a);
   transition: all 0.2s ease;
 }
 
@@ -333,8 +335,8 @@
 .trainer-profile__field select:focus,
 .trainer-profile__field textarea:focus {
   outline: none;
-  border-color: #4F46E5;
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+  border-color: #DC2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
 }
 
 .trainer-profile__field input:disabled,
@@ -378,8 +380,8 @@
 }
 
 .trainer-profile__badge--primary {
-  background: rgba(79, 70, 229, 0.15);
-  color: #4F46E5;
+  background: rgba(220, 38, 38, 0.15);
+  color: #DC2626;
 }
 
 .trainer-profile__badge--warning {
@@ -406,7 +408,7 @@
   align-items: center;
   gap: 16px;
   padding: 16px;
-  background: var(--bg-primary, rgba(0, 0, 0, 0.2));
+  background: var(--bg-primary, #0a0a0a);
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
   border-radius: 10px;
 }
@@ -415,8 +417,8 @@
   width: 40px;
   height: 40px;
   border-radius: 10px;
-  background: rgba(79, 70, 229, 0.1);
-  color: #4F46E5;
+  background: rgba(220, 38, 38, 0.1);
+  color: #DC2626;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -464,15 +466,16 @@
 }
 
 .trainer-profile__security-btn:hover {
-  background: var(--bg-secondary, rgba(255, 255, 255, 0.04));
-  border-color: var(--border-hover, rgba(255, 255, 255, 0.15));
+  background: #DC2626;
+  border-color: #DC2626;
+  color: #fff;
 }
 
 /* ============================================
    LIGHT MODE
    ============================================ */
 :root.theme-light .trainer-profile {
-  background-color: #f8fafc;
+  background-color: #ffffff;
 }
 
 :root.theme-light .trainer-profile__stat {
@@ -482,15 +485,15 @@
 }
 
 :root.theme-light .trainer-profile__stat-value {
-  color: #111827;
+  color: #111111;
 }
 
 :root.theme-light .trainer-profile__stat-label {
-  color: #374151;
+  color: #4a4a4a;
 }
 
 :root.theme-light .trainer-profile__stat-sub {
-  color: #6B7280;
+  color: #6b6b6b;
 }
 
 :root.theme-light .trainer-profile__tabs {
@@ -498,11 +501,11 @@
 }
 
 :root.theme-light .trainer-profile__tab {
-  color: #6B7280;
+  color: #6b6b6b;
 }
 
 :root.theme-light .trainer-profile__tab:hover {
-  color: #374151;
+  color: #4a4a4a;
 }
 
 :root.theme-light .trainer-profile__tab-content {
@@ -512,7 +515,7 @@
 }
 
 :root.theme-light .trainer-profile__field label {
-  color: #374151;
+  color: #4a4a4a;
 }
 
 :root.theme-light .trainer-profile__field input,
@@ -520,7 +523,7 @@
 :root.theme-light .trainer-profile__field textarea {
   background: #fff;
   border-color: #D1D5DB;
-  color: #111827;
+  color: #111111;
 }
 
 :root.theme-light .trainer-profile__field--readonly input {
@@ -529,25 +532,27 @@
 }
 
 :root.theme-light .trainer-profile__security-item {
-  background: #F9FAFB;
+  background: #fafafa;
   border-color: rgba(0, 0, 0, 0.06);
 }
 
 :root.theme-light .trainer-profile__security-title {
-  color: #111827;
+  color: #111111;
 }
 
 :root.theme-light .trainer-profile__security-sub {
-  color: #6B7280;
+  color: #6b6b6b;
 }
 
 :root.theme-light .trainer-profile__security-btn {
   border-color: #D1D5DB;
-  color: #374151;
+  color: #4a4a4a;
 }
 
 :root.theme-light .trainer-profile__security-btn:hover {
-  background: #F3F4F6;
+  background: #DC2626;
+  border-color: #DC2626;
+  color: #fff;
 }
 
 /* ============================================

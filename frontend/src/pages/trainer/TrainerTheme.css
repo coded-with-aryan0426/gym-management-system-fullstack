@@ -1,0 +1,60 @@
+/* ============================================================================
+   Trainer Theme - Red & Black (Dark) / Red & White (Light)
+   Shared theme variables for all trainer pages
+   ============================================================================ */
+
+/* Primary Red Color Palette */
+:root {
+  --trainer-primary: #DC2626;
+  --trainer-primary-hover: #B91C1C;
+  --trainer-primary-light: rgba(220, 38, 38, 0.15);
+  --trainer-primary-dark: #991B1B;
+  --trainer-accent: #EF4444;
+  --trainer-accent-light: rgba(239, 68, 68, 0.1);
+}
+
+/* ============================================
+   DARK MODE (Red & Black) - Default
+   ============================================ */
+.trainer-dashboard,
+.trainer-profile,
+.my-members,
+.my-classes,
+.progress-notes,
+.trainer-schedule,
+.trainer-messages,
+.trainer-notif,
+.trainer-reports,
+.trainer-settings {
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #141414;
+  --bg-tertiary: #1a1a1a;
+  --border-color: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(220, 38, 38, 0.3);
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.7);
+  --text-tertiary: rgba(255, 255, 255, 0.5);
+}
+
+/* ============================================
+   LIGHT MODE (Red & White)
+   ============================================ */
+:root.theme-light .trainer-dashboard,
+:root.theme-light .trainer-profile,
+:root.theme-light .my-members,
+:root.theme-light .my-classes,
+:root.theme-light .progress-notes,
+:root.theme-light .trainer-schedule,
+:root.theme-light .trainer-messages,
+:root.theme-light .trainer-notif,
+:root.theme-light .trainer-reports,
+:root.theme-light .trainer-settings {
+  --bg-primary: #ffffff;
+  --bg-secondary: #fafafa;
+  --bg-tertiary: #f5f5f5;
+  --border-color: rgba(0, 0, 0, 0.08);
+  --border-hover: rgba(220, 38, 38, 0.3);
+  --text-primary: #111111;
+  --text-secondary: #4a4a4a;
+  --text-tertiary: #6b6b6b;
+}

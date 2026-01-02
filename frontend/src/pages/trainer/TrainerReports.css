@@ -2,9 +2,11 @@
    Trainer Reports - Analytics Dashboard with Light/Dark Mode
    ============================================================================ */
 
+@import './TrainerTheme.css';
+
 .trainer-reports {
   min-height: 100%;
-  background-color: var(--bg-primary, #0c0c0e);
+  background-color: var(--bg-primary, #0a0a0a);
 }
 
 /* ============================================
@@ -76,7 +78,7 @@
   gap: 8px;
   height: 40px;
   padding: 10px 20px;
-  background: #4F46E5;
+  background: #DC2626;
   border: none;
   border-radius: 8px;
   color: #fff;
@@ -87,7 +89,7 @@
 }
 
 .trainer-reports__export-btn:hover {
-  background: #4338CA;
+  background: #B91C1C;
 }
 
 /* ============================================
@@ -134,8 +136,8 @@
   height: 44px;
   margin: 0 auto 12px;
   border-radius: 10px;
-  background: rgba(79, 70, 229, 0.15);
-  color: #4F46E5;
+  background: rgba(220, 38, 38, 0.15);
+  color: #DC2626;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -216,13 +218,13 @@
 }
 
 .trainer-reports__card-header h2 svg {
-  color: #4F46E5;
+  color: #DC2626;
 }
 
 .trainer-reports__view-all {
   background: none;
   border: none;
-  color: #4F46E5;
+  color: #DC2626;
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -277,7 +279,7 @@
 
 .trainer-reports__metric-progress {
   height: 100%;
-  background: linear-gradient(90deg, #4F46E5, #6366F1);
+  background: linear-gradient(90deg, #DC2626, #EF4444);
   border-radius: 4px;
   transition: width 0.3s ease;
 }
@@ -301,8 +303,8 @@
   width: 24px;
   height: 24px;
   border-radius: 6px;
-  background: rgba(79, 70, 229, 0.15);
-  color: #4F46E5;
+  background: rgba(220, 38, 38, 0.15);
+  color: #DC2626;
   font-size: 12px;
   font-weight: 700;
   display: flex;
@@ -314,7 +316,7 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #4F46E5, #6366F1);
+  background: linear-gradient(135deg, #DC2626, #EF4444);
   color: #fff;
   font-size: 12px;
   font-weight: 600;
@@ -437,7 +439,7 @@
    LIGHT MODE
    ============================================ */
 :root.theme-light .trainer-reports {
-  background-color: #f8fafc;
+  background-color: #ffffff;
 }
 
 :root.theme-light .trainer-reports__header {
@@ -446,17 +448,17 @@
 }
 
 :root.theme-light .trainer-reports__title-section h1 {
-  color: #111827;
+  color: #111111;
 }
 
 :root.theme-light .trainer-reports__title-section p {
-  color: #6B7280;
+  color: #6b6b6b;
 }
 
 :root.theme-light .trainer-reports__period-select select {
   background: #F9FAFB;
   border-color: #D1D5DB;
-  color: #111827;
+  color: #111111;
 }
 
 :root.theme-light .trainer-reports__stat-card {
@@ -465,11 +467,11 @@
 }
 
 :root.theme-light .trainer-reports__stat-value {
-  color: #111827;
+  color: #111111;
 }
 
 :root.theme-light .trainer-reports__stat-label {
-  color: #6B7280;
+  color: #6b6b6b;
 }
 
 :root.theme-light .trainer-reports__card {
@@ -482,15 +484,15 @@
 }
 
 :root.theme-light .trainer-reports__card-header h2 {
-  color: #111827;
+  color: #111111;
 }
 
 :root.theme-light .trainer-reports__metric-label {
-  color: #6B7280;
+  color: #6b6b6b;
 }
 
 :root.theme-light .trainer-reports__metric-value {
-  color: #111827;
+  color: #111111;
 }
 
 :root.theme-light .trainer-reports__metric-bar {
@@ -498,15 +500,15 @@
 }
 
 :root.theme-light .trainer-reports__member-name {
-  color: #111827;
+  color: #111111;
 }
 
 :root.theme-light .trainer-reports__table-row span {
-  color: #6B7280;
+  color: #6b6b6b;
 }
 
 :root.theme-light .trainer-reports__session-member {
-  color: #111827 !important;
+  color: #111111 !important;
 }
 
 /* ============================================

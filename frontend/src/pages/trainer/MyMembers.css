@@ -1,10 +1,12 @@
 /* ============================================================================
-   My Members - Premium Design with Light/Dark Mode
+   My Members - Red & Black Theme (Dark) / Red & White Theme (Light)
    ============================================================================ */
+
+@import './TrainerTheme.css';
 
 .my-members {
   min-height: 100%;
-  background-color: var(--bg-primary, #0c0c0e);
+  background-color: var(--bg-primary, #0a0a0a);
 }
 
 /* ============================================
@@ -118,8 +120,8 @@
 
 .my-members__search input:focus {
   outline: none;
-  border-color: #4F46E5;
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+  border-color: #DC2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
 }
 
 .my-members__filter-dropdown {
@@ -185,8 +187,8 @@
 }
 
 .my-members__view-toggle button.active {
-  background: rgba(79, 70, 229, 0.15);
-  color: #4F46E5;
+  background: rgba(220, 38, 38, 0.15);
+  color: #DC2626;
 }
 
 /* ============================================
@@ -320,13 +322,13 @@
 
 .member-card__btn--primary {
   flex: 1;
-  background: #4F46E5;
+  background: #DC2626;
   border: none;
   color: #fff;
 }
 
 .member-card__btn--primary:hover {
-  background: #4338CA;
+  background: #B91C1C;
 }
 
 .member-card__btn--icon {
@@ -450,13 +452,13 @@
 }
 
 .member-list-item__btn--primary {
-  background: #4F46E5;
+  background: #DC2626;
   border: none;
   color: #fff;
 }
 
 .member-list-item__btn--primary:hover {
-  background: #4338CA;
+  background: #B91C1C;
 }
 
 .member-list-item__btn--icon {
@@ -474,7 +476,7 @@
    LIGHT MODE
    ============================================ */
 :root.theme-light .my-members {
-  background-color: #f8fafc;
+  background-color: #ffffff;
 }
 
 :root.theme-light .my-members__header {
@@ -483,16 +485,16 @@
 }
 
 :root.theme-light .my-members__title-section h1 {
-  color: #111827;
+  color: #111111;
 }
 
 :root.theme-light .my-members__title-section p {
-  color: #6B7280;
+  color: #6b6b6b;
 }
 
 :root.theme-light .my-members__export-btn {
   border-color: #D1D5DB;
-  color: #374151;
+  color: #4a4a4a;
 }
 
 :root.theme-light .my-members__filter-bar {
@@ -504,13 +506,13 @@
 :root.theme-light .my-members__search input {
   background: #F9FAFB;
   border-color: #D1D5DB;
-  color: #111827;
+  color: #111111;
 }
 
 :root.theme-light .my-members__filter-dropdown select {
   background: #F9FAFB;
   border-color: #D1D5DB;
-  color: #111827;
+  color: #111111;
 }
 
 :root.theme-light .my-members__view-toggle {
@@ -519,7 +521,7 @@
 
 :root.theme-light .my-members__view-toggle button {
   border-color: #D1D5DB;
-  color: #6B7280;
+  color: #6b6b6b;
 }
 
 :root.theme-light .member-card {
@@ -534,11 +536,11 @@
 }
 
 :root.theme-light .member-card__info h3 {
-  color: #111827;
+  color: #111111;
 }
 
 :root.theme-light .member-card__info p {
-  color: #6B7280;
+  color: #6b6b6b;
 }
 
 :root.theme-light .member-card__divider {
@@ -546,7 +548,7 @@
 }
 
 :root.theme-light .member-card__stat-value {
-  color: #111827;
+  color: #111111;
 }
 
 :root.theme-light .member-card__stat-label {
@@ -563,11 +565,11 @@
 }
 
 :root.theme-light .member-list-item__info h3 {
-  color: #111827;
+  color: #111111;
 }
 
 :root.theme-light .member-list-item__info p {
-  color: #6B7280;
+  color: #6b6b6b;
 }
 
 :root.theme-light .member-list-item__stats {
@@ -575,7 +577,7 @@
 }
 
 :root.theme-light .member-list-item__stat-value {
-  color: #111827;
+  color: #111111;
 }
 
 /* ============================================

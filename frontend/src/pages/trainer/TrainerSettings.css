@@ -2,9 +2,11 @@
    Trainer Settings - Premium Design with Light/Dark Mode
    ============================================================================ */
 
+@import './TrainerTheme.css';
+
 .trainer-settings {
   min-height: 100%;
-  background-color: var(--bg-primary, #0c0c0e);
+  background-color: var(--bg-primary, #0a0a0a);
 }
 
 /* ============================================
@@ -96,15 +98,15 @@
 }
 
 .trainer-settings__nav-item--active {
-  background: rgba(79, 70, 229, 0.1);
+  background: rgba(220, 38, 38, 0.1);
 }
 
 .trainer-settings__nav-item--active svg:first-child {
-  color: #4F46E5;
+  color: #DC2626;
 }
 
 .trainer-settings__nav-item--active span {
-  color: #4F46E5;
+  color: #DC2626;
   font-weight: 600;
 }
 
@@ -189,8 +191,8 @@
 .trainer-settings__field select:focus,
 .trainer-settings__field textarea:focus {
   outline: none;
-  border-color: #4F46E5;
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+  border-color: #DC2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
 }
 
 .trainer-settings__save-btn {
@@ -199,7 +201,7 @@
   gap: 8px;
   height: 44px;
   padding: 12px 24px;
-  background: #4F46E5;
+  background: #DC2626;
   border: none;
   border-radius: 8px;
   color: #fff;
@@ -210,7 +212,7 @@
 }
 
 .trainer-settings__save-btn:hover {
-  background: #4338CA;
+  background: #B91C1C;
 }
 
 /* ============================================
@@ -283,7 +285,7 @@
 }
 
 .trainer-settings__switch input:checked + .trainer-settings__slider {
-  background: #4F46E5;
+  background: #DC2626;
 }
 
 .trainer-settings__switch input:checked + .trainer-settings__slider::before {
@@ -318,9 +320,9 @@
 }
 
 .trainer-settings__theme-option--active {
-  border-color: #4F46E5;
-  background: rgba(79, 70, 229, 0.1);
-  color: #4F46E5;
+  border-color: #DC2626;
+  background: rgba(220, 38, 38, 0.1);
+  color: #DC2626;
 }
 
 .trainer-settings__theme-option span {
@@ -390,7 +392,7 @@
    LIGHT MODE
    ============================================ */
 :root.theme-light .trainer-settings {
-  background-color: #f8fafc;
+  background-color: #ffffff;
 }
 
 :root.theme-light .trainer-settings__header {
@@ -399,11 +401,11 @@
 }
 
 :root.theme-light .trainer-settings__header-content h1 {
-  color: #111827;
+  color: #111111;
 }
 
 :root.theme-light .trainer-settings__header-content p {
-  color: #6B7280;
+  color: #6b6b6b;
 }
 
 :root.theme-light .trainer-settings__nav-item:hover {
@@ -411,11 +413,11 @@
 }
 
 :root.theme-light .trainer-settings__nav-item span {
-  color: #6B7280;
+  color: #6b6b6b;
 }
 
 :root.theme-light .trainer-settings__nav-item--active {
-  background: rgba(79, 70, 229, 0.08);
+  background: rgba(220, 38, 38, 0.08);
 }
 
 :root.theme-light .trainer-settings__section {
@@ -424,15 +426,15 @@
 }
 
 :root.theme-light .trainer-settings__section h2 {
-  color: #111827;
+  color: #111111;
 }
 
 :root.theme-light .trainer-settings__section-desc {
-  color: #6B7280;
+  color: #6b6b6b;
 }
 
 :root.theme-light .trainer-settings__field label {
-  color: #374151;
+  color: #4a4a4a;
 }
 
 :root.theme-light .trainer-settings__field input,
@@ -440,7 +442,7 @@
 :root.theme-light .trainer-settings__field textarea {
   background: #F9FAFB;
   border-color: #D1D5DB;
-  color: #111827;
+  color: #111111;
 }
 
 :root.theme-light .trainer-settings__toggle-item {
@@ -449,11 +451,11 @@
 }
 
 :root.theme-light .trainer-settings__toggle-label {
-  color: #111827;
+  color: #111111;
 }
 
 :root.theme-light .trainer-settings__toggle-desc {
-  color: #6B7280;
+  color: #6b6b6b;
 }
 
 :root.theme-light .trainer-settings__slider {
@@ -463,7 +465,7 @@
 :root.theme-light .trainer-settings__theme-option {
   background: #F9FAFB;
   border-color: rgba(0, 0, 0, 0.06);
-  color: #6B7280;
+  color: #6b6b6b;
 }
 
 :root.theme-light .trainer-settings__security-item {
@@ -472,12 +474,12 @@
 }
 
 :root.theme-light .trainer-settings__security-label {
-  color: #111827;
+  color: #111111;
 }
 
 :root.theme-light .trainer-settings__security-btn {
   border-color: #D1D5DB;
-  color: #374151;
+  color: #4a4a4a;
 }
 
 /* ============================================

@@ -2,9 +2,11 @@
    Trainer Schedule - Calendar Design with Light/Dark Mode
    ============================================================================ */
 
+@import './TrainerTheme.css';
+
 .trainer-schedule {
   min-height: 100%;
-  background-color: var(--bg-primary, #0c0c0e);
+  background-color: var(--bg-primary, #0a0a0a);
 }
 
 /* ============================================
@@ -112,8 +114,8 @@
 }
 
 .trainer-schedule__view-toggle button.active {
-  background: rgba(79, 70, 229, 0.15);
-  color: #4F46E5;
+  background: rgba(220, 38, 38, 0.15);
+  color: #DC2626;
 }
 
 .trainer-schedule__date-nav {
@@ -250,7 +252,7 @@
 }
 
 .trainer-schedule__day-number--today {
-  background: #4F46E5;
+  background: #DC2626;
   color: #fff;
   border-radius: 50%;
   font-weight: 600;
@@ -280,9 +282,9 @@
 }
 
 .trainer-schedule__event--class {
-  background: rgba(79, 70, 229, 0.15);
-  color: #4F46E5;
-  border-left-color: #4F46E5;
+  background: rgba(220, 38, 38, 0.15);
+  color: #DC2626;
+  border-left-color: #DC2626;
 }
 
 .trainer-schedule__event--pt {
@@ -319,7 +321,7 @@
 }
 
 .trainer-schedule__add-btn:hover {
-  background: #4F46E5;
+  background: #DC2626;
   color: #fff;
 }
 
@@ -349,7 +351,7 @@
 }
 
 .trainer-schedule__legend-dot--class {
-  background: #4F46E5;
+  background: #DC2626;
 }
 
 .trainer-schedule__legend-dot--pt {
@@ -364,7 +366,7 @@
    LIGHT MODE
    ============================================ */
 :root.theme-light .trainer-schedule {
-  background-color: #f8fafc;
+  background-color: #ffffff;
 }
 
 :root.theme-light .trainer-schedule__header {
@@ -373,16 +375,16 @@
 }
 
 :root.theme-light .trainer-schedule__title-section h1 {
-  color: #111827;
+  color: #111111;
 }
 
 :root.theme-light .trainer-schedule__title-section p {
-  color: #6B7280;
+  color: #6b6b6b;
 }
 
 :root.theme-light .trainer-schedule__sync-btn {
   border-color: #D1D5DB;
-  color: #374151;
+  color: #4a4a4a;
 }
 
 :root.theme-light .trainer-schedule__toolbar {
@@ -396,22 +398,22 @@
 
 :root.theme-light .trainer-schedule__view-toggle button {
   border-color: #D1D5DB;
-  color: #6B7280;
+  color: #6b6b6b;
 }
 
 :root.theme-light .trainer-schedule__nav-btn {
   border-color: #D1D5DB;
-  color: #374151;
+  color: #4a4a4a;
 }
 
 :root.theme-light .trainer-schedule__date-text {
-  color: #111827;
+  color: #111111;
 }
 
 :root.theme-light .trainer-schedule__today-btn,
 :root.theme-light .trainer-schedule__filter-btn {
   border-color: #D1D5DB;
-  color: #374151;
+  color: #4a4a4a;
 }
 
 :root.theme-light .trainer-schedule__calendar {
@@ -425,7 +427,7 @@
 }
 
 :root.theme-light .trainer-schedule__weekday {
-  color: #6B7280;
+  color: #6b6b6b;
 }
 
 :root.theme-light .trainer-schedule__day {
@@ -441,7 +443,7 @@
 }
 
 :root.theme-light .trainer-schedule__day-number {
-  color: #374151;
+  color: #4a4a4a;
 }
 
 :root.theme-light .trainer-schedule__add-btn {
@@ -450,7 +452,7 @@
 }
 
 :root.theme-light .trainer-schedule__legend-item {
-  color: #6B7280;
+  color: #6b6b6b;
 }
 
 /* ============================================

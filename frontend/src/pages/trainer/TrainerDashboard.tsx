@@ -38,7 +38,7 @@ const TrainerDashboard: React.FC = () => {
             change: '+2 this week', 
             changeType: 'positive',
             icon: Users, 
-            color: '#4F46E5',
+            color: '#DC2626',
             onClick: () => navigate('/trainer/members') 
         },
         { 
@@ -46,7 +46,7 @@ const TrainerDashboard: React.FC = () => {
             value: data.todaysClasses, 
             sub: 'Next: 9:00 AM', 
             icon: Calendar, 
-            color: '#10B981',
+            color: '#B91C1C',
             onClick: () => navigate('/trainer/classes') 
         },
         { 
@@ -54,7 +54,7 @@ const TrainerDashboard: React.FC = () => {
             value: data.upcomingSessions, 
             sub: 'This Week', 
             icon: Clock, 
-            color: '#F59E0B',
+            color: '#EF4444',
             onClick: () => navigate('/trainer/schedule') 
         },
         { 
@@ -63,7 +63,7 @@ const TrainerDashboard: React.FC = () => {
             change: '+3% from last', 
             changeType: 'positive',
             icon: Activity, 
-            color: '#EF4444',
+            color: '#991B1B',
             onClick: () => navigate('/trainer/reports') 
         },
     ];
@@ -82,10 +82,10 @@ const TrainerDashboard: React.FC = () => {
     ];
 
     const quickActions = [
-        { icon: Bell, label: 'Send Notification', desc: 'Notify members', color: '#4F46E5', path: '/trainer/notifications' },
-        { icon: FileText, label: 'Add Progress Note', desc: 'Document progress', color: '#10B981', path: '/trainer/progress-notes' },
-        { icon: Calendar, label: 'Schedule PT', desc: 'Personal training', color: '#F59E0B', path: '/trainer/schedule' },
-        { icon: MessageSquare, label: 'Message Member', desc: 'Send message', color: '#3B82F6', path: '/trainer/messages' },
+        { icon: Bell, label: 'Send Notification', desc: 'Notify members', color: '#DC2626', path: '/trainer/notifications' },
+        { icon: FileText, label: 'Add Progress Note', desc: 'Document progress', color: '#B91C1C', path: '/trainer/progress-notes' },
+        { icon: Calendar, label: 'Schedule PT', desc: 'Personal training', color: '#EF4444', path: '/trainer/schedule' },
+        { icon: MessageSquare, label: 'Message Member', desc: 'Send message', color: '#991B1B', path: '/trainer/messages' },
     ];
 
     return (

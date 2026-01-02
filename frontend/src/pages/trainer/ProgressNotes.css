@@ -2,9 +2,11 @@
    Progress Notes - Premium Design with Light/Dark Mode
    ============================================================================ */
 
+@import './TrainerTheme.css';
+
 .progress-notes {
   min-height: 100%;
-  background-color: var(--bg-primary, #0c0c0e);
+  background-color: var(--bg-primary, #0a0a0a);
 }
 
 /* ============================================
@@ -43,7 +45,7 @@
   gap: 8px;
   height: 40px;
   padding: 10px 20px;
-  background: #4F46E5;
+  background: #DC2626;
   border: none;
   border-radius: 8px;
   color: #fff;
@@ -54,7 +56,7 @@
 }
 
 .progress-notes__add-btn:hover {
-  background: #4338CA;
+  background: #B91C1C;
 }
 
 /* ============================================
@@ -111,7 +113,7 @@
 
 .progress-notes__search input:focus {
   outline: none;
-  border-color: #4F46E5;
+  border-color: #DC2626;
 }
 
 .progress-notes__filter-dropdown {
@@ -198,11 +200,11 @@
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
-  border: 3px solid var(--bg-secondary, #0c0c0e);
+  border: 3px solid var(--bg-secondary, #0a0a0a);
   box-shadow: 0 0 0 2px var(--border-color, rgba(255, 255, 255, 0.08));
   position: relative;
   z-index: 1;
-  background: var(--bg-secondary, #0c0c0e);
+  background: var(--bg-secondary, #0a0a0a);
 }
 
 .progress-note__avatar img {
@@ -275,8 +277,8 @@
 .progress-note__type {
   display: inline-block;
   padding: 4px 10px;
-  background: rgba(79, 70, 229, 0.15);
-  color: #4F46E5;
+  background: rgba(220, 38, 38, 0.15);
+  color: #DC2626;
   border-radius: 12px;
   font-size: 12px;
   font-weight: 600;
@@ -334,14 +336,14 @@
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
   border-radius: 6px;
   font-size: 13px;
-  color: #4F46E5;
+  color: #DC2626;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .progress-note__attachment:hover {
-  background: rgba(79, 70, 229, 0.1);
-  border-color: rgba(79, 70, 229, 0.3);
+  background: rgba(220, 38, 38, 0.1);
+  border-color: rgba(220, 38, 38, 0.3);
 }
 
 .progress-notes__load-more {
@@ -359,8 +361,8 @@
 }
 
 .progress-notes__load-more:hover {
-  border-color: #4F46E5;
-  color: #4F46E5;
+  border-color: #DC2626;
+  color: #DC2626;
 }
 
 /* ============================================
@@ -461,7 +463,7 @@
 .progress-notes__form-field select:focus,
 .progress-notes__form-field textarea:focus {
   outline: none;
-  border-color: #4F46E5;
+  border-color: #DC2626;
 }
 
 .progress-notes__form-row {
@@ -522,7 +524,7 @@
 .progress-notes__modal-save {
   height: 40px;
   padding: 10px 24px;
-  background: #4F46E5;
+  background: #DC2626;
   border: none;
   border-radius: 8px;
   color: #fff;
@@ -532,14 +534,14 @@
 }
 
 .progress-notes__modal-save:hover {
-  background: #4338CA;
+  background: #B91C1C;
 }
 
 /* ============================================
    LIGHT MODE
    ============================================ */
 :root.theme-light .progress-notes {
-  background-color: #f8fafc;
+  background-color: #ffffff;
 }
 
 :root.theme-light .progress-notes__header {
@@ -548,11 +550,11 @@
 }
 
 :root.theme-light .progress-notes__title-section h1 {
-  color: #111827;
+  color: #111111;
 }
 
 :root.theme-light .progress-notes__title-section p {
-  color: #6B7280;
+  color: #6b6b6b;
 }
 
 :root.theme-light .progress-notes__filter-bar {
@@ -564,7 +566,7 @@
 :root.theme-light .progress-notes__filter-dropdown select {
   background: #F9FAFB;
   border-color: #D1D5DB;
-  color: #111827;
+  color: #111111;
 }
 
 :root.theme-light .progress-notes__timeline {
@@ -586,11 +588,11 @@
 }
 
 :root.theme-light .progress-note__meta h3 {
-  color: #111827;
+  color: #111111;
 }
 
 :root.theme-light .progress-note__date {
-  color: #6B7280;
+  color: #6b6b6b;
 }
 
 :root.theme-light .progress-note__body {
@@ -599,7 +601,7 @@
 }
 
 :root.theme-light .progress-note__text {
-  color: #374151;
+  color: #4a4a4a;
 }
 
 :root.theme-light .progress-note__stat {
@@ -608,7 +610,7 @@
 }
 
 :root.theme-light .progress-note__stat-value {
-  color: #111827;
+  color: #111111;
 }
 
 :root.theme-light .progress-notes__modal {
@@ -622,11 +624,11 @@
 }
 
 :root.theme-light .progress-notes__modal-header h2 {
-  color: #111827;
+  color: #111111;
 }
 
 :root.theme-light .progress-notes__form-field label {
-  color: #374151;
+  color: #4a4a4a;
 }
 
 :root.theme-light .progress-notes__form-field input,
@@ -635,7 +637,7 @@
 :root.theme-light .progress-notes__measurements-grid input {
   background: #F9FAFB;
   border-color: #D1D5DB;
-  color: #111827;
+  color: #111111;
 }
 
 :root.theme-light .progress-notes__modal-footer {
