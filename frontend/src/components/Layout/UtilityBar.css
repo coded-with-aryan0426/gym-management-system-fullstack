@@ -43,8 +43,8 @@
 
 .utility-bar__search:focus-within {
   background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+  border: 2px solid #DC2626;
+  box-shadow: none;
 }
 
 .utility-bar__search-icon {
@@ -543,8 +543,8 @@
 
 :root.theme-light .utility-bar__search:focus-within {
   background: white;
-  border-color: #DC2626;
-  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+  border: 2px solid #DC2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.25);
 }
 
 :root.theme-light .utility-bar__stats {
