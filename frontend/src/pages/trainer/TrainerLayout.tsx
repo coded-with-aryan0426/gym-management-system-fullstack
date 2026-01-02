@@ -1,15 +1,22 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import DashboardLayout from '../../components/shared/DashboardLayout';
 import { Home, User, Users, BookOpen, Calendar, Bell, ClipboardList, MessageSquare, TrendingUp, Settings } from 'lucide-react';
 import type { NavItem } from '../../components/Layout/CommandRail';
+import '../../styles/unified-design-system.css';
 
 interface TrainerLayoutProps {
     children?: React.ReactNode;
 }
 
 const TrainerLayout: React.FC<TrainerLayoutProps> = ({ children }) => {
-    // Using Indigo (#4F46E5) to match the Trainer Spec
+    useEffect(() => {
+        document.documentElement.setAttribute('data-theme', 'trainer');
+        return () => {
+            document.documentElement.removeAttribute('data-theme');
+        };
+    }, []);
+
     const navItems: NavItem[] = [
         { path: '/trainer', icon: <Home size={20} />, label: 'Dashboard', color: '#4F46E5' },
         { path: '/trainer/profile', icon: <User size={20} />, label: 'My Profile', color: '#4F46E5' },

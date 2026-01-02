@@ -1,14 +1,22 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import DashboardLayout from '../../components/shared/DashboardLayout';
 import { Home, User, CreditCard, Activity, BookOpen, UserCheck, Calendar, Bell } from 'lucide-react';
 import type { NavItem } from '../../components/Layout/CommandRail';
+import '../../styles/unified-design-system.css';
 
 interface MemberLayoutProps {
     children?: React.ReactNode;
 }
 
 const MemberLayout: React.FC<MemberLayoutProps> = ({ children }) => {
+    useEffect(() => {
+        document.documentElement.setAttribute('data-theme', 'member');
+        return () => {
+            document.documentElement.removeAttribute('data-theme');
+        };
+    }, []);
+
     const navItems: NavItem[] = [
         { path: '/member', icon: <Home size={20} />, label: 'Dashboard', color: '#007AFF', end: true },
         { path: '/member/profile', icon: <User size={20} />, label: 'My Profile', color: '#007AFF' },
