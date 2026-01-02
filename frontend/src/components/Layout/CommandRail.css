@@ -4,7 +4,7 @@
    ============================================================================ */
 
 :root {
-  --sidebar-width: 120px;
+  --sidebar-width: 150px;
   --sidebar-collapsed: 56px;
   --sidebar-transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   
