@@ -123,8 +123,8 @@ const CommandRail: React.FC<CommandRailProps> = ({ isCollapsed = false, onToggle
 
   return (
     <aside className={`command-rail ${isCollapsed ? "command-rail--collapsed" : ""}`}>
-      <NavLink to="/" className="command-rail__logo" title={isCollapsed ? "Home" : undefined}>
-        <Logo size={isCollapsed ? 24 : 32} showText={!isCollapsed} />
+<NavLink to="/" className="command-rail__logo" title={isCollapsed ? "Home" : undefined}>
+          <Logo size={isCollapsed ? 20 : 24} showText={!isCollapsed} />
       </NavLink>
 
       {/* Navigation */}
