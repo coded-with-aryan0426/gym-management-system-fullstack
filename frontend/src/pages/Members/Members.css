@@ -663,6 +663,86 @@
 }
 
 /* ============================================
+   MOBILE CARDS - Premium Mobile Experience
+   ============================================ */
+.mobile-card {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--sidebar-bg);
+  border-bottom: 1px solid var(--sidebar-border);
+}
+
+.mobile-card:last-child {
+  border-bottom: none;
+}
+
+.mobile-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.mobile-card__user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mobile-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mobile-card__name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.mobile-card__email {
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.mobile-card__details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+}
+
+.mobile-card__detail {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mobile-card__detail-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.mobile-card__detail-value {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.mobile-card__actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 4px;
+}
+
+/* ============================================
    UTILITY CLASSES
    ============================================ */
 .text-red {

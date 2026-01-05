@@ -144,14 +144,6 @@ const Trainers: React.FC = () => {
 
   const columns: Column<User>[] = [
     {
-      key: 'index',
-      header: '#',
-      width: '50px',
-      render: (_, index) => (
-        <span className="trainer-index">{currentPage * pageSize + index + 1}</span>
-      ),
-    },
-    {
       key: 'trainer',
       header: 'Trainer',
       width: 'auto',
@@ -171,7 +163,7 @@ const Trainers: React.FC = () => {
             <div className="trainer-cell__avatar-wrapper">
               <Avatar
                 name={member.fullName}
-                size="md"
+                size="sm"
                 avatarId={savedAvatarId || member.avatarId}
                 userId={member.userId}
               />
@@ -186,19 +178,9 @@ const Trainers: React.FC = () => {
       },
     },
     {
-      key: 'employeeId',
-      header: 'ID',
-      width: '90px',
-      render: (member) => (
-        <div className="trainer-id-cell">
-          <span className="trainer-id">#{member.userId.toString().padStart(4, '0')}</span>
-        </div>
-      ),
-    },
-    {
       key: 'role',
       header: 'Role',
-      width: '110px',
+      width: '100px',
       render: (member) => {
         const role = member.roles?.[0]?.roleName || 'TRAINER';
         const roleClass = role.toLowerCase() === 'admin' ? 'trainer-role--admin' : 
@@ -227,39 +209,16 @@ const Trainers: React.FC = () => {
           tenureText = `${diffYears}y ${Math.floor((diffDays % 365) / 30)}m`;
           tenureClass = 'trainer-tenure--veteran';
         } else if (diffMonths >= 1) {
-          tenureText = `${diffMonths} month${diffMonths > 1 ? 's' : ''}`;
+          tenureText = `${diffMonths}m`;
           tenureClass = diffMonths >= 6 ? 'trainer-tenure--experienced' : 'trainer-tenure--regular';
         } else {
-          tenureText = `${diffDays} day${diffDays !== 1 ? 's' : ''}`;
+          tenureText = `${diffDays}d`;
           tenureClass = 'trainer-tenure--new';
         }
         
         return (
           <div className={`trainer-tenure ${tenureClass}`}>
-            <span className="trainer-tenure__icon">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <circle cx="12" cy="12" r="10" />
-                <polyline points="12 6 12 12 16 14" />
-              </svg>
-            </span>
             <span className="trainer-tenure__text">{tenureText}</span>
-          </div>
-        );
-      },
-    },
-    {
-      key: 'joinDate',
-      header: 'Joined',
-      width: '110px',
-      render: (member) => {
-        const date = member.createdAt ? new Date(member.createdAt) : new Date();
-        const day = date.getDate().toString().padStart(2, '0');
-        const month = date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
-        const year = date.getFullYear();
-        return (
-          <div className="trainer-date">
-            <span className="trainer-date__main">{day} {month}</span>
-            <span className="trainer-date__year">{year}</span>
           </div>
         );
       },
@@ -267,7 +226,7 @@ const Trainers: React.FC = () => {
     {
       key: 'status',
       header: 'Status',
-      width: '100px',
+      width: '90px',
       render: (member) => {
         const status = (member as any).status || 'Active';
         return <Badge variant={getStatusVariant(status)}>{status}</Badge>;
@@ -276,7 +235,7 @@ const Trainers: React.FC = () => {
     {
       key: 'actions',
       header: '',
-      width: '60px',
+      width: '50px',
       render: (member) => (
         <div className="trainer-actions">
           <ActionMenuButton onClick={(e) => { e.stopPropagation(); handleActionClick(member); }} />

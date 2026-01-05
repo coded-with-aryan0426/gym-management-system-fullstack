@@ -343,14 +343,6 @@ const Members: React.FC = () => {
 
   const columns: Column<MemberDTO>[] = [
     {
-      key: "index",
-      header: "#",
-      width: "50px",
-      render: (_, index) => (
-        <span className="member-index">{currentPage * pageSize + index + 1}</span>
-      ),
-    },
-    {
       key: "fullName",
       header: "Member",
       width: "auto",
@@ -362,7 +354,7 @@ const Members: React.FC = () => {
         >
           <Avatar
             name={member.fullName}
-            size="md"
+            size="sm"
             avatarId={localStorage.getItem(`avatar_${member.userId}`) || (member as any).avatarId}
             userId={member.userId}
           />
@@ -376,7 +368,7 @@ const Members: React.FC = () => {
     {
       key: "planName",
       header: "Plan",
-      width: "140px",
+      width: "120px",
       render: (member) => {
         const planClass = member.planName?.toLowerCase() === 'premium' ? 'member-plan--premium' 
           : member.planName?.toLowerCase() === 'standard' ? 'member-plan--standard' 
@@ -384,48 +376,23 @@ const Members: React.FC = () => {
         return (
           <div className="member-plan-cell">
             <span className={`member-plan-badge ${planClass}`}>{member.planName}</span>
-            <span className="member-plan-duration">{member.planDuration || "-"}</span>
           </div>
         )
       },
     },
     {
-      key: "joinDate",
-      header: "Joined",
-      width: "100px",
-      render: (member) => {
-        const date = member.startDate ? new Date(member.startDate) : null
-        if (!date) return <span className="member-date">-</span>
-        const day = date.getDate().toString().padStart(2, '0')
-        const month = date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()
-        const year = date.getFullYear()
-        return (
-          <span className="member-date">{day} {month} {year}</span>
-        )
-      },
-    },
-    {
       key: "expiryDate",
-      header: "Expires",
-      width: "140px",
+      header: "Expiry",
+      width: "120px",
       render: (member) => {
         const { date, daysLeft, isExpired } = getExpiryInfo(member)
         if (!date) return <span className="member-date">-</span>
 
-        const day = date.getDate().toString().padStart(2, '0')
-        const month = date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()
-        const year = date.getFullYear()
-
         return (
           <div className="member-expiry-cell">
-            <span className={`member-date ${isExpired ? 'member-date--expired' : ''}`}>
-              {day} {month} {year}
+            <span className={`member-days-left ${isExpired ? 'member-days-left--expired' : daysLeft !== null && daysLeft <= 7 ? 'member-days-left--warning' : ''}`}>
+              {isExpired ? `${Math.abs(daysLeft || 0)}d overdue` : `${daysLeft}d left`}
             </span>
-            {daysLeft !== null && (
-              <span className={`member-days-left ${isExpired ? 'member-days-left--expired' : daysLeft <= 7 ? 'member-days-left--warning' : ''}`}>
-                {isExpired ? `${Math.abs(daysLeft)}d overdue` : `${daysLeft}d left`}
-              </span>
-            )}
           </div>
         )
       },
@@ -433,7 +400,7 @@ const Members: React.FC = () => {
     {
       key: "status",
       header: "Status",
-      width: "100px",
+      width: "90px",
       render: (member) => {
         return <Badge variant={getStatusVariant(member.status)}>{member.status}</Badge>
       },
@@ -441,7 +408,7 @@ const Members: React.FC = () => {
     {
       key: "actions",
       header: "",
-      width: "60px",
+      width: "50px",
       render: (member) => (
         <div className="member-actions">
           <ActionMenuButton onClick={(e) => { e.stopPropagation(); handleActionClick(member); }} />
