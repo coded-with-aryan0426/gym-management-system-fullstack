@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- GYM MANAGEMENT SYSTEM - CONTEXT CONFIGURATION -->
+<Context>
+
+    <!-- Prevent sessions from being persisted across restarts -->
+    <Manager pathname="" />
+
+    <!-- Oracle Database JNDI DataSource -->
+    <Resource 
+        name="jdbc/GymDB"
+        auth="Container"
+        type="javax.sql.DataSource"
+        factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
+        driverClassName="oracle.jdbc.OracleDriver"
+        url="jdbc:oracle:thin:@//localhost:1521/FREE"
+        username="system"
+        password="Oracle123"
+        initialSize="5"
+        minIdle="5"
+        maxIdle="20"
+        maxActive="50"
+        maxWait="10000"
+        testOnBorrow="true"
+        testOnReturn="false"
+        testWhileIdle="true"
+        validationQuery="SELECT 1 FROM DUAL"
+        validationInterval="30000"
+        timeBetweenEvictionRunsMillis="30000"
+        minEvictableIdleTimeMillis="60000"
+        removeAbandoned="true"
+        removeAbandonedTimeout="60"
+        logAbandoned="true"
+    />
+
+    <!-- Application Parameters -->
+    <Parameter name="app.environment" value="production" override="false"/>
+    <Parameter name="app.version" value="0.0.1-SNAPSHOT" override="false"/>
+
+</Context>

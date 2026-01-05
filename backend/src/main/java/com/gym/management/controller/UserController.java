@@ -56,9 +56,10 @@ public class UserController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String search,
-            @RequestParam(required = false) String role) {
+            @RequestParam(required = false) String role,
+            @RequestParam(required = false) String status) {
         try {
-            return ResponseEntity.ok(userService.getTrainersPaginated(page, size, search, role));
+            return ResponseEntity.ok(userService.getTrainersPaginated(page, size, search, role, status));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500)

@@ -93,6 +93,7 @@
 /Users/aryan/Intership/backend/src/main/java/com/gym/management/model/SubscriptionPlan.java
 /Users/aryan/Intership/backend/src/main/java/com/gym/management/model/CheckIn.java
 /Users/aryan/Intership/backend/src/main/java/com/gym/management/dto/StaffPerformanceDTO.java
+/Users/aryan/Intership/backend/src/main/java/com/gym/management/controller/CustomErrorController.java
 /Users/aryan/Intership/backend/src/main/java/com/gym/management/security/SecurityConfig.java
 /Users/aryan/Intership/backend/src/main/java/com/gym/management/controller/TrainerDashboardController.java
 /Users/aryan/Intership/backend/src/main/java/com/gym/management/controller/MemberDashboardController.java

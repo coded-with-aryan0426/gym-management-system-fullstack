@@ -33,23 +33,28 @@ cd ../backend
 mvn clean package -DskipTests
 echo -e "${GREEN}✅ WAR file created${NC}"
 
-# Step 4: Display result
-WAR_FILE=$(ls target/*.war 2>/dev/null | head -1)
-if [ -n "$WAR_FILE" ]; then
-    echo -e "\n${GREEN}🎉 DEPLOYMENT READY!${NC}"
-    echo "=============================================="
-    echo -e "WAR file: ${YELLOW}$WAR_FILE${NC}"
-    echo ""
-    echo "To deploy to Tomcat:"
-    echo "  1. Copy the WAR file to your Tomcat webapps folder:"
-    echo "     cp $WAR_FILE \$CATALINA_HOME/webapps/"
-    echo ""
-    echo "  2. Start Tomcat:"
-    echo "     \$CATALINA_HOME/bin/startup.sh"
-    echo ""
-    echo "  3. Access the application at:"
-    echo "     http://localhost:8080/management-0.0.1-SNAPSHOT/"
-else
-    echo -e "${RED}❌ WAR file not found!${NC}"
-    exit 1
+# Step 4: Rename WAR with timestamp (12-hour format)
+echo -e "\n${YELLOW}📦 Step 4: Adding timestamp to WAR file...${NC}"
+TIMESTAMP=$(date +"%Y-%m-%d_%I-%M-%S%p")
+ORIGINAL_WAR="target/management-0.0.1-SNAPSHOT.war"
+TIMESTAMPED_WAR="target/gym-management_${TIMESTAMP}.war"
+
+if [ -f "$ORIGINAL_WAR" ]; then
+    cp "$ORIGINAL_WAR" "$TIMESTAMPED_WAR"
+    echo -e "${GREEN}✅ Created: $TIMESTAMPED_WAR${NC}"
 fi
+
+# Step 5: Display result
+echo -e "\n${GREEN}🎉 DEPLOYMENT READY!${NC}"
+echo "=============================================="
+echo -e "WAR files in target folder:"
+ls -la target/*.war 2>/dev/null | awk '{print "  " $NF " (" $5 " bytes)"}'
+echo ""
+echo -e "${YELLOW}Latest timestamped WAR:${NC}"
+echo "  $TIMESTAMPED_WAR"
+echo ""
+echo "To deploy to Tomcat:"
+echo "  cp $TIMESTAMPED_WAR /Applications/apache-tomcat-10.1.50/webapps/"
+echo ""
+echo "Access at: http://localhost:8080/gym-management_${TIMESTAMP}/"
+

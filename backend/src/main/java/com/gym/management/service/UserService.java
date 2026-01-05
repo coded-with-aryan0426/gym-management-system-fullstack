@@ -209,7 +209,7 @@ public class UserService {
      * Paginated Trainers with "today first" sorting.
      */
     @Transactional(readOnly = true)
-    public PageResponse<User> getTrainersPaginated(int page, int size, String search, String role) {
+    public PageResponse<User> getTrainersPaginated(int page, int size, String search, String role, String status) {
         String targetRole = (role != null && !role.trim().isEmpty()) ? role.toUpperCase() : "TRAINER";
         List<User> allTrainers = userRepository.findByRoleName(targetRole);
 
@@ -219,6 +219,13 @@ public class UserService {
             allTrainers = allTrainers.stream()
                     .filter(u -> (u.getFullName() != null && u.getFullName().toLowerCase().contains(searchLower)) ||
                             (u.getEmail() != null && u.getEmail().toLowerCase().contains(searchLower)))
+                    .collect(Collectors.toList());
+        }
+
+        // Apply status filter
+        if (status != null && !status.trim().isEmpty()) {
+            allTrainers = allTrainers.stream()
+                    .filter(u -> u.getStatus() != null && u.getStatus().equalsIgnoreCase(status))
                     .collect(Collectors.toList());
         }
 
