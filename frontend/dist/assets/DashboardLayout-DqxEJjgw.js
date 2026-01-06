@@ -1,1 +1,0 @@
-import{a as e}from"./rolldown-runtime-Cn8xt2Gj.js";import{b as t}from"./vendor-charts-hHh6mIaE.js";import{d as n}from"./vendor-react-4uHUwIpl.js";import{t as r}from"./index-HQ3xfI2o.js";t();var i=n(),a=({children:e,navItems:t,showUtilityBar:n=!0})=>(0,i.jsx)(r,{navItems:t,showUtilityBar:n,children:e});export{a as t};
