@@ -6,7 +6,9 @@
 
 .trainer-messages {
   display: flex;
-  height: calc(100vh - 60px);
+  display: flex;
+  height: 100%;
+  /* Fill parent container */
   background-color: var(--bg-primary, #0a0a0a);
   overflow: hidden;
 }
@@ -308,8 +310,18 @@
 }
 
 @keyframes typing {
-  0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
-  30% { transform: translateY(-4px); opacity: 1; }
+
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.5;
+  }
+
+  30% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
 }
 
 .trainer-messages__unread-badge {
@@ -480,32 +492,35 @@
 
 .trainer-messages__message-content {
   position: relative;
-  padding: 12px 16px;
-  border-radius: 16px;
+  padding: 12px 18px;
+  border-radius: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.trainer-messages__message-content > p {
+.trainer-messages__message-content>p {
   font-size: 14px;
   line-height: 1.5;
   margin: 0;
 }
 
 .trainer-messages__message--me .trainer-messages__message-content {
-  background: linear-gradient(135deg, #DC2626, #B91C1C);
+  background: linear-gradient(135deg, #DC2626, #991B1B);
+  color: white;
   border-bottom-right-radius: 4px;
 }
 
 .trainer-messages__message--them .trainer-messages__message-content {
-  background: var(--bg-secondary, rgba(255, 255, 255, 0.05));
-  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+  background: var(--bg-secondary, #18181b);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  color: var(--text-primary, #fff);
   border-bottom-left-radius: 4px;
 }
 
-.trainer-messages__message--me .trainer-messages__message-content > p {
+.trainer-messages__message--me .trainer-messages__message-content>p {
   color: #fff;
 }
 
-.trainer-messages__message--them .trainer-messages__message-content > p {
+.trainer-messages__message--them .trainer-messages__message-content>p {
   color: var(--text-primary, #fff);
 }
 
@@ -596,10 +611,21 @@
   margin-bottom: 8px;
 }
 
-.trainer-messages__workout-header { color: #8B5CF6; }
-.trainer-messages__meal-header { color: #10B981; }
-.trainer-messages__progress-header { color: #3B82F6; }
-.trainer-messages__session-header { color: #F59E0B; }
+.trainer-messages__workout-header {
+  color: #8B5CF6;
+}
+
+.trainer-messages__meal-header {
+  color: #10B981;
+}
+
+.trainer-messages__progress-header {
+  color: #3B82F6;
+}
+
+.trainer-messages__session-header {
+  color: #F59E0B;
+}
 
 .trainer-messages__meal-icon {
   font-size: 14px;
@@ -825,12 +851,30 @@
   color: #fff;
 }
 
-.trainer-messages__attach-icon--workout { background: #8B5CF6; }
-.trainer-messages__attach-icon--meal { background: #10B981; font-size: 18px; }
-.trainer-messages__attach-icon--session { background: #F59E0B; }
-.trainer-messages__attach-icon--progress { background: #3B82F6; }
-.trainer-messages__attach-icon--image { background: #EC4899; }
-.trainer-messages__attach-icon--file { background: #6B7280; }
+.trainer-messages__attach-icon--workout {
+  background: #8B5CF6;
+}
+
+.trainer-messages__attach-icon--meal {
+  background: #10B981;
+  font-size: 18px;
+}
+
+.trainer-messages__attach-icon--session {
+  background: #F59E0B;
+}
+
+.trainer-messages__attach-icon--progress {
+  background: #3B82F6;
+}
+
+.trainer-messages__attach-icon--image {
+  background: #EC4899;
+}
+
+.trainer-messages__attach-icon--file {
+  background: #6B7280;
+}
 
 .trainer-messages__chat-input {
   display: flex;
@@ -947,8 +991,15 @@
 }
 
 @keyframes pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
-  50% { box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); }
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4);
+  }
+
+  50% {
+    box-shadow: 0 0 0 10px rgba(220, 38, 38, 0);
+  }
 }
 
 .trainer-messages__no-chat {
@@ -1498,7 +1549,7 @@
   border-color: rgba(0, 0, 0, 0.06);
 }
 
-:root.theme-light .trainer-messages__message--them .trainer-messages__message-content > p {
+:root.theme-light .trainer-messages__message--them .trainer-messages__message-content>p {
   color: #111;
 }
 
@@ -1589,6 +1640,74 @@
 :root.theme-light .trainer-messages__workout-modal-footer {
   background: #f9fafb;
   border-color: rgba(0, 0, 0, 0.06);
+}
+
+/* ============================================
+   QUICK ACTIONS TOOLBAR
+   ============================================ */
+.trainer-messages__quick-actions-bar {
+  display: flex;
+  gap: 8px;
+  padding: 12px 20px;
+  overflow-x: auto;
+  background: var(--bg-secondary, #18181b);
+  border-top: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+  scrollbar-width: none;
+}
+
+.trainer-messages__quick-actions-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.trainer-messages__quick-action-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  color: var(--text-secondary, #a1a1aa);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.trainer-messages__quick-action-pill:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.trainer-messages__quick-action-pill--workout:hover {
+  background: rgba(139, 92, 246, 0.15);
+  color: #A78BFA;
+  border-color: rgba(139, 92, 246, 0.3);
+}
+
+.trainer-messages__quick-action-pill--meal:hover {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34D399;
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.trainer-messages__quick-action-pill--session:hover {
+  background: rgba(245, 158, 11, 0.15);
+  color: #FBBF24;
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+/* Input Area Adjustment */
+.trainer-messages__chat-input-container {
+  border-top: none;
+}
+
+.trainer-messages__input-wrapper {
+  background: var(--input-bg, rgba(0, 0, 0, 0.3));
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+  border-radius: 24px;
 }
 
 /* ============================================

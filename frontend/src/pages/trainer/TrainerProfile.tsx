@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { 
+import {
     Camera, Save, User, Phone, Mail, MapPin, Award, Shield, Key,
     Star, Calendar, Users, Edit3, Clock, TrendingUp, Target,
     Briefcase, FileText, CheckCircle, AlertCircle, Upload,
@@ -133,7 +133,7 @@ const TrainerProfile: React.FC = () => {
                                 <span><MapPin size={12} /> Mumbai</span>
                             </div>
                         </div>
-                        
+
                         <div className="tp__header-stats">
                             <div className="tp__header-stat">
                                 <Users size={14} className="tp__header-stat-icon tp__header-stat-icon--blue" />
@@ -197,7 +197,7 @@ const TrainerProfile: React.FC = () => {
                                         <div className="tp__info"><label>Employee ID</label><span>{trainer.employeeId}</span></div>
                                         <div className="tp__info"><label>Date of Birth</label><span>{trainer.dob}</span></div>
                                         <div className="tp__info"><label>Gender</label><span>{trainer.gender}</span></div>
-                                        <div className="tp__info"><label>Blood Type</label><span className="tp__badge tp__badge--red">{trainer.bloodType}</span></div>
+                                        <div className="tp__info"><label>Blood Type</label><span><span className="tp__blood-badge">{trainer.bloodType}</span></span></div>
                                         <div className="tp__info"><label>Languages</label><span>{trainer.languages.join(', ')}</span></div>
                                         <div className="tp__info"><label>Alt. Phone</label><span>{trainer.altPhone}</span></div>
                                     </div>

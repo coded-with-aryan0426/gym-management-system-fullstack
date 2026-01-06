@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { 
-    Search, Send, Paperclip, MoreVertical, Phone, Video, 
-    ChevronDown, Check, CheckCheck, Plus, Image, FileText, 
-    Dumbbell, Calendar, X, Download, Play, Pause, Mic, 
+import {
+    Search, Send, Paperclip, MoreVertical, Phone, Video,
+    ChevronDown, Check, CheckCheck, Plus, Image, FileText,
+    Dumbbell, Calendar, X, Download, Play, Pause, Mic,
     Smile, Star, Pin, Archive, Trash2, Bell, BellOff,
     Clock, User, Target, TrendingUp, File, Link, Copy,
     ChevronRight, Filter, MessageSquare, Users, Settings,
@@ -66,13 +66,13 @@ const TrainerMessages: React.FC = () => {
     const chatBodyRef = useRef<HTMLDivElement>(null);
 
     const conversations: Conversation[] = [
-        { 
-            id: 1, 
-            name: 'Sarah Wilson', 
-            avatar: 'https://ui-avatars.com/api/?name=Sarah+Wilson&background=DC2626&color=fff', 
-            lastMessage: 'Thanks for the workout plan!', 
-            time: '2m ago', 
-            unread: 2, 
+        {
+            id: 1,
+            name: 'Sarah Wilson',
+            avatar: 'https://ui-avatars.com/api/?name=Sarah+Wilson&background=DC2626&color=fff',
+            lastMessage: 'Thanks for the workout plan!',
+            time: '2m ago',
+            unread: 2,
             online: true,
             memberSince: 'Jan 2024',
             goal: 'Build muscle & strength',
@@ -80,65 +80,65 @@ const TrainerMessages: React.FC = () => {
             isPinned: true,
             tags: ['VIP', 'Strength']
         },
-        { 
-            id: 2, 
-            name: 'Mike Johnson', 
-            avatar: 'https://ui-avatars.com/api/?name=Mike+Johnson&background=3B82F6&color=fff', 
-            lastMessage: 'Can we reschedule tomorrow?', 
-            time: '15m ago', 
-            unread: 0, 
+        {
+            id: 2,
+            name: 'Mike Johnson',
+            avatar: 'https://ui-avatars.com/api/?name=Mike+Johnson&background=3B82F6&color=fff',
+            lastMessage: 'Can we reschedule tomorrow?',
+            time: '15m ago',
+            unread: 0,
             online: false,
             typing: true,
             memberSince: 'Feb 2024',
             goal: 'Weight loss',
             tags: ['Weight Loss']
         },
-        { 
-            id: 3, 
-            name: 'Emma Davis', 
-            avatar: 'https://ui-avatars.com/api/?name=Emma+Davis&background=10B981&color=fff', 
-            lastMessage: 'See you at 3pm!', 
-            time: '1h ago', 
-            unread: 0, 
+        {
+            id: 3,
+            name: 'Emma Davis',
+            avatar: 'https://ui-avatars.com/api/?name=Emma+Davis&background=10B981&color=fff',
+            lastMessage: 'See you at 3pm!',
+            time: '1h ago',
+            unread: 0,
             online: true,
             memberSince: 'Dec 2023',
             goal: 'Overall fitness',
             nextSession: 'Tomorrow, 10:00 AM',
             tags: ['Cardio']
         },
-        { 
-            id: 4, 
-            name: 'James Wilson', 
-            avatar: 'https://ui-avatars.com/api/?name=James+Wilson&background=F59E0B&color=fff', 
-            lastMessage: 'Great session today!', 
-            time: '3h ago', 
-            unread: 0, 
+        {
+            id: 4,
+            name: 'James Wilson',
+            avatar: 'https://ui-avatars.com/api/?name=James+Wilson&background=F59E0B&color=fff',
+            lastMessage: 'Great session today!',
+            time: '3h ago',
+            unread: 0,
             online: false,
             memberSince: 'Mar 2024',
             goal: 'Rehabilitation',
             isPinned: true,
             tags: ['Rehab']
         },
-        { 
-            id: 5, 
-            name: 'Lisa Chen', 
-            avatar: 'https://ui-avatars.com/api/?name=Lisa+Chen&background=8B5CF6&color=fff', 
-            lastMessage: 'What should I eat before...', 
-            time: 'Yesterday', 
-            unread: 1, 
+        {
+            id: 5,
+            name: 'Lisa Chen',
+            avatar: 'https://ui-avatars.com/api/?name=Lisa+Chen&background=8B5CF6&color=fff',
+            lastMessage: 'What should I eat before...',
+            time: 'Yesterday',
+            unread: 1,
             online: false,
             memberSince: 'Jan 2024',
             goal: 'Nutrition & fitness',
             isMuted: true,
             tags: ['Nutrition']
         },
-        { 
-            id: 6, 
-            name: 'David Brown', 
-            avatar: 'https://ui-avatars.com/api/?name=David+Brown&background=EC4899&color=fff', 
-            lastMessage: 'Perfect, I\'ll do that routine', 
-            time: '2 days ago', 
-            unread: 0, 
+        {
+            id: 6,
+            name: 'David Brown',
+            avatar: 'https://ui-avatars.com/api/?name=David+Brown&background=EC4899&color=fff',
+            lastMessage: 'Perfect, I\'ll do that routine',
+            time: '2 days ago',
+            unread: 0,
             online: false,
             memberSince: 'Nov 2023',
             goal: 'Marathon training',
@@ -150,41 +150,47 @@ const TrainerMessages: React.FC = () => {
         1: [
             { id: 1, sender: 'them', text: 'Hi! I wanted to ask about my workout schedule for next week.', time: '10:30 AM', date: 'Today', status: 'read', type: 'text' },
             { id: 2, sender: 'me', text: 'Of course! I was just about to send you the updated plan.', time: '10:32 AM', date: 'Today', status: 'read', type: 'text' },
-            { id: 3, sender: 'me', type: 'workout-plan', time: '10:33 AM', date: 'Today', status: 'read', attachment: {
-                id: 1,
-                type: 'workout',
-                name: 'Week 12 - Upper Body Focus',
-                data: {
-                    duration: '45 min',
-                    exercises: 6,
-                    focus: 'Upper Body',
-                    difficulty: 'Intermediate'
+            {
+                id: 3, sender: 'me', type: 'workout-plan', time: '10:33 AM', date: 'Today', status: 'read', attachment: {
+                    id: 1,
+                    type: 'workout',
+                    name: 'Week 12 - Upper Body Focus',
+                    data: {
+                        duration: '45 min',
+                        exercises: 6,
+                        focus: 'Upper Body',
+                        difficulty: 'Intermediate'
+                    }
                 }
-            }},
+            },
             { id: 4, sender: 'them', text: 'That would be great! Also, should I increase my protein intake?', time: '10:35 AM', date: 'Today', status: 'read', type: 'text' },
             { id: 5, sender: 'me', text: 'Yes, I recommend adding 20g more protein per day. Focus on lean sources like chicken, fish, or plant-based options if you prefer.', time: '10:38 AM', date: 'Today', status: 'read', type: 'text' },
-            { id: 6, sender: 'me', type: 'meal-plan', time: '10:39 AM', date: 'Today', status: 'delivered', attachment: {
-                id: 2,
-                type: 'meal-plan',
-                name: 'High Protein Meal Plan',
-                data: {
-                    calories: '2200',
-                    protein: '150g',
-                    days: 7
+            {
+                id: 6, sender: 'me', type: 'meal-plan', time: '10:39 AM', date: 'Today', status: 'delivered', attachment: {
+                    id: 2,
+                    type: 'meal-plan',
+                    name: 'High Protein Meal Plan',
+                    data: {
+                        calories: '2200',
+                        protein: '150g',
+                        days: 7
+                    }
                 }
-            }},
+            },
             { id: 7, sender: 'them', text: 'Thanks for the workout plan!', time: '10:40 AM', date: 'Today', status: 'read', type: 'text', reactions: ['❤️'] },
-            { id: 8, sender: 'them', type: 'progress-update', time: '10:42 AM', date: 'Today', status: 'read', attachment: {
-                id: 3,
-                type: 'progress',
-                name: 'Weekly Progress',
-                data: {
-                    weight: '78 kg',
-                    change: '-2 kg',
-                    workouts: 5,
-                    streak: 12
+            {
+                id: 8, sender: 'them', type: 'progress-update', time: '10:42 AM', date: 'Today', status: 'read', attachment: {
+                    id: 3,
+                    type: 'progress',
+                    name: 'Weekly Progress',
+                    data: {
+                        weight: '78 kg',
+                        change: '-2 kg',
+                        workouts: 5,
+                        streak: 12
+                    }
                 }
-            }},
+            },
         ],
         2: [
             { id: 1, sender: 'them', text: 'Hey coach, I\'m feeling a bit under the weather today.', time: '9:00 AM', date: 'Today', status: 'read', type: 'text' },
@@ -198,20 +204,20 @@ const TrainerMessages: React.FC = () => {
 
     const filteredConversations = useMemo(() => {
         let filtered = conversations;
-        
+
         if (filterTab === 'unread') {
             filtered = filtered.filter(c => c.unread > 0);
         } else if (filterTab === 'pinned') {
             filtered = filtered.filter(c => c.isPinned);
         }
-        
+
         if (searchQuery) {
-            filtered = filtered.filter(c => 
+            filtered = filtered.filter(c =>
                 c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 c.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
             );
         }
-        
+
         return filtered.sort((a, b) => {
             if (a.isPinned && !b.isPinned) return -1;
             if (!a.isPinned && b.isPinned) return 1;
@@ -244,7 +250,7 @@ const TrainerMessages: React.FC = () => {
             setTimeout(() => {
                 setMessagesData(prev => ({
                     ...prev,
-                    [selectedChat]: prev[selectedChat].map(m => 
+                    [selectedChat]: prev[selectedChat].map(m =>
                         m.id === newMessage.id ? { ...m, status: 'delivered' } : m
                     )
                 }));
@@ -455,20 +461,20 @@ const TrainerMessages: React.FC = () => {
                 </div>
 
                 <div className="trainer-messages__filter-tabs">
-                    <button 
+                    <button
                         className={`trainer-messages__filter-tab ${filterTab === 'all' ? 'active' : ''}`}
                         onClick={() => setFilterTab('all')}
                     >
                         All
                     </button>
-                    <button 
+                    <button
                         className={`trainer-messages__filter-tab ${filterTab === 'unread' ? 'active' : ''}`}
                         onClick={() => setFilterTab('unread')}
                     >
                         Unread
                         {totalUnread > 0 && <span>{totalUnread}</span>}
                     </button>
-                    <button 
+                    <button
                         className={`trainer-messages__filter-tab ${filterTab === 'pinned' ? 'active' : ''}`}
                         onClick={() => setFilterTab('pinned')}
                     >
@@ -554,7 +560,7 @@ const TrainerMessages: React.FC = () => {
                                 <button className="trainer-messages__action-btn" title="Schedule Session">
                                     <Calendar size={18} />
                                 </button>
-                                <button 
+                                <button
                                     className={`trainer-messages__action-btn ${showMemberInfo ? 'active' : ''}`}
                                     onClick={() => setShowMemberInfo(!showMemberInfo)}
                                     title="Member Info"
@@ -585,10 +591,10 @@ const TrainerMessages: React.FC = () => {
                                                     {msg.isEdited && <span className="trainer-messages__edited">edited</span>}
                                                     {msg.sender === 'me' && (
                                                         <span className={`trainer-messages__message-status trainer-messages__message-status--${msg.status}`}>
-                                                            {msg.status === 'read' ? <CheckCheck size={14} /> : 
-                                                             msg.status === 'delivered' ? <CheckCheck size={14} /> : 
-                                                             msg.status === 'sent' ? <Check size={14} /> :
-                                                             <Clock size={12} />}
+                                                            {msg.status === 'read' ? <CheckCheck size={14} /> :
+                                                                msg.status === 'delivered' ? <CheckCheck size={14} /> :
+                                                                    msg.status === 'sent' ? <Check size={14} /> :
+                                                                        <Clock size={12} />}
                                                         </span>
                                                     )}
                                                 </div>
@@ -607,49 +613,30 @@ const TrainerMessages: React.FC = () => {
                         </div>
 
                         <div className="trainer-messages__chat-input-container">
-                            {showAttachMenu && (
-                                <div className="trainer-messages__attach-menu">
-                                    <button onClick={() => { setShowWorkoutBuilder(true); setShowAttachMenu(false); }}>
-                                        <div className="trainer-messages__attach-icon trainer-messages__attach-icon--workout">
-                                            <Dumbbell size={18} />
-                                        </div>
-                                        <span>Workout Plan</span>
-                                    </button>
-                                    <button onClick={() => setShowAttachMenu(false)}>
-                                        <div className="trainer-messages__attach-icon trainer-messages__attach-icon--meal">
-                                            <span>🥗</span>
-                                        </div>
-                                        <span>Meal Plan</span>
-                                    </button>
-                                    <button onClick={sendSessionRequest}>
-                                        <div className="trainer-messages__attach-icon trainer-messages__attach-icon--session">
-                                            <Calendar size={18} />
-                                        </div>
-                                        <span>Schedule Session</span>
-                                    </button>
-                                    <button onClick={() => setShowAttachMenu(false)}>
-                                        <div className="trainer-messages__attach-icon trainer-messages__attach-icon--progress">
-                                            <TrendingUp size={18} />
-                                        </div>
-                                        <span>Progress Check</span>
-                                    </button>
-                                    <button onClick={() => setShowAttachMenu(false)}>
-                                        <div className="trainer-messages__attach-icon trainer-messages__attach-icon--image">
-                                            <Image size={18} />
-                                        </div>
-                                        <span>Photo/Video</span>
-                                    </button>
-                                    <button onClick={() => setShowAttachMenu(false)}>
-                                        <div className="trainer-messages__attach-icon trainer-messages__attach-icon--file">
-                                            <FileText size={18} />
-                                        </div>
-                                        <span>Document</span>
-                                    </button>
-                                </div>
-                            )}
+                            {/* QUICK ACTIONS TOOLBAR - NEW PROFESSIONAL FEATURE */}
+                            <div className="trainer-messages__quick-actions-bar">
+                                <button className="trainer-messages__quick-action-pill trainer-messages__quick-action-pill--workout" onClick={() => setShowWorkoutBuilder(true)}>
+                                    <Dumbbell size={14} /> Workout
+                                </button>
+                                <button className="trainer-messages__quick-action-pill trainer-messages__quick-action-pill--meal">
+                                    <span style={{ fontSize: '12px' }}>🥗</span> Meal Plan
+                                </button>
+                                <button className="trainer-messages__quick-action-pill trainer-messages__quick-action-pill--session" onClick={sendSessionRequest}>
+                                    <Calendar size={14} /> Schedule
+                                </button>
+                                <button className="trainer-messages__quick-action-pill">
+                                    <TrendingUp size={14} /> Check-in
+                                </button>
+                                <button className="trainer-messages__quick-action-pill">
+                                    <Image size={14} /> Media
+                                </button>
+                                <button className="trainer-messages__quick-action-pill">
+                                    <FileText size={14} /> File
+                                </button>
+                            </div>
 
                             <div className="trainer-messages__chat-input">
-                                <button 
+                                <button
                                     className={`trainer-messages__attach-btn ${showAttachMenu ? 'active' : ''}`}
                                     onClick={() => setShowAttachMenu(!showAttachMenu)}
                                 >
@@ -663,7 +650,7 @@ const TrainerMessages: React.FC = () => {
                                         onChange={(e) => setMessageText(e.target.value)}
                                         onKeyPress={(e) => e.key === 'Enter' && handleSend()}
                                     />
-                                    <button 
+                                    <button
                                         className="trainer-messages__emoji-btn"
                                         onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                                     >
@@ -671,14 +658,14 @@ const TrainerMessages: React.FC = () => {
                                     </button>
                                 </div>
                                 {messageText.trim() ? (
-                                    <button 
+                                    <button
                                         className="trainer-messages__send-btn"
                                         onClick={handleSend}
                                     >
                                         <Send size={18} />
                                     </button>
                                 ) : (
-                                    <button 
+                                    <button
                                         className={`trainer-messages__voice-btn ${isRecording ? 'recording' : ''}`}
                                         onClick={() => setIsRecording(!isRecording)}
                                     >

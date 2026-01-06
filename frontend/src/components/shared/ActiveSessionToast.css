@@ -1,0 +1,214 @@
+.active-session-toast {
+    position: relative;
+    /* Changed from fixed */
+    /* top, left, transform removed as they are on wrapper */
+    background: #1c1c1e;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 40px;
+    /* Highly rounded pill shape */
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(0, 0, 0, 0.2);
+    z-index: 10000;
+    width: auto;
+    min-width: 500px;
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* --- Left: Current Profile --- */
+.ast__profile {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-left: 6px;
+    padding-right: 20px;
+    flex: 1;
+}
+
+.ast__avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 18px;
+    /* Squircle */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 600;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.ast__info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.ast__name {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+}
+
+.ast__context {
+    margin: 0;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 500;
+}
+
+.ast__progress-container {
+    margin-top: 6px;
+    width: 100%;
+}
+
+.ast__progress-bar {
+    height: 4px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 4px;
+}
+
+.ast__progress-fill {
+    height: 100%;
+    background: #fff;
+    border-radius: 2px;
+}
+
+.ast__time {
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 0.02em;
+    display: block;
+    text-align: right;
+}
+
+/* --- Divider --- */
+.ast__divider {
+    width: 1px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 0 4px;
+}
+
+/* --- Middle: Next Up --- */
+.ast__next {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0 24px;
+    text-align: center;
+}
+
+.ast__next-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.4);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+}
+
+.ast__next-profile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.ast__next-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #333;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ast__next-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.ast__next-name {
+    font-size: 11px;
+    line-height: 1.1;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
+}
+
+/* --- Right: Actions --- */
+.ast__actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 8px 0 20px;
+}
+
+.ast__btn {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    cursor: pointer;
+    transition: transform 0.1s active;
+}
+
+.ast__btn:active {
+    transform: scale(0.92);
+}
+
+.ast__btn--success {
+    background: #10B981;
+    /* Green */
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.ast__btn--danger {
+    background: #3f1919;
+    /* Dark Red background for X, matching standard cancel styles but maybe brighter based on image? Image shows dark red bg. */
+    background: #451a1a;
+    color: #ef4444;
+    /* Red icon */
+}
+
+/* Adjust based on user image */
+.ast__btn--danger {
+    background: rgba(239, 68, 68, 0.15);
+    color: #EF4444;
+}
+
+/* Wait, image shows explicit filled buttons. Green is filled green. Red is filled dark red with red X? */
+/* Re-evaluating image description: "Green (Check/Tick), Red (X/Cross)" */
+/* Usually implies Green = Confirm, Red = Cancel. */
+/* Image shows: Green button is bright green with white check. Red button is dark brownish-red with light red X. */
+
+.ast__btn--success {
+    background: #22c55e;
+    color: white;
+}
+
+.ast__btn--danger {
+    background: #451b1b;
+    /* Dark reddish brown */
+    color: #f87171;
+    /* Light red */
+}

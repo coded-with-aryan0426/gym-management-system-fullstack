@@ -125,8 +125,15 @@
 }
 
 @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
 }
 
 .current-session-banner__content {
@@ -339,8 +346,9 @@
 
 .trainer-dashboard-v2__main-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr 320px;
-    gap: 20px;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: start;
 }
 
 .section-header {
@@ -534,8 +542,15 @@
 }
 
 @keyframes glow {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
-    50% { box-shadow: 0 0 0 8px rgba(220, 38, 38, 0); }
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4);
+    }
+
+    50% {
+        box-shadow: 0 0 0 8px rgba(220, 38, 38, 0);
+    }
 }
 
 .session-timeline__dot--upcoming {
@@ -1127,7 +1142,7 @@
     .trainer-dashboard-v2__main-grid {
         grid-template-columns: 1fr 1fr;
     }
-    
+
     .trainer-dashboard-v2__sidebar {
         grid-column: 1 / -1;
         display: grid;
@@ -1140,11 +1155,11 @@
     .trainer-dashboard-v2__quick-stats {
         grid-template-columns: repeat(2, 1fr);
     }
-    
+
     .trainer-dashboard-v2__main-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .trainer-dashboard-v2__sidebar {
         grid-template-columns: repeat(2, 1fr);
     }
@@ -1156,26 +1171,26 @@
         gap: 16px;
         align-items: flex-start;
     }
-    
+
     .trainer-dashboard-v2__day-progress {
         width: 100%;
     }
-    
+
     .current-session-banner {
         flex-direction: column;
         align-items: flex-start;
     }
-    
+
     .current-session-banner__actions {
         width: 100%;
     }
-    
+
     .current-session-banner__timer {
         align-self: stretch;
         flex-direction: row;
         justify-content: center;
     }
-    
+
     .trainer-dashboard-v2__sidebar {
         grid-template-columns: 1fr;
     }
@@ -1185,12 +1200,12 @@
     .trainer-dashboard-v2__quick-stats {
         grid-template-columns: 1fr;
     }
-    
+
     .next-session-card__content {
         flex-direction: column;
         align-items: flex-start;
     }
-    
+
     .next-session-card__start-btn {
         width: 100%;
         justify-content: center;

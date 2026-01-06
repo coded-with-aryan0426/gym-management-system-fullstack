@@ -1,7 +1,9 @@
 "use client"
 
 import type React from "react"
-import { NavLink, useNavigate } from "react-router-dom"
+import { useRef, useEffect } from "react"
+import { NavLink, useNavigate, useLocation } from "react-router-dom"
+import anime from "animejs"
 import { Logo } from "../ui/Logo"
 import "./CommandRail.css"
 
@@ -119,14 +121,20 @@ const CommandRail: React.FC<CommandRailProps> = ({ isCollapsed = false, onToggle
 
   const filteredNavItems = itemsToRender;
 
+  // Animation refs
+  const navRef = useRef<HTMLElement>(null);
+  const location = useLocation();
+
   return (
     <aside className={`command-rail ${isCollapsed ? "command-rail--collapsed" : ""}`}>
-<NavLink to="/" className="command-rail__logo" title={isCollapsed ? "Home" : undefined}>
-          <Logo size={isCollapsed ? 20 : 24} showText={!isCollapsed} />
+      <NavLink to="/" className="command-rail__logo" title={isCollapsed ? "Home" : undefined}>
+        <Logo size={isCollapsed ? 20 : 24} showText={!isCollapsed} />
       </NavLink>
 
       {/* Navigation */}
-      <nav className="command-rail__nav">
+      <nav className="command-rail__nav" ref={navRef}>
+
+
         {filteredNavItems.map((item) => (
           <NavLink
             key={item.path}
@@ -134,10 +142,50 @@ const CommandRail: React.FC<CommandRailProps> = ({ isCollapsed = false, onToggle
             end={item.end}
             className={({ isActive }) => `command-rail__link ${isActive ? "command-rail__link--active" : ""}`}
             title={isCollapsed ? item.label : undefined}
-            style={{ '--nav-accent': item.color } as React.CSSProperties}
+            style={{
+              '--nav-accent': item.color,
+              position: 'relative',
+              zIndex: 1, // Text above indicator
+            } as React.CSSProperties}
           >
-            <span className="command-rail__icon">{item.icon}</span>
-            <span className="command-rail__label">{item.label}</span>
+            {/* ... content remains same ... */}
+            {({ isActive }) => (
+              <>
+                <span
+                  className={`command-rail__icon ${isActive ? 'active-icon' : ''}`}
+                  onMouseEnter={(e) => {
+                    if (isActive) return; // Don't animate if already active (box state)
+
+                    // Unique animation based on label
+                    const target = e.currentTarget.querySelector('svg');
+                    const label = item.label.toLowerCase();
+
+                    // Reset
+                    anime.remove(target);
+
+                    if (label === 'dashboard') {
+                      anime({ targets: target, scale: [1, 1.2, 1], rotate: [0, 5, -5, 0], duration: 400, easing: 'easeOutElastic(1, .6)' });
+                    } else if (label === 'members') {
+                      anime({ targets: target, translateY: [0, -3, 0], scaleY: [1, 1.1, 1], duration: 400, easing: 'easeOutQuad' });
+                    } else if (label === 'classes' || label.includes('schedule')) {
+                      anime({ targets: target, rotate: '1turn', duration: 800, easing: 'easeInOutBack' });
+                    } else if (label === 'trainers' || label === 'staff') {
+                      anime({ targets: target, rotate: [0, -10, 10, 0], translateX: [0, -2, 2, 0], duration: 500 });
+                    } else if (label === 'financials') {
+                      anime({ targets: target, rotateY: '180deg', duration: 600, easing: 'easeInOutSine', loop: 2, direction: 'alternate' });
+                    } else if (label === 'reports') {
+                      anime({ targets: target, translateX: [0, 3, 0], skewX: [0, -10, 0], duration: 400 });
+                    } else if (label === 'settings') {
+                      anime({ targets: target, rotate: '180deg', duration: 800, easing: 'spring(1, 80, 10, 0)' });
+                    } else {
+                      // Default pop
+                      anime({ targets: target, scale: [1, 1.15, 1], duration: 400, easing: 'easeOutQuad' });
+                    }
+                  }}
+                >{item.icon}</span>
+                <span className={`command-rail__label ${isActive ? 'active-label' : ''}`}>{item.label}</span>
+              </>
+            )}
           </NavLink>
         ))}
       </nav>
@@ -145,22 +193,22 @@ const CommandRail: React.FC<CommandRailProps> = ({ isCollapsed = false, onToggle
       {/* Footer with Account Settings, Logout, and Toggle */}
       <div className="command-rail__footer">
         {/* Owner and Admin get "Account Settings" (Gym config) - Members/Trainers get Profile via TopBar or hidden for V1 */}
-          {(role === 'OWNER' || role === 'ADMIN') && (
-            <NavLink
-              to="/settings"
-              className={({ isActive }) => `command-rail__link ${isActive ? "command-rail__link--active" : ""}`}
-              title={isCollapsed ? "Settings" : undefined}
-            >
-              <span className="command-rail__icon command-rail__avatar">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
-                </svg>
-              </span>
-              <span className="command-rail__label">Settings</span>
-            </NavLink>
-          )}
+        {(role === 'OWNER' || role === 'ADMIN') && (
+          <NavLink
+            to="/settings"
+            className={({ isActive }) => `command-rail__link ${isActive ? "command-rail__link--active" : ""}`}
+            title={isCollapsed ? "Settings" : undefined}
+          >
+            <span className="command-rail__icon command-rail__avatar">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
+              </svg>
+            </span>
+            <span className="command-rail__label">Settings</span>
+          </NavLink>
+        )}
 
-          {/* Collapse Toggle Button */}
+        {/* Collapse Toggle Button */}
         <button
           className="command-rail__toggle"
           onClick={onToggle}

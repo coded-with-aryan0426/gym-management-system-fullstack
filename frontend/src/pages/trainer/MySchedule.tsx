@@ -1,8 +1,9 @@
 import React, { useState, useMemo } from 'react';
-import { 
+import {
     ChevronLeft, ChevronRight, RefreshCw, Filter, Plus, Calendar as CalendarIcon,
     Clock, MapPin, Users, MoreVertical, X, Check, Repeat, AlertCircle,
-    Target, Zap, Bell, Download, Eye, Edit2, Trash2, Copy
+    Target, Zap, Bell, Download, Eye, Edit2, Trash2, Copy, AlertTriangle,
+    CheckCircle, XCircle, List
 } from 'lucide-react';
 import './TrainerSchedule.css';
 
@@ -26,7 +27,7 @@ interface ScheduleEvent {
 
 const MySchedule: React.FC = () => {
     const [currentDate, setCurrentDate] = useState(new Date(2024, 2, 25));
-    const [viewMode, setViewMode] = useState<'day' | 'week' | 'month'>('week');
+    const [viewMode, setViewMode] = useState<'day' | 'week' | 'month' | 'agenda'>('week');
     const [selectedEvent, setSelectedEvent] = useState<ScheduleEvent | null>(null);
     const [showFilters, setShowFilters] = useState(false);
     const [activeFilters, setActiveFilters] = useState<string[]>([]);
@@ -89,13 +90,13 @@ const MySchedule: React.FC = () => {
         return endH - startH;
     };
 
-    const filteredEvents = activeFilters.length > 0 
+    const filteredEvents = activeFilters.length > 0
         ? events.filter(e => activeFilters.includes(e.type))
         : events;
 
     const toggleFilter = (filter: string) => {
-        setActiveFilters(prev => 
-            prev.includes(filter) 
+        setActiveFilters(prev =>
+            prev.includes(filter)
                 ? prev.filter(f => f !== filter)
                 : [...prev, filter]
         );
@@ -165,6 +166,7 @@ const MySchedule: React.FC = () => {
             <div className="trainer-schedule__content">
                 <div className="trainer-schedule__toolbar">
                     <div className="trainer-schedule__view-toggle">
+                        <button className={viewMode === 'agenda' ? 'active' : ''} onClick={() => setViewMode('agenda')}><List size={12} /> Agenda</button>
                         <button className={viewMode === 'day' ? 'active' : ''} onClick={() => setViewMode('day')}>Day</button>
                         <button className={viewMode === 'week' ? 'active' : ''} onClick={() => setViewMode('week')}>Week</button>
                         <button className={viewMode === 'month' ? 'active' : ''} onClick={() => setViewMode('month')}>Month</button>
@@ -178,7 +180,7 @@ const MySchedule: React.FC = () => {
                     </div>
 
                     <div className="trainer-schedule__filter-group">
-                        <button 
+                        <button
                             className={`trainer-schedule__filter-btn ${showFilters ? 'active' : ''}`}
                             onClick={() => setShowFilters(!showFilters)}
                         >
@@ -197,7 +199,7 @@ const MySchedule: React.FC = () => {
                         {['class', 'pt', 'meeting', 'break', 'blocked'].map(type => {
                             const config = getEventTypeConfig(type);
                             return (
-                                <button 
+                                <button
                                     key={type}
                                     className={`trainer-schedule__filter-chip ${activeFilters.includes(type) ? 'active' : ''}`}
                                     onClick={() => toggleFilter(type)}
@@ -255,21 +257,21 @@ const MySchedule: React.FC = () => {
                                         {hours.map(hour => {
                                             const event = getEventForSlot(date, hour);
                                             const config = event ? getEventTypeConfig(event.type) : null;
-                                            
+
                                             if (event && !isEventStart(event, hour)) {
                                                 return <div key={hour} className="trainer-schedule__hour-slot trainer-schedule__hour-slot--occupied" />;
                                             }
-                                            
+
                                             return (
-                                                <div 
-                                                    key={hour} 
+                                                <div
+                                                    key={hour}
                                                     className="trainer-schedule__hour-slot"
                                                     onClick={() => !event && setSelectedSlot({ day: date, hour })}
                                                 >
                                                     {event && isEventStart(event, hour) && (
-                                                        <div 
+                                                        <div
                                                             className={`trainer-schedule__event-block trainer-schedule__event-block--${event.type}`}
-                                                            style={{ 
+                                                            style={{
                                                                 height: `calc(${getEventDuration(event) * 100}% + ${(getEventDuration(event) - 1)}px)`,
                                                                 background: config?.bg,
                                                                 borderLeftColor: config?.color
@@ -333,7 +335,7 @@ const MySchedule: React.FC = () => {
                                             {hourEvents.map(event => {
                                                 const config = getEventTypeConfig(event.type);
                                                 return (
-                                                    <div 
+                                                    <div
                                                         key={event.id}
                                                         className="trainer-schedule__day-event"
                                                         style={{ borderLeftColor: config.color, background: config.bg }}
@@ -384,6 +386,107 @@ const MySchedule: React.FC = () => {
                                     ))}
                                 </div>
                             ))}
+                        </div>
+                    </div>
+                )}
+
+                {viewMode === 'agenda' && (
+                    <div className="trainer-schedule__agenda-view">
+                        <div className="trainer-schedule__agenda-header">
+                            <h2>Today's Agenda</h2>
+                            <span className="trainer-schedule__agenda-date">Monday, March 25</span>
+                        </div>
+                        <div className="trainer-schedule__agenda-list">
+                            {filteredEvents
+                                .filter(e => e.day === 25)
+                                .sort((a, b) => a.startTime.localeCompare(b.startTime))
+                                .map((event, idx) => {
+                                    const config = getEventTypeConfig(event.type);
+                                    // Check for conflicts
+                                    const hasConflict = filteredEvents.some(other => {
+                                        if (other.id === event.id || other.day !== event.day) return false;
+                                        const eventStart = parseInt(event.startTime.replace(':', ''));
+                                        const eventEnd = parseInt(event.endTime.replace(':', ''));
+                                        const otherStart = parseInt(other.startTime.replace(':', ''));
+                                        const otherEnd = parseInt(other.endTime.replace(':', ''));
+                                        return (eventStart < otherEnd && eventEnd > otherStart);
+                                    });
+
+                                    return (
+                                        <div
+                                            key={event.id}
+                                            className="trainer-schedule__agenda-card"
+                                            style={{ borderLeftColor: config.color }}
+                                        >
+
+                                            <div className="trainer-schedule__agenda-time">
+                                                <span className="trainer-schedule__agenda-time-start">{event.startTime}</span>
+                                                <span className="trainer-schedule__agenda-time-sep">–</span>
+                                                <span className="trainer-schedule__agenda-time-end">{event.endTime}</span>
+                                            </div>
+
+                                            <div className="trainer-schedule__agenda-content">
+                                                <div className="trainer-schedule__agenda-header-row">
+                                                    {hasConflict && (
+                                                        <span className="trainer-schedule__agenda-conflict-badge" title="Schedule conflict detected">
+                                                            <AlertTriangle size={10} />
+                                                        </span>
+                                                    )}
+                                                    <h3 className="trainer-schedule__agenda-title">{event.title}</h3>
+                                                </div>
+                                                <div className="trainer-schedule__agenda-type-badge" style={{ background: config.bg, color: config.color }}>
+                                                    {config.label}
+                                                </div>
+                                                <div className="trainer-schedule__agenda-meta">
+                                                    {event.room && (
+                                                        <span><MapPin size={11} /> {event.room}</span>
+                                                    )}
+                                                    {event.enrolled !== undefined && (
+                                                        <span><Users size={11} /> {event.enrolled}/{event.capacity}</span>
+                                                    )}
+                                                    {event.recurring && (
+                                                        <span><Repeat size={11} /> Recurring</span>
+                                                    )}
+                                                </div>
+                                                {event.notes && (
+                                                    <p className="trainer-schedule__agenda-notes">{event.notes}</p>
+                                                )}
+                                            </div>
+
+                                            <div className="trainer-schedule__agenda-actions">
+                                                {(event.type === 'class' || event.type === 'pt') && event.status !== 'completed' && (
+                                                    <>
+                                                        <button
+                                                            className="trainer-schedule__agenda-action trainer-schedule__agenda-action--complete"
+                                                            title="Mark Complete"
+                                                        >
+                                                            <CheckCircle size={18} />
+                                                        </button>
+                                                        <button
+                                                            className="trainer-schedule__agenda-action trainer-schedule__agenda-action--noshow"
+                                                            title="Mark No-Show"
+                                                        >
+                                                            <XCircle size={18} />
+                                                        </button>
+                                                    </>
+                                                )}
+                                                {event.status === 'completed' && (
+                                                    <span className="trainer-schedule__agenda-completed">
+                                                        <Check size={14} /> Done
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+
+                            {filteredEvents.filter(e => e.day === 25).length === 0 && (
+                                <div className="trainer-schedule__agenda-empty">
+                                    <CalendarIcon size={32} />
+                                    <h3>No events scheduled</h3>
+                                    <p>Your day is free! Add an event to get started.</p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}

@@ -1,0 +1,334 @@
+/* ============================================================================
+   Trainer HUD - Persistent Heads-Up Display
+   ============================================================================ */
+
+.trainer-hud {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 900;
+    width: calc(100% - 32px);
+    max-width: 600px;
+}
+
+/* Desktop: Top position */
+@media (min-width: 769px) {
+    .trainer-hud {
+        top: 16px;
+    }
+}
+
+/* Mobile: Bottom position (above navigation) */
+@media (max-width: 768px) {
+    .trainer-hud {
+        bottom: 16px;
+        left: 16px;
+        right: 16px;
+        transform: none;
+        width: auto;
+        max-width: none;
+    }
+}
+
+.trainer-hud__container {
+    display: flex;
+    align-items: stretch;
+    gap: 1px;
+    background: rgba(24, 24, 27, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+}
+
+/* Live Indicator */
+.trainer-hud__live {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.2), rgba(185, 28, 28, 0.2));
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.trainer-hud__live-dot {
+    width: 10px;
+    height: 10px;
+    background: #DC2626;
+    border-radius: 50%;
+    animation: pulse-live 1.5s ease-in-out infinite;
+    box-shadow: 0 0 10px rgba(220, 38, 38, 0.6);
+}
+
+@keyframes pulse-live {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.2);
+        opacity: 0.7;
+    }
+}
+
+/* Current Session Info */
+.trainer-hud__current {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.trainer-hud__avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 600;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.trainer-hud__info {
+    flex: 1;
+    min-width: 0;
+}
+
+.trainer-hud__client-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.trainer-hud__session-type {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.5);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Timer */
+.trainer-hud__timer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.02);
+    border-left: 1px solid rgba(255, 255, 255, 0.05);
+    min-width: 80px;
+}
+
+.trainer-hud__timer-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.5px;
+}
+
+.trainer-hud__timer-label {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.trainer-hud__timer--warning .trainer-hud__timer-value {
+    color: #F59E0B;
+}
+
+.trainer-hud__timer--ending .trainer-hud__timer-value {
+    color: #EF4444;
+    animation: blink 1s ease-in-out infinite;
+}
+
+@keyframes blink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* Next Session Preview */
+.trainer-hud__next {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.02);
+    border-left: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.trainer-hud__next-icon {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.trainer-hud__next-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.trainer-hud__next-label {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.trainer-hud__next-name {
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.7);
+    white-space: nowrap;
+}
+
+/* Action Buttons */
+.trainer-hud__actions {
+    display: flex;
+    gap: 6px;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border-left: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.trainer-hud__action-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.trainer-hud__action-btn--complete {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10B981;
+}
+
+.trainer-hud__action-btn--complete:hover {
+    background: rgba(16, 185, 129, 0.25);
+}
+
+.trainer-hud__action-btn--noshow {
+    background: rgba(239, 68, 68, 0.15);
+    color: #EF4444;
+}
+
+.trainer-hud__action-btn--noshow:hover {
+    background: rgba(239, 68, 68, 0.25);
+}
+
+/* Dismiss button - Always visible, inside the HUD */
+.trainer-hud__dismiss {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    margin: auto 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+}
+
+.trainer-hud__dismiss:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Idle State (no active session) */
+.trainer-hud--idle .trainer-hud__container {
+    background: rgba(24, 24, 27, 0.8);
+}
+
+.trainer-hud--idle .trainer-hud__live {
+    background: rgba(107, 114, 128, 0.1);
+}
+
+.trainer-hud--idle .trainer-hud__live-dot {
+    background: #6B7280;
+    animation: none;
+    box-shadow: none;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    .trainer-hud__container {
+        border-radius: 14px;
+    }
+
+    .trainer-hud__next {
+        display: none;
+    }
+
+    .trainer-hud__actions {
+        padding: 6px 10px;
+    }
+
+    .trainer-hud__action-btn {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+/* Animation for entry */
+@keyframes hud-slide-in {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    @keyframes hud-slide-in {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+}
+
+.trainer-hud {
+    animation: hud-slide-in 0.3s ease-out;
+}
