@@ -6,7 +6,7 @@
 # Description: Checks for changes and pushes them immediately (Single Run)
 # Target: origin/fullstack-beta
 
-BRANCH="fullstack-beta"
+BRANCH="v2"
 REMOTE="origin"
 
 # Colors
