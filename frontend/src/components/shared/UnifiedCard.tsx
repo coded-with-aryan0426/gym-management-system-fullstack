@@ -7,14 +7,16 @@ interface UnifiedCardProps {
     onClick?: () => void;
     hover?: boolean;
     delay?: number;
+    style?: React.CSSProperties;
 }
 
-export const UnifiedCard: React.FC<UnifiedCardProps> = ({ 
-    children, 
-    className = '', 
-    onClick, 
+export const UnifiedCard: React.FC<UnifiedCardProps> = ({
+    children,
+    className = '',
+    onClick,
     hover = true,
-    delay = 0 
+    delay = 0,
+    style
 }) => {
     return (
         <motion.div
@@ -24,7 +26,7 @@ export const UnifiedCard: React.FC<UnifiedCardProps> = ({
             whileHover={hover ? { y: -4, backgroundColor: 'var(--bg-glass-hover)' } : {}}
             className={`glass-card ${className}`}
             onClick={onClick}
-            style={{ cursor: onClick ? 'pointer' : 'default' }}
+            style={{ cursor: onClick ? 'pointer' : 'default', ...style }}
         >
             {children}
         </motion.div>

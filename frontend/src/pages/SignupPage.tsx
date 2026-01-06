@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { Logo } from '../components/ui/Logo';
 import OtpInput from '../components/auth/OtpInput';
+import SocialLoginButtons from '../components/auth/SocialLoginButtons';
 
 const colors = {
     bgPrimary: "#0D0D0D",
@@ -153,6 +154,15 @@ export default function SignupPage() {
         }
     };
 
+    // Handle social login success
+    const handleSocialSuccess = (data: any) => {
+        localStorage.setItem('user', JSON.stringify(data));
+        if (data.token) {
+            localStorage.setItem('token', data.token);
+        }
+        navigate('/dashboard');
+    };
+
     return (
         <div style={{
             height: "100vh",
@@ -185,36 +195,40 @@ export default function SignupPage() {
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                padding: "40px",
-                paddingTop: "60px",
+                padding: "30px 40px",
                 background: colors.bgPrimary,
                 position: "relative",
                 overflowY: "auto",
                 overflowX: "hidden",
+                minHeight: "100vh"
             }}>
-                <div style={{ width: "100%", maxWidth: 520 }}>
-                    <button onClick={() => navigate('/')} style={{ position: "absolute", top: 30, right: 30, background: "transparent", border: "none", color: colors.textSecondary, cursor: "pointer", fontSize: 13, zIndex: 10 }}>Back to Home</button>
+                <div style={{ width: "100%", maxWidth: 480 }}>
+                    <button onClick={() => navigate('/')} style={{ position: "absolute", top: 20, right: 30, background: "transparent", border: "none", color: colors.textSecondary, cursor: "pointer", fontSize: 12, zIndex: 10 }}>Back to Home</button>
 
-                    <div style={{ marginBottom: 24, textAlign: 'center' }}>
-                        <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>
+                    {/* Header */}
+                    <div style={{ marginBottom: 16, textAlign: 'center' }}>
+                        <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 6 }}>
                             {step === 'OTP' ? 'Verification' : 'Register Gym'}
                         </h2>
-                        <p style={{ color: colors.textSecondary, fontSize: 14 }}>
+                        <p style={{ color: colors.textSecondary, fontSize: 13 }}>
                             {step === 'OTP' ? `Enter the code sent to ${formData.email}` : 'Create your account and gym workspace'}
                         </p>
                     </div>
 
-                    {apiError && (
-                        <div style={{ padding: "10px", background: "rgba(220, 38, 38, 0.1)", border: `1px solid ${colors.crimson}`, borderRadius: 8, color: colors.crimson, marginBottom: 16, fontSize: 13, textAlign: 'center' }}>
-                            ⚠ {apiError}
-                        </div>
-                    )}
+                    {/* Fixed height message container - prevents layout shift */}
+                    <div style={{ minHeight: 42, marginBottom: 6 }}>
+                        {apiError && (
+                            <div style={{ padding: "8px 12px", background: "rgba(220, 38, 38, 0.1)", border: `1px solid ${colors.crimson}`, borderRadius: 8, color: colors.crimson, fontSize: 12, textAlign: 'center', animation: 'fadeIn 0.2s ease' }}>
+                                ⚠ {apiError}
+                            </div>
+                        )}
 
-                    {successMessage && (
-                        <div style={{ padding: "10px", background: "rgba(16, 185, 129, 0.1)", border: `1px solid ${colors.emerald}`, borderRadius: 8, color: colors.emerald, marginBottom: 16, fontSize: 13, textAlign: 'center' }}>
-                            ✓ {successMessage}
-                        </div>
-                    )}
+                        {successMessage && (
+                            <div style={{ padding: "8px 12px", background: "rgba(16, 185, 129, 0.1)", border: `1px solid ${colors.emerald}`, borderRadius: 8, color: colors.emerald, fontSize: 12, textAlign: 'center', animation: 'fadeIn 0.2s ease' }}>
+                                ✓ {successMessage}
+                            </div>
+                        )}
+                    </div>
 
                     {step === 'DETAILS' ? (
                         <form onSubmit={handleSendOtp} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -320,6 +334,13 @@ export default function SignupPage() {
                             >
                                 {isLoading ? "Sending Code..." : "Next: Verify Email"}
                             </button>
+
+                            {/* Social Login Buttons */}
+                            <SocialLoginButtons
+                                onSuccess={handleSocialSuccess}
+                                onError={(err) => setApiError(err)}
+                                mode="signup"
+                            />
 
                             <p style={{ textAlign: "center", marginTop: 12, color: colors.textSecondary, fontSize: 13 }}>
                                 Already have an account? <span onClick={() => navigate('/login')} style={{ color: colors.crimson, cursor: "pointer", textDecoration: "underline" }}>Login</span>

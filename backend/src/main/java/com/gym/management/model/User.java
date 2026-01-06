@@ -101,6 +101,63 @@ public class User {
     @Column(name = "avatar_id")
     private String avatarId;
 
+    // Social login fields
+    @Column(name = "google_id", unique = true)
+    private String googleId;
+
+    @Column(name = "facebook_id", unique = true)
+    private String facebookId;
+
+    @Column(name = "phone_number", unique = true)
+    private String phoneNumberPersisted;
+
+    @Column(name = "auth_provider")
+    @Enumerated(EnumType.STRING)
+    private AuthProvider authProvider = AuthProvider.LOCAL;
+
+    @Column(name = "account_non_locked")
+    private Boolean accountNonLocked = true;
+
+    public String getGoogleId() {
+        return googleId;
+    }
+
+    public void setGoogleId(String googleId) {
+        this.googleId = googleId;
+    }
+
+    public String getFacebookId() {
+        return facebookId;
+    }
+
+    public void setFacebookId(String facebookId) {
+        this.facebookId = facebookId;
+    }
+
+    public String getPhoneNumberPersisted() {
+        return phoneNumberPersisted;
+    }
+
+    public void setPhoneNumberPersisted(String phoneNumberPersisted) {
+        this.phoneNumberPersisted = phoneNumberPersisted;
+    }
+
+    public AuthProvider getAuthProvider() {
+        return authProvider;
+    }
+
+    public void setAuthProvider(AuthProvider authProvider) {
+        this.authProvider = authProvider;
+    }
+
+    public Boolean getAccountNonLocked() {
+        return accountNonLocked;
+    }
+
+    public void setAccountNonLocked(Boolean accountNonLocked) {
+        this.accountNonLocked = accountNonLocked;
+    }
+
     public String getPhone() {
         return phone;
     }

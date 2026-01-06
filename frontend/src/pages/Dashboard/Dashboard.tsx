@@ -23,6 +23,8 @@ import {
   ArrowRight
 } from 'lucide-react'
 import api from "../../services/api"
+import { MorningBrief } from "../../components/dashboard/MorningBrief"
+import { KPIGrid } from "../../components/dashboard/KPIGrid"
 import "./Dashboard.css"
 
 interface TrainerSlot {
@@ -123,8 +125,8 @@ const Dashboard: React.FC = () => {
       setPendingPayments(10500)
 
       setTrainerSchedule([
-        { 
-          name: 'Rahul Sharma', 
+        {
+          name: 'Rahul Sharma',
           initials: 'RS',
           slots: [
             { time: '6:00 AM', status: 'booked', memberName: 'Vikram K.' },
@@ -136,12 +138,12 @@ const Dashboard: React.FC = () => {
             { time: '6:00 PM', status: 'booked', memberName: 'Deepak V.' },
             { time: '7:00 PM', status: 'limited' },
           ],
-          sessionsToday: 6, 
+          sessionsToday: 6,
           totalRevenue: 82500,
           availableSlots: 2
         },
-        { 
-          name: 'Priya Patel', 
+        {
+          name: 'Priya Patel',
           initials: 'PP',
           slots: [
             { time: '7:00 AM', status: 'booked', memberName: 'Sneha R.' },
@@ -152,12 +154,12 @@ const Dashboard: React.FC = () => {
             { time: '5:00 PM', status: 'booked', memberName: 'Kavita S.' },
             { time: '6:00 PM', status: 'booked', memberName: 'Arjun M.' },
           ],
-          sessionsToday: 5, 
+          sessionsToday: 5,
           totalRevenue: 67200,
           availableSlots: 2
         },
-        { 
-          name: 'Amit Kumar', 
+        {
+          name: 'Amit Kumar',
           initials: 'AK',
           slots: [
             { time: '6:00 AM', status: 'booked', memberName: 'Neha T.' },
@@ -168,7 +170,7 @@ const Dashboard: React.FC = () => {
             { time: '6:00 PM', status: 'limited' },
             { time: '7:00 PM', status: 'available' },
           ],
-          sessionsToday: 4, 
+          sessionsToday: 4,
           totalRevenue: 54800,
           availableSlots: 3
         },
@@ -258,8 +260,17 @@ const Dashboard: React.FC = () => {
       animate="visible"
       variants={containerVariants}
     >
+      {/* Morning Brief - Priority Alerts */}
+      <MorningBrief
+        onNavigateToMembers={() => navigate('/members')}
+        onNavigateToPayments={() => navigate('/financials')}
+      />
+
+      {/* KPI Grid - Enhanced Metrics */}
+      <KPIGrid />
+
       <section className="dash-overview">
-        <motion.div 
+        <motion.div
           className="dash-overview-card dash-overview-card--members"
           variants={itemVariants}
           onClick={() => navigate('/members')}
@@ -275,7 +286,7 @@ const Dashboard: React.FC = () => {
           <ChevronRight className="dash-overview-card__arrow" size={20} />
         </motion.div>
 
-        <motion.div 
+        <motion.div
           className="dash-overview-card dash-overview-card--trainers"
           variants={itemVariants}
           onClick={() => navigate('/trainers')}
@@ -291,7 +302,7 @@ const Dashboard: React.FC = () => {
           <ChevronRight className="dash-overview-card__arrow" size={20} />
         </motion.div>
 
-        <motion.div 
+        <motion.div
           className="dash-overview-card dash-overview-card--revenue"
           variants={itemVariants}
           onClick={() => navigate('/financials')}
@@ -309,7 +320,7 @@ const Dashboard: React.FC = () => {
           <ChevronRight className="dash-overview-card__arrow" size={20} />
         </motion.div>
 
-        <motion.div 
+        <motion.div
           className="dash-overview-card dash-overview-card--sessions"
           variants={itemVariants}
           onClick={() => navigate('/pt-sessions')}
@@ -375,52 +386,52 @@ const Dashboard: React.FC = () => {
       </section>
 
       <section className="dash-grid">
-          <motion.div className="dash-section dash-section--trainers" variants={itemVariants}>
-            <div className="dash-section__header">
-              <div className="dash-section__title">
-                <Calendar size={18} />
-                <h2>Trainer Schedule Today</h2>
-              </div>
-              <button className="dash-section__link" onClick={() => navigate('/pt-sessions')}>
-                View All <ArrowRight size={14} />
-              </button>
+        <motion.div className="dash-section dash-section--trainers" variants={itemVariants}>
+          <div className="dash-section__header">
+            <div className="dash-section__title">
+              <Calendar size={18} />
+              <h2>Trainer Schedule Today</h2>
             </div>
-            <div className="dash-section__content">
-              <div className="trainer-cards">
-                {trainerSchedule.map((trainer, idx) => (
-                  <div key={idx} className="trainer-card">
-                    <div className="trainer-card__header">
-                      <div className="trainer-card__avatar">{trainer.initials}</div>
-                      <div className="trainer-card__info">
-                        <span className="trainer-card__name">{trainer.name}</span>
-                        <span className="trainer-card__meta">
-                          {trainer.sessionsToday} sessions · {trainer.availableSlots} slots free
-                        </span>
-                      </div>
-                      <div className="trainer-card__revenue">
-                        {formatCurrency(trainer.totalRevenue)}
-                      </div>
+            <button className="dash-section__link" onClick={() => navigate('/pt-sessions')}>
+              View All <ArrowRight size={14} />
+            </button>
+          </div>
+          <div className="dash-section__content">
+            <div className="trainer-cards">
+              {trainerSchedule.map((trainer, idx) => (
+                <div key={idx} className="trainer-card">
+                  <div className="trainer-card__header">
+                    <div className="trainer-card__avatar">{trainer.initials}</div>
+                    <div className="trainer-card__info">
+                      <span className="trainer-card__name">{trainer.name}</span>
+                      <span className="trainer-card__meta">
+                        {trainer.sessionsToday} sessions · {trainer.availableSlots} slots free
+                      </span>
                     </div>
-                    <div className="trainer-card__slots">
-                      {trainer.slots.map((slot, i) => (
-                        <div key={i} className={`trainer-slot trainer-slot--${slot.status}`}>
-                          <span className="trainer-slot__time">{slot.time}</span>
-                          <span className="trainer-slot__status">
-                            {slot.status === 'booked' ? slot.memberName : slot.status === 'limited' ? '1 Left' : 'Open'}
-                          </span>
-                        </div>
-                      ))}
+                    <div className="trainer-card__revenue">
+                      {formatCurrency(trainer.totalRevenue)}
                     </div>
                   </div>
-                ))}
-              </div>
-              <div className="trainer-schedule__legend">
-                <span><span className="legend-dot legend-dot--available" /> Available</span>
-                <span><span className="legend-dot legend-dot--limited" /> 1 Left</span>
-                <span><span className="legend-dot legend-dot--booked" /> Booked</span>
-              </div>
+                  <div className="trainer-card__slots">
+                    {trainer.slots.map((slot, i) => (
+                      <div key={i} className={`trainer-slot trainer-slot--${slot.status}`}>
+                        <span className="trainer-slot__time">{slot.time}</span>
+                        <span className="trainer-slot__status">
+                          {slot.status === 'booked' ? slot.memberName : slot.status === 'limited' ? '1 Left' : 'Open'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
-          </motion.div>
+            <div className="trainer-schedule__legend">
+              <span><span className="legend-dot legend-dot--available" /> Available</span>
+              <span><span className="legend-dot legend-dot--limited" /> 1 Left</span>
+              <span><span className="legend-dot legend-dot--booked" /> Booked</span>
+            </div>
+          </div>
+        </motion.div>
 
         <motion.div className="dash-section dash-section--alerts" variants={itemVariants}>
           <div className="dash-section__header">
@@ -592,7 +603,7 @@ const Dashboard: React.FC = () => {
                 <div className="stock-row__info">
                   <span className="stock-row__name">{item.name}</span>
                   <div className="stock-row__bar">
-                    <div 
+                    <div
                       className={`stock-row__fill ${item.level < 20 ? 'stock-row__fill--low' : ''}`}
                       style={{ width: `${item.level}%` }}
                     />

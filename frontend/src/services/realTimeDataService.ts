@@ -1,11 +1,11 @@
 // Real-Time Data Service for Enhanced User Action Modals
 
-import type { 
-  RealTimeDataProvider, 
-  RealTimeUserData, 
-  DataUpdate, 
+import type {
+  RealTimeDataProvider,
+  RealTimeUserData,
+  DataUpdate,
   Observable,
-  Relationship 
+  Relationship
 } from '../types/modalEnhancement';
 import type { User } from '../types/user';
 
@@ -103,7 +103,7 @@ export class RealTimeDataService implements RealTimeDataProvider {
   private handleDataUpdate(update: DataUpdate): void {
     const subscriptionKey = this.getSubscriptionKey(update.type, update.userId);
     const observable = this.subscriptions.get(subscriptionKey);
-    
+
     if (observable) {
       observable.next(update.data);
     }
@@ -115,10 +115,10 @@ export class RealTimeDataService implements RealTimeDataProvider {
 
   subscribeToUserUpdates(userId: number): Observable<User> {
     const subscriptionKey = this.getSubscriptionKey('user_update', userId);
-    
+
     if (!this.subscriptions.has(subscriptionKey)) {
       this.subscriptions.set(subscriptionKey, new SimpleObservable<User>());
-      
+
       // Send subscription request to server
       this.sendSubscriptionRequest('user_update', userId);
     }
@@ -128,10 +128,10 @@ export class RealTimeDataService implements RealTimeDataProvider {
 
   subscribeToRelationshipUpdates(userId: number): Observable<Relationship[]> {
     const subscriptionKey = this.getSubscriptionKey('relationship_update', userId);
-    
+
     if (!this.subscriptions.has(subscriptionKey)) {
       this.subscriptions.set(subscriptionKey, new SimpleObservable<Relationship[]>());
-      
+
       // Send subscription request to server
       this.sendSubscriptionRequest('relationship_update', userId);
     }
@@ -142,7 +142,7 @@ export class RealTimeDataService implements RealTimeDataProvider {
   unsubscribe(subscriptionId: string): void {
     if (this.subscriptions.has(subscriptionId)) {
       this.subscriptions.delete(subscriptionId);
-      
+
       // Send unsubscription request to server
       this.sendUnsubscriptionRequest(subscriptionId);
     }

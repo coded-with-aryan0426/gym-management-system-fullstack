@@ -1,73 +1,124 @@
-// User-related type definitions
-export interface User {
-  userId: number;
-  username: string;
-  fullName: string;
-  email: string;
-  phoneNumber?: string;
-  phone?: string;
-  roles?: Role[];
-  role?: string; // Legacy support
-  // Frontend transient fields
-  plan?: string | { name: string };
-  status?: string;
-  joinDate?: string;
-  leavingDate?: string; // When staff left the gym
-  createdAt?: string;
-  membershipDaysRemaining?: number; // Calculated field for display
-  avatarId?: string | null; // Persistent avatar selection
-}
+/**
+ * User-related type definitions
+ */
 
-export interface MemberDTO {
-  userId: number;
-  fullName: string;
-  email: string;
-  phone?: string;
-  planName: string
-  planDuration: string
-  status: string;
-  startDate?: string;
-  endDate?: string;
-  createdAt?: string;
-  joinDate?: string;
+export interface User {
+    userId: number;
+    username: string;
+    fullName: string;
+    email: string;
+    phone?: string;
+    avatarId?: string;
+    status: string;
+    createdAt: string;
+    roles: Role[];
+    // Social auth fields
+    googleId?: string;
+    facebookId?: string;
+    phoneNumber?: string;
+    authProvider?: 'LOCAL' | 'GOOGLE' | 'FACEBOOK';
 }
 
 export interface Role {
-  roleId: number;
-  roleName?: string;
+    roleId: number;
+    roleName: string;
 }
 
-export interface MembershipPlan {
-  id: number;
-  packageId?: number;
-  name: 'Gold Plan' | 'Silver Plan' | 'Platinum Plan';
-  price: number;
-  expiryDate?: string;
+export interface UserGymRole {
+    id: number;
+    userId: number;
+    gymId: number;
+    gymName: string;
+    role: 'OWNER' | 'ADMIN' | 'TRAINER' | 'MEMBER';
+    status: 'ACTIVE' | 'PENDING' | 'SUSPENDED' | 'REVOKED';
+    assignedAt: string;
+    expiresAt?: string;
 }
 
+export interface Member extends User {
+    membershipStatus?: string;
+    membershipExpiry?: string;
+    trainerId?: number;
+    trainerName?: string;
+}
+
+export interface Staff extends User {
+    staffRole?: string;
+    gymId?: number;
+    gymName?: string;
+}
+
+export interface Trainer extends User {
+    specialization?: string;
+    customerCount?: number;
+    customers?: User[];
+}
+
+export interface AuthResponse {
+    token: string;
+    user: User;
+    message?: string;
+    otpSent?: boolean;
+    email?: string;
+}
+
+export interface LoginRequest {
+    username: string;
+    password: string;
+}
+
+export interface OtpVerifyRequest {
+    target: string;
+    code: string;
+    channel: 'EMAIL' | 'SMS' | 'WHATSAPP';
+}
+
+// DTO used by MembersContext
+export interface MemberDTO {
+    userId: number;
+    username: string;
+    fullName: string;
+    email: string;
+    phone?: string;
+    status: string;
+    createdAt?: string;
+    joinDate?: string;
+    startDate?: string;
+    planName?: string;
+    planDuration?: string;
+    membershipStatus?: string;
+    membershipExpiry?: string;
+    trainerId?: number;
+    trainerName?: string;
+    avatarId?: string;
+    roles?: Role[];
+}
+
+// DTOs for API operations
 export interface CreateUserDto {
-  username: string;
-  email: string;
-  fullName: string;
-  password: string;
-  phoneNumber?: string;
-  phone?: string;
-  address?: string;
-  roles?: Role[];
+    username: string;
+    fullName: string;
+    email: string;
+    password?: string;
+    phone?: string;
+    roles?: string[];
 }
 
 export interface UpdateUserDto {
-  email?: string;
-  fullName?: string;
-  password?: string;
-  phoneNumber?: string;
-  phone?: string;
-  address?: string;
-  avatarUrl?: string;
-  avatarId?: string | null; // Persistent avatar selection
-  roles?: Role[];
-  packageId?: number;
-  status?: string; // Active, On Leave, Inactive, Left
-  joinDate?: string; // YYYY-MM-DD format
-  leavingDate?: string; // YYYY-MM-DD format (when staff left)
+    fullName?: string;
+    email?: string;
+    phone?: string;
+    status?: string;
+    avatarId?: string;
 }
+
+// Summary view for lists
+export interface UserSummary {
+    userId: number;
+    username: string;
+    fullName: string;
+    email: string;
+    status: string;
+    avatarId?: string;
+}
+

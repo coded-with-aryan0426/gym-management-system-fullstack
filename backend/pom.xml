@@ -76,6 +76,16 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-mail</artifactId>
 		</dependency>
+		<!-- Rate Limiting with Bucket4j -->
+		<dependency>
+			<groupId>com.bucket4j</groupId>
+			<artifactId>bucket4j-core</artifactId>
+			<version>8.10.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.github.ben-manes.caffeine</groupId>
+			<artifactId>caffeine</artifactId>
+		</dependency>
 		<!-- Flyway for database migrations -->
 		<dependency>
 			<groupId>org.flywaydb</groupId>
@@ -85,11 +95,27 @@
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-database-oracle</artifactId>
 		</dependency>
-		<!-- Tomcat as provided for WAR deployment -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-tomcat</artifactId>
 			<scope>provided</scope>
+		</dependency>
+		<!-- OAuth2 Client for Social Login -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-oauth2-client</artifactId>
+		</dependency>
+		<!-- Google API for token verification -->
+		<dependency>
+			<groupId>com.google.api-client</groupId>
+			<artifactId>google-api-client</artifactId>
+			<version>2.2.0</version>
+		</dependency>
+		<!-- Twilio for SMS/WhatsApp OTP -->
+		<dependency>
+			<groupId>com.twilio.sdk</groupId>
+			<artifactId>twilio</artifactId>
+			<version>9.14.0</version>
 		</dependency>
 	</dependencies>
 

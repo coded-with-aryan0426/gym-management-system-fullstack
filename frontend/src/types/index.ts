@@ -1,5 +1,19 @@
 // Types barrel export
-export * from './user';
+export {
+    type User,
+    type Role,
+    type Member,
+    type Staff,
+    type Trainer,
+    type AuthResponse,
+    type LoginRequest,
+    type OtpVerifyRequest,
+    type MemberDTO,
+    type CreateUserDto,
+    type UpdateUserDto,
+    type UserSummary,
+    type UserGymRole
+} from './user.ts';
 export * from './settings';
 export * from './api';
 export * from './components';

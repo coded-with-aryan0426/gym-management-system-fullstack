@@ -4,6 +4,7 @@ import GymSelector from '../components/GymSelector/GymSelector';
 import { Logo } from '../components/ui/Logo';
 import api from '../services/api'; // Use api wrapper
 import OtpInput from '../components/auth/OtpInput';
+import SocialLoginButtons from '../components/auth/SocialLoginButtons';
 
 const colors = {
     bgPrimary: "#0D0D0D",
@@ -240,9 +241,10 @@ export default function LoginPage() {
                 flexDirection: "column",
                 justifyContent: "center",
                 alignItems: "center",
-                padding: 60,
+                padding: "40px 60px",
                 background: colors.bgPrimary,
-                position: "relative"
+                position: "relative",
+                minHeight: "100vh"
             }}>
                 <div style={{ width: "100%", maxWidth: 420 }}>
                     <button
@@ -261,58 +263,59 @@ export default function LoginPage() {
                         Back to Home
                     </button>
 
-                    <div style={{ marginBottom: 32, textAlign: 'center' }}>
-                        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-                            <Logo size={40} showText={false} />
-                        </div>
-                        <h2 style={{ fontSize: 32, fontWeight: 700, marginBottom: 12 }}>
+                    {/* Header - No logo, just title */}
+                    <div style={{ marginBottom: 24, textAlign: 'center' }}>
+                        <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>
                             {step === 'OTP' ? 'Verification' : 'Login'}
                         </h2>
-                        <p style={{ color: colors.textSecondary }}>
+                        <p style={{ color: colors.textSecondary, fontSize: 14 }}>
                             {step === 'OTP'
-                                ? `Enter the code sent to ${email} `
+                                ? `Enter the code sent to ${email}`
                                 : 'Access your gym management dashboard'}
                         </p>
                     </div>
 
-                    {error && (
-                        <div style={{
-                            padding: "12px",
-                            background: "rgba(220, 38, 38, 0.1)",
-                            border: `1px solid ${colors.crimson}`,
-                            borderRadius: 8,
-                            color: colors.crimson,
-                            marginBottom: 20,
-                            fontSize: 13,
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 8
-                        }}>
-                            <span>⚠</span> {error}
-                        </div>
-                    )}
+                    {/* Fixed height message container - prevents layout shift */}
+                    <div style={{ minHeight: 48, marginBottom: 8 }}>
+                        {error && (
+                            <div style={{
+                                padding: "10px 14px",
+                                background: "rgba(220, 38, 38, 0.1)",
+                                border: `1px solid ${colors.crimson}`,
+                                borderRadius: 8,
+                                color: colors.crimson,
+                                fontSize: 13,
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 8,
+                                animation: 'fadeIn 0.2s ease'
+                            }}>
+                                <span>⚠</span> {error}
+                            </div>
+                        )}
 
-                    {successMessage && (
-                        <div style={{
-                            padding: "12px",
-                            background: "rgba(16, 185, 129, 0.1)",
-                            border: `1px solid ${colors.emerald}`,
-                            borderRadius: 8,
-                            color: colors.emerald,
-                            marginBottom: 20,
-                            fontSize: 13,
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 8
-                        }}>
-                            <span>✓</span> {successMessage}
-                        </div>
-                    )}
+                        {successMessage && (
+                            <div style={{
+                                padding: "10px 14px",
+                                background: "rgba(16, 185, 129, 0.1)",
+                                border: `1px solid ${colors.emerald}`,
+                                borderRadius: 8,
+                                color: colors.emerald,
+                                fontSize: 13,
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 8,
+                                animation: 'fadeIn 0.2s ease'
+                            }}>
+                                <span>✓</span> {successMessage}
+                            </div>
+                        )}
+                    </div>
 
                     {step === 'CREDENTIALS' ? (
                         <form onSubmit={handleLoginSubmit}>
-                            <div style={{ marginBottom: 16 }}>
-                                <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: colors.textSecondary, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                            <div style={{ marginBottom: 14 }}>
+                                <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: colors.textSecondary, marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.5px" }}>
                                     Email or Phone
                                 </label>
                                 <input
@@ -323,21 +326,21 @@ export default function LoginPage() {
                                     required
                                     style={{
                                         width: "100%",
-                                        padding: "14px",
+                                        padding: "12px",
                                         background: colors.bgSecondary,
                                         border: `1px solid ${colors.borderPrimary}`,
-                                        borderRadius: 12,
+                                        borderRadius: 10,
                                         color: colors.textPrimary,
-                                        fontSize: 15,
+                                        fontSize: 14,
                                         outline: "none",
                                     }}
                                 />
                             </div>
 
-                            <div style={{ marginBottom: 24 }}>
-                                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                                    <label style={{ fontSize: 12, fontWeight: 600, color: colors.textSecondary, textTransform: "uppercase", letterSpacing: "0.5px" }}>Password</label>
-                                    <a href="#" style={{ color: colors.crimson, textDecoration: "none", fontSize: 12, fontWeight: 500 }}>Forgot password?</a>
+                            <div style={{ marginBottom: 20 }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
+                                    <label style={{ fontSize: 11, fontWeight: 600, color: colors.textSecondary, textTransform: "uppercase", letterSpacing: "0.5px" }}>Password</label>
+                                    <a href="#" style={{ color: colors.crimson, textDecoration: "none", fontSize: 11, fontWeight: 500 }}>Forgot password?</a>
                                 </div>
                                 <div style={{ position: "relative" }}>
                                     <input
@@ -348,12 +351,12 @@ export default function LoginPage() {
                                         required
                                         style={{
                                             width: "100%",
-                                            padding: "14px 48px 14px 14px",
+                                            padding: "12px 44px 12px 12px",
                                             background: colors.bgSecondary,
                                             border: `1px solid ${colors.borderPrimary}`,
-                                            borderRadius: 12,
+                                            borderRadius: 10,
                                             color: colors.textPrimary,
-                                            fontSize: 15,
+                                            fontSize: 14,
                                             outline: "none",
                                         }}
                                     />
@@ -362,13 +365,14 @@ export default function LoginPage() {
                                         onClick={() => setShowPassword(!showPassword)}
                                         style={{
                                             position: "absolute",
-                                            right: 14,
+                                            right: 12,
                                             top: "50%",
                                             transform: "translateY(-50%)",
                                             background: "transparent",
                                             border: "none",
                                             color: colors.textTertiary,
                                             cursor: "pointer",
+                                            fontSize: 10,
                                         }}
                                     >
                                         {showPassword ? "HIDE" : "SHOW"}
@@ -381,23 +385,30 @@ export default function LoginPage() {
                                 disabled={isLoading}
                                 style={{
                                     width: "100%",
-                                    padding: "16px",
+                                    padding: "14px",
                                     background: `linear-gradient(to right, ${colors.crimson}, ${colors.crimsonHover})`,
                                     border: "none",
-                                    borderRadius: 12,
+                                    borderRadius: 10,
                                     color: "#fff",
-                                    fontSize: 16,
+                                    fontSize: 15,
                                     fontWeight: 600,
                                     cursor: isLoading ? "not-allowed" : "pointer",
                                     opacity: isLoading ? 0.7 : 1,
                                     display: "flex",
                                     alignItems: "center",
                                     justifyContent: "center",
-                                    gap: 12,
+                                    gap: 10,
                                 }}
                             >
                                 {isLoading ? "Checking..." : "Sign In"}
                             </button>
+
+                            {/* Social Login Buttons */}
+                            <SocialLoginButtons
+                                onSuccess={handleAuthSuccess}
+                                onError={(err) => setError(err)}
+                                mode="login"
+                            />
                         </form>
                     ) : (
                         <form onSubmit={handleOtpSubmit}>

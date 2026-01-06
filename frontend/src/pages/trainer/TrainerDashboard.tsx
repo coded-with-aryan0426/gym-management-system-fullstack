@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { 
-    Users, Calendar, Clock, Activity, Bell, FileText, 
+import {
+    Users, Calendar, Clock, Activity, Bell, FileText,
     MessageSquare, TrendingUp, ChevronRight, Play,
     CheckCircle, User, Zap, DollarSign, Target,
     Phone, AlertCircle, Award, Flame, Dumbbell
@@ -66,7 +66,7 @@ const TrainerDashboard: React.FC = () => {
     useEffect(() => {
         const now = new Date();
         const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        
+
         setData({
             trainerName: 'John',
             trainerId: 'TR001',

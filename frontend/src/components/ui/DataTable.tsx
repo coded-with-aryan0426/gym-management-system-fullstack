@@ -7,6 +7,7 @@ export interface Column<T> {
     width?: string;
     hideOnMobile?: boolean;
     mobileOrder?: number;
+    sortable?: boolean;
     render?: (item: T, index: number) => React.ReactNode;
 }
 
@@ -30,6 +31,12 @@ interface DataTableProps<T> {
     className?: string;
     pagination?: PaginationProps;
     mobileCardRender?: (item: T, index: number) => React.ReactNode;
+    // Titan mode props
+    compact?: boolean;
+    selectable?: boolean;
+    selectedIds?: Set<string | number>;
+    onSelectionChange?: (selectedIds: Set<string | number>) => void;
+    stickyHeader?: boolean;
 }
 
 function DataTable<T>({
@@ -42,8 +49,41 @@ function DataTable<T>({
     className = '',
     pagination,
     mobileCardRender,
+    compact = false,
+    selectable = false,
+    selectedIds: externalSelectedIds,
+    onSelectionChange,
+    stickyHeader = false,
 }: DataTableProps<T>) {
     const [isMobile, setIsMobile] = useState(false);
+    const [internalSelectedIds, setInternalSelectedIds] = useState<Set<string | number>>(new Set());
+
+    // Use external or internal selection state
+    const selectedIds = externalSelectedIds ?? internalSelectedIds;
+
+    const handleSelectAll = () => {
+        if (selectedIds.size === data.length) {
+            const newSelection = new Set<string | number>();
+            setInternalSelectedIds(newSelection);
+            onSelectionChange?.(newSelection);
+        } else {
+            const newSelection = new Set(data.map(item => keyExtractor(item)));
+            setInternalSelectedIds(newSelection);
+            onSelectionChange?.(newSelection);
+        }
+    };
+
+    const handleSelectRow = (id: string | number, e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent) => {
+        e.stopPropagation();
+        const newSelection = new Set(selectedIds);
+        if (newSelection.has(id)) {
+            newSelection.delete(id);
+        } else {
+            newSelection.add(id);
+        }
+        setInternalSelectedIds(newSelection);
+        onSelectionChange?.(newSelection);
+    };
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -52,9 +92,17 @@ function DataTable<T>({
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
+    const tableClassNames = [
+        'data-table',
+        className,
+        isMobile ? 'data-table--mobile' : '',
+        compact ? 'data-table--compact' : '',
+        stickyHeader ? 'data-table--sticky' : '',
+    ].filter(Boolean).join(' ');
+
     if (loading) {
         return (
-            <div className={`data-table ${className}`}>
+            <div className={tableClassNames}>
                 <div className="data-table__loading">
                     <div className="data-table__spinner" />
                     <span>Loading...</span>
@@ -65,13 +113,13 @@ function DataTable<T>({
 
     if (data.length === 0 && !pagination) {
         return (
-            <div className={`data-table ${className}`}>
+            <div className={tableClassNames}>
                 <div className="data-table__empty">{emptyMessage}</div>
             </div>
         );
     }
 
-    const visibleColumns = isMobile 
+    const visibleColumns = isMobile
         ? columns.filter(col => !col.hideOnMobile)
         : columns;
 
@@ -123,6 +171,16 @@ function DataTable<T>({
                 <table className="data-table__table">
                     <thead className="data-table__head">
                         <tr>
+                            {selectable && (
+                                <th className="data-table__th data-table__th--checkbox" style={{ width: 40 }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={data.length > 0 && selectedIds.size === data.length}
+                                        onChange={handleSelectAll}
+                                        className="data-table__checkbox"
+                                    />
+                                </th>
+                            )}
                             {visibleColumns.map((col) => (
                                 <th
                                     key={col.key}
@@ -137,27 +195,41 @@ function DataTable<T>({
                     <tbody className="data-table__body">
                         {data.length === 0 ? (
                             <tr>
-                                <td colSpan={visibleColumns.length} className="data-table__empty-cell">
+                                <td colSpan={visibleColumns.length + (selectable ? 1 : 0)} className="data-table__empty-cell">
                                     {emptyMessage}
                                 </td>
                             </tr>
                         ) : (
-                            data.map((item, index) => (
-                                <tr
-                                    key={keyExtractor(item)}
-                                    className={`data-table__row ${onRowClick ? 'data-table__row--clickable' : ''}`}
-                                    onClick={() => onRowClick?.(item)}
-                                >
-                                    {visibleColumns.map((col) => (
-                                        <td key={col.key} className="data-table__td">
-                                            {col.render
-                                                ? col.render(item, index)
-                                                : (item as Record<string, unknown>)[col.key] as React.ReactNode
-                                            }
-                                        </td>
-                                    ))}
-                                </tr>
-                            ))
+                            data.map((item, index) => {
+                                const id = keyExtractor(item);
+                                const isSelected = selectedIds.has(id);
+                                return (
+                                    <tr
+                                        key={id}
+                                        className={`data-table__row ${onRowClick ? 'data-table__row--clickable' : ''} ${isSelected ? 'data-table__row--selected' : ''}`}
+                                        onClick={() => onRowClick?.(item)}
+                                    >
+                                        {selectable && (
+                                            <td className="data-table__td data-table__td--checkbox" onClick={e => e.stopPropagation()}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={isSelected}
+                                                    onChange={(e) => handleSelectRow(id, e)}
+                                                    className="data-table__checkbox"
+                                                />
+                                            </td>
+                                        )}
+                                        {visibleColumns.map((col) => (
+                                            <td key={col.key} className="data-table__td">
+                                                {col.render
+                                                    ? col.render(item, index)
+                                                    : (item as Record<string, unknown>)[col.key] as React.ReactNode
+                                                }
+                                            </td>
+                                        ))}
+                                    </tr>
+                                );
+                            })
                         )}
                     </tbody>
                 </table>

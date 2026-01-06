@@ -28,6 +28,7 @@ const LoginPage = lazy(() => import('./pages/LoginPage'));
 const SignupPage = lazy(() => import('./pages/SignupPage'));
 const UnauthorizedPage = lazy(() => import('./pages/UnauthorizedPage'));
 const ChangePasswordFirst = lazy(() => import('./pages/ChangePasswordFirst'));
+const GoogleCallback = lazy(() => import('./pages/auth/GoogleCallback'));
 
 // Static Pages
 const AboutPage = lazy(() => import('./pages/static/AboutPage'));
@@ -135,6 +136,9 @@ function App() {
                       <Route path="/privacy" element={<PrivacyPage />} />
                       <Route path="/terms" element={<TermsPage />} />
                       <Route path="/member-app" element={<MemberAppPage />} />
+
+                      {/* OAuth Callback Routes */}
+                      <Route path="/auth/google/callback" element={<GoogleCallback />} />
 
                       {/* Trainer Dashboard Routes */}
                       <Route

@@ -1,10 +1,10 @@
 // Optimistic Locking Service for Enhanced User Action Modals
 
-import type { 
-  VersionedEntity, 
-  DataConflict, 
+import type {
+  VersionedEntity,
+  DataConflict,
   ConflictResolution,
-  AuditEntry 
+  AuditEntry
 } from '../types/modalEnhancement';
 import type { User } from '../types/user';
 import { enhancedApi } from './enhancedApi';
@@ -35,30 +35,30 @@ export class OptimisticLockingService {
     entityType: 'user' | 'relationship'
   ): Promise<T> {
     const lockKey = this.getLockKey(entityType, (entity as any).userId || (entity as any).id);
-    
+
     try {
       // Acquire lock
       await this.acquireLock(lockKey, entityType, entity.version);
-      
+
       // Detect conflicts
       const conflicts = await this.detectVersionConflicts(entity, updates, entityType);
-      
+
       if (conflicts.length > 0) {
         // Handle conflicts
         const resolution = await this.resolveConflicts(conflicts, entity, updates);
-        
+
         if (resolution.action === 'manual') {
           throw new Error('Manual conflict resolution required');
         }
-        
+
         // Apply resolved changes
         const resolvedUpdates = resolution.resolvedData || updates;
         return await this.performUpdate(entity, resolvedUpdates, entityType);
       }
-      
+
       // No conflicts, proceed with update
       return await this.performUpdate(entity, updates, entityType);
-      
+
     } finally {
       // Always release lock
       this.releaseLock(lockKey);
@@ -67,16 +67,16 @@ export class OptimisticLockingService {
 
   // Lock management
   private async acquireLock(
-    lockKey: string, 
-    entityType: 'user' | 'relationship', 
+    lockKey: string,
+    entityType: 'user' | 'relationship',
     version: number
   ): Promise<void> {
     const existingLock = this.locks.get(lockKey);
-    
+
     if (existingLock && existingLock.expiresAt > new Date()) {
       throw new Error(`Entity is locked by ${existingLock.lockedBy}`);
     }
-    
+
     const lock: LockInfo = {
       entityId: parseInt(lockKey.split('_')[1]),
       entityType,
@@ -85,7 +85,7 @@ export class OptimisticLockingService {
       lockedAt: new Date(),
       expiresAt: new Date(Date.now() + this.lockTimeout)
     };
-    
+
     this.locks.set(lockKey, lock);
     console.log(`[OptimisticLockingService] Lock acquired: ${lockKey}`);
   }
@@ -108,12 +108,12 @@ export class OptimisticLockingService {
     try {
       if (entityType === 'user') {
         return await enhancedApi.detectConflicts(
-          (entity as any).userId, 
-          updates as Partial<User>, 
+          (entity as any).userId,
+          updates as Partial<User>,
           entity.version
         );
       }
-      
+
       // For relationships, we'd implement similar logic
       return [];
     } catch (error) {
@@ -129,17 +129,17 @@ export class OptimisticLockingService {
     updates: Partial<T>
   ): Promise<ConflictResolution> {
     console.log('[OptimisticLockingService] Resolving conflicts:', conflicts);
-    
+
     // Try automatic resolution first
     const autoResolution = this.attemptAutoResolution(conflicts, entity, updates);
-    
+
     if (autoResolution.autoResolved) {
       return {
         action: 'merge',
         resolvedData: autoResolution.merged
       };
     }
-    
+
     // If auto-resolution failed, require manual intervention
     return {
       action: 'manual'
@@ -155,10 +155,10 @@ export class OptimisticLockingService {
     const merged = { ...entity };
     const unresolvedConflicts: DataConflict[] = [];
     let autoResolved = true;
-    
+
     for (const conflict of conflicts) {
       const resolution = this.resolveFieldConflict(conflict, entity, updates);
-      
+
       if (resolution.canAutoResolve) {
         (merged as any)[conflict.field] = resolution.resolvedValue;
       } else {
@@ -166,7 +166,7 @@ export class OptimisticLockingService {
         autoResolved = false;
       }
     }
-    
+
     return {
       merged,
       conflicts: unresolvedConflicts,
@@ -180,7 +180,7 @@ export class OptimisticLockingService {
     updates: Partial<T>
   ): { canAutoResolve: boolean; resolvedValue?: any } {
     const { field, currentValue, incomingValue, type } = conflict;
-    
+
     // Auto-resolution rules
     switch (type) {
       case 'stale_data':
@@ -189,7 +189,7 @@ export class OptimisticLockingService {
           canAutoResolve: true,
           resolvedValue: incomingValue
         };
-        
+
       case 'concurrent_modification':
         // Auto-resolve non-critical fields
         if (this.isNonCriticalField(field)) {
@@ -200,12 +200,12 @@ export class OptimisticLockingService {
           };
         }
         break;
-        
+
       case 'relationship_conflict':
         // Never auto-resolve relationship conflicts
         return { canAutoResolve: false };
     }
-    
+
     return { canAutoResolve: false };
   }
 
@@ -216,7 +216,7 @@ export class OptimisticLockingService {
       'metadata',
       'notes'
     ];
-    
+
     return nonCriticalFields.includes(field);
   }
 
@@ -233,17 +233,17 @@ export class OptimisticLockingService {
           updates as Partial<User>,
           entity.version
         );
-        
+
         return {
           ...updatedUser,
           version: entity.version + 1,
           lastModified: new Date()
         } as T;
       }
-      
+
       // For relationships, implement similar logic
       throw new Error(`Update not implemented for entity type: ${entityType}`);
-      
+
     } catch (error) {
       console.error('[OptimisticLockingService] Failed to perform update:', error);
       throw error;
@@ -266,13 +266,13 @@ export class OptimisticLockingService {
   cleanupExpiredLocks(): void {
     const now = new Date();
     const expiredKeys: string[] = [];
-    
+
     this.locks.forEach((lock, key) => {
       if (lock.expiresAt <= now) {
         expiredKeys.push(key);
       }
     });
-    
+
     expiredKeys.forEach(key => {
       this.locks.delete(key);
       console.log(`[OptimisticLockingService] Expired lock cleaned up: ${key}`);

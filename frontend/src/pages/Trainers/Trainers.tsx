@@ -1,19 +1,22 @@
 import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
-import { Badge, getStatusVariant, Avatar, DataTable, type Column } from '../../components/ui';
+import { Badge, getStatusVariant, Avatar } from '../../components/ui';
 import { CreateUserModal } from '../../components';
 import { ActionMenuButton } from '../../components/shared';
 import { useClickOutside } from '../../hooks';
 import EnhancedTrainerActionModal from '../../components/TrainerActionModal/EnhancedTrainerActionModal';
 import api from '../../services/api';
-import type { User } from '../../types/user';
+import type { User, Role } from '../../types';
 import './Trainers.css';
+import { Plus, Search, Filter, MoreHorizontal, MessageSquare, X, Check } from "lucide-react";
+import DataTable, { type Column } from "../../components/ui/DataTable";
 
 const Trainers: React.FC = () => {
   const [trainers, setTrainers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTrainer, setSelectedTrainer] = useState<User | null>(null);
+  const [selectedTrainerIds, setSelectedTrainerIds] = useState<Set<string | number>>(new Set());
   const [isActionModalOpen, setIsActionModalOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
@@ -69,14 +72,14 @@ const Trainers: React.FC = () => {
         let filtered = allTrainers;
         if (debouncedSearch) {
           const q = debouncedSearch.toLowerCase();
-          filtered = filtered.filter(t => 
-            t.fullName?.toLowerCase().includes(q) || 
+          filtered = filtered.filter(t =>
+            t.fullName?.toLowerCase().includes(q) ||
             t.email?.toLowerCase().includes(q)
           );
         }
         if (filters.role) {
-          filtered = filtered.filter(t => 
-            t.roles?.some(r => r.roleName === filters.role)
+          filtered = filtered.filter(t =>
+            t.roles?.some((r: Role) => r.roleName === filters.role)
           );
         }
         const start = currentPage * pageSize;
@@ -149,7 +152,7 @@ const Trainers: React.FC = () => {
       width: 'auto',
       render: (member) => {
         const savedAvatarId = typeof window !== 'undefined'
-          ? localStorage.getItem(`avatar_${member.userId}`)
+          ? localStorage.getItem(`avatar_${member.userId} `)
           : null;
         const status = ((member as any).status || 'Active').toLowerCase();
         const isActive = status === 'active';
@@ -167,7 +170,7 @@ const Trainers: React.FC = () => {
                 avatarId={savedAvatarId || member.avatarId}
                 userId={member.userId}
               />
-              <span className={`trainer-cell__status-dot ${isActive ? 'trainer-cell__status-dot--active' : 'trainer-cell__status-dot--inactive'}`} />
+              <span className={`trainer - cell__status - dot ${isActive ? 'trainer-cell__status-dot--active' : 'trainer-cell__status-dot--inactive'} `} />
             </div>
             <div className="trainer-cell__info">
               <span className="trainer-cell__name">{member.fullName}</span>
@@ -183,10 +186,10 @@ const Trainers: React.FC = () => {
       width: '100px',
       render: (member) => {
         const role = member.roles?.[0]?.roleName || 'TRAINER';
-        const roleClass = role.toLowerCase() === 'admin' ? 'trainer-role--admin' : 
-                          role.toLowerCase() === 'manager' ? 'trainer-role--manager' : 'trainer-role--trainer';
+        const roleClass = role.toLowerCase() === 'admin' ? 'trainer-role--admin' :
+          role.toLowerCase() === 'manager' ? 'trainer-role--manager' : 'trainer-role--trainer';
         return (
-          <span className={`trainer-role ${roleClass}`}>{role}</span>
+          <span className={`trainer - role ${roleClass} `}>{role}</span>
         );
       },
     },
@@ -201,23 +204,23 @@ const Trainers: React.FC = () => {
         const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
         const diffMonths = Math.floor(diffDays / 30);
         const diffYears = Math.floor(diffDays / 365);
-        
+
         let tenureText = '';
         let tenureClass = 'trainer-tenure--new';
-        
+
         if (diffYears >= 1) {
-          tenureText = `${diffYears}y ${Math.floor((diffDays % 365) / 30)}m`;
+          tenureText = `${diffYears}y ${Math.floor((diffDays % 365) / 30)} m`;
           tenureClass = 'trainer-tenure--veteran';
         } else if (diffMonths >= 1) {
-          tenureText = `${diffMonths}m`;
+          tenureText = `${diffMonths} m`;
           tenureClass = diffMonths >= 6 ? 'trainer-tenure--experienced' : 'trainer-tenure--regular';
         } else {
-          tenureText = `${diffDays}d`;
+          tenureText = `${diffDays} d`;
           tenureClass = 'trainer-tenure--new';
         }
-        
+
         return (
-          <div className={`trainer-tenure ${tenureClass}`}>
+          <div className={`trainer - tenure ${tenureClass} `}>
             <span className="trainer-tenure__text">{tenureText}</span>
           </div>
         );
@@ -289,7 +292,7 @@ const Trainers: React.FC = () => {
 
           <div className="staff-filter-container" ref={filterRef}>
             <button
-              className={`btn-filters ${isFilterOpen ? 'btn-filters--active' : ''} ${activeFilterCount > 0 ? 'btn-filters--has-filters' : ''}`}
+              className={`btn - filters ${isFilterOpen ? 'btn-filters--active' : ''} ${activeFilterCount > 0 ? 'btn-filters--has-filters' : ''} `}
               onClick={() => setIsFilterOpen(!isFilterOpen)}
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -344,6 +347,43 @@ const Trainers: React.FC = () => {
         </div>
       </div>
 
+      {/* Titan Batch Action Bar */}
+      {selectedTrainerIds.size > 0 && (
+        <div className="staff-batch-actions">
+          <div className="batch-actions__info">
+            <span className="batch-actions__count">{selectedTrainerIds.size} selected</span>
+            <button className="batch-actions__clear" onClick={() => setSelectedTrainerIds(new Set())}>
+              Clear selection
+            </button>
+          </div>
+          <div className="batch-actions__buttons">
+            <button className="batch-btn batch-btn--message" onClick={() => {
+              toast.success(`Messaging ${selectedTrainerIds.size} trainers`);
+              setSelectedTrainerIds(new Set());
+            }}>
+              <span className="batch-btn__icon">✉️</span>
+              Message
+            </button>
+            <button className="batch-btn batch-btn--export" onClick={() => {
+              toast.success(`Exporting ${selectedTrainerIds.size} trainers`);
+              setSelectedTrainerIds(new Set());
+            }}>
+              <span className="batch-btn__icon">⬇️</span>
+              Export
+            </button>
+            <button className="batch-btn batch-btn--danger" onClick={() => {
+              if (window.confirm(`Are you sure you want to delete ${selectedTrainerIds.size} trainers ? `)) {
+                toast.success(`Deleted ${selectedTrainerIds.size} trainers`);
+                setSelectedTrainerIds(new Set());
+              }
+            }}>
+              <span className="batch-btn__icon">🗑️</span>
+              Delete
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="staff-page__content">
         <div className="staff-page__table">
           <DataTable
@@ -353,6 +393,11 @@ const Trainers: React.FC = () => {
             loading={loading}
             emptyMessage="No trainers found"
             onRowClick={handleActionClick}
+            compact
+            selectable
+            stickyHeader
+            selectedIds={selectedTrainerIds}
+            onSelectionChange={setSelectedTrainerIds}
             pagination={{
               currentPage,
               totalPages,
@@ -366,7 +411,7 @@ const Trainers: React.FC = () => {
             }}
             mobileCardRender={(member, index) => {
               const date = member.createdAt ? new Date(member.createdAt) : new Date();
-              const dateStr = `${date.getDate().toString().padStart(2, '0')} ${date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()} ${date.getFullYear()}`;
+              const dateStr = `${date.getDate().toString().padStart(2, '0')} ${date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()} ${date.getFullYear()} `;
               const role = member.roles?.[0]?.roleName || 'TRAINER';
               return (
                 <div className="mobile-card">

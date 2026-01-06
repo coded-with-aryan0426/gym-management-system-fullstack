@@ -10,7 +10,7 @@ import { ActionMenuButton, SortButton } from "../../components/shared"
 import { useClickOutside } from "../../hooks"
 import EnhancedMemberActionModal from "../../components/MemberActionModal/EnhancedMemberActionModal"
 import api from "../../services/api"
-import type { MemberDTO, User } from "../../types/user"
+import type { MemberDTO, User } from "../../types"
 import { useMembers } from "../../contexts/MembersContext"
 import "./Members.css"
 
@@ -38,6 +38,7 @@ const Members: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
+  const [selectedMemberIds, setSelectedMemberIds] = useState<Set<string | number>>(new Set())
 
   const handleActionClick = (member: MemberDTO) => {
     setSelectedMember(member)
@@ -120,8 +121,8 @@ const Members: React.FC = () => {
         let filtered = allMembers
         if (debouncedSearch) {
           const q = debouncedSearch.toLowerCase()
-          filtered = filtered.filter(m => 
-            m.fullName?.toLowerCase().includes(q) || 
+          filtered = filtered.filter(m =>
+            m.fullName?.toLowerCase().includes(q) ||
             m.email?.toLowerCase().includes(q)
           )
         }
@@ -168,7 +169,7 @@ const Members: React.FC = () => {
     if (filters.expiryStatus) count++
     if (filters.joinedPeriod) count++
     return count
-    }, [filters])
+  }, [filters])
 
   const filteredMembers = useMemo(() => {
     let result = members
@@ -319,20 +320,20 @@ const Members: React.FC = () => {
     const now = new Date()
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-    
+
     const activeCount = members.filter(m => m.status === 'Active').length
     const expiredCount = members.filter(m => m.status === 'Expired').length
-    
+
     const expiringSoon = members.filter(m => {
       const { daysLeft, isExpired } = getExpiryInfo(m)
       return !isExpired && daysLeft !== null && daysLeft <= 7 && daysLeft > 0
     }).length
-    
+
     const newThisMonth = members.filter(m => {
       if (!m.startDate) return false
       return new Date(m.startDate) >= startOfMonth
     }).length
-    
+
     const todayJoined = members.filter(m => {
       if (!m.startDate) return false
       return new Date(m.startDate) >= startOfToday
@@ -370,9 +371,9 @@ const Members: React.FC = () => {
       header: "Plan",
       width: "120px",
       render: (member) => {
-        const planClass = member.planName?.toLowerCase() === 'premium' ? 'member-plan--premium' 
-          : member.planName?.toLowerCase() === 'standard' ? 'member-plan--standard' 
-          : 'member-plan--basic'
+        const planClass = member.planName?.toLowerCase() === 'premium' ? 'member-plan--premium'
+          : member.planName?.toLowerCase() === 'standard' ? 'member-plan--standard'
+            : 'member-plan--basic'
         return (
           <div className="member-plan-cell">
             <span className={`member-plan-badge ${planClass}`}>{member.planName}</span>
@@ -445,32 +446,32 @@ const Members: React.FC = () => {
 
         {/* Quick Actions - Moved here between title and search */}
         <div className="members-quick-actions">
-          <button 
+          <button
             className={`members-quick-btn ${filters.expiryStatus === 'expiring-soon' ? 'members-quick-btn--active' : ''}`}
-            onClick={() => setFilters(prev => ({ 
-              ...prev, 
-              expiryStatus: prev.expiryStatus === 'expiring-soon' ? '' : 'expiring-soon' 
+            onClick={() => setFilters(prev => ({
+              ...prev,
+              expiryStatus: prev.expiryStatus === 'expiring-soon' ? '' : 'expiring-soon'
             }))}
           >
             <FiClock size={13} />
             <span>Expiring Soon</span>
             {stats.expiringSoon > 0 && <span className="members-quick-btn__count">{stats.expiringSoon}</span>}
           </button>
-          <button 
+          <button
             className={`members-quick-btn ${filters.joinedPeriod === 'today' ? 'members-quick-btn--active' : ''}`}
-            onClick={() => setFilters(prev => ({ 
-              ...prev, 
-              joinedPeriod: prev.joinedPeriod === 'today' ? '' : 'today' 
+            onClick={() => setFilters(prev => ({
+              ...prev,
+              joinedPeriod: prev.joinedPeriod === 'today' ? '' : 'today'
             }))}
           >
             <FiCalendar size={13} />
             <span>Joined Today</span>
             {stats.todayJoined > 0 && <span className="members-quick-btn__count">{stats.todayJoined}</span>}
           </button>
-          <button 
+          <button
             className={`members-quick-btn ${filters.status[0] === 'Expired' ? 'members-quick-btn--active' : ''}`}
-            onClick={() => setFilters(prev => ({ 
-              ...prev, 
+            onClick={() => setFilters(prev => ({
+              ...prev,
               status: prev.status[0] === 'Expired' ? [] : ['Expired']
             }))}
           >
@@ -642,6 +643,43 @@ const Members: React.FC = () => {
         </div>
       )}
 
+      {/* Titan Batch Action Bar */}
+      {selectedMemberIds.size > 0 && (
+        <div className="members-batch-actions">
+          <div className="batch-actions__info">
+            <span className="batch-actions__count">{selectedMemberIds.size} selected</span>
+            <button className="batch-actions__clear" onClick={() => setSelectedMemberIds(new Set())}>
+              Clear selection
+            </button>
+          </div>
+          <div className="batch-actions__buttons">
+            <button className="batch-btn batch-btn--message" onClick={() => {
+              toast.success(`Messaging ${selectedMemberIds.size} members`);
+              setSelectedMemberIds(new Set());
+            }}>
+              <span className="batch-btn__icon">✉️</span>
+              Message
+            </button>
+            <button className="batch-btn batch-btn--export" onClick={() => {
+              toast.success(`Exporting ${selectedMemberIds.size} members`);
+              setSelectedMemberIds(new Set());
+            }}>
+              <span className="batch-btn__icon">⬇️</span>
+              Export
+            </button>
+            <button className="batch-btn batch-btn--danger" onClick={() => {
+              if (window.confirm(`Are you sure you want to delete ${selectedMemberIds.size} members?`)) {
+                toast.success(`Deleted ${selectedMemberIds.size} members`);
+                setSelectedMemberIds(new Set());
+              }
+            }}>
+              <span className="batch-btn__icon">🗑️</span>
+              Delete
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="members-page__content">
         <div className="members-page__table-container">
           <DataTable
@@ -666,6 +704,11 @@ const Members: React.FC = () => {
                 setCurrentPage(0)
               },
             }}
+            compact
+            selectable
+            stickyHeader
+            selectedIds={selectedMemberIds}
+            onSelectionChange={setSelectedMemberIds}
             mobileCardRender={(member, index) => {
               const date = member.startDate ? new Date(member.startDate) : null
               const dateStr = date
