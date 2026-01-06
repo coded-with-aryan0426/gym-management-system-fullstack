@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "progress_notes")
+@Table(name = "PROGRESS_NOTES")
 public class ProgressNote {
 
     @Id
@@ -19,7 +19,8 @@ public class ProgressNote {
     @JoinColumn(name = "member_id")
     private User member;
 
-    @Column(columnDefinition = "TEXT")
+    @Lob
+    @Column(name = "NOTE")
     private String note;
 
     @Column(name = "created_at")

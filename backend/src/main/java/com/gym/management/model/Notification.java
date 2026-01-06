@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "notifications")
+@Table(name = "NOTIFICATIONS")
 public class Notification {
 
     @Id
@@ -18,7 +18,8 @@ public class Notification {
     @Column(length = 255)
     private String title;
 
-    @Column(columnDefinition = "TEXT")
+    @Lob
+    @Column(name = "MESSAGE")
     private String message;
 
     @Column(length = 50)

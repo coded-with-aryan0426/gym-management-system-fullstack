@@ -36,5 +36,15 @@ if [[ -n $(git status -s) ]]; then
     echo -e "${RED}❌ Push failed.${NC}"
   fi
 else
-  echo -e "${GREEN}✨ No changes detected. Repository is up to date.${NC}"
+  # Check if we are ahead of remote
+  if [[ -n $(git log @{u}..HEAD 2>/dev/null) ]] || [[ -z $(git branch -vv | grep "origin/$BRANCH") ]]; then
+     echo -e "${YELLOW}📦 Local commits detected. Pushing to $REMOTE/$BRANCH...${NC}"
+     if git push $REMOTE $BRANCH; then
+         echo -e "${GREEN}✅ Successfully synced to GitHub${NC}"
+     else
+         echo -e "${RED}❌ Push failed.${NC}"
+     fi
+  else
+     echo -e "${GREEN}✨ No changes detected. Repository is up to date.${NC}"
+  fi
 fi

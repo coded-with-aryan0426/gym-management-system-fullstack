@@ -7,6 +7,7 @@ import com.gym.management.security.JwtTokenProvider;
 import com.gym.management.service.OtpService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -36,6 +37,9 @@ public class AuthController {
 
     @Autowired
     private OtpService otpService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     /**
      * V1 Simplified Login - No gym dependency
@@ -73,7 +77,7 @@ public class AuthController {
         User user = new User();
         user.setUsername(request.getEmail());
         user.setEmail(request.getEmail());
-        user.setPassword(request.getPassword());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setFullName(request.getOwnerName());
         user.setPhone(request.getPhone());
         user.setIsFirstLogin(false); // Owner sets own password
@@ -105,7 +109,7 @@ public class AuthController {
 
         User user = userOpt.get();
 
-        if (!user.getPassword().equals(request.getPassword())) {
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             return ResponseEntity.status(401).body(Map.of("error", "Invalid password"));
         }
 
@@ -221,7 +225,7 @@ public class AuthController {
         User user = new User();
         user.setUsername(request.getEmail());
         user.setEmail(request.getEmail());
-        user.setPassword(request.getPassword()); // In production, hash this
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setFullName(request.getFullName());
         user.setPhone(request.getPhone());
 
@@ -268,7 +272,7 @@ public class AuthController {
         User user = new User();
         user.setUsername(request.getEmail());
         user.setEmail(request.getEmail());
-        user.setPassword(request.getPassword()); // In production, hash this
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setFullName(request.getFullName());
         user.setPhone(request.getPhone());
 
