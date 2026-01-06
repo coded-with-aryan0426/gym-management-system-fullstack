@@ -1,6 +1,6 @@
 #!/bin/bash
-rm -rf backend/target
 git add .
-git commit -m "chore: remove build artifacts and sync"
-git pull origin fullstack-beta --no-rebase
-git push origin fullstack-beta
+git commit -m "chore: save state before sync"
+git fetch origin fullstack-beta
+git merge FETCH_HEAD -m "chore: merge remote changes"
+git push origin HEAD:fullstack-beta
