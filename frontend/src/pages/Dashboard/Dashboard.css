@@ -26,24 +26,28 @@
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-[data-theme="dark"] .dashboard {
-  --dash-bg: #0F0F0F;
-  --dash-surface: #1A1A1A;
-  --dash-surface-elevated: #242424;
-  --dash-border: #2A2A2A;
+/* Support both attribute and class based theme switching */
+[data-theme="dark"] .dashboard,
+:root.theme-dark .dashboard {
+  --dash-bg: #09090b;
+  /* Darker background */
+  --dash-surface: #18181b;
+  /* Rich card background */
+  --dash-surface-elevated: #27272a;
+  --dash-border: #27272a;
   --dash-text-primary: #FFFFFF;
-  --dash-text-secondary: #A0A0A0;
-  --dash-text-muted: #666666;
-  --dash-accent: #00FF88;
-  --dash-accent-dim: rgba(0, 255, 136, 0.15);
-  --dash-urgent: #FF4444;
-  --dash-urgent-dim: rgba(255, 68, 68, 0.15);
-  --dash-warning: #FFB800;
-  --dash-warning-dim: rgba(255, 184, 0, 0.15);
-  --dash-blue: #60A5FA;
-  --dash-blue-dim: rgba(96, 165, 250, 0.15);
-  --dash-purple: #A78BFA;
-  --dash-purple-dim: rgba(167, 139, 250, 0.15);
+  --dash-text-secondary: #A1A1AA;
+  --dash-text-muted: #71717A;
+  --dash-accent: #10B981;
+  --dash-accent-dim: rgba(16, 185, 129, 0.2);
+  --dash-urgent: #EF4444;
+  --dash-urgent-dim: rgba(239, 68, 68, 0.2);
+  --dash-warning: #F59E0B;
+  --dash-warning-dim: rgba(245, 158, 11, 0.2);
+  --dash-blue: #3B82F6;
+  --dash-blue-dim: rgba(59, 130, 246, 0.2);
+  --dash-purple: #8B5CF6;
+  --dash-purple-dim: rgba(139, 92, 246, 0.2);
 }
 
 .dash-overview {

@@ -23,7 +23,7 @@ import {
   ArrowRight
 } from 'lucide-react'
 import api from "../../services/api"
-import { MorningBrief } from "../../components/dashboard/MorningBrief"
+
 import { KPIGrid } from "../../components/dashboard/KPIGrid"
 import "./Dashboard.css"
 
@@ -260,11 +260,7 @@ const Dashboard: React.FC = () => {
       animate="visible"
       variants={containerVariants}
     >
-      {/* Morning Brief - Priority Alerts */}
-      <MorningBrief
-        onNavigateToMembers={() => navigate('/members')}
-        onNavigateToPayments={() => navigate('/financials')}
-      />
+
 
       {/* KPI Grid - Enhanced Metrics */}
       <KPIGrid />
