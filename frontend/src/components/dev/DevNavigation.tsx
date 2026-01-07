@@ -92,10 +92,18 @@ const DevNavigation: React.FC = () => {
     const [position, setPosition] = useState(() => {
         try {
             const saved = localStorage.getItem('devNavPosition');
-            return saved ? JSON.parse(saved) : { x: window.innerWidth - 80, y: window.innerHeight - 80 };
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                // Simple validation to ensure it's on screen
+                if (parsed.x >= 0 && parsed.x <= window.innerWidth && parsed.y >= 0 && parsed.y <= window.innerHeight) {
+                    return parsed;
+                }
+            }
         } catch {
-            return { x: window.innerWidth - 80, y: window.innerHeight - 80 };
+            // Ignore errors
         }
+        // Default to bottom-right
+        return { x: window.innerWidth - 80, y: window.innerHeight - 80 };
     });
 
     // Drag detection state
@@ -213,7 +221,7 @@ const DevNavigation: React.FC = () => {
         <>
             <div
                 className={`dev-nav-trigger ${isDragging ? 'dragging' : ''}`}
-                style={{ left: position.x, top: position.y }}
+                style={{ left: position.x, top: position.y, zIndex: 999999 }}
                 onMouseDown={handleMouseDown}
             >
                 <div className="dev-nav-glow-ring" />

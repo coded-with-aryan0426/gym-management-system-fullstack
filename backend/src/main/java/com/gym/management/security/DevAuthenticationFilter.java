@@ -23,30 +23,29 @@ public class DevAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        
+
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader != null && authHeader.startsWith("Bearer " + DEV_TOKEN_PREFIX)) {
             String tokenRole = authHeader.substring(7 + DEV_TOKEN_PREFIX.length()); // Extract role after prefix
-            
+
             // Validate role
             final String role = ALLOWED_ROLES.contains(tokenRole) ? tokenRole : null;
 
             if (role != null) {
                 // Determine authorities
                 List<SimpleGrantedAuthority> authorities = List.of(
-                    new SimpleGrantedAuthority("ROLE_" + role),
-                    new SimpleGrantedAuthority("ROLE_DEV")
-                );
+                        new SimpleGrantedAuthority("ROLE_" + role),
+                        new SimpleGrantedAuthority("ROLE_DEV"));
 
-                // Create simplified Dev User Principal
-                Object principal = new Object() {
-                    public String getUsername() { return "dev_" + role.toLowerCase(); }
-                    public String toString() { return "DevUser[" + role + "]"; }
-                };
+                // Create standard Spring Security User
+                org.springframework.security.core.userdetails.User principal = new org.springframework.security.core.userdetails.User(
+                        "dev_" + role.toLowerCase(),
+                        "N/A",
+                        authorities);
 
-                UsernamePasswordAuthenticationToken authentication = 
-                    new UsernamePasswordAuthenticationToken(principal, null, authorities);
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(principal,
+                        null, authorities);
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
                 logger.info("Authenticated DEV user as: ROLE_" + role);
