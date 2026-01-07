@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import GymSelector from '../components/GymSelector/GymSelector';
+import GymNameModal from '../components/auth/GymNameModal';
 import { Logo } from '../components/ui/Logo';
 import api from '../services/api'; // Use api wrapper
 import OtpInput from '../components/auth/OtpInput';
@@ -47,6 +48,10 @@ export default function LoginPage() {
     const [showGymSelector, setShowGymSelector] = useState(false);
     const [gymAssociations, setGymAssociations] = useState<GymAssociation[]>([]);
     const [loginResponse, setLoginResponse] = useState<any>(null);
+
+    // New user gym name modal
+    const [showGymNameModal, setShowGymNameModal] = useState(false);
+    const [newUserData, setNewUserData] = useState<{ userId: number; token: string; fullName: string } | null>(null);
 
     // V1 Owner Pivot: Default to STAFF role
     const selectedRole = 'STAFF';
@@ -141,6 +146,17 @@ export default function LoginPage() {
     };
 
     const handleAuthSuccess = (data: any) => {
+        // Check if this is a new user from OAuth
+        if (data.isNewUser) {
+            setNewUserData({
+                userId: data.user?.id || data.id,
+                token: data.token,
+                fullName: data.user?.fullName || data.fullName || ''
+            });
+            setShowGymNameModal(true);
+            return;
+        }
+
         setLoginResponse(data);
         localStorage.setItem('user', JSON.stringify(data));
         if (data.token) {
@@ -187,6 +203,20 @@ export default function LoginPage() {
         } catch (err) {
             setError("Failed to select gym");
         }
+    };
+
+    const handleGymNameComplete = (gymName: string) => {
+        if (newUserData) {
+            const userData = {
+                ...newUserData,
+                gymName,
+                staffRole: 'OWNER'
+            };
+            localStorage.setItem('user', JSON.stringify(userData));
+            localStorage.setItem('token', newUserData.token);
+        }
+        setShowGymNameModal(false);
+        navigate('/dashboard');
     };
 
     return (
@@ -486,6 +516,21 @@ export default function LoginPage() {
                     context={selectedRole}
                     onSelectGym={handleGymSelect}
                     onClose={() => setShowGymSelector(false)}
+                />
+            )}
+
+            {showGymNameModal && newUserData && (
+                <GymNameModal
+                    userId={newUserData.userId}
+                    token={newUserData.token}
+                    fullName={newUserData.fullName}
+                    onComplete={handleGymNameComplete}
+                    onClose={() => {
+                        setShowGymNameModal(false);
+                        // Even without gym, allow them to proceed
+                        localStorage.setItem('token', newUserData.token);
+                        navigate('/dashboard');
+                    }}
                 />
             )}
 

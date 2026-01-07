@@ -55,6 +55,10 @@ public class Gym {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id")
+    private User owner;
+
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
@@ -73,9 +77,23 @@ public class Gym {
     }
 
     // Convenience getters
-    public Long getGymId() { return gymId; }
-    public String getName() { return name; }
-    public String getInviteCode() { return inviteCode; }
-    public Boolean getIsPublic() { return isPublic; }
-    public SubscriptionPlan getSubscriptionPlan() { return subscriptionPlan; }
+    public Long getGymId() {
+        return gymId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getInviteCode() {
+        return inviteCode;
+    }
+
+    public Boolean getIsPublic() {
+        return isPublic;
+    }
+
+    public SubscriptionPlan getSubscriptionPlan() {
+        return subscriptionPlan;
+    }
 }

@@ -57,7 +57,8 @@ public class OAuth2Controller {
         return ResponseEntity.ok(Map.of(
                 "success", true,
                 "token", result.token(),
-                "user", buildUserResponse(result.user())));
+                "isNewUser", result.isNewUser(),
+                "user", buildUserResponse(result.user(), result.isNewUser())));
     }
 
     /**
@@ -84,7 +85,8 @@ public class OAuth2Controller {
         return ResponseEntity.ok(Map.of(
                 "success", true,
                 "token", result.token(),
-                "user", buildUserResponse(result.user())));
+                "isNewUser", result.isNewUser(),
+                "user", buildUserResponse(result.user(), result.isNewUser())));
     }
 
     /**
@@ -189,6 +191,10 @@ public class OAuth2Controller {
     }
 
     private Map<String, Object> buildUserResponse(User user) {
+        return buildUserResponse(user, false);
+    }
+
+    private Map<String, Object> buildUserResponse(User user, boolean isNewUser) {
         if (user == null)
             return Map.of();
         return Map.of(
@@ -196,6 +202,7 @@ public class OAuth2Controller {
                 "email", user.getEmail() != null ? user.getEmail() : "",
                 "fullName", user.getFullName() != null ? user.getFullName() : "",
                 "username", user.getUsername(),
+                "isNewUser", isNewUser,
                 "roles", user.getRoles() != null ? user.getRoles().stream()
                         .map(r -> r.getRoleName()).toList() : java.util.List.of());
     }

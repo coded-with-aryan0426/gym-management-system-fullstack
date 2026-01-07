@@ -82,7 +82,9 @@ public class OAuthService {
             // Profile picture URL available if needed: payload.get("picture")
 
             // Find or create user
-            User user = findOrCreateUser(email, googleId, null, AuthProvider.GOOGLE, name);
+            FindResult findResult = findOrCreateUser(email, googleId, null, AuthProvider.GOOGLE, name);
+            User user = findResult.user();
+            boolean isNewUser = findResult.isNew();
 
             // Update Google ID if not set
             if (user.getGoogleId() == null) {
@@ -93,7 +95,7 @@ public class OAuthService {
             // Generate JWT
             String token = jwtTokenProvider.generateTokenFromUser(user, "google_auth", null, null, null);
 
-            return new AuthResult(true, token, "Success", user);
+            return new AuthResult(true, token, "Success", user, isNewUser);
 
         } catch (Exception e) {
             System.err.println("Google auth error: " + e.getMessage());
@@ -128,7 +130,9 @@ public class OAuthService {
             }
 
             // Find or create user
-            User user = findOrCreateUser(email, null, facebookId, AuthProvider.FACEBOOK, name);
+            FindResult findResult = findOrCreateUser(email, null, facebookId, AuthProvider.FACEBOOK, name);
+            User user = findResult.user();
+            boolean isNewUser = findResult.isNew();
 
             // Update Facebook ID if not set
             if (user.getFacebookId() == null) {
@@ -139,7 +143,7 @@ public class OAuthService {
             // Generate JWT
             String token = jwtTokenProvider.generateTokenFromUser(user, "facebook_auth", null, null, null);
 
-            return new AuthResult(true, token, "Success", user);
+            return new AuthResult(true, token, "Success", user, isNewUser);
 
         } catch (Exception e) {
             System.err.println("Facebook auth error: " + e.getMessage());
@@ -147,10 +151,13 @@ public class OAuthService {
         }
     }
 
+    private record FindResult(User user, boolean isNew) {
+    }
+
     /**
      * Find existing user or create new one for social login.
      */
-    private User findOrCreateUser(String email, String googleId, String facebookId,
+    private FindResult findOrCreateUser(String email, String googleId, String facebookId,
             AuthProvider provider, String name) {
         // Try to find by social ID first
         Optional<User> existing = Optional.empty();
@@ -163,7 +170,7 @@ public class OAuthService {
 
         // If found by social ID, return
         if (existing.isPresent()) {
-            return existing.get();
+            return new FindResult(existing.get(), false);
         }
 
         // Try to find by email
@@ -178,7 +185,7 @@ public class OAuthService {
                 if (facebookId != null && user.getFacebookId() == null) {
                     user.setFacebookId(facebookId);
                 }
-                return userRepository.save(user);
+                return new FindResult(userRepository.save(user), false);
             }
         }
 
@@ -194,7 +201,7 @@ public class OAuthService {
         newUser.setStatus("ACTIVE");
         newUser.setAccountNonLocked(true);
 
-        return userRepository.save(newUser);
+        return new FindResult(userRepository.save(newUser), true);
     }
 
     private String generateUsername(String name, String email) {
@@ -216,9 +223,13 @@ public class OAuthService {
     /**
      * Result record for OAuth authentication.
      */
-    public record AuthResult(boolean success, String token, String message, User user) {
+    public record AuthResult(boolean success, String token, String message, User user, boolean isNewUser) {
         public AuthResult(boolean success, String token, String message) {
-            this(success, token, message, null);
+            this(success, token, message, null, false);
+        }
+
+        public AuthResult(boolean success, String token, String message, User user) {
+            this(success, token, message, user, false);
         }
     }
 }

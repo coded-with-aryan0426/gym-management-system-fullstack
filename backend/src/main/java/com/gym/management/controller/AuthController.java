@@ -95,6 +95,53 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "Registration successful. Please login."));
     }
 
+    /**
+     * Setup gym for new users (after social login)
+     */
+    @PostMapping("/setup-gym")
+    public ResponseEntity<?> setupGym(@RequestBody Map<String, Object> request) {
+        try {
+            Long userId = Long.valueOf(request.get("userId").toString());
+            String gymName = (String) request.get("gymName");
+
+            if (gymName == null || gymName.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Gym name is required"));
+            }
+
+            Optional<User> userOpt = userRepository.findById(userId);
+            if (userOpt.isEmpty()) {
+                return ResponseEntity.status(404).body(Map.of("error", "User not found"));
+            }
+
+            User user = userOpt.get();
+
+            // Create new gym
+            Gym gym = new Gym();
+            gym.setName(gymName.trim());
+            gym.setOwner(user);
+            gym.setCreatedAt(java.time.LocalDateTime.now());
+            gym = gymRepository.save(gym);
+
+            // Assign OWNER role if not already assigned
+            Role ownerRole = roleRepository.findByRoleName("OWNER");
+            if (ownerRole != null && (user.getRoles() == null || user.getRoles().stream()
+                    .noneMatch(r -> "OWNER".equals(r.getRoleName())))) {
+                if (user.getRoles() == null) {
+                    user.setRoles(new HashSet<>());
+                }
+                user.getRoles().add(ownerRole);
+                userRepository.save(user);
+            }
+
+            return ResponseEntity.ok(Map.of(
+                    "message", "Gym created successfully",
+                    "gymId", gym.getGymId(),
+                    "gymName", gym.getName()));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequest request) {
         Optional<User> userOpt = userRepository.findByUsername(request.getUsername());
