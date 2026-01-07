@@ -11,8 +11,10 @@ import {
     ChevronRight,
     GripVertical,
     Minimize2,
-    Maximize2
+    Maximize2,
+    Wand2
 } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 import './DevNavigation.css';
 
 interface DashboardOption {
@@ -85,69 +87,93 @@ const DevNavigation: React.FC = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [isCompact, setIsCompact] = useState(false);
     const [expandedRole, setExpandedRole] = useState<string | null>(null);
+
+    // Position detection with safe defaults
     const [position, setPosition] = useState(() => {
-        const saved = localStorage.getItem('devNavPosition');
-        return saved ? JSON.parse(saved) : { x: window.innerWidth - 100, y: window.innerHeight - 80 };
+        try {
+            const saved = localStorage.getItem('devNavPosition');
+            return saved ? JSON.parse(saved) : { x: window.innerWidth - 80, y: window.innerHeight - 80 };
+        } catch {
+            return { x: window.innerWidth - 80, y: window.innerHeight - 80 };
+        }
     });
+
+    // Drag detection state
+    const dragRef = useRef<{
+        startX: number;
+        startY: number;
+        startPosX: number;
+        startPosY: number;
+        hasMoved: boolean;
+    } | null>(null);
     const [isDragging, setIsDragging] = useState(false);
-    const dragRef = useRef<{ startX: number; startY: number; startPosX: number; startPosY: number } | null>(null);
+
+    // Use AuthContext hook
+    const { devLogin } = useAuth();
+
     const navigate = useNavigate();
     const location = useLocation();
 
+    // Persist position
     useEffect(() => {
         localStorage.setItem('devNavPosition', JSON.stringify(position));
     }, [position]);
 
     const handleMouseDown = (e: React.MouseEvent) => {
+        // Only trigger on left click
+        if (e.button !== 0) return;
+
         e.preventDefault();
-        setIsDragging(true);
+
         dragRef.current = {
             startX: e.clientX,
             startY: e.clientY,
             startPosX: position.x,
-            startPosY: position.y
+            startPosY: position.y,
+            hasMoved: false
         };
+
+        // Add listeners to window to capture moves outside element
+        window.addEventListener('mousemove', handleMouseMove);
+        window.addEventListener('mouseup', handleMouseUp);
     };
 
-    useEffect(() => {
-        const handleMouseMove = (e: MouseEvent) => {
-            if (!isDragging || !dragRef.current) return;
-            const dx = e.clientX - dragRef.current.startX;
-            const dy = e.clientY - dragRef.current.startY;
-            const newX = Math.max(60, Math.min(window.innerWidth - 60, dragRef.current.startPosX + dx));
-            const newY = Math.max(40, Math.min(window.innerHeight - 40, dragRef.current.startPosY + dy));
-            setPosition({ x: newX, y: newY });
-        };
+    const handleMouseMove = (e: MouseEvent) => {
+        if (!dragRef.current) return;
 
-        const handleMouseUp = () => {
-            setIsDragging(false);
-            dragRef.current = null;
-        };
+        const dx = e.clientX - dragRef.current.startX;
+        const dy = e.clientY - dragRef.current.startY;
 
-        if (isDragging) {
-            window.addEventListener('mousemove', handleMouseMove);
-            window.addEventListener('mouseup', handleMouseUp);
+        // If moved beyond threshold, consider it a drag
+        if (!dragRef.current.hasMoved && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) {
+            dragRef.current.hasMoved = true;
+            setIsDragging(true);
         }
 
-        return () => {
-            window.removeEventListener('mousemove', handleMouseMove);
-            window.removeEventListener('mouseup', handleMouseUp);
-        };
-    }, [isDragging]);
+        if (dragRef.current.hasMoved) {
+            const newX = Math.max(30, Math.min(window.innerWidth - 30, dragRef.current.startPosX + dx));
+            const newY = Math.max(30, Math.min(window.innerHeight - 30, dragRef.current.startPosY + dy));
+            setPosition({ x: newX, y: newY });
+        }
+    };
+
+    const handleMouseUp = () => {
+        // Clean up listeners
+        window.removeEventListener('mousemove', handleMouseMove);
+        window.removeEventListener('mouseup', handleMouseUp);
+
+        if (dragRef.current) {
+            // If it wasn't a drag interaction (clicked without moving), toggle menu
+            if (!dragRef.current.hasMoved) {
+                setIsOpen(prev => !prev);
+            }
+            dragRef.current = null;
+            setIsDragging(false);
+        }
+    };
 
     const handleNavigate = (path: string, role: string) => {
-        localStorage.setItem('user', JSON.stringify({
-            id: 1,
-            username: `dev_${role.toLowerCase()}`,
-            fullName: `Dev ${role}`,
-            email: `dev.${role.toLowerCase()}@gym.local`,
-            role: role,
-            context: role === 'MEMBER' ? 'MEMBER' : 'STAFF',
-            staffRole: role === 'ADMIN' ? 'OWNER' : role,
-            roles: [{ roleName: role }]
-        }));
-        localStorage.setItem('token', 'dev-mode-token');
-        navigate(path);
+        devLogin(role as any);
     };
 
     const getCurrentDashboard = () => {
@@ -166,16 +192,18 @@ const DevNavigation: React.FC = () => {
     const getPanelPosition = () => {
         const panelWidth = isCompact ? 280 : 340;
         const panelHeight = isCompact ? 200 : 420;
-        let left = position.x + 20;
-        let top = position.y - panelHeight / 2;
 
-        if (left + panelWidth > window.innerWidth - 10) {
-            left = position.x - panelWidth - 20;
-        }
+        // Default to showing to the left and above
+        let left = position.x - panelWidth - 20;
+        let top = position.y - panelHeight + 40;
+
+        // Adjust if off-screen (basic collision detection)
+        if (left < 10) left = position.x + 20; // Flip to right if too far left
+        if (left + panelWidth > window.innerWidth) left = window.innerWidth - panelWidth - 10;
+
         if (top < 10) top = 10;
-        if (top + panelHeight > window.innerHeight - 10) {
-            top = window.innerHeight - panelHeight - 10;
-        }
+        if (top + panelHeight > window.innerHeight) top = window.innerHeight - panelHeight - 10;
+
         return { left, top };
     };
 
@@ -185,21 +213,16 @@ const DevNavigation: React.FC = () => {
         <>
             <div
                 className={`dev-nav-trigger ${isDragging ? 'dragging' : ''}`}
-                style={{ left: position.x, top: position.y, transform: 'translate(-50%, -50%)' }}
+                style={{ left: position.x, top: position.y }}
+                onMouseDown={handleMouseDown}
             >
-                <div
-                    className="dev-nav-drag-handle"
-                    onMouseDown={handleMouseDown}
-                    title="Drag to move"
-                >
-                    <GripVertical size={14} />
-                </div>
+                <div className="dev-nav-glow-ring" />
                 <button
                     className="dev-nav-btn"
-                    onClick={() => !isDragging && setIsOpen(true)}
+                    // Prevent default click propagation since we handle it in MouseUp
+                    onClick={(e) => e.stopPropagation()}
                 >
-                    <LayoutDashboard size={16} />
-                    <span>DEV</span>
+                    <Wand2 size={24} className="text-white" />
                 </button>
             </div>
 
@@ -224,7 +247,7 @@ const DevNavigation: React.FC = () => {
                             <div className="dev-nav-header">
                                 <div className="dev-nav-title">
                                     <Settings className="spin-slow" size={14} />
-                                    <span>Dev Navigation</span>
+                                    <span>Dev Mode</span>
                                 </div>
                                 <div className="dev-nav-header-actions">
                                     <button

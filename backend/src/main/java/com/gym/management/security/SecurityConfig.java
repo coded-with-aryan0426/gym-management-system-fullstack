@@ -29,6 +29,9 @@ public class SecurityConfig {
     @Autowired
     private RateLimitFilter rateLimitFilter;
 
+    @Autowired(required = false)
+    private DevAuthenticationFilter devAuthenticationFilter;
+
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -67,6 +70,12 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll() // Allow auth endpoints
                         .requestMatchers("/api/public/**").permitAll() // Allow public endpoints
                         .requestMatchers("/api/gyms/public/**").permitAll() // Public gym search
+
+                        // DEV MODE SPECIFIC CONFIGURATION
+                        // The DevAuthenticationFilter will handle authentication for requests with DEV
+                        // tokens
+                        // But we verify path permissions below
+
                         // DEV MODE: Allow data endpoints for testing (remove in production)
                         .requestMatchers("/api/stats/**").permitAll()
                         .requestMatchers("/api/dashboard/**").permitAll()
@@ -86,6 +95,12 @@ public class SecurityConfig {
         http.authenticationProvider(authenticationProvider());
         // Rate limiting filter runs first
         http.addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class);
+
+        // Add Dev Authentication Filter if present (active in dev profile)
+        if (devAuthenticationFilter != null) {
+            http.addFilterBefore(devAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        }
+
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

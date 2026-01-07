@@ -1,104 +1,134 @@
+/* Floating Trigger */
 .dev-nav-trigger {
     position: fixed;
     z-index: 9999;
     display: flex;
     align-items: center;
-    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-    border-radius: 20px;
-    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
-    overflow: hidden;
+    justify-content: center;
+    background: transparent;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    /* Centering on coordinates */
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     user-select: none;
+}
+
+.dev-nav-trigger:hover {
+    transform: translate(-50%, -50%) scale(1.1) rotate(15deg);
+    /* Keep centered */
 }
 
 .dev-nav-trigger.dragging {
     cursor: grabbing;
-    box-shadow: 0 8px 32px rgba(99, 102, 241, 0.6);
+    transform: translate(-50%, -50%) scale(0.95);
 }
 
 .dev-nav-drag-handle {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 8px 4px 8px 8px;
-    color: rgba(255, 255, 255, 0.6);
-    cursor: grab;
-    transition: color 0.2s;
+    display: none;
+    /* Hide drag handle */
 }
 
-.dev-nav-drag-handle:hover {
-    color: #fff;
-}
-
-.dev-nav-drag-handle:active {
-    cursor: grabbing;
-}
-
+/* Magic Button Style */
 .dev-nav-btn {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 8px 12px 8px 4px;
-    background: transparent;
-    color: #fff;
-    border: none;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #8b5cf6, #d946ef);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 0;
+    border-radius: 50%;
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.2);
     cursor: pointer;
+    transition: all 0.3s ease;
+    animation: float 6s ease-in-out infinite;
 }
 
+.dev-nav-btn:hover {
+    box-shadow: 0 0 30px rgba(217, 70, 239, 0.7), inset 0 0 15px rgba(255, 255, 255, 0.4);
+    background: linear-gradient(135deg, #7c3aed, #e879f9);
+    animation-play-state: paused;
+    /* Stop floating when hovering */
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-6px);
+    }
+}
+
+/* Overlay & Panel - unchanged but included for completeness */
 .dev-nav-overlay {
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(2px);
-    z-index: 10000;
+    backdrop-filter: blur(4px);
+    z-index: 9998;
 }
 
 .dev-nav-panel {
     position: fixed;
-    z-index: 10001;
     width: 340px;
-    max-height: 90vh;
-    background: linear-gradient(180deg, #1a1a24 0%, #12121a 100%);
+    background: #18181b;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 14px;
-    padding: 14px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-    overflow-y: auto;
+    border-radius: 24px;
+    box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    z-index: 9999;
+    overflow: hidden;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
 }
 
 .dev-nav-panel.compact {
     width: 280px;
-    padding: 10px;
 }
 
+/* Header */
 .dev-nav-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 12px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 16px 20px;
+    background: rgba(255, 255, 255, 0.02);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .dev-nav-title {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 13px;
-    font-weight: 700;
-    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
 }
 
-.dev-nav-title .spin-slow {
+.dev-nav-title svg {
+    color: #7c3aed;
+}
+
+.spin-slow {
     animation: spin 8s linear infinite;
-    color: #8b5cf6;
 }
 
 @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .dev-nav-header-actions {
@@ -109,164 +139,152 @@
 
 .dev-nav-action-btn,
 .dev-nav-close {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 26px;
-    height: 26px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.4);
+    padding: 6px;
     border-radius: 6px;
-    color: #888;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.2s;
+    display: flex;
 }
 
-.dev-nav-action-btn:hover {
-    background: rgba(139, 92, 246, 0.2);
-    border-color: rgba(139, 92, 246, 0.4);
-    color: #8b5cf6;
-}
-
+.dev-nav-action-btn:hover,
 .dev-nav-close:hover {
-    background: rgba(239, 68, 68, 0.1);
-    border-color: rgba(239, 68, 68, 0.3);
-    color: #ef4444;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
 }
 
+/* Options */
 .dev-nav-options {
+    padding: 12px;
+    max-height: 400px;
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
 }
 
 .dev-nav-group {
     display: flex;
     flex-direction: column;
+    gap: 4px;
 }
 
 .dev-nav-option {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     width: 100%;
     padding: 10px 12px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 10px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 12px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.2s;
     text-align: left;
 }
 
-.dev-nav-panel.compact .dev-nav-option {
-    padding: 8px 10px;
-    gap: 8px;
-}
-
 .dev-nav-option:hover {
-    background: rgba(255, 255, 255, 0.06);
-    border-color: var(--accent-color, #6366f1);
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.05);
 }
 
 .dev-nav-option.active {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(var(--accent-color), 0.1);
     border-color: var(--accent-color);
 }
 
 .dev-nav-option-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 34px;
-    height: 34px;
-    border-radius: 8px;
     flex-shrink: 0;
-}
-
-.dev-nav-panel.compact .dev-nav-option-icon {
-    width: 28px;
-    height: 28px;
 }
 
 .dev-nav-option-content {
     flex: 1;
-    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
 .dev-nav-option-label {
-    display: block;
-    font-size: 13px;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: 500;
     color: #fff;
 }
 
-.dev-nav-panel.compact .dev-nav-option-label {
-    font-size: 12px;
-}
-
 .dev-nav-option-desc {
-    display: block;
-    font-size: 10px;
-    color: #666;
-    margin-top: 2px;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.5);
 }
 
 .dev-nav-option-arrow {
-    color: #444;
-    transition: transform 0.2s ease;
-    flex-shrink: 0;
+    color: rgba(255, 255, 255, 0.2);
+    transition: transform 0.2s;
 }
 
 .dev-nav-option-arrow.expanded {
     transform: rotate(90deg);
-    color: var(--accent-color);
 }
 
-.dev-nav-option:hover .dev-nav-option-arrow {
-    color: var(--accent-color);
-}
-
+/* Subpages */
 .dev-nav-subpages {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: 4px;
-    padding: 8px 0 8px 44px;
+    padding-left: 56px;
     overflow: hidden;
 }
 
 .dev-nav-subpage {
-    padding: 5px 10px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 6px;
-    font-size: 11px;
-    color: #aaa;
+    text-align: left;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    padding: 8px 12px;
+    font-size: 13px;
+    border-radius: 8px;
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all 0.2s;
+    position: relative;
 }
 
 .dev-nav-subpage:hover {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: var(--accent-color);
     color: #fff;
+    background: rgba(255, 255, 255, 0.05);
 }
 
-.dev-nav-subpage.active {
-    background: var(--accent-color);
-    border-color: var(--accent-color);
-    color: #fff;
+.dev-nav-subpage::before {
+    content: '';
+    position: absolute;
+    left: -14px;
+    top: 50%;
+    width: 6px;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
 }
 
+/* Footer */
 .dev-nav-footer {
-    margin-top: 10px;
-    padding-top: 8px;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 12px 20px;
+    background: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.4);
     text-align: center;
+    display: flex;
+    justify-content: center;
 }
 
 .dev-nav-warning {
-    font-size: 10px;
+    background: rgba(245, 158, 11, 0.1);
     color: #f59e0b;
+    padding: 2px 8px;
+    border-radius: 4px;
     font-weight: 500;
 }
