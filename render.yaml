@@ -26,21 +26,3 @@ services:
         sync: false
       - key: MAIL_PASSWORD
         sync: false
-
-  # Frontend Static Site (Optional - if you want to host frontend on Render too)
-  # If using Vercel, you can remove this block.
-  - type: static
-    name: gym-management-frontend
-    root: frontend
-    buildCommand: npm install --legacy-peer-deps && npm run build
-    publishDir: dist
-    envVars:
-      - key: VITE_API_URL
-        fromService:
-          type: web
-          name: gym-management-backend
-          property: url
-      - key: VITE_SUPABASE_URL
-        sync: false
-      - key: VITE_SUPABASE_ANON_KEY
-        sync: false
