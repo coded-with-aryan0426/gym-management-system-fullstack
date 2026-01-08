@@ -26,14 +26,11 @@ public class MultiRoleUserDetails extends CustomUserDetails {
     private Long activeGymId;
 
     public MultiRoleUserDetails(CustomUserDetails baseUserDetails) {
-        super(baseUserDetails.getUsername(), baseUserDetails.getPassword(), 
-              baseUserDetails.getAuthorities(), baseUserDetails.getUser());
+        super(baseUserDetails.getUser());
     }
 
-    public MultiRoleUserDetails(String username, String password, 
-                             Collection<? extends GrantedAuthority> authorities, 
-                             com.gym.management.model.User user) {
-        super(username, password, authorities, user);
+    public MultiRoleUserDetails(com.gym.management.model.User user) {
+        super(user);
     }
 
     /**

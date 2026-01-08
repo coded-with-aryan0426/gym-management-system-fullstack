@@ -1,5 +1,7 @@
 package com.gym.management.service;
 
+import com.gym.management.dto.AuthRequest;
+import com.gym.management.dto.AuthResponse;
 import com.gym.management.model.*;
 import com.gym.management.repository.UserRepository;
 import com.gym.management.security.*;
@@ -40,9 +42,7 @@ public class AuthService {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             authRequest.getUsername(),
-                            authRequest.getPassword()
-                    )
-            );
+                            authRequest.getPassword()));
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -58,7 +58,7 @@ public class AuthService {
             Set<String> roleNames = user.getAllRoles().stream()
                     .map(Enum::name)
                     .collect(Collectors.toSet());
-            
+
             Set<String> permissionNames = user.getPermissions().stream()
                     .map(Enum::name)
                     .collect(Collectors.toSet());
@@ -74,8 +74,7 @@ public class AuthService {
                     null, // membershipStatus - can be added later
                     permissionNames,
                     roleNames,
-                    primaryRoleName
-            );
+                    primaryRoleName);
 
             // Create response
             AuthResponse response = new AuthResponse();
@@ -120,7 +119,7 @@ public class AuthService {
             Set<String> roleNames = user.getAllRoles().stream()
                     .map(Enum::name)
                     .collect(Collectors.toSet());
-            
+
             Set<String> permissionNames = user.getPermissions().stream()
                     .map(Enum::name)
                     .collect(Collectors.toSet());
@@ -136,8 +135,7 @@ public class AuthService {
                     null, // membershipStatus
                     permissionNames,
                     roleNames,
-                    primaryRoleName
-            );
+                    primaryRoleName);
 
             // Create response
             AuthResponse response = new AuthResponse();
@@ -177,7 +175,7 @@ public class AuthService {
                 Set<String> roleNames = user.getAllRoles().stream()
                         .map(Enum::name)
                         .collect(Collectors.toSet());
-                
+
                 Set<String> permissionNames = permissionService.getUserPermissionsForGym(userId, gymId)
                         .stream()
                         .map(Enum::name)
@@ -194,8 +192,7 @@ public class AuthService {
                         null, // membershipStatus
                         permissionNames,
                         roleNames,
-                        primaryRoleName
-                );
+                        primaryRoleName);
 
                 AuthResponse response = new AuthResponse();
                 response.setToken(token);
@@ -226,29 +223,36 @@ public class AuthService {
      */
     public MultiRoleUserDetails getCurrentUserWithDetails() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        
+
         if (authentication != null && authentication.getPrincipal() instanceof MultiRoleUserDetails) {
             return (MultiRoleUserDetails) authentication.getPrincipal();
         }
-        
+
         if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails) {
             CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
             User user = customUserDetails.getUser();
-            
+
             // Enrich user with permissions
             permissionService.enrichUserWithPermissions(user);
-            
+
             // Create multi-role user details
             MultiRoleUserDetails multiRoleUserDetails = new MultiRoleUserDetails(customUserDetails);
             multiRoleUserDetails.setRoles(user.getAllRoles());
             multiRoleUserDetails.setPermissions(user.getPermissions());
             multiRoleUserDetails.setPrimaryRole(user.getPrimaryRole());
             multiRoleUserDetails.setRolesByGym(user.getRolesByGym());
-            
+
             return multiRoleUserDetails;
         }
-        
+
         throw new RuntimeException("User not authenticated");
+    }
+
+    /**
+     * Extract user ID from JWT token
+     */
+    public Long getUserIdFromToken(String token) {
+        return tokenProvider.getUserIdFromToken(token);
     }
 
     /**

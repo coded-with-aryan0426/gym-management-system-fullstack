@@ -4,21 +4,30 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.util.List;
+import java.util.Set;
 
 /**
- * Response DTO for login with gym associations
+ * Response DTO for login with multi-role support
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class AuthResponse {
-    private Long id;
+    private String type;
+    private Long userId;
     private String username;
     private String fullName;
     private String email;
     private String token;
 
-    // Role context - what the user logged in as
+    // Multi-role fields
+    private Set<String> roles;
+    private Set<String> permissions;
+    private String primaryRole;
+    private boolean isFirstLogin;
+
+    // Legacy fields for backward compatibility
+    private Long id;
     private String context; // "STAFF" or "MEMBER"
 
     // For gym selection (when user has multiple gyms)
@@ -37,7 +46,11 @@ public class AuthResponse {
     private String membershipStatus;
 
     private boolean otpSent;
-    private boolean isFirstLogin;
+
+    // Manual setters for Lombok compatibility issues
+    public void setIsFirstLogin(boolean firstLogin) {
+        this.isFirstLogin = firstLogin;
+    }
 
     @Data
     @AllArgsConstructor

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.Set;
 
 @Component
 public class JwtTokenProvider {
@@ -37,7 +38,7 @@ public class JwtTokenProvider {
         // For now, I'll make a reasonable assumption to make it compile.
         // Let's assume membershipStatus is part of the User object or can be derived.
         // Since the instruction doesn't specify how to get it here, I'll pass null.
-        return generateTokenFromUser(userDetails.getUser(), context, gymId, staffRole, null);
+        return generateTokenFromUser(userDetails.getUser(), context, gymId, staffRole, null, null, null, null);
     }
 
     public String generateTokenFromUser(User user, String context, Long activeGymId, String staffRole,
@@ -140,6 +141,16 @@ public class JwtTokenProvider {
                 .getBody();
 
         return claims.get("primaryRole", String.class);
+    }
+
+    public Long getUserIdFromToken(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        return Long.parseLong(claims.getSubject());
     }
 
     public boolean validateToken(String authToken) {

@@ -93,7 +93,8 @@ public class OAuthService {
             }
 
             // Generate JWT
-            String token = jwtTokenProvider.generateTokenFromUser(user, "google_auth", null, null, null);
+            String token = jwtTokenProvider.generateTokenFromUser(user, "google_auth", null, null, null, null, null,
+                    null);
 
             return new AuthResult(true, token, "Success", user, isNewUser);
 
@@ -141,7 +142,8 @@ public class OAuthService {
             }
 
             // Generate JWT
-            String token = jwtTokenProvider.generateTokenFromUser(user, "facebook_auth", null, null, null);
+            String token = jwtTokenProvider.generateTokenFromUser(user, "facebook_auth", null, null, null, null, null,
+                    null);
 
             return new AuthResult(true, token, "Success", user, isNewUser);
 

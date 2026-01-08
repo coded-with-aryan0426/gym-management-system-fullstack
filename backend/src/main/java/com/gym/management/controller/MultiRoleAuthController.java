@@ -16,7 +16,7 @@ import jakarta.validation.Valid;
  * Enhanced authentication controller for multi-role single-login system
  */
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api/multi-role/auth")
 @RequiredArgsConstructor
 @Slf4j
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -68,10 +68,8 @@ public class MultiRoleAuthController {
             @RequestHeader("Authorization") String token) {
         try {
             String jwt = token.replace("Bearer ", "");
-            AuthResponse response = authService.switchGymContext(jwtId -> {
-                // Extract user ID from token
-                return authService.getUserIdFromToken(jwt);
-            }, gymId);
+            Long userId = authService.getUserIdFromToken(jwt);
+            AuthResponse response = authService.switchGymContext(userId, gymId);
             
             log.info("User switched to gym context: {}", gymId);
             return ResponseEntity.ok(response);

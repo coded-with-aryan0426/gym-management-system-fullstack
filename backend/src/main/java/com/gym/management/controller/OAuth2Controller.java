@@ -181,7 +181,7 @@ public class OAuth2Controller {
         }
 
         // Generate JWT
-        String token = jwtTokenProvider.generateTokenFromUser(user, "otp_auth", null, null, null);
+        String token = jwtTokenProvider.generateTokenFromUser(user, "otp_auth", null, null, null, null, null, null);
 
         return ResponseEntity.ok(Map.of(
                 "success", true,

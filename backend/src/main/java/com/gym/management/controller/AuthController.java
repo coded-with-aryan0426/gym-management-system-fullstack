@@ -186,7 +186,7 @@ public class AuthController {
         // Check if first login
         if (Boolean.TRUE.equals(user.getIsFirstLogin())) {
             AuthResponse response = new AuthResponse();
-            response.setFirstLogin(true);
+            response.setIsFirstLogin(true);
             response.setEmail(user.getEmail());
             // Need a temp token or rely on email identification for password change?
             // Better to issue a limited token or just handle it in change-password endpoint
@@ -220,9 +220,9 @@ public class AuthController {
         response.setStaffRole(userRole);
         response.setHasStaffAccess(true);
         response.setHasMemberAccess(true);
-        response.setFirstLogin(Boolean.TRUE.equals(user.getIsFirstLogin()));
+        response.setIsFirstLogin(Boolean.TRUE.equals(user.getIsFirstLogin()));
 
-        String token = tokenProvider.generateTokenFromUser(user, "STAFF", null, userRole, null);
+        String token = tokenProvider.generateTokenFromUser(user, "STAFF", null, userRole, null, null, null, null);
         response.setToken(token);
 
         return ResponseEntity.ok(response);
@@ -299,7 +299,7 @@ public class AuthController {
         response.setHasMemberAccess(false);
 
         // V1: Generate token without gym context
-        String token = tokenProvider.generateTokenFromUser(user, "STAFF", null, requestedRole.toUpperCase(), null);
+        String token = tokenProvider.generateTokenFromUser(user, "STAFF", null, requestedRole.toUpperCase(), null, null, null, null);
         response.setToken(token);
 
         return ResponseEntity.ok(response);
@@ -342,7 +342,7 @@ public class AuthController {
         response.setHasMemberAccess(true);
 
         // V1: Generate token without gym context
-        String token = tokenProvider.generateTokenFromUser(user, "MEMBER", null, "CUSTOMER", null);
+        String token = tokenProvider.generateTokenFromUser(user, "MEMBER", null, "CUSTOMER", null, null, null, null);
         response.setToken(token);
 
         return ResponseEntity.ok(response);
@@ -391,7 +391,7 @@ public class AuthController {
             // Verify membership logic could go here
         }
 
-        String token = tokenProvider.generateTokenFromUser(user, context, gym.getGymId(), staffRole, null);
+        String token = tokenProvider.generateTokenFromUser(user, context, gym.getGymId(), staffRole, null, null, null, null);
         response.setToken(token);
 
         return ResponseEntity.ok(response);

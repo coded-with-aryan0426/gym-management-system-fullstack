@@ -44,7 +44,7 @@ public class PermissionService {
      * Get all roles for a user across all gyms
      */
     public Set<GymRole> getUserRoles(Long userId) {
-        List<UserGymRole> userGymRoles = userGymRoleRepository.findByUserId(userId);
+        List<UserGymRole> userGymRoles = userGymRoleRepository.findByUserUserId(userId);
         return userGymRoles.stream()
                 .filter(UserGymRole::isActiveAndValid)
                 .map(UserGymRole::getRole)
@@ -55,7 +55,7 @@ public class PermissionService {
      * Get roles for a user in a specific gym
      */
     public Set<GymRole> getUserRolesForGym(Long userId, Long gymId) {
-        List<UserGymRole> userGymRoles = userGymRoleRepository.findByUserIdAndGymId(userId, gymId);
+        List<UserGymRole> userGymRoles = userGymRoleRepository.findByUserUserIdAndGymGymId(userId, gymId);
         return userGymRoles.stream()
                 .filter(UserGymRole::isActiveAndValid)
                 .map(UserGymRole::getRole)
@@ -66,7 +66,7 @@ public class PermissionService {
      * Get all gym roles for a user mapped by gym ID
      */
     public Map<Long, Set<GymRole>> getUserRolesByGym(Long userId) {
-        List<UserGymRole> userGymRoles = userGymRoleRepository.findByUserId(userId);
+        List<UserGymRole> userGymRoles = userGymRoleRepository.findByUserUserId(userId);
         return userGymRoles.stream()
                 .filter(UserGymRole::isActiveAndValid)
                 .collect(Collectors.groupingBy(
