@@ -3,9 +3,9 @@ services:
   - type: web
     name: gym-management-backend
     runtime: docker
-    root: backend
+    dockerContext: backend
+    dockerfilePath: backend/Dockerfile
     plan: free
-    region: singapore # Optional: Choose close to users (e.g., singapore, oregon, frankfurt)
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
