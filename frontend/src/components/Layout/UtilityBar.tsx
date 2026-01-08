@@ -55,7 +55,7 @@ const UtilityBar: React.FC = () => {
             case 'staff':
               return (staffStats as Record<string, number>)[key] ?? 0
             case 'classes':
-              const val = (classStats as Record<string, string | number>)[key]
+              const val = (classStats as unknown as Record<string, string | number>)[key]
               if (key === 'occupancyRate') return `${val}%`
               return val ?? 0
             case 'financial':

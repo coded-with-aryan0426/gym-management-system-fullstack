@@ -32,7 +32,7 @@ const ScheduleFilters: React.FC<ScheduleFiltersProps> = ({
     const [isOpen, setIsOpen] = useState(false)
     const popoverRef = useRef<HTMLDivElement>(null)
 
-    useClickOutside(popoverRef, () => setIsOpen(false), isOpen)
+    useClickOutside(popoverRef as React.RefObject<HTMLElement>, () => setIsOpen(false), isOpen)
 
     const activeCount = [
         classType !== 'All',

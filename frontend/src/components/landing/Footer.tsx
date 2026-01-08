@@ -50,7 +50,7 @@ export default function Footer() {
       } else {
         navigate('/');
         setTimeout(() => {
-          const element = document.getElementById(link.sectionId);
+          const element = document.getElementById(link.sectionId!);
           if (element) {
             element.scrollIntoView({ behavior: 'smooth' });
           }

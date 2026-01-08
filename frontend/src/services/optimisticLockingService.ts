@@ -238,7 +238,7 @@ export class OptimisticLockingService {
           ...updatedUser,
           version: entity.version + 1,
           lastModified: new Date()
-        } as T;
+        } as unknown as T;
       }
 
       // For relationships, implement similar logic

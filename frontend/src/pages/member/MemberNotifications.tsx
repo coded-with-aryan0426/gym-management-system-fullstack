@@ -170,7 +170,7 @@ const MemberNotifications: React.FC = () => {
         <div className="mn-header__left">
           <h1 className="mn-header__title">
             Notifications
-            {unreadCount > 0 && <Badge variant="blue" className="ml-2">{unreadCount}</Badge>}
+            {unreadCount > 0 && <Badge variant="info" className="ml-2">{unreadCount}</Badge>}
           </h1>
           <p className="mn-header__subtitle">Stay updated with your gym activity</p>
         </div>

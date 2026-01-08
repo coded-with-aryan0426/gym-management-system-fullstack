@@ -37,8 +37,10 @@ export class RealTimeDataService implements RealTimeDataProvider {
   private maxReconnectAttempts = 5;
   private reconnectDelay = 1000;
   private isConnecting = false;
+  private wsUrl: string;
 
-  constructor(private wsUrl: string = 'ws://localhost:8080/ws') {
+  constructor(wsUrl: string = 'ws://localhost:8080/ws') {
+    this.wsUrl = wsUrl;
     // Disable WebSocket connection for now - using polling instead
     // this.connect();
   }

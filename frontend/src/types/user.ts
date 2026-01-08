@@ -17,6 +17,8 @@ export interface User {
     facebookId?: string;
     phoneNumber?: string;
     authProvider?: 'LOCAL' | 'GOOGLE' | 'FACEBOOK';
+    avatarUrl?: string;
+    joinDate?: string;
 }
 
 export interface Role {
@@ -108,8 +110,10 @@ export interface UpdateUserDto {
     fullName?: string;
     email?: string;
     phone?: string;
+    phoneNumber?: string;
     status?: string;
     avatarId?: string;
+    leavingDate?: string;
 }
 
 // Summary view for lists

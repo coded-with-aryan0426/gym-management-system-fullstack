@@ -88,7 +88,7 @@ const ConflictResolutionDialog: React.FC<ConflictResolutionDialogProps> = ({
           break;
         case 'merge':
           // Simple merge strategy - could be enhanced based on field type
-          resolvedData[conflict.field] = this.mergeValues(
+          resolvedData[conflict.field] = mergeValues(
             conflict.currentValue, 
             conflict.incomingValue
           );
