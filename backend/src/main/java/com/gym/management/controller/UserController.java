@@ -10,12 +10,15 @@ import java.util.Set;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "*") // Allow all origins for v1 simplicity
 public class UserController {
 
     @Autowired
     private UserService userService;
 
+    /**
+     * @deprecated Use paginated endpoints instead. Kept for backward compatibility.
+     */
+    @Deprecated
     @GetMapping
     public List<User> getUsers(@RequestParam(required = false) String role) {
         if (role != null) {
@@ -24,15 +27,13 @@ public class UserController {
         return userService.getAllUsers();
     }
 
+    /**
+     * @deprecated Use paginated endpoints instead. Kept for backward compatibility.
+     */
+    @Deprecated
     @GetMapping("/members")
     public ResponseEntity<?> getMembers() {
-        try {
-            return ResponseEntity.ok(userService.getAllMembers());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500)
-                    .body(java.util.Map.of("error", e.getMessage(), "type", e.getClass().getName()));
-        }
+        return ResponseEntity.ok(userService.getAllMembers());
     }
 
     @GetMapping("/members/paginated")
@@ -42,13 +43,7 @@ public class UserController {
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String plan) {
-        try {
-            return ResponseEntity.ok(userService.getMembersPaginated(page, size, search, status, plan));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500)
-                    .body(java.util.Map.of("error", e.getMessage(), "type", e.getClass().getName()));
-        }
+        return ResponseEntity.ok(userService.getMembersPaginated(page, size, search, status, plan));
     }
 
     @GetMapping("/trainers/paginated")
@@ -58,13 +53,7 @@ public class UserController {
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String role,
             @RequestParam(required = false) String status) {
-        try {
-            return ResponseEntity.ok(userService.getTrainersPaginated(page, size, search, role, status));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500)
-                    .body(java.util.Map.of("error", e.getMessage(), "type", e.getClass().getName()));
-        }
+        return ResponseEntity.ok(userService.getTrainersPaginated(page, size, search, role, status));
     }
 
     @GetMapping("/search")
@@ -97,25 +86,17 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<?> createUser(@RequestBody User user) {
-        try {
-            User created = userService.createUser(user);
-            return ResponseEntity.ok(created);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error creating user: " + e.getMessage());
-        }
+        User created = userService.createUser(user);
+        return ResponseEntity.ok(created);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User user) {
-        try {
-            User updated = userService.updateUser(id, user);
-            if (updated != null) {
-                return ResponseEntity.ok(updated);
-            }
-            return ResponseEntity.notFound().build();
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error updating user: " + e.getMessage());
+        User updated = userService.updateUser(id, user);
+        if (updated != null) {
+            return ResponseEntity.ok(updated);
         }
+        return ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")

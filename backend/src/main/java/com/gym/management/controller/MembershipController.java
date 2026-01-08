@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/memberships")
-@CrossOrigin(origins = "*")
 public class MembershipController {
 
     @Autowired
@@ -17,13 +16,8 @@ public class MembershipController {
 
     @PostMapping("/renew")
     public ResponseEntity<?> renewMembership(@RequestBody RenewMembershipRequest request) {
-        try {
-            Membership membership = membershipService.renewMembership(request.getUserId(), request.getPackageId(),
-                    request.getCustomDurationMonths());
-            return ResponseEntity.ok(membership);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.badRequest().body("Error renewing membership: " + e.getMessage());
-        }
+        Membership membership = membershipService.renewMembership(request.getUserId(), request.getPackageId(),
+                request.getCustomDurationMonths());
+        return ResponseEntity.ok(membership);
     }
 }

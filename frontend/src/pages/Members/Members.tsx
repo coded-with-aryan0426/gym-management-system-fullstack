@@ -105,38 +105,16 @@ const Members: React.FC = () => {
       const fetchSize = hasClientSideFilters ? 500 : pageSize
       const fetchPage = hasClientSideFilters ? 0 : currentPage
 
-      try {
-        const response = await api.getMembersPaginated(
-          fetchPage,
-          fetchSize,
-          debouncedSearch || undefined,
-          statusFilter,
-          planFilter
-        )
-        setMembers(response.content)
-        setTotalCount(hasClientSideFilters ? response.content.length : response.totalCount)
-        setSortType(response.sortType as 'newest' | 'alphabetical')
-      } catch {
-        const allMembers = await api.getMembers()
-        let filtered = allMembers
-        if (debouncedSearch) {
-          const q = debouncedSearch.toLowerCase()
-          filtered = filtered.filter(m =>
-            m.fullName?.toLowerCase().includes(q) ||
-            m.email?.toLowerCase().includes(q)
-          )
-        }
-        if (statusFilter) {
-          filtered = filtered.filter(m => m.status?.toUpperCase() === statusFilter.toUpperCase())
-        }
-        if (planFilter) {
-          filtered = filtered.filter(m => m.planName?.toLowerCase() === planFilter.toLowerCase())
-        }
-        const start = currentPage * pageSize
-        const paged = filtered.slice(start, start + pageSize)
-        setMembers(paged)
-        setTotalCount(filtered.length)
-      }
+      const response = await api.getMembersPaginated(
+        fetchPage,
+        fetchSize,
+        debouncedSearch || undefined,
+        statusFilter,
+        planFilter
+      )
+      setMembers(response.content)
+      setTotalCount(hasClientSideFilters ? response.content.length : response.totalCount)
+      setSortType(response.sortType as 'newest' | 'alphabetical')
     } catch (err) {
       console.error('[Members] Failed to load members:', err)
       toast.error('Failed to load members')
