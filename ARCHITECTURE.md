@@ -33,7 +33,7 @@ graph TD
     end
     
     subgraph "Data Layer"
-        Auth -->|Read/Write| DB[(Oracle/H2 Database)]
+        Auth -->|Read/Write| DB[(Supabase/PostgreSQL)]
         Member -->|Read/Write| DB
         Staff -->|Read/Write| DB
     end

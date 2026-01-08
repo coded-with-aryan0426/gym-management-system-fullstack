@@ -13,4 +13,5 @@ COPY --from=build /app/target/*.war app.war
 # Expose port
 EXPOSE 8081
 
-ENTRYPOINT ["java", "-jar", "app.war"]
+# Default to production profile
+ENTRYPOINT ["java", "-Dspring.profiles.active=prod", "-jar", "app.war"]
