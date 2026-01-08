@@ -41,7 +41,7 @@ public class JwtTokenProvider {
     }
 
     public String generateTokenFromUser(User user, String context, Long activeGymId, String staffRole,
-            String membershipStatus) {
+            String membershipStatus, Set<String> permissions, Set<String> userRoles, String primaryRole) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + JWT_EXPIRATION_MS);
 
@@ -63,6 +63,18 @@ public class JwtTokenProvider {
 
         if (membershipStatus != null) {
             builder.claim("membershipStatus", membershipStatus);
+        }
+
+        if (permissions != null && !permissions.isEmpty()) {
+            builder.claim("permissions", permissions);
+        }
+
+        if (userRoles != null && !userRoles.isEmpty()) {
+            builder.claim("roles", userRoles);
+        }
+
+        if (primaryRole != null) {
+            builder.claim("primaryRole", primaryRole);
         }
 
         return builder.compact();
@@ -96,6 +108,38 @@ public class JwtTokenProvider {
                 .getBody();
 
         return claims.get("activeGymId", Long.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    public Set<String> getPermissionsFromJWT(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        return claims.get("permissions", Set.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    public Set<String> getRolesFromJWT(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        return claims.get("roles", Set.class);
+    }
+
+    public String getPrimaryRoleFromJWT(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        return claims.get("primaryRole", String.class);
     }
 
     public boolean validateToken(String authToken) {

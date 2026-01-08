@@ -269,6 +269,19 @@ public class User {
     @ManyToMany(mappedBy = "customers", fetch = FetchType.EAGER)
     private Set<User> trainers = new HashSet<>();
 
+    // Multi-role support fields
+    @Transient
+    private GymRole primaryRole;
+    
+    @Transient
+    private java.util.Set<Permission> permissions;
+    
+    @Transient
+    private java.util.Set<GymRole> allRoles;
+    
+    @Transient
+    private java.util.Map<Long, java.util.Set<GymRole>> rolesByGym;
+
     // Transient fields for membership creation (not persisted)
     @Transient
     private Long packageId;
