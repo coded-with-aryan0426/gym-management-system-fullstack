@@ -1,0 +1,46 @@
+services:
+  # Backend Service (Spring Boot + Docker)
+  - type: web
+    name: gym-management-backend
+    runtime: docker
+    root: backend
+    plan: free
+    region: singapore # Optional: Choose close to users (e.g., singapore, oregon, frankfurt)
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      # Database Credentials (Fill these in Render Dashboard)
+      - key: SPRING_DATASOURCE_URL
+        sync: false
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
+      # Security & OAuth (Fill these in Render Dashboard)
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      # Email Service (Fill these in Render Dashboard)
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+
+  # Frontend Static Site (Optional - if you want to host frontend on Render too)
+  # If using Vercel, you can remove this block.
+  - type: static
+    name: gym-management-frontend
+    root: frontend
+    buildCommand: npm install --legacy-peer-deps && npm run build
+    publishDir: dist
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: gym-management-backend
+          property: url
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_ANON_KEY
+        sync: false
