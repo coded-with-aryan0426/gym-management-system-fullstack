@@ -10,13 +10,7 @@ FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 COPY --from=build /app/target/*.war app.war
 
-# Create directory for Oracle Wallet (to be mounted)
-RUN mkdir -p /app/wallet
-
 # Expose port
 EXPOSE 8081
-
-# Environment variables should be passed at runtime
-# TNS_ADMIN should point to /app/wallet if mounting there
 
 ENTRYPOINT ["java", "-jar", "app.war"]
