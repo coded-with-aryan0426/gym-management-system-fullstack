@@ -10,8 +10,11 @@ FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 COPY --from=build /app/target/*.war app.war
 
-# Expose port
-EXPOSE 8081
+# Set memory limits to avoid OOM on free tier
+ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0"
 
-# Default to production profile
-ENTRYPOINT ["java", "-Dspring.profiles.active=prod", "-jar", "app.war"]
+# Expose port (Render defaults to 10000)
+EXPOSE 10000
+
+# Run the application
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -Dspring.profiles.active=prod -jar app.war"]
