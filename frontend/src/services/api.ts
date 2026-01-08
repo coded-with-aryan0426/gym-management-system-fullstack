@@ -77,6 +77,16 @@ const api = {
     return response.data;
   },
 
+  // Paginated Staff (Alias to Trainers endpoint which handles roles)
+  async getStaffPaginated(
+    page: number = 0,
+    size: number = 10,
+    search?: string,
+    role?: string
+  ): Promise<PageResponse<User>> {
+    return this.getTrainersPaginated(page, size, search, role);
+  },
+
   async searchUsers(role: string, query: string): Promise<User[]> {
     const response = await apiClient.get<User[]>('/users/search', { params: { role, q: query } });
 
