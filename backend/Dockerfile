@@ -10,8 +10,8 @@ FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 COPY --from=build /app/target/*.war app.war
 
-# Set memory limits to avoid OOM on free tier
-ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0"
+# Set memory limits to avoid OOM on free tier, and force IPv4 to fix network unreachable errors
+ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0 -Djava.net.preferIPv4Stack=true"
 
 # Expose port (Render defaults to 10000)
 EXPOSE 10000
