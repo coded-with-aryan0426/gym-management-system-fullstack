@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { X } from 'lucide-react';
 import './Modal.css';
 
 interface ModalProps {
@@ -24,6 +25,9 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, footer 
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-title"
         >
           <motion.div
             className="modal"
@@ -39,6 +43,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, footer 
           >
             <div className="modal__header">
               <motion.h2
+                id="modal-title"
                 className="modal__title"
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -46,6 +51,13 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, footer 
               >
                 {title}
               </motion.h2>
+              <button
+                className="modal__close"
+                onClick={onClose}
+                aria-label="Close modal"
+              >
+                <X size={20} />
+              </button>
             </div>
             <motion.div
               className="modal__body"
