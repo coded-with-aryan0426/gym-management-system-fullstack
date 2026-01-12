@@ -47,70 +47,51 @@ public class TrainerDashboardController {
 
             User trainer = trainerOpt.get();
             Map<String, Object> dashboard = new HashMap<>();
-
-            // Trainer info
+            
             dashboard.put("trainerId", trainer.getUserId());
             dashboard.put("trainerName", trainer.getFullName());
             dashboard.put("email", trainer.getEmail());
-
-            // Assigned members count
-            int activeMembers = trainer.getCustomers() != null ? trainer.getCustomers().size() : 0;
-            dashboard.put("activeMembers", activeMembers);
-            dashboard.put("totalMembers", activeMembers);
-
-            // Get all sessions for this trainer
-            List<PTSession> allSessions = ptSessionRepository.findByTrainerId(trainerId);
-
-            // Today's sessions
+            
+            // Stats
+            int assignedCount = trainer.getCustomers() != null ? trainer.getCustomers().size() : 0;
+            dashboard.put("assignedMembersCount", assignedCount);
+            
+            List<PTSession> sessions = ptSessionRepository.findByTrainerId(trainerId);
             LocalDate today = LocalDate.now();
-            List<PTSession> todaysSessionsList = allSessions.stream()
-                    .filter(s -> s.getSessionDate() != null && s.getSessionDate().toLocalDate().equals(today))
-                    .collect(Collectors.toList());
-
-            dashboard.put("totalToday", todaysSessionsList.size());
-            long completedToday = todaysSessionsList.stream()
-                    .filter(s -> s.getStatus() != null && s.getStatus().name().equals("COMPLETED"))
-                    .count();
-            dashboard.put("completedToday", completedToday);
-
-            // Mock earnings
-            dashboard.put("todayEarnings", completedToday * 500);
-            dashboard.put("monthEarnings", allSessions.stream()
-                    .filter(s -> s.getStatus() != null && 
-                            s.getStatus().name().equals("COMPLETED") && 
-                            s.getSessionDate() != null && 
-                            s.getSessionDate().getMonth() == today.getMonth())
-                    .count() * 500);
-
-            dashboard.put("attendanceRate", todaysSessionsList.isEmpty() ? 0 : (completedToday * 100 / todaysSessionsList.size()));
-
-            // Upcoming sessions
-            LocalDateTime now = LocalDateTime.now();
-            LocalDateTime weekLater = now.plusDays(7);
-            List<Map<String, Object>> sessions = allSessions.stream()
-                    .filter(s -> s.getSessionDate() != null &&
-                            (s.getSessionDate().toLocalDate().equals(today) ||
-                                    (s.getSessionDate().isAfter(now) && s.getSessionDate().isBefore(weekLater))))
-                    .map(s -> {
-                        Map<String, Object> sessionMap = new HashMap<>();
-                        sessionMap.put("id", s.getSessionId());
-                        sessionMap.put("title", "PT: " + (s.getMember() != null ? s.getMember().getFullName() : "Member"));
-                        sessionMap.put("type", "pt");
-                        sessionMap.put("startTime", s.getSessionDate());
-                        sessionMap.put("endTime", s.getSessionDate().plusMinutes(s.getDurationMinutes()));
-                        sessionMap.put("room", "Training Zone");
-                        sessionMap.put("enrolled", 1);
-                        sessionMap.put("capacity", 1);
-                        sessionMap.put("status", s.getStatus() != null ? s.getStatus().name().toLowerCase() : "upcoming");
-                        return sessionMap;
-                    })
-                    .collect(Collectors.toList());
-
-            dashboard.put("sessions", sessions);
-
-            // Unread notifications count
-            Long unreadNotifications = notificationRepository.countUnreadByUserId(trainerId);
-            dashboard.put("unreadNotificationsCount", unreadNotifications);
+            
+            long todaySessions = sessions.stream()
+                .filter(s -> s.getSessionDate() != null && s.getSessionDate().toLocalDate().equals(today))
+                .count();
+            dashboard.put("todaysSessionsCount", todaySessions);
+            
+            long upcomingSessions = sessions.stream()
+                .filter(s -> s.getSessionDate() != null && s.getSessionDate().isAfter(LocalDateTime.now()))
+                .count();
+            dashboard.put("upcomingSessionsCount", upcomingSessions);
+            
+            // Add other required fields for frontend
+            dashboard.put("todayEarnings", 0);
+            dashboard.put("monthEarnings", 0);
+            dashboard.put("completedToday", sessions.stream()
+                .filter(s -> s.getSessionDate() != null && s.getSessionDate().toLocalDate().equals(today) && "COMPLETED".equals(s.getStatus()))
+                .count());
+            dashboard.put("totalToday", todaySessions);
+            dashboard.put("attendanceRate", todaySessions > 0 ? 100 : 0);
+            dashboard.put("activeMembers", assignedCount);
+            dashboard.put("totalMembers", assignedCount);
+            dashboard.put("sessions", sessions.stream().limit(5).map(s -> {
+                Map<String, Object> sm = new HashMap<>();
+                sm.put("id", s.getSessionId());
+                sm.put("title", s.getMember() != null ? s.getMember().getFullName() : "Private Session");
+                sm.put("type", "pt");
+                sm.put("startTime", s.getSessionDate());
+                sm.put("endTime", s.getSessionDate().plusMinutes(s.getDurationMinutes()));
+                sm.put("room", "Gym Floor");
+                sm.put("enrolled", 1);
+                sm.put("capacity", 1);
+                sm.put("status", s.getSessionDate().isBefore(LocalDateTime.now()) ? "completed" : "upcoming");
+                return sm;
+            }).collect(Collectors.toList()));
 
             return ResponseEntity.ok(apiResponse(true, dashboard, null));
         } catch (Exception e) {
@@ -283,8 +264,43 @@ public class TrainerDashboardController {
     public ResponseEntity<?> getAllNotes() {
         try {
             Long trainerId = getAuthenticatedTrainerId();
-            List<ProgressNote> notes = progressNoteRepository.findByTrainerId(trainerId);
+            List<ProgressNote> notes = progressNoteRepository.findByTrainerUserIdOrderByCreatedAtDesc(trainerId);
             return ResponseEntity.ok(apiResponse(true, notes, null));
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(apiResponse(false, null, e.getMessage()));
+        }
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<?> getProfile() {
+        try {
+            Long trainerId = getAuthenticatedTrainerId();
+            Optional<User> trainerOpt = userRepository.findById(trainerId);
+            if (trainerOpt.isEmpty()) {
+                return ResponseEntity.status(404).body(apiResponse(false, null, "Trainer not found"));
+            }
+            return ResponseEntity.ok(apiResponse(true, trainerOpt.get(), null));
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(apiResponse(false, null, e.getMessage()));
+        }
+    }
+
+    @PutMapping("/profile")
+    public ResponseEntity<?> updateProfile(@RequestBody Map<String, Object> updates) {
+        try {
+            Long trainerId = getAuthenticatedTrainerId();
+            Optional<User> trainerOpt = userRepository.findById(trainerId);
+            if (trainerOpt.isEmpty()) {
+                return ResponseEntity.status(404).body(apiResponse(false, null, "Trainer not found"));
+            }
+
+            User trainer = trainerOpt.get();
+            if (updates.containsKey("fullName")) trainer.setFullName((String) updates.get("fullName"));
+            if (updates.containsKey("phone")) trainer.setPhone((String) updates.get("phone"));
+            if (updates.containsKey("avatarId")) trainer.setAvatarId((String) updates.get("avatarId"));
+            
+            User saved = userRepository.save(trainer);
+            return ResponseEntity.ok(apiResponse(true, saved, "Profile updated successfully"));
         } catch (Exception e) {
             return ResponseEntity.status(401).body(apiResponse(false, null, e.getMessage()));
         }

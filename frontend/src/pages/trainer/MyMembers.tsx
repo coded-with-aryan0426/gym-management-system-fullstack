@@ -4,6 +4,7 @@ import {
     ChevronDown, Users, Clock, TrendingUp, Target, Calendar
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { format, parseISO } from 'date-fns';
 import trainerApi from '../../services/trainerApi';
 import type { TrainerMemberDetail } from '../../services/trainerApi';
 import './MyMembers.css';

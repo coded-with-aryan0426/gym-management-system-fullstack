@@ -7,6 +7,7 @@ import {
     User, BarChart2, Camera, MessageSquare, Tag
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { format, parseISO } from 'date-fns';
 import trainerApi from '../../services/trainerApi';
 import type { ProgressNote as IProgressNote, TrainerMember } from '../../services/trainerApi';
 import './ProgressNotes.css';
@@ -79,21 +80,27 @@ const ProgressNotes: React.FC = () => {
 
     const filteredNotes = useMemo(() => {
         return notes.filter(note => {
-            const matchesMember = filterMember === 'All Members' || note.member.name === filterMember;
-            const matchesCategory = filterCategory === 'all' || note.category === filterCategory;
+            const memberName = membersList.find(m => m.userId === note.memberId)?.fullName || 'Unknown Member';
+            const matchesMember = filterMember === 'All Members' || memberName === filterMember;
+            const matchesCategory = filterCategory === 'all' || (note as any).category === filterCategory;
+            const content = note.note || '';
             const matchesSearch = searchQuery === '' || 
-                note.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                note.member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                note.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+                content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                memberName.toLowerCase().includes(searchQuery.toLowerCase());
             return matchesMember && matchesCategory && matchesSearch;
         });
-    }, [notes, filterMember, filterCategory, searchQuery]);
+    }, [notes, membersList, filterMember, filterCategory, searchQuery]);
 
     const stats = useMemo(() => ({
         totalNotes: notes.length,
-        thisWeek: notes.filter(n => n.date.includes('March 2')).length,
-        membersTracked: new Set(notes.map(n => n.member.name)).size,
-        prsRecorded: notes.filter(n => n.tags.includes('PR')).length
+        thisWeek: notes.filter(n => {
+            const date = new Date(n.createdAt);
+            const now = new Date();
+            const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            return date >= weekAgo;
+        }).length,
+        membersTracked: new Set(notes.map(n => n.memberId)).size,
+        prsRecorded: 0
     }), [notes]);
 
     const getMoodIcon = (mood: string) => {
@@ -188,7 +195,8 @@ const ProgressNotes: React.FC = () => {
                         <div className="progress-notes__filter-dropdown">
                             <User size={12} />
                             <select value={filterMember} onChange={(e) => setFilterMember(e.target.value)}>
-                                {members.map(m => <option key={m}>{m}</option>)}
+                                <option>All Members</option>
+                                {membersList.map(m => <option key={m.userId} value={m.fullName}>{m.fullName}</option>)}
                             </select>
                             <ChevronDown size={12} />
                         </div>
@@ -229,20 +237,23 @@ const ProgressNotes: React.FC = () => {
                             <div className="progress-note__card">
                                 <div className="progress-note__header">
                                     <div className="progress-note__member">
-                                        <img src={note.member.avatar} alt={note.member.name} />
+                                        <img 
+                                            src={`https://ui-avatars.com/api/?name=${membersList.find(m => m.userId === note.memberId)?.fullName || 'U'}&background=DC2626&color=fff&size=40`} 
+                                            alt="member" 
+                                        />
                                         <div className="progress-note__member-info">
-                                            <h3>{note.member.name}</h3>
-                                            <span className="progress-note__member-goal">{note.member.goal}</span>
+                                            <h3>{membersList.find(m => m.userId === note.memberId)?.fullName || 'Unknown Member'}</h3>
+                                            <span className="progress-note__member-goal">Goal Tracking</span>
                                         </div>
                                     </div>
                                     <div className="progress-note__header-right">
                                         <div className="progress-note__mood">
-                                            {getMoodIcon(note.mood)}
-                                            <span>{note.mood}</span>
+                                            {getMoodIcon((note as any).mood || 'good')}
+                                            <span>{(note as any).mood || 'good'}</span>
                                         </div>
                                         <div className="progress-note__date">
                                             <Calendar size={11} />
-                                            {note.date}
+                                            {format(parseISO(note.createdAt), 'MMM d, yyyy')}
                                         </div>
                                         <button className="progress-note__menu-btn">
                                             <MoreVertical size={14} />
@@ -253,47 +264,47 @@ const ProgressNotes: React.FC = () => {
                                 <div className="progress-note__session">
                                     <span 
                                         className="progress-note__category"
-                                        style={{ background: `${getCategoryColor(note.category)}20`, color: getCategoryColor(note.category) }}
+                                        style={{ background: `${getCategoryColor((note as any).category || 'general')}20`, color: getCategoryColor((note as any).category || 'general') }}
                                     >
-                                        {note.category}
+                                        {(note as any).category || 'General'}
                                     </span>
-                                    <span className="progress-note__session-type">{note.sessionType}</span>
+                                    <span className="progress-note__session-type">{(note as any).sessionType || 'Training Session'}</span>
                                     <span className="progress-note__time">
-                                        <Clock size={11} /> {note.time}
+                                        <Clock size={11} /> {format(parseISO(note.createdAt), 'h:mm a')}
                                     </span>
                                 </div>
 
-                                <p className="progress-note__text">{note.content}</p>
+                                <p className="progress-note__text">{note.note}</p>
 
-                                {note.highlights && note.highlights.length > 0 && (
+                                {(note as any).highlights && (note as any).highlights.length > 0 && (
                                     <div className="progress-note__highlights">
                                         <span className="progress-note__section-label">
                                             <Award size={11} /> Highlights
                                         </span>
                                         <ul>
-                                            {note.highlights.map((h, i) => (
+                                            {(note as any).highlights.map((h: string, i: number) => (
                                                 <li key={i}>{h}</li>
                                             ))}
                                         </ul>
                                     </div>
                                 )}
 
-                                {note.concerns && note.concerns.length > 0 && (
+                                {(note as any).concerns && (note as any).concerns.length > 0 && (
                                     <div className="progress-note__concerns">
                                         <span className="progress-note__section-label">
                                             <AlertTriangle size={11} /> Concerns
                                         </span>
                                         <ul>
-                                            {note.concerns.map((c, i) => (
+                                            {(note as any).concerns.map((c: string, i: number) => (
                                                 <li key={i}>{c}</li>
                                             ))}
                                         </ul>
                                     </div>
                                 )}
 
-                                {note.stats.length > 0 && (
+                                {(note as any).stats && (note as any).stats.length > 0 && (
                                     <div className="progress-note__stats">
-                                        {note.stats.map((stat, i) => (
+                                        {(note as any).stats.map((stat: any, i: number) => (
                                             <div key={i} className="progress-note__stat">
                                                 <span className="progress-note__stat-label">{stat.label}</span>
                                                 <div className="progress-note__stat-row">
@@ -312,16 +323,16 @@ const ProgressNotes: React.FC = () => {
 
                                 <div className="progress-note__footer">
                                     <div className="progress-note__tags">
-                                        {note.tags.map((tag, i) => (
+                                        {((note as any).tags || []).map((tag: string, i: number) => (
                                             <span key={i} className="progress-note__tag">
                                                 <Tag size={9} /> {tag}
                                             </span>
                                         ))}
                                     </div>
 
-                                    {note.attachments.length > 0 && (
+                                    {(note as any).attachments && (note as any).attachments.length > 0 && (
                                         <div className="progress-note__attachments">
-                                            {note.attachments.map((att, i) => (
+                                            {(note as any).attachments.map((att: any, i: number) => (
                                                 <button key={i} className="progress-note__attachment">
                                                     {getAttachmentIcon(att.type)}
                                                     {att.name}
@@ -367,9 +378,12 @@ const ProgressNotes: React.FC = () => {
                         <div className="progress-notes__modal-body">
                             <div className="progress-notes__form-field">
                                 <label>Select Member *</label>
-                                <select>
-                                    <option>Search or select member...</option>
-                                    {members.slice(1).map(m => <option key={m}>{m}</option>)}
+                                <select 
+                                    value={newNote.memberId} 
+                                    onChange={(e) => setNewNote(prev => ({ ...prev, memberId: e.target.value }))}
+                                >
+                                    <option value="">Search or select member...</option>
+                                    {membersList.map(m => <option key={m.userId} value={m.userId}>{m.fullName}</option>)}
                                 </select>
                             </div>
 
