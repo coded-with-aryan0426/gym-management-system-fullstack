@@ -283,7 +283,7 @@ public class TrainerDashboardController {
     public ResponseEntity<?> getAllNotes() {
         try {
             Long trainerId = getAuthenticatedTrainerId();
-            List<ProgressNote> notes = progressNoteRepository.findByTrainerUserIdOrderByCreatedAtDesc(trainerId);
+            List<ProgressNote> notes = progressNoteRepository.findByTrainerId(trainerId);
             return ResponseEntity.ok(apiResponse(true, notes, null));
         } catch (Exception e) {
             return ResponseEntity.status(401).body(apiResponse(false, null, e.getMessage()));

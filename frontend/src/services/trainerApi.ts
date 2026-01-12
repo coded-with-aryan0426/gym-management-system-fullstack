@@ -115,20 +115,31 @@ function normalizeResponse<T>(response: any): T {
         if (!response.success) {
             throw new Error(response.message || 'API request failed');
         }
-        return (response.data !== undefined && response.data !== null) ? response.data as T : {} as T;
+        // If data is null/undefined, return a safe default based on expected type
+        if (response.data === undefined || response.data === null) {
+            return {} as T;
+        }
+        return response.data as T;
     }
     return response as T;
 }
 
 function unwrapArray<T>(data: any): T[] {
+    if (!data) return [];
     if (Array.isArray(data)) return data;
-    if (data && typeof data === 'object') {
-        // Check for standardized ApiResponse structure
-        if ('success' in data && data.success && data.data) {
-            if (Array.isArray(data.data)) return data.data;
-            if (Array.isArray(data.data.items)) return data.data.items;
+    
+    if (typeof data === 'object') {
+        // Standard ApiResponse structure
+        if ('success' in data) {
+            if (!data.success) return [];
+            const innerData = data.data;
+            if (!innerData) return [];
+            if (Array.isArray(innerData)) return innerData;
+            if (Array.isArray(innerData.items)) return innerData.items;
+            return [];
         }
-        // Check for direct wrappers
+        
+        // Direct wrappers
         if (Array.isArray(data.items)) return data.items;
         if (data.data && Array.isArray(data.data.items)) return data.data.items;
         if (data.data && Array.isArray(data.data)) return data.data;

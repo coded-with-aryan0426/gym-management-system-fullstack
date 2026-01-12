@@ -45,23 +45,23 @@ const MyMembers: React.FC = () => {
     }, [page, searchQuery, filter]);
 
     const stats = useMemo(() => {
-        const membersList = members || [];
-        const activeCount = membersList.filter(m => m.status === 'active' || m.status === 'ACTIVE').length;
+        const membersList = Array.isArray(members) ? members : [];
+        const activeCount = membersList.filter(m => m && (m.status === 'active' || m.status === 'ACTIVE')).length;
         const todaySessions = 0; 
-        const needsAttention = membersList.filter(m => m.status === 'at-risk').length;
-        const expiringSoon = membersList.filter(m => m.expiryDays !== undefined && m.expiryDays > 0 && m.expiryDays <= 7).length;
+        const needsAttention = membersList.filter(m => m && m.status === 'at-risk').length;
+        const expiringSoon = membersList.filter(m => m && m.expiryDays !== undefined && m.expiryDays > 0 && m.expiryDays <= 7).length;
         return { activeCount, needsAttention, expiringSoon, todaySessions, total: membersList.length };
     }, [members]);
 
     const filteredMembers = useMemo(() => {
-        const membersList = members || [];
+        const membersList = Array.isArray(members) ? members : [];
         if (!quickFilter) return membersList;
         
         if (quickFilter === 'needs-attention') {
-            return membersList.filter(m => m.status === 'at-risk');
+            return membersList.filter(m => m && m.status === 'at-risk');
         }
         if (quickFilter === 'expiring-soon') {
-            return membersList.filter(m => m.expiryDays !== undefined && m.expiryDays > 0 && m.expiryDays <= 7);
+            return membersList.filter(m => m && m.expiryDays !== undefined && m.expiryDays > 0 && m.expiryDays <= 7);
         }
         
         return membersList;

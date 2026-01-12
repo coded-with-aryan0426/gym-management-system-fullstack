@@ -13,7 +13,8 @@ public interface ProgressNoteRepository extends JpaRepository<ProgressNote, Long
 
     List<ProgressNote> findByMemberUserIdOrderByCreatedAtDesc(Long memberId);
 
-    List<ProgressNote> findByTrainerUserIdOrderByCreatedAtDesc(Long trainerId);
+    @Query("SELECT pn FROM ProgressNote pn WHERE pn.trainer.userId = :trainerId ORDER BY pn.createdAt DESC")
+    List<ProgressNote> findByTrainerId(@Param("trainerId") Long trainerId);
 
     @Query("SELECT pn FROM ProgressNote pn WHERE pn.trainer.userId = :trainerId AND pn.member.userId = :memberId ORDER BY pn.createdAt DESC")
     List<ProgressNote> findByTrainerAndMember(@Param("trainerId") Long trainerId, @Param("memberId") Long memberId);

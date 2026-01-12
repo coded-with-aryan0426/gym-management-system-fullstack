@@ -131,7 +131,25 @@ const TrainerDashboard: React.FC = () => {
         // Optional: Reset status after closing if needed, though unmounting handles it
     };
 
-    if (!data) return <div className="tp" style={{ padding: 40, textAlign: 'center', color: 'rgba(255,255,255,0.5)' }}>Loading...</div>;
+    if (loading) return <div className="tp" style={{ padding: 40, textAlign: 'center', color: 'rgba(255,255,255,0.5)' }}>Loading Dashboard...</div>;
+    
+    if (error) return (
+        <div className="tp" style={{ padding: 40, textAlign: 'center', color: '#EF4444' }}>
+            <AlertCircle size={48} style={{ marginBottom: 16, opacity: 0.5 }} />
+            <h3>Failed to Load Dashboard</h3>
+            <p>{error}</p>
+            <button 
+                onClick={() => window.location.reload()}
+                style={{ marginTop: 16, padding: '8px 16px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid #EF4444', borderRadius: 4, color: '#EF4444', cursor: 'pointer' }}
+            >
+                Retry
+            </button>
+        </div>
+    );
+
+    if (!data) return <div className="tp" style={{ padding: 40, textAlign: 'center', color: 'rgba(255,255,255,0.5)' }}>No data available</div>;
+
+    const trainerFirstName = (data.trainerName || 'Trainer').split(' ')[0];
 
     const quickActions = [
         { icon: <Calendar size={16} />, label: 'Schedule', path: '/trainer/schedule' },
@@ -170,7 +188,7 @@ const TrainerDashboard: React.FC = () => {
             {/* Header Section */}
             <div className="trainer-dashboard-v2__header">
                 <div className="trainer-dashboard-v2__greeting">
-                    <h1>{currentTime.getHours() < 12 ? 'Good Morning' : 'Good Afternoon'}, {data.trainerName.split(' ')[0]}</h1>
+                    <h1>{currentTime.getHours() < 12 ? 'Good Morning' : 'Good Afternoon'}, {trainerFirstName}</h1>
                     <p className="trainer-dashboard-v2__date">{format(currentTime, 'EEEE, MMMM do')} • <span className="live-time">{format(currentTime, 'h:mm a')}</span></p>
                 </div>
 
