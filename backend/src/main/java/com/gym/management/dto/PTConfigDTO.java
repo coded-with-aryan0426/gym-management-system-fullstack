@@ -27,4 +27,11 @@ public class PTConfigDTO {
     @Min(value = 15, message = "Slot interval must be at least 15 minutes")
     @Max(value = 60, message = "Slot interval cannot exceed 60 minutes")
     private Integer slotIntervalMinutes;
+
+    public Integer getDefaultDurationMinutes() { return defaultDurationMinutes; }
+    public void setDefaultDurationMinutes(Integer defaultDurationMinutes) { this.defaultDurationMinutes = defaultDurationMinutes; }
+    public Integer getMaxSessionsPerDay() { return maxSessionsPerDay; }
+    public void setMaxSessionsPerDay(Integer maxSessionsPerDay) { this.maxSessionsPerDay = maxSessionsPerDay; }
+    public Integer getSlotIntervalMinutes() { return slotIntervalMinutes; }
+    public void setSlotIntervalMinutes(Integer slotIntervalMinutes) { this.slotIntervalMinutes = slotIntervalMinutes; }
 }

@@ -27,4 +27,10 @@ public class BlackoutDay {
 
     @Column(length = 255)
     private String reason;
+
+    public Long getBlackoutId() { return blackoutId; }
+    public LocalDate getDate() { return date; }
+    public void setDate(LocalDate date) { this.date = date; }
+    public String getReason() { return reason; }
+    public void setReason(String reason) { this.reason = reason; }
 }

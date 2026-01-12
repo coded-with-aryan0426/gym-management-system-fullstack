@@ -48,4 +48,10 @@ public class MembershipPackage {
             isActive = true;
         }
     }
+
+    public Integer getDurationMonths() { return durationMonths; }
+    public void setDurationMonths(Integer durationMonths) { this.durationMonths = durationMonths; }
+    public Integer getDurationDays() { return durationDays; }
+    public String getPackageName() { return packageName; }
+    public void setPackageName(String packageName) { this.packageName = packageName; }
 }

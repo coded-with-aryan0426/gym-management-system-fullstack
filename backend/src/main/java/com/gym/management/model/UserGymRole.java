@@ -70,4 +70,6 @@ public class UserGymRole {
         }
         return true;
     }
+
+    public GymRole getRole() { return role; }
 }

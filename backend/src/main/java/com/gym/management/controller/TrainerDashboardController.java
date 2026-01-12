@@ -271,41 +271,6 @@ public class TrainerDashboardController {
         }
     }
 
-    @GetMapping("/profile")
-    public ResponseEntity<?> getProfile() {
-        try {
-            Long trainerId = getAuthenticatedTrainerId();
-            Optional<User> trainerOpt = userRepository.findById(trainerId);
-            if (trainerOpt.isEmpty()) {
-                return ResponseEntity.status(404).body(apiResponse(false, null, "Trainer not found"));
-            }
-            return ResponseEntity.ok(apiResponse(true, trainerOpt.get(), null));
-        } catch (Exception e) {
-            return ResponseEntity.status(401).body(apiResponse(false, null, e.getMessage()));
-        }
-    }
-
-    @PutMapping("/profile")
-    public ResponseEntity<?> updateProfile(@RequestBody Map<String, Object> updates) {
-        try {
-            Long trainerId = getAuthenticatedTrainerId();
-            Optional<User> trainerOpt = userRepository.findById(trainerId);
-            if (trainerOpt.isEmpty()) {
-                return ResponseEntity.status(404).body(apiResponse(false, null, "Trainer not found"));
-            }
-
-            User trainer = trainerOpt.get();
-            if (updates.containsKey("fullName")) trainer.setFullName((String) updates.get("fullName"));
-            if (updates.containsKey("phone")) trainer.setPhone((String) updates.get("phone"));
-            if (updates.containsKey("avatarId")) trainer.setAvatarId((String) updates.get("avatarId"));
-            
-            User saved = userRepository.save(trainer);
-            return ResponseEntity.ok(apiResponse(true, saved, "Profile updated successfully"));
-        } catch (Exception e) {
-            return ResponseEntity.status(401).body(apiResponse(false, null, e.getMessage()));
-        }
-    }
-
     private Map<String, Object> apiResponse(boolean success, Object data, String message) {
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("success", success);

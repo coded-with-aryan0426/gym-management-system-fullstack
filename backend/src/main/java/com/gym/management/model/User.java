@@ -338,4 +338,9 @@ public class User {
     public void setJoinDate(java.time.LocalDate joinDate) {
         this.joinDate = joinDate;
     }
+
+    public void setAllRoles(java.util.Set<GymRole> allRoles) { this.allRoles = allRoles; }
+    public void setPermissions(java.util.Set<Permission> permissions) { this.permissions = permissions; }
+    public void setRolesByGym(java.util.Map<Long, java.util.Set<GymRole>> rolesByGym) { this.rolesByGym = rolesByGym; }
+    public void setPrimaryRole(GymRole primaryRole) { this.primaryRole = primaryRole; }
 }

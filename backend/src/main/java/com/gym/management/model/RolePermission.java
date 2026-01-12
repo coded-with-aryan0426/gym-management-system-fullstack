@@ -42,4 +42,8 @@ public class RolePermission {
             isActive = true;
         }
     }
+
+    public void setRole(GymRole role) { this.role = role; }
+    public void setPermission(Permission permission) { this.permission = permission; }
+    public void setIsActive(Boolean isActive) { this.isActive = isActive; }
 }

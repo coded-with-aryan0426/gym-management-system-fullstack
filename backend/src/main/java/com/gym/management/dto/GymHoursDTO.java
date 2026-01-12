@@ -30,4 +30,13 @@ public class GymHoursDTO {
     private String closeTime;
 
     private Boolean isClosed; // If true, gym is closed on this day
+
+    public String getDayOfWeek() { return dayOfWeek; }
+    public void setDayOfWeek(String dayOfWeek) { this.dayOfWeek = dayOfWeek; }
+    public String getOpenTime() { return openTime; }
+    public void setOpenTime(String openTime) { this.openTime = openTime; }
+    public String getCloseTime() { return closeTime; }
+    public void setCloseTime(String closeTime) { this.closeTime = closeTime; }
+    public Boolean getIsClosed() { return isClosed; }
+    public void setIsClosed(Boolean isClosed) { this.isClosed = isClosed; }
 }

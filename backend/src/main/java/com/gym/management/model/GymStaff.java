@@ -58,4 +58,6 @@ public class GymStaff {
     public User getUser() { return user; }
     public StaffRole getStaffRole() { return staffRole; }
     public StaffStatus getStatus() { return status; }
+    public LocalDateTime getJoinedAt() { return joinedAt; }
+    public void setJoinedAt(LocalDateTime joinedAt) { this.joinedAt = joinedAt; }
 }

@@ -78,4 +78,17 @@ public class PTSession {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+    public LocalDateTime getSessionDate() { return sessionDate; }
+    public User getTrainer() { return trainer; }
+    public User getMember() { return member; }
+    public SessionStatus getStatus() { return status; }
+    public Integer getDurationMinutes() { return durationMinutes; }
+    public void setTrainer(User trainer) { this.trainer = trainer; }
+    public void setMember(User member) { this.member = member; }
+    public void setSessionDate(LocalDateTime sessionDate) { this.sessionDate = sessionDate; }
+    public void setDurationMinutes(Integer durationMinutes) { this.durationMinutes = durationMinutes; }
+    public void setStatus(SessionStatus status) { this.status = status; }
+    public void setProgressNotes(String progressNotes) { this.progressNotes = progressNotes; }
+    public void setIsRecurring(Boolean isRecurring) { this.isRecurring = isRecurring; }
 }
