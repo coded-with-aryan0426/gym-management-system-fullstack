@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { 
-    Search, Plus, Download, ChevronDown, Trash2, Edit2, 
-    Paperclip, X, Calendar, Clock, Target, TrendingUp, 
+import {
+    Search, Plus, Download, ChevronDown, Trash2, Edit2,
+    Paperclip, X, Calendar, Clock, Target, TrendingUp,
     ChevronRight, Filter, Image, FileText, Video, MoreVertical,
     Star, Award, AlertTriangle, CheckCircle, Activity, Zap,
     User, BarChart2, Camera, MessageSquare, Tag
@@ -21,7 +21,7 @@ const ProgressNotes: React.FC = () => {
     const [selectedNote, setSelectedNote] = useState<any | null>(null);
     const [viewMode, setViewMode] = useState<'timeline' | 'grid'>('timeline');
     const [showFilters, setShowFilters] = useState(false);
-    
+
     const [notes, setNotes] = useState<IProgressNote[]>([]);
     const [membersList, setMembersList] = useState<TrainerMember[]>([]);
     const [loading, setLoading] = useState(true);
@@ -84,7 +84,7 @@ const ProgressNotes: React.FC = () => {
             const matchesMember = filterMember === 'All Members' || memberName === filterMember;
             const matchesCategory = filterCategory === 'all' || (note as any).category === filterCategory;
             const content = note.note || '';
-            const matchesSearch = searchQuery === '' || 
+            const matchesSearch = searchQuery === '' ||
                 content.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 memberName.toLowerCase().includes(searchQuery.toLowerCase());
             return matchesMember && matchesCategory && matchesSearch;
@@ -171,9 +171,9 @@ const ProgressNotes: React.FC = () => {
                 <div className="progress-notes__toolbar">
                     <div className="progress-notes__search">
                         <Search size={14} />
-                        <input 
-                            type="text" 
-                            placeholder="Search notes, members, tags..." 
+                        <input
+                            type="text"
+                            placeholder="Search notes, members, tags..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
@@ -221,15 +221,15 @@ const ProgressNotes: React.FC = () => {
 
                 <div className="progress-notes__timeline">
                     {filteredNotes.map(note => (
-                        <div 
-                            key={note.id} 
-                            className={`progress-note ${note.private ? 'progress-note--private' : ''}`}
+                        <div
+                            key={note.id}
+                            className={`progress-note ${note.private === true ? 'progress-note--private' : ''}`}
                             onClick={() => setSelectedNote(note)}
                         >
                             <div className="progress-note__indicator">
-                                <div 
-                                    className="progress-note__dot" 
-                                    style={{ background: getCategoryColor(note.category) }}
+                                <div
+                                    className="progress-note__dot"
+                                    style={{ background: getCategoryColor(note.category || 'general') }}
                                 />
                                 <div className="progress-note__line" />
                             </div>
@@ -237,9 +237,9 @@ const ProgressNotes: React.FC = () => {
                             <div className="progress-note__card">
                                 <div className="progress-note__header">
                                     <div className="progress-note__member">
-                                        <img 
-                                            src={`https://ui-avatars.com/api/?name=${membersList.find(m => m.userId === note.memberId)?.fullName || 'U'}&background=DC2626&color=fff&size=40`} 
-                                            alt="member" 
+                                        <img
+                                            src={`https://ui-avatars.com/api/?name=${membersList.find(m => m.userId === note.memberId)?.fullName || 'U'}&background=DC2626&color=fff&size=40`}
+                                            alt="member"
                                         />
                                         <div className="progress-note__member-info">
                                             <h3>{membersList.find(m => m.userId === note.memberId)?.fullName || 'Unknown Member'}</h3>
@@ -262,7 +262,7 @@ const ProgressNotes: React.FC = () => {
                                 </div>
 
                                 <div className="progress-note__session">
-                                    <span 
+                                    <span
                                         className="progress-note__category"
                                         style={{ background: `${getCategoryColor((note as any).category || 'general')}20`, color: getCategoryColor((note as any).category || 'general') }}
                                     >
@@ -342,7 +342,7 @@ const ProgressNotes: React.FC = () => {
                                     )}
                                 </div>
 
-                                {note.followUp && (
+                                {note.followUp && note.followUp.length > 0 && (
                                     <div className="progress-note__followup">
                                         <MessageSquare size={11} />
                                         <strong>Follow-up:</strong> {note.followUp}
@@ -378,8 +378,8 @@ const ProgressNotes: React.FC = () => {
                         <div className="progress-notes__modal-body">
                             <div className="progress-notes__form-field">
                                 <label>Select Member *</label>
-                                <select 
-                                    value={newNote.memberId} 
+                                <select
+                                    value={newNote.memberId}
                                     onChange={(e) => setNewNote(prev => ({ ...prev, memberId: e.target.value }))}
                                 >
                                     <option value="">Search or select member...</option>
