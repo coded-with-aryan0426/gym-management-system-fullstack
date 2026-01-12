@@ -262,9 +262,9 @@ public class TrainerDashboardController {
             ProgressNote note = new ProgressNote(trainerOpt.get(), memberOpt.get(), request.get("note"));
             ProgressNote saved = progressNoteRepository.save(note);
 
-            return ResponseEntity.ok(saved);
+            return ResponseEntity.ok(apiResponse(true, saved, "Note added successfully"));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+            return ResponseEntity.status(500).body(apiResponse(false, null, e.getMessage()));
         }
     }
 
@@ -273,9 +273,9 @@ public class TrainerDashboardController {
         try {
             Long trainerId = getAuthenticatedTrainerId();
             List<ProgressNote> notes = progressNoteRepository.findByTrainerAndMember(trainerId, memberId);
-            return ResponseEntity.ok(notes);
+            return ResponseEntity.ok(apiResponse(true, notes, null));
         } catch (Exception e) {
-            return ResponseEntity.status(401).body(Map.of("error", e.getMessage()));
+            return ResponseEntity.status(401).body(apiResponse(false, null, e.getMessage()));
         }
     }
 
@@ -283,10 +283,10 @@ public class TrainerDashboardController {
     public ResponseEntity<?> getAllNotes() {
         try {
             Long trainerId = getAuthenticatedTrainerId();
-            List<ProgressNote> notes = progressNoteRepository.findByTrainerId(trainerId);
-            return ResponseEntity.ok(notes);
+            List<ProgressNote> notes = progressNoteRepository.findByTrainerUserIdOrderByCreatedAtDesc(trainerId);
+            return ResponseEntity.ok(apiResponse(true, notes, null));
         } catch (Exception e) {
-            return ResponseEntity.status(401).body(Map.of("error", e.getMessage()));
+            return ResponseEntity.status(401).body(apiResponse(false, null, e.getMessage()));
         }
     }
 
