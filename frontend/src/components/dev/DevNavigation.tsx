@@ -181,8 +181,12 @@ const DevNavigation: React.FC = () => {
     };
 
     const handleNavigate = (path: string, role: string) => {
-        devLogin(role as any);
+        devLogin(role as any, path);
     };
+
+    if (!import.meta.env.DEV && window.location.hostname !== 'localhost') {
+        return null;
+    }
 
     const getCurrentDashboard = () => {
         const path = location.pathname;
@@ -302,7 +306,7 @@ const DevNavigation: React.FC = () => {
                                         </button>
                                         {!isCompact && expandedRole === dashboard.role && (
                                             <motion.div
-                                                className="dev-nav-subpages"
+                                                className="dev-nav-subpages-grid"
                                                 initial={{ height: 0, opacity: 0 }}
                                                 animate={{ height: 'auto', opacity: 1 }}
                                                 exit={{ height: 0, opacity: 0 }}
@@ -310,12 +314,12 @@ const DevNavigation: React.FC = () => {
                                                 {dashboard.subPages.map((page) => (
                                                     <button
                                                         key={page.path}
-                                                        className={`dev-nav-subpage ${location.pathname === page.path ? 'active' : ''}`}
+                                                        className={`dev-nav-subpage-item ${location.pathname === page.path ? 'active' : ''}`}
                                                         onClick={() => {
                                                             handleNavigate(page.path, dashboard.role);
                                                             setIsOpen(false);
                                                         }}
-                                                        style={{ '--accent-color': dashboard.color } as React.CSSProperties}
+                                                        title={page.name}
                                                     >
                                                         {page.name}
                                                     </button>

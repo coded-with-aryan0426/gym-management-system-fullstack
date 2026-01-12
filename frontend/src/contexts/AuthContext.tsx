@@ -23,7 +23,7 @@ interface AuthContextType {
     isLoading: boolean;
     login: (token: string, userData: User) => void;
     logout: () => void;
-    devLogin: (role: DevRole) => void;
+    devLogin: (role: DevRole, targetPath?: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -78,7 +78,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         window.location.href = '/login';
     };
 
-    const devLogin = (role: DevRole) => {
+    const devLogin = (role: DevRole, targetPath?: string) => {
         localStorage.removeItem('token'); // Clear real token
 
         // Map roles to exact backend expectations
@@ -102,10 +102,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         setUser(mockUser);
 
-        // Redirect
-        if (role === 'ADMIN') window.location.href = '/dashboard';
-        else if (role === 'TRAINER') window.location.href = '/trainer';
-        else window.location.href = '/member';
+        // Redirect to target path if provided, otherwise default for role
+        if (targetPath) {
+            window.location.href = targetPath;
+        } else {
+            if (role === 'ADMIN') window.location.href = '/dashboard';
+            else if (role === 'TRAINER') window.location.href = '/trainer';
+            else window.location.href = '/member';
+        }
     };
 
     return (
