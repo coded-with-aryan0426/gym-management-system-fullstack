@@ -36,8 +36,9 @@ public class TrainerDashboardController {
      * Trainer Dashboard - aggregated stats
      */
     @GetMapping("/dashboard")
-    public ResponseEntity<?> getDashboard(@RequestParam Long trainerId) {
+    public ResponseEntity<?> getDashboard() {
         try {
+            Long trainerId = getAuthenticatedTrainerId();
             Optional<User> trainerOpt = userRepository.findById(trainerId);
             if (trainerOpt.isEmpty()) {
                 return ResponseEntity.notFound().build();
@@ -52,28 +53,56 @@ public class TrainerDashboardController {
             dashboard.put("email", trainer.getEmail());
 
             // Assigned members count
-            int assignedMembers = trainer.getCustomers() != null ? trainer.getCustomers().size() : 0;
-            dashboard.put("assignedMembersCount", assignedMembers);
+            int activeMembers = trainer.getCustomers() != null ? trainer.getCustomers().size() : 0;
+            dashboard.put("activeMembers", activeMembers);
+            dashboard.put("totalMembers", activeMembers); // For now same as active
 
             // Get all sessions for this trainer
             List<PTSession> allSessions = ptSessionRepository.findByTrainerId(trainerId);
 
-            // Today's sessions count
+            // Today's sessions
             LocalDate today = LocalDate.now();
-            long todaysSessions = allSessions.stream()
+            List<PTSession> todaysSessionsList = allSessions.stream()
                     .filter(s -> s.getSessionDate() != null && s.getSessionDate().toLocalDate().equals(today))
+                    .collect(Collectors.toList());
+
+            dashboard.put("totalToday", todaysSessionsList.size());
+            long completedToday = todaysSessionsList.stream()
+                    .filter(s -> com.gym.management.model.SessionStatus.COMPLETED.equals(s.getStatus()))
                     .count();
-            dashboard.put("todaysSessionsCount", todaysSessions);
+            dashboard.put("completedToday", completedToday);
+
+            // Mock earnings (can be calculated from transactions if needed)
+            dashboard.put("todayEarnings", completedToday * 500); // 500 per session
+            dashboard.put("monthEarnings", allSessions.stream()
+                    .filter(s -> com.gym.management.model.SessionStatus.COMPLETED.equals(s.getStatus()) && s.getSessionDate().getMonth() == today.getMonth())
+                    .count() * 500);
+
+            dashboard.put("attendanceRate", todaysSessionsList.isEmpty() ? 0 : (completedToday * 100 / todaysSessionsList.size()));
 
             // Upcoming sessions (next 7 days)
             LocalDateTime now = LocalDateTime.now();
             LocalDateTime weekLater = now.plusDays(7);
-            long upcomingSessions = allSessions.stream()
+            List<Map<String, Object>> sessions = allSessions.stream()
                     .filter(s -> s.getSessionDate() != null &&
-                            s.getSessionDate().isAfter(now) &&
-                            s.getSessionDate().isBefore(weekLater))
-                    .count();
-            dashboard.put("upcomingSessionsCount", upcomingSessions);
+                            (s.getSessionDate().toLocalDate().equals(today) ||
+                                    (s.getSessionDate().isAfter(now) && s.getSessionDate().isBefore(weekLater))))
+                    .map(s -> {
+                        Map<String, Object> session = new HashMap<>();
+                        session.put("id", String.valueOf(s.getSessionId()));
+                        session.put("title", "PT: " + (s.getMember() != null ? s.getMember().getFullName() : "Member"));
+                        session.put("type", "pt");
+                        session.put("startTime", s.getSessionDate());
+                        session.put("endTime", s.getSessionDate().plusMinutes(s.getDurationMinutes()));
+                        session.put("room", "Training Zone");
+                        session.put("enrolled", 1);
+                        session.put("capacity", 1);
+                        session.put("status", s.getStatus() != null ? s.getStatus().name().toLowerCase() : "upcoming");
+                        return session;
+                    })
+                    .collect(Collectors.toList());
+
+            dashboard.put("sessions", sessions);
 
             // Unread notifications count
             Long unreadNotifications = notificationRepository.countUnreadByUserId(trainerId);
@@ -89,20 +118,26 @@ public class TrainerDashboardController {
      * Get trainer's own profile
      */
     @GetMapping("/profile")
-    public ResponseEntity<?> getProfile(@RequestParam Long trainerId) {
-        Optional<User> trainer = userRepository.findById(trainerId);
-        if (trainer.isEmpty()) {
-            return ResponseEntity.notFound().build();
+    public ResponseEntity<?> getProfile() {
+        try {
+            Long trainerId = getAuthenticatedTrainerId();
+            Optional<User> trainer = userRepository.findById(trainerId);
+            if (trainer.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.ok(trainer.get());
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(Map.of("error", e.getMessage()));
         }
-        return ResponseEntity.ok(trainer.get());
     }
 
     /**
      * Update trainer's own profile
      */
     @PutMapping("/profile")
-    public ResponseEntity<?> updateProfile(@RequestParam Long trainerId, @RequestBody Map<String, Object> updates) {
+    public ResponseEntity<?> updateProfile(@RequestBody Map<String, Object> updates) {
         try {
+            Long trainerId = getAuthenticatedTrainerId();
             Optional<User> trainerOpt = userRepository.findById(trainerId);
             if (trainerOpt.isEmpty()) {
                 return ResponseEntity.notFound().build();
@@ -131,40 +166,41 @@ public class TrainerDashboardController {
      * Get assigned members (only those assigned to this trainer)
      */
     @GetMapping("/my-members")
-    public ResponseEntity<?> getMyMembers(@RequestParam Long trainerId) {
-        Optional<User> trainerOpt = userRepository.findById(trainerId);
-        if (trainerOpt.isEmpty()) {
-            return ResponseEntity.notFound().build();
+    public ResponseEntity<?> getMyMembers() {
+        try {
+            Long trainerId = getAuthenticatedTrainerId();
+            Optional<User> trainerOpt = userRepository.findById(trainerId);
+            if (trainerOpt.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            Set<User> customers = trainerOpt.get().getCustomers();
+            List<Map<String, Object>> members = customers.stream().map(m -> {
+                Map<String, Object> memberData = new HashMap<>();
+                memberData.put("userId", m.getUserId());
+                memberData.put("fullName", m.getFullName());
+                memberData.put("email", m.getEmail());
+                memberData.put("phoneNumber", m.getPhoneNumber());
+                memberData.put("avatarId", m.getAvatarId());
+                memberData.put("createdAt", m.getCreatedAt());
+                return memberData;
+            }).collect(Collectors.toList());
+
+            return ResponseEntity.ok(members);
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(Map.of("error", e.getMessage()));
         }
-
-        Set<User> customers = trainerOpt.get().getCustomers();
-        List<Map<String, Object>> members = customers.stream().map(m -> {
-            Map<String, Object> memberData = new HashMap<>();
-            memberData.put("userId", m.getUserId());
-            memberData.put("fullName", m.getFullName());
-            memberData.put("email", m.getEmail());
-            memberData.put("phoneNumber", m.getPhoneNumber());
-            memberData.put("avatarId", m.getAvatarId());
-            memberData.put("createdAt", m.getCreatedAt());
-            return memberData;
-        }).collect(Collectors.toList());
-
-        return ResponseEntity.ok(members);
     }
 
     /**
      * Get trainer's schedule (PT sessions)
      */
-    /**
-     * Get trainer's schedule (PT sessions)
-     */
     @GetMapping("/schedule")
     public ResponseEntity<?> getSchedule(
-            @RequestParam(required = false) Long trainerId,
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate) {
         try {
-            Long tid = (trainerId != null) ? trainerId : getAuthenticatedTrainerId();
+            Long tid = getAuthenticatedTrainerId();
             List<PTSession> sessions = ptSessionRepository.findByTrainerId(tid);
 
             // Filter by date range if provided
@@ -197,10 +233,10 @@ public class TrainerDashboardController {
      */
     @PostMapping("/members/{memberId}/notes")
     public ResponseEntity<?> addProgressNote(
-            @RequestParam Long trainerId,
             @PathVariable Long memberId,
             @RequestBody Map<String, String> request) {
         try {
+            Long trainerId = getAuthenticatedTrainerId();
             Optional<User> trainerOpt = userRepository.findById(trainerId);
             Optional<User> memberOpt = userRepository.findById(memberId);
 
@@ -221,9 +257,14 @@ public class TrainerDashboardController {
      * Get progress notes for a member
      */
     @GetMapping("/members/{memberId}/notes")
-    public ResponseEntity<?> getMemberNotes(@RequestParam Long trainerId, @PathVariable Long memberId) {
-        List<ProgressNote> notes = progressNoteRepository.findByTrainerAndMember(trainerId, memberId);
-        return ResponseEntity.ok(notes);
+    public ResponseEntity<?> getMemberNotes(@PathVariable Long memberId) {
+        try {
+            Long trainerId = getAuthenticatedTrainerId();
+            List<ProgressNote> notes = progressNoteRepository.findByTrainerAndMember(trainerId, memberId);
+            return ResponseEntity.ok(notes);
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(Map.of("error", e.getMessage()));
+        }
     }
 
     // Helper methods
