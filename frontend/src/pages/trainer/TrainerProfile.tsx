@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
     Camera, Save, User, Phone, Mail, MapPin, Award, Shield, Key,
     Star, Calendar, Users, Edit3, Clock, TrendingUp, Target,
@@ -8,43 +8,107 @@ import {
     ChevronRight, Eye, Download, Lock, Smartphone
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import trainerApi from '../../services/trainerApi';
-import type { TrainerProfile as ITrainerProfile } from '../../services/trainerApi';
 import './TrainerProfile.css';
 
 const TrainerProfile: React.FC = () => {
     const [activeTab, setActiveTab] = useState('overview');
     const [isEditing, setIsEditing] = useState(false);
-    const [loading, setLoading] = useState(true);
-    const [profile, setProfile] = useState<ITrainerProfile | null>(null);
-    const [editedProfile, setEditedProfile] = useState<Partial<ITrainerProfile>>({});
 
-    useEffect(() => {
-        const fetchProfile = async () => {
-            try {
-                setLoading(true);
-                const data = await trainerApi.getProfile();
-                setProfile(data);
-                setEditedProfile(data);
-            } catch (err) {
-                console.error('Failed to fetch profile:', err);
-                toast.error('Failed to load profile');
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchProfile();
-    }, []);
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
-        setEditedProfile(prev => ({ ...prev, [name]: value }));
+    const trainer = {
+        name: 'John Smith',
+        role: 'Senior Personal Trainer',
+        employeeId: 'TR-00123',
+        email: 'john.smith@athlonx.com',
+        phone: '+91 98765 43210',
+        altPhone: '+91 98765 43211',
+        dob: '15 Jan 1990',
+        gender: 'Male',
+        bloodType: 'O+',
+        address: '123 Fitness Street, Andheri West, Mumbai - 400058',
+        joiningDate: 'Jan 2020',
+        department: 'Personal Training',
+        reportingTo: 'Sarah Johnson',
+        shift: 'Morning (6AM-2PM)',
+        languages: ['English', 'Hindi', 'Marathi'],
+        specializations: ['Strength Training', 'HIIT', 'Functional Fitness', 'Weight Loss', 'Rehabilitation'],
+        bio: 'Certified personal trainer with 8+ years experience specializing in functional training and rehabilitation.',
+        instagram: '@johnsmith_fitness',
+        linkedin: 'johnsmith-trainer',
+        emergencyName: 'Jane Smith (Spouse)',
+        emergencyPhone: '+91 98765 43299',
+        bankName: 'HDFC Bank',
+        accountNo: '****4567',
+        ifsc: 'HDFC0001234',
     };
 
-    if (loading) return <div className="tp__loading">Loading profile...</div>;
-    if (!profile) return <div className="tp__error">Profile not found</div>;
+    const stats = {
+        activeMembers: 24,
+        totalMembers: 28,
+        sessionsMonth: 86,
+        attendance: 94,
+        rating: 4.9,
+        reviews: 127,
+        experience: '8 Yrs',
+        earnings: '₹48,500',
+    };
 
-    const displayProfile = isEditing ? editedProfile : profile;
+    const certifications = [
+        { name: 'ACE Certified Personal Trainer', issuer: 'ACE Fitness', year: '2018', valid: true, expires: 'Dec 2025' },
+        { name: 'CrossFit Level 2', issuer: 'CrossFit Inc.', year: '2019', valid: true, expires: 'Mar 2025' },
+        { name: 'First Aid & CPR', issuer: 'Red Cross', year: '2023', valid: true, expires: 'Jun 2025' },
+        { name: 'Sports Nutrition Specialist', issuer: 'ISSA', year: '2020', valid: true, expires: 'Aug 2025' },
+        { name: 'Kettlebell Certification', issuer: 'RKC', year: '2021', valid: true, expires: 'Sep 2024' },
+    ];
+
+    const schedule = [
+        { day: 'Mon', hours: '6AM-2PM', sessions: 5 },
+        { day: 'Tue', hours: '6AM-2PM', sessions: 6 },
+        { day: 'Wed', hours: '6AM-2PM', sessions: 4 },
+        { day: 'Thu', hours: '6AM-2PM', sessions: 5 },
+        { day: 'Fri', hours: '6AM-2PM', sessions: 6 },
+        { day: 'Sat', hours: '8AM-12PM', sessions: 3 },
+        { day: 'Sun', hours: 'Off', sessions: 0 },
+    ];
+
+    const performance = [
+        { label: 'Client Retention', value: 96, target: 90 },
+        { label: 'Session Completion', value: 98, target: 95 },
+        { label: 'Client Satisfaction', value: 94, target: 90 },
+        { label: 'Goal Achievement', value: 87, target: 80 },
+    ];
+
+    const achievements = [
+        { icon: Medal, title: 'Top Trainer Dec 2024', desc: 'Highest retention' },
+        { icon: Target, title: '100 Sessions Milestone', desc: 'Nov 2024' },
+        { icon: Star, title: '5-Star Streak', desc: '30 days perfect rating' },
+        { icon: Heart, title: 'Client Favorite', desc: 'Most requested trainer' },
+    ];
+
+    const recentActivity = [
+        { action: 'Completed PT session', with: 'Emma Davis', time: '2h ago', type: 'session' },
+        { action: 'Progress note added', with: 'Mike Chen', time: '3h ago', type: 'note' },
+        { action: 'New client assigned', with: 'Sarah Wilson', time: 'Yesterday', type: 'new' },
+        { action: 'Certification renewed', with: 'First Aid & CPR', time: '2 days ago', type: 'cert' },
+    ];
+
+    const documents = [
+        { name: 'ID Proof (Aadhar)', type: 'id', verified: true },
+        { name: 'Address Proof', type: 'address', verified: true },
+        { name: 'Education Certificate', type: 'education', verified: true },
+        { name: 'PAN Card', type: 'pan', verified: true },
+    ];
+
+    const handleSave = () => {
+        toast.success('Profile updated');
+        setIsEditing(false);
+    };
+
+    const tabs = [
+        { id: 'overview', label: 'Overview', icon: User },
+        { id: 'professional', label: 'Work', icon: Briefcase },
+        { id: 'performance', label: 'Stats', icon: TrendingUp },
+        { id: 'security', label: 'Security', icon: Shield },
+    ];
 
     return (
         <div className="tp">
@@ -53,35 +117,19 @@ const TrainerProfile: React.FC = () => {
                 <div className="tp__header-content">
                     <div className="tp__profile-row">
                         <div className="tp__avatar">
-                            <img src={`https://ui-avatars.com/api/?name=${profile.fullName}&background=DC2626&color=fff&size=96`} alt="" />
+                            <img src="https://ui-avatars.com/api/?name=John+Smith&background=DC2626&color=fff&size=96" alt="" />
                             <button className="tp__avatar-btn"><Camera size={12} /></button>
                             <span className="tp__avatar-status" />
                         </div>
                         <div className="tp__profile-info">
                             <div className="tp__name-row">
-                                {isEditing ? (
-                                    <input 
-                                        className="tp__name-input" 
-                                        name="fullName" 
-                                        value={editedProfile.fullName || ''} 
-                                        onChange={handleInputChange} 
-                                    />
-                                ) : (
-                                    <h1>{profile.fullName}</h1>
-                                )}
+                                <h1>{trainer.name}</h1>
                                 <span className="tp__badge tp__badge--verified"><BadgeCheck size={12} /> Verified</span>
                             </div>
-                            <p className="tp__role">{profile.role || 'Trainer'} • {profile.department || 'Fitness'}</p>
+                            <p className="tp__role">{trainer.role} • {trainer.department}</p>
                             <div className="tp__meta">
-                                <span><Mail size={12} /> {profile.email}</span>
-                                <span><Phone size={12} /> {isEditing ? (
-                                    <input 
-                                        className="tp__inline-input" 
-                                        name="phoneNumber" 
-                                        value={editedProfile.phoneNumber || editedProfile.phone || ''} 
-                                        onChange={handleInputChange} 
-                                    />
-                                ) : (profile.phoneNumber || profile.phone || 'No phone')}</span>
+                                <span><Mail size={12} /> {trainer.email}</span>
+                                <span><Phone size={12} /> {trainer.phone}</span>
                                 <span><MapPin size={12} /> Mumbai</span>
                             </div>
                         </div>

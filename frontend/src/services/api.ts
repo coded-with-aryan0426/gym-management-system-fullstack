@@ -26,7 +26,13 @@ apiClient.interceptors.request.use((config) => {
 apiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
-    if (error.response?.status === 401) {
+    // DEV MODE: Skip redirect to login on localhost
+    const isDevelopment = import.meta.env.DEV ||
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1';
+
+    if (error.response?.status === 401 && !isDevelopment) {
+      // Only redirect in production
       localStorage.removeItem('token');
       window.location.href = '/login';
     }
