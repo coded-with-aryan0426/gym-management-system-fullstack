@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 @Transactional
 public class PermissionService {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PermissionService.java);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PermissionService.class);
     private final RolePermissionRepository rolePermissionRepository;
     private final UserGymRoleRepository userGymRoleRepository;
 
@@ -71,8 +71,7 @@ public class PermissionService {
                 .filter(UserGymRole::isActiveAndValid)
                 .collect(Collectors.groupingBy(
                         ugr -> ugr.getGym().getGymId(),
-                        Collectors.mapping(UserGymRole::getRole, Collectors.toSet())
-                ));
+                        Collectors.mapping(UserGymRole::getRole, Collectors.toSet())));
     }
 
     /**
@@ -81,12 +80,16 @@ public class PermissionService {
      */
     public GymRole getPrimaryRole(Long userId) {
         Set<GymRole> userRoles = getUserRoles(userId);
-        
-        if (userRoles.contains(GymRole.OWNER)) return GymRole.OWNER;
-        if (userRoles.contains(GymRole.ADMIN)) return GymRole.ADMIN;
-        if (userRoles.contains(GymRole.TRAINER)) return GymRole.TRAINER;
-        if (userRoles.contains(GymRole.MEMBER)) return GymRole.MEMBER;
-        
+
+        if (userRoles.contains(GymRole.OWNER))
+            return GymRole.OWNER;
+        if (userRoles.contains(GymRole.ADMIN))
+            return GymRole.ADMIN;
+        if (userRoles.contains(GymRole.TRAINER))
+            return GymRole.TRAINER;
+        if (userRoles.contains(GymRole.MEMBER))
+            return GymRole.MEMBER;
+
         return null;
     }
 
@@ -126,7 +129,8 @@ public class PermissionService {
      * Enrich user object with role and permission information
      */
     public void enrichUserWithPermissions(User user) {
-        if (user == null || user.getUserId() == null) return;
+        if (user == null || user.getUserId() == null)
+            return;
 
         // Get all roles and permissions
         Set<GymRole> allRoles = getUserRoles(user.getUserId());
@@ -146,10 +150,10 @@ public class PermissionService {
      */
     public void initializeDefaultPermissions() {
         log.info("Initializing default permissions for gym roles");
-        
+
         // Clear existing permissions
         rolePermissionRepository.deleteAll();
-        
+
         // OWNER permissions (full access)
         addPermission(GymRole.OWNER, Permission.USER_VIEW);
         addPermission(GymRole.OWNER, Permission.USER_CREATE);
