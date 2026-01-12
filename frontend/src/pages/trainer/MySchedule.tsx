@@ -5,11 +5,9 @@ import {
     CheckCircle, XCircle, List, AlertCircle
 } from 'lucide-react';
 import './TrainerSchedule.css';
-import trainerApi, { type TrainerSession } from '../../services/trainerApi';
 import {
-    getWeekRange, getWeekDates, formatTime, formatTime24,
-    parseSessionDate, calculateEndTime, isToday, formatMonthYear,
-    getWeekdayIndex, formatShortDate
+    getWeekRange, getWeekDates, formatTime,
+    isToday, formatMonthYear, formatShortDate
 } from '../../utils/dateUtils';
 
 // ─────────────────────────────────────────────────────────────
@@ -44,28 +42,6 @@ const EVENT_TYPE_CONFIG: Record<string, { color: string; bg: string; label: stri
     break: { color: '#6B7280', bg: 'rgba(107, 114, 128, 0.15)', label: 'Break' },
     blocked: { color: '#EF4444', bg: 'rgba(239, 68, 68, 0.15)', label: 'Blocked' },
 };
-
-// ─────────────────────────────────────────────────────────────
-// Mapper: PTSession → ScheduleEvent
-// ─────────────────────────────────────────────────────────────
-
-function mapSessionToEvent(session: TrainerSession): ScheduleEvent {
-    const start = parseSessionDate(session.sessionDate);
-    const end = calculateEndTime(start, session.durationMinutes);
-    const clientName = session.member?.fullName || 'Unknown Client';
-
-    return {
-        id: session.sessionId,
-        title: `PT – ${clientName}`,
-        start,
-        end,
-        type: 'pt',
-        status: session.status || 'SCHEDULED',
-        notes: session.progressNotes,
-        client: clientName,
-        recurring: session.isRecurring || false,
-    };
-}
 
 // ─────────────────────────────────────────────────────────────
 // Component

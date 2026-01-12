@@ -1,11 +1,10 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-    Users, Calendar, Clock, Activity, Bell,
+    Users, Calendar, Bell,
     MessageSquare, TrendingUp, ChevronRight,
-    CheckCircle, User, Zap, DollarSign,
-    Phone, Award, Dumbbell, FileText, MapPin,
-    Play, AlertCircle
+    CheckCircle, DollarSign,
+    Dumbbell, FileText, AlertCircle
 } from 'lucide-react';
 import { format, differenceInMinutes } from 'date-fns';
 import { usePageEntry, useCountUp, useButtonPress } from '../../hooks/useAnimations';

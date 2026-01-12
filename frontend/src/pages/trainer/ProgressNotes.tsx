@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
-import { 
-    Search, Plus, Download, ChevronDown, Trash2, Edit2, 
-    Paperclip, X, Calendar, Clock, Target, TrendingUp, 
+import {
+    Search, Plus, Download, ChevronDown, Trash2, Edit2,
+    Paperclip, X, Calendar, Clock, Target, TrendingUp,
     ChevronRight, Filter, Image, FileText, Video, MoreVertical,
     Star, Award, AlertTriangle, CheckCircle, Activity, Zap,
     User, BarChart2, Camera, MessageSquare, Tag
@@ -10,8 +10,8 @@ import './ProgressNotes.css';
 
 interface ProgressNote {
     id: number;
-    member: { 
-        name: string; 
+    member: {
+        name: string;
         avatar: string;
         goal: string;
         startDate: string;
@@ -39,14 +39,12 @@ const ProgressNotes: React.FC = () => {
     const [filterTime, setFilterTime] = useState('This Month');
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedNote, setSelectedNote] = useState<ProgressNote | null>(null);
-    const [viewMode, setViewMode] = useState<'timeline' | 'grid'>('timeline');
-    const [showFilters, setShowFilters] = useState(false);
 
     const notes: ProgressNote[] = [
         {
             id: 1,
-            member: { 
-                name: 'Sarah Wilson', 
+            member: {
+                name: 'Sarah Wilson',
                 avatar: 'https://ui-avatars.com/api/?name=Sarah+Wilson&background=DC2626&color=fff',
                 goal: 'Build muscle & strength',
                 startDate: 'Jan 15, 2024'
@@ -74,8 +72,8 @@ const ProgressNotes: React.FC = () => {
         },
         {
             id: 2,
-            member: { 
-                name: 'Mike Johnson', 
+            member: {
+                name: 'Mike Johnson',
                 avatar: 'https://ui-avatars.com/api/?name=Mike+Johnson&background=3B82F6&color=fff',
                 goal: 'Weight loss & endurance',
                 startDate: 'Feb 1, 2024'
@@ -100,8 +98,8 @@ const ProgressNotes: React.FC = () => {
         },
         {
             id: 3,
-            member: { 
-                name: 'Emma Davis', 
+            member: {
+                name: 'Emma Davis',
                 avatar: 'https://ui-avatars.com/api/?name=Emma+Davis&background=10B981&color=fff',
                 goal: 'Overall fitness & flexibility',
                 startDate: 'Dec 5, 2023'
@@ -126,8 +124,8 @@ const ProgressNotes: React.FC = () => {
         },
         {
             id: 4,
-            member: { 
-                name: 'James Wilson', 
+            member: {
+                name: 'James Wilson',
                 avatar: 'https://ui-avatars.com/api/?name=James+Wilson&background=F59E0B&color=fff',
                 goal: 'Rehabilitation & mobility',
                 startDate: 'Mar 1, 2024'
@@ -166,7 +164,7 @@ const ProgressNotes: React.FC = () => {
         return notes.filter(note => {
             const matchesMember = filterMember === 'All Members' || note.member.name === filterMember;
             const matchesCategory = filterCategory === 'all' || note.category === filterCategory;
-            const matchesSearch = searchQuery === '' || 
+            const matchesSearch = searchQuery === '' ||
                 note.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 note.member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 note.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -249,9 +247,9 @@ const ProgressNotes: React.FC = () => {
                 <div className="progress-notes__toolbar">
                     <div className="progress-notes__search">
                         <Search size={14} />
-                        <input 
-                            type="text" 
-                            placeholder="Search notes, members, tags..." 
+                        <input
+                            type="text"
+                            placeholder="Search notes, members, tags..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
@@ -298,14 +296,14 @@ const ProgressNotes: React.FC = () => {
 
                 <div className="progress-notes__timeline">
                     {filteredNotes.map(note => (
-                        <div 
-                            key={note.id} 
+                        <div
+                            key={note.id}
                             className={`progress-note ${note.private ? 'progress-note--private' : ''}`}
                             onClick={() => setSelectedNote(note)}
                         >
                             <div className="progress-note__indicator">
-                                <div 
-                                    className="progress-note__dot" 
+                                <div
+                                    className="progress-note__dot"
                                     style={{ background: getCategoryColor(note.category) }}
                                 />
                                 <div className="progress-note__line" />
@@ -336,7 +334,7 @@ const ProgressNotes: React.FC = () => {
                                 </div>
 
                                 <div className="progress-note__session">
-                                    <span 
+                                    <span
                                         className="progress-note__category"
                                         style={{ background: `${getCategoryColor(note.category)}20`, color: getCategoryColor(note.category) }}
                                     >

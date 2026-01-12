@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     Camera, Save, User, Phone, Mail, MapPin, Award, Shield, Key,
     Star, Calendar, Users, Edit3, Clock, TrendingUp, Target,
@@ -8,58 +8,147 @@ import {
     ChevronRight, Eye, Download, Lock, Smartphone
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { trainerApi } from '../../services/trainerApi';
+import type { TrainerProfile as TrainerProfileType } from '../../services/trainerApi';
 import './TrainerProfile.css';
 
 const TrainerProfile: React.FC = () => {
     const [activeTab, setActiveTab] = useState('overview');
     const [isEditing, setIsEditing] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const trainer = {
-        name: 'John Smith',
+    // Initial State Structure
+    const [profile, setProfile] = useState<TrainerProfileType>({
+        userId: 0,
+        name: '',
+        email: '',
+        phone: '',
         role: 'Senior Personal Trainer',
-        employeeId: 'TR-00123',
-        email: 'john.smith@athlonx.com',
-        phone: '+91 98765 43210',
-        altPhone: '+91 98765 43211',
-        dob: '15 Jan 1990',
-        gender: 'Male',
-        bloodType: 'O+',
-        address: '123 Fitness Street, Andheri West, Mumbai - 400058',
-        joiningDate: 'Jan 2020',
-        department: 'Personal Training',
-        reportingTo: 'Sarah Johnson',
-        shift: 'Morning (6AM-2PM)',
-        languages: ['English', 'Hindi', 'Marathi'],
-        specializations: ['Strength Training', 'HIIT', 'Functional Fitness', 'Weight Loss', 'Rehabilitation'],
-        bio: 'Certified personal trainer with 8+ years experience specializing in functional training and rehabilitation.',
-        instagram: '@johnsmith_fitness',
-        linkedin: 'johnsmith-trainer',
-        emergencyName: 'Jane Smith (Spouse)',
-        emergencyPhone: '+91 98765 43299',
-        bankName: 'HDFC Bank',
-        accountNo: '****4567',
-        ifsc: 'HDFC0001234',
+        languages: [],
+        specializations: [],
+        certifications: [],
+        stats: {
+            activeMembers: 0,
+            totalMembers: 0,
+            sessionsMonth: 0,
+            attendance: 0,
+            rating: 0,
+            reviews: 0,
+            experience: '0 Yrs',
+            earnings: 0
+        }
+    });
+
+    // Form State (for editing)
+    const [formData, setFormData] = useState<Partial<TrainerProfileType>>({});
+
+    useEffect(() => {
+        loadProfile();
+    }, []);
+
+    const loadProfile = async () => {
+        try {
+            setIsLoading(true);
+            const data = await trainerApi.getProfile();
+            setProfile(data);
+            setFormData(data); // Initialize form data
+        } catch (error) {
+            console.error('Failed to load profile', error);
+            // toast.error('Failed to load profile'); // Suppressed for smoother devux if backend off
+        } finally {
+            setIsLoading(false);
+        }
     };
 
-    const stats = {
-        activeMembers: 24,
-        totalMembers: 28,
-        sessionsMonth: 86,
-        attendance: 94,
-        rating: 4.9,
-        reviews: 127,
-        experience: '8 Yrs',
-        earnings: '₹48,500',
+    const handleSave = async () => {
+        try {
+            const updated = await trainerApi.updateProfile(formData);
+            setProfile(updated);
+            setIsEditing(false);
+            toast.success('Profile updated successfully');
+        } catch (error) {
+            console.error('Update failed', error);
+            toast.error('Failed to update profile');
+        }
     };
 
-    const certifications = [
-        { name: 'ACE Certified Personal Trainer', issuer: 'ACE Fitness', year: '2018', valid: true, expires: 'Dec 2025' },
-        { name: 'CrossFit Level 2', issuer: 'CrossFit Inc.', year: '2019', valid: true, expires: 'Mar 2025' },
-        { name: 'First Aid & CPR', issuer: 'Red Cross', year: '2023', valid: true, expires: 'Jun 2025' },
-        { name: 'Sports Nutrition Specialist', issuer: 'ISSA', year: '2020', valid: true, expires: 'Aug 2025' },
-        { name: 'Kettlebell Certification', issuer: 'RKC', year: '2021', valid: true, expires: 'Sep 2024' },
-    ];
+    const handleChange = (field: keyof TrainerProfileType, value: any) => {
+        setFormData(prev => ({ ...prev, [field]: value }));
+    };
 
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [uploadType, setUploadType] = useState<string>('document');
+
+    const handleUploadClick = (type: string) => {
+        setUploadType(type);
+        fileInputRef.current?.click();
+    };
+
+    const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            try {
+                toast.loading('Uploading...');
+                const doc = await trainerApi.uploadDocument(file, uploadType);
+                toast.dismiss();
+                toast.success('Uploaded successfully');
+
+                if (uploadType === 'certification') {
+                    const newCert = {
+                        name: doc.name,
+                        issuer: 'Uploaded',
+                        year: new Date().getFullYear().toString(),
+                        valid: true,
+                        expires: 'N/A'
+                    };
+                    const updatedCerts = [...(formData.certifications || profile.certifications || []), newCert];
+                    setFormData(prev => ({ ...prev, certifications: updatedCerts }));
+                    setProfile(prev => ({ ...prev, certifications: updatedCerts }));
+                } else {
+                    const updatedDocs = [...(formData.documents || profile.documents || []), doc];
+                    setFormData(prev => ({ ...prev, documents: updatedDocs }));
+                    setProfile(prev => ({ ...prev, documents: updatedDocs }));
+                }
+            } catch (error) {
+                toast.dismiss();
+                toast.error('Upload failed');
+                console.error(error);
+            }
+        }
+    };
+
+    // Helper to render editable text input or static text
+    const renderField = (field: keyof TrainerProfileType, label?: string, icon?: any) => {
+        const val = formData[field] || profile[field] || '';
+        return isEditing ? (
+            <input
+                className="tp__input"
+                value={val as string}
+                onChange={(e) => handleChange(field, e.target.value)}
+                placeholder={label}
+            />
+        ) : (
+            <span>{val as string}</span>
+        );
+    };
+
+    if (isLoading) return <div className="tp-loading">Loading Profile...</div>;
+
+    // Derived Data for UI compatibility
+    const stats = profile.stats || {
+        activeMembers: 0,
+        totalMembers: 0,
+        sessionsMonth: 0,
+        attendance: 0,
+        rating: 0,
+        reviews: 0,
+        experience: '-',
+        earnings: 0
+    };
+
+    const certifications = profile.certifications || [];
+
+    // Static Mock Data for things not in DB yet (Schedule, Achievements, Activity)
     const schedule = [
         { day: 'Mon', hours: '6AM-2PM', sessions: 5 },
         { day: 'Tue', hours: '6AM-2PM', sessions: 6 },
@@ -68,13 +157,6 @@ const TrainerProfile: React.FC = () => {
         { day: 'Fri', hours: '6AM-2PM', sessions: 6 },
         { day: 'Sat', hours: '8AM-12PM', sessions: 3 },
         { day: 'Sun', hours: 'Off', sessions: 0 },
-    ];
-
-    const performance = [
-        { label: 'Client Retention', value: 96, target: 90 },
-        { label: 'Session Completion', value: 98, target: 95 },
-        { label: 'Client Satisfaction', value: 94, target: 90 },
-        { label: 'Goal Achievement', value: 87, target: 80 },
     ];
 
     const achievements = [
@@ -88,20 +170,7 @@ const TrainerProfile: React.FC = () => {
         { action: 'Completed PT session', with: 'Emma Davis', time: '2h ago', type: 'session' },
         { action: 'Progress note added', with: 'Mike Chen', time: '3h ago', type: 'note' },
         { action: 'New client assigned', with: 'Sarah Wilson', time: 'Yesterday', type: 'new' },
-        { action: 'Certification renewed', with: 'First Aid & CPR', time: '2 days ago', type: 'cert' },
     ];
-
-    const documents = [
-        { name: 'ID Proof (Aadhar)', type: 'id', verified: true },
-        { name: 'Address Proof', type: 'address', verified: true },
-        { name: 'Education Certificate', type: 'education', verified: true },
-        { name: 'PAN Card', type: 'pan', verified: true },
-    ];
-
-    const handleSave = () => {
-        toast.success('Profile updated');
-        setIsEditing(false);
-    };
 
     const tabs = [
         { id: 'overview', label: 'Overview', icon: User },
@@ -112,25 +181,38 @@ const TrainerProfile: React.FC = () => {
 
     return (
         <div className="tp">
+            <input
+                type="file"
+                ref={fileInputRef}
+                style={{ display: 'none' }}
+                onChange={handleFileSelect}
+            />
             <div className="tp__header">
                 <div className="tp__header-bg" />
                 <div className="tp__header-content">
                     <div className="tp__profile-row">
                         <div className="tp__avatar">
-                            <img src="https://ui-avatars.com/api/?name=John+Smith&background=DC2626&color=fff&size=96" alt="" />
+                            <img src={`https://ui-avatars.com/api/?name=${(profile.name || 'Trainer').replace(' ', '+')}&background=DC2626&color=fff&size=96`} alt="" />
                             <button className="tp__avatar-btn"><Camera size={12} /></button>
-                            <span className="tp__avatar-status" />
                         </div>
                         <div className="tp__profile-info">
                             <div className="tp__name-row">
-                                <h1>{trainer.name}</h1>
+                                {isEditing ? (
+                                    <input
+                                        className="tp__input-title"
+                                        value={formData.name || ''}
+                                        onChange={e => handleChange('name', e.target.value)}
+                                    />
+                                ) : (
+                                    <h1>{profile.name}</h1>
+                                )}
                                 <span className="tp__badge tp__badge--verified"><BadgeCheck size={12} /> Verified</span>
                             </div>
-                            <p className="tp__role">{trainer.role} • {trainer.department}</p>
+                            <p className="tp__role">{profile.role} • {profile.department || 'General'}</p>
                             <div className="tp__meta">
-                                <span><Mail size={12} /> {trainer.email}</span>
-                                <span><Phone size={12} /> {trainer.phone}</span>
-                                <span><MapPin size={12} /> Mumbai</span>
+                                <span><Mail size={12} /> {profile.email}</span>
+                                <span><Phone size={12} /> {renderField('phone')}</span>
+                                <span><MapPin size={12} /> {renderField('address') || 'Mumbai'}</span>
                             </div>
                         </div>
 
@@ -164,7 +246,7 @@ const TrainerProfile: React.FC = () => {
                                 </button>
                             ) : (
                                 <>
-                                    <button className="tp__btn tp__btn--cancel" onClick={() => setIsEditing(false)}>Cancel</button>
+                                    <button className="tp__btn tp__btn--cancel" onClick={() => { setIsEditing(false); setFormData(profile); }}>Cancel</button>
                                     <button className="tp__btn tp__btn--save" onClick={handleSave}><Save size={14} /> Save</button>
                                 </>
                             )}
@@ -194,44 +276,72 @@ const TrainerProfile: React.FC = () => {
                                 <div className="tp__card">
                                     <h3 className="tp__card-title"><User size={14} /> Personal Details</h3>
                                     <div className="tp__info-grid tp__info-grid--3">
-                                        <div className="tp__info"><label>Employee ID</label><span>{trainer.employeeId}</span></div>
-                                        <div className="tp__info"><label>Date of Birth</label><span>{trainer.dob}</span></div>
-                                        <div className="tp__info"><label>Gender</label><span>{trainer.gender}</span></div>
-                                        <div className="tp__info"><label>Blood Type</label><span><span className="tp__blood-badge">{trainer.bloodType}</span></span></div>
-                                        <div className="tp__info"><label>Languages</label><span>{trainer.languages.join(', ')}</span></div>
-                                        <div className="tp__info"><label>Alt. Phone</label><span>{trainer.altPhone}</span></div>
+                                        <div className="tp__info"><label>Employee ID</label>{renderField('employeeId')}</div>
+                                        <div className="tp__info"><label>Date of Birth</label>{renderField('dob')}</div>
+                                        <div className="tp__info"><label>Gender</label>{renderField('gender')}</div>
+                                        <div className="tp__info"><label>Blood Type</label>{renderField('bloodType')}</div>
+                                        <div className="tp__info"><label>Alt. Phone</label>{renderField('altPhone')}</div>
+
+                                        {/* Languages - simplified as comma sep for edit */}
+                                        <div className="tp__info">
+                                            <label>Languages</label>
+                                            {isEditing ? (
+                                                <input className="tp__input"
+                                                    value={formData.languages?.join(', ') || ''}
+                                                    onChange={e => setFormData({ ...formData, languages: e.target.value.split(',').map(s => s.trim()) })}
+                                                />
+                                            ) : (
+                                                <span>{profile.languages?.join(', ')}</span>
+                                            )}
+                                        </div>
                                     </div>
                                     <div className="tp__info tp__info--full">
-                                        <label>Address</label><span>{trainer.address}</span>
+                                        <label>Address</label>{renderField('address')}
                                     </div>
                                 </div>
 
                                 <div className="tp__card">
                                     <h3 className="tp__card-title"><Heart size={14} /> Emergency Contact</h3>
                                     <div className="tp__info-grid tp__info-grid--2">
-                                        <div className="tp__info"><label>Contact</label><span>{trainer.emergencyName}</span></div>
-                                        <div className="tp__info"><label>Phone</label><span>{trainer.emergencyPhone}</span></div>
+                                        <div className="tp__info"><label>Contact</label>{renderField('emergencyName')}</div>
+                                        <div className="tp__info"><label>Phone</label>{renderField('emergencyPhone')}</div>
                                     </div>
                                 </div>
 
                                 <div className="tp__card">
                                     <h3 className="tp__card-title"><Dumbbell size={14} /> Specializations</h3>
                                     <div className="tp__tags">
-                                        {trainer.specializations.map((s, i) => (
-                                            <span key={i} className="tp__tag">{s}</span>
-                                        ))}
+                                        {isEditing ? (
+                                            <input className="tp__input"
+                                                value={formData.specializations?.join(', ') || ''}
+                                                onChange={e => setFormData({ ...formData, specializations: e.target.value.split(',').map(s => s.trim()) })}
+                                                placeholder="Comma separated"
+                                            />
+                                        ) : (
+                                            profile.specializations?.map((s, i) => (
+                                                <span key={i} className="tp__tag">{s}</span>
+                                            ))
+                                        )}
                                     </div>
-                                    <p className="tp__bio">{trainer.bio}</p>
+                                    <p className="tp__bio">
+                                        <label style={{ display: 'block', marginBottom: 4, fontSize: 10, opacity: 0.5 }}>Bio</label>
+                                        {isEditing ? (
+                                            <textarea className="tp__input tp__textarea" rows={3}
+                                                value={formData.bio || ''}
+                                                onChange={e => handleChange('bio', e.target.value)}
+                                            />
+                                        ) : profile.bio}
+                                    </p>
                                     <div className="tp__social">
-                                        <a href="#" className="tp__social-link"><Instagram size={14} /> {trainer.instagram}</a>
-                                        <a href="#" className="tp__social-link"><Linkedin size={14} /> {trainer.linkedin}</a>
+                                        <a href="#" className="tp__social-link"><Instagram size={14} /> {renderField('instagram')}</a>
+                                        <a href="#" className="tp__social-link"><Linkedin size={14} /> {renderField('linkedin')}</a>
                                     </div>
                                 </div>
 
                                 <div className="tp__card">
                                     <div className="tp__card-header">
                                         <h3 className="tp__card-title"><Award size={14} /> Certifications</h3>
-                                        <button className="tp__link-btn">Add <Upload size={12} /></button>
+                                        <button className="tp__link-btn" onClick={() => handleUploadClick('certification')}>Add <Upload size={12} /></button>
                                     </div>
                                     <div className="tp__certs">
                                         {certifications.map((cert, i) => (
@@ -245,11 +355,10 @@ const TrainerProfile: React.FC = () => {
                                                     <span className={`tp__badge tp__badge--${cert.valid ? 'green' : 'red'}`}>
                                                         {cert.valid ? <><CheckCircle size={10} /> Valid</> : <><AlertCircle size={10} /> Expired</>}
                                                     </span>
-                                                    <span className="tp__cert-exp">Exp: {cert.expires}</span>
                                                 </div>
-                                                <button className="tp__icon-btn"><Eye size={12} /></button>
                                             </div>
                                         ))}
+                                        {certifications.length === 0 && <div className="tp-empty">No certifications listed</div>}
                                     </div>
                                 </div>
                             </div>
@@ -297,11 +406,6 @@ const TrainerProfile: React.FC = () => {
                                             </div>
                                         ))}
                                     </div>
-                                    <div className="tp__schedule-summary">
-                                        <span>48 hrs/week</span>
-                                        <span>29 sessions</span>
-                                        <span>6 days</span>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -312,107 +416,53 @@ const TrainerProfile: React.FC = () => {
                             <div className="tp__card">
                                 <h3 className="tp__card-title"><Briefcase size={14} /> Employment Details</h3>
                                 <div className="tp__info-grid tp__info-grid--2">
-                                    <div className="tp__info"><label>Employee ID</label><span>{trainer.employeeId}</span></div>
-                                    <div className="tp__info"><label>Department</label><span>{trainer.department}</span></div>
-                                    <div className="tp__info"><label>Designation</label><span>{trainer.role}</span></div>
-                                    <div className="tp__info"><label>Joining Date</label><span>{trainer.joiningDate}</span></div>
-                                    <div className="tp__info"><label>Reporting To</label><span>{trainer.reportingTo}</span></div>
-                                    <div className="tp__info"><label>Work Shift</label><span>{trainer.shift}</span></div>
+                                    <div className="tp__info"><label>Employee ID</label>{renderField('employeeId')}</div>
+                                    <div className="tp__info"><label>Department</label>{renderField('department')}</div>
+                                    <div className="tp__info"><label>Designation</label>{renderField('role')}</div>
+                                    <div className="tp__info"><label>Joining Date</label>{renderField('joiningDate')}</div>
+                                    <div className="tp__info"><label>Reporting To</label>{renderField('reportingTo')}</div>
+                                    <div className="tp__info"><label>Work Shift</label>{renderField('shift')}</div>
                                 </div>
                             </div>
 
                             <div className="tp__card">
                                 <h3 className="tp__card-title"><CreditCard size={14} /> Payment Details</h3>
                                 <div className="tp__info-grid tp__info-grid--2">
-                                    <div className="tp__info"><label>Bank</label><span>{trainer.bankName}</span></div>
-                                    <div className="tp__info"><label>Account</label><span>{trainer.accountNo}</span></div>
-                                    <div className="tp__info"><label>IFSC</label><span>{trainer.ifsc}</span></div>
-                                    <div className="tp__info"><label>Monthly Earnings</label><span className="tp__value--highlight">{stats.earnings}</span></div>
+                                    <div className="tp__info"><label>Bank</label>{renderField('bankName')}</div>
+                                    <div className="tp__info"><label>Account</label>{renderField('accountNo')}</div>
+                                    <div className="tp__info"><label>IFSC</label>{renderField('ifsc')}</div>
+                                    <div className="tp__info"><label>Monthly Earnings</label><span className="tp__value--highlight">₹{stats.earnings}</span></div>
                                 </div>
                             </div>
 
-                            <div className="tp__card tp__card--full">
+                            <div className="tp__card">
                                 <div className="tp__card-header">
                                     <h3 className="tp__card-title"><FileText size={14} /> Documents</h3>
-                                    <button className="tp__link-btn">Upload <Upload size={12} /></button>
+                                    <button className="tp__link-btn" onClick={() => handleUploadClick('document')}>Upload <Upload size={12} /></button>
                                 </div>
-                                <div className="tp__docs">
-                                    {documents.map((doc, i) => (
-                                        <div key={i} className="tp__doc">
-                                            <FileText size={14} className="tp__doc-icon" />
-                                            <span className="tp__doc-name">{doc.name}</span>
-                                            <span className="tp__badge tp__badge--green"><CheckCircle size={10} /> Verified</span>
-                                            <button className="tp__icon-btn"><Download size={12} /></button>
+                                <div className="tp__certs">
+                                    {(profile.documents || []).map((doc, i) => (
+                                        <div key={i} className="tp__cert">
+                                            <div className="tp__cert-icon"><FileText size={14} /></div>
+                                            <div className="tp__cert-info">
+                                                <span className="tp__cert-name">{doc.name}</span>
+                                                <span className="tp__cert-meta">{doc.type.toUpperCase()} • {doc.verified ? 'Verified' : 'Pending'}</span>
+                                            </div>
+                                            <div className="tp__cert-status">
+                                                <a href={doc.url} target="_blank" rel="noreferrer" className="tp__btn--icon"><Download size={14} /></a>
+                                            </div>
                                         </div>
                                     ))}
+                                    {(!profile.documents || profile.documents.length === 0) && <div className="tp-empty">No documents uploaded</div>}
                                 </div>
                             </div>
                         </div>
                     )}
 
                     {activeTab === 'performance' && (
-                        <div className="tp__grid tp__grid--2col">
-                            <div className="tp__card">
-                                <h3 className="tp__card-title"><Target size={14} /> Performance Metrics</h3>
-                                <div className="tp__metrics">
-                                    {performance.map((p, i) => (
-                                        <div key={i} className="tp__metric">
-                                            <div className="tp__metric-header">
-                                                <span className="tp__metric-label">{p.label}</span>
-                                                <span className={`tp__metric-value ${p.value >= p.target ? 'tp__metric-value--good' : ''}`}>{p.value}%</span>
-                                            </div>
-                                            <div className="tp__metric-bar">
-                                                <div className={`tp__metric-fill ${p.value >= p.target ? 'tp__metric-fill--good' : ''}`} style={{ width: `${p.value}%` }} />
-                                                <div className="tp__metric-target" style={{ left: `${p.target}%` }} />
-                                            </div>
-                                            <span className="tp__metric-target-text">Target: {p.target}%</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div className="tp__card">
-                                <h3 className="tp__card-title"><TrendingUp size={14} /> Monthly Summary</h3>
-                                <div className="tp__summary-grid">
-                                    <div className="tp__summary-item">
-                                        <span className="tp__summary-value">86</span>
-                                        <span className="tp__summary-label">Total Sessions</span>
-                                    </div>
-                                    <div className="tp__summary-item">
-                                        <span className="tp__summary-value">{stats.earnings}</span>
-                                        <span className="tp__summary-label">Earnings</span>
-                                    </div>
-                                    <div className="tp__summary-item">
-                                        <span className="tp__summary-value">{stats.activeMembers}</span>
-                                        <span className="tp__summary-label">Active Clients</span>
-                                    </div>
-                                    <div className="tp__summary-item">
-                                        <span className="tp__summary-value">3</span>
-                                        <span className="tp__summary-label">New Clients</span>
-                                    </div>
-                                    <div className="tp__summary-item">
-                                        <span className="tp__summary-value">4.9</span>
-                                        <span className="tp__summary-label">Avg Rating</span>
-                                    </div>
-                                    <div className="tp__summary-item">
-                                        <span className="tp__summary-value">12</span>
-                                        <span className="tp__summary-label">New Reviews</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="tp__card tp__card--full">
-                                <h3 className="tp__card-title"><Medal size={14} /> All Achievements</h3>
-                                <div className="tp__achievements-grid">
-                                    {achievements.map((a, i) => (
-                                        <div key={i} className="tp__achievement-card">
-                                            <a.icon size={20} className="tp__achievement-card-icon" />
-                                            <span className="tp__achievement-card-title">{a.title}</span>
-                                            <span className="tp__achievement-card-desc">{a.desc}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
+                        <div style={{ padding: 20, textAlign: 'center' }}>
+                            <h3>Performance Metrics</h3>
+                            <p>Detailed performance charts coming soon.</p>
                         </div>
                     )}
 
