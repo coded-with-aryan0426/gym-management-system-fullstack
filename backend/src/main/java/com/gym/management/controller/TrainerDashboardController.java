@@ -2,6 +2,7 @@ package com.gym.management.controller;
 
 import com.gym.management.model.ProgressNote;
 import com.gym.management.model.PTSession;
+import com.gym.management.model.SessionStatus;
 import com.gym.management.model.User;
 import com.gym.management.repository.ProgressNoteRepository;
 import com.gym.management.repository.NotificationRepository;
@@ -55,7 +56,7 @@ public class TrainerDashboardController {
             // Assigned members count
             int activeMembers = trainer.getCustomers() != null ? trainer.getCustomers().size() : 0;
             dashboard.put("activeMembers", activeMembers);
-            dashboard.put("totalMembers", activeMembers); // For now same as active
+            dashboard.put("totalMembers", activeMembers);
 
             // Get all sessions for this trainer
             List<PTSession> allSessions = ptSessionRepository.findByTrainerId(trainerId);
@@ -68,19 +69,21 @@ public class TrainerDashboardController {
 
             dashboard.put("totalToday", todaysSessionsList.size());
             long completedToday = todaysSessionsList.stream()
-                    .filter(s -> com.gym.management.model.SessionStatus.COMPLETED.equals(s.getStatus()))
+                    .filter(s -> s.getStatus() == SessionStatus.COMPLETED)
                     .count();
             dashboard.put("completedToday", completedToday);
 
-            // Mock earnings (can be calculated from transactions if needed)
-            dashboard.put("todayEarnings", completedToday * 500); // 500 per session
+            // Mock earnings
+            dashboard.put("todayEarnings", completedToday * 500);
             dashboard.put("monthEarnings", allSessions.stream()
-                    .filter(s -> com.gym.management.model.SessionStatus.COMPLETED.equals(s.getStatus()) && s.getSessionDate().getMonth() == today.getMonth())
+                    .filter(s -> s.getStatus() == SessionStatus.COMPLETED && 
+                            s.getSessionDate() != null && 
+                            s.getSessionDate().getMonth() == today.getMonth())
                     .count() * 500);
 
             dashboard.put("attendanceRate", todaysSessionsList.isEmpty() ? 0 : (completedToday * 100 / todaysSessionsList.size()));
 
-            // Upcoming sessions (next 7 days)
+            // Upcoming sessions
             LocalDateTime now = LocalDateTime.now();
             LocalDateTime weekLater = now.plusDays(7);
             List<Map<String, Object>> sessions = allSessions.stream()
@@ -88,17 +91,17 @@ public class TrainerDashboardController {
                             (s.getSessionDate().toLocalDate().equals(today) ||
                                     (s.getSessionDate().isAfter(now) && s.getSessionDate().isBefore(weekLater))))
                     .map(s -> {
-                        Map<String, Object> session = new HashMap<>();
-                        session.put("id", String.valueOf(s.getSessionId()));
-                        session.put("title", "PT: " + (s.getMember() != null ? s.getMember().getFullName() : "Member"));
-                        session.put("type", "pt");
-                        session.put("startTime", s.getSessionDate());
-                        session.put("endTime", s.getSessionDate().plusMinutes(s.getDurationMinutes()));
-                        session.put("room", "Training Zone");
-                        session.put("enrolled", 1);
-                        session.put("capacity", 1);
-                        session.put("status", s.getStatus() != null ? s.getStatus().name().toLowerCase() : "upcoming");
-                        return session;
+                        Map<String, Object> sessionMap = new HashMap<>();
+                        sessionMap.put("id", String.valueOf(s.getSessionId()));
+                        sessionMap.put("title", "PT: " + (s.getMember() != null ? s.getMember().getFullName() : "Member"));
+                        sessionMap.put("type", "pt");
+                        sessionMap.put("startTime", s.getSessionDate());
+                        sessionMap.put("endTime", s.getSessionDate().plusMinutes(s.getDurationMinutes()));
+                        sessionMap.put("room", "Training Zone");
+                        sessionMap.put("enrolled", 1);
+                        sessionMap.put("capacity", 1);
+                        sessionMap.put("status", s.getStatus() != null ? s.getStatus().toString().toLowerCase() : "upcoming");
+                        return sessionMap;
                     })
                     .collect(Collectors.toList());
 
@@ -114,9 +117,6 @@ public class TrainerDashboardController {
         }
     }
 
-    /**
-     * Get trainer's own profile
-     */
     @GetMapping("/profile")
     public ResponseEntity<?> getProfile() {
         try {
@@ -131,9 +131,6 @@ public class TrainerDashboardController {
         }
     }
 
-    /**
-     * Update trainer's own profile
-     */
     @PutMapping("/profile")
     public ResponseEntity<?> updateProfile(@RequestBody Map<String, Object> updates) {
         try {
@@ -162,9 +159,6 @@ public class TrainerDashboardController {
         }
     }
 
-    /**
-     * Get assigned members (only those assigned to this trainer)
-     */
     @GetMapping("/my-members")
     public ResponseEntity<?> getMyMembers() {
         try {
@@ -192,9 +186,6 @@ public class TrainerDashboardController {
         }
     }
 
-    /**
-     * Get trainer's schedule (PT sessions)
-     */
     @GetMapping("/schedule")
     public ResponseEntity<?> getSchedule(
             @RequestParam(required = false) String startDate,
@@ -203,7 +194,6 @@ public class TrainerDashboardController {
             Long tid = getAuthenticatedTrainerId();
             List<PTSession> sessions = ptSessionRepository.findByTrainerId(tid);
 
-            // Filter by date range if provided
             if (startDate != null && endDate != null) {
                 LocalDateTime start = LocalDate.parse(startDate).atStartOfDay();
                 LocalDateTime end = LocalDate.parse(endDate).plusDays(1).atStartOfDay();
@@ -214,7 +204,6 @@ public class TrainerDashboardController {
                         .collect(Collectors.toList());
             }
 
-            // Map to DTOs to avoid lazy loading issues
             List<com.gym.management.dto.PTSessionDTO> sessionDTOs = sessions.stream()
                     .map(com.gym.management.dto.PTSessionDTO::fromEntity)
                     .collect(Collectors.toList());
@@ -228,9 +217,6 @@ public class TrainerDashboardController {
         }
     }
 
-    /**
-     * Add progress note for a member
-     */
     @PostMapping("/members/{memberId}/notes")
     public ResponseEntity<?> addProgressNote(
             @PathVariable Long memberId,
@@ -253,9 +239,6 @@ public class TrainerDashboardController {
         }
     }
 
-    /**
-     * Get progress notes for a member
-     */
     @GetMapping("/members/{memberId}/notes")
     public ResponseEntity<?> getMemberNotes(@PathVariable Long memberId) {
         try {
@@ -266,8 +249,6 @@ public class TrainerDashboardController {
             return ResponseEntity.status(401).body(Map.of("error", e.getMessage()));
         }
     }
-
-    // Helper methods
 
     private Map<String, Object> apiResponse(boolean success, Object data, String message) {
         Map<String, Object> response = new LinkedHashMap<>();
@@ -283,7 +264,6 @@ public class TrainerDashboardController {
         if (auth != null && auth.getPrincipal() instanceof com.gym.management.security.CustomUserDetails) {
             return ((com.gym.management.security.CustomUserDetails) auth.getPrincipal()).getId();
         }
-        // Fallback or throw
         throw new SecurityException("User not authenticated");
     }
 }
