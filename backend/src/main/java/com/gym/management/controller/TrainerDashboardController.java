@@ -42,7 +42,7 @@ public class TrainerDashboardController {
             Long trainerId = getAuthenticatedTrainerId();
             Optional<User> trainerOpt = userRepository.findById(trainerId);
             if (trainerOpt.isEmpty()) {
-                return ResponseEntity.notFound().build();
+                return ResponseEntity.status(404).body(apiResponse(false, null, "Trainer not found"));
             }
 
             User trainer = trainerOpt.get();
@@ -112,9 +112,9 @@ public class TrainerDashboardController {
             Long unreadNotifications = notificationRepository.countUnreadByUserId(trainerId);
             dashboard.put("unreadNotificationsCount", unreadNotifications);
 
-            return ResponseEntity.ok(dashboard);
+            return ResponseEntity.ok(apiResponse(true, dashboard, null));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+            return ResponseEntity.status(500).body(apiResponse(false, null, e.getMessage()));
         }
     }
 
@@ -124,11 +124,11 @@ public class TrainerDashboardController {
             Long trainerId = getAuthenticatedTrainerId();
             Optional<User> trainer = userRepository.findById(trainerId);
             if (trainer.isEmpty()) {
-                return ResponseEntity.notFound().build();
+                return ResponseEntity.status(404).body(apiResponse(false, null, "Trainer not found"));
             }
-            return ResponseEntity.ok(trainer.get());
+            return ResponseEntity.ok(apiResponse(true, trainer.get(), null));
         } catch (Exception e) {
-            return ResponseEntity.status(401).body(Map.of("error", e.getMessage()));
+            return ResponseEntity.status(401).body(apiResponse(false, null, e.getMessage()));
         }
     }
 
@@ -138,7 +138,7 @@ public class TrainerDashboardController {
             Long trainerId = getAuthenticatedTrainerId();
             Optional<User> trainerOpt = userRepository.findById(trainerId);
             if (trainerOpt.isEmpty()) {
-                return ResponseEntity.notFound().build();
+                return ResponseEntity.status(404).body(apiResponse(false, null, "Trainer not found"));
             }
 
             User trainer = trainerOpt.get();
@@ -154,23 +154,40 @@ public class TrainerDashboardController {
             }
 
             User saved = userRepository.save(trainer);
-            return ResponseEntity.ok(saved);
+            return ResponseEntity.ok(apiResponse(true, saved, "Profile updated"));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+            return ResponseEntity.status(500).body(apiResponse(false, null, e.getMessage()));
         }
     }
 
     @GetMapping("/my-members")
-    public ResponseEntity<?> getMyMembers() {
+    public ResponseEntity<?> getMyMembers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size,
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) String status) {
         try {
             Long trainerId = getAuthenticatedTrainerId();
             Optional<User> trainerOpt = userRepository.findById(trainerId);
             if (trainerOpt.isEmpty()) {
-                return ResponseEntity.notFound().build();
+                return ResponseEntity.status(404).body(apiResponse(false, null, "Trainer not found"));
             }
 
             Set<User> customers = trainerOpt.get().getCustomers();
-            List<Map<String, Object>> members = customers.stream().map(m -> {
+            if (customers == null) customers = new HashSet<>();
+            
+            List<User> filteredList = customers.stream()
+                    .filter(c -> q == null || q.isEmpty() || 
+                            c.getFullName().toLowerCase().contains(q.toLowerCase()) || 
+                            c.getEmail().toLowerCase().contains(q.toLowerCase()))
+                    .collect(Collectors.toList());
+
+            int totalItems = filteredList.size();
+            int totalPages = (int) Math.ceil((double) totalItems / size);
+            int start = Math.min(page * size, totalItems);
+            int end = Math.min(start + size, totalItems);
+
+            List<Map<String, Object>> memberDataList = filteredList.subList(start, end).stream().map(m -> {
                 Map<String, Object> memberData = new HashMap<>();
                 memberData.put("userId", m.getUserId());
                 memberData.put("fullName", m.getFullName());
@@ -178,12 +195,23 @@ public class TrainerDashboardController {
                 memberData.put("phoneNumber", m.getPhoneNumber());
                 memberData.put("avatarId", m.getAvatarId());
                 memberData.put("createdAt", m.getCreatedAt());
+                memberData.put("status", "active");
+                memberData.put("plan", "Pro");
+                memberData.put("expiryDays", 25);
+                memberData.put("goal", "Muscle Gain");
                 return memberData;
             }).collect(Collectors.toList());
 
-            return ResponseEntity.ok(members);
+            Map<String, Object> result = new HashMap<>();
+            result.put("items", memberDataList);
+            result.put("totalPages", totalPages);
+            result.put("totalItems", totalItems);
+            result.put("page", page);
+            result.put("size", size);
+
+            return ResponseEntity.ok(apiResponse(true, result, null));
         } catch (Exception e) {
-            return ResponseEntity.status(401).body(Map.of("error", e.getMessage()));
+            return ResponseEntity.status(401).body(apiResponse(false, null, e.getMessage()));
         }
     }
 

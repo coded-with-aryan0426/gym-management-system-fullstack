@@ -29,10 +29,12 @@ const MyMembers: React.FC = () => {
                     q: searchQuery,
                     status: filter.toLowerCase() as any
                 });
-                setMembers(response.items);
-                setTotalPages(response.totalPages);
+                setMembers(response.items || []);
+                setTotalPages(response.totalPages || 0);
             } catch (err) {
                 console.error('Failed to fetch members:', err);
+                setMembers([]);
+                setTotalPages(0);
             } finally {
                 setLoading(false);
             }
@@ -43,24 +45,26 @@ const MyMembers: React.FC = () => {
     }, [page, searchQuery, filter]);
 
     const stats = useMemo(() => {
-        const activeCount = members.filter(m => m.status === 'active' || m.status === 'ACTIVE').length;
-        const todaySessions = 0; // This would come from a different API or calculated if data is available
-        const needsAttention = members.filter(m => m.status === 'at-risk').length;
-        const expiringSoon = members.filter(m => m.expiryDays !== undefined && m.expiryDays > 0 && m.expiryDays <= 7).length;
-        return { activeCount, needsAttention, expiringSoon, todaySessions, total: members.length };
+        const membersList = members || [];
+        const activeCount = membersList.filter(m => m.status === 'active' || m.status === 'ACTIVE').length;
+        const todaySessions = 0; 
+        const needsAttention = membersList.filter(m => m.status === 'at-risk').length;
+        const expiringSoon = membersList.filter(m => m.expiryDays !== undefined && m.expiryDays > 0 && m.expiryDays <= 7).length;
+        return { activeCount, needsAttention, expiringSoon, todaySessions, total: membersList.length };
     }, [members]);
 
     const filteredMembers = useMemo(() => {
-        if (!quickFilter) return members;
+        const membersList = members || [];
+        if (!quickFilter) return membersList;
         
         if (quickFilter === 'needs-attention') {
-            return members.filter(m => m.status === 'at-risk');
+            return membersList.filter(m => m.status === 'at-risk');
         }
         if (quickFilter === 'expiring-soon') {
-            return members.filter(m => m.expiryDays !== undefined && m.expiryDays > 0 && m.expiryDays <= 7);
+            return membersList.filter(m => m.expiryDays !== undefined && m.expiryDays > 0 && m.expiryDays <= 7);
         }
         
-        return members;
+        return membersList;
     }, [members, quickFilter]);
 
     const toggleQuickFilter = (filterName: string) => {

@@ -115,7 +115,7 @@ function normalizeResponse<T>(response: any): T {
         if (!response.success) {
             throw new Error(response.message || 'API request failed');
         }
-        return response.data as T;
+        return (response.data !== undefined && response.data !== null) ? response.data as T : {} as T;
     }
     return response as T;
 }
@@ -123,6 +123,12 @@ function normalizeResponse<T>(response: any): T {
 function unwrapArray<T>(data: any): T[] {
     if (Array.isArray(data)) return data;
     if (data && typeof data === 'object') {
+        // Check for standardized ApiResponse structure
+        if ('success' in data && data.success && data.data) {
+            if (Array.isArray(data.data)) return data.data;
+            if (Array.isArray(data.data.items)) return data.data.items;
+        }
+        // Check for direct wrappers
         if (Array.isArray(data.items)) return data.items;
         if (data.data && Array.isArray(data.data.items)) return data.data.items;
         if (data.data && Array.isArray(data.data)) return data.data;

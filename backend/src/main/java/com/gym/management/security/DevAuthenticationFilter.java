@@ -38,11 +38,20 @@ public class DevAuthenticationFilter extends OncePerRequestFilter {
                         new SimpleGrantedAuthority("ROLE_" + role),
                         new SimpleGrantedAuthority("ROLE_DEV"));
 
-                // Create standard Spring Security User
-                org.springframework.security.core.userdetails.User principal = new org.springframework.security.core.userdetails.User(
-                        "dev_" + role.toLowerCase(),
-                        "N/A",
-                        authorities);
+                // Create standard Spring Security User or CustomUserDetails if possible
+                Object principal;
+                if ("TRAINER".equals(role)) {
+                    com.gym.management.model.User mockUser = new com.gym.management.model.User();
+                    mockUser.setUserId(1L); // Default dev trainer ID
+                    mockUser.setFullName("Dev Trainer");
+                    mockUser.setEmail("trainer@dev.com");
+                    principal = new com.gym.management.security.CustomUserDetails(mockUser);
+                } else {
+                    principal = new org.springframework.security.core.userdetails.User(
+                            "dev_" + role.toLowerCase(),
+                            "N/A",
+                            authorities);
+                }
 
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(principal,
                         null, authorities);
