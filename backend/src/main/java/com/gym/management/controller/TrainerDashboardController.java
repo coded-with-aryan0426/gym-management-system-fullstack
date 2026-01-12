@@ -155,13 +155,17 @@ public class TrainerDashboardController {
     /**
      * Get trainer's schedule (PT sessions)
      */
+    /**
+     * Get trainer's schedule (PT sessions)
+     */
     @GetMapping("/schedule")
     public ResponseEntity<?> getSchedule(
-            @RequestParam Long trainerId,
+            @RequestParam(required = false) Long trainerId,
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate) {
         try {
-            List<PTSession> sessions = ptSessionRepository.findByTrainerId(trainerId);
+            Long tid = (trainerId != null) ? trainerId : getAuthenticatedTrainerId();
+            List<PTSession> sessions = ptSessionRepository.findByTrainerId(tid);
 
             // Filter by date range if provided
             if (startDate != null && endDate != null) {
@@ -174,7 +178,15 @@ public class TrainerDashboardController {
                         .collect(Collectors.toList());
             }
 
-            return ResponseEntity.ok(sessions);
+            // Map to DTOs to avoid lazy loading issues
+            List<com.gym.management.dto.PTSessionDTO> sessionDTOs = sessions.stream()
+                    .map(com.gym.management.dto.PTSessionDTO::fromEntity)
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(apiResponse(true, sessionDTOs, null));
+        } catch (SecurityException e) {
+            return ResponseEntity.status(401)
+                    .body(apiResponse(false, null, e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
         }
@@ -212,5 +224,25 @@ public class TrainerDashboardController {
     public ResponseEntity<?> getMemberNotes(@RequestParam Long trainerId, @PathVariable Long memberId) {
         List<ProgressNote> notes = progressNoteRepository.findByTrainerAndMember(trainerId, memberId);
         return ResponseEntity.ok(notes);
+    }
+
+    // Helper methods
+
+    private Map<String, Object> apiResponse(boolean success, Object data, String message) {
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("success", success);
+        response.put("data", data);
+        response.put("message", message);
+        return response;
+    }
+
+    private Long getAuthenticatedTrainerId() {
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder
+                .getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof com.gym.management.security.CustomUserDetails) {
+            return ((com.gym.management.security.CustomUserDetails) auth.getPrincipal()).getId();
+        }
+        // Fallback or throw
+        throw new SecurityException("User not authenticated");
     }
 }

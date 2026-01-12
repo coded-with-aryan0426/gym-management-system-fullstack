@@ -50,9 +50,39 @@ public class PTSessionDTO {
 
     private RecurringFrequency recurringFrequency;
 
+    private String memberEmail;
+
     // Additional fields for response
     private String trainerName;
     private String memberName;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    public static PTSessionDTO fromEntity(com.gym.management.model.PTSession session) {
+        PTSessionDTO dto = new PTSessionDTO();
+        dto.setSessionId(session.getSessionId());
+        dto.setSessionDate(session.getSessionDate());
+        dto.setDurationMinutes(session.getDurationMinutes());
+        dto.setStatus(session.getStatus());
+        dto.setProgressNotes(session.getProgressNotes());
+        dto.setWorkoutPlan(session.getWorkoutPlan());
+        dto.setDietPlan(session.getDietPlan());
+        dto.setIsRecurring(session.getIsRecurring());
+        dto.setRecurringFrequency(session.getRecurringFrequency());
+        dto.setCreatedAt(session.getCreatedAt());
+        dto.setUpdatedAt(session.getUpdatedAt());
+
+        if (session.getTrainer() != null) {
+            dto.setTrainerId(session.getTrainer().getUserId());
+            dto.setTrainerName(session.getTrainer().getFullName());
+        }
+
+        if (session.getMember() != null) {
+            dto.setMemberId(session.getMember().getUserId());
+            dto.setMemberName(session.getMember().getFullName());
+            dto.setMemberEmail(session.getMember().getEmail());
+        }
+
+        return dto;
+    }
 }

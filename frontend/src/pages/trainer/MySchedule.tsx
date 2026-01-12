@@ -1,98 +1,138 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
     ChevronLeft, ChevronRight, RefreshCw, Filter, Plus, Calendar as CalendarIcon,
-    Clock, MapPin, Users, MoreVertical, X, Check, Repeat, AlertCircle,
-    Target, Zap, Bell, Download, Eye, Edit2, Trash2, Copy, AlertTriangle,
-    CheckCircle, XCircle, List
+    Clock, MapPin, Users, X, Repeat, AlertTriangle,
+    CheckCircle, XCircle, List, AlertCircle
 } from 'lucide-react';
 import './TrainerSchedule.css';
+import trainerApi, { type TrainerSession } from '../../services/trainerApi';
+import {
+    getWeekRange, getWeekDates, formatTime, formatTime24,
+    parseSessionDate, calculateEndTime, isToday, formatMonthYear,
+    getWeekdayIndex, formatShortDate
+} from '../../utils/dateUtils';
+
+// ─────────────────────────────────────────────────────────────
+// Types
+// ─────────────────────────────────────────────────────────────
 
 interface ScheduleEvent {
     id: number;
     title: string;
-    date: string;
-    day: number;
-    startTime: string;
-    endTime: string;
-    type: 'class' | 'pt' | 'meeting' | 'break' | 'blocked';
-    room: string;
-    enrolled?: number;
-    capacity?: number;
-    recurring: boolean;
-    recurringDays?: string[];
+    start: Date;
+    end: Date;
+    type: 'pt' | 'class' | 'meeting' | 'break' | 'blocked';
+    status: string;
     notes?: string;
     client?: string;
-    status: 'scheduled' | 'confirmed' | 'cancelled' | 'completed';
+    recurring: boolean;
+    room?: string;
 }
 
+// Status-driven UI configuration
+const STATUS_UI: Record<string, { color: string; bg: string; label: string; muted: boolean }> = {
+    SCHEDULED: { color: '#10B981', bg: 'rgba(16, 185, 129, 0.15)', label: 'Scheduled', muted: false },
+    COMPLETED: { color: '#6B7280', bg: 'rgba(107, 114, 128, 0.12)', label: 'Completed', muted: true },
+    CANCELLED: { color: '#EF4444', bg: 'rgba(239, 68, 68, 0.12)', label: 'Cancelled', muted: true },
+    MISSED: { color: '#F59E0B', bg: 'rgba(245, 158, 11, 0.15)', label: 'Missed', muted: false },
+};
+
+const EVENT_TYPE_CONFIG: Record<string, { color: string; bg: string; label: string }> = {
+    pt: { color: '#10B981', bg: 'rgba(16, 185, 129, 0.15)', label: 'PT Session' },
+    class: { color: '#8B5CF6', bg: 'rgba(139, 92, 246, 0.15)', label: 'Class' },
+    meeting: { color: '#F59E0B', bg: 'rgba(245, 158, 11, 0.15)', label: 'Meeting' },
+    break: { color: '#6B7280', bg: 'rgba(107, 114, 128, 0.15)', label: 'Break' },
+    blocked: { color: '#EF4444', bg: 'rgba(239, 68, 68, 0.15)', label: 'Blocked' },
+};
+
+// ─────────────────────────────────────────────────────────────
+// Mapper: PTSession → ScheduleEvent
+// ─────────────────────────────────────────────────────────────
+
+function mapSessionToEvent(session: TrainerSession): ScheduleEvent {
+    const start = parseSessionDate(session.sessionDate);
+    const end = calculateEndTime(start, session.durationMinutes);
+    const clientName = session.member?.fullName || 'Unknown Client';
+
+    return {
+        id: session.sessionId,
+        title: `PT – ${clientName}`,
+        start,
+        end,
+        type: 'pt',
+        status: session.status || 'SCHEDULED',
+        notes: session.progressNotes,
+        client: clientName,
+        recurring: session.isRecurring || false,
+    };
+}
+
+// ─────────────────────────────────────────────────────────────
+// Component
+// ─────────────────────────────────────────────────────────────
+
 const MySchedule: React.FC = () => {
-    const [currentDate, setCurrentDate] = useState(new Date(2024, 2, 25));
-    const [viewMode, setViewMode] = useState<'day' | 'week' | 'month' | 'agenda'>('week');
+    const [currentDate, setCurrentDate] = useState(new Date());
+    const [viewMode, setViewMode] = useState<'day' | 'week' | 'agenda'>('week');
     const [selectedEvent, setSelectedEvent] = useState<ScheduleEvent | null>(null);
     const [showFilters, setShowFilters] = useState(false);
     const [activeFilters, setActiveFilters] = useState<string[]>([]);
-    const [showAddModal, setShowAddModal] = useState(false);
-    const [selectedSlot, setSelectedSlot] = useState<{ day: number; hour: number } | null>(null);
 
-    const events: ScheduleEvent[] = [
-        { id: 1, title: 'Morning Yoga', date: '2024-03-25', day: 25, startTime: '06:00', endTime: '07:00', type: 'class', room: 'Studio A', enrolled: 12, capacity: 15, recurring: true, recurringDays: ['Mon', 'Wed', 'Fri'], status: 'confirmed' },
-        { id: 2, title: 'HIIT Burn', date: '2024-03-25', day: 25, startTime: '08:00', endTime: '09:00', type: 'class', room: 'Main Floor', enrolled: 18, capacity: 20, recurring: true, recurringDays: ['Mon', 'Thu'], status: 'confirmed' },
-        { id: 3, title: 'PT - Sarah Wilson', date: '2024-03-25', day: 25, startTime: '10:00', endTime: '11:00', type: 'pt', room: 'PT Area', client: 'Sarah Wilson', recurring: false, notes: 'Focus on lower body', status: 'confirmed' },
-        { id: 4, title: 'Lunch Break', date: '2024-03-25', day: 25, startTime: '12:00', endTime: '13:00', type: 'break', room: '', recurring: true, recurringDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], status: 'scheduled' },
-        { id: 5, title: 'Spin Class', date: '2024-03-25', day: 25, startTime: '14:00', endTime: '15:00', type: 'class', room: 'Spin Studio', enrolled: 20, capacity: 20, recurring: true, recurringDays: ['Mon', 'Wed'], status: 'confirmed' },
-        { id: 6, title: 'PT - Mike Johnson', date: '2024-03-25', day: 25, startTime: '16:00', endTime: '17:00', type: 'pt', room: 'PT Area', client: 'Mike Johnson', recurring: false, notes: 'Upper body focus', status: 'scheduled' },
-        { id: 7, title: 'Staff Meeting', date: '2024-03-25', day: 25, startTime: '17:30', endTime: '18:30', type: 'meeting', room: 'Conference Room', recurring: false, status: 'confirmed' },
-        { id: 8, title: 'Evening Pilates', date: '2024-03-25', day: 25, startTime: '19:00', endTime: '20:00', type: 'class', room: 'Studio B', enrolled: 8, capacity: 12, recurring: true, recurringDays: ['Mon', 'Thu'], status: 'confirmed' },
-        { id: 9, title: 'Advanced HIIT', date: '2024-03-26', day: 26, startTime: '07:00', endTime: '08:00', type: 'class', room: 'Main Floor', enrolled: 15, capacity: 20, recurring: true, recurringDays: ['Tue', 'Thu'], status: 'scheduled' },
-        { id: 10, title: 'PT - Emma Davis', date: '2024-03-26', day: 26, startTime: '09:00', endTime: '10:00', type: 'pt', room: 'PT Area', client: 'Emma Davis', recurring: true, recurringDays: ['Tue', 'Fri'], status: 'confirmed' },
-        { id: 11, title: 'Strength Training', date: '2024-03-26', day: 26, startTime: '11:00', endTime: '12:00', type: 'class', room: 'Weight Room', enrolled: 10, capacity: 15, recurring: true, status: 'scheduled' },
-        { id: 12, title: 'Cardio Blast', date: '2024-03-27', day: 27, startTime: '07:00', endTime: '08:00', type: 'class', room: 'Main Floor', enrolled: 22, capacity: 25, recurring: true, status: 'confirmed' },
-        { id: 13, title: 'PT - James Wilson', date: '2024-03-27', day: 27, startTime: '10:00', endTime: '11:00', type: 'pt', room: 'PT Area', client: 'James Wilson', recurring: false, status: 'scheduled' },
-        { id: 14, title: 'Blocked - Personal', date: '2024-03-28', day: 28, startTime: '09:00', endTime: '12:00', type: 'blocked', room: '', recurring: false, notes: 'Doctor appointment', status: 'scheduled' },
-        { id: 15, title: 'Yoga Flow', date: '2024-03-29', day: 29, startTime: '06:00', endTime: '07:00', type: 'class', room: 'Studio A', enrolled: 10, capacity: 15, recurring: true, status: 'confirmed' },
-    ];
+    // Data state
+    const [events, setEvents] = useState<ScheduleEvent[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    const hours = Array.from({ length: 16 }, (_, i) => i + 6);
+    // Centralized week range calculation
+    const weekRange = useMemo(() => getWeekRange(currentDate), [currentDate]);
+    const weekDates = useMemo(() => getWeekDates(weekRange.start), [weekRange.start]);
 
-    const currentWeekStart = 25;
-    const weekDates = weekDays.map((_, i) => currentWeekStart + i);
+    // ─────────────────────────────────────────────────────────
+    // Data Fetching
+    // ─────────────────────────────────────────────────────────
 
-    const stats = useMemo(() => {
-        const weekEvents = events.filter(e => e.day >= currentWeekStart && e.day < currentWeekStart + 7);
-        const classes = weekEvents.filter(e => e.type === 'class').length;
-        const pts = weekEvents.filter(e => e.type === 'pt').length;
-        const meetings = weekEvents.filter(e => e.type === 'meeting').length;
-        const totalHours = weekEvents.reduce((sum, e) => {
-            const [startH] = e.startTime.split(':').map(Number);
-            const [endH] = e.endTime.split(':').map(Number);
-            return sum + (endH - startH);
-        }, 0);
-        return { classes, pts, meetings, totalHours };
-    }, [events, currentWeekStart]);
+    const fetchSchedule = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const sessions = await trainerApi.getSchedule(weekRange.startISO, weekRange.endISO);
+            const mapped = sessions.map(mapSessionToEvent);
+            setEvents(mapped);
+        } catch (err) {
+            console.error('Failed to fetch schedule:', err);
+            setError('Failed to load schedule. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    }, [weekRange.startISO, weekRange.endISO]);
 
-    const getEventForSlot = (day: number, hour: number) => {
-        return events.find(e => {
-            const [startH] = e.startTime.split(':').map(Number);
-            const [endH] = e.endTime.split(':').map(Number);
-            return e.day === day && hour >= startH && hour < endH;
-        });
+    useEffect(() => {
+        fetchSchedule();
+    }, [fetchSchedule]);
+
+    // ─────────────────────────────────────────────────────────
+    // Navigation
+    // ─────────────────────────────────────────────────────────
+
+    const goToPrevWeek = () => {
+        const prev = new Date(currentDate);
+        prev.setDate(prev.getDate() - 7);
+        setCurrentDate(prev);
     };
 
-    const isEventStart = (event: ScheduleEvent, hour: number) => {
-        const [startH] = event.startTime.split(':').map(Number);
-        return startH === hour;
+    const goToNextWeek = () => {
+        const next = new Date(currentDate);
+        next.setDate(next.getDate() + 7);
+        setCurrentDate(next);
     };
 
-    const getEventDuration = (event: ScheduleEvent) => {
-        const [startH] = event.startTime.split(':').map(Number);
-        const [endH] = event.endTime.split(':').map(Number);
-        return endH - startH;
+    const goToToday = () => {
+        setCurrentDate(new Date());
     };
 
-    const filteredEvents = activeFilters.length > 0
-        ? events.filter(e => activeFilters.includes(e.type))
-        : events;
+    // ─────────────────────────────────────────────────────────
+    // Filters
+    // ─────────────────────────────────────────────────────────
 
     const toggleFilter = (filter: string) => {
         setActiveFilters(prev =>
@@ -102,43 +142,141 @@ const MySchedule: React.FC = () => {
         );
     };
 
+    const filteredEvents = activeFilters.length > 0
+        ? events.filter(e => activeFilters.includes(e.status))
+        : events;
+
+    // ─────────────────────────────────────────────────────────
+    // Stats
+    // ─────────────────────────────────────────────────────────
+
+    const stats = useMemo(() => {
+        const scheduled = events.filter(e => e.status === 'SCHEDULED').length;
+        const completed = events.filter(e => e.status === 'COMPLETED').length;
+        const totalHours = events.reduce((sum, e) => {
+            return sum + (e.end.getTime() - e.start.getTime()) / 3600000;
+        }, 0);
+        return { scheduled, completed, totalHours: Math.round(totalHours * 10) / 10 };
+    }, [events]);
+
+    // ─────────────────────────────────────────────────────────
+    // Helpers
+    // ─────────────────────────────────────────────────────────
+
+    const hours = Array.from({ length: 14 }, (_, i) => i + 6); // 6 AM to 7 PM
+
+    const getEventsForDay = (date: Date) => {
+        return filteredEvents.filter(e =>
+            e.start.toDateString() === date.toDateString()
+        );
+    };
+
+    const getEventForSlot = (date: Date, hour: number) => {
+        return filteredEvents.find(e => {
+            if (e.start.toDateString() !== date.toDateString()) return false;
+            const startH = e.start.getHours();
+            const endH = e.end.getHours() + (e.end.getMinutes() > 0 ? 1 : 0);
+            return hour >= startH && hour < endH;
+        });
+    };
+
+    const isEventStart = (event: ScheduleEvent, hour: number) => {
+        return event.start.getHours() === hour;
+    };
+
+    const getEventDuration = (event: ScheduleEvent) => {
+        return Math.ceil((event.end.getTime() - event.start.getTime()) / 3600000);
+    };
+
     const formatHour = (hour: number) => {
         const ampm = hour >= 12 ? 'PM' : 'AM';
-        const h = hour > 12 ? hour - 12 : hour;
+        const h = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
         return `${h}:00 ${ampm}`;
     };
 
-    const getEventTypeConfig = (type: string) => {
-        switch (type) {
-            case 'class': return { color: '#8B5CF6', bg: 'rgba(139, 92, 246, 0.15)', label: 'Class' };
-            case 'pt': return { color: '#10B981', bg: 'rgba(16, 185, 129, 0.15)', label: 'PT' };
-            case 'meeting': return { color: '#F59E0B', bg: 'rgba(245, 158, 11, 0.15)', label: 'Meeting' };
-            case 'break': return { color: '#6B7280', bg: 'rgba(107, 114, 128, 0.15)', label: 'Break' };
-            case 'blocked': return { color: '#EF4444', bg: 'rgba(239, 68, 68, 0.15)', label: 'Blocked' };
-            default: return { color: '#6B7280', bg: 'rgba(107, 114, 128, 0.15)', label: '' };
-        }
+    const getStatusConfig = (status: string) => {
+        return STATUS_UI[status] || STATUS_UI.SCHEDULED;
     };
+
+    const weekDayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+    // ─────────────────────────────────────────────────────────
+    // Skeleton Loading
+    // ─────────────────────────────────────────────────────────
+
+    if (loading) {
+        return (
+            <div className="trainer-schedule">
+                <div className="trainer-schedule__header">
+                    <div className="trainer-schedule__title-row">
+                        <div className="trainer-schedule__title-section">
+                            <h1>My Schedule</h1>
+                            <span className="trainer-schedule__week-badge skeleton" style={{ width: 100 }} />
+                        </div>
+                    </div>
+                </div>
+                <div className="trainer-schedule__content">
+                    <div className="trainer-schedule__skeleton-grid">
+                        {Array.from({ length: 21 }).map((_, i) => (
+                            <div key={i} className="trainer-schedule__skeleton-slot" />
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // ─────────────────────────────────────────────────────────
+    // Error State
+    // ─────────────────────────────────────────────────────────
+
+    if (error) {
+        return (
+            <div className="trainer-schedule">
+                <div className="trainer-schedule__header">
+                    <div className="trainer-schedule__title-row">
+                        <div className="trainer-schedule__title-section">
+                            <h1>My Schedule</h1>
+                        </div>
+                    </div>
+                </div>
+                <div className="trainer-schedule__error">
+                    <AlertCircle size={48} />
+                    <h3>Failed to load schedule</h3>
+                    <p>{error}</p>
+                    <button onClick={fetchSchedule} className="trainer-schedule__retry-btn">
+                        <RefreshCw size={14} /> Retry
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    // ─────────────────────────────────────────────────────────
+    // Render
+    // ─────────────────────────────────────────────────────────
 
     return (
         <div className="trainer-schedule">
+            {/* Header */}
             <div className="trainer-schedule__header">
                 <div className="trainer-schedule__title-row">
                     <div className="trainer-schedule__title-section">
                         <h1>My Schedule</h1>
                         <span className="trainer-schedule__week-badge">
                             <CalendarIcon size={10} />
-                            Week of Mar 25
+                            Week of {formatShortDate(weekRange.start)}
                         </span>
                     </div>
 
                     <div className="trainer-schedule__week-stats">
-                        <div className="trainer-schedule__week-stat">
-                            <span className="trainer-schedule__week-stat-value">{stats.classes}</span>
-                            <span className="trainer-schedule__week-stat-label">Classes</span>
-                        </div>
                         <div className="trainer-schedule__week-stat trainer-schedule__week-stat--highlight">
-                            <span className="trainer-schedule__week-stat-value">{stats.pts}</span>
-                            <span className="trainer-schedule__week-stat-label">PT Sessions</span>
+                            <span className="trainer-schedule__week-stat-value">{stats.scheduled}</span>
+                            <span className="trainer-schedule__week-stat-label">Upcoming</span>
+                        </div>
+                        <div className="trainer-schedule__week-stat">
+                            <span className="trainer-schedule__week-stat-value">{stats.completed}</span>
+                            <span className="trainer-schedule__week-stat-label">Completed</span>
                         </div>
                         <div className="trainer-schedule__week-stat">
                             <span className="trainer-schedule__week-stat-value">{stats.totalHours}h</span>
@@ -147,36 +285,35 @@ const MySchedule: React.FC = () => {
                     </div>
 
                     <div className="trainer-schedule__header-actions">
-                        <button className="trainer-schedule__sync-btn">
+                        <button className="trainer-schedule__sync-btn" onClick={fetchSchedule}>
                             <RefreshCw size={12} />
-                            Sync Calendar
-                        </button>
-                        <button className="trainer-schedule__export-btn">
-                            <Download size={12} />
-                            Export
-                        </button>
-                        <button className="trainer-schedule__add-btn" onClick={() => setShowAddModal(true)}>
-                            <Plus size={14} />
-                            Add Event
+                            Refresh
                         </button>
                     </div>
                 </div>
             </div>
 
+            {/* Content */}
             <div className="trainer-schedule__content">
+                {/* Toolbar */}
                 <div className="trainer-schedule__toolbar">
                     <div className="trainer-schedule__view-toggle">
-                        <button className={viewMode === 'agenda' ? 'active' : ''} onClick={() => setViewMode('agenda')}><List size={12} /> Agenda</button>
+                        <button className={viewMode === 'agenda' ? 'active' : ''} onClick={() => setViewMode('agenda')}>
+                            <List size={12} /> Agenda
+                        </button>
                         <button className={viewMode === 'day' ? 'active' : ''} onClick={() => setViewMode('day')}>Day</button>
                         <button className={viewMode === 'week' ? 'active' : ''} onClick={() => setViewMode('week')}>Week</button>
-                        <button className={viewMode === 'month' ? 'active' : ''} onClick={() => setViewMode('month')}>Month</button>
                     </div>
 
                     <div className="trainer-schedule__date-nav">
-                        <button className="trainer-schedule__nav-btn"><ChevronLeft size={16} /></button>
-                        <span className="trainer-schedule__date-text">March 2024</span>
-                        <button className="trainer-schedule__nav-btn"><ChevronRight size={16} /></button>
-                        <button className="trainer-schedule__today-btn">Today</button>
+                        <button className="trainer-schedule__nav-btn" onClick={goToPrevWeek}>
+                            <ChevronLeft size={16} />
+                        </button>
+                        <span className="trainer-schedule__date-text">{formatMonthYear(currentDate)}</span>
+                        <button className="trainer-schedule__nav-btn" onClick={goToNextWeek}>
+                            <ChevronRight size={16} />
+                        </button>
+                        <button className="trainer-schedule__today-btn" onClick={goToToday}>Today</button>
                     </div>
 
                     <div className="trainer-schedule__filter-group">
@@ -193,23 +330,21 @@ const MySchedule: React.FC = () => {
                     </div>
                 </div>
 
+                {/* Filters Panel */}
                 {showFilters && (
                     <div className="trainer-schedule__filters-panel">
-                        <span className="trainer-schedule__filters-label">Show:</span>
-                        {['class', 'pt', 'meeting', 'break', 'blocked'].map(type => {
-                            const config = getEventTypeConfig(type);
-                            return (
-                                <button
-                                    key={type}
-                                    className={`trainer-schedule__filter-chip ${activeFilters.includes(type) ? 'active' : ''}`}
-                                    onClick={() => toggleFilter(type)}
-                                    style={{ '--chip-color': config.color } as React.CSSProperties}
-                                >
-                                    <span className="trainer-schedule__filter-dot" style={{ background: config.color }} />
-                                    {config.label}
-                                </button>
-                            );
-                        })}
+                        <span className="trainer-schedule__filters-label">Status:</span>
+                        {Object.entries(STATUS_UI).map(([status, config]) => (
+                            <button
+                                key={status}
+                                className={`trainer-schedule__filter-chip ${activeFilters.includes(status) ? 'active' : ''}`}
+                                onClick={() => toggleFilter(status)}
+                                style={{ '--chip-color': config.color } as React.CSSProperties}
+                            >
+                                <span className="trainer-schedule__filter-dot" style={{ background: config.color }} />
+                                {config.label}
+                            </button>
+                        ))}
                         {activeFilters.length > 0 && (
                             <button className="trainer-schedule__clear-filters" onClick={() => setActiveFilters([])}>
                                 Clear all
@@ -218,22 +353,22 @@ const MySchedule: React.FC = () => {
                     </div>
                 )}
 
+                {/* Week View */}
                 {viewMode === 'week' && (
                     <div className="trainer-schedule__week-view">
                         <div className="trainer-schedule__week-header">
                             <div className="trainer-schedule__time-gutter" />
-                            {weekDays.map((day, i) => {
-                                const date = weekDates[i];
-                                const isToday = date === 25;
-                                const dayEvents = filteredEvents.filter(e => e.day === date);
+                            {weekDates.map((date, i) => {
+                                const dayEvents = getEventsForDay(date);
+                                const isTodayDate = isToday(date);
                                 return (
-                                    <div key={day} className={`trainer-schedule__week-day-header ${isToday ? 'trainer-schedule__week-day-header--today' : ''}`}>
-                                        <span className="trainer-schedule__week-day-name">{day}</span>
-                                        <span className={`trainer-schedule__week-day-date ${isToday ? 'trainer-schedule__week-day-date--today' : ''}`}>
-                                            {date}
+                                    <div key={i} className={`trainer-schedule__week-day-header ${isTodayDate ? 'trainer-schedule__week-day-header--today' : ''}`}>
+                                        <span className="trainer-schedule__week-day-name">{weekDayNames[i]}</span>
+                                        <span className={`trainer-schedule__week-day-date ${isTodayDate ? 'trainer-schedule__week-day-date--today' : ''}`}>
+                                            {date.getDate()}
                                         </span>
                                         {dayEvents.length > 0 && (
-                                            <span className="trainer-schedule__week-day-count">{dayEvents.length} events</span>
+                                            <span className="trainer-schedule__week-day-count">{dayEvents.length} sessions</span>
                                         )}
                                     </div>
                                 );
@@ -249,53 +384,42 @@ const MySchedule: React.FC = () => {
                                 ))}
                             </div>
 
-                            {weekDays.map((day, dayIndex) => {
-                                const date = weekDates[dayIndex];
-                                const isToday = date === 25;
+                            {weekDates.map((date, dayIndex) => {
+                                const isTodayDate = isToday(date);
                                 return (
-                                    <div key={day} className={`trainer-schedule__day-column ${isToday ? 'trainer-schedule__day-column--today' : ''}`}>
+                                    <div key={dayIndex} className={`trainer-schedule__day-column ${isTodayDate ? 'trainer-schedule__day-column--today' : ''}`}>
                                         {hours.map(hour => {
                                             const event = getEventForSlot(date, hour);
-                                            const config = event ? getEventTypeConfig(event.type) : null;
+                                            const statusConfig = event ? getStatusConfig(event.status) : null;
 
                                             if (event && !isEventStart(event, hour)) {
                                                 return <div key={hour} className="trainer-schedule__hour-slot trainer-schedule__hour-slot--occupied" />;
                                             }
 
                                             return (
-                                                <div
-                                                    key={hour}
-                                                    className="trainer-schedule__hour-slot"
-                                                    onClick={() => !event && setSelectedSlot({ day: date, hour })}
-                                                >
+                                                <div key={hour} className="trainer-schedule__hour-slot">
                                                     {event && isEventStart(event, hour) && (
                                                         <div
-                                                            className={`trainer-schedule__event-block trainer-schedule__event-block--${event.type}`}
+                                                            className={`trainer-schedule__event-block ${statusConfig?.muted ? 'trainer-schedule__event-block--muted' : ''}`}
                                                             style={{
                                                                 height: `calc(${getEventDuration(event) * 100}% + ${(getEventDuration(event) - 1)}px)`,
-                                                                background: config?.bg,
-                                                                borderLeftColor: config?.color
+                                                                background: statusConfig?.bg,
+                                                                borderLeftColor: statusConfig?.color
                                                             }}
-                                                            onClick={(e) => { e.stopPropagation(); setSelectedEvent(event); }}
+                                                            onClick={() => setSelectedEvent(event)}
                                                         >
                                                             <div className="trainer-schedule__event-time">
-                                                                {event.startTime} - {event.endTime}
+                                                                {formatTime(event.start)} - {formatTime(event.end)}
                                                             </div>
-                                                            <div className="trainer-schedule__event-title">{event.title}</div>
-                                                            {event.room && (
-                                                                <div className="trainer-schedule__event-room">
-                                                                    <MapPin size={9} /> {event.room}
-                                                                </div>
+                                                            <div className="trainer-schedule__event-title">
+                                                                {event.title}
+                                                                {event.recurring && <Repeat size={10} className="trainer-schedule__recurring-icon" />}
+                                                            </div>
+                                                            {event.status === 'CANCELLED' && (
+                                                                <span className="trainer-schedule__event-cancelled">Cancelled</span>
                                                             )}
-                                                            {event.enrolled !== undefined && (
-                                                                <div className="trainer-schedule__event-enrolled">
-                                                                    <Users size={9} /> {event.enrolled}/{event.capacity}
-                                                                </div>
-                                                            )}
-                                                            {event.recurring && (
-                                                                <div className="trainer-schedule__event-recurring">
-                                                                    <Repeat size={9} />
-                                                                </div>
+                                                            {event.status === 'COMPLETED' && (
+                                                                <CheckCircle size={12} className="trainer-schedule__event-completed-icon" />
                                                             )}
                                                         </div>
                                                     )}
@@ -314,202 +438,83 @@ const MySchedule: React.FC = () => {
                     </div>
                 )}
 
-                {viewMode === 'day' && (
-                    <div className="trainer-schedule__day-view">
-                        <div className="trainer-schedule__day-header">
-                            <h2>Monday, March 25</h2>
-                            <span className="trainer-schedule__day-summary">
-                                {filteredEvents.filter(e => e.day === 25).length} events scheduled
-                            </span>
-                        </div>
-                        <div className="trainer-schedule__day-timeline">
-                            {hours.map(hour => {
-                                const hourEvents = filteredEvents.filter(e => {
-                                    const [startH] = e.startTime.split(':').map(Number);
-                                    return e.day === 25 && startH === hour;
-                                });
-                                return (
-                                    <div key={hour} className="trainer-schedule__day-row">
-                                        <div className="trainer-schedule__day-time">{formatHour(hour)}</div>
-                                        <div className="trainer-schedule__day-events">
-                                            {hourEvents.map(event => {
-                                                const config = getEventTypeConfig(event.type);
-                                                return (
-                                                    <div
-                                                        key={event.id}
-                                                        className="trainer-schedule__day-event"
-                                                        style={{ borderLeftColor: config.color, background: config.bg }}
-                                                        onClick={() => setSelectedEvent(event)}
-                                                    >
-                                                        <div className="trainer-schedule__day-event-header">
-                                                            <h4>{event.title}</h4>
-                                                            <span className="trainer-schedule__day-event-type" style={{ color: config.color }}>
-                                                                {config.label}
-                                                            </span>
-                                                        </div>
-                                                        <div className="trainer-schedule__day-event-meta">
-                                                            <span><Clock size={11} /> {event.startTime} - {event.endTime}</span>
-                                                            {event.room && <span><MapPin size={11} /> {event.room}</span>}
-                                                            {event.enrolled !== undefined && <span><Users size={11} /> {event.enrolled}/{event.capacity}</span>}
-                                                        </div>
-                                                        {event.notes && (
-                                                            <div className="trainer-schedule__day-event-notes">{event.notes}</div>
-                                                        )}
-                                                    </div>
-                                                );
-                                            })}
-                                            {hourEvents.length === 0 && (
-                                                <div className="trainer-schedule__day-empty" onClick={() => setSelectedSlot({ day: 25, hour })}>
-                                                    <Plus size={12} /> Add event
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                )}
-
-                {viewMode === 'month' && (
-                    <div className="trainer-schedule__month-view">
-                        <div className="trainer-schedule__month-weekdays">
-                            {weekDays.map(day => (
-                                <div key={day} className="trainer-schedule__month-weekday">{day}</div>
-                            ))}
-                        </div>
-                        <div className="trainer-schedule__month-grid">
-                            {Array.from({ length: 5 }).map((_, i) => (
-                                <div key={i} className="trainer-schedule__month-week">
-                                    {Array.from({ length: 7 }).map((_, j) => (
-                                        <div key={j} className="trainer-schedule__month-day" />
-                                    ))}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
+                {/* Agenda View */}
                 {viewMode === 'agenda' && (
                     <div className="trainer-schedule__agenda-view">
                         <div className="trainer-schedule__agenda-header">
-                            <h2>Today's Agenda</h2>
-                            <span className="trainer-schedule__agenda-date">Monday, March 25</span>
+                            <h2>This Week's Sessions</h2>
+                            <span className="trainer-schedule__agenda-date">
+                                {formatShortDate(weekRange.start)} – {formatShortDate(weekRange.end)}
+                            </span>
                         </div>
                         <div className="trainer-schedule__agenda-list">
-                            {filteredEvents
-                                .filter(e => e.day === 25)
-                                .sort((a, b) => a.startTime.localeCompare(b.startTime))
-                                .map((event, idx) => {
-                                    const config = getEventTypeConfig(event.type);
-                                    // Check for conflicts
-                                    const hasConflict = filteredEvents.some(other => {
-                                        if (other.id === event.id || other.day !== event.day) return false;
-                                        const eventStart = parseInt(event.startTime.replace(':', ''));
-                                        const eventEnd = parseInt(event.endTime.replace(':', ''));
-                                        const otherStart = parseInt(other.startTime.replace(':', ''));
-                                        const otherEnd = parseInt(other.endTime.replace(':', ''));
-                                        return (eventStart < otherEnd && eventEnd > otherStart);
-                                    });
-
-                                    return (
-                                        <div
-                                            key={event.id}
-                                            className="trainer-schedule__agenda-card"
-                                            style={{ borderLeftColor: config.color }}
-                                        >
-
-                                            <div className="trainer-schedule__agenda-time">
-                                                <span className="trainer-schedule__agenda-time-start">{event.startTime}</span>
-                                                <span className="trainer-schedule__agenda-time-sep">–</span>
-                                                <span className="trainer-schedule__agenda-time-end">{event.endTime}</span>
-                                            </div>
-
-                                            <div className="trainer-schedule__agenda-content">
-                                                <div className="trainer-schedule__agenda-header-row">
-                                                    {hasConflict && (
-                                                        <span className="trainer-schedule__agenda-conflict-badge" title="Schedule conflict detected">
-                                                            <AlertTriangle size={10} />
-                                                        </span>
-                                                    )}
-                                                    <h3 className="trainer-schedule__agenda-title">{event.title}</h3>
-                                                </div>
-                                                <div className="trainer-schedule__agenda-type-badge" style={{ background: config.bg, color: config.color }}>
-                                                    {config.label}
-                                                </div>
-                                                <div className="trainer-schedule__agenda-meta">
-                                                    {event.room && (
-                                                        <span><MapPin size={11} /> {event.room}</span>
-                                                    )}
-                                                    {event.enrolled !== undefined && (
-                                                        <span><Users size={11} /> {event.enrolled}/{event.capacity}</span>
-                                                    )}
-                                                    {event.recurring && (
-                                                        <span><Repeat size={11} /> Recurring</span>
-                                                    )}
-                                                </div>
-                                                {event.notes && (
-                                                    <p className="trainer-schedule__agenda-notes">{event.notes}</p>
-                                                )}
-                                            </div>
-
-                                            <div className="trainer-schedule__agenda-actions">
-                                                {(event.type === 'class' || event.type === 'pt') && event.status !== 'completed' && (
-                                                    <>
-                                                        <button
-                                                            className="trainer-schedule__agenda-action trainer-schedule__agenda-action--complete"
-                                                            title="Mark Complete"
-                                                        >
-                                                            <CheckCircle size={18} />
-                                                        </button>
-                                                        <button
-                                                            className="trainer-schedule__agenda-action trainer-schedule__agenda-action--noshow"
-                                                            title="Mark No-Show"
-                                                        >
-                                                            <XCircle size={18} />
-                                                        </button>
-                                                    </>
-                                                )}
-                                                {event.status === 'completed' && (
-                                                    <span className="trainer-schedule__agenda-completed">
-                                                        <Check size={14} /> Done
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-
-                            {filteredEvents.filter(e => e.day === 25).length === 0 && (
+                            {filteredEvents.length === 0 ? (
                                 <div className="trainer-schedule__agenda-empty">
                                     <CalendarIcon size={32} />
-                                    <h3>No events scheduled</h3>
-                                    <p>Your day is free! Add an event to get started.</p>
+                                    <h3>No sessions scheduled</h3>
+                                    <p>Your week is clear! Sessions will appear here when booked.</p>
                                 </div>
+                            ) : (
+                                filteredEvents
+                                    .sort((a, b) => a.start.getTime() - b.start.getTime())
+                                    .map(event => {
+                                        const statusConfig = getStatusConfig(event.status);
+                                        return (
+                                            <div
+                                                key={event.id}
+                                                className={`trainer-schedule__agenda-card ${statusConfig.muted ? 'trainer-schedule__agenda-card--muted' : ''}`}
+                                                style={{ borderLeftColor: statusConfig.color }}
+                                                onClick={() => setSelectedEvent(event)}
+                                            >
+                                                <div className="trainer-schedule__agenda-time">
+                                                    <span className="trainer-schedule__agenda-date-label">
+                                                        {event.start.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                                                    </span>
+                                                    <span className="trainer-schedule__agenda-time-range">
+                                                        {formatTime(event.start)} – {formatTime(event.end)}
+                                                    </span>
+                                                </div>
+                                                <div className="trainer-schedule__agenda-content">
+                                                    <h3 className="trainer-schedule__agenda-title">
+                                                        {event.title}
+                                                        {event.recurring && <Repeat size={12} />}
+                                                    </h3>
+                                                    <div className="trainer-schedule__agenda-status" style={{ color: statusConfig.color }}>
+                                                        {statusConfig.label}
+                                                    </div>
+                                                    {event.notes && (
+                                                        <p className="trainer-schedule__agenda-notes">{event.notes}</p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        );
+                                    })
                             )}
                         </div>
                     </div>
                 )}
 
+                {/* Legend */}
                 <div className="trainer-schedule__legend">
-                    {['class', 'pt', 'meeting', 'break', 'blocked'].map(type => {
-                        const config = getEventTypeConfig(type);
-                        return (
-                            <div key={type} className="trainer-schedule__legend-item">
-                                <span className="trainer-schedule__legend-dot" style={{ background: config.color }} />
-                                {config.label}
-                            </div>
-                        );
-                    })}
+                    {Object.entries(STATUS_UI).map(([status, config]) => (
+                        <div key={status} className="trainer-schedule__legend-item">
+                            <span className="trainer-schedule__legend-dot" style={{ background: config.color }} />
+                            {config.label}
+                        </div>
+                    ))}
                 </div>
             </div>
 
+            {/* Event Detail Modal */}
             {selectedEvent && (
                 <div className="trainer-schedule__modal-overlay" onClick={() => setSelectedEvent(null)}>
                     <div className="trainer-schedule__modal" onClick={e => e.stopPropagation()}>
                         <div className="trainer-schedule__modal-header">
-                            <div className="trainer-schedule__modal-type" style={{ background: getEventTypeConfig(selectedEvent.type).bg, color: getEventTypeConfig(selectedEvent.type).color }}>
-                                {getEventTypeConfig(selectedEvent.type).label}
+                            <div
+                                className="trainer-schedule__modal-type"
+                                style={{ background: getStatusConfig(selectedEvent.status).bg, color: getStatusConfig(selectedEvent.status).color }}
+                            >
+                                {getStatusConfig(selectedEvent.status).label}
                             </div>
                             <button className="trainer-schedule__modal-close" onClick={() => setSelectedEvent(null)}>
                                 <X size={16} />
@@ -517,27 +522,24 @@ const MySchedule: React.FC = () => {
                         </div>
                         <div className="trainer-schedule__modal-body">
                             <h2>{selectedEvent.title}</h2>
+                            {selectedEvent.recurring && (
+                                <div className="trainer-schedule__modal-recurring">
+                                    <Repeat size={14} /> Recurring Session
+                                </div>
+                            )}
                             <div className="trainer-schedule__modal-details">
                                 <div className="trainer-schedule__modal-detail">
-                                    <Clock size={14} />
-                                    <span>{selectedEvent.startTime} - {selectedEvent.endTime}</span>
+                                    <CalendarIcon size={14} />
+                                    <span>{selectedEvent.start.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</span>
                                 </div>
-                                {selectedEvent.room && (
-                                    <div className="trainer-schedule__modal-detail">
-                                        <MapPin size={14} />
-                                        <span>{selectedEvent.room}</span>
-                                    </div>
-                                )}
-                                {selectedEvent.enrolled !== undefined && (
+                                <div className="trainer-schedule__modal-detail">
+                                    <Clock size={14} />
+                                    <span>{formatTime(selectedEvent.start)} – {formatTime(selectedEvent.end)}</span>
+                                </div>
+                                {selectedEvent.client && (
                                     <div className="trainer-schedule__modal-detail">
                                         <Users size={14} />
-                                        <span>{selectedEvent.enrolled} / {selectedEvent.capacity} enrolled</span>
-                                    </div>
-                                )}
-                                {selectedEvent.recurring && (
-                                    <div className="trainer-schedule__modal-detail">
-                                        <Repeat size={14} />
-                                        <span>Recurring: {selectedEvent.recurringDays?.join(', ')}</span>
+                                        <span>{selectedEvent.client}</span>
                                     </div>
                                 )}
                             </div>
@@ -547,28 +549,18 @@ const MySchedule: React.FC = () => {
                                     <p>{selectedEvent.notes}</p>
                                 </div>
                             )}
-                            {selectedEvent.client && (
-                                <div className="trainer-schedule__modal-client">
-                                    <h4>Client</h4>
-                                    <p>{selectedEvent.client}</p>
-                                </div>
-                            )}
                         </div>
                         <div className="trainer-schedule__modal-actions">
-                            {selectedEvent.type === 'class' && (
-                                <button className="trainer-schedule__modal-btn trainer-schedule__modal-btn--primary">
-                                    <Users size={12} /> Take Attendance
-                                </button>
+                            {selectedEvent.status === 'SCHEDULED' && (
+                                <>
+                                    <button className="trainer-schedule__modal-btn trainer-schedule__modal-btn--primary">
+                                        <CheckCircle size={12} /> Mark Complete
+                                    </button>
+                                    <button className="trainer-schedule__modal-btn trainer-schedule__modal-btn--danger">
+                                        <XCircle size={12} /> Mark No-Show
+                                    </button>
+                                </>
                             )}
-                            <button className="trainer-schedule__modal-btn">
-                                <Edit2 size={12} /> Edit
-                            </button>
-                            <button className="trainer-schedule__modal-btn">
-                                <Copy size={12} /> Duplicate
-                            </button>
-                            <button className="trainer-schedule__modal-btn trainer-schedule__modal-btn--danger">
-                                <Trash2 size={12} /> Cancel
-                            </button>
                         </div>
                     </div>
                 </div>
