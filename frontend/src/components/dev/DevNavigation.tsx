@@ -55,11 +55,15 @@ const dashboards: DashboardOption[] = [
         description: 'Trainer portal',
         subPages: [
             { name: 'Dashboard', path: '/trainer' },
-            { name: 'Schedule', path: '/trainer/schedule' },
-            { name: 'Members', path: '/trainer/members' },
-            { name: 'Classes', path: '/trainer/classes' },
+            { name: 'My Schedule', path: '/trainer/schedule' },
+            { name: 'My Members', path: '/trainer/members' },
+            { name: 'Progress Notes', path: '/trainer/notes' },
+            { name: 'My Classes', path: '/trainer/classes' },
             { name: 'Messages', path: '/trainer/messages' },
-            { name: 'Profile', path: '/trainer/profile' }
+            { name: 'Notifications', path: '/trainer/notifications' },
+            { name: 'Reports', path: '/trainer/reports' },
+            { name: 'Profile', path: '/trainer/profile' },
+            { name: 'Settings', path: '/trainer/settings' }
         ]
     },
     {
@@ -180,8 +184,9 @@ const DevNavigation: React.FC = () => {
         }
     };
 
-    const handleNavigate = (path: string, role: string) => {
-        devLogin(role as any, path);
+    const handleNavigate = (path: string, _role: string) => {
+        // Direct navigation - no auth needed in development
+        navigate(path);
     };
 
     if (!import.meta.env.DEV && window.location.hostname !== 'localhost') {

@@ -10,7 +10,20 @@ interface ProtectedRouteProps {
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles }) => {
     const { user, isAuthenticated, isLoading } = useAuth();
     const location = useLocation();
-    const isDevMode = localStorage.getItem('dev_mode_active') === 'true';
+
+    // DEV MODE: Completely bypass ALL authentication on localhost
+    // This allows accessing any page without login during development
+    const isDevelopment = import.meta.env.DEV ||
+        window.location.hostname === 'localhost' ||
+        window.location.hostname === '127.0.0.1';
+
+    // In development, ALWAYS allow access - no auth checks at all
+    if (isDevelopment) {
+        return <>{children}</>;
+    }
+
+    // === PRODUCTION AUTH CHECKS BELOW ===
+    // Only run auth checks in production
 
     if (isLoading) {
         return (
@@ -18,11 +31,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
                 <div className="w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div>
             </div>
         );
-    }
-
-    // GOD MODE: In development, if dev_mode_active is set, bypass ALL security checks
-    if (isDevMode && (import.meta.env.DEV || window.location.hostname === 'localhost')) {
-        return <>{children}</>;
     }
 
     if (!isAuthenticated || !user) {
@@ -46,3 +54,4 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
 };
 
 export default ProtectedRoute;
+
