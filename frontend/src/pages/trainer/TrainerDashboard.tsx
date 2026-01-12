@@ -7,11 +7,9 @@ import {
     Phone, Award, Dumbbell, FileText, MapPin,
     Play, AlertCircle
 } from 'lucide-react';
-import { format, differenceInMinutes, parseISO } from 'date-fns';
+import { format, differenceInMinutes } from 'date-fns';
 import { usePageEntry, useCountUp, useButtonPress } from '../../hooks/useAnimations';
 import ActiveSessionToast from '../../components/shared/ActiveSessionToast';
-import trainerApi from '../../services/trainerApi';
-import type { TrainerDashboardData, TrainerSession } from '../../services/trainerApi';
 import './TrainerDashboard.css'; // Dedicated Mission Control styles
 
 interface Session {
@@ -44,57 +42,74 @@ const TrainerDashboard: React.FC = () => {
     const [showToast, setShowToast] = useState(true);
     const [toastStatus, setToastStatus] = useState<'active' | 'ended'>('active');
     const [sessions, setSessions] = useState<Session[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const timer = setInterval(() => setCurrentTime(new Date()), 1000);
         return () => clearInterval(timer);
     }, []);
 
+    // Mock data - UI works without backend
     useEffect(() => {
-        const fetchDashboardData = async () => {
-            try {
-                setLoading(true);
-                const dashboardData = await trainerApi.getDashboard();
-                
-                // Map API data to component state
-                setData({
-                    trainerName: dashboardData.trainerName,
-                    todayEarnings: (dashboardData as any).todayEarnings || 0,
-                    monthEarnings: (dashboardData as any).monthEarnings || 0,
-                    completedToday: (dashboardData as any).completedToday || 0,
-                    totalToday: (dashboardData as any).totalToday || 0,
-                    attendanceRate: (dashboardData as any).attendanceRate || 0,
-                    activeMembers: (dashboardData as any).activeMembers || 0,
-                    totalMembers: (dashboardData as any).totalMembers || 0,
-                });
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-                // Map sessions from API
-                const apiSessions = (dashboardData as any).sessions || [];
-                const mappedSessions: Session[] = apiSessions.map((s: any) => ({
-                    id: String(s.id),
-                    title: s.title,
-                    type: s.type,
-                    startTime: parseISO(s.startTime),
-                    endTime: parseISO(s.endTime),
-                    room: s.room,
-                    enrolled: s.enrolled,
-                    capacity: s.capacity,
-                    status: s.status,
-                }));
-                
-                setSessions(mappedSessions);
-                setError(null);
-            } catch (err: any) {
-                console.error('Failed to fetch trainer dashboard:', err);
-                setError(err.message || 'Failed to load dashboard');
-            } finally {
-                setLoading(false);
+        setData({
+            trainerName: 'John Smith',
+            todayEarnings: 2450,
+            monthEarnings: 48500,
+            completedToday: 2,
+            totalToday: 5,
+            attendanceRate: 94,
+            activeMembers: 18,
+            totalMembers: 24,
+        });
+
+        setSessions([
+            {
+                id: '1',
+                title: 'Morning Yoga',
+                type: 'class',
+                startTime: new Date(today.getTime() + 6 * 60 * 60 * 1000),
+                endTime: new Date(today.getTime() + 7 * 60 * 60 * 1000),
+                room: 'Studio A',
+                enrolled: 12,
+                capacity: 15,
+                status: 'completed',
+            },
+            {
+                id: '2',
+                title: 'PT: Emma Davis',
+                type: 'pt',
+                startTime: new Date(now.getTime() - 20 * 60 * 1000),
+                endTime: new Date(now.getTime() + 40 * 60 * 1000),
+                room: 'Training Zone',
+                enrolled: 1,
+                capacity: 1,
+                status: 'in-progress',
+            },
+            {
+                id: '3',
+                title: 'Strength Training',
+                type: 'class',
+                startTime: new Date(today.getTime() + 14 * 60 * 60 * 1000),
+                endTime: new Date(today.getTime() + 15 * 60 * 60 * 1000),
+                room: 'Weight Room',
+                enrolled: 6,
+                capacity: 10,
+                status: 'upcoming',
+            },
+            {
+                id: '4',
+                title: 'PT: Mike Chen',
+                type: 'pt',
+                startTime: new Date(today.getTime() + 16 * 60 * 60 * 1000),
+                endTime: new Date(today.getTime() + 17 * 60 * 60 * 1000),
+                room: 'Training Zone',
+                enrolled: 1,
+                capacity: 1,
+                status: 'upcoming',
             }
-        };
-
-        fetchDashboardData();
+        ]);
     }, []);
 
     const currentSession = useMemo(() => sessions.find(s => s.status === 'in-progress'), [sessions]);
@@ -131,23 +146,7 @@ const TrainerDashboard: React.FC = () => {
         // Optional: Reset status after closing if needed, though unmounting handles it
     };
 
-    if (loading) return <div className="tp" style={{ padding: 40, textAlign: 'center', color: 'rgba(255,255,255,0.5)' }}>Loading Dashboard...</div>;
-    
-    if (error) return (
-        <div className="tp" style={{ padding: 40, textAlign: 'center', color: '#EF4444' }}>
-            <AlertCircle size={48} style={{ marginBottom: 16, opacity: 0.5 }} />
-            <h3>Failed to Load Dashboard</h3>
-            <p>{error}</p>
-            <button 
-                onClick={() => window.location.reload()}
-                style={{ marginTop: 16, padding: '8px 16px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid #EF4444', borderRadius: 4, color: '#EF4444', cursor: 'pointer' }}
-            >
-                Retry
-            </button>
-        </div>
-    );
-
-    if (!data) return <div className="tp" style={{ padding: 40, textAlign: 'center', color: 'rgba(255,255,255,0.5)' }}>No data available</div>;
+    if (!data) return <div className="tp" style={{ padding: 40, textAlign: 'center', color: 'rgba(255,255,255,0.5)' }}>Loading...</div>;
 
     const trainerFirstName = (data.trainerName || 'Trainer').split(' ')[0];
 

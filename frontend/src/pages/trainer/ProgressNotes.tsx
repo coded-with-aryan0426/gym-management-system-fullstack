@@ -1,16 +1,36 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import {
-    Search, Plus, Download, ChevronDown, Trash2, Edit2,
-    Paperclip, X, Calendar, Clock, Target, TrendingUp,
+import React, { useState, useMemo } from 'react';
+import { 
+    Search, Plus, Download, ChevronDown, Trash2, Edit2, 
+    Paperclip, X, Calendar, Clock, Target, TrendingUp, 
     ChevronRight, Filter, Image, FileText, Video, MoreVertical,
     Star, Award, AlertTriangle, CheckCircle, Activity, Zap,
     User, BarChart2, Camera, MessageSquare, Tag
 } from 'lucide-react';
-import { toast } from 'react-hot-toast';
-import { format, parseISO } from 'date-fns';
-import trainerApi from '../../services/trainerApi';
-import type { ProgressNote as IProgressNote, TrainerMember } from '../../services/trainerApi';
 import './ProgressNotes.css';
+
+interface ProgressNote {
+    id: number;
+    member: { 
+        name: string; 
+        avatar: string;
+        goal: string;
+        startDate: string;
+    };
+    date: string;
+    time: string;
+    sessionType: string;
+    category: 'strength' | 'cardio' | 'flexibility' | 'nutrition' | 'general';
+    mood: 'excellent' | 'good' | 'average' | 'struggling';
+    content: string;
+    highlights?: string[];
+    concerns?: string[];
+    goals?: string[];
+    stats: { label: string; value: string; change?: string; trend?: 'up' | 'down' | 'neutral' }[];
+    attachments: { type: 'photo' | 'video' | 'document'; name: string }[];
+    tags: string[];
+    followUp?: string;
+    private: boolean;
+}
 
 const ProgressNotes: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -18,57 +38,121 @@ const ProgressNotes: React.FC = () => {
     const [filterCategory, setFilterCategory] = useState('all');
     const [filterTime, setFilterTime] = useState('This Month');
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedNote, setSelectedNote] = useState<any | null>(null);
+    const [selectedNote, setSelectedNote] = useState<ProgressNote | null>(null);
     const [viewMode, setViewMode] = useState<'timeline' | 'grid'>('timeline');
     const [showFilters, setShowFilters] = useState(false);
 
-    const [notes, setNotes] = useState<IProgressNote[]>([]);
-    const [membersList, setMembersList] = useState<TrainerMember[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    const [newNote, setNewNote] = useState({
-        memberId: '',
-        note: '',
-        category: 'general'
-    });
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setLoading(true);
-                const [notesData, membersData] = await Promise.all([
-                    trainerApi.getAllNotes(),
-                    trainerApi.getMyMembers()
-                ]);
-                setNotes(notesData);
-                setMembersList(membersData);
-            } catch (err) {
-                console.error('Failed to fetch notes data:', err);
-                toast.error('Failed to load notes');
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchData();
-    }, []);
-
-    const handleAddNote = async () => {
-        if (!newNote.memberId || !newNote.note) {
-            toast.error('Please select a member and enter a note');
-            return;
+    const notes: ProgressNote[] = [
+        {
+            id: 1,
+            member: { 
+                name: 'Sarah Wilson', 
+                avatar: 'https://ui-avatars.com/api/?name=Sarah+Wilson&background=DC2626&color=fff',
+                goal: 'Build muscle & strength',
+                startDate: 'Jan 15, 2024'
+            },
+            date: 'March 25, 2024',
+            time: '2:30 PM',
+            sessionType: 'Upper Body Strength',
+            category: 'strength',
+            mood: 'excellent',
+            content: 'Great progress on squats today! Increased weight from 135lbs to 155lbs with excellent form. Sarah is showing consistent improvement in leg strength. Her dedication is really paying off.',
+            highlights: ['Hit new squat PR at 155lbs', 'Perfect form maintained', 'Increased confidence'],
+            goals: ['Progress to 165lbs by next month', 'Add hip mobility work'],
+            stats: [
+                { label: 'Weight', value: '78 kg', change: '-2kg', trend: 'down' },
+                { label: 'Body Fat', value: '18%', change: '-1.5%', trend: 'down' },
+                { label: 'Squat PR', value: '155 lbs', change: '+20lbs', trend: 'up' }
+            ],
+            attachments: [
+                { type: 'photo', name: 'Form Check Photo' },
+                { type: 'document', name: 'Workout Log' }
+            ],
+            tags: ['PR', 'strength', 'legs'],
+            followUp: 'Check squat depth next session',
+            private: false
+        },
+        {
+            id: 2,
+            member: { 
+                name: 'Mike Johnson', 
+                avatar: 'https://ui-avatars.com/api/?name=Mike+Johnson&background=3B82F6&color=fff',
+                goal: 'Weight loss & endurance',
+                startDate: 'Feb 1, 2024'
+            },
+            date: 'March 22, 2024',
+            time: '10:00 AM',
+            sessionType: 'Cardio HIIT',
+            category: 'cardio',
+            mood: 'struggling',
+            content: 'Struggled with HIIT today. Mike mentioned work stress affecting sleep. Adjusted rest periods to 90 seconds instead of 60. Need to monitor energy levels.',
+            concerns: ['Low energy today', 'Sleep issues reported', 'Work stress affecting performance'],
+            goals: ['Focus on steady state cardio twice this week', 'Improve sleep hygiene'],
+            stats: [
+                { label: 'Avg HR', value: '145 bpm', trend: 'neutral' },
+                { label: 'Max HR', value: '178 bpm', trend: 'neutral' },
+                { label: 'Calories', value: '420', change: '-80', trend: 'down' }
+            ],
+            attachments: [],
+            tags: ['cardio', 'adjustment', 'recovery'],
+            followUp: 'Check in about sleep at next session',
+            private: true
+        },
+        {
+            id: 3,
+            member: { 
+                name: 'Emma Davis', 
+                avatar: 'https://ui-avatars.com/api/?name=Emma+Davis&background=10B981&color=fff',
+                goal: 'Overall fitness & flexibility',
+                startDate: 'Dec 5, 2023'
+            },
+            date: 'March 20, 2024',
+            time: '4:00 PM',
+            sessionType: 'Full Body Circuit',
+            category: 'strength',
+            mood: 'excellent',
+            content: 'Excellent session! Completed full circuit with no breaks. Emma is ready to move to advanced program. Her consistency over the past 3 months has been impressive.',
+            highlights: ['Completed full circuit without rest', 'Ready for advanced program', '3-month milestone achieved'],
+            stats: [
+                { label: 'Reps', value: '120', change: '+15', trend: 'up' },
+                { label: 'Time', value: '45 min', change: '-5min', trend: 'up' },
+                { label: 'Intensity', value: 'High', trend: 'up' }
+            ],
+            attachments: [
+                { type: 'video', name: 'Circuit Recording' }
+            ],
+            tags: ['milestone', 'advancement', 'full-body'],
+            private: false
+        },
+        {
+            id: 4,
+            member: { 
+                name: 'James Wilson', 
+                avatar: 'https://ui-avatars.com/api/?name=James+Wilson&background=F59E0B&color=fff',
+                goal: 'Rehabilitation & mobility',
+                startDate: 'Mar 1, 2024'
+            },
+            date: 'March 18, 2024',
+            time: '11:30 AM',
+            sessionType: 'Mobility & Rehab',
+            category: 'flexibility',
+            mood: 'good',
+            content: 'Good progress on shoulder mobility. Range of motion improved by 15 degrees. James is following home exercises consistently. Continue current protocol.',
+            highlights: ['15° improvement in shoulder ROM', 'Consistent with home exercises'],
+            stats: [
+                { label: 'Shoulder ROM', value: '135°', change: '+15°', trend: 'up' },
+                { label: 'Pain Level', value: '3/10', change: '-2', trend: 'down' }
+            ],
+            attachments: [
+                { type: 'photo', name: 'ROM Assessment' }
+            ],
+            tags: ['rehab', 'mobility', 'shoulder'],
+            followUp: 'Re-assess in 2 weeks',
+            private: false
         }
+    ];
 
-        try {
-            const saved = await trainerApi.addMemberNote(Number(newNote.memberId), newNote.note);
-            setNotes(prev => [saved, ...prev]);
-            setIsModalOpen(false);
-            setNewNote({ memberId: '', note: '', category: 'general' });
-            toast.success('Note added successfully');
-        } catch (err) {
-            console.error('Failed to add note:', err);
-            toast.error('Failed to add note');
-        }
-    };
+    const members = ['All Members', 'Sarah Wilson', 'Mike Johnson', 'Emma Davis', 'James Wilson'];
     const categories = [
         { value: 'all', label: 'All Categories', icon: Target },
         { value: 'strength', label: 'Strength', icon: Zap },
@@ -80,27 +164,21 @@ const ProgressNotes: React.FC = () => {
 
     const filteredNotes = useMemo(() => {
         return notes.filter(note => {
-            const memberName = membersList.find(m => m.userId === note.memberId)?.fullName || 'Unknown Member';
-            const matchesMember = filterMember === 'All Members' || memberName === filterMember;
-            const matchesCategory = filterCategory === 'all' || (note as any).category === filterCategory;
-            const content = note.note || '';
-            const matchesSearch = searchQuery === '' ||
-                content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                memberName.toLowerCase().includes(searchQuery.toLowerCase());
+            const matchesMember = filterMember === 'All Members' || note.member.name === filterMember;
+            const matchesCategory = filterCategory === 'all' || note.category === filterCategory;
+            const matchesSearch = searchQuery === '' || 
+                note.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                note.member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                note.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
             return matchesMember && matchesCategory && matchesSearch;
         });
-    }, [notes, membersList, filterMember, filterCategory, searchQuery]);
+    }, [notes, filterMember, filterCategory, searchQuery]);
 
     const stats = useMemo(() => ({
         totalNotes: notes.length,
-        thisWeek: notes.filter(n => {
-            const date = new Date(n.createdAt);
-            const now = new Date();
-            const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-            return date >= weekAgo;
-        }).length,
-        membersTracked: new Set(notes.map(n => n.memberId)).size,
-        prsRecorded: 0
+        thisWeek: notes.filter(n => n.date.includes('March 2')).length,
+        membersTracked: new Set(notes.map(n => n.member.name)).size,
+        prsRecorded: notes.filter(n => n.tags.includes('PR')).length
     }), [notes]);
 
     const getMoodIcon = (mood: string) => {
@@ -171,9 +249,9 @@ const ProgressNotes: React.FC = () => {
                 <div className="progress-notes__toolbar">
                     <div className="progress-notes__search">
                         <Search size={14} />
-                        <input
-                            type="text"
-                            placeholder="Search notes, members, tags..."
+                        <input 
+                            type="text" 
+                            placeholder="Search notes, members, tags..." 
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
@@ -195,8 +273,7 @@ const ProgressNotes: React.FC = () => {
                         <div className="progress-notes__filter-dropdown">
                             <User size={12} />
                             <select value={filterMember} onChange={(e) => setFilterMember(e.target.value)}>
-                                <option>All Members</option>
-                                {membersList.map(m => <option key={m.userId} value={m.fullName}>{m.fullName}</option>)}
+                                {members.map(m => <option key={m}>{m}</option>)}
                             </select>
                             <ChevronDown size={12} />
                         </div>
@@ -221,15 +298,15 @@ const ProgressNotes: React.FC = () => {
 
                 <div className="progress-notes__timeline">
                     {filteredNotes.map(note => (
-                        <div
-                            key={note.id}
-                            className={`progress-note ${note.private === true ? 'progress-note--private' : ''}`}
+                        <div 
+                            key={note.id} 
+                            className={`progress-note ${note.private ? 'progress-note--private' : ''}`}
                             onClick={() => setSelectedNote(note)}
                         >
                             <div className="progress-note__indicator">
-                                <div
-                                    className="progress-note__dot"
-                                    style={{ background: getCategoryColor(note.category || 'general') }}
+                                <div 
+                                    className="progress-note__dot" 
+                                    style={{ background: getCategoryColor(note.category) }}
                                 />
                                 <div className="progress-note__line" />
                             </div>
@@ -237,23 +314,20 @@ const ProgressNotes: React.FC = () => {
                             <div className="progress-note__card">
                                 <div className="progress-note__header">
                                     <div className="progress-note__member">
-                                        <img
-                                            src={`https://ui-avatars.com/api/?name=${membersList.find(m => m.userId === note.memberId)?.fullName || 'U'}&background=DC2626&color=fff&size=40`}
-                                            alt="member"
-                                        />
+                                        <img src={note.member.avatar} alt={note.member.name} />
                                         <div className="progress-note__member-info">
-                                            <h3>{membersList.find(m => m.userId === note.memberId)?.fullName || 'Unknown Member'}</h3>
-                                            <span className="progress-note__member-goal">Goal Tracking</span>
+                                            <h3>{note.member.name}</h3>
+                                            <span className="progress-note__member-goal">{note.member.goal}</span>
                                         </div>
                                     </div>
                                     <div className="progress-note__header-right">
                                         <div className="progress-note__mood">
-                                            {getMoodIcon((note as any).mood || 'good')}
-                                            <span>{(note as any).mood || 'good'}</span>
+                                            {getMoodIcon(note.mood)}
+                                            <span>{note.mood}</span>
                                         </div>
                                         <div className="progress-note__date">
                                             <Calendar size={11} />
-                                            {format(parseISO(note.createdAt), 'MMM d, yyyy')}
+                                            {note.date}
                                         </div>
                                         <button className="progress-note__menu-btn">
                                             <MoreVertical size={14} />
@@ -262,49 +336,49 @@ const ProgressNotes: React.FC = () => {
                                 </div>
 
                                 <div className="progress-note__session">
-                                    <span
+                                    <span 
                                         className="progress-note__category"
-                                        style={{ background: `${getCategoryColor((note as any).category || 'general')}20`, color: getCategoryColor((note as any).category || 'general') }}
+                                        style={{ background: `${getCategoryColor(note.category)}20`, color: getCategoryColor(note.category) }}
                                     >
-                                        {(note as any).category || 'General'}
+                                        {note.category}
                                     </span>
-                                    <span className="progress-note__session-type">{(note as any).sessionType || 'Training Session'}</span>
+                                    <span className="progress-note__session-type">{note.sessionType}</span>
                                     <span className="progress-note__time">
-                                        <Clock size={11} /> {format(parseISO(note.createdAt), 'h:mm a')}
+                                        <Clock size={11} /> {note.time}
                                     </span>
                                 </div>
 
-                                <p className="progress-note__text">{note.note}</p>
+                                <p className="progress-note__text">{note.content}</p>
 
-                                {(note as any).highlights && (note as any).highlights.length > 0 && (
+                                {note.highlights && note.highlights.length > 0 && (
                                     <div className="progress-note__highlights">
                                         <span className="progress-note__section-label">
                                             <Award size={11} /> Highlights
                                         </span>
                                         <ul>
-                                            {(note as any).highlights.map((h: string, i: number) => (
+                                            {note.highlights.map((h, i) => (
                                                 <li key={i}>{h}</li>
                                             ))}
                                         </ul>
                                     </div>
                                 )}
 
-                                {(note as any).concerns && (note as any).concerns.length > 0 && (
+                                {note.concerns && note.concerns.length > 0 && (
                                     <div className="progress-note__concerns">
                                         <span className="progress-note__section-label">
                                             <AlertTriangle size={11} /> Concerns
                                         </span>
                                         <ul>
-                                            {(note as any).concerns.map((c: string, i: number) => (
+                                            {note.concerns.map((c, i) => (
                                                 <li key={i}>{c}</li>
                                             ))}
                                         </ul>
                                     </div>
                                 )}
 
-                                {(note as any).stats && (note as any).stats.length > 0 && (
+                                {note.stats.length > 0 && (
                                     <div className="progress-note__stats">
-                                        {(note as any).stats.map((stat: any, i: number) => (
+                                        {note.stats.map((stat, i) => (
                                             <div key={i} className="progress-note__stat">
                                                 <span className="progress-note__stat-label">{stat.label}</span>
                                                 <div className="progress-note__stat-row">
@@ -323,16 +397,16 @@ const ProgressNotes: React.FC = () => {
 
                                 <div className="progress-note__footer">
                                     <div className="progress-note__tags">
-                                        {((note as any).tags || []).map((tag: string, i: number) => (
+                                        {note.tags.map((tag, i) => (
                                             <span key={i} className="progress-note__tag">
                                                 <Tag size={9} /> {tag}
                                             </span>
                                         ))}
                                     </div>
 
-                                    {(note as any).attachments && (note as any).attachments.length > 0 && (
+                                    {note.attachments.length > 0 && (
                                         <div className="progress-note__attachments">
-                                            {(note as any).attachments.map((att: any, i: number) => (
+                                            {note.attachments.map((att, i) => (
                                                 <button key={i} className="progress-note__attachment">
                                                     {getAttachmentIcon(att.type)}
                                                     {att.name}
@@ -342,7 +416,7 @@ const ProgressNotes: React.FC = () => {
                                     )}
                                 </div>
 
-                                {note.followUp && note.followUp.length > 0 && (
+                                {note.followUp && (
                                     <div className="progress-note__followup">
                                         <MessageSquare size={11} />
                                         <strong>Follow-up:</strong> {note.followUp}
@@ -378,12 +452,9 @@ const ProgressNotes: React.FC = () => {
                         <div className="progress-notes__modal-body">
                             <div className="progress-notes__form-field">
                                 <label>Select Member *</label>
-                                <select
-                                    value={newNote.memberId}
-                                    onChange={(e) => setNewNote(prev => ({ ...prev, memberId: e.target.value }))}
-                                >
-                                    <option value="">Search or select member...</option>
-                                    {membersList.map(m => <option key={m.userId} value={m.userId}>{m.fullName}</option>)}
+                                <select>
+                                    <option>Search or select member...</option>
+                                    {members.slice(1).map(m => <option key={m}>{m}</option>)}
                                 </select>
                             </div>
 
