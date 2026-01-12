@@ -1,12 +1,9 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
     Search, Grid, List, Download, MoreVertical, MessageSquare, 
     ChevronDown, Users, Clock, TrendingUp, Target, Calendar
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { format, parseISO } from 'date-fns';
-import trainerApi from '../../services/trainerApi';
-import type { TrainerMemberDetail } from '../../services/trainerApi';
 import './MyMembers.css';
 
 const MyMembers: React.FC = () => {
@@ -15,58 +12,40 @@ const MyMembers: React.FC = () => {
     const [filter, setFilter] = useState('All');
     const [searchQuery, setSearchQuery] = useState('');
     const [quickFilter, setQuickFilter] = useState<string | null>(null);
-    const [members, setMembers] = useState<TrainerMemberDetail[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [page, setPage] = useState(0);
-    const [totalPages, setTotalPages] = useState(0);
 
-    useEffect(() => {
-        const fetchMembers = async () => {
-            try {
-                setLoading(true);
-                const response = await trainerApi.getMyMembersPaginated({
-                    page,
-                    size: 12,
-                    q: searchQuery,
-                    status: filter.toLowerCase() as any
-                });
-                setMembers(response.items || []);
-                setTotalPages(response.totalPages || 0);
-            } catch (err) {
-                console.error('Failed to fetch members:', err);
-                setMembers([]);
-                setTotalPages(0);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        const debounceTimer = setTimeout(fetchMembers, 300);
-        return () => clearTimeout(debounceTimer);
-    }, [page, searchQuery, filter]);
+    const members = [
+        { id: 1, name: 'Sarah Wilson', email: 'sarah@email.com', phone: '+1 555-1234', status: 'ACTIVE', plan: 'Premium Monthly', daysLeft: 25, stats: { classes: 18, weight: '78kg', pt: '6/12' }, lastSession: '2 days ago', goal: 'Weight Loss' },
+        { id: 2, name: 'Mike Johnson', email: 'mike@email.com', phone: '+1 555-5678', status: 'INACTIVE', plan: 'Basic', daysLeft: 0, stats: { classes: 5, weight: '92kg', pt: '0/0' }, lastSession: '2 weeks ago', goal: 'Muscle Gain' },
+        { id: 3, name: 'Emma Davis', email: 'emma@email.com', phone: '+1 555-9012', status: 'ACTIVE', plan: 'Pro Annual', daysLeft: 200, stats: { classes: 42, weight: '65kg', pt: '12/20' }, lastSession: 'Today', goal: 'Strength' },
+        { id: 4, name: 'James Wilson', email: 'james@email.com', phone: '+1 555-3456', status: 'ACTIVE', plan: 'Premium Monthly', daysLeft: 12, stats: { classes: 8, weight: '82kg', pt: '2/10' }, lastSession: 'Yesterday', goal: 'Endurance' },
+        { id: 5, name: 'Lisa Chen', email: 'lisa@email.com', phone: '+1 555-7890', status: 'ACTIVE', plan: 'Pro Annual', daysLeft: 5, stats: { classes: 32, weight: '58kg', pt: '8/12' }, lastSession: '3 days ago', goal: 'Flexibility' },
+    ];
 
     const stats = useMemo(() => {
-        const membersList = Array.isArray(members) ? members : [];
-        const activeCount = membersList.filter(m => m && (m.status === 'active' || m.status === 'ACTIVE')).length;
-        const todaySessions = 0; 
-        const needsAttention = membersList.filter(m => m && m.status === 'at-risk').length;
-        const expiringSoon = membersList.filter(m => m && m.expiryDays !== undefined && m.expiryDays > 0 && m.expiryDays <= 7).length;
-        return { activeCount, needsAttention, expiringSoon, todaySessions, total: membersList.length };
+        const activeCount = members.filter(m => m.status === 'ACTIVE').length;
+        const needsAttention = members.filter(m => m.lastSession === '2 weeks ago' || m.status === 'INACTIVE').length;
+        const expiringSoon = members.filter(m => m.daysLeft > 0 && m.daysLeft <= 7).length;
+        const todaySessions = members.filter(m => m.lastSession === 'Today').length;
+        return { activeCount, needsAttention, expiringSoon, todaySessions, total: members.length };
     }, [members]);
 
-    const filteredMembers = useMemo(() => {
-        const membersList = Array.isArray(members) ? members : [];
-        if (!quickFilter) return membersList;
+    const filteredMembers = members.filter(m => {
+        const matchesSearch = m.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                             m.email.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesFilter = filter === 'All' || m.status === filter.toUpperCase();
         
         if (quickFilter === 'needs-attention') {
-            return membersList.filter(m => m && m.status === 'at-risk');
+            return matchesSearch && matchesFilter && (m.lastSession === '2 weeks ago' || m.status === 'INACTIVE');
         }
         if (quickFilter === 'expiring-soon') {
-            return membersList.filter(m => m && m.expiryDays !== undefined && m.expiryDays > 0 && m.expiryDays <= 7);
+            return matchesSearch && matchesFilter && m.daysLeft > 0 && m.daysLeft <= 7;
+        }
+        if (quickFilter === 'today') {
+            return matchesSearch && matchesFilter && m.lastSession === 'Today';
         }
         
-        return membersList;
-    }, [members, quickFilter]);
+        return matchesSearch && matchesFilter;
+    });
 
     const toggleQuickFilter = (filterName: string) => {
         setQuickFilter(prev => prev === filterName ? null : filterName);
@@ -150,119 +129,110 @@ const MyMembers: React.FC = () => {
             </div>
 
             <div className="my-members__content">
-                {loading ? (
-                    <div className="my-members__loading">
-                        <div className="loader"></div>
-                        <p>Loading members...</p>
+                {viewMode === 'grid' && (
+                    <div className="my-members__grid">
+                        {filteredMembers.map(member => (
+                            <div key={member.id} className="member-card">
+                                <div className="member-card__header">
+                                    <div className="member-card__avatar">
+                                        <img 
+                                            src={`https://ui-avatars.com/api/?name=${member.name}&background=DC2626&color=fff&size=48`}
+                                            alt={member.name}
+                                        />
+                                    </div>
+                                    <span className={`member-card__status member-card__status--${member.status.toLowerCase()}`}>
+                                        {member.status}
+                                    </span>
+                                </div>
+                                <div className="member-card__info">
+                                    <h3>{member.name}</h3>
+                                    <p>{member.plan} • {member.daysLeft > 0 ? `${member.daysLeft}d left` : 'Expired'}</p>
+                                </div>
+                                <div className="member-card__meta">
+                                    <span className="member-card__goal">
+                                        <Target size={10} />
+                                        {member.goal}
+                                    </span>
+                                    <span className="member-card__last-session">
+                                        <Clock size={10} />
+                                        {member.lastSession}
+                                    </span>
+                                </div>
+                                <div className="member-card__divider" />
+                                <div className="member-card__stats">
+                                    <div className="member-card__stat">
+                                        <span className="member-card__stat-value">{member.stats.classes}</span>
+                                        <span className="member-card__stat-label">Classes</span>
+                                    </div>
+                                    <div className="member-card__stat">
+                                        <span className="member-card__stat-value">{member.stats.weight}</span>
+                                        <span className="member-card__stat-label">Weight</span>
+                                    </div>
+                                    <div className="member-card__stat">
+                                        <span className="member-card__stat-value">{member.stats.pt}</span>
+                                        <span className="member-card__stat-label">PT</span>
+                                    </div>
+                                </div>
+                                <div className="member-card__actions">
+                                    <button className="member-card__btn member-card__btn--primary">View Profile</button>
+                                    <button className="member-card__btn member-card__btn--icon">
+                                        <MessageSquare size={12} />
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
                     </div>
-                ) : (
-                    <>
-                        {viewMode === 'grid' && (
-                            <div className="my-members__grid">
-                                {filteredMembers.map(member => (
-                                    <div key={member.userId} className="member-card">
-                                        <div className="member-card__header">
-                                            <div className="member-card__avatar">
-                                                <img 
-                                                    src={`https://ui-avatars.com/api/?name=${member.fullName}&background=DC2626&color=fff&size=48`}
-                                                    alt={member.fullName}
-                                                />
-                                            </div>
-                                            <span className={`member-card__status member-card__status--${(member.status || 'active').toLowerCase()}`}>
-                                                {member.status || 'Active'}
-                                            </span>
-                                        </div>
-                                        <div className="member-card__info">
-                                            <h3>{member.fullName}</h3>
-                                            <p>{member.plan || 'Standard'} • {member.expiryDays !== undefined ? (member.expiryDays > 0 ? `${member.expiryDays}d left` : 'Expired') : 'N/A'}</p>
-                                        </div>
-                                        <div className="member-card__meta">
-                                            <span className="member-card__goal">
-                                                <Target size={10} />
-                                                {member.goal || 'Fitness'}
-                                            </span>
-                                            <span className="member-card__last-session">
-                                                <Clock size={10} />
-                                                {member.lastVisit ? format(parseISO(member.lastVisit), 'MMM d') : 'No visit'}
-                                            </span>
-                                        </div>
-                                        <div className="member-card__divider" />
-                                        <div className="member-card__stats">
-                                            <div className="member-card__stat">
-                                                <span className="member-card__stat-value">{member.stats?.classes || 0}</span>
-                                                <span className="member-card__stat-label">Classes</span>
-                                            </div>
-                                            <div className="member-card__stat">
-                                                <span className="member-card__stat-value">{member.stats?.weight || '--'}</span>
-                                                <span className="member-card__stat-label">Weight</span>
-                                            </div>
-                                            <div className="member-card__stat">
-                                                <span className="member-card__stat-value">{member.stats?.ptSessions || '0/0'}</span>
-                                                <span className="member-card__stat-label">PT</span>
-                                            </div>
-                                        </div>
-                                        <div className="member-card__actions">
-                                            <button className="member-card__btn member-card__btn--primary" onClick={() => navigate(`/trainer/members/${member.userId}`)}>View Profile</button>
-                                            <button className="member-card__btn member-card__btn--icon">
-                                                <MessageSquare size={12} />
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-
-                        {viewMode === 'list' && (
-                            <div className="my-members__list">
-                                {filteredMembers.map(member => (
-                                    <div key={member.userId} className="member-list-item">
-                                        <div className="member-list-item__avatar">
-                                            <img 
-                                                src={`https://ui-avatars.com/api/?name=${member.fullName}&background=DC2626&color=fff&size=40`}
-                                                alt={member.fullName}
-                                            />
-                                        </div>
-                                        <div className="member-list-item__info">
-                                            <h3>{member.fullName}</h3>
-                                            <p>{member.email} • {member.phoneNumber || 'No phone'}</p>
-                                        </div>
-                                        <div className="member-list-item__meta">
-                                            <span className="member-list-item__goal">
-                                                <Target size={10} />
-                                                {member.goal || 'Fitness'}
-                                            </span>
-                                            <span className="member-list-item__last-session">
-                                                <Clock size={10} />
-                                                {member.lastVisit ? format(parseISO(member.lastVisit), 'MMM d') : 'No visit'}
-                                            </span>
-                                        </div>
-                                        <span className={`member-list-item__status member-list-item__status--${(member.status || 'active').toLowerCase()}`}>
-                                            {member.status || 'Active'}
-                                        </span>
-                                        <div className="member-list-item__stats">
-                                            <div className="member-list-item__stat">
-                                                <span className="member-list-item__stat-value">{member.stats?.classes || 0}</span>
-                                                <span className="member-list-item__stat-label">Classes</span>
-                                            </div>
-                                            <div className="member-list-item__stat">
-                                                <span className="member-list-item__stat-value">{member.stats?.weight || '--'}</span>
-                                                <span className="member-list-item__stat-label">Weight</span>
-                                            </div>
-                                        </div>
-                                        <div className="member-list-item__actions">
-                                            <button className="member-list-item__btn member-list-item__btn--primary" onClick={() => navigate(`/trainer/members/${member.userId}`)}>View</button>
-                                            <button className="member-list-item__btn member-list-item__btn--icon">
-                                                <MoreVertical size={14} />
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </>
                 )}
 
-                {!loading && filteredMembers.length === 0 && (
+                {viewMode === 'list' && (
+                    <div className="my-members__list">
+                        {filteredMembers.map(member => (
+                            <div key={member.id} className="member-list-item">
+                                <div className="member-list-item__avatar">
+                                    <img 
+                                        src={`https://ui-avatars.com/api/?name=${member.name}&background=DC2626&color=fff&size=40`}
+                                        alt={member.name}
+                                    />
+                                </div>
+                                <div className="member-list-item__info">
+                                    <h3>{member.name}</h3>
+                                    <p>{member.email} • {member.phone}</p>
+                                </div>
+                                <div className="member-list-item__meta">
+                                    <span className="member-list-item__goal">
+                                        <Target size={10} />
+                                        {member.goal}
+                                    </span>
+                                    <span className="member-list-item__last-session">
+                                        <Clock size={10} />
+                                        {member.lastSession}
+                                    </span>
+                                </div>
+                                <span className={`member-list-item__status member-list-item__status--${member.status.toLowerCase()}`}>
+                                    {member.status}
+                                </span>
+                                <div className="member-list-item__stats">
+                                    <div className="member-list-item__stat">
+                                        <span className="member-list-item__stat-value">{member.stats.classes}</span>
+                                        <span className="member-list-item__stat-label">Classes</span>
+                                    </div>
+                                    <div className="member-list-item__stat">
+                                        <span className="member-list-item__stat-value">{member.stats.weight}</span>
+                                        <span className="member-list-item__stat-label">Weight</span>
+                                    </div>
+                                </div>
+                                <div className="member-list-item__actions">
+                                    <button className="member-list-item__btn member-list-item__btn--primary">View</button>
+                                    <button className="member-list-item__btn member-list-item__btn--icon">
+                                        <MoreVertical size={14} />
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                {filteredMembers.length === 0 && (
                     <div className="my-members__empty">
                         <Users size={32} />
                         <p>No members found</p>
