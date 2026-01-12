@@ -95,16 +95,73 @@ const MySchedule: React.FC = () => {
         setLoading(true);
         setError(null);
         try {
-            const sessions = await trainerApi.getSchedule(weekRange.startISO, weekRange.endISO);
-            const mapped = sessions.map(mapSessionToEvent);
-            setEvents(mapped);
+            // MOCK DATA - no API call needed
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+            const mockEvents: ScheduleEvent[] = [
+                {
+                    id: 1,
+                    title: 'PT – Sarah Wilson',
+                    start: new Date(today.getTime() + 9 * 60 * 60 * 1000),
+                    end: new Date(today.getTime() + 10 * 60 * 60 * 1000),
+                    type: 'pt',
+                    status: 'SCHEDULED',
+                    client: 'Sarah Wilson',
+                    recurring: true,
+                    notes: 'Focus on upper body strength'
+                },
+                {
+                    id: 2,
+                    title: 'PT – Mike Johnson',
+                    start: new Date(today.getTime() + 11 * 60 * 60 * 1000),
+                    end: new Date(today.getTime() + 12 * 60 * 60 * 1000),
+                    type: 'pt',
+                    status: 'SCHEDULED',
+                    client: 'Mike Johnson',
+                    recurring: false,
+                    notes: 'Weight loss program'
+                },
+                {
+                    id: 3,
+                    title: 'PT – Emma Davis',
+                    start: new Date(today.getTime() + 14 * 60 * 60 * 1000),
+                    end: new Date(today.getTime() + 15 * 60 * 60 * 1000),
+                    type: 'pt',
+                    status: 'SCHEDULED',
+                    client: 'Emma Davis',
+                    recurring: true
+                },
+                {
+                    id: 4,
+                    title: 'PT – James White',
+                    start: new Date(today.getTime() - 24 * 60 * 60 * 1000 + 10 * 60 * 60 * 1000),
+                    end: new Date(today.getTime() - 24 * 60 * 60 * 1000 + 11 * 60 * 60 * 1000),
+                    type: 'pt',
+                    status: 'COMPLETED',
+                    client: 'James White',
+                    recurring: false
+                },
+                {
+                    id: 5,
+                    title: 'PT – Lisa Anderson',
+                    start: new Date(today.getTime() + 24 * 60 * 60 * 1000 + 9 * 60 * 60 * 1000),
+                    end: new Date(today.getTime() + 24 * 60 * 60 * 1000 + 10 * 60 * 60 * 1000),
+                    type: 'pt',
+                    status: 'SCHEDULED',
+                    client: 'Lisa Anderson',
+                    recurring: true
+                }
+            ];
+
+            setEvents(mockEvents);
         } catch (err) {
-            console.error('Failed to fetch schedule:', err);
+            console.error('Failed to load schedule:', err);
             setError('Failed to load schedule. Please try again.');
         } finally {
             setLoading(false);
         }
-    }, [weekRange.startISO, weekRange.endISO]);
+    }, []);
 
     useEffect(() => {
         fetchSchedule();
