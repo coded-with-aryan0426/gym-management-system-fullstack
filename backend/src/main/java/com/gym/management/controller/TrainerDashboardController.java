@@ -69,14 +69,15 @@ public class TrainerDashboardController {
 
             dashboard.put("totalToday", todaysSessionsList.size());
             long completedToday = todaysSessionsList.stream()
-                    .filter(s -> s.getStatus() == SessionStatus.COMPLETED)
+                    .filter(s -> s.getStatus() != null && s.getStatus().name().equals("COMPLETED"))
                     .count();
             dashboard.put("completedToday", completedToday);
 
             // Mock earnings
             dashboard.put("todayEarnings", completedToday * 500);
             dashboard.put("monthEarnings", allSessions.stream()
-                    .filter(s -> s.getStatus() == SessionStatus.COMPLETED && 
+                    .filter(s -> s.getStatus() != null && 
+                            s.getStatus().name().equals("COMPLETED") && 
                             s.getSessionDate() != null && 
                             s.getSessionDate().getMonth() == today.getMonth())
                     .count() * 500);
@@ -92,7 +93,7 @@ public class TrainerDashboardController {
                                     (s.getSessionDate().isAfter(now) && s.getSessionDate().isBefore(weekLater))))
                     .map(s -> {
                         Map<String, Object> sessionMap = new HashMap<>();
-                        sessionMap.put("id", String.valueOf(s.getSessionId()));
+                        sessionMap.put("id", s.getSessionId());
                         sessionMap.put("title", "PT: " + (s.getMember() != null ? s.getMember().getFullName() : "Member"));
                         sessionMap.put("type", "pt");
                         sessionMap.put("startTime", s.getSessionDate());
@@ -100,7 +101,7 @@ public class TrainerDashboardController {
                         sessionMap.put("room", "Training Zone");
                         sessionMap.put("enrolled", 1);
                         sessionMap.put("capacity", 1);
-                        sessionMap.put("status", s.getStatus() != null ? s.getStatus().toString().toLowerCase() : "upcoming");
+                        sessionMap.put("status", s.getStatus() != null ? s.getStatus().name().toLowerCase() : "upcoming");
                         return sessionMap;
                     })
                     .collect(Collectors.toList());
@@ -244,6 +245,17 @@ public class TrainerDashboardController {
         try {
             Long trainerId = getAuthenticatedTrainerId();
             List<ProgressNote> notes = progressNoteRepository.findByTrainerAndMember(trainerId, memberId);
+            return ResponseEntity.ok(notes);
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/notes")
+    public ResponseEntity<?> getAllNotes() {
+        try {
+            Long trainerId = getAuthenticatedTrainerId();
+            List<ProgressNote> notes = progressNoteRepository.findByTrainerId(trainerId);
             return ResponseEntity.ok(notes);
         } catch (Exception e) {
             return ResponseEntity.status(401).body(Map.of("error", e.getMessage()));

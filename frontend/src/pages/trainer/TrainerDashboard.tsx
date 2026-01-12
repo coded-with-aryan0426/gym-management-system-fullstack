@@ -10,7 +10,8 @@ import {
 import { format, differenceInMinutes, parseISO } from 'date-fns';
 import { usePageEntry, useCountUp, useButtonPress } from '../../hooks/useAnimations';
 import ActiveSessionToast from '../../components/shared/ActiveSessionToast';
-import trainerApi, { TrainerDashboardData, TrainerSession } from '../../services/trainerApi';
+import trainerApi from '../../services/trainerApi';
+import type { TrainerDashboardData, TrainerSession } from '../../services/trainerApi';
 import './TrainerDashboard.css'; // Dedicated Mission Control styles
 
 interface Session {

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
     Search, Plus, Download, ChevronDown, Trash2, Edit2, 
     Paperclip, X, Calendar, Clock, Target, TrendingUp, 
@@ -6,31 +6,10 @@ import {
     Star, Award, AlertTriangle, CheckCircle, Activity, Zap,
     User, BarChart2, Camera, MessageSquare, Tag
 } from 'lucide-react';
+import { toast } from 'react-hot-toast';
+import trainerApi from '../../services/trainerApi';
+import type { ProgressNote as IProgressNote, TrainerMember } from '../../services/trainerApi';
 import './ProgressNotes.css';
-
-interface ProgressNote {
-    id: number;
-    member: { 
-        name: string; 
-        avatar: string;
-        goal: string;
-        startDate: string;
-    };
-    date: string;
-    time: string;
-    sessionType: string;
-    category: 'strength' | 'cardio' | 'flexibility' | 'nutrition' | 'general';
-    mood: 'excellent' | 'good' | 'average' | 'struggling';
-    content: string;
-    highlights?: string[];
-    concerns?: string[];
-    goals?: string[];
-    stats: { label: string; value: string; change?: string; trend?: 'up' | 'down' | 'neutral' }[];
-    attachments: { type: 'photo' | 'video' | 'document'; name: string }[];
-    tags: string[];
-    followUp?: string;
-    private: boolean;
-}
 
 const ProgressNotes: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -38,121 +17,57 @@ const ProgressNotes: React.FC = () => {
     const [filterCategory, setFilterCategory] = useState('all');
     const [filterTime, setFilterTime] = useState('This Month');
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedNote, setSelectedNote] = useState<ProgressNote | null>(null);
+    const [selectedNote, setSelectedNote] = useState<any | null>(null);
     const [viewMode, setViewMode] = useState<'timeline' | 'grid'>('timeline');
     const [showFilters, setShowFilters] = useState(false);
+    
+    const [notes, setNotes] = useState<IProgressNote[]>([]);
+    const [membersList, setMembersList] = useState<TrainerMember[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    const notes: ProgressNote[] = [
-        {
-            id: 1,
-            member: { 
-                name: 'Sarah Wilson', 
-                avatar: 'https://ui-avatars.com/api/?name=Sarah+Wilson&background=DC2626&color=fff',
-                goal: 'Build muscle & strength',
-                startDate: 'Jan 15, 2024'
-            },
-            date: 'March 25, 2024',
-            time: '2:30 PM',
-            sessionType: 'Upper Body Strength',
-            category: 'strength',
-            mood: 'excellent',
-            content: 'Great progress on squats today! Increased weight from 135lbs to 155lbs with excellent form. Sarah is showing consistent improvement in leg strength. Her dedication is really paying off.',
-            highlights: ['Hit new squat PR at 155lbs', 'Perfect form maintained', 'Increased confidence'],
-            goals: ['Progress to 165lbs by next month', 'Add hip mobility work'],
-            stats: [
-                { label: 'Weight', value: '78 kg', change: '-2kg', trend: 'down' },
-                { label: 'Body Fat', value: '18%', change: '-1.5%', trend: 'down' },
-                { label: 'Squat PR', value: '155 lbs', change: '+20lbs', trend: 'up' }
-            ],
-            attachments: [
-                { type: 'photo', name: 'Form Check Photo' },
-                { type: 'document', name: 'Workout Log' }
-            ],
-            tags: ['PR', 'strength', 'legs'],
-            followUp: 'Check squat depth next session',
-            private: false
-        },
-        {
-            id: 2,
-            member: { 
-                name: 'Mike Johnson', 
-                avatar: 'https://ui-avatars.com/api/?name=Mike+Johnson&background=3B82F6&color=fff',
-                goal: 'Weight loss & endurance',
-                startDate: 'Feb 1, 2024'
-            },
-            date: 'March 22, 2024',
-            time: '10:00 AM',
-            sessionType: 'Cardio HIIT',
-            category: 'cardio',
-            mood: 'struggling',
-            content: 'Struggled with HIIT today. Mike mentioned work stress affecting sleep. Adjusted rest periods to 90 seconds instead of 60. Need to monitor energy levels.',
-            concerns: ['Low energy today', 'Sleep issues reported', 'Work stress affecting performance'],
-            goals: ['Focus on steady state cardio twice this week', 'Improve sleep hygiene'],
-            stats: [
-                { label: 'Avg HR', value: '145 bpm', trend: 'neutral' },
-                { label: 'Max HR', value: '178 bpm', trend: 'neutral' },
-                { label: 'Calories', value: '420', change: '-80', trend: 'down' }
-            ],
-            attachments: [],
-            tags: ['cardio', 'adjustment', 'recovery'],
-            followUp: 'Check in about sleep at next session',
-            private: true
-        },
-        {
-            id: 3,
-            member: { 
-                name: 'Emma Davis', 
-                avatar: 'https://ui-avatars.com/api/?name=Emma+Davis&background=10B981&color=fff',
-                goal: 'Overall fitness & flexibility',
-                startDate: 'Dec 5, 2023'
-            },
-            date: 'March 20, 2024',
-            time: '4:00 PM',
-            sessionType: 'Full Body Circuit',
-            category: 'strength',
-            mood: 'excellent',
-            content: 'Excellent session! Completed full circuit with no breaks. Emma is ready to move to advanced program. Her consistency over the past 3 months has been impressive.',
-            highlights: ['Completed full circuit without rest', 'Ready for advanced program', '3-month milestone achieved'],
-            stats: [
-                { label: 'Reps', value: '120', change: '+15', trend: 'up' },
-                { label: 'Time', value: '45 min', change: '-5min', trend: 'up' },
-                { label: 'Intensity', value: 'High', trend: 'up' }
-            ],
-            attachments: [
-                { type: 'video', name: 'Circuit Recording' }
-            ],
-            tags: ['milestone', 'advancement', 'full-body'],
-            private: false
-        },
-        {
-            id: 4,
-            member: { 
-                name: 'James Wilson', 
-                avatar: 'https://ui-avatars.com/api/?name=James+Wilson&background=F59E0B&color=fff',
-                goal: 'Rehabilitation & mobility',
-                startDate: 'Mar 1, 2024'
-            },
-            date: 'March 18, 2024',
-            time: '11:30 AM',
-            sessionType: 'Mobility & Rehab',
-            category: 'flexibility',
-            mood: 'good',
-            content: 'Good progress on shoulder mobility. Range of motion improved by 15 degrees. James is following home exercises consistently. Continue current protocol.',
-            highlights: ['15° improvement in shoulder ROM', 'Consistent with home exercises'],
-            stats: [
-                { label: 'Shoulder ROM', value: '135°', change: '+15°', trend: 'up' },
-                { label: 'Pain Level', value: '3/10', change: '-2', trend: 'down' }
-            ],
-            attachments: [
-                { type: 'photo', name: 'ROM Assessment' }
-            ],
-            tags: ['rehab', 'mobility', 'shoulder'],
-            followUp: 'Re-assess in 2 weeks',
-            private: false
+    const [newNote, setNewNote] = useState({
+        memberId: '',
+        note: '',
+        category: 'general'
+    });
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                setLoading(true);
+                const [notesData, membersData] = await Promise.all([
+                    trainerApi.getAllNotes(),
+                    trainerApi.getMyMembers()
+                ]);
+                setNotes(notesData);
+                setMembersList(membersData);
+            } catch (err) {
+                console.error('Failed to fetch notes data:', err);
+                toast.error('Failed to load notes');
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchData();
+    }, []);
+
+    const handleAddNote = async () => {
+        if (!newNote.memberId || !newNote.note) {
+            toast.error('Please select a member and enter a note');
+            return;
         }
-    ];
 
-    const members = ['All Members', 'Sarah Wilson', 'Mike Johnson', 'Emma Davis', 'James Wilson'];
+        try {
+            const saved = await trainerApi.addMemberNote(Number(newNote.memberId), newNote.note);
+            setNotes(prev => [saved, ...prev]);
+            setIsModalOpen(false);
+            setNewNote({ memberId: '', note: '', category: 'general' });
+            toast.success('Note added successfully');
+        } catch (err) {
+            console.error('Failed to add note:', err);
+            toast.error('Failed to add note');
+        }
+    };
     const categories = [
         { value: 'all', label: 'All Categories', icon: Target },
         { value: 'strength', label: 'Strength', icon: Zap },
