@@ -2,7 +2,6 @@ package com.gym.management.controller;
 
 import com.gym.management.model.ProgressNote;
 import com.gym.management.model.PTSession;
-import com.gym.management.model.SessionStatus;
 import com.gym.management.model.User;
 import com.gym.management.repository.ProgressNoteRepository;
 import com.gym.management.repository.NotificationRepository;
@@ -47,34 +46,35 @@ public class TrainerDashboardController {
 
             User trainer = trainerOpt.get();
             Map<String, Object> dashboard = new HashMap<>();
-            
+
             dashboard.put("trainerId", trainer.getUserId());
             dashboard.put("trainerName", trainer.getFullName());
             dashboard.put("email", trainer.getEmail());
-            
+
             // Stats
             int assignedCount = trainer.getCustomers() != null ? trainer.getCustomers().size() : 0;
             dashboard.put("assignedMembersCount", assignedCount);
-            
+
             List<PTSession> sessions = ptSessionRepository.findByTrainerId(trainerId);
             LocalDate today = LocalDate.now();
-            
+
             long todaySessions = sessions.stream()
-                .filter(s -> s.getSessionDate() != null && s.getSessionDate().toLocalDate().equals(today))
-                .count();
+                    .filter(s -> s.getSessionDate() != null && s.getSessionDate().toLocalDate().equals(today))
+                    .count();
             dashboard.put("todaysSessionsCount", todaySessions);
-            
+
             long upcomingSessions = sessions.stream()
-                .filter(s -> s.getSessionDate() != null && s.getSessionDate().isAfter(LocalDateTime.now()))
-                .count();
+                    .filter(s -> s.getSessionDate() != null && s.getSessionDate().isAfter(LocalDateTime.now()))
+                    .count();
             dashboard.put("upcomingSessionsCount", upcomingSessions);
-            
+
             // Add other required fields for frontend
             dashboard.put("todayEarnings", 0);
             dashboard.put("monthEarnings", 0);
             dashboard.put("completedToday", sessions.stream()
-                .filter(s -> s.getSessionDate() != null && s.getSessionDate().toLocalDate().equals(today) && "COMPLETED".equals(s.getStatus()))
-                .count());
+                    .filter(s -> s.getSessionDate() != null && s.getSessionDate().toLocalDate().equals(today)
+                            && "COMPLETED".equals(s.getStatus()))
+                    .count());
             dashboard.put("totalToday", todaySessions);
             dashboard.put("attendanceRate", todaySessions > 0 ? 100 : 0);
             dashboard.put("activeMembers", assignedCount);
@@ -155,11 +155,12 @@ public class TrainerDashboardController {
             }
 
             Set<User> customers = trainerOpt.get().getCustomers();
-            if (customers == null) customers = new HashSet<>();
-            
+            if (customers == null)
+                customers = new HashSet<>();
+
             List<User> filteredList = customers.stream()
-                    .filter(c -> q == null || q.isEmpty() || 
-                            c.getFullName().toLowerCase().contains(q.toLowerCase()) || 
+                    .filter(c -> q == null || q.isEmpty() ||
+                            c.getFullName().toLowerCase().contains(q.toLowerCase()) ||
                             c.getEmail().toLowerCase().contains(q.toLowerCase()))
                     .collect(Collectors.toList());
 

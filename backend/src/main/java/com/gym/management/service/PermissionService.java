@@ -4,7 +4,6 @@ import com.gym.management.model.*;
 import com.gym.management.repository.RolePermissionRepository;
 import com.gym.management.repository.UserGymRoleRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

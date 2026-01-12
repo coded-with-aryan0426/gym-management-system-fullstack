@@ -62,6 +62,16 @@ export interface ProgressNote {
     memberId: number;
     note: string;
     createdAt: string;
+    category?: string;
+    mood?: string;
+    sessionType?: string;
+    highlights?: string;
+    concerns?: string;
+    stats?: string;
+    tags?: string;
+    attachments?: string;
+    followUp?: string;
+    private?: boolean;
 }
 
 export interface ProfileUpdateData {
@@ -127,7 +137,7 @@ function normalizeResponse<T>(response: any): T {
 function unwrapArray<T>(data: any): T[] {
     if (!data) return [];
     if (Array.isArray(data)) return data;
-    
+
     if (typeof data === 'object') {
         // Standard ApiResponse structure
         if ('success' in data) {
@@ -138,7 +148,7 @@ function unwrapArray<T>(data: any): T[] {
             if (Array.isArray(innerData.items)) return innerData.items;
             return [];
         }
-        
+
         // Direct wrappers
         if (Array.isArray(data.items)) return data.items;
         if (data.data && Array.isArray(data.data.items)) return data.data.items;
