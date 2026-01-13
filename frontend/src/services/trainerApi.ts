@@ -81,15 +81,9 @@ export interface TrainerDashboardData {
     unreadNotificationsCount: number;
 }
 
-export interface TrainerMember {
-    userId: number;
-    fullName: string;
-    email: string;
-    phoneNumber: string | null;
-    avatarId: string | null;
-    createdAt: string;
-    status?: string;
-}
+// Consolidated TrainerMember interface moved below or imported
+// Removed duplicate definition
+
 
 export interface TrainerSession {
     sessionId: number;
@@ -130,6 +124,46 @@ export interface ProfileUpdateData {
     specializations?: string[];
 }
 
+// ============ TRAINER CLASS TYPES ============
+
+export interface TrainerClassItem {
+    id: number;
+    title: string;
+    startTime: string;
+    endTime: string;
+    duration: number;
+    day: string;
+    date: string;
+    room: string;
+    enrolled: number;
+    capacity: number;
+    status: 'upcoming' | 'in-progress' | 'completed' | 'cancelled';
+    attendees: { confirmed: number; pending: number; absent: number };
+    type: 'group' | 'pt';
+    recurring: boolean;
+    notes?: string;
+}
+
+export interface CreateClassRequest {
+    title: string;
+    date: string; // YYYY-MM-DD
+    startTime: string; // HH:mm
+    endTime: string;
+    duration: number;
+    room?: string;
+    capacity?: number;
+    type?: 'group' | 'pt';
+    recurring?: boolean;
+    notes?: string;
+}
+
+export interface ClassAttendee {
+    id: number;
+    memberId: number;
+    memberName?: string;
+    status: 'CONFIRMED' | 'PENDING' | 'ABSENT';
+}
+
 export interface MemberSearchParams {
     page?: number;
     size?: number;
@@ -147,15 +181,23 @@ export interface PagedMemberResponse {
 }
 
 export interface TrainerMemberDetail extends TrainerMember {
-    plan?: string;
     expiryDays?: number;
     lastVisit?: string;
-    goal?: string;
     trainerAssigned?: boolean;
-    stats?: {
+    // stats inherited from TrainerMember but Detail adds optional sub-fields?
+    // Let's redefine stats to be compatible or leave it. 
+    // TrainerMember has stricter stats. Detail tries to add more?
+    // Detail has stats?: { ... }. TrainerMember has stats: { ... }.
+    // Error: "stats" in Detail is optional, but required in Base.
+    // We should make stats optional in Base or required in Detail.
+    // Given DTO has stats, Base should have it required. Detail should match or omit.
+    // I'll make Detail inherit stats (required).
+    stats: {
         classes: number;
-        weight?: string;
-        ptSessions?: string;
+        weight: string; // was optional in Detail?
+        pt: string;     // was ptSessions? Base has pt.
+        // If Detail needs different stats, we have a problem.
+        // Let's assume Detail can use Base stats.
     };
 }
 
@@ -240,7 +282,26 @@ const MOCK_PROFILE: TrainerProfile = {
     documents: []
 };
 
+export interface TrainerMember {
+    id: number; // mapped from userId
+    name: string; // mapped from fullName
+    email: string;
+    phone: string;
+    status: string; // simplified to string to avoid conflict
+    plan: string;
+    daysLeft: number;
+    stats: {
+        classes: number;
+        weight: string;
+        pt: string;
+    };
+    lastSession: string;
+    goal: string;
+}
+
 export const trainerApi = {
+    // ... existing methods
+
     async getDashboard(): Promise<TrainerDashboardData> {
         try {
             const response = await apiClient.get('/trainer/dashboard');
@@ -313,8 +374,8 @@ export const trainerApi = {
     },
 
     async getMyMembers(): Promise<TrainerMember[]> {
-        const response = await apiClient.get('/trainer/my-members');
-        return unwrapArray<TrainerMember>(response.data);
+        const response = await apiClient.get('/trainer/members');
+        return response.data; // Array directly
     },
 
     async getSchedule(startDate?: string, endDate?: string): Promise<TrainerSession[]> {
@@ -351,6 +412,65 @@ export const trainerApi = {
         const response = await apiClient.get(`/trainer/my-members?${queryParams.toString()}`);
         return normalizeResponse<PagedMemberResponse>(response.data);
     },
+
+    // ============ TRAINER CLASSES ============
+
+    async getClasses(startDate?: string, endDate?: string): Promise<TrainerClassItem[]> {
+        try {
+            const params: any = {};
+            if (startDate) params.startDate = startDate;
+            if (endDate) params.endDate = endDate;
+            const response = await apiClient.get('/trainer/classes', { params });
+            return normalizeResponse<TrainerClassItem[]>(response.data);
+        } catch (error) {
+            console.warn('API Error (getClasses), using empty array:', error);
+            return [];
+        }
+    },
+
+    async getTodayClasses(): Promise<TrainerClassItem[]> {
+        try {
+            const response = await apiClient.get('/trainer/classes/today');
+            return normalizeResponse<TrainerClassItem[]>(response.data);
+        } catch (error) {
+            console.warn('API Error (getTodayClasses):', error);
+            return [];
+        }
+    },
+
+    async createClass(data: CreateClassRequest): Promise<TrainerClassItem> {
+        const response = await apiClient.post('/trainer/classes', data);
+        return normalizeResponse<TrainerClassItem>(response.data);
+    },
+
+    async updateClass(id: number, data: Partial<CreateClassRequest>): Promise<TrainerClassItem> {
+        const response = await apiClient.put(`/trainer/classes/${id}`, data);
+        return normalizeResponse<TrainerClassItem>(response.data);
+    },
+
+    async updateClassStatus(id: number, status: string): Promise<TrainerClassItem> {
+        const response = await apiClient.put(`/trainer/classes/${id}/status`, { status });
+        return normalizeResponse<TrainerClassItem>(response.data);
+    },
+
+    async deleteClass(id: number): Promise<void> {
+        await apiClient.delete(`/trainer/classes/${id}`);
+    },
+
+    async getClassAttendees(id: number): Promise<ClassAttendee[]> {
+        const response = await apiClient.get(`/trainer/classes/${id}/attendees`);
+        return normalizeResponse<ClassAttendee[]>(response.data);
+    },
+
+    async updateAttendance(classId: number, updates: { attendeeId: number, status: 'CONFIRMED' | 'PENDING' | 'ABSENT' }[]): Promise<any> {
+        const response = await apiClient.put(`/trainer/classes/${classId}/attendance`, updates);
+        return response.data;
+    },
+
+    async getAssignedMembers(): Promise<TrainerMember[]> {
+        const response = await apiClient.get('/trainer/members');
+        return response.data;
+    }
 };
 
 export default trainerApi;

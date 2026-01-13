@@ -1,54 +1,83 @@
-import React, { useState, useMemo } from 'react';
-import { 
-    ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, 
+import React, { useState, useMemo, useEffect } from 'react';
+import {
+    ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon,
     List, Clock, MapPin, Users, Download, ChevronDown, MoreVertical,
     Play, CheckCircle, AlertCircle, XCircle, UserCheck, Bell, Clipboard,
-    TrendingUp, Zap, Target
+    TrendingUp, Zap, Target, Loader2, Edit, Trash2, FileText
 } from 'lucide-react';
+import { trainerApi } from '../../services/trainerApi';
+import type { TrainerClassItem } from '../../services/trainerApi';
 import './MyClasses.css';
-
-interface ClassItem {
-    id: number;
-    title: string;
-    startTime: string;
-    endTime: string;
-    duration: number;
-    day: string;
-    date: string;
-    room: string;
-    enrolled: number;
-    capacity: number;
-    status: 'upcoming' | 'in-progress' | 'completed' | 'cancelled';
-    attendees: { confirmed: number; pending: number; absent: number };
-    type: 'group' | 'pt';
-    recurring: boolean;
-    notes?: string;
-}
+import CreateClassModal from './CreateClassModal';
+import ClassAttendanceModal from './ClassAttendanceModal';
+import ClassReportModal from './ClassReportModal';
 
 const MyClasses: React.FC = () => {
     const [viewMode, setViewMode] = useState<'today' | 'week' | 'list'>('today');
     const [currentWeek, setCurrentWeek] = useState(0);
     const [quickFilter, setQuickFilter] = useState<string | null>(null);
     const [selectedClass, setSelectedClass] = useState<number | null>(null);
+    const [classes, setClasses] = useState<TrainerClassItem[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [actionLoading, setActionLoading] = useState<number | null>(null);
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [isAttendanceModalOpen, setIsAttendanceModalOpen] = useState(false);
+    const [attendanceTarget, setAttendanceTarget] = useState<{ id: number, title: string } | null>(null);
 
-    const classes: ClassItem[] = [
-        { id: 1, title: 'Morning Yoga', startTime: '06:00', endTime: '07:00', duration: 60, day: 'Mon', date: '2024-03-25', room: 'Studio A', enrolled: 12, capacity: 15, status: 'completed', attendees: { confirmed: 11, pending: 0, absent: 1 }, type: 'group', recurring: true },
-        { id: 2, title: 'HIIT Burn', startTime: '08:30', endTime: '09:30', duration: 60, day: 'Mon', date: '2024-03-25', room: 'Main Floor', enrolled: 18, capacity: 20, status: 'in-progress', attendees: { confirmed: 16, pending: 2, absent: 0 }, type: 'group', recurring: true },
-        { id: 3, title: 'PT - Sarah Wilson', startTime: '10:00', endTime: '11:00', duration: 60, day: 'Mon', date: '2024-03-25', room: 'PT Area', enrolled: 1, capacity: 1, status: 'upcoming', attendees: { confirmed: 1, pending: 0, absent: 0 }, type: 'pt', recurring: false, notes: 'Focus on lower body strength' },
-        { id: 4, title: 'Spin Class', startTime: '12:00', endTime: '12:45', duration: 45, day: 'Mon', date: '2024-03-25', room: 'Spin Studio', enrolled: 20, capacity: 20, status: 'upcoming', attendees: { confirmed: 15, pending: 5, absent: 0 }, type: 'group', recurring: true },
-        { id: 5, title: 'PT - Mike Johnson', startTime: '14:00', endTime: '15:00', duration: 60, day: 'Mon', date: '2024-03-25', room: 'PT Area', enrolled: 1, capacity: 1, status: 'upcoming', attendees: { confirmed: 0, pending: 1, absent: 0 }, type: 'pt', recurring: false, notes: 'Recovery session after injury' },
-        { id: 6, title: 'Evening Pilates', startTime: '17:30', endTime: '18:30', duration: 60, day: 'Mon', date: '2024-03-25', room: 'Studio B', enrolled: 8, capacity: 12, status: 'upcoming', attendees: { confirmed: 6, pending: 2, absent: 0 }, type: 'group', recurring: true },
-        { id: 7, title: 'Strength Training', startTime: '19:00', endTime: '20:00', duration: 60, day: 'Mon', date: '2024-03-25', room: 'Weight Room', enrolled: 10, capacity: 15, status: 'cancelled', attendees: { confirmed: 0, pending: 0, absent: 0 }, type: 'group', recurring: true },
-        { id: 8, title: 'Advanced HIIT', startTime: '07:00', endTime: '08:00', duration: 60, day: 'Tue', date: '2024-03-26', room: 'Main Floor', enrolled: 15, capacity: 20, status: 'upcoming', attendees: { confirmed: 12, pending: 3, absent: 0 }, type: 'group', recurring: true },
-        { id: 9, title: 'PT - Emma Davis', startTime: '09:00', endTime: '10:00', duration: 60, day: 'Tue', date: '2024-03-26', room: 'PT Area', enrolled: 1, capacity: 1, status: 'upcoming', attendees: { confirmed: 1, pending: 0, absent: 0 }, type: 'pt', recurring: false },
-        { id: 10, title: 'Cardio Blast', startTime: '18:00', endTime: '19:00', duration: 60, day: 'Wed', date: '2024-03-27', room: 'Main Floor', enrolled: 22, capacity: 25, status: 'upcoming', attendees: { confirmed: 18, pending: 4, absent: 0 }, type: 'group', recurring: true },
-    ];
+    // New Feature States
+    const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+    const [reportClassItem, setReportClassItem] = useState<TrainerClassItem | null>(null);
+    const [activeMenuId, setActiveMenuId] = useState<number | null>(null);
+    const [editingClass, setEditingClass] = useState<TrainerClassItem | null>(null);
 
-    const todayClasses = classes.filter(c => c.date === '2024-03-25');
-    const currentTime = '09:15';
-    
+    // Format today's date
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    const formattedToday = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+    // Get current time for countdown
+    const currentTime = today.toTimeString().slice(0, 5);
+
+    // Fetch classes from API
+    useEffect(() => {
+        fetchClasses();
+    }, [viewMode]);
+
+    const fetchClasses = async () => {
+        setLoading(true);
+        try {
+            let data: TrainerClassItem[];
+            if (viewMode === 'today') {
+                data = await trainerApi.getTodayClasses();
+            } else if (viewMode === 'week') {
+                const now = new Date();
+                const day = now.getDay(); // 0 is Sunday
+                const diff = now.getDate() - day + (day === 0 ? -6 : 1); // Adjust to get Monday
+                const monday = new Date(now.setDate(diff));
+                const sunday = new Date(now.setDate(monday.getDate() + 6));
+
+                const startStr = monday.toISOString().split('T')[0];
+                const endStr = sunday.toISOString().split('T')[0];
+                data = await trainerApi.getClasses(startStr, endStr);
+            } else {
+                // List view - get all
+                data = await trainerApi.getClasses();
+            }
+            setClasses(data);
+        } catch (error) {
+            console.error('Failed to fetch classes:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const todayClasses = useMemo(() =>
+        classes.filter(c => c.date === todayStr),
+        [classes, todayStr]
+    );
+
     const stats = useMemo(() => {
-        const today = todayClasses;
+        const today = viewMode === 'today' ? todayClasses : classes.filter(c => c.date === todayStr);
         const total = today.length;
         const completed = today.filter(c => c.status === 'completed').length;
         const inProgress = today.filter(c => c.status === 'in-progress').length;
@@ -58,7 +87,7 @@ const MyClasses: React.FC = () => {
         const pendingConfirmations = today.reduce((sum, c) => sum + c.attendees.pending, 0);
         const ptSessions = today.filter(c => c.type === 'pt').length;
         return { total, completed, inProgress, upcoming, cancelled, totalAttendees, pendingConfirmations, ptSessions };
-    }, [todayClasses]);
+    }, [viewMode, todayClasses, classes, todayStr]);
 
     const getNextClass = () => {
         const upcoming = todayClasses.filter(c => c.status === 'upcoming');
@@ -100,6 +129,94 @@ const MyClasses: React.FC = () => {
         return `${Math.floor(diff / 60)}h ${diff % 60}m`;
     };
 
+    // Action handlers
+    const handleStartClass = async (id: number) => {
+        setActionLoading(id);
+        try {
+            await trainerApi.updateClassStatus(id, 'in-progress');
+            await fetchClasses();
+        } catch (error) {
+            console.error('Failed to start class:', error);
+        } finally {
+            setActionLoading(null);
+        }
+    };
+
+    const handleCompleteClass = async (id: number) => {
+        setActionLoading(id);
+        try {
+            await trainerApi.updateClassStatus(id, 'completed');
+            await fetchClasses();
+        } catch (error) {
+            console.error('Failed to complete class:', error);
+        } finally {
+            setActionLoading(null);
+        }
+    };
+
+    const handleCancelClass = async (id: number) => {
+        setActionLoading(id);
+        try {
+            await trainerApi.updateClassStatus(id, 'cancelled');
+            await fetchClasses();
+        } catch (error) {
+            console.error('Failed to cancel class:', error);
+        } finally {
+            setActionLoading(null);
+        }
+    };
+
+    const handleAttendance = (id: number, title: string) => {
+        setAttendanceTarget({ id, title });
+        setIsAttendanceModalOpen(true);
+    };
+
+    const handleClassCreated = () => {
+        setEditingClass(null); // Clear edit mode if any
+        fetchClasses();
+    };
+
+    const handleEdit = (cls: TrainerClassItem) => {
+        setEditingClass(cls);
+        setActiveMenuId(null);
+        setIsCreateModalOpen(true);
+    };
+
+    const handleDelete = async (id: number) => {
+        if (!window.confirm('Are you sure you want to delete this class?')) return;
+        setActionLoading(id);
+        try {
+            await trainerApi.deleteClass(id);
+            await fetchClasses();
+        } catch (error) {
+            console.error('Failed to delete class:', error);
+        } finally {
+            setActionLoading(null);
+            setActiveMenuId(null);
+        }
+    };
+
+    const handleViewReport = (cls: TrainerClassItem) => {
+        setReportClassItem(cls);
+        setIsReportModalOpen(true);
+    };
+
+    // Close menu when clicking outside
+    useEffect(() => {
+        const handleClickOutside = () => setActiveMenuId(null);
+        document.addEventListener('click', handleClickOutside);
+        return () => document.removeEventListener('click', handleClickOutside);
+    }, []);
+
+    if (loading) {
+        return (
+            <div className="my-classes my-classes--loading">
+                <Loader2 className="my-classes__spinner" size={32} />
+                <p>Loading classes...</p>
+            </div>
+        );
+    }
+
     return (
         <div className="my-classes">
             <div className="my-classes__header">
@@ -108,7 +225,7 @@ const MyClasses: React.FC = () => {
                         <h1>My Classes</h1>
                         <span className="my-classes__date-badge">
                             <CalendarIcon size={10} />
-                            Today, Mar 25
+                            Today, {formattedToday}
                         </span>
                     </div>
 
@@ -139,7 +256,7 @@ const MyClasses: React.FC = () => {
                             <Target size={12} />
                             PT Only
                         </button>
-                        <button className="my-classes__add-btn">
+                        <button className="my-classes__add-btn" onClick={() => setIsCreateModalOpen(true)}>
                             <Plus size={14} />
                             Schedule
                         </button>
@@ -166,7 +283,10 @@ const MyClasses: React.FC = () => {
                             <span className="my-classes__next-time-label">until start</span>
                         </div>
                         <div className="my-classes__next-actions">
-                            <button className="my-classes__btn my-classes__btn--primary">
+                            <button
+                                className="my-classes__btn my-classes__btn--primary"
+                                onClick={() => handleAttendance(nextClass.id, nextClass.title)}
+                            >
                                 <UserCheck size={12} />
                                 Take Attendance
                             </button>
@@ -181,20 +301,20 @@ const MyClasses: React.FC = () => {
             <div className="my-classes__content">
                 <div className="my-classes__toolbar">
                     <div className="my-classes__view-toggle">
-                        <button 
-                            className={viewMode === 'today' ? 'active' : ''} 
+                        <button
+                            className={viewMode === 'today' ? 'active' : ''}
                             onClick={() => setViewMode('today')}
                         >
                             Today
                         </button>
-                        <button 
-                            className={viewMode === 'week' ? 'active' : ''} 
+                        <button
+                            className={viewMode === 'week' ? 'active' : ''}
                             onClick={() => setViewMode('week')}
                         >
                             This Week
                         </button>
-                        <button 
-                            className={viewMode === 'list' ? 'active' : ''} 
+                        <button
+                            className={viewMode === 'list' ? 'active' : ''}
                             onClick={() => setViewMode('list')}
                         >
                             <List size={12} />
@@ -204,13 +324,13 @@ const MyClasses: React.FC = () => {
 
                     <div className="my-classes__progress-bar">
                         <div className="my-classes__progress-track">
-                            <div 
-                                className="my-classes__progress-fill" 
-                                style={{ width: `${(stats.completed / stats.total) * 100}%` }}
+                            <div
+                                className="my-classes__progress-fill"
+                                style={{ width: `${stats.total > 0 ? (stats.completed / stats.total) * 100 : 0}%` }}
                             />
-                            <div 
-                                className="my-classes__progress-fill my-classes__progress-fill--active" 
-                                style={{ width: `${(stats.inProgress / stats.total) * 100}%`, left: `${(stats.completed / stats.total) * 100}%` }}
+                            <div
+                                className="my-classes__progress-fill my-classes__progress-fill--active"
+                                style={{ width: `${stats.total > 0 ? (stats.inProgress / stats.total) * 100 : 0}%`, left: `${stats.total > 0 ? (stats.completed / stats.total) * 100 : 0}%` }}
                             />
                         </div>
                         <span className="my-classes__progress-text">
@@ -227,8 +347,8 @@ const MyClasses: React.FC = () => {
 
                 <div className="my-classes__timeline">
                     {filteredClasses.map((cls) => (
-                        <div 
-                            key={cls.id} 
+                        <div
+                            key={cls.id}
                             className={`my-classes__card my-classes__card--${cls.status} ${cls.type === 'pt' ? 'my-classes__card--pt' : ''} ${selectedClass === cls.id ? 'my-classes__card--selected' : ''}`}
                             onClick={() => setSelectedClass(selectedClass === cls.id ? null : cls.id)}
                         >
@@ -260,13 +380,13 @@ const MyClasses: React.FC = () => {
 
                                 <div className="my-classes__card-attendance">
                                     <div className="my-classes__attendance-bar">
-                                        <div 
-                                            className="my-classes__attendance-fill my-classes__attendance-fill--confirmed" 
-                                            style={{ width: `${(cls.attendees.confirmed / cls.capacity) * 100}%` }} 
+                                        <div
+                                            className="my-classes__attendance-fill my-classes__attendance-fill--confirmed"
+                                            style={{ width: `${(cls.attendees.confirmed / cls.capacity) * 100}%` }}
                                         />
-                                        <div 
-                                            className="my-classes__attendance-fill my-classes__attendance-fill--pending" 
-                                            style={{ width: `${(cls.attendees.pending / cls.capacity) * 100}%`, left: `${(cls.attendees.confirmed / cls.capacity) * 100}%` }} 
+                                        <div
+                                            className="my-classes__attendance-fill my-classes__attendance-fill--pending"
+                                            style={{ width: `${(cls.attendees.pending / cls.capacity) * 100}%`, left: `${(cls.attendees.confirmed / cls.capacity) * 100}%` }}
                                         />
                                     </div>
                                     <div className="my-classes__attendance-stats">
@@ -295,32 +415,67 @@ const MyClasses: React.FC = () => {
                                     <div className="my-classes__card-actions">
                                         {cls.status === 'upcoming' && (
                                             <>
-                                                <button className="my-classes__action-btn my-classes__action-btn--primary">
-                                                    <Play size={12} /> Start Class
+                                                <button
+                                                    className="my-classes__action-btn my-classes__action-btn--primary"
+                                                    onClick={(e) => { e.stopPropagation(); handleStartClass(cls.id); }}
+                                                    disabled={actionLoading === cls.id}
+                                                >
+                                                    {actionLoading === cls.id ? <Loader2 size={12} className="animate-spin" /> : <Play size={12} />} Start Class
                                                 </button>
-                                                <button className="my-classes__action-btn">
+                                                <button
+                                                    className="my-classes__action-btn"
+                                                    onClick={(e) => { e.stopPropagation(); handleAttendance(cls.id, cls.title); }}
+                                                >
                                                     <UserCheck size={12} /> Attendance
                                                 </button>
                                             </>
                                         )}
                                         {cls.status === 'in-progress' && (
                                             <>
-                                                <button className="my-classes__action-btn my-classes__action-btn--success">
-                                                    <CheckCircle size={12} /> Complete
+                                                <button
+                                                    className="my-classes__action-btn my-classes__action-btn--success"
+                                                    onClick={(e) => { e.stopPropagation(); handleCompleteClass(cls.id); }}
+                                                    disabled={actionLoading === cls.id}
+                                                >
+                                                    {actionLoading === cls.id ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle size={12} />} Complete
                                                 </button>
-                                                <button className="my-classes__action-btn">
+                                                <button
+                                                    className="my-classes__action-btn"
+                                                    onClick={(e) => { e.stopPropagation(); handleAttendance(cls.id, cls.title); }}
+                                                >
                                                     <UserCheck size={12} /> Update Attendance
                                                 </button>
                                             </>
                                         )}
                                         {cls.status === 'completed' && (
-                                            <button className="my-classes__action-btn">
+                                            <button
+                                                className="my-classes__action-btn"
+                                                onClick={(e) => { e.stopPropagation(); handleViewReport(cls); }}
+                                            >
                                                 <TrendingUp size={12} /> View Report
                                             </button>
                                         )}
-                                        <button className="my-classes__action-btn">
-                                            <MoreVertical size={12} />
-                                        </button>
+                                        <div className="relative-menu-container">
+                                            <button
+                                                className="my-classes__action-btn my-classes__action-btn--icon"
+                                                onClick={(e) => { e.stopPropagation(); setActiveMenuId(activeMenuId === cls.id ? null : cls.id); }}
+                                            >
+                                                <MoreVertical size={12} />
+                                            </button>
+                                            {activeMenuId === cls.id && (
+                                                <div className="menu-dropdown">
+                                                    <button onClick={(e) => { e.stopPropagation(); handleEdit(cls); }}>
+                                                        <Edit size={12} /> Edit
+                                                    </button>
+                                                    <button onClick={(e) => { e.stopPropagation(); handleViewReport(cls); }}>
+                                                        <FileText size={12} /> Details
+                                                    </button>
+                                                    <button className="text-red-500" onClick={(e) => { e.stopPropagation(); handleDelete(cls.id); }}>
+                                                        <Trash2 size={12} /> Delete
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 )}
                             </div>
@@ -335,6 +490,27 @@ const MyClasses: React.FC = () => {
                     )}
                 </div>
             </div>
+
+            <CreateClassModal
+                isOpen={isCreateModalOpen}
+                onClose={() => { setIsCreateModalOpen(false); setEditingClass(null); }}
+                onClassCreated={handleClassCreated}
+                editData={editingClass}
+            />
+
+            <ClassAttendanceModal
+                isOpen={isAttendanceModalOpen}
+                onClose={() => setIsAttendanceModalOpen(false)}
+                classId={attendanceTarget?.id ?? null}
+                classTitle={attendanceTarget?.title ?? ''}
+                onSave={fetchClasses}
+            />
+
+            <ClassReportModal
+                isOpen={isReportModalOpen}
+                onClose={() => setIsReportModalOpen(false)}
+                classItem={reportClassItem}
+            />
         </div>
     );
 };

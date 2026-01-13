@@ -9,6 +9,7 @@ import {
 import { format, differenceInMinutes } from 'date-fns';
 import { usePageEntry, useCountUp, useButtonPress } from '../../hooks/useAnimations';
 import ActiveSessionToast from '../../components/shared/ActiveSessionToast';
+import { useAuth } from '../../contexts/AuthContext';
 import './TrainerDashboard.css'; // Dedicated Mission Control styles
 
 interface Session {
@@ -35,6 +36,7 @@ interface DashboardData {
 }
 
 const TrainerDashboard: React.FC = () => {
+    const { user } = useAuth();
     const navigate = useNavigate();
     const [data, setData] = useState<DashboardData | null>(null);
     const [currentTime, setCurrentTime] = useState(new Date());
@@ -53,7 +55,7 @@ const TrainerDashboard: React.FC = () => {
         const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
         setData({
-            trainerName: 'John Smith',
+            trainerName: user?.fullName || 'Trainer',
             todayEarnings: 2450,
             monthEarnings: 48500,
             completedToday: 2,
@@ -109,7 +111,7 @@ const TrainerDashboard: React.FC = () => {
                 status: 'upcoming',
             }
         ]);
-    }, []);
+    }, [user]);
 
     const currentSession = useMemo(() => sessions.find(s => s.status === 'in-progress'), [sessions]);
     // const upcomingSessions = useMemo(() => sessions.filter(s => s.status === 'upcoming').slice(0, 3), [sessions]);
@@ -147,7 +149,7 @@ const TrainerDashboard: React.FC = () => {
 
     if (!data) return <div className="tp" style={{ padding: 40, textAlign: 'center', color: 'rgba(255,255,255,0.5)' }}>Loading...</div>;
 
-    const trainerFirstName = (data.trainerName || 'Trainer').split(' ')[0];
+    const trainerFirstName = (user?.fullName || data.trainerName || 'Trainer').split(' ')[0];
 
     const quickActions = [
         { icon: <Calendar size={16} />, label: 'Schedule', path: '/trainer/schedule' },

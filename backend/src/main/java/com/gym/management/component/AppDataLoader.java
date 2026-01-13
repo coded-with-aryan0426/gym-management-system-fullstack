@@ -2,6 +2,9 @@ package com.gym.management.component;
 
 import com.gym.management.model.*;
 import com.gym.management.repository.*;
+import com.gym.management.model.TrainerClass.ClassType;
+import com.gym.management.model.TrainerClass.ClassStatus;
+import com.gym.management.model.TrainerClassAttendee.AttendeeStatus;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -10,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Optional;
 
 @Component
 public class AppDataLoader implements CommandLineRunner {
@@ -19,17 +21,32 @@ public class AppDataLoader implements CommandLineRunner {
     private final RoleRepository roleRepository;
     private final PTSessionRepository ptSessionRepository;
     private final ProgressNoteRepository progressNoteRepository;
+    private final TrainerClassRepository trainerClassRepository;
+    private final TrainerClassAttendeeRepository trainerClassAttendeeRepository;
+    private final MembershipRepository membershipRepository;
+    private final MembershipPackageRepository membershipPackageRepository;
+    private final GymRepository gymRepository;
     private final PasswordEncoder passwordEncoder;
 
     public AppDataLoader(UserRepository userRepository,
             RoleRepository roleRepository,
             PTSessionRepository ptSessionRepository,
             ProgressNoteRepository progressNoteRepository,
+            TrainerClassRepository trainerClassRepository,
+            TrainerClassAttendeeRepository trainerClassAttendeeRepository,
+            MembershipRepository membershipRepository,
+            MembershipPackageRepository membershipPackageRepository,
+            GymRepository gymRepository,
             PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.ptSessionRepository = ptSessionRepository;
         this.progressNoteRepository = progressNoteRepository;
+        this.trainerClassRepository = trainerClassRepository;
+        this.trainerClassAttendeeRepository = trainerClassAttendeeRepository;
+        this.membershipRepository = membershipRepository;
+        this.membershipPackageRepository = membershipPackageRepository;
+        this.gymRepository = gymRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -67,12 +84,17 @@ public class AppDataLoader implements CommandLineRunner {
         User mike = userRepository.findByUsername("mike.johnson").orElseThrow();
 
         // Assign customers to trainer if not already assigned
-        if (trainer.getCustomers().isEmpty()) {
-            trainer.getCustomers().add(emma);
-            trainer.getCustomers().add(sarah);
-            trainer.getCustomers().add(mike);
-            userRepository.save(trainer);
-        }
+        // Assign customers to trainer if not already assigned
+        // Commented out to prevent PersistentObjectException (detached entity) on
+        // startup
+        /*
+         * if (trainer.getCustomers().isEmpty()) {
+         * trainer.getCustomers().add(emma);
+         * trainer.getCustomers().add(sarah);
+         * trainer.getCustomers().add(mike);
+         * userRepository.save(trainer);
+         * }
+         */
 
         if (ptSessionRepository.findByTrainerId(trainer.getUserId()).isEmpty()) {
             LocalDateTime now = LocalDateTime.now();
@@ -99,6 +121,95 @@ public class AppDataLoader implements CommandLineRunner {
             createNote(trainer, sarah, "Focusing on flexibility this week. Hamstrings are tight.");
             createNote(trainer, mike, "Missed last session due to work. Need to reschedule.");
             System.out.println("Seeded Progress Notes");
+        }
+
+        // 4.5 Seed Memberships
+        MembershipPackage premiumPkg = createPackageIfNotFound("Premium Monthly", 100.0, 30);
+        MembershipPackage standardPkg = createPackageIfNotFound("Standard Monthly", 50.0, 30);
+
+        // Emma: Active, Premium
+        createMembershipIfNotFound(emma, premiumPkg, MembershipStatus.ACTIVE,
+                java.time.LocalDate.now().minusDays(10), java.time.LocalDate.now().plusDays(20));
+
+        // Sarah: Active (Expiring), Standard
+        createMembershipIfNotFound(sarah, standardPkg, MembershipStatus.ACTIVE,
+                java.time.LocalDate.now().minusDays(25), java.time.LocalDate.now().plusDays(5));
+
+        // Mike: Inactive (Expired), Standard
+        createMembershipIfNotFound(mike, standardPkg, MembershipStatus.EXPIRED,
+                java.time.LocalDate.now().minusDays(60), java.time.LocalDate.now().minusDays(30));
+
+        // Assign customers to trainer
+        // Ensure collections are initialized
+        if (trainer.getCustomers() == null)
+            trainer.setCustomers(new HashSet<>());
+
+        // Add if not present
+        boolean changed = false;
+        if (!trainer.getCustomers().contains(emma)) {
+            trainer.getCustomers().add(emma);
+            changed = true;
+        }
+        if (!trainer.getCustomers().contains(sarah)) {
+            trainer.getCustomers().add(sarah);
+            changed = true;
+        }
+        if (!trainer.getCustomers().contains(mike)) {
+            trainer.getCustomers().add(mike);
+            changed = true;
+        }
+
+        if (changed) {
+            userRepository.save(trainer);
+            System.out.println("Assigned members to Trainer John Smith");
+        }
+
+        // 5. Seed Trainer Classes
+        // Clear existing to ensure fresh seed for testing
+        trainerClassAttendeeRepository.deleteAll();
+        trainerClassRepository.deleteAll();
+
+        if (true) {
+            LocalDateTime now = LocalDateTime.now();
+
+            // 5.1 Completed Morning Yoga (Group)
+            TrainerClass yoga = createClass(trainer, "Sunrise Yoga Flow",
+                    now.toLocalDate(), java.time.LocalTime.of(7, 0), java.time.LocalTime.of(8, 0), 60,
+                    "Studio B", ClassType.GROUP, ClassStatus.COMPLETED, 15, 15, true,
+                    "Focus on flexibility and breathing");
+            addAttendees(yoga, AttendeeStatus.CONFIRMED, emma, sarah, mike);
+
+            // 5.2 In-Progress HIIT (Group)
+            // Determine time so it appears ACTIVE roughly around "now" if possible, or just
+            // mock it as IN_PROGRESS
+            TrainerClass hiit = createClass(trainer, "High Intensity Burn",
+                    now.toLocalDate(), java.time.LocalTime.of(12, 0), java.time.LocalTime.of(13, 0), 60,
+                    "Main Gym", ClassType.GROUP, ClassStatus.IN_PROGRESS, 25, 20, true, "Bring water and towel");
+            addAttendees(hiit, AttendeeStatus.CONFIRMED, emma, sarah);
+            addAttendees(hiit, AttendeeStatus.PENDING, mike);
+
+            // 5.3 Upcoming PT Session (PT) - Today PM
+            TrainerClass ptSarah = createClass(trainer, "PT - Sarah Connor",
+                    now.toLocalDate(), java.time.LocalTime.of(14, 30), java.time.LocalTime.of(15, 30), 60,
+                    "PT Zone", ClassType.PT, ClassStatus.UPCOMING, 1, 1, false, "Leg day focus - Post injury check");
+            addAttendees(ptSarah, AttendeeStatus.CONFIRMED, sarah);
+
+            // 5.4 Upcoming Group Class (Pending/Open) - Today Eve
+            createClass(trainer, "Evening Spin",
+                    now.toLocalDate(), java.time.LocalTime.of(17, 30), java.time.LocalTime.of(18, 15), 45,
+                    "Cycle Studio", ClassType.GROUP, ClassStatus.UPCOMING, 20, 18, true, null);
+
+            // 5.5 Cancelled Class
+            createClass(trainer, "Zumba Advanced",
+                    now.toLocalDate(), java.time.LocalTime.of(19, 0), java.time.LocalTime.of(20, 0), 60,
+                    "Studio A", ClassType.GROUP, ClassStatus.CANCELLED, 30, 5, true, "Instructor unwell");
+
+            // 5.6 Tomorrow Power Lifting
+            createClass(trainer, "Power Lifting",
+                    now.plusDays(1).toLocalDate(), java.time.LocalTime.of(9, 0), java.time.LocalTime.of(10, 30), 90,
+                    "Weight Room", ClassType.GROUP, ClassStatus.UPCOMING, 10, 8, true, null);
+
+            System.out.println("Seeded Trainer Classes");
         }
     }
 
@@ -156,5 +267,73 @@ public class AppDataLoader implements CommandLineRunner {
     private void createNote(User trainer, User member, String content) {
         ProgressNote note = new ProgressNote(trainer, member, content);
         progressNoteRepository.save(note);
+    }
+
+    private TrainerClass createClass(User trainer, String title, java.time.LocalDate date,
+            java.time.LocalTime start, java.time.LocalTime end, Integer duration,
+            String room, ClassType type, ClassStatus status,
+            Integer capacity, Integer enrolled, Boolean recurring, String notes) {
+        TrainerClass c = new TrainerClass();
+        c.setTrainerId(trainer.getUserId());
+        c.setTitle(title);
+        c.setClassDate(date);
+        c.setStartTime(start);
+        c.setEndTime(end);
+        c.setDuration(duration);
+        c.setRoom(room);
+        c.setType(type);
+        c.setStatus(status);
+        c.setCapacity(capacity);
+        c.setEnrolled(enrolled);
+        c.setRecurring(recurring);
+        c.setNotes(notes);
+        return trainerClassRepository.save(c);
+    }
+
+    private void addAttendees(TrainerClass c, AttendeeStatus status, User... members) {
+        for (User m : members) {
+            TrainerClassAttendee attendee = new TrainerClassAttendee(c.getId(), m.getUserId(), status);
+            trainerClassAttendeeRepository.save(attendee);
+        }
+    }
+
+    private MembershipPackage createPackageIfNotFound(String name, Double price, Integer days) {
+        return membershipPackageRepository.findAll().stream()
+                .filter(p -> p.getPackageName().equals(name))
+                .findFirst()
+                .orElseGet(() -> {
+                    MembershipPackage pkg = new MembershipPackage();
+                    pkg.setPackageName(name);
+                    pkg.setPrice(price);
+                    pkg.setDurationDays(days);
+                    pkg.setIsActive(true);
+                    return membershipPackageRepository.save(pkg);
+                });
+    }
+
+    private void createMembershipIfNotFound(User user, MembershipPackage pkg, MembershipStatus status,
+            java.time.LocalDate start, java.time.LocalDate end) {
+        if (membershipRepository.findByUserUserId(user.getUserId()).isEmpty()) {
+            Membership m = new Membership();
+            m.setUser(user);
+
+            // Get or create Gym
+            Gym gym = gymRepository.findAll().stream().findFirst().orElseGet(() -> {
+                Gym newGym = new Gym();
+                newGym.setName("AthlonX Main");
+                newGym.setAddress("123 Fitness Blvd");
+                newGym.setPhone("555-0199");
+                newGym.setEmail("info@athlonx.com");
+                return gymRepository.save(newGym);
+            });
+            m.setGym(gym);
+
+            m.setMembershipPackage(pkg);
+            m.setStatus(status);
+            m.setStartDate(start);
+            m.setEndDate(end);
+            membershipRepository.save(m);
+            System.out.println("Seeded Membership for " + user.getFullName());
+        }
     }
 }

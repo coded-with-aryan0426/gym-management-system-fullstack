@@ -7,6 +7,7 @@ import { MembersProvider } from './MembersContext';
 import { TrainerProvider } from './TrainerContext';
 import { ClassesProvider } from './ClassesContext';
 import { NavbarProvider } from './NavbarContext';
+import { ChatProvider } from './ChatContext';
 import DevNavigation from '../components/dev/DevNavigation';
 
 interface AppProviderProps {
@@ -22,50 +23,52 @@ export function AppProvider({ children }: AppProviderProps) {
                         <TrainerProvider>
                             <ClassesProvider>
                                 <NavbarProvider>
-                                    <Toaster
-                                        position="top-right"
-                                        toastOptions={{
-                                            duration: 4000,
-                                            className: 'modern-toast',
-                                            style: {
-                                                background: '#1e1e24',
-                                                color: '#fff',
-                                                borderRadius: '12px',
-                                                border: '1px solid rgba(255,255,255,0.08)',
-                                                padding: '14px 18px',
-                                                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
-                                                fontSize: '14px',
-                                                fontWeight: 500,
-                                                maxWidth: '380px',
-                                            },
-                                            success: {
-                                                iconTheme: {
-                                                    primary: '#22c55e',
-                                                    secondary: '#fff',
-                                                },
+                                    <ChatProvider>
+                                        <Toaster
+                                            position="top-right"
+                                            toastOptions={{
+                                                duration: 4000,
+                                                className: 'modern-toast',
                                                 style: {
-                                                    border: '1px solid rgba(34, 197, 94, 0.2)',
+                                                    background: '#1e1e24',
+                                                    color: '#fff',
+                                                    borderRadius: '12px',
+                                                    border: '1px solid rgba(255,255,255,0.08)',
+                                                    padding: '14px 18px',
+                                                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+                                                    fontSize: '14px',
+                                                    fontWeight: 500,
+                                                    maxWidth: '380px',
                                                 },
-                                            },
-                                            error: {
-                                                duration: 5000,
-                                                iconTheme: {
-                                                    primary: '#ef4444',
-                                                    secondary: '#fff',
+                                                success: {
+                                                    iconTheme: {
+                                                        primary: '#22c55e',
+                                                        secondary: '#fff',
+                                                    },
+                                                    style: {
+                                                        border: '1px solid rgba(34, 197, 94, 0.2)',
+                                                    },
                                                 },
-                                                style: {
-                                                    border: '1px solid rgba(239, 68, 68, 0.2)',
+                                                error: {
+                                                    duration: 5000,
+                                                    iconTheme: {
+                                                        primary: '#ef4444',
+                                                        secondary: '#fff',
+                                                    },
+                                                    style: {
+                                                        border: '1px solid rgba(239, 68, 68, 0.2)',
+                                                    },
                                                 },
-                                            },
-                                            loading: {
-                                                style: {
-                                                    border: '1px solid rgba(59, 130, 246, 0.2)',
-                                                },
-                                            }
-                                        }}
-                                    />
-                                    {children}
-                                    <DevNavigation />
+                                                loading: {
+                                                    style: {
+                                                        border: '1px solid rgba(59, 130, 246, 0.2)',
+                                                    },
+                                                }
+                                            }}
+                                        />
+                                        {children}
+                                        <DevNavigation />
+                                    </ChatProvider>
                                 </NavbarProvider>
                             </ClassesProvider>
                         </TrainerProvider>

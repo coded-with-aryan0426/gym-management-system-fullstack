@@ -1,0 +1,134 @@
+.lms {
+  position: relative;
+  width: 100%;
+}
+
+.lms--disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.lms__control {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  min-height: 32px;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  cursor: text;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.lms__control:focus-within {
+  border-color: var(--trainer-primary, #DC2626);
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.15);
+}
+
+.lms__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex: 1;
+  align-items: center;
+}
+
+.lms__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  background: rgba(220, 38, 38, 0.15);
+  border: 1px solid rgba(220, 38, 38, 0.25);
+  border-radius: 12px;
+  font-size: 11px;
+  color: #DC2626;
+  white-space: nowrap;
+}
+
+.lms__chip-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  font-size: 12px;
+  line-height: 1;
+  color: inherit;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.lms__chip-remove:hover {
+  background: rgba(220, 38, 38, 0.3);
+}
+
+.lms__input {
+  flex: 1;
+  min-width: 100px;
+  padding: 4px 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 13px;
+  color: #fff;
+}
+
+.lms__input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.lms__dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  /* High z-index to escape parent containers */
+  max-height: 200px;
+  margin-top: 4px;
+  padding: 4px;
+  background: #1a1a1a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  overflow-y: auto;
+  list-style: none;
+}
+
+.lms__option {
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.lms__option:hover,
+.lms__option--highlighted {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.lms__option--custom {
+  color: var(--trainer-primary, #DC2626);
+  font-style: italic;
+}
+
+.lms__option--custom:hover,
+.lms__option--custom.lms__option--highlighted {
+  background: rgba(220, 38, 38, 0.1);
+}
+
+.lms__empty {
+  padding: 12px 10px;
+  text-align: center;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.4);
+}

@@ -11,6 +11,33 @@
   background-color: var(--bg-primary, #0a0a0a);
 }
 
+/* Loading State */
+.my-classes--loading {
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  color: var(--text-tertiary, rgba(255, 255, 255, 0.5));
+}
+
+.my-classes__spinner {
+  animation: spin 1s linear infinite;
+  color: #DC2626;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
 /* ============================================
    HEADER
    ============================================ */
@@ -235,7 +262,100 @@
 
 .my-classes__next-actions {
   display: flex;
-  gap: 8px;
+  gap: 0.5rem;
+  position: relative;
+  /* Ensure z-index works properly */
+}
+
+.my-classes__action-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #a1a1aa;
+}
+
+.my-classes__action-btn:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #f4f4f5;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.my-classes__action-btn--primary {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.1) 100%);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+}
+
+.my-classes__action-btn--primary:hover {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(37, 99, 235, 0.2) 100%);
+  border-color: rgba(59, 130, 246, 0.4);
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.1);
+}
+
+.my-classes__action-btn--icon {
+  padding: 0.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Dropdown Menu */
+.relative-menu-container {
+  position: relative;
+}
+
+.menu-dropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  background-color: #18181b;
+  /* zinc-900 */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 140px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+  z-index: 50;
+  animation: fadeIn 0.1s ease-out;
+}
+
+.menu-dropdown button {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8rem;
+  color: #e4e4e7;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  text-align: left;
+}
+
+.menu-dropdown button:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.menu-dropdown button.text-red-500 {
+  color: #f87171;
+}
+
+.menu-dropdown button.text-red-500:hover {
+  background-color: rgba(248, 113, 113, 0.1);
 }
 
 .my-classes__btn {
@@ -480,8 +600,15 @@
 }
 
 @keyframes pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
-  50% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+  }
+
+  50% {
+    box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+  }
 }
 
 .my-classes__card-line {
@@ -870,7 +997,7 @@
   .my-classes__title-row {
     flex-wrap: wrap;
   }
-  
+
   .my-classes__quick-stats {
     order: 3;
     width: 100%;
@@ -879,20 +1006,20 @@
     border-top: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
     margin-top: 8px;
   }
-  
+
   .my-classes__header-actions {
     margin-left: 0;
   }
-  
+
   .my-classes__next-class {
     flex-wrap: wrap;
   }
-  
+
   .my-classes__next-countdown {
     border: none;
     padding: 0;
   }
-  
+
   .my-classes__next-actions {
     width: 100%;
     margin-top: 8px;
@@ -903,7 +1030,7 @@
   .my-classes__header {
     padding: 12px 14px;
   }
-  
+
   .my-classes__content {
     padding: 12px 14px;
   }

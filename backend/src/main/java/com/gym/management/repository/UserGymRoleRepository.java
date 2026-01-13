@@ -56,6 +56,11 @@ public interface UserGymRoleRepository extends JpaRepository<UserGymRole, Long> 
     List<UserGymRole> findActiveStaffByGym(@Param("gymId") Long gymId);
 
     /**
+     * Find all user assignments for a gym (all roles).
+     */
+    List<UserGymRole> findByGymGymIdAndStatus(Long gymId, RoleStatus status);
+
+    /**
      * Find all members at a gym.
      */
     List<UserGymRole> findByGymGymIdAndRoleAndStatus(Long gymId, RoleStatus status, GymRole role);

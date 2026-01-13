@@ -1,0 +1,221 @@
+/* Class Report Modal Styles */
+/* Reusing core modal styles for consistency */
+.report-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 1rem;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.report-modal {
+    background-color: #09090b;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    width: 100%;
+    max-width: 600px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.report-modal__header {
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: linear-gradient(to right, rgba(59, 130, 246, 0.05), transparent);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.report-modal__title h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #f4f4f5;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.report-modal__date {
+    font-size: 0.85rem;
+    color: #a1a1aa;
+    margin-top: 0.25rem;
+}
+
+.report-modal__close {
+    background: none;
+    border: none;
+    color: #71717a;
+    padding: 0.25rem;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.report-modal__close:hover {
+    color: #e4e4e7;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.report-modal__content {
+    padding: 1.5rem;
+    overflow-y: auto;
+    flex: 1;
+}
+
+/* Stats Grid */
+.report-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.report-stat-card {
+    background-color: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+}
+
+.report-stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #e4e4e7;
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.report-stat-value.excellent {
+    color: #4ade80;
+}
+
+.report-stat-value.good {
+    color: #60a5fa;
+}
+
+.report-stat-value.average {
+    color: #facc15;
+}
+
+.report-stat-value.poor {
+    color: #f87171;
+}
+
+.report-stat-label {
+    font-size: 0.75rem;
+    color: #a1a1aa;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Attendance Breakdown */
+.report-section {
+    margin-bottom: 2rem;
+}
+
+.report-section-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #e4e4e7;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Report Table */
+.report-table-container {
+    background-color: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.report-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.report-table th {
+    text-align: left;
+    padding: 0.75rem 1rem;
+    font-size: 0.75rem;
+    color: #a1a1aa;
+    font-weight: 500;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.report-table td {
+    padding: 0.75rem 1rem;
+    color: #e4e4e7;
+    font-size: 0.85rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.report-table tr:last-child td {
+    border-bottom: none;
+}
+
+.status-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    display: inline-block;
+}
+
+.status-badge.status-confirmed {
+    background-color: rgba(74, 222, 128, 0.1);
+    color: #4ade80;
+    border: 1px solid rgba(74, 222, 128, 0.2);
+}
+
+.status-badge.status-absent {
+    background-color: rgba(248, 113, 113, 0.1);
+    color: #f87171;
+    border: 1px solid rgba(248, 113, 113, 0.2);
+}
+
+.status-badge.status-pending {
+    background-color: rgba(250, 204, 21, 0.1);
+    color: #facc15;
+    border: 1px solid rgba(250, 204, 21, 0.2);
+}
+
+/* Notes Section */
+.report-notes {
+    background-color: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 1rem;
+    font-size: 0.9rem;
+    color: #d4d4d8;
+    line-height: 1.5;
+}
+
+/* Footer */
+.report-modal__footer {
+    padding: 1.25rem 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    background-color: rgba(9, 9, 11, 0.95);
+}

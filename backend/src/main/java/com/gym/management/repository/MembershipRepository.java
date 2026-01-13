@@ -10,16 +10,18 @@ import java.util.Optional;
 
 @Repository
 public interface MembershipRepository extends JpaRepository<Membership, Long> {
-    
+
     List<Membership> findByUserUserId(Long userId);
-    
+
     List<Membership> findByUserUserIdAndStatus(Long userId, MembershipStatus status);
-    
+
     List<Membership> findByGymGymIdAndStatus(Long gymId, MembershipStatus status);
-    
+
     List<Membership> findByGymGymId(Long gymId);
-    
+
     Optional<Membership> findByGymGymIdAndUserUserId(Long gymId, Long userId);
-    
+
     boolean existsByGymGymIdAndUserUserId(Long gymId, Long userId);
+
+    Optional<Membership> findTopByUserUserIdAndStatusOrderByEndDateDesc(Long userId, MembershipStatus status);
 }
