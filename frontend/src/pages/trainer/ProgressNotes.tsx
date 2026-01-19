@@ -1,156 +1,75 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
     Search, Plus, Download, ChevronDown, Trash2, Edit2,
     Paperclip, X, Calendar, Clock, Target, TrendingUp,
     ChevronRight, Filter, Image, FileText, Video, MoreVertical,
     Star, Award, AlertTriangle, CheckCircle, Activity, Zap,
-    User, BarChart2, Camera, MessageSquare, Tag
+    User, BarChart2, Camera, MessageSquare, Tag, Loader
 } from 'lucide-react';
 import './ProgressNotes.css';
-
-interface ProgressNote {
-    id: number;
-    member: {
-        name: string;
-        avatar: string;
-        goal: string;
-        startDate: string;
-    };
-    date: string;
-    time: string;
-    sessionType: string;
-    category: 'strength' | 'cardio' | 'flexibility' | 'nutrition' | 'general';
-    mood: 'excellent' | 'good' | 'average' | 'struggling';
-    content: string;
-    highlights?: string[];
-    concerns?: string[];
-    goals?: string[];
-    stats: { label: string; value: string; change?: string; trend?: 'up' | 'down' | 'neutral' }[];
-    attachments: { type: 'photo' | 'video' | 'document'; name: string }[];
-    tags: string[];
-    followUp?: string;
-    private: boolean;
-}
+import { progressNoteApi, type ProgressNoteDTO } from '../../services/progressNoteApi';
+import { trainerApi, type TrainerMember } from '../../services/trainerApi';
 
 const ProgressNotes: React.FC = () => {
+    // UI State
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
+
+    // Data State
+    const [notes, setNotes] = useState<ProgressNoteDTO[]>([]);
+    const [members, setMembers] = useState<TrainerMember[]>([]);
+
+    // Filters
     const [filterMember, setFilterMember] = useState('All Members');
     const [filterCategory, setFilterCategory] = useState('all');
-    const [filterTime, setFilterTime] = useState('This Month');
+    const [filterTime, setFilterTime] = useState('All Time');
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedNote, setSelectedNote] = useState<ProgressNote | null>(null);
+    const [selectedNote, setSelectedNote] = useState<ProgressNoteDTO | null>(null);
 
-    const notes: ProgressNote[] = [
-        {
-            id: 1,
-            member: {
-                name: 'Sarah Wilson',
-                avatar: 'https://ui-avatars.com/api/?name=Sarah+Wilson&background=DC2626&color=fff',
-                goal: 'Build muscle & strength',
-                startDate: 'Jan 15, 2024'
-            },
-            date: 'March 25, 2024',
-            time: '2:30 PM',
-            sessionType: 'Upper Body Strength',
-            category: 'strength',
-            mood: 'excellent',
-            content: 'Great progress on squats today! Increased weight from 135lbs to 155lbs with excellent form. Sarah is showing consistent improvement in leg strength. Her dedication is really paying off.',
-            highlights: ['Hit new squat PR at 155lbs', 'Perfect form maintained', 'Increased confidence'],
-            goals: ['Progress to 165lbs by next month', 'Add hip mobility work'],
-            stats: [
-                { label: 'Weight', value: '78 kg', change: '-2kg', trend: 'down' },
-                { label: 'Body Fat', value: '18%', change: '-1.5%', trend: 'down' },
-                { label: 'Squat PR', value: '155 lbs', change: '+20lbs', trend: 'up' }
-            ],
-            attachments: [
-                { type: 'photo', name: 'Form Check Photo' },
-                { type: 'document', name: 'Workout Log' }
-            ],
-            tags: ['PR', 'strength', 'legs'],
-            followUp: 'Check squat depth next session',
-            private: false
-        },
-        {
-            id: 2,
-            member: {
-                name: 'Mike Johnson',
-                avatar: 'https://ui-avatars.com/api/?name=Mike+Johnson&background=3B82F6&color=fff',
-                goal: 'Weight loss & endurance',
-                startDate: 'Feb 1, 2024'
-            },
-            date: 'March 22, 2024',
-            time: '10:00 AM',
-            sessionType: 'Cardio HIIT',
-            category: 'cardio',
-            mood: 'struggling',
-            content: 'Struggled with HIIT today. Mike mentioned work stress affecting sleep. Adjusted rest periods to 90 seconds instead of 60. Need to monitor energy levels.',
-            concerns: ['Low energy today', 'Sleep issues reported', 'Work stress affecting performance'],
-            goals: ['Focus on steady state cardio twice this week', 'Improve sleep hygiene'],
-            stats: [
-                { label: 'Avg HR', value: '145 bpm', trend: 'neutral' },
-                { label: 'Max HR', value: '178 bpm', trend: 'neutral' },
-                { label: 'Calories', value: '420', change: '-80', trend: 'down' }
-            ],
-            attachments: [],
-            tags: ['cardio', 'adjustment', 'recovery'],
-            followUp: 'Check in about sleep at next session',
-            private: true
-        },
-        {
-            id: 3,
-            member: {
-                name: 'Emma Davis',
-                avatar: 'https://ui-avatars.com/api/?name=Emma+Davis&background=10B981&color=fff',
-                goal: 'Overall fitness & flexibility',
-                startDate: 'Dec 5, 2023'
-            },
-            date: 'March 20, 2024',
-            time: '4:00 PM',
-            sessionType: 'Full Body Circuit',
-            category: 'strength',
-            mood: 'excellent',
-            content: 'Excellent session! Completed full circuit with no breaks. Emma is ready to move to advanced program. Her consistency over the past 3 months has been impressive.',
-            highlights: ['Completed full circuit without rest', 'Ready for advanced program', '3-month milestone achieved'],
-            stats: [
-                { label: 'Reps', value: '120', change: '+15', trend: 'up' },
-                { label: 'Time', value: '45 min', change: '-5min', trend: 'up' },
-                { label: 'Intensity', value: 'High', trend: 'up' }
-            ],
-            attachments: [
-                { type: 'video', name: 'Circuit Recording' }
-            ],
-            tags: ['milestone', 'advancement', 'full-body'],
-            private: false
-        },
-        {
-            id: 4,
-            member: {
-                name: 'James Wilson',
-                avatar: 'https://ui-avatars.com/api/?name=James+Wilson&background=F59E0B&color=fff',
-                goal: 'Rehabilitation & mobility',
-                startDate: 'Mar 1, 2024'
-            },
-            date: 'March 18, 2024',
-            time: '11:30 AM',
-            sessionType: 'Mobility & Rehab',
-            category: 'flexibility',
-            mood: 'good',
-            content: 'Good progress on shoulder mobility. Range of motion improved by 15 degrees. James is following home exercises consistently. Continue current protocol.',
-            highlights: ['15° improvement in shoulder ROM', 'Consistent with home exercises'],
-            stats: [
-                { label: 'Shoulder ROM', value: '135°', change: '+15°', trend: 'up' },
-                { label: 'Pain Level', value: '3/10', change: '-2', trend: 'down' }
-            ],
-            attachments: [
-                { type: 'photo', name: 'ROM Assessment' }
-            ],
-            tags: ['rehab', 'mobility', 'shoulder'],
-            followUp: 'Re-assess in 2 weeks',
-            private: false
+    // Form State
+    const initialFormState: Partial<ProgressNoteDTO> = {
+        member: { name: '', goal: '' },
+        category: 'general',
+        sessionType: '',
+        date: new Date().toISOString().split('T')[0],
+        time: new Date().toTimeString().slice(0, 5),
+        mood: 'good',
+        content: '',
+        highlights: [],
+        concerns: [],
+        stats: [],
+        tags: [],
+        attachments: [],
+        private: false,
+        followUp: ''
+    };
+    const [formData, setFormData] = useState<Partial<ProgressNoteDTO>>(initialFormState);
+    const [formHighlights, setFormHighlights] = useState('');
+    const [formConcerns, setFormConcerns] = useState('');
+    const [formTags, setFormTags] = useState('');
+    const [selectedMemberName, setSelectedMemberName] = useState('');
+
+    useEffect(() => {
+        fetchInitialData();
+    }, []);
+
+    const fetchInitialData = async () => {
+        try {
+            setIsLoading(true);
+            const [fetchedNotes, fetchedMembers] = await Promise.all([
+                progressNoteApi.getAllNotes(),
+                trainerApi.getMyMembers()
+            ]);
+            setNotes(fetchedNotes || []);
+            setMembers(fetchedMembers || []);
+        } catch (error) {
+            console.error('Failed to fetch data:', error);
+        } finally {
+            setIsLoading(false);
         }
-    ];
+    };
 
-    const members = ['All Members', 'Sarah Wilson', 'Mike Johnson', 'Emma Davis', 'James Wilson'];
     const categories = [
         { value: 'all', label: 'All Categories', icon: Target },
         { value: 'strength', label: 'Strength', icon: Zap },
@@ -162,22 +81,93 @@ const ProgressNotes: React.FC = () => {
 
     const filteredNotes = useMemo(() => {
         return notes.filter(note => {
-            const matchesMember = filterMember === 'All Members' || note.member.name === filterMember;
+            const matchesMember = filterMember === 'All Members' || note.member?.name === filterMember;
             const matchesCategory = filterCategory === 'all' || note.category === filterCategory;
+
+            // Basic Time Logic (can be improved)
+            let matchesTime = true;
+            if (filterTime === 'This Month') {
+                const noteDate = new Date(note.date);
+                const now = new Date();
+                matchesTime = noteDate.getMonth() === now.getMonth() && noteDate.getFullYear() === now.getFullYear();
+            } else if (filterTime === 'This Week') {
+                // Simplified week check
+                const noteDate = new Date(note.date);
+                const now = new Date();
+                const diffTime = Math.abs(now.getTime() - noteDate.getTime());
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                matchesTime = diffDays <= 7;
+            }
+
             const matchesSearch = searchQuery === '' ||
                 note.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                note.member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                note.member?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 note.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-            return matchesMember && matchesCategory && matchesSearch;
+
+            return matchesMember && matchesCategory && matchesSearch && matchesTime;
         });
-    }, [notes, filterMember, filterCategory, searchQuery]);
+    }, [notes, filterMember, filterCategory, filterTime, searchQuery]);
 
     const stats = useMemo(() => ({
         totalNotes: notes.length,
-        thisWeek: notes.filter(n => n.date.includes('March 2')).length,
-        membersTracked: new Set(notes.map(n => n.member.name)).size,
+        thisWeek: notes.filter(n => {
+            const d = new Date(n.date);
+            const now = new Date();
+            return (now.getTime() - d.getTime()) / (1000 * 3600 * 24) <= 7;
+        }).length,
+        membersTracked: new Set(notes.map(n => n.member?.name)).size,
         prsRecorded: notes.filter(n => n.tags.includes('PR')).length
     }), [notes]);
+
+    const handleSaveNote = async () => {
+        if (!selectedMemberName || !formData.content) {
+            alert('Please select a member and enter content');
+            return;
+        }
+
+        try {
+            setIsSaving(true);
+            const member = members.find(m => m.name === selectedMemberName);
+            if (!member) {
+                alert('Invalid member selected');
+                return;
+            }
+
+            const payload: ProgressNoteDTO = {
+                ...formData as ProgressNoteDTO,
+                member: {
+                    name: member.name,
+                    avatar: `https://ui-avatars.com/api/?name=${member.name}`, // Construct avatar if missing
+                    goal: member.goal || 'Fitness',
+                    startDate: new Date().toLocaleDateString() // Placeholder
+                },
+                highlights: formHighlights.split('\n').filter(s => s.trim()),
+                concerns: formConcerns.split('\n').filter(s => s.trim()),
+                tags: formTags.split(',').map(s => s.trim()).filter(s => s),
+                stats: [], // Implement stats UI if needed, empty for now
+                attachments: [] // Implement upload later
+            };
+
+            await progressNoteApi.createNoteForMember(member.id, payload);
+
+            // Refresh list
+            await fetchInitialData();
+            setIsModalOpen(false);
+            setFormData(initialFormState);
+            setSelectedMemberName('');
+            setFormHighlights('');
+            setFormConcerns('');
+            setFormTags('');
+
+        } catch (error) {
+            console.error('Failed to save note:', error);
+            alert('Failed to save note');
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    // --- Helper Render Methods ---
 
     const getMoodIcon = (mood: string) => {
         switch (mood) {
@@ -208,7 +198,15 @@ const ProgressNotes: React.FC = () => {
         }
     };
 
+    const getMemberAvatar = (member?: { name: string; avatar?: string }) => {
+        if (member?.avatar && (member.avatar.startsWith('http') || member.avatar.startsWith('data:'))) {
+            return member.avatar;
+        }
+        return `https://ui-avatars.com/api/?name=${encodeURIComponent(member?.name || 'Member')}&background=random`;
+    };
+
     return (
+
         <div className="progress-notes">
             <div className="progress-notes__header">
                 <div className="progress-notes__header-content">
@@ -271,7 +269,8 @@ const ProgressNotes: React.FC = () => {
                         <div className="progress-notes__filter-dropdown">
                             <User size={12} />
                             <select value={filterMember} onChange={(e) => setFilterMember(e.target.value)}>
-                                {members.map(m => <option key={m}>{m}</option>)}
+                                <option>All Members</option>
+                                {members.map(m => <option key={m.id} value={m.name}>{m.name}</option>)}
                             </select>
                             <ChevronDown size={12} />
                         </div>
@@ -294,144 +293,150 @@ const ProgressNotes: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="progress-notes__timeline">
-                    {filteredNotes.map(note => (
-                        <div
-                            key={note.id}
-                            className={`progress-note ${note.private ? 'progress-note--private' : ''}`}
-                            onClick={() => setSelectedNote(note)}
-                        >
-                            <div className="progress-note__indicator">
-                                <div
-                                    className="progress-note__dot"
-                                    style={{ background: getCategoryColor(note.category) }}
-                                />
-                                <div className="progress-note__line" />
-                            </div>
-
-                            <div className="progress-note__card">
-                                <div className="progress-note__header">
-                                    <div className="progress-note__member">
-                                        <img src={note.member.avatar} alt={note.member.name} />
-                                        <div className="progress-note__member-info">
-                                            <h3>{note.member.name}</h3>
-                                            <span className="progress-note__member-goal">{note.member.goal}</span>
-                                        </div>
-                                    </div>
-                                    <div className="progress-note__header-right">
-                                        <div className="progress-note__mood">
-                                            {getMoodIcon(note.mood)}
-                                            <span>{note.mood}</span>
-                                        </div>
-                                        <div className="progress-note__date">
-                                            <Calendar size={11} />
-                                            {note.date}
-                                        </div>
-                                        <button className="progress-note__menu-btn">
-                                            <MoreVertical size={14} />
-                                        </button>
-                                    </div>
+                {isLoading ? (
+                    <div className="flex justify-center items-center h-64 text-gray-500">
+                        <Loader className="animate-spin mr-2" size={20} /> Loading notes...
+                    </div>
+                ) : (
+                    <div className="progress-notes__timeline">
+                        {filteredNotes.map(note => (
+                            <div
+                                key={note.id}
+                                className={`progress-note ${note.private ? 'progress-note--private' : ''}`}
+                                onClick={() => setSelectedNote(note)}
+                            >
+                                <div className="progress-note__indicator">
+                                    <div
+                                        className="progress-note__dot"
+                                        style={{ background: getCategoryColor(note.category) }}
+                                    />
+                                    <div className="progress-note__line" />
                                 </div>
 
-                                <div className="progress-note__session">
-                                    <span
-                                        className="progress-note__category"
-                                        style={{ background: `${getCategoryColor(note.category)}20`, color: getCategoryColor(note.category) }}
-                                    >
-                                        {note.category}
-                                    </span>
-                                    <span className="progress-note__session-type">{note.sessionType}</span>
-                                    <span className="progress-note__time">
-                                        <Clock size={11} /> {note.time}
-                                    </span>
-                                </div>
-
-                                <p className="progress-note__text">{note.content}</p>
-
-                                {note.highlights && note.highlights.length > 0 && (
-                                    <div className="progress-note__highlights">
-                                        <span className="progress-note__section-label">
-                                            <Award size={11} /> Highlights
-                                        </span>
-                                        <ul>
-                                            {note.highlights.map((h, i) => (
-                                                <li key={i}>{h}</li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                )}
-
-                                {note.concerns && note.concerns.length > 0 && (
-                                    <div className="progress-note__concerns">
-                                        <span className="progress-note__section-label">
-                                            <AlertTriangle size={11} /> Concerns
-                                        </span>
-                                        <ul>
-                                            {note.concerns.map((c, i) => (
-                                                <li key={i}>{c}</li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                )}
-
-                                {note.stats.length > 0 && (
-                                    <div className="progress-note__stats">
-                                        {note.stats.map((stat, i) => (
-                                            <div key={i} className="progress-note__stat">
-                                                <span className="progress-note__stat-label">{stat.label}</span>
-                                                <div className="progress-note__stat-row">
-                                                    <span className="progress-note__stat-value">{stat.value}</span>
-                                                    {stat.change && (
-                                                        <span className={`progress-note__stat-change progress-note__stat-change--${stat.trend}`}>
-                                                            {stat.trend === 'up' ? <TrendingUp size={10} /> : stat.trend === 'down' ? <TrendingUp size={10} style={{ transform: 'rotate(180deg)' }} /> : null}
-                                                            {stat.change}
-                                                        </span>
-                                                    )}
-                                                </div>
+                                <div className="progress-note__card">
+                                    <div className="progress-note__header">
+                                        <div className="progress-note__member">
+                                            <img src={getMemberAvatar(note.member)} alt={note.member?.name} />
+                                            <div className="progress-note__member-info">
+                                                <h3>{note.member?.name}</h3>
+                                                <span className="progress-note__member-goal">{note.member?.goal}</span>
                                             </div>
-                                        ))}
+                                        </div>
+                                        <div className="progress-note__header-right">
+                                            <div className="progress-note__mood">
+                                                {getMoodIcon(note.mood)}
+                                                <span>{note.mood}</span>
+                                            </div>
+                                            <div className="progress-note__date">
+                                                <Calendar size={11} />
+                                                {note.date}
+                                            </div>
+                                            <button className="progress-note__menu-btn">
+                                                <MoreVertical size={14} />
+                                            </button>
+                                        </div>
                                     </div>
-                                )}
 
-                                <div className="progress-note__footer">
-                                    <div className="progress-note__tags">
-                                        {note.tags.map((tag, i) => (
-                                            <span key={i} className="progress-note__tag">
-                                                <Tag size={9} /> {tag}
+                                    <div className="progress-note__session">
+                                        <span
+                                            className="progress-note__category"
+                                            style={{ background: `${getCategoryColor(note.category)}20`, color: getCategoryColor(note.category) }}
+                                        >
+                                            {note.category}
+                                        </span>
+                                        <span className="progress-note__session-type">{note.sessionType}</span>
+                                        <span className="progress-note__time">
+                                            <Clock size={11} /> {note.time}
+                                        </span>
+                                    </div>
+
+                                    <p className="progress-note__text">{note.content}</p>
+
+                                    {note.highlights && note.highlights.length > 0 && (
+                                        <div className="progress-note__highlights">
+                                            <span className="progress-note__section-label">
+                                                <Award size={11} /> Highlights
                                             </span>
-                                        ))}
-                                    </div>
+                                            <ul>
+                                                {note.highlights.map((h, i) => (
+                                                    <li key={i}>{h}</li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
 
-                                    {note.attachments.length > 0 && (
-                                        <div className="progress-note__attachments">
-                                            {note.attachments.map((att, i) => (
-                                                <button key={i} className="progress-note__attachment">
-                                                    {getAttachmentIcon(att.type)}
-                                                    {att.name}
-                                                </button>
+                                    {note.concerns && note.concerns.length > 0 && (
+                                        <div className="progress-note__concerns">
+                                            <span className="progress-note__section-label">
+                                                <AlertTriangle size={11} /> Concerns
+                                            </span>
+                                            <ul>
+                                                {note.concerns.map((c, i) => (
+                                                    <li key={i}>{c}</li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+
+                                    {note.stats && note.stats.length > 0 && (
+                                        <div className="progress-note__stats">
+                                            {note.stats.map((stat, i) => (
+                                                <div key={i} className="progress-note__stat">
+                                                    <span className="progress-note__stat-label">{stat.label}</span>
+                                                    <div className="progress-note__stat-row">
+                                                        <span className="progress-note__stat-value">{stat.value}</span>
+                                                        {stat.change && (
+                                                            <span className={`progress-note__stat-change progress-note__stat-change--${stat.trend}`}>
+                                                                {stat.trend === 'up' ? <TrendingUp size={10} /> : stat.trend === 'down' ? <TrendingUp size={10} style={{ transform: 'rotate(180deg)' }} /> : null}
+                                                                {stat.change}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
                                             ))}
                                         </div>
                                     )}
-                                </div>
 
-                                {note.followUp && (
-                                    <div className="progress-note__followup">
-                                        <MessageSquare size={11} />
-                                        <strong>Follow-up:</strong> {note.followUp}
+                                    <div className="progress-note__footer">
+                                        <div className="progress-note__tags">
+                                            {note.tags && note.tags.map((tag, i) => (
+                                                <span key={i} className="progress-note__tag">
+                                                    <Tag size={9} /> {tag}
+                                                </span>
+                                            ))}
+                                        </div>
+
+                                        {note.attachments && note.attachments.length > 0 && (
+                                            <div className="progress-note__attachments">
+                                                {note.attachments.map((att, i) => (
+                                                    <button key={i} className="progress-note__attachment">
+                                                        {getAttachmentIcon(att.type)}
+                                                        {att.name}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
-                                )}
-                            </div>
-                        </div>
-                    ))}
 
-                    {filteredNotes.length === 0 && (
-                        <div className="progress-notes__empty">
-                            <FileText size={32} />
-                            <h3>No notes found</h3>
-                            <p>Try adjusting your filters or add a new note</p>
-                        </div>
-                    )}
-                </div>
+                                    {note.followUp && (
+                                        <div className="progress-note__followup">
+                                            <MessageSquare size={11} />
+                                            <strong>Follow-up:</strong> {note.followUp}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+
+                        {!isLoading && filteredNotes.length === 0 && (
+                            <div className="progress-notes__empty">
+                                <FileText size={32} />
+                                <h3>No notes found</h3>
+                                <p>Try adjusting your filters or add a new note</p>
+                            </div>
+                        )}
+                    </div>
+                )}
 
                 <button className="progress-notes__load-more">
                     Load More Notes
@@ -450,16 +455,22 @@ const ProgressNotes: React.FC = () => {
                         <div className="progress-notes__modal-body">
                             <div className="progress-notes__form-field">
                                 <label>Select Member *</label>
-                                <select>
-                                    <option>Search or select member...</option>
-                                    {members.slice(1).map(m => <option key={m}>{m}</option>)}
+                                <select
+                                    value={selectedMemberName}
+                                    onChange={(e) => setSelectedMemberName(e.target.value)}
+                                >
+                                    <option value="">Search or select member...</option>
+                                    {members.map(m => <option key={m.id} value={m.name}>{m.name}</option>)}
                                 </select>
                             </div>
 
                             <div className="progress-notes__form-row">
                                 <div className="progress-notes__form-field">
                                     <label>Category</label>
-                                    <select>
+                                    <select
+                                        value={formData.category}
+                                        onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
+                                    >
                                         {categories.slice(1).map(c => (
                                             <option key={c.value} value={c.value}>{c.label}</option>
                                         ))}
@@ -467,18 +478,30 @@ const ProgressNotes: React.FC = () => {
                                 </div>
                                 <div className="progress-notes__form-field">
                                     <label>Session Type</label>
-                                    <input type="text" placeholder="e.g., Upper Body Strength" />
+                                    <input
+                                        type="text"
+                                        placeholder="e.g., Upper Body Strength"
+                                        value={formData.sessionType}
+                                        onChange={(e) => setFormData({ ...formData, sessionType: e.target.value })}
+                                    />
                                 </div>
                             </div>
 
                             <div className="progress-notes__form-row">
                                 <div className="progress-notes__form-field">
                                     <label>Session Date *</label>
-                                    <input type="date" />
+                                    <input
+                                        type="date"
+                                        value={formData.date}
+                                        onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                                    />
                                 </div>
                                 <div className="progress-notes__form-field">
                                     <label>Member Mood</label>
-                                    <select>
+                                    <select
+                                        value={formData.mood}
+                                        onChange={(e) => setFormData({ ...formData, mood: e.target.value as any })}
+                                    >
                                         <option value="excellent">Excellent - High energy</option>
                                         <option value="good">Good - Normal</option>
                                         <option value="average">Average - Some fatigue</option>
@@ -489,17 +512,32 @@ const ProgressNotes: React.FC = () => {
 
                             <div className="progress-notes__form-field">
                                 <label>Session Notes *</label>
-                                <textarea rows={4} placeholder="Describe the session, observations, progress made..." />
+                                <textarea
+                                    rows={4}
+                                    placeholder="Describe the session, observations, progress made..."
+                                    value={formData.content}
+                                    onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                                />
                             </div>
 
                             <div className="progress-notes__form-field">
                                 <label>Highlights (one per line)</label>
-                                <textarea rows={2} placeholder="Hit new PR&#10;Improved form&#10;Increased confidence" />
+                                <textarea
+                                    rows={2}
+                                    placeholder="Hit new PR&#10;Improved form&#10;Increased confidence"
+                                    value={formHighlights}
+                                    onChange={(e) => setFormHighlights(e.target.value)}
+                                />
                             </div>
 
                             <div className="progress-notes__form-field">
                                 <label>Concerns (one per line)</label>
-                                <textarea rows={2} placeholder="Low energy&#10;Form needs work&#10;Missed sessions" />
+                                <textarea
+                                    rows={2}
+                                    placeholder="Low energy&#10;Form needs work&#10;Missed sessions"
+                                    value={formConcerns}
+                                    onChange={(e) => setFormConcerns(e.target.value)}
+                                />
                             </div>
 
                             <div className="progress-notes__measurements">
@@ -523,11 +561,21 @@ const ProgressNotes: React.FC = () => {
                             <div className="progress-notes__form-row">
                                 <div className="progress-notes__form-field">
                                     <label>Tags (comma separated)</label>
-                                    <input type="text" placeholder="PR, strength, legs" />
+                                    <input
+                                        type="text"
+                                        placeholder="PR, strength, legs"
+                                        value={formTags}
+                                        onChange={(e) => setFormTags(e.target.value)}
+                                    />
                                 </div>
                                 <div className="progress-notes__form-field">
                                     <label>Follow-up Reminder</label>
-                                    <input type="text" placeholder="What to check next session" />
+                                    <input
+                                        type="text"
+                                        placeholder="What to check next session"
+                                        value={formData.followUp}
+                                        onChange={(e) => setFormData({ ...formData, followUp: e.target.value })}
+                                    />
                                 </div>
                             </div>
 
@@ -540,7 +588,12 @@ const ProgressNotes: React.FC = () => {
                             </div>
 
                             <div className="progress-notes__form-checkbox">
-                                <input type="checkbox" id="private-note" />
+                                <input
+                                    type="checkbox"
+                                    id="private-note"
+                                    checked={formData.private}
+                                    onChange={(e) => setFormData({ ...formData, private: e.target.checked })}
+                                />
                                 <label htmlFor="private-note">Private note (only visible to you)</label>
                             </div>
                         </div>
@@ -548,8 +601,12 @@ const ProgressNotes: React.FC = () => {
                             <button className="progress-notes__modal-cancel" onClick={() => setIsModalOpen(false)}>
                                 Cancel
                             </button>
-                            <button className="progress-notes__modal-save">
-                                Save Note
+                            <button
+                                className="progress-notes__modal-save"
+                                onClick={handleSaveNote}
+                                disabled={isSaving}
+                            >
+                                {isSaving ? 'Saving...' : 'Save Note'}
                             </button>
                         </div>
                     </div>

@@ -15,4 +15,6 @@ public class ChatMessageDTO {
     private String payload;
     private LocalDateTime createdAt;
     private Boolean isSystemMessage;
+    private Boolean isEdited;
+    private java.util.List<MessageReactionDTO> reactions;
 }

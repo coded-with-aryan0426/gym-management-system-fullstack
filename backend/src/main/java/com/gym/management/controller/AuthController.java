@@ -160,13 +160,36 @@ public class AuthController {
             return ResponseEntity.status(401).body(Map.of("error", "Invalid password"));
         }
 
-        // Credentials correct. Generate OTP and send it.
-        otpService.generateAndSendOtp(user.getEmail(), OtpPurpose.LOGIN);
+        // SKIP OTP for returning users (isFirstLogin = false or null)
+        // Only require OTP for first-time users
+        if (Boolean.TRUE.equals(user.getIsFirstLogin())) {
+            // First-time user - require OTP verification
+            otpService.generateAndSendOtp(user.getEmail(), OtpPurpose.LOGIN);
+            AuthResponse response = new AuthResponse();
+            response.setOtpSent(true);
+            response.setEmail(user.getEmail());
+            response.setIsFirstLogin(true);
+            return ResponseEntity.ok(response);
+        }
+
+        // Returning user - issue token directly (no OTP needed)
+        String userRole = determineUserRole(user);
 
         AuthResponse response = new AuthResponse();
-        response.setOtpSent(true);
+        response.setId(user.getUserId());
+        response.setUsername(user.getUsername());
+        response.setFullName(user.getFullName());
         response.setEmail(user.getEmail());
-        // Do not send token yet
+        response.setContext("STAFF");
+        response.setStaffRole(userRole);
+        response.setHasStaffAccess(true);
+        response.setHasMemberAccess(true);
+        response.setIsFirstLogin(false);
+        response.setOtpSent(false); // No OTP sent
+
+        String token = tokenProvider.generateTokenFromUser(user, "STAFF", null, userRole, null, null, null, null);
+        response.setToken(token);
+
         return ResponseEntity.ok(response);
     }
 
@@ -197,19 +220,8 @@ public class AuthController {
             // page.
         }
 
-        // Determine Role Context
-        String userRole = "CUSTOMER";
-        if (user.getRoles() != null) {
-            for (Role role : user.getRoles()) {
-                String roleName = role.getRoleName();
-                if ("OWNER".equalsIgnoreCase(roleName)) {
-                    userRole = "OWNER";
-                    break;
-                } else if ("TRAINER".equalsIgnoreCase(roleName) || "STAFF".equalsIgnoreCase(roleName)) {
-                    userRole = "TRAINER";
-                }
-            }
-        }
+        // Determine Role Context using helper
+        String userRole = determineUserRole(user);
 
         AuthResponse response = new AuthResponse();
         response.setId(user.getUserId());
@@ -244,12 +256,82 @@ public class AuthController {
             return ResponseEntity.badRequest().body(Map.of("error", "Passwords do not match"));
         }
 
-        user.setPassword(request.getNewPassword());
+        // CRITICAL: Encode password with BCrypt before saving!
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         user.setIsFirstLogin(false);
         user.setPasswordChangedAt(java.time.LocalDateTime.now());
         userRepository.save(user);
 
         return ResponseEntity.ok(Map.of("message", "Password changed successfully. Please login again."));
+    }
+
+    /**
+     * Emergency password reset - allows resetting password for any user by email
+     * This is a PUBLIC endpoint for recovery purposes.
+     */
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
+        try {
+            String email = request.get("email");
+            String newPassword = request.get("newPassword");
+
+            if (email == null || email.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Email is required"));
+            }
+            if (newPassword == null || newPassword.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "New password is required"));
+            }
+
+            // Try to find user by email first, then by username
+            Optional<User> userOpt = userRepository.findByEmail(email);
+            if (userOpt.isEmpty()) {
+                userOpt = userRepository.findByUsername(email);
+            }
+
+            if (userOpt.isEmpty()) {
+                return ResponseEntity.status(404).body(Map.of(
+                        "error", "User not found",
+                        "searchedEmail", email));
+            }
+
+            User user = userOpt.get();
+            String encodedPassword = passwordEncoder.encode(newPassword);
+            user.setPassword(encodedPassword);
+            user.setIsFirstLogin(false);
+            userRepository.save(user);
+
+            return ResponseEntity.ok(Map.of(
+                    "message", "Password reset successfully",
+                    "email", user.getEmail(),
+                    "username", user.getUsername()));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of(
+                    "error", "Failed to reset password",
+                    "details", e.getMessage()));
+        }
+    }
+
+    /**
+     * List all users (for debugging password issues)
+     * Shows emails so you know what to use for reset
+     */
+    @GetMapping("/list-users")
+    public ResponseEntity<?> listUsers() {
+        try {
+            List<User> users = userRepository.findAll();
+            List<Map<String, Object>> userList = users.stream()
+                    .map(u -> Map.<String, Object>of(
+                            "id", u.getUserId(),
+                            "email", u.getEmail() != null ? u.getEmail() : "N/A",
+                            "username", u.getUsername() != null ? u.getUsername() : "N/A",
+                            "fullName", u.getFullName() != null ? u.getFullName() : "N/A",
+                            "roles", u.getRoles() != null ? u.getRoles().stream()
+                                    .map(r -> r.getRoleName()).toList() : List.of()))
+                    .toList();
+            return ResponseEntity.ok(Map.of("users", userList, "count", users.size()));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+        }
     }
 
     /**
@@ -299,7 +381,8 @@ public class AuthController {
         response.setHasMemberAccess(false);
 
         // V1: Generate token without gym context
-        String token = tokenProvider.generateTokenFromUser(user, "STAFF", null, requestedRole.toUpperCase(), null, null, null, null);
+        String token = tokenProvider.generateTokenFromUser(user, "STAFF", null, requestedRole.toUpperCase(), null, null,
+                null, null);
         response.setToken(token);
 
         return ResponseEntity.ok(response);
@@ -391,7 +474,8 @@ public class AuthController {
             // Verify membership logic could go here
         }
 
-        String token = tokenProvider.generateTokenFromUser(user, context, gym.getGymId(), staffRole, null, null, null, null);
+        String token = tokenProvider.generateTokenFromUser(user, context, gym.getGymId(), staffRole, null, null, null,
+                null);
         response.setToken(token);
 
         return ResponseEntity.ok(response);
@@ -427,5 +511,47 @@ public class AuthController {
 
         userRepository.save(user);
         return ResponseEntity.ok("User registered successfully");
+    }
+
+    /**
+     * Determine the primary role for a user.
+     * Priority: OWNER/ADMIN > TRAINER > MEMBER/CUSTOMER
+     */
+    private String determineUserRole(User user) {
+        if (user.getRoles() == null || user.getRoles().isEmpty()) {
+            return "CUSTOMER";
+        }
+
+        String userRole = "CUSTOMER";
+        boolean hasTrainer = false;
+        boolean hasMember = false;
+
+        for (Role role : user.getRoles()) {
+            String roleName = role.getRoleName().toUpperCase();
+
+            // OWNER/ADMIN has highest priority
+            if ("OWNER".equals(roleName) || "ADMIN".equals(roleName)) {
+                return "OWNER";
+            }
+
+            // TRAINER has second priority
+            if ("TRAINER".equals(roleName) || "STAFF".equals(roleName)) {
+                hasTrainer = true;
+            }
+
+            // MEMBER/CUSTOMER has lowest priority
+            if ("MEMBER".equals(roleName) || "CUSTOMER".equals(roleName)) {
+                hasMember = true;
+            }
+        }
+
+        if (hasTrainer) {
+            return "TRAINER";
+        }
+        if (hasMember) {
+            return "MEMBER";
+        }
+
+        return userRole;
     }
 }

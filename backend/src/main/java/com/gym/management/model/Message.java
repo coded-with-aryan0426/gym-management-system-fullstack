@@ -52,6 +52,12 @@ public class Message {
     @Column(name = "is_deleted")
     private Boolean isDeleted = false;
 
+    @OneToMany(mappedBy = "message", cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<MessageReaction> reactions = new java.util.ArrayList<>();
+
+    @OneToMany(mappedBy = "message", cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<MessageEditHistory> editHistory = new java.util.ArrayList<>();
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

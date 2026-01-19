@@ -13,7 +13,12 @@ import ClassAttendanceModal from './ClassAttendanceModal';
 import ClassReportModal from './ClassReportModal';
 
 const MyClasses: React.FC = () => {
-    const [viewMode, setViewMode] = useState<'today' | 'week' | 'list'>('today');
+    // Initialize viewMode from localStorage or default to 'today'
+    const [viewMode, setViewMode] = useState<'today' | 'week' | 'list'>(() => {
+        const saved = localStorage.getItem('trainer_classes_view_mode');
+        return (saved === 'today' || saved === 'week' || saved === 'list') ? saved : 'today';
+    });
+
     const [currentWeek, setCurrentWeek] = useState(0);
     const [quickFilter, setQuickFilter] = useState<string | null>(null);
     const [selectedClass, setSelectedClass] = useState<number | null>(null);
@@ -29,6 +34,11 @@ const MyClasses: React.FC = () => {
     const [reportClassItem, setReportClassItem] = useState<TrainerClassItem | null>(null);
     const [activeMenuId, setActiveMenuId] = useState<number | null>(null);
     const [editingClass, setEditingClass] = useState<TrainerClassItem | null>(null);
+
+    // Persist viewMode changes
+    useEffect(() => {
+        localStorage.setItem('trainer_classes_view_mode', viewMode);
+    }, [viewMode]);
 
     // Format today's date
     const today = new Date();
@@ -77,17 +87,21 @@ const MyClasses: React.FC = () => {
     );
 
     const stats = useMemo(() => {
-        const today = viewMode === 'today' ? todayClasses : classes.filter(c => c.date === todayStr);
-        const total = today.length;
-        const completed = today.filter(c => c.status === 'completed').length;
-        const inProgress = today.filter(c => c.status === 'in-progress').length;
-        const upcoming = today.filter(c => c.status === 'upcoming').length;
-        const cancelled = today.filter(c => c.status === 'cancelled').length;
-        const totalAttendees = today.reduce((sum, c) => sum + c.attendees.confirmed, 0);
-        const pendingConfirmations = today.reduce((sum, c) => sum + c.attendees.pending, 0);
-        const ptSessions = today.filter(c => c.type === 'pt').length;
+        // Fix: Use the displayed dataset for stats, not just "today"
+        // If viewing "week", show stats for the whole week. If "today", show today.
+        const sourceData = classes;
+
+        const total = sourceData.length;
+        const completed = sourceData.filter(c => c.status === 'completed').length;
+        const inProgress = sourceData.filter(c => c.status === 'in-progress').length;
+        const upcoming = sourceData.filter(c => c.status === 'upcoming').length;
+        const cancelled = sourceData.filter(c => c.status === 'cancelled').length;
+        const totalAttendees = sourceData.reduce((sum, c) => sum + c.attendees.confirmed, 0);
+        const pendingConfirmations = sourceData.reduce((sum, c) => sum + c.attendees.pending, 0);
+        const ptSessions = sourceData.filter(c => c.type === 'pt').length;
+
         return { total, completed, inProgress, upcoming, cancelled, totalAttendees, pendingConfirmations, ptSessions };
-    }, [viewMode, todayClasses, classes, todayStr]);
+    }, [classes]);
 
     const getNextClass = () => {
         const upcoming = todayClasses.filter(c => c.status === 'upcoming');

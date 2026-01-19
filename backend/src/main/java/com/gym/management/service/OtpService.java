@@ -135,7 +135,7 @@ public class OtpService {
     }
 
     private boolean sendEmailOtp(String email, String code) {
-        // Always log OTP to console for development
+        // Log OTP to console (for debugging only - remove in strict production)
         System.out.println("========================================");
         System.out.println("OTP for " + email + ": " + code);
         System.out.println("========================================");
@@ -154,9 +154,9 @@ public class OtpService {
             return true;
         } catch (Exception e) {
             System.err.println("Failed to send email OTP: " + e.getMessage());
-            // In development, return true since we logged the OTP to console
-            System.out.println("DEV MODE: Email sending failed, but OTP is logged above. Use it for testing.");
-            return true; // Allow flow to continue for development
+            // Return true to allow login flow to continue (OTP logged to console)
+            // In strict production, return false here to require real email delivery
+            return true;
         }
     }
 

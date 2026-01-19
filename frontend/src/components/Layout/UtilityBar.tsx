@@ -3,7 +3,7 @@
 import type React from "react"
 import { useState, useRef, useEffect, useCallback, Fragment } from "react"
 import { useNavigate } from "react-router-dom"
-import { Sun, Moon, Clock, Calendar, Users, UserPlus, TrendingUp, Dumbbell, Zap } from "lucide-react"
+import { Sun, Moon, Clock, Calendar, Users, UserPlus, TrendingUp, Dumbbell, Zap, LogOut, Settings, User as UserIcon } from "lucide-react"
 import CreateActionModal from "../CreateActionModal/CreateActionModal"
 import api from "../../services/api"
 import type { User } from "../../types/user"
@@ -12,6 +12,7 @@ import { useTrainers } from '../../contexts/TrainerContext'
 import { useClasses } from '../../contexts/ClassesContext'
 import { useNavbar } from '../../contexts/NavbarContext'
 import { useTheme } from '../../contexts/ThemeContext'
+import { useAuth } from '../../contexts/AuthContext'
 import "./UtilityBar.css"
 
 interface Notification {
@@ -36,69 +37,72 @@ const UtilityBar: React.FC = () => {
   const [showSearchResults, setShowSearchResults] = useState(false)
   const [isSearching, setIsSearching] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
+  const [showProfileMenu, setShowProfileMenu] = useState(false)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const navigate = useNavigate()
   const notificationRef = useRef<HTMLDivElement>(null)
   const searchRef = useRef<HTMLDivElement>(null)
+  const profileMenuRef = useRef<HTMLDivElement>(null)
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  
+
   const { theme, toggleTheme } = useTheme()
-    const { config } = useNavbar()
-    const { stats: memberStats } = useMembers()
-    const { stats: staffStats } = useTrainers()
-    const { stats: classStats } = useClasses()
+  const { config } = useNavbar()
+  const { user, logout } = useAuth()
+  const { stats: memberStats } = useMembers()
+  const { stats: staffStats } = useTrainers()
+  const { stats: classStats } = useClasses()
 
-        const getMetricValue = (key: string): string | number => {
-          switch (config.metricType) {
-            case 'members':
-              return (memberStats as Record<string, number>)[key] ?? 0
-            case 'staff':
-              return (staffStats as Record<string, number>)[key] ?? 0
-            case 'classes':
-              const val = (classStats as Record<string, string | number>)[key]
-              if (key === 'occupancyRate') return `${val}%`
-              return val ?? 0
-            case 'financial':
-              const financialPlaceholders: Record<string, string> = {
-                todayRevenue: '₹12,450',
-                pending: '3',
-                monthlyRevenue: '₹2.4L',
-              }
-              return financialPlaceholders[key] ?? '0'
-            case 'sessions':
-              const sessionPlaceholders: Record<string, number> = {
-                todaySessions: 8,
-                activeSessions: 3,
-              }
-              return sessionPlaceholders[key] ?? 0
-            default:
-              return 0
-          }
+  const getMetricValue = (key: string): string | number => {
+    switch (config.metricType) {
+      case 'members':
+        return (memberStats as Record<string, number>)[key] ?? 0
+      case 'staff':
+        return (staffStats as Record<string, number>)[key] ?? 0
+      case 'classes':
+        const val = (classStats as Record<string, string | number>)[key]
+        if (key === 'occupancyRate') return `${val}%`
+        return val ?? 0
+      case 'financial':
+        const financialPlaceholders: Record<string, string> = {
+          todayRevenue: '₹12,450',
+          pending: '3',
+          monthlyRevenue: '₹2.4L',
         }
-
-      const getMetricClass = (key: string): string => {
-        switch (key) {
-          case 'active': return 'utility-metric--active'
-          case 'inactive': return 'utility-metric--expired'
-          case 'expiringSoon': return 'utility-metric--warning'
-          case 'newThisMonth': return 'utility-metric--new'
-          default: return ''
+        return financialPlaceholders[key] ?? '0'
+      case 'sessions':
+        const sessionPlaceholders: Record<string, number> = {
+          todaySessions: 8,
+          activeSessions: 3,
         }
-      }
-
-      const getActivePercent = (): number => {
-        if (config.metricType === 'members') {
-          const total = memberStats.total || 0
-          const active = memberStats.active || 0
-          return total > 0 ? Math.round((active / total) * 100) : 0
-        }
-        if (config.metricType === 'staff') {
-          const total = staffStats.total || 0
-          const active = staffStats.active || 0
-          return total > 0 ? Math.round((active / total) * 100) : 0
-        }
+        return sessionPlaceholders[key] ?? 0
+      default:
         return 0
-      }
+    }
+  }
+
+  const getMetricClass = (key: string): string => {
+    switch (key) {
+      case 'active': return 'utility-metric--active'
+      case 'inactive': return 'utility-metric--expired'
+      case 'expiringSoon': return 'utility-metric--warning'
+      case 'newThisMonth': return 'utility-metric--new'
+      default: return ''
+    }
+  }
+
+  const getActivePercent = (): number => {
+    if (config.metricType === 'members') {
+      const total = memberStats.total || 0
+      const active = memberStats.active || 0
+      return total > 0 ? Math.round((active / total) * 100) : 0
+    }
+    if (config.metricType === 'staff') {
+      const total = staffStats.total || 0
+      const active = staffStats.active || 0
+      return total > 0 ? Math.round((active / total) * 100) : 0
+    }
+    return 0
+  }
 
   const [notifications] = useState<Notification[]>([
     { id: 1, type: "member", title: "New Member", message: "John Doe signed up.", time: "2 min ago", read: false },
@@ -116,14 +120,15 @@ const UtilityBar: React.FC = () => {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
         setShowSearchResults(false)
       }
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
+        setShowProfileMenu(false)
+      }
     }
     document.addEventListener("mousedown", handleClickOutside)
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
-  const userStr = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
-  const currentUser = userStr ? JSON.parse(userStr) : null;
-  const userRole = currentUser?.roles?.[0]?.roleName || 'MEMBER';
+  const userRole = user?.role || 'MEMBER';
 
   const performSearch = useCallback(async (query: string) => {
     if (!query.trim()) {
@@ -137,7 +142,7 @@ const UtilityBar: React.FC = () => {
       let results: SearchResult[] = [];
 
       if (userRole === 'TRAINER') {
-        const assignedMembers = await api.getTrainerCustomers(currentUser.id).catch(() => []);
+        const assignedMembers = await api.getTrainerCustomers(user?.id ? Number(user.id) : 0).catch(() => []);
         const lowerQuery = query.toLowerCase();
         const filtered = assignedMembers.filter(m =>
           m.fullName.toLowerCase().includes(lowerQuery) ||
@@ -168,7 +173,7 @@ const UtilityBar: React.FC = () => {
     } finally {
       setIsSearching(false)
     }
-  }, [userRole, currentUser?.id])
+  }, [userRole, user?.id])
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value
@@ -316,239 +321,282 @@ const UtilityBar: React.FC = () => {
         )}
       </div>
 
-        {config.metrics.length > 0 && (config.metricType === 'members' || config.metricType === 'staff') && (
-            <div className={`utility-bar__stats-enhanced ${config.metricType === 'staff' ? 'utility-bar__stats-enhanced--staff' : ''}`}>
-              <div className="utility-metrics-strip">
-                {config.metrics.map((metric, index) => (
-                  <div key={metric.key} className={`utility-metric ${getMetricClass(metric.key)}`}>
-                    <span className="utility-metric__value">{getMetricValue(metric.key)}</span>
-                    <span className="utility-metric__label">{metric.label}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="utility-bar__progress">
-                <div className="utility-progress__bar">
-                  <div 
-                    className="utility-progress__fill" 
-                    style={{ width: `${getActivePercent()}%` }}
-                  />
-                </div>
-                <span className="utility-progress__text">{getActivePercent()}% active</span>
-              </div>
-            </div>
-          )}
-
-          {config.metrics.length > 0 && config.metricType === 'classes' && (
-            <div className="utility-bar__classes-stats">
-              <div className="classes-stat">
-                <div className="classes-stat__icon classes-stat__icon--emerald">
-                  <Clock size={14} />
-                </div>
-                <div className="classes-stat__content">
-                  <span className="classes-stat__value">{classStats.todayTotal}</span>
-                  <span className="classes-stat__label">Today</span>
-                </div>
-              </div>
-
-              <div className="classes-stat-divider" />
-
-              <div className="classes-stat">
-                <div className="classes-stat__icon classes-stat__icon--blue">
-                  <Calendar size={14} />
-                </div>
-                <div className="classes-stat__content">
-                  <span className="classes-stat__value">{classStats.weekTotal}</span>
-                  <span className="classes-stat__label">This Week</span>
-                </div>
-              </div>
-
-              <div className="classes-stat-divider" />
-
-              <div className="classes-stat">
-                <div className="classes-stat__icon classes-stat__icon--violet">
-                  <Users size={14} />
-                </div>
-                <div className="classes-stat__content">
-                  <span className="classes-stat__value">{classStats.occupancyRate}%</span>
-                  <span className="classes-stat__label">Occupancy</span>
-                </div>
-              </div>
-
-              <div className="classes-stat-divider" />
-
-              <div className="classes-stat">
-                <div className="classes-stat__icon classes-stat__icon--amber">
-                  <UserPlus size={14} />
-                </div>
-                <div className="classes-stat__content">
-                  <span className="classes-stat__value">{classStats.availableSpots}</span>
-                  <span className="classes-stat__label">Spots Open</span>
-                </div>
-              </div>
-
-              <div className="classes-stat-divider" />
-
-              <div className="classes-stat">
-                <div className="classes-stat__icon classes-stat__icon--rose">
-                  <TrendingUp size={14} />
-                </div>
-                <div className="classes-stat__content">
-                  <span className="classes-stat__value">{classStats.fullClasses}</span>
-                  <span className="classes-stat__label">Full Classes</span>
-                </div>
-              </div>
-
-              <div className="classes-stat-divider" />
-
-              <div className="classes-stat">
-                <div className="classes-stat__icon classes-stat__icon--cyan">
-                  <Dumbbell size={14} />
-                </div>
-                <div className="classes-stat__content">
-                  <span className="classes-stat__value">{classStats.uniqueTrainers}</span>
-                  <span className="classes-stat__label">Trainers</span>
-                </div>
-              </div>
-
-              <div className="classes-stat-divider" />
-
-              <div className="classes-stat">
-                <div className="classes-stat__icon classes-stat__icon--indigo">
-                  <Zap size={14} />
-                </div>
-                <div className="classes-stat__content">
-                  <span className="classes-stat__value classes-stat__value--text">{classStats.mostPopularType}</span>
-                  <span className="classes-stat__label">Top Class</span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {config.metrics.length > 0 && config.metricType !== 'members' && config.metricType !== 'staff' && config.metricType !== 'classes' && (
-          <div className="utility-bar__stats utility-bar__stats--animated">
+      {config.metrics.length > 0 && (config.metricType === 'members' || config.metricType === 'staff') && (
+        <div className={`utility-bar__stats-enhanced ${config.metricType === 'staff' ? 'utility-bar__stats-enhanced--staff' : ''}`}>
+          <div className="utility-metrics-strip">
             {config.metrics.map((metric, index) => (
-              <Fragment key={metric.key}>
-                <div className="utility-stat">
-                  {metric.key === 'active' && <span className="utility-stat__dot utility-stat__dot--active" />}
-                  {metric.key === 'inactive' && <span className="utility-stat__dot utility-stat__dot--inactive" />}
-                  <span className="utility-stat__value">
-                    {metric.prefix || ''}{getMetricValue(metric.key)}
-                  </span>
-                  <span className="utility-stat__label">{metric.label}</span>
-                </div>
-                {index < config.metrics.length - 1 && (
-                  <div className="utility-stat__divider" />
-                )}
-              </Fragment>
+              <div key={metric.key} className={`utility-metric ${getMetricClass(metric.key)}`}>
+                <span className="utility-metric__value">{getMetricValue(metric.key)}</span>
+                <span className="utility-metric__label">{metric.label}</span>
+              </div>
             ))}
           </div>
-        )}
+          <div className="utility-bar__progress">
+            <div className="utility-progress__bar">
+              <div
+                className="utility-progress__fill"
+                style={{ width: `${getActivePercent()}%` }}
+              />
+            </div>
+            <span className="utility-progress__text">{getActivePercent()}% active</span>
+          </div>
+        </div>
+      )}
 
-        <div className="utility-bar__actions">
-          <button className="utility-bar__create-btn" onClick={() => setIsCreateModalOpen(true)}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
+      {config.metrics.length > 0 && config.metricType === 'classes' && (
+        <div className="utility-bar__classes-stats">
+          <div className="classes-stat">
+            <div className="classes-stat__icon classes-stat__icon--emerald">
+              <Clock size={14} />
+            </div>
+            <div className="classes-stat__content">
+              <span className="classes-stat__value">{classStats.todayTotal}</span>
+              <span className="classes-stat__label">Today</span>
+            </div>
+          </div>
+
+          <div className="classes-stat-divider" />
+
+          <div className="classes-stat">
+            <div className="classes-stat__icon classes-stat__icon--blue">
+              <Calendar size={14} />
+            </div>
+            <div className="classes-stat__content">
+              <span className="classes-stat__value">{classStats.weekTotal}</span>
+              <span className="classes-stat__label">This Week</span>
+            </div>
+          </div>
+
+          <div className="classes-stat-divider" />
+
+          <div className="classes-stat">
+            <div className="classes-stat__icon classes-stat__icon--violet">
+              <Users size={14} />
+            </div>
+            <div className="classes-stat__content">
+              <span className="classes-stat__value">{classStats.occupancyRate}%</span>
+              <span className="classes-stat__label">Occupancy</span>
+            </div>
+          </div>
+
+          <div className="classes-stat-divider" />
+
+          <div className="classes-stat">
+            <div className="classes-stat__icon classes-stat__icon--amber">
+              <UserPlus size={14} />
+            </div>
+            <div className="classes-stat__content">
+              <span className="classes-stat__value">{classStats.availableSpots}</span>
+              <span className="classes-stat__label">Spots Open</span>
+            </div>
+          </div>
+
+          <div className="classes-stat-divider" />
+
+          <div className="classes-stat">
+            <div className="classes-stat__icon classes-stat__icon--rose">
+              <TrendingUp size={14} />
+            </div>
+            <div className="classes-stat__content">
+              <span className="classes-stat__value">{classStats.fullClasses}</span>
+              <span className="classes-stat__label">Full Classes</span>
+            </div>
+          </div>
+
+          <div className="classes-stat-divider" />
+
+          <div className="classes-stat">
+            <div className="classes-stat__icon classes-stat__icon--cyan">
+              <Dumbbell size={14} />
+            </div>
+            <div className="classes-stat__content">
+              <span className="classes-stat__value">{classStats.uniqueTrainers}</span>
+              <span className="classes-stat__label">Trainers</span>
+            </div>
+          </div>
+
+          <div className="classes-stat-divider" />
+
+          <div className="classes-stat">
+            <div className="classes-stat__icon classes-stat__icon--indigo">
+              <Zap size={14} />
+            </div>
+            <div className="classes-stat__content">
+              <span className="classes-stat__value classes-stat__value--text">{classStats.mostPopularType}</span>
+              <span className="classes-stat__label">Top Class</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {config.metrics.length > 0 && config.metricType !== 'members' && config.metricType !== 'staff' && config.metricType !== 'classes' && (
+        <div className="utility-bar__stats utility-bar__stats--animated">
+          {config.metrics.map((metric, index) => (
+            <Fragment key={metric.key}>
+              <div className="utility-stat">
+                {metric.key === 'active' && <span className="utility-stat__dot utility-stat__dot--active" />}
+                {metric.key === 'inactive' && <span className="utility-stat__dot utility-stat__dot--inactive" />}
+                <span className="utility-stat__value">
+                  {metric.prefix || ''}{getMetricValue(metric.key)}
+                </span>
+                <span className="utility-stat__label">{metric.label}</span>
+              </div>
+              {index < config.metrics.length - 1 && (
+                <div className="utility-stat__divider" />
+              )}
+            </Fragment>
+          ))}
+        </div>
+      )}
+
+      <div className="utility-bar__actions">
+        <button className="utility-bar__create-btn" onClick={() => setIsCreateModalOpen(true)}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          <span className="utility-bar__create-text">Create</span>
+        </button>
+
+        <div className="utility-bar__dropdown" ref={notificationRef}>
+          <button
+            className={`utility-bar__icon-btn ${unreadCount > 0 ? 'utility-bar__icon-btn--has-notifications' : ''}`}
+            title="Notifications"
+            onClick={() => setShowNotifications(!showNotifications)}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
             </svg>
-            <span className="utility-bar__create-text">Create</span>
+            {unreadCount > 0 && <span className="utility-bar__badge utility-bar__badge--pulse">{unreadCount}</span>}
           </button>
-
-          <div className="utility-bar__dropdown" ref={notificationRef}>
-              <button
-                className={`utility-bar__icon-btn ${unreadCount > 0 ? 'utility-bar__icon-btn--has-notifications' : ''}`}
-                title="Notifications"
-                onClick={() => setShowNotifications(!showNotifications)}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-                </svg>
-                {unreadCount > 0 && <span className="utility-bar__badge utility-bar__badge--pulse">{unreadCount}</span>}
-              </button>
-              {showNotifications && (
-                <div className="utility-bar__dropdown-menu notifications-panel notifications-panel--premium">
-                  <div className="notifications-panel__header">
-                    <div className="notifications-panel__header-content">
-                      <h3>Notifications</h3>
-                      <span className="notifications-panel__count">{unreadCount} new</span>
+          {showNotifications && (
+            <div className="utility-bar__dropdown-menu notifications-panel notifications-panel--premium">
+              <div className="notifications-panel__header">
+                <div className="notifications-panel__header-content">
+                  <h3>Notifications</h3>
+                  <span className="notifications-panel__count">{unreadCount} new</span>
+                </div>
+                <button className="notifications-panel__mark-all">Mark all read</button>
+              </div>
+              <div className="notifications-panel__list">
+                {notifications.map((notification) => (
+                  <div
+                    key={notification.id}
+                    className={`notification-item notification-item--premium ${!notification.read ? "notification-item--unread" : ""}`}
+                  >
+                    <div className="notification-item__icon-wrapper">
+                      {getNotificationIcon(notification.type)}
+                      {!notification.read && <span className="notification-item__unread-dot" />}
                     </div>
-                    <button className="notifications-panel__mark-all">Mark all read</button>
-                  </div>
-                  <div className="notifications-panel__list">
-                    {notifications.map((notification) => (
-                      <div
-                        key={notification.id}
-                        className={`notification-item notification-item--premium ${!notification.read ? "notification-item--unread" : ""}`}
-                      >
-                        <div className="notification-item__icon-wrapper">
-                          {getNotificationIcon(notification.type)}
-                          {!notification.read && <span className="notification-item__unread-dot" />}
-                        </div>
-                        <div className="notification-item__content">
-                          <p className="notification-item__title">
-                            <span className="notification-item__category">{notification.title}</span>
-                            <span className="notification-item__message">{notification.message}</span>
-                          </p>
-                          <div className="notification-item__meta">
-                            <span className="notification-item__time">
-                              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <circle cx="12" cy="12" r="10" />
-                                <polyline points="12 6 12 12 16 14" />
-                              </svg>
-                              {notification.time}
-                            </span>
-                            <span className={`notification-item__type notification-item__type--${notification.type}`}>
-                              {notification.type}
-                            </span>
-                          </div>
-                        </div>
-                        <button className="notification-item__action">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <polyline points="9 18 15 12 9 6" />
+                    <div className="notification-item__content">
+                      <p className="notification-item__title">
+                        <span className="notification-item__category">{notification.title}</span>
+                        <span className="notification-item__message">{notification.message}</span>
+                      </p>
+                      <div className="notification-item__meta">
+                        <span className="notification-item__time">
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <circle cx="12" cy="12" r="10" />
+                            <polyline points="12 6 12 12 16 14" />
                           </svg>
-                        </button>
+                          {notification.time}
+                        </span>
+                        <span className={`notification-item__type notification-item__type--${notification.type}`}>
+                          {notification.type}
+                        </span>
                       </div>
-                    ))}
-                  </div>
-                  <div className="notifications-panel__footer">
-                    <button className="notifications-panel__view-all">
-                      View All Notifications
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    </div>
+                    <button className="notification-item__action">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <polyline points="9 18 15 12 9 6" />
                       </svg>
                     </button>
                   </div>
-                </div>
-              )}
+                ))}
+              </div>
+              <div className="notifications-panel__footer">
+                <button className="notifications-panel__view-all">
+                  View All Notifications
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
+                </button>
+              </div>
             </div>
-
-          {(userRole === 'TRAINER' || userRole === 'MEMBER' || userRole === 'CUSTOMER') && (
-            <>
-              <button
-                className="utility-bar__theme-toggle"
-                onClick={toggleTheme}
-                title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-              >
-                <div className="theme-toggle__track">
-                  <Sun size={12} className="theme-toggle__icon theme-toggle__icon--sun" />
-                  <Moon size={12} className="theme-toggle__icon theme-toggle__icon--moon" />
-                  <div className={`theme-toggle__thumb ${theme === 'light' ? 'theme-toggle__thumb--light' : ''}`} />
-                </div>
-              </button>
-
-              <button
-                className="utility-bar__avatar"
-                title="Profile & Settings"
-                onClick={() => {
-                  if (userRole === 'TRAINER') navigate('/trainer/profile');
-                  else navigate('/member/profile');
-                }}
-              >
-                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Admin" alt="User" />
-              </button>
-            </>
           )}
         </div>
+
+        <button
+          className="utility-bar__theme-toggle"
+          onClick={toggleTheme}
+          title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+        >
+          <div className="theme-toggle__track">
+            <Sun size={12} className="theme-toggle__icon theme-toggle__icon--sun" />
+            <Moon size={12} className="theme-toggle__icon theme-toggle__icon--moon" />
+            <div className={`theme-toggle__thumb ${theme === 'light' ? 'theme-toggle__thumb--light' : ''}`} />
+          </div>
+        </button>
+
+        <div className="utility-bar__dropdown" ref={profileMenuRef}>
+          <button
+            className="utility-bar__avatar"
+            title="Profile & Settings"
+            onClick={() => setShowProfileMenu(!showProfileMenu)}
+          >
+            <img src={user?.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=Admin"} alt="User" />
+          </button>
+
+          {showProfileMenu && (
+            <div className="utility-bar__dropdown-menu profile-panel">
+              <div className="profile-panel__header">
+                <img
+                  src={user?.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=Admin"}
+                  alt="User"
+                  className="profile-panel__avatar"
+                />
+                <div className="profile-panel__user-info">
+                  <span className="profile-panel__name">{user?.fullName || "User"}</span>
+                  <span className="profile-panel__role">{user?.role || "MEMBER"}</span>
+                </div>
+              </div>
+              <div className="profile-panel__menu">
+                <button
+                  className="profile-panel__item"
+                  onClick={() => {
+                    setShowProfileMenu(false);
+                    if (userRole === 'TRAINER') navigate('/trainer/profile');
+                    else if (userRole === 'MEMBER') navigate('/member/profile');
+                    else navigate('/settings');
+                  }}
+                >
+                  <UserIcon /> Profile
+                </button>
+                <button
+                  className="profile-panel__item"
+                  onClick={() => {
+                    setShowProfileMenu(false);
+                    navigate('/settings');
+                  }}
+                >
+                  <Settings /> Settings
+                </button>
+                <div className="utility-stat__divider" style={{ width: '100%', margin: '4px 0' }} />
+                <button
+                  className="profile-panel__item profile-panel__item--danger"
+                  onClick={() => {
+                    setShowProfileMenu(false);
+                    logout();
+                  }}
+                >
+                  <LogOut /> Log Out
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
       <CreateActionModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}

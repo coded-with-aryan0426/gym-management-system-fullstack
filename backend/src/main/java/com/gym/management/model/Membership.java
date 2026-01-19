@@ -60,25 +60,74 @@ public class Membership {
     }
 
     // Setters
-    public void setId(Long id) { this.id = id; }
-    public void setGym(Gym gym) { this.gym = gym; }
-    public void setUser(User user) { this.user = user; }
-    public void setStatus(MembershipStatus status) { this.status = status; }
-    public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
-    public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
-    public void setApprovedBy(User approvedBy) { this.approvedBy = approvedBy; }
-    public void setMembershipPackage(MembershipPackage membershipPackage) { this.membershipPackage = membershipPackage; }
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setGym(Gym gym) {
+        this.gym = gym;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public void setStatus(MembershipStatus status) {
+        this.status = status;
+    }
+
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
+
+    public void setApprovedBy(User approvedBy) {
+        this.approvedBy = approvedBy;
+    }
+
+    public void setMembershipPackage(MembershipPackage membershipPackage) {
+        this.membershipPackage = membershipPackage;
+    }
 
     // Getters
-    public Long getId() { return id; }
-    public Gym getGym() { return gym; }
-    public User getUser() { return user; }
-    public MembershipStatus getStatus() { return status; }
-    public LocalDate getStartDate() { return startDate; }
-    public LocalDate getEndDate() { return endDate; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public User getApprovedBy() { return approvedBy; }
-    public MembershipPackage getMembershipPackage() { return membershipPackage; }
+    public Long getId() {
+        return id;
+    }
+
+    public Gym getGym() {
+        return gym;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public MembershipStatus getStatus() {
+        return status;
+    }
+
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public User getApprovedBy() {
+        return approvedBy;
+    }
+
+    public MembershipPackage getMembershipPackage() {
+        return membershipPackage;
+    }
 
     // Check if membership is currently active
     public boolean isActive() {

@@ -144601,3 +144601,9 @@ Hibernate:
     where
         tc1_0.trainer_id=? 
         and tc1_0.class_date=?
+2026-01-13T17:07:05.156+05:30  INFO 2539 --- [gym-management] [ionShutdownHook] o.s.m.s.b.SimpleBrokerMessageHandler     : Stopping...
+2026-01-13T17:07:05.156+05:30  INFO 2539 --- [gym-management] [ionShutdownHook] o.s.m.s.b.SimpleBrokerMessageHandler     : BrokerAvailabilityEvent[available=false, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@1ec664bc]]
+2026-01-13T17:07:05.156+05:30  INFO 2539 --- [gym-management] [ionShutdownHook] o.s.m.s.b.SimpleBrokerMessageHandler     : Stopped.
+2026-01-13T17:07:05.163+05:30  INFO 2539 --- [gym-management] [ionShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-01-13T17:07:05.178+05:30  INFO 2539 --- [gym-management] [ionShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-01-13T17:07:05.204+05:30  INFO 2539 --- [gym-management] [ionShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.

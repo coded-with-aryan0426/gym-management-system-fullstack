@@ -20,4 +20,10 @@ public class TrainerDashboardStatsDTO {
     private Integer activeMembers;
     private Integer totalMembers;
     private List<TrainerSessionDTO> sessions;
+    private List<DashboardAlertDTO> alerts;
+    
+    // Charts
+    private List<ChartDataDTO> weeklyActivity;
+    private List<ChartDataDTO> monthlyEarningsHistory;
+    private List<ChartDataDTO> sessionDistribution;
 }

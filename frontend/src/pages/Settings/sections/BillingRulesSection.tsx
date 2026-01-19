@@ -2,17 +2,17 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { toast } from "react-hot-toast"
-import { 
-    CreditCard, 
-    Save, 
-    Loader2, 
-    Info, 
-    Receipt, 
-    Ban, 
-    Percent, 
+import { showToast } from "../../../utils/showToast"
+import {
+    CreditCard,
+    Save,
+    Loader2,
+    Info,
+    Receipt,
+    Ban,
+    Percent,
     Clock,
-    DollarSign,
+    IndianRupee,
     Calendar,
     Bell
 } from "lucide-react"
@@ -68,8 +68,8 @@ const BillingRulesSection: React.FC = () => {
                     gracePeriodDays: parseInt(fetched.gracePeriodDays) || 3,
                     invoicePrefix: fetched.invoicePrefix || 'GYM-',
                     autoInvoiceEnabled: fetched.autoInvoiceEnabled === 'true' || fetched.autoInvoiceEnabled === true,
-                    paymentReminderDays: Array.isArray(fetched.paymentReminderDays) 
-                        ? fetched.paymentReminderDays 
+                    paymentReminderDays: Array.isArray(fetched.paymentReminderDays)
+                        ? fetched.paymentReminderDays
                         : (fetched.paymentReminderDays ? fetched.paymentReminderDays.split(',').map(Number) : [3, 1]),
                     allowPartialPayments: fetched.allowPartialPayments === 'true' || fetched.allowPartialPayments === true,
                 }
@@ -97,9 +97,9 @@ const BillingRulesSection: React.FC = () => {
             await api.put('/api/gym-settings', settings)
             setOriginalSettings(settings)
             setHasChanges(false)
-            toast.success("Billing settings saved successfully")
+            showToast("Billing settings saved successfully", "success")
         } catch (error) {
-            toast.error("Failed to save billing settings")
+            showToast("Failed to save billing settings", "error")
         } finally {
             setSaving(false)
         }
@@ -131,7 +131,7 @@ const BillingRulesSection: React.FC = () => {
                     </div>
                 </div>
                 {hasChanges && (
-                    <button 
+                    <button
                         className="settings-save-btn"
                         onClick={handleSave}
                         disabled={saving}
@@ -145,7 +145,7 @@ const BillingRulesSection: React.FC = () => {
             <div className="settings-section__content">
                 <div className="form-group">
                     <div className="form-group__header">
-                        <DollarSign size={16} />
+                        <IndianRupee size={16} />
                         <h4 className="form-group__title">Currency & Tax</h4>
                     </div>
 

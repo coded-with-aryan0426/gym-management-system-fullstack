@@ -95,7 +95,7 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
       id: '4',
       type: 'success',
       title: 'Payment Received',
-      message: '$150 payment from Emily Davis',
+      message: '₹150 payment from Emily Davis',
       time: '5 hours ago',
       isRead: true
     }

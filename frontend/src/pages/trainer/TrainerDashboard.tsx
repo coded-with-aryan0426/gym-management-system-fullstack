@@ -1,16 +1,23 @@
-import React, { useEffect, useState, useMemo, useRef } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Users, Calendar, Bell,
     MessageSquare, TrendingUp, ChevronRight,
-    CheckCircle, DollarSign,
-    Dumbbell, FileText, AlertCircle
+    CheckCircle, IndianRupee,
+    Dumbbell, FileText, AlertCircle, Clock
 } from 'lucide-react';
 import { format, differenceInMinutes } from 'date-fns';
-import { usePageEntry, useCountUp, useButtonPress } from '../../hooks/useAnimations';
+import { usePageEntry, useButtonPress } from '../../hooks/useAnimations';
 import ActiveSessionToast from '../../components/shared/ActiveSessionToast';
 import { useAuth } from '../../contexts/AuthContext';
-import './TrainerDashboard.css'; // Dedicated Mission Control styles
+import api from '../../services/api';
+import './TrainerDashboard.css';
+
+// New Components
+import DashboardStatCard from './components/DashboardStatCard';
+import ActivityChart from './components/ActivityChart';
+import EarningsChart from './components/EarningsChart';
+import SessionPieChart from './components/SessionPieChart';
 
 interface Session {
     id: string;
@@ -21,7 +28,23 @@ interface Session {
     room: string;
     enrolled: number;
     capacity: number;
-    status: 'upcoming' | 'in-progress' | 'completed';
+    status: 'upcoming' | 'in-progress' | 'completed' | 'cancelled';
+}
+
+interface DashboardAlert {
+    id: string;
+    type: 'MISSED_SESSION' | 'PENDING_NOTE' | 'UNREAD_MESSAGE';
+    message: string;
+    memberName: string;
+    memberId: number;
+    severity: 'high' | 'medium' | 'low';
+    time: string;
+}
+
+interface ChartData {
+    label: string;
+    value: number;
+    meta?: string;
 }
 
 interface DashboardData {
@@ -33,6 +56,11 @@ interface DashboardData {
     attendanceRate: number;
     activeMembers: number;
     totalMembers: number;
+    sessions: Session[];
+    alerts: DashboardAlert[];
+    weeklyActivity: ChartData[];
+    monthlyEarningsHistory: ChartData[];
+    sessionDistribution: ChartData[];
 }
 
 const TrainerDashboard: React.FC = () => {
@@ -40,293 +68,234 @@ const TrainerDashboard: React.FC = () => {
     const navigate = useNavigate();
     const [data, setData] = useState<DashboardData | null>(null);
     const [currentTime, setCurrentTime] = useState(new Date());
-    const [showToast, setShowToast] = useState(true);
-    const [toastStatus, setToastStatus] = useState<'active' | 'ended'>('active');
     const [sessions, setSessions] = useState<Session[]>([]);
+
+    // Animation hooks
+    usePageEntry('.kpi-grid > *, .dashboard-main-grid > *');
+    const buttonPress = useButtonPress();
 
     useEffect(() => {
         const timer = setInterval(() => setCurrentTime(new Date()), 1000);
         return () => clearInterval(timer);
     }, []);
 
-    // Mock data - UI works without backend
+    // Fetch real data
     useEffect(() => {
-        const now = new Date();
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const fetchDashboard = async () => {
+            try {
+                // Use the explicit method if available, or direct axios call
+                const response = await api.getTrainerDashboard();
 
-        setData({
-            trainerName: user?.fullName || 'Trainer',
-            todayEarnings: 2450,
-            monthEarnings: 48500,
-            completedToday: 2,
-            totalToday: 5,
-            attendanceRate: 94,
-            activeMembers: 18,
-            totalMembers: 24,
-        });
+                // Handle different response structures (unwrapped vs wrapped)
+                const apiData = response.data || response;
 
-        setSessions([
-            {
-                id: '1',
-                title: 'Morning Yoga',
-                type: 'class',
-                startTime: new Date(today.getTime() + 6 * 60 * 60 * 1000),
-                endTime: new Date(today.getTime() + 7 * 60 * 60 * 1000),
-                room: 'Studio A',
-                enrolled: 12,
-                capacity: 15,
-                status: 'completed',
-            },
-            {
-                id: '2',
-                title: 'PT: Emma Davis',
-                type: 'pt',
-                startTime: new Date(now.getTime() - 20 * 60 * 1000),
-                endTime: new Date(now.getTime() + 40 * 60 * 1000),
-                room: 'Training Zone',
-                enrolled: 1,
-                capacity: 1,
-                status: 'in-progress',
-            },
-            {
-                id: '3',
-                title: 'Strength Training',
-                type: 'class',
-                startTime: new Date(today.getTime() + 14 * 60 * 60 * 1000),
-                endTime: new Date(today.getTime() + 15 * 60 * 60 * 1000),
-                room: 'Weight Room',
-                enrolled: 6,
-                capacity: 10,
-                status: 'upcoming',
-            },
-            {
-                id: '4',
-                title: 'PT: Mike Chen',
-                type: 'pt',
-                startTime: new Date(today.getTime() + 16 * 60 * 60 * 1000),
-                endTime: new Date(today.getTime() + 17 * 60 * 60 * 1000),
-                room: 'Training Zone',
-                enrolled: 1,
-                capacity: 1,
-                status: 'upcoming',
+                if (apiData) {
+                    // Transform sessions
+                    const transformedSessions = (apiData.sessions || []).map((s: any) => ({
+                        ...s,
+                        startTime: new Date(s.startTime),
+                        endTime: s.endTime ? new Date(s.endTime) : null,
+                        status: s.status ? s.status.toLowerCase() : 'upcoming'
+                    }));
+
+                    setData({
+                        ...apiData,
+                        sessions: transformedSessions,
+                        alerts: apiData.alerts || [],
+                        weeklyActivity: apiData.weeklyActivity || [],
+                        monthlyEarningsHistory: apiData.monthlyEarningsHistory || [],
+                        sessionDistribution: apiData.sessionDistribution || []
+                    });
+                    setSessions(transformedSessions);
+                } else {
+                    console.error("Dashboard API returned empty data", response);
+                }
+            } catch (error) {
+                console.error("Failed to fetch dashboard data", error);
             }
-        ]);
+        };
+
+        fetchDashboard();
     }, [user]);
 
     const currentSession = useMemo(() => sessions.find(s => s.status === 'in-progress'), [sessions]);
-    // const upcomingSessions = useMemo(() => sessions.filter(s => s.status === 'upcoming').slice(0, 3), [sessions]);
 
     const getTimeRemaining = (endTime: Date) => {
+        if (!endTime) return '';
         const diff = differenceInMinutes(endTime, currentTime);
         if (diff <= 0) return 'Ending';
         if (diff < 60) return `${diff}m`;
         return `${Math.floor(diff / 60)}h ${diff % 60}m`;
     };
 
-    // Animation refs
-    const monthEarningsRef = useRef<HTMLDivElement>(null);
-    const todayEarningsRef = useRef<HTMLDivElement>(null);
-
-    // Page entry animations for cards
-    usePageEntry('.quick-stat, .current-session-banner, .session-timeline, .members-attention', { stagger: 50 });
-    usePageEntry('.header-stat', { delay: 200, stagger: 30 });
-
-    // Count-up animations for KPIs
-    useCountUp(monthEarningsRef, data?.monthEarnings || 0, { prefix: '₹', duration: 1000 });
-    useCountUp(todayEarningsRef, data?.todayEarnings || 0, { prefix: '₹', duration: 800 });
-
-    const buttonPress = useButtonPress();
-
-    // Handlers
-    const handleSessionAction = () => {
-        setToastStatus('ended');
+    const getInitials = (name: string) => {
+        if (!name) return '??';
+        return name
+            .split(' ')
+            .map(n => n[0])
+            .join('')
+            .toUpperCase()
+            .substring(0, 2);
     };
 
-    const handleToastClose = () => {
-        setShowToast(false);
-        // Optional: Reset status after closing if needed, though unmounting handles it
-    };
+    if (!data) return <div className="tp-loader">
+        <div className="tp-spinner"></div>
+        <div className="tp-text">Loading Mission Control...</div>
+    </div>;
 
-    if (!data) return <div className="tp" style={{ padding: 40, textAlign: 'center', color: 'rgba(255,255,255,0.5)' }}>Loading...</div>;
-
-    const trainerFirstName = (user?.fullName || data.trainerName || 'Trainer').split(' ')[0];
-
-    const quickActions = [
-        { icon: <Calendar size={16} />, label: 'Schedule', path: '/trainer/schedule' },
-        { icon: <Users size={16} />, label: 'Members', path: '/trainer/members' },
-        { icon: <FileText size={16} />, label: 'Notes', path: '/trainer/progress-notes' },
-        { icon: <MessageSquare size={16} />, label: 'Messages', path: '/trainer/messages' },
-        { icon: <TrendingUp size={16} />, label: 'Reports', path: '/trainer/reports' },
-        { icon: <Bell size={16} />, label: 'Alerts', path: '/trainer/notifications' },
-    ];
+    const trainerFirstName = (user?.fullName || data.trainerName || 'Trainer').split(' ')[0] || 'Trainer';
 
     return (
-        <div className="trainer-dashboard-v2">
+        <div className="trainer-dashboard">
             {/* Global Toast Notification */}
-            {currentSession && showToast && (
-                <ActiveSessionToast
-                    status={toastStatus}
-                    current={{
-                        name: 'Emma Davis', // Using demo data to match image for now
-                        type: 'Personal Training',
-                        location: 'Training Zone',
-                        initial: 'E',
-                        avatarColor: '#8B5CF6',
-                        progress: 65,
-                        timeRemaining: getTimeRemaining(currentSession.endTime)
-                    }}
-                    next={{
-                        name: 'Mike Johnson',
-                        avatarUrl: 'https://ui-avatars.com/api/?name=Mike+Johnson&background=1f2937&color=fff'
-                    }}
-                    onComplete={handleSessionAction}
-                    onCancel={handleSessionAction}
-                    onClose={handleToastClose}
+            <header className="dashboard-header">
+                <div className="header-content">
+                    <h1 className="welcome-text">
+                        Good {currentTime.getHours() < 12 ? 'Morning' : currentTime.getHours() < 18 ? 'Afternoon' : 'Evening'},
+                        <span className="highlight-text"> {trainerFirstName}</span>
+                    </h1>
+                    <p className="date-display">
+                        <Calendar size={14} />
+                        {format(currentTime, 'EEEE, MMMM do, yyyy')}
+                        <span className="time-separator">•</span>
+                        <Clock size={14} />
+                        {format(currentTime, 'HH:mm:ss')}
+                    </p>
+                </div>
+                <div className="header-actions">
+                    <button className="action-btn" onClick={() => navigate('/trainer/schedule')} {...buttonPress}>
+                        <Calendar size={18} /> Schedule
+                    </button>
+                    <button className="action-btn primary" onClick={() => navigate('/trainer/clients')} {...buttonPress}>
+                        <Users size={18} /> Clients
+                    </button>
+                </div>
+            </header>
+
+            {/* KPI Cards Grid */}
+            <section className="kpi-grid">
+                <DashboardStatCard
+                    title="Today's Earnings"
+                    value={`₹${data.todayEarnings}`}
+                    icon={IndianRupee}
+                    color="#10b981"
+                    delay={0.1}
+                    trend="vs yesterday"
+                    trendUp={true}
                 />
-            )}
+                <DashboardStatCard
+                    title="Sessions Today"
+                    value={`${data.completedToday}/${data.totalToday}`}
+                    icon={Dumbbell}
+                    color="#f8fafc" /* White/Zinc */
+                    delay={0.1}
+                    trend={`${data.attendanceRate}% Rate`}
+                    trendUp={data.attendanceRate > 80}
+                />
+                <DashboardStatCard
+                    title="Active Clients"
+                    value={data.activeMembers}
+                    icon={Users}
+                    color="#f8fafc"
+                    delay={0.1}
+                />
+                <DashboardStatCard
+                    title="Pending Tasks"
+                    value={data.alerts.length}
+                    icon={Bell}
+                    color="#DC2626" /* AthlonX Red */
+                    delay={0.1}
+                    trend={data.alerts.length > 0 ? "Action Req." : "All Clear"}
+                    trendUp={data.alerts.length === 0}
+                />
+            </section>
 
-            {/* Header Section */}
-            <div className="trainer-dashboard-v2__header">
-                <div className="trainer-dashboard-v2__greeting">
-                    <h1>{currentTime.getHours() < 12 ? 'Good Morning' : 'Good Afternoon'}, {trainerFirstName}</h1>
-                    <p className="trainer-dashboard-v2__date">{format(currentTime, 'EEEE, MMMM do')} • <span className="live-time">{format(currentTime, 'h:mm a')}</span></p>
-                </div>
+            {/* Main Content Grid */}
+            <div className="dashboard-main-grid">
 
-                <div className="trainer-dashboard-v2__header-stats">
-                    <div ref={todayEarningsRef} className="header-stat">
-                        <span className="header-stat__value">₹0</span>
-                        <span className="header-stat__label">Today</span>
-                    </div>
-                    <div className="header-stat header-stat--progress">
-                        <div className="header-stat__progress-ring">
-                            <svg viewBox="0 0 36 36">
-                                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="3" />
-                                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#10B981" strokeWidth="3" strokeDasharray={`${data.attendanceRate}, 100`} />
-                            </svg>
-                            <span className="header-stat__progress-text">{data.attendanceRate}%</span>
-                        </div>
-                        <span className="header-stat__label">Attend</span>
-                    </div>
-                </div>
-            </div>
+                {/* Left Column: Charts */}
+                <div className="dashboard-column main-column">
+                    {/* Activity Chart */}
+                    <ActivityChart data={data.weeklyActivity} />
 
-            <div className="trainer-dashboard-v2__content">
-
-                {/* 1. Quick Stats Grid */}
-                <div className="trainer-dashboard-v2__quick-stats">
-                    <div className="quick-stat quick-stat--earnings">
-                        <div className="quick-stat__icon"><DollarSign size={20} /></div>
-                        <div className="quick-stat__content">
-                            <span className="quick-stat__value" ref={monthEarningsRef}>₹0</span>
-                            <span className="quick-stat__label">Monthly Earnings</span>
-                        </div>
-                        <span className="quick-stat__trend quick-stat__trend--up"><TrendingUp size={12} /> +12%</span>
-                    </div>
-
-                    <div className="quick-stat quick-stat--sessions">
-                        <div className="quick-stat__icon"><Dumbbell size={20} /></div>
-                        <div className="quick-stat__content">
-                            <span className="quick-stat__value">{data.completedToday}/{data.totalToday}</span>
-                            <span className="quick-stat__label">Sessions Done</span>
-                        </div>
-                        <div className="quick-stat__mini-chart">
-                            <svg viewBox="0 0 36 36">
-                                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="rgba(245, 158, 11, 0.2)" strokeWidth="4" />
-                                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#F59E0B" strokeWidth="4" strokeDasharray={`${(data.completedToday / data.totalToday) * 100}, 100`} />
-                            </svg>
-                        </div>
-                    </div>
-
-                    <div className="quick-stat quick-stat--members">
-                        <div className="quick-stat__icon"><Users size={20} /></div>
-                        <div className="quick-stat__content">
-                            <span className="quick-stat__value">{data.activeMembers}</span>
-                            <span className="quick-stat__label">Active Clients</span>
-                        </div>
-                        <button className="quick-stat__action" onClick={() => navigate('/trainer/members')} {...buttonPress}><ChevronRight size={16} /></button>
-                    </div>
-
-                    {/* Quick Actions as a specialized card */}
-                    <div className="quick-stat" style={{ padding: '10px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                        {quickActions.slice(0, 4).map(action => (
-                            <button
-                                key={action.label}
-                                onClick={() => navigate(action.path)}
-                                {...buttonPress}
-                                style={{
-                                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                                    background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)',
-                                    borderRadius: 8, color: 'rgba(255,255,255,0.6)', cursor: 'pointer', height: '100%', gap: 4
-                                }}
-                            >
-                                {action.icon}
-                                <span style={{ fontSize: 10 }}>{action.label}</span>
-                            </button>
-                        ))}
+                    {/* Secondary Charts Row */}
+                    <div className="charts-row">
+                        <EarningsChart data={data.monthlyEarningsHistory} />
+                        <SessionPieChart data={data.sessionDistribution} />
                     </div>
                 </div>
 
-                {/* 2. Main Content Grid */}
-                <div className="trainer-dashboard-v2__main-grid">
+                {/* Right Column: Agenda & Alerts */}
+                <div className="dashboard-column side-column">
 
-                    {/* Left Col: Schedule */}
-                    <div>
-                        <div className="section-header">
-                            <h2><Calendar size={18} /> Today's Agenda</h2>
-                            <button className="section-header__link" onClick={() => navigate('/trainer/schedule')}>View Full Schedule <ChevronRight size={14} /></button>
+                    {/* Today's Agenda */}
+                    <div className="widget-panel agenda-panel">
+                        <div className="widget-header">
+                            <h3><Calendar size={16} /> Today's Agenda</h3>
+                            <button className="view-all-link" onClick={() => navigate('/trainer/schedule')}>View All</button>
                         </div>
-
-                        <div className="session-timeline">
-                            {sessions.filter(s => s.status !== 'in-progress').map((session, i) => (
-                                <div key={session.id} className={`session-timeline__item session-timeline__item--${session.status}`}>
-                                    <div className="session-timeline__time">
-                                        <span className="session-timeline__time-text">{format(session.startTime, 'h:mm')}</span>
-                                        <span className="session-timeline__time-period">{format(session.startTime, 'a')}</span>
-                                    </div>
-                                    <div className="session-timeline__marker">
-                                        <div className={`session-timeline__dot session-timeline__dot--${session.status}`}>
-                                            {session.status === 'completed' ? <CheckCircle size={14} /> : <div style={{ width: 8, height: 8, background: 'currentColor', borderRadius: '50%' }} />}
+                        <div className="agenda-list">
+                            {sessions.length > 0 ? (
+                                sessions.slice(0, 5).map((session) => (
+                                    <div key={session.id} className={`agenda-item ${session.status}`}>
+                                        <div className="agenda-time">
+                                            <span className="start-time">{format(session.startTime, 'HH:mm')}</span>
+                                            <span className="duration">{differenceInMinutes(session.endTime!, session.startTime)}m</span>
                                         </div>
-                                        {i < sessions.length - 1 && <div className="session-timeline__line" />}
-                                    </div>
-                                    <div className="session-timeline__content">
-                                        <div className="session-timeline__header">
-                                            <span className="session-timeline__type">{session.type}</span>
-                                            {session.status === 'in-progress' && <span className="session-timeline__live-badge">LIVE</span>}
+                                        <div className="agenda-details">
+                                            <h4>{session.title}</h4>
+                                            <div className="agenda-meta">
+                                                <span className="room">{session.room}</span>
+                                                <span className={`status-badge ${session.status}`}>
+                                                    {session.status}
+                                                </span>
+                                            </div>
                                         </div>
-                                        <h4 className="session-timeline__title">{session.title}</h4>
-                                        <p className="session-timeline__meta">{session.room} • {session.enrolled}/{session.capacity} Enrolled</p>
-                                        {session.status === 'upcoming' && i === 0 && (
-                                            <button className="session-timeline__action" {...buttonPress}>Check In</button>
+                                        {session.status === 'upcoming' && (
+                                            <button className="check-in-btn" title="Start Session">
+                                                <ChevronRight size={14} />
+                                            </button>
                                         )}
                                     </div>
+                                ))
+                            ) : (
+                                <div className="empty-state">
+                                    <CheckCircle size={24} />
+                                    <p>No sessions scheduled</p>
                                 </div>
-                            ))}
+                            )}
                         </div>
                     </div>
 
-                    {/* Right Col: Attention & Quick Members */}
-                    <div className="trainer-dashboard-v2__members-section">
-                        <div className="members-attention">
-                            <h3><AlertCircle size={16} /> Needs Attention</h3>
-                            <div className="members-attention__list">
-                                <div className="member-quick-card">
-                                    <div className="member-quick-card__avatar" style={{ background: 'linear-gradient(135deg, #EF4444, #B91C1C)' }}><span>JS</span></div>
-                                    <div className="member-quick-card__info">
-                                        <h4>John Smith</h4>
-                                        <p className="member-quick-card__last">Missed 2 Sessions</p>
+                    {/* Alerts Panel */}
+                    <div className="widget-panel alerts-panel">
+                        <div className="widget-header">
+                            <h3><AlertCircle size={18} /> Needs Attention</h3>
+                            {data.alerts.length > 0 && <span className="badge-count">{data.alerts.length}</span>}
+                        </div>
+                        <div className="alerts-list">
+                            {data.alerts.length > 0 ? (
+                                data.alerts.map(alert => (
+                                    <div key={alert.id} className={`alert-card ${alert.severity}`}>
+                                        <div className="alert-avatar" style={{ background: alert.severity === 'high' ? 'linear-gradient(135deg, #EF4444, #B91C1C)' : undefined }}>
+                                            <span>{getInitials(alert.memberName)}</span>
+                                        </div>
+                                        <div className="alert-content">
+                                            <h4>{alert.memberName}</h4>
+                                            <p>{alert.message}</p>
+                                            <span className="alert-time">{alert.time}</span>
+                                        </div>
+                                        <button className="alert-action-btn" {...buttonPress}>
+                                            {alert.type === 'PENDING_NOTE' ? <FileText size={14} /> : <MessageSquare size={14} />}
+                                        </button>
                                     </div>
-                                    <button className="member-quick-card__btn" {...buttonPress}><MessageSquare size={14} /></button>
+                                ))
+                            ) : (
+                                <div className="empty-state">
+                                    <CheckCircle size={32} />
+                                    <p>All caught up!</p>
                                 </div>
-                                <div className="member-quick-card">
-                                    <div className="member-quick-card__avatar"><span>AK</span></div>
-                                    <div className="member-quick-card__info">
-                                        <h4>Alice Kay</h4>
-                                        <p className="member-quick-card__last">Goal Review Due</p>
-                                    </div>
-                                    <button className="member-quick-card__btn" {...buttonPress}><Calendar size={14} /></button>
-                                </div>
-                            </div>
+                            )}
                         </div>
                     </div>
                 </div>

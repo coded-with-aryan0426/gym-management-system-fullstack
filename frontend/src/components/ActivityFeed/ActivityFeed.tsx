@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { UserPlus, Calendar, DollarSign, UserCheck, AlertCircle } from 'lucide-react';
+import { UserPlus, Calendar, IndianRupee, UserCheck, AlertCircle } from 'lucide-react';
 import { staggerContainer, staggerItem, fadeInUp } from '../../utils/animations';
 import './ActivityFeed.css';
 
@@ -25,7 +25,7 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities }) => {
       case 'session_completed':
         return <Calendar size={16} />;
       case 'payment_received':
-        return <DollarSign size={16} />;
+        return <IndianRupee size={16} />;
       case 'staff_checkin':
         return <UserCheck size={16} />;
       case 'membership_expiring':
@@ -53,15 +53,15 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities }) => {
   };
 
   return (
-    <motion.div 
+    <motion.div
       className="activity-feed"
       {...fadeInUp}
     >
       <div className="activity-feed__header">
         <h3 className="activity-feed__title">Recent Activity</h3>
       </div>
-      
-      <motion.div 
+
+      <motion.div
         className="activity-feed__list"
         variants={staggerContainer}
         initial="initial"
@@ -69,7 +69,7 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities }) => {
       >
         <AnimatePresence>
           {activities.length === 0 ? (
-            <motion.div 
+            <motion.div
               className="activity-feed__empty"
               {...fadeInUp}
             >
@@ -77,8 +77,8 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities }) => {
             </motion.div>
           ) : (
             activities.map((activity, index) => (
-              <motion.div 
-                key={activity.id} 
+              <motion.div
+                key={activity.id}
                 className="activity-item"
                 variants={staggerItem}
                 initial="initial"
@@ -87,7 +87,7 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities }) => {
                 whileHover={{ scale: 1.02, x: 5 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 25 }}
               >
-                <motion.div 
+                <motion.div
                   className={`activity-item__icon activity-item__icon--${getColor(activity.type)}`}
                   initial={{ scale: 0, rotate: -180 }}
                   animate={{ scale: 1, rotate: 0 }}
@@ -95,7 +95,7 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities }) => {
                 >
                   {getIcon(activity.type)}
                 </motion.div>
-                
+
                 <div className="activity-item__content">
                   <div className="activity-item__title">{activity.title}</div>
                   <div className="activity-item__description">{activity.description}</div>

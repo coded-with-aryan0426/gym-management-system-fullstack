@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useChat } from '../../contexts/ChatContext';
-import { Search, X, Users, Loader, Circle } from 'lucide-react';
+import { Search, X, Users, Loader } from 'lucide-react';
 import type { ChatUser } from '../../services/chatApi';
-import * as chatApi from '../../services/chatApi';
+import api from '../../services/api';
 
 interface FilterTab {
     id: string;
@@ -52,11 +52,19 @@ const NewChatModal: React.FC<NewChatModalProps> = ({ onClose }) => {
     }, [searchQuery]);
 
     const loadUsers = useCallback(async () => {
+        if (!api || !api.chat) {
+            console.error('API service not initialized');
+            setError('System error: API unavailable');
+            setLoading(false);
+            return;
+        }
+
         setLoading(true);
         setError(null);
         try {
-            const data = await chatApi.getAvailableChatUsers();
-            setUsers(data || []);
+            const response: any = await api.chat.getAvailableUsers();
+            const userList = response.data && Array.isArray(response.data) ? response.data : [];
+            setUsers(userList);
         } catch (err) {
             setError('Failed to load users');
             console.error('Error loading chat users:', err);
@@ -66,10 +74,12 @@ const NewChatModal: React.FC<NewChatModalProps> = ({ onClose }) => {
     }, []);
 
     const searchUsers = useCallback(async (query: string) => {
+        if (!api || !api.chat) return;
         setSearching(true);
         try {
-            const data = await chatApi.searchUsers(query);
-            setUsers(data || []);
+            const response: any = await api.chat.searchUsers(query);
+            const userList = response.data && Array.isArray(response.data) ? response.data : [];
+            setUsers(userList);
         } catch (err) {
             console.error('Error searching users:', err);
             // Keep existing users on search error
@@ -83,9 +93,22 @@ const NewChatModal: React.FC<NewChatModalProps> = ({ onClose }) => {
         try {
             await startPrivateChat(targetUser.userId);
             onClose();
-        } catch (err) {
+        } catch (err: any) {
             console.error('Failed to start chat:', err);
-            setError('Failed to start conversation');
+            // Check if request required (looser check)
+            if (err.response?.status === 403 || err.response?.data?.error === 'CHAT_REQUEST_REQUIRED') {
+                if (confirm('This user accepts invitations only. Send a request?')) {
+                    try {
+                        await api.chat.sendRequest(targetUser.userId);
+                        alert('Invitation sent successfully!');
+                        onClose();
+                    } catch (reqErr: any) {
+                        alert(reqErr.response?.data?.message || 'Failed to send request');
+                    }
+                }
+            } else {
+                setError('Failed to start conversation');
+            }
         } finally {
             setStarting(null);
         }
@@ -164,13 +187,17 @@ const NewChatModal: React.FC<NewChatModalProps> = ({ onClose }) => {
                 style={{
                     width: '100%',
                     maxWidth: '480px',
+                    height: '600px', // Fixed height to prevent collapse
                     maxHeight: '80vh',
-                    background: 'var(--bg-secondary)',
+                    minHeight: '400px',
+                    background: '#1a1d21', // Explicit background color
                     borderRadius: 'var(--radius-lg)',
                     border: '1px solid rgba(255, 255, 255, 0.1)',
                     overflow: 'hidden',
                     display: 'flex',
-                    flexDirection: 'column'
+                    flexDirection: 'column',
+                    position: 'relative',
+                    zIndex: 1060
                 }}
             >
                 {/* Header */}
@@ -304,15 +331,16 @@ const NewChatModal: React.FC<NewChatModalProps> = ({ onClose }) => {
                                 >
                                     {getInitials(chatUser.fullName)}
                                     {chatUser.online && (
-                                        <Circle
-                                            size={10}
-                                            fill="#22c55e"
-                                            stroke="var(--bg-secondary)"
-                                            strokeWidth={2}
+                                        <div
                                             style={{
                                                 position: 'absolute',
-                                                bottom: '0',
-                                                right: '0'
+                                                bottom: 0,
+                                                right: 0,
+                                                width: '10px',
+                                                height: '10px',
+                                                borderRadius: '50%',
+                                                backgroundColor: '#22c55e',
+                                                border: '2px solid var(--bg-secondary)'
                                             }}
                                         />
                                     )}
@@ -334,8 +362,36 @@ const NewChatModal: React.FC<NewChatModalProps> = ({ onClose }) => {
                                         {chatUser.role || 'Member'}
                                     </span>
                                 </div>
-                                {starting === chatUser.userId && (
+                                {starting === chatUser.userId ? (
                                     <Loader size={18} className="animate-spin" style={{ color: 'var(--accent-primary)' }} />
+                                ) : (
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            if (confirm(`Send a conversation request to ${chatUser.fullName || chatUser.username}?`)) {
+                                                api.chat.sendRequest(chatUser.userId)
+                                                    .then(() => alert('Invitation sent successfully!'))
+                                                    .catch((err: any) => alert(err.response?.data?.message || 'Failed to send request'));
+                                            }
+                                        }}
+                                        title="Send Request"
+                                        style={{
+                                            background: 'none',
+                                            border: 'none',
+                                            color: 'var(--text-tertiary)',
+                                            padding: '8px',
+                                            cursor: 'pointer',
+                                            borderRadius: '50%',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            transition: 'all 0.2s',
+                                        }}
+                                        onMouseEnter={(e) => e.currentTarget.style.color = 'var(--accent-primary)'}
+                                        onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-tertiary)'}
+                                    >
+                                        <Users size={16} /> {/* Using Users icon as generic 'Add' since UserPlus not imported */}
+                                    </button>
                                 )}
                             </div>
                         ))

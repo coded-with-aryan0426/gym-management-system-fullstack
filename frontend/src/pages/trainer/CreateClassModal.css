@@ -138,10 +138,9 @@
 /* Base input styles */
 .form-control {
     width: 100%;
-    padding: 0 12px 0 36px;
-    /* Reduced vertical padding */
+    padding: 0 12px 0 42px !important;
+    /* Force Left Padding for Icon */
     height: 40px;
-    /* Fixed height compact */
     background: #18181b;
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 10px;
@@ -162,7 +161,7 @@ textarea.form-control {
 }
 
 .input-wrapper--textarea .form-control {
-    padding-left: 36px;
+    padding-left: 42px !important;
 }
 
 .form-control:hover {

@@ -157,6 +157,15 @@ export interface CreateClassRequest {
     notes?: string;
 }
 
+export interface CreateSessionRequest {
+    memberId: number;
+    sessionDate: string; // ISO datetime
+    durationMinutes: number;
+    notes?: string;
+    isRecurring?: boolean;
+    recurringFrequency?: string;
+}
+
 export interface ClassAttendee {
     id: number;
     memberId: number;
@@ -384,6 +393,14 @@ export const trainerApi = {
         if (endDate) params.endDate = endDate;
         const response = await apiClient.get('/trainer/schedule', { params });
         return normalizeResponse<TrainerSession[]>(response.data);
+    },
+
+    async createPTSession(data: CreateSessionRequest): Promise<TrainerSession> {
+        const response = await apiClient.post('/api/pt-sessions', {
+            trainerId: (await trainerApi.getProfile()).userId, // Dynamically get ID or trust backend to infer from context if enabled
+            ...data
+        });
+        return normalizeResponse<TrainerSession>(response.data);
     },
 
     async getMemberNotes(memberId: number): Promise<ProgressNote[]> {

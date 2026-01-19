@@ -8,7 +8,6 @@ import { TrainerProvider } from './TrainerContext';
 import { ClassesProvider } from './ClassesContext';
 import { NavbarProvider } from './NavbarContext';
 import { ChatProvider } from './ChatContext';
-import DevNavigation from '../components/dev/DevNavigation';
 
 interface AppProviderProps {
     children: ReactNode;
@@ -25,7 +24,7 @@ export function AppProvider({ children }: AppProviderProps) {
                                 <NavbarProvider>
                                     <ChatProvider>
                                         <Toaster
-                                            position="top-right"
+                                            position="top-center"
                                             toastOptions={{
                                                 duration: 4000,
                                                 className: 'modern-toast',
@@ -67,7 +66,6 @@ export function AppProvider({ children }: AppProviderProps) {
                                             }}
                                         />
                                         {children}
-                                        <DevNavigation />
                                     </ChatProvider>
                                 </NavbarProvider>
                             </ClassesProvider>

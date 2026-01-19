@@ -1,24 +1,55 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useChat } from '../../contexts/ChatContext';
 import { useAuth } from '../../contexts/AuthContext';
+import api from '../../services/api';
+import chatApi from '../../services/chatApi';
 import {
     Send, Paperclip, Smile,
-    Phone, Video, User as UserIcon, Calendar, BarChart2,
-    MessageCircle, CheckCheck, MoreVertical, ShieldOff, Shield, AlertCircle
+    Phone, Video, User as UserIcon, Calendar,
+    MessageCircle, ShieldOff, Shield, AlertCircle, MoreVertical
 } from 'lucide-react';
+import MessageBubble from './MessageBubble';
 
 interface ChatWindowProps {
     onToggleContactPanel?: () => void;
 }
 
 const ChatWindow: React.FC<ChatWindowProps> = ({ onToggleContactPanel }) => {
-    const { activeConversation, messages, sendMessage, connected, blockUser, isUserBlocked } = useChat();
+    const { activeConversation, messages, sendMessage, connected, blockUser, isUserBlocked, typingUsers, sendTyping } = useChat();
     const { user } = useAuth();
     const [newMessage, setNewMessage] = useState('');
     const [showMenu, setShowMenu] = useState(false);
     const [blocking, setBlocking] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const menuRef = useRef<HTMLDivElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0] && activeConversation) {
+            const file = e.target.files[0];
+            try {
+                // Upload
+                const attachment = await api.chat.uploadAttachment(file, activeConversation.conversationId);
+
+                // Send message with attachment ID
+                const type = file.type.startsWith('image/') ? 'IMAGE' : 'FILE';
+                const payload = JSON.stringify({
+                    attachmentId: attachment.attachmentId,
+                    url: attachment.url,
+                    fileName: attachment.fileName,
+                    fileSize: attachment.fileSize
+                });
+
+                await sendMessage('Sent an attachment', type, payload);
+
+            } catch (error) {
+                console.error('Failed to upload file', error);
+                alert('Failed to upload file');
+            } finally {
+                if (fileInputRef.current) fileInputRef.current.value = '';
+            }
+        }
+    };
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -26,7 +57,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onToggleContactPanel }) => {
 
     useEffect(() => {
         scrollToBottom();
-    }, [messages]);
+    }, [messages, typingUsers]);
 
     // Close menu on outside click
     useEffect(() => {
@@ -39,11 +70,31 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onToggleContactPanel }) => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setNewMessage(e.target.value);
+        if (activeConversation) {
+            if (e.target.value.length > 0) {
+                sendTyping(true);
+            } else {
+                sendTyping(false);
+            }
+        }
+    };
+
+    // Debounce logic for stop typing
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            if (newMessage.length > 0) sendTyping(false);
+        }, 2000);
+        return () => clearTimeout(timeout);
+    }, [newMessage]);
+
     const handleSend = (e: React.FormEvent) => {
         e.preventDefault();
         if (newMessage.trim() && activeConversation) {
             sendMessage(newMessage);
             setNewMessage('');
+            sendTyping(false);
         }
     };
 
@@ -58,14 +109,16 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onToggleContactPanel }) => {
                 role: null
             };
         }
+        const currentUserId = user?.userId || Number(user?.id);
         const other = activeConversation.participants?.find(
-            (p: any) => Number(p.userId) !== Number(user?.id)
+            (p: any) => Number(p.userId) !== currentUserId
         ) || activeConversation.participants?.[0];
 
+        const displayName = other?.fullName || other?.username || 'Unknown';
         return {
             userId: other?.userId,
-            name: other?.fullName || 'Unknown',
-            initials: getInitials(other?.fullName),
+            name: displayName,
+            initials: getInitials(displayName),
             role: other?.role
         };
     };
@@ -75,14 +128,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onToggleContactPanel }) => {
         const parts = name.trim().split(/\s+/);
         if (parts.length === 1) return parts[0][0].toUpperCase();
         return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-    };
-
-    const formatMessageTime = (dateString?: string) => {
-        if (!dateString) return '';
-        return new Date(dateString).toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit'
-        });
     };
 
     const formatDateDivider = (dateString?: string) => {
@@ -131,7 +176,12 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onToggleContactPanel }) => {
     const otherParticipant = getOtherParticipant();
     const isBlocked = otherParticipant?.userId ? isUserBlocked(otherParticipant.userId) : false;
 
-    // Group messages by date - messages are already in chronological order from context
+    // Typing indicator
+    const typingUserIds = activeConversation ? typingUsers[activeConversation.conversationId] || [] : [];
+    const currentUserId = user?.userId || Number(user?.id);
+    const isOtherTyping = typingUserIds.some(id => id !== currentUserId);
+
+    // Group messages by date
     const groupedMessages = messages.reduce((groups: any[], msg, index, arr) => {
         const msgDate = new Date(msg.createdAt).toDateString();
         const prevMsgDate = index > 0 ? new Date(arr[index - 1].createdAt).toDateString() : null;
@@ -161,22 +211,15 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onToggleContactPanel }) => {
                 </div>
 
                 <div className="chat-header__actions">
-                    {/* Book Session Button */}
                     <button className="chat-header__action-btn chat-header__action-btn--primary" title="Book Session">
                         <Calendar size={18} />
                     </button>
-
-                    {/* Voice Call - Coming Soon */}
                     <button className="chat-header__action-btn" title="Voice Call (Coming Soon)" disabled style={{ opacity: 0.5 }}>
                         <Phone size={18} />
                     </button>
-
-                    {/* Video Call - Coming Soon */}
                     <button className="chat-header__action-btn" title="Video Call (Coming Soon)" disabled style={{ opacity: 0.5 }}>
                         <Video size={18} />
                     </button>
-
-                    {/* Contact Info Toggle */}
                     <button
                         className="chat-header__action-btn"
                         onClick={onToggleContactPanel}
@@ -185,7 +228,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onToggleContactPanel }) => {
                         <UserIcon size={18} />
                     </button>
 
-                    {/* More Options Dropdown */}
                     {activeConversation.type === 'PRIVATE' && (
                         <div className="chat-header__dropdown" ref={menuRef}>
                             <button
@@ -245,39 +287,49 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onToggleContactPanel }) => {
                     const isMyMessage = item.senderId === Number(user?.id);
 
                     return (
-                        <div
+                        <MessageBubble
                             key={item.messageId || index}
-                            className={`message-bubble ${isMyMessage ? 'message-bubble--sent' : 'message-bubble--received'}`}
-                        >
-                            <div className="message-bubble__content">
-                                {/* Workout Plan Card - if content type is WORKOUT_PLAN */}
-                                {item.contentType === 'WORKOUT_PLAN' && item.payload ? (
-                                    <WorkoutPlanCard payload={JSON.parse(item.payload)} />
-                                ) : (
-                                    <p className="message-bubble__text">{item.content}</p>
-                                )}
-
-                                <div className="message-bubble__meta">
-                                    <span className="message-bubble__time">
-                                        {formatMessageTime(item.createdAt)}
-                                    </span>
-                                    {isMyMessage && (
-                                        <span className="message-bubble__status">
-                                            <CheckCheck size={14} />
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
+                            message={item}
+                            isMyMessage={isMyMessage}
+                            onEdit={chatApi.editMessage}
+                            onDelete={chatApi.deleteMessage}
+                            onReact={chatApi.addReaction}
+                            onRemoveReaction={chatApi.removeReaction}
+                        />
                     );
                 })}
+
+                {/* Typing Indicator */}
+                {isOtherTyping && (
+                    <div className="chat-typing-indicator">
+                        <span className="typing-dot"></span>
+                        <span className="typing-dot"></span>
+                        <span className="typing-dot"></span>
+                        <span style={{ marginLeft: '8px', fontSize: '12px', color: '#888' }}>
+                            {otherParticipant?.name} is typing...
+                        </span>
+                    </div>
+                )}
+
                 <div ref={messagesEndRef} />
             </div>
 
             {/* Input Area */}
             <div className="chat-input">
                 <form onSubmit={handleSend} className="chat-input__form">
-                    <button type="button" className="chat-input__attachment-btn" title="Attach file" disabled={isBlocked}>
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        style={{ display: 'none' }}
+                        onChange={handleFileSelect}
+                    />
+                    <button
+                        type="button"
+                        className="chat-input__attachment-btn"
+                        title="Attach file"
+                        disabled={isBlocked}
+                        onClick={() => fileInputRef.current?.click()}
+                    >
                         <Paperclip size={22} />
                     </button>
 
@@ -285,7 +337,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onToggleContactPanel }) => {
                         <input
                             type="text"
                             value={newMessage}
-                            onChange={(e) => setNewMessage(e.target.value)}
+                            onChange={handleInputChange}
                             placeholder={isBlocked ? "You have blocked this user" : "Type a message..."}
                             className="chat-input__field"
                             disabled={isBlocked}
@@ -304,42 +356,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onToggleContactPanel }) => {
                         <Send size={20} />
                     </button>
                 </form>
-            </div>
-        </div>
-    );
-};
-
-// Workout Plan Card Component (embedded in messages)
-const WorkoutPlanCard: React.FC<{ payload: any }> = ({ payload }) => {
-    return (
-        <div className="workout-plan-card">
-            <div className="workout-plan-card__header">
-                <div className="workout-plan-card__icon">
-                    <BarChart2 size={14} />
-                </div>
-                <span className="workout-plan-card__type">Workout Plan</span>
-            </div>
-            <h4 className="workout-plan-card__title">
-                {payload.title || 'Training Session'}
-            </h4>
-            <div className="workout-plan-card__meta">
-                <span className="workout-plan-card__meta-item">
-                    ⏱️ {payload.duration || '50'} min
-                </span>
-                <span className="workout-plan-card__meta-item">
-                    💪 {payload.exercises || '8'} exercises
-                </span>
-                <span className="workout-plan-card__meta-item">
-                    ⬆️ {payload.difficulty || 'Intermediate'}
-                </span>
-            </div>
-            <div className="workout-plan-card__actions">
-                <button className="workout-plan-card__btn workout-plan-card__btn--primary">
-                    View Plan
-                </button>
-                <button className="workout-plan-card__btn workout-plan-card__btn--secondary">
-                    ↓ Save
-                </button>
             </div>
         </div>
     );

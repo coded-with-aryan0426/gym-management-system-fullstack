@@ -17,6 +17,7 @@ public class ConversationDTO {
     public static class ParticipantDTO {
         private Long userId;
         private String fullName;
+        private String username;
         private String avatarId;
         private String role;
     }

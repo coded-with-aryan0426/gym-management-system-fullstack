@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom"
 import { motion } from "framer-motion"
 import type { Variants } from "framer-motion"
 import {
-  DollarSign,
+  IndianRupee,
   Users,
   UserPlus,
   LogIn,
@@ -304,7 +304,7 @@ const Dashboard: React.FC = () => {
           onClick={() => navigate('/financials')}
         >
           <div className="dash-overview-card__icon">
-            <DollarSign size={24} />
+            <IndianRupee size={24} />
           </div>
           <div className="dash-overview-card__content">
             <span className="dash-overview-card__label">Monthly Revenue</span>
@@ -336,7 +336,7 @@ const Dashboard: React.FC = () => {
       <section className="dash-stats">
         <motion.div className="dash-stat-card" variants={itemVariants}>
           <div className="dash-stat-card__header">
-            <DollarSign size={16} />
+            <IndianRupee size={16} />
             <span>Today's Revenue</span>
           </div>
           <div className="dash-stat-card__value">{formatCurrency(todayRevenue)}</div>

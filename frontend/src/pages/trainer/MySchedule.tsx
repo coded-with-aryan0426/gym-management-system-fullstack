@@ -9,6 +9,8 @@ import {
     getWeekRange, getWeekDates, formatTime,
     isToday, formatMonthYear, formatShortDate
 } from '../../utils/dateUtils';
+import { trainerApi } from '../../services/trainerApi';
+import CreateSessionModal from '../../components/Trainer/CreateSessionModal';
 
 // ─────────────────────────────────────────────────────────────
 // Types
@@ -30,6 +32,7 @@ interface ScheduleEvent {
 // Status-driven UI configuration
 const STATUS_UI: Record<string, { color: string; bg: string; label: string; muted: boolean }> = {
     SCHEDULED: { color: '#10B981', bg: 'rgba(16, 185, 129, 0.15)', label: 'Scheduled', muted: false },
+    UPCOMING: { color: '#10B981', bg: 'rgba(16, 185, 129, 0.15)', label: 'Upcoming', muted: false }, // Added alias
     COMPLETED: { color: '#6B7280', bg: 'rgba(107, 114, 128, 0.12)', label: 'Completed', muted: true },
     CANCELLED: { color: '#EF4444', bg: 'rgba(239, 68, 68, 0.12)', label: 'Cancelled', muted: true },
     MISSED: { color: '#F59E0B', bg: 'rgba(245, 158, 11, 0.15)', label: 'Missed', muted: false },
@@ -59,6 +62,12 @@ const MySchedule: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    // Modal State
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [createModalDate, setCreateModalDate] = useState<Date | undefined>(undefined);
+    const [createModalTime, setCreateModalTime] = useState<number | undefined>(undefined);
+    const [validationError, setValidationError] = useState<string | null>(null);
+
     // Centralized week range calculation
     const weekRange = useMemo(() => getWeekRange(currentDate), [currentDate]);
     const weekDates = useMemo(() => getWeekDates(weekRange.start), [weekRange.start]);
@@ -71,77 +80,93 @@ const MySchedule: React.FC = () => {
         setLoading(true);
         setError(null);
         try {
-            // MOCK DATA - no API call needed
-            const now = new Date();
-            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            // Calculate date range for the current week view
+            const start = weekRange.start;
+            const end = weekRange.end;
+            const startStr = start.toISOString().split('T')[0];
+            const endStr = end.toISOString().split('T')[0];
 
-            const mockEvents: ScheduleEvent[] = [
-                {
-                    id: 1,
-                    title: 'PT – Sarah Wilson',
-                    start: new Date(today.getTime() + 9 * 60 * 60 * 1000),
-                    end: new Date(today.getTime() + 10 * 60 * 60 * 1000),
-                    type: 'pt',
-                    status: 'SCHEDULED',
-                    client: 'Sarah Wilson',
-                    recurring: true,
-                    notes: 'Focus on upper body strength'
-                },
-                {
-                    id: 2,
-                    title: 'PT – Mike Johnson',
-                    start: new Date(today.getTime() + 11 * 60 * 60 * 1000),
-                    end: new Date(today.getTime() + 12 * 60 * 60 * 1000),
-                    type: 'pt',
-                    status: 'SCHEDULED',
-                    client: 'Mike Johnson',
-                    recurring: false,
-                    notes: 'Weight loss program'
-                },
-                {
-                    id: 3,
-                    title: 'PT – Emma Davis',
-                    start: new Date(today.getTime() + 14 * 60 * 60 * 1000),
-                    end: new Date(today.getTime() + 15 * 60 * 60 * 1000),
-                    type: 'pt',
-                    status: 'SCHEDULED',
-                    client: 'Emma Davis',
-                    recurring: true
-                },
-                {
-                    id: 4,
-                    title: 'PT – James White',
-                    start: new Date(today.getTime() - 24 * 60 * 60 * 1000 + 10 * 60 * 60 * 1000),
-                    end: new Date(today.getTime() - 24 * 60 * 60 * 1000 + 11 * 60 * 60 * 1000),
-                    type: 'pt',
-                    status: 'COMPLETED',
-                    client: 'James White',
-                    recurring: false
-                },
-                {
-                    id: 5,
-                    title: 'PT – Lisa Anderson',
-                    start: new Date(today.getTime() + 24 * 60 * 60 * 1000 + 9 * 60 * 60 * 1000),
-                    end: new Date(today.getTime() + 24 * 60 * 60 * 1000 + 10 * 60 * 60 * 1000),
-                    type: 'pt',
-                    status: 'SCHEDULED',
-                    client: 'Lisa Anderson',
-                    recurring: true
-                }
-            ];
+            // Fetch both PT sessions and Classes in parallel
+            const [ptSessions, classesData] = await Promise.all([
+                trainerApi.getSchedule(startStr, endStr),
+                trainerApi.getClasses(startStr, endStr)
+            ]);
 
-            setEvents(mockEvents);
+            const mappedEvents: ScheduleEvent[] = [];
+
+            // Map PT Sessions
+            // Backend returns: { id: "101", title: "PT: Name", startTime: "...", endTime: "...", type: "pt", status: "..." }
+            ptSessions.forEach((session: any) => {
+                const startDate = new Date(session.startTime);
+                const endDate = new Date(session.endTime);
+
+                mappedEvents.push({
+                    id: parseInt(session.id),
+                    title: session.title,
+                    start: startDate,
+                    end: endDate,
+                    type: 'pt',
+                    status: (session.status || 'SCHEDULED').toUpperCase(),
+                    client: session.title.replace('PT: ', ''),
+                    recurring: false, // Backend DTO simplified this out for now
+                    notes: session.notes,
+                    room: session.room
+                });
+            });
+
+            // Map Classes
+            classesData.forEach(cls => {
+                // Parse date and time
+                // cls.date is YYYY-MM-DD, cls.startTime is HH:mm
+                const startDateTime = new Date(`${cls.date}T${cls.startTime}`);
+                const endDateTime = new Date(`${cls.date}T${cls.endTime}`);
+
+                mappedEvents.push({
+                    id: cls.id + 10000, // Offset ID to avoid collision with PT sessions (which likely start at 1)
+                    title: cls.title,
+                    start: startDateTime,
+                    end: endDateTime,
+                    type: 'class',
+                    status: cls.status.toUpperCase(), // Backend is lowercase, UI expects uppercase
+                    room: cls.room,
+                    recurring: cls.recurring,
+                    notes: cls.notes
+                });
+            });
+
+            setEvents(mappedEvents);
         } catch (err) {
             console.error('Failed to load schedule:', err);
             setError('Failed to load schedule. Please try again.');
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [weekRange]);
 
     useEffect(() => {
         fetchSchedule();
     }, [fetchSchedule]);
+
+    const handleSlotClick = (date: Date, hour: number) => {
+        const now = new Date();
+        const slotDateTime = new Date(date);
+        slotDateTime.setHours(hour, 0, 0, 0);
+
+        if (slotDateTime < now) {
+            // Optional: Show toast or ignore
+            // For now, we'll just ignore clicks on past dates or maybe set a transient error
+            return;
+        }
+
+        setCreateModalDate(date);
+        setCreateModalTime(hour);
+        setIsCreateModalOpen(true);
+    };
+
+    const handleCreateSuccess = () => {
+        fetchSchedule(); // Refresh data
+        // Maybe show success toast
+    };
 
     // ─────────────────────────────────────────────────────────
     // Navigation
@@ -184,7 +209,8 @@ const MySchedule: React.FC = () => {
     // ─────────────────────────────────────────────────────────
 
     const stats = useMemo(() => {
-        const scheduled = events.filter(e => e.status === 'SCHEDULED').length;
+        // Count both SCHEDULED and UPCOMING as "Upcoming"
+        const scheduled = events.filter(e => e.status === 'SCHEDULED' || e.status === 'UPCOMING').length;
         const completed = events.filter(e => e.status === 'COMPLETED').length;
         const totalHours = events.reduce((sum, e) => {
             return sum + (e.end.getTime() - e.start.getTime()) / 3600000;
@@ -439,7 +465,10 @@ const MySchedule: React.FC = () => {
                                                                 background: statusConfig?.bg,
                                                                 borderLeftColor: statusConfig?.color
                                                             }}
-                                                            onClick={() => setSelectedEvent(event)}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setSelectedEvent(event);
+                                                            }}
                                                         >
                                                             <div className="trainer-schedule__event-time">
                                                                 {formatTime(event.start)} - {formatTime(event.end)}
@@ -457,7 +486,10 @@ const MySchedule: React.FC = () => {
                                                         </div>
                                                     )}
                                                     {!event && (
-                                                        <div className="trainer-schedule__empty-slot">
+                                                        <div
+                                                            className="trainer-schedule__empty-slot"
+                                                            onClick={() => handleSlotClick(date, hour)}
+                                                        >
                                                             <Plus size={10} />
                                                         </div>
                                                     )}
@@ -471,7 +503,84 @@ const MySchedule: React.FC = () => {
                     </div>
                 )}
 
-                {/* Agenda View */}
+                {/* Day View */}
+                {viewMode === 'day' && (
+                    <div className="trainer-schedule__day-view">
+                        <div className="trainer-schedule__day-header">
+                            <h2>{currentDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</h2>
+                            <p className="trainer-schedule__day-summary">{getEventsForDay(currentDate).length} sessions scheduled</p>
+                        </div>
+
+                        <div className="trainer-schedule__day-body">
+                            <div className="trainer-schedule__time-column">
+                                {hours.map(hour => (
+                                    <div key={hour} className="trainer-schedule__time-slot">
+                                        <span className="trainer-schedule__time-label">{formatHour(hour)}</span>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="trainer-schedule__day-column trainer-schedule__day-column--wide">
+                                {hours.map(hour => {
+                                    /* Use the same logic as week view but wider */
+                                    const event = getEventForSlot(currentDate, hour);
+                                    const statusConfig = event ? getStatusConfig(event.status) : null;
+
+                                    if (event && !isEventStart(event, hour)) {
+                                        return <div key={hour} className="trainer-schedule__hour-slot trainer-schedule__hour-slot--occupied" />;
+                                    }
+
+                                    return (
+                                        <div key={hour} className="trainer-schedule__hour-slot">
+                                            {event && isEventStart(event, hour) && (
+                                                <div
+                                                    className={`trainer-schedule__event-block ${statusConfig?.muted ? 'trainer-schedule__event-block--muted' : ''}`}
+                                                    style={{
+                                                        height: `calc(${getEventDuration(event) * 100}% + ${(getEventDuration(event) - 1)}px)`,
+                                                        background: statusConfig?.bg,
+                                                        borderLeftColor: statusConfig?.color
+                                                    }}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setSelectedEvent(event);
+                                                    }}
+                                                >
+                                                    <div className="trainer-schedule__event-time">
+                                                        {formatTime(event.start)} - {formatTime(event.end)}
+                                                    </div>
+                                                    <div className="trainer-schedule__event-title">
+                                                        {event.title}
+                                                        {event.recurring && <Repeat size={10} className="trainer-schedule__recurring-icon" />}
+                                                    </div>
+                                                    {event.room && (
+                                                        <div className="trainer-schedule__event-room">
+                                                            <MapPin size={10} /> {event.room}
+                                                        </div>
+                                                    )}
+                                                    {event.notes && (
+                                                        <div className="trainer-schedule__event-notes-preview" style={{ fontSize: '0.75rem', opacity: 0.8, marginTop: '2px' }}>
+                                                            {event.notes}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                            {!event && (
+                                                <div
+                                                    className="trainer-schedule__empty-slot"
+                                                    onClick={() => handleSlotClick(currentDate, hour)}
+                                                >
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                        <Plus size={10} /> <span>Schedule</span>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
+                )}
                 {viewMode === 'agenda' && (
                     <div className="trainer-schedule__agenda-view">
                         <div className="trainer-schedule__agenda-header">
@@ -598,6 +707,15 @@ const MySchedule: React.FC = () => {
                     </div>
                 </div>
             )}
+
+            {/* Create Session Modal */}
+            <CreateSessionModal
+                isOpen={isCreateModalOpen}
+                onClose={() => setIsCreateModalOpen(false)}
+                onSuccess={handleCreateSuccess}
+                initialDate={createModalDate}
+                initialTime={createModalTime}
+            />
         </div>
     );
 };

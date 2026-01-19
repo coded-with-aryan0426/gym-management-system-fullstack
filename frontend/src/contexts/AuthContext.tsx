@@ -1,21 +1,22 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import type { ReactNode } from 'react';
 
-// Define User Type
+// ==================== TYPES ====================
+
 export interface User {
-    id: string; // Changed to string to support "dev-admin" etc
+    id: string;
+    userId?: number; // Added for compatibility with backend DTOs
     username: string;
     email: string;
     fullName: string;
     role: 'ADMIN' | 'TRAINER' | 'MEMBER' | 'OWNER';
     token?: string;
     avatar?: string;
-    context?: string;      // Added for compatibility with backend responses
-    staffRole?: string;    // Added for compatibility
-    activeGymId?: number;  // Added for compatibility
-    activeGymName?: string;// Added for compatibility
+    context?: string;
+    staffRole?: string;
+    activeGymId?: number;
+    activeGymName?: string;
 }
-
-export type DevRole = 'ADMIN' | 'TRAINER' | 'MEMBER';
 
 interface AuthContextType {
     user: User | null;
@@ -23,101 +24,112 @@ interface AuthContextType {
     isLoading: boolean;
     login: (token: string, userData: User) => void;
     logout: () => void;
-    devLogin: (role: DevRole, targetPath?: string) => void;
+    getStorageKey: (key: string) => string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// ==================== PORT-SCOPED STORAGE ====================
+
+/**
+ * Generate a storage key scoped to the current port.
+ * This ensures session isolation when running multiple frontend instances:
+ * - Port 5173 → token_port_5173, user_port_5173
+ * - Port 5174 → token_port_5174, user_port_5174
+ * - Port 5175 → token_port_5175, user_port_5175
+ */
+const getStorageKey = (key: string): string => {
+    const port = typeof window !== 'undefined' ? window.location.port || '5173' : '5173';
+    return `${key}_port_${port}`;
+};
+
+/**
+ * Check if a JWT token is expired by decoding the payload.
+ * Returns true if expired or invalid.
+ */
+const isTokenExpired = (token: string): boolean => {
+    if (!token) return true;
+    try {
+        const parts = token.split('.');
+        if (parts.length !== 3) return true;
+        const payload = JSON.parse(atob(parts[1]));
+        const expMs = payload.exp * 1000;
+        return Date.now() >= expMs;
+    } catch {
+        return true;
+    }
+};
+
+// ==================== PROVIDER ====================
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
+    // Clear all auth data for this port
+    const clearAuth = useCallback(() => {
+        localStorage.removeItem(getStorageKey('token'));
+        localStorage.removeItem(getStorageKey('user'));
+        setUser(null);
+    }, []);
+
+    // Initialize auth state from storage
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        const storedUser = localStorage.getItem('user');
-        const devMode = localStorage.getItem('dev_mode_active');
+        const token = localStorage.getItem(getStorageKey('token'));
+        const storedUser = localStorage.getItem(getStorageKey('user'));
 
-        // DEV Mode Restore
-        if (devMode === 'true' && storedUser) {
-            try {
-                setUser(JSON.parse(storedUser));
-            } catch (e) {
-                console.error("Failed to restore dev user", e);
-            }
-            setIsLoading(false);
-            return;
-        }
-
-        // Normal Auth Restore
+        // Normal Auth Restore with expiry check
         if (token && storedUser) {
-            try {
-                const parsedUser = JSON.parse(storedUser);
-                setUser(parsedUser);
-            } catch (error) {
-                console.error('Failed to parse stored user:', error);
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
+            if (isTokenExpired(token)) {
+                console.warn(`[Auth] Token expired for port ${window.location.port}, clearing session`);
+                clearAuth();
+            } else {
+                try {
+                    const parsedUser = JSON.parse(storedUser);
+                    setUser(parsedUser);
+                } catch (error) {
+                    console.error('Failed to parse stored user:', error);
+                    clearAuth();
+                }
             }
         }
         setIsLoading(false);
+    }, [clearAuth]);
+
+    /**
+     * Login with a real JWT token (from backend auth)
+     */
+    const login = useCallback((token: string, userData: User) => {
+        localStorage.setItem(getStorageKey('token'), token);
+        localStorage.setItem(getStorageKey('user'), JSON.stringify({ ...userData, token }));
+        setUser({ ...userData, token });
     }, []);
 
-    const login = (token: string, userData: User) => {
-        localStorage.setItem('token', token);
-        localStorage.setItem('user', JSON.stringify(userData));
-        setUser(userData);
-    };
-
-    const logout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        localStorage.removeItem('dev_mode_active');
-        localStorage.removeItem('dev_role');
-        localStorage.removeItem('devNavPosition');
-        setUser(null);
+    /**
+     * Logout - clears only THIS port's session (other ports remain logged in)
+     */
+    const logout = useCallback(() => {
+        clearAuth();
         window.location.href = '/login';
-    };
+    }, [clearAuth]);
 
-    const devLogin = (role: DevRole, targetPath?: string) => {
-        localStorage.removeItem('token'); // Clear real token
-
-        // Map roles to exact backend expectations
-        const mappedRole = role === 'ADMIN' ? 'OWNER' : role;
-
-        const mockUser: User = {
-            id: `dev-${role.toLowerCase()}`,
-            username: `dev_${role.toLowerCase()}`,
-            email: `dev.${role.toLowerCase()}@gym.local`,
-            fullName: `Dev ${role.charAt(0) + role.slice(1).toLowerCase()}`,
-            role: mappedRole,
-            context: role === 'MEMBER' ? 'MEMBER' : 'STAFF',
-            staffRole: mappedRole,
-            token: `DEV_TOKEN_${role}` // BE-compatible token
-        };
-
-        localStorage.setItem('user', JSON.stringify(mockUser));
-        localStorage.setItem('token', mockUser.token!);
-        localStorage.setItem('dev_mode_active', 'true');
-        localStorage.setItem('dev_role', role);
-
-        setUser(mockUser);
-
-        // Redirect to target path if provided, otherwise default for role
-        if (targetPath) {
-            window.location.href = targetPath;
-        } else {
-            if (role === 'ADMIN') window.location.href = '/dashboard';
-            else if (role === 'TRAINER') window.location.href = '/trainer';
-            else window.location.href = '/member';
-        }
+    const value: AuthContextType = {
+        user,
+        isAuthenticated: !!user,
+        isLoading,
+        login,
+        logout,
+        getStorageKey, // Expose for other services to use
     };
 
     return (
-        <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, logout, devLogin }}>
+        <AuthContext.Provider value={value}>
             {children}
         </AuthContext.Provider>
     );
 };
+
+// ==================== HOOK ====================
 
 export const useAuth = () => {
     const context = useContext(AuthContext);
@@ -126,3 +138,6 @@ export const useAuth = () => {
     }
     return context;
 };
+
+// Export helper for use in non-React contexts (like API services)
+export { getStorageKey };

@@ -175,6 +175,10 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  /* Added gap for icon spacing */
 }
 
 .trainer-schedule__view-toggle button:last-child {
@@ -550,6 +554,8 @@
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
   border-radius: 12px;
   overflow: hidden;
+  min-height: 0;
+  /* Important for nested flex scroll */
 }
 
 .trainer-schedule__day-header {
@@ -571,6 +577,12 @@
 .trainer-schedule__day-summary {
   font-size: 12px;
   color: var(--text-tertiary);
+}
+
+.trainer-schedule__day-body {
+  flex: 1;
+  display: flex;
+  overflow-y: auto;
 }
 
 .trainer-schedule__day-timeline {

@@ -35,6 +35,9 @@ public class ChatController {
     @Autowired
     private BlockingService blockingService;
 
+    @Autowired
+    private com.gym.management.repository.ConversationParticipantRepository participantRepository;
+
     // ==================== CONVERSATION ENDPOINTS ====================
 
     @GetMapping("/conversations")
@@ -53,10 +56,18 @@ public class ChatController {
             dto.setTitle(c.getTitle());
             dto.setMetadata(c.getMetadata());
             dto.setUpdatedAt(c.getUpdatedAt());
-            dto.setParticipants(c.getParticipants().stream().map(p -> {
+            // Fetch participants explicitly with JOIN FETCH for User data
+            java.util.List<com.gym.management.model.ConversationParticipant> participants = participantRepository
+                    .findByConversationIdWithUser(c.getConversationId());
+            dto.setParticipants(participants.stream().map(p -> {
                 com.gym.management.dto.ConversationDTO.ParticipantDTO pd = new com.gym.management.dto.ConversationDTO.ParticipantDTO();
                 pd.setUserId(p.getUser().getUserId());
-                pd.setFullName(p.getUser().getFullName());
+                String name = p.getUser().getFullName();
+                if (name == null || name.trim().isEmpty()) {
+                    name = p.getUser().getUsername();
+                }
+                pd.setFullName(name);
+                pd.setUsername(p.getUser().getUsername());
                 pd.setRole(p.getRole());
                 pd.setAvatarId(p.getUser().getAvatarId());
                 return pd;
@@ -90,6 +101,22 @@ public class ChatController {
             dto.setPayload(m.getPayload());
             dto.setCreatedAt(m.getCreatedAt());
             dto.setIsSystemMessage(m.getIsSystemMessage());
+
+            dto.setIsEdited(m.getEditHistory() != null && !m.getEditHistory().isEmpty());
+            if (m.getReactions() != null) {
+                dto.setReactions(m.getReactions().stream().map(r -> {
+                    com.gym.management.dto.MessageReactionDTO rd = new com.gym.management.dto.MessageReactionDTO();
+                    rd.setReactionId(r.getReactionId());
+                    rd.setUserId(r.getUser().getUserId());
+                    rd.setUserFullName(r.getUser().getFullName());
+                    rd.setEmoji(r.getEmoji());
+                    rd.setCreatedAt(r.getCreatedAt());
+                    return rd;
+                }).collect(java.util.stream.Collectors.toList()));
+            } else {
+                dto.setReactions(new java.util.ArrayList<>());
+            }
+
             return dto;
         }).collect(java.util.stream.Collectors.toList());
 
@@ -106,22 +133,121 @@ public class ChatController {
                     .body(apiResponse(false, null, "Cannot start chat with this user"));
         }
 
-        Conversation c = chatService.getOrCreatePrivateConversation(currentUserId, targetUserId);
+        try {
+            Conversation c = chatService.getOrCreatePrivateConversation(currentUserId, targetUserId);
 
-        com.gym.management.dto.ConversationDTO dto = new com.gym.management.dto.ConversationDTO();
-        dto.setConversationId(c.getConversationId());
-        dto.setType(c.getType());
-        dto.setTitle(c.getTitle());
-        dto.setUpdatedAt(c.getUpdatedAt());
-        dto.setParticipants(c.getParticipants().stream().map(p -> {
-            com.gym.management.dto.ConversationDTO.ParticipantDTO pd = new com.gym.management.dto.ConversationDTO.ParticipantDTO();
-            pd.setUserId(p.getUser().getUserId());
-            pd.setFullName(p.getUser().getFullName());
-            pd.setAvatarId(p.getUser().getAvatarId());
-            return pd;
-        }).collect(java.util.stream.Collectors.toList()));
+            com.gym.management.dto.ConversationDTO dto = new com.gym.management.dto.ConversationDTO();
+            dto.setConversationId(c.getConversationId());
+            dto.setType(c.getType());
+            dto.setTitle(c.getTitle());
+            dto.setUpdatedAt(c.getUpdatedAt());
+            dto.setParticipants(c.getParticipants().stream().map(p -> {
+                com.gym.management.dto.ConversationDTO.ParticipantDTO pd = new com.gym.management.dto.ConversationDTO.ParticipantDTO();
+                pd.setUserId(p.getUser().getUserId());
+                String name = p.getUser().getFullName();
+                if (name == null || name.trim().isEmpty()) {
+                    name = p.getUser().getUsername();
+                }
+                pd.setFullName(name);
+                pd.setUsername(p.getUser().getUsername());
+                pd.setAvatarId(p.getUser().getAvatarId());
+                return pd;
+            }).collect(java.util.stream.Collectors.toList()));
 
-        return ResponseEntity.ok(apiResponse(true, dto, "Chat started"));
+            return ResponseEntity.ok(apiResponse(true, dto, "Chat started"));
+        } catch (IllegalStateException e) {
+            String msg = e.getMessage();
+            if ("CHAT_REQUEST_REQUIRED".equals(msg)) {
+                Map<String, Object> resp = new HashMap<>();
+                resp.put("success", false);
+                resp.put("error", "CHAT_REQUEST_REQUIRED");
+                resp.put("message", "You must send a request first.");
+                return ResponseEntity.status(403).body(resp);
+            }
+            return ResponseEntity.badRequest().body(apiResponse(false, null, e.getMessage()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError()
+                    .body(apiResponse(false, null, "Internal Error: " + e.getMessage()));
+        }
+    }
+
+    @PostMapping("/requests")
+    public ResponseEntity<?> createRequest(@RequestBody Map<String, Long> payload) {
+        Long currentUserId = getAuthenticatedUserId();
+        Long targetUserId = payload.get("targetUserId");
+
+        if (targetUserId == null) {
+            return ResponseEntity.badRequest().body(apiResponse(false, null, "targetUserId required"));
+        }
+
+        try {
+            com.gym.management.model.ConversationRequest req = chatService.createRequest(currentUserId, targetUserId);
+            return ResponseEntity.ok(apiResponse(true, req, "Request sent"));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(apiResponse(false, null, e.getMessage()));
+        }
+    }
+
+    @GetMapping("/requests")
+    public ResponseEntity<?> getPendingRequests() {
+        Long userId = getAuthenticatedUserId();
+        java.util.List<com.gym.management.model.ConversationRequest> requests = chatService.getPendingRequests(userId);
+
+        // Map to DTO to prevent recursion/lazy issues
+        java.util.List<Map<String, Object>> dtos = requests.stream().map(r -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("requestId", r.getRequestId());
+            map.put("senderId", r.getSender().getUserId());
+            map.put("senderName", r.getSender().getFullName());
+            map.put("senderAvatarId", r.getSender().getAvatarId());
+            map.put("createdAt", r.getCreatedAt());
+            map.put("status", r.getStatus());
+            return map;
+        }).collect(java.util.stream.Collectors.toList());
+
+        return ResponseEntity.ok(apiResponse(true, dtos, null));
+    }
+
+    @PostMapping("/requests/{requestId}/accept")
+    public ResponseEntity<?> acceptRequest(@PathVariable Long requestId) {
+        Long userId = getAuthenticatedUserId();
+        try {
+            Conversation c = chatService.acceptRequest(requestId, userId);
+            // Return conversation DTO
+            com.gym.management.dto.ConversationDTO dto = new com.gym.management.dto.ConversationDTO();
+            dto.setConversationId(c.getConversationId());
+            dto.setType(c.getType());
+            dto.setTitle(c.getTitle());
+            dto.setUpdatedAt(c.getUpdatedAt());
+            dto.setParticipants(c.getParticipants().stream().map(p -> {
+                com.gym.management.dto.ConversationDTO.ParticipantDTO pd = new com.gym.management.dto.ConversationDTO.ParticipantDTO();
+                pd.setUserId(p.getUser().getUserId());
+                String name = p.getUser().getFullName();
+                if (name == null || name.trim().isEmpty()) {
+                    name = p.getUser().getUsername();
+                }
+                pd.setFullName(name);
+                pd.setUsername(p.getUser().getUsername());
+                pd.setAvatarId(p.getUser().getAvatarId());
+                return pd;
+            }).collect(java.util.stream.Collectors.toList()));
+
+            return ResponseEntity.ok(apiResponse(true, dto, "Request accepted"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(apiResponse(false, null, e.getMessage()));
+        }
+    }
+
+    @PostMapping("/requests/{requestId}/reject")
+    public ResponseEntity<?> rejectRequest(@PathVariable Long requestId) {
+        Long userId = getAuthenticatedUserId();
+        try {
+            chatService.rejectRequest(requestId, userId);
+            return ResponseEntity.ok(apiResponse(true, null, "Request rejected"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(apiResponse(false, null, e.getMessage()));
+        }
     }
 
     // ==================== USER DISCOVERY ENDPOINTS ====================
@@ -241,6 +367,66 @@ public class ChatController {
         result.put("hasBlocked", hasBlocked);
 
         return ResponseEntity.ok(apiResponse(true, result, null));
+    }
+
+    // ==================== MESSAGE ACTIONS ====================
+
+    @PutMapping("/messages/{messageId}")
+    public ResponseEntity<?> editMessage(@PathVariable Long messageId, @RequestBody Map<String, String> payload) {
+        Long userId = getAuthenticatedUserId();
+        String content = payload.get("content");
+        if (content == null || content.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(apiResponse(false, null, "Content required"));
+        }
+
+        try {
+            Message m = chatService.editMessage(messageId, userId, content);
+            return ResponseEntity.ok(apiResponse(true, null, "Message updated"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(apiResponse(false, null, e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/messages/{messageId}")
+    public ResponseEntity<?> deleteMessage(@PathVariable Long messageId) {
+        Long userId = getAuthenticatedUserId();
+        try {
+            chatService.deleteMessage(messageId, userId);
+            return ResponseEntity.ok(apiResponse(true, null, "Message deleted"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(apiResponse(false, null, e.getMessage()));
+        }
+    }
+
+    @PostMapping("/messages/{messageId}/reactions")
+    public ResponseEntity<?> addReaction(@PathVariable Long messageId, @RequestBody Map<String, String> payload) {
+        Long userId = getAuthenticatedUserId();
+        String emoji = payload.get("emoji");
+        if (emoji == null || emoji.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(apiResponse(false, null, "Emoji required"));
+        }
+
+        try {
+            chatService.reactToMessage(messageId, userId, emoji);
+            return ResponseEntity.ok(apiResponse(true, null, "Reaction added"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(apiResponse(false, null, e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/messages/{messageId}/reactions")
+    public ResponseEntity<?> removeReaction(@PathVariable Long messageId, @RequestParam String emoji) {
+        Long userId = getAuthenticatedUserId();
+        if (emoji == null || emoji.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(apiResponse(false, null, "Emoji required"));
+        }
+
+        try {
+            chatService.removeReaction(messageId, userId, emoji);
+            return ResponseEntity.ok(apiResponse(true, null, "Reaction removed"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(apiResponse(false, null, e.getMessage()));
+        }
     }
 
     // ==================== HELPER METHODS ====================

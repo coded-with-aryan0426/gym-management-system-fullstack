@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { toast } from 'react-hot-toast';
+import { showToast } from '../../utils/showToast';
 import type { KPIStats, Transaction, TransactionCategory } from '../../types/finance';
 import KPIStrip from './components/KPIStrip';
 import FinancialChart from './components/FinancialChart';
@@ -25,7 +25,7 @@ interface BackendTransaction {
 const Financials: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [transactions, setTransactions] = useState<Transaction[]>([]);
-    
+
     const [kpiStats, setKpiStats] = useState<KPIStats>({
         totalRevenue: 0,
         revenueChange: 0,
@@ -47,7 +47,7 @@ const Financials: React.FC = () => {
             setIsLoading(true);
             const response = await apiService.getDashboardTransactions();
             const data = response as BackendTransaction[];
-            
+
             const mapped: Transaction[] = data.map((t) => ({
                 id: t.transactionId,
                 invoiceId: `INV-${String(t.transactionId).padStart(4, '0')}`,
@@ -58,16 +58,16 @@ const Financials: React.FC = () => {
                 method: 'UPI' as const,
                 status: t.status === 'Completed' ? 'Completed' : 'Pending' as const
             }));
-            
+
             setTransactions(mapped);
-            
+
             const totalRevenue = mapped.filter(t => t.amount > 0).reduce((sum, t) => sum + t.amount, 0);
             const totalExpenses = Math.abs(mapped.filter(t => t.amount < 0).reduce((sum, t) => sum + t.amount, 0));
             const pendingTx = mapped.filter(t => t.status === 'Pending');
             const pendingPayments = pendingTx.reduce((sum, t) => sum + Math.abs(t.amount), 0);
             const netProfit = totalRevenue - totalExpenses;
             const profitMargin = totalRevenue > 0 ? Math.round((netProfit / totalRevenue) * 100) : 0;
-            
+
             setKpiStats({
                 totalRevenue,
                 revenueChange: 12.5,
@@ -81,7 +81,7 @@ const Financials: React.FC = () => {
             });
         } catch (error) {
             console.error('Failed to fetch transactions:', error);
-            toast.error('Failed to load financial data');
+            showToast('Failed to load financial data', 'error');
         } finally {
             setIsLoading(false);
         }
@@ -106,18 +106,18 @@ const Financials: React.FC = () => {
     };
 
     const chartData = {
-        day: Array.from({ length: 12 }, (_, i) => ({ 
-            name: `${i * 2}h`, 
+        day: Array.from({ length: 12 }, (_, i) => ({
+            name: `${i * 2}h`,
             revenue: Math.floor(Math.random() * 5000) + 1000,
             expenses: Math.floor(Math.random() * 2000) + 500
         })),
-        week: Array.from({ length: 7 }, (_, i) => ({ 
-            name: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][i], 
+        week: Array.from({ length: 7 }, (_, i) => ({
+            name: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][i],
             revenue: Math.floor(Math.random() * 20000) + 5000,
             expenses: Math.floor(Math.random() * 8000) + 2000
         })),
-        month: Array.from({ length: 4 }, (_, i) => ({ 
-            name: `Week ${i + 1}`, 
+        month: Array.from({ length: 4 }, (_, i) => ({
+            name: `Week ${i + 1}`,
             revenue: Math.floor(Math.random() * 80000) + 20000,
             expenses: Math.floor(Math.random() * 30000) + 10000
         }))
@@ -129,7 +129,7 @@ const Financials: React.FC = () => {
 
     const handleExport = () => {
         exportToCSV(transactions, `transactions_${new Date().toISOString().split('T')[0]}`);
-        toast.success('Report downloaded successfully');
+        showToast('Report downloaded successfully', 'success');
     };
 
     const handleAddTransaction = (newTx: any) => {
@@ -148,7 +148,7 @@ const Financials: React.FC = () => {
         };
 
         setTransactions(prev => [transaction, ...prev]);
-        toast.success(`${newTx.type} added successfully`);
+        showToast(`${newTx.type} added successfully`, 'success');
 
         if (isExpense) {
             setKpiStats(prev => ({
@@ -186,16 +186,16 @@ const Financials: React.FC = () => {
                 <div className="financials-actions">
                     <button className="btn btn--secondary" onClick={handleExport}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                            <polyline points="7 10 12 15 17 10"/>
-                            <line x1="12" y1="15" x2="12" y2="3"/>
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="7 10 12 15 17 10" />
+                            <line x1="12" y1="15" x2="12" y2="3" />
                         </svg>
                         Export
                     </button>
                     <button className="btn btn--primary" onClick={() => setIsModalOpen(true)}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <line x1="12" y1="5" x2="12" y2="19"/>
-                            <line x1="5" y1="12" x2="19" y2="12"/>
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
                         </svg>
                         Add Entry
                     </button>
@@ -260,10 +260,10 @@ const Financials: React.FC = () => {
                         transactions={filteredTransactions}
                         onAction={(action, tx) => {
                             if (action === 'mark-paid') {
-                                setTransactions(prev => 
+                                setTransactions(prev =>
                                     prev.map(t => t.id === tx.id ? { ...t, status: 'Completed' as const } : t)
                                 );
-                                toast.success(`${tx.invoiceId} marked as paid`);
+                                showToast(`${tx.invoiceId} marked as paid`, 'success');
                             }
                         }}
                     />

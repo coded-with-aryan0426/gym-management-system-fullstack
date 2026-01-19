@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useMultiRoleAuth, usePermissionBasedNavigation } from '../../contexts/MultiRoleAuthContext';
-import { 
-  Users, 
-  Calendar, 
-  DollarSign, 
-  TrendingUp, 
+import {
+  Users,
+  Calendar,
+  IndianRupee,
+  TrendingUp,
   Activity,
   UserCheck,
   CreditCard,
@@ -116,10 +116,10 @@ const MultiRoleDashboard: React.FC = () => {
       baseMetrics.push({
         id: 'monthly-revenue',
         title: 'Monthly Revenue',
-        value: '$48,650',
+        value: '₹48,650',
         change: '+15%',
         changeType: 'increase',
-        icon: <DollarSign size={20} />,
+        icon: <IndianRupee size={20} />,
         color: '#8b5cf6'
       });
     }
@@ -273,9 +273,9 @@ const MultiRoleDashboard: React.FC = () => {
           id: 'payment-received',
           type: 'payment',
           title: 'Payment Received',
-          description: '$150 from Emily Davis - Monthly membership',
+          description: '₹150 from Emily Davis - Monthly membership',
           time: '5 hours ago',
-          icon: <DollarSign size={16} />
+          icon: <IndianRupee size={16} />
         }
       );
     }
@@ -299,12 +299,12 @@ const MultiRoleDashboard: React.FC = () => {
 
   const getWelcomeMessage = () => {
     if (!user) return 'Welcome back!';
-    
+
     const hour = new Date().getHours();
     const timeOfDay = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
-    
+
     const roleMessage = user.primaryRole ? `, ${user.primaryRole.toLowerCase()}` : '';
-    
+
     return `${timeOfDay}, ${user.fullName}${roleMessage}!`;
   };
 
@@ -357,7 +357,7 @@ const MultiRoleDashboard: React.FC = () => {
   return (
     <div className="multi-role-dashboard">
       {/* Header */}
-      <motion.div 
+      <motion.div
         className="dashboard-header"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -366,7 +366,7 @@ const MultiRoleDashboard: React.FC = () => {
         <div className="dashboard-welcome">
           <h1>{getWelcomeMessage()}</h1>
           <p>
-            {user?.roles && user.roles.length > 1 
+            {user?.roles && user.roles.length > 1
               ? `You have access as: ${user.roles.join(', ')}`
               : `Managing your gym with ${user?.primaryRole || 'user'} privileges`
             }
@@ -395,7 +395,7 @@ const MultiRoleDashboard: React.FC = () => {
       </motion.div>
 
       {/* Metrics Grid */}
-      <motion.div 
+      <motion.div
         className="metrics-grid"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -433,7 +433,7 @@ const MultiRoleDashboard: React.FC = () => {
 
       {/* Quick Actions */}
       {quickActions.length > 0 && (
-        <motion.div 
+        <motion.div
           className="quick-actions-section"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -467,7 +467,7 @@ const MultiRoleDashboard: React.FC = () => {
 
       {/* Recent Activity */}
       {recentActivity.length > 0 && (
-        <motion.div 
+        <motion.div
           className="activity-section"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

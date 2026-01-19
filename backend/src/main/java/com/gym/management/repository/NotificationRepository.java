@@ -12,15 +12,21 @@ import java.util.List;
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
 
-    List<Notification> findByUserUserIdOrderByCreatedAtDesc(Long userId);
+    // Main feed: Not archived
+    List<Notification> findByUserUserIdAndIsArchivedFalseOrderByCreatedAtDesc(Long userId);
 
-    List<Notification> findByUserUserIdAndIsReadFalseOrderByCreatedAtDesc(Long userId);
+    // Starred feed
+    List<Notification> findByUserUserIdAndIsStarredTrueOrderByCreatedAtDesc(Long userId);
 
-    @Query("SELECT COUNT(n) FROM Notification n WHERE n.user.userId = :userId AND n.isRead = false")
+    // Archived feed
+    List<Notification> findByUserUserIdAndIsArchivedTrueOrderByCreatedAtDesc(Long userId);
+
+    // Unread count (excluding archived)
+    @Query("SELECT COUNT(n) FROM Notification n WHERE n.user.userId = :userId AND n.isRead = false AND n.isArchived = false")
     Long countUnreadByUserId(@Param("userId") Long userId);
 
     @org.springframework.transaction.annotation.Transactional
     @Modifying
-    @Query("UPDATE Notification n SET n.isRead = true WHERE n.user.userId = :userId")
+    @Query("UPDATE Notification n SET n.isRead = true WHERE n.user.userId = :userId AND n.isArchived = false")
     void markAllAsReadByUserId(@Param("userId") Long userId);
 }

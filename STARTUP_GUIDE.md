@@ -1,86 +1,66 @@
-# Gym Management System - Startup Guide
+# 🚀 Gym Management System - Startup Command Center
 
-## Quick Start (After System Shutdown)
+## ⚡️ Quick Start Sequence (Copy & Paste these blocks)
 
-Run these commands in order:
-
-### Step 1: Start Docker Engine (Colima)
+### 1. Start Database (Wait 30s)
 ```bash
 colima start
-```
-Wait for "done" message (~30 seconds).
-
----
-
-### Step 2: Start Oracle Database
-```bash
 docker start oracle-db
 ```
-Wait ~30 seconds for the database to initialize.
 
-**Verify database is ready (optional):**
-```bash
-docker logs oracle-db 2>&1 | grep "DATABASE IS READY"
-```
-
----
-
-### Step 3: Start Backend (Spring Boot)
+### 2. Start Backend (Runs on 8081)
 ```bash
 cd /Users/aryan/Intership/backend
 mvn spring-boot:run
 ```
-Wait for: `Started GymManagementApplication in X seconds`
 
-Backend runs on: **http://localhost:8081**
-_Note: Ensure JAVA_HOME is set to Java 17._
-
----
-
-### Step 4: Start Frontend (Vite/React)
+### 3. Start Frontend (Multi-Port Mode)
 ```bash
 cd /Users/aryan/Intership/frontend
-npm run dev
+npm run dev:all
 ```
-Frontend runs on: **http://localhost:5173**
+- **Owner**: http://localhost:5173
+- **Trainer**: http://localhost:5174
+- **Member**: http://localhost:5175
 
 ---
 
-## Shutdown Commands
+## 🔑 Login Credentials (Double-click to copy)
 
-| Service | Stop Command |
-|---------|--------------|
-| Frontend | `Ctrl+C` in terminal |
-| Backend | `Ctrl+C` in terminal |
-| Database | `docker stop oracle-db` |
-| Docker/Colima | `colima stop` |
+### 👑 Owner (Port 5173)
+```text
+aryansuthar5038@gmail.com
+Aryan@5038
+```
+
+### 🏋️ Trainer (Port 5174)
+```text
+darshon11@gmail.com
+Darshon@11
+```
+
+### 🧑 Member (Port 5175)
+```text
+rishi97@gmial.com
+rishi9700
+```
+
+### 🧪 Test Owner (Alternative)
+```text
+new.owner@gym.com
+password123
+```
 
 ---
 
-## Troubleshooting
-
-### Database won't start
+## 🛑 Emergency Stop & Fix Ports
+**If ports are blocked, run this to kill everything:**
 ```bash
-# Check if Colima is running
-colima status
-
-# If not running, start it
-colima start
+# Kill processes on 8081 (Backend) and 5173-5175 (Frontend)
+lsof -ti :8081,5173,5174,5175 | xargs kill -9
 ```
 
-### Backend shows "Connection refused"
-```bash
-# Wait for database to be ready
-docker logs oracle-db 2>&1 | tail -5
+## 📝 Shutdown
+- **Frontend/Backend**: `Ctrl+C` in their terminals
+- **Database/Colima**: `docker stop oracle-db && colima stop`
 
-# Should show: DATABASE IS READY TO USE!
-```
-
-### Port already in use (8080 or 5173)
-```bash
-# Find and kill process using port 8080
-lsof -i :8080 | grep LISTEN | awk '{print $2}' | xargs kill -9
-
-# Same for port 5173
-lsof -i :5173 | grep LISTEN | awk '{print $2}' | xargs kill -9
-```

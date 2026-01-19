@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { toast } from 'react-hot-toast';
+import { showToast } from '../../utils/showToast';
 import { Badge, getStatusVariant, Avatar } from '../../components/ui';
 import { CreateUserModal } from '../../components';
 import { ActionMenuButton } from '../../components/shared';
@@ -89,7 +89,7 @@ const Trainers: React.FC = () => {
       }
     } catch (err) {
       console.error('[Trainers] Failed to load trainers:', err);
-      toast.error('Failed to load trainers');
+      showToast('Failed to load trainers', 'error');
       setTrainers([]);
     } finally {
       setLoading(false);
@@ -141,7 +141,7 @@ const Trainers: React.FC = () => {
   const handleEditProfile = async (trainer: User) => {
     // Modal already called the API - just refresh the list
     // Do NOT close modal - let user close manually
-    toast.success(`Profile updated for ${trainer.fullName}`);
+    showToast(`Profile updated for ${trainer.fullName}`, 'success');
     loadTrainersPaginated();
   };
 
@@ -358,14 +358,14 @@ const Trainers: React.FC = () => {
           </div>
           <div className="batch-actions__buttons">
             <button className="batch-btn batch-btn--message" onClick={() => {
-              toast.success(`Messaging ${selectedTrainerIds.size} trainers`);
+              showToast(`Messaging ${selectedTrainerIds.size} trainers`, 'success');
               setSelectedTrainerIds(new Set());
             }}>
               <span className="batch-btn__icon">✉️</span>
               Message
             </button>
             <button className="batch-btn batch-btn--export" onClick={() => {
-              toast.success(`Exporting ${selectedTrainerIds.size} trainers`);
+              showToast(`Exporting ${selectedTrainerIds.size} trainers`, 'success');
               setSelectedTrainerIds(new Set());
             }}>
               <span className="batch-btn__icon">⬇️</span>
@@ -373,7 +373,7 @@ const Trainers: React.FC = () => {
             </button>
             <button className="batch-btn batch-btn--danger" onClick={() => {
               if (window.confirm(`Are you sure you want to delete ${selectedTrainerIds.size} trainers ? `)) {
-                toast.success(`Deleted ${selectedTrainerIds.size} trainers`);
+                showToast(`Deleted ${selectedTrainerIds.size} trainers`, 'success');
                 setSelectedTrainerIds(new Set());
               }
             }}>
@@ -472,7 +472,7 @@ const Trainers: React.FC = () => {
         }}
         onSuccess={() => {
           loadTrainersPaginated()
-          toast.success("Trainer added successfully")
+          showToast('Trainer added successfully', 'success')
         }}
       />
     </div>

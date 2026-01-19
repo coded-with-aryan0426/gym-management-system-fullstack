@@ -1,15 +1,18 @@
-import React, { useState, useMemo } from 'react';
-import { 
-    Bell, Calendar, User, CheckCircle, AlertCircle, Info, 
-    Trash2, Check, X, ChevronDown, Settings, MessageSquare,
-    Dumbbell, TrendingUp, Clock, Star, Award, Target,
-    AlertTriangle, DollarSign, Users, Zap, Heart, Filter,
-    ChevronRight, MoreVertical, BellOff, Volume2, Archive,
-    RefreshCw, ExternalLink, Eye, EyeOff, Search, Download
+import React, { useState, useMemo, useEffect } from 'react';
+import {
+    Bell, Calendar, User, CheckCircle, Info,
+    Trash2, X, ChevronDown, Settings, MessageSquare,
+    TrendingUp, Clock, Star, Award, Target,
+    AlertTriangle, DollarSign, Filter,
+    Archive,
+    Eye, Search
 } from 'lucide-react';
 import './TrainerNotifications.css';
+import { useAuth } from '../../contexts/AuthContext';
+import { notificationApi } from '../../api/notificationApi';
 
-type NotificationType = 'booking' | 'cancellation' | 'member' | 'progress' | 'payment' | 
+// UI Interfaces (mapped from API)
+type NotificationType = 'booking' | 'cancellation' | 'member' | 'progress' | 'payment' |
     'reminder' | 'system' | 'achievement' | 'request' | 'message' | 'schedule';
 
 type NotificationPriority = 'urgent' | 'high' | 'normal' | 'low';
@@ -54,246 +57,90 @@ interface NotificationGroup {
 }
 
 const TrainerNotifications: React.FC = () => {
+    const { user } = useAuth();
     const [filter, setFilter] = useState<'all' | 'unread' | 'starred' | 'archived'>('all');
     const [typeFilter, setTypeFilter] = useState<NotificationType | 'all'>('all');
     const [searchQuery, setSearchQuery] = useState('');
     const [showSettings, setShowSettings] = useState(false);
     const [selectedNotifications, setSelectedNotifications] = useState<number[]>([]);
-    const [showFilters, setShowFilters] = useState(false);
+    const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    const [notifications, setNotifications] = useState<Notification[]>([
-        {
-            id: 1,
-            type: 'booking',
-            priority: 'high',
-            title: 'New PT Session Booked',
-            message: 'Sarah Wilson booked a Personal Training session with you.',
-            time: '2 minutes ago',
-            timestamp: new Date(Date.now() - 2 * 60 * 1000),
-            read: false,
-            starred: false,
-            archived: false,
-            sender: {
-                name: 'Sarah Wilson',
-                avatar: 'https://ui-avatars.com/api/?name=Sarah+Wilson&background=DC2626&color=fff'
-            },
-            actions: [
-                { label: 'Confirm', type: 'primary', action: 'confirm' },
-                { label: 'Reschedule', type: 'secondary', action: 'reschedule' }
-            ],
-            meta: {
-                date: 'Tomorrow',
-                time: '9:00 AM - 10:00 AM',
-                location: 'Training Room A'
-            },
-            groupId: 'today'
-        },
-        {
-            id: 2,
-            type: 'cancellation',
-            priority: 'urgent',
-            title: 'Session Cancelled',
-            message: 'Mike Johnson has cancelled his PT session scheduled for today. Reason: Feeling unwell.',
-            time: '15 minutes ago',
-            timestamp: new Date(Date.now() - 15 * 60 * 1000),
-            read: false,
-            starred: false,
-            archived: false,
-            sender: {
-                name: 'Mike Johnson',
-                avatar: 'https://ui-avatars.com/api/?name=Mike+Johnson&background=3B82F6&color=fff'
-            },
-            actions: [
-                { label: 'Offer Reschedule', type: 'primary', action: 'reschedule' },
-                { label: 'Acknowledge', type: 'secondary', action: 'acknowledge' }
-            ],
-            meta: {
-                date: 'Today',
-                time: '2:00 PM - 3:00 PM'
-            },
-            groupId: 'today'
-        },
-        {
-            id: 3,
-            type: 'achievement',
-            priority: 'normal',
-            title: 'Member Achievement!',
-            message: 'Emma Davis has reached her weight loss goal of losing 10kg! Consider updating her program.',
-            time: '1 hour ago',
-            timestamp: new Date(Date.now() - 60 * 60 * 1000),
-            read: false,
-            starred: true,
-            archived: false,
-            sender: {
-                name: 'Emma Davis',
-                avatar: 'https://ui-avatars.com/api/?name=Emma+Davis&background=10B981&color=fff'
-            },
-            actions: [
-                { label: 'Send Congrats', type: 'primary', action: 'message' },
-                { label: 'Update Program', type: 'secondary', action: 'program' }
-            ],
-            meta: {
-                goal: '-10kg achieved'
-            },
-            groupId: 'today'
-        },
-        {
-            id: 4,
-            type: 'request',
-            priority: 'high',
-            title: 'Program Update Request',
-            message: 'James Wilson is requesting a new workout program focused on muscle building.',
-            time: '2 hours ago',
-            timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
-            read: false,
-            starred: false,
-            archived: false,
-            sender: {
-                name: 'James Wilson',
-                avatar: 'https://ui-avatars.com/api/?name=James+Wilson&background=F59E0B&color=fff'
-            },
-            actions: [
-                { label: 'Create Program', type: 'primary', action: 'create' },
-                { label: 'Message', type: 'secondary', action: 'message' }
-            ],
-            groupId: 'today'
-        },
-        {
-            id: 5,
-            type: 'reminder',
-            priority: 'normal',
-            title: 'Upcoming Session',
-            message: 'Reminder: You have a PT session with David Lee in 30 minutes.',
-            time: '30 minutes ago',
-            timestamp: new Date(Date.now() - 30 * 60 * 1000),
-            read: true,
-            starred: false,
-            archived: false,
-            sender: {
-                name: 'David Lee',
-                avatar: 'https://ui-avatars.com/api/?name=David+Lee&background=8B5CF6&color=fff'
-            },
-            meta: {
-                date: 'Today',
-                time: '3:00 PM - 4:00 PM',
-                location: 'Main Gym Floor'
-            },
-            link: '/trainer/schedule',
-            groupId: 'today'
-        },
-        {
-            id: 6,
-            type: 'progress',
-            priority: 'normal',
-            title: 'Progress Check Due',
-            message: 'Lisa Chen is due for her monthly progress assessment. Last check was 30 days ago.',
-            time: '3 hours ago',
-            timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000),
-            read: true,
-            starred: false,
-            archived: false,
-            sender: {
-                name: 'Lisa Chen',
-                avatar: 'https://ui-avatars.com/api/?name=Lisa+Chen&background=EC4899&color=fff'
-            },
-            actions: [
-                { label: 'Schedule Check', type: 'primary', action: 'schedule' },
-                { label: 'View History', type: 'secondary', action: 'history' }
-            ],
-            groupId: 'today'
-        },
-        {
-            id: 7,
-            type: 'message',
-            priority: 'normal',
-            title: 'New Message',
-            message: '"Hey coach, can we discuss my diet plan after tomorrow\'s session?"',
-            time: '5 hours ago',
-            timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000),
-            read: true,
-            starred: false,
-            archived: false,
-            sender: {
-                name: 'Sarah Wilson',
-                avatar: 'https://ui-avatars.com/api/?name=Sarah+Wilson&background=DC2626&color=fff'
-            },
-            actions: [
-                { label: 'Reply', type: 'primary', action: 'reply' }
-            ],
-            link: '/trainer/messages',
-            groupId: 'today'
-        },
-        {
-            id: 8,
-            type: 'schedule',
-            priority: 'low',
-            title: 'Schedule Updated',
-            message: 'Your weekly schedule has been updated by the admin. You have 2 new class assignments.',
-            time: 'Yesterday',
-            timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000),
-            read: true,
-            starred: false,
-            archived: false,
-            actions: [
-                { label: 'View Schedule', type: 'primary', action: 'view' }
-            ],
-            link: '/trainer/schedule',
-            groupId: 'yesterday'
-        },
-        {
-            id: 9,
-            type: 'member',
-            priority: 'normal',
-            title: 'New Member Assigned',
-            message: 'Tom Richards has been assigned to you. He\'s a beginner looking to improve overall fitness.',
-            time: 'Yesterday',
-            timestamp: new Date(Date.now() - 26 * 60 * 60 * 1000),
-            read: true,
-            starred: false,
-            archived: false,
-            sender: {
-                name: 'Tom Richards',
-                avatar: 'https://ui-avatars.com/api/?name=Tom+Richards&background=6366F1&color=fff'
-            },
-            actions: [
-                { label: 'View Profile', type: 'primary', action: 'profile' },
-                { label: 'Send Welcome', type: 'secondary', action: 'welcome' }
-            ],
-            groupId: 'yesterday'
-        },
-        {
-            id: 10,
-            type: 'payment',
-            priority: 'normal',
-            title: 'Commission Credited',
-            message: 'Your commission of $450 for March PT sessions has been credited to your account.',
-            time: '2 days ago',
-            timestamp: new Date(Date.now() - 48 * 60 * 60 * 1000),
-            read: true,
-            starred: true,
-            archived: false,
-            meta: {
-                amount: '$450.00'
-            },
-            actions: [
-                { label: 'View Details', type: 'secondary', action: 'details' }
-            ],
-            groupId: 'earlier'
-        },
-        {
-            id: 11,
-            type: 'system',
-            priority: 'low',
-            title: 'App Update Available',
-            message: 'A new version of the trainer app is available with improved scheduling features.',
-            time: '3 days ago',
-            timestamp: new Date(Date.now() - 72 * 60 * 60 * 1000),
-            read: true,
-            starred: false,
-            archived: false,
-            groupId: 'earlier'
-        }
-    ]);
+    // Fetch notifications
+    useEffect(() => {
+        if (!user?.userId) return;
+
+        const fetchNotifications = async () => {
+            setLoading(true);
+            try {
+                // Determine API filter based on UI filter
+                let apiFilter: 'all' | 'unread' | 'starred' | 'archived' = 'all';
+                if (filter === 'starred') apiFilter = 'starred';
+                if (filter === 'archived') apiFilter = 'archived';
+
+                const data = await notificationApi.getUserNotifications(Number(user.userId), apiFilter);
+
+                // Transform API data to UI model
+                const mapped: Notification[] = data.map(n => {
+                    let meta = {};
+                    let actions: NotificationAction[] = [];
+                    try {
+                        if (n.metaData) meta = JSON.parse(n.metaData);
+                        if (n.actionData) actions = JSON.parse(n.actionData);
+                    } catch (e) {
+                        console.error("Error parsing JSON", e);
+                    }
+
+                    // Calculate relative time
+                    const date = new Date(n.createdAt);
+                    const diff = Date.now() - date.getTime();
+                    let timeString = '';
+                    const minutes = Math.floor(diff / 60000);
+                    const hours = Math.floor(diff / 3600000);
+                    const days = Math.floor(diff / 86400000);
+
+                    if (minutes < 60) timeString = `${minutes} minutes ago`;
+                    else if (hours < 24) timeString = `${hours} hours ago`;
+                    else if (days < 2) timeString = 'Yesterday';
+                    else timeString = `${days} days ago`;
+
+                    // Determine Group ID
+                    let groupId = 'earlier';
+                    if (days === 0) groupId = 'today';
+                    else if (days === 1) groupId = 'yesterday';
+
+                    return {
+                        id: n.id,
+                        type: (n.type as NotificationType) || 'system',
+                        priority: (n.priority as NotificationPriority) || 'normal',
+                        title: n.title,
+                        message: n.message,
+                        time: timeString,
+                        timestamp: date,
+                        read: n.isRead,
+                        starred: n.isStarred,
+                        archived: n.isArchived,
+                        sender: n.senderId ? {
+                            name: `User ${n.senderId}`, // Placeholder until we have user lookup
+                            avatar: `https://ui-avatars.com/api/?name=User+${n.senderId}&background=random`
+                        } : undefined,
+                        actions: actions,
+                        meta: meta,
+                        link: n.link,
+                        groupId: groupId
+                    };
+                });
+
+                setNotifications(mapped);
+            } catch (error) {
+                console.error("Failed to fetch notifications", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchNotifications();
+    }, [user?.userId, filter]); // Refetch when main filter category changes
 
     const [notificationSettings, setNotificationSettings] = useState({
         bookings: true,
@@ -349,15 +196,15 @@ const TrainerNotifications: React.FC = () => {
     const filteredNotifications = useMemo(() => {
         return notifications.filter(n => {
             if (filter === 'unread' && n.read) return false;
-            if (filter === 'starred' && !n.starred) return false;
-            if (filter === 'archived' && !n.archived) return false;
-            if (filter !== 'archived' && n.archived) return false;
+            // API handles starred/archived fetching, but we might double check or handle 'all' view filtering
+            if (filter === 'all' && n.archived) return false; // Hide archived in All view
+
             if (typeFilter !== 'all' && n.type !== typeFilter) return false;
             if (searchQuery) {
                 const query = searchQuery.toLowerCase();
-                return n.title.toLowerCase().includes(query) || 
-                       n.message.toLowerCase().includes(query) ||
-                       n.sender?.name.toLowerCase().includes(query);
+                return n.title.toLowerCase().includes(query) ||
+                    n.message.toLowerCase().includes(query) ||
+                    n.sender?.name.toLowerCase().includes(query);
             }
             return true;
         });
@@ -374,6 +221,8 @@ const TrainerNotifications: React.FC = () => {
             const group = groups.find(g => g.id === n.groupId);
             if (group) {
                 group.notifications.push(n);
+            } else {
+                groups[2].notifications.push(n); // Default to earlier
             }
         });
 
@@ -387,54 +236,105 @@ const TrainerNotifications: React.FC = () => {
         starred: notifications.filter(n => n.starred && !n.archived).length
     }), [notifications]);
 
-    const markAllRead = () => {
-        setNotifications(notifications.map(n => ({ ...n, read: true })));
+    const markAllRead = async () => {
+        if (!user?.userId) return;
+        try {
+            await notificationApi.markAllAsRead(Number(user.userId));
+            setNotifications(notifications.map(n => ({ ...n, read: true })));
+        } catch (error) {
+            console.error("Failed to mark all read", error);
+        }
     };
 
-    const markAsRead = (id: number) => {
-        setNotifications(notifications.map(n => n.id === id ? { ...n, read: true } : n));
+    const markAsRead = async (id: number) => {
+        try {
+            await notificationApi.markAsRead(id);
+            setNotifications(notifications.map(n => n.id === id ? { ...n, read: true } : n));
+        } catch (error) {
+            console.error("Failed to mark read", error);
+        }
     };
 
-    const toggleStar = (id: number) => {
-        setNotifications(notifications.map(n => n.id === id ? { ...n, starred: !n.starred } : n));
+    const toggleStar = async (id: number) => {
+        try {
+            await notificationApi.toggleStar(id);
+            setNotifications(notifications.map(n => n.id === id ? { ...n, starred: !n.starred } : n));
+        } catch (error) {
+            console.error("Failed to toggle star", error);
+        }
     };
 
-    const archiveNotification = (id: number) => {
-        setNotifications(notifications.map(n => n.id === id ? { ...n, archived: true, read: true } : n));
+    const archiveNotification = async (id: number) => {
+        try {
+            await notificationApi.archive(id);
+            if (filter !== 'archived') {
+                setNotifications(notifications.filter(n => n.id !== id));
+            } else {
+                setNotifications(notifications.map(n => n.id === id ? { ...n, archived: true, read: true } : n));
+            }
+        } catch (error) {
+            console.error("Failed to archive", error);
+        }
     };
 
-    const deleteNotification = (id: number) => {
-        setNotifications(notifications.filter(n => n.id !== id));
+    const deleteNotification = async (id: number) => {
+        try {
+            await notificationApi.delete(id);
+            setNotifications(notifications.filter(n => n.id !== id));
+        } catch (error) {
+            console.error("Failed to delete", error);
+        }
     };
 
     const handleAction = (notifId: number, action: string) => {
         console.log(`Action: ${action} for notification ${notifId}`);
+        // Here we would implement specific action logic (e.g. navigation, modal opening)
+        // For now, we assume actions imply handling, so we mark as read
         markAsRead(notifId);
     };
 
     const toggleSelectNotification = (id: number) => {
-        setSelectedNotifications(prev => 
+        setSelectedNotifications(prev =>
             prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
         );
     };
 
-    const bulkMarkRead = () => {
-        setNotifications(notifications.map(n => 
-            selectedNotifications.includes(n.id) ? { ...n, read: true } : n
-        ));
-        setSelectedNotifications([]);
+    const bulkMarkRead = async () => {
+        try {
+            await notificationApi.bulkAction('read', selectedNotifications);
+            setNotifications(notifications.map(n =>
+                selectedNotifications.includes(n.id) ? { ...n, read: true } : n
+            ));
+            setSelectedNotifications([]);
+        } catch (error) {
+            console.error("Failed bulk read", error);
+        }
     };
 
-    const bulkArchive = () => {
-        setNotifications(notifications.map(n => 
-            selectedNotifications.includes(n.id) ? { ...n, archived: true, read: true } : n
-        ));
-        setSelectedNotifications([]);
+    const bulkArchive = async () => {
+        try {
+            await notificationApi.bulkAction('archive', selectedNotifications);
+            if (filter !== 'archived') {
+                setNotifications(notifications.filter(n => !selectedNotifications.includes(n.id)));
+            } else {
+                setNotifications(notifications.map(n =>
+                    selectedNotifications.includes(n.id) ? { ...n, archived: true, read: true } : n
+                ));
+            }
+            setSelectedNotifications([]);
+        } catch (error) {
+            console.error("Failed bulk archive", error);
+        }
     };
 
-    const bulkDelete = () => {
-        setNotifications(notifications.filter(n => !selectedNotifications.includes(n.id)));
-        setSelectedNotifications([]);
+    const bulkDelete = async () => {
+        try {
+            await notificationApi.bulkAction('delete', selectedNotifications);
+            setNotifications(notifications.filter(n => !selectedNotifications.includes(n.id)));
+            setSelectedNotifications([]);
+        } catch (error) {
+            console.error("Failed bulk delete", error);
+        }
     };
 
     const notificationTypes: { value: NotificationType | 'all'; label: string }[] = [
@@ -482,7 +382,7 @@ const TrainerNotifications: React.FC = () => {
                     </div>
 
                     <div className="trainer-notif__header-actions">
-                        <button 
+                        <button
                             className="trainer-notif__settings-btn"
                             onClick={() => setShowSettings(!showSettings)}
                             title="Notification Settings"
@@ -507,26 +407,26 @@ const TrainerNotifications: React.FC = () => {
                         </div>
 
                         <div className="trainer-notif__filter-toggle">
-                            <button 
+                            <button
                                 className={filter === 'all' ? 'active' : ''}
                                 onClick={() => setFilter('all')}
                             >
                                 All
                             </button>
-                            <button 
+                            <button
                                 className={filter === 'unread' ? 'active' : ''}
                                 onClick={() => setFilter('unread')}
                             >
                                 Unread
                                 {stats.unread > 0 && <span>{stats.unread}</span>}
                             </button>
-                            <button 
+                            <button
                                 className={filter === 'starred' ? 'active' : ''}
                                 onClick={() => setFilter('starred')}
                             >
                                 <Star size={12} />
                             </button>
-                            <button 
+                            <button
                                 className={filter === 'archived' ? 'active' : ''}
                                 onClick={() => setFilter('archived')}
                             >
@@ -536,8 +436,8 @@ const TrainerNotifications: React.FC = () => {
 
                         <div className="trainer-notif__type-filter">
                             <Filter size={12} />
-                            <select 
-                                value={typeFilter} 
+                            <select
+                                value={typeFilter}
                                 onChange={(e) => setTypeFilter(e.target.value as NotificationType | 'all')}
                             >
                                 {notificationTypes.map(t => (
@@ -566,7 +466,7 @@ const TrainerNotifications: React.FC = () => {
                                 </button>
                             </div>
                         ) : (
-                            <button 
+                            <button
                                 className="trainer-notif__mark-all"
                                 onClick={markAllRead}
                                 disabled={stats.unread === 0}
@@ -579,15 +479,19 @@ const TrainerNotifications: React.FC = () => {
                 </div>
 
                 <div className="trainer-notif__list">
-                    {groupedNotifications.length === 0 ? (
+                    {loading ? (
+                        <div className="trainer-notif__empty">
+                            <p>Loading notifications...</p>
+                        </div>
+                    ) : groupedNotifications.length === 0 ? (
                         <div className="trainer-notif__empty">
                             <Bell size={48} />
                             <p>No notifications</p>
                             <span>
                                 {filter === 'unread' ? 'You\'re all caught up!' :
-                                 filter === 'starred' ? 'No starred notifications' :
-                                 filter === 'archived' ? 'No archived notifications' :
-                                 'No notifications to show'}
+                                    filter === 'starred' ? 'No starred notifications' :
+                                        filter === 'archived' ? 'No archived notifications' :
+                                            'No notifications to show'}
                             </span>
                         </div>
                     ) : (
@@ -595,8 +499,8 @@ const TrainerNotifications: React.FC = () => {
                             <div key={group.id} className="trainer-notif__group">
                                 <h3 className="trainer-notif__group-label">{group.label}</h3>
                                 {group.notifications.map(notif => (
-                                    <div 
-                                        key={notif.id} 
+                                    <div
+                                        key={notif.id}
                                         className={`trainer-notif__item ${!notif.read ? 'trainer-notif__item--unread' : ''} ${notif.starred ? 'trainer-notif__item--starred' : ''} ${selectedNotifications.includes(notif.id) ? 'trainer-notif__item--selected' : ''} ${getPriorityClass(notif.priority)}`}
                                     >
                                         <div className="trainer-notif__checkbox">
@@ -636,7 +540,7 @@ const TrainerNotifications: React.FC = () => {
                                                 <span className="trainer-notif__time">{notif.time}</span>
                                             </div>
                                             <p className="trainer-notif__message">{notif.message}</p>
-                                            
+
                                             {notif.meta && (
                                                 <div className="trainer-notif__meta">
                                                     {notif.meta.date && (
@@ -664,7 +568,7 @@ const TrainerNotifications: React.FC = () => {
                                             {notif.actions && notif.actions.length > 0 && (
                                                 <div className="trainer-notif__actions">
                                                     {notif.actions.map((action, i) => (
-                                                        <button 
+                                                        <button
                                                             key={i}
                                                             className={`trainer-notif__action-btn trainer-notif__action-btn--${action.type}`}
                                                             onClick={(e) => {
@@ -680,7 +584,7 @@ const TrainerNotifications: React.FC = () => {
                                         </div>
 
                                         <div className="trainer-notif__item-actions">
-                                            <button 
+                                            <button
                                                 className={`trainer-notif__star-btn ${notif.starred ? 'active' : ''}`}
                                                 onClick={() => toggleStar(notif.id)}
                                                 title={notif.starred ? 'Unstar' : 'Star'}
@@ -688,7 +592,7 @@ const TrainerNotifications: React.FC = () => {
                                                 <Star size={14} fill={notif.starred ? 'currentColor' : 'none'} />
                                             </button>
                                             {!notif.read && (
-                                                <button 
+                                                <button
                                                     className="trainer-notif__btn"
                                                     onClick={() => markAsRead(notif.id)}
                                                     title="Mark as read"
@@ -696,14 +600,14 @@ const TrainerNotifications: React.FC = () => {
                                                     <Eye size={14} />
                                                 </button>
                                             )}
-                                            <button 
+                                            <button
                                                 className="trainer-notif__btn"
                                                 onClick={() => archiveNotification(notif.id)}
                                                 title="Archive"
                                             >
                                                 <Archive size={14} />
                                             </button>
-                                            <button 
+                                            <button
                                                 className="trainer-notif__btn trainer-notif__btn--danger"
                                                 onClick={() => deleteNotification(notif.id)}
                                                 title="Delete"
@@ -744,8 +648,8 @@ const TrainerNotifications: React.FC = () => {
                                             <Calendar size={16} />
                                             <span>Session Bookings</span>
                                         </div>
-                                        <input 
-                                            type="checkbox" 
+                                        <input
+                                            type="checkbox"
                                             checked={notificationSettings.bookings}
                                             onChange={(e) => setNotificationSettings(prev => ({ ...prev, bookings: e.target.checked }))}
                                         />
@@ -755,8 +659,8 @@ const TrainerNotifications: React.FC = () => {
                                             <X size={16} />
                                             <span>Cancellations</span>
                                         </div>
-                                        <input 
-                                            type="checkbox" 
+                                        <input
+                                            type="checkbox"
                                             checked={notificationSettings.cancellations}
                                             onChange={(e) => setNotificationSettings(prev => ({ ...prev, cancellations: e.target.checked }))}
                                         />
@@ -766,8 +670,8 @@ const TrainerNotifications: React.FC = () => {
                                             <MessageSquare size={16} />
                                             <span>Messages</span>
                                         </div>
-                                        <input 
-                                            type="checkbox" 
+                                        <input
+                                            type="checkbox"
                                             checked={notificationSettings.messages}
                                             onChange={(e) => setNotificationSettings(prev => ({ ...prev, messages: e.target.checked }))}
                                         />
@@ -777,8 +681,8 @@ const TrainerNotifications: React.FC = () => {
                                             <Award size={16} />
                                             <span>Member Achievements</span>
                                         </div>
-                                        <input 
-                                            type="checkbox" 
+                                        <input
+                                            type="checkbox"
                                             checked={notificationSettings.achievements}
                                             onChange={(e) => setNotificationSettings(prev => ({ ...prev, achievements: e.target.checked }))}
                                         />
@@ -788,8 +692,8 @@ const TrainerNotifications: React.FC = () => {
                                             <Clock size={16} />
                                             <span>Reminders</span>
                                         </div>
-                                        <input 
-                                            type="checkbox" 
+                                        <input
+                                            type="checkbox"
                                             checked={notificationSettings.reminders}
                                             onChange={(e) => setNotificationSettings(prev => ({ ...prev, reminders: e.target.checked }))}
                                         />
@@ -799,8 +703,8 @@ const TrainerNotifications: React.FC = () => {
                                             <DollarSign size={16} />
                                             <span>Payments & Commission</span>
                                         </div>
-                                        <input 
-                                            type="checkbox" 
+                                        <input
+                                            type="checkbox"
                                             checked={notificationSettings.payments}
                                             onChange={(e) => setNotificationSettings(prev => ({ ...prev, payments: e.target.checked }))}
                                         />
@@ -810,61 +714,18 @@ const TrainerNotifications: React.FC = () => {
                                             <Info size={16} />
                                             <span>System Updates</span>
                                         </div>
-                                        <input 
-                                            type="checkbox" 
+                                        <input
+                                            type="checkbox"
                                             checked={notificationSettings.system}
                                             onChange={(e) => setNotificationSettings(prev => ({ ...prev, system: e.target.checked }))}
                                         />
                                     </label>
                                 </div>
                             </div>
-
-                            <div className="trainer-notif__settings-section">
-                                <h3>Delivery Methods</h3>
-                                <p>How would you like to receive notifications</p>
-                                <div className="trainer-notif__settings-list">
-                                    <label className="trainer-notif__setting-item">
-                                        <div className="trainer-notif__setting-info">
-                                            <Volume2 size={16} />
-                                            <span>Sound</span>
-                                        </div>
-                                        <input 
-                                            type="checkbox" 
-                                            checked={notificationSettings.sound}
-                                            onChange={(e) => setNotificationSettings(prev => ({ ...prev, sound: e.target.checked }))}
-                                        />
-                                    </label>
-                                    <label className="trainer-notif__setting-item">
-                                        <div className="trainer-notif__setting-info">
-                                            <Bell size={16} />
-                                            <span>Push Notifications</span>
-                                        </div>
-                                        <input 
-                                            type="checkbox" 
-                                            checked={notificationSettings.push}
-                                            onChange={(e) => setNotificationSettings(prev => ({ ...prev, push: e.target.checked }))}
-                                        />
-                                    </label>
-                                    <label className="trainer-notif__setting-item">
-                                        <div className="trainer-notif__setting-info">
-                                            <MessageSquare size={16} />
-                                            <span>Email Notifications</span>
-                                        </div>
-                                        <input 
-                                            type="checkbox" 
-                                            checked={notificationSettings.email}
-                                            onChange={(e) => setNotificationSettings(prev => ({ ...prev, email: e.target.checked }))}
-                                        />
-                                    </label>
-                                </div>
-                            </div>
                         </div>
                         <div className="trainer-notif__settings-footer">
-                            <button className="trainer-notif__settings-cancel" onClick={() => setShowSettings(false)}>
-                                Cancel
-                            </button>
-                            <button className="trainer-notif__settings-save" onClick={() => setShowSettings(false)}>
-                                Save Settings
+                            <button className="trainer-notif__save-btn" onClick={() => setShowSettings(false)}>
+                                Save Changes
                             </button>
                         </div>
                     </div>

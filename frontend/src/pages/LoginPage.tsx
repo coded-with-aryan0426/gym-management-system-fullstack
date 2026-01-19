@@ -6,6 +6,13 @@ import { Logo } from '../components/ui/Logo';
 import api from '../services/api'; // Use api wrapper
 import OtpInput from '../components/auth/OtpInput';
 import SocialLoginButtons from '../components/auth/SocialLoginButtons';
+import { useAuth } from '../contexts/AuthContext';
+
+// Port-scoped storage to match AuthContext
+const getStorageKey = (key: string): string => {
+    const port = typeof window !== 'undefined' ? window.location.port || '5173' : '5173';
+    return `${key}_port_${port}`;
+};
 
 const colors = {
     bgPrimary: "#0D0D0D",
@@ -30,6 +37,7 @@ interface GymAssociation {
 
 export default function LoginPage() {
     const navigate = useNavigate();
+    const { login: authLogin } = useAuth();
     const [searchParams] = useSearchParams();
 
     // Steps: 'CREDENTIALS' | 'OTP'
@@ -98,13 +106,16 @@ export default function LoginPage() {
             });
 
             if (response.otpSent) {
-                // Use the email returned from backend for verification (handles phone login case)
+                // First-time user: OTP required
                 setVerificationEmail(response.email || email);
                 setStep('OTP');
                 setSuccessMessage("Verification code sent to your email");
-            } else {
-                // Fallback for unexpected response (legacy flow?)
+            } else if (response.token) {
+                // Returning user: token issued directly (no OTP needed)
                 handleAuthSuccess(response);
+            } else {
+                // Unexpected response
+                setError("Invalid server response");
             }
         } catch (err: any) {
             console.error("Login Check Error:", err);
@@ -158,9 +169,21 @@ export default function LoginPage() {
         }
 
         setLoginResponse(data);
-        localStorage.setItem('user', JSON.stringify(data));
+
+        // CRITICAL: Call AuthContext login to update React state (not just localStorage)
+        // This ensures ProtectedRoute reads the correct user data
         if (data.token) {
-            localStorage.setItem('token', data.token);
+            authLogin(data.token, {
+                id: data.id || data.userId,
+                username: data.username,
+                email: data.email,
+                fullName: data.fullName,
+                role: data.staffRole || data.role || 'CUSTOMER',
+                staffRole: data.staffRole,
+                token: data.token,
+                activeGymId: data.activeGymId,
+                activeGymName: data.activeGymName
+            });
         }
 
         // Gym selection logic
@@ -193,11 +216,11 @@ export default function LoginPage() {
             });
 
             if (response.token) {
-                localStorage.setItem('user', JSON.stringify({
+                localStorage.setItem(getStorageKey('user'), JSON.stringify({
                     ...loginResponse,
                     ...response
                 }));
-                localStorage.setItem('token', response.token);
+                localStorage.setItem(getStorageKey('token'), response.token);
                 navigate('/dashboard');
             }
         } catch (err) {
@@ -212,8 +235,8 @@ export default function LoginPage() {
                 gymName,
                 staffRole: 'OWNER'
             };
-            localStorage.setItem('user', JSON.stringify(userData));
-            localStorage.setItem('token', newUserData.token);
+            localStorage.setItem(getStorageKey('user'), JSON.stringify(userData));
+            localStorage.setItem(getStorageKey('token'), newUserData.token);
         }
         setShowGymNameModal(false);
         navigate('/dashboard');
@@ -528,7 +551,7 @@ export default function LoginPage() {
                     onClose={() => {
                         setShowGymNameModal(false);
                         // Even without gym, allow them to proceed
-                        localStorage.setItem('token', newUserData.token);
+                        localStorage.setItem(getStorageKey('token'), newUserData.token);
                         navigate('/dashboard');
                     }}
                 />

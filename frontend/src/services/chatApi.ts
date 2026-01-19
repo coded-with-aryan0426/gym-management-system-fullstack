@@ -21,6 +21,7 @@ export interface ChatUser {
 export interface Participant {
     userId: number;
     fullName: string;
+    username?: string;
     avatarId?: string;
     role?: string;
 }
@@ -35,6 +36,14 @@ export interface Conversation {
     unreadCount?: number;
 }
 
+export interface MessageReaction {
+    reactionId: number;
+    userId: number;
+    userFullName: string;
+    emoji: string;
+    createdAt: string;
+}
+
 export interface ChatMessage {
     messageId: number;
     conversationId: number;
@@ -46,6 +55,8 @@ export interface ChatMessage {
     payload?: string;
     createdAt: string;
     isSystemMessage?: boolean;
+    isEdited?: boolean;
+    reactions?: MessageReaction[];
 }
 
 export interface BlockedUser {
@@ -67,8 +78,17 @@ export interface ApiResponse<T> {
 
 // ==================== HELPER ====================
 
+/**
+ * Generate a storage key scoped to the current port.
+ * Ensures session isolation when running multiple frontend instances.
+ */
+const getStorageKey = (key: string): string => {
+    const port = typeof window !== 'undefined' ? window.location.port || '5173' : '5173';
+    return `${key}_port_${port}`;
+};
+
 const getAuthHeaders = (): HeadersInit => {
-    const userStr = localStorage.getItem('user');
+    const userStr = localStorage.getItem(getStorageKey('user'));
     if (!userStr) return {};
 
     try {
@@ -194,6 +214,48 @@ export const checkBlocked = async (userId: number): Promise<BlockStatus> => {
     return handleResponse<BlockStatus>(response);
 };
 
+// ==================== MESSAGE ACTIONS APIs ====================
+
+export const editMessage = async (messageId: number, content: string): Promise<void> => {
+    const response = await fetch(
+        `${API_BASE}/messages/${messageId}`,
+        {
+            method: 'PUT',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ content })
+        }
+    );
+    await handleResponse<null>(response);
+};
+
+export const deleteMessage = async (messageId: number): Promise<void> => {
+    const response = await fetch(
+        `${API_BASE}/messages/${messageId}`,
+        { method: 'DELETE', headers: getAuthHeaders() }
+    );
+    await handleResponse<null>(response);
+};
+
+export const addReaction = async (messageId: number, emoji: string): Promise<void> => {
+    const response = await fetch(
+        `${API_BASE}/messages/${messageId}/reactions`,
+        {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ emoji })
+        }
+    );
+    await handleResponse<null>(response);
+};
+
+export const removeReaction = async (messageId: number, emoji: string): Promise<void> => {
+    const response = await fetch(
+        `${API_BASE}/messages/${messageId}/reactions?emoji=${encodeURIComponent(emoji)}`,
+        { method: 'DELETE', headers: getAuthHeaders() }
+    );
+    await handleResponse<null>(response);
+};
+
 // ==================== EXPORT ALL ====================
 
 export const chatApi = {
@@ -210,6 +272,12 @@ export const chatApi = {
     unblockUser,
     getBlockedUsers,
     checkBlocked,
+
+    // Message Actions
+    editMessage,
+    deleteMessage,
+    addReaction,
+    removeReaction,
 };
 
 export default chatApi;

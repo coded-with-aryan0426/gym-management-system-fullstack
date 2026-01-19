@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Configuration for rate limiting using Bucket4j with Caffeine cache.
  * Provides separate rate limit buckets for login attempts and general API
- * calls.
+ * calls. Optimized for 1000+ concurrent users.
  */
 @Configuration
 public class RateLimitConfig {
@@ -20,7 +20,7 @@ public class RateLimitConfig {
     /**
      * Cache for login attempt rate limiting.
      * Key: IP address, Value: Bucket
-     * Limit: 5 login attempts per minute per IP
+     * Limit: 30 login attempts per minute per IP (increased for concurrent testing)
      */
     @Bean
     public Cache<String, Bucket> loginRateLimitCache() {
@@ -33,7 +33,7 @@ public class RateLimitConfig {
     /**
      * Cache for general API rate limiting.
      * Key: User ID or IP, Value: Bucket
-     * Limit: 100 API calls per minute per user/IP
+     * Limit: 500 API calls per minute per user/IP (production capacity)
      */
     @Bean
     public Cache<String, Bucket> apiRateLimitCache() {
@@ -45,34 +45,34 @@ public class RateLimitConfig {
 
     /**
      * Creates a login rate limit bucket.
-     * 5 attempts per minute with gradual refill.
+     * 30 attempts per minute with gradual refill (increased for concurrent logins).
      */
 
     public static Bucket createLoginBucket() {
         return Bucket.builder()
-                .addLimit(limit -> limit.capacity(5).refillGreedy(5, Duration.ofMinutes(1)))
+                .addLimit(limit -> limit.capacity(30).refillGreedy(30, Duration.ofMinutes(1)))
                 .build();
     }
 
     /**
      * Creates a general API rate limit bucket.
-     * 100 requests per minute with gradual refill.
+     * 500 requests per minute with gradual refill (production capacity).
      */
 
     public static Bucket createApiBucket() {
         return Bucket.builder()
-                .addLimit(limit -> limit.capacity(100).refillGreedy(100, Duration.ofMinutes(1)))
+                .addLimit(limit -> limit.capacity(500).refillGreedy(500, Duration.ofMinutes(1)))
                 .build();
     }
 
     /**
      * Creates a strict bucket for sensitive operations (password reset, etc).
-     * 3 attempts per 10 minutes.
+     * 10 attempts per 10 minutes (increased for usability).
      */
 
     public static Bucket createStrictBucket() {
         return Bucket.builder()
-                .addLimit(limit -> limit.capacity(3).refillGreedy(3, Duration.ofMinutes(10)))
+                .addLimit(limit -> limit.capacity(10).refillGreedy(10, Duration.ofMinutes(10)))
                 .build();
     }
 }

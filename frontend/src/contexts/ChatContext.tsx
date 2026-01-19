@@ -17,10 +17,12 @@ interface ChatContextType {
     loading: boolean;
     blockedUsers: BlockedUser[];
     availableUsers: ChatUser[];
+    typingUsers: Record<number, number[]>;
 
     // Actions
     setActiveConversation: (conversation: Conversation | null) => void;
     sendMessage: (content: string, type?: string, payload?: any) => void;
+    sendTyping: (isTyping: boolean) => void;
     loadConversations: () => Promise<void>;
     startPrivateChat: (targetUserId: number) => Promise<void>;
 
@@ -52,6 +54,9 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // User discovery state
     const [availableUsers, setAvailableUsers] = useState<ChatUser[]>([]);
+
+    // Typing state
+    const [typingUsers, setTypingUsers] = useState<Record<number, number[]>>({});
 
     const stompClientRef = useRef<Client | null>(null);
     const subscriptionRef = useRef<any>(null);
@@ -94,8 +99,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
             connectHeaders: {
                 Authorization: `Bearer ${token}`
             },
-            debug: () => {
-                // Debug logging disabled in production
+            debug: (str) => {
+                console.log(str);
             },
             onConnect: () => {
                 setConnected(true);
@@ -123,6 +128,68 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     }, []);
 
+    const handleWebSocketEvent = useCallback((event: any) => {
+        switch (event.type) {
+            case 'MESSAGE_EDIT':
+                setMessages(prev => prev.map(m =>
+                    m.messageId === event.messageId
+                        ? { ...m, content: event.content, isEdited: true }
+                        : m
+                ));
+                break;
+            case 'MESSAGE_DELETE':
+                setMessages(prev => prev.map(m =>
+                    m.messageId === event.messageId
+                        ? { ...m, content: 'This message was deleted', isSystemMessage: true }
+                        : m
+                ));
+                break;
+            case 'REACTION_ADD':
+                setMessages(prev => prev.map(m => {
+                    if (m.messageId === event.messageId) {
+                        const exists = m.reactions?.some(r => r.userId === event.userId && r.emoji === event.emoji);
+                        if (exists) return m;
+
+                        const newReaction: any = {
+                            reactionId: Date.now(),
+                            userId: event.userId,
+                            userFullName: 'User',
+                            emoji: event.emoji,
+                            createdAt: new Date().toISOString()
+                        };
+                        return { ...m, reactions: [...(m.reactions || []), newReaction] };
+                    }
+                    return m;
+                }));
+                break;
+            case 'REACTION_REMOVE':
+                setMessages(prev => prev.map(m => {
+                    if (m.messageId === event.messageId) {
+                        return {
+                            ...m,
+                            reactions: (m.reactions || []).filter(r =>
+                                !(r.userId === event.userId && r.emoji === event.emoji)
+                            )
+                        };
+                    }
+                    return m;
+                }));
+                break;
+            case 'TYPING':
+                setTypingUsers(prev => {
+                    const convId = event.conversationId;
+                    const userIds = prev[convId] || [];
+                    if (event.isTyping) {
+                        if (!userIds.includes(event.userId)) return { ...prev, [convId]: [...userIds, event.userId] };
+                    } else {
+                        return { ...prev, [convId]: userIds.filter(id => id !== event.userId) };
+                    }
+                    return prev;
+                });
+                break;
+        }
+    }, []);
+
     const subscribeToConversation = useCallback((conversationId: number) => {
         if (!stompClientRef.current?.connected) return;
 
@@ -131,14 +198,25 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
             subscriptionRef.current.unsubscribe();
         }
 
+        console.log(`Subscribing to /topic/conversation/${conversationId}`);
         subscriptionRef.current = stompClientRef.current.subscribe(
             `/topic/conversation/${conversationId}`,
             (message) => {
-                const newMessage: ChatMessage = JSON.parse(message.body);
-                setMessages(prev => [...prev, newMessage]);
+                console.log("WebSocket received message:", message.body);
+                const body = JSON.parse(message.body);
+                if (body.type) {
+                    handleWebSocketEvent(body);
+                } else {
+                    const newMessage: ChatMessage = body;
+                    setMessages(prev => {
+                        console.log("Adding new message to state:", newMessage);
+                        if (prev.some(m => m.messageId === newMessage.messageId)) return prev;
+                        return [...prev, newMessage];
+                    });
+                }
             }
         );
-    }, []);
+    }, [handleWebSocketEvent]);
 
     // ==================== CONVERSATION APIs ====================
 
@@ -172,13 +250,15 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
             return;
         }
 
+        console.log("Sending status:", stompClientRef.current.connected, activeConversation);
         const chatMessage = {
             conversationId: activeConversation.conversationId,
-            senderId: user?.id,
+            senderId: user?.userId || Number(user?.id),
             content: content,
             contentType: type,
             payload: payload ? JSON.stringify(payload) : null
         };
+        console.log("Publishing message:", chatMessage);
 
         stompClientRef.current.publish({
             destination: "/app/chat.sendMessage",
@@ -202,6 +282,18 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
             throw error;
         }
     }, [token]);
+
+    const sendTyping = useCallback((isTyping: boolean) => {
+        if (!stompClientRef.current?.connected || !activeConversation) return;
+
+        stompClientRef.current.publish({
+            destination: "/app/chat.typing",
+            body: JSON.stringify({
+                conversationId: activeConversation.conversationId,
+                isTyping: isTyping
+            })
+        });
+    }, [activeConversation]);
 
     // ==================== BLOCKING APIs ====================
 
@@ -274,9 +366,11 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         loading,
         blockedUsers,
         availableUsers,
+        typingUsers,
         // Actions
         setActiveConversation,
         sendMessage,
+        sendTyping,
         loadConversations,
         startPrivateChat,
         // Blocking

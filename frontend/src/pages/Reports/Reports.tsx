@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react"
-import { toast } from "react-hot-toast"
+import { showToast } from "../../utils/showToast"
 import { analyticsApi } from "../../services/api"
 import type {
   FullAnalyticsDashboard,
@@ -57,7 +57,7 @@ const Reports: React.FC = () => {
       setDashboard(data)
     } catch (error) {
       console.error("Failed to fetch analytics:", error)
-      toast.error("Failed to load analytics data")
+      showToast("Failed to load analytics data", "error")
     } finally {
       setIsLoading(false)
     }
@@ -571,7 +571,7 @@ const AttendanceTab: React.FC<AttendanceTabProps> = ({ staffAttendance, selected
             <div className="summary-stat">
               <span className="summary-label">Avg Punctuality</span>
               <span className="summary-value">
-                {(staffAttendance.staffRecords.reduce((a, s) => a + s.punctualityScore, 0) / 
+                {(staffAttendance.staffRecords.reduce((a, s) => a + s.punctualityScore, 0) /
                   Math.max(1, staffAttendance.staffRecords.length)).toFixed(1)}%
               </span>
             </div>
@@ -646,12 +646,12 @@ interface InsightCardProps {
 
 const InsightCard: React.FC<InsightCardProps> = ({ insight, compact }) => {
   const getInsightIcon = (icon: string, priority: string) => {
-    const color = priority === "critical" 
-      ? "var(--reports-red)" 
-      : priority === "warning" 
-        ? "var(--reports-amber)" 
+    const color = priority === "critical"
+      ? "var(--reports-red)"
+      : priority === "warning"
+        ? "var(--reports-amber)"
         : "var(--reports-neon-green)"
-    
+
     switch (icon) {
       case "warning":
         return <AlertTriangle size={18} color={color} />

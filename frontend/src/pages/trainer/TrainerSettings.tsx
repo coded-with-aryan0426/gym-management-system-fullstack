@@ -1,107 +1,33 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
+import {
     ChevronRight, Moon, Sun, Check, Eye, EyeOff,
-    Smartphone, Laptop, Monitor, LogOut, Trash2, Download, Upload,
-    CheckCircle2, AlertCircle, Info, X
+    Smartphone, Laptop, Monitor, LogOut, Trash2, Download, Upload
 } from 'lucide-react';
-import { toast } from 'react-hot-toast';
+import { showToast } from '../../utils/showToast';
 import { useTheme } from '../../contexts/ThemeContext';
+import { getTrainerSettings, updateTrainerSettings, type TrainerSettingsDTO } from '../../services/trainerSettingsApi';
 import './TrainerSettings.css';
 
-const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success', description?: string) => {
-    const icons = {
-        success: <CheckCircle2 size={20} />,
-        error: <AlertCircle size={20} />,
-        info: <Info size={20} />
-    };
-    const colors = {
-        success: { bg: 'linear-gradient(135deg, #10B981, #059669)', border: 'rgba(16, 185, 129, 0.3)' },
-        error: { bg: 'linear-gradient(135deg, #EF4444, #DC2626)', border: 'rgba(239, 68, 68, 0.3)' },
-        info: { bg: 'linear-gradient(135deg, #3B82F6, #2563EB)', border: 'rgba(59, 130, 246, 0.3)' }
-    };
-    
-    toast.custom((t) => (
-        <div
-            style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '14px 20px',
-                background: 'rgba(20, 20, 24, 0.95)',
-                backdropFilter: 'blur(20px)',
-                borderRadius: '14px',
-                border: `1px solid ${colors[type].border}`,
-                boxShadow: '0 20px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05)',
-                maxWidth: '360px',
-                opacity: t.visible ? 1 : 0,
-                transform: t.visible ? 'translateY(0) scale(1)' : 'translateY(-8px) scale(0.96)',
-                transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-            }}
-        >
-            <div
-                style={{
-                    width: '36px',
-                    height: '36px',
-                    borderRadius: '10px',
-                    background: colors[type].bg,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: '#fff',
-                    flexShrink: 0,
-                    boxShadow: `0 4px 12px ${type === 'success' ? 'rgba(16, 185, 129, 0.4)' : type === 'error' ? 'rgba(239, 68, 68, 0.4)' : 'rgba(59, 130, 246, 0.4)'}`,
-                }}
-            >
-                {icons[type]}
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
-                <span style={{ color: '#fff', fontSize: '14px', fontWeight: 600, letterSpacing: '-0.2px' }}>
-                    {message}
-                </span>
-                {description && (
-                    <span style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '12px' }}>
-                        {description}
-                    </span>
-                )}
-            </div>
-            <button
-                onClick={() => toast.dismiss(t.id)}
-                style={{
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    border: 'none',
-                    borderRadius: '6px',
-                    width: '24px',
-                    height: '24px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: 'pointer',
-                    color: 'rgba(255, 255, 255, 0.6)',
-                    transition: 'all 0.15s ease',
-                    flexShrink: 0,
-                }}
-                onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
-                    e.currentTarget.style.color = '#fff';
-                }}
-                onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
-                    e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)';
-                }}
-            >
-                <X size={14} />
-            </button>
-        </div>
-    ), { duration: 1500 });
-};
+
 
 const TrainerSettings: React.FC = () => {
     const navigate = useNavigate();
     const { theme, setTheme } = useTheme();
     const [activeSection, setActiveSection] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(false);
+    const [loading, setLoading] = useState(true);
+
+    // State matching API DTO structure
+    const [profile, setProfile] = useState({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        bio: '',
+    });
+
     const [notifications, setNotifications] = useState({
         email: true,
         push: true,
@@ -111,19 +37,98 @@ const TrainerSettings: React.FC = () => {
         sound: true,
         vibration: true,
     });
+
     const [privacy, setPrivacy] = useState({
         profileVisible: true,
         activityStatus: true,
         analytics: false,
         locationServices: true,
     });
-    const [profile, setProfile] = useState({
-        firstName: 'John',
-        lastName: 'Smith',
-        email: 'john.smith@athlonx.com',
-        phone: '+91 98765 43210',
-        bio: 'Certified personal trainer with 8 years experience.',
+
+    const [appearance, setAppearance] = useState({
+        theme: 'light',
+        accentColor: '#3B82F6'
     });
+
+    const [regional, setRegional] = useState({
+        language: 'en',
+        timezone: 'ist',
+        dateFormat: 'dd/mm/yyyy',
+        timeFormat: '12h'
+    });
+
+    // Fetch settings on mount
+    React.useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                const data = await getTrainerSettings();
+
+                // Map API data to state
+                if (data.profile) setProfile(data.profile);
+                if (data.notifications) setNotifications(data.notifications);
+                if (data.privacy) setPrivacy(data.privacy);
+                if (data.appearance) {
+                    setAppearance(data.appearance);
+                    setTheme(data.appearance.theme === 'dark' ? 'dark' : 'light');
+                }
+                if (data.regional) setRegional(data.regional);
+
+            } catch (error) {
+                console.error('Failed to load settings:', error);
+                showToast('Failed to load settings', 'error');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchSettings();
+    }, [setTheme]);
+
+    // Generic Save Function
+    const saveSettings = async (section: string, newData: any) => {
+        try {
+            const currentSettings: TrainerSettingsDTO = {
+                profile,
+                notifications: section === 'notifications' ? newData : notifications,
+                privacy: section === 'privacy' ? newData : privacy,
+                appearance: section === 'appearance' ? newData : appearance,
+                regional: section === 'regional' ? newData : regional,
+            };
+
+            // For profile/regional, we pass the current state unless it's being autosaved (which it isn't)
+            if (section === 'profile') currentSettings.profile = profile;
+            if (section === 'regional') currentSettings.regional = regional;
+
+            await updateTrainerSettings(currentSettings);
+
+            // For explicit saves (buttons)
+            if (section === 'profile' || section === 'regional') {
+                showToast('Settings Saved', 'success', 'Your changes have been applied');
+            }
+        } catch (error) {
+            console.error('Failed to save settings:', error);
+            showToast('Save Failed', 'error', 'Could not update settings');
+        }
+    };
+
+    // Autosave handlers
+    const updateNotifications = (key: keyof typeof notifications, value: boolean) => {
+        const newSettings = { ...notifications, [key]: value };
+        setNotifications(newSettings);
+        saveSettings('notifications', newSettings);
+    };
+
+    const updatePrivacy = (key: keyof typeof privacy, value: boolean) => {
+        const newSettings = { ...privacy, [key]: value };
+        setPrivacy(newSettings);
+        saveSettings('privacy', newSettings);
+    };
+
+    const updateAppearance = (key: keyof typeof appearance, value: any) => {
+        const newSettings = { ...appearance, [key]: value };
+        setAppearance(newSettings);
+        saveSettings('appearance', newSettings);
+    };
 
     const sections = [
         { id: 'profile', label: 'Profile', icon: '👤', gradient: 'linear-gradient(135deg, #3B82F6, #1D4ED8)', desc: 'Name, photo, bio' },
@@ -145,11 +150,16 @@ const TrainerSettings: React.FC = () => {
 
     const darkMode = theme === 'dark';
 
-    const handleSave = () => showToast('Settings Saved', 'success', 'Your changes have been applied');
+    const handleSave = () => {
+        if (activeSection === 'profile') saveSettings('profile', profile);
+        if (activeSection === 'language') saveSettings('regional', regional);
+    };
 
     const toggleTheme = (isDark: boolean) => {
-        setTheme(isDark ? 'dark' : 'light');
-        showToast(`${isDark ? 'Dark' : 'Light'} Mode`, 'success', 'Theme updated successfully');
+        const newTheme = isDark ? 'dark' : 'light';
+        setTheme(newTheme);
+        updateAppearance('theme', newTheme);
+        showToast(`${newTheme === 'dark' ? 'Dark' : 'Light'} Mode`, 'success', 'Theme updated successfully');
     };
 
     const handleLogoutDevice = () => showToast('Device Removed', 'success', 'Session terminated securely');
@@ -184,26 +194,26 @@ const TrainerSettings: React.FC = () => {
                                 <div className="ts-form-row">
                                     <div className="ts-form-group">
                                         <label>First Name</label>
-                                        <input type="text" value={profile.firstName} onChange={(e) => setProfile({...profile, firstName: e.target.value})} />
+                                        <input type="text" value={profile.firstName} onChange={(e) => setProfile({ ...profile, firstName: e.target.value })} />
                                     </div>
                                     <div className="ts-form-group">
                                         <label>Last Name</label>
-                                        <input type="text" value={profile.lastName} onChange={(e) => setProfile({...profile, lastName: e.target.value})} />
+                                        <input type="text" value={profile.lastName} onChange={(e) => setProfile({ ...profile, lastName: e.target.value })} />
                                     </div>
                                 </div>
                                 <div className="ts-form-row">
                                     <div className="ts-form-group">
                                         <label>Email</label>
-                                        <input type="email" value={profile.email} onChange={(e) => setProfile({...profile, email: e.target.value})} />
+                                        <input type="email" value={profile.email} onChange={(e) => setProfile({ ...profile, email: e.target.value })} />
                                     </div>
                                     <div className="ts-form-group">
                                         <label>Phone</label>
-                                        <input type="tel" value={profile.phone} onChange={(e) => setProfile({...profile, phone: e.target.value})} />
+                                        <input type="tel" value={profile.phone} onChange={(e) => setProfile({ ...profile, phone: e.target.value })} />
                                     </div>
                                 </div>
                                 <div className="ts-form-group">
                                     <label>Bio</label>
-                                    <textarea rows={2} value={profile.bio} onChange={(e) => setProfile({...profile, bio: e.target.value})} />
+                                    <textarea rows={2} value={profile.bio} onChange={(e) => setProfile({ ...profile, bio: e.target.value })} />
                                 </div>
                             </div>
                         </div>
@@ -231,7 +241,7 @@ const TrainerSettings: React.FC = () => {
                                         <span className="ts-toggle-row__label">Allow Notifications</span>
                                     </div>
                                     <label className="ts-switch">
-                                        <input type="checkbox" checked={notifications.push} onChange={(e) => setNotifications({...notifications, push: e.target.checked})} />
+                                        <input type="checkbox" checked={notifications.push} onChange={(e) => updateNotifications('push', e.target.checked)} />
                                         <span className="ts-switch__slider" />
                                     </label>
                                 </div>
@@ -240,7 +250,7 @@ const TrainerSettings: React.FC = () => {
                                         <span className="ts-toggle-row__label">Email Notifications</span>
                                     </div>
                                     <label className="ts-switch">
-                                        <input type="checkbox" checked={notifications.email} onChange={(e) => setNotifications({...notifications, email: e.target.checked})} />
+                                        <input type="checkbox" checked={notifications.email} onChange={(e) => updateNotifications('email', e.target.checked)} />
                                         <span className="ts-switch__slider" />
                                     </label>
                                 </div>
@@ -255,7 +265,7 @@ const TrainerSettings: React.FC = () => {
                                         <span className="ts-toggle-row__label">Booking Alerts</span>
                                     </div>
                                     <label className="ts-switch">
-                                        <input type="checkbox" checked={notifications.bookings} onChange={(e) => setNotifications({...notifications, bookings: e.target.checked})} />
+                                        <input type="checkbox" checked={notifications.bookings} onChange={(e) => updateNotifications('bookings', e.target.checked)} />
                                         <span className="ts-switch__slider" />
                                     </label>
                                 </div>
@@ -264,7 +274,7 @@ const TrainerSettings: React.FC = () => {
                                         <span className="ts-toggle-row__label">Session Reminders</span>
                                     </div>
                                     <label className="ts-switch">
-                                        <input type="checkbox" checked={notifications.reminders} onChange={(e) => setNotifications({...notifications, reminders: e.target.checked})} />
+                                        <input type="checkbox" checked={notifications.reminders} onChange={(e) => updateNotifications('reminders', e.target.checked)} />
                                         <span className="ts-switch__slider" />
                                     </label>
                                 </div>
@@ -273,7 +283,7 @@ const TrainerSettings: React.FC = () => {
                                         <span className="ts-toggle-row__label">Marketing</span>
                                     </div>
                                     <label className="ts-switch">
-                                        <input type="checkbox" checked={notifications.marketing} onChange={(e) => setNotifications({...notifications, marketing: e.target.checked})} />
+                                        <input type="checkbox" checked={notifications.marketing} onChange={(e) => updateNotifications('marketing', e.target.checked)} />
                                         <span className="ts-switch__slider" />
                                     </label>
                                 </div>
@@ -288,7 +298,7 @@ const TrainerSettings: React.FC = () => {
                                         <span className="ts-toggle-row__label">Sound</span>
                                     </div>
                                     <label className="ts-switch">
-                                        <input type="checkbox" checked={notifications.sound} onChange={(e) => setNotifications({...notifications, sound: e.target.checked})} />
+                                        <input type="checkbox" checked={notifications.sound} onChange={(e) => updateNotifications('sound', e.target.checked)} />
                                         <span className="ts-switch__slider" />
                                     </label>
                                 </div>
@@ -297,7 +307,7 @@ const TrainerSettings: React.FC = () => {
                                         <span className="ts-toggle-row__label">Vibration</span>
                                     </div>
                                     <label className="ts-switch">
-                                        <input type="checkbox" checked={notifications.vibration} onChange={(e) => setNotifications({...notifications, vibration: e.target.checked})} />
+                                        <input type="checkbox" checked={notifications.vibration} onChange={(e) => updateNotifications('vibration', e.target.checked)} />
                                         <span className="ts-switch__slider" />
                                     </label>
                                 </div>
@@ -430,7 +440,7 @@ const TrainerSettings: React.FC = () => {
                                         <span className="ts-toggle-row__label">Profile Visibility</span>
                                     </div>
                                     <label className="ts-switch">
-                                        <input type="checkbox" checked={privacy.profileVisible} onChange={(e) => setPrivacy({...privacy, profileVisible: e.target.checked})} />
+                                        <input type="checkbox" checked={privacy.profileVisible} onChange={(e) => updatePrivacy('profileVisible', e.target.checked)} />
                                         <span className="ts-switch__slider" />
                                     </label>
                                 </div>
@@ -439,7 +449,7 @@ const TrainerSettings: React.FC = () => {
                                         <span className="ts-toggle-row__label">Activity Status</span>
                                     </div>
                                     <label className="ts-switch">
-                                        <input type="checkbox" checked={privacy.activityStatus} onChange={(e) => setPrivacy({...privacy, activityStatus: e.target.checked})} />
+                                        <input type="checkbox" checked={privacy.activityStatus} onChange={(e) => updatePrivacy('activityStatus', e.target.checked)} />
                                         <span className="ts-switch__slider" />
                                     </label>
                                 </div>
@@ -454,7 +464,7 @@ const TrainerSettings: React.FC = () => {
                                         <span className="ts-toggle-row__label">Usage Analytics</span>
                                     </div>
                                     <label className="ts-switch">
-                                        <input type="checkbox" checked={privacy.analytics} onChange={(e) => setPrivacy({...privacy, analytics: e.target.checked})} />
+                                        <input type="checkbox" checked={privacy.analytics} onChange={(e) => updatePrivacy('analytics', e.target.checked)} />
                                         <span className="ts-switch__slider" />
                                     </label>
                                 </div>
@@ -463,7 +473,7 @@ const TrainerSettings: React.FC = () => {
                                         <span className="ts-toggle-row__label">Location Services</span>
                                     </div>
                                     <label className="ts-switch">
-                                        <input type="checkbox" checked={privacy.locationServices} onChange={(e) => setPrivacy({...privacy, locationServices: e.target.checked})} />
+                                        <input type="checkbox" checked={privacy.locationServices} onChange={(e) => updatePrivacy('locationServices', e.target.checked)} />
                                         <span className="ts-switch__slider" />
                                     </label>
                                 </div>
@@ -490,7 +500,7 @@ const TrainerSettings: React.FC = () => {
                                 </div>
                                 <div className="ts-select-group">
                                     <label>App Language</label>
-                                    <select defaultValue="en">
+                                    <select value={regional.language} onChange={(e) => setRegional({ ...regional, language: e.target.value })}>
                                         <option value="en">🇺🇸 English</option>
                                         <option value="es">🇪🇸 Spanish</option>
                                         <option value="fr">🇫🇷 French</option>
@@ -506,7 +516,7 @@ const TrainerSettings: React.FC = () => {
                                 </div>
                                 <div className="ts-select-group">
                                     <label>Time Zone</label>
-                                    <select defaultValue="ist">
+                                    <select value={regional.timezone} onChange={(e) => setRegional({ ...regional, timezone: e.target.value })}>
                                         <option value="ist">IST (UTC+5:30) - India</option>
                                         <option value="pst">PST (UTC-8) - Pacific</option>
                                         <option value="est">EST (UTC-5) - Eastern</option>
@@ -515,14 +525,14 @@ const TrainerSettings: React.FC = () => {
                                 <div className="ts-form-row">
                                     <div className="ts-select-group">
                                         <label>Date Format</label>
-                                        <select defaultValue="dd/mm/yyyy">
+                                        <select value={regional.dateFormat} onChange={(e) => setRegional({ ...regional, dateFormat: e.target.value })}>
                                             <option value="dd/mm/yyyy">DD/MM/YYYY</option>
                                             <option value="mm/dd/yyyy">MM/DD/YYYY</option>
                                         </select>
                                     </div>
                                     <div className="ts-select-group">
                                         <label>Time Format</label>
-                                        <select defaultValue="12h">
+                                        <select value={regional.timeFormat} onChange={(e) => setRegional({ ...regional, timeFormat: e.target.value })}>
                                             <option value="12h">12-hour</option>
                                             <option value="24h">24-hour</option>
                                         </select>
@@ -702,9 +712,9 @@ const TrainerSettings: React.FC = () => {
                                 </motion.button>
                             ))}
                         </div>
-<div className="ts-footer">
-                              <button className="ts-logout-btn" onClick={handleLogout}><LogOut size={16} /><span>Log Out</span></button>
-                          </div>
+                        <div className="ts-footer">
+                            <button className="ts-logout-btn" onClick={handleLogout}><LogOut size={16} /><span>Log Out</span></button>
+                        </div>
                     </motion.div>
                 )}
             </AnimatePresence>

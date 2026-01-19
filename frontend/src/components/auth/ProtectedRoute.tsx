@@ -7,24 +7,21 @@ interface ProtectedRouteProps {
     children: React.ReactNode;
 }
 
+/**
+ * Protected Route Component
+ * 
+ * Enforces authentication and role-based access control.
+ * - Returns 401-equivalent redirect if not authenticated
+ * - Returns 403-equivalent redirect if role mismatch
+ * 
+ * NOTE: Auth is ALWAYS enforced, even in development mode.
+ * The backend is the final authority - this is a UX guard only.
+ */
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles }) => {
     const { user, isAuthenticated, isLoading } = useAuth();
     const location = useLocation();
 
-    // DEV MODE: Completely bypass ALL authentication on localhost
-    // This allows accessing any page without login during development
-    const isDevelopment = import.meta.env.DEV ||
-        window.location.hostname === 'localhost' ||
-        window.location.hostname === '127.0.0.1';
-
-    // In development, ALWAYS allow access - no auth checks at all
-    if (isDevelopment) {
-        return <>{children}</>;
-    }
-
-    // === PRODUCTION AUTH CHECKS BELOW ===
-    // Only run auth checks in production
-
+    // Show loading state while auth is initializing
     if (isLoading) {
         return (
             <div className="flex items-center justify-center h-screen bg-[#0D0D0D]">
@@ -33,25 +30,44 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
         );
     }
 
+    // 401 - Not authenticated
     if (!isAuthenticated || !user) {
+        console.warn('[Auth] Not authenticated, redirecting to login');
         return <Navigate to="/login" state={{ from: location }} replace />;
     }
 
-    // Role-based access control
+    // Normalize user role (handle staffRole vs role, case insensitivity)
     const userRole = (user.staffRole || user.role || '').toUpperCase();
+
+    // Normalize allowed roles and check authorization
     const isAuthorized = allowedRoles.some(role => {
-        const r = role.toUpperCase();
-        if (r === 'ADMIN' || r === 'OWNER') return userRole === 'ADMIN' || userRole === 'OWNER';
-        if (r === 'CUSTOMER') return userRole === 'CUSTOMER' || userRole === 'MEMBER';
-        return userRole === r;
+        const normalizedRole = role.toUpperCase();
+
+        // ADMIN and OWNER are equivalent
+        if (normalizedRole === 'ADMIN' || normalizedRole === 'OWNER') {
+            return userRole === 'ADMIN' || userRole === 'OWNER';
+        }
+
+        // CUSTOMER and MEMBER are equivalent
+        if (normalizedRole === 'CUSTOMER' || normalizedRole === 'MEMBER') {
+            return userRole === 'CUSTOMER' || userRole === 'MEMBER';
+        }
+
+        // Exact match for TRAINER and other roles
+        return userRole === normalizedRole;
     });
 
+    // 403 - Authenticated but wrong role
     if (!isAuthorized) {
+        console.warn(
+            `[Auth] Access denied: User role "${userRole}" not authorized for [${allowedRoles.join(', ')}]. ` +
+            `Path: ${location.pathname}`
+        );
         return <Navigate to="/unauthorized" replace />;
     }
 
+    // Authorized - render children
     return <>{children}</>;
 };
 
 export default ProtectedRoute;
-

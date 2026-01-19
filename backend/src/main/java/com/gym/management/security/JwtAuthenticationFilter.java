@@ -37,11 +37,33 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 // Long gymId = tokenProvider.getGymIdFromJWT(jwt);
 
                 UserDetails userDetails = customUserDetailsService.loadUserById(userId);
-            
+
+                // Augment authorities with JWT claims (Context-aware security)
+                java.util.List<org.springframework.security.core.GrantedAuthority> authorities = new java.util.ArrayList<>(
+                        userDetails.getAuthorities());
+
+                String staffRole = tokenProvider.getStaffRoleFromJWT(jwt);
+                logger.info("JWT Validation: User=" + userDetails.getUsername() + ", StaffRole=" + staffRole);
+                if (StringUtils.hasText(staffRole)) {
+                    String roleAuth = "ROLE_" + staffRole.toUpperCase();
+                    boolean hasRole = authorities.stream()
+                            .anyMatch(a -> a.getAuthority().equals(roleAuth));
+
+                    if (!hasRole) {
+                        logger.info("Adding authority from JWT: " + roleAuth);
+                        authorities
+                                .add(new org.springframework.security.core.authority.SimpleGrantedAuthority(roleAuth));
+                    } else {
+                        logger.info("User already has authority: " + roleAuth);
+                    }
+                }
+
+                logger.info("Final Authorities: " + authorities);
+
                 // For now, standard UsernamePasswordAuthenticationToken is fine
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
-                
+                        userDetails, null, authorities);
+
                 // We can add the gym context to the details
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 

@@ -6,14 +6,20 @@ import com.gym.management.model.Transaction;
 import com.gym.management.service.DashboardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Dashboard Controller - OWNER/ADMIN only
+ * Provides gym-wide metrics and management functions.
+ */
 @RestController
 @RequestMapping("/api/dashboard")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = { "http://localhost:5173", "http://localhost:5174", "http://localhost:5175" })
+@PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
 public class DashboardController {
 
     @Autowired

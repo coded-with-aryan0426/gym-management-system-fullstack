@@ -10,5 +10,11 @@ public interface ConversationParticipantRepository
 
     List<ConversationParticipant> findByConversationConversationId(Long conversationId);
 
+    @org.springframework.data.jpa.repository.Query("SELECT p FROM ConversationParticipant p JOIN FETCH p.user WHERE p.conversation.conversationId = :conversationId")
+    List<ConversationParticipant> findByConversationIdWithUser(
+            @org.springframework.data.repository.query.Param("conversationId") Long conversationId);
+
     Optional<ConversationParticipant> findByConversationConversationIdAndUserUserId(Long conversationId, Long userId);
+
+    List<ConversationParticipant> findByUserUserId(Long userId);
 }

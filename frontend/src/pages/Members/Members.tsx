@@ -3,7 +3,7 @@
 import type React from "react"
 import { useEffect, useState, useMemo, useCallback, useRef } from "react"
 import { FiFilter, FiSearch, FiUserPlus, FiCalendar, FiClock, FiRefreshCw } from "react-icons/fi"
-import { toast } from "react-hot-toast"
+import { showToast } from "../../utils/showToast"
 import { useSearchParams } from "react-router-dom"
 import { Button, Badge, getStatusVariant, Avatar, DataTable, CreateUserModal, type Column } from "../../components"
 import { ActionMenuButton, SortButton } from "../../components/shared"
@@ -139,7 +139,7 @@ const Members: React.FC = () => {
       }
     } catch (err) {
       console.error('[Members] Failed to load members:', err)
-      toast.error('Failed to load members')
+      showToast('Failed to load members', 'error')
       setMembers([])
     } finally {
       setLoading(false)
@@ -269,12 +269,12 @@ const Members: React.FC = () => {
       }
     } catch (err) {
       console.error("Failed to renew membership:", err)
-      toast.error("Failed to process renewal. Please try again.")
+      showToast('Failed to process renewal', 'error', 'Please try again')
     }
   }
 
   const handleSendMessage = async (member: MemberDTO) => {
-    toast.success(`Message sent to ${member.fullName}`)
+    showToast(`Message sent to ${member.fullName}`, 'success')
   }
 
   const handleFilterChange = (key: keyof FilterState, value: string) => {
@@ -654,14 +654,14 @@ const Members: React.FC = () => {
           </div>
           <div className="batch-actions__buttons">
             <button className="batch-btn batch-btn--message" onClick={() => {
-              toast.success(`Messaging ${selectedMemberIds.size} members`);
+              showToast(`Messaging ${selectedMemberIds.size} members`, 'success');
               setSelectedMemberIds(new Set());
             }}>
               <span className="batch-btn__icon">✉️</span>
               Message
             </button>
             <button className="batch-btn batch-btn--export" onClick={() => {
-              toast.success(`Exporting ${selectedMemberIds.size} members`);
+              showToast(`Exporting ${selectedMemberIds.size} members`, 'success');
               setSelectedMemberIds(new Set());
             }}>
               <span className="batch-btn__icon">⬇️</span>
@@ -669,7 +669,7 @@ const Members: React.FC = () => {
             </button>
             <button className="batch-btn batch-btn--danger" onClick={() => {
               if (window.confirm(`Are you sure you want to delete ${selectedMemberIds.size} members?`)) {
-                toast.success(`Deleted ${selectedMemberIds.size} members`);
+                showToast(`Deleted ${selectedMemberIds.size} members`, 'success');
                 setSelectedMemberIds(new Set());
               }
             }}>
@@ -787,7 +787,7 @@ const Members: React.FC = () => {
         onSuccess={() => {
           loadMembersPaginated()
           refreshMembers()
-          toast.success("Member added successfully")
+          showToast('Member added successfully', 'success')
         }}
         initialRole="CUSTOMER"
       />

@@ -2,6 +2,7 @@ package com.gym.management.controller;
 
 import com.gym.management.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -9,9 +10,14 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Stats Controller - OWNER/ADMIN only
+ * Provides gym-wide statistics and analytics.
+ */
 @RestController
 @RequestMapping("/api/stats")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = { "http://localhost:5173", "http://localhost:5174", "http://localhost:5175" })
+@PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
 public class StatsController {
 
     @Autowired

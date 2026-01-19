@@ -10,6 +10,7 @@ import com.gym.management.repository.ProgressNoteRepository;
 import com.gym.management.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -17,8 +18,14 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
+/**
+ * Member Dashboard Controller - MEMBER, TRAINER, OWNER, ADMIN
+ * Members access their own data, staff can access for management.
+ */
 @RestController
 @RequestMapping("/api/member")
+@CrossOrigin(origins = { "http://localhost:5173", "http://localhost:5174", "http://localhost:5175" })
+@PreAuthorize("hasAnyRole('MEMBER', 'CUSTOMER', 'TRAINER', 'OWNER', 'ADMIN')")
 public class MemberDashboardController {
 
     @Autowired

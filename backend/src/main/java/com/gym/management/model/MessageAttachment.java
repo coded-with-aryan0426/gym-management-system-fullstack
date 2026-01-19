@@ -22,8 +22,11 @@ public class MessageAttachment {
     private Long attachmentId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "message_id", nullable = false)
+    @JoinColumn(name = "message_id", nullable = true) // Changed to nullable
     private Message message;
+
+    @Column(name = "stored_file_name", length = 255)
+    private String storedFileName;
 
     @Column(name = "file_type", nullable = false)
     @Enumerated(EnumType.STRING)

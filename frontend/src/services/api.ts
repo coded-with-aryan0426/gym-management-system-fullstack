@@ -6,6 +6,14 @@ import type { DashboardStats, PageResponse } from '../types/api';
 
 const BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
+/**
+ * Generate a storage key scoped to the current port for session isolation.
+ */
+const getStorageKey = (key: string): string => {
+  const port = typeof window !== 'undefined' ? window.location.port || '5173' : '5173';
+  return `${key}_port_${port}`;
+};
+
 const apiClient: AxiosInstance = axios.create({
   baseURL: BASE_URL,
   headers: {
@@ -13,9 +21,9 @@ const apiClient: AxiosInstance = axios.create({
   },
 });
 
-// Request interceptor for auth token
+// Request interceptor for auth token (port-scoped)
 apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem(getStorageKey('token'));
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -26,14 +34,10 @@ apiClient.interceptors.request.use((config) => {
 apiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
-    // DEV MODE: Skip redirect to login on localhost
-    const isDevelopment = import.meta.env.DEV ||
-      window.location.hostname === 'localhost' ||
-      window.location.hostname === '127.0.0.1';
-
-    if (error.response?.status === 401 && !isDevelopment) {
-      // Only redirect in production
-      localStorage.removeItem('token');
+    // Always redirect on 401 - no dev mode bypass
+    if (error.response?.status === 401) {
+      localStorage.removeItem(getStorageKey('token'));
+      localStorage.removeItem(getStorageKey('user'));
       window.location.href = '/login';
     }
     return Promise.reject(error);
@@ -108,6 +112,60 @@ const api = {
     await apiClient.delete(`/users/${id}`);
   },
 
+  // Chat API
+  chat: {
+    async getConversations(page = 0, size = 20) {
+      const response = await apiClient.get('/chat/conversations', { params: { page, size } });
+      return response.data;
+    },
+    async getMessages(conversationId: number, page = 0, size = 50) {
+      const response = await apiClient.get(`/chat/conversations/${conversationId}/messages`, { params: { page, size } });
+      return response.data;
+    },
+    async startPrivateChat(targetUserId: number) {
+      const response = await apiClient.post('/chat/private', null, { params: { targetUserId } });
+      return response.data;
+    },
+    async getAvailableUsers() {
+      const response = await apiClient.get('/chat/users');
+      return response.data;
+    },
+    async searchUsers(query: string, gymId?: number, role?: string) {
+      const response = await apiClient.get('/chat/users/search', { params: { query, gymId, role } });
+      return response.data;
+    },
+    // Requests
+    async sendRequest(targetUserId: number) {
+      const response = await apiClient.post('/chat/requests', { targetUserId });
+      return response.data;
+    },
+    async getPendingRequests() {
+      const response = await apiClient.get('/chat/requests');
+      return response.data;
+    },
+    async acceptRequest(requestId: number) {
+      const response = await apiClient.post(`/chat/requests/${requestId}/accept`);
+      return response.data;
+    },
+    async rejectRequest(requestId: number) {
+      const response = await apiClient.post(`/chat/requests/${requestId}/reject`);
+      return response.data;
+    },
+    // Attachments
+    async uploadAttachment(file: File, conversationId?: number) {
+      const formData = new FormData();
+      formData.append('file', file);
+      if (conversationId) formData.append('conversationId', conversationId.toString());
+
+      const response = await apiClient.post('/chat/attachments', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    }
+  },
+
   // Auth endpoints
   async login(credentials: any): Promise<any> {
     const response = await apiClient.post('/auth/login', credentials);
@@ -163,6 +221,11 @@ const api = {
   // Dashboard endpoints (new)
   async getDashboardMetrics(): Promise<Record<string, unknown>> {
     const response = await apiClient.get('/dashboard/metrics');
+    return response.data;
+  },
+
+  async getTrainerDashboard(): Promise<any> {
+    const response = await apiClient.get('/trainer/dashboard');
     return response.data;
   },
 

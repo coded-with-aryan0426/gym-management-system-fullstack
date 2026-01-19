@@ -31,7 +31,6 @@ public class AuthService {
     private final JwtTokenProvider tokenProvider;
     private final UserRepository userRepository;
     private final PermissionService permissionService;
-    private final CustomUserDetailsService userDetailsService;
 
     /**
      * Authenticate user and generate JWT token with roles and permissions

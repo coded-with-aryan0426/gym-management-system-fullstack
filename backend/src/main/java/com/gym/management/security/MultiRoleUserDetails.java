@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -39,21 +38,21 @@ public class MultiRoleUserDetails extends CustomUserDetails {
     public static Collection<? extends GrantedAuthority> createAuthorities(
             Set<GymRole> roles, Set<Permission> permissions) {
         Set<GrantedAuthority> authorities = new HashSet<>();
-        
+
         // Add role-based authorities
         if (roles != null) {
             authorities.addAll(roles.stream()
                     .map(role -> new SimpleGrantedAuthority("ROLE_" + role.name()))
                     .collect(Collectors.toSet()));
         }
-        
+
         // Add permission-based authorities
         if (permissions != null) {
             authorities.addAll(permissions.stream()
                     .map(permission -> new SimpleGrantedAuthority("PERMISSION_" + permission.name()))
                     .collect(Collectors.toSet()));
         }
-        
+
         return authorities;
     }
 
@@ -75,7 +74,8 @@ public class MultiRoleUserDetails extends CustomUserDetails {
      * Check if user has any of the specified roles
      */
     public boolean hasAnyRole(GymRole... roles) {
-        if (this.roles == null || roles == null) return false;
+        if (this.roles == null || roles == null)
+            return false;
         return Arrays.stream(roles).anyMatch(this.roles::contains);
     }
 
@@ -83,7 +83,8 @@ public class MultiRoleUserDetails extends CustomUserDetails {
      * Check if user has any of the specified permissions
      */
     public boolean hasAnyPermission(Permission... permissions) {
-        if (this.permissions == null || permissions == null) return false;
+        if (this.permissions == null || permissions == null)
+            return false;
         return Arrays.stream(permissions).anyMatch(this.permissions::contains);
     }
 

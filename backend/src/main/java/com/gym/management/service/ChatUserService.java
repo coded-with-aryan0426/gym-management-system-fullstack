@@ -82,6 +82,31 @@ public class ChatUserService {
             }
         }
 
+        // Fallback: If no users found (e.g. dev environment with no gym roles), return
+        // all users
+        if (availableUsers.isEmpty()) {
+            List<User> allUsers = userRepository.findAll();
+            for (User u : allUsers) {
+                if (!u.getUserId().equals(userId) && !blockedIds.contains(u.getUserId())) {
+                    // Deduce role from security roles
+                    GymRole fallbackRole = GymRole.MEMBER;
+                    if (u.getRoles() != null) {
+                        for (Role r : u.getRoles()) {
+                            String rName = r.getRoleName() != null ? r.getRoleName().toUpperCase() : "";
+                            if (rName.contains("OWNER") || rName.contains("ADMIN")) {
+                                fallbackRole = GymRole.OWNER;
+                                break;
+                            } else if (rName.contains("TRAINER")) {
+                                fallbackRole = GymRole.TRAINER;
+                                break;
+                            }
+                        }
+                    }
+                    availableUsers.add(mapToDTO(u, fallbackRole, -1L));
+                }
+            }
+        }
+
         return new ArrayList<>(availableUsers);
     }
 
@@ -142,7 +167,7 @@ public class ChatUserService {
         dto.setAvatarId(user.getAvatarId());
         dto.setRole(role.name());
         dto.setGymId(gymId);
-        dto.setOnline(false); // TODO: Implement presence tracking
+        dto.setOnline(false);
         return dto;
     }
 }

@@ -28,7 +28,20 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         // Register the "/ws" endpoint, enabling the SockJS protocol options so that we
         // have a fallback if specific WebSocket protocols are not supported.
         registry.addEndpoint("/ws")
-                .setAllowedOrigins("http://localhost:5173") // Specific origin for SockJS credentials
+                .setAllowedOrigins(
+                        "http://localhost:5173", // Owner
+                        "http://localhost:5174", // Trainer
+                        "http://localhost:5175" // Member
+                )
                 .withSockJS();
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.gym.management.security.JwtChannelInterceptor jwtChannelInterceptor;
+
+    @Override
+    public void configureClientInboundChannel(
+            org.springframework.messaging.simp.config.ChannelRegistration registration) {
+        registration.interceptors(jwtChannelInterceptor);
     }
 }

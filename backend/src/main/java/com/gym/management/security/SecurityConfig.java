@@ -3,6 +3,7 @@ package com.gym.management.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -14,7 +15,20 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
 
+import java.util.List;
+
+/**
+ * Security Configuration for Production-Grade Authentication
+ * 
+ * Implements strict role-based access control:
+ * - OWNER/ADMIN: Full access to all endpoints
+ * - TRAINER: Access to trainer and member endpoints
+ * - MEMBER: Access to member endpoints only
+ * 
+ * All endpoints require authentication except explicitly public ones.
+ */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -28,9 +42,6 @@ public class SecurityConfig {
 
     @Autowired
     private RateLimitFilter rateLimitFilter;
-
-    @Autowired(required = false)
-    private DevAuthenticationFilter devAuthenticationFilter;
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
@@ -47,7 +58,6 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        // BCrypt with strength 12 for secure password hashing
         return new BCryptPasswordEncoder(12);
     }
 
@@ -55,52 +65,77 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(request -> {
-                    var corsConfig = new org.springframework.web.cors.CorsConfiguration();
-                    corsConfig.setAllowedOrigins(
-                            java.util.List.of("http://localhost:5173", "http://localhost:3000"));
-                    corsConfig.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-                    corsConfig.setAllowedHeaders(java.util.List.of("*"));
+                    CorsConfiguration corsConfig = new CorsConfiguration();
+                    // Allow all frontend ports for multi-role testing
+                    corsConfig.setAllowedOrigins(List.of(
+                            "http://localhost:5173", // Owner
+                            "http://localhost:5174", // Trainer
+                            "http://localhost:5175", // Member
+                            "http://localhost:3000" // Legacy/alternative
+                    ));
+                    corsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+                    corsConfig.setAllowedHeaders(List.of("*"));
                     corsConfig.setAllowCredentials(true);
+                    corsConfig.setMaxAge(3600L);
                     return corsConfig;
                 }))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll() // Allow
-                                                                                                         // preflight
-                        .requestMatchers("/api/auth/**").permitAll() // Allow auth endpoints
-                        .requestMatchers("/api/public/**").permitAll() // Allow public endpoints
-                        .requestMatchers("/api/gyms/public/**").permitAll() // Public gym search
+                        // ==================== PREFLIGHT ====================
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // DEV MODE SPECIFIC CONFIGURATION
-                        // The DevAuthenticationFilter will handle authentication for requests with DEV
-                        // tokens
-                        // But we verify path permissions below
+                        // ==================== PUBLIC ENDPOINTS ====================
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/public/**").permitAll()
+                        .requestMatchers("/api/gyms/public/**").permitAll()
 
-                        // DEV MODE: Allow data endpoints for testing (remove in production)
-                        .requestMatchers("/api/stats/**").permitAll()
-                        .requestMatchers("/api/dashboard/**").permitAll()
-                        .requestMatchers("/api/users/members").permitAll() // Explicitly allow members endpoint
-                        .requestMatchers("/api/users/**").permitAll()
-                        .requestMatchers("/api/pt-sessions/**").permitAll()
-                        .requestMatchers("/api/packages/**").permitAll()
-                        .requestMatchers("/api/settings/**").permitAll()
-                        .requestMatchers("/api/staff/**").permitAll()
-                        .requestMatchers("/h2-console/**").permitAll() // H2 console for dev
-                        .requestMatchers("/error").permitAll() // Allow error responses
-                        .anyRequest().permitAll() // DEV MODE: Allow everything
-                // .anyRequest().authenticated() // Protect everything else
-                )
-                .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin())); // For H2 console
+                        .requestMatchers("/ws/**").permitAll() // WebSocket handshake
+                        .requestMatchers("/error").permitAll()
 
+                        // ==================== OWNER/ADMIN ONLY ====================
+                        // These endpoints manage the entire gym operation
+                        .requestMatchers("/api/dashboard/**").hasAnyRole("OWNER", "ADMIN")
+                        .requestMatchers("/api/stats/**").hasAnyRole("OWNER", "ADMIN")
+                        .requestMatchers("/api/settings/**").hasAnyRole("OWNER", "ADMIN")
+                        .requestMatchers("/api/staff/**").hasAnyRole("OWNER", "ADMIN")
+                        .requestMatchers("/api/financials/**").hasAnyRole("OWNER", "ADMIN")
+                        .requestMatchers("/api/reports/**").hasAnyRole("OWNER", "ADMIN")
+                        .requestMatchers("/api/packages/**").hasAnyRole("OWNER", "ADMIN")
+
+                        // ==================== OWNER OR TRAINER ====================
+                        // Trainers need access to manage their assigned members and sessions
+                        .requestMatchers("/api/trainer/**").hasAnyRole("OWNER", "ADMIN", "TRAINER")
+                        .requestMatchers("/api/pt-sessions/**").hasAnyRole("OWNER", "ADMIN", "TRAINER")
+                        .requestMatchers("/api/users/members").hasAnyRole("OWNER", "ADMIN", "TRAINER")
+                        .requestMatchers("/api/users/trainers").hasAnyRole("OWNER", "ADMIN", "TRAINER")
+                        .requestMatchers("/api/progress-notes/**").hasAnyRole("OWNER", "ADMIN", "TRAINER")
+                        .requestMatchers("/api/notifications/**").authenticated() // All users get notifications
+
+                        // ==================== MEMBER ENDPOINTS ====================
+                        // Members can access their own data, trainers/owners can also access
+                        .requestMatchers("/api/member/**").hasAnyRole("OWNER", "ADMIN", "TRAINER", "MEMBER", "CUSTOMER")
+
+                        // ==================== CHAT (All authenticated users) ====================
+                        .requestMatchers("/api/chat/attachments/file/**").permitAll() // Public access for images
+                        .requestMatchers("/api/chat/**").authenticated()
+
+                        // ==================== USER PROFILE (Self-access) ====================
+                        // General user endpoints - authenticated users can access their own
+                        .requestMatchers("/api/users/me/**").authenticated()
+                        .requestMatchers("/api/users/profile/**").authenticated()
+
+                        // ==================== PROTECTED BY DEFAULT ====================
+                        // Everything else requires authentication
+                        .anyRequest().authenticated())
+                .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()));
+
+        // Add authentication provider
         http.authenticationProvider(authenticationProvider());
+
         // Rate limiting filter runs first
         http.addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class);
 
-        // Add Dev Authentication Filter if present (active in dev profile)
-        if (devAuthenticationFilter != null) {
-            http.addFilterBefore(devAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-        }
-
+        // JWT filter for production authentication
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

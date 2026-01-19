@@ -143,6 +143,16 @@ public class JwtTokenProvider {
         return claims.get("primaryRole", String.class);
     }
 
+    public String getStaffRoleFromJWT(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        return claims.get("staffRole", String.class);
+    }
+
     public Long getUserIdFromToken(String token) {
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(key)
