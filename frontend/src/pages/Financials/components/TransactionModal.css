@@ -1,10 +1,23 @@
+/* Color Variables */
+:root {
+    --bg-modal: #1E1E1E;
+    --bg-input: #121212;
+    --text-primary: #FFFFFF;
+    --text-secondary: #D9D9D9;
+    --text-placeholder: #B8B8B8;
+    --border-color: #2E2E2E;
+    --primary-color: #4C8DFF;
+    --primary-hover: #3A7BE8;
+    --danger-color: #FF4D4F;
+}
+
 .modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.85);
     backdrop-filter: blur(4px);
     display: flex;
     justify-content: center;
@@ -14,20 +27,23 @@
 }
 
 .modal-container {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-primary);
-    border-radius: 12px;
+    background: var(--bg-modal);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
     width: 100%;
-    max-width: 500px;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    max-width: 600px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
 }
 
 .modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 16px 24px;
-    border-bottom: 1px solid var(--border-secondary);
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .modal-header h2 {
@@ -38,17 +54,12 @@
 }
 
 .modal-body {
-    padding: 24px;
+    padding: 20px 24px;
     display: flex;
     flex-direction: column;
     gap: 16px;
-}
-
-.modal-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    margin-top: 8px;
+    overflow-y: auto;
+    flex: 1;
 }
 
 .form-group {
@@ -69,57 +80,132 @@
 }
 
 .modal-input {
-    background: var(--bg-primary);
-    border: 1px solid var(--border-secondary);
-    border-radius: 6px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
     padding: 10px 12px;
     color: var(--text-primary);
     font-size: 0.9375rem;
+    line-height: 1.4;
     transition: all 0.2s;
+}
+
+.modal-input::placeholder {
+    color: var(--text-placeholder);
 }
 
 .modal-input:focus {
     outline: none;
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(76, 141, 255, 0.2);
 }
 
-.text-secondary {
-    color: var(--text-secondary);
-    font-size: 1.5rem;
-    background: none;
-    border: none;
+/* Date Input Styling */
+input[type="date"] {
+    position: relative;
+    color-scheme: dark;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%23FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>');
     cursor: pointer;
-    line-height: 1;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+}
+
+.input-error {
+    border-color: var(--danger-color);
+}
+
+.error-text {
+    font-size: 0.85rem;
+    color: var(--danger-color);
+    margin-top: 4px;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 24px;
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-modal);
+    border-radius: 0 0 16px 16px;
 }
 
 .btn-secondary {
-    padding: 8px 16px;
+    padding: 10px 20px;
     border-radius: 6px;
     background: transparent;
-    color: var(--text-primary);
-    border: 1px solid var(--border-secondary);
+    color: #E6E6E6;
+    border: 1px solid #5A5A5A;
+    font-size: 0.9375rem;
+    font-weight: 500;
     cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-secondary:hover {
+    background: #2A2A2A;
 }
 
 .btn-primary {
-    padding: 8px 16px;
+    padding: 10px 20px;
     border-radius: 6px;
-    background: var(--color-primary);
-    color: black;
+    background: var(--primary-color);
+    color: white;
     border: none;
+    font-size: 0.9375rem;
     font-weight: 600;
     cursor: pointer;
+    transition: background 0.2s;
+    flex: 1;
+    max-width: 180px;
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: scale(0.95);
+.btn-primary:hover {
+    background: var(--primary-hover);
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.close-btn:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 640px) {
+    .modal-container {
+        height: auto;
+        max-height: 95vh;
+        border-radius: 16px 16px 0 0;
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        max-width: none;
+    }
+    
+    .form-row {
+        flex-direction: row;
+        gap: 12px;
     }
 
-    to {
-        opacity: 1;
-        transform: scale(1);
+    .modal-footer {
+        padding: 16px 20px;
+        padding-bottom: max(16px, env(safe-area-inset-bottom));
     }
 }

@@ -1,7 +1,6 @@
 package com.gym.management.controller;
 
 import com.gym.management.dto.TrainerSettingsDTO;
-import com.gym.management.model.User;
 import com.gym.management.security.CustomUserDetails;
 import com.gym.management.service.TrainerSettingsService;
 import org.springframework.beans.factory.annotation.Autowired;

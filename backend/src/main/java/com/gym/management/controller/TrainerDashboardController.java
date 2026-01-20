@@ -12,7 +12,6 @@ import com.gym.management.dto.trainer.TrainerProfileDTO;
 import com.gym.management.repository.PTSessionRepository;
 import com.gym.management.repository.ProgressNoteRepository;
 import com.gym.management.repository.SessionRatingRepository;
-import com.gym.management.repository.TrainerClassRepository;
 import com.gym.management.repository.UserRepository;
 import com.gym.management.security.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -193,8 +192,8 @@ public class TrainerDashboardController {
 
         // Pending Notes
         allSessions.stream()
-                .filter(s -> s.getStatus() == SessionStatus.COMPLETED && 
-                       (s.getProgressNotes() == null || s.getProgressNotes().trim().isEmpty()))
+                .filter(s -> s.getStatus() == SessionStatus.COMPLETED &&
+                        (s.getProgressNotes() == null || s.getProgressNotes().trim().isEmpty()))
                 .sorted(Comparator.comparing(PTSession::getSessionDate).reversed())
                 .limit(2)
                 .forEach(s -> alerts.add(DashboardAlertDTO.builder()
@@ -209,8 +208,8 @@ public class TrainerDashboardController {
 
         // Missed Sessions
         allSessions.stream()
-                .filter(s -> s.getStatus() == SessionStatus.MISSED || 
-                       (s.getStatus() == SessionStatus.SCHEDULED && s.getSessionDate().isBefore(LocalDateTime.now())))
+                .filter(s -> s.getStatus() == SessionStatus.MISSED ||
+                        (s.getStatus() == SessionStatus.SCHEDULED && s.getSessionDate().isBefore(LocalDateTime.now())))
                 .filter(s -> s.getSessionDate().isAfter(LocalDateTime.now().minusDays(7))) // Last 7 days
                 .sorted(Comparator.comparing(PTSession::getSessionDate).reversed())
                 .limit(2)
@@ -223,10 +222,11 @@ public class TrainerDashboardController {
                         .severity("high")
                         .time(formatTimeAgo(s.getSessionDate()))
                         .build()));
-        
+
         // Sort alerts by severity (High first) then time
         alerts.sort((a1, a2) -> {
-            if (a1.getSeverity().equals(a2.getSeverity())) return 0;
+            if (a1.getSeverity().equals(a2.getSeverity()))
+                return 0;
             return "high".equals(a1.getSeverity()) ? -1 : 1;
         });
 
@@ -238,7 +238,8 @@ public class TrainerDashboardController {
         for (int i = 0; i < 7; i++) {
             LocalDate date = weekStart.plusDays(i);
             long count = allSessions.stream()
-                    .filter(s -> s.getSessionDate().toLocalDate().equals(date) && "COMPLETED".equals(s.getStatus().name()))
+                    .filter(s -> s.getSessionDate().toLocalDate().equals(date)
+                            && "COMPLETED".equals(s.getStatus().name()))
                     .count();
             String label = date.getDayOfWeek().name().substring(0, 3); // Mon, Tue...
             weeklyActivity.add(ChartDataDTO.builder().label(label).value((double) count).build());
@@ -259,17 +260,20 @@ public class TrainerDashboardController {
         }
 
         // Session Distribution (PT vs Classes)
-        // Note: Currently we only fetch PTSessions in this controller logic. 
+        // Note: Currently we only fetch PTSessions in this controller logic.
         // Ideally we should also count classes from TrainerClassRepository.
         // For now, we will count PT sessions as "PT".
         // Let's fetch classes to make it real.
-        List<com.gym.management.model.TrainerClass> classes = trainerClassRepository.findByTrainerIdOrderByClassDateAscStartTimeAsc(trainerId);
+        List<com.gym.management.model.TrainerClass> classes = trainerClassRepository
+                .findByTrainerIdOrderByClassDateAscStartTimeAsc(trainerId);
         long ptCount = allSessions.size();
         long classCount = classes.size();
 
         List<ChartDataDTO> sessionDistribution = new ArrayList<>();
-        sessionDistribution.add(ChartDataDTO.builder().label("PT Sessions").value((double) ptCount).meta("#06b6d4").build()); // Cyan
-        sessionDistribution.add(ChartDataDTO.builder().label("Classes").value((double) classCount).meta("#8b5cf6").build()); // Purple
+        sessionDistribution
+                .add(ChartDataDTO.builder().label("PT Sessions").value((double) ptCount).meta("#06b6d4").build()); // Cyan
+        sessionDistribution
+                .add(ChartDataDTO.builder().label("Classes").value((double) classCount).meta("#8b5cf6").build()); // Purple
 
         TrainerDashboardStatsDTO stats = TrainerDashboardStatsDTO.builder()
                 .trainerName(trainer.getFullName())
@@ -289,12 +293,14 @@ public class TrainerDashboardController {
 
         return ResponseEntity.ok(stats);
     }
-    
+
     private String formatTimeAgo(LocalDateTime dateTime) {
         long minutes = java.time.temporal.ChronoUnit.MINUTES.between(dateTime, LocalDateTime.now());
-        if (minutes < 60) return minutes + "m ago";
+        if (minutes < 60)
+            return minutes + "m ago";
         long hours = minutes / 60;
-        if (hours < 24) return hours + "h ago";
+        if (hours < 24)
+            return hours + "h ago";
         return (hours / 24) + "d ago";
     }
 

@@ -18,6 +18,8 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
+    "@iconify-json/game-icons": "^1.2.3",
+    "@iconify/react": "^6.0.2",
     "@lottiefiles/dotlottie-react": "^0.17.9",
     "@mui/icons-material": "^7.3.6",
     "@mui/material": "^7.3.6",
@@ -53,9 +55,11 @@
     "@types/jest": "^30.0.0",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.5",
+    "@types/react-big-calendar": "^1.16.3",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
     "autoprefixer": "^10.4.23",
+    "concurrently": "^8.2.2",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
@@ -67,8 +71,7 @@
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
     "vite": "npm:rolldown-vite@7.2.5",
-    "vitest": "^4.0.15",
-    "concurrently": "^8.2.2"
+    "vitest": "^4.0.15"
   },
   "overrides": {
     "vite": "npm:rolldown-vite@7.2.5"

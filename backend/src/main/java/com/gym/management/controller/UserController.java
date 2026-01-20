@@ -144,4 +144,32 @@ public class UserController {
                 ? ResponseEntity.ok(trainer)
                 : ResponseEntity.notFound().build();
     }
+
+    // Get performance metrics for all trainers
+    @GetMapping("/trainers/performance")
+    public ResponseEntity<?> getAllTrainersPerformance() {
+        try {
+            return ResponseEntity.ok(userService.getAllTrainersPerformance());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500)
+                    .body(java.util.Map.of("error", e.getMessage(), "type", e.getClass().getName()));
+        }
+    }
+
+    // Get performance metrics for a specific trainer
+    @GetMapping("/trainers/{trainerId}/performance")
+    public ResponseEntity<?> getTrainerPerformance(@PathVariable Long trainerId) {
+        try {
+            var performance = userService.getTrainerPerformance(trainerId);
+            if (performance != null) {
+                return ResponseEntity.ok(performance);
+            }
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500)
+                    .body(java.util.Map.of("error", e.getMessage(), "type", e.getClass().getName()));
+        }
+    }
 }

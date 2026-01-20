@@ -14,7 +14,7 @@ import api from '../../services/api';
 import './TrainerDashboard.css';
 
 // New Components
-import DashboardStatCard from './components/DashboardStatCard';
+import DashboardStatCard from '../../components/dashboard/shared/DashboardStatCard';
 import ActivityChart from './components/ActivityChart';
 import EarningsChart from './components/EarningsChart';
 import SessionPieChart from './components/SessionPieChart';

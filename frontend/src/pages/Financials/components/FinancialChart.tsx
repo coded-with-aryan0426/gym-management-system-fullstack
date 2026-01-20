@@ -46,6 +46,32 @@ const FinancialChart: React.FC<FinancialChartProps> = ({ data, period, onPeriodC
         );
     };
 
+    if (!data || data.length === 0) {
+        return (
+            <div className="financial-chart">
+                <div className="chart-header">
+                    <div className="chart-title-group">
+                        <h3 className="chart-title">Revenue vs Expenses</h3>
+                    </div>
+                    <div className="period-toggle">
+                        {(['day', 'week', 'month'] as const).map((p) => (
+                            <button
+                                key={p}
+                                className={`period-btn ${period === p ? 'active' : ''}`}
+                                onClick={() => onPeriodChange(p)}
+                            >
+                                {p.charAt(0).toUpperCase() + p.slice(1)}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+                <div className="chart-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-tertiary)' }}>
+                    No financial data available for this period
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="financial-chart">
             <div className="chart-header">
@@ -102,6 +128,21 @@ const FinancialChart: React.FC<FinancialChartProps> = ({ data, period, onPeriodC
                             tickLine={false}
                             tick={{ fill: '#71717a', fontSize: 11 }}
                             dy={8}
+                            tickFormatter={(value) => {
+                                if (period === 'month') {
+                                    // For monthly view, show date like "20"
+                                    const d = new Date(value);
+                                    return isNaN(d.getTime()) ? value : d.getDate().toString();
+                                } else if (period === 'day') {
+                                    // For daily view, show time or date
+                                    return value;
+                                } else if (period === 'week') {
+                                    // For weekly view, show day name
+                                    const d = new Date(value);
+                                    return isNaN(d.getTime()) ? value : d.toLocaleDateString('en-US', { weekday: 'short' });
+                                }
+                                return value;
+                            }}
                         />
                         <YAxis 
                             axisLine={false}

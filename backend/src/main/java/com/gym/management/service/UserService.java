@@ -2,6 +2,7 @@ package com.gym.management.service;
 
 import com.gym.management.dto.MemberDTO;
 import com.gym.management.dto.PageResponse;
+import com.gym.management.dto.TrainerPerformanceDTO;
 import com.gym.management.model.Role;
 import com.gym.management.model.User;
 import com.gym.management.model.Membership;
@@ -13,7 +14,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -523,5 +526,71 @@ public class UserService {
             return userRepository.findById(trainerId).orElse(null);
         }
         return null;
+    }
+
+    /**
+     * Calculate performance metrics for a trainer
+     * 
+     * @param trainerId The trainer's user ID
+     * @return TrainerPerformanceDTO with clients, revenue, sessions
+     */
+    @Transactional(readOnly = true)
+    public TrainerPerformanceDTO getTrainerPerformance(Long trainerId) {
+        User trainer = userRepository.findById(trainerId).orElse(null);
+        if (trainer == null) {
+            return null;
+        }
+
+        // Get client count from trainer-customer mapping
+        int clientCount = trainer.getCustomers() != null ? trainer.getCustomers().size() : 0;
+
+        // Get current month's date range
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime startOfMonth = now.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
+        LocalDateTime endOfMonth = now.withDayOfMonth(now.toLocalDate().lengthOfMonth())
+                .withHour(23).withMinute(59).withSecond(59);
+
+        // Count completed sessions this month
+        Long completedSessions = ptSessionRepository.countCompletedSessionsByTrainerAndDateRange(
+                trainerId, startOfMonth, endOfMonth);
+        int sessionsCount = completedSessions != null ? completedSessions.intValue() : 0;
+
+        // Get total session minutes this month
+        Long totalMinutes = ptSessionRepository.sumSessionMinutesByTrainerAndDateRange(
+                trainerId, startOfMonth, endOfMonth);
+        double totalHours = totalMinutes != null ? totalMinutes / 60.0 : 0.0;
+
+        // Calculate revenue (using default rate of ₹500/session for MVP)
+        // In future: fetch from TrainerCompensationRule
+        BigDecimal defaultRatePerSession = new BigDecimal("500");
+        BigDecimal monthlyRevenue = defaultRatePerSession.multiply(BigDecimal.valueOf(sessionsCount));
+
+        return TrainerPerformanceDTO.builder()
+                .trainerId(trainerId)
+                .clientCount(clientCount)
+                .completedSessions(sessionsCount)
+                .totalHours(totalHours)
+                .monthlyRevenue(monthlyRevenue)
+                .build();
+    }
+
+    /**
+     * Get performance metrics for all trainers (batch)
+     * 
+     * @return Map of trainerId -> TrainerPerformanceDTO
+     */
+    @Transactional(readOnly = true)
+    public Map<Long, TrainerPerformanceDTO> getAllTrainersPerformance() {
+        List<User> trainers = userRepository.findByRoleName("TRAINER");
+        Map<Long, TrainerPerformanceDTO> result = new HashMap<>();
+
+        for (User trainer : trainers) {
+            TrainerPerformanceDTO perf = getTrainerPerformance(trainer.getUserId());
+            if (perf != null) {
+                result.put(trainer.getUserId(), perf);
+            }
+        }
+
+        return result;
     }
 }

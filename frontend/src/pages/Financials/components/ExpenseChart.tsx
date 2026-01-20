@@ -1,34 +1,39 @@
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import type { ExpenseBreakdown } from '../../../types/finance';
 import './ExpenseChart.css';
 
-const mockData = [
-    { name: 'Salaries', value: 65000, percent: 48, color: '#F59E0B' },
-    { name: 'Rent', value: 35000, percent: 26, color: '#EF4444' },
-    { name: 'Utilities', value: 15000, percent: 11, color: '#3B82F6' },
-    { name: 'Equipment', value: 12000, percent: 9, color: '#10B981' },
-    { name: 'Other', value: 8000, percent: 6, color: '#8B5CF6' },
-];
-
 interface ExpenseChartProps {
+    data?: ExpenseBreakdown[]; // Now accepts real data
     onFilter?: (category: string) => void;
 }
 
-const ExpenseChart: React.FC<ExpenseChartProps> = ({ onFilter }) => {
-    const total = mockData.reduce((sum, d) => sum + d.value, 0);
-    const topExpense = mockData[0];
+const ExpenseChart: React.FC<ExpenseChartProps> = ({ data = [], onFilter }) => {
+    // Fallback if empty
+    if (!data || data.length === 0) {
+        return (
+            <div className="expense-chart empty-state">
+                <div className="chart-area empty">
+                    <span>No expenses record</span>
+                </div>
+            </div>
+        );
+    }
+
+    const total = data.reduce((sum, d) => sum + d.value, 0);
+    const topExpense = data.reduce((prev, current) => (prev.value > current.value) ? prev : current, data[0]);
 
     const CustomTooltip = ({ active, payload }: any) => {
         if (!active || !payload?.length) return null;
-        const data = payload[0].payload;
+        const item = payload[0].payload;
         return (
             <div className="expense-tooltip">
-                <span className="tooltip-name">{data.name}</span>
-                <span className="tooltip-value">₹{data.value.toLocaleString('en-IN')}</span>
-                <span className="tooltip-percent">{data.percent}% of total</span>
+                <span className="tooltip-name">{item.label}</span>
+                <span className="tooltip-value">₹{item.value.toLocaleString('en-IN')}</span>
+                <span className="tooltip-percent">{item.percentage}% of total</span>
             </div>
         );
-    };
+    }
 
     return (
         <div className="expense-chart">
@@ -36,28 +41,28 @@ const ExpenseChart: React.FC<ExpenseChartProps> = ({ onFilter }) => {
                 <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                         layout="vertical"
-                        data={mockData}
+                        data={data}
                         margin={{ top: 0, right: 16, left: 0, bottom: 0 }}
                     >
                         <XAxis type="number" hide />
                         <YAxis
-                            dataKey="name"
+                            dataKey="label"
                             type="category"
-                            width={65}
+                            width={100}
                             axisLine={false}
                             tickLine={false}
-                            tick={{ fill: '#a1a1aa', fontSize: 10 }}
+                            tick={{ fill: '#a1a1aa', fontSize: 11 }}
                         />
                         <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
                         <Bar
                             dataKey="value"
                             radius={[0, 4, 4, 0]}
-                            barSize={14}
+                            barSize={16}
                             style={{ cursor: 'pointer' }}
-                            onClick={(data) => onFilter?.('Other')}
+                            onClick={(data: any) => onFilter?.(data?.label)}
                         >
-                            {mockData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={entry.color} />
+                            {data.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={entry.color || '#EF4444'} />
                             ))}
                         </Bar>
                     </BarChart>
@@ -69,12 +74,14 @@ const ExpenseChart: React.FC<ExpenseChartProps> = ({ onFilter }) => {
                     <span className="summary-label">Total Expenses</span>
                     <span className="summary-value">₹{total.toLocaleString('en-IN')}</span>
                 </div>
-                <div className="summary-insight">
-                    <span className="insight-indicator warning">!</span>
-                    <span className="insight-text">
-                        <strong>{topExpense.name}</strong> is {topExpense.percent}% of costs
-                    </span>
-                </div>
+                {topExpense && topExpense.value > 0 && (
+                    <div className="summary-insight">
+                        <span className="insight-indicator warning">!</span>
+                        <span className="insight-text">
+                            <strong>{topExpense.label}</strong> is {topExpense.percentage}% of costs
+                        </span>
+                    </div>
+                )}
             </div>
         </div>
     );

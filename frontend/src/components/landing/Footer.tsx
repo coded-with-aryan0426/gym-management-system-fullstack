@@ -41,16 +41,17 @@ export default function Footer() {
     if (link.href) {
       navigate(link.href);
     } else if (link.sectionId) {
+      const sectionId = link.sectionId;
       // If on home page, scroll. Otherwise navigate to home then scroll
       if (location.pathname === '/') {
-        const element = document.getElementById(link.sectionId);
+        const element = document.getElementById(sectionId);
         if (element) {
           element.scrollIntoView({ behavior: 'smooth' });
         }
       } else {
         navigate('/');
         setTimeout(() => {
-          const element = document.getElementById(link.sectionId);
+          const element = document.getElementById(sectionId);
           if (element) {
             element.scrollIntoView({ behavior: 'smooth' });
           }

@@ -15,14 +15,25 @@ const TransactionTable: React.FC<TransactionTableProps> = ({ transactions, onAct
         return transactions.filter(tx => {
             const matchSearch = !search || 
                 tx.description.toLowerCase().includes(search.toLowerCase()) ||
-                tx.invoiceId.toLowerCase().includes(search.toLowerCase());
+                (tx.invoiceId || '').toLowerCase().includes(search.toLowerCase());
             const matchStatus = statusFilter === 'all' || tx.status === statusFilter;
             return matchSearch && matchStatus;
         });
     }, [transactions, search, statusFilter]);
 
     const formatDate = (dateStr: string) => {
+        if (!dateStr || dateStr === 'Invalid Date') return '-';
         const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return '-';
+        
+        // Calculate relative time if recent (within 7 days)
+        const now = new Date();
+        const diffDays = Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
+        
+        if (diffDays === 0) return 'Today';
+        if (diffDays === 1) return 'Yesterday';
+        if (diffDays < 7) return `${diffDays} days ago`;
+        
         return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
     };
 
@@ -81,7 +92,7 @@ const TransactionTable: React.FC<TransactionTableProps> = ({ transactions, onAct
                                 onClick={() => onAction?.('view', tx)}
                             >
                                 <td className="col-date">
-                                    <span className="date-text">{formatDate(tx.date)}</span>
+                                    <span className="date-text">{formatDate(tx.date || '')}</span>
                                     <span className="invoice-id">{tx.invoiceId}</span>
                                 </td>
                                 <td className="col-desc">

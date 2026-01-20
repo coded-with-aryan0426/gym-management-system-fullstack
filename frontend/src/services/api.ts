@@ -1,5 +1,5 @@
 import axios, { type AxiosInstance, type AxiosError } from 'axios';
-import type { User, CreateUserDto, UpdateUserDto, MemberDTO } from '../types/user';
+import type { User, CreateUserDto, UpdateUserDto, MemberDTO, TrainerPerformance } from '../types/user';
 import type { GymSettings, UpdateSettingsDto } from '../types/settings';
 import type { DashboardStats, PageResponse } from '../types/api';
 
@@ -87,9 +87,23 @@ const api = {
     return response.data;
   },
 
+  async getStaffPaginated(
+    page: number = 0,
+    size: number = 10,
+    search?: string,
+    role?: string
+  ): Promise<PageResponse<User>> {
+    return this.getTrainersPaginated(page, size, search, role);
+  },
+
   async searchUsers(role: string, query: string): Promise<User[]> {
     const response = await apiClient.get<User[]>('/users/search', { params: { role, q: query } });
 
+    return response.data;
+  },
+
+  async getAllTrainersPerformance(): Promise<Record<number, TrainerPerformance>> {
+    const response = await apiClient.get<Record<number, TrainerPerformance>>('/users/trainers/performance');
     return response.data;
   },
 
@@ -229,6 +243,11 @@ const api = {
     return response.data;
   },
 
+  async getOwnerDashboard(): Promise<any> {
+    const response = await apiClient.get('/owner/dashboard');
+    return response.data;
+  },
+
   async getFloorStatus(): Promise<unknown[]> {
     const response = await apiClient.get('/dashboard/floor-status');
     return response.data;
@@ -353,6 +372,7 @@ import type { PTSessionDTO, RecurringSessionRequest, CompleteSessionRequest, Ava
 import type { TrainerPerformanceDTO, AttendanceRecordDTO } from '../types/trainerPerformance';
 import type { TrainerShiftDTO } from '../types/trainerShift';
 import type { GymHoursDTO, PTConfigDTO, BlackoutDayDTO } from '../types/gymSettings';
+
 import type { MembershipPackageDTO } from '../types/membershipPackage';
 
 const ptSessionApi = {

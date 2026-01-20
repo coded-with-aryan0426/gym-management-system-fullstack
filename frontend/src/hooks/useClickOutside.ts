@@ -7,7 +7,7 @@ import { useEffect, type RefObject } from 'react'
  * @param enabled - Whether the listener is active (default: true)
  */
 export function useClickOutside<T extends HTMLElement>(
-    ref: RefObject<T>,
+    ref: RefObject<T | null>,
     callback: () => void,
     enabled: boolean = true
 ): void {

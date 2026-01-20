@@ -35,7 +35,7 @@ const getFileIcon = (type: ReturnType<typeof getFileType>) => {
 };
 
 export const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({
-    document,
+    document: previewDocument,
     onClose
 }) => {
     const modalRef = useRef<HTMLDivElement>(null);
@@ -43,7 +43,7 @@ export const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({
 
     // Focus trap and escape key
     useEffect(() => {
-        if (!document) return;
+        if (!previewDocument) return;
 
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Escape') {
@@ -53,18 +53,18 @@ export const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({
 
         // Focus close button on open
         closeButtonRef.current?.focus();
-        document.body?.classList.add('modal-open');
+        window.document.body?.classList.add('modal-open');
         window.addEventListener('keydown', handleKeyDown);
 
         return () => {
-            document.body?.classList.remove('modal-open');
+            window.document.body?.classList.remove('modal-open');
             window.removeEventListener('keydown', handleKeyDown);
         };
-    }, [document, onClose]);
+    }, [previewDocument, onClose]);
 
-    if (!document) return null;
+    if (!previewDocument) return null;
 
-    const fileType = getFileType(document.name, document.type);
+    const fileType = getFileType(previewDocument.name, previewDocument.type);
     const FileIcon = getFileIcon(fileType);
 
     const renderPreview = () => {
@@ -72,26 +72,26 @@ export const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({
             case 'pdf':
                 return (
                     <iframe
-                        src={document.url}
+                        src={previewDocument.url}
                         className="dpm__iframe"
-                        title={`Preview of ${document.name}`}
+                        title={`Preview of ${previewDocument.name}`}
                     />
                 );
             case 'image':
                 return (
                     <img
-                        src={document.url}
-                        alt={document.name}
+                        src={previewDocument.url}
+                        alt={previewDocument.name}
                         className="dpm__image"
                     />
                 );
             case 'video':
                 return (
                     <video
-                        src={document.url}
+                        src={previewDocument.url}
                         controls
                         className="dpm__video"
-                        aria-label={`Video: ${document.name}`}
+                        aria-label={`Video: ${previewDocument.name}`}
                     >
                         Your browser does not support video playback.
                     </video>
@@ -102,8 +102,8 @@ export const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({
                         <FileIcon size={48} />
                         <p>Preview unavailable for this file type</p>
                         <a
-                            href={document.url}
-                            download={document.name}
+                            href={previewDocument.url}
+                            download={previewDocument.name}
                             className="dpm__download-btn"
                         >
                             <Download size={16} /> Download to view
@@ -116,8 +116,8 @@ export const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({
                         <File size={48} />
                         <p>Preview not available</p>
                         <a
-                            href={document.url}
-                            download={document.name}
+                            href={previewDocument.url}
+                            download={previewDocument.name}
                             className="dpm__download-btn"
                         >
                             <Download size={16} /> Download file
@@ -144,17 +144,17 @@ export const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({
                     <div className="dpm__title-row">
                         <FileIcon size={18} className="dpm__file-icon" />
                         <div className="dpm__title-info">
-                            <h2 id="dpm-title" className="dpm__title">{document.name}</h2>
+                            <h2 id="dpm-title" className="dpm__title">{previewDocument.name}</h2>
                             <span className="dpm__meta">
                                 {fileType.toUpperCase()}
-                                {document.uploadedAt && ` • Uploaded ${document.uploadedAt}`}
+                                {previewDocument.uploadedAt && ` • Uploaded ${previewDocument.uploadedAt}`}
                             </span>
                         </div>
                     </div>
                     <div className="dpm__actions">
                         <a
-                            href={document.url}
-                            download={document.name}
+                            href={previewDocument.url}
+                            download={previewDocument.name}
                             className="dpm__action-btn"
                             aria-label="Download file"
                         >

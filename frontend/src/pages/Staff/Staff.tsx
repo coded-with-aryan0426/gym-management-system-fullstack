@@ -111,7 +111,7 @@ const Staff: React.FC = () => {
       await api.updateUser(member.userId, {
         fullName: member.fullName,
         email: member.email,
-        phoneNumber: member.phoneNumber,
+        phone: member.phone,
       });
       showToast(`Profile updated for ${member.fullName}`, 'success');
       loadStaffPaginated();
@@ -211,7 +211,7 @@ const Staff: React.FC = () => {
                   <circle cx="12" cy="12" r="10" />
                   <polyline points="12 6 12 12 16 14" />
                 </svg>
-                New First
+                Newest
               </span>
             ) : (
               <span className="sort-badge sort-badge--alpha">

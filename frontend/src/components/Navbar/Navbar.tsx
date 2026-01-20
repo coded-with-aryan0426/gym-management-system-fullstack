@@ -52,7 +52,8 @@ interface SearchResult {
 
 const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
   const navigate = useNavigate();
-  const { isDarkMode, toggleTheme } = useTheme();
+  const { resolvedTheme, toggleTheme } = useTheme();
+  const isDarkMode = resolvedTheme === 'dark';
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
@@ -612,4 +613,3 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
 };
 
 export default Navbar;
-

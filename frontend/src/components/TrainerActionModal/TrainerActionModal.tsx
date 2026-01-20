@@ -128,7 +128,7 @@ const StaffActionModal: React.FC<StaffActionModalProps> = ({
         await api.updateUser(staff.userId, {
           fullName: editForm.fullName,
           email: editForm.email,
-          phoneNumber: editForm.phone,
+          phone: editForm.phone,
         })
         onEditProfile({ ...staff, ...editForm })
       } catch (err) {

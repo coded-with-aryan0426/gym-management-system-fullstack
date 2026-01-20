@@ -84,8 +84,6 @@ public class AttachmentController {
             }
         } catch (MalformedURLException e) {
             return ResponseEntity.badRequest().build();
-        } catch (IOException e) {
-            return ResponseEntity.internalServerError().build();
         }
     }
 }

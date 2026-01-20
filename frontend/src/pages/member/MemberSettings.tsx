@@ -163,6 +163,8 @@ const MemberSettings: React.FC = () => {
                   <p>Get alerts 1 hour before your classes</p>
                 </div>
                 <Toggle
+                  label=""
+                  name="classReminders"
                   checked={notifications.classReminders}
                   onChange={(val) => handleToggle("classReminders", val, setNotifications)}
                 />
@@ -173,6 +175,8 @@ const MemberSettings: React.FC = () => {
                   <p>Notifications for new messages from trainers</p>
                 </div>
                 <Toggle
+                  label=""
+                  name="trainerMessages"
                   checked={notifications.trainerMessages}
                   onChange={(val) => handleToggle("trainerMessages", val, setNotifications)}
                 />
@@ -183,6 +187,8 @@ const MemberSettings: React.FC = () => {
                   <p>When you hit goals or unlock badges</p>
                 </div>
                 <Toggle
+                  label=""
+                  name="achievements"
                   checked={notifications.achievements}
                   onChange={(val) => handleToggle("achievements", val, setNotifications)}
                 />
@@ -254,7 +260,7 @@ const MemberSettings: React.FC = () => {
           <div className="avatar-placeholder">BR</div>
           <div className="info">
             <h1>Barbara Robinson</h1>
-            <Badge variant="blue">Premium Member</Badge>
+            <Badge variant="info">Premium Member</Badge>
           </div>
         </div>
         <button className="logout-btn" onClick={() => toast.success("Logged out")}>

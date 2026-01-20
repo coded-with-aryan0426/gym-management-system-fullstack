@@ -3,8 +3,6 @@ package com.gym.management.dto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.List;
 
 @Data
 @NoArgsConstructor

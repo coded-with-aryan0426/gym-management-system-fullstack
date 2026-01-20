@@ -167,4 +167,37 @@ public interface PTSessionRepository extends JpaRepository<PTSession, Long> {
         @Query("SELECT s FROM PTSession s WHERE s.status = 'SCHEDULED' " +
                         "AND FUNCTION('DATEADD', MINUTE, s.durationMinutes, s.sessionDate) < :now")
         List<PTSession> findExpiredScheduledSessions(@Param("now") LocalDateTime now);
+
+        /**
+         * Count completed sessions for a trainer within a date range
+         * Used for revenue calculation
+         */
+        @Query("SELECT COUNT(s) FROM PTSession s WHERE s.trainer.userId = :trainerId " +
+                        "AND s.status = 'COMPLETED' " +
+                        "AND s.sessionDate BETWEEN :startDate AND :endDate")
+        Long countCompletedSessionsByTrainerAndDateRange(
+                        @Param("trainerId") Long trainerId,
+                        @Param("startDate") LocalDateTime startDate,
+                        @Param("endDate") LocalDateTime endDate);
+
+        /**
+         * Count distinct active members for a trainer (clients with completed sessions)
+         */
+        @Query("SELECT COUNT(DISTINCT s.member.userId) FROM PTSession s " +
+                        "WHERE s.trainer.userId = :trainerId " +
+                        "AND s.status = 'COMPLETED'")
+        Long countDistinctMembersByTrainer(@Param("trainerId") Long trainerId);
+
+        /**
+         * Get total session minutes for a trainer within a date range
+         * Used for hourly-based revenue calculation
+         */
+        @Query("SELECT COALESCE(SUM(s.durationMinutes), 0) FROM PTSession s " +
+                        "WHERE s.trainer.userId = :trainerId " +
+                        "AND s.status = 'COMPLETED' " +
+                        "AND s.sessionDate BETWEEN :startDate AND :endDate")
+        Long sumSessionMinutesByTrainerAndDateRange(
+                        @Param("trainerId") Long trainerId,
+                        @Param("startDate") LocalDateTime startDate,
+                        @Param("endDate") LocalDateTime endDate);
 }

@@ -157,30 +157,19 @@ const KPICard: React.FC<KPICardProps> = ({
 
 interface KPIGridProps {
     className?: string;
+    stats: {
+        revenue: number;
+        revenueChange: number;
+        activeMembers: number;
+        maxCapacity: number;
+        checkIns: number;
+        pendingPayments: number;
+        pendingCount: number;
+    };
+    loading?: boolean;
 }
 
-export const KPIGrid: React.FC<KPIGridProps> = ({ className }) => {
-    const [metrics, setMetrics] = useState<any>({});
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchMetrics = async () => {
-            try {
-                const response = await api.get('/dashboard/metrics');
-                setMetrics(response.data || {});
-            } catch (err) {
-                console.error('Failed to fetch metrics:', err);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-        fetchMetrics();
-
-        // Refresh every 60 seconds
-        const interval = setInterval(fetchMetrics, 60000);
-        return () => clearInterval(interval);
-    }, []);
-
+export const KPIGrid: React.FC<KPIGridProps> = ({ className, stats, loading = false }) => {
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('en-IN', {
             style: 'currency',
@@ -190,19 +179,19 @@ export const KPIGrid: React.FC<KPIGridProps> = ({ className }) => {
         }).format(amount);
     };
 
-    if (isLoading) {
+    if (loading) {
         return (
             <div className={className} style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(2, 1fr)',
+                gridTemplateColumns: 'repeat(4, 1fr)', // 4 columns
                 gap: 16,
                 marginBottom: 24
             }}>
-                {[1, 2].map(i => (
+                {[1, 2, 3, 4].map(i => (
                     <div key={i} style={{
                         background: 'rgba(255, 255, 255, 0.02)',
                         borderRadius: 16,
-                        height: 140,
+                        height: 120, // Slightly shorter for 4-up
                         animation: 'pulse 1.5s ease-in-out infinite'
                     }} />
                 ))}
@@ -211,32 +200,47 @@ export const KPIGrid: React.FC<KPIGridProps> = ({ className }) => {
     }
 
     return (
-        <div className={className} style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: 16,
-            marginBottom: 24
-        }}>
-            {/* Tier 1: Large KPIs - 2 cards only */}
+        <div className={`kpi-grid ${className || ''}`}>
+            {/* 1. Revenue */}
             <KPICard
                 title="Today's Revenue"
-                subtitle="Liquidity"
-                value={formatCurrency(metrics.todayRevenue || 0)}
-                trend={12}
+                value={formatCurrency(stats.revenue)}
+                trend={stats.revenueChange}
                 trendLabel="vs yesterday"
                 icon="💰"
                 tier={1}
-                color="#DC2626"
+                color="#10B981" // Emerald
             />
+
+            {/* 2. Active Now */}
             <KPICard
                 title="Active Now"
-                subtitle="Current Check-ins"
-                value={metrics.liveCheckIns || 0}
-                trend={8}
-                trendLabel="vs avg"
+                subtitle={`${Math.round((stats.activeMembers / stats.maxCapacity) * 100)}% Capacity`}
+                value={stats.activeMembers}
                 icon="🏃"
                 tier={1}
-                color="#DC2626"
+                color="#3B82F6" // Blue
+            />
+
+            {/* 3. Check-ins */}
+            <KPICard
+                title="Check-ins Today"
+                value={stats.checkIns}
+                trend={8} // Mock trend for checkins if not available
+                trendLabel="vs yesterday"
+                icon="📍"
+                tier={1}
+                color="#F59E0B" // Amber
+            />
+
+            {/* 4. Pending Payments */}
+            <KPICard
+                title="Pending Payments"
+                subtitle={`${stats.pendingCount} Overdue`}
+                value={formatCurrency(stats.pendingPayments)}
+                icon="💳"
+                tier={1}
+                color="#EF4444" // Red
             />
         </div>
     );

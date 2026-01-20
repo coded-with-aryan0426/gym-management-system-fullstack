@@ -1,9 +1,20 @@
 package com.gym.management.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "TRANSACTIONS")
 public class Transaction {
@@ -15,6 +26,7 @@ public class Transaction {
     private Long transactionId;
 
     @Column(name = "DATE_TIME", nullable = false)
+    @com.fasterxml.jackson.annotation.JsonFormat(shape = com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime dateTime;
 
     @Column(name = "DESCRIPTION")
@@ -23,11 +35,20 @@ public class Transaction {
     @Column(name = "CATEGORY")
     private String category; // "Membership", "POS", "Salary", "Expense"
 
+    @Column(name = "TYPE")
+    private String type; // "INCOME", "EXPENSE"
+
     @Column(name = "AMOUNT", precision = 10, scale = 2)
     private BigDecimal amount;
 
     @Column(name = "STATUS")
-    private String status; // "Completed", "Pending"
+    private String status; // "Completed", "Pending", "Cancelled"
+
+    @Column(name = "REFERENCE_NUMBER")
+    private String referenceNumber;
+
+    @Column(name = "CREATED_BY")
+    private String createdBy;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USER_ID")
@@ -37,86 +58,16 @@ public class Transaction {
     @Column(name = "USER_ID", insertable = false, updatable = false)
     private Long userId;
 
-    // Constructors
-    public Transaction() {
-        this.dateTime = LocalDateTime.now();
-        this.status = "Pending";
-    }
+    @CreationTimestamp
+    @Column(name = "CREATED_AT", updatable = false)
+    private LocalDateTime createdAt;
 
-    public Transaction(String description, String category, BigDecimal amount) {
-        this.dateTime = LocalDateTime.now();
-        this.description = description;
-        this.category = category;
-        this.amount = amount;
-        this.status = "Pending";
-    }
+    @UpdateTimestamp
+    @Column(name = "UPDATED_AT")
+    private LocalDateTime updatedAt;
 
-    // Getters and Setters
-    public Long getTransactionId() {
-        return transactionId;
-    }
-
-    public void setTransactionId(Long transactionId) {
-        this.transactionId = transactionId;
-    }
-
-    public LocalDateTime getDateTime() {
-        return dateTime;
-    }
-
-    public void setDateTime(LocalDateTime dateTime) {
-        this.dateTime = dateTime;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getCategory() {
-        return category;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
-    public BigDecimal getAmount() {
-        return amount;
-    }
-
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
+    // Helper for legacy support or manual instantiation
     public void complete() {
         this.status = "Completed";
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
     }
 }

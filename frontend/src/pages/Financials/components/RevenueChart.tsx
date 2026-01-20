@@ -5,32 +5,19 @@ import './RevenueChart.css';
 
 interface RevenueChartProps {
     onFilter?: (category: string) => void;
-    transactions?: Transaction[];
+    data?: any[];
 }
 
-const COLORS = ['#10B981', '#3B82F6', '#F59E0B', '#8B5CF6', '#EC4899'];
-
-const RevenueChart: React.FC<RevenueChartProps> = ({ onFilter, transactions = [] }) => {
+const RevenueChart: React.FC<RevenueChartProps> = ({ onFilter, data = [] }) => {
+    // Data is already processed by API service
     const chartData = useMemo(() => {
-        const income = transactions.filter(t => t.amount > 0);
-        const categoryTotals: Record<string, number> = {};
-        
-        income.forEach(t => {
-            categoryTotals[t.category] = (categoryTotals[t.category] || 0) + t.amount;
-        });
-
-        const total = Object.values(categoryTotals).reduce((sum, v) => sum + v, 0);
-        
-        return Object.entries(categoryTotals)
-            .map(([name, value], i) => ({
-                name,
-                value,
-                percent: total > 0 ? Math.round((value / total) * 100) : 0,
-                color: COLORS[i % COLORS.length]
-            }))
-            .sort((a, b) => b.value - a.value)
-            .slice(0, 5);
-    }, [transactions]);
+        return data.map(d => ({
+            name: d.label,
+            value: d.value,
+            percent: d.percentage,
+            color: d.color
+        })).sort((a, b) => b.value - a.value);
+    }, [data]);
 
     const topSource = chartData[0];
 
@@ -63,8 +50,8 @@ const RevenueChart: React.FC<RevenueChartProps> = ({ onFilter, transactions = []
                             data={chartData}
                             cx="35%"
                             cy="50%"
-                            innerRadius={45}
-                            outerRadius={65}
+                            innerRadius={60}
+                            outerRadius={80}
                             paddingAngle={3}
                             dataKey="value"
                             stroke="none"
@@ -81,7 +68,7 @@ const RevenueChart: React.FC<RevenueChartProps> = ({ onFilter, transactions = []
                         <Tooltip content={<CustomTooltip />} />
                     </PieChart>
                 </ResponsiveContainer>
-                
+
                 <div className="chart-legend">
                     {chartData.map((item, i) => (
                         <button
@@ -91,7 +78,7 @@ const RevenueChart: React.FC<RevenueChartProps> = ({ onFilter, transactions = []
                         >
                             <span className="legend-dot" style={{ background: item.color }}></span>
                             <span className="legend-name">{item.name}</span>
-                            <span className="legend-percent">{item.percent}%</span>
+                            <span className="legend-percent" style={{ marginLeft: 'auto' }}>{item.percent}%</span>
                         </button>
                     ))}
                 </div>

@@ -59,16 +59,16 @@ const TrainerLayout: React.FC<TrainerLayoutProps> = ({ children }) => {
     }, []);
 
     const navItems: NavItem[] = [
-        { path: '/trainer', icon: <Home size={20} />, label: 'Dashboard', color: '#4F46E5', end: true },
-        { path: '/trainer/profile', icon: <User size={20} />, label: 'My Profile', color: '#4F46E5' },
-        { path: '/trainer/members', icon: <Users size={20} />, label: 'My Members', color: '#4F46E5' },
-        { path: '/trainer/classes', icon: <BookOpen size={20} />, label: 'My Classes', color: '#4F46E5' },
-        { path: '/trainer/schedule', icon: <Calendar size={20} />, label: 'My Schedule', color: '#4F46E5' },
-        { path: '/trainer/progress-notes', icon: <ClipboardList size={20} />, label: 'Progress Notes', color: '#4F46E5' },
-        { path: '/trainer/messages', icon: <MessageSquare size={20} />, label: 'Messages', color: '#4F46E5' },
-        { path: '/trainer/notifications', icon: <Bell size={20} />, label: 'Notifications', color: '#4F46E5' },
-        { path: '/trainer/reports', icon: <TrendingUp size={20} />, label: 'Reports', color: '#4F46E5' },
-        { path: '/trainer/settings', icon: <Settings size={20} />, label: 'Settings', color: '#4F46E5' },
+        { path: '/trainer', icon: <Home size={20} />, label: 'Dashboard', color: '#EF4444', end: true },
+        { path: '/trainer/profile', icon: <User size={20} />, label: 'My Profile', color: '#3B82F6' },
+        { path: '/trainer/members', icon: <Users size={20} />, label: 'My Members', color: '#8B5CF6' },
+        { path: '/trainer/classes', icon: <BookOpen size={20} />, label: 'My Classes', color: '#10B981' },
+        { path: '/trainer/schedule', icon: <Calendar size={20} />, label: 'My Schedule', color: '#F59E0B' },
+        { path: '/trainer/progress-notes', icon: <ClipboardList size={20} />, label: 'Progress Notes', color: '#EC4899' },
+        { path: '/trainer/messages', icon: <MessageSquare size={20} />, label: 'Messages', color: '#06B6D4' },
+        { path: '/trainer/notifications', icon: <Bell size={20} />, label: 'Notifications', color: '#F97316' },
+        { path: '/trainer/reports', icon: <TrendingUp size={20} />, label: 'Reports', color: '#6366F1' },
+        { path: '/trainer/settings', icon: <Settings size={20} />, label: 'Settings', color: '#64748B' },
     ];
 
     // FAB handlers
@@ -107,7 +107,7 @@ const TrainerLayout: React.FC<TrainerLayoutProps> = ({ children }) => {
     } : undefined;
 
     return (
-        <DashboardLayout navItems={navItems} showUtilityBar={false}>
+        <DashboardLayout navItems={navItems}>
             {children ? children : <Outlet />}
         </DashboardLayout>
     );

@@ -19,22 +19,56 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, on
         status: 'Completed'
     });
 
+    const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
+        // Clear error when user types
+        if (errors[e.target.name]) {
+            setErrors({ ...errors, [e.target.name]: '' });
+        }
+    };
+
+    const validateForm = () => {
+        const newErrors: { [key: string]: string } = {};
+        
+        if (!formData.category) {
+            newErrors.category = 'Category is required';
+        }
+        
+        if (!formData.amount || Number(formData.amount) <= 0) {
+            newErrors.amount = 'Valid amount is required';
+        }
+
+        if (!formData.date) {
+            newErrors.date = 'Date is required';
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onSubmit(formData);
-        onClose();
+        if (validateForm()) {
+            onSubmit(formData);
+            // Don't close immediately if we add logic for "Save & Add Another" later
+            onClose();
+        }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+            handleSubmit(e as any);
+        }
     };
 
     return (
-        <div className="modal-overlay">
-            <div className="modal-container">
+        <div className="modal-overlay" onClick={(e) => { if(e.target === e.currentTarget) onClose(); }}>
+            <div className="modal-container" onKeyDown={handleKeyDown}>
                 <div className="modal-header">
                     <h2>Add Transaction</h2>
-                    <button onClick={onClose} className="text-secondary hover:text-white">&times;</button>
+                    <button onClick={onClose} className="close-btn" aria-label="Close modal">&times;</button>
                 </div>
                 <form onSubmit={handleSubmit} className="modal-body">
                     <div className="form-group">
@@ -47,7 +81,12 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, on
 
                     <div className="form-group">
                         <label>Category</label>
-                        <select name="category" value={formData.category} onChange={handleChange} className="modal-input" required>
+                        <select 
+                            name="category" 
+                            value={formData.category} 
+                            onChange={handleChange} 
+                            className={`modal-input ${errors.category ? 'input-error' : ''}`}
+                        >
                             <option value="" disabled>Select Category...</option>
                             {formData.type === 'Income' ? (
                                 <>
@@ -66,6 +105,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, on
                                 </>
                             )}
                         </select>
+                        {errors.category && <span className="error-text">{errors.category}</span>}
                     </div>
 
                     <div className="form-row">
@@ -76,10 +116,12 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, on
                                 name="amount"
                                 value={formData.amount}
                                 onChange={handleChange}
-                                className="modal-input"
+                                className={`modal-input ${errors.amount ? 'input-error' : ''}`}
                                 placeholder="0.00"
-                                required
+                                min="0.01"
+                                step="0.01"
                             />
+                            {errors.amount && <span className="error-text">{errors.amount}</span>}
                         </div>
                         <div className="form-group flex-1">
                             <label>Date</label>
@@ -88,9 +130,9 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, on
                                 name="date"
                                 value={formData.date}
                                 onChange={handleChange}
-                                className="modal-input"
-                                required
+                                className={`modal-input ${errors.date ? 'input-error' : ''}`}
                             />
+                            {errors.date && <span className="error-text">{errors.date}</span>}
                         </div>
                     </div>
 

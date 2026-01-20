@@ -5,12 +5,11 @@ import type { NavItem } from '../Layout/CommandRail';
 interface DashboardLayoutProps {
     children: React.ReactNode;
     navItems?: NavItem[];
-    showUtilityBar?: boolean;
 }
 
-const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, navItems, showUtilityBar = true }) => {
+const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, navItems }) => {
     return (
-        <AppShell navItems={navItems} showUtilityBar={showUtilityBar}>
+        <AppShell navItems={navItems}>
             {children}
         </AppShell>
     );

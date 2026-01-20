@@ -83,7 +83,7 @@ const EnhancedUserDetailModal: React.FC<EnhancedUserDetailModalProps> = ({
                 name: updatedUser.fullName,
                 email: updatedUser.email,
                 phone: updatedUser.phoneNumber || '',
-                role: updatedUser.role || (updatedUser.roles?.[0]?.roleId ? `Role ${updatedUser.roles[0].roleId}` : ''),
+                role: (updatedUser as any).role || (updatedUser.roles?.[0] as any)?.name || (updatedUser.roles?.[0] as any)?.roleName || (updatedUser.roles?.[0]?.roleId ? `Role ${updatedUser.roles[0].roleId}` : ''),
                 plan: (updatedUser as any).plan || ''
             });
         },

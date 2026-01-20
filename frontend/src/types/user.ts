@@ -122,3 +122,10 @@ export interface UserSummary {
     avatarId?: string;
 }
 
+export interface TrainerPerformance {
+    trainerId: number;
+    clientCount: number;
+    monthlyRevenue: number;
+    completedSessions: number;
+    totalHours: number;
+}

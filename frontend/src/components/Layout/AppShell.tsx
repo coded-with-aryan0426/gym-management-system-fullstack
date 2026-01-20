@@ -1,7 +1,6 @@
 import React, { useState, createContext, useContext } from 'react';
 import { Outlet } from 'react-router-dom';
 import CommandRail from './CommandRail';
-import UtilityBar from './UtilityBar';
 import './AppShell.css';
 
 interface SidebarContextType {
@@ -19,10 +18,9 @@ export const useSidebar = () => useContext(SidebarContext);
 interface AppShellProps {
     children?: React.ReactNode;
     navItems?: any[];
-    showUtilityBar?: boolean;
 }
 
-const AppShell: React.FC<AppShellProps> = ({ children, navItems, showUtilityBar = true }) => {
+const AppShell: React.FC<AppShellProps> = ({ children, navItems }) => {
     const [isCollapsed, setIsCollapsed] = useState(() => {
         try {
             const stored = localStorage.getItem('sidebar-collapsed');
@@ -47,7 +45,6 @@ const AppShell: React.FC<AppShellProps> = ({ children, navItems, showUtilityBar 
             <div className={`app-shell ${isCollapsed ? 'app-shell--collapsed' : ''}`}>
                 <CommandRail isCollapsed={isCollapsed} onToggle={toggleCollapsed} navItems={navItems} />
                 <div className="app-shell__main">
-                    {showUtilityBar && <UtilityBar />}
                     <main className="app-shell__content">
                         {children || <Outlet />}
                     </main>

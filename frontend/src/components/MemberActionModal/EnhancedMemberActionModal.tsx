@@ -220,7 +220,7 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
         fullName: member.fullName,
         email: member.email,
         phone: member.phoneNumber || "+91 98765 43210",
-        joinDate: (member.joinDate || member.createdAt || "").split('T')[0],
+        joinDate: (((member as any).joinDate || member.createdAt || "") as string).split('T')[0],
         notes: "",
         avatarId: member.userId ? (localStorage.getItem(`avatar_${member.userId}`) || (member as any).avatarId || null) : null,
       })
@@ -284,7 +284,7 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
         fullName: member.fullName,
         email: member.email,
         phone: member.phoneNumber || "+91 98765 43210",
-        joinDate: (member.joinDate || member.createdAt || "").split('T')[0],
+        joinDate: (((member as any).joinDate || member.createdAt || "") as string).split('T')[0],
         notes: "",
         avatarId: member.userId ? (localStorage.getItem(`avatar_${member.userId}`) || (member as any).avatarId || null) : null,
       })
@@ -485,7 +485,7 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
 
     if (!endDateStr) {
       // If no end date, calculate from join date + 30 days as default
-      const joinDateStr = localMember.joinDate || localMember.createdAt
+      const joinDateStr = (localMember as any).joinDate || localMember.createdAt
       if (joinDateStr) {
         const joinDate = new Date(joinDateStr)
         const defaultEndDate = new Date(joinDate)

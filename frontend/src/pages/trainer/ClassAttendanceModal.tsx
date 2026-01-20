@@ -59,7 +59,7 @@ const ClassAttendanceModal: React.FC<ClassAttendanceModalProps> = ({
         try {
             // Prepare updates payload
             const updates = attendees.map(a => ({
-                memberId: a.memberId,
+                attendeeId: a.id,
                 status: a.status
             }));
             await trainerApi.updateAttendance(classId, updates);

@@ -150,7 +150,7 @@ function DataTable<T>({
     const endItem = pagination ? Math.min(startItem + pagination.pageSize - 1, pagination.totalCount) : data.length;
 
     return (
-        <div className={`data-table ${className} ${isMobile ? 'data-table--mobile' : ''}`}>
+        <div className={tableClassNames}>
             {isMobile && mobileCardRender ? (
                 <div className="data-table__cards">
                     {data.length === 0 ? (
@@ -312,4 +312,3 @@ function DataTable<T>({
 }
 
 export default DataTable;
-

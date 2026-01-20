@@ -530,17 +530,17 @@ public class AuthController {
             String roleName = role.getRoleName().toUpperCase();
 
             // OWNER/ADMIN has highest priority
-            if ("OWNER".equals(roleName) || "ADMIN".equals(roleName)) {
+            if (roleName.contains("OWNER") || roleName.contains("ADMIN")) {
                 return "OWNER";
             }
 
             // TRAINER has second priority
-            if ("TRAINER".equals(roleName) || "STAFF".equals(roleName)) {
+            if (roleName.contains("TRAINER") || roleName.contains("STAFF")) {
                 hasTrainer = true;
             }
 
             // MEMBER/CUSTOMER has lowest priority
-            if ("MEMBER".equals(roleName) || "CUSTOMER".equals(roleName)) {
+            if (roleName.contains("MEMBER") || roleName.contains("CUSTOMER")) {
                 hasMember = true;
             }
         }

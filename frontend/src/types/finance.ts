@@ -4,18 +4,22 @@ export type TransactionCategory = 'Membership' | 'Personal Training' | 'Class Pa
 export type ExpenseCategory = 'Salary' | 'Rent' | 'Utilities' | 'Equipment' | 'Marketing' | 'Maintenance' | 'Software' | 'Other';
 
 export interface Transaction {
-    id: number | string;
-    invoiceId: string;
-    date: string; // ISO string
+    id: number;
+    transactionId?: number; // legacy support
+    dateTime: string; // ISO string from backend
     description: string;
-    relatedUserId?: number | string; // Link to member
-    relatedUserName?: string;
-    category: TransactionCategory;
+    category: string;
+    type: 'INCOME' | 'EXPENSE';
     amount: number;
-    method: TransactionMethod;
-    status: TransactionStatus;
-    notes?: string;
-    createdBy?: string; // Staff name
+    status: string; // 'Completed' | 'Pending' | 'Cancelled'
+    referenceNumber?: string;
+    createdBy?: string;
+
+    // UI helpers (mapped from backend data)
+    invoiceId?: string; // Display ID (e.g. INV-{id})
+    date?: string; // YYYY-MM-DD
+    relatedUserName?: string;
+    method?: TransactionMethod;
 }
 
 export interface Expense {

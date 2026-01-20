@@ -98,13 +98,15 @@ public class SecurityConfig {
                         .requestMatchers("/api/stats/**").hasAnyRole("OWNER", "ADMIN")
                         .requestMatchers("/api/settings/**").hasAnyRole("OWNER", "ADMIN")
                         .requestMatchers("/api/staff/**").hasAnyRole("OWNER", "ADMIN")
-                        .requestMatchers("/api/financials/**").hasAnyRole("OWNER", "ADMIN")
+                        .requestMatchers("/api/finance/**").hasAnyRole("OWNER", "ADMIN")
                         .requestMatchers("/api/reports/**").hasAnyRole("OWNER", "ADMIN")
                         .requestMatchers("/api/packages/**").hasAnyRole("OWNER", "ADMIN")
+                        .requestMatchers("/api/owner/equipment/**").hasAnyRole("OWNER", "ADMIN")
 
                         // ==================== OWNER OR TRAINER ====================
                         // Trainers need access to manage their assigned members and sessions
                         .requestMatchers("/api/trainer/**").hasAnyRole("OWNER", "ADMIN", "TRAINER")
+                        .requestMatchers("/api/trainer/equipment/**").hasAnyRole("OWNER", "ADMIN", "TRAINER")
                         .requestMatchers("/api/pt-sessions/**").hasAnyRole("OWNER", "ADMIN", "TRAINER")
                         .requestMatchers("/api/users/members").hasAnyRole("OWNER", "ADMIN", "TRAINER")
                         .requestMatchers("/api/users/trainers").hasAnyRole("OWNER", "ADMIN", "TRAINER")

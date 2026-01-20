@@ -213,14 +213,13 @@ const EnhancedTrainerActionModal: React.FC<EnhancedTrainerActionModalProps> = ({
       const updatedTrainer = await api.updateUser(trainer.userId, {
         fullName: editForm.fullName,
         email: editForm.email,
-        phoneNumber: editForm.phone,
+        phone: editForm.phone,
         status: editForm.status,
-        leavingDate: editForm.leavingDate || undefined,
-        avatarId: editForm.avatarId,
+        avatarId: editForm.avatarId ?? undefined,
       })
 
       // Merge avatarId into response (in case backend doesn't return it yet)
-      const trainerWithAvatar = { ...updatedTrainer, avatarId: editForm.avatarId }
+      const trainerWithAvatar = { ...updatedTrainer, avatarId: editForm.avatarId ?? undefined }
       setLocalTrainer(prev => prev ? { ...prev, ...trainerWithAvatar } : prev)
       showToast.success("Profile updated successfully")
       onEditProfile?.(trainerWithAvatar)

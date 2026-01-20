@@ -5,7 +5,7 @@ import ReactDOM from "react-dom"
 import { motion, AnimatePresence } from "framer-motion"
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-hot-toast"
-import { Users, UserPlus, UserCheck, Calendar, CalendarPlus, Package, X, ChevronLeft } from "lucide-react"
+import { X, ChevronLeft } from "lucide-react"
 import api, { membershipPackageApi } from "../../services/api"
 import type { MembershipPackageDTO } from "../../types/membershipPackage"
 import { useMembers } from "../../contexts/MembersContext"
@@ -17,13 +17,14 @@ import ConfirmDialog from "../ui/ConfirmDialog"
 interface CreateActionModalProps {
     isOpen: boolean
     onClose: () => void
+    initialView?: ViewType
 }
 
-type ViewType = "main" | "user" | "event" | "memberForm" | "staffForm"
+type ViewType = "memberForm" | "staffForm"
 
-const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose }) => {
+const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, initialView = "memberForm" }) => {
     const navigate = useNavigate()
-    const [view, setView] = useState<ViewType>("main")
+    const [view, setView] = useState<ViewType>(initialView)
     const [loading, setLoading] = useState(false)
     const [fetchingPlans, setFetchingPlans] = useState(false)
     const [availablePlans, setAvailablePlans] = useState<MembershipPackageDTO[]>([])
@@ -97,7 +98,7 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose }
     // So this useEffect below might need adjustment.
     useEffect(() => {
         if (isOpen) {
-            setView("main")
+            setView(initialView)
             // We DON'T reset formData here because we want to load it when they click "Member" or "Trainer"
             // But we should reset it if they start fresh? 
             // Let's reset it here to be safe, BUT the load logic in the other useEffect will override it if draft exists.
@@ -111,7 +112,7 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose }
                 startDate: new Date().toISOString().split('T')[0],
             })
         }
-    }, [isOpen])
+    }, [isOpen, initialView])
 
     // Fetch plans... (existing useEffect)
 
@@ -157,22 +158,11 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose }
     }
 
     const handleBack = () => {
-        // If going back from form, we just save draft automatically (already done by useEffect). 
-        // We don't need to confirm on "Back" necessarily, only on "Close".
-        // But maybe user expects "Back" to clear? Usually back keeps state in wizards.
-        if (view === "memberForm" || view === "staffForm") {
-            setView("user")
-        } else if (view === "user" || view === "event") {
-            setView("main")
-        }
+        // Since we now only have form views, Back should close the modal
+        handleCloseRequest()
     }
 
-    const handleEventNavigation = (path: string) => {
-        navigate(path)
-        onClose() // Direct navigation doesn't need confirmation usually? Or should we warn?
-        // Assuming navigation is intentional and safe to leave draft (or we can clear it)
-        setView("main")
-    }
+
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -238,7 +228,6 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose }
             }
 
             onClose()
-            setView("main")
         } catch (err: any) {
             console.error("Failed to create user:", err)
             toast.error(err.response?.data?.message || "Failed to create user")
@@ -248,13 +237,7 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose }
     }
 
     const getTitle = () => {
-        switch (view) {
-            case "main": return "Create New..."
-            case "user": return "New User Account"
-            case "event": return "Schedule Event"
-            case "memberForm": return "Add New Member"
-            case "staffForm": return "Add New Trainer"
-        }
+        return view === "memberForm" ? "Add New Member" : "Add New Trainer"
     }
 
     const isFormView = view === "memberForm" || view === "staffForm"
@@ -274,11 +257,9 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose }
                         {/* Header */}
                         <div className="create-action-header">
                             <div className="create-action-title">
-                                {view !== "main" && (
-                                    <button className="create-action-back" onClick={handleBack}>
-                                        <ChevronLeft size={20} />
-                                    </button>
-                                )}
+                                <button className="create-action-back" onClick={handleBack}>
+                                    <ChevronLeft size={20} />
+                                </button>
                                 <h3>{getTitle()}</h3>
                             </div>
                             <button className="create-action-close" onClick={handleCloseRequest}>
@@ -288,103 +269,7 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose }
 
                         {/* Content */}
                         <div className="create-action-body">
-                            {/* ... Content remains same ... */}
                             <AnimatePresence mode="wait">
-                                {/* MAIN VIEW */}
-                                {view === "main" && (
-                                    <motion.div
-                                        key="main"
-                                        className="create-action-grid"
-                                        initial={{ opacity: 0, x: -20 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        exit={{ opacity: 0, x: -20 }}
-                                        transition={{ duration: 0.2 }}
-                                    >
-                                        <button className="create-card" onClick={() => setView("user")}>
-                                            <div className="create-card__icon">
-                                                <Users size={40} />
-                                            </div>
-                                            <div className="create-card__content">
-                                                <h4>New User</h4>
-                                                <p>Create a member or trainer account</p>
-                                            </div>
-                                        </button>
-
-                                        <button className="create-card" onClick={() => setView("event")}>
-                                            <div className="create-card__icon">
-                                                <Calendar size={40} />
-                                            </div>
-                                            <div className="create-card__content">
-                                                <h4>New Event</h4>
-                                                <p>Schedule a class or PT session</p>
-                                            </div>
-                                        </button>
-                                    </motion.div>
-                                )}
-
-                                {/* USER SELECTION VIEW */}
-                                {view === "user" && (
-                                    <motion.div
-                                        key="user"
-                                        className="create-action-grid"
-                                        initial={{ opacity: 0, x: 20 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        exit={{ opacity: 0, x: 20 }}
-                                        transition={{ duration: 0.2 }}
-                                    >
-                                        <button className="create-card" onClick={() => setView("memberForm")}>
-                                            <div className="create-card__icon create-card__icon--blue">
-                                                <UserPlus size={40} />
-                                            </div>
-                                            <div className="create-card__content">
-                                                <h4>Add Member</h4>
-                                                <p>Register a new gym member</p>
-                                            </div>
-                                        </button>
-
-                                        <button className="create-card" onClick={() => setView("staffForm")}>
-                                            <div className="create-card__icon create-card__icon--orange">
-                                                <UserCheck size={40} />
-                                            </div>
-                                            <div className="create-card__content">
-                                                <h4>Add Trainer</h4>
-                                                <p>Onboard a new trainer</p>
-                                            </div>
-                                        </button>
-                                    </motion.div>
-                                )}
-
-                                {/* EVENT SELECTION VIEW */}
-                                {view === "event" && (
-                                    <motion.div
-                                        key="event"
-                                        className="create-action-grid"
-                                        initial={{ opacity: 0, x: 20 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        exit={{ opacity: 0, x: 20 }}
-                                        transition={{ duration: 0.2 }}
-                                    >
-                                        <button className="create-card" onClick={() => handleEventNavigation("/classes?action=create")}>
-                                            <div className="create-card__icon create-card__icon--purple">
-                                                <CalendarPlus size={40} />
-                                            </div>
-                                            <div className="create-card__content">
-                                                <h4>Schedule Class</h4>
-                                                <p>Create a new group class</p>
-                                            </div>
-                                        </button>
-
-                                        <button className="create-card" onClick={() => handleEventNavigation("/settings?tab=packages")}>
-                                            <div className="create-card__icon create-card__icon--green">
-                                                <Package size={40} />
-                                            </div>
-                                            <div className="create-card__content">
-                                                <h4>Create Plan</h4>
-                                                <p>Define a new membership package</p>
-                                            </div>
-                                        </button>
-                                    </motion.div>
-                                )}
 
                                 {/* MEMBER FORM VIEW */}
                                 {view === "memberForm" && (
@@ -562,20 +447,12 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose }
 
                         {/* Footer */}
                         <div className="create-action-footer">
-                            {isFormView ? (
-                                <>
-                                    <button className="btn-cancel" onClick={handleBack} disabled={loading}>
-                                        Back
-                                    </button>
-                                    <button className="btn-submit" onClick={handleSubmit} disabled={loading}>
-                                        {loading ? "Creating..." : `Create ${view === "memberForm" ? "Member" : "Staff"}`}
-                                    </button>
-                                </>
-                            ) : (
-                                <button className="btn-cancel" onClick={handleCloseRequest}>
-                                    Cancel
-                                </button>
-                            )}
+                            <button className="btn-cancel" onClick={handleBack} disabled={loading}>
+                                Cancel
+                            </button>
+                            <button className="btn-submit" onClick={handleSubmit} disabled={loading}>
+                                {loading ? "Creating..." : `Create ${view === "memberForm" ? "Member" : "Trainer"}`}
+                            </button>
                         </div>
                     </motion.div>
                 </div>

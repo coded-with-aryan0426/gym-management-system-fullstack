@@ -44,7 +44,7 @@ export const TrainerProvider: React.FC<TrainerProviderProps> = ({ children }) =>
             const data = await api.getUsers('TRAINER')
             setTrainers(Array.isArray(data) ? data : [])
         } catch (error) {
-            console.error('Failed to load trainers', error)
+            console.warn('Failed to load trainers', error)
             setTrainers([])
         } finally {
             setLoading(false)
@@ -95,4 +95,3 @@ export const TrainerProvider: React.FC<TrainerProviderProps> = ({ children }) =>
 }
 
 export default TrainerContext
-

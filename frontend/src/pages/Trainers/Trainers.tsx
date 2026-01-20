@@ -1,19 +1,52 @@
 import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { showToast } from '../../utils/showToast';
-import { Badge, getStatusVariant, Avatar } from '../../components/ui';
-import { CreateUserModal } from '../../components';
+import { Badge, getStatusVariant, Avatar, PageStatsBar } from '../../components/ui';
+import CreateActionModal from '../../components/CreateActionModal/CreateActionModal';
 import { ActionMenuButton } from '../../components/shared';
 import { useClickOutside } from '../../hooks';
 import EnhancedTrainerActionModal from '../../components/TrainerActionModal/EnhancedTrainerActionModal';
 import api from '../../services/api';
-import type { User, Role } from '../../types';
+import type { User, Role, TrainerPerformance } from '../../types';
+import "../../styles/pageHeader.css";
 import './Trainers.css';
+import { FiFilter, FiSearch, FiUserPlus, FiTrendingUp, FiUsers, FiActivity } from "react-icons/fi";
 import { Plus, Search, Filter, MoreHorizontal, MessageSquare, X, Check } from "lucide-react";
 import DataTable, { type Column } from "../../components/ui/DataTable";
 
+type StaffStats = {
+  total: number;
+  active: number;
+  inactive: number;
+  onLeave: number;
+  hiredThisMonth: number;
+  utilizationRate: number;
+};
+
+const computeStaffStats = (list: User[]): StaffStats => {
+  const active = list.filter(t => (t as any).status?.toLowerCase() === 'active' || !(t as any).status).length;
+  const inactive = list.filter(t => (t as any).status?.toLowerCase() === 'inactive').length;
+  const onLeave = list.filter(t => {
+    const s = (t as any).status?.toLowerCase();
+    return s === 'on_leave' || s === 'leave';
+  }).length;
+
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const hiredThisMonth = list.filter(t => {
+    const joinDate = (t as any).joinDate || (t as any).createdAt;
+    if (!joinDate) return false;
+    return new Date(joinDate) >= startOfMonth;
+  }).length;
+
+  const utilizationRate = list.length > 0 ? Math.round((active / list.length) * 100) : 100;
+
+  return { total: list.length, active, inactive, onLeave, hiredThisMonth, utilizationRate };
+};
+
 const Trainers: React.FC = () => {
   const [trainers, setTrainers] = useState<User[]>([]);
+  const [performanceData, setPerformanceData] = useState<Record<number, TrainerPerformance>>({});
   const [loading, setLoading] = useState(true);
   const [selectedTrainer, setSelectedTrainer] = useState<User | null>(null);
   const [selectedTrainerIds, setSelectedTrainerIds] = useState<Set<string | number>>(new Set());
@@ -36,6 +69,19 @@ const Trainers: React.FC = () => {
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
+  // Word limit helper
+  const handleSearchChange = (value: string) => {
+    const words = value.trim() === '' ? [] : value.trim().split(/\s+/)
+    if (words.length <= 6) {
+      setSearchQuery(value)
+    }
+  }
+
+  const getWordCount = (text: string) => {
+    const words = text.trim() === '' ? [] : text.trim().split(/\s+/)
+    return words.length
+  }
+
   useEffect(() => {
     if (searchParams.get('action') === 'create') {
       setIsCreateModalOpen(true);
@@ -46,6 +92,10 @@ const Trainers: React.FC = () => {
     role: "",
     status: ""
   });
+
+  const [globalStats, setGlobalStats] = useState<StaffStats | null>(null);
+  const [globalStatsLoading, setGlobalStatsLoading] = useState(false);
+  const [globalStatsError, setGlobalStatsError] = useState<string | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -67,6 +117,14 @@ const Trainers: React.FC = () => {
         setTrainers(response.content);
         setTotalCount(response.totalCount);
         setSortType(response.sortType as 'newest' | 'alphabetical');
+
+        // Fetch performance data for loaded trainers
+        try {
+          const perfData = await api.getAllTrainersPerformance();
+          setPerformanceData(perfData);
+        } catch (err) {
+          console.error("Failed to load trainer performance", err);
+        }
       } catch {
         const allTrainers = await api.getUsers('TRAINER');
         let filtered = allTrainers;
@@ -96,9 +154,38 @@ const Trainers: React.FC = () => {
     }
   }, [currentPage, pageSize, debouncedSearch, filters.role]);
 
+  const loadGlobalStats = useCallback(async () => {
+    setGlobalStatsLoading(true);
+    setGlobalStatsError(null);
+    try {
+      const pageSizeForStats = 200;
+      const first = await api.getTrainersPaginated(0, pageSizeForStats);
+      const totalPages = Math.max(1, Math.ceil(first.totalCount / pageSizeForStats));
+      const all: User[] = [...(first.content || [])];
+
+      for (let p = 1; p < totalPages; p++) {
+        const resp = await api.getTrainersPaginated(p, pageSizeForStats);
+        all.push(...(resp.content || []));
+      }
+
+      setGlobalStats(computeStaffStats(all));
+    } catch (e: any) {
+      setGlobalStats(null);
+      setGlobalStatsError(e?.message || 'Failed to load stats');
+    } finally {
+      setGlobalStatsLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     loadTrainersPaginated();
   }, [loadTrainersPaginated]);
+
+  useEffect(() => {
+    loadGlobalStats();
+    const interval = setInterval(loadGlobalStats, 60000);
+    return () => clearInterval(interval);
+  }, [loadGlobalStats]);
 
   useEffect(() => {
     setCurrentPage(0);
@@ -128,10 +215,15 @@ const Trainers: React.FC = () => {
     }
   }, [searchParams, trainers]);
 
+  const pageStats = useMemo(() => computeStaffStats(trainers), [trainers])
+  const stats = globalStats ?? pageStats
+
   const handleActionClick = (trainer: User) => {
     setSelectedTrainer(trainer);
     setIsActionModalOpen(true);
   };
+
+  // --- Handlers ---
 
   const handleCloseActionModal = () => {
     setIsActionModalOpen(false);
@@ -194,37 +286,30 @@ const Trainers: React.FC = () => {
       },
     },
     {
-      key: 'tenure',
-      header: 'Tenure',
-      width: '100px',
+      key: "metrics",
+      header: "Performance",
+      width: "180px",
       render: (member) => {
-        const joinDate = member.createdAt ? new Date(member.createdAt) : new Date();
-        const now = new Date();
-        const diffMs = now.getTime() - joinDate.getTime();
-        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-        const diffMonths = Math.floor(diffDays / 30);
-        const diffYears = Math.floor(diffDays / 365);
-
-        let tenureText = '';
-        let tenureClass = 'trainer-tenure--new';
-
-        if (diffYears >= 1) {
-          tenureText = `${diffYears}y ${Math.floor((diffDays % 365) / 30)} m`;
-          tenureClass = 'trainer-tenure--veteran';
-        } else if (diffMonths >= 1) {
-          tenureText = `${diffMonths} m`;
-          tenureClass = diffMonths >= 6 ? 'trainer-tenure--experienced' : 'trainer-tenure--regular';
-        } else {
-          tenureText = `${diffDays} d`;
-          tenureClass = 'trainer-tenure--new';
-        }
+        const perf = performanceData[member.userId];
+        const clients = perf?.clientCount || 0;
+        const revenue = perf?.monthlyRevenue || 0;
 
         return (
-          <div className={`trainer - tenure ${tenureClass} `}>
-            <span className="trainer-tenure__text">{tenureText}</span>
+          <div className="trainer-metrics">
+            <div className="trainer-metric">
+              <span className="metric-label">Clients</span>
+              <span className="metric-value">{clients}</span>
+            </div>
+            <div className="trainer-metric-divider"></div>
+            <div className="trainer-metric">
+              <span className="metric-label">Revenue</span>
+              <span className="metric-value text-green">
+                ₹{typeof revenue === 'number' ? revenue.toLocaleString() : revenue}
+              </span>
+            </div>
           </div>
-        );
-      },
+        )
+      }
     },
     {
       key: 'status',
@@ -249,50 +334,55 @@ const Trainers: React.FC = () => {
 
   return (
     <div className="staff-page">
-      <div className="staff-page__header">
-        <div className="staff-page__title-section">
-          <h1 className="trainer-page__title">Trainer Directory</h1>
+      {/* Header with Search and Actions */}
+      <div className="staff-page__header page-header">
+        <div className="staff-page__title-section page-header__title">
+          <h1 className="staff-page__title">Trainers & Staff</h1>
           <div className="staff-page__sort-indicator">
             {sortType === 'newest' ? (
-              <span className="sort-badge sort-badge--newest">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <circle cx="12" cy="12" r="10" />
-                  <polyline points="12 6 12 12 16 14" />
-                </svg>
-                New First
-              </span>
+              <span className="sort-badge sort-badge--newest">Newest</span>
             ) : (
-              <span className="sort-badge sort-badge--alpha">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <path d="M3 6h18M3 12h12M3 18h6" />
-                </svg>
-                A → Z
-              </span>
+              <span className="sort-badge sort-badge--alpha">A → Z</span>
             )}
           </div>
         </div>
 
-        <div className="staff-page__header-right">
-          {activeFilterCount > 0 && (
-            <div className="staff-active-filters">
-              {filters.role && (
-                <span className="filter-chip">
-                  Role: {filters.role}
-                  <button onClick={() => handleFilterChange('role', '')}>×</button>
-                </span>
-              )}
-              {filters.status && (
-                <span className="filter-chip">
-                  Status: {filters.status}
-                  <button onClick={() => handleFilterChange('status', '')}>×</button>
-                </span>
-              )}
+        {/* Quick Actions - Owner Centric */}
+        <div className="staff-quick-actions page-header__quick">
+          <button className="staff-quick-btn">
+            <FiTrendingUp size={13} />
+            <span>Active</span>
+            <span className="staff-quick-btn__count">{stats.active}</span>
+          </button>
+          <button className="staff-quick-btn">
+            <FiActivity size={13} />
+            <span>On Leave</span>
+            <span className="staff-quick-btn__count">{stats.onLeave}</span>
+          </button>
+          <button className="staff-quick-btn">
+            <FiUsers size={13} />
+            <span>Inactive</span>
+            <span className="staff-quick-btn__count staff-quick-btn__count--warning">{stats.inactive}</span>
+          </button>
+        </div>
+
+        <div className="staff-page__header-right page-header__actions">
+          <div className="staff-search">
+            <Search size={14} />
+            <input
+              type="text"
+              placeholder="Search..."
+              value={searchQuery}
+              onChange={(e) => handleSearchChange(e.target.value)}
+            />
+            <div className={`search-word-count ${getWordCount(searchQuery) >= 6 ? 'search-word-count--limit' : ''}`} style={{ fontSize: '10px', marginLeft: '6px', whiteSpace: 'nowrap', fontWeight: 600, opacity: 0.6 }}>
+              {getWordCount(searchQuery)}/6
             </div>
-          )}
+          </div>
 
           <div className="staff-filter-container" ref={filterRef}>
             <button
-              className={`btn - filters ${isFilterOpen ? 'btn-filters--active' : ''} ${activeFilterCount > 0 ? 'btn-filters--has-filters' : ''} `}
+              className={`btn-filters ${isFilterOpen ? 'btn-filters--active' : ''} ${activeFilterCount > 0 ? 'btn-filters--has-filters' : ''}`}
               onClick={() => setIsFilterOpen(!isFilterOpen)}
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -344,6 +434,10 @@ const Trainers: React.FC = () => {
               </div>
             )}
           </div>
+          <button className="staff-action-btn" onClick={() => setIsCreateModalOpen(true)}>
+            <FiUserPlus size={14} />
+            <span>Add Trainer</span>
+          </button>
         </div>
       </div>
 
@@ -384,7 +478,28 @@ const Trainers: React.FC = () => {
         </div>
       )}
 
-      <div className="staff-page__content">
+      {activeFilterCount > 0 && (
+        <div className="staff-active-filters" style={{ display: 'flex', gap: '8px', padding: '0 16px', marginBottom: '8px' }}>
+          {filters.role && (
+            <span className="filter-chip">
+              Role: {filters.role}
+              <button onClick={() => handleFilterChange('role', '')}>×</button>
+            </span>
+          )}
+          {filters.status && (
+            <span className="filter-chip">
+              Status: {filters.status}
+              <button onClick={() => handleFilterChange('status', '')}>×</button>
+            </span>
+          )}
+          <button className="filter-clear-all" onClick={() => {
+            handleFilterChange('role', '');
+            handleFilterChange('status', '');
+          }}>Clear All</button>
+        </div>
+      )}
+
+      <div className="staff-page__content page-content-with-stats">
         <div className="staff-page__table">
           <DataTable
             columns={columns}
@@ -449,6 +564,23 @@ const Trainers: React.FC = () => {
             }}
           />
         </div>
+
+        {/* Vertical Stats Bar - Right Side */}
+        <PageStatsBar
+          variant="trainers"
+          title="Staff"
+          showProgress
+          loading={globalStatsLoading && !globalStats}
+          error={globalStatsError}
+          activePercent={stats.utilizationRate}
+          stats={[
+            { key: 'total', label: 'Total', value: stats.total },
+            { key: 'active', label: 'Working', value: stats.active, variant: 'active' },
+            { key: 'inactive', label: 'Inactive', value: stats.inactive, variant: 'inactive' },
+            { key: 'onleave', label: 'Leave', value: stats.onLeave, variant: 'warning' },
+            { key: 'new', label: 'Hired', value: stats.hiredThisMonth, variant: 'new' },
+          ]}
+        />
       </div>
 
       <EnhancedTrainerActionModal
@@ -459,9 +591,8 @@ const Trainers: React.FC = () => {
         onUpdate={loadTrainersPaginated}
       />
 
-      <CreateUserModal
+      <CreateActionModal
         isOpen={isCreateModalOpen}
-        initialRole="TRAINER"
         onClose={() => {
           setIsCreateModalOpen(false)
           setSearchParams(prev => {
@@ -469,11 +600,9 @@ const Trainers: React.FC = () => {
             newParams.delete('action')
             return newParams
           })
-        }}
-        onSuccess={() => {
           loadTrainersPaginated()
-          showToast('Trainer added successfully', 'success')
         }}
+        initialView="staffForm"
       />
     </div>
   );

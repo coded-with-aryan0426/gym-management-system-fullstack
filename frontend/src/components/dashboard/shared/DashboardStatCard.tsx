@@ -10,6 +10,7 @@ interface DashboardStatCardProps {
     trendUp?: boolean;
     color: string;
     delay?: number;
+    children?: React.ReactNode;
 }
 
 const DashboardStatCard: React.FC<DashboardStatCardProps> = ({
@@ -19,7 +20,8 @@ const DashboardStatCard: React.FC<DashboardStatCardProps> = ({
     trend,
     trendUp,
     color,
-    delay = 0
+    delay = 0,
+    children
 }) => {
     return (
         <motion.div
@@ -43,6 +45,7 @@ const DashboardStatCard: React.FC<DashboardStatCardProps> = ({
                             {trendUp ? '↑' : '↓'} {trend}
                         </div>
                     )}
+                    {children}
                 </div>
             </div>
             {/* Background decoration */}

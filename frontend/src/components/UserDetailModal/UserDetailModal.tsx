@@ -259,8 +259,8 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
                                     onClick={() => handleAssign(result)}
                                 >
                                     <div className="user-detail__card-left">
-                                        {result.avatarUrl ? (
-                                            <img src={result.avatarUrl} alt="" className="user-detail__card-avatar" />
+                                        {(result as any).avatarUrl ? (
+                                            <img src={(result as any).avatarUrl} alt="" className="user-detail__card-avatar" />
                                         ) : (
                                             <div className="user-detail__card-avatar">{getInitials(result.fullName)}</div>
                                         )}
@@ -294,8 +294,8 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
                             relatedUsers.map(relatedUser => (
                                 <div key={relatedUser.userId} className="user-detail__user-card">
                                     <div className="user-detail__card-left">
-                                        {relatedUser.avatarUrl ? (
-                                            <img src={relatedUser.avatarUrl} alt="" className="user-detail__card-avatar" />
+                                        {(relatedUser as any).avatarUrl ? (
+                                            <img src={(relatedUser as any).avatarUrl} alt="" className="user-detail__card-avatar" />
                                         ) : (
                                             <div className="user-detail__card-avatar">{getInitials(relatedUser.fullName)}</div>
                                         )}

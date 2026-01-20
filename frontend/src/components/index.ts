@@ -7,6 +7,7 @@ export { default as Avatar } from "./ui/Avatar"
 export { default as DataTable } from "./ui/DataTable"
 export type { Column } from "./ui/DataTable"
 export { default as Skeleton, SkeletonText, SkeletonCard, SkeletonTableRow, SkeletonMetricCard } from "./ui/Skeleton"
+export { default as PageStatsBar } from "./ui/PageStatsBar"
 
 // Modal Components Export
 export { default as Modal } from "./Modal/Modal"

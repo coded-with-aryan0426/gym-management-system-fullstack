@@ -30,10 +30,9 @@ export const MembersProvider: React.FC<{ children: ReactNode }> = ({ children })
 
         try {
             const data = await api.getMembers();
-            console.log("[MembersContext] Loaded:", data);
             setMembers(Array.isArray(data) ? data : []);
         } catch (error) {
-            console.error("Failed to load members", error);
+            console.warn("Failed to load members", error);
             setMembers([]); // Fallback
         } finally {
             setLoading(false);

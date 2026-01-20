@@ -55,7 +55,7 @@ export default function AboutPage() {
                         </Box>
 
                         <Grid container spacing={3}>
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                                 <MotionBox
                                     whileHover={{ y: -5 }}
                                     className="static-page__card static-page__card--friction"
@@ -70,7 +70,7 @@ export default function AboutPage() {
                                     </Typography>
                                 </MotionBox>
                             </Grid>
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                                 <MotionBox
                                     whileHover={{ y: -5 }}
                                     className="static-page__card static-page__card--fire"
@@ -185,7 +185,7 @@ export default function AboutPage() {
                                 { name: 'Alex Rivers', role: 'CTO & ARCHITECT', color: '#E63946', bio: 'Coding at the speed of sound. Former powerlifter.' },
                                 { name: 'Sarah J. Thorne', role: 'PRODUCT CHIEF', color: '#00F5FF', bio: 'Ops veteran. Obsessed with user flow and friction removal.' }
                             ].map((founder, index) => (
-                                <Grid item xs={12} sm={6} md={4} key={index}>
+                                <Grid size={{ xs: 12, sm: 6, md: 4 }} key={index}>
                                     <MotionBox
                                         whileHover={{ y: -10 }}
                                         className="founder-card"

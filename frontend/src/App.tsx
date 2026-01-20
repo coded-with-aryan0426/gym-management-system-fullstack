@@ -3,6 +3,7 @@ import { lazy, Suspense } from 'react';
 import { AppProvider } from './contexts/AppProvider';
 import { AppShell } from './components/Layout';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Import new design system
 import './styles/global.css';
@@ -13,9 +14,11 @@ const Trainers = lazy(() => import('./pages/Trainers/Trainers'));
 const Members = lazy(() => import('./pages/Members/Members'));
 const Classes = lazy(() => import('./pages/Classes/Classes'));
 const Financials = lazy(() => import('./pages/Financials/Financials'));
+const Equipment = lazy(() => import('./pages/Equipment/Equipment'));
 const PTSessions = lazy(() => import('./pages/PTSessions/PTSessions'));
 const Reports = lazy(() => import('./pages/Reports/Reports'));
 const Settings = lazy(() => import('./pages/Settings/Settings'));
+const OwnerNotifications = lazy(() => import('./pages/Dashboard/OwnerNotifications'));
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const SignupPage = lazy(() => import('./pages/SignupPage'));
@@ -67,7 +70,8 @@ function App() {
   return (
     <BrowserRouter>
       <AppProvider>
-        <Suspense fallback={<PageLoader />}>
+        <ErrorBoundary>
+          <Suspense fallback={<PageLoader />}>
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<LandingPage />} />
@@ -145,9 +149,11 @@ function App() {
                       <Route path="/trainers" element={<Trainers />} />
                       <Route path="/members" element={<Members />} />
                       <Route path="/classes" element={<Classes />} />
+                      <Route path="/equipment" element={<Equipment />} />
                       <Route path="/financials" element={<Financials />} />
                       <Route path="/pt-sessions" element={<PTSessions />} />
                       <Route path="/reports" element={<Reports />} />
+                      <Route path="/notifications" element={<OwnerNotifications />} />
                       <Route path="/settings" element={<Settings />} />
                       <Route path="*" element={<Navigate to="/dashboard" replace />} />
                     </Routes>
@@ -156,7 +162,8 @@ function App() {
               }
             />
           </Routes>
-        </Suspense>
+          </Suspense>
+        </ErrorBoundary>
       </AppProvider>
     </BrowserRouter>
   );

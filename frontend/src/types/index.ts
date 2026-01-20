@@ -12,7 +12,8 @@ export {
     type CreateUserDto,
     type UpdateUserDto,
     type UserSummary,
-    type UserGymRole
+    type UserGymRole,
+    type TrainerPerformance
 } from './user.ts';
 export * from './settings';
 export * from './api';

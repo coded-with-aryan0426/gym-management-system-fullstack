@@ -7,3 +7,4 @@ export { default as Avatar } from './Avatar';
 export { default as DataTable } from './DataTable';
 export type { Column } from './DataTable';
 export { default as Skeleton, SkeletonText, SkeletonCard, SkeletonTableRow, SkeletonMetricCard } from './Skeleton';
+export { default as PageStatsBar } from './PageStatsBar';

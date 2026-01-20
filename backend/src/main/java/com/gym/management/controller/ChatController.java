@@ -380,7 +380,7 @@ public class ChatController {
         }
 
         try {
-            Message m = chatService.editMessage(messageId, userId, content);
+            chatService.editMessage(messageId, userId, content);
             return ResponseEntity.ok(apiResponse(true, null, "Message updated"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(apiResponse(false, null, e.getMessage()));

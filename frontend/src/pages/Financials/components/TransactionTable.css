@@ -1,7 +1,8 @@
 .tx-table-wrapper {
     display: flex;
     flex-direction: column;
-    height: 100%;
+    max-height: 420px;
+    height: auto;
     background: var(--bg-tertiary);
     border: 1px solid var(--border-subtle);
     border-radius: 12px;
@@ -66,6 +67,7 @@
     flex: 1;
     overflow-y: auto;
     overflow-x: auto;
+    position: relative;
 }
 
 .tx-table {
@@ -78,6 +80,7 @@
     position: sticky;
     top: 0;
     z-index: 5;
+    background: var(--bg-secondary);
 }
 
 .tx-table th {
@@ -91,6 +94,7 @@
     letter-spacing: 0.04em;
     border-bottom: 1px solid var(--border-secondary);
     white-space: nowrap;
+    box-shadow: 0 1px 0 var(--border-secondary); /* Ensures border sticks */
 }
 
 .tx-table th.col-amount,

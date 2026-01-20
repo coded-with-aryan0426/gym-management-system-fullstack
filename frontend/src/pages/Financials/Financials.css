@@ -212,7 +212,8 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    max-height: 420px;
+    max-height: 480px; /* Increased slightly for better view */
+    height: 100%;
 }
 
 .section-header-row {

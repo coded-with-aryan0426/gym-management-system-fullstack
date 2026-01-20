@@ -18,20 +18,20 @@ const MemberLayout: React.FC<MemberLayoutProps> = ({ children }) => {
     }, []);
 
     const navItems: NavItem[] = [
-        { path: '/member', icon: <Home size={20} />, label: 'Dashboard', color: '#007AFF', end: true },
-        { path: '/member/profile', icon: <User size={20} />, label: 'My Profile', color: '#007AFF' },
-        { path: '/member/membership', icon: <CreditCard size={20} />, label: 'My Membership', color: '#007AFF' },
-        { path: '/member/progress', icon: <Activity size={20} />, label: 'My Progress', color: '#007AFF' },
-        { path: '/member/classes', icon: <BookOpen size={20} />, label: 'Available Classes', color: '#007AFF' },
-        { path: '/member/trainer', icon: <UserCheck size={20} />, label: 'My Trainer', color: '#007AFF' },
-        { path: '/member/bookings', icon: <Calendar size={20} />, label: 'My Bookings', color: '#007AFF' },
-        { path: '/member/messages', icon: <MessageSquare size={20} />, label: 'Messages', color: '#007AFF' },
-        { path: '/member/notifications', icon: <Bell size={20} />, label: 'Notifications', color: '#007AFF' },
-        { path: '/member/settings', icon: <Settings size={20} />, label: 'Settings', color: '#007AFF' },
+        { path: '/member', icon: <Home size={20} />, label: 'Dashboard', color: '#EF4444', end: true },
+        { path: '/member/profile', icon: <User size={20} />, label: 'My Profile', color: '#3B82F6' },
+        { path: '/member/membership', icon: <CreditCard size={20} />, label: 'My Membership', color: '#8B5CF6' },
+        { path: '/member/progress', icon: <Activity size={20} />, label: 'My Progress', color: '#10B981' },
+        { path: '/member/classes', icon: <BookOpen size={20} />, label: 'Available Classes', color: '#F59E0B' },
+        { path: '/member/trainer', icon: <UserCheck size={20} />, label: 'My Trainer', color: '#06B6D4' },
+        { path: '/member/bookings', icon: <Calendar size={20} />, label: 'My Bookings', color: '#EC4899' },
+        { path: '/member/messages', icon: <MessageSquare size={20} />, label: 'Messages', color: '#6366F1' },
+        { path: '/member/notifications', icon: <Bell size={20} />, label: 'Notifications', color: '#F97316' },
+        { path: '/member/settings', icon: <Settings size={20} />, label: 'Settings', color: '#64748B' },
     ];
 
     return (
-        <DashboardLayout navItems={navItems} showUtilityBar={false}>
+        <DashboardLayout navItems={navItems}>
             {children ? children : <Outlet />}
         </DashboardLayout>
     );
