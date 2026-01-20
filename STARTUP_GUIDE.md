@@ -1,66 +1,80 @@
-# 🚀 Gym Management System - Startup Command Center
+# 🚀 Gym Management System — Startup Command Center
 
-## ⚡️ Quick Start Sequence (Copy & Paste these blocks)
+> **System Status**: Ready
+> **Database**: Oracle SQL
+> **Backend**: Spring Boot (Port 8081)
+> **Frontend**: React (Ports 5173-5175)
 
-### 1. Start Database (Wait 30s)
+---
+
+## ⚡️ Quick Start Sequence
+
+### 1. Database Initialization
+Ensure your Oracle container is running via Colima/Docker.
 ```bash
 colima start
 docker start oracle-db
 ```
 
-### 2. Start Backend (Runs on 8081)
+### 2. Backend Server (Port 8081)
+Start the Spring Boot API.
 ```bash
-cd /Users/aryan/Intership/backend
+cd backend
 mvn spring-boot:run
 ```
 
-### 3. Start Frontend (Multi-Port Mode)
+### 3. Frontend Client (Multi-Role)
+Start the development server for all portals.
 ```bash
-cd /Users/aryan/Intership/frontend
+cd frontend
 npm run dev:all
 ```
-- **Owner**: http://localhost:5173
-- **Trainer**: http://localhost:5174
-- **Member**: http://localhost:5175
+- **👑 Owner Portal**: [http://localhost:5173](http://localhost:5173)
+- **🏋️ Trainer Portal**: [http://localhost:5174](http://localhost:5174)
+- **🧑 Member Portal**: [http://localhost:5175](http://localhost:5175)
 
 ---
 
-## 🔑 Login Credentials (Double-click to copy)
+## 🔑 Access Credentials
 
-### 👑 Owner (Port 5173)
-```text
-aryansuthar5038@gmail.com
-Aryan@5038
-```
-
-### 🏋️ Trainer (Port 5174)
-```text
-darshon11@gmail.com
-Darshon@11
-```
-
-### 🧑 Member (Port 5175)
-```text
-rishi97@gmial.com
-rishi9700
-```
-
-### 🧪 Test Owner (Alternative)
-```text
-new.owner@gym.com
-password123
-```
+| Role | Email | Password | Port |
+|------|-------|----------|------|
+| **Owner** | `aryansuthar5038@gmail.com` | `Aryan@5038` | 5173 |
+| **Trainer** | `darshon11@gmail.com` | `Darshon@11` | 5174 |
+| **Member** | `rishi97@gmial.com` | `rishi9700` | 5175 |
+| **Test Owner** | `new.owner@gym.com` | `password123` | 5173 |
 
 ---
 
-## 🛑 Emergency Stop & Fix Ports
-**If ports are blocked, run this to kill everything:**
+## 📂 Project Organization Map
+
+We have reorganized the project for better discoverability.
+
+### 🧠 Documentation (`/documentation`)
+- **Plans**: Feature PRDs, implementation plans (`/documentation/plans`)
+- **Architecture**: Database schemas, system diagrams (`/documentation/architecture`)
+- **Guides**: Setup guides, audit reports (`/documentation/guides`)
+- **Career**: Interview preparation materials (`/documentation/career`)
+
+### ⚙️ Operations (`/ops`)
+- **Scripts**: Utility shell scripts (`/ops/scripts`)
+- **Logs**: System and error logs (`/ops/logs`)
+
+### 💻 Source Code
+- **`/backend`**: Java Spring Boot Application
+- **`/frontend`**: React + TypeScript Application
+- **`/database`**: SQL Migrations & Seeds
+
+---
+
+## 🛑 Troubleshooting
+
+**Ports Blocked?**
+If you see "Address already in use", run this command to clear the ports:
 ```bash
-# Kill processes on 8081 (Backend) and 5173-5175 (Frontend)
 lsof -ti :8081,5173,5174,5175 | xargs kill -9
 ```
 
-## 📝 Shutdown
-- **Frontend/Backend**: `Ctrl+C` in their terminals
-- **Database/Colima**: `docker stop oracle-db && colima stop`
-
+**Database Connection Failed?**
+- Check if `colima` is running (`colima status`).
+- Verify connection string in `backend/src/main/resources/application.properties`.
