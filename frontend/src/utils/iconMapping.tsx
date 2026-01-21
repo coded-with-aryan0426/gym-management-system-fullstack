@@ -22,17 +22,33 @@ const ICONS = {
     BIKE: `${ICON_BASE_PATH}/bike.png`,
     ELLIPTICAL: `${ICON_BASE_PATH}/elliptical.png`,
     ROWER: `${ICON_BASE_PATH}/rower.png`,
+    STAIRMASTER: `${ICON_BASE_PATH}/stairmaster.png`,
 
     // Strength
     BARBELL: `${ICON_BASE_PATH}/barbell.png`,
     BENCH: `${ICON_BASE_PATH}/bench.png`,
     POWER_RACK: `${ICON_BASE_PATH}/power-rack.png`,
+    CABLE_MACHINE: `${ICON_BASE_PATH}/cable-machine.png`,
+    SMITH_MACHINE: `${ICON_BASE_PATH}/smith-machine.png`,
     LEG_PRESS: `${ICON_BASE_PATH}/leg-press.png`,
+    LAT_PULLDOWN: `${ICON_BASE_PATH}/lat-pulldown.png`,
+    LEG_EXTENSION: `${ICON_BASE_PATH}/leg-extension.png`,
+    PEC_DECK: `${ICON_BASE_PATH}/pec-deck.png`,
     WEIGHT_PLATE: `${ICON_BASE_PATH}/weight-plate.png`,
 
     // Functional
     BATTLE_ROPE: `${ICON_BASE_PATH}/battle-rope.png`,
     PLYO_BOX: `${ICON_BASE_PATH}/plyo-box.png`,
+    MEDICINE_BALL: `${ICON_BASE_PATH}/medicine-ball.png`,
+    SWISS_BALL: `${ICON_BASE_PATH}/swiss-ball.png`,
+    TRX: `${ICON_BASE_PATH}/trx.png`,
+
+    // Wellness
+    FOAM_ROLLER: `${ICON_BASE_PATH}/foam-roller.png`,
+    SAUNA: `${ICON_BASE_PATH}/sauna.png`,
+
+    // Other
+    LOCKERS: `${ICON_BASE_PATH}/lockers.png`,
 };
 
 // Component to render 3D icons with fallback
@@ -70,7 +86,11 @@ const EQUIPMENT_ICON_MAP: IconConfig[] = [
     // CARDIO
     {
         iconSrc: ICONS.TREADMILL,
-        keywords: ['treadmill', 'run', 'walk', 'stair', 'climber', 'stepper']
+        keywords: ['treadmill', 'run', 'walk']
+    },
+    {
+        iconSrc: ICONS.STAIRMASTER,
+        keywords: ['stair', 'climber', 'stepper', 'ladder']
     },
     {
         iconSrc: ICONS.BIKE,
@@ -110,11 +130,31 @@ const EQUIPMENT_ICON_MAP: IconConfig[] = [
     },
     {
         iconSrc: ICONS.POWER_RACK,
-        keywords: ['rack', 'cage', 'rig', 'stand', 'smith', 'pull up']
+        keywords: ['rack', 'cage', 'rig', 'stand', 'pull up']
+    },
+    {
+        iconSrc: ICONS.SMITH_MACHINE,
+        keywords: ['smith machine', 'smith']
+    },
+    {
+        iconSrc: ICONS.CABLE_MACHINE,
+        keywords: ['cable', 'pulley', 'functional trainer', 'crossover']
+    },
+    {
+        iconSrc: ICONS.LAT_PULLDOWN,
+        keywords: ['lat pulldown', 'pulldown']
     },
     {
         iconSrc: ICONS.LEG_PRESS,
         keywords: ['leg press', 'hack squat', 'calf']
+    },
+    {
+        iconSrc: ICONS.LEG_EXTENSION,
+        keywords: ['leg extension', 'extension']
+    },
+    {
+        iconSrc: ICONS.PEC_DECK,
+        keywords: ['pec deck', 'fly', 'butterfly']
     },
 
     // FUNCTIONAL
@@ -126,6 +166,18 @@ const EQUIPMENT_ICON_MAP: IconConfig[] = [
         iconSrc: ICONS.PLYO_BOX,
         keywords: ['plyo', 'box', 'jump']
     },
+    {
+        iconSrc: ICONS.MEDICINE_BALL,
+        keywords: ['medicine ball', 'med ball', 'slam ball', 'wall ball']
+    },
+    {
+        iconSrc: ICONS.SWISS_BALL,
+        keywords: ['swiss ball', 'stability ball', 'yoga ball']
+    },
+    {
+        iconSrc: ICONS.TRX,
+        keywords: ['trx', 'suspension', 'straps']
+    },
 
     // WELLNESS
     {
@@ -133,14 +185,26 @@ const EQUIPMENT_ICON_MAP: IconConfig[] = [
         keywords: ['yoga', 'mat', 'pilates', 'stretch', 'floor']
     },
     {
+        iconSrc: ICONS.FOAM_ROLLER,
+        keywords: ['foam roller', 'roller', 'triggerpoint']
+    },
+    {
         iconSrc: ICONS.MASSAGE_GUN,
-        keywords: ['massage', 'gun', 'roller', 'foam', 'recovery', 'sauna', 'ice bath', 'cryo']
+        keywords: ['massage', 'gun', 'hypervolt', 'theragun', 'recovery']
+    },
+    {
+        iconSrc: ICONS.SAUNA,
+        keywords: ['sauna', 'steam', 'infrared', 'heat']
     },
 
     // OTHER
     {
+        iconSrc: ICONS.LOCKERS,
+        keywords: ['locker']
+    },
+    {
         iconSrc: ICONS.GYM_BAG,
-        keywords: ['bag', 'accessory', 'bottle', 'towel', 'other', 'locker']
+        keywords: ['bag', 'accessory', 'bottle', 'towel', 'other']
     }
 ];
 

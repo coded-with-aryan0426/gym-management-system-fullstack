@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +37,7 @@ public class EquipmentService {
     @Transactional
     public Equipment updateEquipment(Long id, Equipment details) {
         Equipment equipment = getEquipmentById(id);
-        
+
         equipment.setName(details.getName());
         equipment.setCategory(details.getCategory());
         equipment.setBrand(details.getBrand());
@@ -52,7 +51,7 @@ public class EquipmentService {
         equipment.setVendorName(details.getVendorName());
         equipment.setWarrantyExpiryDate(details.getWarrantyExpiryDate());
         equipment.setIcon(details.getIcon());
-        
+
         return equipmentRepository.save(equipment);
     }
 
@@ -65,18 +64,18 @@ public class EquipmentService {
 
     public Map<String, Object> getEquipmentStats() {
         List<Equipment> all = equipmentRepository.findByIsDeletedFalse();
-        
+
         long total = all.size();
         long active = all.stream().filter(e -> e.getStatus() == Equipment.EquipmentStatus.ACTIVE).count();
         long maintenance = all.stream().filter(e -> e.getStatus() == Equipment.EquipmentStatus.MAINTENANCE).count();
         long outOfOrder = all.stream().filter(e -> e.getStatus() == Equipment.EquipmentStatus.OUT_OF_ORDER).count();
-        
+
         Map<String, Object> stats = new HashMap<>();
         stats.put("total", total);
         stats.put("active", active);
         stats.put("maintenance", maintenance);
         stats.put("outOfOrder", outOfOrder);
-        
+
         return stats;
     }
 }
