@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import Editable from '../editor/Editable';
 import './Modal.css';
 
 interface ModalProps {
@@ -25,6 +26,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, footer 
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
         >
+          <Editable id={`modal-${title.replace(/\s+/g, '-').toLowerCase()}`} config={{ allowLayout: true, allowStyle: true, allowVisibility: true }}>
           <motion.div
             className="modal"
             onClick={(e) => e.stopPropagation()}
@@ -66,6 +68,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, footer 
               </motion.div>
             )}
           </motion.div>
+          </Editable>
         </motion.div>
       )}
     </AnimatePresence>

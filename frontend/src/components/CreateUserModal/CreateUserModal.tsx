@@ -9,6 +9,7 @@ import api, { membershipPackageApi } from "../../services/api"
 import type { MembershipPackageDTO } from "../../types/membershipPackage"
 import { Button } from "../ui"
 import "./CreateUserModal.css"
+import Editable from "../editor/Editable"
 
 interface CreateUserModalProps {
   isOpen: boolean
@@ -259,6 +260,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClose, onSu
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
         >
+          <Editable id="create-user-modal" config={{ allowLayout: true, allowStyle: true, allowVisibility: true }}>
           <motion.div
             className={`create-user-modal ${step !== "FORM" ? "create-user-modal--selection" : ""}`}
             onClick={(e) => e.stopPropagation()}
@@ -463,6 +465,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClose, onSu
               </div>
             </div>
           </motion.div>
+          </Editable>
         </motion.div>
       )}
     </AnimatePresence>

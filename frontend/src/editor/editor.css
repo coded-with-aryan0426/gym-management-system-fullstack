@@ -1,0 +1,333 @@
+/**
+ * Editor CSS - All styles for the visual editor
+ */
+
+/* ===== Inspector Overlay ===== */
+.inspector-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 99999;
+}
+
+/* Highlight box */
+.inspector-highlight {
+  position: absolute;
+  pointer-events: none;
+  box-sizing: border-box;
+  transition: all 0.05s ease-out;
+}
+
+/* Hover state - Green border like DevTools */
+.inspector-highlight--hover {
+  border: 2px solid #eee311;
+  background: rgba(238, 227, 17, 0.05);
+}
+
+/* Selected state - Blue border */
+.inspector-highlight--selected {
+  border: 2px solid #3B82F6;
+  background: rgba(59, 130, 246, 0.05);
+}
+
+/* Tag label */
+.inspector-label {
+  position: absolute;
+  top: -22px;
+  left: -2px;
+  padding: 2px 6px;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  border-radius: 3px;
+  pointer-events: none;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.inspector-label--hover {
+  background: #10B981;
+  color: white;
+}
+
+.inspector-label--selected {
+  background: #3B82F6;
+  color: white;
+}
+
+/* Position label below if at top of viewport */
+.inspector-highlight[style*="top: 0"] .inspector-label,
+.inspector-highlight[style*="top: 1"] .inspector-label,
+.inspector-highlight[style*="top: 2"] .inspector-label {
+  top: auto;
+  bottom: -22px;
+}
+
+/* ===== Resize Handles ===== */
+.resize-handle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #3B82F6;
+  border: 1px solid white;
+  border-radius: 2px;
+  pointer-events: auto;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.resize-handle--nw {
+  top: -4px;
+  left: -4px;
+  cursor: nw-resize;
+}
+
+.resize-handle--ne {
+  top: -4px;
+  right: -4px;
+  cursor: ne-resize;
+}
+
+.resize-handle--sw {
+  bottom: -4px;
+  left: -4px;
+  cursor: sw-resize;
+}
+
+.resize-handle--se {
+  bottom: -4px;
+  right: -4px;
+  cursor: se-resize;
+}
+
+.resize-handle--n {
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: n-resize;
+}
+
+.resize-handle--s {
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: s-resize;
+}
+
+.resize-handle--e {
+  top: 50%;
+  right: -4px;
+  transform: translateY(-50%);
+  cursor: e-resize;
+}
+
+.resize-handle--w {
+  top: 50%;
+  left: -4px;
+  transform: translateY(-50%);
+  cursor: w-resize;
+}
+
+.resize-handle:hover {
+  background: #2563EB;
+  transform-origin: center;
+}
+
+/* ===== Editor Toolbar ===== */
+.editor-toolbar {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(30, 30, 30, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  z-index: 100000;
+}
+
+.editor-toolbar button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.editor-toolbar button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.editor-toolbar button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.editor-toolbar button svg {
+  width: 18px;
+  height: 18px;
+}
+
+.editor-toolbar__divider {
+  width: 1px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ===== Selection Panel ===== */
+.selection-panel {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 280px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  background: rgba(20, 20, 25, 0.98);
+  backdrop-filter: blur(20px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+  z-index: 100000;
+  color: white;
+  font-size: 13px;
+}
+
+.selection-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.selection-panel__title {
+  font-weight: 600;
+  color: #3B82F6;
+}
+
+.selection-panel__close {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.selection-panel__close:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.selection-panel__section {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.selection-panel__section-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 8px;
+}
+
+.selection-panel__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.selection-panel__label {
+  width: 60px;
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.selection-panel__input {
+  flex: 1;
+  padding: 6px 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: white;
+  font-size: 12px;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+.selection-panel__input:focus {
+  outline: none;
+  border-color: #3B82F6;
+  background: rgba(59, 130, 246, 0.1);
+}
+
+/* ===== Edit Mode Indicator ===== */
+/* No cursor override - let normal UI interaction work */
+
+/* Ensure all interactive elements remain clickable */
+body.edit-mode-active button,
+body.edit-mode-active a,
+body.edit-mode-active input,
+body.edit-mode-active [role="button"] {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+/* ===== Toggle Button ===== */
+.edit-mode-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+  border: none;
+  border-radius: 50%;
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+  transition: all 0.2s ease;
+  z-index: 99998;
+}
+
+.edit-mode-toggle:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 28px rgba(59, 130, 246, 0.5);
+}
+
+.edit-mode-toggle.active {
+  background: linear-gradient(135deg, #10B981, #059669);
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+}
+
+.edit-mode-toggle svg {
+  width: 24px;
+  height: 24px;
+}

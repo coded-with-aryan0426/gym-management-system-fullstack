@@ -15,6 +15,7 @@ import type { MemberDTO, User } from "../../types"
 import { useMembers } from "../../contexts/MembersContext"
 import "../../styles/pageHeader.css"
 import "./Members.css"
+import Editable from "../../components/editor/Editable"
 
 interface FilterState {
   status: string[]
@@ -450,6 +451,7 @@ const Members: React.FC = () => {
   return (
     <div className="members-page">
       {/* Header with Search and Actions */}
+      <Editable id="members-page-header" config={{ allowLayout: true, allowStyle: true, allowVisibility: true }}>
       <div className="members-page__header page-header">
         <div className="members-page__title-section page-header__title">
           <h1 className="members-page__title">Members</h1>
@@ -474,6 +476,7 @@ const Members: React.FC = () => {
         </div>
 
         {/* Quick Actions - Grouped in the middle */}
+        <Editable id="members-page-quick-stats" config={{ allowLayout: true, allowStyle: true, allowVisibility: true }}>
         <div className="members-quick-actions page-header__quick">
           <button
             className={`members-quick-btn ${filters.expiryStatus === 'expiring-soon' ? 'members-quick-btn--active' : ''}`}
@@ -509,6 +512,7 @@ const Members: React.FC = () => {
             {stats.expiredCount > 0 && <span className="members-quick-btn__count members-quick-btn__count--warning">{stats.expiredCount}</span>}
           </button>
         </div>
+        </Editable>
 
         <div className="members-page__header-right page-header__actions">
           <div className="members-search-box">
@@ -633,6 +637,7 @@ const Members: React.FC = () => {
           </button>
         </div>
       </div>
+      </Editable>
 
 
 
@@ -710,6 +715,7 @@ const Members: React.FC = () => {
       )}
 
       <div className="members-page__content page-content-with-stats">
+        <Editable id="members-page-table" config={{ allowLayout: true, allowStyle: true, allowVisibility: true }}>
         <div className="members-page__table-container">
           <DataTable
             data={filteredMembers}
@@ -788,8 +794,10 @@ const Members: React.FC = () => {
             }}
           />
         </div>
+        </Editable>
 
         {/* Vertical Stats Bar - Right Side */}
+        <Editable id="members-page-stats" config={{ allowLayout: true, allowStyle: true, allowVisibility: true }}>
         <PageStatsBar
           variant="members"
           title="Members"
@@ -804,6 +812,7 @@ const Members: React.FC = () => {
             { key: 'new', label: 'New', value: stats.newThisMonth, variant: 'new' },
           ]}
         />
+        </Editable>
       </div>
 
       {isActionModalOpen && selectedMember && (

@@ -18,6 +18,7 @@ import DashboardStatCard from '../../components/dashboard/shared/DashboardStatCa
 import ActivityChart from './components/ActivityChart';
 import EarningsChart from './components/EarningsChart';
 import SessionPieChart from './components/SessionPieChart';
+import Editable from '../../components/editor/Editable';
 
 interface Session {
     id: string;
@@ -147,7 +148,7 @@ const TrainerDashboard: React.FC = () => {
 
     return (
         <div className="trainer-dashboard">
-            {/* Global Toast Notification */}
+            <Editable id="trainer-dashboard-header" config={{ allowLayout: true, allowStyle: true, allowVisibility: true }}>
             <header className="dashboard-header">
                 <div className="header-content">
                     <h1 className="welcome-text">
@@ -171,43 +172,52 @@ const TrainerDashboard: React.FC = () => {
                     </button>
                 </div>
             </header>
+            </Editable>
 
             {/* KPI Cards Grid */}
             <section className="kpi-grid">
-                <DashboardStatCard
-                    title="Today's Earnings"
-                    value={`₹${data.todayEarnings}`}
-                    icon={IndianRupee}
-                    color="#10b981"
-                    delay={0.1}
-                    trend="vs yesterday"
-                    trendUp={true}
-                />
-                <DashboardStatCard
-                    title="Sessions Today"
-                    value={`${data.completedToday}/${data.totalToday}`}
-                    icon={Dumbbell}
-                    color="#f8fafc" /* White/Zinc */
-                    delay={0.1}
-                    trend={`${data.attendanceRate}% Rate`}
-                    trendUp={data.attendanceRate > 80}
-                />
-                <DashboardStatCard
-                    title="Active Clients"
-                    value={data.activeMembers}
-                    icon={Users}
-                    color="#f8fafc"
-                    delay={0.1}
-                />
-                <DashboardStatCard
-                    title="Pending Tasks"
-                    value={data.alerts.length}
-                    icon={Bell}
-                    color="#DC2626" /* AthlonX Red */
-                    delay={0.1}
-                    trend={data.alerts.length > 0 ? "Action Req." : "All Clear"}
-                    trendUp={data.alerts.length === 0}
-                />
+                <Editable id="trainer-dashboard-kpi-earnings" config={{ allowLayout: true, allowStyle: true, allowVisibility: true }}>
+                  <DashboardStatCard
+                      title="Today's Earnings"
+                      value={`₹${data.todayEarnings}`}
+                      icon={IndianRupee}
+                      color="#10b981"
+                      delay={0.1}
+                      trend="vs yesterday"
+                      trendUp={true}
+                  />
+                </Editable>
+                <Editable id="trainer-dashboard-kpi-sessions" config={{ allowLayout: true, allowStyle: true, allowVisibility: true }}>
+                  <DashboardStatCard
+                      title="Sessions Today"
+                      value={`${data.completedToday}/${data.totalToday}`}
+                      icon={Dumbbell}
+                      color="#f8fafc"
+                      delay={0.1}
+                      trend={`${data.attendanceRate}% Rate`}
+                      trendUp={data.attendanceRate > 80}
+                  />
+                </Editable>
+                <Editable id="trainer-dashboard-kpi-active-clients" config={{ allowLayout: true, allowStyle: true, allowVisibility: true }}>
+                  <DashboardStatCard
+                      title="Active Clients"
+                      value={data.activeMembers}
+                      icon={Users}
+                      color="#f8fafc"
+                      delay={0.1}
+                  />
+                </Editable>
+                <Editable id="trainer-dashboard-kpi-pending-tasks" config={{ allowLayout: true, allowStyle: true, allowVisibility: true }}>
+                  <DashboardStatCard
+                      title="Pending Tasks"
+                      value={data.alerts.length}
+                      icon={Bell}
+                      color="#DC2626"
+                      delay={0.1}
+                      trend={data.alerts.length > 0 ? "Action Req." : "All Clear"}
+                      trendUp={data.alerts.length === 0}
+                  />
+                </Editable>
             </section>
 
             {/* Main Content Grid */}
@@ -215,20 +225,25 @@ const TrainerDashboard: React.FC = () => {
 
                 {/* Left Column: Charts */}
                 <div className="dashboard-column main-column">
-                    {/* Activity Chart */}
-                    <ActivityChart data={data.weeklyActivity} />
+                    <Editable id="trainer-dashboard-activity-chart" config={{ allowLayout: true, allowStyle: true, allowContent: false, allowVisibility: true }}>
+                      <ActivityChart data={data.weeklyActivity} />
+                    </Editable>
 
                     {/* Secondary Charts Row */}
                     <div className="charts-row">
-                        <EarningsChart data={data.monthlyEarningsHistory} />
-                        <SessionPieChart data={data.sessionDistribution} />
+                        <Editable id="trainer-dashboard-earnings-chart" config={{ allowLayout: true, allowStyle: true, allowContent: false, allowVisibility: true }}>
+                          <EarningsChart data={data.monthlyEarningsHistory} />
+                        </Editable>
+                        <Editable id="trainer-dashboard-session-pie" config={{ allowLayout: true, allowStyle: true, allowContent: false, allowVisibility: true }}>
+                          <SessionPieChart data={data.sessionDistribution} />
+                        </Editable>
                     </div>
                 </div>
 
                 {/* Right Column: Agenda & Alerts */}
                 <div className="dashboard-column side-column">
 
-                    {/* Today's Agenda */}
+                    <Editable id="trainer-dashboard-agenda" config={{ allowLayout: true, allowStyle: true, allowContent: false, allowVisibility: true }}>
                     <div className="widget-panel agenda-panel">
                         <div className="widget-header">
                             <h3><Calendar size={16} /> Today's Agenda</h3>
@@ -266,8 +281,10 @@ const TrainerDashboard: React.FC = () => {
                             )}
                         </div>
                     </div>
+                    </Editable>
 
                     {/* Alerts Panel */}
+                    <Editable id="trainer-dashboard-alerts" config={{ allowLayout: true, allowStyle: true, allowVisibility: true }}>
                     <div className="widget-panel alerts-panel">
                         <div className="widget-header">
                             <h3><AlertCircle size={18} /> Needs Attention</h3>
@@ -298,6 +315,7 @@ const TrainerDashboard: React.FC = () => {
                             )}
                         </div>
                     </div>
+                    </Editable>
                 </div>
             </div>
         </div>

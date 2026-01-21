@@ -446,7 +446,7 @@ export const MultiRoleAuthProvider: React.FC<{ children: ReactNode }> = ({ child
     try {
       const token = localStorage.getItem('authToken');
       const userStr = localStorage.getItem('authUser');
-      
+
       if (token && userStr) {
         const user = JSON.parse(userStr);
         dispatch({
@@ -474,7 +474,7 @@ export const MultiRoleAuthProvider: React.FC<{ children: ReactNode }> = ({ child
 
   const login = async (credentials: { username: string; password: string }) => {
     dispatch({ type: 'LOGIN_START' });
-    
+
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
@@ -487,7 +487,7 @@ export const MultiRoleAuthProvider: React.FC<{ children: ReactNode }> = ({ child
       }
 
       const authData: AuthResponse = await response.json();
-      
+
       const userContext: UserContext = {
         userId: authData.userId,
         username: authData.username,
@@ -531,7 +531,7 @@ export const MultiRoleAuthProvider: React.FC<{ children: ReactNode }> = ({ child
       }
 
       const authData: AuthResponse = await response.json();
-      
+
       const userContext: UserContext = {
         userId: authData.userId,
         username: authData.username,
@@ -571,7 +571,7 @@ export const MultiRoleAuthProvider: React.FC<{ children: ReactNode }> = ({ child
       }
 
       const authData: AuthResponse = await response.json();
-      
+
       const userContext: UserContext = {
         userId: authData.userId,
         username: authData.username,
@@ -667,12 +667,12 @@ export const usePermissionBasedNavigation = () => {
         if (item.requiredRoles && !hasAnyRole(item.requiredRoles)) {
           return false;
         }
-        
+
         // Check permission requirements
         if (item.requiredPermissions && !hasAnyPermission(item.requiredPermissions)) {
           return false;
         }
-        
+
         return true;
       })
       .map(item => ({

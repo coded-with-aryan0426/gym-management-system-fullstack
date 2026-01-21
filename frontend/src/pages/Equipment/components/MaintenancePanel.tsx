@@ -155,9 +155,9 @@ const MaintenancePanel: React.FC<MaintenancePanelProps> = ({ equipment, isOpen, 
     return (
         <div className="eq-modal-overlay" onClick={onClose}>
             <div
-                className="eq-modal eq-modal--lg"
+                className="eq-modal eq-modal--xl eq-modal--compact"
                 onClick={e => e.stopPropagation()}
-                style={{ maxHeight: '90vh' }}
+                style={{ maxHeight: '95vh', minHeight: '80vh' }}
             >
                 {/* ══════════════════════════════════════════════════════════ */}
                 {/* HEADER */}
@@ -181,16 +181,12 @@ const MaintenancePanel: React.FC<MaintenancePanelProps> = ({ equipment, isOpen, 
 
                     <div className="flex items-center gap-3">
                         {/* TAB NAVIGATION */}
-                        <nav className="flex items-center gap-1 bg-[#1a1a1a] rounded-lg p-1 border border-white/5">
+                        <nav className="eq-tabs">
                             {(['overview', 'history', 'schedule', 'analysis'] as TabType[]).map(tab => (
                                 <button
                                     key={tab}
                                     onClick={() => { setActiveTab(tab); setShowAddForm(false); }}
-                                    className={`px-3 py-1.5 rounded-md text-[11px] font-medium capitalize transition-all ${activeTab === tab && !showAddForm
-                                        ? 'bg-white/10 text-white'
-                                        : 'text-gray-500 hover:text-white hover:bg-white/5'
-                                        }`}
-                                    style={{ marginRight: '2px' }}
+                                    className={`eq-tab capitalize ${activeTab === tab && !showAddForm ? 'eq-tab--active' : ''}`}
                                 >
                                     {tab}
                                 </button>
@@ -199,9 +195,10 @@ const MaintenancePanel: React.FC<MaintenancePanelProps> = ({ equipment, isOpen, 
 
                         <button
                             onClick={() => setShowAddForm(true)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-[11px] font-semibold transition-all"
+                            className="eq-btn eq-btn--primary"
+                            style={{ padding: '10px 20px', fontSize: '13px' }}
                         >
-                            <Plus size={14} /> Log
+                            <Plus size={16} /> Add Maintenance Log
                         </button>
 
                         <button onClick={onClose} className="eq-modal__close">
@@ -219,54 +216,60 @@ const MaintenancePanel: React.FC<MaintenancePanelProps> = ({ equipment, isOpen, 
                     {/* OVERVIEW TAB */}
                     {/* ──────────────────────────────────────────────────────── */}
                     {activeTab === 'overview' && !showAddForm && (
-                        <div className="p-5 space-y-5">
+                        <div className="eq-modal__body space-y-5">
                             {/* Stats Row */}
-                            <div className="grid grid-cols-4 gap-3">
+                            <div className="eq-stats-grid">
                                 {[
                                     { label: 'Total Logs', value: stats.total, icon: FileText, color: 'blue' },
                                     { label: 'Total Cost', value: formatCurrency(stats.totalCost), icon: DollarSign, color: 'green' },
                                     { label: 'Overdue', value: stats.overdue, icon: AlertCircle, color: 'red' },
-                                    { label: 'Health', value: `${stats.health}/100`, icon: Activity, color: 'purple' }
+                                    { label: 'Health', value: `${stats.health}%`, icon: Activity, color: 'purple' }
                                 ].map(({ label, value, icon: Icon, color }) => (
-                                    <div key={label} className="bg-[#141414] rounded-xl p-4 border border-white/5 hover:border-white/10 transition-all">
-                                        <div className="flex items-center gap-2 mb-2">
+                                    <div key={label} className="eq-stat-card">
+                                        <div className="eq-stat-card__label">
                                             <Icon size={14} className={`text-${color}-400`} />
-                                            <span className="text-[10px] font-medium text-gray-500 uppercase tracking-wide">{label}</span>
+                                            {label}
                                         </div>
-                                        <p className="text-xl font-bold text-white">{value}</p>
+                                        <p className="eq-stat-card__value">{value}</p>
                                     </div>
                                 ))}
                             </div>
 
                             {/* Activity & Upcoming */}
-                            <div className="grid grid-cols-5 gap-4">
-                                <div className="col-span-3 bg-[#141414] rounded-xl border border-white/5 overflow-hidden">
-                                    <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between">
-                                        <h3 className="text-sm font-medium text-white flex items-center gap-2">
+                            <div className="eq-grid eq-grid--3-1" style={{ gap: '20px' }}>
+                                <div className="eq-card" style={{ gridColumn: 'span 2' }}>
+                                    <div className="eq-card__header">
+                                        <h3 className="eq-card__title">
                                             <Clock size={14} className="text-gray-500" /> Recent Activity
                                         </h3>
                                         <button onClick={() => setActiveTab('history')} className="text-[10px] text-blue-400 hover:underline">View All</button>
                                     </div>
-                                    <div className="p-4 min-h-[140px]">
+                                    <div className="eq-card__body">
                                         {history.length === 0 ? (
-                                            <div className="h-full flex flex-col items-center justify-center text-gray-600">
-                                                <ClipboardCheck size={28} className="mb-2 opacity-50" />
-                                                <p className="text-xs">No maintenance records yet</p>
+                                            <div className="h-full flex flex-col items-center justify-center text-gray-600 space-y-2">
+                                                <ClipboardCheck size={24} className="opacity-30" />
+                                                <p className="text-xs">No records found</p>
                                             </div>
                                         ) : (
-                                            <div className="space-y-3">
+                                            <div className="space-y-2">
                                                 {history.slice(0, 3).map(r => (
-                                                    <div key={r.id} className="flex items-start gap-3">
-                                                        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${getTypeColor(r.maintenanceType)}20` }}>
-                                                            {r.maintenanceType === 'REPAIR' ? <Wrench size={14} style={{ color: getTypeColor(r.maintenanceType) }} /> :
-                                                                r.maintenanceType === 'PREVENTIVE' ? <Shield size={14} style={{ color: getTypeColor(r.maintenanceType) }} /> :
-                                                                    <ClipboardCheck size={14} style={{ color: getTypeColor(r.maintenanceType) }} />}
+                                                    <div key={r.id} className="eq-list-item">
+                                                        <div className="eq-badge--icon" style={{ backgroundColor: `${getTypeColor(r.maintenanceType)}20` }}>
+                                                            {r.maintenanceType === 'REPAIR' ? <Wrench size={12} style={{ color: getTypeColor(r.maintenanceType) }} /> :
+                                                                r.maintenanceType === 'PREVENTIVE' ? <Shield size={12} style={{ color: getTypeColor(r.maintenanceType) }} /> :
+                                                                    <ClipboardCheck size={12} style={{ color: getTypeColor(r.maintenanceType) }} />}
                                                         </div>
                                                         <div className="flex-1 min-w-0">
-                                                            <p className="text-xs font-medium text-white truncate">{r.description}</p>
-                                                            <p className="text-[10px] text-gray-500">{r.technicianName} • {formatDate(r.maintenanceDate)}</p>
+                                                            <div className="flex justify-between items-center mb-1">
+                                                                <p className="text-xs font-medium text-white truncate">{r.description}</p>
+                                                                <span className="text-[10px] font-mono text-gray-500">{formatCurrency(r.cost)}</span>
+                                                            </div>
+                                                            <div className="flex items-center gap-2 text-[10px] text-gray-500">
+                                                                <span>{r.technicianName}</span>
+                                                                <span>•</span>
+                                                                <span>{formatDate(r.maintenanceDate)}</span>
+                                                            </div>
                                                         </div>
-                                                        <span className="text-[10px] text-gray-400">{formatCurrency(r.cost)}</span>
                                                     </div>
                                                 ))}
                                             </div>
@@ -274,26 +277,29 @@ const MaintenancePanel: React.FC<MaintenancePanelProps> = ({ equipment, isOpen, 
                                     </div>
                                 </div>
 
-                                <div className="col-span-2 bg-[#141414] rounded-xl border border-white/5 overflow-hidden">
-                                    <div className="px-4 py-3 border-b border-white/5">
-                                        <h3 className="text-sm font-medium text-white flex items-center gap-2">
+                                <div className="eq-card">
+                                    <div className="eq-card__header">
+                                        <h3 className="eq-card__title">
                                             <Calendar size={14} className="text-gray-500" /> Upcoming
                                         </h3>
                                     </div>
-                                    <div className="p-4 min-h-[140px] flex flex-col">
+                                    <div className="eq-card__body">
                                         {stats.scheduled === 0 ? (
-                                            <div className="flex-1 flex flex-col items-center justify-center text-gray-600">
-                                                <CheckCircle size={24} className="mb-2 opacity-50" />
-                                                <p className="text-xs font-medium">All caught up!</p>
-                                                <p className="text-[10px] text-gray-600">No scheduled tasks</p>
+                                            <div className="h-full flex flex-col items-center justify-center text-gray-600 space-y-2">
+                                                <CheckCircle size={24} className="opacity-30" />
+                                                <p className="text-xs">All caught up!</p>
                                             </div>
                                         ) : (
                                             <div className="space-y-2">
-                                                {history.filter(r => r.status === 'SCHEDULED').slice(0, 2).map(r => (
-                                                    <div key={r.id} className="p-2 bg-blue-500/10 rounded-lg border border-blue-500/20">
-                                                        <span className="text-[9px] text-blue-400 font-medium">{r.maintenanceType}</span>
-                                                        <p className="text-[11px] text-white truncate">{r.description}</p>
-                                                        <p className="text-[10px] text-gray-500">{formatDate(r.maintenanceDate)}</p>
+                                                {history.filter(r => r.status === 'SCHEDULED').slice(0, 3).map(r => (
+                                                    <div key={r.id} className="eq-list-item" style={{ borderColor: 'rgba(59, 130, 246, 0.3)', background: 'rgba(59, 130, 246, 0.05)' }}>
+                                                        <div className="flex-1">
+                                                            <div className="flex justify-between items-center mb-1">
+                                                                <span className="text-[9px] font-bold text-blue-400">{r.maintenanceType}</span>
+                                                                <span className="text-[9px] text-gray-500">{formatDate(r.maintenanceDate)}</span>
+                                                            </div>
+                                                            <p className="text-[11px] text-white truncate">{r.description}</p>
+                                                        </div>
                                                     </div>
                                                 ))}
                                             </div>
@@ -310,24 +316,35 @@ const MaintenancePanel: React.FC<MaintenancePanelProps> = ({ equipment, isOpen, 
                     {activeTab === 'history' && !showAddForm && (
                         <div className="flex flex-col h-full">
                             {/* Filters */}
-                            <div className="p-4 border-b border-white/5 bg-[#111] flex items-center gap-3">
+                            <div className="px-5 py-3 border-b border-white/5 bg-[#141414] flex items-center gap-3">
                                 <div className="relative flex-1">
-                                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600" />
+                                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
                                     <input
                                         type="text"
                                         value={searchTerm}
                                         onChange={e => setSearchTerm(e.target.value)}
                                         placeholder="Search logs..."
-                                        className="w-full bg-[#1a1a1a] border border-white/5 rounded-lg py-2 pl-9 pr-3 text-sm text-white placeholder-gray-600 focus:border-blue-500/50 outline-none"
+                                        className="eq-input"
+                                        style={{ paddingLeft: '36px', height: '36px', fontSize: '12px' }}
                                     />
                                 </div>
-                                <select value={typeFilter} onChange={e => setTypeFilter(e.target.value as any)} className="bg-[#1a1a1a] border border-white/5 rounded-lg px-3 py-2 text-xs text-white outline-none">
+                                <select
+                                    value={typeFilter}
+                                    onChange={e => setTypeFilter(e.target.value as any)}
+                                    className="eq-input"
+                                    style={{ width: '140px', height: '36px', padding: '0 12px', fontSize: '12px' }}
+                                >
                                     <option value="ALL">All Types</option>
                                     <option value="PREVENTIVE">Preventive</option>
                                     <option value="REPAIR">Repair</option>
                                     <option value="INSPECTION">Inspection</option>
                                 </select>
-                                <select value={statusFilter} onChange={e => setStatusFilter(e.target.value as any)} className="bg-[#1a1a1a] border border-white/5 rounded-lg px-3 py-2 text-xs text-white outline-none">
+                                <select
+                                    value={statusFilter}
+                                    onChange={e => setStatusFilter(e.target.value as any)}
+                                    className="eq-input"
+                                    style={{ width: '140px', height: '36px', padding: '0 12px', fontSize: '12px' }}
+                                >
                                     <option value="ALL">All Status</option>
                                     <option value="COMPLETED">Completed</option>
                                     <option value="SCHEDULED">Scheduled</option>
@@ -346,18 +363,24 @@ const MaintenancePanel: React.FC<MaintenancePanelProps> = ({ equipment, isOpen, 
                                 ) : (
                                     <div className="space-y-2">
                                         {filteredHistory.map(r => (
-                                            <div key={r.id} className="bg-[#141414] rounded-xl p-4 border border-white/5 hover:border-white/10 transition-all">
-                                                <div className="flex items-start justify-between mb-2">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="text-[10px] text-gray-500 font-mono">{formatDate(r.maintenanceDate)}</span>
-                                                        <span className="px-2 py-0.5 rounded text-[9px] font-bold uppercase" style={{ backgroundColor: `${getTypeColor(r.maintenanceType)}20`, color: getTypeColor(r.maintenanceType) }}>{r.maintenanceType}</span>
+                                            <div key={r.id} className="eq-list-item">
+                                                <div className="flex-1">
+                                                    <div className="flex items-center justify-between mb-1">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-[10px] text-gray-500 font-mono">{formatDate(r.maintenanceDate)}</span>
+                                                            <div className="eq-badge" style={{ backgroundColor: `${getTypeColor(r.maintenanceType)}20`, color: getTypeColor(r.maintenanceType) }}>
+                                                                {r.maintenanceType}
+                                                            </div>
+                                                        </div>
+                                                        <div className="eq-badge" style={{ color: getStatusColor(r.status) }}>
+                                                            {r.status}
+                                                        </div>
                                                     </div>
-                                                    <span className="text-[9px] font-semibold" style={{ color: getStatusColor(r.status) }}>{r.status}</span>
-                                                </div>
-                                                <p className="text-sm text-white font-medium mb-2">{r.description}</p>
-                                                <div className="flex items-center gap-4 text-[11px] text-gray-500">
-                                                    <span className="flex items-center gap-1"><User size={12} /> {r.technicianName}</span>
-                                                    <span className="flex items-center gap-1"><DollarSign size={12} /> {formatCurrency(r.cost)}</span>
+                                                    <p className="text-sm text-white font-medium mb-1">{r.description}</p>
+                                                    <div className="flex items-center gap-4 text-[11px] text-gray-500">
+                                                        <span className="flex items-center gap-1"><User size={12} /> {r.technicianName}</span>
+                                                        <span className="flex items-center gap-1"><DollarSign size={12} /> {formatCurrency(r.cost)}</span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         ))}
@@ -371,44 +394,46 @@ const MaintenancePanel: React.FC<MaintenancePanelProps> = ({ equipment, isOpen, 
                     {/* SCHEDULE TAB */}
                     {/* ──────────────────────────────────────────────────────── */}
                     {activeTab === 'schedule' && !showAddForm && (
-                        <div className="p-4 h-[450px]">
-                            <div className="h-full bg-[#141414] rounded-xl border border-white/5 p-3 eq-calendar">
-                                <BigCalendar
-                                    localizer={localizer}
-                                    events={calendarEvents}
-                                    startAccessor="start"
-                                    endAccessor="end"
-                                    style={{ height: '100%' }}
-                                    views={['month', 'week', 'day']}
-                                    defaultView="month"
-                                    popup
-                                    components={{
-                                        toolbar: ({ label, onNavigate, onView, view }) => (
-                                            <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/5">
-                                                <div className="flex items-center gap-2">
-                                                    <button onClick={() => onNavigate('PREV')} className="p-1.5 hover:bg-white/5 rounded text-gray-500 hover:text-white"><ChevronLeft size={16} /></button>
-                                                    <button onClick={() => onNavigate('NEXT')} className="p-1.5 hover:bg-white/5 rounded text-gray-500 hover:text-white"><ChevronRight size={16} /></button>
-                                                    <span className="text-sm font-semibold text-white ml-2">{label}</span>
+                        <div className="p-4 h-[500px]">
+                            <div className="eq-card h-full">
+                                <div className="eq-calendar h-full p-2">
+                                    <BigCalendar
+                                        localizer={localizer}
+                                        events={calendarEvents}
+                                        startAccessor="start"
+                                        endAccessor="end"
+                                        style={{ height: '100%' }}
+                                        views={['month', 'week', 'day']}
+                                        defaultView="month"
+                                        popup
+                                        components={{
+                                            toolbar: ({ label, onNavigate, onView, view }) => (
+                                                <div className="flex items-center justify-between mb-2 pb-2 border-b border-white/5">
+                                                    <div className="flex items-center gap-2">
+                                                        <button onClick={() => onNavigate('PREV')} className="p-1.5 hover:bg-white/5 rounded text-gray-500 hover:text-white"><ChevronLeft size={16} /></button>
+                                                        <button onClick={() => onNavigate('NEXT')} className="p-1.5 hover:bg-white/5 rounded text-gray-500 hover:text-white"><ChevronRight size={16} /></button>
+                                                        <span className="text-sm font-semibold text-white ml-2">{label}</span>
+                                                    </div>
+                                                    <div className="flex bg-[#0d0d0d] rounded-lg p-0.5 border border-white/5">
+                                                        {['month', 'week', 'day'].map(v => (
+                                                            <button key={v} onClick={() => onView(v as any)} className={`px-2.5 py-1 text-[10px] font-medium rounded capitalize ${view === v ? 'bg-white/10 text-white' : 'text-gray-500 hover:text-white'}`}>{v}</button>
+                                                        ))}
+                                                    </div>
                                                 </div>
-                                                <div className="flex bg-[#0d0d0d] rounded-lg p-0.5 border border-white/5">
-                                                    {['month', 'week', 'day'].map(v => (
-                                                        <button key={v} onClick={() => onView(v as any)} className={`px-2.5 py-1 text-[10px] font-medium rounded capitalize ${view === v ? 'bg-white/10 text-white' : 'text-gray-500 hover:text-white'}`}>{v}</button>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )
-                                    }}
-                                    eventPropGetter={event => ({
-                                        style: {
-                                            backgroundColor: getStatusColor(event.status),
-                                            border: 'none',
-                                            borderRadius: '4px',
-                                            color: 'white',
-                                            fontSize: '10px',
-                                            padding: '2px 6px'
-                                        }
-                                    })}
-                                />
+                                            )
+                                        }}
+                                        eventPropGetter={event => ({
+                                            style: {
+                                                backgroundColor: getStatusColor(event.status),
+                                                border: 'none',
+                                                borderRadius: '4px',
+                                                color: 'white',
+                                                fontSize: '10px',
+                                                padding: '2px 6px'
+                                            }
+                                        })}
+                                    />
+                                </div>
                             </div>
                         </div>
                     )}
@@ -427,32 +452,38 @@ const MaintenancePanel: React.FC<MaintenancePanelProps> = ({ equipment, isOpen, 
                             ) : (
                                 <>
                                     {/* Health Score Card */}
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="bg-[#141414] rounded-xl p-6 border border-white/5 flex flex-col items-center justify-center">
-                                            <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-4">Equipment Health</h3>
-                                            <div className="relative w-28 h-28">
-                                                <svg className="w-full h-full -rotate-90">
-                                                    <circle cx="56" cy="56" r="48" fill="none" stroke="#1a1a1a" strokeWidth="8" />
-                                                    <circle
-                                                        cx="56" cy="56" r="48" fill="none"
-                                                        stroke={stats.health > 70 ? '#22c55e' : stats.health > 40 ? '#eab308' : '#ef4444'}
-                                                        strokeWidth="8" strokeLinecap="round"
-                                                        strokeDasharray={`${stats.health * 3.01} 301`}
-                                                    />
-                                                </svg>
-                                                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                                    <span className="text-2xl font-bold text-white">{stats.health}</span>
-                                                    <span className="text-[10px] text-gray-500">Score</span>
+                                    <div className="eq-grid eq-grid--2" style={{ gap: '20px' }}>
+                                        <div className="eq-card">
+                                            <div className="eq-card__header">
+                                                <h3 className="eq-card__title">Equipment Health</h3>
+                                            </div>
+                                            <div className="eq-card__body flex items-center justify-center">
+                                                <div className="relative w-32 h-32">
+                                                    <svg className="w-full h-full -rotate-90">
+                                                        <circle cx="64" cy="64" r="54" fill="none" stroke="#1a1a1a" strokeWidth="8" />
+                                                        <circle
+                                                            cx="64" cy="64" r="54" fill="none"
+                                                            stroke={stats.health > 70 ? '#22c55e' : stats.health > 40 ? '#eab308' : '#ef4444'}
+                                                            strokeWidth="8" strokeLinecap="round"
+                                                            strokeDasharray={`${stats.health * 3.39} 339`}
+                                                        />
+                                                    </svg>
+                                                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                                        <span className="text-3xl font-bold text-white">{stats.health}</span>
+                                                        <span className="text-[10px] text-gray-500 uppercase tracking-widest">Score</span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <div className="bg-[#141414] rounded-xl p-6 border border-white/5">
-                                            <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-4">Type Distribution</h3>
-                                            <div className="h-40">
+                                        <div className="eq-card">
+                                            <div className="eq-card__header">
+                                                <h3 className="eq-card__title">Type Distribution</h3>
+                                            </div>
+                                            <div className="eq-card__body h-48">
                                                 <ResponsiveContainer width="100%" height="100%">
                                                     <PieChart>
-                                                        <Pie data={chartData} cx="50%" cy="50%" innerRadius={35} outerRadius={55} dataKey="value" paddingAngle={3}>
+                                                        <Pie data={chartData} cx="50%" cy="50%" innerRadius={40} outerRadius={60} dataKey="value" paddingAngle={3}>
                                                             {chartData.map((entry, i) => (
                                                                 <Cell key={i} fill={getTypeColor(entry.name as MaintenanceType)} />
                                                             ))}
@@ -465,20 +496,24 @@ const MaintenancePanel: React.FC<MaintenancePanelProps> = ({ equipment, isOpen, 
                                     </div>
 
                                     {/* Stats Summary */}
-                                    <div className="bg-[#141414] rounded-xl p-5 border border-white/5">
-                                        <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-4">Summary</h3>
-                                        <div className="grid grid-cols-3 gap-6 text-center">
-                                            <div>
-                                                <p className="text-2xl font-bold text-white">{history.filter(r => r.maintenanceType === 'PREVENTIVE').length}</p>
-                                                <p className="text-[11px] text-gray-500">Preventive</p>
-                                            </div>
-                                            <div>
-                                                <p className="text-2xl font-bold text-white">{history.filter(r => r.maintenanceType === 'REPAIR').length}</p>
-                                                <p className="text-[11px] text-gray-500">Repairs</p>
-                                            </div>
-                                            <div>
-                                                <p className="text-2xl font-bold text-white">{history.filter(r => r.maintenanceType === 'INSPECTION').length}</p>
-                                                <p className="text-[11px] text-gray-500">Inspections</p>
+                                    <div className="eq-card">
+                                        <div className="eq-card__header">
+                                            <h3 className="eq-card__title">Summary</h3>
+                                        </div>
+                                        <div className="eq-card__body">
+                                            <div className="grid grid-cols-3 gap-6 text-center">
+                                                <div>
+                                                    <p className="text-2xl font-bold text-white">{history.filter(r => r.maintenanceType === 'PREVENTIVE').length}</p>
+                                                    <p className="text-[10px] text-gray-500 uppercase tracking-wide">Preventive</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-2xl font-bold text-white">{history.filter(r => r.maintenanceType === 'REPAIR').length}</p>
+                                                    <p className="text-[10px] text-gray-500 uppercase tracking-wide">Repairs</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-2xl font-bold text-white">{history.filter(r => r.maintenanceType === 'INSPECTION').length}</p>
+                                                    <p className="text-[10px] text-gray-500 uppercase tracking-wide">Inspections</p>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -500,41 +535,44 @@ const MaintenancePanel: React.FC<MaintenancePanelProps> = ({ equipment, isOpen, 
                             </div>
 
                             {/* Type Selector */}
-                            <div className="grid grid-cols-3 gap-2 mb-4">
-                                {(['PREVENTIVE', 'REPAIR', 'INSPECTION'] as MaintenanceType[]).map(type => (
-                                    <button
-                                        key={type}
-                                        type="button"
-                                        onClick={() => setNewLog({ ...newLog, maintenanceType: type })}
-                                        className={`py-2.5 rounded-lg text-[11px] font-semibold border transition-all flex items-center justify-center gap-2 ${newLog.maintenanceType === type
-                                            ? 'border-transparent text-white'
-                                            : 'bg-[#1a1a1a] text-gray-500 border-white/5 hover:border-white/10'
-                                            }`}
-                                        style={newLog.maintenanceType === type ? { backgroundColor: `${getTypeColor(type)}30`, color: getTypeColor(type) } : {}}
-                                    >
-                                        {type === 'PREVENTIVE' && <Shield size={14} />}
-                                        {type === 'REPAIR' && <Wrench size={14} />}
-                                        {type === 'INSPECTION' && <ClipboardCheck size={14} />}
-                                        {type}
-                                    </button>
-                                ))}
+                            <div className="eq-modal__section">
+                                <label className="eq-label">Maintenance Type</label>
+                                <div className="grid grid-cols-3 gap-4">
+                                    {(['PREVENTIVE', 'REPAIR', 'INSPECTION'] as MaintenanceType[]).map(type => (
+                                        <button
+                                            key={type}
+                                            type="button"
+                                            onClick={() => setNewLog({ ...newLog, maintenanceType: type })}
+                                            className={`py-4 rounded-xl text-sm font-bold border-2 transition-all flex items-center justify-center gap-3 ${newLog.maintenanceType === type
+                                                ? 'border-transparent text-white shadow-lg'
+                                                : 'bg-[#1a1a1a] text-gray-400 border-[#2a2a2a] hover:border-[#3a3a3a] hover:text-white'
+                                                }`}
+                                            style={newLog.maintenanceType === type ? { backgroundColor: `${getTypeColor(type)}25`, color: getTypeColor(type), borderColor: getTypeColor(type) } : {}}
+                                        >
+                                            {type === 'PREVENTIVE' && <Shield size={20} />}
+                                            {type === 'REPAIR' && <Wrench size={20} />}
+                                            {type === 'INSPECTION' && <ClipboardCheck size={20} />}
+                                            {type}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
 
                             {/* Description */}
                             <div className="eq-modal__section">
-                                <label className="eq-label">Description</label>
+                                <label className="eq-label">Description *</label>
                                 <textarea
                                     value={newLog.description}
                                     onChange={e => setNewLog({ ...newLog, description: e.target.value })}
-                                    placeholder="Describe the work performed..."
+                                    placeholder="Describe the maintenance work performed in detail..."
                                     className="eq-input"
-                                    style={{ resize: 'none', height: '80px' }}
+                                    style={{ resize: 'none', height: '120px' }}
                                     required
                                 />
                             </div>
 
                             {/* Fields Grid */}
-                            <div className="grid grid-cols-4 gap-3 mb-5">
+                            <div className="eq-modal__section eq-grid eq-grid--2" style={{ gap: '24px' }}>
                                 <div>
                                     <label className="eq-label">Technician</label>
                                     <input
@@ -581,9 +619,11 @@ const MaintenancePanel: React.FC<MaintenancePanelProps> = ({ equipment, isOpen, 
                                 </div>
                             </div>
 
-                            <button type="submit" className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-lg transition-all flex items-center justify-center gap-2 text-sm">
-                                <CheckCircle size={16} /> Save Record
-                            </button>
+                            <div className="eq-modal__section" style={{ paddingTop: '24px', borderTop: '1px solid #2a2a2a' }}>
+                                <button type="submit" className="eq-btn eq-btn--primary" style={{ width: '100%', padding: '16px', fontSize: '15px' }}>
+                                    <CheckCircle size={20} /> Save Maintenance Record
+                                </button>
+                            </div>
                         </form>
                     )}
                 </main>

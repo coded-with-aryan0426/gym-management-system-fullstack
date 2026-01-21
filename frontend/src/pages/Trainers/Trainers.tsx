@@ -13,6 +13,7 @@ import './Trainers.css';
 import { FiFilter, FiSearch, FiUserPlus, FiTrendingUp, FiUsers, FiActivity } from "react-icons/fi";
 import { Plus, Search, Filter, MoreHorizontal, MessageSquare, X, Check } from "lucide-react";
 import DataTable, { type Column } from "../../components/ui/DataTable";
+import Editable from '../../components/editor/Editable';
 
 type StaffStats = {
   total: number;
@@ -500,6 +501,7 @@ const Trainers: React.FC = () => {
       )}
 
       <div className="staff-page__content page-content-with-stats">
+        <Editable id="trainers-page-table" config={{ allowLayout: true, allowStyle: true, allowVisibility: true }}>
         <div className="staff-page__table">
           <DataTable
             columns={columns}
@@ -564,8 +566,10 @@ const Trainers: React.FC = () => {
             }}
           />
         </div>
+        </Editable>
 
         {/* Vertical Stats Bar - Right Side */}
+        <Editable id="trainers-page-stats" config={{ allowLayout: true, allowStyle: true, allowVisibility: true }}>
         <PageStatsBar
           variant="trainers"
           title="Staff"

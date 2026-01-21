@@ -90,7 +90,7 @@ const EquipmentModal: React.FC<EquipmentModalProps> = ({ isOpen, onClose, onSubm
     // ═══════════════════════════════════════════════════════════════════════════
     return (
         <div className="eq-modal-overlay" onClick={onClose}>
-            <div className="eq-modal eq-modal--md" onClick={e => e.stopPropagation()}>
+            <div className="eq-modal eq-modal--compact" onClick={e => e.stopPropagation()}>
 
                 {/* HEADER */}
                 <header className="eq-modal__header">
@@ -107,7 +107,7 @@ const EquipmentModal: React.FC<EquipmentModalProps> = ({ isOpen, onClose, onSubm
 
                     {/* CATEGORY */}
                     <div className="eq-modal__section">
-                        <label className="eq-label">Select Category</label>
+                        <label className="eq-label">Category</label>
                         <div className="eq-category-grid">
                             {categories.map(cat => (
                                 <button
@@ -128,9 +128,9 @@ const EquipmentModal: React.FC<EquipmentModalProps> = ({ isOpen, onClose, onSubm
                         </div>
                     </div>
 
-                    {/* NAME & QUANTITY */}
-                    <div className="eq-modal__section eq-grid eq-grid--2-1">
-                        <div>
+                    {/* CORE INFO - ROW 1 */}
+                    <div className="eq-modal__section eq-grid eq-grid--4">
+                        <div style={{ gridColumn: 'span 2' }}>
                             <label className="eq-label">Equipment Name *</label>
                             <input
                                 type="text"
@@ -141,23 +141,6 @@ const EquipmentModal: React.FC<EquipmentModalProps> = ({ isOpen, onClose, onSubm
                                 required
                             />
                         </div>
-                        <div>
-                            <label className="eq-label">Quantity</label>
-                            <div className="eq-input-wrapper">
-                                <Hash size={16} className="eq-input-icon" />
-                                <input
-                                    type="number"
-                                    value={formData.quantity || 1}
-                                    onChange={e => handleChange('quantity', parseInt(e.target.value) || 1)}
-                                    className="eq-input eq-input--with-icon"
-                                    min="1"
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* BRAND, MODEL, LOCATION */}
-                    <div className="eq-modal__section eq-grid eq-grid--3">
                         <div>
                             <label className="eq-label">Brand</label>
                             <input
@@ -178,22 +161,65 @@ const EquipmentModal: React.FC<EquipmentModalProps> = ({ isOpen, onClose, onSubm
                                 className="eq-input"
                             />
                         </div>
+                    </div>
+
+                    {/* LOGISTICS - ROW 2 */}
+                    <div className="eq-modal__section eq-grid eq-grid--4">
                         <div>
                             <label className="eq-label">Location</label>
                             <div className="eq-input-wrapper">
-                                <MapPin size={16} className="eq-input-icon" />
+                                <MapPin size={14} className="eq-input-icon" />
                                 <input
                                     type="text"
                                     value={formData.location || ''}
                                     onChange={e => handleChange('location', e.target.value)}
-                                    placeholder="e.g. Floor 1"
+                                    placeholder="Location"
                                     className="eq-input eq-input--with-icon"
+                                />
+                            </div>
+                        </div>
+                        <div>
+                            <label className="eq-label">Quantity</label>
+                            <div className="eq-input-wrapper">
+                                <Hash size={14} className="eq-input-icon" />
+                                <input
+                                    type="number"
+                                    value={formData.quantity || 1}
+                                    onChange={e => handleChange('quantity', parseInt(e.target.value) || 1)}
+                                    className="eq-input eq-input--with-icon"
+                                    min="1"
+                                />
+                            </div>
+                        </div>
+                        <div>
+                            <label className="eq-label">Cost ($)</label>
+                            <div className="eq-input-wrapper">
+                                <DollarSign size={14} className="eq-input-icon" />
+                                <input
+                                    type="number"
+                                    value={formData.purchaseCost || 0}
+                                    onChange={e => handleChange('purchaseCost', parseFloat(e.target.value) || 0)}
+                                    className="eq-input eq-input--with-icon"
+                                    placeholder="0"
+                                />
+                            </div>
+                        </div>
+                        <div>
+                            <label className="eq-label">Date</label>
+                            <div className="eq-input-wrapper">
+                                <Calendar size={14} className="eq-input-icon" />
+                                <input
+                                    type="date"
+                                    value={formData.purchaseDate || ''}
+                                    onChange={e => handleChange('purchaseDate', e.target.value)}
+                                    className="eq-input eq-input--with-icon"
+                                    style={{ colorScheme: 'dark' }}
                                 />
                             </div>
                         </div>
                     </div>
 
-                    {/* STATUS & CONDITION */}
+                    {/* STATE - ROW 3 */}
                     <div className="eq-modal__section eq-modal__section--bordered eq-grid eq-grid--2">
                         <div>
                             <label className="eq-label">Status</label>
@@ -210,7 +236,7 @@ const EquipmentModal: React.FC<EquipmentModalProps> = ({ isOpen, onClose, onSubm
                                             color: s.color
                                         } : {}}
                                     >
-                                        {formData.status === s.value && <Check size={14} className="eq-pill__check" />}
+                                        {formData.status === s.value && <Check size={12} className="eq-pill__check" />}
                                         {s.label}
                                     </button>
                                 ))}
@@ -232,40 +258,10 @@ const EquipmentModal: React.FC<EquipmentModalProps> = ({ isOpen, onClose, onSubm
                                             color: c.color
                                         } : {}}
                                     >
-                                        {formData.condition === c.value && <Check size={14} className="eq-pill__check" />}
+                                        {formData.condition === c.value && <Check size={12} className="eq-pill__check" />}
                                         {c.label}
                                     </button>
                                 ))}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* PURCHASE INFO */}
-                    <div className="eq-modal__section eq-modal__section--bordered eq-grid eq-grid--2">
-                        <div>
-                            <label className="eq-label">Purchase Date</label>
-                            <div className="eq-input-wrapper">
-                                <Calendar size={16} className="eq-input-icon" />
-                                <input
-                                    type="date"
-                                    value={formData.purchaseDate || ''}
-                                    onChange={e => handleChange('purchaseDate', e.target.value)}
-                                    className="eq-input eq-input--with-icon"
-                                    style={{ colorScheme: 'dark' }}
-                                />
-                            </div>
-                        </div>
-                        <div>
-                            <label className="eq-label">Purchase Cost ($)</label>
-                            <div className="eq-input-wrapper">
-                                <DollarSign size={16} className="eq-input-icon" />
-                                <input
-                                    type="number"
-                                    value={formData.purchaseCost || 0}
-                                    onChange={e => handleChange('purchaseCost', parseFloat(e.target.value) || 0)}
-                                    className="eq-input eq-input--with-icon"
-                                    placeholder="0.00"
-                                />
                             </div>
                         </div>
                     </div>

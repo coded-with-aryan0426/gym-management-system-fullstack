@@ -14,6 +14,7 @@ import Avatar from "../ui/Avatar"
 import AvatarPicker from "../ui/AvatarPicker"
 import { getAvatarUrl } from "../ui/Avatar"
 import "./MemberActionModal.css"
+import Editable from "../editor/Editable"
 
 interface Trainer {
   id: number
@@ -1209,6 +1210,9 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
             </AnimatePresence>
 
             {/* Other sub-modals (renew, message) remain the same */}
+              </div>
+            </div>
+          </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -1422,6 +1426,7 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
           )
         }
       </AnimatePresence >
+      </Editable>
     </>
 
 

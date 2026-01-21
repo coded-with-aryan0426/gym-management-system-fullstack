@@ -13,6 +13,7 @@ import { useTrainers } from "../../contexts/TrainerContext"
 import "./CreateActionModal.css"
 
 import ConfirmDialog from "../ui/ConfirmDialog"
+import Editable from "../editor/Editable"
 
 interface CreateActionModalProps {
     isOpen: boolean
@@ -246,6 +247,7 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
         <AnimatePresence>
             {isOpen && (
                 <div className="create-action-overlay" onClick={handleCloseRequest}>
+                    <Editable id="create-action-modal" config={{ allowLayout: true, allowStyle: true, allowVisibility: true }}>
                     <motion.div
                         className={`create-action-modal ${isFormView ? 'create-action-modal--form' : ''}`}
                         onClick={(e) => e.stopPropagation()}
@@ -455,6 +457,7 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
                             </button>
                         </div>
                     </motion.div>
+                    </Editable>
                 </div>
             )}
 

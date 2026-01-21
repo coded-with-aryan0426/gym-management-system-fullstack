@@ -9,6 +9,7 @@ import api from "../../services/api"
 import { showToast } from "../../utils/toast"
 import AvatarPicker from "../ui/AvatarPicker"
 import { getAvatarUrl } from "../ui/Avatar"
+import Editable from "../editor/Editable"
 import "./TrainerActionModal.css"
 
 // ============================================================================
@@ -326,6 +327,7 @@ const EnhancedTrainerActionModal: React.FC<EnhancedTrainerActionModalProps> = ({
           transition={{ duration: 0.2 }}
         >
           {/* Modal Content Wrapper */}
+          <Editable id="trainer-action-modal" config={{ allowLayout: true, allowStyle: true, allowVisibility: true }}>
           <motion.div
             className="trainer-action-modal trainer-action-modal--redesigned"
             onClick={(e) => e.stopPropagation()}
@@ -1146,6 +1148,7 @@ const EnhancedTrainerActionModal: React.FC<EnhancedTrainerActionModalProps> = ({
               </div>
             </div>
           </motion.div>
+        </Editable>
         </motion.div>
       )}
     </AnimatePresence>
