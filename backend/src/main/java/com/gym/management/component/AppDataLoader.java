@@ -71,26 +71,86 @@ public class AppDataLoader implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) throws Exception {
+        // ============================================
         // 1. Initialize Roles
+        // ============================================
+        Role adminRole = createRoleIfNotFound("ROLE_ADMIN");
+        Role ownerRole = createRoleIfNotFound("ROLE_OWNER");
         Role trainerRole = createRoleIfNotFound("ROLE_TRAINER");
         Role memberRole = createRoleIfNotFound("ROLE_MEMBER");
-        createRoleIfNotFound("ROLE_ADMIN");
 
-        // 2. Create Trainer
+        // ============================================
+        // 2. Create Admin Account
+        // Login: admin / admin123
+        // ============================================
+        if (!userRepository.findByUsername("admin").isPresent()) {
+            User admin = new User();
+            admin.setUsername("admin");
+            admin.setFullName("System Administrator");
+            admin.setEmail("admin@fitpro.com");
+            admin.setPhone("555-0000");
+            admin.setPassword(passwordEncoder.encode("admin123"));
+            admin.setRoles(new HashSet<>(Collections.singletonList(adminRole)));
+            admin.setStatus("Active");
+            userRepository.save(admin);
+            System.out.println("✅ Seeded Admin: admin / admin123");
+        }
+
+        // ============================================
+        // 3. Create Owner Account
+        // Login: owner / password123
+        // ============================================
+        if (!userRepository.findByUsername("owner").isPresent()) {
+            User owner = new User();
+            owner.setUsername("owner");
+            owner.setFullName("Gym Owner");
+            owner.setEmail("owner@fitpro.com");
+            owner.setPhone("555-1000");
+            owner.setPassword(passwordEncoder.encode("password123"));
+            owner.setRoles(new HashSet<>(Collections.singletonList(ownerRole)));
+            owner.setStatus("Active");
+            userRepository.save(owner);
+            System.out.println("✅ Seeded Owner: owner / password123");
+        }
+
+        // ============================================
+        // 4. Create Trainers
+        // Login: john.smith / password123
+        // Login: sarah.jones / password123
+        // ============================================
         if (!userRepository.findByUsername("john.smith").isPresent()) {
             User trainer = new User();
             trainer.setUsername("john.smith");
             trainer.setFullName("John Smith");
-            trainer.setEmail("john.smith@athlonx.com");
+            trainer.setEmail("john.smith@fitpro.com");
             trainer.setPhone("555-0101");
-            trainer.setPassword(passwordEncoder.encode("password"));
+            trainer.setPassword(passwordEncoder.encode("password123"));
             trainer.setRoles(new HashSet<>(Collections.singletonList(trainerRole)));
             trainer.setStatus("Active");
             userRepository.save(trainer);
-            System.out.println("Seeded Trainer: " + trainer.getUsername());
+            System.out.println("✅ Seeded Trainer: john.smith / password123");
         }
 
-        // 3. Create Members
+        if (!userRepository.findByUsername("sarah.jones").isPresent()) {
+            User trainer2 = new User();
+            trainer2.setUsername("sarah.jones");
+            trainer2.setFullName("Sarah Jones");
+            trainer2.setEmail("sarah.jones@fitpro.com");
+            trainer2.setPhone("555-0102");
+            trainer2.setPassword(passwordEncoder.encode("password123"));
+            trainer2.setRoles(new HashSet<>(Collections.singletonList(trainerRole)));
+            trainer2.setStatus("Active");
+            userRepository.save(trainer2);
+            System.out.println("✅ Seeded Trainer: sarah.jones / password123");
+        }
+
+        // ============================================
+        // 5. Create Members
+        // Login: member1 / password123
+        // Login: jane.doe / password123
+        // ============================================
+        createMemberIfNotFound("member1", "Test Member", "member1@email.com", memberRole);
+        createMemberIfNotFound("jane.doe", "Jane Doe", "jane.doe@email.com", memberRole);
         createMemberIfNotFound("emma.davis", "Emma Davis", "emma@example.com", memberRole);
         createMemberIfNotFound("sarah.wilson", "Sarah Wilson", "sarah@example.com", memberRole);
         createMemberIfNotFound("mike.johnson", "Mike Johnson", "mike@example.com", memberRole);
@@ -258,11 +318,11 @@ public class AppDataLoader implements CommandLineRunner {
             member.setUsername(username);
             member.setFullName(fullName);
             member.setEmail(email);
-            member.setPassword(passwordEncoder.encode("password")); // Default password
+            member.setPassword(passwordEncoder.encode("password123")); // All members use password123
             member.setRoles(new HashSet<>(Collections.singletonList(role)));
             member.setStatus("Active");
             userRepository.save(member);
-            System.out.println("Seeded Member: " + fullName);
+            System.out.println("✅ Seeded Member: " + username + " / password123");
         }
     }
 
@@ -292,7 +352,7 @@ public class AppDataLoader implements CommandLineRunner {
             String room, ClassType type, ClassStatus status,
             Integer capacity, Integer enrolled, Boolean recurring, String notes) {
         TrainerClass c = new TrainerClass();
-        c.setTrainerId(trainer.getUserId());
+        c.setTrainer(trainer);
         c.setTitle(title);
         c.setClassDate(date);
         c.setStartTime(start);

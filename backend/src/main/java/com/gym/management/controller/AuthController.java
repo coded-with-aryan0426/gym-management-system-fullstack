@@ -151,6 +151,10 @@ public class AuthController {
         }
 
         if (userOpt.isEmpty()) {
+            userOpt = userRepository.findByPhoneNumber(request.getUsername());
+        }
+
+        if (userOpt.isEmpty()) {
             return ResponseEntity.status(401).body(Map.of("error", "User not found"));
         }
 

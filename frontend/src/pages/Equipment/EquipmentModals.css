@@ -7,22 +7,56 @@
    CSS VARIABLES
    ───────────────────────────────────────────────────────────────────────────── */
 :root {
-    --modal-bg: #0d0d0d;
-    --modal-surface: #141414;
-    --modal-surface-hover: #1a1a1a;
-    --modal-border: #2a2a2a;
-    --modal-border-hover: #3a3a3a;
-    --modal-text: #ffffff;
-    --modal-text-muted: #888888;
-    --modal-text-subtle: #555555;
-    --modal-accent: #3b82f6;
-    --modal-accent-hover: #2563eb;
+    /* Map to Global Theme Tokens */
+    --modal-bg: var(--bg-surface);
+    --modal-surface: var(--bg-surface-secondary);
+    --modal-surface-hover: var(--bg-surface-secondary); /* or a slightly different shade if available */
+    --modal-border: var(--border-color);
+    --modal-border-hover: var(--accent-primary);
+    --modal-text: var(--text-primary);
+    --modal-text-muted: var(--text-secondary);
+    --modal-text-subtle: var(--text-secondary); /* Fallback */
+    --modal-accent: var(--accent-primary);
+    --modal-accent-hover: var(--accent-primary);
+    
     --modal-success: #22c55e;
     --modal-warning: #eab308;
     --modal-danger: #ef4444;
+    
+    --modal-success-bg: rgba(34, 197, 94, 0.15);
+    --modal-warning-bg: rgba(234, 179, 8, 0.15);
+    --modal-danger-bg: rgba(239, 68, 68, 0.15);
+    --modal-info-bg: rgba(59, 130, 246, 0.15);
+    
+    --modal-info: #3b82f6;
+    --modal-purple: #8b5cf6;
+    --modal-orange: #f97316;
+    
+    --modal-purple-bg: rgba(139, 92, 246, 0.15);
+    --modal-orange-bg: rgba(249, 115, 22, 0.15);
+    
     --modal-radius: 16px;
     --modal-radius-sm: 12px;
     --modal-radius-xs: 8px;
+}
+
+/* Light mode overrides handled by global token switching, 
+   but we can add specific adjustments if needed */
+:root.light .eq-modal-overlay {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(8px);
+}
+
+:root.light .eq-card__header {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+:root.light .eq-calendar .rbc-day-bg.rbc-off-range-bg {
+    background: var(--bg-surface-secondary);
+}
+
+:root.light .eq-calendar .rbc-day-bg.rbc-today {
+    background: rgba(37, 99, 235, 0.1);
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -84,7 +118,7 @@
 }
 
 .eq-modal--compact .eq-modal__header {
-    padding: 12px 20px;
+    padding: 10px 16px;
     /* Reduced by ~40% */
 }
 
@@ -93,27 +127,27 @@
 }
 
 .eq-modal--compact .eq-modal__body {
-    padding: 20px;
+    padding: 16px;
     /* Reduced by ~30% */
 }
 
 .eq-modal--compact .eq-modal__footer {
-    padding: 12px 20px;
+    padding: 10px 16px;
     /* Reduced by ~40% */
 }
 
 .eq-modal--compact .eq-modal__section {
-    margin-bottom: 16px;
+    margin-bottom: 12px;
     /* Reduced vertical spacing */
 }
 
 .eq-modal--compact .eq-label {
-    margin-bottom: 6px;
+    margin-bottom: 4px;
     font-size: 10px;
 }
 
 .eq-modal--compact .eq-input {
-    padding: 8px 12px;
+    padding: 6px 10px;
     /* Reduced height by ~30% */
     font-size: 13px;
     border-width: 1px;
@@ -178,6 +212,10 @@
     padding: 20px 28px;
     border-bottom: 1px solid var(--modal-border);
     background: rgba(0, 0, 0, 0.4);
+}
+
+:root.light .eq-modal__header {
+    background: rgba(255, 255, 255, 0.5);
 }
 
 .eq-modal__title {
@@ -454,9 +492,17 @@
     background: rgba(255, 255, 255, 0.05);
 }
 
+:root.light .eq-tab:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
 .eq-tab--active {
     background: rgba(255, 255, 255, 0.1);
     color: var(--modal-text);
+}
+
+:root.light .eq-tab--active {
+    background: rgba(0, 0, 0, 0.1);
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -470,6 +516,10 @@
     padding: 20px 28px;
     border-top: 1px solid var(--modal-border);
     background: rgba(0, 0, 0, 0.4);
+}
+
+:root.light .eq-modal__footer {
+    background: rgba(255, 255, 255, 0.5);
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────

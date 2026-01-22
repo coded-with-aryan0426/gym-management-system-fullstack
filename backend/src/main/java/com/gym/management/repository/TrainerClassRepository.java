@@ -10,10 +10,10 @@ import java.util.List;
 @Repository
 public interface TrainerClassRepository extends JpaRepository<TrainerClass, Long> {
 
-    List<TrainerClass> findByTrainerIdOrderByClassDateAscStartTimeAsc(Long trainerId);
+    List<TrainerClass> findByTrainerUserIdOrderByClassDateAscStartTimeAsc(Long trainerId);
 
-    List<TrainerClass> findByTrainerIdAndClassDateBetweenOrderByClassDateAscStartTimeAsc(
+    List<TrainerClass> findByTrainerUserIdAndClassDateBetweenOrderByClassDateAscStartTimeAsc(
             Long trainerId, LocalDate startDate, LocalDate endDate);
 
-    List<TrainerClass> findByTrainerIdAndClassDate(Long trainerId, LocalDate classDate);
+    List<TrainerClass> findByTrainerUserIdAndClassDate(Long trainerId, LocalDate classDate);
 }

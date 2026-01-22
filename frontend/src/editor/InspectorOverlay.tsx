@@ -1,10 +1,9 @@
 /**
- * InspectorOverlay - DevTools-style element inspector with resize functionality
+ * InspectorOverlay - DevTools-style element inspector with resize/move functionality
  * 
- * - Hover: Green border + tag label
- * - Click: Select element (blue border + resize handles)
- * - Drag handles: Resize element
- * - Double-click: Let normal click through
+ * Modes:
+ * - RESIZE: Drag corner/edge handles to change size
+ * - MOVE: Drag element body to reposition
  */
 
 import { useEffect, useState, useCallback, useRef } from 'react'
@@ -22,12 +21,14 @@ interface ElementInfo {
 type ResizeHandle = 'nw' | 'ne' | 'sw' | 'se' | 'n' | 's' | 'e' | 'w' | null
 
 export function InspectorOverlay() {
-    const { isEditing, setSelectedId, setSize } = useEditor()
+    const { isEditing, editTool, setSelectedId, setSize } = useEditor()
     const [hoveredElement, setHoveredElement] = useState<ElementInfo | null>(null)
     const [selectedElement, setSelectedElement] = useState<ElementInfo | null>(null)
     const [isResizing, setIsResizing] = useState(false)
+    const [isMoving, setIsMoving] = useState(false)
     const [activeHandle, setActiveHandle] = useState<ResizeHandle>(null)
     const resizeStartRef = useRef<{ x: number; y: number; width: number; height: number } | null>(null)
+    const moveStartRef = useRef<{ x: number; y: number; left: number; top: number } | null>(null)
 
     // Get display label for element
     const getLabel = (el: Element): string => {
@@ -203,7 +204,7 @@ export function InspectorOverlay() {
 
     // Handle resize start
     const startResize = (handle: ResizeHandle, e: React.MouseEvent) => {
-        if (!selectedElement) return
+        if (!selectedElement || editTool !== 'resize') return
 
         e.preventDefault()
         e.stopPropagation()
@@ -219,6 +220,70 @@ export function InspectorOverlay() {
         setActiveHandle(handle)
         setIsResizing(true)
     }
+
+    // Handle move start
+    const startMove = (e: React.MouseEvent) => {
+        if (!selectedElement || editTool !== 'move') return
+
+        e.preventDefault()
+        e.stopPropagation()
+
+        const el = selectedElement.element as HTMLElement
+
+        // Get current transform values
+        const style = window.getComputedStyle(el)
+        const matrix = new DOMMatrix(style.transform)
+        const currentX = matrix.m41 || 0
+        const currentY = matrix.m42 || 0
+
+        moveStartRef.current = {
+            x: e.clientX,
+            y: e.clientY,
+            left: currentX,
+            top: currentY
+        }
+
+        setIsMoving(true)
+        document.body.style.cursor = 'grabbing'
+    }
+
+    // Move drag effect
+    useEffect(() => {
+        if (!selectedElement || !isMoving) return
+
+        const onMouseMove = (e: MouseEvent) => {
+            if (!moveStartRef.current || !selectedElement) return
+
+            const dx = e.clientX - moveStartRef.current.x
+            const dy = e.clientY - moveStartRef.current.y
+            const el = selectedElement.element as HTMLElement
+
+            // Apply position using transform for smooth movement
+            const newX = moveStartRef.current.left + dx
+            const newY = moveStartRef.current.top + dy
+            el.style.transform = `translate(${newX}px, ${newY}px)`
+
+            // Update rect
+            setSelectedElement(prev => prev ? {
+                ...prev,
+                rect: el.getBoundingClientRect()
+            } : null)
+        }
+
+        const onMouseUp = () => {
+            setIsMoving(false)
+            moveStartRef.current = null
+            document.body.style.cursor = ''
+        }
+
+        document.addEventListener('mousemove', onMouseMove)
+        document.addEventListener('mouseup', onMouseUp)
+
+        return () => {
+            document.removeEventListener('mousemove', onMouseMove)
+            document.removeEventListener('mouseup', onMouseUp)
+        }
+    }, [isMoving, selectedElement])
 
     // Update selection rect on scroll
     useEffect(() => {
@@ -281,33 +346,43 @@ export function InspectorOverlay() {
                 </div>
             )}
 
-            {/* Selection highlight with resize handles */}
+            {/* Selection highlight */}
             {selectedElement && (
                 <div
-                    className="inspector-highlight inspector-highlight--selected"
+                    className={`inspector-highlight inspector-highlight--selected ${editTool === 'move' ? 'inspector-highlight--move' : ''}`}
                     style={{
                         top: selectedElement.rect.top + window.scrollY,
                         left: selectedElement.rect.left + window.scrollX,
                         width: selectedElement.rect.width,
                         height: selectedElement.rect.height,
+                        cursor: editTool === 'move' ? (isMoving ? 'grabbing' : 'grab') : 'default'
                     }}
+                    onMouseDown={editTool === 'move' ? startMove : undefined}
                 >
                     <span className="inspector-label inspector-label--selected">
                         {getLabel(selectedElement.element)}
                         <span style={{ marginLeft: 8, opacity: 0.7 }}>
-                            {Math.round(selectedElement.rect.width)}×{Math.round(selectedElement.rect.height)}
+                            {editTool === 'resize' ? (
+                                `${Math.round(selectedElement.rect.width)}×${Math.round(selectedElement.rect.height)}`
+                            ) : (
+                                '✋ Drag to move'
+                            )}
                         </span>
                     </span>
 
-                    {/* Resize handles - FUNCTIONAL */}
-                    <div className="resize-handle resize-handle--nw" onMouseDown={(e) => startResize('nw', e)} />
-                    <div className="resize-handle resize-handle--ne" onMouseDown={(e) => startResize('ne', e)} />
-                    <div className="resize-handle resize-handle--sw" onMouseDown={(e) => startResize('sw', e)} />
-                    <div className="resize-handle resize-handle--se" onMouseDown={(e) => startResize('se', e)} />
-                    <div className="resize-handle resize-handle--n" onMouseDown={(e) => startResize('n', e)} />
-                    <div className="resize-handle resize-handle--s" onMouseDown={(e) => startResize('s', e)} />
-                    <div className="resize-handle resize-handle--e" onMouseDown={(e) => startResize('e', e)} />
-                    <div className="resize-handle resize-handle--w" onMouseDown={(e) => startResize('w', e)} />
+                    {/* Resize handles - Only in resize mode */}
+                    {editTool === 'resize' && (
+                        <>
+                            <div className="resize-handle resize-handle--nw" onMouseDown={(e) => startResize('nw', e)} />
+                            <div className="resize-handle resize-handle--ne" onMouseDown={(e) => startResize('ne', e)} />
+                            <div className="resize-handle resize-handle--sw" onMouseDown={(e) => startResize('sw', e)} />
+                            <div className="resize-handle resize-handle--se" onMouseDown={(e) => startResize('se', e)} />
+                            <div className="resize-handle resize-handle--n" onMouseDown={(e) => startResize('n', e)} />
+                            <div className="resize-handle resize-handle--s" onMouseDown={(e) => startResize('s', e)} />
+                            <div className="resize-handle resize-handle--e" onMouseDown={(e) => startResize('e', e)} />
+                            <div className="resize-handle resize-handle--w" onMouseDown={(e) => startResize('w', e)} />
+                        </>
+                    )}
                 </div>
             )}
         </div>
@@ -315,3 +390,4 @@ export function InspectorOverlay() {
 }
 
 export default InspectorOverlay
+

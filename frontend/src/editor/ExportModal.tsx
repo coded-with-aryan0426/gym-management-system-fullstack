@@ -126,20 +126,20 @@ ${JSON.stringify(
                     boxShadow: '0 24px 80px rgba(0,0,0,0.5)'
                 }}
             >
-                {/* Header */}
+                {/* Header - COMPACT */}
                 <div style={{
-                    padding: '20px 24px',
+                    padding: '12px 16px',
                     borderBottom: '1px solid rgba(255,255,255,0.1)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between'
                 }}>
                     <div>
-                        <h3 style={{ margin: 0, color: 'white', fontSize: '18px' }}>
+                        <h3 style={{ margin: 0, color: 'white', fontSize: '15px' }}>
                             📋 Copy AI Prompt
                         </h3>
-                        <p style={{ margin: '4px 0 0', color: 'rgba(255,255,255,0.5)', fontSize: '13px' }}>
-                            Paste this directly into any AI chat to apply changes
+                        <p style={{ margin: '2px 0 0', color: 'rgba(255,255,255,0.5)', fontSize: '11px' }}>
+                            Paste directly into AI chat
                         </p>
                     </div>
                     <button
@@ -149,11 +149,11 @@ ${JSON.stringify(
                             border: 'none',
                             color: 'rgba(255,255,255,0.7)',
                             cursor: 'pointer',
-                            padding: '8px',
-                            borderRadius: '8px'
+                            padding: '6px',
+                            borderRadius: '6px'
                         }}
                     >
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M18 6L6 18M6 6l12 12" />
                         </svg>
                     </button>
@@ -162,62 +162,62 @@ ${JSON.stringify(
                 {/* Content */}
                 <pre style={{
                     margin: 0,
-                    padding: '20px 24px',
+                    padding: '12px 16px',
                     overflow: 'auto',
-                    maxHeight: '50vh',
+                    maxHeight: '35vh',
                     background: '#0d0d0f',
                     color: '#E5E5E5',
-                    fontSize: '13px',
+                    fontSize: '11px',
                     fontFamily: "'SF Mono', 'Fira Code', 'Consolas', monospace",
-                    lineHeight: 1.5,
+                    lineHeight: 1.4,
                     whiteSpace: 'pre-wrap',
                     wordBreak: 'break-word'
                 }}>
                     {promptText}
                 </pre>
 
-                {/* Footer */}
+                {/* Footer - COMPACT */}
                 <div style={{
-                    padding: '16px 24px',
+                    padding: '10px 16px',
                     borderTop: '1px solid rgba(255,255,255,0.1)',
                     display: 'flex',
-                    gap: '12px',
+                    gap: '8px',
                     justifyContent: 'space-between',
                     alignItems: 'center'
                 }}>
-                    <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px' }}>
-                        {changes.length} change(s) ready to apply
+                    <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>
+                        {changes.length} change(s)
                     </span>
-                    <div style={{ display: 'flex', gap: '12px' }}>
+                    <div style={{ display: 'flex', gap: '8px' }}>
                         <button
                             onClick={handleDownload}
                             style={{
-                                padding: '10px 20px',
+                                padding: '6px 12px',
                                 background: 'rgba(255,255,255,0.1)',
                                 border: 'none',
-                                borderRadius: '8px',
+                                borderRadius: '6px',
                                 color: 'white',
                                 cursor: 'pointer',
-                                fontSize: '14px'
+                                fontSize: '12px'
                             }}
                         >
-                            Download .md
+                            Download
                         </button>
                         <button
                             onClick={handleCopy}
                             style={{
-                                padding: '10px 24px',
+                                padding: '6px 16px',
                                 background: copied ? '#10B981' : '#3B82F6',
                                 border: 'none',
-                                borderRadius: '8px',
+                                borderRadius: '6px',
                                 color: 'white',
                                 cursor: 'pointer',
-                                fontSize: '14px',
+                                fontSize: '12px',
                                 fontWeight: 600,
                                 transition: 'background 0.2s'
                             }}
                         >
-                            {copied ? '✓ Copied!' : 'Copy Prompt'}
+                            {copied ? '✓ Copied!' : 'Copy'}
                         </button>
                     </div>
                 </div>

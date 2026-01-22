@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, type ReactNode } from 'react'
 import api from '../services/api'
 import type { User } from '../types/user'
+import { useAuth } from './AuthContext'
 
 interface TrainerContextType {
     trainers: User[]
@@ -31,10 +32,16 @@ interface TrainerProviderProps {
 }
 
 export const TrainerProvider: React.FC<TrainerProviderProps> = ({ children }) => {
+    const { isAuthenticated } = useAuth()
     const [trainers, setTrainers] = useState<User[]>([])
     const [loading, setLoading] = useState(true)
 
     const fetchTrainers = useCallback(async () => {
+        if (!isAuthenticated) {
+            setLoading(false)
+            return
+        }
+
         // Only show loading indicator on initial fetch
         if (trainers.length === 0) {
             setLoading(true)
@@ -49,12 +56,17 @@ export const TrainerProvider: React.FC<TrainerProviderProps> = ({ children }) =>
         } finally {
             setLoading(false)
         }
-    }, [trainers.length])
+    }, [isAuthenticated, trainers.length])
 
     // Initial fetch
     useEffect(() => {
-        fetchTrainers()
-    }, []) // eslint-disable-line react-hooks/exhaustive-deps
+        if (isAuthenticated) {
+            fetchTrainers()
+        } else {
+            setTrainers([])
+            setLoading(false)
+        }
+    }, [isAuthenticated, fetchTrainers])
 
     const stats = useMemo(() => {
         const total = trainers.length

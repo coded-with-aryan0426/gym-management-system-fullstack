@@ -211,7 +211,7 @@ public class TrainerPagesDataSeeder implements CommandLineRunner {
     private void seedTrainerClasses(User trainer) {
         // Check if classes already exist
         List<TrainerClass> existing = trainerClassRepository
-                .findByTrainerIdOrderByClassDateAscStartTimeAsc(trainer.getUserId());
+                .findByTrainerUserIdOrderByClassDateAscStartTimeAsc(trainer.getUserId());
         if (!existing.isEmpty()) {
             log.info("🏋️ Trainer classes already exist, skipping...");
             return;
@@ -287,7 +287,7 @@ public class TrainerPagesDataSeeder implements CommandLineRunner {
             }
 
             TrainerClass tc = new TrainerClass();
-            tc.setTrainerId(trainer.getUserId());
+            tc.setTrainer(trainer);
             tc.setTitle(title);
             tc.setType(type);
             tc.setClassDate(date);

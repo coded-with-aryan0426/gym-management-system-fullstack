@@ -60,27 +60,27 @@ const EquipmentModal: React.FC<EquipmentModalProps> = ({ isOpen, onClose, onSubm
     // ─────────────────────────────────────────────────────────────────────────
     // CONFIG
     // ─────────────────────────────────────────────────────────────────────────
-    const categories: { value: EquipmentCategory; label: string; icon: React.ReactNode; color: string }[] = [
-        { value: 'STRENGTH', label: 'Strength', icon: <Dumbbell size={20} />, color: '#ef4444' },
-        { value: 'CARDIO', label: 'Cardio', icon: <Heart size={20} />, color: '#f97316' },
-        { value: 'FUNCTIONAL', label: 'Functional', icon: <Zap size={20} />, color: '#eab308' },
-        { value: 'YOGA', label: 'Yoga', icon: <Flower2 size={20} />, color: '#22c55e' },
-        { value: 'RECOVERY', label: 'Recovery', icon: <Sparkles size={20} />, color: '#3b82f6' },
-        { value: 'OTHER', label: 'Other', icon: <Package size={20} />, color: '#8b5cf6' }
+    const categories: { value: EquipmentCategory; label: string; icon: React.ReactNode; colorVar: string; bgVar: string }[] = [
+        { value: 'STRENGTH', label: 'Strength', icon: <Dumbbell size={20} />, colorVar: 'var(--modal-danger)', bgVar: 'var(--modal-danger-bg)' },
+        { value: 'CARDIO', label: 'Cardio', icon: <Heart size={20} />, colorVar: 'var(--modal-orange)', bgVar: 'var(--modal-orange-bg)' },
+        { value: 'FUNCTIONAL', label: 'Functional', icon: <Zap size={20} />, colorVar: 'var(--modal-warning)', bgVar: 'var(--modal-warning-bg)' },
+        { value: 'YOGA', label: 'Yoga', icon: <Flower2 size={20} />, colorVar: 'var(--modal-success)', bgVar: 'var(--modal-success-bg)' },
+        { value: 'RECOVERY', label: 'Recovery', icon: <Sparkles size={20} />, colorVar: 'var(--modal-info)', bgVar: 'var(--modal-info-bg)' },
+        { value: 'OTHER', label: 'Other', icon: <Package size={20} />, colorVar: 'var(--modal-purple)', bgVar: 'var(--modal-purple-bg)' }
     ];
 
-    const statuses: { value: EquipmentStatus; label: string; color: string }[] = [
-        { value: 'ACTIVE', label: 'Active', color: '#22c55e' },
-        { value: 'MAINTENANCE', label: 'Maintenance', color: '#eab308' },
-        { value: 'OUT_OF_ORDER', label: 'Out of Order', color: '#ef4444' },
-        { value: 'RETIRED', label: 'Retired', color: '#6b7280' }
+    const statuses: { value: EquipmentStatus; label: string; colorVar: string; bgVar: string }[] = [
+        { value: 'ACTIVE', label: 'Active', colorVar: 'var(--modal-success)', bgVar: 'var(--modal-success-bg)' },
+        { value: 'MAINTENANCE', label: 'Maintenance', colorVar: 'var(--modal-warning)', bgVar: 'var(--modal-warning-bg)' },
+        { value: 'OUT_OF_ORDER', label: 'Out of Order', colorVar: 'var(--modal-danger)', bgVar: 'var(--modal-danger-bg)' },
+        { value: 'RETIRED', label: 'Retired', colorVar: 'var(--modal-text-muted)', bgVar: 'var(--modal-surface-hover)' }
     ];
 
-    const conditions: { value: EquipmentCondition; label: string; color: string }[] = [
-        { value: 'NEW', label: 'New', color: '#22c55e' },
-        { value: 'GOOD', label: 'Good', color: '#3b82f6' },
-        { value: 'FAIR', label: 'Fair', color: '#eab308' },
-        { value: 'POOR', label: 'Poor', color: '#ef4444' }
+    const conditions: { value: EquipmentCondition; label: string; colorVar: string; bgVar: string }[] = [
+        { value: 'NEW', label: 'New', colorVar: 'var(--modal-success)', bgVar: 'var(--modal-success-bg)' },
+        { value: 'GOOD', label: 'Good', colorVar: 'var(--modal-info)', bgVar: 'var(--modal-info-bg)' },
+        { value: 'FAIR', label: 'Fair', colorVar: 'var(--modal-warning)', bgVar: 'var(--modal-warning-bg)' },
+        { value: 'POOR', label: 'Poor', colorVar: 'var(--modal-danger)', bgVar: 'var(--modal-danger-bg)' }
     ];
 
     if (!isOpen) return null;
@@ -116,9 +116,9 @@ const EquipmentModal: React.FC<EquipmentModalProps> = ({ isOpen, onClose, onSubm
                                     onClick={() => handleChange('category', cat.value)}
                                     className={`eq-category-btn ${formData.category === cat.value ? 'eq-category-btn--active' : ''}`}
                                     style={formData.category === cat.value ? {
-                                        backgroundColor: `${cat.color}15`,
-                                        borderColor: cat.color,
-                                        color: cat.color
+                                        backgroundColor: cat.bgVar,
+                                        borderColor: cat.colorVar,
+                                        color: cat.colorVar
                                     } : {}}
                                 >
                                     <span className="eq-category-btn__icon">{cat.icon}</span>
@@ -213,7 +213,6 @@ const EquipmentModal: React.FC<EquipmentModalProps> = ({ isOpen, onClose, onSubm
                                     value={formData.purchaseDate || ''}
                                     onChange={e => handleChange('purchaseDate', e.target.value)}
                                     className="eq-input eq-input--with-icon"
-                                    style={{ colorScheme: 'dark' }}
                                 />
                             </div>
                         </div>
@@ -231,9 +230,9 @@ const EquipmentModal: React.FC<EquipmentModalProps> = ({ isOpen, onClose, onSubm
                                         onClick={() => handleChange('status', s.value)}
                                         className={`eq-pill ${formData.status === s.value ? 'eq-pill--active' : ''}`}
                                         style={formData.status === s.value ? {
-                                            backgroundColor: `${s.color}15`,
-                                            borderColor: s.color,
-                                            color: s.color
+                                            backgroundColor: s.bgVar,
+                                            borderColor: s.colorVar,
+                                            color: s.colorVar
                                         } : {}}
                                     >
                                         {formData.status === s.value && <Check size={12} className="eq-pill__check" />}
@@ -253,9 +252,9 @@ const EquipmentModal: React.FC<EquipmentModalProps> = ({ isOpen, onClose, onSubm
                                         onClick={() => handleChange('condition', c.value)}
                                         className={`eq-pill ${formData.condition === c.value ? 'eq-pill--active' : ''}`}
                                         style={formData.condition === c.value ? {
-                                            backgroundColor: `${c.color}15`,
-                                            borderColor: c.color,
-                                            color: c.color
+                                            backgroundColor: c.bgVar,
+                                            borderColor: c.colorVar,
+                                            color: c.colorVar
                                         } : {}}
                                     >
                                         {formData.condition === c.value && <Check size={12} className="eq-pill__check" />}

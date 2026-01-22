@@ -7,6 +7,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react'
 
 type Density = 'compact' | 'normal' | 'relaxed'
+export type EditTool = 'resize' | 'move'
 
 export interface UIOverride {
     visible?: boolean
@@ -28,6 +29,10 @@ interface EditorContextValue {
     // Edit mode state
     isEditing: boolean
     toggleEditing: () => void
+
+    // Tool mode (resize or move)
+    editTool: EditTool
+    setEditTool: (tool: EditTool) => void
 
     // Selection
     selectedId: string | null
@@ -65,6 +70,7 @@ const EditorContext = createContext<EditorContextValue | undefined>(undefined)
 
 export function EditorProvider({ children }: { children: React.ReactNode }) {
     const [isEditing, setIsEditing] = useState(false)
+    const [editTool, setEditTool] = useState<EditTool>('resize')
     const [selectedId, setSelectedId] = useState<string | null>(null)
     const [overrides, setOverrides] = useState<Record<string, UIOverride>>({})
     const [changes, setChanges] = useState<ChangeRecord[]>([])
@@ -270,10 +276,14 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     }, [redoStack, getOverride])
 
     const reset = useCallback(() => {
+        // Reset context state
         setOverrides({})
         setChanges([])
         setRedoStack([])
         setSelectedId(null)
+
+        // Reload page to reset all inline styles
+        window.location.reload()
     }, [])
 
     const value = useMemo<EditorContextValue>(() => ({
@@ -282,6 +292,8 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
             setIsEditing(v => !v)
             setSelectedId(null)
         },
+        editTool,
+        setEditTool,
         selectedId,
         setSelectedId,
         getOverride,
@@ -306,7 +318,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
         canRedo: redoStack.length > 0,
         changes
     }), [
-        isEditing, selectedId, getOverride, changes, redoStack,
+        isEditing, editTool, selectedId, getOverride, changes, redoStack,
         setVisibility, setDensity, setPadding, setMargin, setGap,
         setBackground, setRadius, setSize, setTextColor, setFontSize,
         setBorder, setShadow, setOpacity, setTextContent, undo, redo, reset

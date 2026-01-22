@@ -323,7 +323,7 @@ public class TrainerReportsDataSeeder implements CommandLineRunner {
 
                 // Classes and attendees
                 List<TrainerClass> classes = trainerClassRepository
-                        .findByTrainerIdOrderByClassDateAscStartTimeAsc(trainer.getUserId());
+                        .findByTrainerUserIdOrderByClassDateAscStartTimeAsc(trainer.getUserId());
                 for (TrainerClass cls : classes) {
                     trainerClassAttendeeRepository.deleteByClassId(cls.getId());
                 }

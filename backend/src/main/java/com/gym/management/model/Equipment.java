@@ -22,6 +22,13 @@ public class Equipment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "gym_id")
+    private Long gymId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "gym_id", insertable = false, updatable = false)
+    private Gym gym;
+
     @Column(nullable = false)
     private String name;
 

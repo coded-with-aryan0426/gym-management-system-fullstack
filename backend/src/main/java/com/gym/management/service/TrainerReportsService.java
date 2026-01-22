@@ -171,7 +171,7 @@ public class TrainerReportsService {
 
         // Count Group Classes by type
         List<TrainerClass> classes = trainerClassRepository
-                .findByTrainerIdAndClassDateBetweenOrderByClassDateAscStartTimeAsc(
+                .findByTrainerUserIdAndClassDateBetweenOrderByClassDateAscStartTimeAsc(
                         trainerId, range.start.toLocalDate(), range.end.toLocalDate());
 
         int groupClasses = (int) classes.stream()
@@ -701,7 +701,7 @@ public class TrainerReportsService {
 
     private int countClasses(Long trainerId, LocalDate start, LocalDate end) {
         return trainerClassRepository
-                .findByTrainerIdAndClassDateBetweenOrderByClassDateAscStartTimeAsc(trainerId, start, end)
+                .findByTrainerUserIdAndClassDateBetweenOrderByClassDateAscStartTimeAsc(trainerId, start, end)
                 .size();
     }
 
@@ -714,7 +714,7 @@ public class TrainerReportsService {
                 .filter(s -> s.getStatus() != SessionStatus.CANCELLED)
                 .count();
 
-        int classCount = trainerClassRepository.findByTrainerIdAndClassDate(trainerId, date).size();
+        int classCount = trainerClassRepository.findByTrainerUserIdAndClassDate(trainerId, date).size();
 
         return ptCount + classCount;
     }

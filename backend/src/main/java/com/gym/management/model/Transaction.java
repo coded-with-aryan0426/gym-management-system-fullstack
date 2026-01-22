@@ -25,6 +25,13 @@ public class Transaction {
     @Column(name = "TRANSACTION_ID")
     private Long transactionId;
 
+    @Column(name = "gym_id")
+    private Long gymId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "gym_id", insertable = false, updatable = false)
+    private Gym gym;
+
     @Column(name = "DATE_TIME", nullable = false)
     @com.fasterxml.jackson.annotation.JsonFormat(shape = com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime dateTime;

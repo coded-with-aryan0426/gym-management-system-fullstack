@@ -36,9 +36,14 @@ apiClient.interceptors.response.use(
   (error: AxiosError) => {
     // Always redirect on 401 - no dev mode bypass
     if (error.response?.status === 401) {
-      localStorage.removeItem(getStorageKey('token'));
-      localStorage.removeItem(getStorageKey('user'));
-      window.location.href = '/login';
+      const isLoginRequest = error.config?.url?.includes('/auth/login');
+      const isLoginPage = window.location.pathname === '/login';
+
+      if (!isLoginRequest && !isLoginPage) {
+        localStorage.removeItem(getStorageKey('token'));
+        localStorage.removeItem(getStorageKey('user'));
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }

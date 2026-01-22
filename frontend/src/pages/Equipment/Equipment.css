@@ -1,63 +1,145 @@
 /* Equipment Page Premium Styles */
 
 .equipment-page {
-    /* Using variables from design-system if available, else fallbacks */
+    /* Theme Tokens - Unified System */
+    /* Default to Dark Mode values (since app seems dark-first) or handle via classes */
+    /* We will use CSS variables that switch based on root class */
+    
+    /* Variables will be defined in :root.light and :root.dark blocks below to ensure switching works */
+    
+    padding: 1rem 1.5rem;
+    min-height: 100vh;
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+:root {
+    /* Fallback/Base Tokens (Dark Mode) */
+    --bg-primary: #0B0E14;
+    --bg-surface: #121621;
+    --bg-surface-secondary: #1A1F2E;
+    --border-color: #2A3042;
+    --text-primary: #E6E9F0;
+    --text-secondary: #9AA4B2;
+    --accent-primary: #3B82F6;
+    
+    --status-active: #22C55E;
+    --status-maintenance: #F59E0B;
+    --status-outoforder: #EF4444;
+    
+    --shadow-card: 0 8px 24px rgba(0,0,0,0.35);
+    
     --glass-bg: rgba(30, 30, 30, 0.6);
     --glass-border: rgba(255, 255, 255, 0.08);
-    --primary-gradient: linear-gradient(135deg, #FF4B4B 0%, #DC2626 100%);
-    --glow-color: rgba(220, 38, 38, 0.5);
+    --primary-gradient: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); /* Updated to Blue for consistency */
+    --glow-color: rgba(59, 130, 246, 0.5);
+}
 
-    padding: 1.5rem;
-    background-color: #0c0c0c;
-    /* Deep dark background */
-    min-height: 100vh;
-    color: #ffffff;
-    font-family: 'Inter', sans-serif;
+:root.light {
+    --bg-primary: #F7F8FA;
+    --bg-surface: #FFFFFF;
+    --bg-surface-secondary: #F1F3F6;
+    --border-color: #E1E5EB;
+    --text-primary: #0F172A;
+    --text-secondary: #475569;
+    --accent-primary: #2563EB;
+    
+    /* Status colors same */
+    --status-active: #22C55E;
+    --status-maintenance: #F59E0B;
+    --status-outoforder: #EF4444;
+    
+    --shadow-card: 0 4px 12px rgba(0,0,0,0.06);
+    
+    --glass-bg: rgba(255, 255, 255, 0.8);
+    --glass-border: rgba(0, 0, 0, 0.08);
+    --primary-gradient: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+    --glow-color: rgba(37, 99, 235, 0.3);
+}
+
+:root.dark {
+    /* Explicit Dark Mode Overrides if needed, matching base :root */
+    --bg-primary: #0B0E14;
+    --bg-surface: #121621;
+    --bg-surface-secondary: #1A1F2E;
+    --border-color: #2A3042;
+    --text-primary: #E6E9F0;
+    --text-secondary: #9AA4B2;
+    --accent-primary: #3B82F6;
+    --shadow-card: 0 8px 24px rgba(0,0,0,0.35);
+}
+
+:root.dark .equipment-page {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+:root.light .equipment-page {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
 }
 
 /* Header Section */
 .equipment-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 2rem;
+    align-items: center;
+    margin-bottom: 1rem;
     position: relative;
+    height: 40px;
 }
 
 .equipment-title h1 {
-    font-size: 2rem;
+    font-size: 1.5rem;
     font-weight: 700;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+}
+
+:root.dark .equipment-title h1 {
     background: linear-gradient(to right, #ffffff, #a5a5a5);
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    letter-spacing: -0.02em;
+}
+
+:root.light .equipment-title h1 {
+    background: linear-gradient(to right, #1e293b, #475569);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .equipment-title p {
     color: #888;
-    font-size: 0.95rem;
+    font-size: 0.875rem;
+    line-height: 1.2;
+}
+
+:root.light .equipment-title p {
+    color: #64748b;
 }
 
 /* Add Button - Premium Positioning */
 .add-equipment-btn {
-    position: absolute;
-    top: 0;
-    right: 0;
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
+    padding: 0.5rem 1rem;
     background: var(--primary-gradient);
     border: none;
-    border-radius: 12px;
+    border-radius: 10px;
     color: white;
     font-weight: 600;
-    font-size: 0.95rem;
+    font-size: 0.875rem;
     cursor: pointer;
     box-shadow: 0 4px 15px var(--glow-color);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 10;
+    height: 36px;
 }
 
 .add-equipment-btn:hover {
@@ -69,24 +151,43 @@
     transform: translateY(0);
 }
 
+/* Equipment Title Container */
+.equipment-title {
+    margin-bottom: 0.5rem;
+}
+
 /* Control Bar - Floating Glass Effect */
 .control-bar {
+    width: 100%;
     display: flex;
     gap: 1rem;
-    margin-bottom: 2rem;
-    background: rgba(20, 20, 20, 0.7);
+    margin-bottom: 0;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    padding: 0.75rem;
+    padding: 0.5rem;
     border-radius: 16px;
     border: 1px solid var(--glass-border);
     align-items: center;
 }
 
+:root.dark .control-bar {
+    background: rgba(20, 20, 20, 0.7);
+}
+
+:root.light .control-bar {
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+}
+
 .search-container {
     flex: 1;
     position: relative;
-    group-focus-within: text-white;
+    color: inherit;
+    transition: color 0.2s;
+}
+
+.search-container:focus-within {
+    color: white;
 }
 
 .search-icon {
@@ -103,7 +204,7 @@
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid transparent;
     border-radius: 10px;
-    padding: 0.75rem 1rem 0.75rem 2.8rem;
+    padding: 0.5rem 1rem 0.5rem 2.8rem;
     color: white;
     font-size: 0.95rem;
     outline: none;

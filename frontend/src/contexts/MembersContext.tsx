@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useEffect, type ReactNode, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, type ReactNode, useMemo, useCallback } from 'react';
 import api from '../services/api';
 import { type MemberDTO } from '../types/user';
+import { useAuth } from './AuthContext';
 
 interface MembersContextType {
     members: MemberDTO[];
@@ -19,10 +20,16 @@ interface MembersContextType {
 const MembersContext = createContext<MembersContextType | undefined>(undefined);
 
 export const MembersProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+    const { user, isAuthenticated } = useAuth();
     const [members, setMembers] = useState<MemberDTO[]>([]);
     const [loading, setLoading] = useState(true);
 
-    const fetchMembers = async () => {
+    const fetchMembers = useCallback(async () => {
+        if (!isAuthenticated || !user) {
+            setLoading(false);
+            return;
+        }
+
         // Keep loading true only on initial fetch or full refresh if needed
         // Usually we might want silent refresh, but for now specific loading state is OK
         // Start loading only if we have no members (initial load) to avoid Flicker
@@ -37,11 +44,16 @@ export const MembersProvider: React.FC<{ children: ReactNode }> = ({ children })
         } finally {
             setLoading(false);
         }
-    };
+    }, [isAuthenticated, user, members.length]);
 
     useEffect(() => {
-        fetchMembers();
-    }, []);
+        if (isAuthenticated) {
+            fetchMembers();
+        } else {
+            setMembers([]);
+            setLoading(false);
+        }
+    }, [isAuthenticated, fetchMembers]);
 
     const stats = useMemo(() => {
         const total = members.length;

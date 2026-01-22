@@ -13,6 +13,13 @@ public class CheckIn {
     @Column(name = "CHECK_IN_ID")
     private Long checkInId;
 
+    @Column(name = "gym_id")
+    private Long gymId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "gym_id", insertable = false, updatable = false)
+    private Gym gym;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USER_ID", nullable = false)
     private User user;

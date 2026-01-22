@@ -265,7 +265,7 @@ public class TrainerDashboardController {
         // For now, we will count PT sessions as "PT".
         // Let's fetch classes to make it real.
         List<com.gym.management.model.TrainerClass> classes = trainerClassRepository
-                .findByTrainerIdOrderByClassDateAscStartTimeAsc(trainerId);
+                .findByTrainerUserIdOrderByClassDateAscStartTimeAsc(trainerId);
         long ptCount = allSessions.size();
         long classCount = classes.size();
 
@@ -619,10 +619,10 @@ public class TrainerDashboardController {
 
         List<com.gym.management.model.TrainerClass> classes;
         if (startDate != null && endDate != null) {
-            classes = trainerClassRepository.findByTrainerIdAndClassDateBetweenOrderByClassDateAscStartTimeAsc(
+            classes = trainerClassRepository.findByTrainerUserIdAndClassDateBetweenOrderByClassDateAscStartTimeAsc(
                     trainerId, LocalDate.parse(startDate), LocalDate.parse(endDate));
         } else {
-            classes = trainerClassRepository.findByTrainerIdOrderByClassDateAscStartTimeAsc(trainerId);
+            classes = trainerClassRepository.findByTrainerUserIdOrderByClassDateAscStartTimeAsc(trainerId);
         }
 
         List<com.gym.management.dto.trainer.TrainerClassDTO> dtos = classes.stream()
@@ -637,7 +637,7 @@ public class TrainerDashboardController {
         Long trainerId = getAuthenticatedTrainerId();
         LocalDate today = LocalDate.now();
         List<com.gym.management.model.TrainerClass> classes = trainerClassRepository
-                .findByTrainerIdAndClassDate(trainerId, today);
+                .findByTrainerUserIdAndClassDate(trainerId, today);
         List<com.gym.management.dto.trainer.TrainerClassDTO> dtos = classes.stream()
                 .map(this::mapToClassDTO)
                 .collect(Collectors.toList());
@@ -650,7 +650,8 @@ public class TrainerDashboardController {
         Long trainerId = getAuthenticatedTrainerId();
 
         com.gym.management.model.TrainerClass cls = new com.gym.management.model.TrainerClass();
-        cls.setTrainerId(trainerId);
+        User trainer = userRepository.findById(trainerId).orElseThrow(() -> new RuntimeException("Trainer not found"));
+        cls.setTrainer(trainer);
         cls.setTitle(req.getTitle());
         cls.setClassDate(LocalDate.parse(req.getDate()));
         cls.setStartTime(java.time.LocalTime.parse(req.getStartTime()));
@@ -676,7 +677,7 @@ public class TrainerDashboardController {
         com.gym.management.model.TrainerClass cls = trainerClassRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Class not found"));
 
-        if (!cls.getTrainerId().equals(trainerId)) {
+        if (!cls.getTrainer().getUserId().equals(trainerId)) {
             return ResponseEntity.status(403).body(apiResponse(false, null, "Access denied"));
         }
 
@@ -715,7 +716,7 @@ public class TrainerDashboardController {
         com.gym.management.model.TrainerClass cls = trainerClassRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Class not found"));
 
-        if (!cls.getTrainerId().equals(trainerId)) {
+        if (!cls.getTrainer().getUserId().equals(trainerId)) {
             return ResponseEntity.status(403).body(apiResponse(false, null, "Access denied"));
         }
 
@@ -732,7 +733,7 @@ public class TrainerDashboardController {
         com.gym.management.model.TrainerClass cls = trainerClassRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Class not found"));
 
-        if (!cls.getTrainerId().equals(trainerId)) {
+        if (!cls.getTrainer().getUserId().equals(trainerId)) {
             return ResponseEntity.status(403).body(apiResponse(false, null, "Access denied"));
         }
 

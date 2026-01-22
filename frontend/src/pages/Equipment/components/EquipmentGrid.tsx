@@ -4,28 +4,35 @@ import EquipmentCard from './EquipmentCard';
 
 interface EquipmentGridProps {
     equipmentList: Equipment[];
+    density?: 'compact' | 'comfortable' | 'spacious';
     onEdit: (equipment: Equipment) => void;
     onDelete: (id: number) => void;
     onMaintenance: (equipment: Equipment) => void;
 }
 
-const EquipmentGrid: React.FC<EquipmentGridProps> = ({ equipmentList, onEdit, onDelete, onMaintenance }) => {
+const EquipmentGrid: React.FC<EquipmentGridProps> = ({ equipmentList, density = 'comfortable', onEdit, onDelete, onMaintenance }) => {
     if (equipmentList.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center h-64 text-[#B8B8B8]">
+            <div className="flex flex-col items-center justify-center h-64 text-[var(--text-secondary)]">
                 <p>No equipment found.</p>
             </div>
         );
     }
 
+    const gridCols = {
+        compact: 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5',
+        comfortable: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4',
+        spacious: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+    };
+
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className={`grid ${gridCols[density]} gap-4 transition-all duration-300`}>
             {equipmentList.map(equipment => (
                 <EquipmentCard 
                     key={equipment.id} 
                     equipment={equipment} 
+                    density={density}
                     onEdit={onEdit}
-                    onDelete={onDelete}
                     onMaintenance={onMaintenance}
                 />
             ))}

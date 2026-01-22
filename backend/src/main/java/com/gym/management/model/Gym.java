@@ -1,6 +1,7 @@
 package com.gym.management.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.SQLRestriction;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -13,6 +14,7 @@ import java.util.UUID;
  */
 @Entity
 @Table(name = "gyms")
+@SQLRestriction("is_deleted = 0")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -62,6 +64,18 @@ public class Gym {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "created_by")
+    private Long createdBy;
+
+    @Column(name = "updated_by")
+    private Long updatedBy;
+
+    @Version
+    private Long version;
+
+    @Column(name = "is_deleted", nullable = false)
+    private Boolean isDeleted = false;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -97,14 +111,43 @@ public class Gym {
         return subscriptionPlan;
     }
 
-    public void setName(String name) { this.name = name; }
-    public String getAddress() { return address; }
-    public void setAddress(String address) { this.address = address; }
-    public String getCity() { return city; }
-    public void setCity(String city) { this.city = city; }
-    public String getPhone() { return phone; }
-    public void setPhone(String phone) { this.phone = phone; }
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-    public void setIsPublic(Boolean isPublic) { this.isPublic = isPublic; }
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setIsPublic(Boolean isPublic) {
+        this.isPublic = isPublic;
+    }
 }

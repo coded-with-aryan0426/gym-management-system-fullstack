@@ -1,11 +1,14 @@
 package com.gym.management.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.SQLRestriction;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "trainer_classes")
+@SQLRestriction("is_deleted = 0")
 public class TrainerClass {
 
     @Id
@@ -15,8 +18,16 @@ public class TrainerClass {
     @Column(nullable = false, length = 100)
     private String title;
 
-    @Column(name = "trainer_id", nullable = false)
-    private Long trainerId;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "trainer_id", nullable = false)
+    private User trainer; // Changed from Long to User entity
+
+    @Column(name = "gym_id")
+    private Long gymId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "gym_id", insertable = false, updatable = false)
+    private Gym gym;
 
     @Column(name = "class_date", nullable = false)
     private LocalDate classDate;
@@ -53,6 +64,35 @@ public class TrainerClass {
     @Column(length = 500)
     private String notes;
 
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @Column(name = "created_by")
+    private Long createdBy;
+
+    @Column(name = "updated_by")
+    private Long updatedBy;
+
+    @Version
+    private Long version;
+
+    @Column(name = "is_deleted", nullable = false)
+    private Boolean isDeleted = false;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+
     // Enums
     public enum ClassType {
         GROUP, PT
@@ -83,12 +123,14 @@ public class TrainerClass {
         this.title = title;
     }
 
-    public Long getTrainerId() {
-        return trainerId;
+    // Old getter validation removed
+
+    public User getTrainer() {
+        return trainer;
     }
 
-    public void setTrainerId(Long trainerId) {
-        this.trainerId = trainerId;
+    public void setTrainer(User trainer) {
+        this.trainer = trainer;
     }
 
     public LocalDate getClassDate() {

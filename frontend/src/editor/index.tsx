@@ -31,17 +31,51 @@ import './editor.css'
  *   <App />
  * </EditorRoot>
  */
+import { useState, useEffect } from 'react'
 import { EditorProvider } from './EditorProvider'
 import { InspectorOverlay } from './InspectorOverlay'
 import { SelectionPanel } from './SelectionPanel'
 import { EditorToolbar } from './EditorToolbar'
 import { useEditor } from './EditorProvider'
+import { EditableRegistry } from './EditableRegistry'
 
 function EditorUI() {
-  // SelectionPanel removed - user wants to see UI directly without blocking panel
+  const { selectedId, isEditing, editTool } = useEditor()
+  const [selectedRect, setSelectedRect] = useState<DOMRect | null>(null)
+
+  // Update rect when selection changes
+  useEffect(() => {
+    if (!selectedId || !isEditing) {
+      setSelectedRect(null)
+      return
+    }
+
+    const el = EditableRegistry.findElement(selectedId) ||
+      document.querySelector(`[data-editable-id="${selectedId}"]`) ||
+      document.querySelector(`[data-component-id="${selectedId}"]`)
+
+    if (el) {
+      setSelectedRect(el.getBoundingClientRect())
+
+      // Update on scroll/resize
+      const updateRect = () => setSelectedRect(el.getBoundingClientRect())
+      window.addEventListener('scroll', updateRect, { passive: true })
+      window.addEventListener('resize', updateRect, { passive: true })
+
+      return () => {
+        window.removeEventListener('scroll', updateRect)
+        window.removeEventListener('resize', updateRect)
+      }
+    }
+  }, [selectedId, isEditing])
+
   return (
     <>
       <InspectorOverlay />
+      {/* Only show SelectionPanel in resize mode, hide in move mode */}
+      {selectedId && editTool === 'resize' && (
+        <SelectionPanel elementId={selectedId} elementRect={selectedRect} />
+      )}
       <EditorToolbar />
     </>
   )

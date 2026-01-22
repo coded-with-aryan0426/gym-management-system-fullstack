@@ -1,5 +1,6 @@
 package com.gym.management.model;
 
+import org.hibernate.annotations.SQLRestriction;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,6 +10,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "users")
+@SQLRestriction("is_deleted = 0")
 @Data
 @NoArgsConstructor
 public class User {
@@ -252,6 +254,15 @@ public class User {
         this.createdBy = createdBy;
     }
 
+    @Column(name = "updated_by")
+    private Long updatedBy;
+
+    @Version
+    private Long version;
+
+    @Column(name = "is_deleted", nullable = false)
+    private Boolean isDeleted = false;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_role_map", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
@@ -272,13 +283,13 @@ public class User {
     // Multi-role support fields
     @Transient
     private GymRole primaryRole;
-    
+
     @Transient
     private java.util.Set<Permission> permissions;
-    
+
     @Transient
     private java.util.Set<GymRole> allRoles;
-    
+
     @Transient
     private java.util.Map<Long, java.util.Set<GymRole>> rolesByGym;
 
@@ -339,8 +350,19 @@ public class User {
         this.joinDate = joinDate;
     }
 
-    public void setAllRoles(java.util.Set<GymRole> allRoles) { this.allRoles = allRoles; }
-    public void setPermissions(java.util.Set<Permission> permissions) { this.permissions = permissions; }
-    public void setRolesByGym(java.util.Map<Long, java.util.Set<GymRole>> rolesByGym) { this.rolesByGym = rolesByGym; }
-    public void setPrimaryRole(GymRole primaryRole) { this.primaryRole = primaryRole; }
+    public void setAllRoles(java.util.Set<GymRole> allRoles) {
+        this.allRoles = allRoles;
+    }
+
+    public void setPermissions(java.util.Set<Permission> permissions) {
+        this.permissions = permissions;
+    }
+
+    public void setRolesByGym(java.util.Map<Long, java.util.Set<GymRole>> rolesByGym) {
+        this.rolesByGym = rolesByGym;
+    }
+
+    public void setPrimaryRole(GymRole primaryRole) {
+        this.primaryRole = primaryRole;
+    }
 }
