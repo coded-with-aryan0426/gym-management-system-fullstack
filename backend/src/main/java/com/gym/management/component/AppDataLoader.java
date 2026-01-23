@@ -79,6 +79,29 @@ public class AppDataLoader implements CommandLineRunner {
         Role trainerRole = createRoleIfNotFound("ROLE_TRAINER");
         Role memberRole = createRoleIfNotFound("ROLE_MEMBER");
 
+        String devOwnerEmail = System.getenv("DEV_OWNER_EMAIL");
+        String devOwnerPassword = System.getenv("DEV_OWNER_PASSWORD");
+        if (devOwnerEmail != null && !devOwnerEmail.isBlank()) {
+            boolean exists = userRepository.findByEmail(devOwnerEmail).isPresent();
+            if (!exists) {
+                User devOwner = new User();
+                devOwner.setUsername(devOwnerEmail);
+                devOwner.setFullName("Owner");
+                devOwner.setEmail(devOwnerEmail);
+                devOwner.setPhone("000-0000");
+                String pwd = devOwnerPassword != null && !devOwnerPassword.isBlank() ? devOwnerPassword : "password123";
+                devOwner.setPassword(passwordEncoder.encode(pwd));
+                devOwner.setRoles(new HashSet<>(Collections.singletonList(ownerRole)));
+                devOwner.setStatus("Active");
+                userRepository.save(devOwner);
+            } else if (devOwnerPassword != null && !devOwnerPassword.isBlank()) {
+                User existing = userRepository.findByEmail(devOwnerEmail).orElseThrow();
+                existing.setPassword(passwordEncoder.encode(devOwnerPassword));
+                existing.setIsFirstLogin(false);
+                userRepository.save(existing);
+            }
+        }
+
         // ============================================
         // 2. Create Admin Account
         // Login: admin / admin123
@@ -145,15 +168,30 @@ public class AppDataLoader implements CommandLineRunner {
         }
 
         // ============================================
-        // 5. Create Members
-        // Login: member1 / password123
-        // Login: jane.doe / password123
+        // 5. Create Members (20 total for development)
+        // Login: <username> / password123
         // ============================================
         createMemberIfNotFound("member1", "Test Member", "member1@email.com", memberRole);
         createMemberIfNotFound("jane.doe", "Jane Doe", "jane.doe@email.com", memberRole);
         createMemberIfNotFound("emma.davis", "Emma Davis", "emma@example.com", memberRole);
         createMemberIfNotFound("sarah.wilson", "Sarah Wilson", "sarah@example.com", memberRole);
         createMemberIfNotFound("mike.johnson", "Mike Johnson", "mike@example.com", memberRole);
+        // Additional members for development
+        createMemberIfNotFound("alex.kumar", "Alex Kumar", "alex.kumar@email.com", memberRole);
+        createMemberIfNotFound("priya.sharma", "Priya Sharma", "priya.sharma@email.com", memberRole);
+        createMemberIfNotFound("david.chen", "David Chen", "david.chen@email.com", memberRole);
+        createMemberIfNotFound("lisa.patel", "Lisa Patel", "lisa.patel@email.com", memberRole);
+        createMemberIfNotFound("james.lee", "James Lee", "james.lee@email.com", memberRole);
+        createMemberIfNotFound("sophia.garcia", "Sophia Garcia", "sophia.garcia@email.com", memberRole);
+        createMemberIfNotFound("ryan.miller", "Ryan Miller", "ryan.miller@email.com", memberRole);
+        createMemberIfNotFound("olivia.brown", "Olivia Brown", "olivia.brown@email.com", memberRole);
+        createMemberIfNotFound("ethan.taylor", "Ethan Taylor", "ethan.taylor@email.com", memberRole);
+        createMemberIfNotFound("ava.anderson", "Ava Anderson", "ava.anderson@email.com", memberRole);
+        createMemberIfNotFound("noah.thomas", "Noah Thomas", "noah.thomas@email.com", memberRole);
+        createMemberIfNotFound("mia.jackson", "Mia Jackson", "mia.jackson@email.com", memberRole);
+        createMemberIfNotFound("liam.white", "Liam White", "liam.white@email.com", memberRole);
+        createMemberIfNotFound("isabella.harris", "Isabella Harris", "isabella.harris@email.com", memberRole);
+        createMemberIfNotFound("mason.martin", "Mason Martin", "mason.martin@email.com", memberRole);
 
         // 4. Seed Sessions and Notes
         User trainer = userRepository.findByUsername("john.smith").orElseThrow();
@@ -242,12 +280,9 @@ public class AppDataLoader implements CommandLineRunner {
             System.out.println("Assigned members to Trainer John Smith");
         }
 
-        // 5. Seed Trainer Classes
-        // Clear existing to ensure fresh seed for testing
-        trainerClassAttendeeRepository.deleteAll();
-        trainerClassRepository.deleteAll();
-
-        if (true) {
+        // 5. Seed Trainer Classes (only if none exist - preserves data between
+        // restarts)
+        if (trainerClassRepository.count() == 0) {
             LocalDateTime now = LocalDateTime.now();
 
             // 5.1 Completed Morning Yoga (Group)
