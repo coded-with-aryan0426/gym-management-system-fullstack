@@ -40,11 +40,28 @@ public class UserService {
     }
 
     public List<User> getUsersByRole(String roleName) {
-        return userRepository.findByRoleName(roleName);
+        String baseRole = roleName.toUpperCase();
+        List<User> users = new ArrayList<>();
+        users.addAll(userRepository.findByRoleName(baseRole));
+        if (!baseRole.startsWith("ROLE_")) {
+            users.addAll(userRepository.findByRoleName("ROLE_" + baseRole));
+        } else {
+            users.addAll(userRepository.findByRoleName(baseRole.replace("ROLE_", "")));
+        }
+        // Deduplicate
+        return users.stream().distinct().collect(Collectors.toList());
     }
 
     public List<User> searchUsers(String roleName, String query) {
-        return userRepository.searchUsers(roleName, query);
+        String baseRole = roleName.toUpperCase();
+        List<User> users = new ArrayList<>();
+        users.addAll(userRepository.searchUsers(baseRole, query));
+        if (!baseRole.startsWith("ROLE_")) {
+            users.addAll(userRepository.searchUsers("ROLE_" + baseRole, query));
+        } else {
+            users.addAll(userRepository.searchUsers(baseRole.replace("ROLE_", ""), query));
+        }
+        return users.stream().distinct().collect(Collectors.toList());
     }
 
     @Autowired
@@ -52,8 +69,22 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public List<com.gym.management.dto.MemberDTO> getAllMembers() {
-        List<User> customers = userRepository.findByRoleName("CUSTOMER");
-        return customers.stream().map(user -> {
+        // Query all possible member role names (legacy support for different naming
+        // conventions)
+        java.util.Set<Long> seenIds = new java.util.HashSet<>();
+        List<User> allMembers = new java.util.ArrayList<>();
+
+        // Try all possible role naming conventions
+        String[] memberRoles = { "CUSTOMER", "MEMBER", "ROLE_CUSTOMER", "ROLE_MEMBER" };
+        for (String roleName : memberRoles) {
+            List<User> users = userRepository.findByRoleName(roleName);
+            for (User u : users) {
+                if (seenIds.add(u.getUserId()))
+                    allMembers.add(u);
+            }
+        }
+
+        return allMembers.stream().map(user -> {
             com.gym.management.dto.MemberDTO dto = new com.gym.management.dto.MemberDTO();
             dto.setUserId(user.getUserId());
             dto.setFullName(user.getFullName());
@@ -111,8 +142,18 @@ public class UserService {
      */
     @Transactional(readOnly = true)
     public PageResponse<MemberDTO> getMembersPaginated(int page, int size, String search, String status, String plan) {
-        // Get all customers first (we'll do in-memory pagination with custom sorting)
-        List<User> allCustomers = userRepository.findByRoleName("CUSTOMER");
+        // Query all possible member role names (legacy support)
+        java.util.Set<Long> seenIds = new java.util.HashSet<>();
+        List<User> allCustomers = new java.util.ArrayList<>();
+
+        String[] memberRoles = { "CUSTOMER", "MEMBER", "ROLE_CUSTOMER", "ROLE_MEMBER" };
+        for (String roleName : memberRoles) {
+            List<User> users = userRepository.findByRoleName(roleName);
+            for (User u : users) {
+                if (seenIds.add(u.getUserId()))
+                    allCustomers.add(u);
+            }
+        }
 
         // Apply search filter
         if (search != null && !search.trim().isEmpty()) {
@@ -213,8 +254,28 @@ public class UserService {
      */
     @Transactional(readOnly = true)
     public PageResponse<User> getTrainersPaginated(int page, int size, String search, String role, String status) {
-        String targetRole = (role != null && !role.trim().isEmpty()) ? role.toUpperCase() : "TRAINER";
-        List<User> allTrainers = userRepository.findByRoleName(targetRole);
+        String baseRole = (role != null && !role.trim().isEmpty()) ? role.toUpperCase() : "TRAINER";
+
+        // Handle both conventions for the target role
+        java.util.Set<String> rolesToQuery = new java.util.HashSet<>();
+        rolesToQuery.add(baseRole);
+        if (!baseRole.startsWith("ROLE_")) {
+            rolesToQuery.add("ROLE_" + baseRole);
+        } else {
+            rolesToQuery.add(baseRole.replace("ROLE_", ""));
+        }
+
+        java.util.Set<Long> seenIds = new java.util.HashSet<>();
+        List<User> allTrainers = new java.util.ArrayList<>();
+
+        for (String r : rolesToQuery) {
+            List<User> users = userRepository.findByRoleName(r);
+            for (User u : users) {
+                if (seenIds.add(u.getUserId())) {
+                    allTrainers.add(u);
+                }
+            }
+        }
 
         // Apply search filter
         if (search != null && !search.trim().isEmpty()) {

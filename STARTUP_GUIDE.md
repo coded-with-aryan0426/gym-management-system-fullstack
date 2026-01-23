@@ -37,14 +37,14 @@ npm run dev:all
 
 ## 🔑 Access Credentials
 
-| Role | Email | Password | Port |
-|------|-------|----------|------|
-| **Owner** | `aryansuthar5038@gmail.com` | `Aryan@5038` | 5173 |
-| **Trainer** | `darshon11@gmail.com` | `Darshon@11` | 5174 |
-| **Member** | `rishi97@gmial.com` | `rishi9700` | 5175 |
-| **Test Owner** | `new.owner@gym.com` | `password123` | 5173 |
-
----
+| Role | Username | Password | Email |
+| :--- | :--- | :--- | :--- |
+| 👑 **Admin** | `admin` | `Aryan@194` | `AryanFit3@gmail.com` |
+| 🔑 **Owner** | `owner` | `pass2233` | `owner@fitpro.com` |
+| 🏋️ **Trainer** | `john.smith` | `password12` | `john.smith@fitpro.com` |
+| 🏋️ **Trainer** | `sarah.jones` | `password123` | `sarah.jones@fitpro.com` |
+| 🧑 **Member** | `member1` | `password123` | `member1@email.com` |
+| 🧑 **Member** | `jane.doe` | `password123` | `jane.doe@email.com` |
 
 ## 📂 Project Organization Map
 

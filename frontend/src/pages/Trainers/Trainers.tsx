@@ -585,6 +585,7 @@ const Trainers: React.FC = () => {
             { key: 'new', label: 'Hired', value: stats.hiredThisMonth, variant: 'new' },
           ]}
         />
+        </Editable>
       </div>
 
       <EnhancedTrainerActionModal

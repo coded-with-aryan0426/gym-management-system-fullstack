@@ -74,10 +74,10 @@ public class AppDataLoader implements CommandLineRunner {
         // ============================================
         // 1. Initialize Roles
         // ============================================
-        Role adminRole = createRoleIfNotFound("ROLE_ADMIN");
-        Role ownerRole = createRoleIfNotFound("ROLE_OWNER");
-        Role trainerRole = createRoleIfNotFound("ROLE_TRAINER");
-        Role memberRole = createRoleIfNotFound("ROLE_MEMBER");
+        Role adminRole = createRoleIfNotFound("ADMIN");
+        Role ownerRole = createRoleIfNotFound("OWNER");
+        Role trainerRole = createRoleIfNotFound("TRAINER");
+        Role customerRole = createRoleIfNotFound("CUSTOMER");
 
         String devOwnerEmail = System.getenv("DEV_OWNER_EMAIL");
         String devOwnerPassword = System.getenv("DEV_OWNER_PASSWORD");
@@ -171,27 +171,70 @@ public class AppDataLoader implements CommandLineRunner {
         // 5. Create Members (20 total for development)
         // Login: <username> / password123
         // ============================================
-        createMemberIfNotFound("member1", "Test Member", "member1@email.com", memberRole);
-        createMemberIfNotFound("jane.doe", "Jane Doe", "jane.doe@email.com", memberRole);
-        createMemberIfNotFound("emma.davis", "Emma Davis", "emma@example.com", memberRole);
-        createMemberIfNotFound("sarah.wilson", "Sarah Wilson", "sarah@example.com", memberRole);
-        createMemberIfNotFound("mike.johnson", "Mike Johnson", "mike@example.com", memberRole);
-        // Additional members for development
-        createMemberIfNotFound("alex.kumar", "Alex Kumar", "alex.kumar@email.com", memberRole);
-        createMemberIfNotFound("priya.sharma", "Priya Sharma", "priya.sharma@email.com", memberRole);
-        createMemberIfNotFound("david.chen", "David Chen", "david.chen@email.com", memberRole);
-        createMemberIfNotFound("lisa.patel", "Lisa Patel", "lisa.patel@email.com", memberRole);
-        createMemberIfNotFound("james.lee", "James Lee", "james.lee@email.com", memberRole);
-        createMemberIfNotFound("sophia.garcia", "Sophia Garcia", "sophia.garcia@email.com", memberRole);
-        createMemberIfNotFound("ryan.miller", "Ryan Miller", "ryan.miller@email.com", memberRole);
-        createMemberIfNotFound("olivia.brown", "Olivia Brown", "olivia.brown@email.com", memberRole);
-        createMemberIfNotFound("ethan.taylor", "Ethan Taylor", "ethan.taylor@email.com", memberRole);
-        createMemberIfNotFound("ava.anderson", "Ava Anderson", "ava.anderson@email.com", memberRole);
-        createMemberIfNotFound("noah.thomas", "Noah Thomas", "noah.thomas@email.com", memberRole);
-        createMemberIfNotFound("mia.jackson", "Mia Jackson", "mia.jackson@email.com", memberRole);
-        createMemberIfNotFound("liam.white", "Liam White", "liam.white@email.com", memberRole);
-        createMemberIfNotFound("isabella.harris", "Isabella Harris", "isabella.harris@email.com", memberRole);
-        createMemberIfNotFound("mason.martin", "Mason Martin", "mason.martin@email.com", memberRole);
+        // Create Packages first (moved from step 4.5)
+        MembershipPackage premiumPkg = createPackageIfNotFound("Premium Monthly", 100.0, 30);
+        MembershipPackage standardPkg = createPackageIfNotFound("Standard Monthly", 50.0, 30);
+
+        // Helper to seed membership
+        java.util.function.BiConsumer<User, MembershipPackage> ensureMembership = (u, p) -> {
+            createMembershipIfNotFound(u, p, MembershipStatus.ACTIVE, java.time.LocalDate.now().minusDays(5),
+                    java.time.LocalDate.now().plusDays(25));
+        };
+
+        ensureMembership.accept(createMemberIfNotFound("member1", "Test Member", "member1@email.com", customerRole),
+                standardPkg);
+        ensureMembership.accept(createMemberIfNotFound("jane.doe", "Jane Doe", "jane.doe@email.com", customerRole),
+                premiumPkg);
+        ensureMembership.accept(createMemberIfNotFound("emma.davis", "Emma Davis", "emma@example.com", customerRole),
+                premiumPkg);
+        ensureMembership.accept(
+                createMemberIfNotFound("sarah.wilson", "Sarah Wilson", "sarah@example.com", customerRole), standardPkg);
+        ensureMembership.accept(
+                createMemberIfNotFound("mike.johnson", "Mike Johnson", "mike@example.com", customerRole), standardPkg);
+
+        // Additional members
+        ensureMembership.accept(
+                createMemberIfNotFound("alex.kumar", "Alex Kumar", "alex.kumar@email.com", customerRole), standardPkg);
+        ensureMembership.accept(
+                createMemberIfNotFound("priya.sharma", "Priya Sharma", "priya.sharma@email.com", customerRole),
+                premiumPkg);
+        ensureMembership.accept(
+                createMemberIfNotFound("david.chen", "David Chen", "david.chen@email.com", customerRole), standardPkg);
+        ensureMembership.accept(
+                createMemberIfNotFound("lisa.patel", "Lisa Patel", "lisa.patel@email.com", customerRole), standardPkg);
+        ensureMembership.accept(createMemberIfNotFound("james.lee", "James Lee", "james.lee@email.com", customerRole),
+                premiumPkg);
+
+        ensureMembership.accept(
+                createMemberIfNotFound("sophia.garcia", "Sophia Garcia", "sophia.garcia@email.com", customerRole),
+                standardPkg);
+        ensureMembership.accept(
+                createMemberIfNotFound("ryan.miller", "Ryan Miller", "ryan.miller@email.com", customerRole),
+                standardPkg);
+        ensureMembership.accept(
+                createMemberIfNotFound("olivia.brown", "Olivia Brown", "olivia.brown@email.com", customerRole),
+                premiumPkg);
+        ensureMembership.accept(
+                createMemberIfNotFound("ethan.taylor", "Ethan Taylor", "ethan.taylor@email.com", customerRole),
+                standardPkg);
+        ensureMembership.accept(
+                createMemberIfNotFound("ava.anderson", "Ava Anderson", "ava.anderson@email.com", customerRole),
+                premiumPkg);
+
+        ensureMembership.accept(
+                createMemberIfNotFound("noah.thomas", "Noah Thomas", "noah.thomas@email.com", customerRole),
+                standardPkg);
+        ensureMembership.accept(
+                createMemberIfNotFound("mia.jackson", "Mia Jackson", "mia.jackson@email.com", customerRole),
+                premiumPkg);
+        ensureMembership.accept(
+                createMemberIfNotFound("liam.white", "Liam White", "liam.white@email.com", customerRole), standardPkg);
+        ensureMembership.accept(
+                createMemberIfNotFound("isabella.harris", "Isabella Harris", "isabella.harris@email.com", customerRole),
+                standardPkg);
+        ensureMembership.accept(
+                createMemberIfNotFound("mason.martin", "Mason Martin", "mason.martin@email.com", customerRole),
+                premiumPkg);
 
         // 4. Seed Sessions and Notes
         User trainer = userRepository.findByUsername("john.smith").orElseThrow();
@@ -240,8 +283,7 @@ public class AppDataLoader implements CommandLineRunner {
         }
 
         // 4.5 Seed Memberships
-        MembershipPackage premiumPkg = createPackageIfNotFound("Premium Monthly", 100.0, 30);
-        MembershipPackage standardPkg = createPackageIfNotFound("Standard Monthly", 50.0, 30);
+        // Packages created in Step 5 above
 
         // Emma: Active, Premium
         createMembershipIfNotFound(emma, premiumPkg, MembershipStatus.ACTIVE,
@@ -255,30 +297,33 @@ public class AppDataLoader implements CommandLineRunner {
         createMembershipIfNotFound(mike, standardPkg, MembershipStatus.EXPIRED,
                 java.time.LocalDate.now().minusDays(60), java.time.LocalDate.now().minusDays(30));
 
-        // Assign customers to trainer
-        // Ensure collections are initialized
-        if (trainer.getCustomers() == null)
-            trainer.setCustomers(new HashSet<>());
-
-        // Add if not present
-        boolean changed = false;
-        if (!trainer.getCustomers().contains(emma)) {
-            trainer.getCustomers().add(emma);
-            changed = true;
-        }
-        if (!trainer.getCustomers().contains(sarah)) {
-            trainer.getCustomers().add(sarah);
-            changed = true;
-        }
-        if (!trainer.getCustomers().contains(mike)) {
-            trainer.getCustomers().add(mike);
-            changed = true;
-        }
-
-        if (changed) {
-            userRepository.save(trainer);
-            System.out.println("Assigned members to Trainer John Smith");
-        }
+        // Commented out to prevent ORA-00001 unique constraint violation
+        /*
+         * // Assign customers to trainer
+         * // Ensure collections are initialized
+         * if (trainer.getCustomers() == null)
+         * trainer.setCustomers(new HashSet<>());
+         * 
+         * // Add if not present
+         * boolean changed = false;
+         * if (!trainer.getCustomers().contains(emma)) {
+         * trainer.getCustomers().add(emma);
+         * changed = true;
+         * }
+         * if (!trainer.getCustomers().contains(sarah)) {
+         * trainer.getCustomers().add(sarah);
+         * changed = true;
+         * }
+         * if (!trainer.getCustomers().contains(mike)) {
+         * trainer.getCustomers().add(mike);
+         * changed = true;
+         * }
+         * 
+         * if (changed) {
+         * userRepository.save(trainer);
+         * System.out.println("Assigned members to Trainer John Smith");
+         * }
+         */
 
         // 5. Seed Trainer Classes (only if none exist - preserves data between
         // restarts)
@@ -347,8 +392,8 @@ public class AppDataLoader implements CommandLineRunner {
                 });
     }
 
-    private void createMemberIfNotFound(String username, String fullName, String email, Role role) {
-        if (!userRepository.findByUsername(username).isPresent()) {
+    private User createMemberIfNotFound(String username, String fullName, String email, Role role) {
+        return userRepository.findByUsername(username).orElseGet(() -> {
             User member = new User();
             member.setUsername(username);
             member.setFullName(fullName);
@@ -356,9 +401,10 @@ public class AppDataLoader implements CommandLineRunner {
             member.setPassword(passwordEncoder.encode("password123")); // All members use password123
             member.setRoles(new HashSet<>(Collections.singletonList(role)));
             member.setStatus("Active");
-            userRepository.save(member);
+            User saved = userRepository.save(member);
             System.out.println("✅ Seeded Member: " + username + " / password123");
-        }
+            return saved;
+        });
     }
 
     private void createSession(User trainer, User member, LocalDateTime time, Integer duration, SessionStatus status,

@@ -5,6 +5,11 @@ import com.gym.management.model.PTSession;
 import com.gym.management.model.Role;
 import com.gym.management.model.SessionStatus;
 import com.gym.management.model.User;
+import com.gym.management.model.Membership;
+import com.gym.management.model.MembershipStatus;
+import com.gym.management.model.Gym;
+import com.gym.management.repository.MembershipRepository;
+import com.gym.management.repository.GymRepository;
 import com.gym.management.repository.MembershipPackageRepository;
 import com.gym.management.repository.PTSessionRepository;
 import com.gym.management.repository.RoleRepository;
@@ -48,6 +53,12 @@ public class DataInitializer implements CommandLineRunner {
 
     @Autowired
     private PTSessionRepository ptSessionRepository;
+
+    @Autowired
+    private MembershipRepository membershipRepository;
+
+    @Autowired
+    private GymRepository gymRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -162,6 +173,17 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         // Create 100 Members/Customers
+        // Create 100 Members/Customers
+        java.util.List<MembershipPackage> packages = membershipPackageRepository.findAll();
+        Gym defaultGym = gymRepository.findAll().stream().findFirst().orElseGet(() -> {
+            Gym g = new Gym();
+            g.setName("Default Gym");
+            g.setAddress("123 Main St");
+            g.setPhone("555-1234");
+            g.setEmail("info@gym.com");
+            return gymRepository.save(g);
+        });
+
         for (int i = 1; i <= 100; i++) {
             String firstName = FIRST_NAMES[random.nextInt(FIRST_NAMES.length)];
             String lastName = LAST_NAMES[random.nextInt(LAST_NAMES.length)];
@@ -177,7 +199,26 @@ public class DataInitializer implements CommandLineRunner {
                 Set<Role> roles = new HashSet<>();
                 roles.add(customerRole);
                 user.setRoles(roles);
-                userRepository.save(user);
+                User savedUser = userRepository.save(user);
+
+                // Create Membership
+                if (packages != null && !packages.isEmpty()) {
+                    Membership m = new Membership();
+                    m.setUser(savedUser);
+                    m.setGym(defaultGym);
+                    m.setMembershipPackage(packages.get(random.nextInt(packages.size())));
+                    // 80% active, 20% expired/inactive
+                    if (random.nextDouble() > 0.2) {
+                        m.setStatus(MembershipStatus.ACTIVE);
+                        m.setStartDate(java.time.LocalDate.now().minusDays(random.nextInt(20)));
+                        m.setEndDate(java.time.LocalDate.now().plusDays(30 + random.nextInt(300)));
+                    } else {
+                        m.setStatus(MembershipStatus.EXPIRED);
+                        m.setStartDate(java.time.LocalDate.now().minusDays(100));
+                        m.setEndDate(java.time.LocalDate.now().minusDays(1));
+                    }
+                    membershipRepository.save(m);
+                }
             }
         }
 
