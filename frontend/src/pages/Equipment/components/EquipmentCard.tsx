@@ -20,20 +20,20 @@ const EquipmentCard: React.FC<EquipmentCardProps> = ({ equipment, density = 'com
     };
 
     const isOverdue = equipment.nextMaintenanceDueDate && new Date(equipment.nextMaintenanceDueDate) < new Date();
-    
+
     // Density-based styles
     const padding = {
         compact: 'p-3',
         comfortable: 'p-4',
         spacious: 'p-6'
     };
-    
+
     const iconSize = {
         compact: 80,
         comfortable: 120,
         spacious: 140
     };
-    
+
     const imageHeight = {
         compact: 'h-24',
         comfortable: 'h-32',
@@ -41,107 +41,81 @@ const EquipmentCard: React.FC<EquipmentCardProps> = ({ equipment, density = 'com
     };
 
     return (
-        <div className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl overflow-hidden hover:border-[var(--accent-primary)] hover:shadow-[var(--shadow-card)] transition-all duration-300 group relative flex flex-col h-full hover:-translate-y-1">
+        <div className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl overflow-hidden hover:border-[var(--accent-primary)] hover:shadow-[var(--shadow-card)] transition-all duration-300 group relative flex flex-col h-full hover:-translate-y-1 cursor-pointer" onClick={() => onEdit(equipment)}>
             {/* Hero Image Section */}
             <div className={`${imageHeight[density]} bg-[var(--bg-surface-secondary)] relative flex items-center justify-center p-6 transition-colors overflow-hidden`}>
-                <div className="transform group-hover:scale-105 transition-transform duration-500 text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">
+                <div className="absolute right-[-10%] top-[-10%] opacity-10 group-hover:opacity-20 transform rotate-12 transition-all duration-500 scale-150 text-[var(--text-primary)] pointer-events-none">
+                    {getEquipmentIcon(equipment.category, equipment.name, 180)}
+                </div>
+
+                <div className="relative z-10 transform group-hover:scale-105 transition-transform duration-500 text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">
                     {getEquipmentIcon(equipment.category, equipment.name, iconSize[density])}
                 </div>
 
                 {/* Status Badge */}
                 <div className="absolute top-3 left-3 z-10">
-                    <button 
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onEdit(equipment);
-                        }}
-                        className={`px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wider uppercase border backdrop-blur-sm transition-colors flex items-center gap-1.5 ${statusColors[equipment.status]}`}
-                    >
+                    <div className={`px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wider uppercase border backdrop-blur-sm transition-colors flex items-center gap-1.5 ${statusColors[equipment.status]}`}>
                         <div className={`w-1.5 h-1.5 rounded-full ${equipment.status === 'ACTIVE' ? 'bg-green-500 animate-pulse' : 'bg-current'}`} />
                         {equipment.status.replace('_', ' ')}
-                    </button>
+                    </div>
                 </div>
 
                 {/* Overdue Warning */}
                 {isOverdue && equipment.status !== 'MAINTENANCE' && (
                     <div className="absolute top-3 right-3 z-10">
-                        <div className="px-2 py-1 rounded-md bg-red-600 dark:bg-red-500 text-white text-[10px] font-bold flex items-center gap-1 shadow-lg shadow-red-500/20 animate-pulse"> {/* accessibility-ignore */}
+                        <div className="px-2 py-1 rounded-md bg-red-600 dark:bg-red-500 text-white text-[10px] font-bold flex items-center gap-1 shadow-lg shadow-red-500/20 animate-pulse">
                             <AlertTriangle size={12} />
                             <span>DUE</span>
                         </div>
                     </div>
                 )}
-
-                {/* Quick Actions Overlay (Hover) */}
-                <div className="absolute inset-0 bg-[var(--bg-surface)]/80 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3">
-                    <button
-                        onClick={() => onMaintenance(equipment)}
-                        className="flex flex-col items-center gap-1 p-3 rounded-xl bg-[var(--bg-surface)] text-[var(--text-primary)] hover:text-[var(--accent-primary)] border border-[var(--border-color)] hover:border-[var(--accent-primary)] transition-all duration-300 hover:-translate-y-1 shadow-lg"
-                    >
-                        <Wrench size={20} />
-                        <span className="text-[10px] font-medium">Maintain</span>
-                    </button>
-                    <button
-                        onClick={() => onEdit(equipment)}
-                        className="flex flex-col items-center gap-1 p-3 rounded-xl bg-[var(--bg-surface)] text-[var(--text-primary)] hover:text-[var(--accent-primary)] border border-[var(--border-color)] hover:border-[var(--accent-primary)] transition-all duration-300 hover:-translate-y-1 delay-75 shadow-lg"
-                    >
-                        <Activity size={20} />
-                        <span className="text-[10px] font-medium">Edit</span>
-                    </button>
-                </div>
             </div>
 
             {/* Content Section */}
-            <div className={`${padding[density]} flex-1 flex flex-col`}>
+            <div className={`${padding[density]} flex-1 flex flex-col relative`}>
                 <div className="mb-1">
-                    <h3 className="text-[var(--text-primary)] font-bold text-lg leading-tight truncate" title={equipment.name}>
+                    <h3 className="text-[var(--text-primary)] font-bold text-sm leading-tight truncate" title={equipment.name}>
                         {equipment.name}
                     </h3>
-                    <p className="text-[var(--text-secondary)] text-xs font-medium truncate mt-0.5 flex items-center gap-2">
-                        {equipment.brand} 
-                        <span className="w-1 h-1 rounded-full bg-[var(--border-color)]"></span> 
-                        {equipment.model}
+                    <p className="text-[var(--text-secondary)] text-[10px] uppercase tracking-wide font-medium truncate mt-0.5 flex items-center gap-2">
+                        <span className="text-[var(--text-primary)] opacity-60">{equipment.brand}</span>
+                        <span className="w-1 h-1 rounded-full bg-[var(--border-color)]"></span>
+                        <span className="text-[var(--accent-primary)]">{equipment.model}</span>
                     </p>
                 </div>
 
-                {/* Location */}
-                <div className="flex items-center gap-1.5 text-[var(--text-secondary)] text-xs mb-4">
-                    <MapPin size={12} />
-                    <span className="truncate">{equipment.location}</span>
+                {/* Info Grid */}
+                <div className="mt-3 grid grid-cols-2 gap-y-2 gap-x-4 text-[10px] text-[var(--text-secondary)]">
+                    <div className="flex items-center gap-1.5">
+                        <MapPin size={12} className="text-[var(--icon-location)]" />
+                        <span className="truncate">{equipment.location}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                        <Clock size={12} className="text-[var(--icon-clock)]" />
+                        <span className="truncate">Last: {equipment.lastMaintenanceDate ? new Date(equipment.lastMaintenanceDate).toLocaleDateString() : 'Never'}</span>
+                    </div>
                 </div>
 
-                <div className="mt-auto space-y-3">
-                    {/* Maintenance Info */}
-                    <div className="pt-3 border-t border-[var(--border-color)] flex items-center justify-between text-[10px]">
-                        <div className="flex items-center gap-1.5 text-[var(--text-secondary)]">
-                            <Clock size={12} />
-                            <span>Last: {equipment.lastMaintenanceDate ? new Date(equipment.lastMaintenanceDate).toLocaleDateString() : 'Never'}</span>
-                        </div>
-                        {equipment.nextMaintenanceDueDate && (
-                            <div className={`flex items-center gap-1.5 font-bold ${isOverdue ? 'text-red-600 dark:text-red-400' : 'text-[var(--accent-primary)]'}`}>
-                                <Calendar size={12} />
-                                <span>Due: {new Date(equipment.nextMaintenanceDueDate).toLocaleDateString()}</span>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Action Bar */}
-                    {density !== 'compact' && (
-                        <div className="grid grid-cols-2 gap-2">
-                            <button
-                                onClick={() => onMaintenance(equipment)}
-                                className="px-2 py-1.5 rounded-md bg-transparent hover:bg-[var(--bg-surface-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-[10px] font-medium border border-[var(--border-color)] transition-all text-center"
-                            >
-                                Log Service
-                            </button>
-                            <button
-                                onClick={() => onEdit(equipment)}
-                                className="px-2 py-1.5 rounded-md bg-transparent hover:bg-[var(--bg-surface-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-[10px] font-medium border border-[var(--border-color)] transition-all text-center"
-                            >
-                                Details
-                            </button>
+                <div className="mt-auto pt-2 flex items-center justify-between">
+                    {equipment.nextMaintenanceDueDate && (
+                        <div className={`flex items-center gap-1.5 text-[10px] font-bold ${isOverdue ? 'text-red-600 dark:text-red-400' : 'text-[var(--accent-primary)]'}`}>
+                            <Calendar size={12} />
+                            <span>Next: {new Date(equipment.nextMaintenanceDueDate).toLocaleDateString()}</span>
                         </div>
                     )}
+
+                    {/* Quick Access Maintain Button */}
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onMaintenance(equipment);
+                        }}
+                        className="ml-auto flex items-center gap-1 px-2 py-1 rounded-md bg-[var(--bg-surface-secondary)] hover:bg-[var(--accent-primary)] text-[var(--text-secondary)] hover:text-white transition-all duration-300 text-[10px] font-medium group/btn"
+                        title="Schedule Maintenance"
+                    >
+                        <Wrench size={10} className="group-hover/btn:rotate-45 transition-transform" />
+                        <span>Maintain</span>
+                    </button>
                 </div>
             </div>
         </div>

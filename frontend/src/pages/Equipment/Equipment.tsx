@@ -95,7 +95,7 @@ const EquipmentPage: React.FC = () => {
             const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 item.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 item.category.toLowerCase().includes(searchQuery.toLowerCase());
-            
+
             const matchesStatus = activeStatusFilter === 'ALL' || activeStatusFilter === null || item.status === activeStatusFilter;
             const matchesCategory = selectedCategory === 'ALL' || item.category === selectedCategory;
             const matchesLocation = selectedLocation === 'ALL' || item.location === selectedLocation;
@@ -108,164 +108,166 @@ const EquipmentPage: React.FC = () => {
     const categories: (EquipmentCategory | 'ALL')[] = ['ALL', 'CARDIO', 'STRENGTH', 'FUNCTIONAL', 'YOGA', 'RECOVERY'];
 
     return (
-        <div className="equipment-page">
-            {/* Header */}
-            <div className="equipment-header">
-                <div className="equipment-title">
-                    <h1>Equipment Management</h1>
-                    <p>Track inventory, schedule maintenance, and monitor usage.</p>
+        <div className="equipment-page space-y-5">
+            {/* 1. Top Header: Title + KPIs + Add Button */}
+            <div className="flex items-center justify-between px-1">
+                <div className="flex flex-col">
+                    <div className="flex items-baseline gap-3">
+                        <h1 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">Equipment Management</h1>
+                        <span className="text-xs font-medium text-[var(--accent-primary)] bg-[var(--accent-primary)]/10 px-2 py-0.5 rounded-full border border-[var(--accent-primary)]/20">
+                            PRO MAX
+                        </span>
+                    </div>
+                    <p className="text-xs text-[var(--text-secondary)] mt-0.5 font-medium opacity-80">
+                        Track inventory, schedule maintenance, and monitor usage.
+                    </p>
                 </div>
-                <button
-                    className="add-equipment-btn group"
-                    onClick={() => setIsAddModalOpen(true)}
-                >
-                    <Plus size={16} className="group-hover:rotate-90 transition-transform duration-300" /> 
-                    <span>Add Equipment</span>
-                </button>
-            </div>
 
-            {/* Unified Control Bar & Stats */}
-            <div className="flex flex-col gap-3 mb-6">
-                <div className="control-bar flex items-center justify-between p-2 bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl shadow-sm">
-                    
-                    {/* Search Section */}
-                    <div className="search-container relative group w-40 shrink-0 px-2 mr-2">
-                        <Search className="search-icon absolute left-5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] group-focus-within:text-[var(--accent-primary)] transition-colors" size={14} />
-                        <input
-                            type="text"
-                            placeholder="Search..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="search-input w-full bg-[var(--bg-surface-secondary)] border border-[var(--border-color)] group-focus-within:border-[var(--accent-primary)] text-[var(--text-primary)] rounded-full py-1.5 pl-9 pr-8 outline-none transition-all duration-300 text-xs placeholder-[var(--text-secondary)]"
-                        />
-                         {searchQuery && (
-                            <button 
-                                onClick={() => setSearchQuery('')}
-                                className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-                            >
-                                <X size={12} />
-                            </button>
-                        )}
+                <div className="flex items-center gap-6">
+                    {/* Status Pills (Moved to Header) */}
+                    <div className="flex items-center gap-3 bg-[var(--bg-surface)] border border-[var(--border-color)] p-1.5 rounded-lg shadow-sm">
+                        {[
+                            { id: 'ALL', label: 'Total', value: stats.total, color: 'text-[var(--text-primary)]' },
+                            { id: 'ACTIVE', label: 'Active', value: stats.active, color: 'text-[var(--status-active)]' },
+                            { id: 'MAINTENANCE', label: 'Fixing', value: stats.maintenance, color: 'text-[var(--status-maintenance)]' },
+                            { id: 'OUT_OF_ORDER', label: 'Broken', value: stats.outOfOrder, color: 'text-[var(--status-outoforder)]' },
+                        ].map((stat) => {
+                            const isActive = activeStatusFilter === stat.id || (activeStatusFilter === null && stat.id === 'ALL');
+                            return (
+                                <button
+                                    key={stat.id}
+                                    onClick={() => setActiveStatusFilter(isActive ? 'ALL' : stat.id as any)}
+                                    className={`
+                                        flex items-center gap-2 px-3 py-1.5 rounded-md transition-all duration-200
+                                        ${isActive
+                                            ? 'bg-[var(--bg-surface-secondary)] shadow-sm'
+                                            : 'hover:bg-[var(--bg-surface-secondary)]/50 opacity-60 hover:opacity-100'
+                                        }
+                                    `}
+                                >
+                                    <span className="text-[10px] uppercase font-bold text-[var(--text-secondary)]">{stat.label}</span>
+                                    <span className={`text-xs font-bold font-mono ${stat.color}`}>{stat.value}</span>
+                                </button>
+                            );
+                        })}
                     </div>
 
                     {/* Separator */}
-                    <div className="h-6 w-px bg-[var(--border-color)] mx-2" />
+                    <div className="h-8 w-px bg-[var(--border-color)]/60" />
 
-                    {/* Filters Section */}
-                    <div className="flex items-center gap-4 px-2">
+                    <button
+                        className="add-equipment-btn group"
+                        onClick={() => setIsAddModalOpen(true)}
+                    >
+                        <Plus size={16} className="group-hover:rotate-90 transition-transform duration-300" />
+                        <span>Add Equipment</span>
+                    </button>
+                </div>
+            </div>
+
+            {/* 2. Controls Row: Search + Filters + View Toggle */}
+            <div className="flex flex-col gap-4">
+                <div className="control-bar">
+                    {/* Left: Search & Dropdowns */}
+                    <div className="flex items-center gap-3 flex-1">
+                        {/* Compact Search */}
+                        <div className="search-container group transition-all duration-300 focus-within:w-72">
+                            <Search className="search-icon" size={14} />
+                            <input
+                                type="text"
+                                placeholder="Search equipment..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="search-input"
+                            />
+                            {searchQuery && (
+                                <button
+                                    onClick={() => setSearchQuery('')}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors p-1"
+                                >
+                                    <X size={10} />
+                                </button>
+                            )}
+                        </div>
+
+                        {/* Location Filter */}
                         <div className="relative group">
                             <select
                                 value={selectedLocation}
                                 onChange={(e) => setSelectedLocation(e.target.value)}
-                                className="appearance-none bg-transparent text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] focus:text-[var(--accent-primary)] py-2 pl-2 pr-6 cursor-pointer outline-none transition-colors"
+                                className="appearance-none bg-[var(--bg-surface-secondary)] border border-[var(--border-color)] hover:border-[var(--accent-primary)] text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] h-9 pl-3 pr-8 rounded-lg cursor-pointer outline-none transition-all shadow-sm w-32 truncate focus:ring-2 focus:ring-[var(--glow-color)] focus:border-[var(--accent-primary)]"
                             >
                                 <option value="ALL">All Locations</option>
                                 {uniqueLocations.filter(l => l !== 'ALL').map(loc => (
                                     <option key={loc} value={loc}>{loc}</option>
                                 ))}
                             </select>
-                            <div className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">
-                                <ChevronDown size={14} />
-                            </div>
+                            <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-secondary)]" />
                         </div>
 
+                        {/* Brand Filter */}
                         <div className="relative group">
                             <select
                                 value={selectedBrand}
                                 onChange={(e) => setSelectedBrand(e.target.value)}
-                                className="appearance-none bg-transparent text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] focus:text-[var(--accent-primary)] py-2 pl-2 pr-6 cursor-pointer outline-none transition-colors"
+                                className="appearance-none bg-[var(--bg-surface-secondary)] border border-[var(--border-color)] hover:border-[var(--accent-primary)] text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] h-9 pl-3 pr-8 rounded-lg cursor-pointer outline-none transition-all shadow-sm w-32 truncate focus:ring-2 focus:ring-[var(--glow-color)] focus:border-[var(--accent-primary)]"
                             >
                                 <option value="ALL">All Brands</option>
                                 {uniqueBrands.filter(b => b !== 'ALL').map(brand => (
                                     <option key={brand} value={brand}>{brand}</option>
                                 ))}
                             </select>
-                            <div className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">
-                                <ChevronDown size={14} />
-                            </div>
+                            <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-secondary)]" />
                         </div>
                     </div>
 
-                    {/* Separator */}
-                    <div className="h-6 w-px bg-[var(--border-color)] mx-2" />
-
-                    {/* Stats Section - Compact Row */}
-                    <div className="flex items-center gap-3 px-4">
-                         {[
-                            { id: 'ALL', label: 'TOTAL', value: stats.total, icon: <Dumbbell size={14} />, color: 'text-[var(--accent-primary)]' },
-                            { id: 'ACTIVE', label: 'ACTIVE', value: stats.active, icon: <CheckCircle size={14} />, color: 'text-[var(--status-active)]' },
-                            { id: 'MAINTENANCE', label: 'FIXING', value: stats.maintenance, icon: <Wrench size={14} />, color: 'text-[var(--status-maintenance)]' },
-                            { id: 'OUT_OF_ORDER', label: 'BROKEN', value: stats.outOfOrder, icon: <AlertTriangle size={14} />, color: 'text-[var(--status-outoforder)]' },
-                        ].map((stat) => {
-                             const isActive = activeStatusFilter === stat.id || (activeStatusFilter === null && stat.id === 'ALL');
-                             return (
-                                <button
-                                    key={stat.id}
-                                    onClick={() => setActiveStatusFilter(isActive ? 'ALL' : stat.id as any)}
-                                    className={`flex items-center gap-2 group transition-all duration-300 ${isActive ? 'opacity-100' : 'opacity-60 hover:opacity-100'}`}
-                                >
-                                    <div className={`${isActive ? stat.color : 'text-[var(--text-secondary)]'} transition-colors`}>
-                                        {stat.icon}
-                                    </div>
-                                    <div className="flex flex-col items-start">
-                                        <span className="text-[9px] font-bold text-[var(--text-secondary)] uppercase tracking-wider leading-none mb-0.5">{stat.label}</span>
-                                        <span className={`text-sm font-bold leading-none ${isActive ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}>{stat.value}</span>
-                                    </div>
-                                </button>
-                             );
-                        })}
-                    </div>
-
-                    {/* Spacer */}
-                    <div className="flex-1" />
-
-                    {/* View Toggles */}
-                    <div className="flex items-center gap-1 px-3 border-l border-[var(--border-color)] pl-4">
-                        <button 
+                    {/* Right: View Toggles */}
+                    <div className="bg-[var(--bg-surface)] p-1 rounded-lg border border-[var(--border-color)] flex items-center gap-1 shadow-sm">
+                        <button
                             onClick={() => setGridDensity('compact')}
-                            className={`p-1.5 rounded-lg transition-all duration-300 ${gridDensity === 'compact' ? 'bg-[var(--bg-surface-secondary)] text-[var(--accent-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-secondary)]'}`}
-                            title="Compact View"
+                            className={`p-1.5 rounded-md transition-all ${gridDensity === 'compact' ? 'bg-[var(--bg-surface-secondary)] text-[var(--accent-primary)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
+                            title="Compact"
                         >
-                            <LayoutGrid size={16} />
+                            <LayoutGrid size={14} />
                         </button>
-                        <button 
+                        <button
                             onClick={() => setGridDensity('comfortable')}
-                            className={`p-1.5 rounded-lg transition-all duration-300 ${gridDensity === 'comfortable' ? 'bg-[var(--bg-surface-secondary)] text-[var(--accent-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-secondary)]'}`}
-                            title="Comfortable View"
+                            className={`p-1.5 rounded-md transition-all ${gridDensity === 'comfortable' ? 'bg-[var(--bg-surface-secondary)] text-[var(--accent-primary)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
+                            title="Comfortable"
                         >
-                            <Layout size={16} />
+                            <Layout size={14} />
                         </button>
-                        <button 
+                        <button
                             onClick={() => setGridDensity('spacious')}
-                            className={`p-1.5 rounded-lg transition-all duration-300 ${gridDensity === 'spacious' ? 'bg-[var(--bg-surface-secondary)] text-[var(--accent-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-secondary)]'}`}
-                            title="Spacious View"
+                            className={`p-1.5 rounded-md transition-all ${gridDensity === 'spacious' ? 'bg-[var(--bg-surface-secondary)] text-[var(--accent-primary)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
+                            title="Spacious"
                         >
-                            <Maximize2 size={16} />
+                            <Maximize2 size={14} />
                         </button>
                     </div>
                 </div>
 
-            {/* Category Tabs */}
-            <div className="flex items-center justify-between border-b border-[var(--border-color)] mb-6 overflow-x-auto scrollbar-hide px-2">
-                {categories.map((cat) => (
-                    <button
-                        key={cat}
-                        onClick={() => setSelectedCategory(cat)}
-                        className={`
-                            relative px-8 py-3 text-xs font-bold tracking-wider transition-all duration-300 flex-1 text-center
-                            ${selectedCategory === cat 
-                                ? 'text-[var(--accent-primary)]' 
-                                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                            }
-                        `}
-                    >
-                        {cat}
-                        {selectedCategory === cat && (
-                            <div className="absolute bottom-0 left-0 w-full h-[2px] bg-[var(--accent-primary)] shadow-[0_-1px_6px_var(--glow-color)] rounded-t-full" />
-                        )}
-                    </button>
-                ))}
-            </div>
+                {/* 3. Category Tabs (Pills Style) */}
+                <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-2">
+                    {categories.map((cat) => {
+                        const isSelected = selectedCategory === cat;
+                        return (
+                            <button
+                                key={cat}
+                                onClick={() => setSelectedCategory(cat)}
+                                className={`
+                                    px-4 py-1.5 rounded-full text-[10px] font-bold tracking-wider transition-all duration-300 border
+                                    ${isSelected
+                                        ? 'bg-[var(--accent-primary)] text-white border-[var(--accent-primary)] shadow-md shadow-[var(--glow-color)]'
+                                        : 'bg-transparent border-transparent text-[var(--text-secondary)] hover:bg-[var(--bg-surface-secondary)] hover:text-[var(--text-primary)]'
+                                    }
+                                `}
+                            >
+                                {cat}
+                            </button>
+                        );
+                    })}
+                </div>
             </div>
 
             {/* Grid */}
