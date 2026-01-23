@@ -1,6 +1,6 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { ArrowLeft, CheckCircle, Shield, Wrench, ClipboardCheck } from 'lucide-react';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, CheckCircle, Shield, Wrench, ClipboardCheck, Loader2 } from 'lucide-react';
 import type { MaintenanceType, MaintenanceStatus } from '../../../types/equipmentMaintenance';
 
 interface MaintenanceFormProps {
@@ -15,9 +15,11 @@ interface MaintenanceFormProps {
     setNewLog: (log: any) => void;
     onSubmit: (e: React.FormEvent) => void;
     onCancel: () => void;
+    isLoading?: boolean;
 }
 
-export const MaintenanceForm: React.FC<MaintenanceFormProps> = ({ newLog, setNewLog, onSubmit, onCancel }) => {
+export const MaintenanceForm: React.FC<MaintenanceFormProps> = ({ newLog, setNewLog, onSubmit, onCancel, isLoading = false }) => {
+    const [showSuccess, setShowSuccess] = useState(false);
 
     const getTypeStyles = (type: MaintenanceType) => {
         const colors: Record<string, string> = {
@@ -137,12 +139,23 @@ export const MaintenanceForm: React.FC<MaintenanceFormProps> = ({ newLog, setNew
 
             <div className="pt-6 mt-2 border-t border-[var(--border-color)]">
                 <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    whileHover={{ scale: isLoading ? 1 : 1.02, boxShadow: '0 0 20px rgba(59, 130, 246, 0.4)' }}
+                    whileTap={{ scale: isLoading ? 1 : 0.98 }}
                     type="submit"
-                    className="w-full py-4 bg-[var(--accent-primary)] hover:bg-[var(--accent-primary)]/90 text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-[var(--accent-primary)]/20 transition-all"
+                    disabled={isLoading}
+                    className="w-full py-4 bg-[var(--accent-primary)] hover:bg-[var(--accent-primary)]/90 text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-[var(--accent-primary)]/20 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                    <CheckCircle size={20} /> Save Maintenance Record
+                    <AnimatePresence mode="wait">
+                        {isLoading ? (
+                            <motion.span key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-2">
+                                <Loader2 size={20} className="animate-spin" /> Saving...
+                            </motion.span>
+                        ) : (
+                            <motion.span key="save" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-2">
+                                <CheckCircle size={20} /> Save Maintenance Record
+                            </motion.span>
+                        )}
+                    </AnimatePresence>
                 </motion.button>
             </div>
         </motion.form>

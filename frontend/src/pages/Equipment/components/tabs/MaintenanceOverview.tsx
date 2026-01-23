@@ -59,18 +59,23 @@ export const MaintenanceOverview: React.FC<MaintenanceOverviewProps> = ({ stats,
                 <h3 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-3">Overview KPIs</h3>
                 <div className="grid grid-cols-4 gap-3">
                     {[
-                        { label: 'Total Logs', value: stats.total, icon: FileText, color: 'blue' },
-                        { label: 'Total Cost', value: formatCurrency(stats.totalCost), icon: IndianRupee, color: 'green' },
-                        { label: 'Overdue', value: stats.overdue, icon: AlertCircle, color: 'red' },
-                        { label: 'Health', value: `${stats.health}%`, icon: Activity, color: 'purple' }
-                    ].map(({ label, value, icon: Icon, color }) => (
+                        { label: 'Total Logs', value: stats.total, icon: FileText, bgColor: 'rgba(59, 130, 246, 0.1)', iconColor: '#3b82f6' },
+                        { label: 'Total Cost', value: formatCurrency(stats.totalCost), icon: IndianRupee, bgColor: 'rgba(34, 197, 94, 0.1)', iconColor: '#22c55e' },
+                        { label: 'Overdue', value: stats.overdue, icon: AlertCircle, bgColor: 'rgba(239, 68, 68, 0.1)', iconColor: '#ef4444', pulse: stats.overdue > 0 },
+                        { label: 'Health', value: `${stats.health}%`, icon: Activity, bgColor: 'rgba(168, 85, 247, 0.1)', iconColor: '#a855f7' }
+                    ].map(({ label, value, icon: Icon, bgColor, iconColor, pulse }) => (
                         <motion.div
                             variants={item}
                             key={label}
-                            className="p-3 rounded-xl bg-[var(--bg-surface-secondary)] border border-[var(--border-color)] flex items-center gap-3 hover:shadow-md transition-shadow duration-200"
+                            whileHover={{ y: -4, boxShadow: '0 12px 24px -8px rgba(0,0,0,0.15)' }}
+                            className={`p-3 rounded-xl bg-[var(--bg-surface-secondary)] border border-[var(--border-color)] flex items-center gap-3 transition-all cursor-default ${pulse ? 'animate-pulse' : ''}`}
+                            style={{ boxShadow: '0 4px 12px -4px rgba(0,0,0,0.08)' }}
                         >
-                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--bg-surface)] text-${color}-600 dark:text-${color}-400 shadow-sm`}>
-                                <Icon size={14} />
+                            <div
+                                className="w-8 h-8 rounded-lg flex items-center justify-center shadow-sm"
+                                style={{ backgroundColor: bgColor }}
+                            >
+                                <Icon size={14} style={{ color: iconColor }} />
                             </div>
                             <div>
                                 <p className="text-[10px] font-semibold text-[var(--text-secondary)] uppercase tracking-wide">{label}</p>

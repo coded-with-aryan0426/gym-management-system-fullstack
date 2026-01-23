@@ -36,6 +36,7 @@ const MaintenancePanel: React.FC<MaintenancePanelProps> = ({ equipment, isOpen, 
     const [activeTab, setActiveTab] = useState<TabType>('overview');
     const [showAddForm, setShowAddForm] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [newLog, setNewLog] = useState({
         maintenanceType: 'PREVENTIVE' as MaintenanceType,
@@ -73,6 +74,7 @@ const MaintenancePanel: React.FC<MaintenancePanelProps> = ({ equipment, isOpen, 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!equipment) return;
+        setIsSubmitting(true);
         try {
             await equipmentApi.logMaintenance(equipment.id, newLog);
             setShowAddForm(false);
@@ -87,6 +89,8 @@ const MaintenancePanel: React.FC<MaintenancePanelProps> = ({ equipment, isOpen, 
             loadHistory();
         } catch (error) {
             console.error('Failed to log maintenance', error);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -145,8 +149,8 @@ const MaintenancePanel: React.FC<MaintenancePanelProps> = ({ equipment, isOpen, 
                                     <div className="flex items-center gap-2">
                                         <h1 className="text-lg font-bold text-[var(--text-primary)] tracking-tight">{equipment.name}</h1>
                                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${equipment.status === 'ACTIVE' ? 'bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20' :
-                                                equipment.status === 'MAINTENANCE' ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20' :
-                                                    'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20'
+                                            equipment.status === 'MAINTENANCE' ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20' :
+                                                'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20'
                                             }`}>{equipment.status}</span>
                                     </div>
                                     <p className="text-xs text-[var(--text-secondary)] font-medium mt-0.5">{equipment.brand} • <span className="font-mono opacity-70">{equipment.serialNumber || `SN-${equipment.id}`}</span></p>
@@ -207,6 +211,7 @@ const MaintenancePanel: React.FC<MaintenancePanelProps> = ({ equipment, isOpen, 
                                             setNewLog={setNewLog}
                                             onSubmit={handleSubmit}
                                             onCancel={() => setShowAddForm(false)}
+                                            isLoading={isSubmitting}
                                         />
                                     </motion.div>
                                 ) : (

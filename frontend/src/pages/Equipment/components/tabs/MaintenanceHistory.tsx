@@ -60,8 +60,8 @@ export const MaintenanceHistory: React.FC<MaintenanceHistoryProps> = ({ history 
             animate={{ opacity: 1 }}
             className="flex flex-col h-full"
         >
-            {/* Filters */}
-            <div className="px-5 py-3 border-b border-[var(--border-color)] bg-[var(--bg-surface)] flex items-center gap-3 sticky top-0 z-10 backdrop-blur-sm bg-opacity-80">
+            {/* Filters - Glassmorphism */}
+            <div className="px-5 py-3 border-b border-white/10 flex items-center gap-3 sticky top-0 z-10" style={{ background: 'rgba(var(--bg-surface-rgb), 0.7)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
                 <div className="relative flex-1">
                     <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" />
                     <input
@@ -115,8 +115,10 @@ export const MaintenanceHistory: React.FC<MaintenanceHistoryProps> = ({ history 
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: index * 0.05 }}
+                                    whileHover={{ y: -2, boxShadow: `0 8px 20px -8px ${statusStyles.color}40` }}
                                     key={r.id}
-                                    className={`eq-list-item p-3 rounded-lg border border-[var(--border-color)] hover:border-[var(--accent-primary)] transition-all hover:shadow-sm ${index % 2 === 0 ? 'bg-[var(--bg-surface)]' : 'bg-[var(--bg-surface-secondary)]'}`}
+                                    className={`eq-list-item p-3 rounded-lg border border-[var(--border-color)] hover:border-[var(--accent-primary)] transition-all ${index % 2 === 0 ? 'bg-[var(--bg-surface)]' : 'bg-[var(--bg-surface-secondary)]'}`}
+                                    style={{ boxShadow: '0 2px 8px -4px rgba(0,0,0,0.06)' }}
                                 >
                                     <div className="flex-1">
                                         <div className="flex items-center justify-between mb-2">
