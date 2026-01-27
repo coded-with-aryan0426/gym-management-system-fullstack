@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     User, Lock, Activity, Save, Camera, Mail, Phone, Calendar,
     Shield, Heart, MapPin, Droplet, Target, Award, Sparkles,
     ChevronRight, Edit3, X, Zap, TrendingUp, Clock, Fingerprint,
     Smartphone, AlertCircle, CheckCircle2, CreditCard, History,
-    Trophy, Star, Download, QrCode, ArrowUpRight
+    Trophy, Star, Download, QrCode, ArrowUpRight, Check, Ruler,
+    Scale, Percent
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { memberProfileApi, type MemberProfileData, type MemberProfileUpdate } from '../../api/memberProfileApi';
@@ -54,6 +55,8 @@ const MemberProfile: React.FC = () => {
     const [saving, setSaving] = useState(false);
     const [activeTab, setActiveTab] = useState<TabType>('overview');
     const [editMode, setEditMode] = useState(false);
+    const [hasChanges, setHasChanges] = useState(false);
+    const [originalFormData, setOriginalFormData] = useState<typeof formData | null>(null);
 
     const [formData, setFormData] = useState({
         fullName: '',
@@ -76,6 +79,19 @@ const MemberProfile: React.FC = () => {
 
     const { user } = useAuth();
 
+    const checkForChanges = useCallback((newData: typeof formData, original: typeof formData | null) => {
+        if (!original) return false;
+        return JSON.stringify(newData) !== JSON.stringify(original);
+    }, []);
+
+    const updateFormData = useCallback((updates: Partial<typeof formData>) => {
+        setFormData(prev => {
+            const newData = { ...prev, ...updates };
+            setHasChanges(checkForChanges(newData, originalFormData));
+            return newData;
+        });
+    }, [originalFormData, checkForChanges]);
+
     useEffect(() => {
         const fetchProfile = async () => {
             if (!user?.id) {
@@ -86,7 +102,7 @@ const MemberProfile: React.FC = () => {
             try {
                 const data = await memberProfileApi.getProfile(Number(user.id));
                 setProfile(data);
-                setFormData({
+                const initialFormData = {
                     fullName: data.fullName || '',
                     phone: data.phone || '',
                     dateOfBirth: data.dateOfBirth || '',
@@ -103,7 +119,9 @@ const MemberProfile: React.FC = () => {
                     height: data.height,
                     weight: data.weight,
                     bodyFat: data.bodyFat,
-                });
+                };
+                setFormData(initialFormData);
+                setOriginalFormData(initialFormData);
             } catch (error) {
                 console.error('Failed to fetch profile:', error);
                 toast.error('Failed to load profile');
@@ -142,6 +160,8 @@ const MemberProfile: React.FC = () => {
 
             const updated = await memberProfileApi.updateProfile(Number(user.id), updateData);
             setProfile(updated);
+            setOriginalFormData({ ...formData });
+            setHasChanges(false);
             toast.success('Profile updated successfully!');
             setEditMode(false);
         } catch (error) {
@@ -152,13 +172,23 @@ const MemberProfile: React.FC = () => {
         }
     };
 
+    const handleCancelEdit = () => {
+        if (originalFormData) {
+            setFormData(originalFormData);
+        }
+        setHasChanges(false);
+        setEditMode(false);
+    };
+
     const handleGoalToggle = (goal: string) => {
-        setFormData(prev => ({
-            ...prev,
-            fitnessGoals: prev.fitnessGoals.includes(goal)
+        setFormData(prev => {
+            const newGoals = prev.fitnessGoals.includes(goal)
                 ? prev.fitnessGoals.filter(g => g !== goal)
-                : [...prev.fitnessGoals, goal]
-        }));
+                : [...prev.fitnessGoals, goal];
+            const newData = { ...prev, fitnessGoals: newGoals };
+            setHasChanges(checkForChanges(newData, originalFormData));
+            return newData;
+        });
     };
 
     const tabs: { id: TabType; label: string; icon: React.ReactNode }[] = [
@@ -171,12 +201,12 @@ const MemberProfile: React.FC = () => {
     ];
 
     const fitnessGoalOptions = [
-        { name: 'Weight Loss', icon: <TrendingUp size={14} />, color: '#FF9500' },
-        { name: 'Muscle Gain', icon: <Zap size={14} />, color: '#FF3B30' },
-        { name: 'General Fitness', icon: <Activity size={14} />, color: '#007AFF' },
-        { name: 'Athletic Performance', icon: <Award size={14} />, color: '#AF52DE' },
-        { name: 'Flexibility', icon: <Sparkles size={14} />, color: '#5AC8FA' },
-        { name: 'Stress Relief', icon: <Heart size={14} />, color: '#34C759' }
+        { name: 'Weight Loss', icon: <TrendingUp size={18} />, color: '#FF9500' },
+        { name: 'Muscle Gain', icon: <Zap size={18} />, color: '#FF3B30' },
+        { name: 'General Fitness', icon: <Activity size={18} />, color: '#007AFF' },
+        { name: 'Athletic Performance', icon: <Award size={18} />, color: '#AF52DE' },
+        { name: 'Flexibility', icon: <Sparkles size={18} />, color: '#5AC8FA' },
+        { name: 'Stress Relief', icon: <Heart size={18} />, color: '#34C759' }
     ];
 
     const formatDate = (dateStr: string | null) => {
@@ -208,6 +238,7 @@ const MemberProfile: React.FC = () => {
                 >
                     <Activity size={32} />
                 </motion.div>
+                <p>Loading profile...</p>
             </div>
         );
     }
@@ -228,6 +259,60 @@ const MemberProfile: React.FC = () => {
     const stats = profile.stats;
     const membership = profile.membership;
     const achievements = profile.achievements || [];
+
+    const renderSectionHeader = (title: string, icon: React.ReactNode, showEditHint?: boolean) => (
+        <div className="section-header">
+            <h3 className="section-title">
+                {icon}
+                <span>{title}</span>
+            </h3>
+            {editMode && showEditHint && (
+                <span className="section-edit-hint">Click fields to edit</span>
+            )}
+        </div>
+    );
+
+    const renderSaveBar = () => (
+        editMode && hasChanges && (
+            <motion.div
+                className="section-save-bar"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+            >
+                <button
+                    type="button"
+                    className="section-save-btn section-save-btn--cancel"
+                    onClick={handleCancelEdit}
+                >
+                    <X size={14} />
+                    Discard Changes
+                </button>
+                <button
+                    type="button"
+                    className="section-save-btn section-save-btn--save"
+                    onClick={() => handleSubmit()}
+                    disabled={saving}
+                >
+                    {saving ? (
+                        <>
+                            <motion.div
+                                animate={{ rotate: 360 }}
+                                transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                            >
+                                <Activity size={14} />
+                            </motion.div>
+                            Saving...
+                        </>
+                    ) : (
+                        <>
+                            <Save size={14} />
+                            Save Changes
+                        </>
+                    )}
+                </button>
+            </motion.div>
+        )
+    );
 
     return (
         <motion.div
@@ -259,7 +344,7 @@ const MemberProfile: React.FC = () => {
 
                     <div className="profile-hero__info">
                         <div className="profile-hero__name-row">
-                            <h1 className="profile-hero__name">{formData.fullName}</h1>
+                            <h1 className="profile-hero__name">{formData.fullName || 'Member'}</h1>
                             <PulsingBadge color={profile.status === 'Active' ? '#34C759' : '#FF9500'}>
                                 {profile.status || 'Active'}
                             </PulsingBadge>
@@ -295,16 +380,68 @@ const MemberProfile: React.FC = () => {
                     </div>
 
                     <motion.button
-                        className="profile-hero__edit-btn"
+                        className={`profile-hero__edit-btn ${editMode ? 'profile-hero__edit-btn--active' : ''}`}
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        onClick={() => setEditMode(!editMode)}
+                        onClick={() => editMode ? handleCancelEdit() : setEditMode(true)}
                     >
                         {editMode ? <X size={16} /> : <Edit3 size={16} />}
-                        {editMode ? 'Cancel' : 'Edit Profile'}
+                        {editMode ? 'Cancel Edit' : 'Edit Profile'}
                     </motion.button>
                 </div>
             </motion.div>
+
+            {editMode && (
+                <motion.div
+                    className="edit-mode-banner"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                >
+                    <div className="edit-mode-banner__content">
+                        <Edit3 size={16} />
+                        <span>Edit Mode - Make changes in any section below</span>
+                    </div>
+                    {hasChanges && (
+                        <motion.div
+                            className="edit-mode-banner__actions"
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                        >
+                            <button
+                                type="button"
+                                className="edit-mode-btn edit-mode-btn--cancel"
+                                onClick={handleCancelEdit}
+                            >
+                                <X size={14} />
+                                Discard
+                            </button>
+                            <button
+                                type="button"
+                                className="edit-mode-btn edit-mode-btn--save"
+                                onClick={() => handleSubmit()}
+                                disabled={saving}
+                            >
+                                {saving ? (
+                                    <>
+                                        <motion.div
+                                            animate={{ rotate: 360 }}
+                                            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                                        >
+                                            <Activity size={14} />
+                                        </motion.div>
+                                        Saving...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Check size={14} />
+                                        Save All Changes
+                                    </>
+                                )}
+                            </button>
+                        </motion.div>
+                    )}
+                </motion.div>
+            )}
 
             <div className="profile-layout-grid">
                 <div className="profile-main-content">
@@ -324,7 +461,7 @@ const MemberProfile: React.FC = () => {
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={activeTab}
-                            className="profile-content-mini"
+                            className={`profile-content-mini ${editMode ? 'profile-content-mini--edit-mode' : ''}`}
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}
@@ -333,29 +470,79 @@ const MemberProfile: React.FC = () => {
                                 {activeTab === 'overview' && (
                                     <div className="profile-overview-tab">
                                         <div className="overview-section">
-                                            <h3 className="section-title"><User size={14} /> Personal Profile</h3>
+                                            {renderSectionHeader('Personal Profile', <User size={14} />, true)}
                                             <div className="profile-summary-grid">
                                                 <div className="summary-item">
                                                     <span className="summary-label">Full Name</span>
-                                                    <span className="summary-value">{formData.fullName}</span>
+                                                    {editMode ? (
+                                                        <input
+                                                            type="text"
+                                                            value={formData.fullName}
+                                                            onChange={(e) => updateFormData({ fullName: e.target.value })}
+                                                            className="summary-input"
+                                                            placeholder="Enter your name"
+                                                        />
+                                                    ) : (
+                                                        <span className="summary-value">{formData.fullName || 'Not set'}</span>
+                                                    )}
                                                 </div>
                                                 <div className="summary-item">
                                                     <span className="summary-label">Birthday</span>
-                                                    <span className="summary-value">{formData.dateOfBirth || 'Not set'}</span>
+                                                    {editMode ? (
+                                                        <input
+                                                            type="date"
+                                                            value={formData.dateOfBirth}
+                                                            onChange={(e) => updateFormData({ dateOfBirth: e.target.value })}
+                                                            className="summary-input"
+                                                        />
+                                                    ) : (
+                                                        <span className="summary-value">{formData.dateOfBirth || 'Not set'}</span>
+                                                    )}
                                                 </div>
                                                 <div className="summary-item">
                                                     <span className="summary-label">Gender</span>
-                                                    <span className="summary-value">{formData.gender || 'Not set'}</span>
+                                                    {editMode ? (
+                                                        <select
+                                                            value={formData.gender}
+                                                            onChange={(e) => updateFormData({ gender: e.target.value })}
+                                                            className="summary-input"
+                                                        >
+                                                            <option value="">Select Gender</option>
+                                                            <option value="Male">Male</option>
+                                                            <option value="Female">Female</option>
+                                                            <option value="Other">Other</option>
+                                                        </select>
+                                                    ) : (
+                                                        <span className="summary-value">{formData.gender || 'Not set'}</span>
+                                                    )}
                                                 </div>
                                                 <div className="summary-item">
                                                     <span className="summary-label">Blood Type</span>
-                                                    <span className="summary-value"><Droplet size={12} color="#FF3B30" /> {formData.bloodType || 'Not set'}</span>
+                                                    {editMode ? (
+                                                        <select
+                                                            value={formData.bloodType}
+                                                            onChange={(e) => updateFormData({ bloodType: e.target.value })}
+                                                            className="summary-input"
+                                                        >
+                                                            <option value="">Select Blood Type</option>
+                                                            <option value="A+">A+</option>
+                                                            <option value="A-">A-</option>
+                                                            <option value="B+">B+</option>
+                                                            <option value="B-">B-</option>
+                                                            <option value="O+">O+</option>
+                                                            <option value="O-">O-</option>
+                                                            <option value="AB+">AB+</option>
+                                                            <option value="AB-">AB-</option>
+                                                        </select>
+                                                    ) : (
+                                                        <span className="summary-value"><Droplet size={12} color="#FF3B30" /> {formData.bloodType || 'Not set'}</span>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
 
                                         <div className="overview-section">
-                                            <h3 className="section-title"><Award size={14} /> Recent Achievements</h3>
+                                            {renderSectionHeader('Recent Achievements', <Award size={14} />)}
                                             <div className="achievements-grid">
                                                 {achievements.length > 0 ? (
                                                     achievements.slice(0, 3).map((achievement) => (
@@ -375,13 +562,25 @@ const MemberProfile: React.FC = () => {
                                                             icon={<Clock size={16} />}
                                                             color="#8E8E93"
                                                         />
+                                                        <AchievementCard
+                                                            title="First Week"
+                                                            date="Train for 7 days"
+                                                            icon={<Calendar size={16} />}
+                                                            color="#8E8E93"
+                                                        />
+                                                        <AchievementCard
+                                                            title="Profile Complete"
+                                                            date="Fill in all details"
+                                                            icon={<CheckCircle2 size={16} />}
+                                                            color="#8E8E93"
+                                                        />
                                                     </>
                                                 )}
                                             </div>
                                         </div>
 
                                         <div className="overview-section">
-                                            <h3 className="section-title"><TrendingUp size={14} /> Fitness Progress</h3>
+                                            {renderSectionHeader('Fitness Progress', <TrendingUp size={14} />)}
                                             <div className="progress-mini-grid">
                                                 <div className="progress-item">
                                                     <div className="progress-item__header">
@@ -389,7 +588,7 @@ const MemberProfile: React.FC = () => {
                                                         <span>{stats?.currentStreak || 0} days</span>
                                                     </div>
                                                     <div className="progress-bar-bg">
-                                                        <div className="progress-bar-fill" style={{ width: `${Math.min((stats?.currentStreak || 0) * 10, 100)}%`, background: '#007AFF' }} />
+                                                        <div className="progress-bar-fill" style={{ width: `${Math.min((stats?.currentStreak || 0) * 10, 100)}%`, background: 'linear-gradient(90deg, #007AFF, #5AC8FA)' }} />
                                                     </div>
                                                 </div>
                                                 <div className="progress-item">
@@ -398,299 +597,406 @@ const MemberProfile: React.FC = () => {
                                                         <span>{stats?.totalWorkouts || 0}</span>
                                                     </div>
                                                     <div className="progress-bar-bg">
-                                                        <div className="progress-bar-fill" style={{ width: `${Math.min((stats?.totalWorkouts || 0) / 2, 100)}%`, background: '#AF52DE' }} />
+                                                        <div className="progress-bar-fill" style={{ width: `${Math.min((stats?.totalWorkouts || 0) / 2, 100)}%`, background: 'linear-gradient(90deg, #AF52DE, #FF9500)' }} />
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
 
                                         <div className="overview-section">
-                                            <h3 className="section-title"><Target size={14} /> Active Goals</h3>
-                                            <div className="goals-tags">
-                                                {formData.fitnessGoals.length > 0 ? (
-                                                    formData.fitnessGoals.map(goal => (
-                                                        <span key={goal} className="goal-tag">
-                                                            {fitnessGoalOptions.find(g => g.name === goal)?.icon}
-                                                            {goal}
-                                                        </span>
-                                                    ))
-                                                ) : (
-                                                    <span className="goal-tag" style={{ opacity: 0.5 }}>No active goals</span>
-                                                )}
-                                            </div>
+                                            {renderSectionHeader('Active Goals', <Target size={14} />, editMode)}
+                                            {editMode ? (
+                                                <div className="goals-selection-inline">
+                                                    {fitnessGoalOptions.map((goal) => (
+                                                        <button
+                                                            key={goal.name}
+                                                            type="button"
+                                                            className={`goal-chip ${formData.fitnessGoals.includes(goal.name) ? 'goal-chip--active' : ''}`}
+                                                            onClick={() => handleGoalToggle(goal.name)}
+                                                            style={{ '--goal-color': goal.color } as React.CSSProperties}
+                                                        >
+                                                            {goal.icon}
+                                                            {goal.name}
+                                                            {formData.fitnessGoals.includes(goal.name) && <Check size={14} />}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <div className="goals-tags">
+                                                    {formData.fitnessGoals.length > 0 ? (
+                                                        formData.fitnessGoals.map(goal => {
+                                                            const goalOption = fitnessGoalOptions.find(g => g.name === goal);
+                                                            return (
+                                                                <span key={goal} className="goal-tag" style={{ borderColor: goalOption?.color }}>
+                                                                    {goalOption?.icon}
+                                                                    {goal}
+                                                                </span>
+                                                            );
+                                                        })
+                                                    ) : (
+                                                        <span className="goal-tag" style={{ opacity: 0.5 }}>No active goals - click Edit to add</span>
+                                                    )}
+                                                </div>
+                                            )}
                                         </div>
+
+                                        {renderSaveBar()}
                                     </div>
                                 )}
 
                                 {activeTab === 'personal' && (
-                                    <div className="profile-form-grid-compact">
-                                        <div className="profile-field-compact">
-                                            <label className="profile-field-compact__label"><User size={12} />Name</label>
-                                            <div className="profile-field-compact__input-wrapper">
-                                                <input
-                                                    type="text"
-                                                    value={formData.fullName}
-                                                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                                                    className={`profile-field-compact__input ${!editMode ? 'profile-field-compact__input--readonly' : ''}`}
-                                                    placeholder="Full Name"
-                                                    readOnly={!editMode}
-                                                />
+                                    <div className="tab-content-section">
+                                        {renderSectionHeader('Personal Information', <User size={14} />, editMode)}
+                                        <div className="profile-form-grid-compact">
+                                            <div className="profile-field-compact">
+                                                <label className="profile-field-compact__label"><User size={12} />Full Name</label>
+                                                <div className="profile-field-compact__input-wrapper">
+                                                    <input
+                                                        type="text"
+                                                        value={formData.fullName}
+                                                        onChange={(e) => updateFormData({ fullName: e.target.value })}
+                                                        className={`profile-field-compact__input ${!editMode ? 'profile-field-compact__input--readonly' : ''}`}
+                                                        placeholder="Enter your full name"
+                                                        readOnly={!editMode}
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="profile-field-compact">
+                                                <label className="profile-field-compact__label"><Calendar size={12} />Date of Birth</label>
+                                                <div className="profile-field-compact__input-wrapper">
+                                                    <input
+                                                        type="date"
+                                                        value={formData.dateOfBirth}
+                                                        onChange={(e) => updateFormData({ dateOfBirth: e.target.value })}
+                                                        className={`profile-field-compact__input ${!editMode ? 'profile-field-compact__input--readonly' : ''}`}
+                                                        readOnly={!editMode}
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="profile-field-compact">
+                                                <label className="profile-field-compact__label"><User size={12} />Gender</label>
+                                                <div className="profile-field-compact__input-wrapper">
+                                                    <select
+                                                        value={formData.gender}
+                                                        onChange={(e) => updateFormData({ gender: e.target.value })}
+                                                        className={`profile-field-compact__input ${!editMode ? 'profile-field-compact__input--readonly' : ''}`}
+                                                        disabled={!editMode}
+                                                    >
+                                                        <option value="">Select Gender</option>
+                                                        <option value="Male">Male</option>
+                                                        <option value="Female">Female</option>
+                                                        <option value="Other">Other</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div className="profile-field-compact">
+                                                <label className="profile-field-compact__label"><Droplet size={12} />Blood Type</label>
+                                                <div className="profile-field-compact__input-wrapper">
+                                                    <select
+                                                        value={formData.bloodType}
+                                                        onChange={(e) => updateFormData({ bloodType: e.target.value })}
+                                                        className={`profile-field-compact__input ${!editMode ? 'profile-field-compact__input--readonly' : ''}`}
+                                                        disabled={!editMode}
+                                                    >
+                                                        <option value="">Select Blood Type</option>
+                                                        <option value="A+">A+</option>
+                                                        <option value="A-">A-</option>
+                                                        <option value="B+">B+</option>
+                                                        <option value="B-">B-</option>
+                                                        <option value="O+">O+</option>
+                                                        <option value="O-">O-</option>
+                                                        <option value="AB+">AB+</option>
+                                                        <option value="AB-">AB-</option>
+                                                    </select>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div className="profile-field-compact">
-                                            <label className="profile-field-compact__label"><Calendar size={12} />Birthday</label>
-                                            <div className="profile-field-compact__input-wrapper">
-                                                <input
-                                                    type="date"
-                                                    value={formData.dateOfBirth}
-                                                    onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
-                                                    className={`profile-field-compact__input ${!editMode ? 'profile-field-compact__input--readonly' : ''}`}
-                                                    readOnly={!editMode}
-                                                />
+
+                                        <div className="section-divider" />
+
+                                        {renderSectionHeader('Body Measurements', <Activity size={14} />, editMode)}
+                                        <div className="profile-form-grid-compact">
+                                            <div className="profile-field-compact">
+                                                <label className="profile-field-compact__label"><Ruler size={12} />Height (cm)</label>
+                                                <div className="profile-field-compact__input-wrapper">
+                                                    <input
+                                                        type="number"
+                                                        value={formData.height || ''}
+                                                        onChange={(e) => updateFormData({ height: e.target.value ? Number(e.target.value) : null })}
+                                                        className={`profile-field-compact__input ${!editMode ? 'profile-field-compact__input--readonly' : ''}`}
+                                                        placeholder="e.g., 175"
+                                                        readOnly={!editMode}
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="profile-field-compact">
+                                                <label className="profile-field-compact__label"><Scale size={12} />Weight (kg)</label>
+                                                <div className="profile-field-compact__input-wrapper">
+                                                    <input
+                                                        type="number"
+                                                        value={formData.weight || ''}
+                                                        onChange={(e) => updateFormData({ weight: e.target.value ? Number(e.target.value) : null })}
+                                                        className={`profile-field-compact__input ${!editMode ? 'profile-field-compact__input--readonly' : ''}`}
+                                                        placeholder="e.g., 70"
+                                                        readOnly={!editMode}
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="profile-field-compact">
+                                                <label className="profile-field-compact__label"><Percent size={12} />Body Fat (%)</label>
+                                                <div className="profile-field-compact__input-wrapper">
+                                                    <input
+                                                        type="number"
+                                                        value={formData.bodyFat || ''}
+                                                        onChange={(e) => updateFormData({ bodyFat: e.target.value ? Number(e.target.value) : null })}
+                                                        className={`profile-field-compact__input ${!editMode ? 'profile-field-compact__input--readonly' : ''}`}
+                                                        placeholder="e.g., 15"
+                                                        readOnly={!editMode}
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
-                                        <div className="profile-field-compact">
-                                            <label className="profile-field-compact__label"><User size={12} />Gender</label>
-                                            <div className="profile-field-compact__input-wrapper">
-                                                <select
-                                                    value={formData.gender}
-                                                    onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                                                    className={`profile-field-compact__input ${!editMode ? 'profile-field-compact__input--readonly' : ''}`}
-                                                    disabled={!editMode}
-                                                >
-                                                    <option value="">Select Gender</option>
-                                                    <option value="Male">Male</option>
-                                                    <option value="Female">Female</option>
-                                                    <option value="Other">Other</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div className="profile-field-compact">
-                                            <label className="profile-field-compact__label"><Droplet size={12} />Blood</label>
-                                            <div className="profile-field-compact__input-wrapper">
-                                                <select
-                                                    value={formData.bloodType}
-                                                    onChange={(e) => setFormData({ ...formData, bloodType: e.target.value })}
-                                                    className={`profile-field-compact__input ${!editMode ? 'profile-field-compact__input--readonly' : ''}`}
-                                                    disabled={!editMode}
-                                                >
-                                                    <option value="">Select Blood Type</option>
-                                                    <option value="A+">A+</option>
-                                                    <option value="A-">A-</option>
-                                                    <option value="B+">B+</option>
-                                                    <option value="B-">B-</option>
-                                                    <option value="O+">O+</option>
-                                                    <option value="O-">O-</option>
-                                                    <option value="AB+">AB+</option>
-                                                    <option value="AB-">AB-</option>
-                                                </select>
-                                            </div>
-                                        </div>
+
+                                        {renderSaveBar()}
                                     </div>
                                 )}
 
                                 {activeTab === 'contact' && (
-                                    <div className="profile-form-grid-compact">
-                                        <div className="profile-field-compact profile-field-compact--full">
-                                            <label className="profile-field-compact__label"><Mail size={12} />Email</label>
-                                            <div className="profile-field-compact__input-wrapper">
-                                                <input
-                                                    type="email"
-                                                    value={profile?.email || ''}
-                                                    className="profile-field-compact__input profile-field-compact__input--readonly"
-                                                    readOnly
-                                                />
+                                    <div className="tab-content-section">
+                                        {renderSectionHeader('Contact Information', <Phone size={14} />, editMode)}
+                                        <div className="profile-form-grid-compact">
+                                            <div className="profile-field-compact profile-field-compact--full">
+                                                <label className="profile-field-compact__label"><Mail size={12} />Email Address</label>
+                                                <div className="profile-field-compact__input-wrapper">
+                                                    <input
+                                                        type="email"
+                                                        value={profile?.email || ''}
+                                                        className="profile-field-compact__input profile-field-compact__input--readonly"
+                                                        readOnly
+                                                    />
+                                                    <span className="field-note">Email cannot be changed</span>
+                                                </div>
+                                            </div>
+                                            <div className="profile-field-compact profile-field-compact--full">
+                                                <label className="profile-field-compact__label"><Phone size={12} />Phone Number</label>
+                                                <div className="profile-field-compact__input-wrapper">
+                                                    <input
+                                                        type="tel"
+                                                        value={formData.phone}
+                                                        onChange={(e) => updateFormData({ phone: e.target.value })}
+                                                        className={`profile-field-compact__input ${!editMode ? 'profile-field-compact__input--readonly' : ''}`}
+                                                        readOnly={!editMode}
+                                                        placeholder="Enter your phone number"
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
-                                        <div className="profile-field-compact">
-                                            <label className="profile-field-compact__label"><Phone size={12} />Phone</label>
-                                            <div className="profile-field-compact__input-wrapper">
-                                                <input
-                                                    type="tel"
-                                                    value={formData.phone}
-                                                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                                    className={`profile-field-compact__input ${!editMode ? 'profile-field-compact__input--readonly' : ''}`}
-                                                    readOnly={!editMode}
-                                                />
+
+                                        <div className="section-divider" />
+
+                                        {renderSectionHeader('Address', <MapPin size={14} />, editMode)}
+                                        <div className="profile-form-grid-compact">
+                                            <div className="profile-field-compact profile-field-compact--full">
+                                                <label className="profile-field-compact__label"><MapPin size={12} />Street Address</label>
+                                                <div className="profile-field-compact__input-wrapper">
+                                                    <input
+                                                        type="text"
+                                                        value={formData.address}
+                                                        onChange={(e) => updateFormData({ address: e.target.value })}
+                                                        className={`profile-field-compact__input ${!editMode ? 'profile-field-compact__input--readonly' : ''}`}
+                                                        readOnly={!editMode}
+                                                        placeholder="Enter your street address"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="profile-field-compact">
+                                                <label className="profile-field-compact__label"><MapPin size={12} />City</label>
+                                                <div className="profile-field-compact__input-wrapper">
+                                                    <input
+                                                        type="text"
+                                                        value={formData.city}
+                                                        onChange={(e) => updateFormData({ city: e.target.value })}
+                                                        className={`profile-field-compact__input ${!editMode ? 'profile-field-compact__input--readonly' : ''}`}
+                                                        readOnly={!editMode}
+                                                        placeholder="Enter city"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="profile-field-compact">
+                                                <label className="profile-field-compact__label"><MapPin size={12} />State / Province</label>
+                                                <div className="profile-field-compact__input-wrapper">
+                                                    <input
+                                                        type="text"
+                                                        value={formData.state}
+                                                        onChange={(e) => updateFormData({ state: e.target.value })}
+                                                        className={`profile-field-compact__input ${!editMode ? 'profile-field-compact__input--readonly' : ''}`}
+                                                        readOnly={!editMode}
+                                                        placeholder="Enter state"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="profile-field-compact">
+                                                <label className="profile-field-compact__label"><MapPin size={12} />Zip / Postal Code</label>
+                                                <div className="profile-field-compact__input-wrapper">
+                                                    <input
+                                                        type="text"
+                                                        value={formData.zipCode}
+                                                        onChange={(e) => updateFormData({ zipCode: e.target.value })}
+                                                        className={`profile-field-compact__input ${!editMode ? 'profile-field-compact__input--readonly' : ''}`}
+                                                        readOnly={!editMode}
+                                                        placeholder="Enter zip code"
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
-                                        <div className="profile-field-compact profile-field-compact--full">
-                                            <label className="profile-field-compact__label"><MapPin size={12} />Address</label>
-                                            <div className="profile-field-compact__input-wrapper">
-                                                <input
-                                                    type="text"
-                                                    value={formData.address}
-                                                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                                                    className={`profile-field-compact__input ${!editMode ? 'profile-field-compact__input--readonly' : ''}`}
-                                                    readOnly={!editMode}
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="profile-field-compact">
-                                            <label className="profile-field-compact__label"><MapPin size={12} />City</label>
-                                            <div className="profile-field-compact__input-wrapper">
-                                                <input
-                                                    type="text"
-                                                    value={formData.city}
-                                                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                                                    className={`profile-field-compact__input ${!editMode ? 'profile-field-compact__input--readonly' : ''}`}
-                                                    readOnly={!editMode}
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="profile-field-compact">
-                                            <label className="profile-field-compact__label"><MapPin size={12} />State</label>
-                                            <div className="profile-field-compact__input-wrapper">
-                                                <input
-                                                    type="text"
-                                                    value={formData.state}
-                                                    onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-                                                    className={`profile-field-compact__input ${!editMode ? 'profile-field-compact__input--readonly' : ''}`}
-                                                    readOnly={!editMode}
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="profile-field-compact">
-                                            <label className="profile-field-compact__label"><MapPin size={12} />Zip Code</label>
-                                            <div className="profile-field-compact__input-wrapper">
-                                                <input
-                                                    type="text"
-                                                    value={formData.zipCode}
-                                                    onChange={(e) => setFormData({ ...formData, zipCode: e.target.value })}
-                                                    className={`profile-field-compact__input ${!editMode ? 'profile-field-compact__input--readonly' : ''}`}
-                                                    readOnly={!editMode}
-                                                />
-                                            </div>
-                                        </div>
+
+                                        {renderSaveBar()}
                                     </div>
                                 )}
 
                                 {activeTab === 'emergency' && (
-                                    <div className="profile-form-grid-compact">
-                                        <div className="profile-field-compact">
-                                            <label className="profile-field-compact__label"><User size={12} />Contact Name</label>
-                                            <div className="profile-field-compact__input-wrapper">
-                                                <input
-                                                    type="text"
-                                                    value={formData.emergencyContactName}
-                                                    onChange={(e) => setFormData({ ...formData, emergencyContactName: e.target.value })}
-                                                    className={`profile-field-compact__input ${!editMode ? 'profile-field-compact__input--readonly' : ''}`}
-                                                    readOnly={!editMode}
-                                                />
+                                    <div className="tab-content-section">
+                                        {renderSectionHeader('Emergency Contact', <Heart size={14} />, editMode)}
+                                        <p className="section-description">This information will be used in case of emergency during your workouts.</p>
+                                        <div className="profile-form-grid-compact">
+                                            <div className="profile-field-compact">
+                                                <label className="profile-field-compact__label"><User size={12} />Contact Name</label>
+                                                <div className="profile-field-compact__input-wrapper">
+                                                    <input
+                                                        type="text"
+                                                        value={formData.emergencyContactName}
+                                                        onChange={(e) => updateFormData({ emergencyContactName: e.target.value })}
+                                                        className={`profile-field-compact__input ${!editMode ? 'profile-field-compact__input--readonly' : ''}`}
+                                                        readOnly={!editMode}
+                                                        placeholder="Enter emergency contact name"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="profile-field-compact">
+                                                <label className="profile-field-compact__label"><Phone size={12} />Contact Phone</label>
+                                                <div className="profile-field-compact__input-wrapper">
+                                                    <input
+                                                        type="tel"
+                                                        value={formData.emergencyContactPhone}
+                                                        onChange={(e) => updateFormData({ emergencyContactPhone: e.target.value })}
+                                                        className={`profile-field-compact__input ${!editMode ? 'profile-field-compact__input--readonly' : ''}`}
+                                                        readOnly={!editMode}
+                                                        placeholder="Enter emergency contact phone"
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
-                                        <div className="profile-field-compact">
-                                            <label className="profile-field-compact__label"><Phone size={12} />Contact Phone</label>
-                                            <div className="profile-field-compact__input-wrapper">
-                                                <input
-                                                    type="tel"
-                                                    value={formData.emergencyContactPhone}
-                                                    onChange={(e) => setFormData({ ...formData, emergencyContactPhone: e.target.value })}
-                                                    className={`profile-field-compact__input ${!editMode ? 'profile-field-compact__input--readonly' : ''}`}
-                                                    readOnly={!editMode}
-                                                />
+
+                                        <div className="section-divider" />
+
+                                        {renderSectionHeader('Health Information', <AlertCircle size={14} />, editMode)}
+                                        <p className="section-description">Share any health conditions, allergies, or important medical information.</p>
+                                        <div className="profile-form-grid-compact">
+                                            <div className="profile-field-compact profile-field-compact--full">
+                                                <label className="profile-field-compact__label"><AlertCircle size={12} />Health Notes & Allergies</label>
+                                                <div className="profile-field-compact__input-wrapper">
+                                                    <textarea
+                                                        value={formData.healthNotes}
+                                                        onChange={(e) => updateFormData({ healthNotes: e.target.value })}
+                                                        className={`profile-field-compact__input ${!editMode ? 'profile-field-compact__input--readonly' : ''}`}
+                                                        readOnly={!editMode}
+                                                        rows={4}
+                                                        style={{ resize: 'none' }}
+                                                        placeholder="Enter any health conditions, allergies, injuries, or other medical information that trainers should know about..."
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
-                                        <div className="profile-field-compact profile-field-compact--full">
-                                            <label className="profile-field-compact__label"><AlertCircle size={12} />Health Notes</label>
-                                            <div className="profile-field-compact__input-wrapper">
-                                                <textarea
-                                                    value={formData.healthNotes}
-                                                    onChange={(e) => setFormData({ ...formData, healthNotes: e.target.value })}
-                                                    className={`profile-field-compact__input ${!editMode ? 'profile-field-compact__input--readonly' : ''}`}
-                                                    readOnly={!editMode}
-                                                    rows={2}
-                                                    style={{ resize: 'none' }}
-                                                />
-                                            </div>
-                                        </div>
+
+                                        {renderSaveBar()}
                                     </div>
                                 )}
 
                                 {activeTab === 'preferences' && (
-                                    <div className="goals-selection-grid">
-                                        {fitnessGoalOptions.map((goal) => (
-                                            <button
-                                                key={goal.name}
-                                                type="button"
-                                                className={`goal-option-card ${formData.fitnessGoals.includes(goal.name) ? 'goal-option-card--active' : ''}`}
-                                                onClick={() => handleGoalToggle(goal.name)}
-                                            >
-                                                <div className="goal-option-card__icon" style={{ color: goal.color }}>
-                                                    {goal.icon}
-                                                </div>
-                                                {goal.name}
-                                            </button>
-                                        ))}
+                                    <div className="tab-content-section">
+                                        {renderSectionHeader('Fitness Goals', <Target size={14} />)}
+                                        <p className="section-description">Select your fitness goals to help us personalize your experience.</p>
+                                        <div className="goals-selection-grid">
+                                            {fitnessGoalOptions.map((goal) => (
+                                                <button
+                                                    key={goal.name}
+                                                    type="button"
+                                                    className={`goal-option-card ${formData.fitnessGoals.includes(goal.name) ? 'goal-option-card--active' : ''}`}
+                                                    onClick={() => editMode && handleGoalToggle(goal.name)}
+                                                    disabled={!editMode}
+                                                    style={{ '--goal-accent': goal.color } as React.CSSProperties}
+                                                >
+                                                    <div className="goal-option-card__icon" style={{ color: goal.color }}>
+                                                        {goal.icon}
+                                                    </div>
+                                                    <span className="goal-option-card__name">{goal.name}</span>
+                                                    {formData.fitnessGoals.includes(goal.name) && (
+                                                        <Check size={16} className="goal-option-card__check" />
+                                                    )}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        {!editMode && (
+                                            <p className="edit-prompt">Click "Edit Profile" to modify your goals</p>
+                                        )}
+
+                                        {renderSaveBar()}
                                     </div>
                                 )}
 
                                 {activeTab === 'security' && (
-                                    <div className="profile-form-grid-compact">
-                                        <div className="profile-field-compact profile-field-compact--full security-item">
-                                            <div className="security-item__content">
-                                                <Lock size={16} />
-                                                <div>
-                                                    <div className="security-item__title">Password</div>
-                                                    <div className="security-item__subtitle">Change your password</div>
+                                    <div className="tab-content-section">
+                                        {renderSectionHeader('Account Security', <Shield size={14} />)}
+                                        <div className="security-options">
+                                            <div className="security-item">
+                                                <div className="security-item__content">
+                                                    <Lock size={20} />
+                                                    <div>
+                                                        <div className="security-item__title">Password</div>
+                                                        <div className="security-item__subtitle">Change your account password</div>
+                                                    </div>
                                                 </div>
+                                                <button className="profile-btn-compact profile-btn-compact--secondary" type="button">
+                                                    Change Password
+                                                </button>
                                             </div>
-                                            <button className="profile-btn-compact profile-btn-compact--secondary" type="button">Change</button>
-                                        </div>
-                                        <div className="profile-field-compact profile-field-compact--full security-item">
-                                            <div className="security-item__content">
-                                                <Shield size={16} />
-                                                <div>
-                                                    <div className="security-item__title">Two-Factor Auth</div>
-                                                    <div className="security-item__subtitle">Protect your account</div>
+                                            <div className="security-item">
+                                                <div className="security-item__content">
+                                                    <Shield size={20} />
+                                                    <div>
+                                                        <div className="security-item__title">Two-Factor Authentication</div>
+                                                        <div className="security-item__subtitle">Add an extra layer of security to your account</div>
+                                                    </div>
                                                 </div>
+                                                <PulsingBadge color={profile.twoFactorEnabled ? '#34C759' : '#FF9500'}>
+                                                    {profile.twoFactorEnabled ? 'Enabled' : 'Disabled'}
+                                                </PulsingBadge>
                                             </div>
-                                            <PulsingBadge color={profile.twoFactorEnabled ? '#34C759' : '#FF9500'}>
-                                                {profile.twoFactorEnabled ? 'Enabled' : 'Disabled'}
-                                            </PulsingBadge>
-                                        </div>
-                                        <div className="profile-field-compact profile-field-compact--full security-item">
-                                            <div className="security-item__content">
-                                                <Smartphone size={16} />
-                                                <div>
-                                                    <div className="security-item__title">Authorized Devices</div>
-                                                    <div className="security-item__subtitle">Manage your sessions</div>
+                                            <div className="security-item">
+                                                <div className="security-item__content">
+                                                    <Smartphone size={20} />
+                                                    <div>
+                                                        <div className="security-item__title">Active Sessions</div>
+                                                        <div className="security-item__subtitle">Manage your logged-in devices</div>
+                                                    </div>
                                                 </div>
+                                                <button className="profile-btn-compact profile-btn-compact--secondary" type="button">
+                                                    View Sessions
+                                                </button>
                                             </div>
-                                            <button className="profile-btn-compact profile-btn-compact--secondary" type="button">Manage</button>
+                                            <div className="security-item">
+                                                <div className="security-item__content">
+                                                    <Fingerprint size={20} />
+                                                    <div>
+                                                        <div className="security-item__title">Biometric Login</div>
+                                                        <div className="security-item__subtitle">Use fingerprint or face ID to sign in</div>
+                                                    </div>
+                                                </div>
+                                                <button className="profile-btn-compact profile-btn-compact--secondary" type="button">
+                                                    Setup
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
-                                )}
-
-                                {editMode && activeTab !== 'security' && activeTab !== 'overview' && activeTab !== 'preferences' && (
-                                    <div className="profile-actions-compact">
-                                        <button
-                                            type="button"
-                                            className="profile-btn-compact profile-btn-compact--secondary"
-                                            onClick={() => setEditMode(false)}
-                                        >
-                                            Cancel
-                                        </button>
-                                        <button
-                                            type="submit"
-                                            className="profile-btn-compact profile-btn-compact--primary"
-                                            disabled={saving}
-                                        >
-                                            {saving ? 'Saving...' : 'Save Changes'}
-                                        </button>
-                                    </div>
-                                )}
-
-                                {activeTab === 'preferences' && (
-                                    <div className="profile-actions-compact">
-                                        <button
-                                            type="button"
-                                            className="profile-btn-compact profile-btn-compact--primary"
-                                            onClick={handleSubmit}
-                                            disabled={saving}
-                                        >
-                                            {saving ? 'Updating Goals...' : 'Update Goals'}
-                                        </button>
                                     </div>
                                 )}
                             </form>
