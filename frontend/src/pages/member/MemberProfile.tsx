@@ -8,23 +8,9 @@ import {
     Trophy, Star, Download, QrCode, ArrowUpRight
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { memberProfileApi, MemberProfileData, MemberProfileUpdate } from '../../api/memberProfileApi';
 import '../../styles/macos-member.css';
 import './MemberProfile.css';
-
-interface ProfileData {
-    fullName: string;
-    email: string;
-    phoneNumber: string;
-    createdAt?: string;
-    dateOfBirth?: string;
-    gender?: string;
-    bloodType?: string;
-    address?: string;
-    emergencyContact?: string;
-    emergencyPhone?: string;
-    fitnessGoals?: string[];
-    healthConditions?: string;
-}
 
 type TabType = 'overview' | 'personal' | 'contact' | 'emergency' | 'preferences' | 'security';
 
@@ -62,7 +48,7 @@ const AchievementCard: React.FC<{ title: string; date: string; icon: React.React
 );
 
 const MemberProfile: React.FC = () => {
-    const [profile, setProfile] = useState<ProfileData | null>(null);
+    const [profile, setProfile] = useState<MemberProfileData | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [activeTab, setActiveTab] = useState<TabType>('overview');
@@ -70,15 +56,21 @@ const MemberProfile: React.FC = () => {
 
     const [formData, setFormData] = useState({
         fullName: '',
-        phoneNumber: '',
+        phone: '',
         dateOfBirth: '',
         gender: '',
         bloodType: '',
         address: '',
-        emergencyContact: '',
-        emergencyPhone: '',
+        city: '',
+        state: '',
+        zipCode: '',
+        emergencyContactName: '',
+        emergencyContactPhone: '',
+        healthNotes: '',
         fitnessGoals: [] as string[],
-        healthConditions: '',
+        height: null as number | null,
+        weight: null as number | null,
+        bodyFat: null as number | null,
     });
 
     const userStr = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
@@ -88,56 +80,33 @@ const MemberProfile: React.FC = () => {
         const fetchProfile = async () => {
             if (!user?.id) {
                 setLoading(false);
-                const mockProfile: ProfileData = {
-                    fullName: user?.fullName || 'John Owner',
-                    email: user?.email || 'john.owner@email.com',
-                    phoneNumber: '+1 (555) 123-4567',
-                    createdAt: '2024-01-15',
-                    dateOfBirth: '1990-05-15',
-                    gender: 'Male',
-                    bloodType: 'O+',
-                    address: '123 Gym Street, Fitness City, FC 12345',
-                    emergencyContact: 'Jane Owner',
-                    emergencyPhone: '+1 (555) 987-6543',
-                    fitnessGoals: ['Muscle Gain', 'General Fitness'],
-                    healthConditions: ''
-                };
-                setProfile(mockProfile);
-                setFormData({
-                    fullName: mockProfile.fullName,
-                    phoneNumber: mockProfile.phoneNumber || '',
-                    dateOfBirth: mockProfile.dateOfBirth || '',
-                    gender: mockProfile.gender || '',
-                    bloodType: mockProfile.bloodType || '',
-                    address: mockProfile.address || '',
-                    emergencyContact: mockProfile.emergencyContact || '',
-                    emergencyPhone: mockProfile.emergencyPhone || '',
-                    fitnessGoals: mockProfile.fitnessGoals || [],
-                    healthConditions: mockProfile.healthConditions || '',
-                });
                 return;
             }
 
             try {
-                const response = await fetch(`/api/member/profile?memberId=${user.id}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    setProfile(data);
-                    setFormData({
-                        fullName: data.fullName || '',
-                        phoneNumber: data.phoneNumber || '',
-                        dateOfBirth: data.dateOfBirth || '',
-                        gender: data.gender || '',
-                        bloodType: data.bloodType || '',
-                        address: data.address || '',
-                        emergencyContact: data.emergencyContact || '',
-                        emergencyPhone: data.emergencyPhone || '',
-                        fitnessGoals: data.fitnessGoals || [],
-                        healthConditions: data.healthConditions || '',
-                    });
-                }
+                const data = await memberProfileApi.getProfile(user.id);
+                setProfile(data);
+                setFormData({
+                    fullName: data.fullName || '',
+                    phone: data.phone || '',
+                    dateOfBirth: data.dateOfBirth || '',
+                    gender: data.gender || '',
+                    bloodType: data.bloodType || '',
+                    address: data.address || '',
+                    city: data.city || '',
+                    state: data.state || '',
+                    zipCode: data.zipCode || '',
+                    emergencyContactName: data.emergencyContactName || '',
+                    emergencyContactPhone: data.emergencyContactPhone || '',
+                    healthNotes: data.healthNotes || '',
+                    fitnessGoals: data.fitnessGoals || [],
+                    height: data.height,
+                    weight: data.weight,
+                    bodyFat: data.bodyFat,
+                });
             } catch (error) {
                 console.error('Failed to fetch profile:', error);
+                toast.error('Failed to load profile');
             } finally {
                 setLoading(false);
             }
@@ -146,13 +115,41 @@ const MemberProfile: React.FC = () => {
         fetchProfile();
     }, [user?.id]);
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e?: React.FormEvent) => {
         if (e) e.preventDefault();
+        if (!user?.id) return;
+
         setSaving(true);
-        await new Promise(resolve => setTimeout(resolve, 800));
-        toast.success('Profile updated successfully!');
-        setSaving(false);
-        setEditMode(false);
+        try {
+            const updateData: MemberProfileUpdate = {
+                fullName: formData.fullName,
+                phone: formData.phone,
+                dateOfBirth: formData.dateOfBirth || undefined,
+                gender: formData.gender || undefined,
+                bloodType: formData.bloodType || undefined,
+                address: formData.address || undefined,
+                city: formData.city || undefined,
+                state: formData.state || undefined,
+                zipCode: formData.zipCode || undefined,
+                emergencyContactName: formData.emergencyContactName || undefined,
+                emergencyContactPhone: formData.emergencyContactPhone || undefined,
+                healthNotes: formData.healthNotes || undefined,
+                fitnessGoals: formData.fitnessGoals,
+                height: formData.height || undefined,
+                weight: formData.weight || undefined,
+                bodyFat: formData.bodyFat || undefined,
+            };
+
+            const updated = await memberProfileApi.updateProfile(user.id, updateData);
+            setProfile(updated);
+            toast.success('Profile updated successfully!');
+            setEditMode(false);
+        } catch (error) {
+            console.error('Failed to update profile:', error);
+            toast.error('Failed to update profile');
+        } finally {
+            setSaving(false);
+        }
     };
 
     const handleGoalToggle = (goal: string) => {
@@ -182,6 +179,26 @@ const MemberProfile: React.FC = () => {
         { name: 'Stress Relief', icon: <Heart size={14} />, color: '#34C759' }
     ];
 
+    const formatDate = (dateStr: string | null) => {
+        if (!dateStr) return 'Not set';
+        try {
+            return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        } catch {
+            return dateStr;
+        }
+    };
+
+    const getRelativeTime = (dateStr: string) => {
+        const date = new Date(dateStr);
+        const now = new Date();
+        const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+        if (diffDays === 0) return 'Today';
+        if (diffDays === 1) return 'Yesterday';
+        if (diffDays < 7) return `${diffDays} days ago`;
+        if (diffDays < 30) return `${Math.floor(diffDays / 7)} week${Math.floor(diffDays / 7) > 1 ? 's' : ''} ago`;
+        return `${Math.floor(diffDays / 30)} month${Math.floor(diffDays / 30) > 1 ? 's' : ''} ago`;
+    };
+
     if (loading) {
         return (
             <div className="profile-loading">
@@ -195,9 +212,22 @@ const MemberProfile: React.FC = () => {
         );
     }
 
+    if (!profile) {
+        return (
+            <div className="profile-loading">
+                <AlertCircle size={32} />
+                <p>Please log in to view your profile</p>
+            </div>
+        );
+    }
+
     const memberInitials = formData.fullName
         ? formData.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
         : 'M';
+
+    const stats = profile.stats;
+    const membership = profile.membership;
+    const achievements = profile.achievements || [];
 
     return (
         <motion.div
@@ -230,20 +260,38 @@ const MemberProfile: React.FC = () => {
                     <div className="profile-hero__info">
                         <div className="profile-hero__name-row">
                             <h1 className="profile-hero__name">{formData.fullName}</h1>
-                            <PulsingBadge color="#34C759">Active</PulsingBadge>
+                            <PulsingBadge color={profile.status === 'Active' ? '#34C759' : '#FF9500'}>
+                                {profile.status || 'Active'}
+                            </PulsingBadge>
                         </div>
                         <p className="profile-hero__email">
                             <Mail size={12} />
-                            {profile?.email}
+                            {profile.email}
                         </p>
-                        <p className="profile-hero__id">ID: #12345</p>
+                        <p className="profile-hero__id">ID: #{profile.userId}</p>
                     </div>
 
                     <div className="profile-stats-inline">
-                        <StatMini label="Joined" value="Jan 2024" icon={<Calendar size={12} />} />
-                        <StatMini label="Workouts" value="156" icon={<Activity size={12} />} />
-                        <StatMini label="Streak" value="7d" icon={<Zap size={12} />} />
-                        <StatMini label="Level" value="Gold" icon={<Trophy size={12} />} />
+                        <StatMini 
+                            label="Joined" 
+                            value={stats?.joinedDate ? formatDate(stats.joinedDate) : 'N/A'} 
+                            icon={<Calendar size={12} />} 
+                        />
+                        <StatMini 
+                            label="Workouts" 
+                            value={String(stats?.totalWorkouts || 0)} 
+                            icon={<Activity size={12} />} 
+                        />
+                        <StatMini 
+                            label="Streak" 
+                            value={`${stats?.currentStreak || 0}d`} 
+                            icon={<Zap size={12} />} 
+                        />
+                        <StatMini 
+                            label="Level" 
+                            value={stats?.memberLevel || 'Beginner'} 
+                            icon={<Trophy size={12} />} 
+                        />
                     </div>
 
                     <motion.button
@@ -309,24 +357,26 @@ const MemberProfile: React.FC = () => {
                                         <div className="overview-section">
                                             <h3 className="section-title"><Award size={14} /> Recent Achievements</h3>
                                             <div className="achievements-grid">
-                                                <AchievementCard 
-                                                    title="Early Bird" 
-                                                    date="2 days ago" 
-                                                    icon={<Clock size={16} />} 
-                                                    color="#FF9500" 
-                                                />
-                                                <AchievementCard 
-                                                    title="Consistency King" 
-                                                    date="1 week ago" 
-                                                    icon={<CheckCircle2 size={16} />} 
-                                                    color="#34C759" 
-                                                />
-                                                <AchievementCard 
-                                                    title="Power Lifter" 
-                                                    date="2 weeks ago" 
-                                                    icon={<Zap size={16} />} 
-                                                    color="#FF3B30" 
-                                                />
+                                                {achievements.length > 0 ? (
+                                                    achievements.slice(0, 3).map((achievement) => (
+                                                        <AchievementCard 
+                                                            key={achievement.id}
+                                                            title={achievement.name} 
+                                                            date={getRelativeTime(achievement.earnedAt)} 
+                                                            icon={<Trophy size={16} />} 
+                                                            color="#FF9500" 
+                                                        />
+                                                    ))
+                                                ) : (
+                                                    <>
+                                                        <AchievementCard 
+                                                            title="Getting Started" 
+                                                            date="Complete your first workout" 
+                                                            icon={<Clock size={16} />} 
+                                                            color="#8E8E93" 
+                                                        />
+                                                    </>
+                                                )}
                                             </div>
                                         </div>
 
@@ -335,20 +385,20 @@ const MemberProfile: React.FC = () => {
                                             <div className="progress-mini-grid">
                                                 <div className="progress-item">
                                                     <div className="progress-item__header">
-                                                        <span>Weight Goal</span>
-                                                        <span>75 / 70 kg</span>
+                                                        <span>Workout Streak</span>
+                                                        <span>{stats?.currentStreak || 0} days</span>
                                                     </div>
                                                     <div className="progress-bar-bg">
-                                                        <div className="progress-bar-fill" style={{ width: '85%', background: '#007AFF' }} />
+                                                        <div className="progress-bar-fill" style={{ width: `${Math.min((stats?.currentStreak || 0) * 10, 100)}%`, background: '#007AFF' }} />
                                                     </div>
                                                 </div>
                                                 <div className="progress-item">
                                                     <div className="progress-item__header">
-                                                        <span>Workout Frequency</span>
-                                                        <span>4 / 5 days</span>
+                                                        <span>Total Workouts</span>
+                                                        <span>{stats?.totalWorkouts || 0}</span>
                                                     </div>
                                                     <div className="progress-bar-bg">
-                                                        <div className="progress-bar-fill" style={{ width: '80%', background: '#AF52DE' }} />
+                                                        <div className="progress-bar-fill" style={{ width: `${Math.min((stats?.totalWorkouts || 0) / 2, 100)}%`, background: '#AF52DE' }} />
                                                     </div>
                                                 </div>
                                             </div>
@@ -457,8 +507,8 @@ const MemberProfile: React.FC = () => {
                                             <div className="profile-field-compact__input-wrapper">
                                                 <input
                                                     type="tel"
-                                                    value={formData.phoneNumber}
-                                                    onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                                                    value={formData.phone}
+                                                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                                     className={`profile-field-compact__input ${!editMode ? 'profile-field-compact__input--readonly' : ''}`}
                                                     readOnly={!editMode}
                                                 />
@@ -476,6 +526,42 @@ const MemberProfile: React.FC = () => {
                                                 />
                                             </div>
                                         </div>
+                                        <div className="profile-field-compact">
+                                            <label className="profile-field-compact__label"><MapPin size={12} />City</label>
+                                            <div className="profile-field-compact__input-wrapper">
+                                                <input
+                                                    type="text"
+                                                    value={formData.city}
+                                                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                                                    className={`profile-field-compact__input ${!editMode ? 'profile-field-compact__input--readonly' : ''}`}
+                                                    readOnly={!editMode}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="profile-field-compact">
+                                            <label className="profile-field-compact__label"><MapPin size={12} />State</label>
+                                            <div className="profile-field-compact__input-wrapper">
+                                                <input
+                                                    type="text"
+                                                    value={formData.state}
+                                                    onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                                                    className={`profile-field-compact__input ${!editMode ? 'profile-field-compact__input--readonly' : ''}`}
+                                                    readOnly={!editMode}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="profile-field-compact">
+                                            <label className="profile-field-compact__label"><MapPin size={12} />Zip Code</label>
+                                            <div className="profile-field-compact__input-wrapper">
+                                                <input
+                                                    type="text"
+                                                    value={formData.zipCode}
+                                                    onChange={(e) => setFormData({ ...formData, zipCode: e.target.value })}
+                                                    className={`profile-field-compact__input ${!editMode ? 'profile-field-compact__input--readonly' : ''}`}
+                                                    readOnly={!editMode}
+                                                />
+                                            </div>
+                                        </div>
                                     </div>
                                 )}
 
@@ -486,8 +572,8 @@ const MemberProfile: React.FC = () => {
                                             <div className="profile-field-compact__input-wrapper">
                                                 <input
                                                     type="text"
-                                                    value={formData.emergencyContact}
-                                                    onChange={(e) => setFormData({ ...formData, emergencyContact: e.target.value })}
+                                                    value={formData.emergencyContactName}
+                                                    onChange={(e) => setFormData({ ...formData, emergencyContactName: e.target.value })}
                                                     className={`profile-field-compact__input ${!editMode ? 'profile-field-compact__input--readonly' : ''}`}
                                                     readOnly={!editMode}
                                                 />
@@ -498,8 +584,8 @@ const MemberProfile: React.FC = () => {
                                             <div className="profile-field-compact__input-wrapper">
                                                 <input
                                                     type="tel"
-                                                    value={formData.emergencyPhone}
-                                                    onChange={(e) => setFormData({ ...formData, emergencyPhone: e.target.value })}
+                                                    value={formData.emergencyContactPhone}
+                                                    onChange={(e) => setFormData({ ...formData, emergencyContactPhone: e.target.value })}
                                                     className={`profile-field-compact__input ${!editMode ? 'profile-field-compact__input--readonly' : ''}`}
                                                     readOnly={!editMode}
                                                 />
@@ -509,8 +595,8 @@ const MemberProfile: React.FC = () => {
                                             <label className="profile-field-compact__label"><AlertCircle size={12} />Health Notes</label>
                                             <div className="profile-field-compact__input-wrapper">
                                                 <textarea
-                                                    value={formData.healthConditions}
-                                                    onChange={(e) => setFormData({ ...formData, healthConditions: e.target.value })}
+                                                    value={formData.healthNotes}
+                                                    onChange={(e) => setFormData({ ...formData, healthNotes: e.target.value })}
                                                     className={`profile-field-compact__input ${!editMode ? 'profile-field-compact__input--readonly' : ''}`}
                                                     readOnly={!editMode}
                                                     rows={2}
@@ -546,7 +632,7 @@ const MemberProfile: React.FC = () => {
                                                 <Lock size={16} />
                                                 <div>
                                                     <div className="security-item__title">Password</div>
-                                                    <div className="security-item__subtitle">Changed 30d ago</div>
+                                                    <div className="security-item__subtitle">Change your password</div>
                                                 </div>
                                             </div>
                                             <button className="profile-btn-compact profile-btn-compact--secondary" type="button">Change</button>
@@ -559,14 +645,16 @@ const MemberProfile: React.FC = () => {
                                                     <div className="security-item__subtitle">Protect your account</div>
                                                 </div>
                                             </div>
-                                            <PulsingBadge color="#34C759">Enabled</PulsingBadge>
+                                            <PulsingBadge color={profile.twoFactorEnabled ? '#34C759' : '#FF9500'}>
+                                                {profile.twoFactorEnabled ? 'Enabled' : 'Disabled'}
+                                            </PulsingBadge>
                                         </div>
                                         <div className="profile-field-compact profile-field-compact--full security-item">
                                             <div className="security-item__content">
                                                 <Smartphone size={16} />
                                                 <div>
                                                     <div className="security-item__title">Authorized Devices</div>
-                                                    <div className="security-item__subtitle">2 active sessions</div>
+                                                    <div className="security-item__subtitle">Manage your sessions</div>
                                                 </div>
                                             </div>
                                             <button className="profile-btn-compact profile-btn-compact--secondary" type="button">Manage</button>
@@ -616,15 +704,24 @@ const MemberProfile: React.FC = () => {
                             <h3 className="widget-title"><CreditCard size={14} /> Membership</h3>
                             <ArrowUpRight size={14} className="widget-icon-link" />
                         </div>
-                        <div className="membership-card">
-                            <div className="membership-type">Platinum Member</div>
-                            <div className="membership-expiry">Expires: Dec 31, 2024</div>
-                            <div className="membership-status-bar">
-                                <div className="status-bar-fill" style={{ width: '65%' }} />
+                        {membership ? (
+                            <div className="membership-card">
+                                <div className="membership-type">{membership.planName}</div>
+                                <div className="membership-expiry">Expires: {new Date(membership.endDate).toLocaleDateString()}</div>
+                                <div className="membership-status-bar">
+                                    <div className="status-bar-fill" style={{ width: `${Math.min(Math.max(membership.daysRemaining / 365 * 100, 5), 100)}%` }} />
+                                </div>
+                                <div className="membership-days-left">{membership.daysRemaining} days remaining</div>
                             </div>
-                            <div className="membership-days-left">182 days remaining</div>
-                        </div>
-                        <button className="widget-action-btn primary">Renew Membership</button>
+                        ) : (
+                            <div className="membership-card">
+                                <div className="membership-type">No Active Membership</div>
+                                <div className="membership-expiry">Subscribe to get started</div>
+                            </div>
+                        )}
+                        <button className="widget-action-btn primary">
+                            {membership ? 'Renew Membership' : 'Get Membership'}
+                        </button>
                     </div>
 
                     <div className="sidebar-widget quick-actions-widget">
@@ -654,18 +751,18 @@ const MemberProfile: React.FC = () => {
                         <div className="body-stats-list">
                             <div className="body-stat-item">
                                 <span className="stat-label">Height</span>
-                                <span className="stat-value">175 cm</span>
+                                <span className="stat-value">{formData.height ? `${formData.height} cm` : 'Not set'}</span>
                             </div>
                             <div className="body-stat-item">
                                 <span className="stat-label">Weight</span>
-                                <span className="stat-value">72 kg</span>
+                                <span className="stat-value">{formData.weight ? `${formData.weight} kg` : 'Not set'}</span>
                             </div>
                             <div className="body-stat-item">
                                 <span className="stat-label">Body Fat</span>
-                                <span className="stat-value">15%</span>
+                                <span className="stat-value">{formData.bodyFat ? `${formData.bodyFat}%` : 'Not set'}</span>
                             </div>
                         </div>
-                        <button className="widget-action-btn">Update Stats</button>
+                        <button className="widget-action-btn" onClick={() => {setActiveTab('personal'); setEditMode(true);}}>Update Stats</button>
                     </div>
                 </div>
             </div>

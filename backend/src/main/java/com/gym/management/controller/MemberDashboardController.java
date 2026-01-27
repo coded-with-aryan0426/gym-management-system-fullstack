@@ -1,5 +1,7 @@
 package com.gym.management.controller;
 
+import com.gym.management.dto.MemberProfileDTO;
+import com.gym.management.dto.MemberProfileUpdateDTO;
 import com.gym.management.model.ClassBooking;
 import com.gym.management.model.Membership;
 import com.gym.management.model.User;
@@ -8,6 +10,7 @@ import com.gym.management.repository.MembershipRepository;
 import com.gym.management.repository.NotificationRepository;
 import com.gym.management.repository.ProgressNoteRepository;
 import com.gym.management.repository.UserRepository;
+import com.gym.management.service.MemberProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -42,6 +45,9 @@ public class MemberDashboardController {
 
     @Autowired
     private ProgressNoteRepository progressNoteRepository;
+
+    @Autowired
+    private MemberProfileService memberProfileService;
 
     /**
      * Member Dashboard - aggregated stats
@@ -115,42 +121,30 @@ public class MemberDashboardController {
     }
 
     /**
-     * Get member's own profile
+     * Get member's own profile (full profile with all details)
      */
     @GetMapping("/profile")
     public ResponseEntity<?> getProfile(@RequestParam Long memberId) {
-        Optional<User> member = userRepository.findById(memberId);
-        if (member.isEmpty()) {
+        try {
+            MemberProfileDTO profile = memberProfileService.getMemberProfile(memberId);
+            return ResponseEntity.ok(profile);
+        } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
         }
-        return ResponseEntity.ok(member.get());
     }
 
     /**
      * Update member's own profile
      */
     @PutMapping("/profile")
-    public ResponseEntity<?> updateProfile(@RequestParam Long memberId, @RequestBody Map<String, Object> updates) {
+    public ResponseEntity<?> updateProfile(@RequestParam Long memberId, @RequestBody MemberProfileUpdateDTO updateDTO) {
         try {
-            Optional<User> memberOpt = userRepository.findById(memberId);
-            if (memberOpt.isEmpty()) {
-                return ResponseEntity.notFound().build();
-            }
-
-            User member = memberOpt.get();
-
-            if (updates.containsKey("fullName")) {
-                member.setFullName((String) updates.get("fullName"));
-            }
-            if (updates.containsKey("phoneNumber")) {
-                member.setPhoneNumber((String) updates.get("phoneNumber"));
-            }
-            if (updates.containsKey("avatarId")) {
-                member.setAvatarId((String) updates.get("avatarId"));
-            }
-
-            User saved = userRepository.save(member);
-            return ResponseEntity.ok(saved);
+            MemberProfileDTO updated = memberProfileService.updateMemberProfile(memberId, updateDTO);
+            return ResponseEntity.ok(updated);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
         }

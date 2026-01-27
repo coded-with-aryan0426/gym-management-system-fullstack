@@ -4,6 +4,8 @@ import org.hibernate.annotations.SQLRestriction;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -262,6 +264,51 @@ public class User {
 
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted = false;
+
+    @Column(name = "date_of_birth")
+    private LocalDate dateOfBirth;
+
+    @Column(name = "gender")
+    private String gender;
+
+    @Column(name = "blood_type")
+    private String bloodType;
+
+    @Column(name = "address")
+    private String address;
+
+    @Column(name = "city")
+    private String city;
+
+    @Column(name = "state")
+    private String state;
+
+    @Column(name = "zip_code")
+    private String zipCode;
+
+    @Column(name = "emergency_contact_name")
+    private String emergencyContactName;
+
+    @Column(name = "emergency_contact_phone")
+    private String emergencyContactPhone;
+
+    @Column(name = "health_notes", columnDefinition = "TEXT")
+    private String healthNotes;
+
+    @Column(name = "fitness_goals", columnDefinition = "TEXT")
+    private String fitnessGoals;
+
+    @Column(name = "height", precision = 5, scale = 2)
+    private BigDecimal height;
+
+    @Column(name = "weight", precision = 5, scale = 2)
+    private BigDecimal weight;
+
+    @Column(name = "body_fat", precision = 4, scale = 2)
+    private BigDecimal bodyFat;
+
+    @Column(name = "two_factor_enabled")
+    private Boolean twoFactorEnabled = false;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_role_map", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
