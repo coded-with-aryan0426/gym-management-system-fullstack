@@ -1,14 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     CreditCard, Check, Zap, Shield, Download, Star, Clock, Users,
-    Dumbbell, ChevronRight, Pause, RefreshCw, X, Gem, Award, Medal,
-    Calendar, AlertCircle, QrCode, Wallet, Plus, Trash2, Edit3,
-    Bell, Gift, TrendingUp, Smartphone, Lock, Eye, EyeOff,
-    CircleCheck, CircleX, Info, ArrowRight, Copy, ExternalLink,
-    Ticket, MapPin, Coffee
+    Dumbbell, ChevronRight, Pause, RefreshCw, X, Gem, Award,
+    Calendar, QrCode, Wallet, Plus, Trash2,
+    Bell, Gift, TrendingUp, Lock,
+    CircleCheck, CircleX, Info, ArrowRight, Copy,
+    MapPin, Coffee, Flame, Target, Activity,
+    Crown, Sparkles, Timer, Heart, BarChart3
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { apiClient } from '../../services/api';
 import '../../styles/unified-design-system.css';
 import './MyMembership.css';
 
@@ -38,11 +40,11 @@ interface PaymentMethod {
 
 const containerVariants = {
     hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.08 } }
+    visible: { opacity: 1, transition: { staggerChildren: 0.06 } }
 };
 
 const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 16 },
     visible: { opacity: 1, y: 0 }
 };
 
@@ -54,6 +56,7 @@ const MyMembership: React.FC = () => {
     const [showFreezeModal, setShowFreezeModal] = useState(false);
     const [showAddCard, setShowAddCard] = useState(false);
     const [freezeDays, setFreezeDays] = useState(7);
+    const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
     const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([
         { id: '1', type: 'visa', last4: '4242', expiry: '12/26', isDefault: true },
@@ -65,26 +68,57 @@ const MyMembership: React.FC = () => {
 
     useEffect(() => {
         const fetchMembership = async () => {
-            const mockData: MembershipData = {
-                hasMembership: true,
-                status: 'Active',
-                packageName: 'Premium Monthly',
-                packagePrice: 99.99,
-                startDate: '2025-12-01',
-                endDate: '2026-01-26',
-                daysRemaining: 24,
-                isExpired: false,
-                autoRenew: true,
-                freezeAvailable: true,
-                freezeDaysUsed: 3,
-                freezeDaysTotal: 14
-            };
-            setMembership(mockData);
-            setLoading(false);
+            const userId = user?.id || user?.userId;
+            if (!userId || isNaN(Number(userId))) {
+                setLoading(false);
+                setMembership({ hasMembership: false });
+                return;
+            }
+            try {
+                const response = await apiClient.get('/member/membership', {
+                    params: { memberId: userId }
+                });
+                const data = response.data;
+                setMembership({
+                    ...data,
+                    autoRenew: data.autoRenew ?? true,
+                    freezeAvailable: true,
+                    freezeDaysUsed: 3,
+                    freezeDaysTotal: 14
+                });
+            } catch (error) {
+                console.error('Error fetching membership:', error);
+                setMembership({ hasMembership: false });
+            } finally {
+                setLoading(false);
+            }
         };
 
         fetchMembership();
-    }, [user?.id]);
+    }, [user?.id, user?.userId]);
+
+    useEffect(() => {
+        if (!membership?.endDate) return;
+
+        const calculateTimeLeft = () => {
+            const endDate = new Date(membership.endDate!);
+            const now = new Date();
+            const difference = endDate.getTime() - now.getTime();
+
+            if (difference > 0) {
+                setTimeLeft({
+                    days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+                    hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+                    minutes: Math.floor((difference / 1000 / 60) % 60),
+                    seconds: Math.floor((difference / 1000) % 60)
+                });
+            }
+        };
+
+        calculateTimeLeft();
+        const timer = setInterval(calculateTimeLeft, 1000);
+        return () => clearInterval(timer);
+    }, [membership?.endDate]);
 
     const formatDate = (dateStr: string) => {
         return new Date(dateStr).toLocaleDateString('en-US', {
@@ -94,13 +128,22 @@ const MyMembership: React.FC = () => {
         });
     };
 
+    const membershipTier = useMemo(() => {
+        const name = membership?.packageName?.toLowerCase() || '';
+        if (name.includes('premium') || name.includes('vip')) return { tier: 'premium', color: '#f59e0b', icon: <Crown size={16} /> };
+        if (name.includes('pro') || name.includes('elite')) return { tier: 'elite', color: '#8b5cf6', icon: <Sparkles size={16} /> };
+        return { tier: 'standard', color: '#3b82f6', icon: <Star size={16} /> };
+    }, [membership?.packageName]);
+
     const benefits = [
-        { icon: <Dumbbell size={20} />, title: 'Unlimited Gym Access', desc: '24/7 access to all equipment', used: true },
-        { icon: <Users size={20} />, title: 'Group Classes', desc: 'Unlimited access to all classes', used: true },
-        { icon: <Star size={20} />, title: 'PT Sessions', desc: '2 of 4 used this month', used: true, progress: 50 },
-        { icon: <Coffee size={20} />, title: 'Spa & Sauna', desc: 'Full spa access included', used: false },
-        { icon: <Users size={20} />, title: 'Guest Passes', desc: '0 of 2 used this month', used: false, progress: 0 },
-        { icon: <Gift size={20} />, title: 'Member Rewards', desc: '850 points earned', used: true }
+        { icon: <Dumbbell size={18} />, title: 'Unlimited Gym Access', desc: '24/7 access to all equipment', active: true, premium: false },
+        { icon: <Users size={18} />, title: 'Group Classes', desc: 'All fitness classes included', active: true, premium: false },
+        { icon: <Star size={18} />, title: 'PT Sessions', desc: '2 of 4 sessions used', active: true, premium: false, progress: 50 },
+        { icon: <Coffee size={18} />, title: 'Spa & Sauna', desc: 'Relaxation zone access', active: membershipTier.tier !== 'standard', premium: true },
+        { icon: <Users size={18} />, title: 'Guest Passes', desc: '2 passes per month', active: true, premium: false, progress: 0 },
+        { icon: <Gift size={18} />, title: 'Member Rewards', desc: '850 points earned', active: true, premium: false },
+        { icon: <Target size={18} />, title: 'Personal Goals', desc: 'AI-powered tracking', active: true, premium: false },
+        { icon: <Activity size={18} />, title: 'Health Analytics', desc: 'Advanced body metrics', active: membershipTier.tier !== 'standard', premium: true }
     ];
 
     const usageStats = {
@@ -108,23 +151,22 @@ const MyMembership: React.FC = () => {
         classesAttended: 12,
         ptSessionsUsed: 2,
         ptSessionsTotal: 4,
-        guestPassesUsed: 0,
-        guestPassesTotal: 2,
-        calories: '24,500',
-        minutesActive: 1680
+        calories: 24500,
+        minutesActive: 1680,
+        streak: 7,
+        points: 850
     };
 
     const paymentHistory = [
         { id: 'INV-2025-001', date: 'Dec 20, 2025', amount: 99.99, status: 'Paid', method: 'Visa ••4242', type: 'Monthly Subscription' },
         { id: 'INV-2025-002', date: 'Nov 20, 2025', amount: 99.99, status: 'Paid', method: 'Visa ••4242', type: 'Monthly Subscription' },
         { id: 'INV-2025-003', date: 'Oct 20, 2025', amount: 99.99, status: 'Paid', method: 'Visa ••4242', type: 'Monthly Subscription' },
-        { id: 'INV-2025-004', date: 'Sep 20, 2025', amount: 50.00, status: 'Paid', method: 'Visa ••4242', type: 'PT Session Pack' }
     ];
 
     const upcomingPerks = [
-        { date: 'Jan 5', title: 'Free Smoothie Day', icon: <Coffee size={16} /> },
-        { date: 'Jan 10', title: 'Member Appreciation Event', icon: <Gift size={16} /> },
-        { date: 'Jan 15', title: 'New Year Fitness Challenge', icon: <TrendingUp size={16} /> }
+        { date: 'Jan 28', title: 'Free Smoothie Day', icon: <Coffee size={14} />, type: 'event' },
+        { date: 'Jan 30', title: 'Double Points Weekend', icon: <Sparkles size={14} />, type: 'promo' },
+        { date: 'Feb 1', title: 'New Year Challenge', icon: <Target size={14} />, type: 'challenge' }
     ];
 
     const handleFreezeMembership = () => {
@@ -133,7 +175,7 @@ const MyMembership: React.FC = () => {
     };
 
     const handleCopyMemberId = () => {
-        navigator.clipboard.writeText('MEM-2024-12345');
+        navigator.clipboard.writeText(`MEM-${user?.id || '0000'}`);
         toast.success('Member ID copied!');
     };
 
@@ -150,22 +192,42 @@ const MyMembership: React.FC = () => {
         toast.success('Payment method removed');
     };
 
-    const getCardIcon = (type: string) => {
-        switch (type) {
-            case 'visa': return '💳';
-            case 'mastercard': return '💳';
-            case 'amex': return '💳';
-            default: return '💳';
-        }
-    };
-
     if (loading) {
         return (
-            <div className="membership-loading">
-                <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}>
-                    <CreditCard size={32} />
+            <div className="mm-loading">
+                <motion.div 
+                    className="mm-loading__spinner"
+                    animate={{ rotate: 360 }} 
+                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                >
+                    <CreditCard size={28} />
                 </motion.div>
+                <span>Loading membership...</span>
             </div>
+        );
+    }
+
+    if (!membership?.hasMembership) {
+        return (
+            <motion.div 
+                className="mm-no-membership"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+            >
+                <div className="mm-no-membership__icon">
+                    <CreditCard size={48} strokeWidth={1.5} />
+                </div>
+                <h2>No Active Membership</h2>
+                <p>Start your fitness journey with a membership plan</p>
+                <motion.button 
+                    className="mm-cta-btn"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                >
+                    <Sparkles size={18} />
+                    View Plans
+                </motion.button>
+            </motion.div>
         );
     }
 
@@ -174,121 +236,181 @@ const MyMembership: React.FC = () => {
 
     return (
         <motion.div
-            className="member-membership"
+            className="mm-container"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
         >
-            <motion.header className="membership-header" variants={itemVariants}>
-                <div className="membership-header__content">
-                    <h1>My Membership</h1>
-                    <p>Manage your subscription, benefits, and payments</p>
-                </div>
-                <div className="membership-header__actions">
-                    <motion.button 
-                        className="membership-qr-btn"
-                        onClick={() => setShowQRCode(true)}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                    >
-                        <QrCode size={18} />
-                        Check-in QR
-                    </motion.button>
-                </div>
-            </motion.header>
-
-            <motion.div className="membership-hero" variants={itemVariants}>
-                <div className="membership-hero__bg">
-                    <div className="membership-hero__pattern" />
-                </div>
+            <motion.div className="mm-hero" variants={itemVariants}>
+                <div className="mm-hero__glow" />
+                <div className="mm-hero__pattern" />
                 
-                <div className="membership-hero__content">
-                    <div className="membership-hero__top">
-                        <div className="membership-hero__plan">
-                            <span className="membership-hero__plan-label">Current Plan</span>
-                            <div className="membership-hero__plan-name">
-                                <Gem size={24} />
-                                <h2>{membership?.packageName || 'Premium Monthly'}</h2>
+                <div className="mm-hero__content">
+                    <div className="mm-hero__top">
+                        <div className="mm-hero__plan">
+                            <div className="mm-hero__tier" style={{ '--tier-color': membershipTier.color } as React.CSSProperties}>
+                                {membershipTier.icon}
+                                <span>{membershipTier.tier.toUpperCase()}</span>
                             </div>
-                            <div className="membership-hero__id" onClick={handleCopyMemberId}>
-                                <span>ID: MEM-2024-12345</span>
-                                <Copy size={12} />
+                            <h1 className="mm-hero__title">{membership?.packageName || 'Membership'}</h1>
+                            <div className="mm-hero__id" onClick={handleCopyMemberId}>
+                                <span>ID: MEM-{user?.id || '0000'}</span>
+                                <Copy size={10} />
                             </div>
                         </div>
-                        <div className="membership-hero__status-area">
-                            <motion.span 
-                                className={`membership-status ${membership?.isExpired ? 'membership-status--expired' : ''}`}
+                        
+                        <div className="mm-hero__status-group">
+                            <motion.div 
+                                className={`mm-status ${membership?.isExpired ? 'mm-status--expired' : ''}`}
                                 animate={{ scale: [1, 1.02, 1] }}
                                 transition={{ duration: 2, repeat: Infinity }}
                             >
-                                {membership?.isExpired ? <CircleX size={14} /> : <CircleCheck size={14} />}
+                                {membership?.isExpired ? <CircleX size={12} /> : <CircleCheck size={12} />}
                                 {membership?.isExpired ? 'Expired' : 'Active'}
-                            </motion.span>
+                            </motion.div>
                             {membership?.autoRenew && (
-                                <span className="membership-auto-renew">
-                                    <RefreshCw size={12} />
-                                    Auto-renew ON
+                                <span className="mm-auto-renew">
+                                    <RefreshCw size={10} />
+                                    Auto-renew
                                 </span>
                             )}
                         </div>
                     </div>
 
-                    <div className="membership-hero__stats">
-                        <div className="membership-hero__stat">
-                            <Calendar size={16} />
-                            <div>
-                                <span className="stat-label">Started</span>
-                                <span className="stat-value">{membership?.startDate ? formatDate(membership.startDate) : 'N/A'}</span>
-                            </div>
+                    <div className="mm-countdown">
+                        <div className="mm-countdown__label">
+                            <Timer size={14} />
+                            Time Remaining
                         </div>
-                        <div className="membership-hero__stat">
-                            <Clock size={16} />
-                            <div>
-                                <span className="stat-label">Renews</span>
-                                <span className="stat-value">{membership?.endDate ? formatDate(membership.endDate) : 'N/A'}</span>
+                        <div className="mm-countdown__grid">
+                            <div className="mm-countdown__item">
+                                <span className="mm-countdown__value">{timeLeft.days}</span>
+                                <span className="mm-countdown__unit">days</span>
                             </div>
-                        </div>
-                        <div className="membership-hero__stat">
-                            <CreditCard size={16} />
-                            <div>
-                                <span className="stat-label">Monthly</span>
-                                <span className="stat-value">${membership?.packagePrice?.toFixed(2)}</span>
+                            <span className="mm-countdown__separator">:</span>
+                            <div className="mm-countdown__item">
+                                <span className="mm-countdown__value">{String(timeLeft.hours).padStart(2, '0')}</span>
+                                <span className="mm-countdown__unit">hrs</span>
                             </div>
-                        </div>
-                        <div className="membership-hero__stat membership-hero__stat--highlight">
-                            <Zap size={16} />
-                            <div>
-                                <span className="stat-label">Remaining</span>
-                                <span className="stat-value">{membership?.daysRemaining} days</span>
+                            <span className="mm-countdown__separator">:</span>
+                            <div className="mm-countdown__item">
+                                <span className="mm-countdown__value">{String(timeLeft.minutes).padStart(2, '0')}</span>
+                                <span className="mm-countdown__unit">min</span>
+                            </div>
+                            <span className="mm-countdown__separator">:</span>
+                            <div className="mm-countdown__item mm-countdown__item--seconds">
+                                <span className="mm-countdown__value">{String(timeLeft.seconds).padStart(2, '0')}</span>
+                                <span className="mm-countdown__unit">sec</span>
                             </div>
                         </div>
                     </div>
 
-                    <div className="membership-hero__progress">
-                        <div className="membership-progress-bar">
-                            <motion.div
-                                className="membership-progress-fill"
-                                initial={{ width: 0 }}
-                                animate={{ width: `${progressPercentage}%` }}
-                                transition={{ duration: 1, ease: 'easeOut' }}
-                            />
+                    <div className="mm-hero__stats">
+                        <div className="mm-hero__stat">
+                            <Calendar size={14} />
+                            <div>
+                                <span className="mm-stat-label">Started</span>
+                                <span className="mm-stat-value">{membership?.startDate ? formatDate(membership.startDate) : 'N/A'}</span>
+                            </div>
                         </div>
+                        <div className="mm-hero__stat">
+                            <Clock size={14} />
+                            <div>
+                                <span className="mm-stat-label">Renews</span>
+                                <span className="mm-stat-value">{membership?.endDate ? formatDate(membership.endDate) : 'N/A'}</span>
+                            </div>
+                        </div>
+                        <div className="mm-hero__stat">
+                            <CreditCard size={14} />
+                            <div>
+                                <span className="mm-stat-label">Monthly</span>
+                                <span className="mm-stat-value">${membership?.packagePrice?.toFixed(2) || '0.00'}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="mm-hero__progress">
+                        <motion.div
+                            className="mm-hero__progress-fill"
+                            initial={{ width: 0 }}
+                            animate={{ width: `${progressPercentage}%` }}
+                            transition={{ duration: 1.2, ease: 'easeOut' }}
+                        />
+                    </div>
+
+                    <div className="mm-hero__actions">
+                        <motion.button 
+                            className="mm-qr-btn"
+                            onClick={() => setShowQRCode(true)}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                        >
+                            <QrCode size={16} />
+                            Check-in QR
+                        </motion.button>
+                        <motion.button 
+                            className="mm-renew-btn"
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                        >
+                            <RefreshCw size={16} />
+                            Renew Early
+                        </motion.button>
                     </div>
                 </div>
             </motion.div>
 
-            <motion.div className="membership-tabs" variants={itemVariants}>
+            <motion.div className="mm-quick-stats" variants={itemVariants}>
+                <div className="mm-quick-stat">
+                    <div className="mm-quick-stat__icon mm-quick-stat__icon--blue">
+                        <MapPin size={16} />
+                    </div>
+                    <div className="mm-quick-stat__info">
+                        <span className="mm-quick-stat__value">{usageStats.gymVisits}</span>
+                        <span className="mm-quick-stat__label">Visits</span>
+                    </div>
+                </div>
+                <div className="mm-quick-stat">
+                    <div className="mm-quick-stat__icon mm-quick-stat__icon--green">
+                        <Flame size={16} />
+                    </div>
+                    <div className="mm-quick-stat__info">
+                        <span className="mm-quick-stat__value">{usageStats.streak}</span>
+                        <span className="mm-quick-stat__label">Streak</span>
+                    </div>
+                </div>
+                <div className="mm-quick-stat">
+                    <div className="mm-quick-stat__icon mm-quick-stat__icon--purple">
+                        <Heart size={16} />
+                    </div>
+                    <div className="mm-quick-stat__info">
+                        <span className="mm-quick-stat__value">{(usageStats.calories / 1000).toFixed(1)}k</span>
+                        <span className="mm-quick-stat__label">Calories</span>
+                    </div>
+                </div>
+                <div className="mm-quick-stat">
+                    <div className="mm-quick-stat__icon mm-quick-stat__icon--amber">
+                        <Award size={16} />
+                    </div>
+                    <div className="mm-quick-stat__info">
+                        <span className="mm-quick-stat__value">{usageStats.points}</span>
+                        <span className="mm-quick-stat__label">Points</span>
+                    </div>
+                </div>
+            </motion.div>
+
+            <motion.div className="mm-tabs" variants={itemVariants}>
                 {[
-                    { id: 'overview', label: 'Overview', icon: <TrendingUp size={16} /> },
-                    { id: 'benefits', label: 'Benefits', icon: <Gift size={16} /> },
-                    { id: 'payments', label: 'Payments', icon: <CreditCard size={16} /> },
-                    { id: 'settings', label: 'Settings', icon: <Shield size={16} /> }
+                    { id: 'overview', label: 'Overview', icon: <BarChart3 size={14} /> },
+                    { id: 'benefits', label: 'Benefits', icon: <Gift size={14} /> },
+                    { id: 'payments', label: 'Payments', icon: <CreditCard size={14} /> },
+                    { id: 'settings', label: 'Settings', icon: <Shield size={14} /> }
                 ].map((tab) => (
                     <motion.button
                         key={tab.id}
-                        className={`membership-tab ${activeTab === tab.id ? 'membership-tab--active' : ''}`}
+                        className={`mm-tab ${activeTab === tab.id ? 'mm-tab--active' : ''}`}
                         onClick={() => setActiveTab(tab.id as typeof activeTab)}
-                        whileHover={{ y: -2 }}
+                        whileHover={{ y: -1 }}
                         whileTap={{ scale: 0.98 }}
                     >
                         {tab.icon}
@@ -300,116 +422,134 @@ const MyMembership: React.FC = () => {
             <AnimatePresence mode="wait">
                 <motion.div
                     key={activeTab}
-                    className="membership-content"
-                    initial={{ opacity: 0, y: 20 }}
+                    className="mm-content"
+                    initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
+                    exit={{ opacity: 0, y: -12 }}
+                    transition={{ duration: 0.2 }}
                 >
                     {activeTab === 'overview' && (
                         <>
-                            <div className="membership-quick-actions">
+                            <div className="mm-actions-grid">
                                 <motion.button 
-                                    className="quick-action-card"
+                                    className="mm-action-card"
                                     onClick={() => setShowQRCode(true)}
-                                    whileHover={{ y: -4 }}
+                                    whileHover={{ y: -3, boxShadow: '0 8px 24px rgba(59, 130, 246, 0.15)' }}
                                 >
-                                    <div className="quick-action-icon quick-action-icon--blue">
-                                        <QrCode size={22} />
+                                    <div className="mm-action-card__icon mm-action-card__icon--blue">
+                                        <QrCode size={20} />
                                     </div>
-                                    <span>Check-in</span>
+                                    <div className="mm-action-card__text">
+                                        <span className="mm-action-card__title">Check-in</span>
+                                        <span className="mm-action-card__desc">Scan at entrance</span>
+                                    </div>
                                 </motion.button>
                                 <motion.button 
-                                    className="quick-action-card"
-                                    whileHover={{ y: -4 }}
+                                    className="mm-action-card"
+                                    whileHover={{ y: -3, boxShadow: '0 8px 24px rgba(34, 197, 94, 0.15)' }}
                                     onClick={() => toast.success('Guest pass sent!')}
                                 >
-                                    <div className="quick-action-icon quick-action-icon--green">
-                                        <Users size={22} />
+                                    <div className="mm-action-card__icon mm-action-card__icon--green">
+                                        <Users size={20} />
                                     </div>
-                                    <span>Guest Pass</span>
+                                    <div className="mm-action-card__text">
+                                        <span className="mm-action-card__title">Guest Pass</span>
+                                        <span className="mm-action-card__desc">2 remaining</span>
+                                    </div>
                                 </motion.button>
                                 <motion.button 
-                                    className="quick-action-card"
+                                    className="mm-action-card"
                                     onClick={() => setShowFreezeModal(true)}
-                                    whileHover={{ y: -4 }}
+                                    whileHover={{ y: -3, boxShadow: '0 8px 24px rgba(139, 92, 246, 0.15)' }}
                                 >
-                                    <div className="quick-action-icon quick-action-icon--purple">
-                                        <Pause size={22} />
+                                    <div className="mm-action-card__icon mm-action-card__icon--purple">
+                                        <Pause size={20} />
                                     </div>
-                                    <span>Freeze</span>
+                                    <div className="mm-action-card__text">
+                                        <span className="mm-action-card__title">Freeze</span>
+                                        <span className="mm-action-card__desc">11 days left</span>
+                                    </div>
                                 </motion.button>
                                 <motion.button 
-                                    className="quick-action-card"
-                                    whileHover={{ y: -4 }}
+                                    className="mm-action-card"
+                                    whileHover={{ y: -3, boxShadow: '0 8px 24px rgba(245, 158, 11, 0.15)' }}
                                     onClick={() => toast.success('Renewal reminder set')}
                                 >
-                                    <div className="quick-action-icon quick-action-icon--orange">
-                                        <Bell size={22} />
+                                    <div className="mm-action-card__icon mm-action-card__icon--amber">
+                                        <Bell size={20} />
                                     </div>
-                                    <span>Remind Me</span>
+                                    <div className="mm-action-card__text">
+                                        <span className="mm-action-card__title">Remind Me</span>
+                                        <span className="mm-action-card__desc">Before expiry</span>
+                                    </div>
                                 </motion.button>
                             </div>
 
-                            <div className="membership-section">
-                                <div className="membership-section__header">
-                                    <h3><Dumbbell size={18} /> This Month's Activity</h3>
+                            <div className="mm-section">
+                                <div className="mm-section__header">
+                                    <h3><Activity size={16} /> Monthly Activity</h3>
                                 </div>
-                                <div className="membership-stats-grid">
-                                    <motion.div className="stat-card" whileHover={{ scale: 1.02 }}>
-                                        <div className="stat-card__icon stat-card__icon--blue">
-                                            <MapPin size={20} />
+                                <div className="mm-activity-grid">
+                                    <motion.div className="mm-activity-card" whileHover={{ scale: 1.01 }}>
+                                        <div className="mm-activity-card__header">
+                                            <MapPin size={16} />
+                                            <span>Gym Visits</span>
                                         </div>
-                                        <div className="stat-card__value">{usageStats.gymVisits}</div>
-                                        <div className="stat-card__label">Gym Visits</div>
+                                        <div className="mm-activity-card__value">{usageStats.gymVisits}</div>
+                                        <div className="mm-activity-card__change">+3 from last month</div>
                                     </motion.div>
-                                    <motion.div className="stat-card" whileHover={{ scale: 1.02 }}>
-                                        <div className="stat-card__icon stat-card__icon--green">
-                                            <Users size={20} />
+                                    <motion.div className="mm-activity-card" whileHover={{ scale: 1.01 }}>
+                                        <div className="mm-activity-card__header">
+                                            <Users size={16} />
+                                            <span>Classes</span>
                                         </div>
-                                        <div className="stat-card__value">{usageStats.classesAttended}</div>
-                                        <div className="stat-card__label">Classes</div>
+                                        <div className="mm-activity-card__value">{usageStats.classesAttended}</div>
+                                        <div className="mm-activity-card__change">+5 from last month</div>
                                     </motion.div>
-                                    <motion.div className="stat-card" whileHover={{ scale: 1.02 }}>
-                                        <div className="stat-card__icon stat-card__icon--purple">
-                                            <Star size={20} />
+                                    <motion.div className="mm-activity-card" whileHover={{ scale: 1.01 }}>
+                                        <div className="mm-activity-card__header">
+                                            <Star size={16} />
+                                            <span>PT Sessions</span>
                                         </div>
-                                        <div className="stat-card__value">{usageStats.ptSessionsUsed}/{usageStats.ptSessionsTotal}</div>
-                                        <div className="stat-card__label">PT Sessions</div>
-                                        <div className="stat-card__progress">
-                                            <div className="stat-card__progress-fill" style={{ width: `${(usageStats.ptSessionsUsed / usageStats.ptSessionsTotal) * 100}%` }} />
+                                        <div className="mm-activity-card__value">{usageStats.ptSessionsUsed}/{usageStats.ptSessionsTotal}</div>
+                                        <div className="mm-activity-card__progress">
+                                            <div style={{ width: `${(usageStats.ptSessionsUsed / usageStats.ptSessionsTotal) * 100}%` }} />
                                         </div>
                                     </motion.div>
-                                    <motion.div className="stat-card" whileHover={{ scale: 1.02 }}>
-                                        <div className="stat-card__icon stat-card__icon--orange">
-                                            <Clock size={20} />
+                                    <motion.div className="mm-activity-card" whileHover={{ scale: 1.01 }}>
+                                        <div className="mm-activity-card__header">
+                                            <Clock size={16} />
+                                            <span>Active Time</span>
                                         </div>
-                                        <div className="stat-card__value">{Math.floor(usageStats.minutesActive / 60)}h</div>
-                                        <div className="stat-card__label">Active Time</div>
+                                        <div className="mm-activity-card__value">{Math.floor(usageStats.minutesActive / 60)}h</div>
+                                        <div className="mm-activity-card__change">{usageStats.minutesActive} minutes</div>
                                     </motion.div>
                                 </div>
                             </div>
 
-                            <div className="membership-section">
-                                <div className="membership-section__header">
-                                    <h3><Gift size={18} /> Upcoming Perks</h3>
-                                    <button className="section-link">View All</button>
+                            <div className="mm-section">
+                                <div className="mm-section__header">
+                                    <h3><Gift size={16} /> Upcoming Perks</h3>
+                                    <button className="mm-section__link">View All</button>
                                 </div>
-                                <div className="upcoming-perks">
+                                <div className="mm-perks-list">
                                     {upcomingPerks.map((perk, i) => (
                                         <motion.div 
                                             key={i} 
-                                            className="perk-card"
-                                            initial={{ opacity: 0, x: -20 }}
+                                            className="mm-perk-item"
+                                            initial={{ opacity: 0, x: -12 }}
                                             animate={{ opacity: 1, x: 0 }}
-                                            transition={{ delay: i * 0.1 }}
+                                            transition={{ delay: i * 0.08 }}
                                             whileHover={{ x: 4 }}
                                         >
-                                            <div className="perk-card__icon">{perk.icon}</div>
-                                            <div className="perk-card__content">
-                                                <span className="perk-card__title">{perk.title}</span>
-                                                <span className="perk-card__date">{perk.date}</span>
+                                            <div className={`mm-perk-item__icon mm-perk-item__icon--${perk.type}`}>
+                                                {perk.icon}
                                             </div>
-                                            <ChevronRight size={16} />
+                                            <div className="mm-perk-item__content">
+                                                <span className="mm-perk-item__title">{perk.title}</span>
+                                                <span className="mm-perk-item__date">{perk.date}</span>
+                                            </div>
+                                            <ChevronRight size={14} className="mm-perk-item__arrow" />
                                         </motion.div>
                                     ))}
                                 </div>
@@ -418,93 +558,111 @@ const MyMembership: React.FC = () => {
                     )}
 
                     {activeTab === 'benefits' && (
-                        <div className="membership-benefits">
-                            <div className="benefits-grid">
+                        <>
+                            <div className="mm-benefits-grid">
                                 {benefits.map((benefit, i) => (
                                     <motion.div
                                         key={i}
-                                        className={`benefit-card ${benefit.used ? 'benefit-card--used' : ''}`}
-                                        initial={{ opacity: 0, y: 20 }}
+                                        className={`mm-benefit-card ${benefit.active ? '' : 'mm-benefit-card--locked'}`}
+                                        initial={{ opacity: 0, y: 16 }}
                                         animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: i * 0.05 }}
-                                        whileHover={{ y: -4 }}
+                                        transition={{ delay: i * 0.04 }}
+                                        whileHover={benefit.active ? { y: -3 } : {}}
                                     >
-                                        <div className="benefit-card__icon">{benefit.icon}</div>
-                                        <h4>{benefit.title}</h4>
-                                        <p>{benefit.desc}</p>
-                                        {benefit.progress !== undefined && (
-                                            <div className="benefit-card__progress">
-                                                <div 
-                                                    className="benefit-card__progress-fill" 
-                                                    style={{ width: `${benefit.progress}%` }} 
-                                                />
+                                        {benefit.premium && !benefit.active && (
+                                            <div className="mm-benefit-card__lock">
+                                                <Lock size={12} />
                                             </div>
                                         )}
-                                        {benefit.used && (
-                                            <span className="benefit-card__check">
-                                                <Check size={12} />
-                                            </span>
+                                        <div className="mm-benefit-card__icon">{benefit.icon}</div>
+                                        <h4 className="mm-benefit-card__title">{benefit.title}</h4>
+                                        <p className="mm-benefit-card__desc">{benefit.desc}</p>
+                                        {benefit.progress !== undefined && benefit.active && (
+                                            <div className="mm-benefit-card__progress">
+                                                <div style={{ width: `${benefit.progress}%` }} />
+                                            </div>
+                                        )}
+                                        {benefit.active && (
+                                            <div className="mm-benefit-card__check">
+                                                <Check size={10} />
+                                            </div>
+                                        )}
+                                        {benefit.premium && !benefit.active && (
+                                            <span className="mm-benefit-card__upgrade">Upgrade to unlock</span>
                                         )}
                                     </motion.div>
                                 ))}
                             </div>
 
-                            <div className="membership-section">
-                                <div className="membership-section__header">
-                                    <h3><Award size={18} /> Membership Rewards</h3>
+                            <div className="mm-section">
+                                <div className="mm-section__header">
+                                    <h3><Award size={16} /> Rewards Program</h3>
                                 </div>
-                                <div className="rewards-card">
-                                    <div className="rewards-card__points">
-                                        <span className="rewards-card__points-value">850</span>
-                                        <span className="rewards-card__points-label">Points Earned</span>
-                                    </div>
-                                    <div className="rewards-card__progress">
-                                        <div className="rewards-card__progress-bar">
-                                            <div className="rewards-card__progress-fill" style={{ width: '85%' }} />
+                                <div className="mm-rewards-card">
+                                    <div className="mm-rewards-card__left">
+                                        <div className="mm-rewards-card__points">
+                                            <Sparkles size={20} />
+                                            <span className="mm-rewards-card__value">{usageStats.points}</span>
                                         </div>
-                                        <span>150 more points to next reward</span>
+                                        <span className="mm-rewards-card__label">Points Earned</span>
                                     </div>
-                                    <button className="rewards-card__btn">
-                                        <Gift size={16} />
-                                        Redeem Points
-                                    </button>
+                                    <div className="mm-rewards-card__right">
+                                        <div className="mm-rewards-card__progress">
+                                            <div className="mm-rewards-card__progress-bar">
+                                                <div style={{ width: '85%' }} />
+                                            </div>
+                                            <span>150 more to next reward</span>
+                                        </div>
+                                        <motion.button 
+                                            className="mm-rewards-card__btn"
+                                            whileHover={{ scale: 1.02 }}
+                                            whileTap={{ scale: 0.98 }}
+                                        >
+                                            <Gift size={14} />
+                                            Redeem
+                                        </motion.button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </>
                     )}
 
                     {activeTab === 'payments' && (
-                        <div className="membership-payments">
-                            <div className="membership-section">
-                                <div className="membership-section__header">
-                                    <h3><Wallet size={18} /> Payment Methods</h3>
-                                    <button className="section-link" onClick={() => setShowAddCard(true)}>
-                                        <Plus size={14} /> Add Card
+                        <>
+                            <div className="mm-section">
+                                <div className="mm-section__header">
+                                    <h3><Wallet size={16} /> Payment Methods</h3>
+                                    <button className="mm-section__link" onClick={() => setShowAddCard(true)}>
+                                        <Plus size={12} /> Add Card
                                     </button>
                                 </div>
-                                <div className="payment-methods">
+                                <div className="mm-payment-methods">
                                     {paymentMethods.map((pm) => (
                                         <motion.div 
                                             key={pm.id} 
-                                            className={`payment-card ${pm.isDefault ? 'payment-card--default' : ''}`}
+                                            className={`mm-payment-card ${pm.isDefault ? 'mm-payment-card--default' : ''}`}
                                             whileHover={{ scale: 1.01 }}
                                         >
-                                            <div className="payment-card__icon">{getCardIcon(pm.type)}</div>
-                                            <div className="payment-card__info">
-                                                <span className="payment-card__type">{pm.type.toUpperCase()} •••• {pm.last4}</span>
-                                                <span className="payment-card__expiry">Expires {pm.expiry}</span>
+                                            <div className="mm-payment-card__brand">
+                                                {pm.type === 'visa' && <span className="mm-card-visa">VISA</span>}
+                                                {pm.type === 'mastercard' && <span className="mm-card-mc">MC</span>}
+                                                {pm.type === 'amex' && <span className="mm-card-amex">AMEX</span>}
+                                            </div>
+                                            <div className="mm-payment-card__info">
+                                                <span className="mm-payment-card__number">•••• •••• •••• {pm.last4}</span>
+                                                <span className="mm-payment-card__expiry">Expires {pm.expiry}</span>
                                             </div>
                                             {pm.isDefault && (
-                                                <span className="payment-card__badge">Default</span>
+                                                <span className="mm-payment-card__badge">Default</span>
                                             )}
-                                            <div className="payment-card__actions">
+                                            <div className="mm-payment-card__actions">
                                                 {!pm.isDefault && (
                                                     <button onClick={() => handleSetDefaultCard(pm.id)} title="Set as default">
-                                                        <Check size={14} />
+                                                        <Check size={12} />
                                                     </button>
                                                 )}
                                                 <button onClick={() => handleRemoveCard(pm.id)} title="Remove">
-                                                    <Trash2 size={14} />
+                                                    <Trash2 size={12} />
                                                 </button>
                                             </div>
                                         </motion.div>
@@ -512,67 +670,55 @@ const MyMembership: React.FC = () => {
                                 </div>
                             </div>
 
-                            <div className="membership-section">
-                                <div className="membership-section__header">
-                                    <h3><CreditCard size={18} /> Payment History</h3>
-                                    <button className="section-link">
-                                        <Download size={14} /> Export
+                            <div className="mm-section">
+                                <div className="mm-section__header">
+                                    <h3><CreditCard size={16} /> Payment History</h3>
+                                    <button className="mm-section__link">
+                                        <Download size={12} /> Export
                                     </button>
                                 </div>
-                                <div className="payment-history">
-                                    <table>
-                                        <thead>
-                                            <tr>
-                                                <th>Invoice</th>
-                                                <th>Date</th>
-                                                <th>Description</th>
-                                                <th>Amount</th>
-                                                <th>Status</th>
-                                                <th></th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {paymentHistory.map((payment) => (
-                                                <tr key={payment.id}>
-                                                    <td className="invoice-id">{payment.id}</td>
-                                                    <td>{payment.date}</td>
-                                                    <td>
-                                                        <div className="payment-desc">
-                                                            <span>{payment.type}</span>
-                                                            <span className="payment-method">{payment.method}</span>
-                                                        </div>
-                                                    </td>
-                                                    <td className="payment-amount">${payment.amount.toFixed(2)}</td>
-                                                    <td>
-                                                        <span className="payment-status">{payment.status}</span>
-                                                    </td>
-                                                    <td>
-                                                        <button className="download-btn" onClick={() => toast.success('Invoice downloaded')}>
-                                                            <Download size={14} />
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
+                                <div className="mm-payment-history">
+                                    {paymentHistory.map((payment, i) => (
+                                        <motion.div 
+                                            key={payment.id}
+                                            className="mm-history-item"
+                                            initial={{ opacity: 0, y: 8 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: i * 0.05 }}
+                                        >
+                                            <div className="mm-history-item__icon">
+                                                <Check size={12} />
+                                            </div>
+                                            <div className="mm-history-item__info">
+                                                <span className="mm-history-item__type">{payment.type}</span>
+                                                <span className="mm-history-item__meta">{payment.date} • {payment.method}</span>
+                                            </div>
+                                            <div className="mm-history-item__right">
+                                                <span className="mm-history-item__amount">${payment.amount.toFixed(2)}</span>
+                                                <button className="mm-history-item__download" onClick={() => toast.success('Invoice downloaded')}>
+                                                    <Download size={12} />
+                                                </button>
+                                            </div>
+                                        </motion.div>
+                                    ))}
                                 </div>
                             </div>
-                        </div>
+                        </>
                     )}
 
                     {activeTab === 'settings' && (
-                        <div className="membership-settings">
-                            <div className="settings-card">
-                                <div className="settings-card__header">
-                                    <div className="settings-card__icon settings-card__icon--blue">
-                                        <RefreshCw size={20} />
+                        <div className="mm-settings-list">
+                            <motion.div className="mm-setting-card" whileHover={{ x: 2 }}>
+                                <div className="mm-setting-card__left">
+                                    <div className="mm-setting-card__icon mm-setting-card__icon--blue">
+                                        <RefreshCw size={18} />
                                     </div>
-                                    <div className="settings-card__info">
+                                    <div className="mm-setting-card__info">
                                         <h4>Auto-Renewal</h4>
                                         <p>Automatically renew your membership</p>
                                     </div>
                                 </div>
-                                <label className="toggle-switch">
+                                <label className="mm-toggle">
                                     <input 
                                         type="checkbox" 
                                         checked={membership?.autoRenew} 
@@ -581,67 +727,69 @@ const MyMembership: React.FC = () => {
                                             toast.success('Auto-renewal updated');
                                         }}
                                     />
-                                    <span className="toggle-slider" />
+                                    <span className="mm-toggle__slider" />
                                 </label>
-                            </div>
+                            </motion.div>
 
-                            <div className="settings-card">
-                                <div className="settings-card__header">
-                                    <div className="settings-card__icon settings-card__icon--purple">
-                                        <Pause size={20} />
+                            <motion.div className="mm-setting-card" whileHover={{ x: 2 }}>
+                                <div className="mm-setting-card__left">
+                                    <div className="mm-setting-card__icon mm-setting-card__icon--purple">
+                                        <Pause size={18} />
                                     </div>
-                                    <div className="settings-card__info">
+                                    <div className="mm-setting-card__info">
                                         <h4>Freeze Membership</h4>
-                                        <p>{membership?.freezeDaysUsed}/{membership?.freezeDaysTotal} days used this year</p>
-                                        <div className="freeze-progress">
-                                            <div className="freeze-progress__bar">
-                                                <div className="freeze-progress__fill" style={{ width: `${freezeProgress}%` }} />
-                                            </div>
+                                        <p>{membership?.freezeDaysUsed}/{membership?.freezeDaysTotal} freeze days used</p>
+                                        <div className="mm-setting-card__progress">
+                                            <div style={{ width: `${freezeProgress}%` }} />
                                         </div>
                                     </div>
                                 </div>
-                                <button 
-                                    className="settings-btn"
+                                <motion.button 
+                                    className="mm-setting-btn"
                                     onClick={() => setShowFreezeModal(true)}
                                     disabled={!membership?.freezeAvailable}
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
                                 >
                                     Freeze
-                                </button>
-                            </div>
+                                </motion.button>
+                            </motion.div>
 
-                            <div className="settings-card">
-                                <div className="settings-card__header">
-                                    <div className="settings-card__icon settings-card__icon--green">
-                                        <Bell size={20} />
+                            <motion.div className="mm-setting-card" whileHover={{ x: 2 }}>
+                                <div className="mm-setting-card__left">
+                                    <div className="mm-setting-card__icon mm-setting-card__icon--green">
+                                        <Bell size={18} />
                                     </div>
-                                    <div className="settings-card__info">
+                                    <div className="mm-setting-card__info">
                                         <h4>Renewal Reminders</h4>
-                                        <p>Get notified before your membership expires</p>
+                                        <p>Get notified before membership expires</p>
                                     </div>
                                 </div>
-                                <label className="toggle-switch">
+                                <label className="mm-toggle">
                                     <input type="checkbox" defaultChecked />
-                                    <span className="toggle-slider" />
+                                    <span className="mm-toggle__slider" />
                                 </label>
-                            </div>
+                            </motion.div>
 
-                            <div className="settings-card settings-card--danger">
-                                <div className="settings-card__header">
-                                    <div className="settings-card__icon settings-card__icon--red">
-                                        <CircleX size={20} />
+                            <motion.div className="mm-setting-card mm-setting-card--danger" whileHover={{ x: 2 }}>
+                                <div className="mm-setting-card__left">
+                                    <div className="mm-setting-card__icon mm-setting-card__icon--red">
+                                        <CircleX size={18} />
                                     </div>
-                                    <div className="settings-card__info">
+                                    <div className="mm-setting-card__info">
                                         <h4>Cancel Membership</h4>
                                         <p>End your membership at the current billing period</p>
                                     </div>
                                 </div>
-                                <button 
-                                    className="settings-btn settings-btn--danger"
+                                <motion.button 
+                                    className="mm-setting-btn mm-setting-btn--danger"
                                     onClick={() => toast.error('Please contact support to cancel')}
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
                                 >
                                     Cancel
-                                </button>
-                            </div>
+                                </motion.button>
+                            </motion.div>
                         </div>
                     )}
                 </motion.div>
@@ -650,35 +798,35 @@ const MyMembership: React.FC = () => {
             <AnimatePresence>
                 {showQRCode && (
                     <motion.div 
-                        className="modal-overlay"
+                        className="mm-modal-overlay"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={() => setShowQRCode(false)}
                     >
                         <motion.div 
-                            className="qr-modal"
+                            className="mm-qr-modal"
                             initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.9, opacity: 0 }}
                             onClick={e => e.stopPropagation()}
                         >
-                            <button className="modal-close" onClick={() => setShowQRCode(false)}>
-                                <X size={20} />
+                            <button className="mm-modal-close" onClick={() => setShowQRCode(false)}>
+                                <X size={18} />
                             </button>
-                            <div className="qr-modal__content">
-                                <div className="qr-code-placeholder">
-                                    <QrCode size={120} strokeWidth={1} />
+                            <div className="mm-qr-modal__content">
+                                <div className="mm-qr-code">
+                                    <QrCode size={100} strokeWidth={1} />
                                 </div>
                                 <h3>Scan to Check In</h3>
                                 <p>Show this QR code at the gym entrance</p>
-                                <div className="qr-modal__id">
-                                    <span>Member ID: MEM-2024-12345</span>
-                                    <button onClick={handleCopyMemberId}><Copy size={14} /></button>
+                                <div className="mm-qr-modal__id" onClick={handleCopyMemberId}>
+                                    <span>MEM-{user?.id || '0000'}</span>
+                                    <Copy size={12} />
                                 </div>
-                                <div className="qr-modal__info">
-                                    <CircleCheck size={14} />
-                                    <span>Valid until {membership?.endDate ? formatDate(membership.endDate) : 'N/A'}</span>
+                                <div className="mm-qr-modal__valid">
+                                    <CircleCheck size={12} />
+                                    Valid until {membership?.endDate ? formatDate(membership.endDate) : 'N/A'}
                                 </div>
                             </div>
                         </motion.div>
@@ -687,61 +835,61 @@ const MyMembership: React.FC = () => {
 
                 {showFreezeModal && (
                     <motion.div 
-                        className="modal-overlay"
+                        className="mm-modal-overlay"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={() => setShowFreezeModal(false)}
                     >
                         <motion.div 
-                            className="freeze-modal"
+                            className="mm-freeze-modal"
                             initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.9, opacity: 0 }}
                             onClick={e => e.stopPropagation()}
                         >
-                            <div className="freeze-modal__header">
-                                <h3><Pause size={20} /> Freeze Membership</h3>
-                                <button onClick={() => setShowFreezeModal(false)}><X size={18} /></button>
+                            <div className="mm-freeze-modal__header">
+                                <h3><Pause size={18} /> Freeze Membership</h3>
+                                <button onClick={() => setShowFreezeModal(false)}><X size={16} /></button>
                             </div>
-                            <div className="freeze-modal__body">
-                                <div className="freeze-info">
-                                    <Info size={16} />
-                                    <p>Freezing your membership will pause billing. You have {(membership?.freezeDaysTotal || 14) - (membership?.freezeDaysUsed || 0)} days remaining this year.</p>
+                            <div className="mm-freeze-modal__body">
+                                <div className="mm-freeze-info">
+                                    <Info size={14} />
+                                    <p>Freezing pauses billing. You have {(membership?.freezeDaysTotal || 14) - (membership?.freezeDaysUsed || 0)} days remaining.</p>
                                 </div>
-                                <div className="freeze-duration">
-                                    <label>Freeze Duration</label>
-                                    <div className="freeze-duration__options">
+                                <div className="mm-freeze-duration">
+                                    <label>Duration</label>
+                                    <div className="mm-freeze-options">
                                         {[7, 14, 21, 30].map(days => (
                                             <button
                                                 key={days}
-                                                className={`freeze-option ${freezeDays === days ? 'freeze-option--active' : ''}`}
+                                                className={`mm-freeze-option ${freezeDays === days ? 'mm-freeze-option--active' : ''}`}
                                                 onClick={() => setFreezeDays(days)}
                                             >
-                                                {days} days
+                                                {days}d
                                             </button>
                                         ))}
                                     </div>
                                 </div>
-                                <div className="freeze-dates">
-                                    <div className="freeze-date">
-                                        <span>Freeze starts</span>
+                                <div className="mm-freeze-dates">
+                                    <div className="mm-freeze-date">
+                                        <span>Starts</span>
                                         <strong>Tomorrow</strong>
                                     </div>
-                                    <ArrowRight size={16} />
-                                    <div className="freeze-date">
-                                        <span>Resumes on</span>
+                                    <ArrowRight size={14} />
+                                    <div className="mm-freeze-date">
+                                        <span>Resumes</span>
                                         <strong>{new Date(Date.now() + (freezeDays + 1) * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</strong>
                                     </div>
                                 </div>
                             </div>
-                            <div className="freeze-modal__footer">
-                                <button className="modal-btn modal-btn--secondary" onClick={() => setShowFreezeModal(false)}>
+                            <div className="mm-freeze-modal__footer">
+                                <button className="mm-modal-btn mm-modal-btn--secondary" onClick={() => setShowFreezeModal(false)}>
                                     Cancel
                                 </button>
-                                <button className="modal-btn modal-btn--primary" onClick={handleFreezeMembership}>
-                                    <Pause size={14} />
-                                    Freeze for {freezeDays} Days
+                                <button className="mm-modal-btn mm-modal-btn--primary" onClick={handleFreezeMembership}>
+                                    <Pause size={12} />
+                                    Freeze {freezeDays} Days
                                 </button>
                             </div>
                         </motion.div>
