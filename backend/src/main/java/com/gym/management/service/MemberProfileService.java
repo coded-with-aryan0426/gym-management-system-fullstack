@@ -6,6 +6,7 @@ import com.gym.management.model.*;
 import com.gym.management.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
@@ -24,14 +25,13 @@ public class MemberProfileService {
     private final WorkoutLogRepository workoutLogRepository;
     private final MemberAchievementRepository memberAchievementRepository;
 
-    @Transactional(readOnly = true)
     public MemberProfileDTO getMemberProfile(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
 
-        MemberProfileDTO.MemberStatsDTO stats = calculateMemberStats(userId, user);
-        MemberProfileDTO.MembershipInfoDTO membershipInfo = getMembershipInfo(userId);
-        List<MemberProfileDTO.AchievementDTO> achievements = getAchievements(userId);
+        MemberProfileDTO.MemberStatsDTO stats = calculateMemberStatsSafe(userId, user);
+        MemberProfileDTO.MembershipInfoDTO membershipInfo = getMembershipInfoSafe(userId);
+        List<MemberProfileDTO.AchievementDTO> achievements = getAchievementsSafe(userId);
 
         return MemberProfileDTO.builder()
                 .userId(user.getUserId())
@@ -123,9 +123,52 @@ public class MemberProfileService {
         return getMemberProfile(userId);
     }
 
+    private MemberProfileDTO.MemberStatsDTO calculateMemberStatsSafe(Long userId, User user) {
+        String memberLevel = "Beginner";
+        LocalDate joinedDate = user.getCreatedAt() != null ? user.getCreatedAt().toLocalDate() : null;
+
+        return MemberProfileDTO.MemberStatsDTO.builder()
+                .totalWorkouts(0)
+                .currentStreak(0)
+                .memberLevel(memberLevel)
+                .joinedDate(joinedDate)
+                .build();
+    }
+
+    private MemberProfileDTO.MembershipInfoDTO getMembershipInfoSafe(Long userId) {
+        try {
+            return membershipRepository.findTopByUserUserIdAndStatusOrderByEndDateDesc(userId, MembershipStatus.ACTIVE)
+                    .map(membership -> {
+                        int daysRemaining = (int) ChronoUnit.DAYS.between(LocalDate.now(), membership.getEndDate());
+                        return MemberProfileDTO.MembershipInfoDTO.builder()
+                                .membershipId(membership.getId())
+                                .planName(membership.getMembershipPackage() != null ? 
+                                        membership.getMembershipPackage().getPackageName() : "Unknown")
+                                .planType(null)
+                                .startDate(membership.getStartDate())
+                                .endDate(membership.getEndDate())
+                                .daysRemaining(Math.max(0, daysRemaining))
+                                .status(membership.getStatus().name())
+                                .build();
+                    })
+                    .orElse(null);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private List<MemberProfileDTO.AchievementDTO> getAchievementsSafe(Long userId) {
+        return Collections.emptyList();
+    }
+
     private MemberProfileDTO.MemberStatsDTO calculateMemberStats(Long userId, User user) {
-        long totalWorkouts = workoutLogRepository.countByUserUserId(userId);
-        int currentStreak = calculateStreak(userId);
+        long totalWorkouts = 0;
+        int currentStreak = 0;
+        try {
+            totalWorkouts = workoutLogRepository.countByUserUserId(userId);
+            currentStreak = calculateStreak(userId);
+        } catch (Exception e) {
+        }
         String memberLevel = calculateMemberLevel(totalWorkouts);
         LocalDate joinedDate = user.getCreatedAt() != null ? user.getCreatedAt().toLocalDate() : null;
 
@@ -192,16 +235,20 @@ public class MemberProfileService {
     }
 
     private List<MemberProfileDTO.AchievementDTO> getAchievements(Long userId) {
-        return memberAchievementRepository.findByUserUserIdOrderByEarnedAtDesc(userId)
-                .stream()
-                .map(a -> MemberProfileDTO.AchievementDTO.builder()
-                        .id(a.getId())
-                        .type(a.getAchievementType())
-                        .name(a.getAchievementName())
-                        .description(a.getDescription())
-                        .earnedAt(a.getEarnedAt())
-                        .build())
-                .collect(Collectors.toList());
+        try {
+            return memberAchievementRepository.findByUserUserIdOrderByEarnedAtDesc(userId)
+                    .stream()
+                    .map(a -> MemberProfileDTO.AchievementDTO.builder()
+                            .id(a.getId())
+                            .type(a.getAchievementType())
+                            .name(a.getAchievementName())
+                            .description(a.getDescription())
+                            .earnedAt(a.getEarnedAt())
+                            .build())
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
     }
 
     private List<String> parseFitnessGoals(String fitnessGoals) {

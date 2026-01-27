@@ -129,7 +129,7 @@ public class MemberDashboardController {
             MemberProfileDTO profile = memberProfileService.getMemberProfile(memberId);
             return ResponseEntity.ok(profile);
         } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(404).body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
         }
