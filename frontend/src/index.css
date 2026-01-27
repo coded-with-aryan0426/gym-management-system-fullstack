@@ -3,7 +3,6 @@
 
 @import "tailwindcss";
 @import './styles/design-system.css';
-@import './styles/premium-design-system.css';
 @import './styles/performance.css';
 @import './styles/grid.css';
 @import './styles/animations.css';
