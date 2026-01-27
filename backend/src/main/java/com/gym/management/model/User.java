@@ -292,10 +292,10 @@ public class User {
     @Column(name = "emergency_contact_phone")
     private String emergencyContactPhone;
 
-    @Column(name = "health_notes", columnDefinition = "TEXT")
+    @Column(name = "health_notes", columnDefinition = "CLOB")
     private String healthNotes;
 
-    @Column(name = "fitness_goals", columnDefinition = "TEXT")
+    @Column(name = "fitness_goals", columnDefinition = "CLOB")
     private String fitnessGoals;
 
     @Column(name = "height", precision = 5, scale = 2)
