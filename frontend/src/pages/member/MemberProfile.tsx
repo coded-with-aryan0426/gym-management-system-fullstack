@@ -2,13 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     User, Lock, Activity, Save, Camera, Mail, Phone, Calendar,
-    Shield, Heart, MapPin, Droplet, Target, Award, Sparkles, 
-    ChevronRight, Edit3, X, Zap, TrendingUp, Clock, Fingerprint, 
-    Smartphone, AlertCircle, CheckCircle2, CreditCard, History, 
+    Shield, Heart, MapPin, Droplet, Target, Award, Sparkles,
+    ChevronRight, Edit3, X, Zap, TrendingUp, Clock, Fingerprint,
+    Smartphone, AlertCircle, CheckCircle2, CreditCard, History,
     Trophy, Star, Download, QrCode, ArrowUpRight
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { memberProfileApi, MemberProfileData, MemberProfileUpdate } from '../../api/memberProfileApi';
+import { memberProfileApi, type MemberProfileData, type MemberProfileUpdate } from '../../api/memberProfileApi';
+import { useAuth } from '../../contexts/AuthContext';
 import '../../styles/macos-member.css';
 import './MemberProfile.css';
 
@@ -73,8 +74,7 @@ const MemberProfile: React.FC = () => {
         bodyFat: null as number | null,
     });
 
-    const userStr = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
-    const user = userStr ? JSON.parse(userStr) : null;
+    const { user } = useAuth();
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -84,7 +84,7 @@ const MemberProfile: React.FC = () => {
             }
 
             try {
-                const data = await memberProfileApi.getProfile(user.id);
+                const data = await memberProfileApi.getProfile(Number(user.id));
                 setProfile(data);
                 setFormData({
                     fullName: data.fullName || '',
@@ -140,7 +140,7 @@ const MemberProfile: React.FC = () => {
                 bodyFat: formData.bodyFat || undefined,
             };
 
-            const updated = await memberProfileApi.updateProfile(user.id, updateData);
+            const updated = await memberProfileApi.updateProfile(Number(user.id), updateData);
             setProfile(updated);
             toast.success('Profile updated successfully!');
             setEditMode(false);
@@ -235,17 +235,17 @@ const MemberProfile: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
         >
-            <motion.div 
+            <motion.div
                 className="profile-hero"
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
             >
                 <div className="profile-hero__bg" />
                 <div className="profile-hero__pattern" />
-                
+
                 <div className="profile-hero__content">
                     <div className="profile-avatar">
-                        <motion.div 
+                        <motion.div
                             className="profile-avatar__ring"
                             animate={{ rotate: 360 }}
                             transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
@@ -272,25 +272,25 @@ const MemberProfile: React.FC = () => {
                     </div>
 
                     <div className="profile-stats-inline">
-                        <StatMini 
-                            label="Joined" 
-                            value={stats?.joinedDate ? formatDate(stats.joinedDate) : 'N/A'} 
-                            icon={<Calendar size={12} />} 
+                        <StatMini
+                            label="Joined"
+                            value={stats?.joinedDate ? formatDate(stats.joinedDate) : 'N/A'}
+                            icon={<Calendar size={12} />}
                         />
-                        <StatMini 
-                            label="Workouts" 
-                            value={String(stats?.totalWorkouts || 0)} 
-                            icon={<Activity size={12} />} 
+                        <StatMini
+                            label="Workouts"
+                            value={String(stats?.totalWorkouts || 0)}
+                            icon={<Activity size={12} />}
                         />
-                        <StatMini 
-                            label="Streak" 
-                            value={`${stats?.currentStreak || 0}d`} 
-                            icon={<Zap size={12} />} 
+                        <StatMini
+                            label="Streak"
+                            value={`${stats?.currentStreak || 0}d`}
+                            icon={<Zap size={12} />}
                         />
-                        <StatMini 
-                            label="Level" 
-                            value={stats?.memberLevel || 'Beginner'} 
-                            icon={<Trophy size={12} />} 
+                        <StatMini
+                            label="Level"
+                            value={stats?.memberLevel || 'Beginner'}
+                            icon={<Trophy size={12} />}
                         />
                     </div>
 
@@ -359,21 +359,21 @@ const MemberProfile: React.FC = () => {
                                             <div className="achievements-grid">
                                                 {achievements.length > 0 ? (
                                                     achievements.slice(0, 3).map((achievement) => (
-                                                        <AchievementCard 
+                                                        <AchievementCard
                                                             key={achievement.id}
-                                                            title={achievement.name} 
-                                                            date={getRelativeTime(achievement.earnedAt)} 
-                                                            icon={<Trophy size={16} />} 
-                                                            color="#FF9500" 
+                                                            title={achievement.name}
+                                                            date={getRelativeTime(achievement.earnedAt)}
+                                                            icon={<Trophy size={16} />}
+                                                            color="#FF9500"
                                                         />
                                                     ))
                                                 ) : (
                                                     <>
-                                                        <AchievementCard 
-                                                            title="Getting Started" 
-                                                            date="Complete your first workout" 
-                                                            icon={<Clock size={16} />} 
-                                                            color="#8E8E93" 
+                                                        <AchievementCard
+                                                            title="Getting Started"
+                                                            date="Complete your first workout"
+                                                            icon={<Clock size={16} />}
+                                                            color="#8E8E93"
                                                         />
                                                     </>
                                                 )}
@@ -664,15 +664,15 @@ const MemberProfile: React.FC = () => {
 
                                 {editMode && activeTab !== 'security' && activeTab !== 'overview' && activeTab !== 'preferences' && (
                                     <div className="profile-actions-compact">
-                                        <button 
-                                            type="button" 
+                                        <button
+                                            type="button"
                                             className="profile-btn-compact profile-btn-compact--secondary"
                                             onClick={() => setEditMode(false)}
                                         >
                                             Cancel
                                         </button>
-                                        <button 
-                                            type="submit" 
+                                        <button
+                                            type="submit"
                                             className="profile-btn-compact profile-btn-compact--primary"
                                             disabled={saving}
                                         >
@@ -680,10 +680,10 @@ const MemberProfile: React.FC = () => {
                                         </button>
                                     </div>
                                 )}
-                                
+
                                 {activeTab === 'preferences' && (
                                     <div className="profile-actions-compact">
-                                        <button 
+                                        <button
                                             type="button"
                                             className="profile-btn-compact profile-btn-compact--primary"
                                             onClick={handleSubmit}
@@ -762,7 +762,7 @@ const MemberProfile: React.FC = () => {
                                 <span className="stat-value">{formData.bodyFat ? `${formData.bodyFat}%` : 'Not set'}</span>
                             </div>
                         </div>
-                        <button className="widget-action-btn" onClick={() => {setActiveTab('personal'); setEditMode(true);}}>Update Stats</button>
+                        <button className="widget-action-btn" onClick={() => { setActiveTab('personal'); setEditMode(true); }}>Update Stats</button>
                     </div>
                 </div>
             </div>
