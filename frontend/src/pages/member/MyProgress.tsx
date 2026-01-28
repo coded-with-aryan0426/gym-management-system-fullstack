@@ -170,28 +170,30 @@ const MyProgress: React.FC = () => {
             });
 
             const entries: ProgressEntry[] = (metricsData || []).map((m: any) => {
-                const measurement = measurementsByDate.get(m.recordDate);
+                const metricDate = m.recordDate?.split('T')[0];
+                const measurement = measurementsByDate.get(metricDate) || measurementsByDate.get(m.recordDate);
                 return {
                     id: m.id,
-                    date: m.recordDate,
+                    date: metricDate || m.recordDate,
                     weight: m.weight,
                     bodyFat: m.bodyFat,
                     muscleMass: m.muscleMass,
-                    chest: measurement?.chest || m.chest,
-                    waist: measurement?.waist || m.waist,
-                    arms: measurement?.arms || m.arms,
-                    legs: measurement?.legs || m.legs,
-                    hips: measurement?.hips || m.hips,
-                    shoulders: measurement?.shoulders || m.shoulders,
+                    chest: measurement?.chest ?? m.chest,
+                    waist: measurement?.waist ?? m.waist,
+                    arms: measurement?.arms ?? m.arms,
+                    legs: measurement?.legs ?? m.legs,
+                    hips: measurement?.hips ?? m.hips,
+                    shoulders: measurement?.shoulders ?? m.shoulders,
                     notes: m.notes
                 };
             });
 
             (measurementsData || []).forEach((m: any) => {
-                if (!entries.find(e => e.date === m.recordDate)) {
+                const mDate = m.recordDate?.split('T')[0];
+                if (!entries.find(e => e.date === mDate || e.date === m.recordDate)) {
                     entries.push({
                         id: m.id + 10000,
-                        date: m.recordDate,
+                        date: mDate || m.recordDate,
                         weight: undefined,
                         bodyFat: undefined,
                         muscleMass: undefined,
@@ -463,81 +465,107 @@ const MyProgress: React.FC = () => {
         );
     };
 
-    const handleLogProgress = () => {
-        if (!newProgress.weight && !newProgress.bodyFat && !newProgress.muscleMass) {
-            alert('Please enter at least one measurement');
+    const handleLogProgress = async () => {
+        if (!newProgress.weight && !newProgress.bodyFat && !newProgress.muscleMass && !newProgress.waist && !newProgress.chest) {
+            alert('Please enter at least some data to log');
             return;
         }
 
-        const newEntry: ProgressEntry = {
-            id: progressEntries.length + 1,
-            date: new Date().toISOString().split('T')[0],
-            weight: newProgress.weight ? parseFloat(newProgress.weight) : latest?.weight,
-            bodyFat: newProgress.bodyFat ? parseFloat(newProgress.bodyFat) : latest?.bodyFat,
-            muscleMass: newProgress.muscleMass ? parseFloat(newProgress.muscleMass) : latest?.muscleMass,
-            chest: newProgress.chest ? parseFloat(newProgress.chest) : latest?.chest,
-            waist: newProgress.waist ? parseFloat(newProgress.waist) : latest?.waist,
-            arms: newProgress.arms ? parseFloat(newProgress.arms) : latest?.arms,
-            legs: newProgress.legs ? parseFloat(newProgress.legs) : latest?.legs,
-            hips: newProgress.hips ? parseFloat(newProgress.hips) : latest?.hips,
-            shoulders: newProgress.shoulders ? parseFloat(newProgress.shoulders) : latest?.shoulders,
-            notes: newProgress.notes || undefined
-        };
-        setProgressEntries([...progressEntries, newEntry]);
-        setNewProgress({ weight: '', bodyFat: '', muscleMass: '', chest: '', waist: '', arms: '', legs: '', hips: '', shoulders: '', notes: '' });
-        setActiveModal(null);
-    };
-
-    const handleLogWorkout = () => {
-        if (!newWorkout.exercise || !newWorkout.weight) return;
-
-        const existingPB = personalBests.find(pb => pb.exercise.toLowerCase() === newWorkout.exercise.toLowerCase());
-        const newWeight = parseFloat(newWorkout.weight);
-
-        if (!existingPB || newWeight > existingPB.weight) {
-            const newPB: PersonalBest = {
-                id: personalBests.length + 1,
-                exercise: newWorkout.exercise,
-                weight: newWeight,
-                reps: newWorkout.reps ? parseInt(newWorkout.reps) : undefined,
-                unit: newWorkout.unit,
-                date: new Date().toISOString().split('T')[0],
-                previousBest: existingPB?.weight,
-                category: newWorkout.category
+        try {
+            setSaving(true);
+            const entryData = {
+                recordDate: new Date().toISOString().split('T')[0],
+                weight: newProgress.weight ? parseFloat(newProgress.weight) : undefined,
+                bodyFat: newProgress.bodyFat ? parseFloat(newProgress.bodyFat) : undefined,
+                muscleMass: newProgress.muscleMass ? parseFloat(newProgress.muscleMass) : undefined,
+                chest: newProgress.chest ? parseFloat(newProgress.chest) : undefined,
+                waist: newProgress.waist ? parseFloat(newProgress.waist) : undefined,
+                arms: newProgress.arms ? parseFloat(newProgress.arms) : undefined,
+                legs: newProgress.legs ? parseFloat(newProgress.legs) : undefined,
+                hips: newProgress.hips ? parseFloat(newProgress.hips) : undefined,
+                shoulders: newProgress.shoulders ? parseFloat(newProgress.shoulders) : undefined,
+                notes: newProgress.notes || undefined
             };
 
-            if (existingPB) {
-                setPersonalBests(personalBests.map(pb =>
-                    pb.id === existingPB.id ? { ...newPB, id: existingPB.id } : pb
-                ));
-            } else {
-                setPersonalBests([...personalBests, newPB]);
+            await memberProgressApi.createProgressMetric(memberId, entryData);
+            
+            // Also create a body measurement entry for redundancy and detailed history
+            if (newProgress.waist || newProgress.chest || newProgress.arms || newProgress.hips) {
+                await memberProgressApi.createBodyMeasurement(memberId, entryData);
             }
-        }
 
-        setNewWorkout({ exercise: '', weight: '', reps: '', unit: 'lbs', category: 'push', notes: '' });
-        setActiveModal(null);
+            await fetchProgressData();
+            setNewProgress({ weight: '', bodyFat: '', muscleMass: '', chest: '', waist: '', arms: '', legs: '', hips: '', shoulders: '', notes: '' });
+            setActiveModal(null);
+        } catch (error) {
+            console.error('Error saving progress:', error);
+            alert('Failed to save progress. Please try again.');
+        } finally {
+            setSaving(false);
+        }
     };
 
-    const handleCreateGoal = () => {
-        if (!newGoal.title || !newGoal.currentValue || !newGoal.targetValue) return;
+    const handleLogWorkout = async () => {
+        if (!newWorkout.exercise || !newWorkout.weight) {
+            alert('Please enter exercise and weight');
+            return;
+        }
 
-        const goal: Goal = {
-            id: goals.length + 1,
-            title: newGoal.title,
-            type: newGoal.type,
-            startValue: parseFloat(newGoal.currentValue),
-            currentValue: parseFloat(newGoal.currentValue),
-            targetValue: parseFloat(newGoal.targetValue),
-            unit: newGoal.unit,
-            startDate: new Date().toISOString().split('T')[0],
-            targetDate: newGoal.targetDate || undefined,
-            weeklyTarget: newGoal.weeklyTarget ? parseFloat(newGoal.weeklyTarget) : undefined
-        };
+        try {
+            setSaving(true);
+            const pbData = {
+                exercise: newWorkout.exercise,
+                weightValue: parseFloat(newWorkout.weight),
+                reps: newWorkout.reps ? parseInt(newWorkout.reps) : undefined,
+                unit: newWorkout.unit,
+                recordDate: new Date().toISOString().split('T')[0],
+                category: newWorkout.category,
+                notes: newWorkout.notes || undefined
+            };
 
-        setGoals([...goals, goal]);
-        setNewGoal({ title: '', type: 'weight', currentValue: '', targetValue: '', unit: 'kg', targetDate: '', weeklyTarget: '' });
-        setActiveModal(null);
+            await memberProgressApi.createOrUpdatePersonalBest(memberId, pbData);
+            await fetchProgressData();
+            setNewWorkout({ exercise: '', weight: '', reps: '', unit: 'lbs', category: 'push', notes: '' });
+            setActiveModal(null);
+        } catch (error) {
+            console.error('Error saving PR:', error);
+            alert('Failed to save PR. Please try again.');
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleCreateGoal = async () => {
+        if (!newGoal.title || !newGoal.targetValue) {
+            alert('Please enter goal title and target value');
+            return;
+        }
+
+        try {
+            setSaving(true);
+            const goalData = {
+                title: newGoal.title,
+                goalType: newGoal.type.toUpperCase(),
+                startValue: newGoal.currentValue ? parseFloat(newGoal.currentValue) : (stats.currentWeight || 0),
+                currentValue: newGoal.currentValue ? parseFloat(newGoal.currentValue) : (stats.currentWeight || 0),
+                targetValue: parseFloat(newGoal.targetValue),
+                unit: newGoal.unit,
+                startDate: new Date().toISOString().split('T')[0],
+                targetDate: newGoal.targetDate || undefined,
+                weeklyTarget: newGoal.weeklyTarget ? parseFloat(newGoal.weeklyTarget) : undefined,
+                isActive: true
+            };
+
+            await memberProgressApi.createGoal(memberId, goalData);
+            await fetchProgressData();
+            setNewGoal({ title: '', type: 'weight', currentValue: '', targetValue: '', unit: 'kg', targetDate: '', weeklyTarget: '' });
+            setActiveModal(null);
+        } catch (error) {
+            console.error('Error creating goal:', error);
+            alert('Failed to create goal. Please try again.');
+        } finally {
+            setSaving(false);
+        }
     };
 
     const measurementComparison = [
@@ -1873,18 +1901,25 @@ const MyProgress: React.FC = () => {
                                                     <tr key={entry.id}>
                                                         <td>{new Date(entry.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</td>
                                                         <td>
-                                                            {entry.weight}kg
-                                                            {prev && entry.weight && prev.weight && (
-                                                                <span className={entry.weight < prev.weight ? 'change-positive' : entry.weight > prev.weight ? 'change-negative' : ''}>
-                                                                    {entry.weight < prev.weight ? ' ↓' : entry.weight > prev.weight ? ' ↑' : ''}
+                                                            {entry.weight ? `${entry.weight}kg` : '---'}
+                                                            {prev && entry.weight && prev.weight && entry.weight !== prev.weight && (
+                                                                <span className={entry.weight < prev.weight ? 'change-positive' : 'change-negative'}>
+                                                                    {entry.weight < prev.weight ? ' ↓' : ' ↑'}
                                                                 </span>
                                                             )}
                                                         </td>
-                                                        <td>{entry.bodyFat}%</td>
-                                                        <td>{entry.muscleMass}kg</td>
-                                                        <td>{entry.waist}cm</td>
-                                                        <td>{entry.chest}cm</td>
-                                                        <td>{entry.arms}cm</td>
+                                                        <td>
+                                                            {entry.bodyFat ? `${entry.bodyFat}%` : '---'}
+                                                            {prev && entry.bodyFat && prev.bodyFat && entry.bodyFat !== prev.bodyFat && (
+                                                                <span className={entry.bodyFat < prev.bodyFat ? 'change-positive' : 'change-negative'}>
+                                                                    {entry.bodyFat < prev.bodyFat ? ' ↓' : ' ↑'}
+                                                                </span>
+                                                            )}
+                                                        </td>
+                                                        <td>{entry.muscleMass ? `${entry.muscleMass}kg` : '---'}</td>
+                                                        <td>{entry.waist ? `${entry.waist}cm` : '---'}</td>
+                                                        <td>{entry.chest ? `${entry.chest}cm` : '---'}</td>
+                                                        <td>{entry.arms ? `${entry.arms}cm` : '---'}</td>
                                                     </tr>
                                                 );
                                             })}
