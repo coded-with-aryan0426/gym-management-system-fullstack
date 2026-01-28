@@ -145,17 +145,17 @@ const MyProgress: React.FC = () => {
     const memberId = user?.userId || user?.id;
 
     const [isLightTheme, setIsLightTheme] = useState(false);
-    
+
     useEffect(() => {
         const checkTheme = () => {
             setIsLightTheme(document.documentElement.classList.contains('theme-light'));
         };
-        
+
         checkTheme();
-        
+
         const observer = new MutationObserver(checkTheme);
         observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-        
+
         return () => observer.disconnect();
     }, []);
 
@@ -173,7 +173,7 @@ const MyProgress: React.FC = () => {
 
         try {
             setLoading(true);
-            
+
             const [summaryData, metricsData, goalsData, pbData, workoutsData, measurementsData] = await Promise.all([
                 memberProgressApi.getSummary(memberId).catch(() => null),
                 memberProgressApi.getMetrics(memberId, timeRange === 'ALL' ? undefined : timeRange).catch(() => []),
@@ -284,7 +284,7 @@ const MyProgress: React.FC = () => {
     const getLatestEntry = () => progressEntries[progressEntries.length - 1] || null;
     const getFirstEntry = () => progressEntries[0] || null;
     const getPreviousEntry = () => progressEntries[progressEntries.length - 2] || null;
-    
+
     const getLatestMeasurementEntry = () => {
         for (let i = progressEntries.length - 1; i >= 0; i--) {
             const entry = progressEntries[i];
@@ -294,7 +294,7 @@ const MyProgress: React.FC = () => {
         }
         return null;
     };
-    
+
     const getFirstMeasurementEntry = () => {
         for (let i = 0; i < progressEntries.length; i++) {
             const entry = progressEntries[i];
@@ -384,7 +384,7 @@ const MyProgress: React.FC = () => {
         const today = new Date();
         const startOfWeek = new Date(today);
         startOfWeek.setDate(today.getDate() - today.getDay());
-        
+
         return days.map((day, i) => {
             const date = new Date(startOfWeek);
             date.setDate(startOfWeek.getDate() + i);
@@ -392,7 +392,7 @@ const MyProgress: React.FC = () => {
             const workoutsOnDate = workoutLogs.filter(w => w.date?.startsWith(dateStr));
             const totalDuration = workoutsOnDate.reduce((sum, w) => sum + w.duration, 0);
             const workoutType = workoutsOnDate[0]?.type || 'Rest';
-            
+
             return {
                 day,
                 value: totalDuration,
@@ -407,8 +407,8 @@ const MyProgress: React.FC = () => {
 
     const WeightIcon = ({ size = 14 }: { size?: number }) => (
         <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="5" r="3"/>
-            <path d="M6.5 8a6.5 6.5 0 1 0 11 0Z"/>
+            <circle cx="12" cy="5" r="3" />
+            <path d="M6.5 8a6.5 6.5 0 1 0 11 0Z" />
         </svg>
     );
 
@@ -466,19 +466,18 @@ const MyProgress: React.FC = () => {
                 <div className="tooltip-date">{data.fullDate}</div>
                 <div className="tooltip-value">
                     <span className="tooltip-metric">
-                        {dataKey === 'weight' ? 'Weight' : 
-                         dataKey === 'bodyFat' ? 'Body Fat' : 
-                         dataKey === 'muscle' ? 'Muscle Mass' :
-                         dataKey === 'leanMass' ? 'Lean Mass' : 'Volume'}
+                        {dataKey === 'weight' ? 'Weight' :
+                            dataKey === 'bodyFat' ? 'Body Fat' :
+                                dataKey === 'muscle' ? 'Muscle Mass' :
+                                    dataKey === 'leanMass' ? 'Lean Mass' : 'Volume'}
                     </span>
                     <span className="tooltip-number">{value}{getUnit()}</span>
                 </div>
                 {change && Number(change) !== 0 && (
-                    <div className={`tooltip-change ${
-                        (dataKey === 'weight' || dataKey === 'bodyFat') 
-                            ? (Number(change) < 0 ? 'positive' : 'negative')
-                            : (Number(change) > 0 ? 'positive' : 'negative')
-                    }`}>
+                    <div className={`tooltip-change ${(dataKey === 'weight' || dataKey === 'bodyFat')
+                        ? (Number(change) < 0 ? 'positive' : 'negative')
+                        : (Number(change) > 0 ? 'positive' : 'negative')
+                        }`}>
                         {Number(change) > 0 ? '+' : ''}{change}{getUnit()} from previous
                     </div>
                 )}
@@ -508,11 +507,11 @@ const MyProgress: React.FC = () => {
                 notes: newProgress.notes || undefined
             };
 
-            await memberProgressApi.createProgressMetric(memberId, entryData);
-            
+            await memberProgressApi.createMetric(memberId, entryData);
+
             // Also create a body measurement entry for redundancy and detailed history
             if (newProgress.waist || newProgress.chest || newProgress.arms || newProgress.hips) {
-                await memberProgressApi.createBodyMeasurement(memberId, entryData);
+                await memberProgressApi.createMeasurement(memberId, entryData);
             }
 
             await fetchProgressData();
@@ -641,34 +640,34 @@ const MyProgress: React.FC = () => {
 
             {/* Summary Banner */}
             {(weightChange.value !== 0 || muscleChange.value !== 0 || stats.streak > 0) && (
-            <motion.div className="summary-banner" variants={itemVariants}>
-                <div className="summary-banner__content">
-                    <div className="summary-banner__main">
-                        <Sparkles size={20} />
-                        <span>
-                            {weightChange.value !== 0 || muscleChange.value !== 0 ? (
-                                <><strong>Great progress!</strong> You've {weightChange.value < 0 ? `lost ${Math.abs(weightChange.value)}kg` : ''}{weightChange.value < 0 && muscleChange.value > 0 ? ' and ' : ''}{muscleChange.value > 0 ? `gained ${muscleChange.value}kg muscle` : ''}{summary?.firstEntryDate ? ` since ${new Date(summary.firstEntryDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : ''}</>
-                            ) : (
-                                <><strong>Keep going!</strong> {stats.streak > 0 ? `You're on a ${stats.streak} day streak!` : 'Start logging your progress today.'}</>
-                            )}
-                        </span>
+                <motion.div className="summary-banner" variants={itemVariants}>
+                    <div className="summary-banner__content">
+                        <div className="summary-banner__main">
+                            <Sparkles size={20} />
+                            <span>
+                                {weightChange.value !== 0 || muscleChange.value !== 0 ? (
+                                    <><strong>Great progress!</strong> You've {weightChange.value < 0 ? `lost ${Math.abs(weightChange.value)}kg` : ''}{weightChange.value < 0 && muscleChange.value > 0 ? ' and ' : ''}{muscleChange.value > 0 ? `gained ${muscleChange.value}kg muscle` : ''}{summary?.firstEntryDate ? ` since ${new Date(summary.firstEntryDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : ''}</>
+                                ) : (
+                                    <><strong>Keep going!</strong> {stats.streak > 0 ? `You're on a ${stats.streak} day streak!` : 'Start logging your progress today.'}</>
+                                )}
+                            </span>
+                        </div>
+                        <div className="summary-banner__stats">
+                            <div className="mini-stat">
+                                <span className="mini-stat__value">{stats.streak}</span>
+                                <span className="mini-stat__label">Day Streak</span>
+                            </div>
+                            <div className="mini-stat">
+                                <span className="mini-stat__value">{stats.workoutsThisWeek}/7</span>
+                                <span className="mini-stat__label">This Week</span>
+                            </div>
+                            <div className="mini-stat">
+                                <span className="mini-stat__value">{Math.round(summary?.consistencyRate || consistencyRate)}%</span>
+                                <span className="mini-stat__label">Consistency</span>
+                            </div>
+                        </div>
                     </div>
-                    <div className="summary-banner__stats">
-                        <div className="mini-stat">
-                            <span className="mini-stat__value">{stats.streak}</span>
-                            <span className="mini-stat__label">Day Streak</span>
-                        </div>
-                        <div className="mini-stat">
-                            <span className="mini-stat__value">{stats.workoutsThisWeek}/7</span>
-                            <span className="mini-stat__label">This Week</span>
-                        </div>
-                        <div className="mini-stat">
-                            <span className="mini-stat__value">{Math.round(summary?.consistencyRate || consistencyRate)}%</span>
-                            <span className="mini-stat__label">Consistency</span>
-                        </div>
-                    </div>
-                </div>
-            </motion.div>
+                </motion.div>
             )}
 
             {/* Top Stats Row */}
@@ -983,8 +982,8 @@ const MyProgress: React.FC = () => {
                                 <span className="chart-stat-label">Big 3 Total</span>
                                 <span className="chart-stat-value">
                                     {(personalBests.find(p => p.exercise === 'Bench Press')?.weight || 0) +
-                                     (personalBests.find(p => p.exercise === 'Squat')?.weight || 0) +
-                                     (personalBests.find(p => p.exercise === 'Deadlift')?.weight || 0)} lbs
+                                        (personalBests.find(p => p.exercise === 'Squat')?.weight || 0) +
+                                        (personalBests.find(p => p.exercise === 'Deadlift')?.weight || 0)} lbs
                                 </span>
                                 <span className="chart-stat-date">combined</span>
                             </div>
@@ -1092,7 +1091,7 @@ const MyProgress: React.FC = () => {
                                 <div className="measurements-chart-container">
                                     <div className="measurements-visual">
                                         {measurementComparison.map((m, i) => {
-                                            const change = m.current - m.start;
+                                            const change = (m.current ?? 0) - (m.start ?? 0);
                                             const isGood = m.label === 'Waist' || m.label === 'Hips' ? change < 0 : change > 0;
                                             return (
                                                 <motion.div
@@ -1108,13 +1107,13 @@ const MyProgress: React.FC = () => {
                                                             <motion.div
                                                                 className="measurement-row__bar-start"
                                                                 initial={{ width: 0 }}
-                                                                animate={{ width: `${(m.start / 130) * 100}%` }}
+                                                                animate={{ width: `${((m.start ?? 0) / 130) * 100}%` }}
                                                                 transition={{ delay: i * 0.1 + 0.2 }}
                                                             />
                                                             <motion.div
                                                                 className={`measurement-row__bar-current ${isGood ? 'good' : 'bad'}`}
                                                                 initial={{ width: 0 }}
-                                                                animate={{ width: `${(m.current / 130) * 100}%` }}
+                                                                animate={{ width: `${((m.current ?? 0) / 130) * 100}%` }}
                                                                 transition={{ delay: i * 0.1 + 0.4 }}
                                                             />
                                                         </div>
@@ -1148,9 +1147,9 @@ const MyProgress: React.FC = () => {
                                                         <stop offset="100%" stopColor="#AF52DE" stopOpacity={0} />
                                                     </linearGradient>
                                                 </defs>
-                                                  <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} vertical={false} />
-                                                  <XAxis dataKey="date" stroke={chartColors.axis} tick={{ fontSize: 11, fill: isLightTheme ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.4)' }} axisLine={false} tickLine={false} />
-                                                  <YAxis stroke={chartColors.axis} tick={{ fontSize: 11, fill: isLightTheme ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.4)' }} axisLine={false} tickLine={false} domain={['dataMin - 2', 'dataMax + 2']} />
+                                                <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} vertical={false} />
+                                                <XAxis dataKey="date" stroke={chartColors.axis} tick={{ fontSize: 11, fill: isLightTheme ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.4)' }} axisLine={false} tickLine={false} />
+                                                <YAxis stroke={chartColors.axis} tick={{ fontSize: 11, fill: isLightTheme ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.4)' }} axisLine={false} tickLine={false} domain={['dataMin - 2', 'dataMax + 2']} />
 
                                                 <Tooltip content={<CustomTooltip />} />
                                                 <Area type="monotone" dataKey="bodyFat" name="Body Fat %" stroke="#34C759" strokeWidth={2.5} fill="url(#fatGradient)" dot={{ fill: '#34C759', strokeWidth: 0, r: 4 }} />
@@ -1180,9 +1179,9 @@ const MyProgress: React.FC = () => {
                                                     <stop offset="100%" stopColor="#007AFF" stopOpacity={0} />
                                                 </linearGradient>
                                             </defs>
-                                              <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} vertical={false} />
-                                              <XAxis dataKey="date" stroke={chartColors.axis} tick={{ fontSize: 11, fill: isLightTheme ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.4)' }} axisLine={false} tickLine={false} />
-                                              <YAxis stroke={chartColors.axis} tick={{ fontSize: 11, fill: isLightTheme ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.4)' }} axisLine={false} tickLine={false} domain={['dataMin - 2', 'dataMax + 2']} tickFormatter={(value) => `${value}kg`} />
+                                            <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} vertical={false} />
+                                            <XAxis dataKey="date" stroke={chartColors.axis} tick={{ fontSize: 11, fill: isLightTheme ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.4)' }} axisLine={false} tickLine={false} />
+                                            <YAxis stroke={chartColors.axis} tick={{ fontSize: 11, fill: isLightTheme ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.4)' }} axisLine={false} tickLine={false} domain={['dataMin - 2', 'dataMax + 2']} tickFormatter={(value) => `${value}kg`} />
 
                                             <Tooltip content={<CustomTooltip />} />
                                             <ReferenceLine y={stats.goalWeight} stroke="#30D158" strokeDasharray="5 5" label={{ value: `Goal: ${stats.goalWeight}kg`, position: 'right', fill: '#30D158', fontSize: 10 }} />
@@ -1191,9 +1190,9 @@ const MyProgress: React.FC = () => {
                                         </AreaChart>
                                     ) : (
                                         <BarChart data={chartData} barCategoryGap="20%">
-                                              <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} vertical={false} />
-                                              <XAxis dataKey="date" stroke={chartColors.axis} tick={{ fontSize: 11, fill: isLightTheme ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.4)' }} axisLine={false} tickLine={false} />
-                                              <YAxis stroke={chartColors.axis} tick={{ fontSize: 11, fill: isLightTheme ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.4)' }} axisLine={false} tickLine={false} tickFormatter={(value) => `${value} lbs`} />
+                                            <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} vertical={false} />
+                                            <XAxis dataKey="date" stroke={chartColors.axis} tick={{ fontSize: 11, fill: isLightTheme ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.4)' }} axisLine={false} tickLine={false} />
+                                            <YAxis stroke={chartColors.axis} tick={{ fontSize: 11, fill: isLightTheme ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.4)' }} axisLine={false} tickLine={false} tickFormatter={(value) => `${value} lbs`} />
                                             <Tooltip content={<CustomTooltip />} />
                                             <Bar dataKey="volume" fill="#AF52DE" radius={[4, 4, 0, 0]} />
                                         </BarChart>
@@ -1229,23 +1228,23 @@ const MyProgress: React.FC = () => {
                         const isExpanded = expandedGoal === goal.id;
 
                         return (
-                            <motion.div 
-                                key={goal.id} 
+                            <motion.div
+                                key={goal.id}
                                 className={`goal-card ${isExpanded ? 'expanded' : ''}`}
                                 onClick={() => setExpandedGoal(isExpanded ? null : goal.id)}
                                 layout
                             >
                                 <div className="goal-card__header">
-                                    <div className="goal-card__icon" style={{ 
-                                        background: goal.type === 'weight' ? 'rgba(0, 122, 255, 0.15)' : 
-                                                   goal.type === 'muscle' ? 'rgba(175, 82, 222, 0.15)' : 
-                                                   'rgba(48, 209, 88, 0.15)',
-                                        color: goal.type === 'weight' ? '#007AFF' : 
-                                               goal.type === 'muscle' ? '#AF52DE' : '#30D158'
+                                    <div className="goal-card__icon" style={{
+                                        background: goal.type === 'weight' ? 'rgba(0, 122, 255, 0.15)' :
+                                            goal.type === 'muscle' ? 'rgba(175, 82, 222, 0.15)' :
+                                                'rgba(48, 209, 88, 0.15)',
+                                        color: goal.type === 'weight' ? '#007AFF' :
+                                            goal.type === 'muscle' ? '#AF52DE' : '#30D158'
                                     }}>
-                                        {goal.type === 'weight' ? <WeightIcon size={16} /> : 
-                                         goal.type === 'muscle' ? <Dumbbell size={16} /> : 
-                                         <Activity size={16} />}
+                                        {goal.type === 'weight' ? <WeightIcon size={16} /> :
+                                            goal.type === 'muscle' ? <Dumbbell size={16} /> :
+                                                <Activity size={16} />}
                                     </div>
                                     <div className="goal-card__info">
                                         <span className="goal-card__title">{goal.title}</span>
@@ -1258,9 +1257,9 @@ const MyProgress: React.FC = () => {
                                     <div className="goal-progress-bar">
                                         <motion.div
                                             className="goal-progress-bar__fill"
-                                            style={{ 
-                                                background: goal.type === 'weight' ? '#007AFF' : 
-                                                           goal.type === 'muscle' ? '#AF52DE' : '#30D158'
+                                            style={{
+                                                background: goal.type === 'weight' ? '#007AFF' :
+                                                    goal.type === 'muscle' ? '#AF52DE' : '#30D158'
                                             }}
                                             initial={{ width: 0 }}
                                             animate={{ width: `${progress}%` }}
@@ -1370,8 +1369,8 @@ const MyProgress: React.FC = () => {
                         <div className="weekly-summary__ring">
                             <svg viewBox="0 0 100 100">
                                 <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="8" />
-                                <circle 
-                                    cx="50" cy="50" r="45" fill="none" 
+                                <circle
+                                    cx="50" cy="50" r="45" fill="none"
                                     stroke="#007AFF" strokeWidth="8"
                                     strokeLinecap="round"
                                     strokeDasharray={`${consistencyRate * 2.83} 283`}
@@ -1501,7 +1500,7 @@ const MyProgress: React.FC = () => {
                                     <Info size={14} />
                                     <span>Tip: Log your progress at the same time each day for accurate tracking. Morning measurements are most consistent.</span>
                                 </div>
-                                
+
                                 <div className="form-section">
                                     <h4>Body Metrics</h4>
                                     <div className="form-grid">
@@ -1540,7 +1539,7 @@ const MyProgress: React.FC = () => {
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <div className="form-section">
                                     <h4>Body Measurements (cm)</h4>
                                     <p className="form-section-desc">Measure at the widest/largest point for each area</p>
