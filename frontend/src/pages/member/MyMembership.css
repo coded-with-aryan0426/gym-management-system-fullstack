@@ -1,10 +1,10 @@
 .mm-container {
     min-height: 100vh;
-    padding: 16px;
+    padding: 24px;
     background: #09090b;
     color: #fff;
-    max-width: 900px;
-    margin: 0 auto;
+    width: 100%;
+    max-width: 100%;
 }
 
 .mm-dev-banner {
@@ -324,7 +324,7 @@
 .mm-hero__stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
+    gap: 12px;
     margin-bottom: 16px;
 }
 
@@ -412,8 +412,8 @@
 .mm-quick-stats {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    margin-bottom: 16px;
+    gap: 12px;
+    margin-bottom: 20px;
 }
 
 .mm-quick-stat {
@@ -462,7 +462,7 @@
     background: #18181b;
     border: 1px solid #27272a;
     border-radius: 10px;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
 }
 
 .mm-tab {
@@ -498,8 +498,8 @@
 .mm-actions-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    margin-bottom: 20px;
+    gap: 12px;
+    margin-bottom: 24px;
 }
 
 .mm-action-card {
@@ -548,7 +548,7 @@
 }
 
 .mm-section {
-    margin-bottom: 20px;
+    margin-bottom: 24px;
 }
 
 .mm-section__header {
@@ -587,7 +587,7 @@
 .mm-activity-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
+    gap: 12px;
 }
 
 .mm-activity-card {
@@ -692,8 +692,8 @@
 .mm-benefits-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    margin-bottom: 20px;
+    gap: 12px;
+    margin-bottom: 24px;
 }
 
 .mm-benefit-card {
@@ -1426,6 +1426,29 @@
 
 .mm-modal-btn--primary:hover {
     background: #7c3aed;
+}
+
+@media (max-width: 1200px) {
+    .mm-benefits-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 1024px) {
+    .mm-container {
+        padding: 20px;
+    }
+    
+    .mm-hero__stats,
+    .mm-quick-stats,
+    .mm-actions-grid,
+    .mm-activity-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .mm-benefits-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 @media (max-width: 768px) {
