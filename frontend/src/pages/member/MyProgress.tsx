@@ -179,10 +179,10 @@ const MyProgress: React.FC = () => {
             }));
             setProgressEntries(entries);
 
-            const mappedGoals: Goal[] = (goalsData || []).map((g: any) => ({
+            const mappedGoals: Goal[] = (goalsData || []).filter((g: any) => g.goalType).map((g: any) => ({
                 id: g.id,
                 title: g.title,
-                type: g.goalType?.toLowerCase() as Goal['type'],
+                type: (g.goalType?.toLowerCase() || 'weight') as Goal['type'],
                 startValue: g.startValue || 0,
                 currentValue: g.currentValue || 0,
                 targetValue: g.targetValue || 0,
@@ -193,13 +193,13 @@ const MyProgress: React.FC = () => {
             }));
             setGoals(mappedGoals);
 
-            const mappedPBs: PersonalBest[] = (pbData || []).map((pb: any) => ({
+            const mappedPBs: PersonalBest[] = (pbData || []).filter((pb: any) => pb.exercise).map((pb: any) => ({
                 id: pb.id,
-                exercise: pb.exercise,
-                weight: pb.weightValue,
+                exercise: pb.exercise || 'Unknown',
+                weight: pb.weightValue || 0,
                 reps: pb.reps,
                 unit: pb.unit || 'lbs',
-                date: pb.recordDate,
+                date: pb.recordDate || new Date().toISOString(),
                 previousBest: pb.previousBest,
                 category: (pb.category?.toLowerCase() || 'push') as PersonalBest['category']
             }));
@@ -215,15 +215,7 @@ const MyProgress: React.FC = () => {
             }));
             setWorkoutLogs(mappedWorkouts);
 
-            const mockNotes: ProgressNote[] = [
-                {
-                    id: 1,
-                    note: 'Great progress on squats! Keep focusing on depth and maintaining good form.',
-                    createdAt: new Date().toISOString().split('T')[0],
-                    trainer: { userId: 1, fullName: 'Your Trainer' }
-                }
-            ];
-            setNotes(mockNotes);
+            setNotes([]);
 
         } catch (error) {
             console.error('Error fetching progress data:', error);
@@ -240,7 +232,7 @@ const MyProgress: React.FC = () => {
     const getFirstEntry = () => progressEntries[0] || null;
     const getPreviousEntry = () => progressEntries[progressEntries.length - 2] || null;
 
-    const calculateChange = (current: number | undefined, start: number | undefined) => {
+    const calculateChange = (current: number | undefined | null, start: number | undefined | null) => {
         if (!current || !start) return { value: 0, percent: 0 };
         const value = current - start;
         const percent = ((value / start) * 100);
@@ -269,23 +261,23 @@ const MyProgress: React.FC = () => {
     const previous = getPreviousEntry();
 
     const stats = {
-        currentWeight: latest?.weight || 78,
-        startWeight: first?.weight || 85,
-        previousWeight: previous?.weight || 79,
-        goalWeight: 75,
-        bodyFat: latest?.bodyFat || 18,
-        startBodyFat: first?.bodyFat || 22,
-        previousBodyFat: previous?.bodyFat || 18.5,
-        muscleMass: latest?.muscleMass || 62,
-        startMuscleMass: first?.muscleMass || 58,
-        previousMuscleMass: previous?.muscleMass || 61.5,
-        streak: 12,
-        longestStreak: 18,
-        caloriesBurned: workoutLogs.reduce((sum, w) => sum + w.caloriesBurned, 0),
-        totalWorkouts: 48,
-        thisMonthWorkouts: 18,
-        avgWorkoutDuration: Math.round(workoutLogs.filter(w => w.duration > 0).reduce((sum, w) => sum + w.duration, 0) / workoutLogs.filter(w => w.duration > 0).length),
-        workoutsThisWeek: workoutLogs.filter(w => w.duration > 0).length
+        currentWeight: summary?.currentWeight || latest?.weight || null,
+        startWeight: summary?.startWeight || first?.weight || null,
+        previousWeight: previous?.weight || null,
+        goalWeight: summary?.goalWeight || null,
+        bodyFat: summary?.currentBodyFat || latest?.bodyFat || null,
+        startBodyFat: summary?.startBodyFat || first?.bodyFat || null,
+        previousBodyFat: previous?.bodyFat || null,
+        muscleMass: summary?.currentMuscleMass || latest?.muscleMass || null,
+        startMuscleMass: summary?.startMuscleMass || first?.muscleMass || null,
+        previousMuscleMass: previous?.muscleMass || null,
+        streak: summary?.currentStreak || 0,
+        longestStreak: summary?.longestStreak || 0,
+        caloriesBurned: summary?.totalCaloriesBurned || workoutLogs.reduce((sum, w) => sum + w.caloriesBurned, 0),
+        totalWorkouts: summary?.totalWorkouts || 0,
+        thisMonthWorkouts: summary?.workoutsThisMonth || 0,
+        avgWorkoutDuration: summary?.avgWorkoutDuration || (workoutLogs.filter(w => w.duration > 0).length > 0 ? Math.round(workoutLogs.filter(w => w.duration > 0).reduce((sum, w) => sum + w.duration, 0) / workoutLogs.filter(w => w.duration > 0).length) : 0),
+        workoutsThisWeek: summary?.workoutsThisWeek || workoutLogs.filter(w => w.duration > 0).length
     };
 
     const weightChange = calculateChange(stats.currentWeight, stats.startWeight);
@@ -293,30 +285,48 @@ const MyProgress: React.FC = () => {
     const bodyFatChange = calculateChange(stats.bodyFat, stats.startBodyFat);
     const weeklyWeightChange = calculateChange(stats.currentWeight, stats.previousWeight);
 
-    const bmiValue = (stats.currentWeight / (1.75 * 1.75)).toFixed(1);
-    const bmiCategory = parseFloat(bmiValue) < 18.5 ? 'Underweight' : parseFloat(bmiValue) < 25 ? 'Normal' : parseFloat(bmiValue) < 30 ? 'Overweight' : 'Obese';
+    const heightInMeters = user?.height ? user.height / 100 : (summary?.height ? summary.height / 100 : 1.75);
+    const bmiValue = stats.currentWeight ? (stats.currentWeight / (heightInMeters * heightInMeters)).toFixed(1) : null;
+    const bmiCategory = bmiValue ? (parseFloat(bmiValue) < 18.5 ? 'Underweight' : parseFloat(bmiValue) < 25 ? 'Normal' : parseFloat(bmiValue) < 30 ? 'Overweight' : 'Obese') : null;
 
     const heatmapData = Array.from({ length: 35 }, (_, i) => {
         const date = new Date(Date.now() - (34 - i) * 24 * 60 * 60 * 1000);
         const dayOfWeek = date.getDay();
         const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+        const dateStr = date.toISOString().split('T')[0];
+        const workoutsOnDate = workoutLogs.filter(w => w.date?.startsWith(dateStr));
+        const intensity = workoutsOnDate.length > 0 ? Math.min(4, workoutsOnDate.reduce((sum, w) => sum + Math.ceil(w.duration / 30), 0)) : 0;
         return {
             day: i + 1,
-            intensity: Math.random() > 0.3 ? Math.floor(Math.random() * 4) + 1 : 0,
+            intensity,
             date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
             isWeekend
         };
     });
 
-    const weeklyActivity = [
-        { day: 'Mon', value: 65, active: true, type: 'Strength' },
-        { day: 'Tue', value: 45, active: true, type: 'Cardio' },
-        { day: 'Wed', value: 0, active: false, type: 'Rest' },
-        { day: 'Thu', value: 55, active: true, type: 'Upper' },
-        { day: 'Fri', value: 60, active: true, type: 'Lower' },
-        { day: 'Sat', value: 50, active: true, type: 'Full Body' },
-        { day: 'Sun', value: 0, active: false, type: 'Rest' }
-    ];
+    const getWeeklyActivity = () => {
+        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const today = new Date();
+        const startOfWeek = new Date(today);
+        startOfWeek.setDate(today.getDate() - today.getDay());
+        
+        return days.map((day, i) => {
+            const date = new Date(startOfWeek);
+            date.setDate(startOfWeek.getDate() + i);
+            const dateStr = date.toISOString().split('T')[0];
+            const workoutsOnDate = workoutLogs.filter(w => w.date?.startsWith(dateStr));
+            const totalDuration = workoutsOnDate.reduce((sum, w) => sum + w.duration, 0);
+            const workoutType = workoutsOnDate[0]?.type || 'Rest';
+            
+            return {
+                day,
+                value: totalDuration,
+                active: totalDuration > 0,
+                type: workoutType
+            };
+        });
+    };
+    const weeklyActivity = getWeeklyActivity();
 
     const consistencyRate = Math.round((workoutLogs.filter(w => w.duration > 0).length / 7) * 100);
 
@@ -335,25 +345,30 @@ const MyProgress: React.FC = () => {
         { id: 'consistency', label: 'Activity', icon: <Calendar size={14} /> }
     ];
 
-    const chartData = progressEntries.map((entry, index) => ({
-        date: new Date(entry.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        fullDate: entry.date,
-        weight: entry.weight,
-        bodyFat: entry.bodyFat,
-        muscle: entry.muscleMass,
-        chest: entry.chest,
-        waist: entry.waist,
-        arms: entry.arms,
-        legs: entry.legs,
-        volume: 1200 + (index * 180),
-        leanMass: entry.weight && entry.bodyFat ? (entry.weight * (1 - entry.bodyFat / 100)).toFixed(1) : 0
-    }));
+    const chartData = progressEntries.map((entry, index) => {
+        const dateStr = entry.date?.split('T')[0];
+        const workoutsOnDate = workoutLogs.filter(w => w.date?.startsWith(dateStr || ''));
+        const totalVolume = workoutsOnDate.reduce((sum, w) => sum + (w.caloriesBurned || 0), 0);
+        return {
+            date: new Date(entry.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+            fullDate: entry.date,
+            weight: entry.weight,
+            bodyFat: entry.bodyFat,
+            muscle: entry.muscleMass,
+            chest: entry.chest,
+            waist: entry.waist,
+            arms: entry.arms,
+            legs: entry.legs,
+            volume: totalVolume || 0,
+            leanMass: entry.weight && entry.bodyFat ? (entry.weight * (1 - entry.bodyFat / 100)).toFixed(1) : 0
+        };
+    });
 
-    const bodyCompositionData = [
+    const bodyCompositionData = stats.muscleMass && stats.currentWeight && stats.bodyFat ? [
         { name: 'Muscle', value: stats.muscleMass, color: '#AF52DE' },
         { name: 'Fat', value: stats.currentWeight * (stats.bodyFat / 100), color: '#FF9F0A' },
-        { name: 'Other', value: stats.currentWeight - stats.muscleMass - (stats.currentWeight * stats.bodyFat / 100), color: '#007AFF' }
-    ];
+        { name: 'Other', value: Math.max(0, stats.currentWeight - stats.muscleMass - (stats.currentWeight * stats.bodyFat / 100)), color: '#007AFF' }
+    ] : [];
 
     const CustomTooltip = ({ active, payload, label }: any) => {
         if (!active || !payload || !payload.length) return null;
@@ -474,13 +489,13 @@ const MyProgress: React.FC = () => {
     };
 
     const measurementComparison = [
-        { label: 'Chest', current: latest?.chest || 105.5, start: first?.chest || 102, unit: 'cm', ideal: '104-110', good: true },
-        { label: 'Waist', current: latest?.waist || 81, start: first?.waist || 88, unit: 'cm', ideal: '< 94', good: true },
-        { label: 'Arms', current: latest?.arms || 37, start: first?.arms || 35, unit: 'cm', ideal: '36-40', good: true },
-        { label: 'Legs', current: latest?.legs || 60.3, start: first?.legs || 58, unit: 'cm', ideal: '58-65', good: true },
-        { label: 'Hips', current: latest?.hips || 94, start: first?.hips || 98, unit: 'cm', ideal: '< 102', good: true },
-        { label: 'Shoulders', current: latest?.shoulders || 119, start: first?.shoulders || 115, unit: 'cm', ideal: '> 115', good: true }
-    ];
+        { label: 'Chest', current: latest?.chest || null, start: first?.chest || null, unit: 'cm', ideal: '104-110', good: true },
+        { label: 'Waist', current: latest?.waist || null, start: first?.waist || null, unit: 'cm', ideal: '< 94', good: true },
+        { label: 'Arms', current: latest?.arms || null, start: first?.arms || null, unit: 'cm', ideal: '36-40', good: true },
+        { label: 'Legs', current: latest?.legs || null, start: first?.legs || null, unit: 'cm', ideal: '58-65', good: true },
+        { label: 'Hips', current: latest?.hips || null, start: first?.hips || null, unit: 'cm', ideal: '< 102', good: true },
+        { label: 'Shoulders', current: latest?.shoulders || null, start: first?.shoulders || null, unit: 'cm', ideal: '> 115', good: true }
+    ].filter(m => m.current !== null || m.start !== null);
 
     if (loading) {
         return (
@@ -524,12 +539,17 @@ const MyProgress: React.FC = () => {
             </motion.div>
 
             {/* Summary Banner */}
+            {(weightChange.value !== 0 || muscleChange.value !== 0 || stats.streak > 0) && (
             <motion.div className="summary-banner" variants={itemVariants}>
                 <div className="summary-banner__content">
                     <div className="summary-banner__main">
                         <Sparkles size={20} />
                         <span>
-                            <strong>Great progress!</strong> You've lost {Math.abs(weightChange.value)}kg and gained {muscleChange.value}kg muscle in 8 weeks
+                            {weightChange.value !== 0 || muscleChange.value !== 0 ? (
+                                <><strong>Great progress!</strong> You've {weightChange.value < 0 ? `lost ${Math.abs(weightChange.value)}kg` : ''}{weightChange.value < 0 && muscleChange.value > 0 ? ' and ' : ''}{muscleChange.value > 0 ? `gained ${muscleChange.value}kg muscle` : ''}{summary?.firstEntryDate ? ` since ${new Date(summary.firstEntryDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : ''}</>
+                            ) : (
+                                <><strong>Keep going!</strong> {stats.streak > 0 ? `You're on a ${stats.streak} day streak!` : 'Start logging your progress today.'}</>
+                            )}
                         </span>
                     </div>
                     <div className="summary-banner__stats">
@@ -542,12 +562,13 @@ const MyProgress: React.FC = () => {
                             <span className="mini-stat__label">This Week</span>
                         </div>
                         <div className="mini-stat">
-                            <span className="mini-stat__value">{consistencyRate}%</span>
+                            <span className="mini-stat__value">{Math.round(summary?.consistencyRate || consistencyRate)}%</span>
                             <span className="mini-stat__label">Consistency</span>
                         </div>
                     </div>
                 </div>
             </motion.div>
+            )}
 
             {/* Top Stats Row */}
             <motion.div className="stats-row" variants={itemVariants}>
@@ -556,20 +577,24 @@ const MyProgress: React.FC = () => {
                         <WeightIcon size={20} />
                     </div>
                     <div className="stat-card__body">
-                        <div className="stat-card__value">{stats.currentWeight}<span>kg</span></div>
+                        <div className="stat-card__value">{stats.currentWeight ?? '--'}<span>kg</span></div>
                         <div className="stat-card__label">Current Weight</div>
                         <div className="stat-card__detail">
-                            Goal: {stats.goalWeight}kg ({Math.abs(stats.currentWeight - stats.goalWeight).toFixed(1)}kg to go)
+                            {stats.goalWeight ? `Goal: ${stats.goalWeight}kg (${Math.abs((stats.currentWeight ?? 0) - stats.goalWeight).toFixed(1)}kg to go)` : 'Set a goal to track progress'}
                         </div>
                     </div>
                     <div className="stat-card__right">
-                        <div className={`stat-card__trend ${weightChange.value <= 0 ? 'positive' : 'negative'}`}>
-                            {weightChange.value <= 0 ? <TrendingDown size={14} /> : <TrendingUp size={14} />}
-                            {weightChange.value > 0 ? '+' : ''}{weightChange.value}kg
-                        </div>
-                        <div className="stat-card__sub">
-                            {weeklyWeightChange.value > 0 ? '+' : ''}{weeklyWeightChange.value}kg this week
-                        </div>
+                        {weightChange.value !== 0 && (
+                            <div className={`stat-card__trend ${weightChange.value <= 0 ? 'positive' : 'negative'}`}>
+                                {weightChange.value <= 0 ? <TrendingDown size={14} /> : <TrendingUp size={14} />}
+                                {weightChange.value > 0 ? '+' : ''}{weightChange.value}kg
+                            </div>
+                        )}
+                        {weeklyWeightChange.value !== 0 && (
+                            <div className="stat-card__sub">
+                                {weeklyWeightChange.value > 0 ? '+' : ''}{weeklyWeightChange.value}kg this week
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -578,20 +603,24 @@ const MyProgress: React.FC = () => {
                         <Percent size={20} />
                     </div>
                     <div className="stat-card__body">
-                        <div className="stat-card__value">{stats.bodyFat}<span>%</span></div>
+                        <div className="stat-card__value">{stats.bodyFat ?? '--'}<span>%</span></div>
                         <div className="stat-card__label">Body Fat</div>
                         <div className="stat-card__detail">
-                            Started at {stats.startBodyFat}% ({Math.abs(bodyFatChange.value)}% lost)
+                            {stats.startBodyFat ? `Started at ${stats.startBodyFat}% (${Math.abs(bodyFatChange.value)}% lost)` : 'Log your first measurement'}
                         </div>
                     </div>
                     <div className="stat-card__right">
-                        <div className={`stat-card__trend ${bodyFatChange.value <= 0 ? 'positive' : 'negative'}`}>
-                            {bodyFatChange.value <= 0 ? <TrendingDown size={14} /> : <TrendingUp size={14} />}
-                            {bodyFatChange.value}%
-                        </div>
-                        <div className="stat-card__category">
-                            {stats.bodyFat < 15 ? 'Athletic' : stats.bodyFat < 20 ? 'Fit' : stats.bodyFat < 25 ? 'Average' : 'Above Average'}
-                        </div>
+                        {bodyFatChange.value !== 0 && (
+                            <div className={`stat-card__trend ${bodyFatChange.value <= 0 ? 'positive' : 'negative'}`}>
+                                {bodyFatChange.value <= 0 ? <TrendingDown size={14} /> : <TrendingUp size={14} />}
+                                {bodyFatChange.value}%
+                            </div>
+                        )}
+                        {stats.bodyFat && (
+                            <div className="stat-card__category">
+                                {stats.bodyFat < 15 ? 'Athletic' : stats.bodyFat < 20 ? 'Fit' : stats.bodyFat < 25 ? 'Average' : 'Above Average'}
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -600,17 +629,19 @@ const MyProgress: React.FC = () => {
                         <Dumbbell size={20} />
                     </div>
                     <div className="stat-card__body">
-                        <div className="stat-card__value">{stats.muscleMass}<span>kg</span></div>
+                        <div className="stat-card__value">{stats.muscleMass ?? '--'}<span>kg</span></div>
                         <div className="stat-card__label">Muscle Mass</div>
                         <div className="stat-card__detail">
-                            {((stats.muscleMass / stats.currentWeight) * 100).toFixed(0)}% of total body weight
+                            {stats.muscleMass && stats.currentWeight ? `${((stats.muscleMass / stats.currentWeight) * 100).toFixed(0)}% of total body weight` : 'Log your first measurement'}
                         </div>
                     </div>
                     <div className="stat-card__right">
-                        <div className={`stat-card__trend ${muscleChange.value >= 0 ? 'positive' : 'negative'}`}>
-                            {muscleChange.value >= 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
-                            +{muscleChange.value}kg
-                        </div>
+                        {muscleChange.value !== 0 && (
+                            <div className={`stat-card__trend ${muscleChange.value >= 0 ? 'positive' : 'negative'}`}>
+                                {muscleChange.value >= 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
+                                +{muscleChange.value}kg
+                            </div>
+                        )}
                         <div className="stat-card__sub">
                             {calculateWeeklyAverage('muscleMass')}kg/week avg
                         </div>
@@ -622,14 +653,16 @@ const MyProgress: React.FC = () => {
                         <BarChart3 size={20} />
                     </div>
                     <div className="stat-card__body">
-                        <div className="stat-card__value">{bmiValue}</div>
+                        <div className="stat-card__value">{bmiValue ?? '--'}</div>
                         <div className="stat-card__label">BMI</div>
-                        <div className="stat-card__detail">Category: {bmiCategory}</div>
+                        <div className="stat-card__detail">Category: {bmiCategory ?? 'N/A'}</div>
                     </div>
                     <div className="stat-card__right">
-                        <div className={`bmi-indicator ${bmiCategory.toLowerCase()}`}>
-                            {bmiCategory}
-                        </div>
+                        {bmiCategory && (
+                            <div className={`bmi-indicator ${bmiCategory.toLowerCase()}`}>
+                                {bmiCategory}
+                            </div>
+                        )}
                     </div>
                 </div>
             </motion.div>
