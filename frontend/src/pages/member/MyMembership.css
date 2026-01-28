@@ -156,11 +156,31 @@
     padding: 20px;
 }
 
-.mm-hero__top {
+.mm-hero__header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 16px;
+}
+
+.mm-hero__body {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 16px;
+}
+
+.mm-hero__body-left {
+    flex: 1;
+}
+
+.mm-hero__body-right {
+    flex: 1;
+}
+
+.mm-hero__footer {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }
 
 .mm-hero__tier {
@@ -175,7 +195,7 @@
     font-weight: 700;
     letter-spacing: 0.08em;
     color: var(--tier-color, #3b82f6);
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .mm-hero__tier svg {
@@ -184,7 +204,7 @@
 }
 
 .mm-hero__title {
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 800;
     letter-spacing: -0.03em;
     margin: 0;
@@ -198,11 +218,11 @@
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    margin-top: 8px;
-    padding: 4px 8px;
+    margin-top: 4px;
+    padding: 3px 6px;
     background: rgba(255, 255, 255, 0.04);
-    border-radius: 5px;
-    font-size: 10px;
+    border-radius: 4px;
+    font-size: 9px;
     color: #71717a;
     cursor: pointer;
     transition: all 0.2s;
@@ -224,9 +244,9 @@
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    padding: 5px 12px;
-    border-radius: 8px;
-    font-size: 10px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 9px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -245,35 +265,93 @@
     display: flex;
     align-items: center;
     gap: 4px;
-    font-size: 9px;
+    font-size: 8px;
     color: #71717a;
 }
 
-.mm-hero__main {
-    display: flex;
-    gap: 16px;
-    margin-bottom: 16px;
-}
-
 .mm-countdown {
-    flex: 1;
     background: rgba(0, 0, 0, 0.3);
     border-radius: 12px;
-    padding: 16px;
+    padding: 12px;
     border: 1px solid rgba(255, 255, 255, 0.04);
-    margin-bottom: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.mm-countdown__label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 9px;
+    font-weight: 600;
+    color: #71717a;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+}
+
+.mm-countdown__grid {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 6px;
+}
+
+.mm-countdown__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 44px;
+    padding: 6px 8px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.mm-countdown__value {
+    font-size: 20px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    background: linear-gradient(135deg, #fff, #a1a1aa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+}
+
+.mm-countdown__unit {
+    font-size: 8px;
+    font-weight: 600;
+    color: #71717a;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 1px;
+}
+
+.mm-countdown__separator {
+    font-size: 16px;
+    font-weight: 300;
+    color: #3f3f46;
+}
+
+.mm-countdown__item--seconds .mm-countdown__value {
+    color: #3b82f6;
+    background: linear-gradient(135deg, #60a5fa, #3b82f6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .mm-hero__stats {
-    flex: 1;
     display: flex;
     flex-direction: column;
     gap: 8px;
-    margin-bottom: 0;
+    height: 100%;
 }
 
 .mm-hero__stat {
-    flex: 1;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -309,7 +387,6 @@
     background: rgba(255, 255, 255, 0.06);
     border-radius: 2px;
     overflow: hidden;
-    margin-bottom: 16px;
 }
 
 .mm-hero__progress-fill {
@@ -320,25 +397,26 @@
 
 .mm-hero__actions {
     display: flex;
-    gap: 12px;
+    gap: 10px;
     justify-content: flex-start;
 }
 
 .mm-qr-btn,
 .mm-renew-btn {
-    flex: 0 0 auto;
+    flex: initial;
+    width: auto;
+    min-width: 130px;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 10px 20px;
-    border-radius: 10px;
+    padding: 8px 16px;
+    border-radius: 8px;
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
     border: none;
     transition: all 0.2s;
-    min-width: 140px;
 }
 
 .mm-qr-btn {
@@ -1391,6 +1469,16 @@
     .mm-actions-grid,
     .mm-activity-grid {
         grid-template-columns: repeat(2, 1fr);
+    }
+
+    .mm-hero__body {
+        flex-direction: column;
+    }
+
+    .mm-hero__body-left,
+    .mm-hero__body-right {
+        flex: none;
+        width: 100%;
     }
     
     .mm-benefits-grid {
