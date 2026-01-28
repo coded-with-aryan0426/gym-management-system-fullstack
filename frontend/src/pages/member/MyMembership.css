@@ -1,8 +1,8 @@
 .mm-container {
     min-height: 100vh;
     padding: 24px;
-    background: #09090b;
-    color: #fff;
+    background: var(--macos-bg-primary);
+    color: var(--macos-text-primary);
     width: 100%;
     max-width: 100%;
 }
@@ -39,9 +39,13 @@
     color: #fbbf24;
 }
 
+.theme-light .mm-dev-banner__text strong {
+    color: #d97706;
+}
+
 .mm-dev-banner__text span {
     font-size: 12px;
-    color: #a1a1aa;
+    color: var(--macos-text-secondary);
     line-height: 1.4;
 }
 
@@ -58,12 +62,12 @@
     align-items: center;
     justify-content: center;
     gap: 12px;
-    background: #09090b;
-    color: #71717a;
+    background: var(--macos-bg-primary);
+    color: var(--macos-text-tertiary);
 }
 
 .mm-loading__spinner {
-    color: #3b82f6;
+    color: var(--macos-accent);
 }
 
 .mm-loading span {
@@ -89,7 +93,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #3b82f6;
+    color: var(--macos-accent);
     margin-bottom: 8px;
 }
 
@@ -101,7 +105,7 @@
 
 .mm-no-membership p {
     font-size: 13px;
-    color: #71717a;
+    color: var(--macos-text-secondary);
     margin: 0;
 }
 
@@ -125,8 +129,12 @@
     border-radius: 12px;
     overflow: hidden;
     margin-bottom: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: #111113;
+    border: 1px solid var(--macos-border);
+    background: var(--macos-bg-secondary);
+}
+
+.theme-light .mm-hero {
+    box-shadow: var(--shadow-sm);
 }
 
 .mm-hero__content {
@@ -160,7 +168,7 @@
     gap: 4px;
     padding: 2px 8px;
     border-radius: 4px;
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--macos-bg-tertiary);
     font-size: 8px;
     font-weight: 800;
     color: var(--tier-color, #3b82f6);
@@ -171,7 +179,7 @@
     font-size: 18px;
     font-weight: 800;
     margin: 0;
-    color: #fff;
+    color: var(--macos-text-primary);
 }
 
 .mm-hero__id {
@@ -179,7 +187,7 @@
     align-items: center;
     gap: 4px;
     font-size: 10px;
-    color: #71717a;
+    color: var(--macos-text-tertiary);
     cursor: pointer;
 }
 
@@ -189,9 +197,9 @@
     font-size: 9px;
     font-weight: 700;
     text-transform: uppercase;
-    background: rgba(34, 197, 94, 0.1);
-    color: #4ade80;
-    border: 1px solid rgba(34, 197, 94, 0.2);
+    background: var(--macos-success-bg);
+    color: var(--macos-success);
+    border: 1px solid rgba(52, 199, 89, 0.2);
 }
 
 .mm-hero__actions {
@@ -214,14 +222,14 @@
 }
 
 .mm-qr-btn {
-    background: #3b82f6;
+    background: var(--macos-accent);
     color: #fff;
 }
 
 .mm-renew-btn {
-    background: rgba(255, 255, 255, 0.06);
-    color: #fff;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--macos-bg-tertiary);
+    color: var(--macos-text-primary);
+    border: 1px solid var(--macos-border);
 }
 
 .mm-hero__body {
@@ -236,10 +244,11 @@
 }
 
 .mm-countdown-compact {
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--macos-bg-primary);
     border-radius: 10px;
     padding: 10px 14px;
-    border: 1px solid rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--macos-border);
+    opacity: 0.9;
 }
 
 .mm-countdown-compact__label {
@@ -248,7 +257,7 @@
     gap: 6px;
     font-size: 10px;
     font-weight: 600;
-    color: #71717a;
+    color: var(--macos-text-tertiary);
     margin-bottom: 6px;
 }
 
@@ -267,18 +276,18 @@
 .mm-countdown-compact__value {
     font-size: 20px;
     font-weight: 800;
-    color: #fff;
+    color: var(--macos-text-primary);
     font-variant-numeric: tabular-nums;
 }
 
 .mm-countdown-compact__unit {
     font-size: 10px;
-    color: #52525b;
+    color: var(--macos-text-tertiary);
     font-weight: 600;
 }
 
 .mm-countdown-compact__sep {
-    color: #27272a;
+    color: var(--macos-border);
     font-weight: 300;
 }
 
@@ -297,18 +306,18 @@
     align-items: center;
     gap: 8px;
     padding: 6px 12px;
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--macos-bg-tertiary);
     border-radius: 6px;
     font-size: 11px;
-    color: #a1a1aa;
+    color: var(--macos-text-secondary);
 }
 
 .mm-hero__stat-pill strong {
-    color: #fff;
+    color: var(--macos-text-primary);
 }
 
 .mm-hero__stat-pill svg {
-    color: #3b82f6;
+    color: var(--macos-accent);
     opacity: 0.8;
 }
 
@@ -318,7 +327,7 @@
 
 .mm-hero__progress-bar {
     height: 4px;
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--macos-bg-tertiary);
     border-radius: 2px;
     overflow: hidden;
 }
@@ -333,7 +342,7 @@
     justify-content: space-between;
     margin-top: 4px;
     font-size: 9px;
-    color: #52525b;
+    color: var(--macos-text-tertiary);
 }
 
 @media (max-width: 1024px) {
@@ -355,7 +364,7 @@
 }
 
 .mm-renew-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--macos-bg-glass-hover);
 }
 
 .mm-quick-stats {
@@ -370,9 +379,13 @@
     align-items: center;
     gap: 10px;
     padding: 12px;
-    background: #18181b;
+    background: var(--macos-bg-secondary);
     border-radius: 12px;
-    border: 1px solid #27272a;
+    border: 1px solid var(--macos-border);
+}
+
+.theme-light .mm-quick-stat {
+    box-shadow: var(--shadow-sm);
 }
 
 .mm-quick-stat__icon {
@@ -393,14 +406,14 @@
     display: block;
     font-size: 18px;
     font-weight: 800;
-    color: #fff;
+    color: var(--macos-text-primary);
     line-height: 1;
 }
 
 .mm-quick-stat__label {
     display: block;
     font-size: 10px;
-    color: #71717a;
+    color: var(--macos-text-tertiary);
     margin-top: 2px;
 }
 
@@ -408,8 +421,8 @@
     display: flex;
     gap: 4px;
     padding: 4px;
-    background: #18181b;
-    border: 1px solid #27272a;
+    background: var(--macos-bg-secondary);
+    border: 1px solid var(--macos-border);
     border-radius: 10px;
     margin-bottom: 20px;
 }
@@ -422,7 +435,7 @@
     gap: 6px;
     padding: 8px 12px;
     border-radius: 8px;
-    color: #71717a;
+    color: var(--macos-text-secondary);
     font-size: 12px;
     font-weight: 600;
     border: none;
@@ -432,12 +445,14 @@
 }
 
 .mm-tab:hover {
-    color: #a1a1aa;
+    color: var(--macos-text-primary);
+    background: var(--macos-bg-glass-hover);
 }
 
 .mm-tab--active {
-    color: #fff;
-    background: #27272a;
+    color: var(--macos-text-primary);
+    background: var(--macos-bg-tertiary);
+    box-shadow: var(--shadow-xs);
 }
 
 .mm-content {
@@ -457,11 +472,15 @@
     align-items: center;
     gap: 10px;
     padding: 16px 12px;
-    background: #18181b;
-    border: 1px solid #27272a;
+    background: var(--macos-bg-secondary);
+    border: 1px solid var(--macos-border);
     border-radius: 12px;
     cursor: pointer;
     transition: all 0.2s;
+}
+
+.theme-light .mm-action-card {
+    box-shadow: var(--shadow-sm);
 }
 
 .mm-action-card__icon {
@@ -486,13 +505,13 @@
     display: block;
     font-size: 12px;
     font-weight: 600;
-    color: #fff;
+    color: var(--macos-text-primary);
 }
 
 .mm-action-card__desc {
     display: block;
     font-size: 10px;
-    color: #71717a;
+    color: var(--macos-text-tertiary);
     margin-top: 2px;
 }
 
@@ -514,11 +533,11 @@
     font-size: 14px;
     font-weight: 700;
     margin: 0;
-    color: #fff;
+    color: var(--macos-text-primary);
 }
 
 .mm-section__header h3 svg {
-    color: #3b82f6;
+    color: var(--macos-accent);
 }
 
 .mm-section__link {
@@ -527,7 +546,7 @@
     gap: 4px;
     font-size: 11px;
     font-weight: 500;
-    color: #3b82f6;
+    color: var(--macos-accent);
     background: none;
     border: none;
     cursor: pointer;
@@ -541,9 +560,13 @@
 
 .mm-activity-card {
     padding: 14px;
-    background: #18181b;
-    border: 1px solid #27272a;
+    background: var(--macos-bg-secondary);
+    border: 1px solid var(--macos-border);
     border-radius: 12px;
+}
+
+.theme-light .mm-activity-card {
+    box-shadow: var(--shadow-sm);
 }
 
 .mm-activity-card__header {
@@ -551,30 +574,30 @@
     align-items: center;
     gap: 6px;
     font-size: 11px;
-    color: #71717a;
+    color: var(--macos-text-tertiary);
     margin-bottom: 8px;
 }
 
 .mm-activity-card__header svg {
-    color: #3b82f6;
+    color: var(--macos-accent);
 }
 
 .mm-activity-card__value {
     font-size: 24px;
     font-weight: 800;
-    color: #fff;
+    color: var(--macos-text-primary);
     line-height: 1;
 }
 
 .mm-activity-card__change {
     font-size: 10px;
-    color: #22c55e;
+    color: var(--macos-success);
     margin-top: 4px;
 }
 
 .mm-activity-card__progress {
     height: 3px;
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--macos-bg-tertiary);
     border-radius: 2px;
     margin-top: 8px;
     overflow: hidden;
@@ -582,7 +605,7 @@
 
 .mm-activity-card__progress > div {
     height: 100%;
-    background: #3b82f6;
+    background: var(--macos-accent);
     border-radius: 2px;
 }
 
@@ -597,10 +620,14 @@
     align-items: center;
     gap: 12px;
     padding: 12px 14px;
-    background: #18181b;
-    border: 1px solid #27272a;
+    background: var(--macos-bg-secondary);
+    border: 1px solid var(--macos-border);
     border-radius: 10px;
     cursor: pointer;
+}
+
+.theme-light .mm-perk-item {
+    box-shadow: var(--shadow-sm);
 }
 
 .mm-perk-item__icon {
@@ -624,18 +651,18 @@
     display: block;
     font-size: 13px;
     font-weight: 600;
-    color: #fff;
+    color: var(--macos-text-primary);
 }
 
 .mm-perk-item__date {
     display: block;
     font-size: 10px;
-    color: #71717a;
+    color: var(--macos-text-tertiary);
     margin-top: 2px;
 }
 
 .mm-perk-item__arrow {
-    color: #3f3f46;
+    color: var(--macos-border);
 }
 
 .mm-benefits-grid {
@@ -648,10 +675,14 @@
 .mm-benefit-card {
     position: relative;
     padding: 16px;
-    background: #18181b;
-    border: 1px solid #27272a;
+    background: var(--macos-bg-secondary);
+    border: 1px solid var(--macos-border);
     border-radius: 12px;
     transition: all 0.2s;
+}
+
+.theme-light .mm-benefit-card {
+    box-shadow: var(--shadow-sm);
 }
 
 .mm-benefit-card--locked {
@@ -662,7 +693,7 @@
     position: absolute;
     top: 10px;
     right: 10px;
-    color: #71717a;
+    color: var(--macos-text-tertiary);
 }
 
 .mm-benefit-card__icon {
@@ -673,26 +704,26 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #3b82f6;
+    color: var(--macos-accent);
     margin-bottom: 10px;
 }
 
 .mm-benefit-card__title {
     font-size: 12px;
     font-weight: 600;
-    color: #fff;
+    color: var(--macos-text-primary);
     margin: 0 0 4px 0;
 }
 
 .mm-benefit-card__desc {
     font-size: 10px;
-    color: #71717a;
+    color: var(--macos-text-secondary);
     margin: 0;
 }
 
 .mm-benefit-card__progress {
     height: 3px;
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--macos-bg-tertiary);
     border-radius: 2px;
     margin-top: 10px;
     overflow: hidden;
@@ -700,7 +731,7 @@
 
 .mm-benefit-card__progress > div {
     height: 100%;
-    background: #3b82f6;
+    background: var(--macos-accent);
     border-radius: 2px;
 }
 
@@ -711,8 +742,8 @@
     width: 18px;
     height: 18px;
     border-radius: 50%;
-    background: rgba(34, 197, 94, 0.12);
-    color: #22c55e;
+    background: var(--macos-success-bg);
+    color: var(--macos-success);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -721,7 +752,7 @@
 .mm-benefit-card__upgrade {
     display: block;
     font-size: 9px;
-    color: #8b5cf6;
+    color: var(--macos-purple);
     margin-top: 8px;
 }
 
@@ -748,12 +779,12 @@
 .mm-rewards-card__value {
     font-size: 32px;
     font-weight: 800;
-    color: #fff;
+    color: var(--macos-text-primary);
 }
 
 .mm-rewards-card__label {
     font-size: 11px;
-    color: #71717a;
+    color: var(--macos-text-secondary);
     margin-top: 4px;
 }
 
@@ -771,7 +802,7 @@
 .mm-rewards-card__progress-bar {
     width: 120px;
     height: 4px;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--macos-bg-tertiary);
     border-radius: 2px;
     overflow: hidden;
     margin-bottom: 4px;
@@ -785,7 +816,7 @@
 
 .mm-rewards-card__progress span {
     font-size: 10px;
-    color: #71717a;
+    color: var(--macos-text-tertiary);
 }
 
 .mm-rewards-card__btn {
@@ -793,7 +824,7 @@
     align-items: center;
     gap: 6px;
     padding: 8px 16px;
-    background: #8b5cf6;
+    background: var(--macos-purple);
     border: none;
     border-radius: 8px;
     color: #fff;
@@ -813,8 +844,8 @@
     align-items: center;
     gap: 14px;
     padding: 14px 16px;
-    background: #18181b;
-    border: 1px solid #27272a;
+    background: var(--macos-bg-secondary);
+    border: 1px solid var(--macos-border);
     border-radius: 12px;
 }
 
@@ -827,7 +858,7 @@
     width: 48px;
     height: 32px;
     border-radius: 6px;
-    background: #27272a;
+    background: var(--macos-bg-tertiary);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -860,21 +891,21 @@
     display: block;
     font-size: 13px;
     font-weight: 600;
-    color: #fff;
+    color: var(--macos-text-primary);
     letter-spacing: 0.02em;
 }
 
 .mm-payment-card__expiry {
     display: block;
     font-size: 10px;
-    color: #71717a;
+    color: var(--macos-text-tertiary);
     margin-top: 2px;
 }
 
 .mm-payment-card__badge {
     padding: 4px 10px;
     background: rgba(59, 130, 246, 0.12);
-    color: #3b82f6;
+    color: var(--macos-accent);
     font-size: 9px;
     font-weight: 600;
     border-radius: 5px;
@@ -891,9 +922,9 @@
     width: 28px;
     height: 28px;
     border-radius: 6px;
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--macos-bg-tertiary);
     border: none;
-    color: #71717a;
+    color: var(--macos-text-tertiary);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -902,8 +933,8 @@
 }
 
 .mm-payment-card__actions button:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
+    background: var(--macos-bg-glass-hover);
+    color: var(--macos-text-primary);
 }
 
 .mm-payment-history {
@@ -917,8 +948,8 @@
     align-items: center;
     gap: 12px;
     padding: 14px 16px;
-    background: #18181b;
-    border: 1px solid #27272a;
+    background: var(--macos-bg-secondary);
+    border: 1px solid var(--macos-border);
     border-radius: 10px;
 }
 
@@ -926,8 +957,8 @@
     width: 28px;
     height: 28px;
     border-radius: 8px;
-    background: rgba(34, 197, 94, 0.12);
-    color: #22c55e;
+    background: var(--macos-success-bg);
+    color: var(--macos-success);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -941,13 +972,13 @@
     display: block;
     font-size: 13px;
     font-weight: 600;
-    color: #fff;
+    color: var(--macos-text-primary);
 }
 
 .mm-history-item__meta {
     display: block;
     font-size: 10px;
-    color: #71717a;
+    color: var(--macos-text-tertiary);
     margin-top: 2px;
 }
 
@@ -960,16 +991,16 @@
 .mm-history-item__amount {
     font-size: 14px;
     font-weight: 700;
-    color: #fff;
+    color: var(--macos-text-primary);
 }
 
 .mm-history-item__download {
     width: 28px;
     height: 28px;
     border-radius: 6px;
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--macos-bg-tertiary);
     border: none;
-    color: #71717a;
+    color: var(--macos-text-tertiary);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -977,8 +1008,8 @@
 }
 
 .mm-history-item__download:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
+    background: var(--macos-bg-glass-hover);
+    color: var(--macos-text-primary);
 }
 
 .mm-settings-list {
@@ -992,8 +1023,8 @@
     align-items: center;
     justify-content: space-between;
     padding: 16px;
-    background: #18181b;
-    border: 1px solid #27272a;
+    background: var(--macos-bg-secondary);
+    border: 1px solid var(--macos-border);
     border-radius: 12px;
 }
 
@@ -1024,20 +1055,20 @@
 .mm-setting-card__info h4 {
     font-size: 13px;
     font-weight: 600;
-    color: #fff;
+    color: var(--macos-text-primary);
     margin: 0;
 }
 
 .mm-setting-card__info p {
     font-size: 11px;
-    color: #71717a;
+    color: var(--macos-text-secondary);
     margin: 2px 0 0;
 }
 
 .mm-setting-card__progress {
     width: 80px;
     height: 3px;
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--macos-bg-tertiary);
     border-radius: 2px;
     margin-top: 6px;
     overflow: hidden;
@@ -1045,7 +1076,7 @@
 
 .mm-setting-card__progress > div {
     height: 100%;
-    background: #8b5cf6;
+    background: var(--macos-purple);
     border-radius: 2px;
 }
 
@@ -1065,7 +1096,7 @@
 .mm-toggle__slider {
     position: absolute;
     inset: 0;
-    background: #27272a;
+    background: var(--macos-bg-tertiary);
     border-radius: 12px;
     transition: all 0.3s;
 }
@@ -1077,13 +1108,13 @@
     height: 18px;
     left: 3px;
     bottom: 3px;
-    background: #71717a;
+    background: var(--macos-text-tertiary);
     border-radius: 50%;
     transition: all 0.3s;
 }
 
 .mm-toggle input:checked + .mm-toggle__slider {
-    background: #3b82f6;
+    background: var(--macos-accent);
 }
 
 .mm-toggle input:checked + .mm-toggle__slider::before {
@@ -1098,18 +1129,18 @@
     font-weight: 600;
     cursor: pointer;
     border: none;
-    background: rgba(255, 255, 255, 0.06);
-    color: #fff;
+    background: var(--macos-bg-tertiary);
+    color: var(--macos-text-primary);
     transition: all 0.2s;
 }
 
 .mm-setting-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--macos-bg-glass-hover);
 }
 
 .mm-setting-btn--danger {
-    background: rgba(239, 68, 68, 0.12);
-    color: #ef4444;
+    background: var(--macos-error-bg);
+    color: var(--macos-error);
 }
 
 .mm-setting-btn--danger:hover {
@@ -1135,9 +1166,9 @@
     width: 32px;
     height: 32px;
     border-radius: 8px;
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--macos-bg-tertiary);
     border: none;
-    color: #71717a;
+    color: var(--macos-text-tertiary);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -1146,13 +1177,14 @@
 
 .mm-qr-modal {
     position: relative;
-    background: #18181b;
-    border: 1px solid #27272a;
+    background: var(--macos-bg-secondary);
+    border: 1px solid var(--macos-border);
     border-radius: 20px;
     padding: 32px 24px;
     text-align: center;
     max-width: 300px;
     width: 100%;
+    box-shadow: var(--shadow-lg);
 }
 
 .mm-qr-code {
@@ -1175,11 +1207,12 @@
     font-size: 16px;
     font-weight: 700;
     margin: 0 0 6px;
+    color: var(--macos-text-primary);
 }
 
 .mm-qr-modal p {
     font-size: 12px;
-    color: #71717a;
+    color: var(--macos-text-secondary);
     margin: 0;
 }
 
@@ -1189,11 +1222,11 @@
     gap: 8px;
     margin-top: 16px;
     padding: 8px 14px;
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--macos-bg-tertiary);
     border-radius: 8px;
     font-size: 12px;
     font-weight: 600;
-    color: #fff;
+    color: var(--macos-text-primary);
     cursor: pointer;
 }
 
@@ -1204,17 +1237,18 @@
     gap: 6px;
     margin-top: 12px;
     font-size: 11px;
-    color: #22c55e;
+    color: var(--macos-success);
 }
 
 .mm-freeze-modal {
     position: relative;
-    background: #18181b;
-    border: 1px solid #27272a;
+    background: var(--macos-bg-secondary);
+    border: 1px solid var(--macos-border);
     border-radius: 20px;
     max-width: 380px;
     width: 100%;
     overflow: hidden;
+    box-shadow: var(--shadow-lg);
 }
 
 .mm-freeze-modal__header {
@@ -1222,7 +1256,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 16px 20px;
-    border-bottom: 1px solid #27272a;
+    border-bottom: 1px solid var(--macos-border);
 }
 
 .mm-freeze-modal__header h3 {
@@ -1232,6 +1266,7 @@
     font-size: 15px;
     font-weight: 700;
     margin: 0;
+    color: var(--macos-text-primary);
 }
 
 .mm-freeze-modal__header button {
@@ -1240,7 +1275,7 @@
     border-radius: 6px;
     background: transparent;
     border: none;
-    color: #71717a;
+    color: var(--macos-text-tertiary);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -1261,14 +1296,14 @@
 }
 
 .mm-freeze-info svg {
-    color: #3b82f6;
+    color: var(--macos-accent);
     flex-shrink: 0;
     margin-top: 1px;
 }
 
 .mm-freeze-info p {
     font-size: 12px;
-    color: #a1a1aa;
+    color: var(--macos-text-secondary);
     margin: 0;
     line-height: 1.5;
 }
@@ -1277,7 +1312,7 @@
     display: block;
     font-size: 11px;
     font-weight: 600;
-    color: #71717a;
+    color: var(--macos-text-tertiary);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     margin-bottom: 10px;
@@ -1292,10 +1327,10 @@
 .mm-freeze-option {
     flex: 1;
     padding: 10px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid #27272a;
+    background: var(--macos-bg-tertiary);
+    border: 1px solid var(--macos-border);
     border-radius: 8px;
-    color: #a1a1aa;
+    color: var(--macos-text-secondary);
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
@@ -1305,7 +1340,7 @@
 .mm-freeze-option--active {
     background: rgba(139, 92, 246, 0.12);
     border-color: rgba(139, 92, 246, 0.3);
-    color: #8b5cf6;
+    color: var(--macos-purple);
 }
 
 .mm-freeze-dates {
@@ -1313,7 +1348,7 @@
     align-items: center;
     gap: 16px;
     padding: 14px;
-    background: rgba(255, 255, 255, 0.02);
+    background: var(--macos-bg-tertiary);
     border-radius: 10px;
 }
 
@@ -1324,24 +1359,24 @@
 .mm-freeze-date span {
     display: block;
     font-size: 10px;
-    color: #71717a;
+    color: var(--macos-text-tertiary);
     margin-bottom: 4px;
 }
 
 .mm-freeze-date strong {
     font-size: 13px;
-    color: #fff;
+    color: var(--macos-text-primary);
 }
 
 .mm-freeze-dates > svg {
-    color: #3f3f46;
+    color: var(--macos-border);
 }
 
 .mm-freeze-modal__footer {
     display: flex;
     gap: 10px;
     padding: 16px 20px;
-    border-top: 1px solid #27272a;
+    border-top: 1px solid var(--macos-border);
 }
 
 .mm-modal-btn {
@@ -1360,16 +1395,16 @@
 }
 
 .mm-modal-btn--secondary {
-    background: rgba(255, 255, 255, 0.05);
-    color: #a1a1aa;
+    background: var(--macos-bg-tertiary);
+    color: var(--macos-text-secondary);
 }
 
 .mm-modal-btn--secondary:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--macos-bg-glass-hover);
 }
 
 .mm-modal-btn--primary {
-    background: #8b5cf6;
+    background: var(--macos-purple);
     color: #fff;
 }
 

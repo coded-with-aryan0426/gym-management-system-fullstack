@@ -17,8 +17,8 @@
     display: flex;
     gap: 10px;
     padding: 12px 16px;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: var(--macos-bg-glass);
+    border: 1px solid var(--macos-border);
     border-radius: 12px;
     overflow-x: auto;
 }
@@ -28,10 +28,10 @@
     align-items: center;
     gap: 8px;
     padding: 10px 16px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--macos-bg-tertiary);
+    border: 1px solid var(--macos-border);
     border-radius: 8px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--macos-text-secondary);
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
@@ -40,19 +40,19 @@
 }
 
 .quick-action-btn:hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: #fff;
-    border-color: rgba(255, 255, 255, 0.15);
+    background: var(--macos-bg-glass-hover);
+    color: var(--macos-text-primary);
+    border-color: var(--macos-border-focus);
 }
 
 .quick-action-btn.primary {
-    background: #007AFF;
-    border-color: #007AFF;
+    background: var(--macos-accent);
+    border-color: var(--macos-accent);
     color: #fff;
 }
 
 .quick-action-btn.primary:hover {
-    background: #0066d6;
+    background: var(--macos-accent-hover);
 }
 
 .quick-action-btn.history-btn {
@@ -70,6 +70,11 @@
     padding: 16px 20px;
 }
 
+.theme-light .summary-banner {
+    background: linear-gradient(135deg, rgba(0, 122, 255, 0.08) 0%, rgba(48, 209, 88, 0.05) 100%);
+    border-color: rgba(0, 122, 255, 0.15);
+}
+
 .summary-banner__content {
     display: flex;
     justify-content: space-between;
@@ -81,7 +86,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    color: rgba(255, 255, 255, 0.9);
+    color: var(--macos-text-primary);
     font-size: 14px;
 }
 
@@ -90,7 +95,7 @@
 }
 
 .summary-banner__main strong {
-    color: #fff;
+    color: var(--macos-text-primary);
 }
 
 .summary-banner__stats {
@@ -108,12 +113,12 @@
 .mini-stat__value {
     font-size: 18px;
     font-weight: 700;
-    color: #fff;
+    color: var(--macos-text-primary);
 }
 
 .mini-stat__label {
     font-size: 10px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--macos-text-tertiary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -133,11 +138,15 @@
     align-items: flex-start;
     gap: 12px;
     padding: 16px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: var(--macos-bg-secondary);
+    border: 1px solid var(--macos-border);
     border-radius: 14px;
     position: relative;
     transition: all 0.2s ease;
+}
+
+.theme-light .stat-card {
+    box-shadow: var(--shadow-sm);
 }
 
 .stat-card.clickable {
@@ -145,9 +154,10 @@
 }
 
 .stat-card.clickable:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.1);
+    background: var(--macos-bg-tertiary);
+    border-color: var(--macos-border-focus);
     transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
 }
 
 .stat-card__icon {
@@ -162,22 +172,22 @@
 
 .stat-card--weight .stat-card__icon {
     background: rgba(0, 122, 255, 0.15);
-    color: #007AFF;
+    color: var(--macos-accent);
 }
 
 .stat-card--bodyfat .stat-card__icon {
-    background: rgba(48, 209, 88, 0.15);
-    color: #30D158;
+    background: var(--macos-success-bg);
+    color: var(--macos-success);
 }
 
 .stat-card--muscle .stat-card__icon {
     background: rgba(175, 82, 222, 0.15);
-    color: #AF52DE;
+    color: var(--macos-purple);
 }
 
 .stat-card--bmi .stat-card__icon {
-    background: rgba(255, 159, 10, 0.15);
-    color: #FF9F0A;
+    background: var(--macos-warning-bg);
+    color: var(--macos-warning);
 }
 
 .stat-card__body {
@@ -188,26 +198,26 @@
 .stat-card__value {
     font-size: 24px;
     font-weight: 700;
-    color: #fff;
+    color: var(--macos-text-primary);
     line-height: 1.1;
 }
 
 .stat-card__value span {
     font-size: 14px;
     font-weight: 500;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--macos-text-tertiary);
     margin-left: 2px;
 }
 
 .stat-card__label {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--macos-text-secondary);
     margin-top: 4px;
 }
 
 .stat-card__detail {
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--macos-text-tertiary);
     margin-top: 2px;
 }
 
@@ -229,24 +239,24 @@
 }
 
 .stat-card__trend.positive {
-    background: rgba(48, 209, 88, 0.12);
-    color: #30D158;
+    background: var(--macos-success-bg);
+    color: var(--macos-success);
 }
 
 .stat-card__trend.negative {
-    background: rgba(255, 69, 58, 0.12);
-    color: #FF453A;
+    background: var(--macos-error-bg);
+    color: var(--macos-error);
 }
 
 .stat-card__sub {
     font-size: 10px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--macos-text-tertiary);
 }
 
 .stat-card__category {
     font-size: 10px;
-    color: rgba(255, 255, 255, 0.5);
-    background: rgba(255, 255, 255, 0.05);
+    color: var(--macos-text-tertiary);
+    background: var(--macos-bg-tertiary);
     padding: 2px 6px;
     border-radius: 4px;
 }
@@ -259,19 +269,19 @@
 }
 
 .bmi-indicator.normal {
-    background: rgba(48, 209, 88, 0.15);
-    color: #30D158;
+    background: var(--macos-success-bg);
+    color: var(--macos-success);
 }
 
 .bmi-indicator.overweight {
-    background: rgba(255, 159, 10, 0.15);
-    color: #FF9F0A;
+    background: var(--macos-warning-bg);
+    color: var(--macos-warning);
 }
 
 .bmi-indicator.underweight,
 .bmi-indicator.obese {
-    background: rgba(255, 69, 58, 0.15);
-    color: #FF453A;
+    background: var(--macos-error-bg);
+    color: var(--macos-error);
 }
 
 /* ============================================
@@ -279,10 +289,14 @@
    ============================================ */
 
 .chart-section {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: var(--macos-bg-secondary);
+    border: 1px solid var(--macos-border);
     border-radius: 16px;
     padding: 20px;
+}
+
+.theme-light .chart-section {
+    box-shadow: var(--shadow-sm);
 }
 
 .chart-section__header {
@@ -294,7 +308,7 @@
 
 .chart-tabs {
     display: flex;
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--macos-bg-tertiary);
     padding: 4px;
     border-radius: 10px;
     gap: 4px;
@@ -308,7 +322,7 @@
     border-radius: 8px;
     border: none;
     background: transparent;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--macos-text-tertiary);
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
@@ -316,11 +330,11 @@
 }
 
 .chart-tab:hover {
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--macos-text-secondary);
 }
 
 .chart-tab.active {
-    background: #007AFF;
+    background: var(--macos-accent);
     color: white;
 }
 
@@ -333,7 +347,7 @@
     padding: 6px 12px;
     border: none;
     background: transparent;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--macos-text-tertiary);
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
@@ -342,20 +356,20 @@
 }
 
 .time-filter:hover {
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--macos-text-secondary);
 }
 
 .time-filter.active {
-    color: #007AFF;
+    color: var(--macos-accent);
     background: rgba(0, 122, 255, 0.1);
 }
 
 /* Chart Stats Summary */
 .chart-stats-summary {
     display: flex;
-    gap: 16px;
-    padding: 16px;
-    background: rgba(255, 255, 255, 0.02);
+    gap: 12px;
+    padding: 12px;
+    background: var(--macos-bg-tertiary);
     border-radius: 12px;
     margin-bottom: 16px;
     overflow-x: auto;
@@ -367,9 +381,9 @@
     gap: 2px;
     min-width: 100px;
     padding: 8px 12px;
-    background: rgba(255, 255, 255, 0.02);
+    background: var(--macos-bg-secondary);
     border-radius: 8px;
-    border: 1px solid transparent;
+    border: 1px solid var(--macos-border);
 }
 
 .chart-stat.highlight-stat {
@@ -379,7 +393,7 @@
 
 .chart-stat-label {
     font-size: 10px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--macos-text-tertiary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -387,28 +401,28 @@
 .chart-stat-value {
     font-size: 16px;
     font-weight: 700;
-    color: #fff;
+    color: var(--macos-text-primary);
 }
 
 .chart-stat-value.highlight {
-    color: #007AFF;
+    color: var(--macos-accent);
 }
 
 .chart-stat-value.goal-value {
-    color: #30D158;
+    color: var(--macos-success);
 }
 
 .chart-stat-value.positive {
-    color: #30D158;
+    color: var(--macos-success);
 }
 
 .chart-stat-value.negative {
-    color: #FF453A;
+    color: var(--macos-error);
 }
 
 .chart-stat-date {
     font-size: 10px;
-    color: rgba(255, 255, 255, 0.35);
+    color: var(--macos-text-tertiary);
 }
 
 .chart-container {
@@ -422,16 +436,21 @@
 
 /* Custom Tooltip */
 .custom-tooltip {
-    background: rgba(30, 30, 30, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--macos-bg-secondary);
+    border: 1px solid var(--macos-border);
     border-radius: 10px;
     padding: 12px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    box-shadow: var(--shadow-lg);
+}
+
+.theme-light .custom-tooltip {
+    background: #fff;
+    border-color: rgba(0, 0, 0, 0.05);
 }
 
 .tooltip-date {
     font-size: 10px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--macos-text-tertiary);
     margin-bottom: 6px;
 }
 
@@ -443,13 +462,13 @@
 
 .tooltip-metric {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--macos-text-secondary);
 }
 
 .tooltip-number {
     font-size: 14px;
     font-weight: 700;
-    color: #fff;
+    color: var(--macos-text-primary);
 }
 
 .tooltip-change {
@@ -460,13 +479,13 @@
 }
 
 .tooltip-change.positive {
-    background: rgba(48, 209, 88, 0.15);
-    color: #30D158;
+    background: var(--macos-success-bg);
+    color: var(--macos-success);
 }
 
 .tooltip-change.negative {
-    background: rgba(255, 69, 58, 0.15);
-    color: #FF453A;
+    background: var(--macos-error-bg);
+    color: var(--macos-error);
 }
 
 /* Activity Container */
@@ -481,7 +500,7 @@
 .weekly-bars h4,
 .heatmap-section h4 {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--macos-text-tertiary);
     margin-bottom: 12px;
     font-weight: 600;
 }
@@ -521,27 +540,27 @@
 }
 
 .week-bar.active {
-    background: linear-gradient(180deg, #007AFF 0%, #0055d4 100%);
+    background: linear-gradient(180deg, var(--macos-accent) 0%, var(--macos-accent-hover) 100%);
 }
 
 .week-bar.rest {
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--macos-bg-tertiary);
 }
 
 .week-bar-day {
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--macos-text-secondary);
     font-weight: 500;
 }
 
 .week-bar-type {
     font-size: 9px;
-    color: rgba(255, 255, 255, 0.35);
+    color: var(--macos-text-tertiary);
 }
 
 .week-bar-mins {
     font-size: 10px;
-    color: #007AFF;
+    color: var(--macos-accent);
     font-weight: 600;
 }
 
@@ -565,7 +584,7 @@
     max-width: 28px;
     aspect-ratio: 1;
     border-radius: 3px;
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--macos-bg-tertiary);
     transition: transform 0.15s ease;
     cursor: pointer;
 }
@@ -584,7 +603,7 @@
     align-items: center;
     gap: 8px;
     font-size: 10px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--macos-text-tertiary);
     margin-top: 12px;
     justify-content: center;
 }
@@ -598,7 +617,7 @@
     width: 12px;
     height: 12px;
     border-radius: 2px;
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--macos-bg-tertiary);
 }
 
 .legend-cell.intensity-1 { background: rgba(0, 122, 255, 0.25); }
@@ -627,7 +646,7 @@
 .measurement-row__label {
     font-size: 13px;
     font-weight: 500;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--macos-text-secondary);
 }
 
 .measurement-row__bar-container {
@@ -636,7 +655,7 @@
 
 .measurement-row__bar-bg {
     height: 8px;
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--macos-bg-tertiary);
     border-radius: 4px;
     position: relative;
     overflow: hidden;
@@ -645,7 +664,7 @@
 .measurement-row__bar-start {
     position: absolute;
     height: 100%;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--macos-border);
     border-radius: 4px;
 }
 
@@ -672,7 +691,7 @@
 .measurement-row__current {
     font-size: 14px;
     font-weight: 600;
-    color: #fff;
+    color: var(--macos-text-primary);
 }
 
 .measurement-row__change {
@@ -681,16 +700,16 @@
 }
 
 .measurement-row__change.positive {
-    color: #30D158;
+    color: var(--macos-success);
 }
 
 .measurement-row__change.negative {
-    color: #FF453A;
+    color: var(--macos-error);
 }
 
 .measurement-row__ideal {
     font-size: 10px;
-    color: rgba(255, 255, 255, 0.35);
+    color: var(--macos-text-tertiary);
 }
 
 /* Body Composition Chart */
@@ -713,7 +732,7 @@
 
 .composition-pie h5 {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--macos-text-tertiary);
     margin-bottom: 16px;
     font-weight: 600;
 }
@@ -729,7 +748,7 @@
     align-items: center;
     gap: 10px;
     font-size: 13px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--macos-text-secondary);
 }
 
 .pie-dot {
@@ -743,11 +762,15 @@
    ============================================ */
 
 .goals-section-enhanced {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: var(--macos-bg-secondary);
+    border: 1px solid var(--macos-border);
     border-radius: 16px;
     padding: 20px;
     margin-top: 8px;
+}
+
+.theme-light .goals-section-enhanced {
+    box-shadow: var(--shadow-sm);
 }
 
 .section-header {
@@ -766,17 +789,17 @@
 .section-title h3 {
     font-size: 15px;
     font-weight: 600;
-    color: #fff;
+    color: var(--macos-text-primary);
 }
 
 .section-title svg {
-    color: #007AFF;
+    color: var(--macos-accent);
 }
 
 .goal-count {
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.4);
-    background: rgba(255, 255, 255, 0.05);
+    color: var(--macos-text-tertiary);
+    background: var(--macos-bg-tertiary);
     padding: 2px 8px;
     border-radius: 10px;
 }
@@ -787,9 +810,9 @@
     gap: 6px;
     padding: 8px 14px;
     background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--macos-border);
     border-radius: 8px;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--macos-text-secondary);
     font-size: 12px;
     font-weight: 500;
     cursor: pointer;
@@ -797,8 +820,8 @@
 }
 
 .section-action:hover {
-    background: rgba(255, 255, 255, 0.05);
-    color: #fff;
+    background: var(--macos-bg-tertiary);
+    color: var(--macos-text-primary);
 }
 
 .goals-grid {
@@ -808,8 +831,8 @@
 }
 
 .goal-card {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: var(--macos-bg-tertiary);
+    border: 1px solid var(--macos-border);
     border-radius: 14px;
     padding: 16px;
     cursor: pointer;
@@ -818,8 +841,9 @@
 }
 
 .goal-card:hover {
-    background: rgba(255, 255, 255, 0.04);
-    border-color: rgba(255, 255, 255, 0.1);
+    background: var(--macos-bg-glass-hover);
+    border-color: var(--macos-border-focus);
+    box-shadow: var(--shadow-md);
 }
 
 .goal-card__header {
@@ -845,19 +869,19 @@
 .goal-card__title {
     font-size: 14px;
     font-weight: 600;
-    color: #fff;
+    color: var(--macos-text-primary);
     display: block;
 }
 
 .goal-card__type {
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--macos-text-tertiary);
 }
 
 .goal-card__percent {
     font-size: 18px;
     font-weight: 700;
-    color: #fff;
+    color: var(--macos-text-primary);
 }
 
 .goal-card__progress {
@@ -866,7 +890,7 @@
 
 .goal-progress-bar {
     height: 6px;
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--macos-bg-secondary);
     border-radius: 3px;
     overflow: hidden;
     position: relative;
@@ -882,26 +906,13 @@
     justify-content: space-between;
     margin-top: 8px;
     font-size: 10px;
-    color: rgba(255, 255, 255, 0.35);
+    color: var(--macos-text-tertiary);
     position: relative;
     height: 14px;
 }
 
-.goal-progress-bar__markers span {
-    position: relative;
-    transform: none;
-}
-
-.goal-progress-bar__markers span:first-child {
-    text-align: left;
-}
-
-.goal-progress-bar__markers span:last-child {
-    text-align: right;
-}
-
 .goal-progress-bar__markers .current-marker {
-    color: #007AFF;
+    color: var(--macos-accent);
     font-weight: 600;
     position: absolute;
     left: 50%;
@@ -923,22 +934,22 @@
 
 .goal-stat__label {
     font-size: 9px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--macos-text-tertiary);
     text-transform: uppercase;
 }
 
 .goal-stat__value {
     font-size: 12px;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--macos-text-secondary);
 }
 
 .goal-stat__value.on-track {
-    color: #30D158;
+    color: var(--macos-success);
 }
 
 .goal-stat__value.behind {
-    color: #FF9F0A;
+    color: var(--macos-warning);
 }
 
 .goal-card__status {
@@ -952,20 +963,20 @@
 }
 
 .goal-card__status.on-track {
-    background: rgba(48, 209, 88, 0.1);
-    color: #30D158;
+    background: var(--macos-success-bg);
+    color: var(--macos-success);
 }
 
 .goal-card__status.behind {
-    background: rgba(255, 159, 10, 0.1);
-    color: #FF9F0A;
+    background: var(--macos-warning-bg);
+    color: var(--macos-warning);
 }
 
 .goal-card__expand {
     position: absolute;
     bottom: 8px;
     right: 8px;
-    color: rgba(255, 255, 255, 0.3);
+    color: var(--macos-text-quaternary);
 }
 
 /* ============================================
@@ -979,10 +990,14 @@
 }
 
 .panel-card {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: var(--macos-bg-secondary);
+    border: 1px solid var(--macos-border);
     border-radius: 14px;
     padding: 18px;
+}
+
+.theme-light .panel-card {
+    box-shadow: var(--shadow-sm);
 }
 
 .panel-card__header {
@@ -995,7 +1010,7 @@
 .panel-card__header h3 {
     font-size: 14px;
     font-weight: 600;
-    color: #fff;
+    color: var(--macos-text-primary);
     flex: 1;
 }
 
@@ -1005,30 +1020,30 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--macos-bg-tertiary);
     border: none;
     border-radius: 8px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--macos-text-tertiary);
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
 .panel-add-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
+    background: var(--macos-bg-glass-hover);
+    color: var(--macos-text-primary);
 }
 
 .notes-count {
     font-size: 10px;
-    background: rgba(255, 45, 85, 0.15);
-    color: #FF2D55;
+    background: var(--macos-error-bg);
+    color: var(--macos-error);
     padding: 2px 8px;
     border-radius: 10px;
 }
 
 .icon-gold { color: #FFD60A; }
-.icon-blue { color: #007AFF; }
-.icon-pink { color: #FF2D55; }
+.icon-blue { color: var(--macos-accent); }
+.icon-pink { color: var(--macos-pink); }
 
 /* Personal Bests */
 .pb-list {
@@ -1043,7 +1058,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 10px 12px;
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--macos-bg-tertiary);
     border-radius: 10px;
 }
 
@@ -1066,27 +1081,27 @@
 
 .pb-category-badge[data-category="push"] {
     background: rgba(0, 122, 255, 0.15);
-    color: #007AFF;
+    color: var(--macos-accent);
 }
 
 .pb-category-badge[data-category="pull"] {
     background: rgba(175, 82, 222, 0.15);
-    color: #AF52DE;
+    color: var(--macos-purple);
 }
 
 .pb-category-badge[data-category="legs"] {
-    background: rgba(48, 209, 88, 0.15);
-    color: #30D158;
+    background: var(--macos-success-bg);
+    color: var(--macos-success);
 }
 
 .pb-category-badge[data-category="core"] {
-    background: rgba(255, 159, 10, 0.15);
-    color: #FF9F0A;
+    background: var(--macos-warning-bg);
+    color: var(--macos-warning);
 }
 
 .pb-category-badge[data-category="cardio"] {
-    background: rgba(255, 45, 85, 0.15);
-    color: #FF2D55;
+    background: var(--macos-error-bg);
+    color: var(--macos-error);
 }
 
 .pb-item__info {
@@ -1097,12 +1112,12 @@
 .pb-exercise {
     font-size: 13px;
     font-weight: 500;
-    color: #fff;
+    color: var(--macos-text-primary);
 }
 
 .pb-date {
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--macos-text-tertiary);
 }
 
 .pb-item__right {
@@ -1114,7 +1129,7 @@
 .pb-weight {
     font-size: 14px;
     font-weight: 700;
-    color: #007AFF;
+    color: var(--macos-accent);
 }
 
 .pb-improvement {
@@ -1122,7 +1137,7 @@
     align-items: center;
     gap: 3px;
     font-size: 10px;
-    color: #30D158;
+    color: var(--macos-success);
 }
 
 .panel-btn {
@@ -1133,9 +1148,9 @@
     gap: 6px;
     padding: 10px;
     background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--macos-border);
     border-radius: 8px;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--macos-text-secondary);
     font-size: 12px;
     font-weight: 500;
     cursor: pointer;
@@ -1143,18 +1158,18 @@
 }
 
 .panel-btn:hover {
-    background: rgba(255, 255, 255, 0.05);
-    color: #fff;
+    background: var(--macos-bg-tertiary);
+    color: var(--macos-text-primary);
 }
 
 .panel-btn--primary {
-    background: #007AFF;
-    border-color: #007AFF;
+    background: var(--macos-accent);
+    border-color: var(--macos-accent);
     color: #fff;
 }
 
 .panel-btn--primary:hover {
-    background: #0066d6;
+    background: var(--macos-accent-hover);
 }
 
 /* Weekly Summary */
@@ -1186,13 +1201,13 @@
 .ring-percent {
     font-size: 20px;
     font-weight: 700;
-    color: #fff;
+    color: var(--macos-text-primary);
     display: block;
 }
 
 .ring-label {
     font-size: 10px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--macos-text-tertiary);
 }
 
 .weekly-summary__stats {
@@ -1209,18 +1224,18 @@
 }
 
 .weekly-stat svg {
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--macos-text-tertiary);
 }
 
 .weekly-stat span:nth-child(2) {
     font-size: 14px;
     font-weight: 600;
-    color: #fff;
+    color: var(--macos-text-primary);
 }
 
 .weekly-stat__label {
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--macos-text-tertiary);
     margin-left: auto;
 }
 
@@ -1247,7 +1262,7 @@
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #007AFF, #5856D6);
+    background: linear-gradient(135deg, var(--macos-accent), var(--macos-purple));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1264,18 +1279,18 @@
 .trainer-name {
     font-size: 13px;
     font-weight: 600;
-    color: #fff;
+    color: var(--macos-text-primary);
 }
 
 .trainer-time {
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--macos-text-tertiary);
 }
 
 .feedback-text {
     font-size: 13px;
     line-height: 1.5;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--macos-text-secondary);
     font-style: italic;
 }
 
@@ -1284,10 +1299,14 @@
    ============================================ */
 
 .milestones-section {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: var(--macos-bg-secondary);
+    border: 1px solid var(--macos-border);
     border-radius: 14px;
     padding: 20px 24px;
+}
+
+.theme-light .milestones-section {
+    box-shadow: var(--shadow-sm);
 }
 
 .milestones-track {
@@ -1304,7 +1323,7 @@
     left: 60px;
     right: 60px;
     height: 2px;
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--macos-border);
 }
 
 .milestone {
@@ -1320,46 +1339,46 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.04);
-    border: 2px solid rgba(255, 255, 255, 0.08);
+    background: var(--macos-bg-tertiary);
+    border: 2px solid var(--macos-border);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: rgba(255, 255, 255, 0.3);
+    color: var(--macos-text-tertiary);
     transition: all 0.3s ease;
 }
 
 .milestone span {
     font-size: 11px;
     font-weight: 500;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--macos-text-tertiary);
     white-space: nowrap;
 }
 
 .milestone-date {
     font-size: 10px !important;
-    color: rgba(255, 255, 255, 0.3) !important;
+    color: var(--macos-text-quaternary) !important;
 }
 
 .milestone.completed .milestone__icon {
-    background: rgba(48, 209, 88, 0.15);
-    border-color: #30D158;
-    color: #30D158;
+    background: var(--macos-success-bg);
+    border-color: var(--macos-success);
+    color: var(--macos-success);
 }
 
 .milestone.completed span {
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--macos-text-secondary);
 }
 
 .milestone.active .milestone__icon {
-    background: #007AFF;
-    border-color: #007AFF;
+    background: var(--macos-accent);
+    border-color: var(--macos-accent);
     color: #fff;
     box-shadow: 0 0 20px rgba(0, 122, 255, 0.4);
 }
 
 .milestone.active span {
-    color: #fff;
+    color: var(--macos-text-primary);
     font-weight: 600;
 }
 
@@ -1369,7 +1388,7 @@
     right: 8px;
     width: 8px;
     height: 8px;
-    background: #007AFF;
+    background: var(--macos-accent);
     border-radius: 50%;
     animation: pulse 2s infinite;
 }
@@ -1395,11 +1414,12 @@
     justify-content: center;
     z-index: 1000;
     padding: 20px;
+    backdrop-filter: blur(4px);
 }
 
 .modal-content {
-    background: #1c1c1e;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--macos-bg-secondary);
+    border: 1px solid var(--macos-border);
     border-radius: 16px;
     width: 100%;
     max-width: 480px;
@@ -1407,6 +1427,11 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    box-shadow: var(--shadow-lg);
+}
+
+.theme-light .modal-content {
+    background: #fff;
 }
 
 .modal-content.modal-large {
@@ -1418,13 +1443,13 @@
     justify-content: space-between;
     align-items: center;
     padding: 18px 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid var(--macos-border);
 }
 
 .modal-header h2 {
     font-size: 17px;
     font-weight: 600;
-    color: #fff;
+    color: var(--macos-text-primary);
 }
 
 .modal-close {
@@ -1433,17 +1458,17 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--macos-bg-tertiary);
     border: none;
     border-radius: 8px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--macos-text-tertiary);
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
 .modal-close:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
+    background: var(--macos-bg-glass-hover);
+    color: var(--macos-text-primary);
 }
 
 .modal-body {
@@ -1464,14 +1489,14 @@
 }
 
 .modal-tip svg {
-    color: #007AFF;
+    color: var(--macos-accent);
     flex-shrink: 0;
     margin-top: 2px;
 }
 
 .modal-tip span {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--macos-text-secondary);
     line-height: 1.5;
 }
 
@@ -1482,13 +1507,13 @@
 .form-section h4 {
     font-size: 13px;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--macos-text-secondary);
     margin-bottom: 12px;
 }
 
 .form-section-desc {
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--macos-text-tertiary);
     margin-top: -8px;
     margin-bottom: 12px;
 }
@@ -1516,17 +1541,17 @@
 .form-group label {
     font-size: 12px;
     font-weight: 500;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--macos-text-secondary);
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
     padding: 10px 12px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--macos-bg-tertiary);
+    border: 1px solid var(--macos-border);
     border-radius: 8px;
-    color: #fff;
+    color: var(--macos-text-primary);
     font-size: 14px;
     transition: all 0.2s ease;
 }
@@ -1535,18 +1560,18 @@
 .form-group select:focus,
 .form-group textarea:focus {
     outline: none;
-    border-color: #007AFF;
-    background: rgba(0, 122, 255, 0.05);
+    border-color: var(--macos-accent);
+    background: var(--macos-bg-secondary);
 }
 
 .form-group input::placeholder,
 .form-group textarea::placeholder {
-    color: rgba(255, 255, 255, 0.3);
+    color: var(--macos-text-quaternary);
 }
 
 .form-hint {
     font-size: 10px;
-    color: rgba(255, 255, 255, 0.35);
+    color: var(--macos-text-tertiary);
 }
 
 .form-row {
@@ -1567,7 +1592,7 @@
     justify-content: flex-end;
     gap: 10px;
     padding: 16px 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-top: 1px solid var(--macos-border);
 }
 
 .btn-secondary,
@@ -1585,23 +1610,23 @@
 
 .btn-secondary {
     background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.7);
+    border: 1px solid var(--macos-border);
+    color: var(--macos-text-secondary);
 }
 
 .btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.05);
-    color: #fff;
+    background: var(--macos-bg-tertiary);
+    color: var(--macos-text-primary);
 }
 
 .btn-primary {
-    background: #007AFF;
-    border: 1px solid #007AFF;
+    background: var(--macos-accent);
+    border: 1px solid var(--macos-accent);
     color: #fff;
 }
 
 .btn-primary:hover {
-    background: #0066d6;
+    background: var(--macos-accent-hover);
 }
 
 /* Photo Upload */
@@ -1612,7 +1637,7 @@
     justify-content: center;
     gap: 12px;
     padding: 40px;
-    border: 2px dashed rgba(255, 255, 255, 0.1);
+    border: 2px dashed var(--macos-border);
     border-radius: 12px;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -1620,22 +1645,22 @@
 }
 
 .photo-upload-zone:hover {
-    border-color: #007AFF;
+    border-color: var(--macos-accent);
     background: rgba(0, 122, 255, 0.05);
 }
 
 .photo-upload-zone svg {
-    color: rgba(255, 255, 255, 0.3);
+    color: var(--macos-text-quaternary);
 }
 
 .photo-upload-zone p {
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--macos-text-secondary);
 }
 
 .photo-upload-zone span {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.3);
+    color: var(--macos-text-tertiary);
 }
 
 .photo-upload-zone input {
@@ -1655,7 +1680,7 @@
 .photo-tips h4 {
     font-size: 13px;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--macos-text-secondary);
     margin-bottom: 10px;
 }
 
@@ -1667,7 +1692,7 @@
 
 .photo-tips li {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--macos-text-tertiary);
     padding: 6px 0;
     padding-left: 20px;
     position: relative;
@@ -1677,7 +1702,7 @@
     content: '•';
     position: absolute;
     left: 0;
-    color: #007AFF;
+    color: var(--macos-accent);
 }
 
 /* History Table */
@@ -1694,27 +1719,27 @@
 .history-table td {
     padding: 12px;
     text-align: left;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid var(--macos-border);
 }
 
 .history-table th {
     font-size: 11px;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--macos-text-tertiary);
     text-transform: uppercase;
 }
 
 .history-table td {
     font-size: 13px;
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--macos-text-secondary);
 }
 
 .history-table .change-positive {
-    color: #30D158;
+    color: var(--macos-success);
 }
 
 .history-table .change-negative {
-    color: #FF453A;
+    color: var(--macos-error);
 }
 
 /* ============================================
@@ -1854,6 +1879,6 @@
         justify-content: space-between;
         margin-top: 8px;
         padding-top: 8px;
-        border-top: 1px solid rgba(255, 255, 255, 0.06);
+        border-top: 1px solid var(--macos-border);
     }
 }

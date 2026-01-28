@@ -4,8 +4,8 @@
     padding: var(--s-4) var(--s-6);
     max-width: 1300px;
     margin: 0 auto;
-    background: var(--bg-primary);
-    color: var(--text-primary);
+    background: var(--macos-bg-primary);
+    color: var(--macos-text-primary);
     transition: background 0.3s ease, color 0.3s ease;
 }
 
@@ -18,13 +18,13 @@
     justify-content: space-between;
     align-items: flex-end;
     padding-bottom: 12px;
-    border-bottom: 1px solid var(--border-main);
+    border-bottom: 1px solid var(--macos-border);
     margin-bottom: 16px;
 }
 
 .welcome-group .text-greeting {
     font-size: 14px;
-    color: var(--text-secondary);
+    color: var(--macos-text-secondary);
     display: block;
     font-weight: 500;
 }
@@ -34,7 +34,11 @@
     font-weight: 800;
     margin: 0;
     letter-spacing: -0.02em;
-    background: linear-gradient(to right, var(--text-primary), var(--text-tertiary));
+    color: var(--macos-text-primary);
+}
+
+.theme-light .heading-hero {
+    background: linear-gradient(to right, #1D1D1F, #515154);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -45,11 +49,11 @@
     gap: 8px;
     font-size: 12px;
     font-weight: 600;
-    color: var(--text-tertiary);
-    background: var(--bg-glass);
+    color: var(--macos-text-tertiary);
+    background: var(--macos-bg-glass);
     padding: 6px 14px;
     border-radius: 20px;
-    border: 1px solid var(--border-main);
+    border: 1px solid var(--macos-border);
     backdrop-filter: var(--glass-blur);
 }
 
@@ -65,14 +69,18 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    background: var(--bg-glass) !important;
-    border: 1px solid var(--border-main) !important;
+    background: var(--macos-bg-secondary) !important;
+    border: 1px solid var(--macos-border) !important;
+}
+
+.theme-light .header-stat-card {
+    box-shadow: var(--shadow-sm);
 }
 
 .header-stat-label {
     font-size: 11px;
     font-weight: 700;
-    color: var(--text-tertiary);
+    color: var(--macos-text-tertiary);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     margin-bottom: 4px;
@@ -81,7 +89,7 @@
 .header-stat-value {
     font-size: 24px;
     font-weight: 800;
-    color: var(--text-primary);
+    color: var(--macos-text-primary);
     display: flex;
     align-items: baseline;
     gap: 6px;
@@ -90,15 +98,15 @@
 .header-stat-unit {
     font-size: 12px;
     font-weight: 600;
-    color: var(--text-tertiary);
+    color: var(--macos-text-tertiary);
 }
 
 /* Main Content Area */
 .current-session-banner-unified {
     padding: 20px 24px !important;
     margin-bottom: 32px;
-    background: linear-gradient(135deg, rgba(var(--accent-blue-rgb), 0.1), var(--bg-glass)) !important;
-    border-color: rgba(var(--accent-blue-rgb), 0.2) !important;
+    background: linear-gradient(135deg, rgba(0, 122, 255, 0.1), var(--macos-bg-glass)) !important;
+    border-color: rgba(0, 122, 255, 0.2) !important;
     backdrop-filter: var(--glass-blur);
 }
 
@@ -114,7 +122,7 @@
     gap: 6px;
     font-size: 10px;
     font-weight: 800;
-    color: var(--accent-blue);
+    color: var(--macos-accent);
     margin-bottom: 8px;
     letter-spacing: 0.05em;
 }
@@ -123,12 +131,12 @@
     font-size: 20px;
     font-weight: 700;
     margin: 0 0 4px 0;
-    color: var(--text-primary);
+    color: var(--macos-text-primary);
 }
 
 .session-info {
     font-size: 14px;
-    color: var(--text-secondary);
+    color: var(--macos-text-secondary);
     margin: 0;
 }
 
@@ -143,13 +151,18 @@
     align-items: center;
     gap: 16px;
     padding: 16px 20px !important;
-    background: var(--bg-glass) !important;
-    border: 1px solid var(--border-main) !important;
+    background: var(--macos-bg-secondary) !important;
+    border: 1px solid var(--macos-border) !important;
+}
+
+.theme-light .class-card-compact {
+    box-shadow: var(--shadow-sm);
 }
 
 .class-card-compact:hover {
-    background: var(--bg-glass-hover) !important;
-    border-color: var(--accent-blue) !important;
+    background: var(--macos-bg-tertiary) !important;
+    border-color: var(--macos-accent) !important;
+    transform: translateX(4px);
 }
 
 .class-time-block {
@@ -163,20 +176,20 @@
     font-size: 18px;
     font-weight: 800;
     line-height: 1;
-    color: var(--text-primary);
+    color: var(--macos-text-primary);
 }
 
 .class-time-ampm {
     font-size: 10px;
     font-weight: 700;
-    color: var(--text-tertiary);
+    color: var(--macos-text-tertiary);
     text-transform: uppercase;
 }
 
 .class-divider {
     width: 1px;
     height: 40px;
-    background: var(--border-main);
+    background: var(--macos-border);
 }
 
 .class-details {
@@ -186,7 +199,7 @@
 .class-type-tag {
     font-size: 9px;
     font-weight: 800;
-    color: var(--accent-purple);
+    color: var(--macos-purple);
     margin-bottom: 4px;
     letter-spacing: 0.05em;
 }
@@ -195,12 +208,12 @@
     font-size: 16px;
     font-weight: 700;
     margin: 0 0 2px 0;
-    color: var(--text-primary);
+    color: var(--macos-text-primary);
 }
 
 .class-meta {
     font-size: 12px;
-    color: var(--text-tertiary);
+    color: var(--macos-text-tertiary);
     margin: 0;
 }
 
@@ -213,14 +226,14 @@
 .class-date-label {
     font-size: 12px;
     font-weight: 600;
-    color: var(--text-secondary);
+    color: var(--macos-text-secondary);
 }
 
 /* Sidebar Styling */
 .sidebar-section-title {
     font-size: 13px;
     font-weight: 800;
-    color: var(--text-primary);
+    color: var(--macos-text-primary);
     margin: 0 0 16px 0;
     text-transform: uppercase;
     letter-spacing: 0.08em;
@@ -233,8 +246,8 @@
 }
 
 .quick-action-btn-dashboard {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-main);
+    background: var(--macos-bg-tertiary);
+    border: 1px solid var(--macos-border);
     border-radius: var(--radius-lg);
     padding: 16px 8px;
     display: flex;
@@ -245,9 +258,14 @@
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.theme-light .quick-action-btn-dashboard {
+    background: #FFFFFF;
+    box-shadow: var(--shadow-sm);
+}
+
 .quick-action-btn-dashboard:hover {
-    background: var(--bg-glass-hover);
-    border-color: var(--accent-blue);
+    background: var(--macos-bg-glass-hover);
+    border-color: var(--macos-accent);
     transform: translateY(-4px);
     box-shadow: var(--shadow-md);
 }
@@ -258,15 +276,14 @@
     justify-content: center;
     width: 36px;
     height: 36px;
-    background: rgba(var(--accent-blue-rgb), 0.1);
+    background: rgba(0, 122, 255, 0.1);
     border-radius: 12px;
-    color: var(--accent-blue);
 }
 
 .quick-action-label {
     font-size: 12px;
     font-weight: 700;
-    color: var(--text-secondary);
+    color: var(--macos-text-secondary);
 }
 
 .trainer-card-compact {
@@ -275,16 +292,20 @@
     gap: 12px;
     margin-bottom: 16px;
     padding: 12px;
-    background: var(--bg-secondary);
+    background: var(--macos-bg-tertiary);
     border-radius: var(--radius-lg);
-    border: 1px solid var(--border-main);
+    border: 1px solid var(--macos-border);
+}
+
+.theme-light .trainer-card-compact {
+    background: #FFFFFF;
 }
 
 .trainer-avatar-sm {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+    background: linear-gradient(135deg, var(--macos-accent), var(--macos-purple));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -297,12 +318,12 @@
 .trainer-name-sm {
     font-size: 14px;
     font-weight: 700;
-    color: var(--text-primary);
+    color: var(--macos-text-primary);
 }
 
 .trainer-special-sm {
     font-size: 11px;
-    color: var(--text-tertiary);
+    color: var(--macos-text-tertiary);
 }
 
 .membership-status-bar {
@@ -316,8 +337,8 @@
     font-size: 10px;
     font-weight: 800;
     padding: 3px 10px;
-    background: rgba(var(--accent-green-rgb), 0.1);
-    color: var(--accent-green);
+    background: var(--macos-success-bg);
+    color: var(--macos-success);
     border-radius: 20px;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -325,16 +346,16 @@
 
 .progress-bar-container {
     height: 8px;
-    background: var(--bg-tertiary);
+    background: var(--macos-bg-tertiary);
     border-radius: 4px;
     overflow: hidden;
     margin: 8px 0;
-    border: 1px solid var(--border-main);
+    border: 1px solid var(--macos-border);
 }
 
 .progress-bar-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+    background: linear-gradient(90deg, var(--macos-accent), var(--macos-purple));
     border-radius: 4px;
 }
 
@@ -346,23 +367,27 @@
 }
 
 .metric-item {
-    background: var(--bg-secondary);
+    background: var(--macos-bg-tertiary);
     padding: 12px 8px;
     border-radius: var(--radius-lg);
     text-align: center;
-    border: 1px solid var(--border-main);
+    border: 1px solid var(--macos-border);
+}
+
+.theme-light .metric-item {
+    background: #FFFFFF;
 }
 
 .metric-value {
     font-size: 16px;
     font-weight: 800;
-    color: var(--text-primary);
+    color: var(--macos-text-primary);
 }
 
 .metric-label {
     font-size: 10px;
     font-weight: 700;
-    color: var(--text-tertiary);
+    color: var(--macos-text-tertiary);
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
@@ -372,7 +397,7 @@
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-    color: var(--text-secondary);
+    color: var(--macos-text-secondary);
     font-size: 16px;
     font-weight: 500;
 }

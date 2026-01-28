@@ -144,6 +144,27 @@ const MyProgress: React.FC = () => {
     const user = userStr ? JSON.parse(userStr) : null;
     const memberId = user?.userId || user?.id;
 
+    const [isLightTheme, setIsLightTheme] = useState(false);
+    
+    useEffect(() => {
+        const checkTheme = () => {
+            setIsLightTheme(document.documentElement.classList.contains('theme-light'));
+        };
+        
+        checkTheme();
+        
+        const observer = new MutationObserver(checkTheme);
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+        
+        return () => observer.disconnect();
+    }, []);
+
+    const chartColors = {
+        grid: isLightTheme ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.04)',
+        axis: isLightTheme ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.3)',
+        text: isLightTheme ? '#1D1D1F' : '#FFFFFF'
+    };
+
     const fetchProgressData = useCallback(async () => {
         if (!memberId) {
             setLoading(false);
@@ -1127,9 +1148,10 @@ const MyProgress: React.FC = () => {
                                                         <stop offset="100%" stopColor="#AF52DE" stopOpacity={0} />
                                                     </linearGradient>
                                                 </defs>
-                                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
-                                                <XAxis dataKey="date" stroke="rgba(255,255,255,0.3)" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-                                                <YAxis stroke="rgba(255,255,255,0.3)" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} domain={['dataMin - 2', 'dataMax + 2']} />
+                                                  <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} vertical={false} />
+                                                  <XAxis dataKey="date" stroke={chartColors.axis} tick={{ fontSize: 11, fill: isLightTheme ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.4)' }} axisLine={false} tickLine={false} />
+                                                  <YAxis stroke={chartColors.axis} tick={{ fontSize: 11, fill: isLightTheme ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.4)' }} axisLine={false} tickLine={false} domain={['dataMin - 2', 'dataMax + 2']} />
+
                                                 <Tooltip content={<CustomTooltip />} />
                                                 <Area type="monotone" dataKey="bodyFat" name="Body Fat %" stroke="#34C759" strokeWidth={2.5} fill="url(#fatGradient)" dot={{ fill: '#34C759', strokeWidth: 0, r: 4 }} />
                                                 <Area type="monotone" dataKey="muscle" name="Muscle Mass" stroke="#AF52DE" strokeWidth={2.5} fill="url(#muscleGradient)" dot={{ fill: '#AF52DE', strokeWidth: 0, r: 4 }} />
@@ -1158,9 +1180,10 @@ const MyProgress: React.FC = () => {
                                                     <stop offset="100%" stopColor="#007AFF" stopOpacity={0} />
                                                 </linearGradient>
                                             </defs>
-                                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
-                                            <XAxis dataKey="date" stroke="rgba(255,255,255,0.3)" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-                                            <YAxis stroke="rgba(255,255,255,0.3)" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} domain={['dataMin - 2', 'dataMax + 2']} tickFormatter={(value) => `${value}kg`} />
+                                              <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} vertical={false} />
+                                              <XAxis dataKey="date" stroke={chartColors.axis} tick={{ fontSize: 11, fill: isLightTheme ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.4)' }} axisLine={false} tickLine={false} />
+                                              <YAxis stroke={chartColors.axis} tick={{ fontSize: 11, fill: isLightTheme ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.4)' }} axisLine={false} tickLine={false} domain={['dataMin - 2', 'dataMax + 2']} tickFormatter={(value) => `${value}kg`} />
+
                                             <Tooltip content={<CustomTooltip />} />
                                             <ReferenceLine y={stats.goalWeight} stroke="#30D158" strokeDasharray="5 5" label={{ value: `Goal: ${stats.goalWeight}kg`, position: 'right', fill: '#30D158', fontSize: 10 }} />
                                             <ReferenceLine y={stats.startWeight} stroke="#FF9F0A" strokeDasharray="3 3" label={{ value: `Start: ${stats.startWeight}kg`, position: 'right', fill: '#FF9F0A', fontSize: 10 }} />
@@ -1168,9 +1191,9 @@ const MyProgress: React.FC = () => {
                                         </AreaChart>
                                     ) : (
                                         <BarChart data={chartData} barCategoryGap="20%">
-                                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
-                                            <XAxis dataKey="date" stroke="rgba(255,255,255,0.3)" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-                                            <YAxis stroke="rgba(255,255,255,0.3)" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(value) => `${value} lbs`} />
+                                              <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} vertical={false} />
+                                              <XAxis dataKey="date" stroke={chartColors.axis} tick={{ fontSize: 11, fill: isLightTheme ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.4)' }} axisLine={false} tickLine={false} />
+                                              <YAxis stroke={chartColors.axis} tick={{ fontSize: 11, fill: isLightTheme ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.4)' }} axisLine={false} tickLine={false} tickFormatter={(value) => `${value} lbs`} />
                                             <Tooltip content={<CustomTooltip />} />
                                             <Bar dataKey="volume" fill="#AF52DE" radius={[4, 4, 0, 0]} />
                                         </BarChart>
