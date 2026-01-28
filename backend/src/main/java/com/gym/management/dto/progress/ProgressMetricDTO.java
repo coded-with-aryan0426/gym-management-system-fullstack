@@ -21,6 +21,12 @@ public class ProgressMetricDTO {
     private BigDecimal bodyFat;
     private BigDecimal muscleMass;
     private BigDecimal bmi;
+    private BigDecimal chest;
+    private BigDecimal waist;
+    private BigDecimal arms;
+    private BigDecimal legs;
+    private BigDecimal hips;
+    private BigDecimal shoulders;
     private String notes;
     private LocalDateTime createdAt;
 }

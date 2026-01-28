@@ -41,6 +41,24 @@ public class ProgressMetric {
     @Column(name = "bmi", precision = 4, scale = 2)
     private BigDecimal bmi;
 
+    @Column(name = "chest", precision = 5, scale = 2)
+    private BigDecimal chest;
+
+    @Column(name = "waist", precision = 5, scale = 2)
+    private BigDecimal waist;
+
+    @Column(name = "arms", precision = 5, scale = 2)
+    private BigDecimal arms;
+
+    @Column(name = "legs", precision = 5, scale = 2)
+    private BigDecimal legs;
+
+    @Column(name = "hips", precision = 5, scale = 2)
+    private BigDecimal hips;
+
+    @Column(name = "shoulders", precision = 5, scale = 2)
+    private BigDecimal shoulders;
+
     @Column(columnDefinition = "CLOB")
     private String notes;
 

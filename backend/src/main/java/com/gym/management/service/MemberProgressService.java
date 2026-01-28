@@ -254,6 +254,12 @@ public class MemberProgressService {
                 .bodyFat(dto.getBodyFat())
                 .muscleMass(dto.getMuscleMass())
                 .bmi(calculateBmi(dto.getWeight(), user))
+                .chest(dto.getChest())
+                .waist(dto.getWaist())
+                .arms(dto.getArms())
+                .legs(dto.getLegs())
+                .hips(dto.getHips())
+                .shoulders(dto.getShoulders())
                 .notes(dto.getNotes())
                 .build();
 
@@ -341,6 +347,12 @@ public class MemberProgressService {
         if (dto.getWeight() != null) metric.setWeight(dto.getWeight());
         if (dto.getBodyFat() != null) metric.setBodyFat(dto.getBodyFat());
         if (dto.getMuscleMass() != null) metric.setMuscleMass(dto.getMuscleMass());
+        if (dto.getChest() != null) metric.setChest(dto.getChest());
+        if (dto.getWaist() != null) metric.setWaist(dto.getWaist());
+        if (dto.getArms() != null) metric.setArms(dto.getArms());
+        if (dto.getLegs() != null) metric.setLegs(dto.getLegs());
+        if (dto.getHips() != null) metric.setHips(dto.getHips());
+        if (dto.getShoulders() != null) metric.setShoulders(dto.getShoulders());
         if (dto.getNotes() != null) metric.setNotes(dto.getNotes());
         if (dto.getWeight() != null) {
             metric.setBmi(calculateBmi(dto.getWeight(), metric.getUser()));
@@ -588,6 +600,12 @@ public class MemberProgressService {
                 .bodyFat(metric.getBodyFat())
                 .muscleMass(metric.getMuscleMass())
                 .bmi(metric.getBmi())
+                .chest(metric.getChest())
+                .waist(metric.getWaist())
+                .arms(metric.getArms())
+                .legs(metric.getLegs())
+                .hips(metric.getHips())
+                .shoulders(metric.getShoulders())
                 .notes(metric.getNotes())
                 .createdAt(metric.getCreatedAt())
                 .build();

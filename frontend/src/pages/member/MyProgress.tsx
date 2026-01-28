@@ -153,30 +153,60 @@ const MyProgress: React.FC = () => {
         try {
             setLoading(true);
             
-            const [summaryData, metricsData, goalsData, pbData, workoutsData] = await Promise.all([
+            const [summaryData, metricsData, goalsData, pbData, workoutsData, measurementsData] = await Promise.all([
                 memberProgressApi.getSummary(memberId).catch(() => null),
                 memberProgressApi.getMetrics(memberId, timeRange === 'ALL' ? undefined : timeRange).catch(() => []),
                 memberProgressApi.getGoals(memberId).catch(() => []),
                 memberProgressApi.getPersonalBests(memberId).catch(() => []),
-                memberProgressApi.getWorkouts(memberId, '30D').catch(() => [])
+                memberProgressApi.getWorkouts(memberId, '30D').catch(() => []),
+                memberProgressApi.getMeasurements(memberId, timeRange === 'ALL' ? undefined : timeRange).catch(() => [])
             ]);
 
             setSummary(summaryData);
 
-            const entries: ProgressEntry[] = (metricsData || []).map((m: any) => ({
-                id: m.id,
-                date: m.recordDate,
-                weight: m.weight,
-                bodyFat: m.bodyFat,
-                muscleMass: m.muscleMass,
-                chest: undefined,
-                waist: undefined,
-                arms: undefined,
-                legs: undefined,
-                hips: undefined,
-                shoulders: undefined,
-                notes: m.notes
-            }));
+            const measurementsByDate = new Map<string, any>();
+            (measurementsData || []).forEach((m: any) => {
+                measurementsByDate.set(m.recordDate, m);
+            });
+
+            const entries: ProgressEntry[] = (metricsData || []).map((m: any) => {
+                const measurement = measurementsByDate.get(m.recordDate);
+                return {
+                    id: m.id,
+                    date: m.recordDate,
+                    weight: m.weight,
+                    bodyFat: m.bodyFat,
+                    muscleMass: m.muscleMass,
+                    chest: measurement?.chest || m.chest,
+                    waist: measurement?.waist || m.waist,
+                    arms: measurement?.arms || m.arms,
+                    legs: measurement?.legs || m.legs,
+                    hips: measurement?.hips || m.hips,
+                    shoulders: measurement?.shoulders || m.shoulders,
+                    notes: m.notes
+                };
+            });
+
+            (measurementsData || []).forEach((m: any) => {
+                if (!entries.find(e => e.date === m.recordDate)) {
+                    entries.push({
+                        id: m.id + 10000,
+                        date: m.recordDate,
+                        weight: undefined,
+                        bodyFat: undefined,
+                        muscleMass: undefined,
+                        chest: m.chest,
+                        waist: m.waist,
+                        arms: m.arms,
+                        legs: m.legs,
+                        hips: m.hips,
+                        shoulders: m.shoulders,
+                        notes: m.notes
+                    });
+                }
+            });
+
+            entries.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
             setProgressEntries(entries);
 
             const mappedGoals: Goal[] = (goalsData || []).filter((g: any) => g.goalType).map((g: any) => ({
@@ -231,6 +261,26 @@ const MyProgress: React.FC = () => {
     const getLatestEntry = () => progressEntries[progressEntries.length - 1] || null;
     const getFirstEntry = () => progressEntries[0] || null;
     const getPreviousEntry = () => progressEntries[progressEntries.length - 2] || null;
+    
+    const getLatestMeasurementEntry = () => {
+        for (let i = progressEntries.length - 1; i >= 0; i--) {
+            const entry = progressEntries[i];
+            if (entry?.waist || entry?.chest || entry?.arms || entry?.hips || entry?.shoulders) {
+                return entry;
+            }
+        }
+        return null;
+    };
+    
+    const getFirstMeasurementEntry = () => {
+        for (let i = 0; i < progressEntries.length; i++) {
+            const entry = progressEntries[i];
+            if (entry?.waist || entry?.chest || entry?.arms || entry?.hips || entry?.shoulders) {
+                return entry;
+            }
+        }
+        return null;
+    };
 
     const calculateChange = (current: number | undefined | null, start: number | undefined | null) => {
         if (!current || !start) return { value: 0, percent: 0 };
@@ -259,6 +309,8 @@ const MyProgress: React.FC = () => {
     const latest = getLatestEntry();
     const first = getFirstEntry();
     const previous = getPreviousEntry();
+    const latestMeasurement = getLatestMeasurementEntry();
+    const firstMeasurement = getFirstMeasurementEntry();
 
     const stats = {
         currentWeight: summary?.currentWeight || latest?.weight || null,
@@ -285,8 +337,8 @@ const MyProgress: React.FC = () => {
     const bodyFatChange = calculateChange(stats.bodyFat, stats.startBodyFat);
     const weeklyWeightChange = calculateChange(stats.currentWeight, stats.previousWeight);
 
-    const heightInMeters = user?.height ? user.height / 100 : (summary?.height ? summary.height / 100 : 1.75);
-    const bmiValue = stats.currentWeight ? (stats.currentWeight / (heightInMeters * heightInMeters)).toFixed(1) : null;
+    const heightInMeters = user?.height ? user.height / 100 : (summary?.height ? summary.height / 100 : null);
+    const bmiValue = stats.currentWeight && heightInMeters ? (stats.currentWeight / (heightInMeters * heightInMeters)).toFixed(1) : null;
     const bmiCategory = bmiValue ? (parseFloat(bmiValue) < 18.5 ? 'Underweight' : parseFloat(bmiValue) < 25 ? 'Normal' : parseFloat(bmiValue) < 30 ? 'Overweight' : 'Obese') : null;
 
     const heatmapData = Array.from({ length: 35 }, (_, i) => {
@@ -775,28 +827,79 @@ const MyProgress: React.FC = () => {
                         <>
                             <div className="chart-stat">
                                 <span className="chart-stat-label">Waist Change</span>
-                                <span className="chart-stat-value positive">-{Math.abs((latest?.waist || 81) - (first?.waist || 88))} cm</span>
-                                <span className="chart-stat-date">{first?.waist}cm → {latest?.waist}cm</span>
+                                {latestMeasurement?.waist && firstMeasurement?.waist ? (
+                                    <>
+                                        <span className={`chart-stat-value ${latestMeasurement.waist < firstMeasurement.waist ? 'positive' : latestMeasurement.waist > firstMeasurement.waist ? 'negative' : ''}`}>
+                                            {latestMeasurement.waist < firstMeasurement.waist ? '-' : '+'}{Math.abs(latestMeasurement.waist - firstMeasurement.waist).toFixed(1)} cm
+                                        </span>
+                                        <span className="chart-stat-date">{firstMeasurement.waist}cm → {latestMeasurement.waist}cm</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <span className="chart-stat-value muted">No data</span>
+                                        <span className="chart-stat-date">Log measurements</span>
+                                    </>
+                                )}
                             </div>
                             <div className="chart-stat">
                                 <span className="chart-stat-label">Chest Growth</span>
-                                <span className="chart-stat-value positive">+{((latest?.chest || 105.5) - (first?.chest || 102)).toFixed(1)} cm</span>
-                                <span className="chart-stat-date">{first?.chest}cm → {latest?.chest}cm</span>
+                                {latestMeasurement?.chest && firstMeasurement?.chest ? (
+                                    <>
+                                        <span className={`chart-stat-value ${latestMeasurement.chest > firstMeasurement.chest ? 'positive' : latestMeasurement.chest < firstMeasurement.chest ? 'negative' : ''}`}>
+                                            {latestMeasurement.chest >= firstMeasurement.chest ? '+' : ''}{(latestMeasurement.chest - firstMeasurement.chest).toFixed(1)} cm
+                                        </span>
+                                        <span className="chart-stat-date">{firstMeasurement.chest}cm → {latestMeasurement.chest}cm</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <span className="chart-stat-value muted">No data</span>
+                                        <span className="chart-stat-date">Log measurements</span>
+                                    </>
+                                )}
                             </div>
                             <div className="chart-stat">
                                 <span className="chart-stat-label">Arm Growth</span>
-                                <span className="chart-stat-value positive">+{((latest?.arms || 37) - (first?.arms || 35)).toFixed(1)} cm</span>
-                                <span className="chart-stat-date">{first?.arms}cm → {latest?.arms}cm</span>
+                                {latestMeasurement?.arms && firstMeasurement?.arms ? (
+                                    <>
+                                        <span className={`chart-stat-value ${latestMeasurement.arms > firstMeasurement.arms ? 'positive' : latestMeasurement.arms < firstMeasurement.arms ? 'negative' : ''}`}>
+                                            {latestMeasurement.arms >= firstMeasurement.arms ? '+' : ''}{(latestMeasurement.arms - firstMeasurement.arms).toFixed(1)} cm
+                                        </span>
+                                        <span className="chart-stat-date">{firstMeasurement.arms}cm → {latestMeasurement.arms}cm</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <span className="chart-stat-value muted">No data</span>
+                                        <span className="chart-stat-date">Log measurements</span>
+                                    </>
+                                )}
                             </div>
                             <div className="chart-stat">
                                 <span className="chart-stat-label">Waist-to-Hip Ratio</span>
-                                <span className="chart-stat-value">{((latest?.waist || 81) / (latest?.hips || 94)).toFixed(2)}</span>
-                                <span className="chart-stat-date">{((latest?.waist || 81) / (latest?.hips || 94)) < 0.9 ? 'Healthy' : 'At Risk'}</span>
+                                {latestMeasurement?.waist && latestMeasurement?.hips ? (
+                                    <>
+                                        <span className="chart-stat-value">{(latestMeasurement.waist / latestMeasurement.hips).toFixed(2)}</span>
+                                        <span className="chart-stat-date">{(latestMeasurement.waist / latestMeasurement.hips) < 0.9 ? 'Healthy' : 'At Risk'}</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <span className="chart-stat-value muted">No data</span>
+                                        <span className="chart-stat-date">Log waist & hips</span>
+                                    </>
+                                )}
                             </div>
                             <div className="chart-stat">
                                 <span className="chart-stat-label">Shoulder-to-Waist</span>
-                                <span className="chart-stat-value">{((latest?.shoulders || 119) / (latest?.waist || 81)).toFixed(2)}</span>
-                                <span className="chart-stat-date">{((latest?.shoulders || 119) / (latest?.waist || 81)) > 1.4 ? 'V-Taper' : 'Improving'}</span>
+                                {latestMeasurement?.shoulders && latestMeasurement?.waist ? (
+                                    <>
+                                        <span className="chart-stat-value">{(latestMeasurement.shoulders / latestMeasurement.waist).toFixed(2)}</span>
+                                        <span className="chart-stat-date">{(latestMeasurement.shoulders / latestMeasurement.waist) > 1.4 ? 'V-Taper' : 'Improving'}</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <span className="chart-stat-value muted">No data</span>
+                                        <span className="chart-stat-date">Log shoulders & waist</span>
+                                    </>
+                                )}
                             </div>
                             <div className="chart-stat">
                                 <span className="chart-stat-label">Entries Logged</span>
