@@ -4,6 +4,7 @@ import com.gym.management.dto.progress.*;
 import com.gym.management.model.*;
 import com.gym.management.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
