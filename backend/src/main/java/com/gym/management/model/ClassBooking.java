@@ -1,94 +1,68 @@
 package com.gym.management.model;
 
 import jakarta.persistence.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "class_bookings")
+@Data
+@NoArgsConstructor
 public class ClassBooking {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "booking_id")
+    private Long bookingId;
 
-    @Column(name = "gym_id")
-    private Long gymId;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "class_id", nullable = false)
+    private GymClass gymClass;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "gym_id", insertable = false, updatable = false)
-    private Gym gym;
-
-    @Column(name = "class_id")
-    private Long classId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "member_id", nullable = false)
     private User member;
 
-    @Column(name = "booking_date")
-    private LocalDateTime bookingDate = LocalDateTime.now();
+    @Column(name = "booking_status")
+    @Enumerated(EnumType.STRING)
+    private BookingStatus status = BookingStatus.CONFIRMED;
 
-    @Column(length = 20)
-    private String status = "BOOKED"; // BOOKED, CANCELLED, COMPLETED, WAITLIST
+    @Column(name = "booked_at")
+    private LocalDateTime bookedAt;
 
     @Column(name = "cancelled_at")
     private LocalDateTime cancelledAt;
 
-    // Constructors
-    public ClassBooking() {
+    @Column(name = "attended")
+    private Boolean attended = false;
+
+    @Column(name = "notes")
+    private String notes;
+
+    @PrePersist
+    protected void onCreate() {
+        bookedAt = LocalDateTime.now();
     }
 
-    public ClassBooking(Long classId, User member) {
-        this.classId = classId;
-        this.member = member;
-    }
+    public Long getBookingId() { return bookingId; }
+    public void setBookingId(Long bookingId) { this.bookingId = bookingId; }
+    public GymClass getGymClass() { return gymClass; }
+    public void setGymClass(GymClass gymClass) { this.gymClass = gymClass; }
+    public User getMember() { return member; }
+    public void setMember(User member) { this.member = member; }
+    public BookingStatus getStatus() { return status; }
+    public void setStatus(BookingStatus status) { this.status = status; }
+    public LocalDateTime getBookedAt() { return bookedAt; }
+    public void setBookedAt(LocalDateTime bookedAt) { this.bookedAt = bookedAt; }
+    public LocalDateTime getCancelledAt() { return cancelledAt; }
+    public void setCancelledAt(LocalDateTime cancelledAt) { this.cancelledAt = cancelledAt; }
+    public Boolean getAttended() { return attended; }
+    public void setAttended(Boolean attended) { this.attended = attended; }
+    public String getNotes() { return notes; }
+    public void setNotes(String notes) { this.notes = notes; }
 
-    // Getters and Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getClassId() {
-        return classId;
-    }
-
-    public void setClassId(Long classId) {
-        this.classId = classId;
-    }
-
-    public User getMember() {
-        return member;
-    }
-
-    public void setMember(User member) {
-        this.member = member;
-    }
-
-    public LocalDateTime getBookingDate() {
-        return bookingDate;
-    }
-
-    public void setBookingDate(LocalDateTime bookingDate) {
-        this.bookingDate = bookingDate;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public LocalDateTime getCancelledAt() {
-        return cancelledAt;
-    }
-
-    public void setCancelledAt(LocalDateTime cancelledAt) {
-        this.cancelledAt = cancelledAt;
+    public enum BookingStatus {
+        CONFIRMED, CANCELLED, WAITLISTED, ATTENDED, NO_SHOW
     }
 }
