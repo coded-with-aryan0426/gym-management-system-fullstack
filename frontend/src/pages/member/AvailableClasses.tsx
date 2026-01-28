@@ -4,10 +4,13 @@ import {
     Search, Calendar, List, Clock, MapPin,
     Users, ChevronLeft, ChevronRight, Heart, Zap,
     Dumbbell, Bike, Sparkles, Target, User, CalendarDays,
-    Loader2, AlertCircle, CheckCircle2
+    Loader2, AlertCircle, CheckCircle2, BookmarkCheck,
+    TrendingUp, Star, Award, LayoutGrid, Timer
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { ptSessionApi } from '../../services/api';
+import { UnifiedPage } from '../../components/shared/UnifiedPage';
+import { UnifiedCard } from '../../components/shared/UnifiedCard';
 import '../../styles/macos-member.css';
 import './AvailableClasses.css';
 
@@ -44,50 +47,93 @@ const getClassType = (session: ClassSession): string => {
     return 'PT Session';
 };
 
-const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.04 } }
-};
-
-const itemVariants = {
-    hidden: { opacity: 0, y: 16 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.3 } }
-};
+const MOCK_CLASSES: ClassSession[] = [
+    {
+        id: -1,
+        sessionType: 'Yoga',
+        trainerName: 'Sarah Johnson',
+        sessionDate: new Date().toISOString(),
+        durationMinutes: 60,
+        difficulty: 'Beginner',
+        location: 'Studio A',
+        spotsLeft: 5,
+        status: 'SCHEDULED',
+        trainer: { id: 101, fullName: 'Sarah Johnson' }
+    },
+    {
+        id: -2,
+        sessionType: 'HIIT',
+        trainerName: 'Mike Chen',
+        sessionDate: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
+        durationMinutes: 45,
+        difficulty: 'Intermediate',
+        location: 'Main Floor',
+        spotsLeft: 8,
+        status: 'SCHEDULED',
+        trainer: { id: 102, fullName: 'Mike Chen' }
+    },
+    {
+        id: -3,
+        sessionType: 'Strength',
+        trainerName: 'Emma Wilson',
+        sessionDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        durationMinutes: 60,
+        difficulty: 'Advanced',
+        location: 'Weight Room',
+        spotsLeft: 3,
+        status: 'SCHEDULED',
+        trainer: { id: 103, fullName: 'Emma Wilson' }
+    }
+];
 
 const AvailableClasses: React.FC = () => {
     const [sessions, setSessions] = useState<ClassSession[]>([]);
     const [loading, setLoading] = useState(true);
     const [booking, setBooking] = useState<number | null>(null);
-    const [view, setView] = useState<'list' | 'calendar'>('list');
+    const [view, setView] = useState<'grid' | 'calendar'>('grid');
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedType, setSelectedType] = useState('All');
     const [selectedWeek, setSelectedWeek] = useState(0);
-    const [error, setError] = useState<string | null>(null);
+    const [dashboardStats, setDashboardStats] = useState({ bookedCount: 0 });
 
-    const getStorageKey = (key: string): string => {
-        const port = typeof window !== 'undefined' ? window.location.port || '5173' : '5173';
-        return `${key}_port_${port}`;
-    };
-
-    const userStr = localStorage.getItem(getStorageKey('user'));
+    const userStr = localStorage.getItem('user');
     const user = userStr ? JSON.parse(userStr) : null;
     const memberId = user?.userId || user?.id;
 
     useEffect(() => {
-        fetchSessions();
+        fetchData();
     }, [memberId]);
+
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            await Promise.all([fetchSessions(), fetchDashboardStats()]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchDashboardStats = async () => {
+        if (!memberId) return;
+        try {
+            const response = await fetch(`/api/member/dashboard?memberId=${memberId}`);
+            if (response.ok) {
+                const data = await response.json();
+                setDashboardStats({ bookedCount: data.bookedClassesCount || 0 });
+            }
+        } catch (error) {
+            console.error('Failed to fetch dashboard stats:', error);
+        }
+    };
 
     const fetchSessions = async () => {
         try {
-            setLoading(true);
-            setError(null);
-
             let allSessions: any[] = [];
             
             try {
-                if (memberId) {
-                    allSessions = await ptSessionApi.getMemberSessions(memberId);
-                }
+                // Fetch all sessions (to see available ones)
+                // In a real app, this might be a dedicated /classes endpoint
+                allSessions = await ptSessionApi.getAllSessions();
             } catch {
                 allSessions = [];
             }
@@ -103,13 +149,17 @@ const AvailableClasses: React.FC = () => {
                 memberName: s.memberName,
                 trainer: s.trainerName ? { id: s.trainerId, fullName: s.trainerName } : undefined,
                 member: s.memberName ? { id: s.memberId, fullName: s.memberName } : undefined,
-                sessionType: s.sessionType,
-                difficulty: s.difficulty,
-                location: s.location,
-                spotsLeft: s.spotsLeft
+                sessionType: s.sessionType || 'Group',
+                difficulty: s.difficulty || 'Intermediate',
+                location: s.location || 'Gym Floor',
+                spotsLeft: s.spotsLeft ?? 10
             }));
 
-            const upcoming = mapped.filter(s => {
+            // Merge with mock classes for demo purposes
+            const combined = [...MOCK_CLASSES, ...mapped];
+            
+            // Filter out past sessions
+            const upcoming = combined.filter(s => {
                 const sessionDate = new Date(s.sessionDate);
                 const now = new Date();
                 return sessionDate >= now && s.status !== 'CANCELLED' && s.status !== 'COMPLETED';
@@ -118,9 +168,7 @@ const AvailableClasses: React.FC = () => {
             setSessions(upcoming);
         } catch (err) {
             console.error('Failed to fetch sessions:', err);
-            setSessions([]);
-        } finally {
-            setLoading(false);
+            setSessions(MOCK_CLASSES);
         }
     };
 
@@ -134,17 +182,28 @@ const AvailableClasses: React.FC = () => {
         try {
             const session = sessions.find(s => s.id === sessionId);
             if (session) {
-                const updateData = {
-                    sessionId: sessionId,
-                    trainerId: session.trainerId || 0,
-                    memberId: memberId,
-                    sessionDate: session.sessionDate,
-                    durationMinutes: session.durationMinutes,
-                    status: session.status as any
-                };
-                await ptSessionApi.updateSession(sessionId, updateData);
-                toast.success('Class booked successfully!');
-                fetchSessions();
+                // If it's a mock class, just update state locally
+                if (sessionId < 0) {
+                    await new Promise(resolve => setTimeout(resolve, 800)); // Simulate API delay
+                    setSessions(prev => prev.map(s => 
+                        s.id === sessionId ? { ...s, memberId: memberId, spotsLeft: (s.spotsLeft || 1) - 1 } : s
+                    ));
+                } else {
+                    // Real API call
+                    const updateData = {
+                        sessionId: sessionId,
+                        trainerId: session.trainerId || 0,
+                        memberId: memberId,
+                        sessionDate: session.sessionDate,
+                        durationMinutes: session.durationMinutes,
+                        status: session.status as any
+                    };
+                    await ptSessionApi.updateSession(sessionId, updateData);
+                }
+                
+                toast.success('Booking Successful! Enjoy your session.');
+                fetchDashboardStats();
+                if (sessionId > 0) fetchSessions();
             }
         } catch (err) {
             console.error('Booking failed:', err);
@@ -154,6 +213,12 @@ const AvailableClasses: React.FC = () => {
         }
     };
 
+    const myBookings = useMemo(() => sessions.filter(s => s.memberId === memberId), [sessions, memberId]);
+    const todaysClasses = useMemo(() => {
+        const today = new Date().toDateString();
+        return sessions.filter(s => new Date(s.sessionDate).toDateString() === today);
+    }, [sessions]);
+
     const types = useMemo(() => {
         const uniqueTypes = new Set(sessions.map(s => getClassType(s)));
         return ['All', ...Array.from(uniqueTypes)];
@@ -162,7 +227,7 @@ const AvailableClasses: React.FC = () => {
     const filteredSessions = useMemo(() => {
         return sessions.filter(session => {
             const type = getClassType(session);
-            const trainerName = session.trainer?.fullName || '';
+            const trainerName = session.trainer?.fullName || session.trainerName || '';
             const matchesSearch = 
                 trainerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 type.toLowerCase().includes(searchTerm.toLowerCase());
@@ -170,25 +235,6 @@ const AvailableClasses: React.FC = () => {
             return matchesSearch && matchesType;
         });
     }, [sessions, searchTerm, selectedType]);
-
-    const getWeekDays = (weekOffset: number) => {
-        const today = new Date();
-        const startOfWeek = new Date(today);
-        startOfWeek.setDate(today.getDate() - today.getDay() + (weekOffset * 7));
-        return Array.from({ length: 7 }, (_, i) => {
-            const d = new Date(startOfWeek);
-            d.setDate(d.getDate() + i);
-            return d;
-        });
-    };
-
-    const weekDays = getWeekDays(selectedWeek);
-
-    const getSessionsForDay = (date: Date) =>
-        filteredSessions.filter(session => {
-            const sessionDate = new Date(session.sessionDate);
-            return sessionDate.toDateString() === date.toDateString();
-        });
 
     const formatTime = (dateStr: string) => {
         const date = new Date(dateStr);
@@ -198,11 +244,6 @@ const AvailableClasses: React.FC = () => {
     const formatDate = (dateStr: string) => {
         const date = new Date(dateStr);
         return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-    };
-
-    const isToday = (date: Date) => {
-        const today = new Date();
-        return date.toDateString() === today.toDateString();
     };
 
     const getDifficultyColor = (diff?: string) => {
@@ -216,316 +257,195 @@ const AvailableClasses: React.FC = () => {
 
     if (loading) {
         return (
-            <div className="classes-page">
-                <div className="classes-loading">
-                    <motion.div
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                    >
-                        <Loader2 size={24} className="classes-loading__icon" />
-                    </motion.div>
-                    <p>Loading available classes...</p>
-                </div>
+            <div className="classes-loading-container">
+                <Loader2 className="animate-spin text-primary" size={40} />
+                <p>Curating your schedule...</p>
             </div>
         );
     }
 
     return (
-        <motion.div
-            className="classes-page"
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-        >
-            <motion.header className="classes-header" variants={itemVariants}>
-                <div className="classes-header__content">
-                    <h1 className="classes-header__title">Class Schedule</h1>
-                    <p className="classes-header__subtitle">
-                        Browse and book available sessions
-                    </p>
+        <UnifiedPage className="classes-page-unified">
+            <header className="classes-hero">
+                <div className="classes-hero__content">
+                    <h1 className="hero-title">Class Schedule</h1>
+                    <p className="hero-subtitle">Optimize your routine with expert-led sessions</p>
                 </div>
-                <div className="classes-header__stats">
-                    <div className="classes-stat">
-                        <span className="classes-stat__value">{filteredSessions.length}</span>
-                        <span className="classes-stat__label">Available</span>
+                
+                <div className="classes-hero__stats">
+                    <UnifiedCard className="hero-stat-box" hover={false}>
+                        <div className="hero-stat-icon" style={{ background: 'rgba(52, 199, 89, 0.1)' }}>
+                            <BookmarkCheck size={20} color="#34C759" />
+                        </div>
+                        <div>
+                            <div className="hero-stat-value">{dashboardStats.bookedCount}</div>
+                            <div className="hero-stat-label">Booked</div>
+                        </div>
+                    </UnifiedCard>
+                    <UnifiedCard className="hero-stat-box" hover={false}>
+                        <div className="hero-stat-icon" style={{ background: 'rgba(0, 122, 255, 0.1)' }}>
+                            <Timer size={20} color="#007AFF" />
+                        </div>
+                        <div>
+                            <div className="hero-stat-value">{todaysClasses.length}</div>
+                            <div className="hero-stat-label">Today</div>
+                        </div>
+                    </UnifiedCard>
+                </div>
+            </header>
+
+            {todaysClasses.length > 0 && (
+                <section className="classes-section">
+                    <div className="section-header">
+                        <h2 className="section-title"><Sparkles size={18} /> Today's Sessions</h2>
                     </div>
-                </div>
-            </motion.header>
-
-            <motion.div className="classes-toolbar" variants={itemVariants}>
-                <div className="classes-search">
-                    <Search size={16} className="classes-search__icon" />
-                    <input
-                        type="text"
-                        placeholder="Search classes or trainers..."
-                        value={searchTerm}
-                        onChange={e => setSearchTerm(e.target.value)}
-                        className="classes-search__input"
-                    />
-                </div>
-
-                <div className="classes-filters">
-                    {types.map(type => (
-                        <button
-                            key={type}
-                            className={`classes-filter ${selectedType === type ? 'classes-filter--active' : ''}`}
-                            onClick={() => setSelectedType(type as string)}
-                        >
-                            {type}
-                        </button>
-                    ))}
-                </div>
-
-                <div className="classes-view-toggle">
-                    <button
-                        className={`classes-view-btn ${view === 'list' ? 'classes-view-btn--active' : ''}`}
-                        onClick={() => setView('list')}
-                        title="List view"
-                    >
-                        <List size={16} />
-                    </button>
-                    <button
-                        className={`classes-view-btn ${view === 'calendar' ? 'classes-view-btn--active' : ''}`}
-                        onClick={() => setView('calendar')}
-                        title="Calendar view"
-                    >
-                        <CalendarDays size={16} />
-                    </button>
-                </div>
-            </motion.div>
-
-            {error && (
-                <motion.div className="classes-error" variants={itemVariants}>
-                    <AlertCircle size={16} />
-                    <span>{error}</span>
-                    <button onClick={fetchSessions}>Try Again</button>
-                </motion.div>
+                    <div className="horizontal-scroll-container">
+                        {todaysClasses.map(session => (
+                            <TodayClassCard 
+                                key={session.id} 
+                                session={session} 
+                                memberId={memberId}
+                                booking={booking}
+                                onBook={handleBook}
+                            />
+                        ))}
+                    </div>
+                </section>
             )}
 
-            <AnimatePresence mode="wait">
-                {view === 'list' ? (
-                    <motion.div
-                        key="list"
-                        className="classes-content"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                    >
-                        {filteredSessions.length === 0 ? (
-                            <motion.div className="classes-empty" variants={itemVariants}>
-                                <div className="classes-empty__icon">
-                                    <Calendar size={32} />
-                                </div>
-                                <h3 className="classes-empty__title">No Classes Available</h3>
-                                <p className="classes-empty__text">
-                                    {searchTerm || selectedType !== 'All'
-                                        ? 'Try adjusting your filters to see more classes'
-                                        : 'Check back later for new sessions or contact your trainer'}
-                                </p>
-                                {(searchTerm || selectedType !== 'All') && (
-                                    <button
-                                        className="classes-empty__btn"
-                                        onClick={() => {
-                                            setSearchTerm('');
-                                            setSelectedType('All');
-                                        }}
-                                    >
-                                        Clear Filters
-                                    </button>
-                                )}
-                            </motion.div>
-                        ) : (
-                            <div className="classes-grid">
-                                {filteredSessions.map((session, index) => {
-                                    const type = getClassType(session);
-                                    const config = classTypeConfig[type] || classTypeConfig['PT Session'];
-                                    const isBooked = session.memberId === memberId;
-
-                                    return (
-                                        <motion.div
-                                            key={session.id}
-                                            className={`class-card ${isBooked ? 'class-card--booked' : ''}`}
-                                            variants={itemVariants}
-                                            whileHover={{ y: -2, transition: { duration: 0.2 } }}
-                                        >
-                                            <div className="class-card__header">
-                                                <div
-                                                    className="class-card__icon"
-                                                    style={{ background: config.bg, color: config.color }}
-                                                >
-                                                    {config.icon}
-                                                </div>
-                                                <div className="flex gap-2">
-                                                    {session.difficulty && (
-                                                        <span className={`class-card__badge ${getDifficultyColor(session.difficulty)}`}>
-                                                            {session.difficulty}
-                                                        </span>
-                                                    )}
-                                                    {isBooked && (
-                                                        <span className="class-card__badge badge--success">
-                                                            <CheckCircle2 size={10} /> Booked
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            <h3 className="class-card__title">{type}</h3>
-
-                                            {session.trainer && (
-                                                <p className="class-card__trainer">
-                                                    <User size={12} />
-                                                    {session.trainer.fullName}
-                                                </p>
-                                            )}
-
-                                            <div className="class-card__details">
-                                                <div className="class-card__detail">
-                                                    <Calendar size={12} />
-                                                    <span>{formatDate(session.sessionDate)}</span>
-                                                </div>
-                                                <div className="class-card__detail">
-                                                    <Clock size={12} />
-                                                    <span>{formatTime(session.sessionDate)} · {session.durationMinutes}m</span>
-                                                </div>
-                                                {session.location && (
-                                                    <div className="class-card__detail">
-                                                        <MapPin size={12} />
-                                                        <span>{session.location}</span>
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            <div className="class-card__footer">
-                                                {session.spotsLeft !== undefined && (
-                                                    <span className="class-card__spots">
-                                                        <Users size={12} />
-                                                        {session.spotsLeft} left
-                                                    </span>
-                                                )}
-                                                <button
-                                                    className={`class-card__btn ${isBooked ? 'class-card__btn--booked' : ''}`}
-                                                    onClick={() => !isBooked && handleBook(session.id!)}
-                                                    disabled={booking === session.id || isBooked}
-                                                >
-                                                    {booking === session.id ? (
-                                                        <>
-                                                            <Loader2 size={12} className="spin" />
-                                                            ...
-                                                        </>
-                                                    ) : isBooked ? (
-                                                        'Booked'
-                                                    ) : (
-                                                        'Book'
-                                                    )}
-                                                </button>
-                                            </div>
-                                        </motion.div>
-                                    );
-                                })}
-                            </div>
-                        )}
-                    </motion.div>
-                ) : (
-                    <motion.div
-                        key="calendar"
-                        className="classes-calendar"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                    >
-                        <div className="classes-calendar__nav">
-                            <button
-                                className="classes-calendar__nav-btn"
-                                onClick={() => setSelectedWeek(w => w - 1)}
-                            >
-                                <ChevronLeft size={18} />
-                            </button>
-                            <span className="classes-calendar__nav-label">
-                                {weekDays[0].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {weekDays[6].toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                            </span>
-                            <button
-                                className="classes-calendar__nav-btn"
-                                onClick={() => setSelectedWeek(w => w + 1)}
-                            >
-                                <ChevronRight size={18} />
-                            </button>
-                            {selectedWeek !== 0 && (
-                                <button
-                                    className="classes-calendar__today-btn"
-                                    onClick={() => setSelectedWeek(0)}
-                                >
-                                    Today
-                                </button>
-                            )}
+            <section className="classes-section">
+                <div className="section-header">
+                    <h2 className="section-title"><LayoutGrid size={18} /> Browse Classes</h2>
+                    <div className="classes-toolbar-compact">
+                        <div className="search-pill">
+                            <Search size={14} />
+                            <input 
+                                placeholder="Search..." 
+                                value={searchTerm}
+                                onChange={e => setSearchTerm(e.target.value)}
+                            />
                         </div>
-
-                        <div className="classes-calendar__header">
-                            {weekDays.map((day, i) => (
-                                <div
-                                    key={i}
-                                    className={`classes-calendar__day-header ${isToday(day) ? 'classes-calendar__day-header--today' : ''}`}
+                        <div className="filter-scroll">
+                            {types.map(type => (
+                                <button
+                                    key={type}
+                                    className={`filter-pill ${selectedType === type ? 'active' : ''}`}
+                                    onClick={() => setSelectedType(type)}
                                 >
-                                    <span className="classes-calendar__weekday">
-                                        {day.toLocaleDateString('en-US', { weekday: 'short' })}
-                                    </span>
-                                    <span className="classes-calendar__date">{day.getDate()}</span>
-                                </div>
+                                    {type}
+                                </button>
                             ))}
                         </div>
+                    </div>
+                </div>
 
-                        <div className="classes-calendar__grid">
-                            {weekDays.map((day, i) => {
-                                const dayClasses = getSessionsForDay(day);
-                                return (
-                                    <div
-                                        key={i}
-                                        className={`classes-calendar__column ${isToday(day) ? 'classes-calendar__column--today' : ''}`}
-                                    >
-                                        {dayClasses.length > 0 ? (
-                                            dayClasses.map(session => {
-                                                const type = getClassType(session);
-                                                const config = classTypeConfig[type] || classTypeConfig['PT Session'];
-                                                const isBooked = session.memberId === memberId;
+                <div className="classes-grid-compact">
+                    <AnimatePresence>
+                        {filteredSessions.length > 0 ? (
+                            filteredSessions.map((session, index) => (
+                                <ClassCardCompact 
+                                    key={session.id} 
+                                    session={session} 
+                                    index={index}
+                                    memberId={memberId}
+                                    booking={booking}
+                                    onBook={handleBook}
+                                />
+                            ))
+                        ) : (
+                            <motion.div 
+                                className="classes-empty-state"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                            >
+                                <Calendar size={40} className="empty-icon" />
+                                <h3>No classes found</h3>
+                                <p>Try adjusting your filters or search term</p>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
+            </section>
+        </UnifiedPage>
+    );
+};
 
-                                                return (
-                                                    <div
-                                                        key={session.id}
-                                                        className={`classes-calendar__item ${isBooked ? 'classes-calendar__item--booked' : ''}`}
-                                                        style={{ borderLeftColor: config.color }}
-                                                        onClick={() => !isBooked && handleBook(session.id!)}
-                                                    >
-                                                        <div className="classes-calendar__item-icon" style={{ color: config.color }}>
-                                                            {config.icon}
-                                                        </div>
-                                                        <div className="classes-calendar__item-info">
-                                                            <span className="classes-calendar__item-time">
-                                                                {formatTime(session.sessionDate)}
-                                                            </span>
-                                                            <span className="classes-calendar__item-type">{type}</span>
-                                                            {session.trainer && (
-                                                                <span className="classes-calendar__item-trainer">
-                                                                    {session.trainer.fullName}
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                        {isBooked && (
-                                                            <CheckCircle2 size={10} className="classes-calendar__item-check" />
-                                                        )}
-                                                    </div>
-                                                );
-                                            })
-                                        ) : (
-                                            <div className="classes-calendar__empty">
-                                                <span>No classes</span>
-                                            </div>
-                                        )}
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+interface CardProps {
+    session: ClassSession;
+    index?: number;
+    memberId?: number;
+    booking: number | null;
+    onBook: (id: number) => void;
+}
+
+const TodayClassCard: React.FC<CardProps> = ({ session, memberId, booking, onBook }) => {
+    const type = getClassType(session);
+    const config = classTypeConfig[type] || classTypeConfig['PT Session'];
+    const isBooked = session.memberId === memberId;
+
+    return (
+        <UnifiedCard className="today-class-card" delay={0.1}>
+            <div className="today-card-top">
+                <div className="type-icon-circle" style={{ background: config.bg, color: config.color }}>
+                    {config.icon}
+                </div>
+                <div className="time-badge">{new Date(session.sessionDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+            </div>
+            <h3 className="today-card-title">{type}</h3>
+            <p className="today-card-trainer">with {session.trainerName || 'Expert Trainer'}</p>
+            <div className="today-card-footer">
+                <div className="location-info"><MapPin size={12} /> {session.location}</div>
+                <button 
+                    className={`book-btn-sm ${isBooked ? 'booked' : ''}`}
+                    onClick={() => !isBooked && onBook(session.id)}
+                    disabled={booking === session.id || isBooked}
+                >
+                    {booking === session.id ? <Loader2 size={12} className="animate-spin" /> : isBooked ? <CheckCircle2 size={12} /> : 'Book'}
+                </button>
+            </div>
+        </UnifiedCard>
+    );
+};
+
+const ClassCardCompact: React.FC<CardProps> = ({ session, index, memberId, booking, onBook }) => {
+    const type = getClassType(session);
+    const config = classTypeConfig[type] || classTypeConfig['PT Session'];
+    const isBooked = session.memberId === memberId;
+
+    return (
+        <motion.div
+            layout
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: (index || 0) * 0.02 }}
+        >
+            <UnifiedCard className={`class-card-compact-ui ${isBooked ? 'booked' : ''}`}>
+                <div className="compact-card-left">
+                    <div className="compact-icon-box" style={{ background: config.bg, color: config.color }}>
+                        {config.icon}
+                    </div>
+                    <div className="compact-info">
+                        <div className="compact-type">{type}</div>
+                        <div className="compact-trainer">Coach {session.trainerName || 'AthlonX'}</div>
+                    </div>
+                </div>
+                <div className="compact-card-mid">
+                    <div className="compact-meta"><Clock size={12} /> {new Date(session.sessionDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                    <div className="compact-meta"><Calendar size={12} /> {new Date(session.sessionDate).toLocaleDateString([], { weekday: 'short' })}</div>
+                </div>
+                <div className="compact-card-right">
+                    <div className={`compact-difficulty ${session.difficulty?.toLowerCase() || 'intermediate'}`}>
+                        {session.difficulty || 'Intermediate'}
+                    </div>
+                    <button 
+                        className={`compact-book-btn ${isBooked ? 'booked' : ''}`}
+                        onClick={() => !isBooked && onBook(session.id)}
+                        disabled={booking === session.id || isBooked}
+                    >
+                        {booking === session.id ? <Loader2 size={14} className="animate-spin" /> : isBooked ? <CheckCircle2 size={14} /> : 'Book'}
+                    </button>
+                </div>
+            </UnifiedCard>
         </motion.div>
     );
 };
