@@ -1,231 +1,511 @@
 /* ============================================
-   MyProgress - macOS Style Specific Styles
+   MyProgress - Dream UI Redesign
    ============================================ */
 
 .progress-macos {
-    max-width: 100%;
-}
-
-/* Header */
-.progress__header {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: var(--space-6);
+    flex-direction: column;
+    gap: var(--space-6);
+    padding-bottom: var(--space-8);
 }
 
-/* Stat Cards */
-.progress__stat-card {
-    text-align: center;
+/* Redesigned Hero Journey Section */
+.progress-hero {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: var(--space-6);
+    background: linear-gradient(135deg, rgba(0, 122, 255, 0.1) 0%, rgba(175, 82, 222, 0.1) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-xl);
+    padding: var(--space-8);
+    overflow: hidden;
+    position: relative;
 }
 
-.progress__stat-icon {
-    width: 44px;
-    height: 44px;
-    border-radius: var(--radius-md);
+.progress-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -20%;
+    width: 100%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(0, 122, 255, 0.05) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.progress-hero__content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--space-6);
+    z-index: 1;
+}
+
+.progress-hero__badge {
+    display: inline-flex;
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--macos-accent);
+    width: fit-content;
+    margin-bottom: var(--space-2);
+}
+
+.progress-hero__actions {
+    display: flex;
+    gap: var(--space-3);
+}
+
+/* Journey Ring Styles */
+.progress-hero__stats {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto var(--space-3);
+    z-index: 1;
 }
 
-.progress__stat-icon--blue {
-    background: rgba(0, 122, 255, 0.15);
-    color: var(--macos-accent);
+.journey-ring {
+    position: relative;
+    width: 180px;
+    height: 180px;
 }
 
-.progress__stat-icon--green {
-    background: var(--macos-success-bg);
-    color: var(--macos-success);
+.journey-ring svg {
+    transform: rotate(-90deg);
 }
 
-.progress__stat-icon--purple {
-    background: rgba(175, 82, 222, 0.15);
-    color: var(--macos-purple);
+.journey-ring__bg {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.05);
+    stroke-width: 8;
 }
 
-.progress__stat-icon--orange {
-    background: var(--macos-warning-bg);
-    color: var(--macos-warning);
+.journey-ring__fill {
+    fill: none;
+    stroke: var(--macos-accent);
+    stroke-width: 8;
+    stroke-linecap: round;
+    stroke-dasharray: 283;
 }
 
-.progress__stat-value {
-    font-size: 32px;
-    font-weight: 700;
+.journey-ring__text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.journey-ring__text .value {
+    font-size: 36px;
+    font-weight: 800;
     color: var(--macos-text-primary);
 }
 
-.progress__stat-value span {
-    font-size: 16px;
+.journey-ring__text .label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--macos-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Bento Stats */
+.progress-stat-bento {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-5) !important;
+}
+
+.progress-stat-bento__icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon--orange { background: rgba(255, 159, 10, 0.15); color: #FF9F0A; }
+.icon--blue { background: rgba(0, 122, 255, 0.15); color: #007AFF; }
+.icon--purple { background: rgba(191, 94, 255, 0.15); color: #BF5EFF; }
+.icon--green { background: rgba(48, 209, 88, 0.15); color: #30D158; }
+
+.progress-stat-bento__content .value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--macos-text-primary);
+    line-height: 1.2;
+}
+
+.progress-stat-bento__content .value span {
+    font-size: 14px;
     font-weight: 500;
     color: var(--macos-text-tertiary);
     margin-left: 2px;
 }
 
-.progress__stat-label {
+.progress-stat-bento__content .label {
     font-size: 13px;
     color: var(--macos-text-secondary);
-    margin-top: 4px;
+    margin-bottom: 2px;
 }
 
-.progress__stat-change {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 12px;
+.progress-stat-bento__content .sub-label,
+.progress-stat-bento__content .change {
+    font-size: 11px;
     font-weight: 500;
-    margin-top: 8px;
-    padding: 4px 10px;
-    border-radius: 20px;
 }
 
-.progress__stat-change--positive {
-    background: var(--macos-success-bg);
-    color: var(--macos-success);
+.change.positive { color: var(--macos-success); }
+
+/* Main Chart Section Styles */
+.main-chart-section {
+    padding: var(--space-6) !important;
 }
 
-.progress__stat-change--negative {
-    background: var(--macos-error-bg);
-    color: var(--macos-error);
-}
-
-/* Chart Section */
-.progress__chart-section {
-    margin-top: var(--space-6);
-    margin-bottom: var(--space-6);
-}
-
-.progress__chart-header {
+.section-header-compact {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--space-5);
+    margin-bottom: var(--space-8);
 }
 
-.progress__chart-tabs {
+.tabs-pill {
     display: flex;
-    gap: var(--space-1);
+    background: rgba(255, 255, 255, 0.05);
     padding: 4px;
-    background: var(--macos-bg-glass);
-    border-radius: var(--radius-md);
+    border-radius: 100px;
+    gap: 4px;
 }
 
-.progress__chart-tab {
-    padding: 6px 14px;
-    border-radius: var(--radius-sm);
+.tab-pill-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    border-radius: 100px;
+    border: none;
+    background: transparent;
+    color: var(--macos-text-tertiary);
     font-size: 13px;
     font-weight: 500;
-    color: var(--macos-text-tertiary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tab-pill-btn.active {
+    background: var(--macos-accent);
+    color: white;
+}
+
+.time-filter {
+    display: flex;
+    gap: 8px;
+}
+
+.filter-btn {
     background: transparent;
     border: none;
+    color: var(--macos-text-tertiary);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 8px;
     cursor: pointer;
-    transition: all var(--transition-fast);
 }
 
-.progress__chart-tab:hover {
-    color: var(--macos-text-secondary);
+.filter-btn.active {
+    color: var(--macos-accent);
 }
 
-.progress__chart-tab--active {
-    color: var(--macos-text-primary);
-    background: var(--macos-bg-glass-active);
-}
-
-.progress__chart-container {
-    height: 280px;
-}
-
-/* Goals */
-.progress__goals-list {
+/* Consistency Heatmap Styles */
+.consistency-heatmap {
     display: flex;
     flex-direction: column;
-    gap: var(--space-4);
-}
-
-.progress__goal-item {
-    padding: var(--space-4);
-    background: var(--macos-bg-glass);
-    border-radius: var(--radius-md);
-}
-
-.progress__goal-header {
-    display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 4px;
+    justify-content: center;
+    height: 100%;
+    gap: var(--space-6);
 }
 
-.progress__goal-title {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--macos-text-primary);
-}
-
-.progress__goal-stats {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 8px;
-    font-size: 12px;
-    color: var(--macos-text-tertiary);
-}
-
-/* Achievements */
-.progress__achievements-grid {
+.heatmap-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--space-3);
+    grid-template-columns: repeat(10, 1fr);
+    gap: 8px;
 }
 
-.progress__achievement-item {
+.heatmap-cell {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    transition: transform 0.2s ease;
+}
+
+.heatmap-cell:hover {
+    transform: scale(1.2);
+    z-index: 2;
+}
+
+.intensity-1 { background: rgba(0, 122, 255, 0.2); }
+.intensity-2 { background: rgba(0, 122, 255, 0.4); }
+.intensity-3 { background: rgba(0, 122, 255, 0.6); }
+.intensity-4 { background: rgba(0, 122, 255, 0.8); }
+
+.heatmap-labels {
     display: flex;
     align-items: center;
-    gap: var(--space-3);
-    padding: var(--space-3);
-    background: var(--macos-bg-glass);
-    border-radius: var(--radius-md);
-    transition: background var(--transition-fast);
-}
-
-.progress__achievement-item:hover {
-    background: var(--macos-bg-glass-hover);
-}
-
-.progress__achievement-icon {
-    font-size: 24px;
-}
-
-.progress__achievement-title {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--macos-text-primary);
-}
-
-.progress__achievement-date {
+    gap: 8px;
     font-size: 11px;
     color: var(--macos-text-tertiary);
 }
 
-/* Responsive */
-@media (max-width: 900px) {
-    .progress__header {
-        flex-direction: column;
-        gap: var(--space-4);
-    }
+.heatmap-labels div {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+}
 
-    .progress__chart-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--space-3);
+/* Personal Bests Card */
+.pb-card .card-header,
+.goals-card .card-header,
+.trainer-insight-card .card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: var(--space-5);
+}
+
+.pb-card h3, .goals-card h3, .trainer-insight-card h3 {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.pb-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+}
+
+.pb-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-3) var(--space-4);
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: var(--radius-md);
+}
+
+.pb-item__info {
+    display: flex;
+    flex-direction: column;
+}
+
+.pb-item__info .exercise {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--macos-text-primary);
+}
+
+.pb-item__info .date {
+    font-size: 11px;
+    color: var(--macos-text-tertiary);
+}
+
+.pb-item__value {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--macos-accent);
+}
+
+/* Goals Progress Compact */
+.goals-list-compact {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+}
+
+.goal-item-compact .goal-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.mini-progress-bar {
+    height: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 100px;
+    overflow: hidden;
+    margin-bottom: 6px;
+}
+
+.mini-progress-bar .fill {
+    height: 100%;
+    background: var(--macos-accent);
+    border-radius: 100px;
+}
+
+.goal-target {
+    font-size: 11px;
+    color: var(--macos-text-tertiary);
+    text-align: right;
+}
+
+/* Trainer Insight Card */
+.trainer-insight-card .insight-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: var(--space-4);
+}
+
+.avatar-placeholder {
+    width: 32px;
+    height: 32px;
+    border-radius: 100px;
+    background: var(--macos-accent);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.insight-profile .name {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.insight-profile .time {
+    font-size: 11px;
+    color: var(--macos-text-tertiary);
+}
+
+.insight-content .note {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--macos-text-secondary);
+    font-style: italic;
+    margin-bottom: var(--space-5);
+}
+
+/* Milestones Strip */
+.milestones-strip {
+    padding: var(--space-6) !important;
+}
+
+.milestones-track {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    padding: 0 var(--space-8);
+}
+
+.milestones-track::before {
+    content: '';
+    position: absolute;
+    top: 24px;
+    left: var(--space-8);
+    right: var(--space-8);
+    height: 2px;
+    background: rgba(255, 255, 255, 0.05);
+    z-index: 0;
+}
+
+.milestone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    z-index: 1;
+    position: relative;
+}
+
+.milestone .icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 100px;
+    background: var(--macos-bg-glass);
+    border: 2px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--macos-text-tertiary);
+    transition: all 0.3s ease;
+}
+
+.milestone span {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--macos-text-tertiary);
+    white-space: nowrap;
+}
+
+.milestone.completed .icon {
+    background: rgba(48, 209, 88, 0.15);
+    border-color: #30D158;
+    color: #30D158;
+}
+
+.milestone.active .icon {
+    background: var(--macos-accent);
+    border-color: var(--macos-accent);
+    color: white;
+    box-shadow: 0 0 15px rgba(0, 122, 255, 0.3);
+}
+
+.milestone.active .progress-dot {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 10px;
+    height: 10px;
+    background: var(--macos-accent);
+    border-radius: 100px;
+    border: 2px solid #000;
+}
+
+/* Utilities */
+.full-width {
+    width: 100%;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1024px) {
+    .progress-hero {
+        grid-template-columns: 1fr;
+        padding: var(--space-6);
+    }
+    
+    .progress-hero__stats {
+        justify-content: flex-start;
+    }
+    
+    .milestones-track {
+        overflow-x: auto;
+        justify-content: flex-start;
+        gap: var(--space-8);
+        padding-bottom: var(--space-4);
     }
 }
 
-@media (max-width: 640px) {
-    .progress__achievements-grid {
-        grid-template-columns: 1fr;
+@media (max-width: 768px) {
+    .section-header-compact {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-4);
     }
-
-    .progress__chart-tabs {
-        overflow-x: auto;
-        width: 100%;
+    
+    .heatmap-grid {
+        grid-template-columns: repeat(5, 1fr);
     }
 }
