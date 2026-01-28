@@ -308,54 +308,56 @@ const MyMembership: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="mm-countdown">
-                        <div className="mm-countdown__label">
-                            <Timer size={14} />
-                            Time Remaining
+                    <div className="mm-hero__main">
+                        <div className="mm-countdown">
+                            <div className="mm-countdown__label">
+                                <Timer size={14} />
+                                Time Remaining
+                            </div>
+                            <div className="mm-countdown__grid">
+                                <div className="mm-countdown__item">
+                                    <span className="mm-countdown__value">{timeLeft.days}</span>
+                                    <span className="mm-countdown__unit">days</span>
+                                </div>
+                                <span className="mm-countdown__separator">:</span>
+                                <div className="mm-countdown__item">
+                                    <span className="mm-countdown__value">{String(timeLeft.hours).padStart(2, '0')}</span>
+                                    <span className="mm-countdown__unit">hrs</span>
+                                </div>
+                                <span className="mm-countdown__separator">:</span>
+                                <div className="mm-countdown__item">
+                                    <span className="mm-countdown__value">{String(timeLeft.minutes).padStart(2, '0')}</span>
+                                    <span className="mm-countdown__unit">min</span>
+                                </div>
+                                <span className="mm-countdown__separator">:</span>
+                                <div className="mm-countdown__item mm-countdown__item--seconds">
+                                    <span className="mm-countdown__value">{String(timeLeft.seconds).padStart(2, '0')}</span>
+                                    <span className="mm-countdown__unit">sec</span>
+                                </div>
+                            </div>
                         </div>
-                        <div className="mm-countdown__grid">
-                            <div className="mm-countdown__item">
-                                <span className="mm-countdown__value">{timeLeft.days}</span>
-                                <span className="mm-countdown__unit">days</span>
-                            </div>
-                            <span className="mm-countdown__separator">:</span>
-                            <div className="mm-countdown__item">
-                                <span className="mm-countdown__value">{String(timeLeft.hours).padStart(2, '0')}</span>
-                                <span className="mm-countdown__unit">hrs</span>
-                            </div>
-                            <span className="mm-countdown__separator">:</span>
-                            <div className="mm-countdown__item">
-                                <span className="mm-countdown__value">{String(timeLeft.minutes).padStart(2, '0')}</span>
-                                <span className="mm-countdown__unit">min</span>
-                            </div>
-                            <span className="mm-countdown__separator">:</span>
-                            <div className="mm-countdown__item mm-countdown__item--seconds">
-                                <span className="mm-countdown__value">{String(timeLeft.seconds).padStart(2, '0')}</span>
-                                <span className="mm-countdown__unit">sec</span>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div className="mm-hero__stats">
-                        <div className="mm-hero__stat">
-                            <Calendar size={14} />
-                            <div>
-                                <span className="mm-stat-label">Started</span>
-                                <span className="mm-stat-value">{membership?.startDate ? formatDate(membership.startDate) : 'N/A'}</span>
+                        <div className="mm-hero__stats">
+                            <div className="mm-hero__stat">
+                                <Calendar size={14} />
+                                <div>
+                                    <span className="mm-stat-label">Started</span>
+                                    <span className="mm-stat-value">{membership?.startDate ? formatDate(membership.startDate) : 'N/A'}</span>
+                                </div>
                             </div>
-                        </div>
-                        <div className="mm-hero__stat">
-                            <Clock size={14} />
-                            <div>
-                                <span className="mm-stat-label">Renews</span>
-                                <span className="mm-stat-value">{membership?.endDate ? formatDate(membership.endDate) : 'N/A'}</span>
+                            <div className="mm-hero__stat">
+                                <Clock size={14} />
+                                <div>
+                                    <span className="mm-stat-label">Renews</span>
+                                    <span className="mm-stat-value">{membership?.endDate ? formatDate(membership.endDate) : 'N/A'}</span>
+                                </div>
                             </div>
-                        </div>
-                        <div className="mm-hero__stat">
-                            <CreditCard size={14} />
-                            <div>
-                                <span className="mm-stat-label">Monthly</span>
-                                <span className="mm-stat-value">${membership?.packagePrice?.toFixed(2) || '0.00'}</span>
+                            <div className="mm-hero__stat">
+                                <CreditCard size={14} />
+                                <div>
+                                    <span className="mm-stat-label">Monthly</span>
+                                    <span className="mm-stat-value">${membership?.packagePrice?.toFixed(2) || '0.00'}</span>
+                                </div>
                             </div>
                         </div>
                     </div>

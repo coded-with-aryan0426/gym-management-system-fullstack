@@ -249,90 +249,35 @@
     color: #71717a;
 }
 
+.mm-hero__main {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
 .mm-countdown {
+    flex: 1;
     background: rgba(0, 0, 0, 0.3);
     border-radius: 12px;
     padding: 16px;
-    margin-bottom: 16px;
     border: 1px solid rgba(255, 255, 255, 0.04);
-}
-
-.mm-countdown__label {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 10px;
-    font-weight: 600;
-    color: #71717a;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 12px;
-}
-
-.mm-countdown__grid {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-}
-
-.mm-countdown__item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-width: 52px;
-    padding: 8px 12px;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.mm-countdown__value {
-    font-size: 28px;
-    font-weight: 800;
-    font-variant-numeric: tabular-nums;
-    background: linear-gradient(135deg, #fff, #a1a1aa);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    line-height: 1;
-}
-
-.mm-countdown__unit {
-    font-size: 9px;
-    font-weight: 600;
-    color: #71717a;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-top: 2px;
-}
-
-.mm-countdown__separator {
-    font-size: 20px;
-    font-weight: 300;
-    color: #3f3f46;
-}
-
-.mm-countdown__item--seconds .mm-countdown__value {
-    color: #3b82f6;
-    background: linear-gradient(135deg, #60a5fa, #3b82f6);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    margin-bottom: 0;
 }
 
 .mm-hero__stats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-bottom: 16px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 0;
 }
 
 .mm-hero__stat {
+    flex: 1;
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 12px;
+    padding: 10px 14px;
     background: rgba(255, 255, 255, 0.03);
     border-radius: 10px;
     border: 1px solid rgba(255, 255, 255, 0.04);
@@ -375,23 +320,25 @@
 
 .mm-hero__actions {
     display: flex;
-    gap: 10px;
+    gap: 12px;
+    justify-content: flex-start;
 }
 
 .mm-qr-btn,
 .mm-renew-btn {
-    flex: 1;
+    flex: 0 0 auto;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 10px 16px;
+    padding: 10px 20px;
     border-radius: 10px;
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
     border: none;
     transition: all 0.2s;
+    min-width: 140px;
 }
 
 .mm-qr-btn {
