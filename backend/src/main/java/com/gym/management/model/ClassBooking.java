@@ -15,6 +15,36 @@ public class ClassBooking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "gym_class_id", nullable = false)
+    private GymClass gymClass;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User member;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private BookingStatus status;
+
+    private LocalDateTime bookedAt;
+    private LocalDateTime cancelledAt;
+    private Boolean attended;
+    private String notes;
+
+    @PrePersist
+    protected void onCreate() {
+        if (bookedAt == null) {
+            bookedAt = LocalDateTime.now();
+        }
+        if (status == null) {
+            status = BookingStatus.CONFIRMED;
+        }
+        if (attended == null) {
+            attended = false;
+        }
+    }
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public Long getBookingId() { return id; }

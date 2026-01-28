@@ -30,7 +30,7 @@ public class MemberAchievement {
     @Column(name = "achievement_name", nullable = false)
     private String achievementName;
 
-    @Column(columnDefinition = "TEXT")
+    @Lob
     private String description;
 
     @Column(name = "earned_at")

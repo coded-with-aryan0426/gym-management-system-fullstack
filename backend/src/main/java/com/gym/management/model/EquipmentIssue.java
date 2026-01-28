@@ -28,7 +28,8 @@ public class EquipmentIssue {
     @JoinColumn(name = "reported_by_user_id", nullable = false)
     private User reportedBy;
 
-    @Column(columnDefinition = "TEXT", nullable = false)
+    @Lob
+    @Column(nullable = false)
     private String description;
 
     @Enumerated(EnumType.STRING)

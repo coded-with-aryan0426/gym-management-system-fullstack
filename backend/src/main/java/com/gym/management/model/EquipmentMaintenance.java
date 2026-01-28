@@ -30,7 +30,7 @@ public class EquipmentMaintenance {
     @Column(nullable = false)
     private MaintenanceType maintenanceType;
 
-    @Column(columnDefinition = "TEXT")
+    @Lob
     private String description;
 
     private String technicianName;
