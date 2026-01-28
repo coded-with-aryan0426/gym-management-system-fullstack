@@ -13,7 +13,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/member/progress")
 @CrossOrigin(origins = { "http://localhost:5173", "http://localhost:5174", "http://localhost:5175" })
-@PreAuthorize("hasAnyRole('MEMBER', 'CUSTOMER', 'TRAINER', 'OWNER', 'ADMIN')")
 public class MemberProgressController {
 
     @Autowired
@@ -335,6 +334,16 @@ public class MemberProgressController {
             }
         } catch (Exception e) {
             return ResponseEntity.status(500).build();
+        }
+    }
+
+    @PutMapping("/recalculate-bmi")
+    public ResponseEntity<?> recalculateBmi(@RequestParam Long memberId, @RequestParam(required = false) java.math.BigDecimal height) {
+        try {
+            progressService.recalculateBmiForUser(memberId, height);
+            return ResponseEntity.ok(Map.of("message", "BMI recalculated for all progress entries"));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
         }
     }
 }

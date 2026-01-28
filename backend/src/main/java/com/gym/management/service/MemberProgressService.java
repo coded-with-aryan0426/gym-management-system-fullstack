@@ -759,4 +759,33 @@ public class MemberProgressService {
                 .createdAt(log.getCreatedAt())
                 .build();
     }
+
+    @Transactional
+    public void recalculateBmiForUser(Long userId, BigDecimal newHeight) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (newHeight != null && newHeight.compareTo(BigDecimal.ZERO) > 0) {
+            user.setHeight(newHeight);
+            userRepository.save(user);
+        }
+
+        BigDecimal height = user.getHeight();
+        if (height == null || height.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new RuntimeException("User height not set. Please provide height parameter.");
+        }
+
+        List<ProgressMetric> metrics = progressMetricRepository.findByUserUserIdOrderByRecordDateAsc(userId);
+        BigDecimal heightInMeters = height.divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
+        BigDecimal heightSquared = heightInMeters.multiply(heightInMeters);
+
+        for (ProgressMetric metric : metrics) {
+            if (metric.getWeight() != null) {
+                BigDecimal bmi = metric.getWeight().divide(heightSquared, 2, RoundingMode.HALF_UP);
+                metric.setBmi(bmi);
+            }
+        }
+
+        progressMetricRepository.saveAll(metrics);
+    }
 }
