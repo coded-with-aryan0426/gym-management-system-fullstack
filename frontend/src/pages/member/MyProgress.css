@@ -1,305 +1,346 @@
 /* ============================================
-   MyProgress - Dream UI Redesign
+   MyProgress - Optimized Space-Efficient Design
    ============================================ */
 
-.progress-macos {
+.progress-page {
     display: flex;
     flex-direction: column;
-    gap: var(--space-6);
-    padding-bottom: var(--space-8);
+    gap: 16px;
+    padding-bottom: 24px;
 }
 
-/* Redesigned Hero Journey Section */
-.progress-hero {
+/* ============================================
+   Top Stats Row - Horizontal Cards
+   ============================================ */
+
+.stats-row {
     display: grid;
-    grid-template-columns: 1fr 300px;
-    gap: var(--space-6);
-    background: linear-gradient(135deg, rgba(0, 122, 255, 0.1) 0%, rgba(175, 82, 222, 0.1) 100%);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: var(--radius-xl);
-    padding: var(--space-8);
-    overflow: hidden;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+.stat-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 14px;
     position: relative;
+    transition: all 0.2s ease;
 }
 
-.progress-hero::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -20%;
-    width: 100%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(0, 122, 255, 0.05) 0%, transparent 70%);
-    pointer-events: none;
+.stat-card:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
 }
 
-.progress-hero__content {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: var(--space-6);
-    z-index: 1;
-}
-
-.progress-hero__badge {
-    display: inline-flex;
-    padding: 6px 12px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 100px;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--macos-accent);
-    width: fit-content;
-    margin-bottom: var(--space-2);
-}
-
-.progress-hero__actions {
-    display: flex;
-    gap: var(--space-3);
-}
-
-/* Journey Ring Styles */
-.progress-hero__stats {
+.stat-card__icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1;
+    flex-shrink: 0;
 }
 
-.journey-ring {
-    position: relative;
-    width: 180px;
-    height: 180px;
+.stat-card--streak .stat-card__icon {
+    background: rgba(255, 159, 10, 0.15);
+    color: #FF9F0A;
 }
 
-.journey-ring svg {
-    transform: rotate(-90deg);
+.stat-card--weight .stat-card__icon {
+    background: rgba(0, 122, 255, 0.15);
+    color: #007AFF;
 }
 
-.journey-ring__bg {
-    fill: none;
-    stroke: rgba(255, 255, 255, 0.05);
-    stroke-width: 8;
+.stat-card--muscle .stat-card__icon {
+    background: rgba(175, 82, 222, 0.15);
+    color: #AF52DE;
 }
 
-.journey-ring__fill {
-    fill: none;
-    stroke: var(--macos-accent);
-    stroke-width: 8;
-    stroke-linecap: round;
-    stroke-dasharray: 283;
+.stat-card--calories .stat-card__icon {
+    background: rgba(48, 209, 88, 0.15);
+    color: #30D158;
 }
 
-.journey-ring__text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+.stat-card__body {
+    flex: 1;
+    min-width: 0;
 }
 
-.journey-ring__text .value {
-    font-size: 36px;
-    font-weight: 800;
-    color: var(--macos-text-primary);
-}
-
-.journey-ring__text .label {
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--macos-text-tertiary);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-/* Bento Stats */
-.progress-stat-bento {
-    display: flex;
-    align-items: center;
-    gap: var(--space-4);
-    padding: var(--space-5) !important;
-}
-
-.progress-stat-bento__icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.icon--orange { background: rgba(255, 159, 10, 0.15); color: #FF9F0A; }
-.icon--blue { background: rgba(0, 122, 255, 0.15); color: #007AFF; }
-.icon--purple { background: rgba(191, 94, 255, 0.15); color: #BF5EFF; }
-.icon--green { background: rgba(48, 209, 88, 0.15); color: #30D158; }
-
-.progress-stat-bento__content .value {
-    font-size: 24px;
+.stat-card__value {
+    font-size: 22px;
     font-weight: 700;
-    color: var(--macos-text-primary);
-    line-height: 1.2;
+    color: #fff;
+    line-height: 1.1;
 }
 
-.progress-stat-bento__content .value span {
-    font-size: 14px;
+.stat-card__value span {
+    font-size: 13px;
     font-weight: 500;
-    color: var(--macos-text-tertiary);
+    color: rgba(255, 255, 255, 0.4);
     margin-left: 2px;
 }
 
-.progress-stat-bento__content .label {
-    font-size: 13px;
-    color: var(--macos-text-secondary);
-    margin-bottom: 2px;
+.stat-card__label {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+    margin-top: 2px;
 }
 
-.progress-stat-bento__content .sub-label,
-.progress-stat-bento__content .change {
+.stat-card__badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 3px 8px;
+    background: rgba(255, 159, 10, 0.2);
+    color: #FF9F0A;
+    font-size: 10px;
+    font-weight: 600;
+    border-radius: 20px;
+}
+
+.stat-card__trend {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 6px;
     font-size: 11px;
-    font-weight: 500;
+    font-weight: 600;
 }
 
-.change.positive { color: var(--macos-success); }
-
-/* Main Chart Section Styles */
-.main-chart-section {
-    padding: var(--space-6) !important;
+.stat-card__trend.positive {
+    background: rgba(48, 209, 88, 0.12);
+    color: #30D158;
 }
 
-.section-header-compact {
+.stat-card__sub {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.35);
+}
+
+/* ============================================
+   Chart Section
+   ============================================ */
+
+.chart-section {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 16px;
+    padding: 20px;
+}
+
+.chart-section__header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--space-8);
+    margin-bottom: 20px;
 }
 
-.tabs-pill {
+.chart-tabs {
     display: flex;
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.04);
     padding: 4px;
-    border-radius: 100px;
+    border-radius: 10px;
     gap: 4px;
 }
 
-.tab-pill-btn {
+.chart-tab {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 6px 16px;
-    border-radius: 100px;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 8px;
     border: none;
     background: transparent;
-    color: var(--macos-text-tertiary);
+    color: rgba(255, 255, 255, 0.5);
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
-.tab-pill-btn.active {
-    background: var(--macos-accent);
+.chart-tab:hover {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.chart-tab.active {
+    background: #007AFF;
     color: white;
 }
 
-.time-filter {
+.time-filters {
     display: flex;
-    gap: 8px;
+    gap: 4px;
 }
 
-.filter-btn {
-    background: transparent;
+.time-filter {
+    padding: 6px 12px;
     border: none;
-    color: var(--macos-text-tertiary);
+    background: transparent;
+    color: rgba(255, 255, 255, 0.4);
     font-size: 12px;
     font-weight: 600;
-    padding: 4px 8px;
     cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s ease;
 }
 
-.filter-btn.active {
-    color: var(--macos-accent);
+.time-filter:hover {
+    color: rgba(255, 255, 255, 0.7);
 }
 
-/* Consistency Heatmap Styles */
-.consistency-heatmap {
+.time-filter.active {
+    color: #007AFF;
+    background: rgba(0, 122, 255, 0.1);
+}
+
+.chart-container {
+    min-height: 280px;
+}
+
+.chart-inner {
+    width: 100%;
+    height: 280px;
+}
+
+/* Heatmap Styles */
+.heatmap-container {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100%;
-    gap: var(--space-6);
+    height: 280px;
+    gap: 16px;
+}
+
+.heatmap-weeks {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    width: 100%;
+    max-width: 350px;
+    margin-bottom: 8px;
+}
+
+.heatmap-day-label {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.3);
+    text-align: center;
 }
 
 .heatmap-grid {
     display: grid;
-    grid-template-columns: repeat(10, 1fr);
-    gap: 8px;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    width: 100%;
+    max-width: 350px;
 }
 
 .heatmap-cell {
-    width: 20px;
-    height: 20px;
+    aspect-ratio: 1;
     border-radius: 4px;
-    background: rgba(255, 255, 255, 0.05);
-    transition: transform 0.2s ease;
+    background: rgba(255, 255, 255, 0.04);
+    transition: transform 0.15s ease;
 }
 
 .heatmap-cell:hover {
-    transform: scale(1.2);
-    z-index: 2;
+    transform: scale(1.15);
 }
 
-.intensity-1 { background: rgba(0, 122, 255, 0.2); }
-.intensity-2 { background: rgba(0, 122, 255, 0.4); }
-.intensity-3 { background: rgba(0, 122, 255, 0.6); }
-.intensity-4 { background: rgba(0, 122, 255, 0.8); }
+.heatmap-cell.intensity-1 { background: rgba(0, 122, 255, 0.2); }
+.heatmap-cell.intensity-2 { background: rgba(0, 122, 255, 0.4); }
+.heatmap-cell.intensity-3 { background: rgba(0, 122, 255, 0.6); }
+.heatmap-cell.intensity-4 { background: rgba(0, 122, 255, 0.85); }
 
-.heatmap-labels {
+.heatmap-legend {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 11px;
-    color: var(--macos-text-tertiary);
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.4);
 }
 
-.heatmap-labels div {
+.legend-cells {
+    display: flex;
+    gap: 3px;
+}
+
+.legend-cell {
     width: 12px;
     height: 12px;
     border-radius: 2px;
+    background: rgba(255, 255, 255, 0.04);
 }
 
-/* Personal Bests Card */
-.pb-card .card-header,
-.goals-card .card-header,
-.trainer-insight-card .card-header {
+.legend-cell.intensity-1 { background: rgba(0, 122, 255, 0.2); }
+.legend-cell.intensity-2 { background: rgba(0, 122, 255, 0.4); }
+.legend-cell.intensity-3 { background: rgba(0, 122, 255, 0.6); }
+.legend-cell.intensity-4 { background: rgba(0, 122, 255, 0.85); }
+
+/* ============================================
+   Three Column Grid
+   ============================================ */
+
+.three-col-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.panel-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 14px;
+    padding: 18px;
+}
+
+.panel-card__header {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: var(--space-5);
+    margin-bottom: 16px;
 }
 
-.pb-card h3, .goals-card h3, .trainer-insight-card h3 {
-    font-size: 15px;
+.panel-card__header h3 {
+    font-size: 14px;
     font-weight: 600;
+    color: #fff;
 }
 
+.icon-gold { color: #FFD60A; }
+.icon-blue { color: #007AFF; }
+.icon-pink { color: #FF2D55; }
+
+/* Personal Bests */
 .pb-list {
     display: flex;
     flex-direction: column;
-    gap: var(--space-3);
-    margin-bottom: var(--space-4);
+    gap: 10px;
+    margin-bottom: 14px;
 }
 
 .pb-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--space-3) var(--space-4);
+    padding: 10px 12px;
     background: rgba(255, 255, 255, 0.03);
-    border-radius: var(--radius-md);
+    border-radius: 10px;
+}
+
+.pb-item__left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pb-emoji {
+    font-size: 18px;
 }
 
 .pb-item__info {
@@ -307,205 +348,292 @@
     flex-direction: column;
 }
 
-.pb-item__info .exercise {
+.pb-exercise {
     font-size: 13px;
     font-weight: 500;
-    color: var(--macos-text-primary);
+    color: #fff;
 }
 
-.pb-item__info .date {
+.pb-date {
     font-size: 11px;
-    color: var(--macos-text-tertiary);
+    color: rgba(255, 255, 255, 0.4);
 }
 
-.pb-item__value {
+.pb-weight {
     font-size: 14px;
     font-weight: 700;
-    color: var(--macos-accent);
+    color: #007AFF;
 }
 
-/* Goals Progress Compact */
-.goals-list-compact {
+.panel-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.panel-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+}
+
+.panel-btn--primary {
+    background: #007AFF;
+    border-color: #007AFF;
+    color: #fff;
+}
+
+.panel-btn--primary:hover {
+    background: #0066d6;
+}
+
+/* Goals */
+.goals-list {
     display: flex;
     flex-direction: column;
-    gap: var(--space-5);
+    gap: 16px;
 }
 
-.goal-item-compact .goal-info {
+.goal-item__header {
     display: flex;
     justify-content: space-between;
-    font-size: 13px;
-    font-weight: 500;
     margin-bottom: 8px;
 }
 
-.mini-progress-bar {
+.goal-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: #fff;
+}
+
+.goal-percent {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.goal-bar {
     height: 6px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 100px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 3px;
     overflow: hidden;
     margin-bottom: 6px;
 }
 
-.mini-progress-bar .fill {
+.goal-bar__fill {
     height: 100%;
-    background: var(--macos-accent);
-    border-radius: 100px;
+    border-radius: 3px;
 }
 
-.goal-target {
+.goal-values {
     font-size: 11px;
-    color: var(--macos-text-tertiary);
+    color: rgba(255, 255, 255, 0.4);
     text-align: right;
 }
 
-/* Trainer Insight Card */
-.trainer-insight-card .insight-profile {
+/* Trainer Feedback */
+.trainer-feedback {
     display: flex;
-    align-items: center;
+    flex-direction: column;
     gap: 12px;
-    margin-bottom: var(--space-4);
 }
 
-.avatar-placeholder {
-    width: 32px;
-    height: 32px;
-    border-radius: 100px;
-    background: var(--macos-accent);
-    color: white;
+.trainer-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.trainer-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #007AFF, #5856D6);
     display: flex;
     align-items: center;
     justify-content: center;
+    color: #fff;
     font-size: 12px;
     font-weight: 700;
 }
 
-.insight-profile .name {
+.trainer-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.trainer-name {
     font-size: 13px;
     font-weight: 600;
+    color: #fff;
 }
 
-.insight-profile .time {
+.trainer-time {
     font-size: 11px;
-    color: var(--macos-text-tertiary);
+    color: rgba(255, 255, 255, 0.4);
 }
 
-.insight-content .note {
+.feedback-text {
     font-size: 13px;
     line-height: 1.5;
-    color: var(--macos-text-secondary);
+    color: rgba(255, 255, 255, 0.6);
     font-style: italic;
-    margin-bottom: var(--space-5);
 }
 
-/* Milestones Strip */
-.milestones-strip {
-    padding: var(--space-6) !important;
+/* ============================================
+   Milestones Section
+   ============================================ */
+
+.milestones-section {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 14px;
+    padding: 20px 24px;
 }
 
 .milestones-track {
     display: flex;
     justify-content: space-between;
     position: relative;
-    padding: 0 var(--space-8);
+    padding: 0 20px;
 }
 
-.milestones-track::before {
-    content: '';
+.milestone-line {
     position: absolute;
-    top: 24px;
-    left: var(--space-8);
-    right: var(--space-8);
+    top: 20px;
+    left: 60px;
+    right: 60px;
     height: 2px;
-    background: rgba(255, 255, 255, 0.05);
-    z-index: 0;
+    background: rgba(255, 255, 255, 0.06);
 }
 
 .milestone {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
-    z-index: 1;
+    gap: 8px;
     position: relative;
+    z-index: 1;
 }
 
-.milestone .icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 100px;
-    background: var(--macos-bg-glass);
-    border: 2px solid rgba(255, 255, 255, 0.05);
+.milestone__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.04);
+    border: 2px solid rgba(255, 255, 255, 0.08);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--macos-text-tertiary);
+    color: rgba(255, 255, 255, 0.3);
     transition: all 0.3s ease;
 }
 
 .milestone span {
     font-size: 11px;
-    font-weight: 600;
-    color: var(--macos-text-tertiary);
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.4);
     white-space: nowrap;
 }
 
-.milestone.completed .icon {
+.milestone.completed .milestone__icon {
     background: rgba(48, 209, 88, 0.15);
     border-color: #30D158;
     color: #30D158;
 }
 
-.milestone.active .icon {
-    background: var(--macos-accent);
-    border-color: var(--macos-accent);
-    color: white;
-    box-shadow: 0 0 15px rgba(0, 122, 255, 0.3);
+.milestone.completed span {
+    color: rgba(255, 255, 255, 0.6);
 }
 
-.milestone.active .progress-dot {
+.milestone.active .milestone__icon {
+    background: #007AFF;
+    border-color: #007AFF;
+    color: #fff;
+    box-shadow: 0 0 20px rgba(0, 122, 255, 0.4);
+}
+
+.milestone.active span {
+    color: #fff;
+    font-weight: 600;
+}
+
+.milestone__pulse {
     position: absolute;
-    top: -4px;
-    right: -4px;
-    width: 10px;
-    height: 10px;
-    background: var(--macos-accent);
-    border-radius: 100px;
-    border: 2px solid #000;
+    top: -2px;
+    right: 8px;
+    width: 8px;
+    height: 8px;
+    background: #007AFF;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
 }
 
-/* Utilities */
-.full-width {
-    width: 100%;
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.3); opacity: 0.7; }
 }
 
-/* Responsive Adjustments */
-@media (max-width: 1024px) {
-    .progress-hero {
-        grid-template-columns: 1fr;
-        padding: var(--space-6);
+/* ============================================
+   Responsive Design
+   ============================================ */
+
+@media (max-width: 1200px) {
+    .stats-row {
+        grid-template-columns: repeat(2, 1fr);
     }
     
-    .progress-hero__stats {
-        justify-content: flex-start;
+    .three-col-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .three-col-grid .panel-card:last-child {
+        grid-column: span 2;
+    }
+}
+
+@media (max-width: 768px) {
+    .stats-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .three-col-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .three-col-grid .panel-card:last-child {
+        grid-column: span 1;
+    }
+    
+    .chart-section__header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    
+    .chart-tabs {
+        width: 100%;
+        overflow-x: auto;
     }
     
     .milestones-track {
         overflow-x: auto;
         justify-content: flex-start;
-        gap: var(--space-8);
-        padding-bottom: var(--space-4);
-    }
-}
-
-@media (max-width: 768px) {
-    .section-header-compact {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--space-4);
+        gap: 32px;
+        padding-bottom: 8px;
     }
     
-    .heatmap-grid {
-        grid-template-columns: repeat(5, 1fr);
+    .milestone-line {
+        display: none;
     }
 }

@@ -5,21 +5,12 @@ import {
     ResponsiveContainer, Area, AreaChart, BarChart, Bar
 } from 'recharts';
 import {
-    Scale, Activity, TrendingDown, TrendingUp, Dumbbell, User,
-    Target, Trophy, Plus, ChevronRight, Flame, Award, Medal,
-    Camera, Calendar, Timer, Zap, Heart
+    Activity, Dumbbell, Target, Trophy, Plus, Flame, Medal,
+    Camera, Calendar, Zap, Heart, TrendingUp, TrendingDown, Droplets,
+    Clock, ChevronRight, CircleUser
 } from 'lucide-react';
-import { toast } from 'react-hot-toast';
 import '../../styles/macos-member.css';
 import './MyProgress.css';
-
-// Achievement icon mapping
-const achievementIcons: Record<string, React.ReactNode> = {
-    streak: <Flame size={24} color="var(--macos-warning)" />,
-    classes: <Dumbbell size={24} color="var(--macos-success)" />,
-    goal: <Target size={24} color="var(--macos-accent)" />,
-    trophy: <Trophy size={24} color="var(--macos-purple)" />
-};
 
 interface ProgressNote {
     id: number;
@@ -36,11 +27,11 @@ type TabType = 'weight' | 'bodyFat' | 'strength' | 'consistency';
 
 const containerVariants = {
     hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.08 } }
+    visible: { opacity: 1, transition: { staggerChildren: 0.06 } }
 };
 
 const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 16 },
     visible: { opacity: 1, y: 0 }
 };
 
@@ -48,23 +39,17 @@ const MyProgress: React.FC = () => {
     const [notes, setNotes] = useState<ProgressNote[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<TabType>('weight');
+    const [timeRange, setTimeRange] = useState<'30D' | '90D' | '1Y'>('30D');
 
     const userStr = localStorage.getItem('user');
     const user = userStr ? JSON.parse(userStr) : null;
 
     useEffect(() => {
-        // Set mock data for development
         const mockNotes: ProgressNote[] = [
             {
                 id: 1,
-                note: 'Great progress on squats! Increased weight from 135lbs to 155lbs with good form. Continue focusing on depth.',
+                note: 'Great progress on squats! Increased weight from 135lbs to 155lbs with good form.',
                 createdAt: '2025-12-22',
-                trainer: { userId: 1, fullName: 'John Smith' }
-            },
-            {
-                id: 2,
-                note: 'Completed initial assessment. Current fitness level: Intermediate. Starting 12-week muscle building program.',
-                createdAt: '2025-12-15',
                 trainer: { userId: 1, fullName: 'John Smith' }
             }
         ];
@@ -72,25 +57,21 @@ const MyProgress: React.FC = () => {
         setLoading(false);
     }, [user?.id]);
 
-    const formatDate = (dateStr: string) => {
-        return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    };
-
-    // Chart Data
     const chartData = [
-        { date: 'Oct', weight: 85, bodyFat: 22, muscle: 58, volume: 1200 },
-        { date: 'Nov', weight: 83.5, bodyFat: 21, muscle: 59, volume: 1500 },
-        { date: 'Dec', weight: 81, bodyFat: 19.5, muscle: 61, volume: 1800 },
-        { date: 'Jan', weight: 78, bodyFat: 18, muscle: 62.5, volume: 2200 }
+        { date: 'W1', weight: 85, bodyFat: 22, muscle: 58, volume: 1200 },
+        { date: 'W2', weight: 84.2, bodyFat: 21.5, muscle: 58.5, volume: 1350 },
+        { date: 'W3', weight: 83.5, bodyFat: 21, muscle: 59, volume: 1500 },
+        { date: 'W4', weight: 82, bodyFat: 20, muscle: 60, volume: 1700 },
+        { date: 'W5', weight: 81, bodyFat: 19.5, muscle: 61, volume: 1800 },
+        { date: 'W6', weight: 79.5, bodyFat: 18.5, muscle: 61.8, volume: 2000 },
+        { date: 'W7', weight: 78, bodyFat: 18, muscle: 62.5, volume: 2200 }
     ];
 
-    // Simulated Heatmap Data (last 30 days)
-    const heatmapData = Array.from({ length: 30 }, (_, i) => ({
+    const heatmapData = Array.from({ length: 28 }, (_, i) => ({
         day: i + 1,
         intensity: Math.floor(Math.random() * 5)
     }));
 
-    // Stats
     const stats = {
         currentWeight: 78,
         startWeight: 85,
@@ -98,27 +79,42 @@ const MyProgress: React.FC = () => {
         bodyFat: 18,
         startBodyFat: 22,
         muscleMass: 62.5,
-        bmi: 22.4,
         streak: 12,
-        totalWorkouts: 48,
-        caloriesBurned: '24.5k'
+        caloriesBurned: '24.5k',
+        waterIntake: 2.4,
+        activeMinutes: 156
     };
 
-    // Personal Bests
     const personalBests = [
-        { exercise: 'Bench Press', weight: '185 lbs', date: 'Jan 15' },
-        { exercise: 'Deadlift', weight: '315 lbs', date: 'Jan 22' },
-        { exercise: 'Squat', weight: '245 lbs', date: 'Jan 10' }
+        { exercise: 'Bench Press', weight: '185 lbs', date: 'Jan 15', icon: '🏋️' },
+        { exercise: 'Deadlift', weight: '315 lbs', date: 'Jan 22', icon: '💪' },
+        { exercise: 'Squat', weight: '245 lbs', date: 'Jan 10', icon: '🦵' }
     ];
 
-    // Active Goals
     const activeGoals = [
-        { id: 1, title: 'Weight Target', current: 78, target: 75, progress: 70, unit: 'kg' },
-        { id: 2, title: 'Muscle Gain', current: 62.5, target: 65, progress: 45, unit: 'kg' }
+        { id: 1, title: 'Weight Target', current: 78, target: 75, unit: 'kg', color: '#007AFF' },
+        { id: 2, title: 'Muscle Gain', current: 62.5, target: 65, unit: 'kg', color: '#AF52DE' }
     ];
+
+    const weeklyActivity = [
+        { day: 'Mon', value: 45, active: true },
+        { day: 'Tue', value: 60, active: true },
+        { day: 'Wed', value: 0, active: false },
+        { day: 'Thu', value: 75, active: true },
+        { day: 'Fri', value: 30, active: true },
+        { day: 'Sat', value: 90, active: true },
+        { day: 'Sun', value: 0, active: false }
+    ];
+
+    const WeightIcon = ({ size = 14 }: { size?: number }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="5" r="3"/>
+            <path d="M6.5 8a6.5 6.5 0 1 0 11 0Z"/>
+        </svg>
+    );
 
     const tabs: { id: TabType; label: string; icon: React.ReactNode }[] = [
-        { id: 'weight', label: 'Weight', icon: <Scale size={14} /> },
+        { id: 'weight', label: 'Weight', icon: <WeightIcon size={14} /> },
         { id: 'bodyFat', label: 'Body Fat', icon: <Activity size={14} /> },
         { id: 'strength', label: 'Strength', icon: <Dumbbell size={14} /> },
         { id: 'consistency', label: 'Consistency', icon: <Calendar size={14} /> }
@@ -134,107 +130,77 @@ const MyProgress: React.FC = () => {
         );
     }
 
+    const weightChange = stats.startWeight - stats.currentWeight;
+    const goalProgress = Math.round(((stats.startWeight - stats.currentWeight) / (stats.startWeight - stats.goalWeight)) * 100);
+
     return (
         <motion.div
-            className="macos-page progress-macos"
+            className="macos-page progress-page"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
         >
-            {/* Redesigned Hero Journey Section */}
-            <motion.section className="progress-hero" variants={itemVariants}>
-                <div className="progress-hero__content">
-                    <div className="progress-hero__header">
-                        <div className="progress-hero__badge">Transformation Journey</div>
-                        <h1 className="macos-heading-xl">You're making incredible progress, {user?.fullName?.split(' ')[0]}!</h1>
-                        <p className="macos-text-md">You've reached 85% of your monthly fitness goal. Keep the momentum going!</p>
-                    </div>
-                    
-                    <div className="progress-hero__actions">
-                        <button className="macos-btn macos-btn--primary">
-                            <Plus size={16} /> Log Metric
-                        </button>
-                        <button className="macos-btn macos-btn--secondary">
-                            <Camera size={16} /> Progress Photo
-                        </button>
-                    </div>
-                </div>
-
-                <div className="progress-hero__stats">
-                    <div className="journey-ring">
-                        <svg viewBox="0 0 100 100">
-                            <circle className="journey-ring__bg" cx="50" cy="50" r="45" />
-                            <motion.circle 
-                                className="journey-ring__fill" 
-                                cx="50" cy="50" r="45" 
-                                initial={{ strokeDashoffset: 283 }}
-                                animate={{ strokeDashoffset: 283 - (283 * 0.85) }}
-                                transition={{ duration: 1.5, ease: "easeOut" }}
-                            />
-                        </svg>
-                        <div className="journey-ring__text">
-                            <span className="value">85%</span>
-                            <span className="label">Monthly Goal</span>
-                        </div>
-                    </div>
-                </div>
-            </motion.section>
-
-            {/* High Density Bento Stats */}
-            <motion.div className="bento-grid bento-grid--4col" variants={itemVariants}>
-                <motion.div className="glass-card glass-card--md progress-stat-bento" whileHover={{ y: -4 }}>
-                    <div className="progress-stat-bento__icon icon--orange">
+            {/* Top Stats Row - Compact Horizontal Cards */}
+            <motion.div className="stats-row" variants={itemVariants}>
+                <div className="stat-card stat-card--streak">
+                    <div className="stat-card__icon">
                         <Flame size={20} />
                     </div>
-                    <div className="progress-stat-bento__content">
-                        <div className="value">{stats.streak}</div>
-                        <div className="label">Day Streak</div>
-                        <div className="sub-label">Top 5% this month</div>
+                    <div className="stat-card__body">
+                        <div className="stat-card__value">{stats.streak}</div>
+                        <div className="stat-card__label">Day Streak</div>
                     </div>
-                </motion.div>
+                    <div className="stat-card__badge">Top 5%</div>
+                </div>
 
-                <motion.div className="glass-card glass-card--md progress-stat-bento" whileHover={{ y: -4 }}>
-                    <div className="progress-stat-bento__icon icon--blue">
-                        <Scale size={20} />
+                <div className="stat-card stat-card--weight">
+                    <div className="stat-card__icon">
+                        <WeightIcon size={20} />
                     </div>
-                    <div className="progress-stat-bento__content">
-                        <div className="value">{stats.currentWeight}<span>kg</span></div>
-                        <div className="label">Weight</div>
-                        <div className="change positive">-{stats.startWeight - stats.currentWeight}kg total</div>
+                    <div className="stat-card__body">
+                        <div className="stat-card__value">{stats.currentWeight}<span>kg</span></div>
+                        <div className="stat-card__label">Weight</div>
                     </div>
-                </motion.div>
+                    <div className="stat-card__trend positive">
+                        <TrendingDown size={14} />
+                        -{weightChange}kg
+                    </div>
+                </div>
 
-                <motion.div className="glass-card glass-card--md progress-stat-bento" whileHover={{ y: -4 }}>
-                    <div className="progress-stat-bento__icon icon--purple">
+                <div className="stat-card stat-card--muscle">
+                    <div className="stat-card__icon">
                         <Dumbbell size={20} />
                     </div>
-                    <div className="progress-stat-bento__content">
-                        <div className="value">{stats.muscleMass}<span>kg</span></div>
-                        <div className="label">Muscle Mass</div>
-                        <div className="change positive">+1.2kg gain</div>
+                    <div className="stat-card__body">
+                        <div className="stat-card__value">{stats.muscleMass}<span>kg</span></div>
+                        <div className="stat-card__label">Muscle Mass</div>
                     </div>
-                </motion.div>
+                    <div className="stat-card__trend positive">
+                        <TrendingUp size={14} />
+                        +1.2kg
+                    </div>
+                </div>
 
-                <motion.div className="glass-card glass-card--md progress-stat-bento" whileHover={{ y: -4 }}>
-                    <div className="progress-stat-bento__icon icon--green">
+                <div className="stat-card stat-card--calories">
+                    <div className="stat-card__icon">
                         <Zap size={20} />
                     </div>
-                    <div className="progress-stat-bento__content">
-                        <div className="value">{stats.caloriesBurned}</div>
-                        <div className="label">Calories</div>
-                        <div className="sub-label">Energy spent</div>
+                    <div className="stat-card__body">
+                        <div className="stat-card__value">{stats.caloriesBurned}</div>
+                        <div className="stat-card__label">Calories</div>
                     </div>
-                </motion.div>
+                    <div className="stat-card__sub">Energy spent</div>
+                </div>
             </motion.div>
 
-            {/* Interactive Data Exploration Section */}
-            <motion.section className="glass-card glass-card--lg main-chart-section" variants={itemVariants}>
-                <div className="section-header-compact">
-                    <div className="tabs-pill">
+            {/* Main Chart Section */}
+            <motion.section className="chart-section" variants={itemVariants}>
+                <div className="chart-section__header">
+                    <div className="chart-tabs">
                         {tabs.map((tab) => (
                             <button
                                 key={tab.id}
-                                className={`tab-pill-btn ${activeTab === tab.id ? 'active' : ''}`}
+                                className={`chart-tab ${activeTab === tab.id ? 'active' : ''}`}
                                 onClick={() => setActiveTab(tab.id)}
                             >
                                 {tab.icon}
@@ -242,182 +208,212 @@ const MyProgress: React.FC = () => {
                             </button>
                         ))}
                     </div>
-                    <div className="time-filter">
-                        <button className="filter-btn active">30D</button>
-                        <button className="filter-btn">90D</button>
-                        <button className="filter-btn">1Y</button>
+                    <div className="time-filters">
+                        {(['30D', '90D', '1Y'] as const).map((range) => (
+                            <button
+                                key={range}
+                                className={`time-filter ${timeRange === range ? 'active' : ''}`}
+                                onClick={() => setTimeRange(range)}
+                            >
+                                {range}
+                            </button>
+                        ))}
                     </div>
                 </div>
 
-                <div className="chart-wrapper">
+                <div className="chart-container">
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={activeTab}
-                            initial={{ opacity: 0, x: 10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -10 }}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
                             transition={{ duration: 0.2 }}
-                            style={{ height: '320px', width: '100%' }}
+                            className="chart-inner"
                         >
-                            <ResponsiveContainer width="100%" height="100%">
-                                {activeTab === 'weight' ? (
-                                    <AreaChart data={chartData}>
-                                        <defs>
-                                            <linearGradient id="colorWeight" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="5%" stopColor="#007AFF" stopOpacity={0.3} />
-                                                <stop offset="95%" stopColor="#007AFF" stopOpacity={0} />
-                                            </linearGradient>
-                                        </defs>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                                        <XAxis dataKey="date" stroke="rgba(255,255,255,0.2)" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-                                        <YAxis hide domain={['dataMin - 5', 'dataMax + 5']} />
-                                        <Tooltip 
-                                            contentStyle={{ background: 'rgba(20,20,25,0.9)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
-                                        />
-                                        <Area type="monotone" dataKey="weight" stroke="#007AFF" strokeWidth={3} fill="url(#colorWeight)" />
-                                    </AreaChart>
-                                ) : activeTab === 'bodyFat' ? (
-                                    <AreaChart data={chartData}>
-                                        <defs>
-                                            <linearGradient id="colorFat" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="5%" stopColor="#34C759" stopOpacity={0.3} />
-                                                <stop offset="95%" stopColor="#34C759" stopOpacity={0} />
-                                            </linearGradient>
-                                        </defs>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                                        <XAxis dataKey="date" stroke="rgba(255,255,255,0.2)" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-                                        <YAxis hide domain={['dataMin - 2', 'dataMax + 2']} />
-                                        <Tooltip 
-                                            contentStyle={{ background: 'rgba(20,20,25,0.9)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
-                                        />
-                                        <Area type="monotone" dataKey="bodyFat" stroke="#34C759" strokeWidth={3} fill="url(#colorFat)" />
-                                    </AreaChart>
-                                ) : activeTab === 'strength' ? (
-                                    <BarChart data={chartData}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                                        <XAxis dataKey="date" stroke="rgba(255,255,255,0.2)" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-                                        <YAxis hide />
-                                        <Tooltip 
-                                            contentStyle={{ background: 'rgba(20,20,25,0.9)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
-                                        />
-                                        <Bar dataKey="volume" fill="#AF52DE" radius={[6, 6, 0, 0]} />
-                                    </BarChart>
-                                ) : (
-                                    <div className="consistency-heatmap">
-                                        <div className="heatmap-grid">
-                                            {heatmapData.map(d => (
-                                                <div 
-                                                    key={d.day} 
-                                                    className={`heatmap-cell intensity-${d.intensity}`}
-                                                    title={`Day ${d.day}: Intensity ${d.intensity}`}
-                                                />
+                            {activeTab === 'consistency' ? (
+                                <div className="heatmap-container">
+                                    <div className="heatmap-weeks">
+                                        {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
+                                            <span key={day} className="heatmap-day-label">{day}</span>
+                                        ))}
+                                    </div>
+                                    <div className="heatmap-grid">
+                                        {heatmapData.map((d, i) => (
+                                            <motion.div
+                                                key={d.day}
+                                                className={`heatmap-cell intensity-${d.intensity}`}
+                                                initial={{ scale: 0 }}
+                                                animate={{ scale: 1 }}
+                                                transition={{ delay: i * 0.02 }}
+                                            />
+                                        ))}
+                                    </div>
+                                    <div className="heatmap-legend">
+                                        <span>Less</span>
+                                        <div className="legend-cells">
+                                            {[0, 1, 2, 3, 4].map(i => (
+                                                <div key={i} className={`legend-cell intensity-${i}`} />
                                             ))}
                                         </div>
-                                        <div className="heatmap-labels">
-                                            <span>Less</span>
-                                            <div className="intensity-1" />
-                                            <div className="intensity-2" />
-                                            <div className="intensity-3" />
-                                            <div className="intensity-4" />
-                                            <span>More</span>
-                                        </div>
+                                        <span>More</span>
                                     </div>
-                                )}
-                            </ResponsiveContainer>
+                                </div>
+                            ) : (
+                                <ResponsiveContainer width="100%" height={280}>
+                                    {activeTab === 'weight' ? (
+                                        <AreaChart data={chartData}>
+                                            <defs>
+                                                <linearGradient id="weightGradient" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="0%" stopColor="#007AFF" stopOpacity={0.3} />
+                                                    <stop offset="100%" stopColor="#007AFF" stopOpacity={0} />
+                                                </linearGradient>
+                                            </defs>
+                                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                                            <XAxis dataKey="date" stroke="rgba(255,255,255,0.2)" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
+                                            <YAxis hide domain={['dataMin - 3', 'dataMax + 2']} />
+                                            <Tooltip
+                                                contentStyle={{ background: 'rgba(20,20,25,0.95)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', fontSize: '13px' }}
+                                                labelStyle={{ color: 'rgba(255,255,255,0.6)' }}
+                                            />
+                                            <Area type="monotone" dataKey="weight" stroke="#007AFF" strokeWidth={2.5} fill="url(#weightGradient)" dot={{ fill: '#007AFF', strokeWidth: 0, r: 3 }} activeDot={{ r: 5, fill: '#007AFF' }} />
+                                        </AreaChart>
+                                    ) : activeTab === 'bodyFat' ? (
+                                        <AreaChart data={chartData}>
+                                            <defs>
+                                                <linearGradient id="fatGradient" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="0%" stopColor="#34C759" stopOpacity={0.3} />
+                                                    <stop offset="100%" stopColor="#34C759" stopOpacity={0} />
+                                                </linearGradient>
+                                            </defs>
+                                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                                            <XAxis dataKey="date" stroke="rgba(255,255,255,0.2)" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
+                                            <YAxis hide domain={['dataMin - 2', 'dataMax + 2']} />
+                                            <Tooltip
+                                                contentStyle={{ background: 'rgba(20,20,25,0.95)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', fontSize: '13px' }}
+                                            />
+                                            <Area type="monotone" dataKey="bodyFat" stroke="#34C759" strokeWidth={2.5} fill="url(#fatGradient)" dot={{ fill: '#34C759', strokeWidth: 0, r: 3 }} />
+                                        </AreaChart>
+                                    ) : (
+                                        <BarChart data={chartData} barCategoryGap="20%">
+                                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                                            <XAxis dataKey="date" stroke="rgba(255,255,255,0.2)" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
+                                            <YAxis hide />
+                                            <Tooltip
+                                                contentStyle={{ background: 'rgba(20,20,25,0.95)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', fontSize: '13px' }}
+                                            />
+                                            <Bar dataKey="volume" fill="#AF52DE" radius={[4, 4, 0, 0]} />
+                                        </BarChart>
+                                    )}
+                                </ResponsiveContainer>
+                            )}
                         </motion.div>
                     </AnimatePresence>
                 </div>
             </motion.section>
 
-            {/* Secondary Grid: Strength & Goals */}
-            <motion.div className="bento-grid bento-grid--3col" variants={itemVariants}>
+            {/* Three Column Grid */}
+            <motion.div className="three-col-grid" variants={itemVariants}>
                 {/* Personal Bests */}
-                <motion.div className="glass-card glass-card--md pb-card">
-                    <div className="card-header">
-                        <Trophy size={18} color="var(--macos-warning)" />
+                <div className="panel-card">
+                    <div className="panel-card__header">
+                        <Trophy size={18} className="icon-gold" />
                         <h3>Personal Bests</h3>
                     </div>
                     <div className="pb-list">
                         {personalBests.map((pb, idx) => (
                             <div key={idx} className="pb-item">
-                                <div className="pb-item__info">
-                                    <span className="exercise">{pb.exercise}</span>
-                                    <span className="date">{pb.date}</span>
+                                <div className="pb-item__left">
+                                    <span className="pb-emoji">{pb.icon}</span>
+                                    <div className="pb-item__info">
+                                        <span className="pb-exercise">{pb.exercise}</span>
+                                        <span className="pb-date">{pb.date}</span>
+                                    </div>
                                 </div>
-                                <div className="pb-item__value">{pb.weight}</div>
+                                <span className="pb-weight">{pb.weight}</span>
                             </div>
                         ))}
                     </div>
-                    <button className="macos-btn macos-btn--ghost full-width">View Lift Library</button>
-                </motion.div>
+                    <button className="panel-btn">
+                        View Lift Library
+                        <ChevronRight size={14} />
+                    </button>
+                </div>
 
-                {/* Goals Progress */}
-                <motion.div className="glass-card glass-card--md goals-card">
-                    <div className="card-header">
-                        <Target size={18} color="var(--macos-accent)" />
+                {/* Active Goals */}
+                <div className="panel-card">
+                    <div className="panel-card__header">
+                        <Target size={18} className="icon-blue" />
                         <h3>Active Goals</h3>
                     </div>
-                    <div className="goals-list-compact">
-                        {activeGoals.map(goal => (
-                            <div key={goal.id} className="goal-item-compact">
-                                <div className="goal-info">
-                                    <span>{goal.title}</span>
-                                    <span className="percentage">{goal.progress}%</span>
+                    <div className="goals-list">
+                        {activeGoals.map(goal => {
+                            const progress = Math.round(((goal.current - (goal.id === 1 ? stats.startWeight : 58)) / (goal.target - (goal.id === 1 ? stats.startWeight : 58))) * 100);
+                            return (
+                                <div key={goal.id} className="goal-item">
+                                    <div className="goal-item__header">
+                                        <span className="goal-title">{goal.title}</span>
+                                        <span className="goal-percent">{Math.min(100, Math.max(0, goal.id === 1 ? goalProgress : 64))}%</span>
+                                    </div>
+                                    <div className="goal-bar">
+                                        <motion.div
+                                            className="goal-bar__fill"
+                                            style={{ background: goal.color }}
+                                            initial={{ width: 0 }}
+                                            animate={{ width: `${Math.min(100, Math.max(0, goal.id === 1 ? goalProgress : 64))}%` }}
+                                            transition={{ duration: 1, delay: 0.3 }}
+                                        />
+                                    </div>
+                                    <div className="goal-values">
+                                        {goal.current}{goal.unit} / {goal.target}{goal.unit}
+                                    </div>
                                 </div>
-                                <div className="mini-progress-bar">
-                                    <motion.div 
-                                        className="fill" 
-                                        initial={{ width: 0 }}
-                                        animate={{ width: `${goal.progress}%` }}
-                                        transition={{ duration: 1, delay: 0.5 }}
-                                    />
-                                </div>
-                                <div className="goal-target">
-                                    {goal.current}{goal.unit} / {goal.target}{goal.unit}
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
-                </motion.div>
+                </div>
 
-                {/* Trainer Feedback Preview */}
-                <motion.div className="glass-card glass-card--md trainer-insight-card">
-                    <div className="card-header">
-                        <Heart size={18} color="#FF2D55" />
+                {/* Trainer Feedback */}
+                <div className="panel-card">
+                    <div className="panel-card__header">
+                        <Heart size={18} className="icon-pink" />
                         <h3>Trainer Feedback</h3>
                     </div>
-                    <div className="insight-content">
-                        <div className="insight-profile">
-                            <div className="avatar-placeholder">JS</div>
-                            <div>
-                                <div className="name">John Smith</div>
-                                <div className="time">2 days ago</div>
+                    <div className="trainer-feedback">
+                        <div className="trainer-profile">
+                            <div className="trainer-avatar">JS</div>
+                            <div className="trainer-info">
+                                <span className="trainer-name">John Smith</span>
+                                <span className="trainer-time">2 days ago</span>
                             </div>
                         </div>
-                        <p className="note">"{notes[0]?.note.substring(0, 80)}..."</p>
-                        <button className="macos-btn macos-btn--primary full-width">Read Full Note</button>
+                        <p className="feedback-text">"{notes[0]?.note || 'No feedback yet'}"</p>
+                        <button className="panel-btn panel-btn--primary">
+                            Read Full Note
+                        </button>
                     </div>
-                </motion.div>
+                </div>
             </motion.div>
 
-            {/* Bottom Section: Milestones */}
-            <motion.section className="glass-card glass-card--md milestones-strip" variants={itemVariants}>
+            {/* Milestones Timeline */}
+            <motion.section className="milestones-section" variants={itemVariants}>
                 <div className="milestones-track">
+                    <div className="milestone-line" />
                     <div className="milestone completed">
-                        <div className="icon"><Medal size={16} /></div>
+                        <div className="milestone__icon"><Medal size={16} /></div>
                         <span>Started Journey</span>
                     </div>
                     <div className="milestone completed">
-                        <div className="icon"><Medal size={16} /></div>
+                        <div className="milestone__icon"><Medal size={16} /></div>
                         <span>First 10 Workouts</span>
                     </div>
                     <div className="milestone active">
-                        <div className="icon"><Medal size={16} /></div>
+                        <div className="milestone__icon"><Medal size={16} /></div>
                         <span>30 Day Streak</span>
-                        <div className="progress-dot" />
+                        <div className="milestone__pulse" />
                     </div>
                     <div className="milestone upcoming">
-                        <div className="icon"><Medal size={16} /></div>
+                        <div className="milestone__icon"><Medal size={16} /></div>
                         <span>Strength Mastery</span>
                     </div>
                 </div>
