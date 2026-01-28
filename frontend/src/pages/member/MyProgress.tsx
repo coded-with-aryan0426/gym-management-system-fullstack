@@ -2238,80 +2238,167 @@ const MyProgress: React.FC = () => {
                         onClick={() => setActiveModal(null)}
                     >
                         <motion.div
-                            className="modal-content modal-large"
-                            initial={{ scale: 0.95, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.95, opacity: 0 }}
+                            className="modal-content history-modal-premium"
+                            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.95, opacity: 0, y: 20 }}
                             onClick={e => e.stopPropagation()}
                         >
-                            <div className="modal-header">
-                                <h2>Progress History</h2>
-                                <button className="modal-close" onClick={() => setActiveModal(null)}>
-                                    <X size={20} />
+                            <div className="history-modal-header">
+                                <div className="header-title-section">
+                                    <div className="header-icon-badge">
+                                        <History size={20} />
+                                    </div>
+                                    <div>
+                                        <h2>Progress Journey</h2>
+                                        <span className="header-subtitle">{progressEntries.length} entries recorded</span>
+                                    </div>
+                                </div>
+                                <button className="modal-close-premium" onClick={() => setActiveModal(null)}>
+                                    <X size={18} />
                                 </button>
                             </div>
-                            <div className="modal-body">
-                                <div className="history-table">
-                                    <table>
-                                        <thead>
-                                            <tr>
-                                                <th>Date</th>
-                                                <th>Weight</th>
-                                                <th>Body Fat</th>
-                                                <th>Muscle</th>
-                                                <th>Waist</th>
-                                                <th>Chest</th>
-                                                <th>Arms</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {[...progressEntries].reverse().map((entry, i) => {
-                                                const prev = progressEntries[progressEntries.length - i - 2];
-                                                  return (
-                                                      <tr key={entry.id}>
-                                                          <td>{new Date(entry.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</td>
-                                                          <td>
-                                                              {entry.weight ? `${entry.weight}kg` : '---'}
-                                                              {prev && entry.weight && prev.weight && entry.weight !== prev.weight && (
-                                                                  <span className={entry.weight < prev.weight ? 'change-positive' : 'change-negative'}>
-                                                                      {entry.weight < prev.weight ? ' ↓' : ' ↑'}
-                                                                  </span>
-                                                              )}
-                                                          </td>
-                                                          <td>
-                                                              {entry.bodyFat ? `${entry.bodyFat}%` : '---'}
-                                                              {prev && entry.bodyFat && prev.bodyFat && entry.bodyFat !== prev.bodyFat && (
-                                                                  <span className={entry.bodyFat < prev.bodyFat ? 'change-positive' : 'change-negative'}>
-                                                                      {entry.bodyFat < prev.bodyFat ? ' ↓' : ' ↑'}
-                                                                  </span>
-                                                              )}
-                                                          </td>
-                                                          <td>{entry.muscleMass ? `${entry.muscleMass}kg` : '---'}</td>
-                                                          <td>{entry.waist ? `${entry.waist}cm` : '---'}</td>
-                                                          <td>{entry.chest ? `${entry.chest}cm` : '---'}</td>
-                                                          <td>{entry.arms ? `${entry.arms}cm` : '---'}</td>
-                                                          <td className="actions-cell">
-                                                              <div className="action-buttons">
-                                                                  <button className="action-icon-btn edit" onClick={() => handleEditEntry(entry)} title="Edit">
-                                                                      <Edit3 size={14} />
-                                                                  </button>
-                                                                  <button className="action-icon-btn delete" onClick={() => handleDeleteEntry(entry.id)} title="Delete">
-                                                                      <X size={14} />
-                                                                  </button>
-                                                              </div>
-                                                          </td>
-                                                      </tr>
-                                                  );
-
-                                            })}
-                                        </tbody>
-                                    </table>
-                                </div>
+                            
+                            <div className="history-modal-body">
+                                {progressEntries.length > 0 ? (
+                                    <div className="history-cards-container">
+                                        {[...progressEntries].reverse().map((entry, i) => {
+                                            const prev = progressEntries[progressEntries.length - i - 2];
+                                            const weightChange = prev && entry.weight && prev.weight ? entry.weight - prev.weight : 0;
+                                            const fatChange = prev && entry.bodyFat && prev.bodyFat ? entry.bodyFat - prev.bodyFat : 0;
+                                            
+                                            return (
+                                                <motion.div 
+                                                    key={entry.id} 
+                                                    className="history-entry-card"
+                                                    initial={{ opacity: 0, x: -20 }}
+                                                    animate={{ opacity: 1, x: 0 }}
+                                                    transition={{ delay: i * 0.05 }}
+                                                >
+                                                    <div className="entry-date-badge">
+                                                        <Calendar size={14} />
+                                                        <span>{new Date(entry.date).toLocaleDateString('en-US', { 
+                                                            weekday: 'short',
+                                                            month: 'short', 
+                                                            day: 'numeric',
+                                                            year: 'numeric'
+                                                        })}</span>
+                                                        {i === 0 && <span className="latest-badge">Latest</span>}
+                                                    </div>
+                                                    
+                                                    <div className="entry-metrics-grid">
+                                                        <div className="metric-pill weight">
+                                                            <ScaleIcon size={14} />
+                                                            <span className="metric-value">{entry.weight ? `${entry.weight}kg` : '—'}</span>
+                                                            {weightChange !== 0 && (
+                                                                <span className={`metric-change ${weightChange < 0 ? 'positive' : 'negative'}`}>
+                                                                    {weightChange < 0 ? <TrendingDown size={12} /> : <TrendingUp size={12} />}
+                                                                    {Math.abs(weightChange).toFixed(1)}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        
+                                                        <div className="metric-pill bodyfat">
+                                                            <Percent size={14} />
+                                                            <span className="metric-value">{entry.bodyFat ? `${entry.bodyFat}%` : '—'}</span>
+                                                            {fatChange !== 0 && (
+                                                                <span className={`metric-change ${fatChange < 0 ? 'positive' : 'negative'}`}>
+                                                                    {fatChange < 0 ? <TrendingDown size={12} /> : <TrendingUp size={12} />}
+                                                                    {Math.abs(fatChange).toFixed(1)}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        
+                                                        <div className="metric-pill muscle">
+                                                            <Dumbbell size={14} />
+                                                            <span className="metric-value">{entry.muscleMass ? `${entry.muscleMass}kg` : '—'}</span>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div className="entry-measurements">
+                                                        {entry.chest && (
+                                                            <div className="measurement-tag">
+                                                                <span className="tag-label">Chest</span>
+                                                                <span className="tag-value">{entry.chest}cm</span>
+                                                            </div>
+                                                        )}
+                                                        {entry.waist && (
+                                                            <div className="measurement-tag">
+                                                                <span className="tag-label">Waist</span>
+                                                                <span className="tag-value">{entry.waist}cm</span>
+                                                            </div>
+                                                        )}
+                                                        {entry.arms && (
+                                                            <div className="measurement-tag">
+                                                                <span className="tag-label">Arms</span>
+                                                                <span className="tag-value">{entry.arms}cm</span>
+                                                            </div>
+                                                        )}
+                                                        {entry.hips && (
+                                                            <div className="measurement-tag">
+                                                                <span className="tag-label">Hips</span>
+                                                                <span className="tag-value">{entry.hips}cm</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    
+                                                    {entry.notes && (
+                                                        <div className="entry-notes">
+                                                            <Info size={12} />
+                                                            <span>{entry.notes}</span>
+                                                        </div>
+                                                    )}
+                                                    
+                                                    <div className="entry-actions">
+                                                        <button 
+                                                            className="action-btn edit-btn" 
+                                                            onClick={() => handleEditEntry(entry)}
+                                                            title="Edit entry"
+                                                        >
+                                                            <Edit3 size={14} />
+                                                            <span>Edit</span>
+                                                        </button>
+                                                        <button 
+                                                            className="action-btn delete-btn" 
+                                                            onClick={() => handleDeleteEntry(entry.id)}
+                                                            title="Delete entry"
+                                                        >
+                                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                                <path d="M3 6h18"/>
+                                                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                                                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                                                                <line x1="10" y1="11" x2="10" y2="17"/>
+                                                                <line x1="14" y1="11" x2="14" y2="17"/>
+                                                            </svg>
+                                                            <span>Delete</span>
+                                                        </button>
+                                                    </div>
+                                                </motion.div>
+                                            );
+                                        })}
+                                    </div>
+                                ) : (
+                                    <div className="history-empty-state">
+                                        <div className="empty-icon">
+                                            <History size={48} />
+                                        </div>
+                                        <h3>No Progress Recorded Yet</h3>
+                                        <p>Start logging your progress to see your journey here</p>
+                                        <button className="btn-primary" onClick={() => setActiveModal('logProgress')}>
+                                            <Plus size={16} />
+                                            Log First Entry
+                                        </button>
+                                    </div>
+                                )}
                             </div>
-                            <div className="modal-footer">
-                                <button className="btn-secondary" onClick={() => setActiveModal(null)}>Close</button>
-                                <button className="btn-primary">
-                                    Export Data
+                            
+                            <div className="history-modal-footer">
+                                <button className="btn-secondary" onClick={() => setActiveModal(null)}>
+                                    Close
+                                </button>
+                                <button className="btn-primary" onClick={() => setActiveModal('logProgress')}>
+                                    <Plus size={16} />
+                                    Add New Entry
                                 </button>
                             </div>
                         </motion.div>
