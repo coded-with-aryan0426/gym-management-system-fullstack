@@ -21,10 +21,6 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
-/**
- * Member Dashboard Controller - MEMBER, TRAINER, OWNER, ADMIN
- * Members access their own data, staff can access for management.
- */
 @RestController
 @RequestMapping("/api/member")
 @CrossOrigin(origins = { "http://localhost:5173", "http://localhost:5174", "http://localhost:5175" })
@@ -49,9 +45,6 @@ public class MemberDashboardController {
     @Autowired
     private MemberProfileService memberProfileService;
 
-    /**
-     * Member Dashboard - aggregated stats
-     */
     @GetMapping("/dashboard")
     public ResponseEntity<?> getDashboard(@RequestParam Long memberId) {
         try {
@@ -63,12 +56,10 @@ public class MemberDashboardController {
             User member = memberOpt.get();
             Map<String, Object> dashboard = new HashMap<>();
 
-            // Member info
             dashboard.put("memberId", member.getUserId());
             dashboard.put("memberName", member.getFullName());
             dashboard.put("email", member.getEmail());
 
-            // Membership status - get first active membership
             List<Membership> memberships = membershipRepository.findByUserUserId(memberId);
             if (!memberships.isEmpty()) {
                 Membership membership = memberships.get(0);
@@ -92,7 +83,6 @@ public class MemberDashboardController {
                 dashboard.put("membership", null);
             }
 
-            // Assigned trainer
             Set<User> trainers = member.getTrainers();
             if (trainers != null && !trainers.isEmpty()) {
                 User trainer = trainers.iterator().next();
@@ -106,11 +96,9 @@ public class MemberDashboardController {
                 dashboard.put("assignedTrainer", null);
             }
 
-            // Booked classes count
-            List<ClassBooking> bookings = classBookingRepository.findActiveBookingsByMember(memberId);
-            dashboard.put("bookedClassesCount", bookings.size());
+            Long bookingsCount = classBookingRepository.countMemberBookings(memberId);
+            dashboard.put("bookedClassesCount", bookingsCount);
 
-            // Unread notifications count
             Long unreadNotifications = notificationRepository.countUnreadByUserId(memberId);
             dashboard.put("unreadNotificationsCount", unreadNotifications);
 
@@ -120,9 +108,6 @@ public class MemberDashboardController {
         }
     }
 
-    /**
-     * Get member's own profile (full profile with all details)
-     */
     @GetMapping("/profile")
     public ResponseEntity<?> getProfile(@RequestParam Long memberId) {
         try {
@@ -135,9 +120,6 @@ public class MemberDashboardController {
         }
     }
 
-    /**
-     * Update member's own profile
-     */
     @PutMapping("/profile")
     public ResponseEntity<?> updateProfile(@RequestParam Long memberId, @RequestBody MemberProfileUpdateDTO updateDTO) {
         try {
@@ -150,9 +132,6 @@ public class MemberDashboardController {
         }
     }
 
-    /**
-     * Get member's membership details
-     */
     @GetMapping("/membership")
     public ResponseEntity<?> getMembership(@RequestParam Long memberId) {
         List<Membership> memberships = membershipRepository.findByUserUserId(memberId);
@@ -182,73 +161,12 @@ public class MemberDashboardController {
         return ResponseEntity.ok(result);
     }
 
-    /**
-     * Get member's bookings
-     */
     @GetMapping("/bookings")
     public ResponseEntity<?> getMyBookings(@RequestParam Long memberId) {
-        List<ClassBooking> bookings = classBookingRepository.findByMemberUserId(memberId);
+        List<ClassBooking> bookings = classBookingRepository.findByMemberUserIdOrderByBookedAtDesc(memberId);
         return ResponseEntity.ok(bookings);
     }
 
-    /**
-     * Book a class
-     */
-    @PostMapping("/classes/book")
-    public ResponseEntity<?> bookClass(@RequestParam Long memberId, @RequestBody Map<String, Long> request) {
-        try {
-            Long classId = request.get("classId");
-
-            // Check if already booked
-            if (classBookingRepository.existsByClassIdAndMemberUserIdAndStatus(classId, memberId, "BOOKED")) {
-                return ResponseEntity.badRequest().body(Map.of("error", "Already booked for this class"));
-            }
-
-            Optional<User> memberOpt = userRepository.findById(memberId);
-            if (memberOpt.isEmpty()) {
-                return ResponseEntity.notFound().build();
-            }
-
-            ClassBooking booking = new ClassBooking(classId, memberOpt.get());
-            ClassBooking saved = classBookingRepository.save(booking);
-
-            return ResponseEntity.ok(saved);
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
-        }
-    }
-
-    /**
-     * Cancel a booking
-     */
-    @DeleteMapping("/bookings/{bookingId}")
-    public ResponseEntity<?> cancelBooking(@RequestParam Long memberId, @PathVariable Long bookingId) {
-        try {
-            Optional<ClassBooking> bookingOpt = classBookingRepository.findById(bookingId);
-            if (bookingOpt.isEmpty()) {
-                return ResponseEntity.notFound().build();
-            }
-
-            ClassBooking booking = bookingOpt.get();
-
-            // Verify ownership
-            if (!booking.getMember().getUserId().equals(memberId)) {
-                return ResponseEntity.status(403).body(Map.of("error", "Not authorized"));
-            }
-
-            booking.setStatus("CANCELLED");
-            booking.setCancelledAt(LocalDateTime.now());
-            classBookingRepository.save(booking);
-
-            return ResponseEntity.ok(Map.of("message", "Booking cancelled"));
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
-        }
-    }
-
-    /**
-     * Get assigned trainer info
-     */
     @GetMapping("/my-trainer")
     public ResponseEntity<?> getMyTrainer(@RequestParam Long memberId) {
         Optional<User> memberOpt = userRepository.findById(memberId);
@@ -273,9 +191,6 @@ public class MemberDashboardController {
         return ResponseEntity.ok(result);
     }
 
-    /**
-     * Get progress notes for member (from their trainer)
-     */
     @GetMapping("/progress-notes")
     public ResponseEntity<?> getProgressNotes(@RequestParam Long memberId) {
         var notes = progressNoteRepository.findByMemberUserIdOrderByCreatedAtDesc(memberId);

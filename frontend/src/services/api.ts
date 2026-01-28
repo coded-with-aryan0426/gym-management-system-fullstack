@@ -842,5 +842,88 @@ const memberProgressApi = {
   }
 };
 
+// Gym Classes API
+export interface GymClassDTO {
+  classId: number;
+  className: string;
+  classType: string;
+  description?: string;
+  trainerId?: number;
+  trainerName?: string;
+  startTime: string;
+  durationMinutes: number;
+  maxCapacity: number;
+  currentBookings: number;
+  spotsLeft: number;
+  difficulty?: string;
+  location?: string;
+  status: string;
+  recurring?: boolean;
+  recurrencePattern?: string;
+  isBooked?: boolean;
+  bookingId?: number;
+}
+
+export interface ClassBookingDTO {
+  bookingId: number;
+  classId: number;
+  className: string;
+  classType: string;
+  memberId: number;
+  memberName: string;
+  status: string;
+  bookedAt: string;
+  cancelledAt?: string;
+  attended?: boolean;
+  notes?: string;
+  classStartTime: string;
+  durationMinutes: number;
+  trainerName?: string;
+  location?: string;
+  difficulty?: string;
+}
+
+const gymClassApi = {
+  async getAvailableClasses(memberId?: number): Promise<GymClassDTO[]> {
+    const params = memberId ? { memberId } : {};
+    const response = await apiClient.get<GymClassDTO[]>('/classes', { params });
+    return response.data;
+  },
+
+  async getTodaysClasses(memberId?: number): Promise<GymClassDTO[]> {
+    const params = memberId ? { memberId } : {};
+    const response = await apiClient.get<GymClassDTO[]>('/classes/today', { params });
+    return response.data;
+  },
+
+  async getMemberBookings(memberId: number): Promise<ClassBookingDTO[]> {
+    const response = await apiClient.get<ClassBookingDTO[]>(`/classes/member/${memberId}/bookings`);
+    return response.data;
+  },
+
+  async getMemberBookingsCount(memberId: number): Promise<number> {
+    const response = await apiClient.get<{ count: number }>(`/classes/member/${memberId}/bookings/count`);
+    return response.data.count;
+  },
+
+  async bookClass(classId: number, memberId: number): Promise<ClassBookingDTO> {
+    const response = await apiClient.post<ClassBookingDTO>(`/classes/${classId}/book`, null, {
+      params: { memberId }
+    });
+    return response.data;
+  },
+
+  async cancelBooking(bookingId: number, memberId: number): Promise<void> {
+    await apiClient.delete(`/classes/bookings/${bookingId}`, {
+      params: { memberId }
+    });
+  },
+
+  async createClass(dto: Partial<GymClassDTO>): Promise<GymClassDTO> {
+    const response = await apiClient.post<GymClassDTO>('/classes', dto);
+    return response.data;
+  }
+};
+
 // Export all APIs
-export { ptSessionApi, trainerPerformanceApi, gymSettingsApi, membershipPackageApi, analyticsApi, memberProgressApi };
+export { ptSessionApi, trainerPerformanceApi, gymSettingsApi, membershipPackageApi, analyticsApi, memberProgressApi, gymClassApi };

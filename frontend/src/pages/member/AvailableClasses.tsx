@@ -7,27 +7,10 @@ import {
     Loader2, AlertCircle, CheckCircle2, CalendarCheck, Flame
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { ptSessionApi } from '../../services/api';
+import { gymClassApi } from '../../services/api';
+import type { GymClassDTO } from '../../services/api';
 import '../../styles/macos-member.css';
 import './AvailableClasses.css';
-
-interface ClassSession {
-    id: number;
-    sessionDate: string;
-    durationMinutes: number;
-    status: string;
-    trainer?: { id: number; fullName: string };
-    member?: { id: number; fullName: string };
-    memberId?: number;
-    trainerId?: number;
-    trainerName?: string;
-    memberName?: string;
-    sessionType?: string;
-    difficulty?: 'Beginner' | 'Intermediate' | 'Advanced';
-    location?: string;
-    spotsLeft?: number;
-    maxCapacity?: number;
-}
 
 const classTypeConfig: Record<string, { icon: React.ReactNode; color: string; bg: string }> = {
     'Yoga': { icon: <Heart size={16} />, color: '#34C759', bg: 'rgba(52, 199, 89, 0.12)' },
@@ -41,67 +24,6 @@ const classTypeConfig: Record<string, { icon: React.ReactNode; color: string; bg
     'CrossFit': { icon: <Flame size={16} />, color: '#FF6B35', bg: 'rgba(255, 107, 53, 0.12)' }
 };
 
-const generateDummyClasses = (): ClassSession[] => {
-    const today = new Date();
-    const trainers = [
-        { id: 101, fullName: 'Sarah Johnson' },
-        { id: 102, fullName: 'Mike Chen' },
-        { id: 103, fullName: 'Emma Wilson' },
-        { id: 104, fullName: 'David Park' },
-        { id: 105, fullName: 'Lisa Anderson' }
-    ];
-    
-    const classTypes = ['Yoga', 'HIIT', 'Strength', 'Spin', 'Pilates', 'Boxing', 'CrossFit', 'Group'];
-    const locations = ['Studio A', 'Studio B', 'Main Floor', 'Spin Room', 'Boxing Ring'];
-    const difficulties: ('Beginner' | 'Intermediate' | 'Advanced')[] = ['Beginner', 'Intermediate', 'Advanced'];
-    
-    const dummyClasses: ClassSession[] = [];
-    
-    for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
-        const classDate = new Date(today);
-        classDate.setDate(today.getDate() + dayOffset);
-        
-        const timesForDay = dayOffset === 0 
-            ? ['09:00', '10:30', '12:00', '14:00', '16:00', '18:00', '19:30']
-            : ['08:00', '10:00', '12:00', '15:00', '17:30', '19:00'];
-        
-        timesForDay.forEach((time, idx) => {
-            const [hours, minutes] = time.split(':').map(Number);
-            const sessionDate = new Date(classDate);
-            sessionDate.setHours(hours, minutes, 0, 0);
-            
-            if (sessionDate > new Date()) {
-                const trainer = trainers[Math.floor(Math.random() * trainers.length)];
-                const classType = classTypes[Math.floor(Math.random() * classTypes.length)];
-                const maxCapacity = Math.floor(Math.random() * 15) + 10;
-                const spotsLeft = Math.floor(Math.random() * maxCapacity);
-                
-                dummyClasses.push({
-                    id: 10000 + dayOffset * 100 + idx,
-                    sessionDate: sessionDate.toISOString(),
-                    durationMinutes: [45, 60, 75, 90][Math.floor(Math.random() * 4)],
-                    status: 'SCHEDULED',
-                    trainer: trainer,
-                    trainerId: trainer.id,
-                    trainerName: trainer.fullName,
-                    sessionType: classType,
-                    difficulty: difficulties[Math.floor(Math.random() * difficulties.length)],
-                    location: locations[Math.floor(Math.random() * locations.length)],
-                    spotsLeft: spotsLeft,
-                    maxCapacity: maxCapacity
-                });
-            }
-        });
-    }
-    
-    return dummyClasses;
-};
-
-const getClassType = (session: ClassSession): string => {
-    if (session.sessionType) return session.sessionType;
-    return 'PT Session';
-};
-
 const containerVariants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.04 } }
@@ -113,8 +35,9 @@ const itemVariants = {
 };
 
 const AvailableClasses: React.FC = () => {
-    const [sessions, setSessions] = useState<ClassSession[]>([]);
-    const [bookedSessions, setBookedSessions] = useState<ClassSession[]>([]);
+    const [classes, setClasses] = useState<GymClassDTO[]>([]);
+    const [todaysClasses, setTodaysClasses] = useState<GymClassDTO[]>([]);
+    const [bookedCount, setBookedCount] = useState(0);
     const [loading, setLoading] = useState(true);
     const [booking, setBooking] = useState<number | null>(null);
     const [view, setView] = useState<'list' | 'calendar'>('list');
@@ -134,141 +57,105 @@ const AvailableClasses: React.FC = () => {
     const memberId = user?.userId || user?.id;
 
     useEffect(() => {
-        fetchSessions();
+        fetchClasses();
     }, [memberId]);
 
-    const fetchSessions = async () => {
+    const fetchClasses = async () => {
         try {
             setLoading(true);
             setError(null);
 
-            let realSessions: any[] = [];
-            
-            try {
-                if (memberId) {
-                    realSessions = await ptSessionApi.getMemberSessions(memberId);
-                }
-            } catch {
-                realSessions = [];
-            }
+            const [availableClasses, todayClasses, bookingsCount] = await Promise.all([
+                gymClassApi.getAvailableClasses(memberId),
+                gymClassApi.getTodaysClasses(memberId),
+                memberId ? gymClassApi.getMemberBookingsCount(memberId) : Promise.resolve(0)
+            ]);
 
-            const mappedReal: ClassSession[] = (realSessions || []).map((s: any) => ({
-                id: s.sessionId || s.id,
-                sessionDate: s.sessionDate,
-                durationMinutes: s.durationMinutes,
-                status: s.status,
-                memberId: s.memberId,
-                trainerId: s.trainerId,
-                trainerName: s.trainerName,
-                memberName: s.memberName,
-                trainer: s.trainerName ? { id: s.trainerId, fullName: s.trainerName } : undefined,
-                member: s.memberName ? { id: s.memberId, fullName: s.memberName } : undefined,
-                sessionType: s.sessionType || 'PT Session',
-                difficulty: s.difficulty,
-                location: s.location,
-                spotsLeft: s.spotsLeft
-            }));
-
-            const dummyClasses = generateDummyClasses();
-            
-            const allSessions = [...mappedReal, ...dummyClasses];
-
-            const upcoming = allSessions.filter(s => {
-                const sessionDate = new Date(s.sessionDate);
-                const now = new Date();
-                return sessionDate >= now && s.status !== 'CANCELLED' && s.status !== 'COMPLETED';
-            });
-
-            const booked = mappedReal.filter(s => s.memberId === memberId);
-            setBookedSessions(booked);
-
-            setSessions(upcoming);
+            setClasses(availableClasses);
+            setTodaysClasses(todayClasses);
+            setBookedCount(bookingsCount);
         } catch (err) {
-            console.error('Failed to fetch sessions:', err);
-            setSessions(generateDummyClasses());
+            console.error('Failed to fetch classes:', err);
+            setError('Failed to load classes. Please try again.');
+            setClasses([]);
+            setTodaysClasses([]);
         } finally {
             setLoading(false);
         }
     };
 
-    const handleBook = async (sessionId: number) => {
+    const handleBook = async (classId: number) => {
         if (!memberId) {
             toast.error('Please log in to book a class');
             return;
         }
 
-        setBooking(sessionId);
+        setBooking(classId);
         try {
-            const session = sessions.find(s => s.id === sessionId);
-            if (session) {
-                if (session.id >= 10000) {
-                    await new Promise(resolve => setTimeout(resolve, 800));
-                    
-                    setSessions(prev => prev.map(s => 
-                        s.id === sessionId 
-                            ? { ...s, memberId: memberId, spotsLeft: (s.spotsLeft || 1) - 1 }
-                            : s
-                    ));
-                    setBookedSessions(prev => [...prev, { ...session, memberId: memberId }]);
-                } else {
-                    const updateData = {
-                        sessionId: sessionId,
-                        trainerId: session.trainerId || 0,
-                        memberId: memberId,
-                        sessionDate: session.sessionDate,
-                        durationMinutes: session.durationMinutes,
-                        status: session.status as any
-                    };
-                    await ptSessionApi.updateSession(sessionId, updateData);
-                    fetchSessions();
-                }
-                
-                setShowBookingSuccess(sessionId);
-                toast.success(
-                    <div className="toast-booking-success">
-                        <CheckCircle2 size={18} />
-                        <div>
-                            <strong>Booking Confirmed!</strong>
-                            <p>{getClassType(session)} with {session.trainer?.fullName}</p>
-                        </div>
-                    </div>,
-                    { duration: 4000, icon: null }
-                );
-                
-                setTimeout(() => setShowBookingSuccess(null), 3000);
-            }
-        } catch (err) {
+            const booking = await gymClassApi.bookClass(classId, memberId);
+            
+            setClasses(prev => prev.map(c => 
+                c.classId === classId 
+                    ? { ...c, isBooked: true, bookingId: booking.bookingId, spotsLeft: c.spotsLeft - 1 }
+                    : c
+            ));
+            setTodaysClasses(prev => prev.map(c => 
+                c.classId === classId 
+                    ? { ...c, isBooked: true, bookingId: booking.bookingId, spotsLeft: c.spotsLeft - 1 }
+                    : c
+            ));
+            setBookedCount(prev => prev + 1);
+
+            const bookedClass = classes.find(c => c.classId === classId);
+            setShowBookingSuccess(classId);
+            toast.success(
+                <div className="toast-booking-success">
+                    <CheckCircle2 size={18} />
+                    <div>
+                        <strong>Booking Confirmed!</strong>
+                        <p>{bookedClass?.classType} with {bookedClass?.trainerName}</p>
+                    </div>
+                </div>,
+                { duration: 4000, icon: null }
+            );
+            
+            setTimeout(() => setShowBookingSuccess(null), 3000);
+        } catch (err: any) {
             console.error('Booking failed:', err);
-            toast.error('Failed to book class. Please try again.');
+            const message = err.response?.data?.message || 'Failed to book class. Please try again.';
+            toast.error(message);
         } finally {
             setBooking(null);
         }
     };
 
     const types = useMemo(() => {
-        const uniqueTypes = new Set(sessions.map(s => getClassType(s)));
+        const uniqueTypes = new Set(classes.map(c => c.classType));
         return ['All', ...Array.from(uniqueTypes)];
-    }, [sessions]);
+    }, [classes]);
 
-    const filteredSessions = useMemo(() => {
-        return sessions.filter(session => {
-            const type = getClassType(session);
-            const trainerName = session.trainer?.fullName || '';
+    const filteredClasses = useMemo(() => {
+        return classes.filter(classItem => {
+            const trainerName = classItem.trainerName || '';
             const matchesSearch = 
                 trainerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                type.toLowerCase().includes(searchTerm.toLowerCase());
-            const matchesType = selectedType === 'All' || type === selectedType;
+                classItem.classType.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                classItem.className.toLowerCase().includes(searchTerm.toLowerCase());
+            const matchesType = selectedType === 'All' || classItem.classType === selectedType;
             return matchesSearch && matchesType;
         });
-    }, [sessions, searchTerm, selectedType]);
+    }, [classes, searchTerm, selectedType]);
 
-    const todaysClasses = useMemo(() => {
-        const today = new Date();
-        return filteredSessions.filter(session => {
-            const sessionDate = new Date(session.sessionDate);
-            return sessionDate.toDateString() === today.toDateString();
-        }).sort((a, b) => new Date(a.sessionDate).getTime() - new Date(b.sessionDate).getTime());
-    }, [filteredSessions]);
+    const filteredTodaysClasses = useMemo(() => {
+        return todaysClasses.filter(classItem => {
+            const trainerName = classItem.trainerName || '';
+            const matchesSearch = 
+                trainerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                classItem.classType.toLowerCase().includes(searchTerm.toLowerCase());
+            const matchesType = selectedType === 'All' || classItem.classType === selectedType;
+            return matchesSearch && matchesType;
+        });
+    }, [todaysClasses, searchTerm, selectedType]);
 
     const getWeekDays = (weekOffset: number) => {
         const today = new Date();
@@ -283,10 +170,10 @@ const AvailableClasses: React.FC = () => {
 
     const weekDays = getWeekDays(selectedWeek);
 
-    const getSessionsForDay = (date: Date) =>
-        filteredSessions.filter(session => {
-            const sessionDate = new Date(session.sessionDate);
-            return sessionDate.toDateString() === date.toDateString();
+    const getClassesForDay = (date: Date) =>
+        filteredClasses.filter(classItem => {
+            const classDate = new Date(classItem.startTime);
+            return classDate.toDateString() === date.toDateString();
         });
 
     const formatTime = (dateStr: string) => {
@@ -311,10 +198,6 @@ const AvailableClasses: React.FC = () => {
             case 'Advanced': return 'badge--danger';
             default: return 'badge--info';
         }
-    };
-
-    const isSessionBooked = (session: ClassSession) => {
-        return session.memberId === memberId || bookedSessions.some(b => b.id === session.id);
     };
 
     if (loading) {
@@ -349,42 +232,41 @@ const AvailableClasses: React.FC = () => {
                 </div>
                 <div className="classes-header__stats">
                     <div className="classes-stat">
-                        <span className="classes-stat__value">{filteredSessions.length}</span>
+                        <span className="classes-stat__value">{filteredClasses.length}</span>
                         <span className="classes-stat__label">Available</span>
                     </div>
                     <div className="classes-stat classes-stat--booked">
                         <CalendarCheck size={16} className="classes-stat__icon" />
-                        <span className="classes-stat__value">{bookedSessions.length}</span>
+                        <span className="classes-stat__value">{bookedCount}</span>
                         <span className="classes-stat__label">Booked</span>
                     </div>
                     <div className="classes-stat classes-stat--today">
                         <Flame size={16} className="classes-stat__icon" />
-                        <span className="classes-stat__value">{todaysClasses.length}</span>
+                        <span className="classes-stat__value">{filteredTodaysClasses.length}</span>
                         <span className="classes-stat__label">Today</span>
                     </div>
                 </div>
             </motion.header>
 
-            {todaysClasses.length > 0 && (
+            {filteredTodaysClasses.length > 0 && (
                 <motion.section className="todays-classes" variants={itemVariants}>
                     <div className="todays-classes__header">
                         <div className="todays-classes__title">
                             <Flame size={18} className="todays-classes__icon" />
                             <h2>Today's Classes</h2>
-                            <span className="todays-classes__count">{todaysClasses.length} sessions</span>
+                            <span className="todays-classes__count">{filteredTodaysClasses.length} sessions</span>
                         </div>
                     </div>
                     <div className="todays-classes__list">
-                        {todaysClasses.slice(0, 5).map(session => {
-                            const type = getClassType(session);
-                            const config = classTypeConfig[type] || classTypeConfig['PT Session'];
-                            const isBooked = isSessionBooked(session);
-                            const isBookingThis = booking === session.id;
-                            const justBooked = showBookingSuccess === session.id;
+                        {filteredTodaysClasses.slice(0, 5).map(classItem => {
+                            const config = classTypeConfig[classItem.classType] || classTypeConfig['PT Session'];
+                            const isBooked = classItem.isBooked;
+                            const isBookingThis = booking === classItem.classId;
+                            const justBooked = showBookingSuccess === classItem.classId;
 
                             return (
                                 <motion.div
-                                    key={session.id}
+                                    key={classItem.classId}
                                     className={`todays-class-item ${isBooked ? 'todays-class-item--booked' : ''} ${justBooked ? 'todays-class-item--just-booked' : ''}`}
                                     whileHover={{ scale: 1.01 }}
                                     layout
@@ -397,28 +279,28 @@ const AvailableClasses: React.FC = () => {
                                     </div>
                                     <div className="todays-class-item__info">
                                         <div className="todays-class-item__main">
-                                            <span className="todays-class-item__type">{type}</span>
-                                            {session.difficulty && (
-                                                <span className={`todays-class-item__difficulty ${getDifficultyColor(session.difficulty)}`}>
-                                                    {session.difficulty}
+                                            <span className="todays-class-item__type">{classItem.classType}</span>
+                                            {classItem.difficulty && (
+                                                <span className={`todays-class-item__difficulty ${getDifficultyColor(classItem.difficulty)}`}>
+                                                    {classItem.difficulty}
                                                 </span>
                                             )}
                                         </div>
                                         <div className="todays-class-item__meta">
-                                            <span><Clock size={11} /> {formatTime(session.sessionDate)}</span>
-                                            <span><User size={11} /> {session.trainer?.fullName}</span>
-                                            {session.location && <span><MapPin size={11} /> {session.location}</span>}
+                                            <span><Clock size={11} /> {formatTime(classItem.startTime)}</span>
+                                            <span><User size={11} /> {classItem.trainerName}</span>
+                                            {classItem.location && <span><MapPin size={11} /> {classItem.location}</span>}
                                         </div>
                                     </div>
                                     <div className="todays-class-item__action">
-                                        {session.spotsLeft !== undefined && (
+                                        {classItem.spotsLeft !== undefined && (
                                             <span className="todays-class-item__spots">
-                                                {session.spotsLeft} spots
+                                                {classItem.spotsLeft} spots
                                             </span>
                                         )}
                                         <button
                                             className={`todays-class-item__btn ${isBooked ? 'todays-class-item__btn--booked' : ''}`}
-                                            onClick={() => !isBooked && handleBook(session.id)}
+                                            onClick={() => !isBooked && handleBook(classItem.classId)}
                                             disabled={isBookingThis || isBooked}
                                         >
                                             {isBookingThis ? (
@@ -497,7 +379,7 @@ const AvailableClasses: React.FC = () => {
                 <motion.div className="classes-error" variants={itemVariants}>
                     <AlertCircle size={16} />
                     <span>{error}</span>
-                    <button onClick={fetchSessions}>Try Again</button>
+                    <button onClick={fetchClasses}>Try Again</button>
                 </motion.div>
             )}
 
@@ -510,7 +392,7 @@ const AvailableClasses: React.FC = () => {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                     >
-                        {filteredSessions.length === 0 ? (
+                        {filteredClasses.length === 0 ? (
                             <motion.div className="classes-empty" variants={itemVariants}>
                                 <div className="classes-empty__icon">
                                     <Calendar size={32} />
@@ -535,15 +417,14 @@ const AvailableClasses: React.FC = () => {
                             </motion.div>
                         ) : (
                             <div className="classes-grid">
-                                {filteredSessions.map((session) => {
-                                    const type = getClassType(session);
-                                    const config = classTypeConfig[type] || classTypeConfig['PT Session'];
-                                    const isBooked = isSessionBooked(session);
-                                    const justBooked = showBookingSuccess === session.id;
+                                {filteredClasses.map((classItem) => {
+                                    const config = classTypeConfig[classItem.classType] || classTypeConfig['PT Session'];
+                                    const isBooked = classItem.isBooked;
+                                    const justBooked = showBookingSuccess === classItem.classId;
 
                                     return (
                                         <motion.div
-                                            key={session.id}
+                                            key={classItem.classId}
                                             className={`class-card ${isBooked ? 'class-card--booked' : ''} ${justBooked ? 'class-card--just-booked' : ''}`}
                                             variants={itemVariants}
                                             whileHover={{ y: -2, transition: { duration: 0.2 } }}
@@ -567,9 +448,9 @@ const AvailableClasses: React.FC = () => {
                                                     {config.icon}
                                                 </div>
                                                 <div className="flex gap-2">
-                                                    {session.difficulty && (
-                                                        <span className={`class-card__badge ${getDifficultyColor(session.difficulty)}`}>
-                                                            {session.difficulty}
+                                                    {classItem.difficulty && (
+                                                        <span className={`class-card__badge ${getDifficultyColor(classItem.difficulty)}`}>
+                                                            {classItem.difficulty}
                                                         </span>
                                                     )}
                                                     {isBooked && (
@@ -580,45 +461,45 @@ const AvailableClasses: React.FC = () => {
                                                 </div>
                                             </div>
 
-                                            <h3 className="class-card__title">{type}</h3>
+                                            <h3 className="class-card__title">{classItem.classType}</h3>
 
-                                            {session.trainer && (
+                                            {classItem.trainerName && (
                                                 <p className="class-card__trainer">
                                                     <User size={12} />
-                                                    {session.trainer.fullName}
+                                                    {classItem.trainerName}
                                                 </p>
                                             )}
 
                                             <div className="class-card__details">
                                                 <div className="class-card__detail">
                                                     <Calendar size={12} />
-                                                    <span>{formatDate(session.sessionDate)}</span>
+                                                    <span>{formatDate(classItem.startTime)}</span>
                                                 </div>
                                                 <div className="class-card__detail">
                                                     <Clock size={12} />
-                                                    <span>{formatTime(session.sessionDate)} · {session.durationMinutes}m</span>
+                                                    <span>{formatTime(classItem.startTime)} · {classItem.durationMinutes}m</span>
                                                 </div>
-                                                {session.location && (
+                                                {classItem.location && (
                                                     <div className="class-card__detail">
                                                         <MapPin size={12} />
-                                                        <span>{session.location}</span>
+                                                        <span>{classItem.location}</span>
                                                     </div>
                                                 )}
                                             </div>
 
                                             <div className="class-card__footer">
-                                                {session.spotsLeft !== undefined && (
-                                                    <span className={`class-card__spots ${session.spotsLeft <= 3 ? 'class-card__spots--low' : ''}`}>
+                                                {classItem.spotsLeft !== undefined && (
+                                                    <span className={`class-card__spots ${classItem.spotsLeft <= 3 ? 'class-card__spots--low' : ''}`}>
                                                         <Users size={12} />
-                                                        {session.spotsLeft} spots left
+                                                        {classItem.spotsLeft} spots left
                                                     </span>
                                                 )}
                                                 <button
                                                     className={`class-card__btn ${isBooked ? 'class-card__btn--booked' : ''}`}
-                                                    onClick={() => !isBooked && handleBook(session.id!)}
-                                                    disabled={booking === session.id || isBooked}
+                                                    onClick={() => !isBooked && handleBook(classItem.classId)}
+                                                    disabled={booking === classItem.classId || isBooked}
                                                 >
-                                                    {booking === session.id ? (
+                                                    {booking === classItem.classId ? (
                                                         <>
                                                             <Loader2 size={12} className="spin" />
                                                             Booking...
@@ -689,36 +570,35 @@ const AvailableClasses: React.FC = () => {
 
                         <div className="classes-calendar__grid">
                             {weekDays.map((day, i) => {
-                                const dayClasses = getSessionsForDay(day);
+                                const dayClasses = getClassesForDay(day);
                                 return (
                                     <div
                                         key={i}
                                         className={`classes-calendar__column ${isToday(day) ? 'classes-calendar__column--today' : ''}`}
                                     >
                                         {dayClasses.length > 0 ? (
-                                            dayClasses.map(session => {
-                                                const type = getClassType(session);
-                                                const config = classTypeConfig[type] || classTypeConfig['PT Session'];
-                                                const isBooked = isSessionBooked(session);
+                                            dayClasses.map(classItem => {
+                                                const config = classTypeConfig[classItem.classType] || classTypeConfig['PT Session'];
+                                                const isBooked = classItem.isBooked;
 
                                                 return (
                                                     <div
-                                                        key={session.id}
+                                                        key={classItem.classId}
                                                         className={`classes-calendar__item ${isBooked ? 'classes-calendar__item--booked' : ''}`}
                                                         style={{ borderLeftColor: config.color }}
-                                                        onClick={() => !isBooked && handleBook(session.id!)}
+                                                        onClick={() => !isBooked && handleBook(classItem.classId)}
                                                     >
                                                         <div className="classes-calendar__item-icon" style={{ color: config.color }}>
                                                             {config.icon}
                                                         </div>
                                                         <div className="classes-calendar__item-info">
                                                             <span className="classes-calendar__item-time">
-                                                                {formatTime(session.sessionDate)}
+                                                                {formatTime(classItem.startTime)}
                                                             </span>
-                                                            <span className="classes-calendar__item-type">{type}</span>
-                                                            {session.trainer && (
+                                                            <span className="classes-calendar__item-type">{classItem.classType}</span>
+                                                            {classItem.trainerName && (
                                                                 <span className="classes-calendar__item-trainer">
-                                                                    {session.trainer.fullName}
+                                                                    {classItem.trainerName}
                                                                 </span>
                                                             )}
                                                         </div>
