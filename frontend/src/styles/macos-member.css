@@ -76,6 +76,27 @@
     --transition-spring: 400ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
+:root.theme-light {
+    --macos-bg-primary: #F5F5F7;
+    --macos-bg-secondary: #FFFFFF;
+    --macos-bg-tertiary: #E8E8ED;
+    --macos-bg-glass: rgba(255, 255, 255, 0.7);
+    --macos-bg-glass-hover: rgba(255, 255, 255, 0.8);
+    --macos-bg-glass-active: rgba(255, 255, 255, 0.9);
+
+    --macos-border: rgba(0, 0, 0, 0.1);
+    --macos-border-focus: rgba(0, 0, 0, 0.2);
+
+    --macos-text-primary: #1D1D1F;
+    --macos-text-secondary: #515154;
+    --macos-text-tertiary: #86868B;
+    --macos-text-quaternary: #A1A1A6;
+
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.12);
+}
+
 /* ============================================
    Base Styles
    ============================================ */

@@ -1,36 +1,40 @@
 /* Member Dashboard Styles - Focused on Premium Aesthetics and High Information Density */
 
 .member-dashboard-unified {
-    padding: 12px 20px;
+    padding: var(--s-4) var(--s-6);
     max-width: 1300px;
     margin: 0 auto;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    transition: background 0.3s ease, color 0.3s ease;
 }
 
 .member-dashboard__header {
-    margin-bottom: 12px;
+    margin-bottom: 24px;
 }
 
 .header-top-row {
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    padding-bottom: 8px;
+    padding-bottom: 12px;
     border-bottom: 1px solid var(--border-main);
-    margin-bottom: 12px;
+    margin-bottom: 16px;
 }
 
 .welcome-group .text-greeting {
     font-size: 14px;
     color: var(--text-secondary);
     display: block;
+    font-weight: 500;
 }
 
 .heading-hero {
-    font-size: 24px;
+    font-size: 32px;
     font-weight: 800;
     margin: 0;
     letter-spacing: -0.02em;
-    background: linear-gradient(to right, #fff, var(--text-tertiary));
+    background: linear-gradient(to right, var(--text-primary), var(--text-tertiary));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -38,59 +42,64 @@
 .header-date-display {
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 11px;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 600;
     color: var(--text-tertiary);
     background: var(--bg-glass);
-    padding: 4px 10px;
+    padding: 6px 14px;
     border-radius: 20px;
     border: 1px solid var(--border-main);
+    backdrop-filter: var(--glass-blur);
 }
 
 .header-stats-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    margin-top: 12px;
+    gap: 16px;
+    margin-top: 20px;
 }
 
 .header-stat-card {
-    padding: 10px 14px !important;
+    padding: 16px 20px !important;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    background: var(--bg-glass) !important;
+    border: 1px solid var(--border-main) !important;
 }
 
 .header-stat-label {
-    font-size: 10px;
-    font-weight: 600;
+    font-size: 11px;
+    font-weight: 700;
     color: var(--text-tertiary);
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    margin-bottom: 2px;
+    margin-bottom: 4px;
 }
 
 .header-stat-value {
-    font-size: 18px;
+    font-size: 24px;
     font-weight: 800;
     color: var(--text-primary);
     display: flex;
     align-items: baseline;
-    gap: 4px;
+    gap: 6px;
 }
 
 .header-stat-unit {
-    font-size: 10px;
-    font-weight: 500;
+    font-size: 12px;
+    font-weight: 600;
     color: var(--text-tertiary);
 }
 
 /* Main Content Area */
 .current-session-banner-unified {
-    padding: 12px 16px !important;
-    margin-bottom: 20px;
-    background: linear-gradient(135deg, rgba(var(--accent-blue-rgb), 0.1), transparent);
-    border-color: rgba(var(--accent-blue-rgb), 0.2);
+    padding: 20px 24px !important;
+    margin-bottom: 32px;
+    background: linear-gradient(135deg, rgba(var(--accent-blue-rgb), 0.1), var(--bg-glass)) !important;
+    border-color: rgba(var(--accent-blue-rgb), 0.2) !important;
+    backdrop-filter: var(--glass-blur);
 }
 
 .session-banner-content {
@@ -102,21 +111,23 @@
 .session-tag {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    font-size: 9px;
+    gap: 6px;
+    font-size: 10px;
     font-weight: 800;
     color: var(--accent-blue);
-    margin-bottom: 4px;
+    margin-bottom: 8px;
+    letter-spacing: 0.05em;
 }
 
 .session-title {
-    font-size: 16px;
+    font-size: 20px;
     font-weight: 700;
-    margin: 0 0 2px 0;
+    margin: 0 0 4px 0;
+    color: var(--text-primary);
 }
 
 .session-info {
-    font-size: 12px;
+    font-size: 14px;
     color: var(--text-secondary);
     margin: 0;
 }
@@ -124,38 +135,47 @@
 .schedule-list {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 12px;
 }
 
 .class-card-compact {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 10px 14px !important;
+    gap: 16px;
+    padding: 16px 20px !important;
+    background: var(--bg-glass) !important;
+    border: 1px solid var(--border-main) !important;
+}
+
+.class-card-compact:hover {
+    background: var(--bg-glass-hover) !important;
+    border-color: var(--accent-blue) !important;
 }
 
 .class-time-block {
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-width: 45px;
+    min-width: 50px;
 }
 
 .class-time-hour {
-    font-size: 15px;
+    font-size: 18px;
     font-weight: 800;
     line-height: 1;
+    color: var(--text-primary);
 }
 
 .class-time-ampm {
-    font-size: 9px;
-    font-weight: 600;
+    font-size: 10px;
+    font-weight: 700;
     color: var(--text-tertiary);
+    text-transform: uppercase;
 }
 
 .class-divider {
     width: 1px;
-    height: 30px;
+    height: 40px;
     background: var(--border-main);
 }
 
@@ -164,20 +184,22 @@
 }
 
 .class-type-tag {
-    font-size: 8px;
-    font-weight: 700;
+    font-size: 9px;
+    font-weight: 800;
     color: var(--accent-purple);
-    margin-bottom: 2px;
+    margin-bottom: 4px;
+    letter-spacing: 0.05em;
 }
 
 .class-name {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 700;
-    margin: 0 0 1px 0;
+    margin: 0 0 2px 0;
+    color: var(--text-primary);
 }
 
 .class-meta {
-    font-size: 11px;
+    font-size: 12px;
     color: var(--text-tertiary);
     margin: 0;
 }
@@ -189,7 +211,7 @@
 }
 
 .class-date-label {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     color: var(--text-secondary);
 }
@@ -197,85 +219,89 @@
 /* Sidebar Styling */
 .sidebar-section-title {
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 800;
     color: var(--text-primary);
-    margin: 0 0 12px 0;
+    margin: 0 0 16px 0;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.08em;
 }
 
 .quick-actions-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
+    gap: 12px;
 }
 
 .quick-action-btn-dashboard {
-    background: var(--bg-tertiary);
+    background: var(--bg-secondary);
     border: 1px solid var(--border-main);
     border-radius: var(--radius-lg);
-    padding: 10px 6px;
+    padding: 16px 8px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .quick-action-btn-dashboard:hover {
     background: var(--bg-glass-hover);
-    border-color: var(--border-focus);
-    transform: translateY(-2px);
+    border-color: var(--accent-blue);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
 }
 
 .quick-action-icon {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 10px;
+    width: 36px;
+    height: 36px;
+    background: rgba(var(--accent-blue-rgb), 0.1);
+    border-radius: 12px;
+    color: var(--accent-blue);
 }
 
 .quick-action-label {
-    font-size: 11px;
-    font-weight: 600;
+    font-size: 12px;
+    font-weight: 700;
     color: var(--text-secondary);
 }
 
 .trainer-card-compact {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 12px;
-    padding: 8px;
-    background: var(--bg-tertiary);
-    border-radius: var(--radius-md);
+    gap: 12px;
+    margin-bottom: 16px;
+    padding: 12px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-main);
 }
 
 .trainer-avatar-sm {
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    background: var(--accent-blue);
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 11px;
+    font-size: 14px;
     font-weight: 700;
     color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .trainer-name-sm {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 700;
     color: var(--text-primary);
 }
 
 .trainer-special-sm {
-    font-size: 10px;
+    font-size: 11px;
     color: var(--text-tertiary);
 }
 
@@ -283,69 +309,89 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
 }
 
 .membership-badge {
-    font-size: 9px;
+    font-size: 10px;
     font-weight: 800;
-    padding: 2px 8px;
+    padding: 3px 10px;
     background: rgba(var(--accent-green-rgb), 0.1);
     color: var(--accent-green);
     border-radius: 20px;
     text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .progress-bar-container {
-    height: 6px;
+    height: 8px;
     background: var(--bg-tertiary);
-    border-radius: 3px;
+    border-radius: 4px;
     overflow: hidden;
-    margin: 4px 0;
+    margin: 8px 0;
+    border: 1px solid var(--border-main);
 }
 
 .progress-bar-fill {
     height: 100%;
     background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
-    border-radius: 3px;
+    border-radius: 4px;
 }
 
 .progress-snapshot-metrics {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-top: 12px;
+    gap: 12px;
+    margin-top: 16px;
 }
 
 .metric-item {
-    background: var(--bg-tertiary);
-    padding: 8px;
-    border-radius: var(--radius-md);
+    background: var(--bg-secondary);
+    padding: 12px 8px;
+    border-radius: var(--radius-lg);
     text-align: center;
+    border: 1px solid var(--border-main);
 }
 
 .metric-value {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 800;
     color: var(--text-primary);
 }
 
 .metric-label {
-    font-size: 9px;
-    font-weight: 600;
+    font-size: 10px;
+    font-weight: 700;
     color: var(--text-tertiary);
     text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.member-dashboard-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    color: var(--text-secondary);
+    font-size: 16px;
+    font-weight: 500;
+}
+
+@media (max-width: 1024px) {
+    .header-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 @media (max-width: 768px) {
     .member-dashboard-unified {
-        padding: 12px;
+        padding: 16px;
     }
     
     .header-top-row {
         flex-direction: column;
         align-items: flex-start;
-        gap: 8px;
+        gap: 12px;
     }
 
     .header-stats-grid {
@@ -355,15 +401,19 @@
     .session-banner-content {
         flex-direction: column;
         align-items: flex-start;
-        gap: 12px;
+        gap: 16px;
     }
 
     .class-card-compact {
-        padding: 12px !important;
-        gap: 10px;
+        padding: 16px !important;
+        gap: 12px;
     }
 
     .class-action-area {
         display: none;
+    }
+    
+    .heading-hero {
+        font-size: 26px;
     }
 }

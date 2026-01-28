@@ -11,9 +11,9 @@ interface MemberLayoutProps {
 
 const MemberLayout: React.FC<MemberLayoutProps> = ({ children }) => {
     useEffect(() => {
-        document.documentElement.setAttribute('data-theme', 'member');
+        document.documentElement.setAttribute('data-layout', 'member');
         return () => {
-            document.documentElement.removeAttribute('data-theme');
+            document.documentElement.removeAttribute('data-layout');
         };
     }, []);
 
