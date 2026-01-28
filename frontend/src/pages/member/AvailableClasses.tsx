@@ -29,14 +29,14 @@ interface ClassSession {
 }
 
 const classTypeConfig: Record<string, { icon: React.ReactNode; color: string; bg: string }> = {
-    'Yoga': { icon: <Heart size={20} />, color: '#34C759', bg: 'rgba(52, 199, 89, 0.12)' },
-    'HIIT': { icon: <Zap size={20} />, color: '#FF3B30', bg: 'rgba(255, 59, 48, 0.12)' },
-    'Strength': { icon: <Dumbbell size={20} />, color: '#007AFF', bg: 'rgba(0, 122, 255, 0.12)' },
-    'Spin': { icon: <Bike size={20} />, color: '#AF52DE', bg: 'rgba(175, 82, 222, 0.12)' },
-    'Pilates': { icon: <Sparkles size={20} />, color: '#5AC8FA', bg: 'rgba(90, 200, 250, 0.12)' },
-    'Boxing': { icon: <Target size={20} />, color: '#FF9500', bg: 'rgba(255, 149, 0, 0.12)' },
-    'PT Session': { icon: <User size={20} />, color: '#5856D6', bg: 'rgba(88, 86, 214, 0.12)' },
-    'Group': { icon: <Users size={20} />, color: '#FF2D55', bg: 'rgba(255, 45, 85, 0.12)' }
+    'Yoga': { icon: <Heart size={16} />, color: '#34C759', bg: 'rgba(52, 199, 89, 0.12)' },
+    'HIIT': { icon: <Zap size={16} />, color: '#FF3B30', bg: 'rgba(255, 59, 48, 0.12)' },
+    'Strength': { icon: <Dumbbell size={16} />, color: '#007AFF', bg: 'rgba(0, 122, 255, 0.12)' },
+    'Spin': { icon: <Bike size={16} />, color: '#AF52DE', bg: 'rgba(175, 82, 222, 0.12)' },
+    'Pilates': { icon: <Sparkles size={16} />, color: '#5AC8FA', bg: 'rgba(90, 200, 250, 0.12)' },
+    'Boxing': { icon: <Target size={16} />, color: '#FF9500', bg: 'rgba(255, 149, 0, 0.12)' },
+    'PT Session': { icon: <User size={16} />, color: '#5856D6', bg: 'rgba(88, 86, 214, 0.12)' },
+    'Group': { icon: <Users size={16} />, color: '#FF2D55', bg: 'rgba(255, 45, 85, 0.12)' }
 };
 
 const getClassType = (session: ClassSession): string => {
@@ -222,7 +222,7 @@ const AvailableClasses: React.FC = () => {
                         animate={{ rotate: 360 }}
                         transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                     >
-                        <Loader2 size={32} className="classes-loading__icon" />
+                        <Loader2 size={24} className="classes-loading__icon" />
                     </motion.div>
                     <p>Loading available classes...</p>
                 </div>
@@ -254,7 +254,7 @@ const AvailableClasses: React.FC = () => {
 
             <motion.div className="classes-toolbar" variants={itemVariants}>
                 <div className="classes-search">
-                    <Search size={18} className="classes-search__icon" />
+                    <Search size={16} className="classes-search__icon" />
                     <input
                         type="text"
                         placeholder="Search classes or trainers..."
@@ -282,21 +282,21 @@ const AvailableClasses: React.FC = () => {
                         onClick={() => setView('list')}
                         title="List view"
                     >
-                        <List size={18} />
+                        <List size={16} />
                     </button>
                     <button
                         className={`classes-view-btn ${view === 'calendar' ? 'classes-view-btn--active' : ''}`}
                         onClick={() => setView('calendar')}
                         title="Calendar view"
                     >
-                        <CalendarDays size={18} />
+                        <CalendarDays size={16} />
                     </button>
                 </div>
             </motion.div>
 
             {error && (
                 <motion.div className="classes-error" variants={itemVariants}>
-                    <AlertCircle size={20} />
+                    <AlertCircle size={16} />
                     <span>{error}</span>
                     <button onClick={fetchSessions}>Try Again</button>
                 </motion.div>
@@ -314,7 +314,7 @@ const AvailableClasses: React.FC = () => {
                         {filteredSessions.length === 0 ? (
                             <motion.div className="classes-empty" variants={itemVariants}>
                                 <div className="classes-empty__icon">
-                                    <Calendar size={48} />
+                                    <Calendar size={32} />
                                 </div>
                                 <h3 className="classes-empty__title">No Classes Available</h3>
                                 <p className="classes-empty__text">
@@ -346,7 +346,7 @@ const AvailableClasses: React.FC = () => {
                                             key={session.id}
                                             className={`class-card ${isBooked ? 'class-card--booked' : ''}`}
                                             variants={itemVariants}
-                                            whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                                            whileHover={{ y: -2, transition: { duration: 0.2 } }}
                                         >
                                             <div className="class-card__header">
                                                 <div
@@ -355,39 +355,41 @@ const AvailableClasses: React.FC = () => {
                                                 >
                                                     {config.icon}
                                                 </div>
-                                                {session.difficulty && (
-                                                    <span className={`class-card__badge ${getDifficultyColor(session.difficulty)}`}>
-                                                        {session.difficulty}
-                                                    </span>
-                                                )}
-                                                {isBooked && (
-                                                    <span className="class-card__badge badge--success">
-                                                        <CheckCircle2 size={12} /> Booked
-                                                    </span>
-                                                )}
+                                                <div className="flex gap-2">
+                                                    {session.difficulty && (
+                                                        <span className={`class-card__badge ${getDifficultyColor(session.difficulty)}`}>
+                                                            {session.difficulty}
+                                                        </span>
+                                                    )}
+                                                    {isBooked && (
+                                                        <span className="class-card__badge badge--success">
+                                                            <CheckCircle2 size={10} /> Booked
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </div>
 
                                             <h3 className="class-card__title">{type}</h3>
 
                                             {session.trainer && (
                                                 <p className="class-card__trainer">
-                                                    <User size={14} />
+                                                    <User size={12} />
                                                     {session.trainer.fullName}
                                                 </p>
                                             )}
 
                                             <div className="class-card__details">
                                                 <div className="class-card__detail">
-                                                    <Calendar size={14} />
+                                                    <Calendar size={12} />
                                                     <span>{formatDate(session.sessionDate)}</span>
                                                 </div>
                                                 <div className="class-card__detail">
-                                                    <Clock size={14} />
-                                                    <span>{formatTime(session.sessionDate)} · {session.durationMinutes}min</span>
+                                                    <Clock size={12} />
+                                                    <span>{formatTime(session.sessionDate)} · {session.durationMinutes}m</span>
                                                 </div>
                                                 {session.location && (
                                                     <div className="class-card__detail">
-                                                        <MapPin size={14} />
+                                                        <MapPin size={12} />
                                                         <span>{session.location}</span>
                                                     </div>
                                                 )}
@@ -396,8 +398,8 @@ const AvailableClasses: React.FC = () => {
                                             <div className="class-card__footer">
                                                 {session.spotsLeft !== undefined && (
                                                     <span className="class-card__spots">
-                                                        <Users size={14} />
-                                                        {session.spotsLeft} spots left
+                                                        <Users size={12} />
+                                                        {session.spotsLeft} left
                                                     </span>
                                                 )}
                                                 <button
@@ -407,13 +409,13 @@ const AvailableClasses: React.FC = () => {
                                                 >
                                                     {booking === session.id ? (
                                                         <>
-                                                            <Loader2 size={14} className="spin" />
-                                                            Booking...
+                                                            <Loader2 size={12} className="spin" />
+                                                            ...
                                                         </>
                                                     ) : isBooked ? (
                                                         'Booked'
                                                     ) : (
-                                                        'Book Now'
+                                                        'Book'
                                                     )}
                                                 </button>
                                             </div>
@@ -436,7 +438,7 @@ const AvailableClasses: React.FC = () => {
                                 className="classes-calendar__nav-btn"
                                 onClick={() => setSelectedWeek(w => w - 1)}
                             >
-                                <ChevronLeft size={20} />
+                                <ChevronLeft size={18} />
                             </button>
                             <span className="classes-calendar__nav-label">
                                 {weekDays[0].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {weekDays[6].toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
@@ -445,7 +447,7 @@ const AvailableClasses: React.FC = () => {
                                 className="classes-calendar__nav-btn"
                                 onClick={() => setSelectedWeek(w => w + 1)}
                             >
-                                <ChevronRight size={20} />
+                                <ChevronRight size={18} />
                             </button>
                             {selectedWeek !== 0 && (
                                 <button
@@ -507,7 +509,7 @@ const AvailableClasses: React.FC = () => {
                                                             )}
                                                         </div>
                                                         {isBooked && (
-                                                            <CheckCircle2 size={14} className="classes-calendar__item-check" />
+                                                            <CheckCircle2 size={10} className="classes-calendar__item-check" />
                                                         )}
                                                     </div>
                                                 );
