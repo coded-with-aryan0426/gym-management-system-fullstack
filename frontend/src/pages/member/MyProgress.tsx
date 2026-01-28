@@ -10,7 +10,7 @@ import {
     Camera, Calendar, Zap, Heart, TrendingUp, TrendingDown,
     Clock, ChevronRight, X, Check, Edit3, Ruler, Scale as ScaleIcon,
     AlertCircle, Info, ChevronDown, ChevronUp, History, BarChart3,
-    Award, Sparkles, ArrowRight, Timer, Percent
+    Award, Sparkles, ArrowRight, Timer, Percent, Images
 } from 'lucide-react';
 import { memberProgressApi } from '../../services/api';
 import '../../styles/macos-member.css';
@@ -439,7 +439,6 @@ const MyProgress: React.FC = () => {
     const tabs: { id: TabType; label: string; icon: React.ReactNode }[] = [
         { id: 'weight', label: 'Weight', icon: <WeightIcon size={14} /> },
         { id: 'bodyFat', label: 'Body Composition', icon: <Activity size={14} /> },
-        { id: 'bmi', label: 'BMI', icon: <BarChart3 size={14} /> },
         { id: 'measurements', label: 'Measurements', icon: <Ruler size={14} /> },
         { id: 'strength', label: 'Strength', icon: <Dumbbell size={14} /> },
         { id: 'consistency', label: 'Activity', icon: <Calendar size={14} /> }
@@ -756,7 +755,11 @@ const MyProgress: React.FC = () => {
                 </button>
                 <button className="quick-action-btn" onClick={() => setActiveModal('photoUpload')}>
                     <Camera size={16} />
-                    Progress Photo
+                    Add Photo
+                </button>
+                <button className="quick-action-btn" onClick={() => setActiveModal('photoGallery')}>
+                    <Images size={16} />
+                    View Gallery
                 </button>
                 <button className="quick-action-btn history-btn" onClick={() => setActiveModal('history')}>
                     <History size={16} />
