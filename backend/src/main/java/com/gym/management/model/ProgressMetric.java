@@ -6,16 +6,17 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "workout_logs")
+@Table(name = "progress_metrics")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class WorkoutLog {
+public class ProgressMetric {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,23 +26,20 @@ public class WorkoutLog {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "workout_date", nullable = false)
-    private LocalDate workoutDate;
+    @Column(name = "record_date", nullable = false)
+    private LocalDate recordDate;
 
-    @Column(name = "duration_minutes")
-    private Integer durationMinutes;
+    @Column(name = "weight", precision = 5, scale = 2)
+    private BigDecimal weight;
 
-    @Column(name = "workout_type")
-    private String workoutType;
+    @Column(name = "body_fat", precision = 5, scale = 2)
+    private BigDecimal bodyFat;
 
-    @Column(name = "calories_burned")
-    private Integer caloriesBurned;
+    @Column(name = "muscle_mass", precision = 5, scale = 2)
+    private BigDecimal muscleMass;
 
-    @Column(name = "exercises_count")
-    private Integer exercisesCount;
-
-    @Column(name = "intensity_level")
-    private Integer intensityLevel;
+    @Column(name = "bmi", precision = 4, scale = 2)
+    private BigDecimal bmi;
 
     @Column(columnDefinition = "CLOB")
     private String notes;
@@ -49,10 +47,19 @@ public class WorkoutLog {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
     @PrePersist
     protected void onCreate() {
         if (createdAt == null) {
             createdAt = LocalDateTime.now();
         }
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
     }
 }

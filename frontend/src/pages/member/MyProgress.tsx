@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -12,6 +12,7 @@ import {
     AlertCircle, Info, ChevronDown, ChevronUp, History, BarChart3,
     Award, Sparkles, ArrowRight, Timer, Percent
 } from 'lucide-react';
+import { memberProgressApi } from '../../services/api';
 import '../../styles/macos-member.css';
 import './MyProgress.css';
 
@@ -94,11 +95,13 @@ const MyProgress: React.FC = () => {
     const [timeRange, setTimeRange] = useState<'7D' | '30D' | '90D' | '1Y' | 'ALL'>('30D');
     const [activeModal, setActiveModal] = useState<ModalType>(null);
     const [expandedGoal, setExpandedGoal] = useState<number | null>(null);
+    const [saving, setSaving] = useState(false);
 
     const [progressEntries, setProgressEntries] = useState<ProgressEntry[]>([]);
     const [personalBests, setPersonalBests] = useState<PersonalBest[]>([]);
     const [goals, setGoals] = useState<Goal[]>([]);
     const [workoutLogs, setWorkoutLogs] = useState<WorkoutLog[]>([]);
+    const [summary, setSummary] = useState<any>(null);
 
     const [newProgress, setNewProgress] = useState({
         weight: '',
@@ -132,68 +135,106 @@ const MyProgress: React.FC = () => {
         weeklyTarget: ''
     });
 
-    const userStr = localStorage.getItem('user');
+    const getStorageKey = (key: string): string => {
+        const port = typeof window !== 'undefined' ? window.location.port || '5173' : '5173';
+        return `${key}_port_${port}`;
+    };
+
+    const userStr = localStorage.getItem(getStorageKey('user'));
     const user = userStr ? JSON.parse(userStr) : null;
+    const memberId = user?.userId || user?.id;
+
+    const fetchProgressData = useCallback(async () => {
+        if (!memberId) {
+            setLoading(false);
+            return;
+        }
+
+        try {
+            setLoading(true);
+            
+            const [summaryData, metricsData, goalsData, pbData, workoutsData] = await Promise.all([
+                memberProgressApi.getSummary(memberId).catch(() => null),
+                memberProgressApi.getMetrics(memberId, timeRange === 'ALL' ? undefined : timeRange).catch(() => []),
+                memberProgressApi.getGoals(memberId).catch(() => []),
+                memberProgressApi.getPersonalBests(memberId).catch(() => []),
+                memberProgressApi.getWorkouts(memberId, '30D').catch(() => [])
+            ]);
+
+            setSummary(summaryData);
+
+            const entries: ProgressEntry[] = (metricsData || []).map((m: any) => ({
+                id: m.id,
+                date: m.recordDate,
+                weight: m.weight,
+                bodyFat: m.bodyFat,
+                muscleMass: m.muscleMass,
+                chest: undefined,
+                waist: undefined,
+                arms: undefined,
+                legs: undefined,
+                hips: undefined,
+                shoulders: undefined,
+                notes: m.notes
+            }));
+            setProgressEntries(entries);
+
+            const mappedGoals: Goal[] = (goalsData || []).map((g: any) => ({
+                id: g.id,
+                title: g.title,
+                type: g.goalType?.toLowerCase() as Goal['type'],
+                startValue: g.startValue || 0,
+                currentValue: g.currentValue || 0,
+                targetValue: g.targetValue || 0,
+                unit: g.unit || 'kg',
+                startDate: g.startDate,
+                targetDate: g.targetDate,
+                weeklyTarget: g.weeklyTarget
+            }));
+            setGoals(mappedGoals);
+
+            const mappedPBs: PersonalBest[] = (pbData || []).map((pb: any) => ({
+                id: pb.id,
+                exercise: pb.exercise,
+                weight: pb.weightValue,
+                reps: pb.reps,
+                unit: pb.unit || 'lbs',
+                date: pb.recordDate,
+                previousBest: pb.previousBest,
+                category: (pb.category?.toLowerCase() || 'push') as PersonalBest['category']
+            }));
+            setPersonalBests(mappedPBs);
+
+            const mappedWorkouts: WorkoutLog[] = (workoutsData || []).map((w: any) => ({
+                id: w.id,
+                date: w.workoutDate,
+                duration: w.durationMinutes || 0,
+                caloriesBurned: w.caloriesBurned || 0,
+                type: w.workoutType || 'General',
+                exercises: w.exercisesCount || 0
+            }));
+            setWorkoutLogs(mappedWorkouts);
+
+            const mockNotes: ProgressNote[] = [
+                {
+                    id: 1,
+                    note: 'Great progress on squats! Keep focusing on depth and maintaining good form.',
+                    createdAt: new Date().toISOString().split('T')[0],
+                    trainer: { userId: 1, fullName: 'Your Trainer' }
+                }
+            ];
+            setNotes(mockNotes);
+
+        } catch (error) {
+            console.error('Error fetching progress data:', error);
+        } finally {
+            setLoading(false);
+        }
+    }, [memberId, timeRange]);
 
     useEffect(() => {
-        const mockNotes: ProgressNote[] = [
-            {
-                id: 1,
-                note: 'Great progress on squats! Increased weight from 135lbs to 155lbs with good form. Keep focusing on depth and maintaining a straight back. Your consistency is paying off!',
-                createdAt: '2025-12-22',
-                trainer: { userId: 1, fullName: 'John Smith' }
-            },
-            {
-                id: 2,
-                note: 'Excellent improvement in endurance. Your cardio sessions show a 15% increase in stamina over the last month.',
-                createdAt: '2025-12-15',
-                trainer: { userId: 1, fullName: 'John Smith' }
-            }
-        ];
-
-        const mockEntries: ProgressEntry[] = [
-            { id: 1, date: '2025-11-01', weight: 85, bodyFat: 22, muscleMass: 58, chest: 102, waist: 88, arms: 35, legs: 58, hips: 98, shoulders: 115 },
-            { id: 2, date: '2025-11-08', weight: 84.2, bodyFat: 21.5, muscleMass: 58.5, chest: 102.5, waist: 87, arms: 35.2, legs: 58.2, hips: 97.5, shoulders: 115.5 },
-            { id: 3, date: '2025-11-15', weight: 83.5, bodyFat: 21, muscleMass: 59, chest: 103, waist: 86, arms: 35.5, legs: 58.5, hips: 97, shoulders: 116 },
-            { id: 4, date: '2025-11-22', weight: 82.8, bodyFat: 20.5, muscleMass: 59.5, chest: 103.2, waist: 85, arms: 35.8, legs: 58.8, hips: 96.5, shoulders: 116.5 },
-            { id: 5, date: '2025-11-29', weight: 82, bodyFat: 20, muscleMass: 60, chest: 103.5, waist: 84.5, arms: 36, legs: 59, hips: 96, shoulders: 117 },
-            { id: 6, date: '2025-12-06', weight: 81, bodyFat: 19.5, muscleMass: 60.5, chest: 104, waist: 83.5, arms: 36.3, legs: 59.3, hips: 95.5, shoulders: 117.5 },
-            { id: 7, date: '2025-12-13', weight: 80, bodyFat: 19, muscleMass: 61, chest: 104.5, waist: 82.5, arms: 36.6, legs: 59.6, hips: 95, shoulders: 118 },
-            { id: 8, date: '2025-12-20', weight: 79, bodyFat: 18.5, muscleMass: 61.5, chest: 105, waist: 81.5, arms: 36.9, legs: 60, hips: 94.5, shoulders: 118.5 },
-            { id: 9, date: '2025-12-27', weight: 78, bodyFat: 18, muscleMass: 62, chest: 105.5, waist: 81, arms: 37, legs: 60.3, hips: 94, shoulders: 119 }
-        ];
-
-        const mockPBs: PersonalBest[] = [
-            { id: 1, exercise: 'Bench Press', weight: 185, reps: 5, unit: 'lbs', date: '2025-12-20', previousBest: 175, category: 'push' },
-            { id: 2, exercise: 'Deadlift', weight: 315, reps: 3, unit: 'lbs', date: '2025-12-22', previousBest: 295, category: 'pull' },
-            { id: 3, exercise: 'Squat', weight: 245, reps: 5, unit: 'lbs', date: '2025-12-18', previousBest: 225, category: 'legs' },
-            { id: 4, exercise: 'Pull-ups', weight: 25, reps: 8, unit: 'lbs', date: '2025-12-15', previousBest: 15, category: 'pull' },
-            { id: 5, exercise: 'Overhead Press', weight: 135, reps: 5, unit: 'lbs', date: '2025-12-10', previousBest: 125, category: 'push' }
-        ];
-
-        const mockGoals: Goal[] = [
-            { id: 1, title: 'Weight Loss Goal', type: 'weight', startValue: 85, currentValue: 78, targetValue: 75, unit: 'kg', startDate: '2025-11-01', targetDate: '2026-02-01', weeklyTarget: 0.5 },
-            { id: 2, title: 'Build Muscle Mass', type: 'muscle', startValue: 58, currentValue: 62, targetValue: 65, unit: 'kg', startDate: '2025-11-01', targetDate: '2026-03-01', weeklyTarget: 0.3 },
-            { id: 3, title: 'Reduce Body Fat', type: 'bodyFat', startValue: 22, currentValue: 18, targetValue: 15, unit: '%', startDate: '2025-11-01', targetDate: '2026-04-01', weeklyTarget: 0.25 }
-        ];
-
-        const mockWorkouts: WorkoutLog[] = [
-            { id: 1, date: '2025-12-27', duration: 65, caloriesBurned: 420, type: 'Strength', exercises: 8 },
-            { id: 2, date: '2025-12-26', duration: 45, caloriesBurned: 380, type: 'Cardio', exercises: 4 },
-            { id: 3, date: '2025-12-25', duration: 0, caloriesBurned: 0, type: 'Rest', exercises: 0 },
-            { id: 4, date: '2025-12-24', duration: 55, caloriesBurned: 350, type: 'Upper Body', exercises: 7 },
-            { id: 5, date: '2025-12-23', duration: 60, caloriesBurned: 400, type: 'Lower Body', exercises: 6 },
-            { id: 6, date: '2025-12-22', duration: 50, caloriesBurned: 320, type: 'Full Body', exercises: 9 },
-            { id: 7, date: '2025-12-21', duration: 40, caloriesBurned: 450, type: 'HIIT', exercises: 5 }
-        ];
-
-        setNotes(mockNotes);
-        setProgressEntries(mockEntries);
-        setPersonalBests(mockPBs);
-        setGoals(mockGoals);
-        setWorkoutLogs(mockWorkouts);
-        setLoading(false);
-    }, [user?.id]);
+        fetchProgressData();
+    }, [fetchProgressData]);
 
     const getLatestEntry = () => progressEntries[progressEntries.length - 1] || null;
     const getFirstEntry = () => progressEntries[0] || null;

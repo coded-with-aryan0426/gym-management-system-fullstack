@@ -5,8 +5,8 @@
 .progress-page {
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    padding-bottom: 24px;
+    gap: 20px;
+    padding-bottom: 32px;
 }
 
 /* ============================================
@@ -473,22 +473,28 @@
 .activity-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 24px;
-    height: 280px;
+    gap: 32px;
+    height: 240px;
+    padding: 8px 0;
 }
 
 .weekly-bars h4,
 .heatmap-section h4 {
     font-size: 12px;
     color: rgba(255, 255, 255, 0.5);
-    margin-bottom: 16px;
+    margin-bottom: 12px;
     font-weight: 600;
+}
+
+.weekly-bars {
+    display: flex;
+    flex-direction: column;
 }
 
 .week-bar-grid {
     display: flex;
     gap: 12px;
-    height: 200px;
+    height: 160px;
     align-items: flex-end;
 }
 
@@ -501,7 +507,7 @@
 }
 
 .week-bar-wrapper {
-    height: 140px;
+    height: 100px;
     width: 100%;
     display: flex;
     align-items: flex-end;
@@ -543,16 +549,20 @@
 .heatmap-section {
     display: flex;
     flex-direction: column;
+    max-height: 220px;
+    overflow: hidden;
 }
 
 .heatmap-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 4px;
-    flex: 1;
+    max-height: 160px;
 }
 
 .heatmap-cell {
+    width: 100%;
+    max-width: 28px;
     aspect-ratio: 1;
     border-radius: 3px;
     background: rgba(255, 255, 255, 0.04);
@@ -737,6 +747,7 @@
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 16px;
     padding: 20px;
+    margin-top: 8px;
 }
 
 .section-header {
@@ -850,39 +861,51 @@
 }
 
 .goal-card__progress {
-    margin-bottom: 12px;
+    margin-bottom: 8px;
 }
 
 .goal-progress-bar {
-    height: 8px;
+    height: 6px;
     background: rgba(255, 255, 255, 0.06);
-    border-radius: 4px;
-    overflow: visible;
+    border-radius: 3px;
+    overflow: hidden;
     position: relative;
 }
 
 .goal-progress-bar__fill {
     height: 100%;
-    border-radius: 4px;
+    border-radius: 3px;
 }
 
 .goal-progress-bar__markers {
     display: flex;
     justify-content: space-between;
-    margin-top: 6px;
+    margin-top: 8px;
     font-size: 10px;
     color: rgba(255, 255, 255, 0.35);
     position: relative;
+    height: 14px;
 }
 
 .goal-progress-bar__markers span {
-    position: absolute;
-    transform: translateX(-50%);
+    position: relative;
+    transform: none;
+}
+
+.goal-progress-bar__markers span:first-child {
+    text-align: left;
+}
+
+.goal-progress-bar__markers span:last-child {
+    text-align: right;
 }
 
 .goal-progress-bar__markers .current-marker {
     color: #007AFF;
     font-weight: 600;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 .goal-card__stats {

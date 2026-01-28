@@ -603,5 +603,244 @@ const analyticsApi = {
   }
 };
 
+// Member Progress API
+export interface ProgressMetricDTO {
+  id?: number;
+  userId?: number;
+  recordDate?: string;
+  weight?: number;
+  bodyFat?: number;
+  muscleMass?: number;
+  bmi?: number;
+  notes?: string;
+  createdAt?: string;
+}
+
+export interface BodyMeasurementDTO {
+  id?: number;
+  userId?: number;
+  recordDate?: string;
+  chest?: number;
+  waist?: number;
+  hips?: number;
+  arms?: number;
+  legs?: number;
+  shoulders?: number;
+  neck?: number;
+  calves?: number;
+  notes?: string;
+  createdAt?: string;
+}
+
+export interface MemberGoalDTO {
+  id?: number;
+  userId?: number;
+  title: string;
+  goalType: string;
+  startValue?: number;
+  currentValue?: number;
+  targetValue: number;
+  unit?: string;
+  startDate?: string;
+  targetDate?: string;
+  weeklyTarget?: number;
+  isActive?: boolean;
+  completedAt?: string;
+  createdAt?: string;
+}
+
+export interface PersonalBestDTO {
+  id?: number;
+  userId?: number;
+  exercise: string;
+  weightValue: number;
+  reps?: number;
+  unit?: string;
+  recordDate?: string;
+  previousBest?: number;
+  category?: string;
+  notes?: string;
+  createdAt?: string;
+}
+
+export interface WorkoutLogDTO {
+  id?: number;
+  userId?: number;
+  workoutDate?: string;
+  durationMinutes?: number;
+  workoutType?: string;
+  caloriesBurned?: number;
+  exercisesCount?: number;
+  intensityLevel?: number;
+  notes?: string;
+  createdAt?: string;
+}
+
+export interface ProgressSummaryDTO {
+  userId: number;
+  currentWeight?: number;
+  startWeight?: number;
+  goalWeight?: number;
+  weightChange?: number;
+  weightChangePercent?: number;
+  currentBodyFat?: number;
+  startBodyFat?: number;
+  bodyFatChange?: number;
+  currentMuscleMass?: number;
+  startMuscleMass?: number;
+  muscleMassChange?: number;
+  currentBmi?: number;
+  bmiCategory?: string;
+  currentStreak?: number;
+  longestStreak?: number;
+  totalWorkouts?: number;
+  workoutsThisWeek?: number;
+  workoutsThisMonth?: number;
+  totalCaloriesBurned?: number;
+  avgWorkoutDuration?: number;
+  consistencyRate?: number;
+  totalProgressEntries?: number;
+  totalPersonalBests?: number;
+  activeGoals?: number;
+  completedGoals?: number;
+  firstEntryDate?: string;
+  lastEntryDate?: string;
+  recentMetrics?: ProgressMetricDTO[];
+  recentMeasurements?: BodyMeasurementDTO[];
+  topPersonalBests?: PersonalBestDTO[];
+  activeGoalsList?: MemberGoalDTO[];
+  recentWorkouts?: WorkoutLogDTO[];
+}
+
+const memberProgressApi = {
+  async getSummary(memberId: number): Promise<ProgressSummaryDTO> {
+    const response = await apiClient.get<ProgressSummaryDTO>('/member/progress/summary', {
+      params: { memberId }
+    });
+    return response.data;
+  },
+
+  async getMetrics(memberId: number, timeRange?: string): Promise<ProgressMetricDTO[]> {
+    const response = await apiClient.get<ProgressMetricDTO[]>('/member/progress/metrics', {
+      params: { memberId, timeRange }
+    });
+    return response.data;
+  },
+
+  async createMetric(memberId: number, dto: ProgressMetricDTO): Promise<ProgressMetricDTO> {
+    const response = await apiClient.post<ProgressMetricDTO>('/member/progress/metrics', dto, {
+      params: { memberId }
+    });
+    return response.data;
+  },
+
+  async updateMetric(memberId: number, metricId: number, dto: ProgressMetricDTO): Promise<ProgressMetricDTO> {
+    const response = await apiClient.put<ProgressMetricDTO>(`/member/progress/metrics/${metricId}`, dto, {
+      params: { memberId }
+    });
+    return response.data;
+  },
+
+  async deleteMetric(memberId: number, metricId: number): Promise<void> {
+    await apiClient.delete(`/member/progress/metrics/${metricId}`, {
+      params: { memberId }
+    });
+  },
+
+  async getMeasurements(memberId: number, timeRange?: string): Promise<BodyMeasurementDTO[]> {
+    const response = await apiClient.get<BodyMeasurementDTO[]>('/member/progress/measurements', {
+      params: { memberId, timeRange }
+    });
+    return response.data;
+  },
+
+  async createMeasurement(memberId: number, dto: BodyMeasurementDTO): Promise<BodyMeasurementDTO> {
+    const response = await apiClient.post<BodyMeasurementDTO>('/member/progress/measurements', dto, {
+      params: { memberId }
+    });
+    return response.data;
+  },
+
+  async updateMeasurement(memberId: number, measurementId: number, dto: BodyMeasurementDTO): Promise<BodyMeasurementDTO> {
+    const response = await apiClient.put<BodyMeasurementDTO>(`/member/progress/measurements/${measurementId}`, dto, {
+      params: { memberId }
+    });
+    return response.data;
+  },
+
+  async deleteMeasurement(memberId: number, measurementId: number): Promise<void> {
+    await apiClient.delete(`/member/progress/measurements/${measurementId}`, {
+      params: { memberId }
+    });
+  },
+
+  async getGoals(memberId: number): Promise<MemberGoalDTO[]> {
+    const response = await apiClient.get<MemberGoalDTO[]>('/member/progress/goals', {
+      params: { memberId }
+    });
+    return response.data;
+  },
+
+  async createGoal(memberId: number, dto: MemberGoalDTO): Promise<MemberGoalDTO> {
+    const response = await apiClient.post<MemberGoalDTO>('/member/progress/goals', dto, {
+      params: { memberId }
+    });
+    return response.data;
+  },
+
+  async updateGoal(memberId: number, goalId: number, dto: MemberGoalDTO): Promise<MemberGoalDTO> {
+    const response = await apiClient.put<MemberGoalDTO>(`/member/progress/goals/${goalId}`, dto, {
+      params: { memberId }
+    });
+    return response.data;
+  },
+
+  async deleteGoal(memberId: number, goalId: number): Promise<void> {
+    await apiClient.delete(`/member/progress/goals/${goalId}`, {
+      params: { memberId }
+    });
+  },
+
+  async getPersonalBests(memberId: number): Promise<PersonalBestDTO[]> {
+    const response = await apiClient.get<PersonalBestDTO[]>('/member/progress/personal-bests', {
+      params: { memberId }
+    });
+    return response.data;
+  },
+
+  async createOrUpdatePersonalBest(memberId: number, dto: PersonalBestDTO): Promise<PersonalBestDTO> {
+    const response = await apiClient.post<PersonalBestDTO>('/member/progress/personal-bests', dto, {
+      params: { memberId }
+    });
+    return response.data;
+  },
+
+  async deletePersonalBest(memberId: number, pbId: number): Promise<void> {
+    await apiClient.delete(`/member/progress/personal-bests/${pbId}`, {
+      params: { memberId }
+    });
+  },
+
+  async getWorkouts(memberId: number, timeRange?: string): Promise<WorkoutLogDTO[]> {
+    const response = await apiClient.get<WorkoutLogDTO[]>('/member/progress/workouts', {
+      params: { memberId, timeRange }
+    });
+    return response.data;
+  },
+
+  async createWorkout(memberId: number, dto: WorkoutLogDTO): Promise<WorkoutLogDTO> {
+    const response = await apiClient.post<WorkoutLogDTO>('/member/progress/workouts', dto, {
+      params: { memberId }
+    });
+    return response.data;
+  },
+
+  async deleteWorkout(memberId: number, logId: number): Promise<void> {
+    await apiClient.delete(`/member/progress/workouts/${logId}`, {
+      params: { memberId }
+    });
+  }
+};
+
 // Export all APIs
-export { ptSessionApi, trainerPerformanceApi, gymSettingsApi, membershipPackageApi, analyticsApi };
+export { ptSessionApi, trainerPerformanceApi, gymSettingsApi, membershipPackageApi, analyticsApi, memberProgressApi };
