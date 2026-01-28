@@ -839,6 +839,41 @@ const memberProgressApi = {
     await apiClient.delete(`/member/progress/workouts/${logId}`, {
       params: { memberId }
     });
+  },
+
+  async getPhotos(memberId: number): Promise<any[]> {
+    const response = await apiClient.get<any[]>('/member/progress/photos', {
+      params: { memberId }
+    });
+    return response.data;
+  },
+
+  async addPhoto(memberId: number, data: { photoUrl: string; description?: string; recordDate?: string }): Promise<any> {
+    const response = await apiClient.post<any>('/member/progress/photos', data, {
+      params: { memberId }
+    });
+    return response.data;
+  },
+
+  async uploadPhoto(memberId: number, file: File, description?: string, recordDate?: string): Promise<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (description) formData.append('description', description);
+    if (recordDate) formData.append('recordDate', recordDate);
+
+    const response = await apiClient.post<any>('/member/progress/photos/upload', formData, {
+      params: { memberId },
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  async deletePhoto(memberId: number, photoId: number): Promise<void> {
+    await apiClient.delete(`/member/progress/photos/${photoId}`, {
+      params: { memberId }
+    });
   }
 };
 

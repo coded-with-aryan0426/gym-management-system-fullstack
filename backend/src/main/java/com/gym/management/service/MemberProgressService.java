@@ -35,6 +35,12 @@ public class MemberProgressService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private ProgressPhotoRepository progressPhotoRepository;
+
+    @Value("${app.upload.dir:uploads}")
+    private String uploadDir;
+
     public ProgressSummaryDTO getProgressSummary(Long userId) {
         ProgressSummaryDTO summary = new ProgressSummaryDTO();
         summary.setUserId(userId);
@@ -589,6 +595,80 @@ public class MemberProgressService {
         }
 
         workoutLogRepository.delete(log);
+    }
+
+    // Photo methods
+    @Transactional
+    public ProgressPhotoDTO uploadProgressPhoto(Long userId, org.springframework.web.multipart.MultipartFile file, String description, LocalDate recordDate) throws java.io.IOException {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        java.nio.file.Files.createDirectories(java.nio.file.Paths.get(uploadDir));
+
+        String originalFilename = file.getOriginalFilename();
+        String extension = "";
+        if (originalFilename != null && originalFilename.contains(".")) {
+            extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        }
+
+        String storedFileName = java.util.UUID.randomUUID().toString() + extension;
+        java.nio.file.Path targetPath = java.nio.file.Paths.get(uploadDir, storedFileName);
+
+        java.nio.file.Files.copy(file.getInputStream(), targetPath);
+
+        ProgressPhoto photo = ProgressPhoto.builder()
+                .user(user)
+                .photoUrl("/api/member/progress/photos/file/" + storedFileName)
+                .description(description)
+                .recordDate(recordDate != null ? recordDate : LocalDate.now())
+                .build();
+
+        ProgressPhoto saved = progressPhotoRepository.save(photo);
+        return toProgressPhotoDTO(saved);
+    }
+
+    public List<ProgressPhotoDTO> getProgressPhotos(Long userId) {
+        List<ProgressPhoto> photos = progressPhotoRepository.findByUserUserIdOrderByRecordDateDesc(userId);
+        return photos.stream().map(this::toProgressPhotoDTO).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public ProgressPhotoDTO addProgressPhoto(Long userId, ProgressPhotoDTO dto) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        ProgressPhoto photo = ProgressPhoto.builder()
+                .user(user)
+                .photoUrl(dto.getPhotoUrl())
+                .description(dto.getDescription())
+                .recordDate(dto.getRecordDate() != null ? dto.getRecordDate() : LocalDate.now())
+                .build();
+
+        ProgressPhoto saved = progressPhotoRepository.save(photo);
+        return toProgressPhotoDTO(saved);
+    }
+
+    @Transactional
+    public void deleteProgressPhoto(Long userId, Long photoId) {
+        ProgressPhoto photo = progressPhotoRepository.findById(photoId)
+                .orElseThrow(() -> new RuntimeException("Photo not found"));
+
+        if (!photo.getUser().getUserId().equals(userId)) {
+            throw new RuntimeException("Not authorized to delete this photo");
+        }
+
+        progressPhotoRepository.delete(photo);
+    }
+
+    private ProgressPhotoDTO toProgressPhotoDTO(ProgressPhoto photo) {
+        return ProgressPhotoDTO.builder()
+                .id(photo.getId())
+                .userId(photo.getUser().getUserId())
+                .photoUrl(photo.getPhotoUrl())
+                .description(photo.getDescription())
+                .recordDate(photo.getRecordDate())
+                .createdAt(photo.getCreatedAt())
+                .build();
     }
 
     private ProgressMetricDTO toProgressMetricDTO(ProgressMetric metric) {

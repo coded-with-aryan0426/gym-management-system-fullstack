@@ -75,8 +75,15 @@ interface WorkoutLog {
     exercises: number;
 }
 
-type TabType = 'weight' | 'bodyFat' | 'strength' | 'consistency' | 'measurements';
-type ModalType = 'logProgress' | 'logWorkout' | 'createGoal' | 'photoUpload' | 'history' | null;
+interface ProgressPhoto {
+    id: number;
+    photoUrl: string;
+    description?: string;
+    recordDate: string;
+}
+
+type TabType = 'weight' | 'bodyFat' | 'bmi' | 'strength' | 'consistency' | 'measurements';
+type ModalType = 'logProgress' | 'logWorkout' | 'createGoal' | 'photoUpload' | 'history' | 'photoGallery' | null;
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -102,6 +109,8 @@ const MyProgress: React.FC = () => {
     const [goals, setGoals] = useState<Goal[]>([]);
     const [workoutLogs, setWorkoutLogs] = useState<WorkoutLog[]>([]);
     const [summary, setSummary] = useState<any>(null);
+    const [photos, setPhotos] = useState<ProgressPhoto[]>([]);
+    const [editingEntry, setEditingEntry] = useState<ProgressEntry | null>(null);
 
     const [newProgress, setNewProgress] = useState({
         weight: '',
@@ -134,6 +143,10 @@ const MyProgress: React.FC = () => {
         targetDate: '',
         weeklyTarget: ''
     });
+
+    const [photoFile, setPhotoFile] = useState<File | null>(null);
+    const [photoDescription, setPhotoDescription] = useState('');
+    const [photoDate, setPhotoDate] = useState(new Date().toISOString().split('T')[0]);
 
     const getStorageKey = (key: string): string => {
         const port = typeof window !== 'undefined' ? window.location.port || '5173' : '5173';
@@ -174,16 +187,18 @@ const MyProgress: React.FC = () => {
         try {
             setLoading(true);
 
-            const [summaryData, metricsData, goalsData, pbData, workoutsData, measurementsData] = await Promise.all([
+            const [summaryData, metricsData, goalsData, pbData, workoutsData, measurementsData, photosData] = await Promise.all([
                 memberProgressApi.getSummary(memberId).catch(() => null),
                 memberProgressApi.getMetrics(memberId, timeRange === 'ALL' ? undefined : timeRange).catch(() => []),
                 memberProgressApi.getGoals(memberId).catch(() => []),
                 memberProgressApi.getPersonalBests(memberId).catch(() => []),
                 memberProgressApi.getWorkouts(memberId, '30D').catch(() => []),
-                memberProgressApi.getMeasurements(memberId, timeRange === 'ALL' ? undefined : timeRange).catch(() => [])
+                memberProgressApi.getMeasurements(memberId, timeRange === 'ALL' ? undefined : timeRange).catch(() => []),
+                memberProgressApi.getPhotos(memberId).catch(() => [])
             ]);
 
             setSummary(summaryData);
+            setPhotos(photosData);
 
             const measurementsByDate = new Map<string, any>();
             (measurementsData || []).forEach((m: any) => {
@@ -362,7 +377,16 @@ const MyProgress: React.FC = () => {
 
     const heightInMeters = user?.height ? user.height / 100 : (summary?.height ? summary.height / 100 : null);
     const bmiValue = stats.currentWeight && heightInMeters ? (stats.currentWeight / (heightInMeters * heightInMeters)).toFixed(1) : null;
-    const bmiCategory = bmiValue ? (parseFloat(bmiValue) < 18.5 ? 'Underweight' : parseFloat(bmiValue) < 25 ? 'Normal' : parseFloat(bmiValue) < 30 ? 'Overweight' : 'Obese') : null;
+    const bmiCategory = bmiValue ? (parseFloat(bmiValue) < 18.5 ? 'Underweight' : parseFloat(bmiValue) < 25 ? 'Normal' : parseFloat(bmiValue) < 30 ? 'Overweight' : 'Obese') : 'N/A';
+
+    // Calculate BMI for each entry for the chart
+    const entriesWithBmi = progressEntries.map(entry => {
+        const entryBmi = entry.weight && heightInMeters ? (entry.weight / (heightInMeters * heightInMeters)).toFixed(1) : null;
+        return {
+            ...entry,
+            bmi: entryBmi ? parseFloat(entryBmi) : null
+        };
+    });
 
     const heatmapData = Array.from({ length: 35 }, (_, i) => {
         const date = new Date(Date.now() - (34 - i) * 24 * 60 * 60 * 1000);
@@ -415,6 +439,7 @@ const MyProgress: React.FC = () => {
     const tabs: { id: TabType; label: string; icon: React.ReactNode }[] = [
         { id: 'weight', label: 'Weight', icon: <WeightIcon size={14} /> },
         { id: 'bodyFat', label: 'Body Composition', icon: <Activity size={14} /> },
+        { id: 'bmi', label: 'BMI', icon: <BarChart3 size={14} /> },
         { id: 'measurements', label: 'Measurements', icon: <Ruler size={14} /> },
         { id: 'strength', label: 'Strength', icon: <Dumbbell size={14} /> },
         { id: 'consistency', label: 'Activity', icon: <Calendar size={14} /> }
@@ -424,12 +449,19 @@ const MyProgress: React.FC = () => {
         const dateStr = entry.date?.split('T')[0];
         const workoutsOnDate = workoutLogs.filter(w => w.date?.startsWith(dateStr || ''));
         const totalVolume = workoutsOnDate.reduce((sum, w) => sum + (w.caloriesBurned || 0), 0);
+        
+        // Calculate BMI for this entry using height
+        const currentHeight = user?.height || summary?.height;
+        const hInMeters = currentHeight ? currentHeight / 100 : null;
+        const entryBmi = entry.weight && hInMeters ? (entry.weight / (hInMeters * hInMeters)).toFixed(1) : null;
+
         return {
             date: new Date(entry.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
             fullDate: entry.date,
             weight: entry.weight,
             bodyFat: entry.bodyFat,
             muscle: entry.muscleMass,
+            bmi: entryBmi ? parseFloat(entryBmi) : null,
             chest: entry.chest,
             waist: entry.waist,
             arms: entry.arms,
@@ -485,6 +517,74 @@ const MyProgress: React.FC = () => {
         );
     };
 
+    const handlePhotoUpload = async () => {
+        if (!photoFile || !memberId) {
+            alert('Please select a photo');
+            return;
+        }
+
+        try {
+            setSaving(true);
+            await memberProgressApi.uploadPhoto(memberId, photoFile, photoDescription, photoDate);
+            
+            // Refresh data
+            const photosData = await memberProgressApi.getPhotos(memberId);
+            setPhotos(photosData);
+            
+            // Reset form
+            setPhotoFile(null);
+            setPhotoDescription('');
+            setPhotoDate(new Date().toISOString().split('T')[0]);
+            setActiveModal(null);
+        } catch (error) {
+            console.error('Error uploading photo:', error);
+            alert('Failed to upload photo');
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleDeletePhoto = async (photoId: number) => {
+        if (!window.confirm('Are you sure you want to delete this photo?')) return;
+
+        try {
+            await memberProgressApi.deletePhoto(memberId, photoId);
+            setPhotos(prev => prev.filter(p => p.id !== photoId));
+        } catch (error) {
+            console.error('Error deleting photo:', error);
+            alert('Failed to delete photo');
+        }
+    };
+
+    const handleEditEntry = (entry: ProgressEntry) => {
+        setEditingEntry(entry);
+        setNewProgress({
+            weight: entry.weight?.toString() || '',
+            bodyFat: entry.bodyFat?.toString() || '',
+            muscleMass: entry.muscleMass?.toString() || '',
+            chest: entry.chest?.toString() || '',
+            waist: entry.waist?.toString() || '',
+            arms: entry.arms?.toString() || '',
+            legs: entry.legs?.toString() || '',
+            hips: entry.hips?.toString() || '',
+            shoulders: entry.shoulders?.toString() || '',
+            notes: entry.notes || ''
+        });
+        setActiveModal('logProgress');
+    };
+
+    const handleDeleteEntry = async (metricId: number) => {
+        if (!window.confirm('Are you sure you want to delete this entry?')) return;
+
+        try {
+            await memberProgressApi.deleteMetric(memberId, metricId);
+            await fetchProgressData();
+        } catch (error) {
+            console.error('Error deleting metric:', error);
+            alert('Failed to delete metric');
+        }
+    };
+
     const handleLogProgress = async () => {
         if (!memberId) {
             alert('User session not found. Please log in again.');
@@ -524,14 +624,22 @@ const MyProgress: React.FC = () => {
 
         try {
             setSaving(true);
-            await memberProgressApi.createMetric(memberId, entryData);
-
-            if (newProgress.waist || newProgress.chest || newProgress.arms || newProgress.hips) {
-                await memberProgressApi.createMeasurement(memberId, entryData);
+            if (editingEntry) {
+                await memberProgressApi.updateMetric(memberId, editingEntry.id, entryData);
+                if (newProgress.waist || newProgress.chest || newProgress.arms || newProgress.hips) {
+                    // Try to find matching measurement or update if possible
+                    await memberProgressApi.createMeasurement(memberId, entryData);
+                }
+            } else {
+                await memberProgressApi.createMetric(memberId, entryData);
+                if (newProgress.waist || newProgress.chest || newProgress.arms || newProgress.hips) {
+                    await memberProgressApi.createMeasurement(memberId, entryData);
+                }
             }
 
             await fetchProgressData();
             setNewProgress({ weight: '', bodyFat: '', muscleMass: '', chest: '', waist: '', arms: '', legs: '', hips: '', shoulders: '', notes: '' });
+            setEditingEntry(null);
             setActiveModal(null);
         } catch (error: any) {
             console.error('Error saving progress:', error);
@@ -1150,7 +1258,25 @@ const MyProgress: React.FC = () => {
                                         })}
                                     </div>
                                 </div>
-                            ) : activeTab === 'bodyFat' ? (
+                                    ) : activeTab === 'bmi' ? (
+                                        <AreaChart data={chartData}>
+                                            <defs>
+                                                <linearGradient id="bmiGradient" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="0%" stopColor="#007AFF" stopOpacity={0.3} />
+                                                    <stop offset="100%" stopColor="#007AFF" stopOpacity={0} />
+                                                </linearGradient>
+                                            </defs>
+                                            <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} vertical={false} />
+                                            <XAxis dataKey="date" stroke={chartColors.axis} tick={{ fontSize: 11, fill: isLightTheme ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.4)' }} axisLine={false} tickLine={false} />
+                                            <YAxis stroke={chartColors.axis} tick={{ fontSize: 11, fill: isLightTheme ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.4)' }} axisLine={false} tickLine={false} domain={[15, 40]} />
+                                            <Tooltip content={<CustomTooltip />} />
+                                            <ReferenceLine y={18.5} stroke="#FF9F0A" strokeDasharray="3 3" label={{ value: 'Underweight', position: 'insideBottomLeft', fill: '#FF9F0A', fontSize: 10 }} />
+                                            <ReferenceLine y={25} stroke="#30D158" strokeDasharray="3 3" label={{ value: 'Healthy', position: 'insideTopLeft', fill: '#30D158', fontSize: 10 }} />
+                                            <ReferenceLine y={30} stroke="#FF3B30" strokeDasharray="3 3" label={{ value: 'Overweight', position: 'insideTopLeft', fill: '#FF3B30', fontSize: 10 }} />
+                                            <Area type="monotone" dataKey="bmi" stroke="#007AFF" strokeWidth={2.5} fill="url(#bmiGradient)" dot={{ fill: '#007AFF', strokeWidth: 0, r: 4 }} />
+                                        </AreaChart>
+                                    ) : activeTab === 'bodyFat' ? (
+
                                 <div className="body-composition-chart">
                                     <div className="composition-main">
                                         <ResponsiveContainer width="100%" height={250}>
@@ -1333,6 +1459,81 @@ const MyProgress: React.FC = () => {
                 </div>
             </motion.section>
 
+            {/* BMI Trend Section */}
+            <motion.section className="bmi-trend-section" variants={itemVariants}>
+                <div className="section-header">
+                    <div className="section-title">
+                        <BarChart3 size={18} />
+                        <h3>BMI Trend</h3>
+                        <span className="bmi-status">{bmiValue ? `Current: ${bmiValue} (${bmiCategory})` : 'No data'}</span>
+                    </div>
+                </div>
+                <div className="bmi-chart-expanded">
+                    <ResponsiveContainer width="100%" height={200}>
+                        <AreaChart data={chartData}>
+                            <defs>
+                                <linearGradient id="bmiGradientMain" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stopColor="#007AFF" stopOpacity={0.2} />
+                                    <stop offset="100%" stopColor="#007AFF" stopOpacity={0} />
+                                </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} vertical={false} />
+                            <XAxis dataKey="date" stroke={chartColors.axis} tick={{ fontSize: 10, fill: chartColors.axis }} axisLine={false} tickLine={false} />
+                            <YAxis stroke={chartColors.axis} tick={{ fontSize: 10, fill: chartColors.axis }} axisLine={false} tickLine={false} domain={['dataMin - 1', 'dataMax + 1']} />
+                            <Tooltip content={<CustomTooltip />} />
+                            <ReferenceLine y={18.5} stroke="#FF9F0A" strokeDasharray="3 3" />
+                            <ReferenceLine y={25} stroke="#30D158" strokeDasharray="3 3" />
+                            <ReferenceLine y={30} stroke="#FF3B30" strokeDasharray="3 3" />
+                            <Area type="monotone" dataKey="bmi" stroke="#007AFF" strokeWidth={2} fill="url(#bmiGradientMain)" dot={{ fill: '#007AFF', r: 3 }} />
+                        </AreaChart>
+                    </ResponsiveContainer>
+                    <div className="bmi-scale-labels">
+                        <div className="bmi-label underweight"><span>&lt; 18.5</span> Underweight</div>
+                        <div className="bmi-label healthy"><span>18.5 - 24.9</span> Healthy</div>
+                        <div className="bmi-label overweight"><span>25.0 - 29.9</span> Overweight</div>
+                        <div className="bmi-label obese"><span>&gt; 30.0</span> Obese</div>
+                    </div>
+                </div>
+            </motion.section>
+
+            {/* Photo Gallery Preview */}
+            <motion.section className="photo-gallery-preview" variants={itemVariants}>
+                <div className="section-header">
+                    <div className="section-title">
+                        <Camera size={18} />
+                        <h3>Visual Progress</h3>
+                        <span className="photo-count">{photos.length} photos</span>
+                    </div>
+                    <button className="section-action" onClick={() => setActiveModal('photoGallery')}>
+                        View Gallery
+                        <ArrowRight size={14} />
+                    </button>
+                </div>
+                <div className="photo-grid-preview">
+                    {photos.length > 0 ? (
+                        photos.slice(0, 4).map(photo => (
+                            <div key={photo.id} className="photo-preview-item" onClick={() => setActiveModal('photoGallery')}>
+                                <img src={photo.photoUrl} alt={photo.description || 'Progress'} />
+                                <div className="photo-date-overlay">
+                                    {new Date(photo.recordDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <div className="empty-photos" onClick={() => setActiveModal('photoUpload')}>
+                            <Camera size={24} />
+                            <span>Add your first progress photo</span>
+                        </div>
+                    )}
+                    {photos.length > 0 && (
+                        <button className="add-photo-card" onClick={() => setActiveModal('photoUpload')}>
+                            <Plus size={24} />
+                            <span>Add Photo</span>
+                        </button>
+                    )}
+                </div>
+            </motion.section>
+
             {/* Three Column Grid */}
             <motion.div className="three-col-grid" variants={itemVariants}>
                 {/* Personal Bests */}
@@ -1508,12 +1709,18 @@ const MyProgress: React.FC = () => {
                             onClick={e => e.stopPropagation()}
                         >
                             <div className="modal-header">
-                                <h2>Log Today's Progress</h2>
-                                <button className="modal-close" onClick={() => setActiveModal(null)}>
+                                <h2>{editingEntry ? 'Edit Progress Entry' : "Log Today's Progress"}</h2>
+                                <button className="modal-close" onClick={() => { setActiveModal(null); setEditingEntry(null); }}>
                                     <X size={20} />
                                 </button>
                             </div>
                             <div className="modal-body">
+                                {editingEntry && (
+                                    <div className="editing-banner">
+                                        <Info size={14} />
+                                        <span>Editing entry from {new Date(editingEntry.date).toLocaleDateString()}</span>
+                                    </div>
+                                )}
                                 <div className="modal-tip">
                                     <Info size={14} />
                                     <span>Tip: Log your progress at the same time each day for accurate tracking. Morning measurements are most consistent.</span>
@@ -1856,6 +2063,76 @@ const MyProgress: React.FC = () => {
                     </motion.div>
                 )}
 
+                {activeModal === 'photoGallery' && (
+                    <motion.div
+                        className="modal-overlay"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setActiveModal(null)}
+                    >
+                        <motion.div
+                            className="modal-content modal-xl"
+                            initial={{ scale: 0.95, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.95, opacity: 0 }}
+                            onClick={e => e.stopPropagation()}
+                        >
+                            <div className="modal-header">
+                                <div>
+                                    <h2>Visual Progress Gallery</h2>
+                                    <span className="modal-subtitle">Track your transformation over time</span>
+                                </div>
+                                <div className="header-actions">
+                                    <button className="btn-primary btn-sm" onClick={() => setActiveModal('photoUpload')}>
+                                        <Plus size={14} />
+                                        Add Photo
+                                    </button>
+                                    <button className="modal-close" onClick={() => setActiveModal(null)}>
+                                        <X size={20} />
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="modal-body">
+                                {photos.length > 0 ? (
+                                    <div className="photo-gallery-grid">
+                                        {photos.map(photo => (
+                                            <div key={photo.id} className="gallery-card">
+                                                <div className="gallery-image-container">
+                                                    <img src={photo.photoUrl} alt={photo.description || 'Progress'} />
+                                                    <button className="delete-photo-btn" onClick={() => handleDeletePhoto(photo.id)}>
+                                                        <X size={14} />
+                                                    </button>
+                                                </div>
+                                                <div className="gallery-info">
+                                                    <span className="gallery-date">
+                                                        {new Date(photo.recordDate).toLocaleDateString('en-US', { 
+                                                            weekday: 'long', 
+                                                            year: 'numeric', 
+                                                            month: 'long', 
+                                                            day: 'numeric' 
+                                                        })}
+                                                    </span>
+                                                    {photo.description && <p className="gallery-desc">{photo.description}</p>}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="empty-gallery">
+                                        <Camera size={64} />
+                                        <h3>No photos yet</h3>
+                                        <p>Start your visual journey by uploading your first progress photo.</p>
+                                        <button className="btn-primary" onClick={() => setActiveModal('photoUpload')}>
+                                            Upload Photo
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+
                 {activeModal === 'photoUpload' && (
                     <motion.div
                         className="modal-overlay"
@@ -1878,27 +2155,71 @@ const MyProgress: React.FC = () => {
                                 </button>
                             </div>
                             <div className="modal-body">
-                                <div className="photo-upload-zone">
-                                    <Camera size={48} />
-                                    <p>Click or drag to upload a progress photo</p>
-                                    <span>JPG, PNG up to 10MB</span>
-                                    <input type="file" accept="image/*" />
+                                <div 
+                                    className={`photo-upload-zone ${photoFile ? 'has-file' : ''}`}
+                                    onClick={() => document.getElementById('photo-input')?.click()}
+                                >
+                                    {photoFile ? (
+                                        <div className="photo-preview-container">
+                                            <img src={URL.createObjectURL(photoFile)} alt="Preview" />
+                                            <div className="change-photo-overlay">
+                                                <Camera size={24} />
+                                                <span>Change Photo</span>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <Camera size={48} />
+                                            <p>Click to select or drag progress photo</p>
+                                            <span>JPG, PNG up to 10MB</span>
+                                        </>
+                                    )}
+                                    <input 
+                                        id="photo-input"
+                                        type="file" 
+                                        accept="image/*" 
+                                        onChange={e => setPhotoFile(e.target.files?.[0] || null)}
+                                        hidden
+                                    />
                                 </div>
+
+                                <div className="form-group mt-4">
+                                    <label>Record Date</label>
+                                    <input 
+                                        type="date" 
+                                        value={photoDate}
+                                        onChange={e => setPhotoDate(e.target.value)}
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Description (Optional)</label>
+                                    <textarea
+                                        placeholder="Front view, side view, etc."
+                                        value={photoDescription}
+                                        onChange={e => setPhotoDescription(e.target.value)}
+                                        rows={2}
+                                    />
+                                </div>
+
                                 <div className="photo-tips">
                                     <h4>Tips for Progress Photos</h4>
                                     <ul>
                                         <li>Use consistent lighting and background</li>
                                         <li>Take photos at the same time of day</li>
-                                        <li>Wear similar clothing for comparison</li>
                                         <li>Include front, side, and back views</li>
                                     </ul>
                                 </div>
                             </div>
                             <div className="modal-footer">
-                                <button className="btn-secondary" onClick={() => setActiveModal(null)}>Cancel</button>
-                                <button className="btn-primary">
-                                    <Check size={16} />
-                                    Upload Photo
+                                <button className="btn-secondary" onClick={() => setActiveModal(null)} disabled={saving}>Cancel</button>
+                                <button className={`btn-primary ${saving ? 'loading' : ''}`} onClick={handlePhotoUpload} disabled={saving || !photoFile}>
+                                    {saving ? <div className="spinner-small"></div> : (
+                                        <>
+                                            <Check size={16} />
+                                            <span>Upload Photo</span>
+                                        </>
+                                    )}
                                 </button>
                             </div>
                         </motion.div>
@@ -1943,31 +2264,42 @@ const MyProgress: React.FC = () => {
                                         <tbody>
                                             {[...progressEntries].reverse().map((entry, i) => {
                                                 const prev = progressEntries[progressEntries.length - i - 2];
-                                                return (
-                                                    <tr key={entry.id}>
-                                                        <td>{new Date(entry.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</td>
-                                                        <td>
-                                                            {entry.weight ? `${entry.weight}kg` : '---'}
-                                                            {prev && entry.weight && prev.weight && entry.weight !== prev.weight && (
-                                                                <span className={entry.weight < prev.weight ? 'change-positive' : 'change-negative'}>
-                                                                    {entry.weight < prev.weight ? ' ↓' : ' ↑'}
-                                                                </span>
-                                                            )}
-                                                        </td>
-                                                        <td>
-                                                            {entry.bodyFat ? `${entry.bodyFat}%` : '---'}
-                                                            {prev && entry.bodyFat && prev.bodyFat && entry.bodyFat !== prev.bodyFat && (
-                                                                <span className={entry.bodyFat < prev.bodyFat ? 'change-positive' : 'change-negative'}>
-                                                                    {entry.bodyFat < prev.bodyFat ? ' ↓' : ' ↑'}
-                                                                </span>
-                                                            )}
-                                                        </td>
-                                                        <td>{entry.muscleMass ? `${entry.muscleMass}kg` : '---'}</td>
-                                                        <td>{entry.waist ? `${entry.waist}cm` : '---'}</td>
-                                                        <td>{entry.chest ? `${entry.chest}cm` : '---'}</td>
-                                                        <td>{entry.arms ? `${entry.arms}cm` : '---'}</td>
-                                                    </tr>
-                                                );
+                                                  return (
+                                                      <tr key={entry.id}>
+                                                          <td>{new Date(entry.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</td>
+                                                          <td>
+                                                              {entry.weight ? `${entry.weight}kg` : '---'}
+                                                              {prev && entry.weight && prev.weight && entry.weight !== prev.weight && (
+                                                                  <span className={entry.weight < prev.weight ? 'change-positive' : 'change-negative'}>
+                                                                      {entry.weight < prev.weight ? ' ↓' : ' ↑'}
+                                                                  </span>
+                                                              )}
+                                                          </td>
+                                                          <td>
+                                                              {entry.bodyFat ? `${entry.bodyFat}%` : '---'}
+                                                              {prev && entry.bodyFat && prev.bodyFat && entry.bodyFat !== prev.bodyFat && (
+                                                                  <span className={entry.bodyFat < prev.bodyFat ? 'change-positive' : 'change-negative'}>
+                                                                      {entry.bodyFat < prev.bodyFat ? ' ↓' : ' ↑'}
+                                                                  </span>
+                                                              )}
+                                                          </td>
+                                                          <td>{entry.muscleMass ? `${entry.muscleMass}kg` : '---'}</td>
+                                                          <td>{entry.waist ? `${entry.waist}cm` : '---'}</td>
+                                                          <td>{entry.chest ? `${entry.chest}cm` : '---'}</td>
+                                                          <td>{entry.arms ? `${entry.arms}cm` : '---'}</td>
+                                                          <td className="actions-cell">
+                                                              <div className="action-buttons">
+                                                                  <button className="action-icon-btn edit" onClick={() => handleEditEntry(entry)} title="Edit">
+                                                                      <Edit3 size={14} />
+                                                                  </button>
+                                                                  <button className="action-icon-btn delete" onClick={() => handleDeleteEntry(entry.id)} title="Delete">
+                                                                      <X size={14} />
+                                                                  </button>
+                                                              </div>
+                                                          </td>
+                                                      </tr>
+                                                  );
+
                                             })}
                                         </tbody>
                                     </table>

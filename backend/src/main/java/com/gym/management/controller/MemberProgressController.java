@@ -269,4 +269,72 @@ public class MemberProgressController {
             return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
         }
     }
+
+    // Photo Endpoints
+    @GetMapping("/photos")
+    public ResponseEntity<?> getProgressPhotos(@RequestParam Long memberId) {
+        try {
+            return ResponseEntity.ok(progressService.getProgressPhotos(memberId));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/photos")
+    public ResponseEntity<?> addProgressPhoto(
+            @RequestParam Long memberId,
+            @RequestBody ProgressPhotoDTO dto) {
+        try {
+            return ResponseEntity.ok(progressService.addProgressPhoto(memberId, dto));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/photos/{photoId}")
+    public ResponseEntity<?> deleteProgressPhoto(
+            @RequestParam Long memberId,
+            @PathVariable Long photoId) {
+        try {
+            progressService.deleteProgressPhoto(memberId, photoId);
+            return ResponseEntity.ok(Map.of("message", "Photo deleted"));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/photos/upload")
+    public ResponseEntity<?> uploadProgressPhoto(
+            @RequestParam Long memberId,
+            @RequestParam("file") org.springframework.web.multipart.MultipartFile file,
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate recordDate) {
+        try {
+            return ResponseEntity.ok(progressService.uploadProgressPhoto(memberId, file, description, recordDate));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/photos/file/{filename:.+}")
+    public ResponseEntity<org.springframework.core.io.Resource> getProgressPhotoFile(@PathVariable String filename) {
+        try {
+            java.nio.file.Path filePath = java.nio.file.Paths.get("uploads").resolve(filename).normalize();
+            org.springframework.core.io.Resource resource = new org.springframework.core.io.UrlResource(filePath.toUri());
+
+            if (resource.exists() || resource.isReadable()) {
+                String contentType = java.nio.file.Files.probeContentType(filePath);
+                if (contentType == null) {
+                    contentType = "application/octet-stream";
+                }
+                return ResponseEntity.ok()
+                        .header(org.springframework.http.HttpHeaders.CONTENT_TYPE, contentType)
+                        .body(resource);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
+    }
 }

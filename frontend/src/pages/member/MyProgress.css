@@ -1761,6 +1761,282 @@
     color: var(--macos-error);
 }
 
+/* BMI Trend Section */
+.bmi-trend-section {
+    background: var(--macos-bg-secondary);
+    border: 1px solid var(--macos-border);
+    border-radius: 16px;
+    padding: 20px;
+    margin-top: 8px;
+}
+
+.theme-light .bmi-trend-section {
+    box-shadow: var(--shadow-sm);
+}
+
+.bmi-status {
+    font-size: 12px;
+    color: var(--macos-accent);
+    font-weight: 600;
+    margin-left: 8px;
+}
+
+.bmi-chart-expanded {
+    padding: 12px 0;
+}
+
+.bmi-scale-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 16px;
+    padding: 8px 12px;
+    background: var(--macos-bg-tertiary);
+    border-radius: 10px;
+    gap: 8px;
+}
+
+.bmi-label {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--macos-text-tertiary);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    flex: 1;
+}
+
+.bmi-label span {
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.bmi-label.underweight span { color: #FF9F0A; }
+.bmi-label.healthy span { color: #30D158; }
+.bmi-label.overweight span { color: #FF3B30; }
+.bmi-label.obese span { color: #AF52DE; }
+
+/* Photo Gallery Preview */
+.photo-gallery-preview {
+    background: var(--macos-bg-secondary);
+    border: 1px solid var(--macos-border);
+    border-radius: 16px;
+    padding: 20px;
+    margin-top: 8px;
+}
+
+.theme-light .photo-gallery-preview {
+    box-shadow: var(--shadow-sm);
+}
+
+.photo-count {
+    font-size: 11px;
+    color: var(--macos-text-tertiary);
+    background: var(--macos-bg-tertiary);
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.photo-grid-preview {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.photo-preview-item {
+    aspect-ratio: 3/4;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    border: 1px solid var(--macos-border);
+    transition: transform 0.2s ease;
+}
+
+.photo-preview-item:hover {
+    transform: scale(1.02);
+    border-color: var(--macos-accent);
+}
+
+.photo-preview-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.photo-date-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 8px;
+    background: linear-gradient(transparent, rgba(0,0,0,0.7));
+    color: white;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.empty-photos {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 40px;
+    background: var(--macos-bg-tertiary);
+    border: 2px dashed var(--macos-border);
+    border-radius: 12px;
+    color: var(--macos-text-tertiary);
+    cursor: pointer;
+}
+
+.empty-photos:hover {
+    border-color: var(--macos-accent);
+    color: var(--macos-text-secondary);
+}
+
+.add-photo-card {
+    aspect-ratio: 3/4;
+    border-radius: 12px;
+    background: var(--macos-bg-tertiary);
+    border: 2px dashed var(--macos-border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: var(--macos-text-tertiary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.add-photo-card:hover {
+    border-color: var(--macos-accent);
+    color: var(--macos-accent);
+    background: rgba(0, 122, 255, 0.05);
+}
+
+/* Gallery Modal Styles */
+.modal-content.modal-xl {
+    max-width: 1000px;
+}
+
+.modal-subtitle {
+    font-size: 12px;
+    color: var(--macos-text-tertiary);
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
+.photo-gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+.gallery-card {
+    background: var(--macos-bg-tertiary);
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid var(--macos-border);
+}
+
+.gallery-image-container {
+    aspect-ratio: 3/4;
+    position: relative;
+    overflow: hidden;
+}
+
+.gallery-image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.delete-photo-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(255, 59, 48, 0.8);
+    color: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.gallery-card:hover .delete-photo-btn {
+    opacity: 1;
+}
+
+.gallery-info {
+    padding: 12px;
+}
+
+.gallery-date {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--macos-text-primary);
+    display: block;
+    margin-bottom: 4px;
+}
+
+.gallery-desc {
+    font-size: 11px;
+    color: var(--macos-text-tertiary);
+    margin: 0;
+}
+
+.empty-gallery {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 80px 0;
+    color: var(--macos-text-tertiary);
+}
+
+.empty-gallery h3 {
+    color: var(--macos-text-secondary);
+}
+
+/* Editing Styles */
+.editing-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: rgba(175, 82, 222, 0.1);
+    border: 1px solid rgba(175, 82, 222, 0.2);
+    border-radius: 10px;
+    margin-bottom: 16px;
+    color: var(--macos-purple);
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.editing-banner svg {
+    color: var(--macos-purple);
+}
+
 /* ============================================
    Responsive Design
    ============================================ */
