@@ -13,40 +13,12 @@ public class ClassBooking {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "booking_id")
-    private Long bookingId;
+    private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "class_id", nullable = false)
-    private GymClass gymClass;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "member_id", nullable = false)
-    private User member;
-
-    @Column(name = "booking_status")
-    @Enumerated(EnumType.STRING)
-    private BookingStatus status = BookingStatus.CONFIRMED;
-
-    @Column(name = "booked_at")
-    private LocalDateTime bookedAt;
-
-    @Column(name = "cancelled_at")
-    private LocalDateTime cancelledAt;
-
-    @Column(name = "attended")
-    private Boolean attended = false;
-
-    @Column(name = "notes")
-    private String notes;
-
-    @PrePersist
-    protected void onCreate() {
-        bookedAt = LocalDateTime.now();
-    }
-
-    public Long getBookingId() { return bookingId; }
-    public void setBookingId(Long bookingId) { this.bookingId = bookingId; }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public Long getBookingId() { return id; }
+    public void setBookingId(Long bookingId) { this.id = bookingId; }
     public GymClass getGymClass() { return gymClass; }
     public void setGymClass(GymClass gymClass) { this.gymClass = gymClass; }
     public User getMember() { return member; }

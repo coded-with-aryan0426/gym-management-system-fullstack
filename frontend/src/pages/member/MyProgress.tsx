@@ -313,7 +313,7 @@ const MyProgress: React.FC = () => {
     };
 
     const calculateWeeklyAverage = (key: keyof ProgressEntry) => {
-        if (progressEntries.length < 2) return 0;
+        if (progressEntries.length < 2) return "0.00";
         const first = progressEntries[0][key] as number;
         const last = progressEntries[progressEntries.length - 1][key] as number;
         const weeks = progressEntries.length - 1;
@@ -486,30 +486,46 @@ const MyProgress: React.FC = () => {
     };
 
     const handleLogProgress = async () => {
+        if (!memberId) {
+            alert('User session not found. Please log in again.');
+            return;
+        }
+
         if (!newProgress.weight && !newProgress.bodyFat && !newProgress.muscleMass && !newProgress.waist && !newProgress.chest) {
             alert('Please enter at least some data to log');
             return;
         }
 
+        const recordDate = new Date().toISOString().split('T')[0];
+        const entryData = {
+            recordDate,
+            weight: newProgress.weight ? parseFloat(newProgress.weight) : undefined,
+            bodyFat: newProgress.bodyFat ? parseFloat(newProgress.bodyFat) : undefined,
+            muscleMass: newProgress.muscleMass ? parseFloat(newProgress.muscleMass) : undefined,
+            chest: newProgress.chest ? parseFloat(newProgress.chest) : undefined,
+            waist: newProgress.waist ? parseFloat(newProgress.waist) : undefined,
+            arms: newProgress.arms ? parseFloat(newProgress.arms) : undefined,
+            legs: newProgress.legs ? parseFloat(newProgress.legs) : undefined,
+            hips: newProgress.hips ? parseFloat(newProgress.hips) : undefined,
+            shoulders: newProgress.shoulders ? parseFloat(newProgress.shoulders) : undefined,
+            notes: newProgress.notes || undefined
+        };
+
+        // Optimistic Update
+        const tempId = Date.now();
+        const optimisticEntry: ProgressEntry = {
+            id: tempId,
+            date: recordDate,
+            ...entryData
+        };
+
+        const previousEntries = [...progressEntries];
+        setProgressEntries(prev => [...prev, optimisticEntry].sort((a, b) => a.date.localeCompare(b.date)));
+
         try {
             setSaving(true);
-            const entryData = {
-                recordDate: new Date().toISOString().split('T')[0],
-                weight: newProgress.weight ? parseFloat(newProgress.weight) : undefined,
-                bodyFat: newProgress.bodyFat ? parseFloat(newProgress.bodyFat) : undefined,
-                muscleMass: newProgress.muscleMass ? parseFloat(newProgress.muscleMass) : undefined,
-                chest: newProgress.chest ? parseFloat(newProgress.chest) : undefined,
-                waist: newProgress.waist ? parseFloat(newProgress.waist) : undefined,
-                arms: newProgress.arms ? parseFloat(newProgress.arms) : undefined,
-                legs: newProgress.legs ? parseFloat(newProgress.legs) : undefined,
-                hips: newProgress.hips ? parseFloat(newProgress.hips) : undefined,
-                shoulders: newProgress.shoulders ? parseFloat(newProgress.shoulders) : undefined,
-                notes: newProgress.notes || undefined
-            };
-
             await memberProgressApi.createMetric(memberId, entryData);
 
-            // Also create a body measurement entry for redundancy and detailed history
             if (newProgress.waist || newProgress.chest || newProgress.arms || newProgress.hips) {
                 await memberProgressApi.createMeasurement(memberId, entryData);
             }
@@ -517,9 +533,11 @@ const MyProgress: React.FC = () => {
             await fetchProgressData();
             setNewProgress({ weight: '', bodyFat: '', muscleMass: '', chest: '', waist: '', arms: '', legs: '', hips: '', shoulders: '', notes: '' });
             setActiveModal(null);
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error saving progress:', error);
-            alert('Failed to save progress. Please try again.');
+            setProgressEntries(previousEntries); // Rollback
+            const errorMsg = error.response?.data?.error || error.message || 'Unknown error';
+            alert(`Failed to save progress: ${errorMsg}`);
         } finally {
             setSaving(false);
         }
@@ -1618,10 +1636,16 @@ const MyProgress: React.FC = () => {
                                 </div>
                             </div>
                             <div className="modal-footer">
-                                <button className="btn-secondary" onClick={() => setActiveModal(null)}>Cancel</button>
-                                <button className="btn-primary" onClick={handleLogProgress}>
-                                    <Check size={16} />
-                                    Save Progress
+                                <button className="btn-secondary" onClick={() => setActiveModal(null)} disabled={saving}>Cancel</button>
+                                <button className={`btn-primary ${saving ? 'loading' : ''}`} onClick={handleLogProgress} disabled={saving}>
+                                    {saving ? (
+                                        <div className="spinner-small"></div>
+                                    ) : (
+                                        <>
+                                            <Check size={16} />
+                                            <span>Save Progress</span>
+                                        </>
+                                    )}
                                 </button>
                             </div>
                         </motion.div>
