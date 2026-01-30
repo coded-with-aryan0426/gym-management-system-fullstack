@@ -249,31 +249,40 @@ const MyTrainer: React.FC = () => {
 
                                 {assignedTrainers.length > 0 ? (
                                     <div className="glass-card" style={{ padding: 'var(--space-6)', marginBottom: 'var(--space-6)' }}>
-                                        <div style={{ display: 'flex', gap: 'var(--space-6)', alignItems: 'center' }}>
+                                        <div style={{ display: 'flex', gap: 'var(--space-6)', alignItems: 'flex-start' }}>
                                             <div style={{ 
-                                                width: '100px', 
-                                                height: '100px', 
+                                                width: '120px', 
+                                                height: '120px', 
                                                 borderRadius: 'var(--radius-xl)', 
                                                 background: 'linear-gradient(135deg, #007AFF, #5856D6)',
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 justifyContent: 'center',
-                                                fontSize: '36px',
+                                                fontSize: '44px',
                                                 fontWeight: 'bold',
-                                                color: 'white'
+                                                color: 'white',
+                                                flexShrink: 0
                                             }}>
                                                 {assignedTrainers[0].name[0]}
                                             </div>
                                             <div style={{ flex: 1 }}>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                                     <div>
-                                                        <h2 className="macos-heading-md" style={{ marginBottom: '4px' }}>{assignedTrainers[0].name}</h2>
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--macos-text-secondary)', fontSize: '14px' }}>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                                                            <h2 className="macos-heading-md" style={{ margin: 0 }}>{assignedTrainers[0].name}</h2>
+                                                            <span className="profile-badge" style={{ background: '#007AFF15', color: '#007AFF', fontSize: '10px' }}>
+                                                                Certified PT
+                                                            </span>
+                                                        </div>
+                                                        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '16px', color: 'var(--macos-text-secondary)', fontSize: '14px' }}>
                                                             <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                                                 <Star size={14} fill="#FFCC00" color="#FFCC00" /> {assignedTrainers[0].stats.rating}
                                                             </span>
                                                             <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                                                 <Award size={14} /> {assignedTrainers[0].stats.experience} Exp
+                                                            </span>
+                                                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                                <Shield size={14} /> Elite Specialist
                                                             </span>
                                                         </div>
                                                     </div>
@@ -286,15 +295,45 @@ const MyTrainer: React.FC = () => {
                                                         </button>
                                                     </div>
                                                 </div>
-                                                <p style={{ marginTop: '12px', color: 'var(--macos-text-secondary)', fontSize: '14px', lineHeight: '1.5' }}>
+
+                                                <div style={{ 
+                                                    display: 'grid', 
+                                                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
+                                                    gap: '12px', 
+                                                    margin: '16px 0',
+                                                    padding: '12px',
+                                                    background: 'rgba(255,255,255,0.03)',
+                                                    borderRadius: 'var(--radius-lg)',
+                                                    border: '1px solid var(--macos-border)'
+                                                }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
+                                                        <Mail size={14} className="macos-text-tertiary" />
+                                                        <span className="macos-text-secondary">{assignedTrainers[0].email}</span>
+                                                    </div>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
+                                                        <Phone size={14} className="macos-text-tertiary" />
+                                                        <span className="macos-text-secondary">{assignedTrainers[0].phone || 'Not available'}</span>
+                                                    </div>
+                                                </div>
+
+                                                <p style={{ color: 'var(--macos-text-secondary)', fontSize: '14px', lineHeight: '1.6' }}>
                                                     {assignedTrainers[0].bio}
                                                 </p>
-                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '16px' }}>
-                                                    {assignedTrainers[0].skills?.slice(0, 4).map((skill, i) => (
-                                                        <span key={i} className="skill-badge skill-badge--primary">
-                                                            {skill.name}
-                                                        </span>
-                                                    ))}
+                                                
+                                                <div style={{ marginTop: '16px' }}>
+                                                    <div className="skill-section-label" style={{ marginBottom: '8px' }}>Core Specializations</div>
+                                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                                        {assignedTrainers[0].specializations?.map((spec, i) => (
+                                                            <span key={i} className="skill-badge skill-badge--primary" style={{ padding: '4px 12px' }}>
+                                                                {spec}
+                                                            </span>
+                                                        ))}
+                                                        {assignedTrainers[0].skills?.map((skill, i) => (
+                                                            <span key={`skill-${i}`} className="skill-badge skill-badge--secondary">
+                                                                {skill.name}
+                                                            </span>
+                                                        ))}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -336,24 +375,48 @@ const MyTrainer: React.FC = () => {
                                             className="glass-card trainer-card"
                                             style={{ padding: 'var(--space-4)' }}
                                         >
-                                            <div className="trainer-card__header">
+                                            <div className="trainer-card__header" style={{ marginBottom: '12px' }}>
                                                 <div className="trainer-card__avatar" style={{ width: '48px', height: '48px', fontSize: '18px' }}>
                                                     {trainer.name[0]}
                                                 </div>
                                                 <div className="trainer-card__info">
-                                                    <h3 style={{ fontSize: '16px' }}>{trainer.name}</h3>
-                                                    <div className="trainer-card__rating">
-                                                        <Star size={12} fill="#FFCC00" color="#FFCC00" />
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                        <h3 style={{ fontSize: '15px', margin: 0 }}>{trainer.name}</h3>
+                                                        <span className="profile-badge" style={{ background: '#007AFF10', color: '#007AFF', fontSize: '9px', padding: '1px 6px' }}>
+                                                            PT
+                                                        </span>
+                                                    </div>
+                                                    <div className="trainer-card__rating" style={{ fontSize: '11px' }}>
+                                                        <Star size={10} fill="#FFCC00" color="#FFCC00" />
                                                         <span>{trainer.stats.rating}</span>
+                                                        <span style={{ margin: '0 4px', opacity: 0.5 }}>•</span>
+                                                        <span>{trainer.stats.experience} Exp</span>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <p style={{ fontSize: '12px', color: 'var(--macos-text-tertiary)', margin: '8px 0', height: '36px', overflow: 'hidden' }}>
+                                            
+                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '12px' }}>
+                                                {trainer.specializations?.slice(0, 2).map((spec, i) => (
+                                                    <span key={i} style={{ 
+                                                        fontSize: '10px', 
+                                                        background: 'rgba(255,255,255,0.05)', 
+                                                        padding: '2px 8px', 
+                                                        borderRadius: '4px',
+                                                        color: 'var(--macos-text-secondary)',
+                                                        border: '1px solid var(--macos-border)'
+                                                    }}>
+                                                        {spec}
+                                                    </span>
+                                                ))}
+                                            </div>
+
+                                            <p style={{ fontSize: '12px', color: 'var(--macos-text-tertiary)', margin: '0 0 16px', height: '36px', overflow: 'hidden', lineHeight: '1.4' }}>
                                                 {trainer.bio}
                                             </p>
+                                            
                                             <button 
                                                 className="macos-btn macos-btn--primary" 
-                                                style={{ width: '100%', padding: '6px', fontSize: '12px' }}
+                                                style={{ width: '100%', padding: '8px', fontSize: '12px' }}
                                                 onClick={() => handleRequestTrainer(trainer.userId, trainer.name)}
                                             >
                                                 View Profile
@@ -432,33 +495,43 @@ const MyTrainer: React.FC = () => {
                                                 </div>
                                             )}
 
-                                            <div className="trainer-card__header">
-                                                <div className="trainer-card__avatar">
-                                                    {trainer.name[0]}
-                                                </div>
-                                                <div className="trainer-card__info">
-                                                    <h3>{trainer.name}</h3>
-                                                    <div className="trainer-card__rating">
-                                                        <Star size={14} fill="#FFCC00" color="#FFCC00" />
-                                                        <span>{trainer.stats?.rating || 0}</span>
-                                                        <span className="macos-text-tertiary">({trainer.stats?.reviews || 0})</span>
+                                                <div className="trainer-card__header">
+                                                    <div className="trainer-card__avatar">
+                                                        {trainer.name[0]}
+                                                    </div>
+                                                    <div className="trainer-card__info">
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                            <h3 style={{ margin: 0 }}>{trainer.name}</h3>
+                                                            <span className="profile-badge" style={{ background: '#007AFF15', color: '#007AFF', fontSize: '10px' }}>PT</span>
+                                                        </div>
+                                                        <div className="trainer-card__rating">
+                                                            <Star size={14} fill="#FFCC00" color="#FFCC00" />
+                                                            <span>{trainer.stats?.rating || 0}</span>
+                                                            <span className="macos-text-tertiary">({trainer.stats?.reviews || 0})</span>
+                                                            <span style={{ margin: '0 4px', opacity: 0.5 }}>•</span>
+                                                            <span>{trainer.stats?.experience || '0 Yrs'} Exp</span>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
 
-                                            <p className="macos-text-sm" style={{ marginBottom: 'var(--space-4)', color: 'var(--macos-text-secondary)', height: '40px', overflow: 'hidden' }}>
-                                                {trainer.bio}
-                                            </p>
+                                                <p className="macos-text-sm" style={{ marginBottom: 'var(--space-4)', color: 'var(--macos-text-secondary)', height: '40px', overflow: 'hidden' }}>
+                                                    {trainer.bio}
+                                                </p>
 
-                                            <div className="trainer-card__skills">
-                                                <div className="skill-tags">
-                                                    {trainer.skills?.slice(0, 3).map((skill, idx) => (
-                                                        <div key={idx} className="skill-badge skill-badge--secondary">
-                                                            {skill.name}
-                                                        </div>
-                                                    ))}
+                                                <div className="trainer-card__skills">
+                                                    <div className="skill-tags">
+                                                        {trainer.specializations?.slice(0, 2).map((spec, idx) => (
+                                                            <div key={`spec-${idx}`} className="skill-badge skill-badge--primary">
+                                                                {spec}
+                                                            </div>
+                                                        ))}
+                                                        {trainer.skills?.slice(0, 2).map((skill, idx) => (
+                                                            <div key={idx} className="skill-badge skill-badge--secondary">
+                                                                {skill.name}
+                                                            </div>
+                                                        ))}
+                                                    </div>
                                                 </div>
-                                            </div>
 
                                             <div style={{ marginTop: 'auto', paddingTop: 'var(--space-4)', display: 'flex', gap: '8px' }}>
                                                 <button
@@ -517,20 +590,6 @@ const MyTrainer: React.FC = () => {
                                 <span className="stat-value">{assignedTrainers.length}</span>
                             </div>
                         </div>
-                    </div>
-
-                    <div className="sidebar-widget membership-widget">
-                        <div className="widget-header">
-                            <h3 className="widget-title"><Calendar size={14} /> Availability</h3>
-                        </div>
-                        <div className="membership-card" style={{ padding: '12px' }}>
-                            <div style={{ fontSize: '13px', color: 'var(--macos-text-secondary)' }}>
-                                All trainers are currently accepting new members. Browse the directory to start your journey.
-                            </div>
-                        </div>
-                        <button className="widget-action-btn primary" onClick={() => setShowDiscovery(true)}>
-                            Explore All Trainers
-                        </button>
                     </div>
                 </div>
             </div>

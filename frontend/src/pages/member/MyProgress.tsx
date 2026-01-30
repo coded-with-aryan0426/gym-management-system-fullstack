@@ -13,6 +13,7 @@ import {
     Award, Sparkles, ArrowRight, Timer, Percent, Images
 } from 'lucide-react';
 import { memberProgressApi } from '../../services/api';
+import { useAuth } from '../../contexts/AuthContext';
 import '../../styles/macos-member.css';
 import './MyProgress.css';
 
