@@ -150,7 +150,7 @@ const MyProgress: React.FC = () => {
     const [photoDate, setPhotoDate] = useState(new Date().toISOString().split('T')[0]);
 
     const { user, isLoading: authLoading } = useAuth();
-    const memberId = user?.userId || user?.id;
+    const memberId = Number(user?.userId || user?.id);
 
     const [isLightTheme, setIsLightTheme] = useState(false);
 
@@ -181,6 +181,13 @@ const MyProgress: React.FC = () => {
 
         try {
             setLoading(true);
+
+            // Ensure memberId is valid before making API calls
+            if (!memberId || isNaN(memberId)) {
+                console.error('Invalid memberId:', memberId);
+                setLoading(false);
+                return;
+            }
 
             const [summaryData, metricsData, goalsData, pbData, workoutsData, measurementsData, photosData] = await Promise.all([
                 memberProgressApi.getSummary(memberId).catch(() => null),

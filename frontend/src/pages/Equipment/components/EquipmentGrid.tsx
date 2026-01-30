@@ -32,7 +32,7 @@ const EquipmentGrid: React.FC<EquipmentGridProps> = ({ equipmentList, density = 
                 <EquipmentCard
                     key={equipment.id}
                     equipment={equipment}
-                    density={density}
+                    density={density === 'list' ? 'comfortable' : density}
                     onEdit={onEdit}
                     onMaintenance={onMaintenance}
                 />

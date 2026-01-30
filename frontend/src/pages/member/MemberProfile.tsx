@@ -6,7 +6,7 @@ import {
     ChevronRight, Edit3, X, Zap, TrendingUp, Clock, Fingerprint,
     Smartphone, AlertCircle, CheckCircle2, CreditCard, History,
     Trophy, Star, Download, QrCode, ArrowUpRight, Check, Ruler,
-    Scale, Percent, Users, MessageSquare
+    Scale, Percent, Users, MessageSquare, Info
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { memberProfileApi, type MemberProfileData, type MemberProfileUpdate } from '../../api/memberProfileApi';

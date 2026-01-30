@@ -9,6 +9,7 @@ import {
 import { toast } from 'react-hot-toast';
 import { gymClassApi } from '../../services/api';
 import type { GymClassDTO } from '../../services/api';
+import { useAuth } from '../../contexts/AuthContext';
 import '../../styles/macos-member.css';
 import './AvailableClasses.css';
 
@@ -48,7 +49,7 @@ const AvailableClasses: React.FC = () => {
     const [showBookingSuccess, setShowBookingSuccess] = useState<number | null>(null);
 
     const { user, isLoading: authLoading } = useAuth();
-    const memberId = user?.userId || user?.id;
+    const memberId = Number(user?.userId || user?.id);
 
     useEffect(() => {
         if (!authLoading) {

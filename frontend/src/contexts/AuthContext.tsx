@@ -16,6 +16,7 @@ export interface User {
     staffRole?: string;
     activeGymId?: number;
     activeGymName?: string;
+    height?: number;
 }
 
 interface AuthContextType {

@@ -119,7 +119,8 @@ const MyTrainer: React.FC = () => {
                 (t.specializations && t.specializations.some(s => s.toLowerCase().includes(searchQuery.toLowerCase())));
             
             const matchesCategory = selectedCategory === 'All Skills' ||
-                (t.skills && t.skills.some(s => s.category === selectedCategory));
+                (t.skills && t.skills.some(s => s.category === selectedCategory)) ||
+                (t.specializations && t.specializations.some(spec => spec.includes(selectedCategory)));
             
             return matchesSearch && matchesCategory;
         });
