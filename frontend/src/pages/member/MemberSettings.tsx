@@ -63,36 +63,35 @@ const MemberSettings: React.FC = () => {
   const [showPasswords, setShowPasswords] = useState({ current: false, new: false, confirm: false })
   const [sessions, setSessions] = useState<any[]>([])
 
-  useEffect(() => {
-    if (user?.userId) {
-      fetchSettings()
-      fetchSessions()
-    }
-  }, [user?.userId])
-
-  const fetchSettings = async () => {
-    try {
-      setIsLoading(true)
-      const data = await memberSettingsApi.getSettings(user!.userId!)
-      setSettings(data)
-      setProfileForm(data.profile || {})
-    } catch (error) {
-      toast.error("Failed to load settings")
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const fetchSessions = async () => {
-    try {
-      if (user?.userId) {
-        const data = await memberSettingsApi.getSessions(user.userId)
-        setSessions(data)
+    useEffect(() => {
+      const id = user?.userId || (user?.id ? parseInt(String(user.id)) : null)
+      if (id) {
+        fetchSettings(id)
+        fetchSessions(id)
       }
-    } catch (error) {
-      console.error("Failed to fetch sessions")
+    }, [user?.userId, user?.id])
+
+    const fetchSettings = async (id: number) => {
+      try {
+        setIsLoading(true)
+        const data = await memberSettingsApi.getSettings(id)
+        setSettings(data)
+        setProfileForm(data.profile || {})
+      } catch (error) {
+        toast.error("Failed to load settings")
+      } finally {
+        setIsLoading(false)
+      }
     }
-  }
+
+    const fetchSessions = async (id: number) => {
+      try {
+        const data = await memberSettingsApi.getSessions(id)
+        setSessions(data)
+      } catch (error) {
+        console.error("Failed to fetch sessions")
+      }
+    }
 
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault()

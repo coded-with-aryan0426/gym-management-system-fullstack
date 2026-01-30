@@ -173,8 +173,10 @@ export default function LoginPage() {
         // CRITICAL: Call AuthContext login to update React state (not just localStorage)
         // This ensures ProtectedRoute reads the correct user data
         if (data.token) {
+            const userId = data.userId || data.id;
             authLogin(data.token, {
-                id: data.id || data.userId,
+                id: String(userId),
+                userId: typeof userId === 'number' ? userId : parseInt(String(userId)),
                 username: data.username,
                 email: data.email,
                 fullName: data.fullName,
