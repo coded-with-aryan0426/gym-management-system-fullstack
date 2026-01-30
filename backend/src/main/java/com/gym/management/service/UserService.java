@@ -320,6 +320,24 @@ public class UserService {
         return new PageResponse<>(pageContent, page, size, totalCount, "newest");
     }
 
+    @Autowired
+    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+
+    @Transactional
+    public void changePassword(Long userId, String oldPassword, String newPassword) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new RuntimeException("Incorrect current password");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setIsFirstLogin(false);
+        user.setPasswordChangedAt(LocalDateTime.now());
+        userRepository.save(user);
+    }
+
     public User getUserById(Long id) {
         Objects.requireNonNull(id, "User ID must not be null");
         return userRepository.findById(id).orElse(null);
