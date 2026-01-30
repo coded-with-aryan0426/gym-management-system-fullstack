@@ -37,7 +37,48 @@ public class MemberTrainerController {
     private PTSessionRepository ptSessionRepository;
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     private ObjectMapper objectMapper;
+
+    @GetMapping("/assigned")
+    public ResponseEntity<List<TrainerProfileDTO>> getAssignedTrainers(@RequestHeader("Authorization") String token) {
+        // In a real app, we'd get the user from the token
+        // For now, let's assume we can get the current user. 
+        // We'll need a way to identify the current logged-in user.
+        // Let's use the security context.
+        String username = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByUsername(username).orElse(null);
+        
+        if (currentUser == null || currentUser.getTrainers() == null) {
+            return ResponseEntity.ok(Collections.emptyList());
+        }
+        
+        List<TrainerProfileDTO> dtos = currentUser.getTrainers().stream()
+                .map(this::mapToDiscoveryDTO)
+                .collect(Collectors.toList());
+                
+        return ResponseEntity.ok(dtos);
+    }
+
+    @PostMapping("/{trainerId}/request")
+    public ResponseEntity<Map<String, String>> requestTrainer(@PathVariable Long trainerId) {
+        String username = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByUsername(username).orElse(null);
+        User trainer = userRepository.findById(trainerId).orElse(null);
+
+        if (currentUser == null || trainer == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "User or Trainer not found"));
+        }
+
+        // For now, let's just add the trainer to the user's trainers list
+        // In a more complex system, this would create a 'TrainerRequest' entity
+        currentUser.getTrainers().add(trainer);
+        userRepository.save(currentUser);
+
+        return ResponseEntity.ok(Map.of("message", "Trainer request successful! " + trainer.getFullName() + " has been assigned."));
+    }
 
     @GetMapping
     public ResponseEntity<List<TrainerProfileDTO>> getAllTrainers() {

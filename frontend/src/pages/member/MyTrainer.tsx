@@ -59,17 +59,23 @@ const cardVariants = {
 
 const MyTrainer: React.FC = () => {
     const [trainers, setTrainers] = useState<TrainerProfile[]>([]);
+    const [assignedTrainers, setAssignedTrainers] = useState<TrainerProfile[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('All Skills');
     const [sortBy, setSortBy] = useState<'rating' | 'match' | 'experience'>('match');
+    const [requesting, setRequesting] = useState<number | null>(null);
 
     useEffect(() => {
-        const fetchTrainers = async () => {
+        const fetchData = async () => {
             try {
-                // Fetch from our new endpoint
-                const response = await api.get('/api/member/trainers');
-                let data = response.data;
+                // Fetch assigned trainers
+                const assignedResponse = await api.get('/api/member/trainers/assigned');
+                setAssignedTrainers(assignedResponse.data || []);
+
+                // Fetch all trainers for discovery
+                const allResponse = await api.get('/api/member/trainers');
+                let data = allResponse.data;
 
                 // If data is empty, use enhanced mock data for demonstration
                 if (!data || data.length === 0) {
@@ -85,8 +91,24 @@ const MyTrainer: React.FC = () => {
             }
         };
 
-        fetchTrainers();
+        fetchData();
     }, []);
+
+    const handleRequestTrainer = async (trainerId: number, trainerName: string) => {
+        setRequesting(trainerId);
+        try {
+            const response = await api.post(`/api/member/trainers/${trainerId}/request`);
+            toast.success(response.data.message || `Request sent to ${trainerName}`);
+            
+            // Refresh assigned trainers
+            const assignedResponse = await api.get('/api/member/trainers/assigned');
+            setAssignedTrainers(assignedResponse.data || []);
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || 'Failed to request trainer');
+        } finally {
+            setRequesting(null);
+        }
+    };
 
     const getMockTrainers = (): TrainerProfile[] => [
         {
@@ -183,173 +205,218 @@ const MyTrainer: React.FC = () => {
             <header className="trainer__header">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                     <div>
-                        <h1 className="macos-heading-xl">Find Your Trainer</h1>
-                        <p className="macos-text-md">Skill-based matching for your fitness goals</p>
-                    </div>
-                    <div className="macos-badge macos-badge--blue" style={{ marginBottom: '8px' }}>
-                        <Target size={14} /> Personalized Matching Active
+                        <h1 className="macos-heading-xl">Your Training Program</h1>
+                        <p className="macos-text-md">Personalized guidance to reach your goals</p>
                     </div>
                 </div>
             </header>
 
-            {/* Category Filters */}
-            <div className="glass-card trainer-discovery__filters macos-hide-scrollbar" style={{ overflowX: 'auto' }}>
-                {SKILL_CATEGORIES.map(cat => (
-                    <button
-                        key={cat}
-                        className={`trainer-filter-chip ${selectedCategory === cat ? 'active' : ''}`}
-                        onClick={() => setSelectedCategory(cat)}
-                    >
-                        {cat}
-                    </button>
-                ))}
-            </div>
-
-            {/* Controls */}
-            <div className="trainer-discovery__controls">
-                <div className="trainer-search-wrapper">
-                    <Search size={18} />
-                    <input
-                        type="text"
-                        placeholder="Search by name or specific skill..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                </div>
-                <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
-                    <div className="macos-select-wrapper" style={{ minWidth: '160px' }}>
-                        <ArrowUpDown size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', opacity: 0.6 }} />
-                        <select
-                            value={sortBy}
-                            onChange={(e) => setSortBy(e.target.value as any)}
-                            className="macos-btn macos-btn--secondary"
-                            style={{ paddingLeft: '34px', width: '100%', textAlign: 'left' }}
-                        >
-                            <option value="match">Sort by Match</option>
-                            <option value="rating">Top Rated</option>
-                            <option value="experience">Experience</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            {/* Results Info */}
-            <div style={{ marginBottom: 'var(--space-4)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span className="macos-text-sm macos-text-tertiary">
-                    Showing {filteredAndSortedTrainers.length} professional trainers
-                </span>
-                <div style={{ display: 'flex', gap: '12px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#60a5fa' }}></div>
-                        <span style={{ fontSize: '11px', color: 'var(--macos-text-tertiary)' }}>Primary Skill</span>
-                    </div>
-                </div>
-            </div>
-
-            {/* Trainer Grid */}
-            <div className="trainer-grid">
-                <AnimatePresence mode="popLayout">
-                    {filteredAndSortedTrainers.map((trainer) => (
-                        <motion.div
-                            key={trainer.userId}
-                            layout
-                            variants={cardVariants}
-                            initial="hidden"
-                            animate="visible"
-                            exit={{ opacity: 0, scale: 0.9 }}
-                            whileHover="hover"
-                            className={`glass-card trainer-card ${trainer.isBestMatch ? 'trainer-card--best-match' : ''}`}
-                        >
-                            {trainer.isBestMatch && (
-                                <div className="best-match-badge">
-                                    <Zap size={12} fill="currentColor" /> Best Match
-                                </div>
-                            )}
-
-                            <div className="trainer-card__header">
-                                <div className="trainer-card__avatar">
-                                    {trainer.name.split(' ').map(n => n[0]).join('')}
-                                </div>
-                                <div className="trainer-card__info">
-                                    <h3>{trainer.name}</h3>
-                                    <div className="trainer-card__rating">
-                                        <Star size={14} fill="var(--macos-warning)" color="var(--macos-warning)" />
-                                        <span>{trainer.stats.rating}</span>
-                                        <span className="macos-text-tertiary">({trainer.stats.reviews} reviews)</span>
+            {/* Assigned Trainer Section */}
+            <section style={{ marginBottom: 'var(--space-10)' }}>
+                <h2 className="macos-heading-md" style={{ marginBottom: 'var(--space-4)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <CheckCircle2 size={20} color="var(--macos-success)" />
+                    Your Assigned Trainer
+                </h2>
+                
+                {assignedTrainers.length > 0 ? (
+                    <div className="trainer-grid">
+                        {assignedTrainers.map(trainer => (
+                            <motion.div
+                                key={`assigned-${trainer.userId}`}
+                                variants={cardVariants}
+                                initial="hidden"
+                                animate="visible"
+                                className="glass-card trainer-card trainer-card--assigned"
+                            >
+                                <div className="trainer-card__header">
+                                    <div className="trainer-card__avatar">
+                                        {trainer.name.split(' ').map(n => n[0]).join('')}
                                     </div>
-                                    {trainer.matchPercentage && (
-                                        <div style={{ marginTop: '4px', fontSize: '12px', color: 'var(--macos-accent)', fontWeight: 600 }}>
-                                            {trainer.matchPercentage}% Skill Match
+                                    <div className="trainer-card__info">
+                                        <h3>{trainer.name}</h3>
+                                        <div className="trainer-card__rating">
+                                            <Star size={14} fill="var(--macos-warning)" color="var(--macos-warning)" />
+                                            <span>{trainer.stats.rating}</span>
                                         </div>
-                                    )}
+                                    </div>
+                                    <div className="macos-badge macos-badge--green" style={{ marginLeft: 'auto' }}>
+                                        Current Trainer
+                                    </div>
                                 </div>
-                            </div>
-
-                            <p className="macos-text-sm" style={{ marginBottom: 'var(--space-4)', color: 'var(--macos-text-secondary)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                                {trainer.bio}
+                                <div className="trainer-card__skills">
+                                    <div className="skill-tags">
+                                        {trainer.skills.slice(0, 3).map((skill, idx) => (
+                                            <div key={idx} className="skill-badge skill-badge--primary">
+                                                {skill.name}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                                <button className="macos-btn macos-btn--primary" style={{ marginTop: 'var(--space-4)', width: '100%' }}>
+                                    Message {trainer.name.split(' ')[0]}
+                                </button>
+                            </motion.div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="glass-card" style={{ padding: 'var(--space-8)', textAlign: 'center', border: '1px dashed var(--macos-border)' }}>
+                        <div className="macos-empty-state">
+                            <div className="macos-empty-state__icon" style={{ opacity: 0.5 }}><User size={32} /></div>
+                            <h3 className="macos-heading-sm">No trainer is assigned to you yet</h3>
+                            <p className="macos-text-sm" style={{ maxWidth: '400px', margin: '8px auto' }}>
+                                Request trainer assignments at the front desk or browse trainers below to request one you like.
                             </p>
+                        </div>
+                    </div>
+                )}
+            </section>
 
-                            <div className="trainer-card__skills">
-                                <span className="skill-section-label">Core Competencies</span>
-                                <div className="skill-tags">
-                                    {trainer.skills.map((skill, idx) => (
-                                        <div
-                                            key={idx}
-                                            className={`skill-badge ${skill.isPrimary ? 'skill-badge--primary' : 'skill-badge--secondary'}`}
-                                            title={`${skill.category} - ${skill.level}`}
-                                        >
-                                            {skill.name}
-                                            <span className="skill-level">{skill.level}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
+            <div className="macos-divider" style={{ margin: 'var(--space-10) 0' }}></div>
 
-                            <div className="trainer-card__meta">
-                                <div className="meta-item">
-                                    <span className="meta-label">Experience</span>
-                                    <span className="meta-value">{trainer.stats.experience}</span>
-                                </div>
-                                <div className="meta-item">
-                                    <span className="meta-label">Availability</span>
-                                    <span className="meta-value">Mon - Fri</span>
-                                </div>
-                                <div className="meta-item">
-                                    <span className="meta-label">Active Clients</span>
-                                    <span className="meta-value">{trainer.stats.activeMembers}</span>
-                                </div>
-                            </div>
+            {/* Discovery Section */}
+            <section id="discovery-section">
+                <header className="trainer__header" style={{ marginBottom: 'var(--space-6)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                        <div>
+                            <h2 className="macos-heading-xl">Find Your Trainer</h2>
+                            <p className="macos-text-md">Explore all professional trainers in our system</p>
+                        </div>
+                        <div className="macos-badge macos-badge--blue" style={{ marginBottom: '8px' }}>
+                            <Target size={14} /> Personalized Matching Active
+                        </div>
+                    </div>
+                </header>
 
-                            <div style={{ marginTop: 'var(--space-4)', display: 'flex', gap: '8px' }}>
-                                <button
-                                    className="macos-btn macos-btn--primary"
-                                    style={{ flex: 1 }}
-                                    onClick={() => toast.success(`Selection request sent to ${trainer.name}`)}
-                                >
-                                    Choose Trainer
-                                </button>
-                                <button className="macos-btn macos-btn--secondary" style={{ padding: '8px' }}>
-                                    <Info size={18} />
-                                </button>
-                            </div>
-                        </motion.div>
+                {/* Category Filters */}
+                <div className="glass-card trainer-discovery__filters macos-hide-scrollbar" style={{ overflowX: 'auto' }}>
+                    {SKILL_CATEGORIES.map(cat => (
+                        <button
+                            key={cat}
+                            className={`trainer-filter-chip ${selectedCategory === cat ? 'active' : ''}`}
+                            onClick={() => setSelectedCategory(cat)}
+                        >
+                            {cat}
+                        </button>
                     ))}
-                </AnimatePresence>
-            </div>
+                </div>
+
+                {/* Controls */}
+                <div className="trainer-discovery__controls">
+                    <div className="trainer-search-wrapper">
+                        <Search size={18} />
+                        <input
+                            type="text"
+                            placeholder="Search by name or specific skill..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
+                    <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+                        <div className="macos-select-wrapper" style={{ minWidth: '160px' }}>
+                            <ArrowUpDown size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', opacity: 0.6 }} />
+                            <select
+                                value={sortBy}
+                                onChange={(e) => setSortBy(e.target.value as any)}
+                                className="macos-btn macos-btn--secondary"
+                                style={{ paddingLeft: '34px', width: '100%', textAlign: 'left' }}
+                            >
+                                <option value="match">Sort by Match</option>
+                                <option value="rating">Top Rated</option>
+                                <option value="experience">Experience</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Results Info */}
+                <div style={{ marginBottom: 'var(--space-4)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span className="macos-text-sm macos-text-tertiary">
+                        Showing {filteredAndSortedTrainers.length} professional trainers
+                    </span>
+                </div>
+
+                {/* Trainer Grid */}
+                <div className="trainer-grid">
+                    <AnimatePresence mode="popLayout">
+                        {filteredAndSortedTrainers.map((trainer) => (
+                            <motion.div
+                                key={trainer.userId}
+                                layout
+                                variants={cardVariants}
+                                initial="hidden"
+                                animate="visible"
+                                exit={{ opacity: 0, scale: 0.9 }}
+                                whileHover="hover"
+                                className={`glass-card trainer-card ${trainer.isBestMatch ? 'trainer-card--best-match' : ''}`}
+                            >
+                                {trainer.isBestMatch && (
+                                    <div className="best-match-badge">
+                                        <Zap size={12} fill="currentColor" /> Best Match
+                                    </div>
+                                )}
+
+                                <div className="trainer-card__header">
+                                    <div className="trainer-card__avatar">
+                                        {trainer.name.split(' ').map(n => n[0]).join('')}
+                                    </div>
+                                    <div className="trainer-card__info">
+                                        <h3>{trainer.name}</h3>
+                                        <div className="trainer-card__rating">
+                                            <Star size={14} fill="var(--macos-warning)" color="var(--macos-warning)" />
+                                            <span>{trainer.stats.rating}</span>
+                                            <span className="macos-text-tertiary">({trainer.stats.reviews})</span>
+                                        </div>
+                                        {trainer.matchPercentage && (
+                                            <div style={{ marginTop: '4px', fontSize: '12px', color: 'var(--macos-accent)', fontWeight: 600 }}>
+                                                {trainer.matchPercentage}% Match
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <p className="macos-text-sm" style={{ marginBottom: 'var(--space-4)', color: 'var(--macos-text-secondary)', height: '40px', overflow: 'hidden' }}>
+                                    {trainer.bio}
+                                </p>
+
+                                <div className="trainer-card__skills">
+                                    <div className="skill-tags">
+                                        {trainer.skills.map((skill, idx) => (
+                                            <div
+                                                key={idx}
+                                                className={`skill-badge ${skill.isPrimary ? 'skill-badge--primary' : 'skill-badge--secondary'}`}
+                                            >
+                                                {skill.name}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div style={{ marginTop: 'var(--space-4)', display: 'flex', gap: '8px' }}>
+                                    <button
+                                        className={`macos-btn ${assignedTrainers.some(at => at.userId === trainer.userId) ? 'macos-btn--secondary' : 'macos-btn--primary'}`}
+                                        style={{ flex: 1 }}
+                                        onClick={() => handleRequestTrainer(trainer.userId, trainer.name)}
+                                        disabled={requesting === trainer.userId || assignedTrainers.some(at => at.userId === trainer.userId)}
+                                    >
+                                        {requesting === trainer.userId ? 'Requesting...' : 
+                                         assignedTrainers.some(at => at.userId === trainer.userId) ? 'Assigned' : 'Request Trainer'}
+                                    </button>
+                                    <button className="macos-btn macos-btn--secondary" style={{ padding: '8px' }}>
+                                        <Info size={18} />
+                                    </button>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </AnimatePresence>
+                </div>
+            </section>
 
             {filteredAndSortedTrainers.length === 0 && (
                 <div className="glass-card" style={{ padding: 'var(--space-10)', textAlign: 'center' }}>
                     <div className="macos-empty-state">
                         <div className="macos-empty-state__icon"><Filter size={32} /></div>
                         <h3 className="macos-heading-md">No trainers match your criteria</h3>
-                        <p className="macos-text-md">Try adjusting your filters or search terms to find more trainers.</p>
-                        <button
-                            className="macos-btn macos-btn--primary"
-                            style={{ marginTop: 'var(--space-4)' }}
-                            onClick={() => { setSelectedCategory('All Skills'); setSearchQuery(''); }}
-                        >
-                            Reset All Filters
-                        </button>
+                        <p className="macos-text-md">Try adjusting your filters or search terms.</p>
                     </div>
                 </div>
             )}

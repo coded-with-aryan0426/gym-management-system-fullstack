@@ -3,6 +3,7 @@ package com.gym.management.controller;
 import com.gym.management.dto.progress.*;
 import com.gym.management.service.MemberProgressService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +18,9 @@ public class MemberProgressController {
 
     @Autowired
     private MemberProgressService progressService;
+
+    @Value("${app.upload.dir:uploads}")
+    private String uploadDir;
 
     @GetMapping("/summary")
     public ResponseEntity<?> getProgressSummary(@RequestParam Long memberId) {
@@ -318,7 +322,7 @@ public class MemberProgressController {
     @GetMapping("/photos/file/{filename:.+}")
     public ResponseEntity<org.springframework.core.io.Resource> getProgressPhotoFile(@PathVariable String filename) {
         try {
-            java.nio.file.Path filePath = java.nio.file.Paths.get("uploads").resolve(filename).normalize();
+            java.nio.file.Path filePath = java.nio.file.Paths.get(uploadDir).resolve(filename).normalize();
             org.springframework.core.io.Resource resource = new org.springframework.core.io.UrlResource(filePath.toUri());
 
             if (resource.exists() || resource.isReadable()) {
