@@ -330,17 +330,15 @@ const MyTrainer: React.FC = () => {
                                                         <div>
                                                             <div className="skill-section-label" style={{ marginBottom: '8px' }}>Active Specialties</div>
                                                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                                                                {trainer.specializations?.map((spec, i) => (
-                                                                    <span key={i} className="skill-badge skill-badge--primary" style={{ padding: '4px 12px' }}>
-                                                                        {spec}
-                                                                    </span>
-                                                                ))}
-                                                                {trainer.skills?.map((skill, i) => (
-                                                                    <span key={`skill-${i}`} className="skill-badge skill-badge--secondary">
-                                                                        {skill.name} <span className="skill-level">{skill.level}</span>
-                                                                    </span>
-                                                                ))}
-                                                            </div>
+                                                                    {[...new Set([
+                                                                        ...(trainer.specializations || []),
+                                                                        ...(trainer.skills?.map(s => s.category) || [])
+                                                                    ])].filter(cat => SKILL_CATEGORIES.includes(cat) && cat !== 'All Skills').map((tag, i) => (
+                                                                        <span key={i} className="skill-badge skill-badge--primary" style={{ padding: '4px 12px' }}>
+                                                                            {tag}
+                                                                        </span>
+                                                                    ))}
+                                                                </div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -405,9 +403,12 @@ const MyTrainer: React.FC = () => {
                                             </div>
                                             
                                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '12px' }}>
-                                                {trainer.specializations?.slice(0, 2).map((spec, i) => (
+                                                {[...new Set([
+                                                    ...(trainer.specializations || []),
+                                                    ...(trainer.skills?.map(s => s.category) || [])
+                                                ])].filter(cat => SKILL_CATEGORIES.includes(cat) && cat !== 'All Skills').slice(0, 3).map((tag, i) => (
                                                     <span key={i} className="skill-badge skill-badge--secondary" style={{ fontSize: '10px', padding: '2px 8px' }}>
-                                                        {spec}
+                                                        {tag}
                                                     </span>
                                                 ))}
                                             </div>
@@ -525,21 +526,14 @@ const MyTrainer: React.FC = () => {
                                                         Core Expertise
                                                     </div>
                                                     <div className="skill-tags">
-                                                        {trainer.specializations?.slice(0, 3).map((spec, idx) => (
-                                                            <div key={`spec-${idx}`} className="skill-badge skill-badge--primary">
-                                                                {spec}
-                                                            </div>
-                                                        ))}
-                                                        {trainer.skills?.slice(0, 3).map((skill, idx) => (
+                                                        {[...new Set([
+                                                            ...(trainer.specializations || []),
+                                                            ...(trainer.skills?.map(s => s.category) || [])
+                                                        ])].filter(cat => SKILL_CATEGORIES.includes(cat) && cat !== 'All Skills').map((tag, idx) => (
                                                             <div key={idx} className="skill-badge skill-badge--secondary">
-                                                                {skill.name}
+                                                                {tag}
                                                             </div>
                                                         ))}
-                                                        {(trainer.specializations?.length || 0) + (trainer.skills?.length || 0) > 6 && (
-                                                            <div className="skill-badge skill-badge--more">
-                                                                +{(trainer.specializations?.length || 0) + (trainer.skills?.length || 0) - 6}
-                                                            </div>
-                                                        )}
                                                     </div>
                                                 </div>
 
