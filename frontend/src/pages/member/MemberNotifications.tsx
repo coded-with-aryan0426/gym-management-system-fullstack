@@ -13,22 +13,15 @@ import {
   CheckCheck,
   Trash2,
   Settings,
-  ChevronRight,
-  Gift,
-  Clock,
-  AlertTriangle,
-  Star,
-  Archive,
-  MoreVertical,
-  Filter,
-  CheckCircle2,
-  XCircle,
   ArrowRight,
   Search,
-  Inbox
+  Inbox,
+  Star,
+  Archive,
+  AlertTriangle,
+  Gift
 } from "lucide-react"
 import { toast } from "react-hot-toast"
-import { Badge } from "../../components"
 import { useAuth } from "../../contexts/AuthContext"
 import "./MemberNotifications.css"
 
@@ -75,7 +68,7 @@ const MemberNotifications: React.FC = () => {
 
   useEffect(() => {
     fetchNotifications()
-    const interval = setInterval(fetchNotifications, 30000) // Poll every 30s
+    const interval = setInterval(fetchNotifications, 30000)
     return () => clearInterval(interval)
   }, [userId, filter])
 
@@ -219,38 +212,51 @@ const MemberNotifications: React.FC = () => {
   }, [filteredAndSearched])
 
   const unreadCount = notifications.filter((n) => !n.isRead && !n.isArchived).length
+  const starredCount = notifications.filter(n => n.isStarred).length
 
   return (
     <div className="mn-page">
       <header className="mn-header">
         <div className="mn-header__left">
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="mn-header__title-wrapper"
-          >
-            <h1 className="mn-header__title">Notifications</h1>
-            {unreadCount > 0 && <span className="mn-unread-pill">{unreadCount} New</span>}
-          </motion.div>
-          <p className="mn-header__subtitle">Your personalized activity feed and gym updates</p>
+          <div className="mn-header__title-group">
+            <div className="mn-header__title-wrapper">
+              <h1 className="mn-header__title">Notifications</h1>
+              {unreadCount > 0 && <span className="mn-unread-pill">{unreadCount}</span>}
+            </div>
+            
+            <div className="mn-header-stats">
+              <div className="mn-h-stat">
+                <span className="value">{notifications.length}</span>
+                <span className="label">Total</span>
+              </div>
+              <div className="mn-h-stat">
+                <span className="value">{unreadCount}</span>
+                <span className="label">Unread</span>
+              </div>
+              <div className="mn-h-stat">
+                <span className="value">{starredCount}</span>
+                <span className="label">Starred</span>
+              </div>
+            </div>
+          </div>
         </div>
         
         <div className="mn-header__actions">
           <div className="mn-search-bar">
-            <Search size={16} />
+            <Search size={14} />
             <input 
               type="text" 
-              placeholder="Search notifications..." 
+              placeholder="Search..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
           <button className="mn-action-btn mn-action-btn--primary" onClick={markAllAsRead}>
-            <CheckCheck size={18} />
+            <CheckCheck size={16} />
             <span>Mark all read</span>
           </button>
           <button className="mn-icon-btn" onClick={() => navigate("/member/settings")}>
-            <Settings size={18} />
+            <Settings size={16} />
           </button>
         </div>
       </header>
@@ -262,29 +268,22 @@ const MemberNotifications: React.FC = () => {
               className={`mn-nav-item ${filter === 'all' ? 'active' : ''}`}
               onClick={() => setFilter('all')}
             >
-              <Inbox size={18} />
-              <span>All Notifications</span>
+              <Inbox size={16} />
+              <span>Inbox</span>
               {unreadCount > 0 && <span className="mn-nav-count">{unreadCount}</span>}
-            </button>
-            <button 
-              className={`mn-nav-item ${filter === 'unread' ? 'active' : ''}`}
-              onClick={() => setFilter('unread')}
-            >
-              <Bell size={18} />
-              <span>Unread</span>
             </button>
             <button 
               className={`mn-nav-item ${filter === 'starred' ? 'active' : ''}`}
               onClick={() => setFilter('starred')}
             >
-              <Star size={18} />
+              <Star size={16} />
               <span>Starred</span>
             </button>
             <button 
               className={`mn-nav-item ${filter === 'archived' ? 'active' : ''}`}
               onClick={() => setFilter('archived')}
             >
-              <Archive size={18} />
+              <Archive size={16} />
               <span>Archived</span>
             </button>
           </nav>
@@ -313,37 +312,26 @@ const MemberNotifications: React.FC = () => {
         <main className="mn-main">
           <AnimatePresence mode="wait">
             {isLoading ? (
-              <motion.div 
-                key="loading"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="mn-loading"
-              >
-                {[1, 2, 3, 4].map(i => (
+              <div className="mn-loading">
+                {[1, 2, 3, 4, 5].map(i => (
                   <div key={i} className="mn-skeleton" />
                 ))}
-              </motion.div>
+              </div>
             ) : filteredAndSearched.length === 0 ? (
               <motion.div
                 key="empty"
-                initial={{ opacity: 0, scale: 0.9 }}
+                initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
                 className="mn-empty"
               >
-                <div className="mn-empty-illustration">
-                  <div className="mn-empty-circle">
-                    <Bell size={40} />
-                  </div>
-                  <div className="mn-empty-sparkle sparkle-1" />
-                  <div className="mn-empty-sparkle sparkle-2" />
+                <div className="mn-empty-circle">
+                  <Bell size={32} />
                 </div>
-                <h3>All caught up!</h3>
-                <p>No notifications found matching your current filter.</p>
+                <h3>Clear for now</h3>
+                <p>No notifications found matching your filters.</p>
                 {filter !== 'all' && (
                   <button onClick={() => setFilter('all')} className="mn-clear-filter">
-                    Clear filters
+                    Back to Inbox
                   </button>
                 )}
               </motion.div>
@@ -362,7 +350,7 @@ const MemberNotifications: React.FC = () => {
                             <motion.div
                               key={notif.id}
                               layout
-                              initial={{ opacity: 0, y: 10 }}
+                              initial={{ opacity: 0, y: 5 }}
                               animate={{ opacity: 1, y: 0 }}
                               className={`mn-card ${!notif.isRead ? 'unread' : ''} ${notif.priority === 'urgent' ? 'urgent' : ''}`}
                               onClick={() => {
@@ -372,7 +360,7 @@ const MemberNotifications: React.FC = () => {
                             >
                               <div className="mn-card-main">
                                 <div className="mn-card-icon-box" style={{ backgroundColor: typeInfo.bg, color: typeInfo.color }}>
-                                  <Icon size={20} />
+                                  <Icon size={18} />
                                 </div>
                                 <div className="mn-card-content">
                                   <div className="mn-card-top">
@@ -382,8 +370,8 @@ const MemberNotifications: React.FC = () => {
                                   <p className="mn-card-msg">{notif.message}</p>
                                   {notif.link && (
                                     <div className="mn-card-link" style={{ color: typeInfo.color }}>
-                                      <span>View details</span>
-                                      <ArrowRight size={14} />
+                                      <span>View Details</span>
+                                      <ArrowRight size={12} />
                                     </div>
                                   )}
                                 </div>
@@ -394,21 +382,19 @@ const MemberNotifications: React.FC = () => {
                                   className={`mn-card-action-btn star ${notif.isStarred ? 'active' : ''}`}
                                   onClick={(e) => { e.stopPropagation(); toggleStar(notif.id); }}
                                 >
-                                  <Star size={16} fill={notif.isStarred ? "currentColor" : "none"} />
+                                  <Star size={14} fill={notif.isStarred ? "currentColor" : "none"} />
                                 </button>
                                 <button 
                                   className="mn-card-action-btn archive"
                                   onClick={(e) => { e.stopPropagation(); archiveNotification(notif.id); }}
-                                  title="Archive"
                                 >
-                                  <Archive size={16} />
+                                  <Archive size={14} />
                                 </button>
                                 <button 
                                   className="mn-card-action-btn delete"
                                   onClick={(e) => { e.stopPropagation(); deleteNotification(notif.id); }}
-                                  title="Delete"
                                 >
-                                  <Trash2 size={16} />
+                                  <Trash2 size={14} />
                                 </button>
                               </div>
                             </motion.div>
@@ -423,25 +409,6 @@ const MemberNotifications: React.FC = () => {
           </AnimatePresence>
         </main>
       </div>
-
-      <footer className="mn-footer">
-        <div className="mn-quick-stats">
-          <div className="mn-q-stat">
-            <span className="value">{notifications.length}</span>
-            <span className="label">Total Received</span>
-          </div>
-          <div className="mn-q-stat">
-            <span className="value">{unreadCount}</span>
-            <span className="label">Pending Review</span>
-          </div>
-          <div className="mn-q-stat">
-            <span className="value">
-              {notifications.filter(n => n.isStarred).length}
-            </span>
-            <span className="label">Starred Items</span>
-          </div>
-        </div>
-      </footer>
     </div>
   )
 }
