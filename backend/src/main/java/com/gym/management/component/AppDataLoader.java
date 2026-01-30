@@ -427,7 +427,7 @@ public class AppDataLoader implements CommandLineRunner {
         User aryan = createMemberIfNotFound("aryanfit3", "Aryan Fit", "AryanFit3@gmail.com", customerRole);
         ensureMembership.accept(aryan, standardPkg);
 
-        if (classBookingRepository.findByMemberUserId(aryan.getUserId()).isEmpty()) {
+        if (classBookingRepository.findByMemberUserIdOrderByBookedAtDesc(aryan.getUserId()).isEmpty()) {
             // Find existing classes to book
             java.util.List<GymClass> classes = gymClassRepository.findAll();
             if (!classes.isEmpty()) {
