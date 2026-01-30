@@ -20,6 +20,7 @@ public class NotificationController {
      * Get notifications for a user with optional filter
      */
     @GetMapping("/user/{userId}")
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public ResponseEntity<List<Notification>> getUserNotifications(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "all") String filter) {

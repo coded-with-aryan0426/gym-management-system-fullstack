@@ -11,9 +11,11 @@ import java.util.Optional;
 @Repository
 public interface MembershipRepository extends JpaRepository<Membership, Long> {
 
-    List<Membership> findByUserUserId(Long userId);
+    @org.springframework.data.jpa.repository.Query("SELECT m FROM Membership m LEFT JOIN FETCH m.membershipPackage WHERE m.user.userId = :userId")
+    List<Membership> findByUserUserId(@org.springframework.data.repository.query.Param("userId") Long userId);
 
-    List<Membership> findByUserUserIdAndStatus(Long userId, MembershipStatus status);
+    @org.springframework.data.jpa.repository.Query("SELECT m FROM Membership m LEFT JOIN FETCH m.membershipPackage WHERE m.user.userId = :userId AND m.status = :status")
+    List<Membership> findByUserUserIdAndStatus(@org.springframework.data.repository.query.Param("userId") Long userId, @org.springframework.data.repository.query.Param("status") MembershipStatus status);
 
     List<Membership> findByGymGymIdAndStatus(Long gymId, MembershipStatus status);
 

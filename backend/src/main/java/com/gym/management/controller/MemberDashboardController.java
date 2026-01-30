@@ -46,6 +46,7 @@ public class MemberDashboardController {
     private MemberProfileService memberProfileService;
 
     @GetMapping("/dashboard")
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public ResponseEntity<?> getDashboard(@RequestParam Long memberId) {
         try {
             Optional<User> memberOpt = userRepository.findById(memberId);
@@ -133,6 +134,7 @@ public class MemberDashboardController {
     }
 
     @GetMapping("/membership")
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public ResponseEntity<?> getMembership(@RequestParam Long memberId) {
         List<Membership> memberships = membershipRepository.findByUserUserId(memberId);
         if (memberships.isEmpty()) {

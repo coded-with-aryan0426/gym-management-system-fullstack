@@ -425,16 +425,23 @@ public class AppDataLoader implements CommandLineRunner {
         // 7. Seed Specific Member Data for AryanFit3@gmail.com
         // ============================================
         // User AryanFit3@gmail.com uses their email as username according to JWT logs
-        User aryan = userRepository.findByUsername("AryanFit3@gmail.com").orElseGet(() -> {
-            User u = new User();
-            u.setUsername("AryanFit3@gmail.com");
-            u.setFullName("Aryan Fit");
-            u.setEmail("AryanFit3@gmail.com");
-            u.setPassword(passwordEncoder.encode("password123"));
-            u.setRoles(new HashSet<>(Collections.singletonList(customerRole)));
-            u.setStatus("Active");
-            return userRepository.save(u);
-        });
+        java.util.List<User> aryanList = userRepository.findAll().stream()
+                .filter(u -> "AryanFit3@gmail.com".equals(u.getUsername()) || "AryanFit3@gmail.com".equals(u.getEmail()))
+                .collect(java.util.stream.Collectors.toList());
+        
+        User aryan;
+        if (!aryanList.isEmpty()) {
+            aryan = aryanList.get(0);
+        } else {
+            aryan = new User();
+            aryan.setUsername("AryanFit3@gmail.com");
+            aryan.setFullName("Aryan Fit");
+            aryan.setEmail("AryanFit3@gmail.com");
+            aryan.setPassword(passwordEncoder.encode("password123"));
+            aryan.setRoles(new HashSet<>(Collections.singletonList(customerRole)));
+            aryan.setStatus("Active");
+            aryan = userRepository.save(aryan);
+        }
         
         // Ensure standard monthly membership
         ensureMembership.accept(aryan, standardPkg);
