@@ -1,6 +1,5 @@
 package com.gym.management.dto.progress;
 
-import com.gym.management.model.MemberGoal;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;

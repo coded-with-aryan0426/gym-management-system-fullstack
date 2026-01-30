@@ -13,8 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -32,9 +30,6 @@ public class MemberTrainerController {
 
     @Autowired
     private SessionRatingRepository sessionRatingRepository;
-
-    @Autowired
-    private PTSessionRepository ptSessionRepository;
 
     @Autowired
     private ObjectMapper objectMapper;

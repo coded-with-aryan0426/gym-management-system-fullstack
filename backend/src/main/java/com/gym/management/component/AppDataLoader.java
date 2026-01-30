@@ -398,7 +398,7 @@ public class AppDataLoader implements CommandLineRunner {
             // Upcoming Classes
             GymClass yoga = createGymClass("Morning Yoga Flow", "YOGA", "A gentle morning flow.", trainer1, now.plusDays(1).withHour(8).withMinute(0), 60, 20, "Studio A", "Beginner");
             GymClass hiit = createGymClass("Evening HIIT Blast", "HIIT", "High-intensity training.", trainer1, now.withHour(18).withMinute(0), 45, 15, "Main Floor", "Advanced");
-            GymClass pilates = createGymClass("Core Pilates", "PILATES", "Strength and balance.", trainer1, now.plusDays(2).withHour(10).withMinute(0), 50, 12, "Studio B", "Intermediate");
+            createGymClass("Core Pilates", "PILATES", "Strength and balance.", trainer1, now.plusDays(2).withHour(10).withMinute(0), 50, 12, "Studio B", "Intermediate");
 
             // Past Class
             GymClass crossfit = createGymClass("CrossFit WOD", "CROSSFIT", "Daily workout.", trainer1, now.minusDays(1).withHour(7).withMinute(0), 60, 10, "Box", "Advanced");
@@ -460,12 +460,16 @@ public class AppDataLoader implements CommandLineRunner {
         }
 
         // Seed Notifications if none exist for this user
-        if (notificationRepository.countUnreadByUserId(aryan.getUserId()) == 0) {
-            createNotification(aryan, "Welcome Aryan!", "Your profile is now active. Check your schedule for upcoming sessions.", "WELCOME", "normal");
-            createNotification(aryan, "Subscription Active", "Your Standard Monthly membership is now active.", "SUBSCRIPTION", "high");
-            createNotification(aryan, "Upcoming Class", "You have a class scheduled for tomorrow.", "REMINDER", "urgent");
-            
-            System.out.println("✅ Seeded Notifications for AryanFit3@gmail.com");
+        for (User user : aryanList) {
+            if (notificationRepository.countByUserId(user.getUserId()) == 0) {
+                createNotification(user, "Welcome Aryan!", "Your profile is now active. Check your schedule for upcoming sessions.", "WELCOME", "normal");
+                createNotification(user, "Subscription Active", "Your Standard Monthly membership is now active.", "SUBSCRIPTION", "high");
+                createNotification(user, "Upcoming Class", "You have a class scheduled for tomorrow.", "REMINDER", "urgent");
+                
+                System.out.println("✅ Seeded Notifications for Aryan User ID: " + user.getUserId() + " (" + user.getUsername() + ")");
+            } else {
+                System.out.println("ℹ️ Notifications already exist for Aryan User ID: " + user.getUserId());
+            }
         }
     }
 

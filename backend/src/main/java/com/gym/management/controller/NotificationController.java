@@ -24,7 +24,9 @@ public class NotificationController {
     public ResponseEntity<List<Notification>> getUserNotifications(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "all") String filter) {
+        System.out.println("Fetching notifications for userId: " + userId + ", filter: " + filter);
         List<Notification> notifications = notificationService.getUserNotifications(userId, filter);
+        System.out.println("Found " + notifications.size() + " notifications for userId: " + userId);
         return ResponseEntity.ok(notifications);
     }
 
