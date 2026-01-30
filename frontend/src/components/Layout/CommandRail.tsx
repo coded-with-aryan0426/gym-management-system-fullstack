@@ -60,24 +60,24 @@ const CommandRail: React.FC<CommandRailProps> = ({ isCollapsed = false, onToggle
   const { user, logout } = useAuth();
   const { themeMode, setThemeMode } = useTheme();
   const navigate = useNavigate();
-  const role = user?.role || 'MEMBER';
-  const [isSlideUpOpen, setIsSlideUpOpen] = useState(false);
-  const location = useLocation();
-
-  const profileMenuRef = useRef<HTMLDivElement>(null);
-  useClickOutside(profileMenuRef, () => setIsSlideUpOpen(false), isSlideUpOpen);
-
-  const getSettingsPath = () => {
-    if (role === 'TRAINER') return '/trainer/settings';
-    if (role === 'MEMBER' || role === 'CUSTOMER') return '/member/settings';
-    return '/settings';
-  };
-
-  const getNotificationsPath = () => {
-    if (role === 'TRAINER') return '/trainer/notifications';
-    if (role === 'MEMBER' || role === 'CUSTOMER') return '/member/notifications';
-    return '/notifications';
-  };
+    const role = (user?.role || 'MEMBER').toUpperCase();
+    const [isSlideUpOpen, setIsSlideUpOpen] = useState(false);
+    const location = useLocation();
+  
+    const profileMenuRef = useRef<HTMLDivElement>(null);
+    useClickOutside(profileMenuRef, () => setIsSlideUpOpen(false), isSlideUpOpen);
+  
+    const getSettingsPath = () => {
+      if (role === 'TRAINER') return '/trainer/settings';
+      if (role === 'MEMBER' || role === 'CUSTOMER') return '/member/settings';
+      return '/settings';
+    };
+  
+    const getNotificationsPath = () => {
+      if (role === 'TRAINER') return '/trainer/notifications';
+      if (role === 'MEMBER' || role === 'CUSTOMER') return '/member/notifications';
+      return '/notifications';
+    };
 
   const itemsToRender = navItems === defaultNavItems ? navItems.filter(item => {
     if (role === 'OWNER' || role === 'ADMIN') return true;

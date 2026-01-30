@@ -366,47 +366,30 @@ const UtilityBar: React.FC = () => {
                   <span className="profile-panel__role">{user?.role || "MEMBER"}</span>
                 </div>
               </div>
-                <div className="profile-panel__menu">
-                  <button
-                    className="profile-panel__item"
-                    onClick={() => {
-                      setShowProfileMenu(false);
-                      if (userRole === 'TRAINER') navigate('/trainer/profile');
-                      else if (userRole === 'MEMBER' || userRole === 'CUSTOMER') navigate('/member/profile');
-                      else navigate('/settings');
-                    }}
-                  >
-                    <UserIcon size={16} /> Profile
-                  </button>
-                  <button
-                    className="profile-panel__item"
-                    onClick={() => {
-                      setShowProfileMenu(false);
-                      navigate(getSettingsPath());
-                    }}
-                  >
-                    <Settings size={16} /> Settings
-                  </button>
-                  <button
-                    className="profile-panel__item"
-                    onClick={() => {
-                      setShowProfileMenu(false);
-                      navigate(getNotificationsPath());
-                    }}
-                  >
-                    <Bell size={16} /> Notifications
-                  </button>
-                  <div className="utility-stat__divider" style={{ width: '100%', margin: '4px 0' }} />
-                  <button
-                    className="profile-panel__item profile-panel__item--danger"
-                    onClick={() => {
-                      setShowProfileMenu(false);
-                      logout();
-                    }}
-                  >
-                    <LogOut size={16} /> Log Out
-                  </button>
-                </div>
+                  <div className="profile-panel__menu">
+                    <button
+                      className="profile-panel__item"
+                      onClick={() => {
+                        setShowProfileMenu(false);
+                        const role = user?.role || 'MEMBER';
+                        if (role === 'TRAINER') navigate('/trainer/profile');
+                        else if (role === 'MEMBER' || role === 'CUSTOMER') navigate('/member/profile');
+                        else navigate('/dashboard/profile'); // Default fallback
+                      }}
+                    >
+                      <UserIcon size={16} /> Profile
+                    </button>
+                    <div className="utility-stat__divider" style={{ width: '100%', margin: '4px 0' }} />
+                    <button
+                      className="profile-panel__item profile-panel__item--danger"
+                      onClick={() => {
+                        setShowProfileMenu(false);
+                        logout();
+                      }}
+                    >
+                      <LogOut size={16} /> Log Out
+                    </button>
+                  </div>
             </div>
           )}
         </div>

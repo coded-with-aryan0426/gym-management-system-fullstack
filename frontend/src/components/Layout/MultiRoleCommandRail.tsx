@@ -94,15 +94,15 @@ const MultiRoleCommandRail: React.FC<MultiRoleCommandRailProps> = ({
 
     const navigationCategories = getNavigationByCategory()
   
+    const role = (user?.primaryRole || 'MEMBER').toUpperCase();
+  
     const getSettingsPath = () => {
-      const role = user?.primaryRole;
       if (role === 'TRAINER') return '/trainer/settings';
       if (role === 'MEMBER' || role === 'CUSTOMER') return '/member/settings';
       return '/settings';
     };
   
     const getNotificationsPath = () => {
-      const role = user?.primaryRole;
       if (role === 'TRAINER') return '/trainer/notifications';
       if (role === 'MEMBER' || role === 'CUSTOMER') return '/member/notifications';
       return '/notifications';
