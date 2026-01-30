@@ -425,7 +425,7 @@ public class AppDataLoader implements CommandLineRunner {
         // 7. Seed Specific Member Data for AryanFit3@gmail.com
         // ============================================
         // User AryanFit3@gmail.com uses their email as username according to JWT logs
-        User aryan = userRepository.findByEmail("AryanFit3@gmail.com").orElseGet(() -> {
+        User aryan = userRepository.findByUsername("AryanFit3@gmail.com").orElseGet(() -> {
             User u = new User();
             u.setUsername("AryanFit3@gmail.com");
             u.setFullName("Aryan Fit");

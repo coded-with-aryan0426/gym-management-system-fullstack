@@ -39,7 +39,9 @@ public class MemberProgressDataSeeder implements CommandLineRunner {
         List<User> members = userRepository.findByRoleName("MEMBER");
         
         if (members.isEmpty()) {
-            User devMember = userRepository.findByEmail("member@dev.com").orElse(null);
+            User devMember = userRepository.findByUsername("member").orElseGet(() -> 
+                userRepository.findByEmail("member@dev.com").stream().findFirst().orElse(null)
+            );
             if (devMember != null) {
                 members = List.of(devMember);
             } else {
