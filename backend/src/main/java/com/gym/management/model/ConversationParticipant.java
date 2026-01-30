@@ -48,6 +48,37 @@ public class ConversationParticipant {
     @Column(name = "accepted_at")
     private LocalDateTime acceptedAt;
 
+    // Explicit getters and setters for Lombok compatibility
+    public ParticipantId getId() { return id; }
+    public void setId(ParticipantId id) { this.id = id; }
+    
+    public Conversation getConversation() { return conversation; }
+    public void setConversation(Conversation conversation) { this.conversation = conversation; }
+    
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
+    
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
+    
+    public ParticipantStatus getStatus() { return status; }
+    public void setStatus(ParticipantStatus status) { this.status = status; }
+    
+    public Long getLastReadMessageId() { return lastReadMessageId; }
+    public void setLastReadMessageId(Long lastReadMessageId) { this.lastReadMessageId = lastReadMessageId; }
+    
+    public Boolean getIsMuted() { return isMuted; }
+    public void setIsMuted(Boolean isMuted) { this.isMuted = isMuted; }
+    
+    public Boolean getIsPinned() { return isPinned; }
+    public void setIsPinned(Boolean isPinned) { this.isPinned = isPinned; }
+    
+    public LocalDateTime getJoinedAt() { return joinedAt; }
+    public void setJoinedAt(LocalDateTime joinedAt) { this.joinedAt = joinedAt; }
+    
+    public LocalDateTime getAcceptedAt() { return acceptedAt; }
+    public void setAcceptedAt(LocalDateTime acceptedAt) { this.acceptedAt = acceptedAt; }
+
     public enum ParticipantStatus {
         PENDING, // Awaiting acceptance
         ACTIVE, // Normal active participant

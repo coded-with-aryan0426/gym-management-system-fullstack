@@ -13,6 +13,46 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class Message {
 
+    // Explicit getters and setters for Lombok compatibility
+    public Long getMessageId() { return messageId; }
+    public void setMessageId(Long messageId) { this.messageId = messageId; }
+    
+    public Conversation getConversation() { return conversation; }
+    public void setConversation(Conversation conversation) { this.conversation = conversation; }
+    
+    public User getSender() { return sender; }
+    public void setSender(User sender) { this.sender = sender; }
+    
+    public String getContent() { return content; }
+    public void setContent(String content) { this.content = content; }
+    
+    public String getContentType() { return contentType; }
+    public void setContentType(String contentType) { this.contentType = contentType; }
+    
+    public String getPayload() { return payload; }
+    public void setPayload(String payload) { this.payload = payload; }
+    
+    public Boolean getIsSystemMessage() { return isSystemMessage; }
+    public void setIsSystemMessage(Boolean isSystemMessage) { this.isSystemMessage = isSystemMessage; }
+    
+    public Long getReplyToMessageId() { return replyToMessageId; }
+    public void setReplyToMessageId(Long replyToMessageId) { this.replyToMessageId = replyToMessageId; }
+    
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    
+    public Boolean getIsDeleted() { return isDeleted; }
+    public void setIsDeleted(Boolean isDeleted) { this.isDeleted = isDeleted; }
+    
+    public java.util.List<MessageReaction> getReactions() { return reactions; }
+    public void setReactions(java.util.List<MessageReaction> reactions) { this.reactions = reactions; }
+    
+    public java.util.List<MessageEditHistory> getEditHistory() { return editHistory; }
+    public void setEditHistory(java.util.List<MessageEditHistory> editHistory) { this.editHistory = editHistory; }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "message_id")
