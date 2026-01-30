@@ -26,8 +26,6 @@ const MemberLayout: React.FC<MemberLayoutProps> = ({ children }) => {
         { path: '/member/trainer', icon: <UserCheck size={20} />, label: 'My Trainer', color: '#06B6D4' },
         { path: '/member/bookings', icon: <Calendar size={20} />, label: 'My Bookings', color: '#EC4899' },
         { path: '/member/messages', icon: <MessageSquare size={20} />, label: 'Messages', color: '#6366F1' },
-        { path: '/member/notifications', icon: <Bell size={20} />, label: 'Notifications', color: '#F97316' },
-        { path: '/member/settings', icon: <Settings size={20} />, label: 'Settings', color: '#64748B' },
     ];
 
     return (

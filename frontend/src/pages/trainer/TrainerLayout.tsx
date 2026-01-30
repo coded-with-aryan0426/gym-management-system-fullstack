@@ -66,9 +66,7 @@ const TrainerLayout: React.FC<TrainerLayoutProps> = ({ children }) => {
         { path: '/trainer/schedule', icon: <Calendar size={20} />, label: 'My Schedule', color: '#F59E0B' },
         { path: '/trainer/progress-notes', icon: <ClipboardList size={20} />, label: 'Progress Notes', color: '#EC4899' },
         { path: '/trainer/messages', icon: <MessageSquare size={20} />, label: 'Messages', color: '#06B6D4' },
-        { path: '/trainer/notifications', icon: <Bell size={20} />, label: 'Notifications', color: '#F97316' },
         { path: '/trainer/reports', icon: <TrendingUp size={20} />, label: 'Reports', color: '#6366F1' },
-        { path: '/trainer/settings', icon: <Settings size={20} />, label: 'Settings', color: '#64748B' },
     ];
 
     // FAB handlers

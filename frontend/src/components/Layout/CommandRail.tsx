@@ -67,6 +67,18 @@ const CommandRail: React.FC<CommandRailProps> = ({ isCollapsed = false, onToggle
   const profileMenuRef = useRef<HTMLDivElement>(null);
   useClickOutside(profileMenuRef, () => setIsSlideUpOpen(false), isSlideUpOpen);
 
+  const getSettingsPath = () => {
+    if (role === 'TRAINER') return '/trainer/settings';
+    if (role === 'MEMBER' || role === 'CUSTOMER') return '/member/settings';
+    return '/settings';
+  };
+
+  const getNotificationsPath = () => {
+    if (role === 'TRAINER') return '/trainer/notifications';
+    if (role === 'MEMBER' || role === 'CUSTOMER') return '/member/notifications';
+    return '/notifications';
+  };
+
   const itemsToRender = navItems === defaultNavItems ? navItems.filter(item => {
     if (role === 'OWNER' || role === 'ADMIN') return true;
     const restricted = ['/financials', '/reports'];
@@ -168,13 +180,18 @@ const CommandRail: React.FC<CommandRailProps> = ({ isCollapsed = false, onToggle
                       <span className="slide-panel__subtitle">{user?.email || "Account Settings"}</span>
                     </div>
                   </div>
-                  <div className="slide-panel__content">
-                    <button className="slide-panel__item" onClick={() => { setIsSlideUpOpen(false); navigate('/settings'); }}>
-                      <Settings size={14} />
-                      <span>Settings</span>
-                    </button>
-                  
-                  <div className="slide-panel__divider" />
+                    <div className="slide-panel__content">
+                      <button className="slide-panel__item" onClick={() => { setIsSlideUpOpen(false); navigate(getSettingsPath()); }}>
+                        <Settings size={14} />
+                        <span>Settings</span>
+                      </button>
+
+                      <button className="slide-panel__item" onClick={() => { setIsSlideUpOpen(false); navigate(getNotificationsPath()); }}>
+                        <Bell size={14} />
+                        <span>Notifications</span>
+                      </button>
+                    
+                    <div className="slide-panel__divider" />
                   
                   <div className="theme-switcher">
                     <button 
