@@ -33,8 +33,7 @@ import {
 import { toast } from "react-hot-toast"
 import { Toggle, Badge } from "../../components"
 import { useAuth } from "../../contexts/AuthContext"
-import { memberSettingsApi } from "../../services/memberSettingsApi"
-import type { MemberSettingsDTO } from "../../services/memberSettingsApi"
+import { memberSettingsApi, type MemberSettingsDTO } from "../../services/memberSettingsApi"
 import "./MemberSettings.css"
 
 type SettingSection =
