@@ -29,7 +29,7 @@ import {
 } from "lucide-react"
 import { toast } from "react-hot-toast"
 import { Badge } from "../../components"
-import { useAuth } from "../../hooks/useAuth"
+import { useAuth } from "../../contexts/AuthContext"
 import "./MemberNotifications.css"
 
 interface Notification {
