@@ -40,40 +40,58 @@ public class TrainerDetailsSeeder implements CommandLineRunner {
         };
 
         String[][] skillSets = {
-            {"Muscle Gain", "Bodybuilding", "Nutrition Planning"},
             {"Fat Loss", "HIIT", "Cardio Conditioning"},
-            {"Yoga", "Mobility", "Rehabilitation"},
-            {"Strength Training", "Powerlifting", "Olympic Lifting"},
-            {"Endurance", "Triathlon Prep", "Sports Nutrition"}
+            {"Muscle Building", "Powerlifting", "Hypertrophy"},
+            {"Bodyweight Strength", "Barbell Training", "Functional Strength"},
+            {"Cycling", "Running", "Circuit Training"},
+            {"Stretching", "Injury Prevention", "Post-Op Recovery"},
+            {"Vinyasa Flow", "Balance", "Flexibility"}
+        };
+
+        String[] skillCategories = {
+            "Weight Loss",
+            "Muscle Gain",
+            "Strength Training",
+            "Cardio & Endurance",
+            "Rehabilitation",
+            "Yoga / Mobility"
         };
 
         String[] specializationsList = {
-            "Bodybuilding,Hypertrophy,Nutrition",
-            "Weight Loss,HIIT,Cardio",
-            "Yoga,Mobility,Flexibility",
-            "Powerlifting,Strength,Athletics",
-            "Endurance,Performance,Stamina"
+            "Weight Loss,Cardio & Endurance",
+            "Muscle Gain,Strength Training",
+            "Strength Training,Muscle Gain",
+            "Cardio & Endurance,Weight Loss",
+            "Rehabilitation,Strength Training",
+            "Yoga / Mobility,Rehabilitation"
         };
 
         Random random = new Random();
 
         for (int i = 0; i < trainers.size(); i++) {
             User trainer = trainers.get(i);
-            if (!trainerDetailsRepository.existsById(trainer.getUserId())) {
-                TrainerDetails details = new TrainerDetails();
+            TrainerDetails details = trainerDetailsRepository.findById(trainer.getUserId())
+                .orElse(new TrainerDetails());
+            
+            if (details.getUser() == null) {
                 details.setUser(trainer);
+                details.setJoiningDate(LocalDate.now().minusYears(1).minusMonths(random.nextInt(12)));
+            }
+            
+            // Only update if no skills or specializations exist, or if they are "General"
+            if (details.getSkillsJson() == null || details.getSkillsJson().contains("\"category\": \"General\"") || details.getSpecializations() == null) {
                 details.setBio(bios[i % bios.length]);
                 details.setExperienceYears(3 + random.nextInt(10));
-                details.setJoiningDate(LocalDate.now().minusYears(1).minusMonths(random.nextInt(12)));
                 details.setSpecializations(specializationsList[i % specializationsList.length]);
                 
                 // Construct Skills JSON
                 String[] selectedSkills = skillSets[i % skillSets.length];
+                String category = skillCategories[i % skillCategories.length];
                 StringBuilder skillsJson = new StringBuilder("[");
                 for (int j = 0; j < selectedSkills.length; j++) {
                     skillsJson.append(String.format(
-                        "{\"name\": \"%s\", \"category\": \"General\", \"level\": \"Expert\", \"isPrimary\": %b}",
-                        selectedSkills[j], j == 0
+                        "{\"name\": \"%s\", \"category\": \"%s\", \"level\": \"Expert\", \"isPrimary\": %b}",
+                        selectedSkills[j], category, j == 0
                     ));
                     if (j < selectedSkills.length - 1) skillsJson.append(",");
                 }
@@ -81,7 +99,7 @@ public class TrainerDetailsSeeder implements CommandLineRunner {
                 details.setSkillsJson(skillsJson.toString());
                 
                 trainerDetailsRepository.save(details);
-                System.out.println("✅ Seeded details for trainer: " + trainer.getFullName());
+                System.out.println("✅ Updated details for trainer: " + trainer.getFullName());
             }
         }
     }

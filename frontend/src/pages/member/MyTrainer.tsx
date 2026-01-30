@@ -119,8 +119,8 @@ const MyTrainer: React.FC = () => {
                 (t.specializations && t.specializations.some(s => s.toLowerCase().includes(searchQuery.toLowerCase())));
             
             const matchesCategory = selectedCategory === 'All Skills' ||
-                (t.skills && t.skills.some(s => s.category === selectedCategory)) ||
-                (t.specializations && t.specializations.some(spec => spec.includes(selectedCategory)));
+                (t.skills && t.skills.some(s => s.category.trim() === selectedCategory)) ||
+                (t.specializations && t.specializations.some(spec => spec.trim() === selectedCategory));
             
             return matchesSearch && matchesCategory;
         });
@@ -331,8 +331,8 @@ const MyTrainer: React.FC = () => {
                                                             <div className="skill-section-label" style={{ marginBottom: '8px' }}>Active Specialties</div>
                                                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                                                                     {[...new Set([
-                                                                        ...(trainer.specializations || []),
-                                                                        ...(trainer.skills?.map(s => s.category) || [])
+                                                                        ...(trainer.specializations?.map(s => s.trim()) || []),
+                                                                        ...(trainer.skills?.map(s => s.category.trim()) || [])
                                                                     ])].filter(cat => SKILL_CATEGORIES.includes(cat) && cat !== 'All Skills').map((tag, i) => (
                                                                         <span key={i} className="skill-badge skill-badge--primary" style={{ padding: '4px 12px' }}>
                                                                             {tag}
@@ -404,8 +404,8 @@ const MyTrainer: React.FC = () => {
                                             
                                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '12px' }}>
                                                 {[...new Set([
-                                                    ...(trainer.specializations || []),
-                                                    ...(trainer.skills?.map(s => s.category) || [])
+                                                    ...(trainer.specializations?.map(s => s.trim()) || []),
+                                                    ...(trainer.skills?.map(s => s.category.trim()) || [])
                                                 ])].filter(cat => SKILL_CATEGORIES.includes(cat) && cat !== 'All Skills').slice(0, 3).map((tag, i) => (
                                                     <span key={i} className="skill-badge skill-badge--secondary" style={{ fontSize: '10px', padding: '2px 8px' }}>
                                                         {tag}
@@ -527,8 +527,8 @@ const MyTrainer: React.FC = () => {
                                                     </div>
                                                     <div className="skill-tags">
                                                         {[...new Set([
-                                                            ...(trainer.specializations || []),
-                                                            ...(trainer.skills?.map(s => s.category) || [])
+                                                            ...(trainer.specializations?.map(s => s.trim()) || []),
+                                                            ...(trainer.skills?.map(s => s.category.trim()) || [])
                                                         ])].filter(cat => SKILL_CATEGORIES.includes(cat) && cat !== 'All Skills').map((tag, idx) => (
                                                             <div key={idx} className="skill-badge skill-badge--secondary">
                                                                 {tag}
