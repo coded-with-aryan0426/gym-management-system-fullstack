@@ -8,7 +8,7 @@ interface LogoProps {
 }
 
 export const Logo = ({ size = 32, color = "#E63946", showText = true }: LogoProps) => (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, overflow: 'hidden' }}>
         {/* SVG Icon */}
         <Box
             sx={{
@@ -17,6 +17,7 @@ export const Logo = ({ size = 32, color = "#E63946", showText = true }: LogoProp
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                flexShrink: 0,
             }}
         >
             <svg
@@ -52,12 +53,15 @@ export const Logo = ({ size = 32, color = "#E63946", showText = true }: LogoProp
         {showText && (
             <Typography
                 sx={{
-                    fontSize: Math.max(16, size * 0.7),
+                    fontSize: Math.max(14, size * 0.65),
                     fontWeight: 800,
                     color: 'var(--text-primary)',
                     fontFamily: 'var(--font-heading)',
                     letterSpacing: '-0.5px',
                     lineHeight: 1,
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
                 }}
             >
                 AthlonX
