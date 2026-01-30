@@ -1,17 +1,18 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
-    Bell, Calendar, User, CheckCircle, Info,
-    Trash2, X, ChevronDown, Settings, MessageSquare,
+    Bell, Calendar, User, CheckCheck, Info,
+    Trash2, X, Settings, MessageSquare,
     TrendingUp, Clock, Star, Award, Target,
     AlertTriangle, DollarSign, Filter,
-    Archive,
-    Eye, Search
+    Archive, Search, ArrowRight, Inbox
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'react-hot-toast';
 import './TrainerNotifications.css';
 import { useAuth } from '../../contexts/AuthContext';
 import { notificationApi } from '../../api/notificationApi';
 
-// UI Interfaces (mapped from API)
 type NotificationType = 'booking' | 'cancellation' | 'member' | 'progress' | 'payment' |
     'reminder' | 'system' | 'achievement' | 'request' | 'message' | 'schedule';
 
@@ -39,698 +40,370 @@ interface Notification {
         avatar: string;
     };
     actions?: NotificationAction[];
-    meta?: {
-        date?: string;
-        time?: string;
-        location?: string;
-        amount?: string;
-        goal?: string;
-    };
     link?: string;
     groupId?: string;
 }
 
-interface NotificationGroup {
-    id: string;
-    label: string;
-    notifications: Notification[];
-}
-
 const TrainerNotifications: React.FC = () => {
+    const navigate = useNavigate();
     const { user } = useAuth();
     const [filter, setFilter] = useState<'all' | 'unread' | 'starred' | 'archived'>('all');
     const [typeFilter, setTypeFilter] = useState<NotificationType | 'all'>('all');
     const [searchQuery, setSearchQuery] = useState('');
-    const [showSettings, setShowSettings] = useState(false);
-    const [selectedNotifications, setSelectedNotifications] = useState<number[]>([]);
     const [notifications, setNotifications] = useState<Notification[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
 
-    // Fetch notifications
-    useEffect(() => {
-        if (!user?.userId) return;
-
-        const fetchNotifications = async () => {
-            setLoading(true);
-            try {
-                // Determine API filter based on UI filter
-                let apiFilter: 'all' | 'unread' | 'starred' | 'archived' = 'all';
-                if (filter === 'starred') apiFilter = 'starred';
-                if (filter === 'archived') apiFilter = 'archived';
-
-                const data = await notificationApi.getUserNotifications(Number(user.userId), apiFilter);
-
-                // Transform API data to UI model
-                const mapped: Notification[] = data.map(n => {
-                    let meta = {};
-                    let actions: NotificationAction[] = [];
-                    try {
-                        if (n.metaData) meta = JSON.parse(n.metaData);
-                        if (n.actionData) actions = JSON.parse(n.actionData);
-                    } catch (e) {
-                        console.error("Error parsing JSON", e);
-                    }
-
-                    // Calculate relative time
-                    const date = new Date(n.createdAt);
-                    const diff = Date.now() - date.getTime();
-                    let timeString = '';
-                    const minutes = Math.floor(diff / 60000);
-                    const hours = Math.floor(diff / 3600000);
-                    const days = Math.floor(diff / 86400000);
-
-                    if (minutes < 60) timeString = `${minutes} minutes ago`;
-                    else if (hours < 24) timeString = `${hours} hours ago`;
-                    else if (days < 2) timeString = 'Yesterday';
-                    else timeString = `${days} days ago`;
-
-                    // Determine Group ID
-                    let groupId = 'earlier';
-                    if (days === 0) groupId = 'today';
-                    else if (days === 1) groupId = 'yesterday';
-
-                    return {
-                        id: n.id,
-                        type: (n.type as NotificationType) || 'system',
-                        priority: (n.priority as NotificationPriority) || 'normal',
-                        title: n.title,
-                        message: n.message,
-                        time: timeString,
-                        timestamp: date,
-                        read: n.isRead,
-                        starred: n.isStarred,
-                        archived: n.isArchived,
-                        sender: n.senderId ? {
-                            name: `User ${n.senderId}`, // Placeholder until we have user lookup
-                            avatar: `https://ui-avatars.com/api/?name=User+${n.senderId}&background=random`
-                        } : undefined,
-                        actions: actions,
-                        meta: meta,
-                        link: n.link,
-                        groupId: groupId
-                    };
-                });
-
-                setNotifications(mapped);
-            } catch (error) {
-                console.error("Failed to fetch notifications", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchNotifications();
-    }, [user?.userId, filter]); // Refetch when main filter category changes
-
-    const [notificationSettings, setNotificationSettings] = useState({
-        bookings: true,
-        cancellations: true,
-        messages: true,
-        achievements: true,
-        reminders: true,
-        system: false,
-        payments: true,
-        sound: true,
-        email: true,
-        push: true
-    });
-
-    const getIcon = (type: NotificationType) => {
-        const icons: Record<NotificationType, React.ReactNode> = {
-            booking: <Calendar size={18} />,
-            cancellation: <X size={18} />,
-            member: <User size={18} />,
-            progress: <TrendingUp size={18} />,
-            payment: <DollarSign size={18} />,
-            reminder: <Clock size={18} />,
-            system: <Info size={18} />,
-            achievement: <Award size={18} />,
-            request: <Target size={18} />,
-            message: <MessageSquare size={18} />,
-            schedule: <Calendar size={18} />
-        };
-        return icons[type] || <Bell size={18} />;
-    };
-
-    const getTypeClass = (type: NotificationType) => {
-        const classes: Record<NotificationType, string> = {
-            booking: 'trainer-notif__icon--booking',
-            cancellation: 'trainer-notif__icon--cancellation',
-            member: 'trainer-notif__icon--member',
-            progress: 'trainer-notif__icon--progress',
-            payment: 'trainer-notif__icon--payment',
-            reminder: 'trainer-notif__icon--reminder',
-            system: 'trainer-notif__icon--system',
-            achievement: 'trainer-notif__icon--achievement',
-            request: 'trainer-notif__icon--request',
-            message: 'trainer-notif__icon--message',
-            schedule: 'trainer-notif__icon--schedule'
-        };
-        return classes[type] || '';
-    };
-
-    const getPriorityClass = (priority: NotificationPriority) => {
-        return `trainer-notif__priority--${priority}`;
-    };
-
-    const filteredNotifications = useMemo(() => {
-        return notifications.filter(n => {
-            if (filter === 'unread' && n.read) return false;
-            // API handles starred/archived fetching, but we might double check or handle 'all' view filtering
-            if (filter === 'all' && n.archived) return false; // Hide archived in All view
-
-            if (typeFilter !== 'all' && n.type !== typeFilter) return false;
-            if (searchQuery) {
-                const query = searchQuery.toLowerCase();
-                return n.title.toLowerCase().includes(query) ||
-                    n.message.toLowerCase().includes(query) ||
-                    n.sender?.name.toLowerCase().includes(query);
-            }
-            return true;
-        });
-    }, [notifications, filter, typeFilter, searchQuery]);
-
-    const groupedNotifications = useMemo(() => {
-        const groups: NotificationGroup[] = [
-            { id: 'today', label: 'Today', notifications: [] },
-            { id: 'yesterday', label: 'Yesterday', notifications: [] },
-            { id: 'earlier', label: 'Earlier', notifications: [] }
-        ];
-
-        filteredNotifications.forEach(n => {
-            const group = groups.find(g => g.id === n.groupId);
-            if (group) {
-                group.notifications.push(n);
-            } else {
-                groups[2].notifications.push(n); // Default to earlier
-            }
-        });
-
-        return groups.filter(g => g.notifications.length > 0);
-    }, [filteredNotifications]);
-
-    const stats = useMemo(() => ({
-        total: notifications.filter(n => !n.archived).length,
-        unread: notifications.filter(n => !n.read && !n.archived).length,
-        urgent: notifications.filter(n => n.priority === 'urgent' && !n.read && !n.archived).length,
-        starred: notifications.filter(n => n.starred && !n.archived).length
-    }), [notifications]);
-
-    const markAllRead = async () => {
+    const fetchNotifications = async () => {
         if (!user?.userId) return;
         try {
-            await notificationApi.markAllAsRead(Number(user.userId));
-            setNotifications(notifications.map(n => ({ ...n, read: true })));
+            const data = await notificationApi.getUserNotifications(Number(user.userId), filter);
+            const mapped: Notification[] = data.map(n => ({
+                id: n.id,
+                type: (n.type as NotificationType) || 'system',
+                priority: (n.priority as NotificationPriority) || 'normal',
+                title: n.title,
+                message: n.message,
+                time: formatDate(n.createdAt),
+                timestamp: new Date(n.createdAt),
+                read: n.isRead,
+                starred: n.isStarred,
+                archived: n.isArchived,
+                link: n.link,
+                groupId: getGroupId(n.createdAt)
+            }));
+            setNotifications(mapped);
         } catch (error) {
-            console.error("Failed to mark all read", error);
+            console.error("Failed to fetch notifications:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchNotifications();
+        const interval = setInterval(fetchNotifications, 30000);
+        return () => clearInterval(interval);
+    }, [user?.userId, filter]);
+
+    const formatDate = (dateStr: string) => {
+        const date = new Date(dateStr);
+        const now = new Date();
+        const diffMs = now.getTime() - date.getTime();
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        
+        if (diffMins < 1) return "Just now";
+        if (diffMins < 60) return `${diffMins}m ago`;
+        if (diffHours < 24) return `${diffHours}h ago`;
+        
+        const isToday = date.toDateString() === now.toDateString();
+        if (isToday) return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        
+        return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    };
+
+    const getGroupId = (dateStr: string) => {
+        const date = new Date(dateStr).toDateString();
+        const today = new Date().toDateString();
+        const yesterday = new Date(Date.now() - 86400000).toDateString();
+        if (date === today) return 'Today';
+        if (date === yesterday) return 'Yesterday';
+        return 'Earlier';
+    };
+
+    const getIcon = (type: NotificationType) => {
+        switch (type) {
+            case 'booking':
+            case 'schedule': return Calendar;
+            case 'cancellation': return X;
+            case 'member': return User;
+            case 'progress': return TrendingUp;
+            case 'payment': return DollarSign;
+            case 'reminder': return Clock;
+            case 'achievement': return Award;
+            case 'request': return Target;
+            case 'message': return MessageSquare;
+            default: return Bell;
+        }
+    };
+
+    const getTypeColor = (type: NotificationType, priority: string) => {
+        if (priority === 'urgent' || priority === 'high') return { color: "#FF3B30", bg: "rgba(255, 59, 48, 0.12)" };
+        switch (type) {
+            case 'booking':
+            case 'schedule': return { color: "#007AFF", bg: "rgba(0, 122, 255, 0.12)" };
+            case 'payment': return { color: "#34C759", bg: "rgba(52, 199, 89, 0.12)" };
+            case 'achievement': return { color: "#FF9500", bg: "rgba(255, 149, 0, 0.12)" };
+            case 'message': return { color: "#AF52DE", bg: "rgba(175, 82, 222, 0.12)" };
+            default: return { color: "#8E8E93", bg: "rgba(142, 142, 147, 0.12)" };
         }
     };
 
     const markAsRead = async (id: number) => {
         try {
             await notificationApi.markAsRead(id);
-            setNotifications(notifications.map(n => n.id === id ? { ...n, read: true } : n));
+            setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
         } catch (error) {
-            console.error("Failed to mark read", error);
+            toast.error("Action failed");
         }
     };
 
     const toggleStar = async (id: number) => {
         try {
             await notificationApi.toggleStar(id);
-            setNotifications(notifications.map(n => n.id === id ? { ...n, starred: !n.starred } : n));
+            setNotifications(prev => prev.map(n => n.id === id ? { ...n, starred: !n.starred } : n));
         } catch (error) {
-            console.error("Failed to toggle star", error);
+            toast.error("Action failed");
         }
     };
 
     const archiveNotification = async (id: number) => {
         try {
             await notificationApi.archive(id);
-            if (filter !== 'archived') {
-                setNotifications(notifications.filter(n => n.id !== id));
-            } else {
-                setNotifications(notifications.map(n => n.id === id ? { ...n, archived: true, read: true } : n));
-            }
+            setNotifications(prev => prev.filter(n => n.id !== id));
+            toast.success("Archived");
         } catch (error) {
-            console.error("Failed to archive", error);
+            toast.error("Action failed");
         }
     };
 
     const deleteNotification = async (id: number) => {
         try {
             await notificationApi.delete(id);
-            setNotifications(notifications.filter(n => n.id !== id));
+            setNotifications(prev => prev.filter(n => n.id !== id));
+            toast.success("Deleted");
         } catch (error) {
-            console.error("Failed to delete", error);
+            toast.error("Action failed");
         }
     };
 
-    const handleAction = (notifId: number, action: string) => {
-        console.log(`Action: ${action} for notification ${notifId}`);
-        // Here we would implement specific action logic (e.g. navigation, modal opening)
-        // For now, we assume actions imply handling, so we mark as read
-        markAsRead(notifId);
-    };
-
-    const toggleSelectNotification = (id: number) => {
-        setSelectedNotifications(prev =>
-            prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
-        );
-    };
-
-    const bulkMarkRead = async () => {
+    const markAllRead = async () => {
+        if (!user?.userId) return;
         try {
-            await notificationApi.bulkAction('read', selectedNotifications);
-            setNotifications(notifications.map(n =>
-                selectedNotifications.includes(n.id) ? { ...n, read: true } : n
-            ));
-            setSelectedNotifications([]);
+            await notificationApi.markAllAsRead(Number(user.userId));
+            setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+            toast.success("All marked as read");
         } catch (error) {
-            console.error("Failed bulk read", error);
+            toast.error("Action failed");
         }
     };
 
-    const bulkArchive = async () => {
-        try {
-            await notificationApi.bulkAction('archive', selectedNotifications);
-            if (filter !== 'archived') {
-                setNotifications(notifications.filter(n => !selectedNotifications.includes(n.id)));
-            } else {
-                setNotifications(notifications.map(n =>
-                    selectedNotifications.includes(n.id) ? { ...n, archived: true, read: true } : n
-                ));
-            }
-            setSelectedNotifications([]);
-        } catch (error) {
-            console.error("Failed bulk archive", error);
-        }
-    };
+    const filteredAndSearched = useMemo(() => {
+        return notifications
+            .filter(n => {
+                const matchesSearch = n.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                     n.message.toLowerCase().includes(searchQuery.toLowerCase());
+                if (!matchesSearch) return false;
+                if (typeFilter !== 'all' && n.type !== typeFilter) return false;
+                return true;
+            })
+            .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+    }, [notifications, searchQuery, typeFilter]);
 
-    const bulkDelete = async () => {
-        try {
-            await notificationApi.bulkAction('delete', selectedNotifications);
-            setNotifications(notifications.filter(n => !selectedNotifications.includes(n.id)));
-            setSelectedNotifications([]);
-        } catch (error) {
-            console.error("Failed bulk delete", error);
-        }
-    };
+    const groupedNotifications = useMemo(() => {
+        const groups: Record<string, Notification[]> = { Today: [], Yesterday: [], Earlier: [] };
+        filteredAndSearched.forEach(n => {
+            if (n.groupId && groups[n.groupId]) groups[n.groupId].push(n);
+            else groups.Earlier.push(n);
+        });
+        return groups;
+    }, [filteredAndSearched]);
 
-    const notificationTypes: { value: NotificationType | 'all'; label: string }[] = [
-        { value: 'all', label: 'All Types' },
-        { value: 'booking', label: 'Bookings' },
-        { value: 'cancellation', label: 'Cancellations' },
-        { value: 'message', label: 'Messages' },
-        { value: 'achievement', label: 'Achievements' },
-        { value: 'request', label: 'Requests' },
-        { value: 'progress', label: 'Progress' },
-        { value: 'reminder', label: 'Reminders' },
-        { value: 'payment', label: 'Payments' },
-        { value: 'system', label: 'System' }
-    ];
+    const stats = useMemo(() => ({
+        total: notifications.length,
+        unread: notifications.filter(n => !n.read).length,
+        starred: notifications.filter(n => n.starred).length
+    }), [notifications]);
 
     return (
-        <div className="trainer-notif">
-            <div className="trainer-notif__header">
-                <div className="trainer-notif__header-content">
-                    <div className="trainer-notif__title-section">
-                        <h1>Notifications</h1>
-                        {stats.unread > 0 && (
-                            <span className="trainer-notif__badge">{stats.unread} new</span>
-                        )}
-                        {stats.urgent > 0 && (
-                            <span className="trainer-notif__badge trainer-notif__badge--urgent">
-                                <AlertTriangle size={12} /> {stats.urgent} urgent
-                            </span>
-                        )}
-                    </div>
-
-                    <div className="trainer-notif__header-stats">
-                        <div className="trainer-notif__header-stat">
-                            <span className="trainer-notif__header-stat-value">{stats.total}</span>
-                            <span className="trainer-notif__header-stat-label">Total</span>
+        <div className="tn-page">
+            <header className="tn-header">
+                <div className="tn-header__left">
+                    <div className="tn-header__title-group">
+                        <div className="tn-header__title-wrapper">
+                            <h1 className="tn-header__title">Notifications</h1>
+                            {stats.unread > 0 && <span className="tn-unread-pill">{stats.unread}</span>}
                         </div>
-                        <div className="trainer-notif__header-stat">
-                            <span className="trainer-notif__header-stat-value">{stats.unread}</span>
-                            <span className="trainer-notif__header-stat-label">Unread</span>
-                        </div>
-                        <div className="trainer-notif__header-stat">
-                            <span className="trainer-notif__header-stat-value">{stats.starred}</span>
-                            <span className="trainer-notif__header-stat-label">Starred</span>
-                        </div>
-                    </div>
-
-                    <div className="trainer-notif__header-actions">
-                        <button
-                            className="trainer-notif__settings-btn"
-                            onClick={() => setShowSettings(!showSettings)}
-                            title="Notification Settings"
-                        >
-                            <Settings size={18} />
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div className="trainer-notif__content">
-                <div className="trainer-notif__toolbar">
-                    <div className="trainer-notif__toolbar-left">
-                        <div className="trainer-notif__search">
-                            <Search size={14} />
-                            <input
-                                type="text"
-                                placeholder="Search notifications..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                            />
-                        </div>
-
-                        <div className="trainer-notif__filter-toggle">
-                            <button
-                                className={filter === 'all' ? 'active' : ''}
-                                onClick={() => setFilter('all')}
-                            >
-                                All
-                            </button>
-                            <button
-                                className={filter === 'unread' ? 'active' : ''}
-                                onClick={() => setFilter('unread')}
-                            >
-                                Unread
-                                {stats.unread > 0 && <span>{stats.unread}</span>}
-                            </button>
-                            <button
-                                className={filter === 'starred' ? 'active' : ''}
-                                onClick={() => setFilter('starred')}
-                            >
-                                <Star size={12} />
-                            </button>
-                            <button
-                                className={filter === 'archived' ? 'active' : ''}
-                                onClick={() => setFilter('archived')}
-                            >
-                                <Archive size={12} />
-                            </button>
-                        </div>
-
-                        <div className="trainer-notif__type-filter">
-                            <Filter size={12} />
-                            <select
-                                value={typeFilter}
-                                onChange={(e) => setTypeFilter(e.target.value as NotificationType | 'all')}
-                            >
-                                {notificationTypes.map(t => (
-                                    <option key={t.value} value={t.value}>{t.label}</option>
-                                ))}
-                            </select>
-                            <ChevronDown size={12} />
-                        </div>
-                    </div>
-
-                    <div className="trainer-notif__toolbar-right">
-                        {selectedNotifications.length > 0 ? (
-                            <div className="trainer-notif__bulk-actions">
-                                <span>{selectedNotifications.length} selected</span>
-                                <button onClick={bulkMarkRead} title="Mark as read">
-                                    <Eye size={14} />
-                                </button>
-                                <button onClick={bulkArchive} title="Archive">
-                                    <Archive size={14} />
-                                </button>
-                                <button onClick={bulkDelete} className="danger" title="Delete">
-                                    <Trash2 size={14} />
-                                </button>
-                                <button onClick={() => setSelectedNotifications([])} title="Clear selection">
-                                    <X size={14} />
-                                </button>
+                        
+                        <div className="tn-header-stats">
+                            <div className="tn-h-stat">
+                                <span className="value">{stats.total}</span>
+                                <span className="label">Total</span>
                             </div>
-                        ) : (
-                            <button
-                                className="trainer-notif__mark-all"
-                                onClick={markAllRead}
-                                disabled={stats.unread === 0}
-                            >
-                                <CheckCircle size={14} />
-                                Mark all read
-                            </button>
-                        )}
+                            <div className="tn-h-stat">
+                                <span className="value">{stats.unread}</span>
+                                <span className="label">Unread</span>
+                            </div>
+                            <div className="tn-h-stat">
+                                <span className="value">{stats.starred}</span>
+                                <span className="label">Starred</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
+                
+                <div className="tn-header__actions">
+                    <div className="tn-search-bar">
+                        <Search size={14} />
+                        <input 
+                            type="text" 
+                            placeholder="Search..." 
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
+                    <button className="tn-action-btn tn-action-btn--primary" onClick={markAllRead}>
+                        <CheckCheck size={16} />
+                        <span>Mark all read</span>
+                    </button>
+                    <button className="tn-icon-btn" onClick={() => navigate("/trainer/settings")}>
+                        <Settings size={16} />
+                    </button>
+                </div>
+            </header>
 
-                <div className="trainer-notif__list">
-                    {loading ? (
-                        <div className="trainer-notif__empty">
-                            <p>Loading notifications...</p>
+            <div className="tn-layout">
+                <aside className="tn-sidebar">
+                    <nav className="tn-nav">
+                        <button 
+                            className={`tn-nav-item ${filter === 'all' ? 'active' : ''}`}
+                            onClick={() => setFilter('all')}
+                        >
+                            <Inbox size={16} />
+                            <span>Inbox</span>
+                            {stats.unread > 0 && <span className="tn-nav-count">{stats.unread}</span>}
+                        </button>
+                        <button 
+                            className={`tn-nav-item ${filter === 'starred' ? 'active' : ''}`}
+                            onClick={() => setFilter('starred')}
+                        >
+                            <Star size={16} />
+                            <span>Starred</span>
+                        </button>
+                        <button 
+                            className={`tn-nav-item ${filter === 'archived' ? 'active' : ''}`}
+                            onClick={() => setFilter('archived')}
+                        >
+                            <Archive size={16} />
+                            <span>Archived</span>
+                        </button>
+                    </nav>
+
+                    <div className="tn-sidebar-divider" />
+
+                    <div className="tn-sidebar-section">
+                        <span className="tn-section-label">Categories</span>
+                        <div className="tn-category-list">
+                            <button onClick={() => setTypeFilter('booking')} className={typeFilter === 'booking' ? 'active' : ''}>
+                                <div className="tn-cat-icon blue"><Calendar size={14} /></div>
+                                <span>Bookings</span>
+                            </button>
+                            <button onClick={() => setTypeFilter('payment')} className={typeFilter === 'payment' ? 'active' : ''}>
+                                <div className="tn-cat-icon green"><DollarSign size={14} /></div>
+                                <span>Payments</span>
+                            </button>
+                            <button onClick={() => setTypeFilter('message')} className={typeFilter === 'message' ? 'active' : ''}>
+                                <div className="tn-cat-icon purple"><MessageSquare size={14} /></div>
+                                <span>Messages</span>
+                            </button>
                         </div>
-                    ) : groupedNotifications.length === 0 ? (
-                        <div className="trainer-notif__empty">
-                            <Bell size={48} />
-                            <p>No notifications</p>
-                            <span>
-                                {filter === 'unread' ? 'You\'re all caught up!' :
-                                    filter === 'starred' ? 'No starred notifications' :
-                                        filter === 'archived' ? 'No archived notifications' :
-                                            'No notifications to show'}
-                            </span>
-                        </div>
-                    ) : (
-                        groupedNotifications.map(group => (
-                            <div key={group.id} className="trainer-notif__group">
-                                <h3 className="trainer-notif__group-label">{group.label}</h3>
-                                {group.notifications.map(notif => (
-                                    <div
-                                        key={notif.id}
-                                        className={`trainer-notif__item ${!notif.read ? 'trainer-notif__item--unread' : ''} ${notif.starred ? 'trainer-notif__item--starred' : ''} ${selectedNotifications.includes(notif.id) ? 'trainer-notif__item--selected' : ''} ${getPriorityClass(notif.priority)}`}
-                                    >
-                                        <div className="trainer-notif__checkbox">
-                                            <input
-                                                type="checkbox"
-                                                checked={selectedNotifications.includes(notif.id)}
-                                                onChange={() => toggleSelectNotification(notif.id)}
-                                            />
-                                        </div>
+                    </div>
+                </aside>
 
-                                        {notif.sender ? (
-                                            <div className="trainer-notif__avatar">
-                                                <img src={notif.sender.avatar} alt={notif.sender.name} />
-                                                <div className={`trainer-notif__type-badge ${getTypeClass(notif.type)}`}>
-                                                    {getIcon(notif.type)}
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            <div className={`trainer-notif__icon ${getTypeClass(notif.type)}`}>
-                                                {getIcon(notif.type)}
-                                            </div>
-                                        )}
+                <main className="tn-main">
+                    <AnimatePresence mode="wait">
+                        {isLoading ? (
+                            <div className="tn-loading">
+                                {[1, 2, 3, 4, 5].map(i => (
+                                    <div key={i} className="tn-skeleton" />
+                                ))}
+                            </div>
+                        ) : filteredAndSearched.length === 0 ? (
+                            <motion.div
+                                key="empty"
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="tn-empty"
+                            >
+                                <div className="tn-empty-circle">
+                                    <Bell size={32} />
+                                </div>
+                                <h3>Clear for now</h3>
+                                <p>No notifications found matching your filters.</p>
+                                {filter !== 'all' && (
+                                    <button onClick={() => setFilter('all')} className="tn-clear-filter">
+                                        Back to Inbox
+                                    </button>
+                                )}
+                            </motion.div>
+                        ) : (
+                            <div className="tn-scroll-area">
+                                {Object.entries(groupedNotifications).map(([group, items]) => (
+                                    items.length > 0 && (
+                                        <div key={group} className="tn-group">
+                                            <h3 className="tn-group-label">{group}</h3>
+                                            <div className="tn-items-stack">
+                                                {items.map((notif) => {
+                                                    const typeInfo = getTypeColor(notif.type, notif.priority);
+                                                    const Icon = getIcon(notif.type);
 
-                                        <div className="trainer-notif__info" onClick={() => markAsRead(notif.id)}>
-                                            <div className="trainer-notif__item-header">
-                                                <div className="trainer-notif__title-row">
-                                                    <h4>{notif.title}</h4>
-                                                    {notif.priority === 'urgent' && (
-                                                        <span className="trainer-notif__urgent-tag">
-                                                            <AlertTriangle size={10} /> Urgent
-                                                        </span>
-                                                    )}
-                                                    {notif.priority === 'high' && (
-                                                        <span className="trainer-notif__high-tag">High Priority</span>
-                                                    )}
-                                                </div>
-                                                <span className="trainer-notif__time">{notif.time}</span>
-                                            </div>
-                                            <p className="trainer-notif__message">{notif.message}</p>
-
-                                            {notif.meta && (
-                                                <div className="trainer-notif__meta">
-                                                    {notif.meta.date && (
-                                                        <span><Calendar size={11} /> {notif.meta.date}</span>
-                                                    )}
-                                                    {notif.meta.time && (
-                                                        <span><Clock size={11} /> {notif.meta.time}</span>
-                                                    )}
-                                                    {notif.meta.location && (
-                                                        <span><Target size={11} /> {notif.meta.location}</span>
-                                                    )}
-                                                    {notif.meta.amount && (
-                                                        <span className="trainer-notif__amount">
-                                                            <DollarSign size={11} /> {notif.meta.amount}
-                                                        </span>
-                                                    )}
-                                                    {notif.meta.goal && (
-                                                        <span className="trainer-notif__goal">
-                                                            <Award size={11} /> {notif.meta.goal}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            )}
-
-                                            {notif.actions && notif.actions.length > 0 && (
-                                                <div className="trainer-notif__actions">
-                                                    {notif.actions.map((action, i) => (
-                                                        <button
-                                                            key={i}
-                                                            className={`trainer-notif__action-btn trainer-notif__action-btn--${action.type}`}
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                handleAction(notif.id, action.action);
+                                                    return (
+                                                        <motion.div
+                                                            key={notif.id}
+                                                            layout
+                                                            initial={{ opacity: 0, y: 5 }}
+                                                            animate={{ opacity: 1, y: 0 }}
+                                                            className={`tn-card ${!notif.read ? 'unread' : ''} ${notif.priority === 'urgent' ? 'urgent' : ''}`}
+                                                            onClick={() => {
+                                                                if (!notif.read) markAsRead(notif.id);
+                                                                if (notif.link) navigate(notif.link);
                                                             }}
                                                         >
-                                                            {action.label}
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            )}
+                                                            <div className="tn-card-main">
+                                                                <div className="tn-card-icon-box" style={{ backgroundColor: typeInfo.bg, color: typeInfo.color }}>
+                                                                    <Icon size={18} />
+                                                                </div>
+                                                                <div className="tn-card-content">
+                                                                    <div className="tn-card-top">
+                                                                        <span className="tn-card-title">{notif.title}</span>
+                                                                        <span className="tn-card-time">{notif.time}</span>
+                                                                    </div>
+                                                                    <p className="tn-card-msg">{notif.message}</p>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <div className="tn-card-actions">
+                                                                <button 
+                                                                    className={`tn-card-action-btn star ${notif.starred ? 'active' : ''}`}
+                                                                    onClick={(e) => { e.stopPropagation(); toggleStar(notif.id); }}
+                                                                >
+                                                                    <Star size={14} fill={notif.starred ? "currentColor" : "none"} />
+                                                                </button>
+                                                                <button 
+                                                                    className="tn-card-action-btn archive"
+                                                                    onClick={(e) => { e.stopPropagation(); archiveNotification(notif.id); }}
+                                                                >
+                                                                    <Archive size={14} />
+                                                                </button>
+                                                                <button 
+                                                                    className="tn-card-action-btn delete"
+                                                                    onClick={(e) => { e.stopPropagation(); deleteNotification(notif.id); }}
+                                                                >
+                                                                    <Trash2 size={14} />
+                                                                </button>
+                                                            </div>
+                                                        </motion.div>
+                                                    )
+                                                })}
+                                            </div>
                                         </div>
-
-                                        <div className="trainer-notif__item-actions">
-                                            <button
-                                                className={`trainer-notif__star-btn ${notif.starred ? 'active' : ''}`}
-                                                onClick={() => toggleStar(notif.id)}
-                                                title={notif.starred ? 'Unstar' : 'Star'}
-                                            >
-                                                <Star size={14} fill={notif.starred ? 'currentColor' : 'none'} />
-                                            </button>
-                                            {!notif.read && (
-                                                <button
-                                                    className="trainer-notif__btn"
-                                                    onClick={() => markAsRead(notif.id)}
-                                                    title="Mark as read"
-                                                >
-                                                    <Eye size={14} />
-                                                </button>
-                                            )}
-                                            <button
-                                                className="trainer-notif__btn"
-                                                onClick={() => archiveNotification(notif.id)}
-                                                title="Archive"
-                                            >
-                                                <Archive size={14} />
-                                            </button>
-                                            <button
-                                                className="trainer-notif__btn trainer-notif__btn--danger"
-                                                onClick={() => deleteNotification(notif.id)}
-                                                title="Delete"
-                                            >
-                                                <Trash2 size={14} />
-                                            </button>
-                                        </div>
-                                    </div>
+                                    )
                                 ))}
                             </div>
-                        ))
-                    )}
-                </div>
-
-                {filteredNotifications.length > 10 && (
-                    <button className="trainer-notif__load-more">
-                        Load More Notifications
-                    </button>
-                )}
+                        )}
+                    </AnimatePresence>
+                </main>
             </div>
-
-            {showSettings && (
-                <div className="trainer-notif__settings-modal-overlay" onClick={() => setShowSettings(false)}>
-                    <div className="trainer-notif__settings-modal" onClick={e => e.stopPropagation()}>
-                        <div className="trainer-notif__settings-header">
-                            <h2>Notification Settings</h2>
-                            <button onClick={() => setShowSettings(false)}>
-                                <X size={18} />
-                            </button>
-                        </div>
-                        <div className="trainer-notif__settings-body">
-                            <div className="trainer-notif__settings-section">
-                                <h3>Notification Types</h3>
-                                <p>Choose which notifications you want to receive</p>
-                                <div className="trainer-notif__settings-list">
-                                    <label className="trainer-notif__setting-item">
-                                        <div className="trainer-notif__setting-info">
-                                            <Calendar size={16} />
-                                            <span>Session Bookings</span>
-                                        </div>
-                                        <input
-                                            type="checkbox"
-                                            checked={notificationSettings.bookings}
-                                            onChange={(e) => setNotificationSettings(prev => ({ ...prev, bookings: e.target.checked }))}
-                                        />
-                                    </label>
-                                    <label className="trainer-notif__setting-item">
-                                        <div className="trainer-notif__setting-info">
-                                            <X size={16} />
-                                            <span>Cancellations</span>
-                                        </div>
-                                        <input
-                                            type="checkbox"
-                                            checked={notificationSettings.cancellations}
-                                            onChange={(e) => setNotificationSettings(prev => ({ ...prev, cancellations: e.target.checked }))}
-                                        />
-                                    </label>
-                                    <label className="trainer-notif__setting-item">
-                                        <div className="trainer-notif__setting-info">
-                                            <MessageSquare size={16} />
-                                            <span>Messages</span>
-                                        </div>
-                                        <input
-                                            type="checkbox"
-                                            checked={notificationSettings.messages}
-                                            onChange={(e) => setNotificationSettings(prev => ({ ...prev, messages: e.target.checked }))}
-                                        />
-                                    </label>
-                                    <label className="trainer-notif__setting-item">
-                                        <div className="trainer-notif__setting-info">
-                                            <Award size={16} />
-                                            <span>Member Achievements</span>
-                                        </div>
-                                        <input
-                                            type="checkbox"
-                                            checked={notificationSettings.achievements}
-                                            onChange={(e) => setNotificationSettings(prev => ({ ...prev, achievements: e.target.checked }))}
-                                        />
-                                    </label>
-                                    <label className="trainer-notif__setting-item">
-                                        <div className="trainer-notif__setting-info">
-                                            <Clock size={16} />
-                                            <span>Reminders</span>
-                                        </div>
-                                        <input
-                                            type="checkbox"
-                                            checked={notificationSettings.reminders}
-                                            onChange={(e) => setNotificationSettings(prev => ({ ...prev, reminders: e.target.checked }))}
-                                        />
-                                    </label>
-                                    <label className="trainer-notif__setting-item">
-                                        <div className="trainer-notif__setting-info">
-                                            <DollarSign size={16} />
-                                            <span>Payments & Commission</span>
-                                        </div>
-                                        <input
-                                            type="checkbox"
-                                            checked={notificationSettings.payments}
-                                            onChange={(e) => setNotificationSettings(prev => ({ ...prev, payments: e.target.checked }))}
-                                        />
-                                    </label>
-                                    <label className="trainer-notif__setting-item">
-                                        <div className="trainer-notif__setting-info">
-                                            <Info size={16} />
-                                            <span>System Updates</span>
-                                        </div>
-                                        <input
-                                            type="checkbox"
-                                            checked={notificationSettings.system}
-                                            onChange={(e) => setNotificationSettings(prev => ({ ...prev, system: e.target.checked }))}
-                                        />
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="trainer-notif__settings-footer">
-                            <button className="trainer-notif__save-btn" onClick={() => setShowSettings(false)}>
-                                Save Changes
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 };
