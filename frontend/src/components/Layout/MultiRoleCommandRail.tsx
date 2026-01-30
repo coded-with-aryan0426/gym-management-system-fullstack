@@ -92,9 +92,23 @@ const MultiRoleCommandRail: React.FC<MultiRoleCommandRailProps> = ({
   const navigate = useNavigate()
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
 
-  const navigationCategories = getNavigationByCategory()
-
-  const getIcon = (id: string, color: string, isActive: boolean) => {
+    const navigationCategories = getNavigationByCategory()
+  
+    const getSettingsPath = () => {
+      const role = user?.primaryRole;
+      if (role === 'TRAINER') return '/trainer/settings';
+      if (role === 'MEMBER' || role === 'CUSTOMER') return '/member/settings';
+      return '/settings';
+    };
+  
+    const getNotificationsPath = () => {
+      const role = user?.primaryRole;
+      if (role === 'TRAINER') return '/trainer/notifications';
+      if (role === 'MEMBER' || role === 'CUSTOMER') return '/member/notifications';
+      return '/notifications';
+    };
+  
+    const getIcon = (id: string, color: string, isActive: boolean) => {
     const IconComponent = iconMap[id] || Settings
     return (
       <IconComponent 
@@ -252,13 +266,18 @@ const MultiRoleCommandRail: React.FC<MultiRoleCommandRailProps> = ({
                       </div>
                     </div>
                   </div>
-                  <div className="slide-panel__content">
-                    <button className="slide-panel__item" onClick={() => { setIsUserMenuOpen(false); navigate('/member/settings'); }}>
-                      <Settings size={14} />
-                      <span>Settings</span>
-                    </button>
-                  
-                  <div className="slide-panel__divider" />
+                    <div className="slide-panel__content">
+                      <button className="slide-panel__item" onClick={() => { setIsUserMenuOpen(false); navigate(getSettingsPath()); }}>
+                        <Settings size={14} />
+                        <span>Settings</span>
+                      </button>
+
+                      <button className="slide-panel__item" onClick={() => { setIsUserMenuOpen(false); navigate(getNotificationsPath()); }}>
+                        <Bell size={14} />
+                        <span>Notifications</span>
+                      </button>
+                    
+                    <div className="slide-panel__divider" />
                   
                   <div className="theme-switcher">
                     <button 

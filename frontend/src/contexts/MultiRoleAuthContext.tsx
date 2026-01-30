@@ -100,15 +100,6 @@ export const NAVIGATION_CONFIG: NavItem[] = [
     order: 1
   },
   {
-    id: 'notifications',
-    path: '/notifications',
-    label: 'Notifications',
-    icon: navigationIcons.notifications,
-    requiredRoles: ['OWNER', 'ADMIN'],
-    category: 'main',
-    order: 1.5
-  },
-  {
     id: 'members',
     path: '/members',
     label: 'Members',
@@ -323,49 +314,6 @@ export const NAVIGATION_CONFIG: NavItem[] = [
         icon: navigationIcons.equipment,
         requiredPermissions: ['EQUIPMENT_MAINTENANCE'],
         order: 1
-      }
-    ]
-  },
-  {
-    id: 'settings',
-    path: '/settings',
-    label: 'Settings',
-    icon: navigationIcons.settings,
-    requiredPermissions: ['SYSTEM_SETTINGS'],
-    category: 'system',
-    order: 16,
-    children: [
-      {
-        id: 'gym-settings',
-        path: '/settings/gym',
-        label: 'Gym Settings',
-        icon: navigationIcons.settings,
-        requiredPermissions: ['GYM_MANAGE_SETTINGS'],
-        order: 1
-      },
-      {
-        id: 'user-management',
-        path: '/settings/users',
-        label: 'User Management',
-        icon: navigationIcons.members,
-        requiredPermissions: ['USER_CREATE', 'USER_UPDATE', 'USER_DELETE'],
-        order: 2
-      },
-      {
-        id: 'role-management',
-        path: '/settings/roles',
-        label: 'Role Management',
-        icon: navigationIcons.settings,
-        requiredPermissions: ['USER_ASSIGN_ROLES'],
-        order: 3
-      },
-      {
-        id: 'system-admin',
-        path: '/settings/system',
-        label: 'System Administration',
-        icon: navigationIcons.settings,
-        requiredPermissions: ['SYSTEM_BACKUP', 'MAINTENANCE_MODE'],
-        order: 4
       }
     ]
   }

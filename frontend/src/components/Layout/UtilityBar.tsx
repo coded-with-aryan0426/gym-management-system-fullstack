@@ -3,7 +3,7 @@
 import type React from "react"
 import { useState, useRef, useEffect, useCallback, Fragment } from "react"
 import { useNavigate } from "react-router-dom"
-import { Sun, Moon, Clock, Calendar, Users, UserPlus, TrendingUp, Dumbbell, Zap, LogOut, Settings, User as UserIcon } from "lucide-react"
+import { Sun, Moon, Clock, Calendar, Users, UserPlus, TrendingUp, Dumbbell, Zap, LogOut, Settings, User as UserIcon, Bell } from "lucide-react"
 import api from "../../services/api"
 import type { User } from "../../types/user"
 import { useMembers } from '../../contexts/MembersContext'
@@ -126,9 +126,21 @@ const UtilityBar: React.FC = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
-  const userRole = user?.role || 'MEMBER';
-
-  const performSearch = useCallback(async (query: string) => {
+    const userRole = user?.role || 'MEMBER';
+  
+    const getSettingsPath = () => {
+      if (userRole === 'TRAINER') return '/trainer/settings';
+      if (userRole === 'MEMBER' || userRole === 'CUSTOMER') return '/member/settings';
+      return '/settings';
+    };
+  
+    const getNotificationsPath = () => {
+      if (userRole === 'TRAINER') return '/trainer/notifications';
+      if (userRole === 'MEMBER' || userRole === 'CUSTOMER') return '/member/notifications';
+      return '/notifications';
+    };
+  
+    const performSearch = useCallback(async (query: string) => {
     if (!query.trim()) {
       setSearchResults([])
       setShowSearchResults(false)
@@ -320,76 +332,6 @@ const UtilityBar: React.FC = () => {
       </div>
 
       <div className="utility-bar__actions">
-
-        <div className="utility-bar__dropdown" ref={notificationRef}>
-          <button
-            className={`utility-bar__icon-btn ${unreadCount > 0 ? 'utility-bar__icon-btn--has-notifications' : ''}`}
-            title="Notifications"
-            onClick={() => setShowNotifications(!showNotifications)}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-            </svg>
-            {unreadCount > 0 && <span className="utility-bar__badge utility-bar__badge--pulse">{unreadCount}</span>}
-          </button>
-          {showNotifications && (
-            <div className="utility-bar__dropdown-menu notifications-panel notifications-panel--premium">
-              <div className="notifications-panel__header">
-                <div className="notifications-panel__header-content">
-                  <h3>Notifications</h3>
-                  <span className="notifications-panel__count">{unreadCount} new</span>
-                </div>
-                <button className="notifications-panel__mark-all">Mark all read</button>
-              </div>
-              <div className="notifications-panel__list">
-                {notifications.map((notification) => (
-                  <div
-                    key={notification.id}
-                    className={`notification-item notification-item--premium ${!notification.read ? "notification-item--unread" : ""}`}
-                  >
-                    <div className="notification-item__icon-wrapper">
-                      {getNotificationIcon(notification.type)}
-                      {!notification.read && <span className="notification-item__unread-dot" />}
-                    </div>
-                    <div className="notification-item__content">
-                      <p className="notification-item__title">
-                        <span className="notification-item__category">{notification.title}</span>
-                        <span className="notification-item__message">{notification.message}</span>
-                      </p>
-                      <div className="notification-item__meta">
-                        <span className="notification-item__time">
-                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <circle cx="12" cy="12" r="10" />
-                            <polyline points="12 6 12 12 16 14" />
-                          </svg>
-                          {notification.time}
-                        </span>
-                        <span className={`notification-item__type notification-item__type--${notification.type}`}>
-                          {notification.type}
-                        </span>
-                      </div>
-                    </div>
-                    <button className="notification-item__action">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <polyline points="9 18 15 12 9 6" />
-                      </svg>
-                    </button>
-                  </div>
-                ))}
-              </div>
-              <div className="notifications-panel__footer">
-                <button className="notifications-panel__view-all">
-                  View All Notifications
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <polyline points="9 18 15 12 9 6" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-
         <button
           className="utility-bar__theme-toggle"
           onClick={toggleTheme}
@@ -424,38 +366,47 @@ const UtilityBar: React.FC = () => {
                   <span className="profile-panel__role">{user?.role || "MEMBER"}</span>
                 </div>
               </div>
-              <div className="profile-panel__menu">
-                <button
-                  className="profile-panel__item"
-                  onClick={() => {
-                    setShowProfileMenu(false);
-                    if (userRole === 'TRAINER') navigate('/trainer/profile');
-                    else if (userRole === 'MEMBER') navigate('/member/profile');
-                    else navigate('/settings');
-                  }}
-                >
-                  <UserIcon /> Profile
-                </button>
-                <button
-                  className="profile-panel__item"
-                  onClick={() => {
-                    setShowProfileMenu(false);
-                    navigate('/settings');
-                  }}
-                >
-                  <Settings /> Settings
-                </button>
-                <div className="utility-stat__divider" style={{ width: '100%', margin: '4px 0' }} />
-                <button
-                  className="profile-panel__item profile-panel__item--danger"
-                  onClick={() => {
-                    setShowProfileMenu(false);
-                    logout();
-                  }}
-                >
-                  <LogOut /> Log Out
-                </button>
-              </div>
+                <div className="profile-panel__menu">
+                  <button
+                    className="profile-panel__item"
+                    onClick={() => {
+                      setShowProfileMenu(false);
+                      if (userRole === 'TRAINER') navigate('/trainer/profile');
+                      else if (userRole === 'MEMBER' || userRole === 'CUSTOMER') navigate('/member/profile');
+                      else navigate('/settings');
+                    }}
+                  >
+                    <UserIcon size={16} /> Profile
+                  </button>
+                  <button
+                    className="profile-panel__item"
+                    onClick={() => {
+                      setShowProfileMenu(false);
+                      navigate(getSettingsPath());
+                    }}
+                  >
+                    <Settings size={16} /> Settings
+                  </button>
+                  <button
+                    className="profile-panel__item"
+                    onClick={() => {
+                      setShowProfileMenu(false);
+                      navigate(getNotificationsPath());
+                    }}
+                  >
+                    <Bell size={16} /> Notifications
+                  </button>
+                  <div className="utility-stat__divider" style={{ width: '100%', margin: '4px 0' }} />
+                  <button
+                    className="profile-panel__item profile-panel__item--danger"
+                    onClick={() => {
+                      setShowProfileMenu(false);
+                      logout();
+                    }}
+                  >
+                    <LogOut size={16} /> Log Out
+                  </button>
+                </div>
             </div>
           )}
         </div>
