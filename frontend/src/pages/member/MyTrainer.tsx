@@ -521,17 +521,25 @@ const MyTrainer: React.FC = () => {
                                                 </p>
 
                                                 <div className="trainer-card__skills">
+                                                    <div className="skill-section-label" style={{ fontSize: '10px', color: 'var(--macos-text-tertiary)', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                                        Core Expertise
+                                                    </div>
                                                     <div className="skill-tags">
-                                                        {trainer.specializations?.slice(0, 2).map((spec, idx) => (
+                                                        {trainer.specializations?.slice(0, 3).map((spec, idx) => (
                                                             <div key={`spec-${idx}`} className="skill-badge skill-badge--primary">
                                                                 {spec}
                                                             </div>
                                                         ))}
-                                                        {trainer.skills?.slice(0, 2).map((skill, idx) => (
+                                                        {trainer.skills?.slice(0, 3).map((skill, idx) => (
                                                             <div key={idx} className="skill-badge skill-badge--secondary">
                                                                 {skill.name}
                                                             </div>
                                                         ))}
+                                                        {(trainer.specializations?.length || 0) + (trainer.skills?.length || 0) > 6 && (
+                                                            <div className="skill-badge skill-badge--more">
+                                                                +{(trainer.specializations?.length || 0) + (trainer.skills?.length || 0) - 6}
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
 
