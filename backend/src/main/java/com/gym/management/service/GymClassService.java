@@ -89,6 +89,7 @@ public class GymClassService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<GymClassDTO> getAvailableClasses(Long memberId) {
         LocalDateTime now = LocalDateTime.now();
         List<GymClass> classes = gymClassRepository.findByStartTimeAfterAndStatusOrderByStartTimeAsc(now, GymClass.ClassStatus.SCHEDULED);
@@ -109,6 +110,7 @@ public class GymClassService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<GymClassDTO> getTodaysClasses(Long memberId) {
         LocalDate today = LocalDate.now();
         LocalDateTime startOfDay = today.atStartOfDay();
@@ -133,6 +135,7 @@ public class GymClassService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<ClassBookingDTO> getMemberBookings(Long memberId) {
         List<ClassBooking> bookings = classBookingRepository.findUpcomingBookings(memberId);
         return bookings.stream()
@@ -140,6 +143,7 @@ public class GymClassService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public Long getMemberBookingsCount(Long memberId) {
         return classBookingRepository.countMemberBookings(memberId);
     }

@@ -15,6 +15,7 @@ public class NotificationService {
     @Autowired
     private NotificationRepository notificationRepository;
 
+    @Transactional(readOnly = true)
     public List<Notification> getUserNotifications(Long userId, String filter) {
         switch (filter) {
             case "starred":
@@ -29,6 +30,7 @@ public class NotificationService {
         }
     }
 
+    @Transactional(readOnly = true)
     public Long getUnreadCount(Long userId) {
         return notificationRepository.countUnreadByUserId(userId);
     }

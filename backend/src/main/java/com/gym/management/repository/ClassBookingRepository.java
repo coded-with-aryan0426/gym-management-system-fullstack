@@ -27,6 +27,6 @@ public interface ClassBookingRepository extends JpaRepository<ClassBooking, Long
     @Query("SELECT cb FROM ClassBooking cb WHERE cb.gymClass.classId = :classId AND cb.status = 'CONFIRMED'")
     List<ClassBooking> findConfirmedBookingsForClass(@Param("classId") Long classId);
 
-    @Query("SELECT cb FROM ClassBooking cb JOIN cb.gymClass gc WHERE cb.member.userId = :memberId AND gc.startTime > CURRENT_TIMESTAMP AND cb.status = 'CONFIRMED' ORDER BY gc.startTime ASC")
+    @Query("SELECT cb FROM ClassBooking cb JOIN FETCH cb.member m JOIN FETCH cb.gymClass gc JOIN FETCH gc.trainer t WHERE m.userId = :memberId AND gc.startTime > CURRENT_TIMESTAMP AND cb.status = 'CONFIRMED' ORDER BY gc.startTime ASC")
     List<ClassBooking> findUpcomingBookings(@Param("memberId") Long memberId);
 }

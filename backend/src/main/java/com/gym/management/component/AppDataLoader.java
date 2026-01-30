@@ -424,14 +424,25 @@ public class AppDataLoader implements CommandLineRunner {
         // ============================================
         // 7. Seed Specific Member Data for AryanFit3@gmail.com
         // ============================================
-        User aryan = createMemberIfNotFound("aryanfit3", "Aryan Fit", "AryanFit3@gmail.com", customerRole);
+        // User AryanFit3@gmail.com uses their email as username according to JWT logs
+        User aryan = userRepository.findByEmail("AryanFit3@gmail.com").orElseGet(() -> {
+            User u = new User();
+            u.setUsername("AryanFit3@gmail.com");
+            u.setFullName("Aryan Fit");
+            u.setEmail("AryanFit3@gmail.com");
+            u.setPassword(passwordEncoder.encode("password123"));
+            u.setRoles(new HashSet<>(Collections.singletonList(customerRole)));
+            u.setStatus("Active");
+            return userRepository.save(u);
+        });
+        
+        // Ensure standard monthly membership
         ensureMembership.accept(aryan, standardPkg);
 
+        // Seed Bookings if none exist for this user
         if (classBookingRepository.findByMemberUserIdOrderByBookedAtDesc(aryan.getUserId()).isEmpty()) {
-            // Find existing classes to book
             java.util.List<GymClass> classes = gymClassRepository.findAll();
             if (!classes.isEmpty()) {
-                // Book available classes
                 for (int i = 0; i < Math.min(3, classes.size()); i++) {
                     GymClass gc = classes.get(i);
                     ClassBooking.BookingStatus status = (i == 0) ? ClassBooking.BookingStatus.ATTENDED : ClassBooking.BookingStatus.CONFIRMED;
@@ -441,6 +452,7 @@ public class AppDataLoader implements CommandLineRunner {
             System.out.println("✅ Seeded Bookings for AryanFit3@gmail.com");
         }
 
+        // Seed Notifications if none exist for this user
         if (notificationRepository.countUnreadByUserId(aryan.getUserId()) == 0) {
             createNotification(aryan, "Welcome Aryan!", "Your profile is now active. Check your schedule for upcoming sessions.", "WELCOME", "normal");
             createNotification(aryan, "Subscription Active", "Your Standard Monthly membership is now active.", "SUBSCRIPTION", "high");

@@ -109,8 +109,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/trainer/equipment/**").hasAnyRole("OWNER", "ADMIN", "TRAINER")
                         .requestMatchers("/api/pt-sessions/member/**").hasAnyRole("OWNER", "ADMIN", "TRAINER", "MEMBER", "CUSTOMER")
                         .requestMatchers("/api/pt-sessions/**").hasAnyRole("OWNER", "ADMIN", "TRAINER")
-                        .requestMatchers("/api/users/members").hasAnyRole("OWNER", "ADMIN", "TRAINER")
-                        .requestMatchers("/api/users/trainers").hasAnyRole("OWNER", "ADMIN", "TRAINER")
+                        .requestMatchers("/api/users/members").hasAnyRole("OWNER", "ADMIN", "TRAINER", "MEMBER", "CUSTOMER")
+                        .requestMatchers("/api/users/trainers").hasAnyRole("OWNER", "ADMIN", "TRAINER", "MEMBER", "CUSTOMER")
                         .requestMatchers("/api/progress-notes/**").hasAnyRole("OWNER", "ADMIN", "TRAINER")
                         .requestMatchers("/api/notifications/**").authenticated() // All users get notifications
 
