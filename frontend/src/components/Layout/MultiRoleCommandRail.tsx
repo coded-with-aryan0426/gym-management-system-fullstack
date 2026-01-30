@@ -180,21 +180,23 @@ const MultiRoleCommandRail: React.FC<MultiRoleCommandRailProps> = ({
             className={`command-rail__user-trigger ${isUserMenuOpen ? 'active' : ''}`}
             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
           >
-            <div className="command-rail__user-avatar">
-              <div className="avatar avatar--sm avatar--initials" style={{ 
-                background: 'var(--color-dashboard)', 
-                width: '100%', 
-                height: '100%', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                fontSize: '12px',
-                fontWeight: '700',
-                color: 'white'
-              }}>
-                <span className="avatar__initials">{user?.fullName?.charAt(0) || 'U'}</span>
+              <div className="command-rail__user-avatar" style={{ width: '32px', height: '32px' }}>
+                <div className="avatar avatar--sm avatar--initials" style={{ 
+                  background: 'var(--color-dashboard)', 
+                  width: '100%', 
+                  height: '100%', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  fontSize: '13px',
+                  fontWeight: '700',
+                  color: 'white',
+                  borderRadius: '8px',
+                  boxShadow: '0 2px 8px rgba(248, 113, 113, 0.25)'
+                }}>
+                  <span className="avatar__initials">{user?.fullName?.charAt(0) || 'U'}</span>
+                </div>
               </div>
-            </div>
             {!isCollapsed && (
               <>
                 <div className="command-rail__user-info" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', flex: 1, overflow: 'hidden' }}>
@@ -223,10 +225,33 @@ const MultiRoleCommandRail: React.FC<MultiRoleCommandRailProps> = ({
                   position: 'absolute' 
                 }}
               >
-                <div className="slide-panel__header">
-                  <span className="slide-panel__title">{user?.fullName}</span>
-                  <span className="slide-panel__subtitle">{user?.email || 'Member Account'}</span>
-                </div>
+                  <div className="slide-panel__header">
+                    <div className="slide-panel__header-avatar">
+                      <div className="avatar avatar--md avatar--initials" style={{ 
+                        background: 'var(--color-dashboard)', 
+                        width: '40px', 
+                        height: '40px', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center',
+                        fontSize: '16px',
+                        fontWeight: '700',
+                        color: 'white',
+                        borderRadius: '50%',
+                        boxShadow: '0 4px 12px rgba(248, 113, 113, 0.3)'
+                      }}>
+                        <span className="avatar__initials">{user?.fullName?.charAt(0) || 'U'}</span>
+                      </div>
+                    </div>
+                    <div className="slide-panel__header-info">
+                      <span className="slide-panel__title">{user?.fullName}</span>
+                      <span className="slide-panel__subtitle">{user?.email || 'Member Account'}</span>
+                      <div className="command-rail__user-role" style={{ marginTop: '2px', display: 'flex', alignItems: 'center' }}>
+                        <ShieldCheck size={10} style={{ marginRight: 4 }} />
+                        {user?.primaryRole}
+                      </div>
+                    </div>
+                  </div>
                   <div className="slide-panel__content">
                     <button className="slide-panel__item" onClick={() => { setIsUserMenuOpen(false); navigate('/member/settings'); }}>
                       <Settings size={14} />

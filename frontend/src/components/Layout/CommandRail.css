@@ -199,11 +199,121 @@
 /* Footer & Toggle */
 .command-rail__footer {
   margin-top: auto;
-  padding-top: 12px;
+  padding: 16px 8px 8px;
   border-top: 1px solid var(--sidebar-border);
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
+}
+
+.command-rail__user-trigger {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border-radius: 12px;
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  color: var(--text-primary);
+  width: 100%;
+}
+
+.command-rail__user-trigger:hover {
+  background: var(--hover-bg);
+  border-color: var(--sidebar-border);
+}
+
+.command-rail__user-trigger.active {
+  background: var(--active-bg);
+  border-color: var(--sidebar-border);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.command-rail__user-avatar {
+  flex-shrink: 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.command-rail__user-name {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+
+.command-rail__user-role {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+}
+
+.command-rail__slide-panel {
+  background: var(--panel-bg);
+  border: 1px solid var(--sidebar-border);
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  z-index: 1001;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.slide-panel__header {
+  padding: 20px 16px;
+  background: var(--hover-bg);
+  border-bottom: 1px solid var(--sidebar-border);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.slide-panel__title {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.slide-panel__subtitle {
+  display: block;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.slide-panel__content {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.slide-panel__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.2s;
+  text-align: left;
 }
 
 .command-rail__toggle {
