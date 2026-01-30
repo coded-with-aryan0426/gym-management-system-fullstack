@@ -31,12 +31,6 @@ public class TrainerDetails {
     private String department;
     private String reportingTo;
 
-    // Stored as simple strings/JSON-like mapping in Controller if needed,
-    // or rely on frontend to send comma-separated strings for lists.
-    // For simplicity with Oracle, we might use CLOB or just standard strings for
-    // short lists.
-    // Let's use standard constraints.
-
     @Column(length = 1000)
     private String specializations; // Comma separated
 
@@ -57,6 +51,14 @@ public class TrainerDetails {
 
     @Column(length = 4000)
     private String certificationsJson; // JSON string for list of certs
+
+    @Column(length = 4000)
+    private String skillsJson; // JSON string for structured skills (primary, secondary, proficiency)
+
+    @Column(length = 2000)
+    private String availabilityJson; // JSON string for availability
+
+    private Integer experienceYears;
 
     @Column(length = 4000)
     private String documentsJson; // JSON string for list of documents

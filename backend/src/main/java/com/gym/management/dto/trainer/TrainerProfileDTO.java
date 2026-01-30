@@ -46,12 +46,38 @@ public class TrainerProfileDTO {
 
     private String shift;
 
+    private List<SkillDTO> skills;
+    private List<AvailabilityDTO> availability;
+    private Integer experienceYears;
+
     // JSON strings or Object lists
     private List<CertificationDTO> certifications;
     private List<DocumentDTO> documents;
 
     // Stats (Computed or Mocked for now)
     private ProfileStatsDTO stats;
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class SkillDTO {
+        private String name;
+        private String category; // e.g. "Weight Loss", "Muscle Gain"
+        private String level; // e.g. "Beginner", "Expert"
+        private boolean isPrimary;
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class AvailabilityDTO {
+        private String day;
+        private String startTime;
+        private String endTime;
+        private boolean isAvailable;
+    }
 
     @Data
     @Builder
