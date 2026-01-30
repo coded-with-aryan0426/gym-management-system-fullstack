@@ -420,6 +420,34 @@ public class AppDataLoader implements CommandLineRunner {
             
             System.out.println("✅ Seeded Notifications for member1");
         }
+
+        // ============================================
+        // 7. Seed Specific Member Data for AryanFit3@gmail.com
+        // ============================================
+        User aryan = createMemberIfNotFound("aryanfit3", "Aryan Fit", "AryanFit3@gmail.com", customerRole);
+        ensureMembership.accept(aryan, standardPkg);
+
+        if (classBookingRepository.findByMemberUserId(aryan.getUserId()).isEmpty()) {
+            // Find existing classes to book
+            java.util.List<GymClass> classes = gymClassRepository.findAll();
+            if (!classes.isEmpty()) {
+                // Book available classes
+                for (int i = 0; i < Math.min(3, classes.size()); i++) {
+                    GymClass gc = classes.get(i);
+                    ClassBooking.BookingStatus status = (i == 0) ? ClassBooking.BookingStatus.ATTENDED : ClassBooking.BookingStatus.CONFIRMED;
+                    createClassBooking(gc, aryan, status, "Seeded booking for testing.");
+                }
+            }
+            System.out.println("✅ Seeded Bookings for AryanFit3@gmail.com");
+        }
+
+        if (notificationRepository.countUnreadByUserId(aryan.getUserId()) == 0) {
+            createNotification(aryan, "Welcome Aryan!", "Your profile is now active. Check your schedule for upcoming sessions.", "WELCOME", "normal");
+            createNotification(aryan, "Subscription Active", "Your Standard Monthly membership is now active.", "SUBSCRIPTION", "high");
+            createNotification(aryan, "Upcoming Class", "You have a class scheduled for tomorrow.", "REMINDER", "urgent");
+            
+            System.out.println("✅ Seeded Notifications for AryanFit3@gmail.com");
+        }
     }
 
     private GymClass createGymClass(String name, String type, String desc, User trainer, LocalDateTime start, Integer duration, Integer capacity, String location, String difficulty) {
