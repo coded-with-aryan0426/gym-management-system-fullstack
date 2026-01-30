@@ -14,6 +14,9 @@ import com.gym.management.model.Membership;
 import com.gym.management.model.MembershipStatus;
 import com.gym.management.model.MembershipPackage;
 import com.gym.management.model.Gym;
+import com.gym.management.model.GymClass;
+import com.gym.management.model.ClassBooking;
+import com.gym.management.model.Notification;
 import com.gym.management.repository.UserRepository;
 import com.gym.management.repository.RoleRepository;
 import com.gym.management.repository.PTSessionRepository;
@@ -23,6 +26,9 @@ import com.gym.management.repository.TrainerClassAttendeeRepository;
 import com.gym.management.repository.MembershipRepository;
 import com.gym.management.repository.MembershipPackageRepository;
 import com.gym.management.repository.GymRepository;
+import com.gym.management.repository.GymClassRepository;
+import com.gym.management.repository.ClassBookingRepository;
+import com.gym.management.repository.NotificationRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -44,6 +50,9 @@ public class AppDataLoader implements CommandLineRunner {
     private final MembershipRepository membershipRepository;
     private final MembershipPackageRepository membershipPackageRepository;
     private final GymRepository gymRepository;
+    private final GymClassRepository gymClassRepository;
+    private final ClassBookingRepository classBookingRepository;
+    private final NotificationRepository notificationRepository;
     private final PasswordEncoder passwordEncoder;
 
     public AppDataLoader(UserRepository userRepository,
@@ -55,6 +64,9 @@ public class AppDataLoader implements CommandLineRunner {
             MembershipRepository membershipRepository,
             MembershipPackageRepository membershipPackageRepository,
             GymRepository gymRepository,
+            GymClassRepository gymClassRepository,
+            ClassBookingRepository classBookingRepository,
+            NotificationRepository notificationRepository,
             PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
@@ -65,6 +77,9 @@ public class AppDataLoader implements CommandLineRunner {
         this.membershipRepository = membershipRepository;
         this.membershipPackageRepository = membershipPackageRepository;
         this.gymRepository = gymRepository;
+        this.gymClassRepository = gymClassRepository;
+        this.classBookingRepository = classBookingRepository;
+        this.notificationRepository = notificationRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -369,6 +384,79 @@ public class AppDataLoader implements CommandLineRunner {
 
             System.out.println("Seeded Trainer Classes");
         }
+
+        // ============================================
+        // 6. Seed Member Specific Data (Schedule, Bookings, Notifications)
+        // For: member1
+        // ============================================
+        User member1 = userRepository.findByUsername("member1").orElseThrow();
+        User trainer1 = userRepository.findByUsername("john.smith").orElseThrow();
+
+        if (gymClassRepository.count() == 0) {
+            LocalDateTime now = LocalDateTime.now();
+
+            // Upcoming Classes
+            GymClass yoga = createGymClass("Morning Yoga Flow", "YOGA", "A gentle morning flow.", trainer1, now.plusDays(1).withHour(8).withMinute(0), 60, 20, "Studio A", "Beginner");
+            GymClass hiit = createGymClass("Evening HIIT Blast", "HIIT", "High-intensity training.", trainer1, now.withHour(18).withMinute(0), 45, 15, "Main Floor", "Advanced");
+            GymClass pilates = createGymClass("Core Pilates", "PILATES", "Strength and balance.", trainer1, now.plusDays(2).withHour(10).withMinute(0), 50, 12, "Studio B", "Intermediate");
+
+            // Past Class
+            GymClass crossfit = createGymClass("CrossFit WOD", "CROSSFIT", "Daily workout.", trainer1, now.minusDays(1).withHour(7).withMinute(0), 60, 10, "Box", "Advanced");
+            crossfit.setStatus(GymClass.ClassStatus.COMPLETED);
+            gymClassRepository.save(crossfit);
+
+            // Seed Bookings for member1
+            createClassBooking(yoga, member1, ClassBooking.BookingStatus.CONFIRMED, "Looking forward to it!");
+            createClassBooking(hiit, member1, ClassBooking.BookingStatus.CONFIRMED, "First time trying this.");
+            createClassBooking(crossfit, member1, ClassBooking.BookingStatus.ATTENDED, "Great workout!");
+
+            System.out.println("✅ Seeded Member Schedule & Bookings for member1");
+        }
+
+        if (notificationRepository.countUnreadByUserId(member1.getUserId()) == 0) {
+            createNotification(member1, "Welcome to FitPro!", "We're excited to have you on board! Check out the class schedule to get started.", "WELCOME", "normal");
+            createNotification(member1, "Booking Confirmed", "Your booking for Morning Yoga Flow has been confirmed for tomorrow at 8:00 AM.", "BOOKING", "high");
+            createNotification(member1, "Class Reminder", "Don't forget! You have Evening HIIT Blast today at 6:00 PM.", "REMINDER", "urgent");
+            
+            System.out.println("✅ Seeded Notifications for member1");
+        }
+    }
+
+    private GymClass createGymClass(String name, String type, String desc, User trainer, LocalDateTime start, Integer duration, Integer capacity, String location, String difficulty) {
+        GymClass gc = new GymClass();
+        gc.setClassName(name);
+        gc.setClassType(type);
+        gc.setDescription(desc);
+        gc.setTrainer(trainer);
+        gc.setStartTime(start);
+        gc.setDurationMinutes(duration);
+        gc.setMaxCapacity(capacity);
+        gc.setLocation(location);
+        gc.setDifficulty(difficulty);
+        gc.setStatus(GymClass.ClassStatus.SCHEDULED);
+        return gymClassRepository.save(gc);
+    }
+
+    private void createClassBooking(GymClass gc, User member, ClassBooking.BookingStatus status, String notes) {
+        ClassBooking cb = new ClassBooking();
+        cb.setGymClass(gc);
+        cb.setMember(member);
+        cb.setStatus(status);
+        cb.setNotes(notes);
+        cb.setBookedAt(LocalDateTime.now().minusHours(2));
+        if (status == ClassBooking.BookingStatus.ATTENDED) {
+            cb.setAttended(true);
+        }
+        classBookingRepository.save(cb);
+        
+        // Update current bookings count
+        gc.setCurrentBookings(gc.getCurrentBookings() + 1);
+        gymClassRepository.save(gc);
+    }
+
+    private void createNotification(User user, String title, String message, String type, String priority) {
+        Notification n = new Notification(user, title, message, type, priority);
+        notificationRepository.save(n);
     }
 
     private Role createRoleIfNotFound(String name) {
