@@ -3,7 +3,7 @@
    ============================================================================ */
 
 :root {
-  --sidebar-width: 312px;
+  --sidebar-width: 240px;
   --sidebar-collapsed: 64px;
   --sidebar-transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   
@@ -309,9 +309,23 @@
 }
 
 .slide-panel__header {
-  padding: 12px;
+  padding: 16px 12px;
   background: var(--hover-bg);
   border-bottom: 1px solid var(--sidebar-border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.slide-panel__header-avatar {
+  flex-shrink: 0;
+}
+
+.slide-panel__header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
 .slide-panel__title {
@@ -319,12 +333,18 @@
   font-size: 14px;
   font-weight: 700;
   color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .slide-panel__subtitle {
   display: block;
   font-size: 11px;
   color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .slide-panel__content {

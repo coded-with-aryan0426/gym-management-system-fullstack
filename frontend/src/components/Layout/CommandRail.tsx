@@ -152,26 +152,27 @@ const CommandRail: React.FC<CommandRailProps> = ({ isCollapsed = false, onToggle
                 initial={{ opacity: 0, y: 10, scale: 0.95 }}
                 animate={{ opacity: 1, y: -8, scale: 1 }}
                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                style={{ 
-                  bottom: '100%', 
-                  left: isCollapsed ? '54px' : '0', 
-                  width: isCollapsed ? '200px' : '100%', 
-                  position: 'absolute' 
-                }}
-              >
-                <div className="slide-panel__header">
-                  <span className="slide-panel__title">{user?.fullName || "User"}</span>
-                  <span className="slide-panel__subtitle">{user?.email || "Account Settings"}</span>
-                </div>
-                <div className="slide-panel__content">
-                  <button className="slide-panel__item" onClick={() => { setIsSlideUpOpen(false); navigate('/profile'); }}>
-                    <User size={14} />
-                    <span>My Profile</span>
-                  </button>
-                  <button className="slide-panel__item" onClick={() => { setIsSlideUpOpen(false); navigate('/settings'); }}>
-                    <Settings size={14} />
-                    <span>Settings</span>
-                  </button>
+                  style={{ 
+                    bottom: '100%', 
+                    left: '0', 
+                    width: '220px', 
+                    position: 'absolute' 
+                  }}
+                >
+                  <div className="slide-panel__header">
+                    <div className="slide-panel__header-avatar">
+                      <Avatar name={user?.fullName || "User"} size="md" />
+                    </div>
+                    <div className="slide-panel__header-info">
+                      <span className="slide-panel__title">{user?.fullName || "User"}</span>
+                      <span className="slide-panel__subtitle">{user?.email || "Account Settings"}</span>
+                    </div>
+                  </div>
+                  <div className="slide-panel__content">
+                    <button className="slide-panel__item" onClick={() => { setIsSlideUpOpen(false); navigate('/settings'); }}>
+                      <Settings size={14} />
+                      <span>Settings</span>
+                    </button>
                   
                   <div className="slide-panel__divider" />
                   
