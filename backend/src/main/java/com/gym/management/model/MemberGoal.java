@@ -55,6 +55,7 @@ public class MemberGoal {
     private BigDecimal weeklyTarget;
 
     @Column(name = "is_active")
+    @Builder.Default
     private Boolean isActive = true;
 
     @Column(name = "completed_at")

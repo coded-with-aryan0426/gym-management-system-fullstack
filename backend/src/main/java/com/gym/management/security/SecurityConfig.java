@@ -116,6 +116,7 @@ public class SecurityConfig {
 
                         // ==================== MEMBER ENDPOINTS ====================
                         // Members can access their own data, trainers/owners can also access
+                        .requestMatchers("/api/member/progress/photos/file/**").permitAll() // Public access for progress photos
                         .requestMatchers("/api/member/**").hasAnyRole("OWNER", "ADMIN", "TRAINER", "MEMBER", "CUSTOMER")
 
                         // ==================== CHAT (All authenticated users) ====================
