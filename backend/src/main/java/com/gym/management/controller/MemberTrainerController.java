@@ -79,7 +79,7 @@ public class MemberTrainerController {
 
     @GetMapping
     public ResponseEntity<List<TrainerProfileDTO>> getAllTrainers() {
-        List<User> trainers = userRepository.findAllByRolesRoleName("TRAINER");
+        List<User> trainers = userRepository.findByRoleName("TRAINER");
         
         List<TrainerProfileDTO> dtos = trainers.stream()
                 .map(this::mapToDiscoveryDTO)
