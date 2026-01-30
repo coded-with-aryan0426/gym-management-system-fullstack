@@ -148,13 +148,7 @@ const MyProgress: React.FC = () => {
     const [photoDescription, setPhotoDescription] = useState('');
     const [photoDate, setPhotoDate] = useState(new Date().toISOString().split('T')[0]);
 
-    const getStorageKey = (key: string): string => {
-        const port = typeof window !== 'undefined' ? window.location.port || '5173' : '5173';
-        return `${key}_port_${port}`;
-    };
-
-    const userStr = localStorage.getItem(getStorageKey('user'));
-    const user = userStr ? JSON.parse(userStr) : null;
+    const { user, isLoading: authLoading } = useAuth();
     const memberId = user?.userId || user?.id;
 
     const [isLightTheme, setIsLightTheme] = useState(false);
@@ -179,8 +173,8 @@ const MyProgress: React.FC = () => {
     };
 
     const fetchProgressData = useCallback(async () => {
-        if (!memberId) {
-            setLoading(false);
+        if (authLoading || !memberId) {
+            if (!authLoading) setLoading(false);
             return;
         }
 

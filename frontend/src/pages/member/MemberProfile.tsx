@@ -80,7 +80,7 @@ const MemberProfile: React.FC = () => {
         bodyFat: null as number | null,
     });
 
-    const { user } = useAuth();
+    const { user, isLoading: authLoading } = useAuth();
 
     const checkForChanges = useCallback((newData: typeof formData, original: typeof formData | null) => {
         if (!original) return false;
@@ -97,6 +97,7 @@ const MemberProfile: React.FC = () => {
 
     useEffect(() => {
         const fetchProfile = async () => {
+            if (authLoading) return;
             if (!user?.id) {
                 setLoading(false);
                 return;
@@ -134,8 +135,9 @@ const MemberProfile: React.FC = () => {
         };
 
         const fetchAssignedTrainer = async () => {
+            if (authLoading || !user?.id) return;
             try {
-                const response = await api.get('/api/member/trainers/assigned');
+                const response = await api.get('/member/trainers/assigned');
                 if (response.data && response.data.length > 0) {
                     setAssignedTrainer(response.data[0]);
                 }
@@ -148,7 +150,7 @@ const MemberProfile: React.FC = () => {
 
         fetchProfile();
         fetchAssignedTrainer();
-    }, [user?.id]);
+    }, [user?.id, authLoading]);
 
     const handleSubmit = async (e?: React.FormEvent) => {
         if (e) e.preventDefault();
@@ -246,7 +248,7 @@ const MemberProfile: React.FC = () => {
         return `${Math.floor(diffDays / 30)} month${Math.floor(diffDays / 30) > 1 ? 's' : ''} ago`;
     };
 
-    if (loading) {
+    if (authLoading || loading) {
         return (
             <div className="profile-loading">
                 <motion.div
@@ -255,7 +257,23 @@ const MemberProfile: React.FC = () => {
                 >
                     <Activity size={32} />
                 </motion.div>
-                <p>Loading profile...</p>
+                <p>{authLoading ? 'Verifying session...' : 'Loading profile...'}</p>
+            </div>
+        );
+    }
+
+    if (!user) {
+        return (
+            <div className="profile-loading">
+                <AlertCircle size={32} />
+                <p>Please log in to view your profile</p>
+                <button 
+                    className="macos-btn macos-btn--primary" 
+                    onClick={() => window.location.href = '/login'}
+                    style={{ marginTop: '16px' }}
+                >
+                    Go to Login
+                </button>
             </div>
         );
     }
@@ -264,10 +282,18 @@ const MemberProfile: React.FC = () => {
         return (
             <div className="profile-loading">
                 <AlertCircle size={32} />
-                <p>Please log in to view your profile</p>
+                <p>Unable to load profile data</p>
+                <button 
+                    className="macos-btn macos-btn--secondary" 
+                    onClick={() => window.location.reload()}
+                    style={{ marginTop: '16px' }}
+                >
+                    Retry
+                </button>
             </div>
         );
     }
+
 
     const memberInitials = formData.fullName
         ? formData.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()

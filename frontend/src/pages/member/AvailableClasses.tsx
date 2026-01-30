@@ -47,18 +47,14 @@ const AvailableClasses: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [showBookingSuccess, setShowBookingSuccess] = useState<number | null>(null);
 
-    const getStorageKey = (key: string): string => {
-        const port = typeof window !== 'undefined' ? window.location.port || '5173' : '5173';
-        return `${key}_port_${port}`;
-    };
-
-    const userStr = localStorage.getItem(getStorageKey('user'));
-    const user = userStr ? JSON.parse(userStr) : null;
+    const { user, isLoading: authLoading } = useAuth();
     const memberId = user?.userId || user?.id;
 
     useEffect(() => {
-        fetchClasses();
-    }, [memberId]);
+        if (!authLoading) {
+            fetchClasses();
+        }
+    }, [memberId, authLoading]);
 
     const fetchClasses = async () => {
         try {

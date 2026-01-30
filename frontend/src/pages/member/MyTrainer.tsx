@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import api from '../../services/api';
+import { useAuth } from '../../contexts/AuthContext';
 import '../../styles/macos-member.css';
 import './MemberProfile.css';
 import './MyTrainer.css';
@@ -70,17 +71,21 @@ const MyTrainer: React.FC = () => {
     const [requesting, setRequesting] = useState<number | null>(null);
     const [showDiscovery, setShowDiscovery] = useState(false);
 
+    const { user, isLoading: authLoading } = useAuth();
+
     useEffect(() => {
-        fetchData();
-    }, []);
+        if (!authLoading) {
+            fetchData();
+        }
+    }, [authLoading]);
 
     const fetchData = async () => {
         setLoading(true);
         try {
-            const assignedResponse = await api.get('/api/member/trainers/assigned');
+            const assignedResponse = await api.get('/member/trainers/assigned');
             setAssignedTrainers(assignedResponse.data || []);
 
-            const allResponse = await api.get('/api/member/trainers');
+            const allResponse = await api.get('/member/trainers');
             setTrainers(allResponse.data || []);
         } catch (error) {
             console.error('Failed to fetch trainers:', error);
@@ -93,11 +98,11 @@ const MyTrainer: React.FC = () => {
     const handleRequestTrainer = async (trainerId: number, trainerName: string) => {
         setRequesting(trainerId);
         try {
-            const response = await api.post(`/api/member/trainers/${trainerId}/request`);
+            const response = await api.post(`/member/trainers/${trainerId}/request`);
             toast.success(response.data.message || `Trainer ${trainerName} has been assigned to you.`);
             
             // Refresh data
-            const assignedResponse = await api.get('/api/member/trainers/assigned');
+            const assignedResponse = await api.get('/member/trainers/assigned');
             setAssignedTrainers(assignedResponse.data || []);
             setShowDiscovery(false);
         } catch (error: any) {
