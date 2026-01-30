@@ -233,7 +233,7 @@ const MyTrainer: React.FC = () => {
                 </div>
             </motion.div>
 
-            <div className="profile-layout-grid">
+            <div className="profile-layout-grid" style={{ gridTemplateColumns: '1fr' }}>
                 <div className="profile-main-content">
                     <AnimatePresence mode="wait">
                         {!showDiscovery ? (
@@ -563,20 +563,6 @@ const MyTrainer: React.FC = () => {
                             </motion.div>
                         )}
                     </AnimatePresence>
-                </div>
-
-                <div className="profile-sidebar">
-                    <div className="sidebar-widget" style={{ background: 'linear-gradient(135deg, #FF3B3015, #AF52DE15)' }}>
-                        <h3 className="widget-title"><Sparkles size={14} /> Need Help?</h3>
-                        <div style={{ padding: 'var(--space-4)' }}>
-                            <p style={{ fontSize: '12px', color: 'var(--macos-text-secondary)', marginBottom: '12px' }}>
-                                Can't find the right trainer or need to change your team? Our concierge is here to help.
-                            </p>
-                            <button className="macos-btn macos-btn--secondary" style={{ width: '100%', fontSize: '12px' }}>
-                                Contact Support
-                            </button>
-                        </div>
-                    </div>
                 </div>
             </div>
         </motion.div>
