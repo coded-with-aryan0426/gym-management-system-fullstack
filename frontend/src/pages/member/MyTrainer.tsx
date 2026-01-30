@@ -120,7 +120,7 @@ const MyTrainer: React.FC = () => {
             
             const matchesCategory = selectedCategory === 'All Skills' ||
                 (t.skills && t.skills.some(s => s.category.trim() === selectedCategory)) ||
-                (t.specializations && t.specializations.some(spec => spec.trim() === selectedCategory));
+                (t.specializations && t.specializations.flatMap(s => s.split(',')).some(spec => spec.trim() === selectedCategory));
             
             return matchesSearch && matchesCategory;
         });
@@ -329,16 +329,16 @@ const MyTrainer: React.FC = () => {
                                                         
                                                         <div>
                                                             <div className="skill-section-label" style={{ marginBottom: '8px' }}>Active Specialties</div>
-                                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                                                                    {[...new Set([
-                                                                        ...(trainer.specializations?.map(s => s.trim()) || []),
-                                                                        ...(trainer.skills?.map(s => s.category.trim()) || [])
-                                                                    ])].filter(cat => SKILL_CATEGORIES.includes(cat) && cat !== 'All Skills').map((tag, i) => (
-                                                                        <span key={i} className="skill-badge skill-badge--primary" style={{ padding: '4px 12px' }}>
-                                                                            {tag}
-                                                                        </span>
-                                                                    ))}
-                                                                </div>
+                                                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                                                        {[...new Set([
+                                                                            ...(trainer.specializations?.flatMap(s => s.split(',')).map(s => s.trim()) || []),
+                                                                            ...(trainer.skills?.map(s => s.category.trim()) || [])
+                                                                        ])].filter(cat => SKILL_CATEGORIES.includes(cat) && cat !== 'All Skills').map((tag, i) => (
+                                                                            <span key={i} className="skill-badge skill-badge--primary" style={{ padding: '4px 12px' }}>
+                                                                                {tag}
+                                                                            </span>
+                                                                        ))}
+                                                                    </div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -404,7 +404,7 @@ const MyTrainer: React.FC = () => {
                                             
                                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '12px' }}>
                                                 {[...new Set([
-                                                    ...(trainer.specializations?.map(s => s.trim()) || []),
+                                                    ...(trainer.specializations?.flatMap(s => s.split(',')).map(s => s.trim()) || []),
                                                     ...(trainer.skills?.map(s => s.category.trim()) || [])
                                                 ])].filter(cat => SKILL_CATEGORIES.includes(cat) && cat !== 'All Skills').slice(0, 3).map((tag, i) => (
                                                     <span key={i} className="skill-badge skill-badge--secondary" style={{ fontSize: '10px', padding: '2px 8px' }}>
@@ -456,20 +456,18 @@ const MyTrainer: React.FC = () => {
                                     </div>
                                 </div>
 
-                                <div className="trainer-discovery__controls" style={{ marginBottom: 'var(--space-6)' }}>
-                                    <div className="trainer-search-wrapper">
+                                <div className="trainer-discovery__controls" style={{ marginBottom: 'var(--space-6)', display: 'flex', gap: '16px', alignItems: 'center', background: 'var(--macos-bg-glass)', padding: '12px', borderRadius: 'var(--radius-xl)', border: '1px solid var(--macos-border)' }}>
+                                    <div className="trainer-search-wrapper" style={{ flex: '0 0 320px', margin: 0 }}>
                                         <Search size={18} />
                                         <input
                                             type="text"
                                             placeholder="Search by name, skill, or goal..."
                                             value={searchQuery}
                                             onChange={(e) => setSearchQuery(e.target.value)}
+                                            style={{ background: 'rgba(255,255,255,0.05)' }}
                                         />
                                     </div>
-                                </div>
-
-                                <div className="glass-card trainer-discovery__filters macos-hide-scrollbar" style={{ overflowX: 'auto', marginBottom: 'var(--space-6)', padding: '12px' }}>
-                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                    <div className="macos-hide-scrollbar" style={{ flex: 1, overflowX: 'auto', display: 'flex', gap: '8px', padding: '2px 0' }}>
                                         {SKILL_CATEGORIES.map(cat => (
                                             <button
                                                 key={cat}
@@ -527,7 +525,7 @@ const MyTrainer: React.FC = () => {
                                                     </div>
                                                     <div className="skill-tags">
                                                         {[...new Set([
-                                                            ...(trainer.specializations?.map(s => s.trim()) || []),
+                                                            ...(trainer.specializations?.flatMap(s => s.split(',')).map(s => s.trim()) || []),
                                                             ...(trainer.skills?.map(s => s.category.trim()) || [])
                                                         ])].filter(cat => SKILL_CATEGORIES.includes(cat) && cat !== 'All Skills').map((tag, idx) => (
                                                             <div key={idx} className="skill-badge skill-badge--secondary">
