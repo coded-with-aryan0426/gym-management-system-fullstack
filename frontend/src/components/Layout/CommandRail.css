@@ -3,17 +3,18 @@
    ============================================================================ */
 
 :root {
-  --sidebar-width: 240px;
+  --sidebar-width: 312px;
   --sidebar-collapsed: 64px;
   --sidebar-transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   
-  /* Premium Palette */
+  /* Premium Palette - Dark (Default) */
   --sidebar-bg: #0f0f12;
   --sidebar-border: rgba(255, 255, 255, 0.06);
   --text-primary: #FFFFFF;
   --text-secondary: #9CA3AF;
   --hover-bg: rgba(255, 255, 255, 0.05);
   --active-bg: rgba(255, 255, 255, 0.08);
+  --panel-bg: #18181b;
   
   /* Icon Colors based on screenshot */
   --color-dashboard: #f87171;
@@ -26,6 +27,16 @@
   --color-messages: #818cf8;
   --color-notifications: #fb923c;
   --color-settings: #94a3b8;
+}
+
+[data-theme='light'] {
+  --sidebar-bg: #ffffff;
+  --sidebar-border: rgba(0, 0, 0, 0.08);
+  --text-primary: #111827;
+  --text-secondary: #6B7280;
+  --hover-bg: rgba(0, 0, 0, 0.04);
+  --active-bg: rgba(0, 0, 0, 0.06);
+  --panel-bg: #ffffff;
 }
 
 .command-rail {
@@ -105,7 +116,8 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--text-secondary);
+  opacity: 0.5;
   white-space: nowrap;
 }
 
@@ -288,18 +300,18 @@
 
 /* Slide Panel Enhancements */
 .command-rail__slide-panel {
-  background: #18181b;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--panel-bg);
+  border: 1px solid var(--sidebar-border);
   border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
   overflow: hidden;
   z-index: 1001;
 }
 
 .slide-panel__header {
   padding: 12px;
-  background: rgba(255, 255, 255, 0.03);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--hover-bg);
+  border-bottom: 1px solid var(--sidebar-border);
 }
 
 .slide-panel__title {

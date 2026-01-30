@@ -227,15 +227,11 @@ const MultiRoleCommandRail: React.FC<MultiRoleCommandRailProps> = ({
                   <span className="slide-panel__title">{user?.fullName}</span>
                   <span className="slide-panel__subtitle">{user?.email || 'Member Account'}</span>
                 </div>
-                <div className="slide-panel__content">
-                  <button className="slide-panel__item" onClick={() => { setIsUserMenuOpen(false); navigate('/member/profile'); }}>
-                    <User size={14} />
-                    <span>My Profile</span>
-                  </button>
-                  <button className="slide-panel__item" onClick={() => { setIsUserMenuOpen(false); navigate('/member/settings'); }}>
-                    <Settings size={14} />
-                    <span>Settings</span>
-                  </button>
+                  <div className="slide-panel__content">
+                    <button className="slide-panel__item" onClick={() => { setIsUserMenuOpen(false); navigate('/member/settings'); }}>
+                      <Settings size={14} />
+                      <span>Settings</span>
+                    </button>
                   
                   <div className="slide-panel__divider" />
                   
