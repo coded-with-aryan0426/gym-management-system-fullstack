@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
+import { useAuth } from '../../contexts/AuthContext';
 import { gymClassApi, ptSessionApi } from '../../services/api';
 import '../../styles/macos-member.css';
 import './MyBookings.css';
@@ -38,16 +39,18 @@ const itemVariants = {
 
 const MyBookings: React.FC = () => {
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [bookings, setBookings] = useState<UnifiedBooking[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<TabType>('UPCOMING');
 
-    const userStr = localStorage.getItem('user');
-    const user = userStr ? JSON.parse(userStr) : null;
-    const memberId = user?.userId || user?.id;
+    const memberId = user?.userId || (user?.id ? Number(user.id) : null);
 
     const fetchAllBookings = async () => {
-        if (!memberId) return;
+        if (!memberId) {
+            setLoading(false);
+            return;
+        }
         setLoading(true);
         try {
             const [classBookings, ptSessions] = await Promise.all([

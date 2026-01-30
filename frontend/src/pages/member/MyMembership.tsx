@@ -10,6 +10,7 @@ import {
     Crown, Sparkles, Timer, Heart, BarChart3, AlertCircle
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { useAuth } from '../../contexts/AuthContext';
 import { apiClient } from '../../services/api';
 import '../../styles/unified-design-system.css';
 import './MyMembership.css';
@@ -65,6 +66,7 @@ const itemVariants = {
 };
 
 const MyMembership: React.FC = () => {
+    const { user } = useAuth();
     const [membership, setMembership] = useState<MembershipData | null>(null);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'overview' | 'benefits' | 'payments' | 'settings'>('overview');
@@ -80,12 +82,9 @@ const MyMembership: React.FC = () => {
         { id: '2', type: 'mastercard', last4: '8888', expiry: '08/25', isDefault: false }
     ]);
 
-    const userStr = localStorage.getItem('user');
-    const user = userStr ? JSON.parse(userStr) : null;
-
     useEffect(() => {
         const fetchMembership = async () => {
-            const userId = user?.id || user?.userId;
+            const userId = user?.userId || user?.id;
             if (!userId || isNaN(Number(userId))) {
                 setMembership(DUMMY_MEMBERSHIP);
                 setIsUsingDummyData(true);
@@ -120,7 +119,7 @@ const MyMembership: React.FC = () => {
         };
 
         fetchMembership();
-    }, [user?.id, user?.userId]);
+    }, [user]);
 
     useEffect(() => {
         if (!membership?.endDate) return;

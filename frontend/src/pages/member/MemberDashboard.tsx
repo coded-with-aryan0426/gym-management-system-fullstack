@@ -26,6 +26,7 @@ import {
     Pause
 } from 'lucide-react';
 import { format } from 'date-fns';
+import { useAuth } from '../../contexts/AuthContext';
 import { UnifiedPage } from '../../components/shared/UnifiedPage';
 import { UnifiedCard } from '../../components/shared/UnifiedCard';
 import './MemberDashboard.css';
@@ -52,26 +53,25 @@ interface DashboardData {
 
 const MemberDashboard: React.FC = () => {
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [dashboard, setDashboard] = useState<DashboardData | null>(null);
     const [loading, setLoading] = useState(true);
     const [currentTime, setCurrentTime] = useState(new Date());
 
-    const userStr = localStorage.getItem('user');
-    const user = userStr ? JSON.parse(userStr) : null;
-
     useEffect(() => {
         const timer = setInterval(() => setCurrentTime(new Date()), 60000);
         const fetchDashboard = async () => {
-            if (!user?.id) { setLoading(false); return; }
+            const memberId = user?.userId || user?.id;
+            if (!memberId) { setLoading(false); return; }
             try {
-                const response = await fetch(`/api/member/dashboard?memberId=${user.id}`);
+                const response = await fetch(`/api/member/dashboard?memberId=${memberId}`);
                 if (response.ok) setDashboard(await response.json());
             } catch (error) { console.error('Failed to fetch dashboard:', error); }
             finally { setLoading(false); }
         };
         fetchDashboard();
         return () => clearInterval(timer);
-    }, [user?.id]);
+    }, [user]);
 
     const getGreeting = () => {
         const hour = currentTime.getHours();
