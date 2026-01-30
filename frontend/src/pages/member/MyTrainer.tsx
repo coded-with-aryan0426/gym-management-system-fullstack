@@ -566,42 +566,6 @@ const MyTrainer: React.FC = () => {
                 </div>
 
                 <div className="profile-sidebar">
-                    <div className="sidebar-widget">
-                        <h3 className="widget-title"><Shield size={14} /> Training Policy</h3>
-                        <div style={{ padding: 'var(--space-4)', fontSize: '13px', color: 'var(--macos-text-secondary)' }}>
-                            <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
-                                <CheckCircle2 size={16} color="var(--macos-success)" />
-                                <span>1-on-1 personalized sessions</span>
-                            </div>
-                            <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
-                                <CheckCircle2 size={16} color="var(--macos-success)" />
-                                <span>Weekly progress reviews</span>
-                            </div>
-                            <div style={{ display: 'flex', gap: '8px' }}>
-                                <CheckCircle2 size={16} color="var(--macos-success)" />
-                                <span>Custom nutrition guidance</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="sidebar-widget">
-                        <h3 className="widget-title"><Activity size={14} /> Ecosystem Stats</h3>
-                        <div className="body-stats-list" style={{ padding: '0 var(--space-4)' }}>
-                            <div className="body-stat-item">
-                                <span className="stat-label">Global Professionals</span>
-                                <span className="stat-value">{trainers.length}</span>
-                            </div>
-                            <div className="body-stat-item">
-                                <span className="stat-label">Assigned Experts</span>
-                                <span className="stat-value">{assignedTrainers.length}</span>
-                            </div>
-                            <div className="body-stat-item">
-                                <span className="stat-label">Support Status</span>
-                                <span className="stat-value" style={{ color: 'var(--macos-success)' }}>24/7 Live</span>
-                            </div>
-                        </div>
-                    </div>
-
                     <div className="sidebar-widget" style={{ background: 'linear-gradient(135deg, #FF3B3015, #AF52DE15)' }}>
                         <h3 className="widget-title"><Sparkles size={14} /> Need Help?</h3>
                         <div style={{ padding: 'var(--space-4)' }}>
