@@ -23,21 +23,8 @@ import {
 } from "lucide-react"
 import { toast } from "react-hot-toast"
 import { useAuth } from "../../contexts/AuthContext"
+import { notificationApi, type Notification } from "../../api/notificationApi"
 import "./MemberNotifications.css"
-
-interface Notification {
-  id: number
-  title: string
-  message: string
-  type: string
-  priority: string
-  isRead: boolean
-  isStarred: boolean
-  isArchived: boolean
-  createdAt: string
-  link?: string
-  actionData?: string
-}
 
 type FilterType = "all" | "unread" | "starred" | "archived" | "membership" | "booking" | "achievement"
 
@@ -54,11 +41,11 @@ const MemberNotifications: React.FC = () => {
   const fetchNotifications = async () => {
     if (!userId) return
     try {
-      const response = await fetch(`/api/notifications/user/${userId}?filter=${filter === 'archived' ? 'archived' : 'all'}`)
-      if (response.ok) {
-        const data = await response.json()
-        setNotifications(data)
-      }
+      const data = await notificationApi.getUserNotifications(
+        Number(userId), 
+        filter === 'archived' ? 'archived' : 'all'
+      )
+      setNotifications(data)
     } catch (error) {
       console.error("Failed to fetch notifications:", error)
     } finally {
@@ -74,10 +61,8 @@ const MemberNotifications: React.FC = () => {
 
   const markAsRead = async (id: number) => {
     try {
-      const response = await fetch(`/api/notifications/${id}/read`, { method: "PUT" })
-      if (response.ok) {
-        setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n))
-      }
+      await notificationApi.markAsRead(id)
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n))
     } catch (error) {
       toast.error("Failed to update notification")
     }
@@ -85,12 +70,9 @@ const MemberNotifications: React.FC = () => {
 
   const toggleStar = async (id: number) => {
     try {
-      const response = await fetch(`/api/notifications/${id}/star`, { method: "PUT" })
-      if (response.ok) {
-        const updated = await response.json()
-        setNotifications(prev => prev.map(n => n.id === id ? { ...n, isStarred: updated.isStarred } : n))
-        toast.success(updated.isStarred ? "Starred" : "Unstarred")
-      }
+      const updated = await notificationApi.toggleStar(id)
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, isStarred: updated.isStarred } : n))
+      toast.success(updated.isStarred ? "Starred" : "Unstarred")
     } catch (error) {
       toast.error("Action failed")
     }
@@ -98,11 +80,9 @@ const MemberNotifications: React.FC = () => {
 
   const archiveNotification = async (id: number) => {
     try {
-      const response = await fetch(`/api/notifications/${id}/archive`, { method: "PUT" })
-      if (response.ok) {
-        setNotifications(prev => prev.filter(n => n.id !== id))
-        toast.success("Archived")
-      }
+      await notificationApi.archive(id)
+      setNotifications(prev => prev.filter(n => n.id !== id))
+      toast.success("Archived")
     } catch (error) {
       toast.error("Failed to archive")
     }
@@ -110,11 +90,9 @@ const MemberNotifications: React.FC = () => {
 
   const deleteNotification = async (id: number) => {
     try {
-      const response = await fetch(`/api/notifications/${id}`, { method: "DELETE" })
-      if (response.ok) {
-        setNotifications(prev => prev.filter(n => n.id !== id))
-        toast.success("Deleted")
-      }
+      await notificationApi.delete(id)
+      setNotifications(prev => prev.filter(n => n.id !== id))
+      toast.success("Deleted")
     } catch (error) {
       toast.error("Failed to delete")
     }
@@ -123,11 +101,9 @@ const MemberNotifications: React.FC = () => {
   const markAllAsRead = async () => {
     if (!userId) return
     try {
-      const response = await fetch(`/api/notifications/user/${userId}/read-all`, { method: "PUT" })
-      if (response.ok) {
-        setNotifications(prev => prev.map(n => ({ ...n, isRead: true })))
-        toast.success("All marked as read")
-      }
+      await notificationApi.markAllAsRead(Number(userId))
+      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })))
+      toast.success("All marked as read")
     } catch (error) {
       toast.error("Failed to update all")
     }

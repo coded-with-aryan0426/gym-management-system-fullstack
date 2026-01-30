@@ -161,25 +161,6 @@ public class MemberProfileService {
         return Collections.emptyList();
     }
 
-    private MemberProfileDTO.MemberStatsDTO calculateMemberStats(Long userId, User user) {
-        long totalWorkouts = 0;
-        int currentStreak = 0;
-        try {
-            totalWorkouts = workoutLogRepository.countByUserUserId(userId);
-            currentStreak = calculateStreak(userId);
-        } catch (Exception e) {
-        }
-        String memberLevel = calculateMemberLevel(totalWorkouts);
-        LocalDate joinedDate = user.getCreatedAt() != null ? user.getCreatedAt().toLocalDate() : null;
-
-        return MemberProfileDTO.MemberStatsDTO.builder()
-                .totalWorkouts((int) totalWorkouts)
-                .currentStreak(currentStreak)
-                .memberLevel(memberLevel)
-                .joinedDate(joinedDate)
-                .build();
-    }
-
     private int calculateStreak(Long userId) {
         List<LocalDate> workoutDates = workoutLogRepository.findWorkoutDatesByUserId(userId);
         if (workoutDates.isEmpty()) {
@@ -214,41 +195,6 @@ public class MemberProfileService {
         if (totalWorkouts >= 50) return "Silver";
         if (totalWorkouts >= 20) return "Bronze";
         return "Beginner";
-    }
-
-    private MemberProfileDTO.MembershipInfoDTO getMembershipInfo(Long userId) {
-        return membershipRepository.findTopByUserUserIdAndStatusOrderByEndDateDesc(userId, MembershipStatus.ACTIVE)
-                .map(membership -> {
-                    int daysRemaining = (int) ChronoUnit.DAYS.between(LocalDate.now(), membership.getEndDate());
-                    return MemberProfileDTO.MembershipInfoDTO.builder()
-                            .membershipId(membership.getId())
-                            .planName(membership.getMembershipPackage() != null ? 
-                                    membership.getMembershipPackage().getPackageName() : "Unknown")
-                            .planType(null)
-                            .startDate(membership.getStartDate())
-                            .endDate(membership.getEndDate())
-                            .daysRemaining(Math.max(0, daysRemaining))
-                            .status(membership.getStatus().name())
-                            .build();
-                })
-                .orElse(null);
-    }
-
-    private List<MemberProfileDTO.AchievementDTO> getAchievements(Long userId) {
-        try {
-            return memberAchievementRepository.findByUserUserIdOrderByEarnedAtDesc(userId)
-                    .stream()
-                    .map(a -> MemberProfileDTO.AchievementDTO.builder()
-                            .id(a.getId())
-                            .type(a.getAchievementType())
-                            .name(a.getAchievementName())
-                            .description(a.getDescription())
-                            .earnedAt(a.getEarnedAt())
-                            .build())
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            return Collections.emptyList();
-        }
     }
 
     private List<String> parseFitnessGoals(String fitnessGoals) {
