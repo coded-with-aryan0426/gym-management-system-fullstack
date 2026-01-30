@@ -17,16 +17,23 @@ public class MemberSettingsService {
     private final PrivacySettingRepository privacySettingRepository;
     private final UserRepository userRepository;
 
+    @Transactional
     public MemberSettingsDTO getMemberSettings(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        try {
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
 
-        return MemberSettingsDTO.builder()
-                .profile(memberProfileService.getMemberProfile(userId))
-                .preferences(getPreferences(user))
-                .notifications(getNotifications(user))
-                .privacy(getPrivacy(user))
-                .build();
+            return MemberSettingsDTO.builder()
+                    .profile(memberProfileService.getMemberProfile(userId))
+                    .preferences(getPreferences(user))
+                    .notifications(getNotifications(user))
+                    .privacy(getPrivacy(user))
+                    .build();
+        } catch (Exception e) {
+            System.err.println("Error in getMemberSettings for userId: " + userId);
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     private MemberSettingsDTO.MemberPreferenceDTO getPreferences(User user) {
