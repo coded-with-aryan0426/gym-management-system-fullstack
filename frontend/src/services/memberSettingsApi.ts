@@ -1,6 +1,6 @@
 import api from './api';
 
-export interface MemberSettingsDTO {
+export type MemberSettingsDTO = {
     profile: any;
     preferences: {
         workoutPreferences?: string;
