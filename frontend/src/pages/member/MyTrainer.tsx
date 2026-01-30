@@ -5,7 +5,7 @@ import {
     Zap, TrendingUp, Target, User, ChevronRight,
     ArrowUpDown, Info, Sparkles, MessageSquare, ArrowLeft,
     Users, Shield, Activity, Calendar, Trophy, Mail, Phone,
-    Plus, UserPlus, X
+    Plus, UserPlus, X, Heart, Globe, Briefcase
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import api from '../../services/api';
@@ -146,7 +146,7 @@ const MyTrainer: React.FC = () => {
 
     return (
         <motion.div
-            className="member-profile" // Reusing profile class for similar layout
+            className="member-profile"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
@@ -156,7 +156,7 @@ const MyTrainer: React.FC = () => {
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
             >
-                <div className="profile-hero__bg" style={{ background: 'linear-gradient(135deg, #007AFF 0%, #5856D6 100%)' }} />
+                <div className="profile-hero__bg" style={{ background: 'linear-gradient(135deg, #FF3B30 0%, #AF52DE 100%)' }} />
                 <div className="profile-hero__pattern" />
 
                 <div className="profile-hero__content">
@@ -168,7 +168,7 @@ const MyTrainer: React.FC = () => {
                         />
                         <div className="profile-avatar__image">
                             {assignedTrainers.length > 0 ? (
-                                assignedTrainers[0].name.split(' ').map(n => n[0]).join('')
+                                <Briefcase size={32} />
                             ) : (
                                 <Users size={32} />
                             )}
@@ -178,20 +178,22 @@ const MyTrainer: React.FC = () => {
                     <div className="profile-hero__info">
                         <div className="profile-hero__name-row">
                             <h1 className="profile-hero__name">
-                                {assignedTrainers.length > 0 ? assignedTrainers[0].name : 'No Trainer Assigned'}
+                                {assignedTrainers.length > 0 ? `Your Training Team` : 'Expert Guidance'}
                             </h1>
                             {assignedTrainers.length > 0 && (
                                 <span className="profile-badge" style={{ background: '#34C75915', color: '#34C759' }}>
-                                    Active Program
+                                    {assignedTrainers.length} Active {assignedTrainers.length === 1 ? 'Expert' : 'Experts'}
                                 </span>
                             )}
                         </div>
                         <p className="profile-hero__email">
-                            <Target size={12} />
-                            {assignedTrainers.length > 0 ? 'Your Professional Guide' : 'Get a trainer to accelerate your results'}
+                            <Sparkles size={12} />
+                            {assignedTrainers.length > 0 
+                                ? 'Elite professionals dedicated to your fitness journey' 
+                                : 'Connect with certified specialists to reach your peak performance'}
                         </p>
                         <p className="profile-hero__id">
-                            {assignedTrainers.length > 0 ? `Experience: ${assignedTrainers[0].stats.experience}` : 'Browse trainers below'}
+                            Real-time coaching support & personalized programs
                         </p>
                     </div>
 
@@ -201,21 +203,21 @@ const MyTrainer: React.FC = () => {
                                 <span className="profile-stat-mini__value">{trainers.length}</span>
                                 <Users size={12} className="profile-stat-mini__icon" />
                             </div>
-                            <span className="profile-stat-mini__label">Available</span>
+                            <span className="profile-stat-mini__label">Professionals</span>
                         </div>
                         <div className="profile-stat-mini">
                             <div className="profile-stat-mini__header">
                                 <span className="profile-stat-mini__value">98%</span>
-                                <Star size={12} className="profile-stat-mini__icon" />
+                                <Heart size={12} className="profile-stat-mini__icon" />
                             </div>
-                            <span className="profile-stat-mini__label">Success Rate</span>
+                            <span className="profile-stat-mini__label">Member Sat</span>
                         </div>
                         <div className="profile-stat-mini">
                             <div className="profile-stat-mini__header">
-                                <span className="profile-stat-mini__value">24/7</span>
-                                <Clock size={12} className="profile-stat-mini__icon" />
+                                <span className="profile-stat-mini__value">Elite</span>
+                                <Trophy size={12} className="profile-stat-mini__icon" />
                             </div>
-                            <span className="profile-stat-mini__label">Support</span>
+                            <span className="profile-stat-mini__label">Expertise</span>
                         </div>
                     </div>
 
@@ -225,8 +227,8 @@ const MyTrainer: React.FC = () => {
                         whileTap={{ scale: 0.98 }}
                         onClick={() => setShowDiscovery(!showDiscovery)}
                     >
-                        {showDiscovery ? <X size={16} /> : <Search size={16} />}
-                        {showDiscovery ? 'Close Search' : 'Find Your Trainer'}
+                        {showDiscovery ? <ArrowLeft size={16} /> : <Search size={16} />}
+                        {showDiscovery ? 'Back to Team' : 'Discover Trainers'}
                     </motion.button>
                 </div>
             </motion.div>
@@ -243,101 +245,107 @@ const MyTrainer: React.FC = () => {
                             >
                                 <div className="section-header">
                                     <h3 className="section-title">
-                                        <Award size={16} />
-                                        <span>Current Assignment</span>
+                                        <Shield size={16} color="var(--macos-accent)" />
+                                        <span>My Coaching Team</span>
                                     </h3>
+                                    <span className="section-subtitle">{assignedTrainers.length} Assigned</span>
                                 </div>
 
                                 {assignedTrainers.length > 0 ? (
-                                    <div className="glass-card" style={{ padding: 'var(--space-6)', marginBottom: 'var(--space-6)' }}>
-                                        <div style={{ display: 'flex', gap: 'var(--space-6)', alignItems: 'flex-start' }}>
-                                            <div style={{ 
-                                                width: '120px', 
-                                                height: '120px', 
-                                                borderRadius: 'var(--radius-xl)', 
-                                                background: 'linear-gradient(135deg, #007AFF, #5856D6)',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                fontSize: '44px',
-                                                fontWeight: 'bold',
-                                                color: 'white',
-                                                flexShrink: 0
-                                            }}>
-                                                {assignedTrainers[0].name[0]}
-                                            </div>
-                                            <div style={{ flex: 1 }}>
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                                    <div>
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                                                            <h2 className="macos-heading-md" style={{ margin: 0 }}>{assignedTrainers[0].name}</h2>
-                                                            <span className="profile-badge" style={{ background: '#007AFF15', color: '#007AFF', fontSize: '10px' }}>
-                                                                Certified PT
-                                                            </span>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
+                                        {assignedTrainers.map((trainer) => (
+                                            <div key={trainer.userId} className="glass-card trainer-card--full" style={{ padding: 'var(--space-6)' }}>
+                                                <div style={{ display: 'flex', gap: 'var(--space-6)', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                                                    <div style={{ 
+                                                        width: '100px', 
+                                                        height: '100px', 
+                                                        borderRadius: 'var(--radius-xl)', 
+                                                        background: 'linear-gradient(135deg, #007AFF, #5856D6)',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        fontSize: '36px',
+                                                        fontWeight: 'bold',
+                                                        color: 'white',
+                                                        flexShrink: 0,
+                                                        boxShadow: '0 8px 16px rgba(0,122,255,0.2)'
+                                                    }}>
+                                                        {trainer.name[0]}
+                                                    </div>
+                                                    <div style={{ flex: 1, minWidth: '280px' }}>
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                                            <div>
+                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                                                                    <h2 className="macos-heading-md" style={{ margin: 0 }}>{trainer.name}</h2>
+                                                                    <span className="profile-badge" style={{ background: '#007AFF15', color: '#007AFF', fontSize: '10px' }}>
+                                                                        Certified Specialist
+                                                                    </span>
+                                                                </div>
+                                                                <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '16px', color: 'var(--macos-text-secondary)', fontSize: '14px' }}>
+                                                                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                                        <Star size={14} fill="#FFCC00" color="#FFCC00" /> {trainer.stats.rating}
+                                                                    </span>
+                                                                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                                        <Award size={14} /> {trainer.stats.experience} Exp
+                                                                    </span>
+                                                                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                                        <Target size={14} /> {trainer.specializations[0] || 'Elite Pro'}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <div style={{ display: 'flex', gap: '8px' }}>
+                                                                <button className="macos-btn macos-btn--secondary" style={{ padding: '8px' }} title="Send Message">
+                                                                    <MessageSquare size={18} />
+                                                                </button>
+                                                                <button className="macos-btn macos-btn--secondary" style={{ padding: '8px' }} title="Trainer Details">
+                                                                    <Info size={18} />
+                                                                </button>
+                                                            </div>
                                                         </div>
-                                                        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '16px', color: 'var(--macos-text-secondary)', fontSize: '14px' }}>
-                                                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                                <Star size={14} fill="#FFCC00" color="#FFCC00" /> {assignedTrainers[0].stats.rating}
-                                                            </span>
-                                                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                                <Award size={14} /> {assignedTrainers[0].stats.experience} Exp
-                                                            </span>
-                                                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                                <Shield size={14} /> Elite Specialist
-                                                            </span>
+
+                                                        <div style={{ 
+                                                            display: 'grid', 
+                                                            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
+                                                            gap: '12px', 
+                                                            margin: '16px 0',
+                                                            padding: '12px',
+                                                            background: 'rgba(255,255,255,0.02)',
+                                                            borderRadius: 'var(--radius-lg)',
+                                                            border: '1px solid var(--macos-border)'
+                                                        }}>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
+                                                                <Mail size={14} className="macos-text-tertiary" />
+                                                                <span className="macos-text-secondary">{trainer.email}</span>
+                                                            </div>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
+                                                                <Phone size={14} className="macos-text-tertiary" />
+                                                                <span className="macos-text-secondary">{trainer.phone || 'Contact via Gym'}</span>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                    <div style={{ display: 'flex', gap: '8px' }}>
-                                                        <button className="macos-btn macos-btn--secondary" style={{ padding: '8px' }}>
-                                                            <MessageSquare size={18} />
-                                                        </button>
-                                                        <button className="macos-btn macos-btn--secondary" style={{ padding: '8px' }}>
-                                                            <Info size={18} />
-                                                        </button>
-                                                    </div>
-                                                </div>
 
-                                                <div style={{ 
-                                                    display: 'grid', 
-                                                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
-                                                    gap: '12px', 
-                                                    margin: '16px 0',
-                                                    padding: '12px',
-                                                    background: 'rgba(255,255,255,0.03)',
-                                                    borderRadius: 'var(--radius-lg)',
-                                                    border: '1px solid var(--macos-border)'
-                                                }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
-                                                        <Mail size={14} className="macos-text-tertiary" />
-                                                        <span className="macos-text-secondary">{assignedTrainers[0].email}</span>
-                                                    </div>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
-                                                        <Phone size={14} className="macos-text-tertiary" />
-                                                        <span className="macos-text-secondary">{assignedTrainers[0].phone || 'Not available'}</span>
-                                                    </div>
-                                                </div>
-
-                                                <p style={{ color: 'var(--macos-text-secondary)', fontSize: '14px', lineHeight: '1.6' }}>
-                                                    {assignedTrainers[0].bio}
-                                                </p>
-                                                
-                                                <div style={{ marginTop: '16px' }}>
-                                                    <div className="skill-section-label" style={{ marginBottom: '8px' }}>Core Specializations</div>
-                                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                                                        {assignedTrainers[0].specializations?.map((spec, i) => (
-                                                            <span key={i} className="skill-badge skill-badge--primary" style={{ padding: '4px 12px' }}>
-                                                                {spec}
-                                                            </span>
-                                                        ))}
-                                                        {assignedTrainers[0].skills?.map((skill, i) => (
-                                                            <span key={`skill-${i}`} className="skill-badge skill-badge--secondary">
-                                                                {skill.name}
-                                                            </span>
-                                                        ))}
+                                                        <p style={{ color: 'var(--macos-text-secondary)', fontSize: '14px', lineHeight: '1.6', marginBottom: '16px' }}>
+                                                            {trainer.bio || 'Experienced professional dedicated to your fitness goals.'}
+                                                        </p>
+                                                        
+                                                        <div>
+                                                            <div className="skill-section-label" style={{ marginBottom: '8px' }}>Active Specialties</div>
+                                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                                                {trainer.specializations?.map((spec, i) => (
+                                                                    <span key={i} className="skill-badge skill-badge--primary" style={{ padding: '4px 12px' }}>
+                                                                        {spec}
+                                                                    </span>
+                                                                ))}
+                                                                {trainer.skills?.map((skill, i) => (
+                                                                    <span key={`skill-${i}`} className="skill-badge skill-badge--secondary">
+                                                                        {skill.name} <span className="skill-level">{skill.level}</span>
+                                                                    </span>
+                                                                ))}
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
+                                        ))}
                                     </div>
                                 ) : (
                                     <div className="glass-card" style={{ padding: 'var(--space-10)', textAlign: 'center', border: '1px dashed var(--macos-border)', background: 'rgba(255,255,255,0.02)' }}>
@@ -345,9 +353,9 @@ const MyTrainer: React.FC = () => {
                                             <div style={{ marginBottom: 'var(--space-4)', background: 'var(--macos-bg-tertiary)', width: '64px', height: '64px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto var(--space-4)' }}>
                                                 <UserPlus size={32} style={{ opacity: 0.5 }} />
                                             </div>
-                                            <h3 className="macos-heading-md" style={{ marginBottom: 'var(--space-2)' }}>No trainer is assigned to you</h3>
+                                            <h3 className="macos-heading-md" style={{ marginBottom: 'var(--space-2)' }}>Your Team is Empty</h3>
                                             <p className="macos-text-md" style={{ maxWidth: '500px', margin: '0 auto var(--space-6)', color: 'var(--macos-text-secondary)' }}>
-                                                No trainer is assigned to you. Request trainer assignments to the front desk or request any trainer you like.
+                                                You don't have any trainers assigned yet. Start your journey by finding the perfect match for your goals.
                                             </p>
                                             <button 
                                                 className="macos-btn macos-btn--primary" 
@@ -355,7 +363,7 @@ const MyTrainer: React.FC = () => {
                                                 style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '0 auto' }}
                                             >
                                                 <Sparkles size={16} />
-                                                Find Your Trainer
+                                                Browse Directory
                                             </button>
                                         </div>
                                     </div>
@@ -363,12 +371,12 @@ const MyTrainer: React.FC = () => {
 
                                 <div className="section-header" style={{ marginTop: 'var(--space-10)' }}>
                                     <h3 className="section-title">
-                                        <TrendingUp size={16} />
-                                        <span>Recommended Trainers</span>
+                                        <TrendingUp size={16} color="var(--macos-purple)" />
+                                        <span>Recommended for You</span>
                                     </h3>
                                 </div>
                                 <div className="trainer-grid">
-                                    {trainers.slice(0, 2).map((trainer) => (
+                                    {trainers.filter(t => !assignedTrainers.some(at => at.userId === t.userId)).slice(0, 3).map((trainer) => (
                                         <motion.div
                                             key={trainer.userId}
                                             variants={cardVariants}
@@ -398,14 +406,7 @@ const MyTrainer: React.FC = () => {
                                             
                                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '12px' }}>
                                                 {trainer.specializations?.slice(0, 2).map((spec, i) => (
-                                                    <span key={i} style={{ 
-                                                        fontSize: '10px', 
-                                                        background: 'rgba(255,255,255,0.05)', 
-                                                        padding: '2px 8px', 
-                                                        borderRadius: '4px',
-                                                        color: 'var(--macos-text-secondary)',
-                                                        border: '1px solid var(--macos-border)'
-                                                    }}>
+                                                    <span key={i} className="skill-badge skill-badge--secondary" style={{ fontSize: '10px', padding: '2px 8px' }}>
                                                         {spec}
                                                     </span>
                                                 ))}
@@ -435,7 +436,7 @@ const MyTrainer: React.FC = () => {
                             >
                                 <div className="section-header">
                                     <h3 className="section-title">
-                                        <Search size={16} />
+                                        <Globe size={16} color="var(--macos-accent)" />
                                         <span>Professional Directory</span>
                                     </h3>
                                     <div style={{ display: 'flex', gap: '8px' }}>
@@ -576,20 +577,32 @@ const MyTrainer: React.FC = () => {
                     </div>
 
                     <div className="sidebar-widget">
-                        <h3 className="widget-title"><Zap size={14} /> Quick Stats</h3>
+                        <h3 className="widget-title"><Activity size={14} /> Ecosystem Stats</h3>
                         <div className="body-stats-list" style={{ padding: '0 var(--space-4)' }}>
                             <div className="body-stat-item">
-                                <span className="stat-label">Total Trainers</span>
+                                <span className="stat-label">Global Professionals</span>
                                 <span className="stat-value">{trainers.length}</span>
                             </div>
                             <div className="body-stat-item">
-                                <span className="stat-label">Top Rated</span>
-                                <span className="stat-value">Alex R.</span>
-                            </div>
-                            <div className="body-stat-item">
-                                <span className="stat-label">My Requests</span>
+                                <span className="stat-label">Assigned Experts</span>
                                 <span className="stat-value">{assignedTrainers.length}</span>
                             </div>
+                            <div className="body-stat-item">
+                                <span className="stat-label">Support Status</span>
+                                <span className="stat-value" style={{ color: 'var(--macos-success)' }}>24/7 Live</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="sidebar-widget" style={{ background: 'linear-gradient(135deg, #FF3B3015, #AF52DE15)' }}>
+                        <h3 className="widget-title"><Sparkles size={14} /> Need Help?</h3>
+                        <div style={{ padding: 'var(--space-4)' }}>
+                            <p style={{ fontSize: '12px', color: 'var(--macos-text-secondary)', marginBottom: '12px' }}>
+                                Can't find the right trainer or need to change your team? Our concierge is here to help.
+                            </p>
+                            <button className="macos-btn macos-btn--secondary" style={{ width: '100%', fontSize: '12px' }}>
+                                Contact Support
+                            </button>
                         </div>
                     </div>
                 </div>

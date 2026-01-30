@@ -19,20 +19,109 @@
     padding: var(--space-4);
 }
 
-.trainer-filter-chip {
-    padding: 8px 16px;
+/* Trainer Card Full (Assigned) */
+.trainer-card--full {
+    border: 1px solid var(--macos-border);
+    background: var(--macos-bg-glass);
+    transition: all 0.3s ease;
+}
+
+.trainer-card--full:hover {
+    border-color: var(--macos-accent);
+    box-shadow: 0 12px 40px -12px rgba(0, 0, 0, 0.4);
+}
+
+.profile-hero__bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 0;
+}
+
+.profile-hero__pattern {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0.1;
+    background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0);
+    background-size: 24px 24px;
+    z-index: 1;
+}
+
+.profile-badge {
+    padding: 2px 10px;
     border-radius: var(--radius-full);
-    background: var(--macos-bg-tertiary);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.sidebar-widget {
+    background: var(--macos-bg-glass);
+    border: 1px solid var(--macos-border);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    margin-bottom: var(--space-4);
+}
+
+.widget-title {
+    padding: var(--space-3) var(--space-4);
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid var(--macos-border);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--macos-text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+}
+
+.body-stats-list {
+    padding: var(--space-2) var(--space-4);
+}
+
+.body-stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.body-stat-item:last-child {
+    border-bottom: none;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: var(--macos-text-secondary);
+}
+
+.stat-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--macos-text-primary);
+}
+
+.trainer-filter-chip {
+    padding: 6px 14px;
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--macos-border);
     color: var(--macos-text-secondary);
-    font-size: 14px;
+    font-size: 12px;
     cursor: pointer;
     transition: all 0.2s ease;
     white-space: nowrap;
 }
 
 .trainer-filter-chip:hover {
-    background: var(--macos-bg-secondary);
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--macos-text-primary);
 }
 
 .trainer-filter-chip.active {
