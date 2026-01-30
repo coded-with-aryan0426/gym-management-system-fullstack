@@ -98,5 +98,12 @@ public class ConversationParticipant {
     public static class ParticipantId implements Serializable {
         private Long conversationId;
         private Long userId;
+
+        // Explicit getters and setters for Lombok compatibility
+        public Long getConversationId() { return conversationId; }
+        public void setConversationId(Long conversationId) { this.conversationId = conversationId; }
+        
+        public Long getUserId() { return userId; }
+        public void setUserId(Long userId) { this.userId = userId; }
     }
 }

@@ -6,10 +6,11 @@ import {
     ChevronRight, Edit3, X, Zap, TrendingUp, Clock, Fingerprint,
     Smartphone, AlertCircle, CheckCircle2, CreditCard, History,
     Trophy, Star, Download, QrCode, ArrowUpRight, Check, Ruler,
-    Scale, Percent
+    Scale, Percent, Users, MessageSquare
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { memberProfileApi, type MemberProfileData, type MemberProfileUpdate } from '../../api/memberProfileApi';
+import api from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import '../../styles/macos-member.css';
 import './MemberProfile.css';
@@ -51,12 +52,14 @@ const AchievementCard: React.FC<{ title: string; date: string; icon: React.React
 
 const MemberProfile: React.FC = () => {
     const [profile, setProfile] = useState<MemberProfileData | null>(null);
+    const [assignedTrainer, setAssignedTrainer] = useState<any | null>(null);
     const [loading, setLoading] = useState(true);
+    const [trainerLoading, setTrainerLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [activeTab, setActiveTab] = useState<TabType>('overview');
     const [editMode, setEditMode] = useState(false);
     const [hasChanges, setHasChanges] = useState(false);
-    const [originalFormData, setOriginalFormData] = useState<typeof formData | null>(null);
+    const [originalFormData, setOriginalFormData] = useState<any | null>(null);
 
     const [formData, setFormData] = useState({
         fullName: '',
@@ -130,7 +133,21 @@ const MemberProfile: React.FC = () => {
             }
         };
 
+        const fetchAssignedTrainer = async () => {
+            try {
+                const response = await api.get('/api/member/trainers/assigned');
+                if (response.data && response.data.length > 0) {
+                    setAssignedTrainer(response.data[0]);
+                }
+            } catch (error) {
+                console.error('Failed to fetch assigned trainer:', error);
+            } finally {
+                setTrainerLoading(false);
+            }
+        };
+
         fetchProfile();
+        fetchAssignedTrainer();
     }, [user?.id]);
 
     const handleSubmit = async (e?: React.FormEvent) => {
@@ -390,58 +407,6 @@ const MemberProfile: React.FC = () => {
                     </motion.button>
                 </div>
             </motion.div>
-
-            {editMode && (
-                <motion.div
-                    className="edit-mode-banner"
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                >
-                    <div className="edit-mode-banner__content">
-                        <Edit3 size={16} />
-                        <span>Edit Mode - Make changes in any section below</span>
-                    </div>
-                    {hasChanges && (
-                        <motion.div
-                            className="edit-mode-banner__actions"
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                        >
-                            <button
-                                type="button"
-                                className="edit-mode-btn edit-mode-btn--cancel"
-                                onClick={handleCancelEdit}
-                            >
-                                <X size={14} />
-                                Discard
-                            </button>
-                            <button
-                                type="button"
-                                className="edit-mode-btn edit-mode-btn--save"
-                                onClick={() => handleSubmit()}
-                                disabled={saving}
-                            >
-                                {saving ? (
-                                    <>
-                                        <motion.div
-                                            animate={{ rotate: 360 }}
-                                            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                                        >
-                                            <Activity size={14} />
-                                        </motion.div>
-                                        Saving...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Check size={14} />
-                                        Save All Changes
-                                    </>
-                                )}
-                            </button>
-                        </motion.div>
-                    )}
-                </motion.div>
-            )}
 
             <div className="profile-layout-grid">
                 <div className="profile-main-content">
@@ -1005,6 +970,52 @@ const MemberProfile: React.FC = () => {
                 </div>
 
                 <div className="profile-sidebar">
+                    {/* Your Trainer Widget */}
+                    <div className="sidebar-widget">
+                        <div className="widget-header">
+                            <h3 className="widget-title"><Users size={14} /> Your Trainer</h3>
+                            <ChevronRight size={14} className="widget-icon-link" />
+                        </div>
+                        {trainerLoading ? (
+                            <div className="membership-card" style={{ padding: '12px', textAlign: 'center' }}>
+                                <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}>
+                                    <Activity size={16} />
+                                </motion.div>
+                            </div>
+                        ) : assignedTrainer ? (
+                            <div className="membership-card" style={{ padding: '12px' }}>
+                                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'linear-gradient(135deg, #007AFF, #5856D6)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold' }}>
+                                        {assignedTrainer.name[0]}
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                        <div style={{ fontSize: '14px', fontWeight: '600' }}>{assignedTrainer.name}</div>
+                                        <div style={{ fontSize: '11px', color: 'var(--macos-text-secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                            <Star size={10} fill="#FFCC00" color="#FFCC00" /> {assignedTrainer.stats.rating} • {assignedTrainer.stats.experience}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style={{ marginTop: '12px', display: 'flex', gap: '8px' }}>
+                                    <button className="macos-btn macos-btn--secondary" style={{ flex: 1, padding: '6px', fontSize: '12px' }}>
+                                        <MessageSquare size={14} /> Message
+                                    </button>
+                                    <button className="macos-btn macos-btn--secondary" style={{ flex: 1, padding: '6px', fontSize: '12px' }}>
+                                        <Info size={14} /> Details
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="membership-card" style={{ padding: '12px', textAlign: 'center' }}>
+                                <div style={{ fontSize: '13px', color: 'var(--macos-text-secondary)', marginBottom: '8px' }}>
+                                    No trainer assigned yet
+                                </div>
+                                <button className="widget-action-btn primary" onClick={() => window.location.href = '/member/trainer'}>
+                                    Find a Trainer
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
                     <div className="sidebar-widget membership-widget">
                         <div className="widget-header">
                             <h3 className="widget-title"><CreditCard size={14} /> Membership</h3>

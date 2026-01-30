@@ -49,6 +49,31 @@ public class ConversationRequest {
     @Column(name = "responded_at")
     private LocalDateTime respondedAt;
 
+    // Explicit getters and setters for Lombok compatibility
+    public Long getRequestId() { return requestId; }
+    public void setRequestId(Long requestId) { this.requestId = requestId; }
+    
+    public User getSender() { return sender; }
+    public void setSender(User sender) { this.sender = sender; }
+    
+    public User getReceiver() { return receiver; }
+    public void setReceiver(User receiver) { this.receiver = receiver; }
+    
+    public Conversation getConversation() { return conversation; }
+    public void setConversation(Conversation conversation) { this.conversation = conversation; }
+    
+    public RequestStatus getStatus() { return status; }
+    public void setStatus(RequestStatus status) { this.status = status; }
+    
+    public String getMessage() { return message; }
+    public void setMessage(String message) { this.message = message; }
+    
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    
+    public LocalDateTime getRespondedAt() { return respondedAt; }
+    public void setRespondedAt(LocalDateTime respondedAt) { this.respondedAt = respondedAt; }
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

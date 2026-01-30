@@ -37,9 +37,6 @@ public class MemberTrainerController {
     private PTSessionRepository ptSessionRepository;
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
     private ObjectMapper objectMapper;
 
     @GetMapping("/assigned")

@@ -21,6 +21,31 @@ public class ChatUserDTO {
     private boolean online;
     private String lastSeen; // ISO timestamp
 
+    // Explicit getters and setters for Lombok compatibility
+    public Long getUserId() { return userId; }
+    public void setUserId(Long userId) { this.userId = userId; }
+    
+    public String getFullName() { return fullName; }
+    public void setFullName(String fullName) { this.fullName = fullName; }
+    
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
+    
+    public String getAvatarId() { return avatarId; }
+    public void setAvatarId(String avatarId) { this.avatarId = avatarId; }
+    
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
+    
+    public Long getGymId() { return gymId; }
+    public void setGymId(Long gymId) { this.gymId = gymId; }
+    
+    public boolean isOnline() { return online; }
+    public void setOnline(boolean online) { this.online = online; }
+    
+    public String getLastSeen() { return lastSeen; }
+    public void setLastSeen(String lastSeen) { this.lastSeen = lastSeen; }
+
     // For quick identification in UI
     public String getInitials() {
         if (fullName == null || fullName.isEmpty()) {
