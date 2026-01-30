@@ -84,7 +84,8 @@ const navigationIcons = {
   equipment: 'equipment',
   settings: 'settings',
   reports: 'reports',
-  staff: 'staff'
+  staff: 'staff',
+  notifications: 'notifications'
 };
 
 // Navigation configuration based on permissions
@@ -97,6 +98,15 @@ export const NAVIGATION_CONFIG: NavItem[] = [
     requiredRoles: ['OWNER', 'ADMIN', 'TRAINER', 'MEMBER'],
     category: 'main',
     order: 1
+  },
+  {
+    id: 'notifications',
+    path: '/notifications',
+    label: 'Notifications',
+    icon: navigationIcons.notifications,
+    requiredRoles: ['OWNER', 'ADMIN'],
+    category: 'main',
+    order: 1.5
   },
   {
     id: 'members',
