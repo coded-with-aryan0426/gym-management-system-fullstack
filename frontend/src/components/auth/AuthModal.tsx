@@ -9,6 +9,7 @@ import OtpInput from './OtpInput';
 import SocialLoginButtons from './SocialLoginButtons';
 import GymSelector from '../GymSelector/GymSelector';
 import GymNameModal from './GymNameModal';
+import { Logo } from '../ui/Logo';
 
 const getStorageKey = (key: string): string => {
     const port = typeof window !== 'undefined' ? window.location.port || '5173' : '5173';
@@ -421,41 +422,19 @@ export default function AuthModal() {
                             transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
                         }}
                     >
-                        {/* Header - Compact */}
+                        {/* Header - Premium Branded */}
                         <div style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            padding: '14px 20px',
+                            padding: '20px 20px 16px',
                             borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+                            position: 'relative',
                         }}>
-                            <div>
-                                <h2 style={{ 
-                                    fontSize: 17, 
-                                    fontWeight: 700, 
-                                    color: colors.textPrimary, 
-                                    margin: 0,
-                                    letterSpacing: '-0.3px'
-                                }}>
-                                    {activeTab === 'login' 
-                                        ? (loginStep === 'OTP' ? 'Verify Code' : 'Welcome Back')
-                                        : (signupStep === 'OTP' ? 'Verify Code' : 'Start Your Gym')
-                                    }
-                                </h2>
-                                <p style={{
-                                    fontSize: 12,
-                                    color: colors.textTertiary,
-                                    margin: '2px 0 0 0',
-                                }}>
-                                    {activeTab === 'login' 
-                                        ? (loginStep === 'OTP' ? 'Enter the code sent to your email' : 'Sign in to your account')
-                                        : (signupStep === 'OTP' ? 'Enter the code sent to your email' : 'Create your gym owner account')
-                                    }
-                                </p>
-                            </div>
+                            {/* Close Button */}
                             <button
                                 onClick={closeAuthModal}
                                 style={{
+                                    position: 'absolute',
+                                    top: 14,
+                                    right: 14,
                                     background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
                                     border: 'none',
                                     color: colors.textTertiary,
@@ -464,6 +443,7 @@ export default function AuthModal() {
                                     display: 'flex',
                                     borderRadius: 8,
                                     transition: 'all 0.2s ease',
+                                    zIndex: 1,
                                 }}
                                 onMouseEnter={(e) => {
                                     e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
@@ -474,6 +454,69 @@ export default function AuthModal() {
                             >
                                 <X size={16} />
                             </button>
+
+                            {/* Logo Brand Block */}
+                            <div style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                gap: 12,
+                            }}>
+                                {/* Logo Pill */}
+                                <div style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: 8,
+                                    padding: '8px 16px',
+                                    background: isDark 
+                                        ? 'rgba(220, 38, 38, 0.08)' 
+                                        : 'rgba(220, 38, 38, 0.05)',
+                                    border: `1px solid ${isDark ? 'rgba(220, 38, 38, 0.25)' : 'rgba(220, 38, 38, 0.15)'}`,
+                                    borderRadius: 50,
+                                    boxShadow: isDark 
+                                        ? '0 0 20px rgba(220, 38, 38, 0.1)' 
+                                        : '0 0 15px rgba(220, 38, 38, 0.06)',
+                                }}>
+                                    <Logo size={22} color="#DC2626" showText={false} />
+                                    <span style={{
+                                        fontSize: 13,
+                                        fontWeight: 800,
+                                        color: colors.crimson,
+                                        letterSpacing: '0.12em',
+                                        textTransform: 'uppercase',
+                                    }}>
+                                        AthlonX
+                                    </span>
+                                </div>
+
+                                {/* Title & Subtitle */}
+                                <div style={{ textAlign: 'center' }}>
+                                    <h2 style={{ 
+                                        fontSize: 20, 
+                                        fontWeight: 800, 
+                                        color: colors.textPrimary, 
+                                        margin: 0,
+                                        letterSpacing: '-0.4px',
+                                        lineHeight: 1.2,
+                                    }}>
+                                        {activeTab === 'login' 
+                                            ? (loginStep === 'OTP' ? 'Verify Your Identity' : 'Welcome Back')
+                                            : (signupStep === 'OTP' ? 'Verify Your Email' : 'Start Your Journey')
+                                        }
+                                    </h2>
+                                    <p style={{
+                                        fontSize: 13,
+                                        color: colors.textSecondary,
+                                        margin: '6px 0 0 0',
+                                        lineHeight: 1.4,
+                                    }}>
+                                        {activeTab === 'login' 
+                                            ? (loginStep === 'OTP' ? 'Enter the 6-digit code sent to your email' : 'Sign in to manage your gym')
+                                            : (signupStep === 'OTP' ? 'Enter the 6-digit code sent to your email' : 'Create your gym owner account')
+                                        }
+                                    </p>
+                                </div>
+                            </div>
                         </div>
 
                         {/* Tab Switcher - Compact Slider */}
