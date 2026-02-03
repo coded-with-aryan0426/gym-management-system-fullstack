@@ -421,26 +421,38 @@ export default function AuthModal() {
                             transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
                         }}
                     >
-                        {/* Header */}
+                        {/* Header - Compact */}
                         <div style={{
                             display: 'flex',
                             justifyContent: 'space-between',
                             alignItems: 'center',
-                            padding: '20px 24px',
+                            padding: '14px 20px',
                             borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
                         }}>
-                            <h2 style={{ 
-                                fontSize: 20, 
-                                fontWeight: 700, 
-                                color: colors.textPrimary, 
-                                margin: 0,
-                                letterSpacing: '-0.3px'
-                            }}>
-                                {activeTab === 'login' 
-                                    ? (loginStep === 'OTP' ? 'Verification' : 'Welcome Back')
-                                    : (signupStep === 'OTP' ? 'Verification' : 'Create Account')
-                                }
-                            </h2>
+                            <div>
+                                <h2 style={{ 
+                                    fontSize: 17, 
+                                    fontWeight: 700, 
+                                    color: colors.textPrimary, 
+                                    margin: 0,
+                                    letterSpacing: '-0.3px'
+                                }}>
+                                    {activeTab === 'login' 
+                                        ? (loginStep === 'OTP' ? 'Verify Code' : 'Welcome Back')
+                                        : (signupStep === 'OTP' ? 'Verify Code' : 'Start Your Gym')
+                                    }
+                                </h2>
+                                <p style={{
+                                    fontSize: 12,
+                                    color: colors.textTertiary,
+                                    margin: '2px 0 0 0',
+                                }}>
+                                    {activeTab === 'login' 
+                                        ? (loginStep === 'OTP' ? 'Enter the code sent to your email' : 'Sign in to your account')
+                                        : (signupStep === 'OTP' ? 'Enter the code sent to your email' : 'Create your gym owner account')
+                                    }
+                                </p>
+                            </div>
                             <button
                                 onClick={closeAuthModal}
                                 style={{
@@ -448,21 +460,19 @@ export default function AuthModal() {
                                     border: 'none',
                                     color: colors.textTertiary,
                                     cursor: 'pointer',
-                                    padding: 8,
+                                    padding: 6,
                                     display: 'flex',
-                                    borderRadius: 10,
+                                    borderRadius: 8,
                                     transition: 'all 0.2s ease',
                                 }}
                                 onMouseEnter={(e) => {
                                     e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
-                                    e.currentTarget.style.transform = 'scale(1.05)';
                                 }}
                                 onMouseLeave={(e) => {
                                     e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
-                                    e.currentTarget.style.transform = 'scale(1)';
                                 }}
                             >
-                                <X size={18} />
+                                <X size={16} />
                             </button>
                         </div>
 

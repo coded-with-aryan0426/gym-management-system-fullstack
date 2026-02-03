@@ -10,6 +10,7 @@ import type { MembershipPackageDTO } from "../../types/membershipPackage"
 import { Button } from "../ui"
 import "./CreateUserModal.css"
 import Editable from "../editor/Editable"
+import MembershipAssignment from "../membership/MembershipAssignment"
 
 interface CreateUserModalProps {
   isOpen: boolean
@@ -26,6 +27,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClose, onSu
   const [step, setStep] = useState<ModalStep>("CATEGORY")
   const [role, setRole] = useState<"CUSTOMER" | "TRAINER" | "STAFF" | null>(null)
   const [availablePlans, setAvailablePlans] = useState<MembershipPackageDTO[]>([])
+  const [selectedMembershipId, setSelectedMembershipId] = useState<number | null>(null)
 
   const [formData, setFormData] = useState({
     username: "",
@@ -90,6 +92,12 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClose, onSu
     }
 
     setFormData((prev) => ({ ...prev, [name]: value }))
+  }
+
+  // Handle membership selection from our enhanced component
+  const handleMembershipSelect = (membershipId: number) => {
+    setSelectedMembershipId(membershipId)
+    setFormData((prev) => ({ ...prev, packageId: membershipId.toString() }))
   }
 
   // Validation helpers
@@ -177,6 +185,11 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClose, onSu
       // Validate email: mandatory
       if (!effectiveFormData.email) {
         toast.error("Email is required");
+        return;
+      }
+      // Validate membership selection
+      if (!selectedMembershipId) {
+        toast.error("Please select a membership plan");
         return;
       }
       // Use Phone as Username
