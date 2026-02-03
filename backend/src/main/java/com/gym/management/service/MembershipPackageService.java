@@ -38,8 +38,8 @@ public class MembershipPackageService {
     }
 
     public MembershipPackageDTO createPackage(MembershipPackageDTO dto) {
-        if (membershipPackageRepository.existsByPackageName(dto.getPackageName())) {
-            throw new IllegalArgumentException("Package with this name already exists");
+        if (membershipPackageRepository.existsByPackageNameAndDurationDays(dto.getPackageName(), dto.getDurationDays())) {
+            throw new IllegalArgumentException("Package with this name and duration already exists");
         }
 
         MembershipPackage pkg = new MembershipPackage();
@@ -57,6 +57,14 @@ public class MembershipPackageService {
         Objects.requireNonNull(packageId, "Package ID must not be null");
         MembershipPackage pkg = membershipPackageRepository.findById(packageId)
                 .orElseThrow(() -> new IllegalArgumentException("Package not found"));
+
+        String nextName = dto.getPackageName() != null ? dto.getPackageName() : pkg.getPackageName();
+        Integer nextDuration = dto.getDurationDays() != null ? dto.getDurationDays() : pkg.getDurationDays();
+
+        if (nextName != null && nextDuration != null
+                && membershipPackageRepository.existsByPackageNameAndDurationDaysAndPackageIdNot(nextName, nextDuration, packageId)) {
+            throw new IllegalArgumentException("Package with this name and duration already exists");
+        }
 
         if (dto.getPackageName() != null) {
             pkg.setPackageName(dto.getPackageName());

@@ -431,13 +431,17 @@ public class UserService {
                         : java.time.LocalDate.now();
                 membership.setStartDate(startDate);
 
-                // Calculate end date based on duration
-                int months = user.getDuration() != null ? user.getDuration() : 1;
-                if (months <= 0) {
-                    months = pkg.getDurationMonths() != null ? pkg.getDurationMonths() : 1;
+                // Calculate end date based on package duration (days preferred)
+                Integer durationDays = pkg.getDurationDays();
+                if (durationDays != null && durationDays > 0) {
+                    membership.setEndDate(startDate.plusDays(durationDays));
+                } else {
+                    int months = user.getDuration() != null ? user.getDuration() : 1;
+                    if (months <= 0) {
+                        months = pkg.getDurationMonths() != null ? pkg.getDurationMonths() : 1;
+                    }
+                    membership.setEndDate(startDate.plusMonths(months));
                 }
-                java.time.LocalDate endDate = startDate.plusMonths(months);
-                membership.setEndDate(endDate);
 
                 // Set status to ACTIVE
                 membership.setStatus(com.gym.management.model.MembershipStatus.ACTIVE);

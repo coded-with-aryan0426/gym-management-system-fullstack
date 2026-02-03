@@ -315,6 +315,10 @@
   gap: 8px;
 }
 
+.cam-duration-grid--plans {
+  grid-template-columns: repeat(2, 1fr);
+}
+
 .cam-duration-btn {
   display: flex;
   align-items: center;
@@ -329,6 +333,27 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
+}
+
+.cam-duration-btn--card {
+  height: auto;
+  padding: 12px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  text-align: left;
+}
+
+.cam-duration-btn__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.cam-duration-btn__price {
+  font-size: 14px;
+  font-weight: 700;
+  color: #10b981;
 }
 
 .cam-duration-btn:hover {
@@ -349,6 +374,18 @@
 
 .cam-duration-btn--selected svg {
   color: #3b82f6;
+}
+
+.cam-duration-btn--selected .cam-duration-btn__label {
+  color: #60a5fa;
+}
+
+.cam-duration-empty {
+  padding: 16px;
+  border-radius: 10px;
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 12px;
 }
 
 /* Summary */
@@ -631,6 +668,17 @@
 :root.theme-light .cam-duration-btn--selected,
 [data-theme="light"] .cam-duration-btn--selected {
   background: rgba(59, 130, 246, 0.08);
+}
+
+:root.theme-light .cam-duration-btn__label,
+[data-theme="light"] .cam-duration-btn__label {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+:root.theme-light .cam-duration-empty,
+[data-theme="light"] .cam-duration-empty {
+  border-color: rgba(0, 0, 0, 0.12);
+  color: rgba(0, 0, 0, 0.5);
 }
 
 :root.theme-light .cam-summary,

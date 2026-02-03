@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useMemo } from "react"
 import ReactDOM from "react-dom"
 import { motion, AnimatePresence } from "framer-motion"
 import { useNavigate } from "react-router-dom"
@@ -23,6 +23,11 @@ interface CreateActionModalProps {
 
 type ViewType = "memberForm" | "staffForm"
 
+type PlanGroup = {
+    name: string
+    plans: MembershipPackageDTO[]
+}
+
 const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, initialView = "memberForm" }) => {
     const navigate = useNavigate()
     const [view, setView] = useState<ViewType>(initialView)
@@ -32,6 +37,7 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
     // Membership plans
     const [membershipPlans, setMembershipPlans] = useState<MembershipPackageDTO[]>([])
     const [loadingPlans, setLoadingPlans] = useState(false)
+    const [selectedPlanName, setSelectedPlanName] = useState<string>("")
 
     // Form state
     const [formData, setFormData] = useState({
@@ -39,7 +45,6 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
         email: "",
         phoneNumber: "",
         packageId: "",
-        duration: "1",
         startDate: new Date().toISOString().split('T')[0],
     })
 
@@ -66,16 +71,36 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
         }
     }
 
+    const planGroups = useMemo<PlanGroup[]>(() => {
+        const grouped = new Map<string, MembershipPackageDTO[]>()
+        membershipPlans.forEach((plan) => {
+            const name = plan.packageName?.trim() || "Plan"
+            if (!grouped.has(name)) {
+                grouped.set(name, [])
+            }
+            grouped.get(name)?.push(plan)
+        })
+
+        return Array.from(grouped.entries()).map(([name, plans]) => ({
+            name,
+            plans: [...plans].sort((a, b) => (a.durationDays || 0) - (b.durationDays || 0))
+        }))
+    }, [membershipPlans])
+
+    const selectedGroup = planGroups.find((group) => group.name === selectedPlanName)
+    const durationOptions = selectedGroup?.plans ?? []
+    const selectedPlan = membershipPlans.find(p => p.packageId.toString() === formData.packageId)
+
     // Reset on open
     useEffect(() => {
         if (isOpen) {
             setView(initialView)
+            setSelectedPlanName("")
             setFormData({
                 fullName: "",
                 email: "",
                 phoneNumber: "",
                 packageId: "",
-                duration: "1",
                 startDate: new Date().toISOString().split('T')[0],
             })
         }
@@ -85,7 +110,7 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
         return formData.fullName || formData.email || formData.phoneNumber
     }
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
         if (name === "phoneNumber") {
             const digitsOnly = value.replace(/\D/g, "").slice(0, 10)
@@ -95,8 +120,13 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
         setFormData(prev => ({ ...prev, [name]: value }))
     }
 
-    const handlePlanSelect = (planId: number) => {
-        setFormData(prev => ({ ...prev, packageId: planId.toString() }))
+    const handlePlanNameSelect = (name: string) => {
+        setSelectedPlanName(name)
+        setFormData(prev => ({ ...prev, packageId: "" }))
+    }
+
+    const handleDurationSelect = (plan: MembershipPackageDTO) => {
+        setFormData(prev => ({ ...prev, packageId: plan.packageId.toString() }))
     }
 
     const handleCloseRequest = () => {
@@ -109,12 +139,12 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
 
     const discardAndClose = () => {
         setShowConfirm(false)
+        setSelectedPlanName("")
         setFormData({
             fullName: "",
             email: "",
             phoneNumber: "",
             packageId: "",
-            duration: "1",
             startDate: new Date().toISOString().split('T')[0],
         })
         onClose()
@@ -139,7 +169,7 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
             return
         }
         if (isMember && !formData.packageId) {
-            toast.error("Please select a membership plan")
+            toast.error("Please select a membership plan and duration")
             return
         }
 
@@ -157,7 +187,6 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
 
             if (isMember) {
                 payload.startDate = formData.startDate
-                payload.duration = parseInt(formData.duration)
                 payload.packageId = parseInt(formData.packageId)
             }
 
@@ -183,9 +212,19 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
 
     const getTitle = () => view === "memberForm" ? "Add New Member" : "Add New Trainer"
 
-    const selectedPlan = membershipPlans.find(p => p.packageId.toString() === formData.packageId)
-
     const formatPrice = (price: number) => `₹${price.toLocaleString('en-IN')}`
+
+    const formatDuration = (days: number) => {
+        if (days >= 365) {
+            const years = Math.floor(days / 365)
+            return `${years} Year${years > 1 ? 's' : ''}`
+        }
+        if (days >= 30) {
+            const months = Math.floor(days / 30)
+            return `${months} Month${months > 1 ? 's' : ''}`
+        }
+        return `${days} Day${days > 1 ? 's' : ''}`
+    }
 
     const modalContent = (
         <AnimatePresence>
@@ -293,44 +332,34 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
                                             </div>
                                         </div>
 
-                                        {/* Membership Section */}
+                                        {/* Membership Name Section */}
                                         <div className="cam-section">
                                             <div className="cam-section__header">
                                                 <CreditCard size={14} />
-                                                <span>Membership Plan</span>
+                                                <span>Membership Name</span>
                                             </div>
-                                            
                                             {loadingPlans ? (
                                                 <div className="cam-plans-loading">
                                                     <div className="cam-spinner" />
                                                     <span>Loading plans...</span>
                                                 </div>
-                                            ) : membershipPlans.length === 0 ? (
-                                                <div className="cam-plans-empty">
-                                                    No membership plans available
-                                                </div>
+                                            ) : planGroups.length === 0 ? (
+                                                <div className="cam-plans-empty">No membership plans available</div>
                                             ) : (
                                                 <div className="cam-plans">
-                                                    {membershipPlans.map((plan) => (
+                                                    {planGroups.map((group) => (
                                                         <button
-                                                            key={plan.packageId}
+                                                            key={group.name}
                                                             type="button"
-                                                            className={`cam-plan-card ${formData.packageId === plan.packageId.toString() ? 'cam-plan-card--selected' : ''}`}
-                                                            onClick={() => handlePlanSelect(plan.packageId)}
+                                                            className={`cam-plan-card ${selectedPlanName === group.name ? 'cam-plan-card--selected' : ''}`}
+                                                            onClick={() => handlePlanNameSelect(group.name)}
                                                         >
                                                             <div className="cam-plan-card__check">
-                                                                {formData.packageId === plan.packageId.toString() && <Check size={12} />}
+                                                                {selectedPlanName === group.name && <Check size={12} />}
                                                             </div>
                                                             <div className="cam-plan-card__info">
-                                                                <span className="cam-plan-card__name">{plan.packageName}</span>
-                                                                <span className="cam-plan-card__price">{formatPrice(plan.price)}</span>
+                                                                <span className="cam-plan-card__name">{group.name}</span>
                                                             </div>
-                                                            <span className="cam-plan-card__duration">
-                                                                {plan.durationDays >= 30 
-                                                                    ? `${Math.round(plan.durationDays / 30)} month${plan.durationDays >= 60 ? 's' : ''}`
-                                                                    : `${plan.durationDays} days`
-                                                                }
-                                                            </span>
                                                         </button>
                                                     ))}
                                                 </div>
@@ -341,26 +370,26 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
                                         <div className="cam-section">
                                             <div className="cam-section__header">
                                                 <Clock size={14} />
-                                                <span>Subscription Duration</span>
+                                                <span>Duration & Price</span>
                                             </div>
-                                            <div className="cam-duration-grid">
-                                                {[
-                                                    { value: "1", label: "1 Month" },
-                                                    { value: "3", label: "3 Months" },
-                                                    { value: "6", label: "6 Months" },
-                                                    { value: "12", label: "1 Year" },
-                                                ].map((opt) => (
-                                                    <button
-                                                        key={opt.value}
-                                                        type="button"
-                                                        className={`cam-duration-btn ${formData.duration === opt.value ? 'cam-duration-btn--selected' : ''}`}
-                                                        onClick={() => setFormData(prev => ({ ...prev, duration: opt.value }))}
-                                                    >
-                                                        {opt.label}
-                                                        {formData.duration === opt.value && <Check size={12} />}
-                                                    </button>
-                                                ))}
-                                            </div>
+                                            {selectedPlanName ? (
+                                                <div className="cam-duration-grid cam-duration-grid--plans">
+                                                    {durationOptions.map((plan) => (
+                                                        <button
+                                                            key={plan.packageId}
+                                                            type="button"
+                                                            className={`cam-duration-btn cam-duration-btn--card ${formData.packageId === plan.packageId.toString() ? 'cam-duration-btn--selected' : ''}`}
+                                                            onClick={() => handleDurationSelect(plan)}
+                                                        >
+                                                            <span className="cam-duration-btn__label">{formatDuration(plan.durationDays)}</span>
+                                                            <span className="cam-duration-btn__price">{formatPrice(plan.price)}</span>
+                                                            {formData.packageId === plan.packageId.toString() && <Check size={12} />}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <div className="cam-duration-empty">Select a membership name to view durations</div>
+                                            )}
                                         </div>
 
                                         {/* Summary */}
@@ -372,11 +401,11 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
                                                 </div>
                                                 <div className="cam-summary__row">
                                                     <span>Duration</span>
-                                                    <span>{formData.duration} Month{parseInt(formData.duration) > 1 ? 's' : ''}</span>
+                                                    <span>{formatDuration(selectedPlan.durationDays)}</span>
                                                 </div>
                                                 <div className="cam-summary__row cam-summary__row--total">
                                                     <span>Total</span>
-                                                    <span>{formatPrice(selectedPlan.price * parseInt(formData.duration))}</span>
+                                                    <span>{formatPrice(selectedPlan.price)}</span>
                                                 </div>
                                             </div>
                                         )}

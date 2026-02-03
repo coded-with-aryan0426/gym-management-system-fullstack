@@ -98,4 +98,21 @@ public interface MembershipPackageRepository extends JpaRepository<MembershipPac
      * @return true if exists, false otherwise
      */
     boolean existsByPackageName(String packageName);
+
+    /**
+     * Check if package name + duration already exists
+     * @param packageName The package name to check
+     * @param durationDays The duration in days
+     * @return true if exists, false otherwise
+     */
+    boolean existsByPackageNameAndDurationDays(String packageName, Integer durationDays);
+
+    /**
+     * Check if package name + duration already exists excluding current id
+     * @param packageName The package name to check
+     * @param durationDays The duration in days
+     * @param packageId The package id to exclude
+     * @return true if exists, false otherwise
+     */
+    boolean existsByPackageNameAndDurationDaysAndPackageIdNot(String packageName, Integer durationDays, Long packageId);
 }
