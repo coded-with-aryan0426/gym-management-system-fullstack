@@ -4,6 +4,7 @@ import React from 'react';
 import { Box, Typography, Button, TextField, InputAdornment, Chip, Paper, Avatar } from '@mui/material';
 import { Sparkles, ArrowRight, Play, Star, Trophy, Shield, Zap, UserPlus, Mail } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const GradientText = ({ children }: { children: React.ReactNode }) => (
   <Box
@@ -30,6 +31,9 @@ interface HeroProps {
 }
 
 export default function Hero({ onSignupClick }: HeroProps) {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+  
   return (
       <Box
         sx={{
@@ -38,7 +42,8 @@ export default function Hero({ onSignupClick }: HeroProps) {
           paddingTop: { xs: '80px', sm: '100px', md: '120px' },
           paddingBottom: { xs: '60px', md: '80px' },
           overflow: 'hidden',
-          backgroundColor: '#0A0A0A',
+          backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC',
+          transition: 'background-color 0.3s ease',
         }}
       >
       <Box
@@ -54,7 +59,7 @@ export default function Hero({ onSignupClick }: HeroProps) {
         }}
       >
         {/* Content Side */}
-        <Box sx={{ flex: 1, color: 'white', width: '100%', textAlign: { xs: 'center', lg: 'left' } }}>
+        <Box sx={{ flex: 1, color: isDark ? 'white' : 'var(--text-primary)', width: '100%', textAlign: { xs: 'center', lg: 'left' } }}>
           <Chip
             icon={<Sparkles size={14} color="#E63946" />}
             label={
@@ -87,7 +92,7 @@ export default function Hero({ onSignupClick }: HeroProps) {
               fontFamily: 'var(--font-heading)',
               lineHeight: 1.1,
               letterSpacing: { xs: '-1px', md: '-2px' },
-              color: 'white',
+              color: isDark ? 'white' : 'var(--text-primary)',
               marginBottom: { xs: 2, md: 3 },
               maxWidth: { lg: 700 },
             }}
@@ -101,7 +106,7 @@ export default function Hero({ onSignupClick }: HeroProps) {
               fontSize: { xs: '15px', sm: '16px', md: '18px', lg: '20px' },
               fontWeight: 400,
               lineHeight: 1.6,
-              color: 'var(--color-gray-400)',
+              color: isDark ? 'var(--color-gray-400)' : 'var(--text-secondary)',
               maxWidth: { xs: '100%', lg: 550 },
               margin: { xs: '0 auto 24px', lg: '0 0 40px 0' },
             }}
@@ -126,35 +131,35 @@ export default function Hero({ onSignupClick }: HeroProps) {
               flexDirection: { xs: 'column', sm: 'row' }
             }}>
               <TextField
-                placeholder="Enter your email"
-                variant="outlined"
-                fullWidth
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    height: { xs: 52, md: 60 },
-                    backgroundColor: 'rgba(255,255,255,0.03)',
-                    borderRadius: '12px',
-                    fontSize: { xs: '14px', md: '16px' },
-                    color: 'white',
-                    '& fieldset': {
-                      borderColor: 'rgba(255,255,255,0.1)',
+                  placeholder="Enter your email"
+                  variant="outlined"
+                  fullWidth
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      height: { xs: 52, md: 60 },
+                      backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)',
+                      borderRadius: '12px',
+                      fontSize: { xs: '14px', md: '16px' },
+                      color: isDark ? 'white' : 'var(--text-primary)',
+                      '& fieldset': {
+                        borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+                      },
+                      '&:hover fieldset': {
+                        borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#E63946',
+                      },
                     },
-                    '&:hover fieldset': {
-                      borderColor: 'rgba(255,255,255,0.2)',
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#E63946',
-                    },
-                  },
-                }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Mail size={18} color="#666" />
-                    </InputAdornment>
-                  ),
-                }}
-              />
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Mail size={18} color={isDark ? "#666" : "#999"} />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
 
               <Button
                 variant="contained"
@@ -186,7 +191,7 @@ export default function Hero({ onSignupClick }: HeroProps) {
               variant="text"
               startIcon={<Play size={18} />}
               sx={{
-                color: 'var(--color-gray-300)',
+                color: isDark ? 'var(--color-gray-300)' : 'var(--text-secondary)',
                 fontSize: { xs: '13px', md: '14px' },
                 fontWeight: 500,
                 textTransform: 'none',
@@ -194,7 +199,7 @@ export default function Hero({ onSignupClick }: HeroProps) {
                 justifyContent: { xs: 'center', lg: 'flex-start' },
                 width: 'fit-content',
                 '&:hover': {
-                  color: 'white',
+                  color: isDark ? 'white' : 'var(--text-primary)',
                   backgroundColor: 'transparent',
                 },
               }}
@@ -212,7 +217,7 @@ export default function Hero({ onSignupClick }: HeroProps) {
               flexWrap: 'wrap',
               justifyContent: { xs: 'center', lg: 'flex-start' },
               paddingTop: { xs: 3, md: 4 },
-              borderTop: '1px solid rgba(255,255,255,0.1)',
+              borderTop: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)',
             }}
           >
             {trustSignals.map((signal) => (
@@ -232,7 +237,7 @@ export default function Hero({ onSignupClick }: HeroProps) {
                   sx={{
                     fontSize: { xs: '11px', sm: '12px', md: '13px' },
                     fontWeight: 500,
-                    color: 'var(--color-gray-300)',
+                    color: isDark ? 'var(--color-gray-300)' : 'var(--text-secondary)',
                     whiteSpace: 'nowrap',
                   }}
                 >
@@ -285,11 +290,11 @@ export default function Hero({ onSignupClick }: HeroProps) {
               top: { md: -10, lg: -20 },
               right: { md: -10, lg: -20 },
               padding: { md: 1.5, lg: 2 },
-              backgroundColor: 'rgba(26, 26, 26, 0.95)',
+              backgroundColor: isDark ? 'rgba(26, 26, 26, 0.95)' : 'rgba(255, 255, 255, 0.95)',
               backdropFilter: 'blur(10px)',
               borderRadius: '12px',
-              boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
-              border: '1px solid rgba(255,255,255,0.1)',
+              boxShadow: isDark ? '0 10px 40px rgba(0,0,0,0.5)' : '0 10px 40px rgba(0,0,0,0.15)',
+              border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)',
               alignItems: 'center',
               gap: 1.5,
               zIndex: 2,
@@ -299,10 +304,10 @@ export default function Hero({ onSignupClick }: HeroProps) {
               <UserPlus size={18} />
             </Avatar>
             <Box>
-              <Typography sx={{ fontSize: { md: '12px', lg: '14px' }, fontWeight: 600, color: 'white' }}>
+              <Typography sx={{ fontSize: { md: '12px', lg: '14px' }, fontWeight: 600, color: isDark ? 'white' : 'var(--text-primary)' }}>
                 New Member Joined
               </Typography>
-              <Typography sx={{ fontSize: { md: '10px', lg: '12px' }, color: 'var(--color-gray-400)' }}>
+              <Typography sx={{ fontSize: { md: '10px', lg: '12px' }, color: isDark ? 'var(--color-gray-400)' : 'var(--text-tertiary)' }}>
                 Just now
               </Typography>
             </Box>
@@ -320,18 +325,18 @@ export default function Hero({ onSignupClick }: HeroProps) {
               bottom: { md: 20, lg: 40 },
               left: { md: -20, lg: -40 },
               padding: { md: 1.5, lg: 2 },
-              backgroundColor: 'rgba(26, 26, 26, 0.95)',
+              backgroundColor: isDark ? 'rgba(26, 26, 26, 0.95)' : 'rgba(255, 255, 255, 0.95)',
               backdropFilter: 'blur(10px)',
               borderRadius: '12px',
-              boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
-              border: '1px solid rgba(255,255,255,0.1)',
+              boxShadow: isDark ? '0 10px 40px rgba(0,0,0,0.5)' : '0 10px 40px rgba(0,0,0,0.15)',
+              border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)',
               zIndex: 2,
             }}
           >
-            <Typography sx={{ fontSize: { md: '10px', lg: '12px' }, color: 'var(--color-gray-400)', marginBottom: 0.5 }}>
+            <Typography sx={{ fontSize: { md: '10px', lg: '12px' }, color: isDark ? 'var(--color-gray-400)' : 'var(--text-tertiary)', marginBottom: 0.5 }}>
               Today's Revenue
             </Typography>
-            <Typography sx={{ fontSize: { md: '20px', lg: '24px' }, fontWeight: 700, color: 'white' }}>
+            <Typography sx={{ fontSize: { md: '20px', lg: '24px' }, fontWeight: 700, color: isDark ? 'white' : 'var(--text-primary)' }}>
               ₹2,45,000
             </Typography>
             <Chip

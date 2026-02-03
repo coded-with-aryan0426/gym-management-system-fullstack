@@ -5,6 +5,7 @@ import { Box, Typography, Grid, Container, Link, IconButton } from '@mui/materia
 import { Facebook, Twitter, Instagram, Linkedin, Youtube, Star, Shield, Zap } from 'lucide-react';
 import { Logo } from '../ui/Logo';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTheme } from '../../contexts/ThemeContext';
 
 // Footer link configuration with proper routing
 const footerSections = [
@@ -36,6 +37,8 @@ const footerSections = [
 export default function Footer() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
 
   const handleLinkClick = (link: { label: string; sectionId?: string; href?: string }) => {
     if (link.href) {
@@ -64,11 +67,12 @@ export default function Footer() {
     <Box
         component="footer"
         sx={{
-          backgroundColor: '#0A0A0A',
-          borderTop: '1px solid rgba(255,255,255,0.08)',
+          backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC',
+          borderTop: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.08)',
           paddingTop: 'var(--space-20)',
           paddingBottom: 'var(--space-8)',
-          color: 'white',
+          color: isDark ? 'white' : 'var(--text-primary)',
+          transition: 'background-color 0.3s ease',
         }}
       >
       <Container maxWidth="xl">
@@ -88,7 +92,7 @@ export default function Footer() {
               <Typography
                 sx={{
                   fontSize: '14px',
-                  color: 'var(--color-gray-400)',
+                  color: isDark ? 'var(--color-gray-400)' : 'var(--text-secondary)',
                   lineHeight: 1.6,
                   marginBottom: 3,
                 }}
@@ -103,7 +107,7 @@ export default function Footer() {
                     key={idx}
                     size="small"
                     sx={{
-                      color: 'var(--color-gray-600)',
+                      color: isDark ? 'var(--color-gray-600)' : 'var(--text-tertiary)',
                       transition: 'all 0.3s ease',
                       '&:hover': {
                         color: '#E63946',
@@ -126,7 +130,7 @@ export default function Footer() {
                   fontSize: '13px',
                   fontWeight: 700,
                   textTransform: 'uppercase',
-                  color: 'white',
+                  color: isDark ? 'white' : 'var(--text-primary)',
                   marginBottom: 3,
                   fontFamily: 'var(--font-heading)',
                   letterSpacing: '1px'
@@ -143,7 +147,7 @@ export default function Footer() {
                     onClick={() => handleLinkClick(link)}
                     sx={{
                       fontSize: '14px',
-                      color: 'var(--color-gray-500)',
+                      color: isDark ? 'var(--color-gray-500)' : 'var(--text-tertiary)',
                       transition: 'all 0.2s',
                       textAlign: 'left',
                       background: 'none',
@@ -164,8 +168,8 @@ export default function Footer() {
         <Box
           sx={{
             paddingY: 4,
-            borderTop: '1px solid rgba(255,255,255,0.05)',
-            borderBottom: '1px solid rgba(255,255,255,0.05)',
+            borderTop: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.05)',
+            borderBottom: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.05)',
             display: 'flex',
             gap: 6,
             flexWrap: 'wrap',
@@ -175,19 +179,19 @@ export default function Footer() {
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Star size={16} color="#E63946" strokeWidth={3} />
-            <Typography sx={{ fontSize: '13px', color: 'var(--color-gray-400)', fontWeight: 600 }}>
+            <Typography sx={{ fontSize: '13px', color: isDark ? 'var(--color-gray-400)' : 'var(--text-secondary)', fontWeight: 600 }}>
               4.9/5 RATING
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Shield size={16} color="#E63946" strokeWidth={3} />
-            <Typography sx={{ fontSize: '13px', color: 'var(--color-gray-400)', fontWeight: 600 }}>
+            <Typography sx={{ fontSize: '13px', color: isDark ? 'var(--color-gray-400)' : 'var(--text-secondary)', fontWeight: 600 }}>
               MILITARY GRADE SECURITY
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Zap size={16} color="#E63946" strokeWidth={3} />
-            <Typography sx={{ fontSize: '13px', color: 'var(--color-gray-400)', fontWeight: 600 }}>
+            <Typography sx={{ fontSize: '13px', color: isDark ? 'var(--color-gray-400)' : 'var(--text-secondary)', fontWeight: 600 }}>
               99.9% UPTIME GUARANTEE
             </Typography>
           </Box>
@@ -204,15 +208,15 @@ export default function Footer() {
             gap: 2,
           }}
         >
-          <Typography sx={{ fontSize: '14px', color: 'var(--color-gray-500)' }}>
+          <Typography sx={{ fontSize: '14px', color: isDark ? 'var(--color-gray-500)' : 'var(--text-tertiary)' }}>
             &copy; {new Date().getFullYear()} AthlonX Gym Management. All rights reserved.
           </Typography>
 
           <Box sx={{ display: 'flex', gap: 3 }}>
-            <Typography sx={{ fontSize: '14px', color: 'var(--color-gray-500)', cursor: 'pointer', '&:hover': { color: 'white' } }}>
+            <Typography sx={{ fontSize: '14px', color: isDark ? 'var(--color-gray-500)' : 'var(--text-tertiary)', cursor: 'pointer', '&:hover': { color: isDark ? 'white' : 'var(--text-primary)' } }}>
               English (India)
             </Typography>
-            <Typography sx={{ fontSize: '14px', color: 'var(--color-gray-500)', cursor: 'pointer', '&:hover': { color: 'white' } }}>
+            <Typography sx={{ fontSize: '14px', color: isDark ? 'var(--color-gray-500)' : 'var(--text-tertiary)', cursor: 'pointer', '&:hover': { color: isDark ? 'white' : 'var(--text-primary)' } }}>
               INR (₹)
             </Typography>
           </Box>
