@@ -1,9 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Card, Badge } from '../ui';
-import { Plus, Edit, Trash2, Eye, TrendingUp, Users, DollarSign, Calendar, X } from 'lucide-react';
-import { toast } from 'react-hot-toast';
-import { membershipPackageApi } from '../../services/api';
-import { MembershipPackageDTO } from '../../types/membershipPackage';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Plus, Edit, Trash2, Eye, TrendingUp, Users, DollarSign, Calendar } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
+import { MembershipPackageDTO } from '@/types/membershipPackage';
+import membershipPlanApi from '@/services/membershipPlanApi';
 
 interface MembershipPlanManagementProps {
   onPlanSelect?: (plan: MembershipPackageDTO) => void;
@@ -21,6 +27,8 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
   const [editingPlan, setEditingPlan] = useState<MembershipPackageDTO | null>(null);
   const [analytics, setAnalytics] = useState<any>(null);
   
+  const { toast } = useToast();
+
   // Form state
   const [formData, setFormData] = useState({
     packageName: '',
@@ -43,12 +51,15 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
       const response = mode === 'selection' 
         ? await membershipPlanApi.getActivePlans()
         : await membershipPlanApi.getAllPlans();
-      setPlans(response); // API service returns data directly usually, check logic
+      setPlans(response.data);
       setError(null);
     } catch (err: any) {
-      console.error(err);
       setError(err.response?.data?.message || 'Failed to fetch membership plans');
-      toast.error('Failed to fetch membership plans');
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch membership plans',
+        variant: 'destructive'
+      });
     } finally {
       setLoading(false);
     }
@@ -57,7 +68,7 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
   const fetchAnalytics = async () => {
     try {
       const response = await membershipPlanApi.getAnalytics();
-      setAnalytics(response);
+      setAnalytics(response.data);
     } catch (err) {
       console.error('Failed to fetch analytics:', err);
     }
@@ -76,17 +87,21 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
 
       if (editingPlan) {
         await membershipPlanApi.updatePlan(editingPlan.packageId, planData);
-        toast.success('Membership plan updated successfully');
+        toast({ title: 'Success', description: 'Membership plan updated successfully' });
       } else {
         await membershipPlanApi.createPlan(planData);
-        toast.success('Membership plan created successfully');
+        toast({ title: 'Success', description: 'Membership plan created successfully' });
       }
       
       resetForm();
       fetchPlans();
       fetchAnalytics();
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to save membership plan');
+      toast({
+        title: 'Error',
+        description: err.response?.data?.message || 'Failed to save membership plan',
+        variant: 'destructive'
+      });
     }
   };
 
@@ -107,11 +122,15 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
     
     try {
       await membershipPlanApi.deletePlan(planId);
-      toast.success('Membership plan deleted successfully');
+      toast({ title: 'Success', description: 'Membership plan deleted successfully' });
       fetchPlans();
       fetchAnalytics();
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to delete membership plan');
+      toast({
+        title: 'Error',
+        description: err.response?.data?.message || 'Failed to delete membership plan',
+        variant: 'destructive'
+      });
     }
   };
 
@@ -119,15 +138,19 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
     try {
       if (plan.isActive) {
         await membershipPlanApi.deactivatePlan(plan.packageId);
-        toast.success('Membership plan deactivated');
+        toast({ title: 'Success', description: 'Membership plan deactivated' });
       } else {
         await membershipPlanApi.activatePlan(plan.packageId);
-        toast.success('Membership plan activated');
+        toast({ title: 'Success', description: 'Membership plan activated' });
       }
       fetchPlans();
       fetchAnalytics();
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to update plan status');
+      toast({
+        title: 'Error',
+        description: err.response?.data?.message || 'Failed to update plan status',
+        variant: 'destructive'
+      });
     }
   };
 
@@ -146,7 +169,7 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD' // Gym uses USD or INR? Code usually defaults to currency symbol. Previous code used USD.
+      currency: 'USD'
     }).format(price);
   };
 
@@ -172,9 +195,9 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
 
   if (error) {
     return (
-      <div className="p-4 bg-red-50 text-red-600 rounded-md">
-        {error}
-      </div>
+      <Alert variant="destructive">
+        <AlertDescription>{error}</AlertDescription>
+      </Alert>
     );
   }
 
@@ -182,48 +205,56 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
     <div className="space-y-6">
       {mode === 'management' && analytics && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Plans</p>
-                <p className="text-2xl font-bold">{analytics.totalPlans}</p>
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Total Plans</p>
+                  <p className="text-2xl font-bold">{analytics.totalPlans}</p>
+                </div>
+                <Calendar className="h-8 w-8 text-blue-500" />
               </div>
-              <Calendar className="h-8 w-8 text-blue-500" />
-            </div>
+            </CardContent>
           </Card>
           
-          <Card className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Active Plans</p>
-                <p className="text-2xl font-bold">{analytics.activePlans}</p>
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Active Plans</p>
+                  <p className="text-2xl font-bold">{analytics.activePlans}</p>
+                </div>
+                <Users className="h-8 w-8 text-green-500" />
               </div>
-              <Users className="h-8 w-8 text-green-500" />
-            </div>
+            </CardContent>
           </Card>
           
-          <Card className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Avg Price</p>
-                <p className="text-2xl font-bold">
-                  {formatPrice(analytics.averagePrice || 0)}
-                </p>
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Avg Price</p>
+                  <p className="text-2xl font-bold">
+                    {formatPrice(analytics.averagePrice || 0)}
+                  </p>
+                </div>
+                <DollarSign className="h-8 w-8 text-yellow-500" />
               </div>
-              <DollarSign className="h-8 w-8 text-yellow-500" />
-            </div>
+            </CardContent>
           </Card>
           
-          <Card className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-                <p className="text-2xl font-bold">
-                  {formatPrice(analytics.totalRevenue || 0)}
-                </p>
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Total Revenue</p>
+                  <p className="text-2xl font-bold">
+                    {formatPrice(analytics.totalRevenue || 0)}
+                  </p>
+                </div>
+                <TrendingUp className="h-8 w-8 text-purple-500" />
               </div>
-              <TrendingUp className="h-8 w-8 text-purple-500" />
-            </div>
+            </CardContent>
           </Card>
         </div>
       )}
@@ -231,24 +262,27 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
       {mode === 'management' && (
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold">Membership Plans</h2>
-          {!showForm && (
-            <Button onClick={() => setShowForm(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Create Plan
-            </Button>
-          )}
+          <Button onClick={() => setShowForm(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Create Plan
+          </Button>
         </div>
       )}
 
       {showForm && (
-        <Card title={editingPlan ? 'Edit Membership Plan' : 'Create New Membership Plan'}>
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              {editingPlan ? 'Edit Membership Plan' : 'Create New Membership Plan'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="packageName" className="block text-sm font-medium text-gray-700 mb-1">Plan Name</label>
-                  <input
+                  <Label htmlFor="packageName">Plan Name</Label>
+                  <Input
                     id="packageName"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     value={formData.packageName}
                     onChange={(e) => setFormData({ ...formData, packageName: e.target.value })}
                     placeholder="e.g., Premium Monthly"
@@ -257,13 +291,12 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
                 </div>
                 
                 <div>
-                  <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
-                  <input
+                  <Label htmlFor="price">Price ($)</Label>
+                  <Input
                     id="price"
                     type="number"
                     step="0.01"
                     min="0"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     value={formData.price}
                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                     placeholder="99.99"
@@ -272,12 +305,11 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
                 </div>
                 
                 <div>
-                  <label htmlFor="durationDays" className="block text-sm font-medium text-gray-700 mb-1">Duration (days)</label>
-                  <input
+                  <Label htmlFor="durationDays">Duration (days)</Label>
+                  <Input
                     id="durationDays"
                     type="number"
                     min="1"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     value={formData.durationDays}
                     onChange={(e) => setFormData({ ...formData, durationDays: e.target.value })}
                     placeholder="30"
@@ -286,12 +318,11 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
                 </div>
                 
                 <div>
-                  <label htmlFor="includedPTSessions" className="block text-sm font-medium text-gray-700 mb-1">Included PT Sessions</label>
-                  <input
+                  <Label htmlFor="includedPTSessions">Included PT Sessions</Label>
+                  <Input
                     id="includedPTSessions"
                     type="number"
                     min="0"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     value={formData.includedPTSessions}
                     onChange={(e) => setFormData({ ...formData, includedPTSessions: e.target.value })}
                     placeholder="0"
@@ -300,8 +331,8 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
                 </div>
               </div>
               
-              <div className="flex justify-end space-x-2 pt-4">
-                <Button type="button" variant="secondary" onClick={resetForm}>
+              <div className="flex justify-end space-x-2">
+                <Button type="button" variant="outline" onClick={resetForm}>
                   Cancel
                 </Button>
                 <Button type="submit">
@@ -309,82 +340,87 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
                 </Button>
               </div>
             </form>
+          </CardContent>
         </Card>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {plans.map((plan) => (
           <Card key={plan.packageId} className="hover:shadow-lg transition-shadow">
-            <div className="pb-3 border-b mb-3 flex justify-between items-start">
-                <h3 className="text-lg font-semibold">{plan.packageName}</h3>
-                <Badge variant={plan.isActive ? 'active' : 'inactive'}>
+            <CardHeader className="pb-3">
+              <div className="flex justify-between items-start">
+                <CardTitle className="text-lg">{plan.packageName}</CardTitle>
+                <Badge variant={plan.isActive ? 'default' : 'secondary'}>
                   {plan.isActive ? 'Active' : 'Inactive'}
                 </Badge>
-            </div>
-            
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Price</span>
-                <span className="font-semibold">{formatPrice(plan.price)}</span>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">Price</span>
+                  <span className="font-semibold">{formatPrice(plan.price)}</span>
+                </div>
+                
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">Duration</span>
+                  <span className="font-medium">{formatDuration(plan.durationDays)}</span>
+                </div>
+                
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">PT Sessions</span>
+                  <span className="font-medium">{plan.includedPTSessions}</span>
+                </div>
               </div>
               
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Duration</span>
-                <span className="font-medium">{formatDuration(plan.durationDays)}</span>
+              <div className="flex justify-between items-center mt-4 pt-4 border-t">
+                {mode === 'selection' ? (
+                  <Button 
+                    size="sm" 
+                    onClick={() => onPlanSelect?.(plan)}
+                    className="w-full"
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    Select Plan
+                  </Button>
+                ) : (
+                  <div className="flex space-x-2 w-full">
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      onClick={() => handleEdit(plan)}
+                      className="flex-1"
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit
+                    </Button>
+                    
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => handleToggleStatus(plan)}
+                      className="flex-1"
+                    >
+                      {plan.isActive ? 'Deactivate' : 'Activate'}
+                    </Button>
+                    
+                    <Button 
+                      size="sm" 
+                      variant="destructive"
+                      onClick={() => handleDelete(plan.packageId)}
+                      className="flex-1"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
               </div>
-              
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">PT Sessions</span>
-                <span className="font-medium">{plan.includedPTSessions}</span>
-              </div>
-            </div>
-            
-            <div className="flex justify-between items-center mt-4 pt-4 border-t gap-2">
-              {mode === 'selection' ? (
-                <Button 
-                  size="sm" 
-                  onClick={() => onPlanSelect?.(plan)}
-                  className="w-full"
-                >
-                  <Eye className="h-4 w-4 mr-2" />
-                  Select Plan
-                </Button>
-              ) : (
-                <>
-                  <Button 
-                    size="sm" 
-                    variant="secondary" 
-                    onClick={() => handleEdit(plan)}
-                    className="flex-1"
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  
-                  <Button 
-                    size="sm" 
-                    variant="secondary"
-                    onClick={() => handleToggleStatus(plan)}
-                    className="flex-1"
-                  >
-                    {plan.isActive ? 'Deactivate' : 'Activate'}
-                  </Button>
-                  
-                  <Button 
-                    size="sm" 
-                    variant="danger"
-                    onClick={() => handleDelete(plan.packageId)}
-                    className="flex-1"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </>
-              )}
-            </div>
+            </CardContent>
           </Card>
         ))}
       </div>
       
-      {plans.length === 0 && !loading && (
+      {plans.length === 0 && (
         <div className="text-center py-12">
           <p className="text-gray-500 text-lg">
             {mode === 'selection' 
