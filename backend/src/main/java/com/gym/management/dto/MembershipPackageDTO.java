@@ -34,7 +34,4 @@ public class MembershipPackageDTO {
     private Integer includedPTSessions;
 
     private Boolean isActive;
-
-    @Size(max = 7, message = "Color hex must be in format #RRGGBB")
-    private String colorHex;
 }
