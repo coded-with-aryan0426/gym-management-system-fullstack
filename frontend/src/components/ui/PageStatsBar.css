@@ -2,13 +2,13 @@
     display: flex;
     flex-direction: column;
     gap: 0;
-    padding: 10px 8px;
+    padding: 10px 10px;
     background: var(--card-bg, rgba(255, 255, 255, 0.03));
     border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
     border-radius: 10px;
     backdrop-filter: blur(10px);
     font-size: 11px;
-    width: 100px;
+    width: 130px;
     flex-shrink: 0;
     height: fit-content;
     position: sticky;
@@ -33,10 +33,23 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 4px;
-    padding: 6px 6px;
+    gap: 6px;
+    padding: 8px 8px;
     position: relative;
     border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.05));
+    transition: background 0.15s ease;
+}
+
+.page-stats__item:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+:root.theme-light .page-stats__item:hover {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.page-stats__item:last-child {
+    border-bottom: none;
 }
 
 .page-stats__icon {
@@ -49,15 +62,15 @@
     color: var(--text-primary, #fff);
     font-variant-numeric: tabular-nums;
     line-height: 1;
-    min-width: 24px;
+    min-width: 28px;
 }
 
 .page-stats__label {
-    font-size: 9px;
+    font-size: 10px;
     color: var(--text-secondary, rgba(255, 255, 255, 0.5));
     white-space: nowrap;
     text-transform: uppercase;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.4px;
     flex: 1;
     text-align: right;
     font-weight: 600;
@@ -72,10 +85,10 @@
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    gap: 6px;
+    gap: 8px;
 }
 
-/* Variant Colors - Bold accent bars */
+/* Variant Colors - Bold accent bars with crimson theme */
 .page-stats__item--active .page-stats__value {
     color: #10b981;
 }
@@ -87,13 +100,13 @@
     top: 50%;
     transform: translateY(-50%);
     width: 3px;
-    height: 75%;
+    height: 70%;
     border-radius: 0 2px 2px 0;
     background: linear-gradient(180deg, #10b981, #059669);
 }
 
 .page-stats__item--inactive .page-stats__value {
-    color: #f43f5e;
+    color: #DC2626;
 }
 
 .page-stats__item--inactive::before {
@@ -103,9 +116,9 @@
     top: 50%;
     transform: translateY(-50%);
     width: 3px;
-    height: 75%;
+    height: 70%;
     border-radius: 0 2px 2px 0;
-    background: linear-gradient(180deg, #f43f5e, #dc2626);
+    background: linear-gradient(180deg, #DC2626, #B91C1C);
 }
 
 .page-stats__item--warning .page-stats__value {
@@ -119,7 +132,7 @@
     top: 50%;
     transform: translateY(-50%);
     width: 3px;
-    height: 75%;
+    height: 70%;
     border-radius: 0 2px 2px 0;
     background: linear-gradient(180deg, #f59e0b, #d97706);
 }
@@ -135,18 +148,18 @@
     top: 50%;
     transform: translateY(-50%);
     width: 3px;
-    height: 75%;
+    height: 70%;
     border-radius: 0 2px 2px 0;
     background: linear-gradient(180deg, #6366f1, #4f46e5);
 }
 
-/* Progress bar - compact */
+/* Progress bar - compact with crimson accent */
 .page-stats__progress {
     display: flex;
     flex-direction: column;
     align-items: stretch;
     gap: 6px;
-    padding: 10px 8px 6px;
+    padding: 10px 8px 8px;
     margin-top: 4px;
     border-top: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
 }
@@ -167,7 +180,7 @@
     height: 100%;
     background: linear-gradient(90deg, #10b981, #34d399);
     border-radius: 3px;
-    transition: width 0.5s ease;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .page-stats__progress-text {
@@ -184,8 +197,8 @@
     font-weight: 700;
     color: var(--text-secondary, rgba(255, 255, 255, 0.4));
     text-transform: uppercase;
-    letter-spacing: 0.6px;
-    padding: 0 8px 8px;
+    letter-spacing: 0.8px;
+    padding: 0 8px 10px;
     border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
     margin-bottom: 4px;
     text-align: center;
@@ -213,34 +226,41 @@
     border-top-color: rgba(0, 0, 0, 0.06);
 }
 
-/* Tablet/Mobile: convert to responsive stats ribbon (no content loss) */
+/* Tablet/Mobile: convert to responsive stats ribbon */
 @media (max-width: 1024px) {
     .page-stats-bar {
         position: static;
         width: 100%;
         max-width: 100%;
-        padding: 12px 12px;
-        border-radius: 14px;
+        padding: 12px 14px;
+        border-radius: 12px;
         backdrop-filter: blur(10px);
     }
 
     .page-stats__title {
         text-align: left;
-        padding: 0 2px 10px;
+        padding: 0 4px 10px;
     }
 
     .page-stats__items {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-        gap: 10px;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 8px;
     }
 
     .page-stats__item {
         border-bottom: none;
-        border-radius: 12px;
+        border-radius: 10px;
         border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
         background: rgba(255, 255, 255, 0.02);
-        padding: 10px 10px;
+        padding: 10px 12px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    .page-stats__item::before {
+        display: none;
     }
 
     :root.theme-light .page-stats__item {
@@ -248,22 +268,65 @@
         border-color: rgba(0, 0, 0, 0.06);
     }
 
+    .page-stats__content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+    }
+
     .page-stats__label {
         text-align: left;
-        font-size: 10px;
+        font-size: 9px;
+        order: 1;
     }
 
     .page-stats__value {
         font-size: 20px;
         min-width: 0;
+        order: 2;
     }
 
     .page-stats__progress {
-        padding: 10px 2px 0;
-        margin-top: 10px;
+        padding: 10px 4px 0;
+        margin-top: 8px;
     }
 
     .page-stats__progress-text {
         text-align: left;
+    }
+}
+
+/* Mobile - horizontal scroll for stats */
+@media (max-width: 640px) {
+    .page-stats-bar {
+        padding: 10px 12px;
+    }
+
+    .page-stats__items {
+        display: flex;
+        flex-direction: row;
+        gap: 8px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .page-stats__items::-webkit-scrollbar {
+        display: none;
+    }
+
+    .page-stats__item {
+        min-width: 80px;
+        flex-shrink: 0;
+        padding: 8px 10px;
+    }
+
+    .page-stats__value {
+        font-size: 18px;
+    }
+
+    .page-stats__label {
+        font-size: 8px;
     }
 }
