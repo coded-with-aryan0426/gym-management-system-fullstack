@@ -24,8 +24,12 @@ public class MembershipPackageService {
     private MembershipRepository membershipRepository;
 
     public List<MembershipPackageDTO> getAllPackages() {
+        cleanupDuplicatePackages();
         return membershipPackageRepository.findAll()
                 .stream()
+                .sorted(Comparator.comparing(MembershipPackage::getPackageName, String.CASE_INSENSITIVE_ORDER)
+                        .thenComparing(MembershipPackage::getDurationDays)
+                        .thenComparing(MembershipPackage::getPrice))
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
@@ -33,6 +37,9 @@ public class MembershipPackageService {
     public List<MembershipPackageDTO> getActivePackages() {
         return membershipPackageRepository.findActivePackages()
                 .stream()
+                .sorted(Comparator.comparing(MembershipPackage::getPackageName, String.CASE_INSENSITIVE_ORDER)
+                        .thenComparing(MembershipPackage::getDurationDays)
+                        .thenComparing(MembershipPackage::getPrice))
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
@@ -128,6 +135,45 @@ public class MembershipPackageService {
         
         pkg.setIsActive(true);
         membershipPackageRepository.save(pkg);
+    }
+
+    /**
+     * CLEANUP DUPLICATE PACKAGES
+     * Removes duplicate plans with the same name + duration when they are unused
+     */
+    private void cleanupDuplicatePackages() {
+        List<MembershipPackage> allPackages = membershipPackageRepository.findAll();
+        if (allPackages.size() < 2) {
+            return;
+        }
+
+        Map<String, List<MembershipPackage>> groupedPackages = allPackages.stream()
+                .collect(Collectors.groupingBy(pkg ->
+                        pkg.getPackageName().trim().toLowerCase() + "|" + pkg.getDurationDays()));
+
+        List<Long> duplicateIdsToDelete = new ArrayList<>();
+
+        for (List<MembershipPackage> group : groupedPackages.values()) {
+            if (group.size() <= 1) {
+                continue;
+            }
+
+            List<MembershipPackage> sortedGroup = group.stream()
+                    .sorted(Comparator.comparing(MembershipPackage::getPackageId))
+                    .collect(Collectors.toList());
+
+            for (int i = 1; i < sortedGroup.size(); i++) {
+                MembershipPackage duplicate = sortedGroup.get(i);
+                long memberCount = membershipRepository.countByMembershipPackagePackageId(duplicate.getPackageId());
+                if (memberCount == 0) {
+                    duplicateIdsToDelete.add(duplicate.getPackageId());
+                }
+            }
+        }
+
+        if (!duplicateIdsToDelete.isEmpty()) {
+            membershipPackageRepository.deleteAllById(duplicateIdsToDelete);
+        }
     }
     
     /**
