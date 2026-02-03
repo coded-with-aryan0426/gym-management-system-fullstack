@@ -4,7 +4,7 @@ import { toast } from 'react-hot-toast';
 import { Card, Badge, Button } from '../ui';
 import { Input } from '../base';
 import ErrorMessage from '../utilities/ErrorMessage';
-import type { MembershipPackageDTO } from '../../types/membershipPackage';
+import { MembershipPackageDTO } from '../../types/membershipPackage';
 import membershipPlanApi from '../../services/membershipPlanApi';
 
 interface MembershipPlanManagementProps {
@@ -76,10 +76,6 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
       };
 
       if (editingPlan) {
-        if (!editingPlan.packageId) {
-          toast.error('Invalid membership plan');
-          return;
-        }
         await membershipPlanApi.updatePlan(editingPlan.packageId, planData);
         toast.success('Membership plan updated successfully');
       } else {
@@ -102,7 +98,7 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
       price: plan.price.toString(),
       durationDays: plan.durationDays.toString(),
       includedPTSessions: plan.includedPTSessions.toString(),
-      isActive: Boolean(plan.isActive)
+      isActive: plan.isActive
     });
     setShowForm(true);
   };
@@ -122,11 +118,6 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
 
   const handleToggleStatus = async (plan: MembershipPackageDTO) => {
     try {
-      if (!plan.packageId) {
-        toast.error('Invalid membership plan');
-        return;
-      }
-
       if (plan.isActive) {
         await membershipPlanApi.deactivatePlan(plan.packageId);
         toast.success('Membership plan deactivated');
@@ -326,13 +317,9 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {plans.map((plan) => (
           <Card
-            key={plan.packageId ?? plan.packageName}
+            key={plan.packageId}
             title={plan.packageName}
-            action={
-              <Badge variant={plan.isActive ? 'active' : 'expired'}>
-                {plan.isActive ? 'Active' : 'Inactive'}
-              </Badge>
-            }
+            action={<Badge variant={plan.isActive ? 'active' : 'expired'}>{plan.isActive ? 'Active' : 'Inactive'}</Badge>}
             className="hover:shadow-lg transition-shadow"
           >
               <div className="space-y-3">
@@ -386,7 +373,7 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
                     <Button 
                       size="sm" 
                       variant="danger"
-                      onClick={() => (plan.packageId ? handleDelete(plan.packageId) : toast.error('Invalid membership plan'))}
+                      onClick={() => handleDelete(plan.packageId)}
                       className="flex-1"
                       icon={<Trash2 size={16} />}
                     >
