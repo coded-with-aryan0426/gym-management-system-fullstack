@@ -97,33 +97,38 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    try {
-      const planData = {
-        ...formData,
-        price: parseFloat(formData.price),
-        durationDays: parseInt(formData.durationDays),
-        includedPTSessions: parseInt(formData.includedPTSessions)
-      };
-
-      if (editingPlan && editingPlan.packageId !== undefined) {
-        await membershipPlanApi.updatePlan(editingPlan.packageId, planData);
-        toast.success('Membership plan updated successfully');
-      } else {
-        await membershipPlanApi.createPlan(planData);
-        toast.success('Membership plan created successfully');
-      }
+    const handleSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
       
-      resetForm();
-      fetchPlans();
-      fetchAnalytics();
-      onSuccess?.();
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to save membership plan');
-    }
-  };
+      try {
+        const planData = {
+          ...formData,
+          price: parseFloat(formData.price),
+          durationDays: parseInt(formData.durationDays),
+          includedPTSessions: parseInt(formData.includedPTSessions)
+        };
+
+        if (editingPlan && editingPlan.packageId !== undefined) {
+          await membershipPlanApi.updatePlan(editingPlan.packageId, planData);
+          toast.success('Membership plan updated successfully');
+        } else {
+          await membershipPlanApi.createPlan(planData);
+          toast.success('Membership plan created successfully');
+        }
+        
+        resetForm();
+        fetchPlans();
+        fetchAnalytics();
+        onSuccess?.();
+      } catch (err: any) {
+        const message = err.response?.data?.message || 'Failed to save membership plan';
+        if (message.includes('already exists')) {
+          toast.error('This membership plan already exists. Please use a different name or duration.');
+        } else {
+          toast.error(message);
+        }
+      }
+    };
 
   const handleEdit = (plan: MembershipPackageDTO) => {
     setEditingPlan(plan);
@@ -147,7 +152,17 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
       fetchAnalytics();
       onSuccess?.();
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to delete membership plan');
+      const message = err.response?.data?.message || 'Failed to delete membership plan';
+      if (message.includes('assigned to') || message.includes('in use')) {
+        toast.error(message);
+      } else if (err.response?.status === 409) {
+        toast.error('Cannot delete this plan as it is currently in use by members.');
+      } else if (err.response?.status === 404) {
+        toast.error('Membership plan not found. It may have already been deleted.');
+        fetchPlans();
+      } else {
+        toast.error(message);
+      }
     }
   };
 

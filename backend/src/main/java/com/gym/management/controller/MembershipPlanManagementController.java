@@ -52,14 +52,20 @@ public class MembershipPlanManagementController {
      */
     @PostMapping
     @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
-    public ResponseEntity<MembershipPackageDTO> createMembershipPlan(
+    public ResponseEntity<?> createMembershipPlan(
             @Valid @RequestBody MembershipPackageDTO planDTO) {
         
-        // Validate business rules
-        validateMembershipPlan(planDTO);
-        
-        MembershipPackageDTO createdPlan = membershipPackageService.createPackage(planDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdPlan);
+        try {
+            // Validate business rules
+            validateMembershipPlan(planDTO);
+            
+            MembershipPackageDTO createdPlan = membershipPackageService.createPackage(planDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdPlan);
+        } catch (IllegalArgumentException e) {
+            // Duplicate plan or validation error
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(java.util.Map.of("message", e.getMessage()));
+        }
     }
     
     /**
@@ -68,15 +74,26 @@ public class MembershipPlanManagementController {
      */
     @PutMapping("/{planId}")
     @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
-    public ResponseEntity<MembershipPackageDTO> updateMembershipPlan(
+    public ResponseEntity<?> updateMembershipPlan(
             @PathVariable Long planId,
             @Valid @RequestBody MembershipPackageDTO planDTO) {
         
-        // Validate business rules
-        validateMembershipPlan(planDTO);
-        
-        MembershipPackageDTO updatedPlan = membershipPackageService.updatePackage(planId, planDTO);
-        return ResponseEntity.ok(updatedPlan);
+        try {
+            // Validate business rules
+            validateMembershipPlan(planDTO);
+            
+            MembershipPackageDTO updatedPlan = membershipPackageService.updatePackage(planId, planDTO);
+            return ResponseEntity.ok(updatedPlan);
+        } catch (IllegalArgumentException e) {
+            String msg = e.getMessage();
+            if (msg != null && msg.contains("not found")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(java.util.Map.of("message", msg));
+            }
+            // Duplicate plan or validation error
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(java.util.Map.of("message", msg));
+        }
     }
     
     /**

@@ -10,7 +10,9 @@ import lombok.AllArgsConstructor;
  * Maps to membership_packages table in the database
  */
 @Entity
-@Table(name = "membership_packages")
+@Table(name = "membership_packages", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"package_name", "duration_days"}, name = "uk_membership_package_name_duration")
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
