@@ -45,7 +45,7 @@ export default function PresentStruggle() {
         <Box
             ref={containerRef}
             sx={{
-                backgroundColor: '#0F0F0F',
+                backgroundColor: '#0A0A0A',
                 paddingY: { xs: '80px', md: '140px' },
                 position: 'relative',
                 overflow: 'hidden'

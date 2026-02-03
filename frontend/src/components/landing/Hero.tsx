@@ -31,16 +31,16 @@ interface HeroProps {
 
 export default function Hero({ onSignupClick }: HeroProps) {
   return (
-    <Box
-      sx={{
-        position: 'relative',
-        minHeight: { xs: 'auto', md: '100vh' },
-        paddingTop: { xs: '80px', sm: '100px', md: '120px' },
-        paddingBottom: { xs: '60px', md: '80px' },
-        overflow: 'hidden',
-        background: 'var(--gradient-hero)',
-      }}
-    >
+      <Box
+        sx={{
+          position: 'relative',
+          minHeight: { xs: 'auto', md: '100vh' },
+          paddingTop: { xs: '80px', sm: '100px', md: '120px' },
+          paddingBottom: { xs: '60px', md: '80px' },
+          overflow: 'hidden',
+          backgroundColor: '#0A0A0A',
+        }}
+      >
       <Box
         sx={{
           maxWidth: '1400px',

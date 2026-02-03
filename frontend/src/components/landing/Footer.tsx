@@ -62,15 +62,15 @@ export default function Footer() {
 
   return (
     <Box
-      component="footer"
-      sx={{
-        backgroundColor: 'var(--color-primary-900)',
-        borderTop: '1px solid rgba(255,255,255,0.08)',
-        paddingTop: 'var(--space-20)',
-        paddingBottom: 'var(--space-8)',
-        color: 'white',
-      }}
-    >
+        component="footer"
+        sx={{
+          backgroundColor: '#0A0A0A',
+          borderTop: '1px solid rgba(255,255,255,0.08)',
+          paddingTop: 'var(--space-20)',
+          paddingBottom: 'var(--space-8)',
+          color: 'white',
+        }}
+      >
       <Container maxWidth="xl">
         {/* Main Footer Grid */}
         <Grid container spacing={{ xs: 5, md: 6 }} sx={{ marginBottom: 8 }}>

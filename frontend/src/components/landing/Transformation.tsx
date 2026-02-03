@@ -48,7 +48,7 @@ export default function Transformation() {
   return (
     <Box
       sx={{
-        background: 'var(--gradient-hero)',
+        backgroundColor: '#0A0A0A',
         paddingY: { xs: '80px', md: '120px' },
       }}
     >
