@@ -1,6 +1,7 @@
 package com.gym.management.controller;
 
 import com.gym.management.dto.MembershipPackageDTO;
+import com.gym.management.dto.MembershipPlanAnalyticsDTO;
 import com.gym.management.service.MembershipPackageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,7 +20,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/admin/membership-plans")
 @RequiredArgsConstructor
-@SecurityRequirement(name = "bearerAuth")
 public class MembershipPlanManagementController {
     
     private final MembershipPackageService membershipPackageService;
@@ -30,7 +30,6 @@ public class MembershipPlanManagementController {
      */
     @GetMapping
     @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
-    @Operation(summary = "Get all membership plans", description = "Retrieve all membership plans for management")
     public ResponseEntity<List<MembershipPackageDTO>> getAllMembershipPlans() {
         List<MembershipPackageDTO> plans = membershipPackageService.getAllPackages();
         return ResponseEntity.ok(plans);
@@ -42,7 +41,6 @@ public class MembershipPlanManagementController {
      */
     @GetMapping("/active")
     @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
-    @Operation(summary = "Get active membership plans", description = "Retrieve only active membership plans")
     public ResponseEntity<List<MembershipPackageDTO>> getActiveMembershipPlans() {
         List<MembershipPackageDTO> plans = membershipPackageService.getActivePackages();
         return ResponseEntity.ok(plans);
@@ -54,7 +52,6 @@ public class MembershipPlanManagementController {
      */
     @PostMapping
     @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
-    @Operation(summary = "Create membership plan", description = "Create a new membership plan")
     public ResponseEntity<MembershipPackageDTO> createMembershipPlan(
             @Valid @RequestBody MembershipPackageDTO planDTO) {
         
@@ -71,7 +68,6 @@ public class MembershipPlanManagementController {
      */
     @PutMapping("/{planId}")
     @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
-    @Operation(summary = "Update membership plan", description = "Update an existing membership plan")
     public ResponseEntity<MembershipPackageDTO> updateMembershipPlan(
             @PathVariable Long planId,
             @Valid @RequestBody MembershipPackageDTO planDTO) {
@@ -89,7 +85,6 @@ public class MembershipPlanManagementController {
      */
     @PatchMapping("/{planId}/deactivate")
     @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
-    @Operation(summary = "Deactivate membership plan", description = "Deactivate a membership plan (soft delete)")
     public ResponseEntity<Void> deactivateMembershipPlan(@PathVariable Long planId) {
         membershipPackageService.deactivatePackage(planId);
         return ResponseEntity.noContent().build();
@@ -101,7 +96,6 @@ public class MembershipPlanManagementController {
      */
     @PatchMapping("/{planId}/activate")
     @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
-    @Operation(summary = "Activate membership plan", description = "Activate a deactivated membership plan")
     public ResponseEntity<Void> activateMembershipPlan(@PathVariable Long planId) {
         membershipPackageService.activatePackage(planId);
         return ResponseEntity.noContent().build();
@@ -113,7 +107,6 @@ public class MembershipPlanManagementController {
      */
     @GetMapping("/analytics")
     @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
-    @Operation(summary = "Get membership plan analytics", description = "Get analytics data for membership plans")
     public ResponseEntity<MembershipPlanAnalyticsDTO> getMembershipPlanAnalytics() {
         MembershipPlanAnalyticsDTO analytics = membershipPackageService.getPlanAnalytics();
         return ResponseEntity.ok(analytics);

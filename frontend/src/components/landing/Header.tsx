@@ -6,6 +6,7 @@ import { Menu, X, Sun, Moon } from 'lucide-react';
 import { Logo } from '../ui/Logo';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useAuthModal } from '../../contexts/AuthModalContext';
 
 // Navigation items - scroll sections on homepage
 const scrollNavItems = [
@@ -28,6 +29,7 @@ export default function Header() {
   const location = useLocation();
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === 'dark';
+  const { openAuthModal } = useAuthModal();
 
   // Custom scroll listener for smoother control
   useEffect(() => {
@@ -179,7 +181,7 @@ export default function Header() {
               {/* Login - Hidden on xs */}
               <Button
               variant="text"
-              onClick={() => navigate('/login')}
+              onClick={() => openAuthModal('login')}
               sx={{
                 display: { xs: 'none', sm: 'flex' },
                 color: isDark ? 'white' : 'var(--text-primary)',
@@ -199,7 +201,7 @@ export default function Header() {
             {/* CTA Button - Always visible but smaller on mobile */}
             <Button
               variant="contained"
-              onClick={() => navigate('/signup')}
+              onClick={() => openAuthModal('signup')}
               sx={{
                 height: { xs: 40, sm: 44, md: 48 },
                 padding: { xs: '0 16px', sm: '0 20px', md: '0 28px' },
@@ -368,34 +370,34 @@ export default function Header() {
           <Divider sx={{ borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)', marginY: 3 }} />
 
           {/* Mobile Login Button */}
-          <Button
-            fullWidth
-            variant="outlined"
-            onClick={() => navigateToPage('/login')}
-            sx={{
-              height: 52,
-              borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
-              color: isDark ? 'white' : 'var(--text-primary)',
-              fontSize: 16,
-              fontWeight: 600,
-              textTransform: 'none',
-              borderRadius: '12px',
-              marginBottom: 2,
-              '&:hover': {
-                borderColor: '#E63946',
-                backgroundColor: 'rgba(230, 57, 70, 0.1)',
-              }
-            }}
-          >
-            Log In
-          </Button>
+            <Button
+              fullWidth
+              variant="outlined"
+              onClick={() => { openAuthModal('login'); setMobileMenuOpen(false); }}
+              sx={{
+                height: 52,
+                borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
+                color: isDark ? 'white' : 'var(--text-primary)',
+                fontSize: 16,
+                fontWeight: 600,
+                textTransform: 'none',
+                borderRadius: '12px',
+                marginBottom: 2,
+                '&:hover': {
+                  borderColor: '#E63946',
+                  backgroundColor: 'rgba(230, 57, 70, 0.1)',
+                }
+              }}
+            >
+              Log In
+            </Button>
 
-          {/* Mobile CTA Button */}
-          <Button
-            fullWidth
-            variant="contained"
-            onClick={() => navigateToPage('/signup')}
-            sx={{
+            {/* Mobile CTA Button */}
+            <Button
+              fullWidth
+              variant="contained"
+              onClick={() => { openAuthModal('signup'); setMobileMenuOpen(false); }}
+              sx={{
               height: 52,
               background: 'var(--gradient-cta)',
               fontSize: 16,
