@@ -33,6 +33,9 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
 
     // Confirmation Dialog State
     const [showConfirm, setShowConfirm] = useState(false)
+    
+    // Membership selection state
+    const [selectedMembershipId, setSelectedMembershipId] = useState<number | undefined>(undefined)
 
     // Form state
     const [formData, setFormData] = useState({
