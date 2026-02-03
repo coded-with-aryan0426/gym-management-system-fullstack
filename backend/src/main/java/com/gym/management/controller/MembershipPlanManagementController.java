@@ -113,6 +113,28 @@ public class MembershipPlanManagementController {
     }
     
     /**
+     * DELETE MEMBERSHIP PLAN
+     * Owner/Admin exclusive - permanently delete a membership plan
+     * Only allowed if no members are currently using this plan
+     */
+    @DeleteMapping("/{planId}")
+    @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
+    public ResponseEntity<?> deleteMembershipPlan(@PathVariable Long planId) {
+        try {
+            membershipPackageService.deletePackage(planId);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalStateException e) {
+            // Plan is in use by members
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(java.util.Map.of("message", e.getMessage()));
+        } catch (IllegalArgumentException e) {
+            // Plan not found
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(java.util.Map.of("message", e.getMessage()));
+        }
+    }
+    
+    /**
      * VALIDATE MEMBERSHIP PLAN BUSINESS RULES
      */
     private void validateMembershipPlan(MembershipPackageDTO planDTO) {

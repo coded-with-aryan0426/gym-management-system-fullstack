@@ -31,4 +31,18 @@ public interface MembershipRepository extends JpaRepository<Membership, Long> {
     List<Membership> findExpiringMemberships(
             @org.springframework.data.repository.query.Param("startDate") java.time.LocalDate startDate,
             @org.springframework.data.repository.query.Param("endDate") java.time.LocalDate endDate);
+
+    /**
+     * Check if any members are using a specific membership package
+     * @param packageId The package ID to check
+     * @return true if the package is in use by any member
+     */
+    boolean existsByMembershipPackagePackageId(Long packageId);
+
+    /**
+     * Count how many members are using a specific membership package
+     * @param packageId The package ID to check
+     * @return count of members using this package
+     */
+    long countByMembershipPackagePackageId(Long packageId);
 }

@@ -88,14 +88,19 @@ public class MembershipPackageService {
 
     public void deletePackage(Long packageId) {
         Objects.requireNonNull(packageId, "Package ID must not be null");
+        
         // Verify package exists before deletion
-        if (!membershipPackageRepository.existsById(packageId)) {
-            throw new IllegalArgumentException("Package not found");
+        MembershipPackage pkg = membershipPackageRepository.findById(packageId)
+                .orElseThrow(() -> new IllegalArgumentException("Package not found"));
+
+        // Check if any members are using this package
+        long memberCount = membershipRepository.countByMembershipPackagePackageId(packageId);
+        if (memberCount > 0) {
+            throw new IllegalStateException(
+                    "Cannot delete this membership plan. It is currently assigned to " + memberCount + 
+                    " member" + (memberCount > 1 ? "s" : "") + ". Please reassign or remove these members first.");
         }
 
-        // Check if package has active subscriptions (placeholder - would check
-        // subscription table)
-        // For now, just delete
         membershipPackageRepository.deleteById(packageId);
     }
     
