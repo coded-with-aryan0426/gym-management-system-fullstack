@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useEffect, useState, useMemo, useCallback, useRef } from "react"
-import { FiFilter, FiSearch, FiUserPlus, FiCalendar, FiClock, FiRefreshCw } from "react-icons/fi"
+import { FiFilter, FiSearch, FiUserPlus, FiCalendar, FiClock, FiRefreshCw, FiSettings } from "react-icons/fi"
 import { showToast } from "../../utils/showToast"
 import { useSearchParams } from "react-router-dom"
 import { Button, Badge, getStatusVariant, Avatar, DataTable, PageStatsBar, type Column } from "../../components"
@@ -10,12 +10,14 @@ import CreateActionModal from "../../components/CreateActionModal/CreateActionMo
 import { ActionMenuButton, SortButton } from "../../components/shared"
 import { useClickOutside } from "../../hooks"
 import EnhancedMemberActionModal from "../../components/MemberActionModal/EnhancedMemberActionModal"
+import MembershipPlanManagement from "../../components/admin/MembershipPlanManagement"
 import api from "../../services/api"
 import type { MemberDTO, User } from "../../types"
 import { useMembers } from "../../contexts/MembersContext"
 import "../../styles/pageHeader.css"
 import "./Members.css"
 import Editable from "../../components/editor/Editable"
+import { motion, AnimatePresence } from "framer-motion"
 
 interface FilterState {
   status: string[]
