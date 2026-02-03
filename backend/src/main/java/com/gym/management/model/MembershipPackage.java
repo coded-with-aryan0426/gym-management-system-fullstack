@@ -41,6 +41,9 @@ public class MembershipPackage {
     @Column(name = "is_active")
     private Boolean isActive;
 
+    @Column(name = "color_hex", length = 7)
+    private String colorHex;
+
     @PrePersist
     protected void onCreate() {
         if (includedPTSessions == null) {
@@ -50,6 +53,9 @@ public class MembershipPackage {
             isActive = true;
         }
     }
+
+    public String getColorHex() { return colorHex; }
+    public void setColorHex(String colorHex) { this.colorHex = colorHex; }
 
     public Integer getDurationMonths() { return durationMonths; }
     public void setDurationMonths(Integer durationMonths) { this.durationMonths = durationMonths; }

@@ -44,6 +44,12 @@ public class MembershipPackageService {
                 .collect(Collectors.toList());
     }
 
+    // Premium color palette for plan cards
+    private static final String[] PLAN_COLORS = {
+        "#DC2626", "#F59E0B", "#10B981", "#3B82F6", "#8B5CF6",
+        "#EC4899", "#06B6D4", "#84CC16", "#F97316", "#6366F1"
+    };
+
     public MembershipPackageDTO createPackage(MembershipPackageDTO dto) {
         if (membershipPackageRepository.existsByPackageNameAndDurationDays(dto.getPackageName(), dto.getDurationDays())) {
             throw new IllegalArgumentException("Package with this name and duration already exists");
@@ -55,9 +61,28 @@ public class MembershipPackageService {
         pkg.setDurationDays(dto.getDurationDays());
         pkg.setIncludedPTSessions(dto.getIncludedPTSessions());
         pkg.setIsActive(dto.getIsActive() != null ? dto.getIsActive() : true);
+        
+        // Auto-assign unique color
+        pkg.setColorHex(assignUniqueColor());
 
         MembershipPackage saved = membershipPackageRepository.save(pkg);
         return convertToDTO(saved);
+    }
+
+    private String assignUniqueColor() {
+        Set<String> usedColors = membershipPackageRepository.findAll().stream()
+                .map(MembershipPackage::getColorHex)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        
+        for (String color : PLAN_COLORS) {
+            if (!usedColors.contains(color)) {
+                return color;
+            }
+        }
+        // If all colors used, generate a random one
+        Random rand = new Random();
+        return String.format("#%06X", rand.nextInt(0xFFFFFF + 1));
     }
 
     public MembershipPackageDTO updatePackage(Long packageId, MembershipPackageDTO dto) {
