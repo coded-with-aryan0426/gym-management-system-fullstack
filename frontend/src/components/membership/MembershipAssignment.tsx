@@ -116,17 +116,10 @@ const MembershipAssignment: React.FC<MembershipAssignmentProps> = ({
           <option value="">Choose a membership plan</option>
           {membershipPlans.map((plan) => (
             <option key={plan.packageId} value={plan.packageId.toString()}>
-              {plan.packageName} - ₹{plan.price.toLocaleString('en-IN')} ({formatDuration(plan.durationDays)})
+              {plan.packageName} - ₹{plan.price.toLocaleString('en-IN')}
             </option>
           ))}
         </select>
-        {selectedPlan && (
-          <div className="membership-select-preview">
-            <span className="membership-select-preview__name">{selectedPlan.packageName}</span>
-            <span className="membership-select-preview__price">₹{selectedPlan.price.toLocaleString('en-IN')}</span>
-            <span className="membership-select-preview__duration">{formatDuration(selectedPlan.durationDays)}</span>
-          </div>
-        )}
       </div>
     );
   }
