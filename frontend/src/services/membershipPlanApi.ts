@@ -1,4 +1,4 @@
-import { MembershipPackageDTO } from '../types/membershipPackage';
+import type { MembershipPackageDTO } from '../types/membershipPackage';
 import { apiClient } from './api';
 
 export interface MembershipPlanAnalytics {

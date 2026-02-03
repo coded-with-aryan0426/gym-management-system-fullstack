@@ -12,7 +12,7 @@ import {
   Download,
   RefreshCw
 } from 'lucide-react';
-import { MembershipPackageDTO } from '../../types/membershipPackage';
+import type { MembershipPackageDTO } from '../../types/membershipPackage';
 import { MembershipDTO } from '../../types/membership';
 import membershipApi from '../../services/membershipApi';
 import { toast } from 'react-hot-toast';

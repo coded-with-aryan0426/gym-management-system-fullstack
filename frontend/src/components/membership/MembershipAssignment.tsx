@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Badge, Button } from '../ui';
 import { Calendar, DollarSign, Users, Clock } from 'lucide-react';
-import { MembershipPackageDTO } from '../../types/membershipPackage';
+import type { MembershipPackageDTO } from '../../types/membershipPackage';
 import membershipPlanApi from '../../services/membershipPlanApi';
 import { toast } from 'react-hot-toast';
 

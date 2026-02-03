@@ -1,6 +1,6 @@
 import { apiClient } from './api';
 import { MembershipDTO } from '../types/membership';
-import { MembershipPackageDTO } from '../types/membershipPackage';
+import type { MembershipPackageDTO } from '../types/membershipPackage';
 
 class MembershipApiService {
   private static instance: MembershipApiService;

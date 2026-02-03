@@ -4,7 +4,7 @@ import { toast } from 'react-hot-toast';
 import { Card, Badge, Button } from '../ui';
 import { Input } from '../base';
 import ErrorMessage from '../utilities/ErrorMessage';
-import { MembershipPackageDTO } from '../../types/membershipPackage';
+import type { MembershipPackageDTO } from '../../types/membershipPackage';
 import membershipPlanApi from '../../services/membershipPlanApi';
 
 interface MembershipPlanManagementProps {
@@ -75,8 +75,8 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
         includedPTSessions: parseInt(formData.includedPTSessions)
       };
 
-      if (editingPlan) {
-        await membershipPlanApi.updatePlan(editingPlan.packageId, planData);
+        if (editingPlan && editingPlan.packageId !== undefined) {
+          await membershipPlanApi.updatePlan(editingPlan.packageId, planData);
         toast.success('Membership plan updated successfully');
       } else {
         await membershipPlanApi.createPlan(planData);
@@ -98,7 +98,7 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
       price: plan.price.toString(),
       durationDays: plan.durationDays.toString(),
       includedPTSessions: plan.includedPTSessions.toString(),
-      isActive: plan.isActive
+        isActive: plan.isActive ?? true
     });
     setShowForm(true);
   };
@@ -118,6 +118,7 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
 
   const handleToggleStatus = async (plan: MembershipPackageDTO) => {
     try {
+      if (plan.packageId === undefined) return;
       if (plan.isActive) {
         await membershipPlanApi.deactivatePlan(plan.packageId);
         toast.success('Membership plan deactivated');
@@ -373,7 +374,7 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
                     <Button 
                       size="sm" 
                       variant="danger"
-                      onClick={() => handleDelete(plan.packageId)}
+                        onClick={() => plan.packageId !== undefined && handleDelete(plan.packageId)}
                       className="flex-1"
                       icon={<Trash2 size={16} />}
                     >
