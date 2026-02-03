@@ -15,11 +15,11 @@
 
 /* Header */
 .data-table__head {
-  background: rgba(255, 255, 255, 0.02);
+  background: transparent;
 }
 
 .data-table__th {
-  padding: 12px 16px;
+  padding: 10px 16px;
   text-align: left;
   font-size: 11px;
   font-weight: 600;
@@ -53,17 +53,17 @@
 }
 
 .data-table__td {
-  padding: 14px 16px;
+  padding: 10px 16px;
   font-size: 13px;
   color: var(--text-primary);
   vertical-align: middle;
   line-height: 1.4;
-  height: 60px;
+  height: 52px;
 }
 
-/* Alternating rows - subtle */
+/* Alternating rows - very subtle */
 .data-table__row:nth-child(even) {
-  background: var(--bg-tertiary);
+  background: rgba(255, 255, 255, 0.01);
 }
 
 .data-table__row:nth-child(even):hover {
@@ -140,9 +140,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
+  padding: 10px 16px;
   border-top: 1px solid var(--border-subtle);
-  background: var(--bg-tertiary);
+  background: transparent;
   gap: 16px;
   flex-wrap: wrap;
 }
@@ -449,13 +449,13 @@
    ============================================================================ */
 
 .data-table--compact .data-table__th {
-  padding: 8px 12px;
+  padding: 8px 14px;
   font-size: 10px;
 }
 
 .data-table--compact .data-table__td {
-  padding: 8px 12px;
-  height: 40px;
+  padding: 6px 14px;
+  height: 48px;
   font-size: 12px;
 }
 
