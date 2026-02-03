@@ -326,9 +326,31 @@ export default function LoginPage() {
                         Back to Home
                     </button>
 
-                    {/* Header - No logo, just title */}
+                    {/* Header - Premium brand block */}
                     <div style={{ marginBottom: 24, textAlign: 'center' }}>
-                        <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>
+                        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 8,
+                                padding: '6px 12px',
+                                borderRadius: 999,
+                                background: isDark ? 'rgba(220, 38, 38, 0.12)' : 'rgba(220, 38, 38, 0.08)',
+                                border: `1px solid ${isDark ? 'rgba(220, 38, 38, 0.3)' : 'rgba(220, 38, 38, 0.2)'}`,
+                            }}>
+                                <Logo size={20} showText={false} />
+                                <span style={{
+                                    fontSize: 11,
+                                    fontWeight: 700,
+                                    letterSpacing: '0.14em',
+                                    textTransform: 'uppercase',
+                                    color: colors.crimson
+                                }}>
+                                    AthlonX
+                                </span>
+                            </div>
+                        </div>
+                        <h2 style={{ fontSize: 28, fontWeight: 800, marginBottom: 8, letterSpacing: '-0.02em' }}>
                             {step === 'OTP' ? 'Verification' : 'Login'}
                         </h2>
                         <p style={{ color: colors.textSecondary, fontSize: 14 }}>

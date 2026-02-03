@@ -211,9 +211,31 @@ export default function SignupPage() {
                 <div style={{ width: "100%", maxWidth: 480 }}>
                     <button onClick={() => navigate('/')} style={{ position: "absolute", top: 20, right: 30, background: "transparent", border: "none", color: colors.textSecondary, cursor: "pointer", fontSize: 12, zIndex: 10 }}>Back to Home</button>
 
-                    {/* Header */}
+                    {/* Header - Premium brand block */}
                     <div style={{ marginBottom: 16, textAlign: 'center' }}>
-                        <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 6 }}>
+                        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 8,
+                                padding: '6px 12px',
+                                borderRadius: 999,
+                                background: isDark ? 'rgba(220, 38, 38, 0.12)' : 'rgba(220, 38, 38, 0.08)',
+                                border: `1px solid ${isDark ? 'rgba(220, 38, 38, 0.3)' : 'rgba(220, 38, 38, 0.2)'}`,
+                            }}>
+                                <Logo size={20} showText={false} />
+                                <span style={{
+                                    fontSize: 11,
+                                    fontWeight: 700,
+                                    letterSpacing: '0.14em',
+                                    textTransform: 'uppercase',
+                                    color: colors.crimson
+                                }}>
+                                    AthlonX
+                                </span>
+                            </div>
+                        </div>
+                        <h2 style={{ fontSize: 24, fontWeight: 800, marginBottom: 6, letterSpacing: '-0.02em' }}>
                             {step === 'OTP' ? 'Verification' : 'Register Gym'}
                         </h2>
                         <p style={{ color: colors.textSecondary, fontSize: 13 }}>
