@@ -3,6 +3,7 @@
 import React from 'react';
 import { Box, Typography, Button, Container, Avatar, AvatarGroup } from '@mui/material';
 import { ArrowRight, Calendar, Lock, Zap, Target, Clock } from 'lucide-react';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const GradientText = ({ children }: { children: React.ReactNode }) => (
     <Box
@@ -34,14 +35,18 @@ interface SecondaryCTAProps {
 }
 
 export default function SecondaryCTA({ onSignupClick }: SecondaryCTAProps) {
+    const { theme } = useTheme();
+    const isDark = theme === 'dark';
+
     return (
         <Box
             sx={{
-                backgroundColor: '#0A0A0A',
+                backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC',
                 paddingY: { xs: '80px', md: '140px' },
                 position: 'relative',
                 overflow: 'hidden',
-                borderTop: '1px solid rgba(255,255,255,0.05)',
+                borderTop: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.05)',
+                transition: 'background-color 0.3s ease'
             }}
         >
             {/* Background Glow */}
@@ -68,7 +73,7 @@ export default function SecondaryCTA({ onSignupClick }: SecondaryCTAProps) {
                             '& .MuiAvatar-root': {
                                 width: 48,
                                 height: 48,
-                                border: '3px solid #0A0A0A',
+                                border: isDark ? '3px solid #0A0A0A' : '3px solid #F8FAFC',
                                 marginLeft: '-12px',
                             },
                         }}
@@ -102,7 +107,7 @@ export default function SecondaryCTA({ onSignupClick }: SecondaryCTAProps) {
                         fontSize: { xs: '36px', md: '56px' },
                         fontWeight: 900,
                         fontFamily: 'var(--font-heading)',
-                        color: 'white',
+                        color: isDark ? 'white' : '#0F172A',
                         marginBottom: 3,
                         lineHeight: 1.1,
                         letterSpacing: '-1.5px'
@@ -115,7 +120,7 @@ export default function SecondaryCTA({ onSignupClick }: SecondaryCTAProps) {
                 <Typography
                     sx={{
                         fontSize: '18px',
-                        color: 'var(--color-gray-400)',
+                        color: isDark ? 'var(--color-gray-400)' : '#64748B',
                         marginBottom: 6,
                         maxWidth: 600,
                         margin: '0 auto 48px',
@@ -166,16 +171,16 @@ export default function SecondaryCTA({ onSignupClick }: SecondaryCTAProps) {
                         sx={{
                             height: 64,
                             paddingX: 5,
-                            borderColor: 'rgba(255,255,255,0.1)',
-                            color: 'white',
+                            borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+                            color: isDark ? 'white' : '#0F172A',
                             fontSize: '18px',
                             fontWeight: 700,
                             textTransform: 'none',
                             borderRadius: '16px',
                             backdropFilter: 'blur(10px)',
                             '&:hover': {
-                                borderColor: 'white',
-                                backgroundColor: 'rgba(255,255,255,0.05)',
+                                borderColor: isDark ? 'white' : '#0F172A',
+                                backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
                                 transform: 'translateY(-3px)',
                             },
                         }}
@@ -207,7 +212,7 @@ export default function SecondaryCTA({ onSignupClick }: SecondaryCTAProps) {
                             <Typography
                                 sx={{
                                     fontSize: '15px',
-                                    color: 'var(--color-gray-500)',
+                                    color: isDark ? 'var(--color-gray-500)' : '#64748B',
                                     fontWeight: 500
                                 }}
                             >

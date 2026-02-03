@@ -211,9 +211,9 @@ export default function SocialProof() {
                         gap: 6,
                         marginTop: 10,
                         padding: 4,
-                        backgroundColor: 'rgba(255,255,255,0.02)',
+                        backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)',
                         borderRadius: '24px',
-                        border: '1px solid rgba(255,255,255,0.05)'
+                        border: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.08)'
                     }}
                 >
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -222,7 +222,7 @@ export default function SocialProof() {
                                 <Star key={star} size={20} fill="#E63946" color="#E63946" />
                             ))}
                         </Box>
-                        <Typography sx={{ fontSize: '15px', fontWeight: 600, color: 'white' }}>
+                        <Typography sx={{ fontSize: '15px', fontWeight: 600, color: isDark ? 'white' : '#0F172A' }}>
                             4.9/5 Average Rating across 2,847 gyms
                         </Typography>
                     </Box>

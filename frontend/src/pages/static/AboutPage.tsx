@@ -7,11 +7,15 @@ import SpeedIcon from '@mui/icons-material/Speed';
 import GroupIcon from '@mui/icons-material/Group';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import BoltIcon from '@mui/icons-material/Bolt';
+import { useTheme } from '../../contexts/ThemeContext';
 import './StaticPages.css';
 
 const MotionBox = motion(Box);
 
 export default function AboutPage() {
+    const { theme } = useTheme();
+    const isDark = theme === 'dark';
+
     return (
         <Box className="static-page">
             <Header />
@@ -43,7 +47,7 @@ export default function AboutPage() {
                                 </Typography>
                                 <Typography sx={{ 
                                     fontSize: { xs: '16px', md: '18px' }, 
-                                    color: 'rgba(255,255,255,0.7)', 
+                                    color: isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)', 
                                     maxWidth: '700px', 
                                     mx: 'auto',
                                     lineHeight: 1.6,
@@ -65,7 +69,7 @@ export default function AboutPage() {
                                         <SpeedIcon sx={{ fontSize: '100px', color: '#00F5FF' }} />
                                     </Box>
                                     <Typography variant="h4" sx={{ mb: 2, fontWeight: 900, color: '#00F5FF' }}>The Friction</Typography>
-                                    <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '17px', lineHeight: 1.7 }}>
+                                    <Typography sx={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)', fontSize: '17px', lineHeight: 1.7 }}>
                                         Legacy systems are slow, grey, and depressing. They suck the life out of your business with endless menus and broken workflows.
                                     </Typography>
                                 </MotionBox>
@@ -80,7 +84,7 @@ export default function AboutPage() {
                                         <FitnessCenterIcon sx={{ fontSize: '100px', color: '#E63946' }} />
                                     </Box>
                                     <Typography variant="h4" sx={{ mb: 2, fontWeight: 900, color: '#E63946' }}>The Fire</Typography>
-                                    <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '17px', lineHeight: 1.7 }}>
+                                    <Typography sx={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)', fontSize: '17px', lineHeight: 1.7 }}>
                                         We engineered a command center that moves at the speed of thought. Bold, energetic, and lethal in its efficiency.
                                     </Typography>
                                 </MotionBox>
@@ -100,29 +104,29 @@ export default function AboutPage() {
                                 <Box sx={{ position: 'absolute', top: '-20%', right: '-10%', width: '300px', height: '300px', background: 'radial-gradient(circle, rgba(230, 57, 70, 0.15) 0%, transparent 70%)', filter: 'blur(50px)' }} />
                                 <Typography sx={{ color: '#FF9F1C', fontWeight: 900, mb: 2, fontSize: '14px', letterSpacing: '2px' }}>DATA-BACKED DOMINANCE</Typography>
                                 <Typography variant="h2" sx={{ fontWeight: 900, mb: 1, fontSize: '32px', lineHeight: 1.2 }}>85% Admin <br />Reduction</Typography>
-                                <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '15px', lineHeight: 1.5, maxWidth: '400px' }}>
+                                <Typography sx={{ color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)', fontSize: '15px', lineHeight: 1.5, maxWidth: '400px' }}>
                                     We didn't just save time; we eliminated the mundane. Our partners focus on what matters: the athletes.
                                 </Typography>
                                 <Box sx={{ display: 'flex', gap: 4, mt: 3 }}>
                                     <Box>
                                         <Typography variant="h4" sx={{ fontWeight: 900, color: '#E63946', fontSize: '28px' }}>2.4k</Typography>
-                                        <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase' }}>Facilities</Typography>
+                                        <Typography sx={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase' }}>Facilities</Typography>
                                     </Box>
                                     <Box>
                                         <Typography variant="h4" sx={{ fontWeight: 900, color: '#00F5FF', fontSize: '28px' }}>99.9%</Typography>
-                                        <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase' }}>Uptime</Typography>
+                                        <Typography sx={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase' }}>Uptime</Typography>
                                     </Box>
                                 </Box>
                             </MotionBox>
 
                             <MotionBox whileHover={{ scale: 1.01 }} className="bento-item bento-item--tall">
-                                <Typography sx={{ fontSize: '18px', lineHeight: 1.6, color: 'white', fontWeight: 600, fontStyle: 'italic', mb: 'auto' }}>
+                                <Typography sx={{ fontSize: '18px', lineHeight: 1.6, color: isDark ? 'white' : '#0F172A', fontWeight: 600, fontStyle: 'italic', mb: 'auto' }}>
                                     "AthlonX is the pulse of our gym. The energy of the software matches the energy on our floor. It's fast, sharp, and undeniably powerful."
                                 </Typography>
                                 <Box sx={{ mt: 4, display: 'flex', alignItems: 'center', gap: 2 }}>
-                                    <Avatar sx={{ bgcolor: '#FF9F1C', width: 48, height: 48, fontWeight: 900, border: '2px solid rgba(255,255,255,0.1)' }}>MC</Avatar>
+                                    <Avatar sx={{ bgcolor: '#FF9F1C', width: 48, height: 48, fontWeight: 900, border: isDark ? '2px solid rgba(255,255,255,0.1)' : '2px solid rgba(0,0,0,0.1)' }}>MC</Avatar>
                                     <Box>
-                                        <Typography sx={{ fontWeight: 900, fontSize: '16px' }}>Marcus Chen</Typography>
+                                        <Typography sx={{ fontWeight: 900, fontSize: '16px', color: isDark ? 'white' : '#0F172A' }}>Marcus Chen</Typography>
                                         <Typography sx={{ color: '#FF9F1C', fontSize: '12px', fontWeight: 700 }}>CEO, IRONHAVEN GROUP</Typography>
                                     </Box>
                                 </Box>
@@ -133,8 +137,8 @@ export default function AboutPage() {
                                     <SpeedIcon sx={{ fontSize: '32px' }} />
                                 </Box>
                                 <Box>
-                                    <Typography sx={{ fontWeight: 900, fontSize: '18px' }}>Zero Friction</Typography>
-                                    <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px' }}>Speed to action is our obsession.</Typography>
+                                    <Typography sx={{ fontWeight: 900, fontSize: '18px', color: isDark ? 'white' : '#0F172A' }}>Zero Friction</Typography>
+                                    <Typography sx={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)', fontSize: '13px' }}>Speed to action is our obsession.</Typography>
                                 </Box>
                             </MotionBox>
 
@@ -143,8 +147,8 @@ export default function AboutPage() {
                                     <GroupIcon sx={{ fontSize: '32px' }} />
                                 </Box>
                                 <Box>
-                                    <Typography sx={{ fontWeight: 900, fontSize: '18px' }}>Legion Built</Typography>
-                                    <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px' }}>The power of the community.</Typography>
+                                    <Typography sx={{ fontWeight: 900, fontSize: '18px', color: isDark ? 'white' : '#0F172A' }}>Legion Built</Typography>
+                                    <Typography sx={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)', fontSize: '13px' }}>The power of the community.</Typography>
                                 </Box>
                             </MotionBox>
                         </Box>
@@ -154,7 +158,7 @@ export default function AboutPage() {
                 {/* Timeline */}
                 <Box sx={{ py: '100px' }}>
                     <Container maxWidth="md">
-                        <Typography variant="h3" sx={{ textAlign: 'center', fontWeight: 900, mb: 8, fontSize: '48px' }}>
+                        <Typography variant="h3" sx={{ textAlign: 'center', fontWeight: 900, mb: 8, fontSize: '48px', color: isDark ? 'white' : '#0F172A' }}>
                             Our <span style={{ color: '#E63946' }}>Trajectory</span>
                         </Typography>
                         <Box className="timeline">
@@ -166,8 +170,8 @@ export default function AboutPage() {
                                 <Box key={index} className="timeline-item">
                                     <Box className="timeline-content">
                                         <Typography sx={{ color: item.color, fontWeight: 900, fontSize: '28px' }}>{item.year}</Typography>
-                                        <Typography variant="h5" sx={{ fontWeight: 900, mb: 1 }}>{item.title}</Typography>
-                                        <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '16px' }}>{item.desc}</Typography>
+                                        <Typography variant="h5" sx={{ fontWeight: 900, mb: 1, color: isDark ? 'white' : '#0F172A' }}>{item.title}</Typography>
+                                        <Typography sx={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)', fontSize: '16px' }}>{item.desc}</Typography>
                                     </Box>
                                     <Box className="timeline-dot" sx={{ bgcolor: item.color, boxShadow: `0 0 20px ${item.color}` }} />
                                 </Box>

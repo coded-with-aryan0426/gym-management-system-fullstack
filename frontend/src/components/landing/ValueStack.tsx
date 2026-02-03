@@ -3,6 +3,7 @@
 import React from 'react';
 import { Box, Typography, Card, List, ListItem, ListItemIcon, ListItemText, Paper, Button, Grid, Container } from '@mui/material';
 import { Crown, Target, Smartphone, Settings, Check, ArrowRight, Lock } from 'lucide-react';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const valueTiers = [
   {
@@ -68,12 +69,16 @@ const valueTiers = [
 ];
 
 export default function ValueStack() {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+
   return (
     <Box
       sx={{
-        backgroundColor: '#0A0A0A',
+        backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC',
         paddingY: { xs: '80px', md: '120px' },
-        borderTop: '1px solid rgba(255,255,255,0.05)',
+        borderTop: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.05)',
+        transition: 'background-color 0.3s ease'
       }}
     >
       <Container maxWidth="lg">
@@ -97,7 +102,7 @@ export default function ValueStack() {
               fontSize: { xs: '36px', md: '56px' },
               fontWeight: 900,
               fontFamily: 'var(--font-heading)',
-              color: 'white',
+              color: isDark ? 'white' : '#0F172A',
               lineHeight: 1.1,
               letterSpacing: '-1px',
               marginBottom: 3
@@ -108,7 +113,7 @@ export default function ValueStack() {
           <Typography
             sx={{
               fontSize: '18px',
-              color: 'var(--color-gray-500)',
+              color: isDark ? 'var(--color-gray-500)' : '#64748B',
               lineHeight: 1.6
             }}
           >
@@ -121,20 +126,21 @@ export default function ValueStack() {
           {valueTiers.map((tier) => (
             <Grid size={{ xs: 12, md: 6 }} key={tier.id}>
               <Card
-                sx={{
-                  backgroundColor: 'rgba(255,255,255,0.02)',
-                  borderRadius: '24px',
-                  padding: 4,
-                  border: '1px solid rgba(255,255,255,0.05)',
-                  height: '100%',
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    borderColor: 'rgba(230, 57, 70, 0.3)',
-                    transform: 'translateY(-4px)',
-                    backgroundColor: 'rgba(255,255,255,0.03)',
-                  },
-                }}
-              >
+                  sx={{
+                    backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)',
+                    borderRadius: '24px',
+                    padding: 4,
+                    border: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.08)',
+                    height: '100%',
+                    transition: 'all 0.3s ease',
+                    boxShadow: isDark ? 'none' : '0 2px 8px rgba(0,0,0,0.05)',
+                    '&:hover': {
+                      borderColor: 'rgba(230, 57, 70, 0.3)',
+                      transform: 'translateY(-4px)',
+                      backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)',
+                    },
+                  }}
+                >
                 {/* Header Row */}
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
                   <Box
@@ -171,7 +177,7 @@ export default function ValueStack() {
                     fontSize: '22px',
                     fontWeight: 800,
                     fontFamily: 'var(--font-heading)',
-                    color: 'white',
+                    color: isDark ? 'white' : '#0F172A',
                     marginBottom: 1,
                   }}
                 >
@@ -181,7 +187,7 @@ export default function ValueStack() {
                 <Typography
                   sx={{
                     fontSize: '14px',
-                    color: 'var(--color-gray-500)',
+                    color: isDark ? 'var(--color-gray-500)' : '#64748B',
                     marginBottom: 4,
                     fontWeight: 500
                   }}
@@ -206,7 +212,7 @@ export default function ValueStack() {
                         primary={feature}
                         primaryTypographyProps={{
                           fontSize: '15px',
-                          color: 'var(--color-gray-400)',
+                          color: isDark ? 'var(--color-gray-400)' : '#64748B',
                           fontWeight: 400
                         }}
                       />
@@ -225,7 +231,7 @@ export default function ValueStack() {
             margin: '0 auto',
             marginTop: 10,
             padding: 5,
-            backgroundColor: 'rgba(255,255,255,0.02)',
+            backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)',
             borderRadius: '32px',
             textAlign: 'center',
             position: 'relative',
@@ -237,7 +243,7 @@ export default function ValueStack() {
           <Typography
             sx={{
               fontSize: '16px',
-              color: 'var(--color-gray-500)',
+              color: isDark ? 'var(--color-gray-500)' : '#64748B',
               textDecoration: 'line-through',
               marginBottom: 1,
               fontWeight: 600
@@ -265,7 +271,7 @@ export default function ValueStack() {
                 fontSize: '64px',
                 fontWeight: 900,
                 fontFamily: 'var(--font-heading)',
-                color: 'white',
+                color: isDark ? 'white' : '#0F172A',
                 letterSpacing: '-2px'
               }}
             >
@@ -274,7 +280,7 @@ export default function ValueStack() {
             <Typography
               sx={{
                 fontSize: '20px',
-                color: 'var(--color-gray-500)',
+                color: isDark ? 'var(--color-gray-500)' : '#64748B',
                 fontWeight: 600
               }}
             >
@@ -285,7 +291,7 @@ export default function ValueStack() {
           <Typography
             sx={{
               fontSize: '14px',
-              color: 'var(--color-gray-500)',
+              color: isDark ? 'var(--color-gray-500)' : '#64748B',
               marginBottom: 4,
             }}
           >
@@ -338,7 +344,7 @@ export default function ValueStack() {
           <Typography
             sx={{
               fontSize: '14px',
-              color: 'var(--color-gray-500)',
+              color: isDark ? 'var(--color-gray-500)' : '#64748B',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
