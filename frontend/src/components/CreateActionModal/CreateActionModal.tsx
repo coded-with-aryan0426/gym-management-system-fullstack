@@ -129,6 +129,12 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
         setFormData(prev => ({ ...prev, [name]: value }))
     }
 
+    // Handle membership selection from our enhanced component
+    const handleMembershipSelect = (membershipId: number) => {
+        setSelectedMembershipId(membershipId)
+        setFormData(prev => ({ ...prev, packageId: membershipId.toString() }))
+    }
+
     const clearDrafts = () => {
         localStorage.removeItem("member_form_draft")
         localStorage.removeItem("trainer_form_draft")
