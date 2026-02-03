@@ -22,8 +22,6 @@ const MembershipAssignment: React.FC<MembershipAssignmentProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<MembershipPackageDTO | null>(null);
-  
-  const { toast } = useToast();
 
   useEffect(() => {
     fetchMembershipPlans();
@@ -46,11 +44,7 @@ const MembershipAssignment: React.FC<MembershipAssignmentProps> = ({
       setError(null);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to fetch membership plans');
-      toast({
-        title: 'Error',
-        description: 'Failed to fetch membership plans',
-        variant: 'destructive'
-      });
+      toast.error('Failed to fetch membership plans');
     } finally {
       setLoading(false);
     }
@@ -91,11 +85,11 @@ const MembershipAssignment: React.FC<MembershipAssignmentProps> = ({
   if (loading) {
     return (
       <Card>
-        <CardContent className="p-6">
+        <div className="p-6">
           <div className="flex items-center justify-center h-32">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
-        </CardContent>
+        </div>
       </Card>
     );
   }
@@ -103,7 +97,7 @@ const MembershipAssignment: React.FC<MembershipAssignmentProps> = ({
   if (error) {
     return (
       <Card>
-        <CardContent className="p-6">
+        <div className="p-6">
           <div className="text-center text-red-600">
             <p className="font-medium">Error loading membership plans</p>
             <p className="text-sm mt-1">{error}</p>
@@ -116,7 +110,7 @@ const MembershipAssignment: React.FC<MembershipAssignmentProps> = ({
               Retry
             </Button>
           </div>
-        </CardContent>
+        </div>
       </Card>
     );
   }
@@ -124,108 +118,72 @@ const MembershipAssignment: React.FC<MembershipAssignmentProps> = ({
   if (membershipPlans.length === 0) {
     return (
       <Card>
-        <CardContent className="p-6">
+        <div className="p-6">
           <div className="text-center text-gray-500">
-            <Users className="h-12 w-12 mx-auto mb-4 text-gray-400" />
             <p className="font-medium">No membership plans available</p>
-            <p className="text-sm mt-1">
-              {mode === 'create' 
-                ? 'Contact your gym administrator to set up membership plans.'
-                : 'Please create membership plans first.'
-              }
-            </p>
+            <p className="text-sm mt-1">Please create membership plans first</p>
           </div>
-        </CardContent>
+        </div>
       </Card>
     );
   }
 
   return (
     <div className="space-y-4">
-      <div>
-        <Label htmlFor="membershipPlan">
-          {mode === 'renew' ? 'Renew Membership Plan' : 'Select Membership Plan'}
-          <span className="text-red-500 ml-1">*</span>
-        </Label>
-        <Select 
-          value={selectedPlan?.packageId.toString() || ''} 
-          onValueChange={handlePlanSelect}
+      <div className="space-y-3">
+        <label className="block text-sm font-medium text-gray-700">
+          Select Membership Plan *
+        </label>
+        <select
+          value={selectedPlan?.packageId.toString() || ''}
+          onChange={(e) => handlePlanSelect(e.target.value)}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           required
         >
-          <SelectTrigger id="membershipPlan" className="mt-1">
-            <SelectValue placeholder="Choose a membership plan..." />
-          </SelectTrigger>
-          <SelectContent>
-            {membershipPlans.map((plan) => (
-              <SelectItem key={plan.packageId} value={plan.packageId.toString()}>
-                <div className="flex items-center justify-between w-full">
-                  <span>{plan.packageName}</span>
-                  <Badge variant="outline" className="ml-2">
-                    {formatPrice(plan.price)}
-                  </Badge>
-                </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          <option value="">Choose a membership plan</option>
+          {membershipPlans.map((plan) => (
+            <option key={plan.packageId} value={plan.packageId.toString()}>
+              {plan.packageName} - ${plan.price}
+            </option>
+          ))}
+        </select>
       </div>
 
       {selectedPlan && (
-        <Card className="border-2 border-primary/20">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">{selectedPlan.packageName}</CardTitle>
-              <Badge variant="default">Selected</Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex items-center space-x-2">
-                <DollarSign className="h-4 w-4 text-green-600" />
-                <div>
-                  <p className="text-sm text-gray-600">Total Price</p>
-                  <p className="font-semibold">{formatPrice(selectedPlan.price)}</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center space-x-2">
-                <Clock className="h-4 w-4 text-blue-600" />
-                <div>
-                  <p className="text-sm text-gray-600">Duration</p>
-                  <p className="font-semibold">{formatDuration(selectedPlan.durationDays)}</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center space-x-2">
-                <Calendar className="h-4 w-4 text-purple-600" />
-                <div>
-                  <p className="text-sm text-gray-600">Monthly Price</p>
-                  <p className="font-semibold">
-                    {formatPrice(calculateMonthlyPrice(selectedPlan.price, selectedPlan.durationDays))}
-                  </p>
-                </div>
-              </div>
-              
-              <div className="flex items-center space-x-2">
-                <Users className="h-4 w-4 text-orange-600" />
-                <div>
-                  <p className="text-sm text-gray-600">PT Sessions</p>
-                  <p className="font-semibold">
-                    {selectedPlan.includedPTSessions} {selectedPlan.includedPTSessions === 1 ? 'session' : 'sessions'}
-                  </p>
-                </div>
-              </div>
-            </div>
-            
-            {mode === 'renew' && memberId && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                <p className="text-sm text-blue-800">
-                  <strong>Renewal Summary:</strong> This membership will be assigned to member ID {memberId} 
-                  for {formatDuration(selectedPlan.durationDays)} starting from today.
+        <Card elevation="2" className="border-blue-200 bg-blue-50">
+          <div className="p-4">
+            <div className="flex items-start justify-between mb-3">
+              <div>
+                <h4 className="font-semibold text-gray-900">{selectedPlan.packageName}</h4>
+                <p className="text-2xl font-bold text-blue-600">
+                  {formatPrice(selectedPlan.price)}
+                </p>
+                <p className="text-sm text-gray-600">
+                  {formatDuration(selectedPlan.durationDays)} • ~{formatPrice(calculateMonthlyPrice(selectedPlan.price, selectedPlan.durationDays))}/month
                 </p>
               </div>
+              <Badge variant="active" className="text-xs">
+                Selected
+              </Badge>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-gray-500" />
+                <span>{selectedPlan.durationDays} days</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Users className="h-4 w-4 text-gray-500" />
+                <span>{selectedPlan.includedPTSessions} PT sessions</span>
+              </div>
+            </div>
+
+            {selectedPlan.description && (
+              <div className="mt-3 pt-3 border-t border-gray-200">
+                <p className="text-sm text-gray-600">{selectedPlan.description}</p>
+              </div>
             )}
-          </CardContent>
+          </div>
         </Card>
       )}
     </div>
