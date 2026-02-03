@@ -1,4 +1,5 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect } from 'react';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface OtpInputProps {
     length?: number;
@@ -7,8 +8,19 @@ interface OtpInputProps {
     disabled?: boolean;
 }
 
+const getColors = (isDark: boolean) => ({
+    bgSecondary: isDark ? "#1A1A1A" : "#FFFFFF",
+    borderPrimary: isDark ? "#1F2937" : "#E2E8F0",
+    textPrimary: isDark ? "#F9FAFB" : "#0F172A",
+    emerald: "#10B981",
+    crimson: "#DC2626",
+});
+
 const OtpInput: React.FC<OtpInputProps> = ({ length = 6, value, onChange, disabled = false }) => {
     const inputs = useRef<(HTMLInputElement | null)[]>([]);
+    const { theme } = useTheme();
+    const isDark = theme === 'dark';
+    const colors = getColors(isDark);
 
     // Focus on first input only if value is empty when component mounts
     useEffect(() => {
@@ -58,14 +70,6 @@ const OtpInput: React.FC<OtpInputProps> = ({ length = 6, value, onChange, disabl
         // Focus the last filled input
         const focusIndex = Math.min(pastedData.length, length - 1);
         inputs.current[focusIndex]?.focus();
-    };
-
-    const colors = {
-        bgSecondary: "#1A1A1A",
-        borderPrimary: "#1F2937",
-        textPrimary: "#F9FAFB",
-        emerald: "#10B981",
-        crimson: "#DC2626",
     };
 
     return (
