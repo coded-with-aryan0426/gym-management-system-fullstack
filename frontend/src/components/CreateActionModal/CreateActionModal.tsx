@@ -5,7 +5,7 @@ import ReactDOM from "react-dom"
 import { motion, AnimatePresence } from "framer-motion"
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-hot-toast"
-import { X, ChevronLeft, User, Phone, Mail, Calendar, CreditCard, Clock, Check } from "lucide-react"
+import { X, ChevronLeft, ChevronDown, User, Phone, Mail, Calendar, CreditCard, Clock, Check } from "lucide-react"
 import api from "../../services/api"
 import membershipPlanApi from "../../services/membershipPlanApi"
 import type { MembershipPackageDTO } from "../../types/membershipPackage"
@@ -38,6 +38,8 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
     const [membershipPlans, setMembershipPlans] = useState<MembershipPackageDTO[]>([])
     const [loadingPlans, setLoadingPlans] = useState(false)
     const [selectedPlanName, setSelectedPlanName] = useState<string>("")
+    const [isPlanOpen, setIsPlanOpen] = useState(true)
+    const [isDurationOpen, setIsDurationOpen] = useState(false)
 
     // Form state
     const [formData, setFormData] = useState({
@@ -91,11 +93,19 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
     const durationOptions = selectedGroup?.plans ?? []
     const selectedPlan = membershipPlans.find(p => p.packageId.toString() === formData.packageId)
 
+    useEffect(() => {
+        if (!selectedPlanName) {
+            setIsDurationOpen(false)
+        }
+    }, [selectedPlanName])
+
     // Reset on open
     useEffect(() => {
         if (isOpen) {
             setView(initialView)
             setSelectedPlanName("")
+            setIsPlanOpen(true)
+            setIsDurationOpen(false)
             setFormData({
                 fullName: "",
                 email: "",
@@ -123,6 +133,7 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
     const handlePlanNameSelect = (name: string) => {
         setSelectedPlanName(name)
         setFormData(prev => ({ ...prev, packageId: "" }))
+        setIsDurationOpen(true)
     }
 
     const handleDurationSelect = (plan: MembershipPackageDTO) => {
@@ -140,6 +151,8 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
     const discardAndClose = () => {
         setShowConfirm(false)
         setSelectedPlanName("")
+        setIsPlanOpen(true)
+        setIsDurationOpen(false)
         setFormData({
             fullName: "",
             email: "",
@@ -333,63 +346,112 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
                                         </div>
 
                                         {/* Membership Name Section */}
-                                        <div className="cam-section">
-                                            <div className="cam-section__header">
-                                                <CreditCard size={14} />
-                                                <span>Membership Name</span>
-                                            </div>
-                                            {loadingPlans ? (
-                                                <div className="cam-plans-loading">
-                                                    <div className="cam-spinner" />
-                                                    <span>Loading plans...</span>
+                                        <div className="cam-section cam-section--dropdown">
+                                            <button
+                                                type="button"
+                                                className={`cam-dropdown-trigger ${isPlanOpen ? "cam-dropdown-trigger--open" : ""}`}
+                                                onClick={() => setIsPlanOpen(prev => !prev)}
+                                            >
+                                                <div className="cam-section__header">
+                                                    <CreditCard size={14} />
+                                                    <span>Membership Name</span>
                                                 </div>
-                                            ) : planGroups.length === 0 ? (
-                                                <div className="cam-plans-empty">No membership plans available</div>
-                                            ) : (
-                                                <div className="cam-plans">
-                                                    {planGroups.map((group) => (
-                                                        <button
-                                                            key={group.name}
-                                                            type="button"
-                                                            className={`cam-plan-card ${selectedPlanName === group.name ? 'cam-plan-card--selected' : ''}`}
-                                                            onClick={() => handlePlanNameSelect(group.name)}
-                                                        >
-                                                            <div className="cam-plan-card__check">
-                                                                {selectedPlanName === group.name && <Check size={12} />}
-                                                            </div>
-                                                            <div className="cam-plan-card__info">
-                                                                <span className="cam-plan-card__name">{group.name}</span>
-                                                            </div>
-                                                        </button>
-                                                    ))}
+                                                <div className="cam-dropdown-meta">
+                                                    <span className={`cam-dropdown-value ${selectedPlanName ? "" : "cam-dropdown-value--muted"}`}>
+                                                        {selectedPlanName || "Select membership"}
+                                                    </span>
                                                 </div>
-                                            )}
+                                                <ChevronDown size={16} className="cam-dropdown-icon" />
+                                            </button>
+                                            <AnimatePresence initial={false}>
+                                                {isPlanOpen && (
+                                                    <motion.div
+                                                        className="cam-dropdown-body"
+                                                        initial={{ opacity: 0, height: 0 }}
+                                                        animate={{ opacity: 1, height: "auto" }}
+                                                        exit={{ opacity: 0, height: 0 }}
+                                                        transition={{ duration: 0.2 }}
+                                                    >
+                                                        {loadingPlans ? (
+                                                            <div className="cam-plans-loading">
+                                                                <div className="cam-spinner" />
+                                                                <span>Loading plans...</span>
+                                                            </div>
+                                                        ) : planGroups.length === 0 ? (
+                                                            <div className="cam-plans-empty">No membership plans available</div>
+                                                        ) : (
+                                                            <div className="cam-plans">
+                                                                {planGroups.map((group) => (
+                                                                    <button
+                                                                        key={group.name}
+                                                                        type="button"
+                                                                        className={`cam-plan-card ${selectedPlanName === group.name ? "cam-plan-card--selected" : ""}`}
+                                                                        onClick={() => handlePlanNameSelect(group.name)}
+                                                                    >
+                                                                        <div className="cam-plan-card__check">
+                                                                            {selectedPlanName === group.name && <Check size={12} />}
+                                                                        </div>
+                                                                        <div className="cam-plan-card__info">
+                                                                            <span className="cam-plan-card__name">{group.name}</span>
+                                                                        </div>
+                                                                    </button>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </motion.div>
+                                                )}
+                                            </AnimatePresence>
                                         </div>
 
                                         {/* Duration Section */}
-                                        <div className="cam-section">
-                                            <div className="cam-section__header">
-                                                <Clock size={14} />
-                                                <span>Duration & Price</span>
-                                            </div>
-                                            {selectedPlanName ? (
-                                                <div className="cam-duration-grid cam-duration-grid--plans">
-                                                    {durationOptions.map((plan) => (
-                                                        <button
-                                                            key={plan.packageId}
-                                                            type="button"
-                                                            className={`cam-duration-btn cam-duration-btn--card ${formData.packageId === plan.packageId.toString() ? 'cam-duration-btn--selected' : ''}`}
-                                                            onClick={() => handleDurationSelect(plan)}
-                                                        >
-                                                            <span className="cam-duration-btn__label">{formatDuration(plan.durationDays)}</span>
-                                                            <span className="cam-duration-btn__price">{formatPrice(plan.price)}</span>
-                                                            {formData.packageId === plan.packageId.toString() && <Check size={12} />}
-                                                        </button>
-                                                    ))}
+                                        <div className="cam-section cam-section--dropdown">
+                                            <button
+                                                type="button"
+                                                className={`cam-dropdown-trigger ${isDurationOpen ? "cam-dropdown-trigger--open" : ""}`}
+                                                onClick={() => setIsDurationOpen(prev => !prev)}
+                                                disabled={!selectedPlanName}
+                                            >
+                                                <div className="cam-section__header">
+                                                    <Clock size={14} />
+                                                    <span>Duration & Price</span>
                                                 </div>
-                                            ) : (
-                                                <div className="cam-duration-empty">Select a membership name to view durations</div>
-                                            )}
+                                                <div className="cam-dropdown-meta">
+                                                    <span className={`cam-dropdown-value ${selectedPlan ? "" : "cam-dropdown-value--muted"}`}>
+                                                        {selectedPlan ? `${formatDuration(selectedPlan.durationDays)} · ${formatPrice(selectedPlan.price)}` : "Select duration"}
+                                                    </span>
+                                                </div>
+                                                <ChevronDown size={16} className="cam-dropdown-icon" />
+                                            </button>
+                                            <AnimatePresence initial={false}>
+                                                {isDurationOpen && (
+                                                    <motion.div
+                                                        className="cam-dropdown-body"
+                                                        initial={{ opacity: 0, height: 0 }}
+                                                        animate={{ opacity: 1, height: "auto" }}
+                                                        exit={{ opacity: 0, height: 0 }}
+                                                        transition={{ duration: 0.2 }}
+                                                    >
+                                                        {selectedPlanName ? (
+                                                            <div className="cam-duration-grid cam-duration-grid--plans">
+                                                                {durationOptions.map((plan) => (
+                                                                    <button
+                                                                        key={plan.packageId}
+                                                                        type="button"
+                                                                        className={`cam-duration-btn cam-duration-btn--card ${formData.packageId === plan.packageId.toString() ? "cam-duration-btn--selected" : ""}`}
+                                                                        onClick={() => handleDurationSelect(plan)}
+                                                                    >
+                                                                        <span className="cam-duration-btn__label">{formatDuration(plan.durationDays)}</span>
+                                                                        <span className="cam-duration-btn__price">{formatPrice(plan.price)}</span>
+                                                                        {formData.packageId === plan.packageId.toString() && <Check size={12} />}
+                                                                    </button>
+                                                                ))}
+                                                            </div>
+                                                        ) : (
+                                                            <div className="cam-duration-empty">Select a membership name to view durations</div>
+                                                        )}
+                                                    </motion.div>
+                                                )}
+                                            </AnimatePresence>
                                         </div>
 
                                         {/* Summary */}
