@@ -1,8 +1,9 @@
 import { Box, Typography, Container, Avatar } from '@mui/material';
-import { motion, useScroll, useTransform, useSpring, useInView } from 'framer-motion';
-import { useRef, useEffect, useState } from 'react';
+import { motion, useInView } from 'framer-motion';
+import { useRef } from 'react';
 import Header from '../../components/landing/Header';
 import Footer from '../../components/landing/Footer';
+import ScrollProgress from '../../components/landing/ScrollProgress';
 import { useTheme } from '../../contexts/ThemeContext';
 import {
     Target,

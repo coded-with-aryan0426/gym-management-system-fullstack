@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Badge, Button } from '../ui';
-import { Calendar, DollarSign, Users, Clock } from 'lucide-react';
-import { MembershipPackageDTO } from '../../types/membershipPackage';
+import { Calendar, Users } from 'lucide-react';
+import type { MembershipPackageDTO } from '../../types/membershipPackage';
 import membershipPlanApi from '../../services/membershipPlanApi';
 import { toast } from 'react-hot-toast';
 
@@ -51,10 +51,14 @@ const MembershipAssignment: React.FC<MembershipAssignmentProps> = ({
   };
 
   const handlePlanSelect = (planId: string) => {
-    const plan = membershipPlans.find(p => p.packageId.toString() === planId);
+    const plan = membershipPlans.find(p => (p.packageId ?? '').toString() === planId);
     if (plan) {
       setSelectedPlan(plan);
-      onMembershipSelect(plan.packageId);
+      if (plan.packageId) {
+        onMembershipSelect(plan.packageId);
+      } else {
+        toast.error('Invalid membership plan');
+      }
     }
   };
 
@@ -102,7 +106,7 @@ const MembershipAssignment: React.FC<MembershipAssignmentProps> = ({
             <p className="font-medium">Error loading membership plans</p>
             <p className="text-sm mt-1">{error}</p>
             <Button 
-              variant="outline" 
+              variant="secondary" 
               size="sm" 
               className="mt-4"
               onClick={fetchMembershipPlans}
@@ -135,22 +139,24 @@ const MembershipAssignment: React.FC<MembershipAssignmentProps> = ({
           Select Membership Plan *
         </label>
         <select
-          value={selectedPlan?.packageId.toString() || ''}
+          value={selectedPlan?.packageId?.toString() || ''}
           onChange={(e) => handlePlanSelect(e.target.value)}
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           required
         >
           <option value="">Choose a membership plan</option>
-          {membershipPlans.map((plan) => (
-            <option key={plan.packageId} value={plan.packageId.toString()}>
-              {plan.packageName} - ${plan.price}
-            </option>
-          ))}
+          {membershipPlans
+            .filter((plan): plan is MembershipPackageDTO & { packageId: number } => plan.packageId != null)
+            .map((plan) => (
+              <option key={plan.packageId} value={plan.packageId.toString()}>
+                {plan.packageName} - ${plan.price}
+              </option>
+            ))}
         </select>
       </div>
 
       {selectedPlan && (
-        <Card elevation="2" className="border-blue-200 bg-blue-50">
+        <Card className="border-blue-200 bg-blue-50">
           <div className="p-4">
             <div className="flex items-start justify-between mb-3">
               <div>
@@ -178,11 +184,6 @@ const MembershipAssignment: React.FC<MembershipAssignmentProps> = ({
               </div>
             </div>
 
-            {selectedPlan.description && (
-              <div className="mt-3 pt-3 border-t border-gray-200">
-                <p className="text-sm text-gray-600">{selectedPlan.description}</p>
-              </div>
-            )}
           </div>
         </Card>
       )}

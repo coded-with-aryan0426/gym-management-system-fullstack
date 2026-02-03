@@ -1,15 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Plus, Edit, Trash2, Eye, TrendingUp, Users, DollarSign, Calendar } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
-import { MembershipPackageDTO } from '@/types/membershipPackage';
-import membershipPlanApi from '@/services/membershipPlanApi';
+import { toast } from 'react-hot-toast';
+import { Card, Badge, Button } from '../ui';
+import { Input } from '../base';
+import ErrorMessage from '../utilities/ErrorMessage';
+import type { MembershipPackageDTO } from '../../types/membershipPackage';
+import membershipPlanApi from '../../services/membershipPlanApi';
 
 interface MembershipPlanManagementProps {
   onPlanSelect?: (plan: MembershipPackageDTO) => void;
@@ -26,8 +22,6 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
   const [showForm, setShowForm] = useState(false);
   const [editingPlan, setEditingPlan] = useState<MembershipPackageDTO | null>(null);
   const [analytics, setAnalytics] = useState<any>(null);
-  
-  const { toast } = useToast();
 
   // Form state
   const [formData, setFormData] = useState({
@@ -55,11 +49,7 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
       setError(null);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to fetch membership plans');
-      toast({
-        title: 'Error',
-        description: 'Failed to fetch membership plans',
-        variant: 'destructive'
-      });
+      toast.error('Failed to fetch membership plans');
     } finally {
       setLoading(false);
     }
@@ -86,22 +76,22 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
       };
 
       if (editingPlan) {
+        if (!editingPlan.packageId) {
+          toast.error('Invalid membership plan');
+          return;
+        }
         await membershipPlanApi.updatePlan(editingPlan.packageId, planData);
-        toast({ title: 'Success', description: 'Membership plan updated successfully' });
+        toast.success('Membership plan updated successfully');
       } else {
         await membershipPlanApi.createPlan(planData);
-        toast({ title: 'Success', description: 'Membership plan created successfully' });
+        toast.success('Membership plan created successfully');
       }
       
       resetForm();
       fetchPlans();
       fetchAnalytics();
     } catch (err: any) {
-      toast({
-        title: 'Error',
-        description: err.response?.data?.message || 'Failed to save membership plan',
-        variant: 'destructive'
-      });
+      toast.error(err.response?.data?.message || 'Failed to save membership plan');
     }
   };
 
@@ -112,7 +102,7 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
       price: plan.price.toString(),
       durationDays: plan.durationDays.toString(),
       includedPTSessions: plan.includedPTSessions.toString(),
-      isActive: plan.isActive
+      isActive: Boolean(plan.isActive)
     });
     setShowForm(true);
   };
@@ -122,35 +112,32 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
     
     try {
       await membershipPlanApi.deletePlan(planId);
-      toast({ title: 'Success', description: 'Membership plan deleted successfully' });
+      toast.success('Membership plan deleted successfully');
       fetchPlans();
       fetchAnalytics();
     } catch (err: any) {
-      toast({
-        title: 'Error',
-        description: err.response?.data?.message || 'Failed to delete membership plan',
-        variant: 'destructive'
-      });
+      toast.error(err.response?.data?.message || 'Failed to delete membership plan');
     }
   };
 
   const handleToggleStatus = async (plan: MembershipPackageDTO) => {
     try {
+      if (!plan.packageId) {
+        toast.error('Invalid membership plan');
+        return;
+      }
+
       if (plan.isActive) {
         await membershipPlanApi.deactivatePlan(plan.packageId);
-        toast({ title: 'Success', description: 'Membership plan deactivated' });
+        toast.success('Membership plan deactivated');
       } else {
         await membershipPlanApi.activatePlan(plan.packageId);
-        toast({ title: 'Success', description: 'Membership plan activated' });
+        toast.success('Membership plan activated');
       }
       fetchPlans();
       fetchAnalytics();
     } catch (err: any) {
-      toast({
-        title: 'Error',
-        description: err.response?.data?.message || 'Failed to update plan status',
-        variant: 'destructive'
-      });
+      toast.error(err.response?.data?.message || 'Failed to update plan status');
     }
   };
 
@@ -194,11 +181,7 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
   }
 
   if (error) {
-    return (
-      <Alert variant="destructive">
-        <AlertDescription>{error}</AlertDescription>
-      </Alert>
-    );
+    return <ErrorMessage message={error} onRetry={fetchPlans} />;
   }
 
   return (
@@ -206,7 +189,7 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
       {mode === 'management' && analytics && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card>
-            <CardContent className="p-6">
+            <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Total Plans</p>
@@ -214,11 +197,11 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
                 </div>
                 <Calendar className="h-8 w-8 text-blue-500" />
               </div>
-            </CardContent>
+            </div>
           </Card>
           
           <Card>
-            <CardContent className="p-6">
+            <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Active Plans</p>
@@ -226,11 +209,11 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
                 </div>
                 <Users className="h-8 w-8 text-green-500" />
               </div>
-            </CardContent>
+            </div>
           </Card>
           
           <Card>
-            <CardContent className="p-6">
+            <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Avg Price</p>
@@ -240,11 +223,11 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
                 </div>
                 <DollarSign className="h-8 w-8 text-yellow-500" />
               </div>
-            </CardContent>
+            </div>
           </Card>
           
           <Card>
-            <CardContent className="p-6">
+            <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Total Revenue</p>
@@ -254,7 +237,7 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
                 </div>
                 <TrendingUp className="h-8 w-8 text-purple-500" />
               </div>
-            </CardContent>
+            </div>
           </Card>
         </div>
       )}
@@ -262,27 +245,21 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
       {mode === 'management' && (
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold">Membership Plans</h2>
-          <Button onClick={() => setShowForm(true)}>
-            <Plus className="h-4 w-4 mr-2" />
+          <Button onClick={() => setShowForm(true)} icon={<Plus size={16} />}>
             Create Plan
           </Button>
         </div>
       )}
 
       {showForm && (
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              {editingPlan ? 'Edit Membership Plan' : 'Create New Membership Plan'}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+        <Card title={editingPlan ? 'Edit Membership Plan' : 'Create New Membership Plan'}>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="packageName">Plan Name</Label>
                   <Input
                     id="packageName"
+                    label="Plan Name"
+                    fullWidth
                     value={formData.packageName}
                     onChange={(e) => setFormData({ ...formData, packageName: e.target.value })}
                     placeholder="e.g., Premium Monthly"
@@ -291,9 +268,10 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
                 </div>
                 
                 <div>
-                  <Label htmlFor="price">Price ($)</Label>
                   <Input
                     id="price"
+                    label="Price ($)"
+                    fullWidth
                     type="number"
                     step="0.01"
                     min="0"
@@ -305,9 +283,10 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
                 </div>
                 
                 <div>
-                  <Label htmlFor="durationDays">Duration (days)</Label>
                   <Input
                     id="durationDays"
+                    label="Duration (days)"
+                    fullWidth
                     type="number"
                     min="1"
                     value={formData.durationDays}
@@ -318,9 +297,10 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
                 </div>
                 
                 <div>
-                  <Label htmlFor="includedPTSessions">Included PT Sessions</Label>
                   <Input
                     id="includedPTSessions"
+                    label="Included PT Sessions"
+                    fullWidth
                     type="number"
                     min="0"
                     value={formData.includedPTSessions}
@@ -332,7 +312,7 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
               </div>
               
               <div className="flex justify-end space-x-2">
-                <Button type="button" variant="outline" onClick={resetForm}>
+                <Button type="button" variant="secondary" onClick={resetForm}>
                   Cancel
                 </Button>
                 <Button type="submit">
@@ -340,22 +320,21 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
                 </Button>
               </div>
             </form>
-          </CardContent>
         </Card>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {plans.map((plan) => (
-          <Card key={plan.packageId} className="hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-3">
-              <div className="flex justify-between items-start">
-                <CardTitle className="text-lg">{plan.packageName}</CardTitle>
-                <Badge variant={plan.isActive ? 'default' : 'secondary'}>
-                  {plan.isActive ? 'Active' : 'Inactive'}
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent>
+          <Card
+            key={plan.packageId ?? plan.packageName}
+            title={plan.packageName}
+            action={
+              <Badge variant={plan.isActive ? 'active' : 'expired'}>
+                {plan.isActive ? 'Active' : 'Inactive'}
+              </Badge>
+            }
+            className="hover:shadow-lg transition-shadow"
+          >
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-600">Price</span>
@@ -379,25 +358,25 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
                     size="sm" 
                     onClick={() => onPlanSelect?.(plan)}
                     className="w-full"
+                    icon={<Eye size={16} />}
                   >
-                    <Eye className="h-4 w-4 mr-2" />
                     Select Plan
                   </Button>
                 ) : (
                   <div className="flex space-x-2 w-full">
                     <Button 
                       size="sm" 
-                      variant="outline" 
+                      variant="secondary" 
                       onClick={() => handleEdit(plan)}
                       className="flex-1"
+                      icon={<Edit size={16} />}
                     >
-                      <Edit className="h-4 w-4 mr-2" />
                       Edit
                     </Button>
                     
                     <Button 
                       size="sm" 
-                      variant="outline"
+                      variant="secondary"
                       onClick={() => handleToggleStatus(plan)}
                       className="flex-1"
                     >
@@ -406,16 +385,16 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
                     
                     <Button 
                       size="sm" 
-                      variant="destructive"
-                      onClick={() => handleDelete(plan.packageId)}
+                      variant="danger"
+                      onClick={() => (plan.packageId ? handleDelete(plan.packageId) : toast.error('Invalid membership plan'))}
                       className="flex-1"
+                      icon={<Trash2 size={16} />}
                     >
-                      <Trash2 className="h-4 w-4" />
+                      Delete
                     </Button>
                   </div>
                 )}
               </div>
-            </CardContent>
           </Card>
         ))}
       </div>
