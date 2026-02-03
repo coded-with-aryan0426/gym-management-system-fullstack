@@ -517,7 +517,11 @@ export default function AuthModal() {
                         )}
 
                         {/* Content */}
-                        <div style={{ padding: '24px' }}>
+                        <div style={{ 
+                            padding: '24px',
+                            animation: 'tabSwitch 0.25s ease-out',
+                        }}
+                        key={activeTab + loginStep + signupStep}>
                             {/* Messages - Only render when there's a message */}
                             {(error || successMessage) && (
                                 <div style={{ marginBottom: 16 }}>
@@ -652,6 +656,16 @@ export default function AuthModal() {
                                                 boxShadow: '0 4px 16px rgba(220, 38, 38, 0.35)',
                                                 transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
                                             }}
+                                            onMouseEnter={(e) => {
+                                                if (!isLoading) {
+                                                    e.currentTarget.style.boxShadow = '0 6px 24px rgba(220, 38, 38, 0.5)';
+                                                    e.currentTarget.style.transform = 'translateY(-2px)';
+                                                }
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.boxShadow = '0 4px 16px rgba(220, 38, 38, 0.35)';
+                                                e.currentTarget.style.transform = 'translateY(0)';
+                                            }}
                                         >
                                             {isLoading ? "Signing in..." : "Sign In"}
                                         </button>
@@ -686,6 +700,16 @@ export default function AuthModal() {
                                                 opacity: isLoading || loginOtp.length !== 6 ? 0.7 : 1,
                                                 boxShadow: '0 4px 16px rgba(220, 38, 38, 0.35)',
                                                 transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                if (!isLoading && loginOtp.length === 6) {
+                                                    e.currentTarget.style.boxShadow = '0 6px 24px rgba(220, 38, 38, 0.5)';
+                                                    e.currentTarget.style.transform = 'translateY(-2px)';
+                                                }
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.boxShadow = '0 4px 16px rgba(220, 38, 38, 0.35)';
+                                                e.currentTarget.style.transform = 'translateY(0)';
                                             }}
                                         >
                                             {isLoading ? "Verifying..." : "Verify & Login"}
@@ -831,6 +855,16 @@ export default function AuthModal() {
                                                 boxShadow: '0 4px 16px rgba(220, 38, 38, 0.35)',
                                                 transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
                                             }}
+                                            onMouseEnter={(e) => {
+                                                if (!isLoading) {
+                                                    e.currentTarget.style.boxShadow = '0 6px 24px rgba(220, 38, 38, 0.5)';
+                                                    e.currentTarget.style.transform = 'translateY(-2px)';
+                                                }
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.boxShadow = '0 4px 16px rgba(220, 38, 38, 0.35)';
+                                                e.currentTarget.style.transform = 'translateY(0)';
+                                            }}
                                         >
                                             {isLoading ? "Sending Code..." : "Create Account"}
                                         </button>
@@ -864,6 +898,16 @@ export default function AuthModal() {
                                                 opacity: isLoading || signupOtp.length !== 6 ? 0.7 : 1,
                                                 boxShadow: '0 4px 16px rgba(220, 38, 38, 0.35)',
                                                 transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                if (!isLoading && signupOtp.length === 6) {
+                                                    e.currentTarget.style.boxShadow = '0 6px 24px rgba(220, 38, 38, 0.5)';
+                                                    e.currentTarget.style.transform = 'translateY(-2px)';
+                                                }
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.boxShadow = '0 4px 16px rgba(220, 38, 38, 0.35)';
+                                                e.currentTarget.style.transform = 'translateY(0)';
                                             }}
                                         >
                                             {isLoading ? "Creating Account..." : "Verify & Register"}
@@ -930,9 +974,19 @@ export default function AuthModal() {
                     from { opacity: 0; transform: scale(0.95) translateY(-10px); }
                     to { opacity: 1; transform: scale(1) translateY(0); }
                 }
+                @keyframes tabSwitch {
+                    0% { opacity: 0.7; transform: translateX(5px); }
+                    100% { opacity: 1; transform: translateX(0); }
+                }
                 input:focus {
-                    border-color: #10B981 !important;
-                    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15) !important;
+                    border-color: #DC2626 !important;
+                    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12) !important;
+                }
+                input::placeholder {
+                    color: ${isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.35)'};
+                }
+                button:active:not(:disabled) {
+                    transform: scale(0.98);
                 }
             `}</style>
         </>
@@ -940,11 +994,11 @@ export default function AuthModal() {
 }
 
 // Input Field Component
-const InputField = ({ label, type = "text", value, onChange, error, placeholder, isValid, maxLength, colors }: any) => (
+const InputField = ({ label, type = "text", value, onChange, error, placeholder, isValid, maxLength, colors, isDark }: any) => (
     <div style={{ width: "100%" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: 'center', marginBottom: 6 }}>
             <label style={{ fontSize: 11, fontWeight: 600, color: colors.textSecondary, textTransform: "uppercase", letterSpacing: "0.5px" }}>{label}</label>
-            {error && <span style={{ color: colors.crimson, fontSize: 10 }}>{error}</span>}
+            {error && <span style={{ color: colors.crimson, fontSize: 10, fontWeight: 500 }}>{error}</span>}
         </div>
         <div style={{ position: "relative" }}>
             <input
@@ -955,47 +1009,81 @@ const InputField = ({ label, type = "text", value, onChange, error, placeholder,
                 maxLength={maxLength}
                 style={{
                     width: "100%",
-                    padding: "12px",
-                    background: colors.bgPrimary,
-                    border: `1px solid ${error ? colors.crimson : colors.borderPrimary}`,
+                    padding: "12px 14px",
+                    paddingRight: isValid ? 36 : 14,
+                    background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
+                    border: `1px solid ${error ? colors.crimson : isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
                     borderRadius: 10,
                     color: colors.textPrimary,
                     fontSize: 14,
                     outline: "none",
                     boxSizing: 'border-box',
-                    transition: "border 0.2s"
+                    transition: "all 0.2s ease"
                 }}
             />
-            {isValid && <div style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", color: colors.emerald, fontSize: 12 }}>✓</div>}
+            {isValid && (
+                <div style={{ 
+                    position: "absolute", 
+                    right: 12, 
+                    top: "50%", 
+                    transform: "translateY(-50%)", 
+                    color: colors.emerald, 
+                    fontSize: 14,
+                    fontWeight: 600,
+                    animation: 'fadeIn 0.2s ease'
+                }}>✓</div>
+            )}
         </div>
     </div>
 );
 
 // Password Field Component
-const PasswordField = ({ label, value, onChange, error, show, onToggle, colors }: any) => (
-    <div>
-        <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: colors.textSecondary, marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.5px" }}>{label}</label>
+const PasswordField = ({ label, value, onChange, error, show, onToggle, colors, isDark }: any) => (
+    <div style={{ width: "100%" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: 'center', marginBottom: 6 }}>
+            <label style={{ fontSize: 11, fontWeight: 600, color: colors.textSecondary, textTransform: "uppercase", letterSpacing: "0.5px" }}>{label}</label>
+            {error && <span style={{ color: colors.crimson, fontSize: 10, fontWeight: 500 }}>{error}</span>}
+        </div>
         <div style={{ position: "relative" }}>
             <input
                 type={show ? "text" : "password"}
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
+                placeholder="••••••••"
                 style={{
                     width: "100%",
-                    padding: "12px 36px 12px 12px",
-                    background: colors.bgPrimary,
-                    border: `1px solid ${error ? colors.crimson : colors.borderPrimary}`,
+                    padding: "12px 50px 12px 14px",
+                    background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
+                    border: `1px solid ${error ? colors.crimson : isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
                     borderRadius: 10,
                     color: colors.textPrimary,
                     fontSize: 14,
                     outline: "none",
                     boxSizing: 'border-box',
+                    transition: "all 0.2s ease"
                 }}
             />
-            <button type="button" onClick={onToggle} style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: colors.textTertiary, cursor: "pointer", fontSize: 10, fontWeight: 500 }}>
+            <button 
+                type="button" 
+                onClick={onToggle} 
+                style={{ 
+                    position: "absolute", 
+                    right: 12, 
+                    top: "50%", 
+                    transform: "translateY(-50%)", 
+                    background: "none", 
+                    border: "none", 
+                    color: colors.textTertiary, 
+                    cursor: "pointer", 
+                    fontSize: 10, 
+                    fontWeight: 600,
+                    letterSpacing: '0.5px',
+                    padding: '4px',
+                    transition: 'color 0.2s ease'
+                }}
+            >
                 {show ? "HIDE" : "SHOW"}
             </button>
         </div>
-        {error && <div style={{ color: colors.crimson, fontSize: 10, marginTop: 2 }}>{error}</div>}
     </div>
 );

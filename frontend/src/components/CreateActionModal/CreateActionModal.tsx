@@ -14,6 +14,7 @@ import "./CreateActionModal.css"
 
 import ConfirmDialog from "../ui/ConfirmDialog"
 import Editable from "../editor/Editable"
+import MembershipAssignment from "../membership/MembershipAssignment"
 
 interface CreateActionModalProps {
     isOpen: boolean

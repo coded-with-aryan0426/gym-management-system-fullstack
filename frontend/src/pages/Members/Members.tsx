@@ -2,11 +2,12 @@
 
 import type React from "react"
 import { useEffect, useState, useMemo, useCallback, useRef } from "react"
-import { FiFilter, FiSearch, FiUserPlus, FiCalendar, FiClock, FiRefreshCw } from "react-icons/fi"
+import { FiFilter, FiSearch, FiUserPlus, FiCalendar, FiClock, FiRefreshCw, FiPackage } from "react-icons/fi"
 import { showToast } from "../../utils/showToast"
 import { useSearchParams } from "react-router-dom"
 import { Button, Badge, getStatusVariant, Avatar, DataTable, PageStatsBar, type Column } from "../../components"
 import CreateActionModal from "../../components/CreateActionModal/CreateActionModal"
+import MembershipPlanManagement from "../../components/admin/MembershipPlanManagement"
 import { ActionMenuButton, SortButton } from "../../components/shared"
 import { useClickOutside } from "../../hooks"
 import EnhancedMemberActionModal from "../../components/MemberActionModal/EnhancedMemberActionModal"
@@ -31,6 +32,7 @@ const Members: React.FC = () => {
   const [selectedMember, setSelectedMember] = useState<MemberDTO | null>(null)
   const [isActionModalOpen, setIsActionModalOpen] = useState(false)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [isMembershipModalOpen, setIsMembershipModalOpen] = useState(false)
 
   const [currentPage, setCurrentPage] = useState(0)
   const [pageSize, setPageSize] = useState(10)
@@ -631,6 +633,10 @@ const Members: React.FC = () => {
             )}
           </div>
 
+          <button className="members-action-btn" onClick={() => setIsMembershipModalOpen(true)}>
+            <FiPackage size={14} />
+            <span>Create Membership</span>
+          </button>
           <button className="members-action-btn" onClick={() => setIsCreateModalOpen(true)}>
             <FiUserPlus size={14} />
             <span>Add Member</span>
@@ -841,6 +847,15 @@ const Members: React.FC = () => {
           refreshMembers()
         }}
         initialView="memberForm"
+      />
+
+      <MembershipPlanManagement
+        isOpen={isMembershipModalOpen}
+        onClose={() => setIsMembershipModalOpen(false)}
+        onSuccess={() => {
+          showToast('Membership plan saved successfully', 'success')
+          refreshMembers()
+        }}
       />
     </div>
   )
