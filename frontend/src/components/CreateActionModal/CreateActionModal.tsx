@@ -33,8 +33,8 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
 
     // Confirmation Dialog State
     const [showConfirm, setShowConfirm] = useState(false)
-    
-    // Membership selection state
+
+    // Selected membership ID state
     const [selectedMembershipId, setSelectedMembershipId] = useState<number | undefined>(undefined)
 
     // Form state
@@ -116,6 +116,7 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
                 duration: "1",
                 startDate: new Date().toISOString().split('T')[0],
             })
+            setSelectedMembershipId(undefined)
         }
     }, [isOpen, initialView])
 
@@ -165,6 +166,7 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
             duration: "1",
             startDate: new Date().toISOString().split('T')[0],
         })
+        setSelectedMembershipId(undefined)
         onClose()
     }
 
