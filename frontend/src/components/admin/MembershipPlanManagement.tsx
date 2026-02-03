@@ -1,18 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Eye, TrendingUp, Users, DollarSign, Calendar } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, Plus, Edit, Trash2, Eye, TrendingUp, Users, Calendar, IndianRupee } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { Card, Badge, Button } from '../ui';
+import { Badge, Button } from '../ui';
 import { Input } from '../base';
-import ErrorMessage from '../utilities/ErrorMessage';
 import type { MembershipPackageDTO } from '../../types/membershipPackage';
 import membershipPlanApi from '../../services/membershipPlanApi';
 
 interface MembershipPlanManagementProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess?: () => void;
   onPlanSelect?: (plan: MembershipPackageDTO) => void;
   mode?: 'management' | 'selection';
 }
 
 const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
+  isOpen,
+  onClose,
+  onSuccess,
   onPlanSelect,
   mode = 'management'
 }) => {
@@ -22,6 +27,7 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
   const [showForm, setShowForm] = useState(false);
   const [editingPlan, setEditingPlan] = useState<MembershipPackageDTO | null>(null);
   const [analytics, setAnalytics] = useState<any>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -33,11 +39,38 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
   });
 
   useEffect(() => {
-    fetchPlans();
-    if (mode === 'management') {
-      fetchAnalytics();
+    if (isOpen) {
+      fetchPlans();
+      if (mode === 'management') {
+        fetchAnalytics();
+      }
     }
-  }, []);
+  }, [isOpen, mode]);
+
+  // Handle escape key and click outside
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) onClose();
+    };
+    
+    const handleClickOutside = (e: MouseEvent) => {
+      if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+      document.addEventListener('mousedown', handleClickOutside);
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen, onClose]);
 
   const fetchPlans = async () => {
     try {
@@ -75,8 +108,8 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
         includedPTSessions: parseInt(formData.includedPTSessions)
       };
 
-        if (editingPlan && editingPlan.packageId !== undefined) {
-          await membershipPlanApi.updatePlan(editingPlan.packageId, planData);
+      if (editingPlan && editingPlan.packageId !== undefined) {
+        await membershipPlanApi.updatePlan(editingPlan.packageId, planData);
         toast.success('Membership plan updated successfully');
       } else {
         await membershipPlanApi.createPlan(planData);
@@ -86,6 +119,7 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
       resetForm();
       fetchPlans();
       fetchAnalytics();
+      onSuccess?.();
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed to save membership plan');
     }
@@ -98,7 +132,7 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
       price: plan.price.toString(),
       durationDays: plan.durationDays.toString(),
       includedPTSessions: plan.includedPTSessions.toString(),
-        isActive: plan.isActive ?? true
+      isActive: plan.isActive ?? true
     });
     setShowForm(true);
   };
@@ -111,6 +145,7 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
       toast.success('Membership plan deleted successfully');
       fetchPlans();
       fetchAnalytics();
+      onSuccess?.();
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed to delete membership plan');
     }
@@ -128,6 +163,7 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
       }
       fetchPlans();
       fetchAnalytics();
+      onSuccess?.();
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed to update plan status');
     }
@@ -146,9 +182,10 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
   };
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'INR',
+      maximumFractionDigits: 0
     }).format(price);
   };
 
@@ -164,239 +201,754 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return <ErrorMessage message={error} onRetry={fetchPlans} />;
-  }
+  if (!isOpen) return null;
 
   return (
-    <div className="space-y-6">
-      {mode === 'management' && analytics && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
-            <div className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Total Plans</p>
-                  <p className="text-2xl font-bold">{analytics.totalPlans}</p>
-                </div>
-                <Calendar className="h-8 w-8 text-blue-500" />
-              </div>
-            </div>
-          </Card>
-          
-          <Card>
-            <div className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Active Plans</p>
-                  <p className="text-2xl font-bold">{analytics.activePlans}</p>
-                </div>
-                <Users className="h-8 w-8 text-green-500" />
-              </div>
-            </div>
-          </Card>
-          
-          <Card>
-            <div className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Avg Price</p>
-                  <p className="text-2xl font-bold">
-                    {formatPrice(analytics.averagePrice || 0)}
-                  </p>
-                </div>
-                <DollarSign className="h-8 w-8 text-yellow-500" />
-              </div>
-            </div>
-          </Card>
-          
-          <Card>
-            <div className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-                  <p className="text-2xl font-bold">
-                    {formatPrice(analytics.totalRevenue || 0)}
-                  </p>
-                </div>
-                <TrendingUp className="h-8 w-8 text-purple-500" />
-              </div>
-            </div>
-          </Card>
-        </div>
-      )}
+    <>
+      {/* Backdrop */}
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.6)',
+          backdropFilter: 'blur(4px)',
+          zIndex: 9998,
+          animation: 'fadeIn 0.2s ease',
+        }}
+      />
 
-      {mode === 'management' && (
-        <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold">Membership Plans</h2>
-          <Button onClick={() => setShowForm(true)} icon={<Plus size={16} />}>
-            Create Plan
-          </Button>
-        </div>
-      )}
+      {/* Modal */}
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          padding: '20px',
+        }}
+      >
+        <div
+          ref={modalRef}
+          style={{
+            background: 'var(--bg-secondary, #1A1A1A)',
+            borderRadius: 16,
+            width: '100%',
+            maxWidth: 900,
+            maxHeight: '90vh',
+            overflowY: 'auto',
+            boxShadow: '0 25px 60px -12px rgba(0, 0, 0, 0.9), 0 0 40px rgba(220, 38, 38, 0.1)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            animation: 'modalSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
+          }}
+        >
+          {/* Header */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '16px 20px',
+            borderBottom: '1px solid rgba(255,255,255,0.08)',
+            position: 'sticky',
+            top: 0,
+            background: 'var(--bg-secondary, #1A1A1A)',
+            zIndex: 10,
+          }}>
+            <div>
+              <h2 style={{ 
+                fontSize: 18, 
+                fontWeight: 700, 
+                color: 'var(--text-primary, #F9FAFB)', 
+                margin: 0,
+                letterSpacing: '-0.3px'
+              }}>
+                Membership Plans
+              </h2>
+              <p style={{
+                fontSize: 13,
+                color: 'var(--text-secondary, #9CA3AF)',
+                margin: '4px 0 0 0',
+              }}>
+                Create and manage your gym membership packages
+              </p>
+            </div>
+            <button
+              onClick={onClose}
+              style={{
+                background: 'rgba(255,255,255,0.05)',
+                border: 'none',
+                color: 'var(--text-tertiary, #6B7280)',
+                cursor: 'pointer',
+                padding: 8,
+                display: 'flex',
+                borderRadius: 8,
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
+              }}
+            >
+              <X size={18} />
+            </button>
+          </div>
 
-      {showForm && (
-        <Card title={editingPlan ? 'Edit Membership Plan' : 'Create New Membership Plan'}>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Input
-                    id="packageName"
-                    label="Plan Name"
-                    fullWidth
-                    value={formData.packageName}
-                    onChange={(e) => setFormData({ ...formData, packageName: e.target.value })}
-                    placeholder="e.g., Premium Monthly"
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <Input
-                    id="price"
-                    label="Price ($)"
-                    fullWidth
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                    placeholder="99.99"
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <Input
-                    id="durationDays"
-                    label="Duration (days)"
-                    fullWidth
-                    type="number"
-                    min="1"
-                    value={formData.durationDays}
-                    onChange={(e) => setFormData({ ...formData, durationDays: e.target.value })}
-                    placeholder="30"
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <Input
-                    id="includedPTSessions"
-                    label="Included PT Sessions"
-                    fullWidth
-                    type="number"
-                    min="0"
-                    value={formData.includedPTSessions}
-                    onChange={(e) => setFormData({ ...formData, includedPTSessions: e.target.value })}
-                    placeholder="0"
-                    required
-                  />
-                </div>
+          {/* Content */}
+          <div style={{ padding: '20px' }}>
+            {/* Analytics Cards */}
+            {mode === 'management' && analytics && (
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(4, 1fr)',
+                gap: 12,
+                marginBottom: 20,
+              }}>
+                <StatCard 
+                  icon={<Calendar size={20} />}
+                  label="Total Plans"
+                  value={analytics.totalPlans || 0}
+                  color="#3B82F6"
+                />
+                <StatCard 
+                  icon={<Users size={20} />}
+                  label="Active Plans"
+                  value={analytics.activePlans || 0}
+                  color="#10B981"
+                />
+                <StatCard 
+                  icon={<IndianRupee size={20} />}
+                  label="Avg Price"
+                  value={formatPrice(analytics.averagePrice || 0)}
+                  color="#F59E0B"
+                />
+                <StatCard 
+                  icon={<TrendingUp size={20} />}
+                  label="Total Revenue"
+                  value={formatPrice(analytics.totalRevenue || 0)}
+                  color="#8B5CF6"
+                />
               </div>
-              
-              <div className="flex justify-end space-x-2">
-                <Button type="button" variant="secondary" onClick={resetForm}>
-                  Cancel
-                </Button>
-                <Button type="submit">
-                  {editingPlan ? 'Update Plan' : 'Create Plan'}
-                </Button>
-              </div>
-            </form>
-        </Card>
-      )}
+            )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {plans.map((plan) => (
-          <Card
-            key={plan.packageId}
-            title={plan.packageName}
-            action={<Badge variant={plan.isActive ? 'active' : 'expired'}>{plan.isActive ? 'Active' : 'Inactive'}</Badge>}
-            className="hover:shadow-lg transition-shadow"
-          >
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Price</span>
-                  <span className="font-semibold">{formatPrice(plan.price)}</span>
-                </div>
-                
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Duration</span>
-                  <span className="font-medium">{formatDuration(plan.durationDays)}</span>
-                </div>
-                
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">PT Sessions</span>
-                  <span className="font-medium">{plan.includedPTSessions}</span>
-                </div>
+            {/* Action Bar */}
+            {mode === 'management' && !showForm && (
+              <div style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                marginBottom: 16,
+              }}>
+                <button
+                  onClick={() => setShowForm(true)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    padding: '10px 16px',
+                    background: 'linear-gradient(135deg, #DC2626 0%, #B91C1C 100%)',
+                    border: 'none',
+                    borderRadius: 8,
+                    color: '#fff',
+                    fontSize: 13,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(220, 38, 38, 0.3)',
+                    transition: 'all 0.2s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-1px)';
+                    e.currentTarget.style.boxShadow = '0 6px 16px rgba(220, 38, 38, 0.4)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(220, 38, 38, 0.3)';
+                  }}
+                >
+                  <Plus size={16} />
+                  Create Plan
+                </button>
               </div>
-              
-              <div className="flex justify-between items-center mt-4 pt-4 border-t">
-                {mode === 'selection' ? (
-                  <Button 
-                    size="sm" 
-                    onClick={() => onPlanSelect?.(plan)}
-                    className="w-full"
-                    icon={<Eye size={16} />}
-                  >
-                    Select Plan
-                  </Button>
-                ) : (
-                  <div className="flex space-x-2 w-full">
-                    <Button 
-                      size="sm" 
-                      variant="secondary" 
-                      onClick={() => handleEdit(plan)}
-                      className="flex-1"
-                      icon={<Edit size={16} />}
-                    >
-                      Edit
-                    </Button>
-                    
-                    <Button 
-                      size="sm" 
-                      variant="secondary"
-                      onClick={() => handleToggleStatus(plan)}
-                      className="flex-1"
-                    >
-                      {plan.isActive ? 'Deactivate' : 'Activate'}
-                    </Button>
-                    
-                    <Button 
-                      size="sm" 
-                      variant="danger"
-                        onClick={() => plan.packageId !== undefined && handleDelete(plan.packageId)}
-                      className="flex-1"
-                      icon={<Trash2 size={16} />}
-                    >
-                      Delete
-                    </Button>
+            )}
+
+            {/* Loading State */}
+            {loading && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '60px 0',
+              }}>
+                <div style={{
+                  width: 32,
+                  height: 32,
+                  border: '3px solid rgba(220, 38, 38, 0.2)',
+                  borderTopColor: '#DC2626',
+                  borderRadius: '50%',
+                  animation: 'spin 0.8s linear infinite',
+                }} />
+              </div>
+            )}
+
+            {/* Error State */}
+            {error && !loading && (
+              <div style={{
+                textAlign: 'center',
+                padding: '40px 20px',
+                color: '#DC2626',
+              }}>
+                <p>{error}</p>
+                <button
+                  onClick={fetchPlans}
+                  style={{
+                    marginTop: 12,
+                    padding: '8px 16px',
+                    background: 'rgba(220, 38, 38, 0.1)',
+                    border: '1px solid rgba(220, 38, 38, 0.3)',
+                    borderRadius: 6,
+                    color: '#DC2626',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Retry
+                </button>
+              </div>
+            )}
+
+            {/* Create/Edit Form */}
+            {showForm && !loading && (
+              <div style={{
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: 12,
+                padding: 20,
+                marginBottom: 20,
+              }}>
+                <h3 style={{
+                  fontSize: 15,
+                  fontWeight: 600,
+                  color: 'var(--text-primary, #F9FAFB)',
+                  marginBottom: 16,
+                }}>
+                  {editingPlan ? 'Edit Membership Plan' : 'Create New Plan'}
+                </h3>
+                <form onSubmit={handleSubmit}>
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(2, 1fr)',
+                    gap: 16,
+                  }}>
+                    <div>
+                      <label style={{
+                        display: 'block',
+                        fontSize: 11,
+                        fontWeight: 600,
+                        color: 'var(--text-secondary, #9CA3AF)',
+                        marginBottom: 6,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                      }}>
+                        Plan Name
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.packageName}
+                        onChange={(e) => setFormData({ ...formData, packageName: e.target.value })}
+                        placeholder="e.g., Premium Monthly"
+                        required
+                        style={{
+                          width: '100%',
+                          padding: '10px 12px',
+                          background: 'rgba(255,255,255,0.03)',
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          borderRadius: 8,
+                          color: 'var(--text-primary, #F9FAFB)',
+                          fontSize: 14,
+                          outline: 'none',
+                          boxSizing: 'border-box',
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{
+                        display: 'block',
+                        fontSize: 11,
+                        fontWeight: 600,
+                        color: 'var(--text-secondary, #9CA3AF)',
+                        marginBottom: 6,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                      }}>
+                        Price (₹)
+                      </label>
+                      <input
+                        type="number"
+                        value={formData.price}
+                        onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                        placeholder="1999"
+                        required
+                        min="0"
+                        style={{
+                          width: '100%',
+                          padding: '10px 12px',
+                          background: 'rgba(255,255,255,0.03)',
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          borderRadius: 8,
+                          color: 'var(--text-primary, #F9FAFB)',
+                          fontSize: 14,
+                          outline: 'none',
+                          boxSizing: 'border-box',
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{
+                        display: 'block',
+                        fontSize: 11,
+                        fontWeight: 600,
+                        color: 'var(--text-secondary, #9CA3AF)',
+                        marginBottom: 6,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                      }}>
+                        Duration (Days)
+                      </label>
+                      <input
+                        type="number"
+                        value={formData.durationDays}
+                        onChange={(e) => setFormData({ ...formData, durationDays: e.target.value })}
+                        placeholder="30"
+                        required
+                        min="1"
+                        style={{
+                          width: '100%',
+                          padding: '10px 12px',
+                          background: 'rgba(255,255,255,0.03)',
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          borderRadius: 8,
+                          color: 'var(--text-primary, #F9FAFB)',
+                          fontSize: 14,
+                          outline: 'none',
+                          boxSizing: 'border-box',
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{
+                        display: 'block',
+                        fontSize: 11,
+                        fontWeight: 600,
+                        color: 'var(--text-secondary, #9CA3AF)',
+                        marginBottom: 6,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                      }}>
+                        PT Sessions Included
+                      </label>
+                      <input
+                        type="number"
+                        value={formData.includedPTSessions}
+                        onChange={(e) => setFormData({ ...formData, includedPTSessions: e.target.value })}
+                        placeholder="0"
+                        required
+                        min="0"
+                        style={{
+                          width: '100%',
+                          padding: '10px 12px',
+                          background: 'rgba(255,255,255,0.03)',
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          borderRadius: 8,
+                          color: 'var(--text-primary, #F9FAFB)',
+                          fontSize: 14,
+                          outline: 'none',
+                          boxSizing: 'border-box',
+                        }}
+                      />
+                    </div>
                   </div>
-                )}
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                    gap: 10,
+                    marginTop: 20,
+                  }}>
+                    <button
+                      type="button"
+                      onClick={resetForm}
+                      style={{
+                        padding: '10px 16px',
+                        background: 'transparent',
+                        border: '1px solid rgba(255,255,255,0.15)',
+                        borderRadius: 8,
+                        color: 'var(--text-secondary, #9CA3AF)',
+                        fontSize: 13,
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      style={{
+                        padding: '10px 20px',
+                        background: 'linear-gradient(135deg, #DC2626 0%, #B91C1C 100%)',
+                        border: 'none',
+                        borderRadius: 8,
+                        color: '#fff',
+                        fontSize: 13,
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        boxShadow: '0 4px 12px rgba(220, 38, 38, 0.3)',
+                      }}
+                    >
+                      {editingPlan ? 'Update Plan' : 'Create Plan'}
+                    </button>
+                  </div>
+                </form>
               </div>
-          </Card>
-        ))}
-      </div>
-      
-      {plans.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-gray-500 text-lg">
-            {mode === 'selection' 
-              ? 'No active membership plans available'
-              : 'No membership plans found. Create your first plan to get started.'
-            }
-          </p>
+            )}
+
+            {/* Plans Grid */}
+            {!loading && !error && (
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+                gap: 16,
+              }}>
+                {plans.map((plan) => (
+                  <PlanCard
+                    key={plan.packageId}
+                    plan={plan}
+                    mode={mode}
+                    formatPrice={formatPrice}
+                    formatDuration={formatDuration}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    onToggleStatus={handleToggleStatus}
+                    onSelect={onPlanSelect}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Empty State */}
+            {!loading && !error && plans.length === 0 && (
+              <div style={{
+                textAlign: 'center',
+                padding: '60px 20px',
+                color: 'var(--text-secondary, #9CA3AF)',
+              }}>
+                <div style={{
+                  width: 64,
+                  height: 64,
+                  background: 'rgba(220, 38, 38, 0.1)',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 16px',
+                }}>
+                  <Calendar size={28} style={{ color: '#DC2626' }} />
+                </div>
+                <p style={{ fontSize: 15, fontWeight: 500, marginBottom: 4 }}>
+                  {mode === 'selection' 
+                    ? 'No active membership plans available'
+                    : 'No membership plans yet'
+                  }
+                </p>
+                <p style={{ fontSize: 13, opacity: 0.8 }}>
+                  {mode === 'management' && 'Create your first plan to get started'}
+                </p>
+              </div>
+            )}
+          </div>
         </div>
-      )}
+      </div>
+
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes modalSlideIn {
+          from { opacity: 0; transform: scale(0.95) translateY(-10px); }
+          to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+        input:focus {
+          border-color: #DC2626 !important;
+          box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12) !important;
+        }
+        input::placeholder {
+          color: rgba(255,255,255,0.3);
+        }
+      `}</style>
+    </>
+  );
+};
+
+// Stat Card Component
+const StatCard: React.FC<{
+  icon: React.ReactNode;
+  label: string;
+  value: string | number;
+  color: string;
+}> = ({ icon, label, value, color }) => (
+  <div style={{
+    background: 'rgba(255,255,255,0.03)',
+    border: '1px solid rgba(255,255,255,0.06)',
+    borderRadius: 10,
+    padding: 14,
+  }}>
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    }}>
+      <div>
+        <p style={{
+          fontSize: 11,
+          fontWeight: 500,
+          color: 'var(--text-secondary, #9CA3AF)',
+          margin: 0,
+          textTransform: 'uppercase',
+          letterSpacing: '0.3px',
+        }}>
+          {label}
+        </p>
+        <p style={{
+          fontSize: 18,
+          fontWeight: 700,
+          color: 'var(--text-primary, #F9FAFB)',
+          margin: '4px 0 0 0',
+        }}>
+          {value}
+        </p>
+      </div>
+      <div style={{
+        width: 40,
+        height: 40,
+        background: `${color}15`,
+        borderRadius: 10,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: color,
+      }}>
+        {icon}
+      </div>
+    </div>
+  </div>
+);
+
+// Plan Card Component
+const PlanCard: React.FC<{
+  plan: MembershipPackageDTO;
+  mode: 'management' | 'selection';
+  formatPrice: (price: number) => string;
+  formatDuration: (days: number) => string;
+  onEdit: (plan: MembershipPackageDTO) => void;
+  onDelete: (id: number) => void;
+  onToggleStatus: (plan: MembershipPackageDTO) => void;
+  onSelect?: (plan: MembershipPackageDTO) => void;
+}> = ({ plan, mode, formatPrice, formatDuration, onEdit, onDelete, onToggleStatus, onSelect }) => {
+  const getPlanGradient = (name: string) => {
+    const lower = name.toLowerCase();
+    if (lower.includes('premium') || lower.includes('gold')) {
+      return 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)';
+    } else if (lower.includes('standard') || lower.includes('silver')) {
+      return 'linear-gradient(135deg, #6366F1 0%, #4F46E5 100%)';
+    } else {
+      return 'linear-gradient(135deg, #10B981 0%, #059669 100%)';
+    }
+  };
+
+  return (
+    <div style={{
+      background: 'rgba(255,255,255,0.03)',
+      border: '1px solid rgba(255,255,255,0.08)',
+      borderRadius: 12,
+      overflow: 'hidden',
+      transition: 'all 0.2s ease',
+    }}>
+      {/* Plan Header */}
+      <div style={{
+        background: getPlanGradient(plan.packageName),
+        padding: '16px 16px 12px',
+        position: 'relative',
+      }}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+        }}>
+          <h3 style={{
+            fontSize: 16,
+            fontWeight: 700,
+            color: '#fff',
+            margin: 0,
+          }}>
+            {plan.packageName}
+          </h3>
+          <span style={{
+            padding: '3px 8px',
+            background: plan.isActive ? 'rgba(16, 185, 129, 0.9)' : 'rgba(239, 68, 68, 0.9)',
+            borderRadius: 4,
+            fontSize: 10,
+            fontWeight: 600,
+            color: '#fff',
+            textTransform: 'uppercase',
+          }}>
+            {plan.isActive ? 'Active' : 'Inactive'}
+          </span>
+        </div>
+        <p style={{
+          fontSize: 24,
+          fontWeight: 800,
+          color: '#fff',
+          margin: '8px 0 0 0',
+        }}>
+          {formatPrice(plan.price)}
+        </p>
+      </div>
+
+      {/* Plan Details */}
+      <div style={{ padding: 16 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}>
+            <span style={{
+              fontSize: 12,
+              color: 'var(--text-secondary, #9CA3AF)',
+            }}>
+              Duration
+            </span>
+            <span style={{
+              fontSize: 13,
+              fontWeight: 600,
+              color: 'var(--text-primary, #F9FAFB)',
+            }}>
+              {formatDuration(plan.durationDays)}
+            </span>
+          </div>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}>
+            <span style={{
+              fontSize: 12,
+              color: 'var(--text-secondary, #9CA3AF)',
+            }}>
+              PT Sessions
+            </span>
+            <span style={{
+              fontSize: 13,
+              fontWeight: 600,
+              color: 'var(--text-primary, #F9FAFB)',
+            }}>
+              {plan.includedPTSessions}
+            </span>
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div style={{
+          display: 'flex',
+          gap: 8,
+          marginTop: 16,
+          paddingTop: 16,
+          borderTop: '1px solid rgba(255,255,255,0.06)',
+        }}>
+          {mode === 'selection' ? (
+            <button
+              onClick={() => onSelect?.(plan)}
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 6,
+                padding: '10px',
+                background: 'linear-gradient(135deg, #DC2626 0%, #B91C1C 100%)',
+                border: 'none',
+                borderRadius: 8,
+                color: '#fff',
+                fontSize: 13,
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              <Eye size={14} />
+              Select Plan
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={() => onEdit(plan)}
+                style={{
+                  flex: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 4,
+                  padding: '8px',
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: 6,
+                  color: 'var(--text-secondary, #9CA3AF)',
+                  fontSize: 12,
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                <Edit size={13} />
+                Edit
+              </button>
+              <button
+                onClick={() => onToggleStatus(plan)}
+                style={{
+                  flex: 1,
+                  padding: '8px',
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: 6,
+                  color: 'var(--text-secondary, #9CA3AF)',
+                  fontSize: 12,
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                {plan.isActive ? 'Deactivate' : 'Activate'}
+              </button>
+              <button
+                onClick={() => plan.packageId !== undefined && onDelete(plan.packageId)}
+                style={{
+                  padding: '8px 10px',
+                  background: 'rgba(239, 68, 68, 0.1)',
+                  border: '1px solid rgba(239, 68, 68, 0.2)',
+                  borderRadius: 6,
+                  color: '#EF4444',
+                  fontSize: 12,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                <Trash2 size={13} />
+              </button>
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
