@@ -1,0 +1,129 @@
+/* ============================================================================
+   Membership Assignment - Selection Mode Styles
+   ============================================================================ */
+
+.membership-select-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Main Select Dropdown - Matches form-input style */
+.membership-select {
+  width: 100%;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: #fff;
+  font-size: 14px;
+  transition: all 0.2s;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 40px;
+}
+
+.membership-select:focus {
+  outline: none;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.membership-select:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.membership-select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.membership-select--loading {
+  color: #666;
+}
+
+.membership-select--error {
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #f87171;
+}
+
+/* Option styles */
+.membership-select option {
+  background: #1a1a1a;
+  color: #fff;
+  padding: 12px;
+}
+
+/* Preview card when plan is selected */
+.membership-select-preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 8px;
+  margin-top: 4px;
+}
+
+.membership-select-preview__name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #3b82f6;
+}
+
+.membership-select-preview__price {
+  font-size: 13px;
+  font-weight: 700;
+  color: #10b981;
+}
+
+.membership-select-preview__duration {
+  font-size: 12px;
+  color: #888;
+  margin-left: auto;
+}
+
+/* ============================================================================
+   LIGHT MODE OVERRIDES
+   ============================================================================ */
+:root.theme-light .membership-select,
+[data-theme="light"] .membership-select,
+body.light-mode .membership-select {
+  background: #ffffff;
+  border: 1px solid var(--border-primary, #CBD5E1);
+  color: var(--text-primary, #0f172a);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+}
+
+:root.theme-light .membership-select:focus,
+[data-theme="light"] .membership-select:focus,
+body.light-mode .membership-select:focus {
+  background: #ffffff;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+:root.theme-light .membership-select option,
+[data-theme="light"] .membership-select option,
+body.light-mode .membership-select option {
+  background: #ffffff;
+  color: #0f172a;
+}
+
+:root.theme-light .membership-select-preview,
+[data-theme="light"] .membership-select-preview,
+body.light-mode .membership-select-preview {
+  background: rgba(59, 130, 246, 0.08);
+  border-color: rgba(59, 130, 246, 0.15);
+}
+
+:root.theme-light .membership-select-preview__duration,
+[data-theme="light"] .membership-select-preview__duration,
+body.light-mode .membership-select-preview__duration {
+  color: #64748b;
+}

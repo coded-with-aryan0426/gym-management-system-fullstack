@@ -4,12 +4,13 @@ import { Calendar, IndianRupee, Users, Clock } from 'lucide-react';
 import type { MembershipPackageDTO } from '../../types/membershipPackage';
 import membershipPlanApi from '../../services/membershipPlanApi';
 import { toast } from 'react-hot-toast';
+import './MembershipAssignment.css';
 
 interface MembershipAssignmentProps {
   memberId?: number;
   onMembershipSelect: (membershipId: number) => void;
   selectedMembershipId?: number;
-  mode?: 'create' | 'edit' | 'renew';
+  mode?: 'create' | 'edit' | 'renew' | 'selection';
 }
 
 const MembershipAssignment: React.FC<MembershipAssignmentProps> = ({
@@ -82,6 +83,55 @@ const MembershipAssignment: React.FC<MembershipAssignmentProps> = ({
     return Math.round((price / months) * 100) / 100;
   };
 
+  // Selection mode - compact dropdown for forms
+  if (mode === 'selection') {
+    if (loading) {
+      return (
+        <div className="membership-select-wrapper">
+          <select className="membership-select membership-select--loading" disabled>
+            <option>Loading plans...</option>
+          </select>
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className="membership-select-wrapper">
+          <select className="membership-select membership-select--error" disabled>
+            <option>Error loading plans</option>
+          </select>
+        </div>
+      );
+    }
+
+    return (
+      <div className="membership-select-wrapper">
+        <select
+          value={selectedPlan?.packageId.toString() || ''}
+          onChange={(e) => handlePlanSelect(e.target.value)}
+          className="membership-select"
+          required
+        >
+          <option value="">Choose a membership plan</option>
+          {membershipPlans.map((plan) => (
+            <option key={plan.packageId} value={plan.packageId.toString()}>
+              {plan.packageName} - ₹{plan.price.toLocaleString('en-IN')} ({formatDuration(plan.durationDays)})
+            </option>
+          ))}
+        </select>
+        {selectedPlan && (
+          <div className="membership-select-preview">
+            <span className="membership-select-preview__name">{selectedPlan.packageName}</span>
+            <span className="membership-select-preview__price">₹{selectedPlan.price.toLocaleString('en-IN')}</span>
+            <span className="membership-select-preview__duration">{formatDuration(selectedPlan.durationDays)}</span>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Full card mode for other contexts
   if (loading) {
     return (
       <Card>
