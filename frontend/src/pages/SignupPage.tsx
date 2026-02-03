@@ -4,20 +4,21 @@ import api from '../services/api';
 import { Logo } from '../components/ui/Logo';
 import OtpInput from '../components/auth/OtpInput';
 import SocialLoginButtons from '../components/auth/SocialLoginButtons';
+import { useTheme } from '../contexts/ThemeContext';
 
-const colors = {
-    bgPrimary: "#0D0D0D",
-    bgSecondary: "#1A1A1A",
-    bgTertiary: "#252525",
-    borderPrimary: "#1F2937",
-    textPrimary: "#F9FAFB",
-    textSecondary: "#9CA3AF",
-    textTertiary: "#6B7280",
+const getColors = (isDark: boolean) => ({
+    bgPrimary: isDark ? "#0D0D0D" : "#F8FAFC",
+    bgSecondary: isDark ? "#1A1A1A" : "#FFFFFF",
+    bgTertiary: isDark ? "#252525" : "#F1F5F9",
+    borderPrimary: isDark ? "#1F2937" : "#E2E8F0",
+    textPrimary: isDark ? "#F9FAFB" : "#0F172A",
+    textSecondary: isDark ? "#9CA3AF" : "#64748B",
+    textTertiary: isDark ? "#6B7280" : "#94A3B8",
     crimson: "#DC2626",
     crimsonHover: "#B91C1C",
     emerald: "#10B981",
     teal: "#14B8A6",
-};
+});
 
 // Validation helpers
 const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -33,6 +34,9 @@ const getPasswordStrength = (password: string) => {
 
 export default function SignupPage() {
     const navigate = useNavigate();
+    const { theme } = useTheme();
+    const isDark = theme === 'dark';
+    const colors = getColors(isDark);
 
     // Steps: 'DETAILS' | 'OTP'
     const [step, setStep] = useState<'DETAILS' | 'OTP'>('DETAILS');
@@ -172,6 +176,7 @@ export default function SignupPage() {
             color: colors.textPrimary,
             display: "flex",
             fontFamily: "'Inter', sans-serif",
+            transition: "background-color 0.3s ease, color 0.3s ease",
         }}>
             {/* Left Sidebar - Hidden on mobile */}
             <div className="signup-sidebar" style={{
@@ -181,11 +186,11 @@ export default function SignupPage() {
                 display: "none",
             }}>
                 <div style={{ position: "absolute", inset: 0, backgroundImage: "url('/login-sidebar.png')", backgroundSize: "cover", backgroundPosition: "center" }} />
-                <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to top, ${colors.bgPrimary} 0%, rgba(13,13,13,0.6) 50%, rgba(13,13,13,0.4) 100%)` }} />
+                <div style={{ position: "absolute", inset: 0, background: isDark ? `linear-gradient(to top, ${colors.bgPrimary} 0%, rgba(13,13,13,0.6) 50%, rgba(13,13,13,0.4) 100%)` : `linear-gradient(to top, ${colors.bgPrimary} 0%, rgba(248,250,252,0.6) 50%, rgba(248,250,252,0.4) 100%)` }} />
                 <div style={{ position: "absolute", bottom: 60, left: 60, maxWidth: 480 }}>
                     <Logo size={48} showText={false} />
                     <h1 style={{ fontSize: 42, fontWeight: 800, marginBottom: 16, lineHeight: 1.1, marginTop: 24 }}>Join <span style={{ color: colors.crimson }}>AthlonX</span></h1>
-                    <p style={{ fontSize: 18, color: "rgba(255,255,255,0.8)", lineHeight: 1.6 }}>Start your fitness journey with the most powerful gym management platform.</p>
+                    <p style={{ fontSize: 18, color: isDark ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.6)", lineHeight: 1.6 }}>Start your fitness journey with the most powerful gym management platform.</p>
                 </div>
             </div>
 
@@ -200,7 +205,8 @@ export default function SignupPage() {
                 position: "relative",
                 overflowY: "auto",
                 overflowX: "hidden",
-                minHeight: "100vh"
+                minHeight: "100vh",
+                transition: "background-color 0.3s ease",
             }}>
                 <div style={{ width: "100%", maxWidth: 480 }}>
                     <button onClick={() => navigate('/')} style={{ position: "absolute", top: 20, right: 30, background: "transparent", border: "none", color: colors.textSecondary, cursor: "pointer", fontSize: 12, zIndex: 10 }}>Back to Home</button>
@@ -242,6 +248,7 @@ export default function SignupPage() {
                                         onChange={(val: string) => handleChange('fullName', val)}
                                         error={errors.fullName}
                                         placeholder="John Doe"
+                                        colors={colors}
                                     />
                                 </div>
 
@@ -253,6 +260,7 @@ export default function SignupPage() {
                                     error={errors.email}
                                     placeholder="name@company.com"
                                     isValid={isValidEmail(formData.email)}
+                                    colors={colors}
                                 />
 
                                 <InputField
@@ -264,6 +272,7 @@ export default function SignupPage() {
                                     placeholder="9876543210"
                                     maxLength={10}
                                     isValid={isValidIndianPhone(formData.phone)}
+                                    colors={colors}
                                 />
                             </div>
 
@@ -276,6 +285,7 @@ export default function SignupPage() {
                                     onChange={(val: string) => handleChange('gymName', val)}
                                     error={errors.gymName}
                                     placeholder="My awesome gym"
+                                    colors={colors}
                                 />
                             </div>
 
@@ -289,6 +299,7 @@ export default function SignupPage() {
                                     error={errors.password}
                                     show={showPassword}
                                     onToggle={() => setShowPassword(!showPassword)}
+                                    colors={colors}
                                 />
                                 <PasswordField
                                     label="Confirm"
@@ -297,6 +308,7 @@ export default function SignupPage() {
                                     error={errors.confirmPassword}
                                     show={showConfirmPassword}
                                     onToggle={() => setShowConfirmPassword(!showConfirmPassword)}
+                                    colors={colors}
                                 />
                             </div>
 
@@ -412,16 +424,16 @@ export default function SignupPage() {
                 
                 /* Custom Scrollbar */
                 ::-webkit-scrollbar { width: 6px; }
-                ::-webkit-scrollbar-track { background: #0D0D0D; }
-                ::-webkit-scrollbar-thumb { background: #252525; borderRadius: 3px; }
-                ::-webkit-scrollbar-thumb:hover { background: #353535; }
+                ::-webkit-scrollbar-track { background: ${colors.bgPrimary}; }
+                ::-webkit-scrollbar-thumb { background: ${colors.bgTertiary}; borderRadius: 3px; }
+                ::-webkit-scrollbar-thumb:hover { background: ${isDark ? '#353535' : '#CBD5E1'}; }
             `}</style>
         </div>
     );
 }
 
 // Components
-const InputField = ({ label, type = "text", value, onChange, error, placeholder, isValid, maxLength }: any) => (
+const InputField = ({ label, type = "text", value, onChange, error, placeholder, isValid, maxLength, colors }: any) => (
     <div style={{ width: "100%" }}>
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
             <label style={{ fontSize: 11, fontWeight: 600, color: colors.textSecondary, textTransform: "uppercase", letterSpacing: "0.5px" }}>{label}</label>
@@ -451,7 +463,7 @@ const InputField = ({ label, type = "text", value, onChange, error, placeholder,
     </div>
 );
 
-const PasswordField = ({ label, value, onChange, error, show, onToggle }: any) => (
+const PasswordField = ({ label, value, onChange, error, show, onToggle, colors }: any) => (
     <div>
         <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: colors.textSecondary, marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.5px" }}>{label}</label>
         <div style={{ position: "relative" }}>

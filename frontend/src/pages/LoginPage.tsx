@@ -7,6 +7,7 @@ import api from '../services/api'; // Use api wrapper
 import OtpInput from '../components/auth/OtpInput';
 import SocialLoginButtons from '../components/auth/SocialLoginButtons';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 
 // Port-scoped storage to match AuthContext
 const getStorageKey = (key: string): string => {
@@ -14,18 +15,18 @@ const getStorageKey = (key: string): string => {
     return `${key}_port_${port}`;
 };
 
-const colors = {
-    bgPrimary: "#0D0D0D",
-    bgSecondary: "#1A1A1A",
-    bgTertiary: "#252525",
-    borderPrimary: "#1F2937",
-    textPrimary: "#F9FAFB",
-    textSecondary: "#9CA3AF",
-    textTertiary: "#6B7280",
+const getColors = (isDark: boolean) => ({
+    bgPrimary: isDark ? "#0D0D0D" : "#F8FAFC",
+    bgSecondary: isDark ? "#1A1A1A" : "#FFFFFF",
+    bgTertiary: isDark ? "#252525" : "#F1F5F9",
+    borderPrimary: isDark ? "#1F2937" : "#E2E8F0",
+    textPrimary: isDark ? "#F9FAFB" : "#0F172A",
+    textSecondary: isDark ? "#9CA3AF" : "#64748B",
+    textTertiary: isDark ? "#6B7280" : "#94A3B8",
     crimson: "#DC2626",
     crimsonHover: "#B91C1C",
     emerald: "#10B981",
-};
+});
 
 interface GymAssociation {
     gymId: number;
@@ -38,6 +39,9 @@ interface GymAssociation {
 export default function LoginPage() {
     const navigate = useNavigate();
     const { login: authLogin } = useAuth();
+    const { theme } = useTheme();
+    const isDark = theme === 'dark';
+    const colors = getColors(isDark);
     const [searchParams] = useSearchParams();
 
     // Steps: 'CREDENTIALS' | 'OTP'
@@ -253,6 +257,7 @@ export default function LoginPage() {
             color: colors.textPrimary,
             display: "flex",
             fontFamily: "'Inter', sans-serif",
+            transition: "background-color 0.3s ease, color 0.3s ease",
         }}>
             {/* Left Side - Image & Branding */}
             <div className="login-sidebar" style={{
@@ -271,7 +276,9 @@ export default function LoginPage() {
                 <div style={{
                     position: "absolute",
                     inset: 0,
-                    background: `linear-gradient(to top, ${colors.bgPrimary} 0%, rgba(13, 13, 13, 0.6) 50%, rgba(13, 13, 13, 0.4) 100%)`
+                    background: isDark 
+                        ? `linear-gradient(to top, ${colors.bgPrimary} 0%, rgba(13, 13, 13, 0.6) 50%, rgba(13, 13, 13, 0.4) 100%)`
+                        : `linear-gradient(to top, ${colors.bgPrimary} 0%, rgba(248, 250, 252, 0.6) 50%, rgba(248, 250, 252, 0.4) 100%)`
                 }} />
                 <div style={{
                     position: "absolute",
@@ -283,7 +290,7 @@ export default function LoginPage() {
                     <h1 style={{ fontSize: 42, fontWeight: 800, marginBottom: 16, lineHeight: 1.1, marginTop: 24 }}>
                         Welcome to <span style={{ color: colors.crimson }}>AthlonX</span>
                     </h1>
-                    <p style={{ fontSize: 18, color: "rgba(255,255,255,0.8)", lineHeight: 1.6 }}>
+                    <p style={{ fontSize: 18, color: isDark ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.6)", lineHeight: 1.6 }}>
                         Empowering fitness professionals to build stronger communities and healthier businesses.
                     </p>
                 </div>
@@ -299,7 +306,8 @@ export default function LoginPage() {
                 padding: "40px 60px",
                 background: colors.bgPrimary,
                 position: "relative",
-                minHeight: "100vh"
+                minHeight: "100vh",
+                transition: "background-color 0.3s ease",
             }}>
                 <div style={{ width: "100%", maxWidth: 420 }}>
                     <button
