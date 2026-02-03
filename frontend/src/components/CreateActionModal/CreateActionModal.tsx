@@ -133,11 +133,13 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
     const handlePlanNameSelect = (name: string) => {
         setSelectedPlanName(name)
         setFormData(prev => ({ ...prev, packageId: "" }))
+        setIsPlanOpen(false)
         setIsDurationOpen(true)
     }
 
     const handleDurationSelect = (plan: MembershipPackageDTO) => {
         setFormData(prev => ({ ...prev, packageId: plan.packageId.toString() }))
+        setIsDurationOpen(false)
     }
 
     const handleCloseRequest = () => {
