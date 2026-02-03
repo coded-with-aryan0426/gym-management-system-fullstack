@@ -3,6 +3,7 @@
 import React from 'react';
 import { Box, Typography, Card, Grid, Container, Avatar } from '@mui/material';
 import { Quote, Star, TrendingUp, Clock, Award } from 'lucide-react';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const testimonials = [
     {
@@ -41,13 +42,17 @@ const testimonials = [
 ];
 
 export default function SocialProof() {
+    const { theme } = useTheme();
+    const isDark = theme === 'dark';
+
     return (
         <Box
             sx={{
-                backgroundColor: '#0A0A0A',
+                backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC',
                 paddingY: { xs: '80px', md: '120px' },
-                borderTop: '1px solid rgba(255,255,255,0.05)',
-                borderBottom: '1px solid rgba(255,255,255,0.05)',
+                borderTop: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.05)',
+                borderBottom: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.05)',
+                transition: 'background-color 0.3s ease'
             }}
         >
             <Container maxWidth="lg">
@@ -71,7 +76,7 @@ export default function SocialProof() {
                             fontSize: { xs: '36px', md: '56px' },
                             fontWeight: 900,
                             fontFamily: 'var(--font-heading)',
-                            color: 'white',
+                            color: isDark ? 'white' : '#0F172A',
                             lineHeight: 1.1,
                             letterSpacing: '-1px'
                         }}
@@ -86,8 +91,8 @@ export default function SocialProof() {
                         <Grid size={{ xs: 12, md: 4 }} key={testimonial.id}>
                             <Card
                                 sx={{
-                                    backgroundColor: 'rgba(255,255,255,0.02)',
-                                    border: '1px solid rgba(255,255,255,0.05)',
+                                    backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)',
+                                    border: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.08)',
                                     borderRadius: '24px',
                                     padding: 4,
                                     height: '100%',
@@ -95,10 +100,11 @@ export default function SocialProof() {
                                     flexDirection: 'column',
                                     position: 'relative',
                                     transition: 'all 0.3s ease',
+                                    boxShadow: isDark ? 'none' : '0 2px 8px rgba(0,0,0,0.05)',
                                     '&:hover': {
                                         borderColor: 'rgba(230, 57, 70, 0.3)',
                                         transform: 'translateY(-10px)',
-                                        backgroundColor: 'rgba(255,255,255,0.03)',
+                                        backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)',
                                     }
                                 }}
                             >
@@ -127,7 +133,7 @@ export default function SocialProof() {
                                         fontSize: '16px',
                                         fontWeight: 400,
                                         lineHeight: 1.6,
-                                        color: 'var(--color-gray-400)',
+                                        color: isDark ? 'var(--color-gray-400)' : '#64748B',
                                         marginBottom: 4,
                                         flex: 1,
                                         fontStyle: 'italic'

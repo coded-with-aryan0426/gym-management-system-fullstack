@@ -4,6 +4,7 @@ import React from 'react';
 import { Box, Typography, Card, Chip, Grid, Container } from '@mui/material';
 import { FileText, Grid as GridIcon, PhoneOff, AlertCircle } from 'lucide-react';
 import { motion, useScroll, useTransform } from 'framer-motion';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const problems = [
     {
@@ -39,6 +40,8 @@ const problems = [
 ];
 
 export default function Problem() {
+    const { theme } = useTheme();
+    const isDark = theme === 'dark';
     const containerRef = React.useRef(null);
     const { scrollYProgress } = useScroll({
         target: containerRef,
@@ -51,11 +54,12 @@ export default function Problem() {
         <Box
             ref={containerRef}
             sx={{
-                backgroundColor: '#0A0A0A',
+                backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC',
                 paddingY: { xs: '60px', sm: '80px', md: '100px', lg: '120px' },
                 paddingX: { xs: '16px', sm: '24px', md: '0' },
                 position: 'relative',
-                overflow: 'hidden'
+                overflow: 'hidden',
+                transition: 'background-color 0.3s ease'
             }}
         >
             {/* Background Glow */}
@@ -99,7 +103,7 @@ export default function Problem() {
                                 fontSize: { xs: '36px', md: '56px' },
                                 fontWeight: 800,
                                 fontFamily: 'var(--font-heading)',
-                                color: 'white',
+                                color: isDark ? 'white' : '#0F172A',
                                 maxWidth: 800,
                                 margin: '0 auto',
                                 lineHeight: 1.1,
@@ -147,21 +151,24 @@ export default function Problem() {
                                 >
                                     <Card
                                         sx={{
-                                            backgroundColor: '#1A1A1A',
+                                            backgroundColor: isDark ? '#1A1A1A' : '#FFFFFF',
                                             borderLeft: '4px solid #E63946',
-                                            borderTop: '1px solid rgba(255,255,255,0.05)',
-                                            borderRight: '1px solid rgba(255,255,255,0.05)',
-                                            borderBottom: '1px solid rgba(255,255,255,0.05)',
+                                            borderTop: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.08)',
+                                            borderRight: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.08)',
+                                            borderBottom: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.08)',
                                             borderRadius: '16px',
                                             padding: 4,
                                             height: '100%',
                                             transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                                             position: 'relative',
                                             overflow: 'hidden',
+                                            boxShadow: isDark ? 'none' : '0 2px 8px rgba(0,0,0,0.05)',
                                             '&:hover': {
-                                                backgroundColor: '#222222',
+                                                backgroundColor: isDark ? '#222222' : '#F8FAFC',
                                                 transform: 'translateY(-8px)',
-                                                boxShadow: '0 20px 40px rgba(0,0,0,0.4), 0 0 20px rgba(230, 57, 70, 0.1)',
+                                                boxShadow: isDark 
+                                                    ? '0 20px 40px rgba(0,0,0,0.4), 0 0 20px rgba(230, 57, 70, 0.1)'
+                                                    : '0 20px 40px rgba(0,0,0,0.1), 0 0 20px rgba(230, 57, 70, 0.05)',
                                                 '& .icon-glow': {
                                                     boxShadow: '0 0 30px rgba(230, 57, 70, 0.4)',
                                                 }
@@ -193,7 +200,7 @@ export default function Problem() {
                                                 fontSize: '24px',
                                                 fontWeight: 700,
                                                 fontFamily: 'var(--font-heading)',
-                                                color: 'white',
+                                                color: isDark ? 'white' : '#0F172A',
                                                 marginBottom: 2,
                                             }}
                                         >
@@ -205,7 +212,7 @@ export default function Problem() {
                                             sx={{
                                                 fontSize: '16px',
                                                 lineHeight: 1.6,
-                                                color: 'var(--color-gray-300)',
+                                                color: isDark ? 'var(--color-gray-300)' : '#475569',
                                                 marginBottom: 4,
                                             }}
                                         >
@@ -250,7 +257,7 @@ export default function Problem() {
                             maxWidth: 800,
                             margin: '96px auto 0',
                             padding: 6,
-                            backgroundColor: 'rgba(255,255,255,0.02)',
+                            backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)',
                             borderLeft: '4px solid #E63946',
                             borderRadius: '0 24px 24px 0',
                             textAlign: 'center'
@@ -260,13 +267,13 @@ export default function Problem() {
                             sx={{
                                 fontSize: '20px',
                                 fontStyle: 'italic',
-                                color: 'var(--color-gray-300)',
+                                color: isDark ? 'var(--color-gray-300)' : '#475569',
                                 lineHeight: 1.8,
                                 fontWeight: 400
                             }}
                         >
                             "I built AthlonX because I was tired of using 5 different softwares just to keep my gym open. I wanted one dashboard that told me the truth about my business."
-                            <Box component="span" sx={{ display: 'block', marginTop: 3, fontStyle: 'normal', fontWeight: 700, color: 'white', fontSize: '18px', letterSpacing: '0.5px' }}>
+                            <Box component="span" sx={{ display: 'block', marginTop: 3, fontStyle: 'normal', fontWeight: 700, color: isDark ? 'white' : '#0F172A', fontSize: '18px', letterSpacing: '0.5px' }}>
                                 — ARYAN, FOUNDER OF ATHLONX
                             </Box>
                         </Typography>

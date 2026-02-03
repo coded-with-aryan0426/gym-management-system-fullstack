@@ -4,6 +4,7 @@ import React from 'react';
 import { Box, Typography, Chip, Paper, Grid, Container } from '@mui/material';
 import { Zap, TrendingUp, Target, Rocket } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const transformationStages = [
   {
@@ -45,11 +46,15 @@ const transformationStages = [
 ];
 
 export default function Transformation() {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+
   return (
     <Box
       sx={{
-        backgroundColor: '#0A0A0A',
+        backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC',
         paddingY: { xs: '80px', md: '120px' },
+        transition: 'background-color 0.3s ease'
       }}
     >
       <Container maxWidth="lg">
@@ -73,7 +78,7 @@ export default function Transformation() {
               fontSize: { xs: '36px', md: '56px' },
               fontWeight: 900,
               fontFamily: 'var(--font-heading)',
-              color: 'white',
+              color: isDark ? 'white' : '#0F172A',
               lineHeight: 1.1,
               letterSpacing: '-1px'
             }}
@@ -113,25 +118,25 @@ export default function Transformation() {
                       alignItems: 'center',
                     }}
                   >
-                    {/* Stage Card */}
-                    <Paper
-                      sx={{
-                        backgroundColor: 'rgba(255, 255, 255, 0.02)',
-                        backdropFilter: 'blur(10px)',
-                        border: '1px solid rgba(255, 255, 255, 0.05)',
-                        borderRadius: '24px',
-                        padding: 3,
-                        marginBottom: 3,
-                        textAlign: 'center',
-                        transition: 'var(--transition-base)',
-                        maxWidth: 260,
-                        '&:hover': {
-                          backgroundColor: 'rgba(230, 57, 70, 0.05)',
-                          borderColor: 'rgba(230, 57, 70, 0.3)',
-                          transform: 'translateY(-8px)',
-                        },
-                      }}
-                    >
+                      {/* Stage Card */}
+                      <Paper
+                        sx={{
+                          backgroundColor: isDark ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.02)',
+                          backdropFilter: 'blur(10px)',
+                          border: isDark ? '1px solid rgba(255, 255, 255, 0.05)' : '1px solid rgba(0, 0, 0, 0.08)',
+                          borderRadius: '24px',
+                          padding: 3,
+                          marginBottom: 3,
+                          textAlign: 'center',
+                          transition: 'var(--transition-base)',
+                          maxWidth: 260,
+                          '&:hover': {
+                            backgroundColor: isDark ? 'rgba(230, 57, 70, 0.05)' : 'rgba(230, 57, 70, 0.05)',
+                            borderColor: 'rgba(230, 57, 70, 0.3)',
+                            transform: 'translateY(-8px)',
+                          },
+                        }}
+                      >
                       {/* Icon */}
                       <Box
                         sx={{
@@ -163,31 +168,31 @@ export default function Transformation() {
                         {item.stage}
                       </Typography>
 
-                      {/* Headline */}
-                      <Typography
-                        variant="h6"
-                        sx={{
-                          fontSize: '18px',
-                          fontWeight: 700,
-                          fontFamily: 'var(--font-heading)',
-                          color: 'white',
-                          marginBottom: 1.5,
-                        }}
-                      >
-                        {item.headline}
-                      </Typography>
+                        {/* Headline */}
+                        <Typography
+                          variant="h6"
+                          sx={{
+                            fontSize: '18px',
+                            fontWeight: 700,
+                            fontFamily: 'var(--font-heading)',
+                            color: isDark ? 'white' : '#0F172A',
+                            marginBottom: 1.5,
+                          }}
+                        >
+                          {item.headline}
+                        </Typography>
 
-                      {/* Description */}
-                      <Typography
-                        sx={{
-                          fontSize: '14px',
-                          color: 'var(--color-gray-500)',
-                          lineHeight: 1.5,
-                          marginBottom: 2,
-                        }}
-                      >
-                        {item.description}
-                      </Typography>
+                        {/* Description */}
+                        <Typography
+                          sx={{
+                            fontSize: '14px',
+                            color: isDark ? 'var(--color-gray-500)' : '#64748B',
+                            lineHeight: 1.5,
+                            marginBottom: 2,
+                          }}
+                        >
+                          {item.description}
+                        </Typography>
 
                       {/* Outcome */}
                       <Chip
@@ -222,16 +227,16 @@ export default function Transformation() {
                       }}
                     />
 
-                    {/* Timeline Label */}
-                    <Typography
-                      sx={{
-                        fontSize: '13px',
-                        fontWeight: 700,
-                        color: 'white',
-                      }}
-                    >
-                      {item.timeline}
-                    </Typography>
+                      {/* Timeline Label */}
+                      <Typography
+                        sx={{
+                          fontSize: '13px',
+                          fontWeight: 700,
+                          color: isDark ? 'white' : '#0F172A',
+                        }}
+                      >
+                        {item.timeline}
+                      </Typography>
                   </Box>
                 </motion.div>
               </Grid>

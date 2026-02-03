@@ -4,6 +4,7 @@ import React from 'react';
 import { Box, Typography, Container, Grid } from '@mui/material';
 import { Layers, PieChart, Users, Puzzle } from 'lucide-react';
 import { motion, useScroll, useTransform } from 'framer-motion';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const presentProblems = [
     {
@@ -33,6 +34,8 @@ const presentProblems = [
 ];
 
 export default function PresentStruggle() {
+    const { theme } = useTheme();
+    const isDark = theme === 'dark';
     const containerRef = React.useRef(null);
     const { scrollYProgress } = useScroll({
         target: containerRef,
@@ -45,10 +48,11 @@ export default function PresentStruggle() {
         <Box
             ref={containerRef}
             sx={{
-                backgroundColor: '#0A0A0A',
+                backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC',
                 paddingY: { xs: '80px', md: '140px' },
                 position: 'relative',
-                overflow: 'hidden'
+                overflow: 'hidden',
+                transition: 'background-color 0.3s ease'
             }}
         >
             <Container maxWidth="lg">
@@ -65,7 +69,7 @@ export default function PresentStruggle() {
                                 sx={{
                                     fontSize: { xs: '32px', md: '48px' },
                                     fontWeight: 800,
-                                    color: 'white',
+                                    color: isDark ? 'white' : '#0F172A',
                                     marginBottom: 3,
                                     fontFamily: 'var(--font-heading)',
                                     lineHeight: 1.2
@@ -76,7 +80,7 @@ export default function PresentStruggle() {
                             <Typography
                                 sx={{
                                     fontSize: '18px',
-                                    color: 'var(--color-gray-400)',
+                                    color: isDark ? 'var(--color-gray-400)' : '#64748B',
                                     marginBottom: 6,
                                     maxWidth: '500px'
                                 }}
@@ -139,25 +143,25 @@ export default function PresentStruggle() {
                                                 sx={{
                                                     fontSize: '20px',
                                                     fontWeight: 700,
-                                                    color: 'white',
+                                                    color: isDark ? 'white' : '#0F172A',
                                                     fontFamily: 'var(--font-heading)'
                                                 }}
                                             >
                                                 {item.title}
                                             </Typography>
                                         </Box>
-                                        <Typography sx={{ color: 'var(--color-gray-400)', marginBottom: 2, fontSize: '15px' }}>
+                                        <Typography sx={{ color: isDark ? 'var(--color-gray-400)' : '#64748B', marginBottom: 2, fontSize: '15px' }}>
                                             {item.description}
                                         </Typography>
                                         <Box
                                             sx={{
                                                 padding: '12px 20px',
-                                                backgroundColor: 'rgba(255,255,255,0.03)',
+                                                backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
                                                 borderRadius: '12px',
                                                 borderLeft: '2px inset #E63946'
                                             }}
                                         >
-                                            <Typography sx={{ color: 'var(--color-gray-300)', fontSize: '14px', fontStyle: 'italic' }}>
+                                            <Typography sx={{ color: isDark ? 'var(--color-gray-300)' : '#475569', fontSize: '14px', fontStyle: 'italic' }}>
                                                 "{item.quote}"
                                             </Typography>
                                             <Typography sx={{ color: '#E63946', fontSize: '12px', fontWeight: 700, marginTop: 1, textTransform: 'uppercase', letterSpacing: '1px' }}>

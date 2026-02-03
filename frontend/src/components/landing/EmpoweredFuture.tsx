@@ -14,6 +14,7 @@ import {
     Bell
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const features = [
     {
@@ -61,13 +62,17 @@ const features = [
 ];
 
 export default function EmpoweredFuture() {
+    const { theme } = useTheme();
+    const isDark = theme === 'dark';
+
     return (
         <Box
             sx={{
-                backgroundColor: '#0A0A0A',
+                backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC',
                 paddingY: { xs: '100px', md: '160px' },
                 position: 'relative',
-                overflow: 'hidden'
+                overflow: 'hidden',
+                transition: 'background-color 0.3s ease'
             }}
         >
             {/* Ambient Background Effects */}
@@ -109,7 +114,7 @@ export default function EmpoweredFuture() {
                             sx={{
                                 fontSize: { xs: '40px', md: '72px' },
                                 fontWeight: 900,
-                                color: 'white',
+                                color: isDark ? 'white' : '#0F172A',
                                 marginBottom: 3,
                                 fontFamily: 'var(--font-heading)',
                                 letterSpacing: '-2px',
@@ -121,7 +126,7 @@ export default function EmpoweredFuture() {
                         <Typography
                             sx={{
                                 fontSize: { xs: '18px', md: '22px' },
-                                color: 'var(--color-gray-400)',
+                                color: isDark ? 'var(--color-gray-400)' : '#64748B',
                                 maxWidth: '700px',
                                 margin: '0 auto',
                                 fontWeight: 400
@@ -138,7 +143,7 @@ export default function EmpoweredFuture() {
                     <Grid size={{ xs: 12, md: 3 }}>
                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                             {features.slice(0, 3).map((feature) => (
-                                <FeatureCard key={feature.title} {...feature} align="right" />
+                                <FeatureCard key={feature.title} {...feature} align="right" isDark={isDark} />
                             ))}
                         </Box>
                     </Grid>
@@ -237,7 +242,7 @@ export default function EmpoweredFuture() {
                     <Grid size={{ xs: 12, md: 3 }}>
                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                             {features.slice(3, 6).map((feature) => (
-                                <FeatureCard key={feature.title} {...feature} align="left" />
+                                <FeatureCard key={feature.title} {...feature} align="left" isDark={isDark} />
                             ))}
                         </Box>
                     </Grid>
@@ -253,9 +258,10 @@ interface FeatureCardProps {
     benefit: string;
     delay: number;
     align?: 'left' | 'right';
+    isDark?: boolean;
 }
 
-function FeatureCard({ title, icon: Icon, benefit, delay, align = 'left' }: FeatureCardProps) {
+function FeatureCard({ title, icon: Icon, benefit, delay, align = 'left', isDark = true }: FeatureCardProps) {
     return (
         <motion.div
             initial={{ opacity: 0, x: align === 'left' ? 30 : -30 }}
@@ -272,12 +278,13 @@ function FeatureCard({ title, icon: Icon, benefit, delay, align = 'left' }: Feat
                     gap: 2.5,
                     p: 3,
                     borderRadius: '24px',
-                    backgroundColor: 'rgba(26, 26, 26, 0.6)',
+                    backgroundColor: isDark ? 'rgba(26, 26, 26, 0.6)' : 'rgba(255, 255, 255, 0.8)',
                     backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(255,255,255,0.05)',
+                    border: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.08)',
                     transition: 'all 0.3s ease',
+                    boxShadow: isDark ? 'none' : '0 2px 8px rgba(0,0,0,0.05)',
                     '&:hover': {
-                        backgroundColor: 'rgba(230, 57, 70, 0.05)',
+                        backgroundColor: isDark ? 'rgba(230, 57, 70, 0.05)' : 'rgba(230, 57, 70, 0.05)',
                         borderColor: 'rgba(230, 57, 70, 0.3)',
                         '& .icon-circle': {
                             backgroundColor: '#E63946',
@@ -294,7 +301,7 @@ function FeatureCard({ title, icon: Icon, benefit, delay, align = 'left' }: Feat
                         width: 48,
                         height: 48,
                         borderRadius: '16px',
-                        backgroundColor: 'rgba(255,255,255,0.03)',
+                        backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.05)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -310,14 +317,14 @@ function FeatureCard({ title, icon: Icon, benefit, delay, align = 'left' }: Feat
                         sx={{
                             fontSize: '18px',
                             fontWeight: 700,
-                            color: 'white',
+                            color: isDark ? 'white' : '#0F172A',
                             mb: 0.5,
                             fontFamily: 'var(--font-heading)'
                         }}
                     >
                         {title}
                     </Typography>
-                    <Typography sx={{ fontSize: '14px', color: 'var(--color-gray-500)', lineHeight: 1.5 }}>
+                    <Typography sx={{ fontSize: '14px', color: isDark ? 'var(--color-gray-500)' : '#64748B', lineHeight: 1.5 }}>
                         {benefit}
                     </Typography>
                 </Box>
