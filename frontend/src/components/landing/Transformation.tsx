@@ -50,16 +50,16 @@ export default function Transformation() {
   const isDark = theme === 'dark';
 
   return (
-    <Box
-      sx={{
-        backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC',
-        paddingY: { xs: '80px', md: '120px' },
-        transition: 'background-color 0.3s ease'
-      }}
-    >
-      <Container maxWidth="lg">
-        {/* Section Header */}
-        <Box sx={{ textAlign: 'center', marginBottom: 10 }}>
+      <Box
+        sx={{
+          backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC',
+          paddingY: { xs: '48px', md: '72px' },
+          transition: 'background-color 0.3s ease'
+        }}
+      >
+        <Container maxWidth="lg">
+          {/* Section Header */}
+          <Box sx={{ textAlign: 'center', marginBottom: 6 }}>
           <Typography
             sx={{
               fontSize: '14px',

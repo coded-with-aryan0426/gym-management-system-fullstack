@@ -42,7 +42,7 @@ export default function SecondaryCTA({ onSignupClick }: SecondaryCTAProps) {
         <Box
             sx={{
                 backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC',
-                paddingY: { xs: '80px', md: '140px' },
+                paddingY: { xs: '48px', md: '80px' },
                 position: 'relative',
                 overflow: 'hidden',
                 borderTop: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.05)',
@@ -121,9 +121,9 @@ export default function SecondaryCTA({ onSignupClick }: SecondaryCTAProps) {
                     sx={{
                         fontSize: '18px',
                         color: isDark ? 'var(--color-gray-400)' : '#64748B',
-                        marginBottom: 6,
+                        marginBottom: 4,
                         maxWidth: 600,
-                        margin: '0 auto 48px',
+                        margin: '0 auto 32px',
                         lineHeight: 1.6
                     }}
                 >
@@ -137,7 +137,7 @@ export default function SecondaryCTA({ onSignupClick }: SecondaryCTAProps) {
                         flexDirection: { xs: 'column', sm: 'row' },
                         gap: 2.5,
                         justifyContent: 'center',
-                        marginBottom: 6,
+                        marginBottom: 4,
                     }}
                 >
                     <Button
@@ -233,7 +233,7 @@ export default function SecondaryCTA({ onSignupClick }: SecondaryCTAProps) {
                         paddingX: 3,
                         paddingY: 1.5,
                         borderRadius: '12px',
-                        marginTop: 6,
+                        marginTop: 4,
                     }}
                 >
                     <Clock size={18} color="#E63946" />

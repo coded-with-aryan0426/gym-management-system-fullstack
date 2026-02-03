@@ -73,17 +73,17 @@ export default function ValueStack() {
   const isDark = theme === 'dark';
 
   return (
-    <Box
-      sx={{
-        backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC',
-        paddingY: { xs: '80px', md: '120px' },
-        borderTop: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.05)',
-        transition: 'background-color 0.3s ease'
-      }}
-    >
-      <Container maxWidth="lg">
-        {/* Section Header */}
-        <Box sx={{ textAlign: 'center', marginBottom: 8, maxWidth: 800, marginX: 'auto' }}>
+      <Box
+        sx={{
+          backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC',
+          paddingY: { xs: '48px', md: '72px' },
+          borderTop: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.05)',
+          transition: 'background-color 0.3s ease'
+        }}
+      >
+        <Container maxWidth="lg">
+          {/* Section Header */}
+          <Box sx={{ textAlign: 'center', marginBottom: 5, maxWidth: 800, marginX: 'auto' }}>
           <Typography
             sx={{
               fontSize: '14px',
@@ -224,12 +224,12 @@ export default function ValueStack() {
           ))}
         </Grid>
 
-        {/* Price Summary Card */}
-        <Paper
-          sx={{
-            maxWidth: 540,
-            margin: '0 auto',
-            marginTop: 10,
+          {/* Price Summary Card */}
+          <Paper
+            sx={{
+              maxWidth: 540,
+              margin: '0 auto',
+              marginTop: 6,
             padding: 5,
             backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)',
             borderRadius: '32px',

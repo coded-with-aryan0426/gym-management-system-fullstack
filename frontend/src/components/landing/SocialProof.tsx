@@ -209,10 +209,10 @@ export default function SocialProof() {
                         alignItems: 'center',
                         flexWrap: 'wrap',
                         gap: 6,
-                        marginTop: 10,
-                        padding: 4,
+                        marginTop: 6,
+                        padding: 3,
                         backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)',
-                        borderRadius: '24px',
+                        borderRadius: '16px',
                         border: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.08)'
                     }}
                 >

@@ -63,21 +63,21 @@ export default function Footer() {
     }
   };
 
-  return (
-    <Box
-        component="footer"
-        sx={{
-          backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC',
-          borderTop: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.08)',
-          paddingTop: 'var(--space-20)',
-          paddingBottom: 'var(--space-8)',
-          color: isDark ? 'white' : 'var(--text-primary)',
-          transition: 'background-color 0.3s ease',
-        }}
-      >
-      <Container maxWidth="xl">
-        {/* Main Footer Grid */}
-        <Grid container spacing={{ xs: 5, md: 6 }} sx={{ marginBottom: 8 }}>
+    return (
+      <Box
+          component="footer"
+          sx={{
+            backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC',
+            borderTop: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.08)',
+            paddingTop: { xs: '48px', md: '64px' },
+            paddingBottom: { xs: '24px', md: '32px' },
+            color: isDark ? 'white' : 'var(--text-primary)',
+            transition: 'background-color 0.3s ease',
+          }}
+        >
+        <Container maxWidth="xl">
+          {/* Main Footer Grid */}
+          <Grid container spacing={{ xs: 4, md: 5 }} sx={{ marginBottom: 5 }}>
           {/* Brand Column */}
           <Grid size={{ xs: 12, md: 4 }}>
             <Box sx={{ maxWidth: 300 }}>
