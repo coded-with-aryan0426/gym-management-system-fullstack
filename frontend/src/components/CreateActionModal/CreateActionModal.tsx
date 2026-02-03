@@ -347,25 +347,13 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
                                         <div className="form-row">
                                             <div className="form-group">
                                                 <label>Membership Plan *</label>
-                                                <select
-                                                    name="packageId"
-                                                    value={formData.packageId}
-                                                    onChange={handleChange}
-                                                    className="form-input"
-                                                    disabled={fetchingPlans}
-                                                    required
-                                                >
-                                                    <option value="">Select a plan</option>
-                                                    {availablePlans
-                                                        .filter((plan, index, self) =>
-                                                            index === self.findIndex(p => p.packageName === plan.packageName)
-                                                        )
-                                                        .map(plan => (
-                                                            <option key={plan.packageId} value={plan.packageId}>
-                                                                {plan.packageName} - ₹{plan.price}
-                                                            </option>
-                                                        ))}
-                                                </select>
+                                                {/* Enhanced Membership Assignment Component */}
+                                                <MembershipAssignment
+                                                    memberId={undefined}
+                                                    onMembershipSelect={handleMembershipSelect}
+                                                    selectedMembershipId={selectedMembershipId}
+                                                    mode="selection"
+                                                />
                                             </div>
                                             <div className="form-group">
                                                 <label>Duration *</label>

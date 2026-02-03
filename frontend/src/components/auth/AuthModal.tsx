@@ -466,53 +466,74 @@ export default function AuthModal() {
                             </button>
                         </div>
 
-                        {/* Tab Switcher */}
+                        {/* Tab Switcher - Slider Style */}
                         {loginStep === 'CREDENTIALS' && signupStep === 'DETAILS' && (
                             <div style={{
-                                display: 'flex',
                                 padding: '16px 24px 0',
-                                gap: 8,
                             }}>
-                                <button
-                                    onClick={() => setActiveTab('login')}
-                                    style={{
-                                        flex: 1,
-                                        padding: '12px',
-                                        background: activeTab === 'login' 
-                                            ? 'linear-gradient(135deg, #DC2626 0%, #B91C1C 100%)' 
-                                            : 'transparent',
-                                        border: `1px solid ${activeTab === 'login' ? 'transparent' : isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
-                                        borderRadius: 12,
-                                        color: activeTab === 'login' ? '#fff' : colors.textSecondary,
-                                        fontSize: 14,
-                                        fontWeight: 600,
-                                        cursor: 'pointer',
-                                        transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
-                                        boxShadow: activeTab === 'login' ? '0 4px 12px rgba(220, 38, 38, 0.3)' : 'none',
-                                    }}
-                                >
-                                    Log In
-                                </button>
-                                <button
-                                    onClick={() => setActiveTab('signup')}
-                                    style={{
-                                        flex: 1,
-                                        padding: '12px',
-                                        background: activeTab === 'signup' 
-                                            ? 'linear-gradient(135deg, #DC2626 0%, #B91C1C 100%)' 
-                                            : 'transparent',
-                                        border: `1px solid ${activeTab === 'signup' ? 'transparent' : isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
-                                        borderRadius: 12,
-                                        color: activeTab === 'signup' ? '#fff' : colors.textSecondary,
-                                        fontSize: 14,
-                                        fontWeight: 600,
-                                        cursor: 'pointer',
-                                        transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
-                                        boxShadow: activeTab === 'signup' ? '0 4px 12px rgba(220, 38, 38, 0.3)' : 'none',
-                                    }}
-                                >
-                                    Sign Up
-                                </button>
+                                <div style={{
+                                    position: 'relative',
+                                    display: 'flex',
+                                    background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+                                    borderRadius: 14,
+                                    padding: 4,
+                                }}>
+                                    {/* Sliding Indicator */}
+                                    <div 
+                                        style={{
+                                            position: 'absolute',
+                                            top: 4,
+                                            left: activeTab === 'login' ? 4 : 'calc(50% + 2px)',
+                                            width: 'calc(50% - 6px)',
+                                            height: 'calc(100% - 8px)',
+                                            background: 'linear-gradient(135deg, #DC2626 0%, #B91C1C 100%)',
+                                            borderRadius: 10,
+                                            boxShadow: '0 4px 12px rgba(220, 38, 38, 0.4)',
+                                            transition: 'left 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                            zIndex: 0,
+                                        }}
+                                    />
+                                    {/* Login Tab */}
+                                    <button
+                                        onClick={() => setActiveTab('login')}
+                                        style={{
+                                            flex: 1,
+                                            padding: '12px 20px',
+                                            background: 'transparent',
+                                            border: 'none',
+                                            borderRadius: 10,
+                                            color: activeTab === 'login' ? '#fff' : colors.textSecondary,
+                                            fontSize: 14,
+                                            fontWeight: 600,
+                                            cursor: 'pointer',
+                                            transition: 'color 0.3s ease',
+                                            position: 'relative',
+                                            zIndex: 1,
+                                        }}
+                                    >
+                                        Log In
+                                    </button>
+                                    {/* Signup Tab */}
+                                    <button
+                                        onClick={() => setActiveTab('signup')}
+                                        style={{
+                                            flex: 1,
+                                            padding: '12px 20px',
+                                            background: 'transparent',
+                                            border: 'none',
+                                            borderRadius: 10,
+                                            color: activeTab === 'signup' ? '#fff' : colors.textSecondary,
+                                            fontSize: 14,
+                                            fontWeight: 600,
+                                            cursor: 'pointer',
+                                            transition: 'color 0.3s ease',
+                                            position: 'relative',
+                                            zIndex: 1,
+                                        }}
+                                    >
+                                        Sign Up
+                                    </button>
+                                </div>
                             </div>
                         )}
 
