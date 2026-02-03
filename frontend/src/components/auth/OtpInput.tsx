@@ -73,7 +73,7 @@ const OtpInput: React.FC<OtpInputProps> = ({ length = 6, value, onChange, disabl
     };
 
     return (
-        <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
             {Array.from({ length }).map((_, i) => (
                 <input
                     key={i}
@@ -87,14 +87,14 @@ const OtpInput: React.FC<OtpInputProps> = ({ length = 6, value, onChange, disabl
                     onPaste={handlePaste}
                     disabled={disabled}
                     style={{
-                        width: '52px',
-                        height: '60px',
+                        width: '44px',
+                        height: '50px',
                         textAlign: 'center',
-                        fontSize: '24px',
+                        fontSize: '20px',
                         fontWeight: 'bold',
                         backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
                         border: `1px solid ${value[i] ? colors.crimson : isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
-                        borderRadius: '12px',
+                        borderRadius: '10px',
                         color: colors.textPrimary,
                         outline: 'none',
                         transition: 'all 0.2s ease',
@@ -103,7 +103,7 @@ const OtpInput: React.FC<OtpInputProps> = ({ length = 6, value, onChange, disabl
                     }}
                     onFocus={(e) => {
                         e.target.style.borderColor = colors.crimson;
-                        e.target.style.boxShadow = `0 0 0 3px rgba(220, 38, 38, 0.12)`;
+                        e.target.style.boxShadow = `0 0 0 2px rgba(220, 38, 38, 0.1)`;
                     }}
                     onBlur={(e) => {
                         e.target.style.borderColor = value[i] ? colors.crimson : (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)');

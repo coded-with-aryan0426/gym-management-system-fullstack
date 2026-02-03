@@ -60,6 +60,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClose, onSu
         duration: "1",
         startDate: new Date().toISOString().split('T')[0],
       })
+      setSelectedMembershipId(null)
     }
   }, [isOpen, initialRole])
 
@@ -436,17 +437,13 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClose, onSu
                   <div className="form-row">
                     <div className="form-group">
                       <label>Membership Plan *</label>
-                      <select name="packageId" value={formData.packageId} onChange={handleChange} className="form-input" disabled={fetchingPlans} required>
-                        <option value="">Select a plan</option>
-                        {/* Remove duplicates by filtering unique plan names */}
-                        {availablePlans
-                          .filter((plan, index, self) =>
-                            index === self.findIndex(p => p.packageName === plan.packageName)
-                          )
-                          .map(plan => (
-                            <option key={plan.packageId} value={plan.packageId}>{plan.packageName} - ₹{plan.price}</option>
-                          ))}
-                      </select>
+                      {/* Enhanced Membership Assignment Component */}
+                      <MembershipAssignment
+                        memberId={undefined}
+                        onMembershipSelect={handleMembershipSelect}
+                        selectedMembershipId={selectedMembershipId}
+                        mode="selection"
+                      />
                     </div>
                     <div className="form-group">
                       <label>Duration *</label>
