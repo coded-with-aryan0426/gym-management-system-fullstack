@@ -4,7 +4,7 @@ import {
     Bell, Calendar, User, CheckCheck, Info,
     Trash2, X, Settings, MessageSquare,
     TrendingUp, Clock, Star, Award, Target,
-    AlertTriangle, DollarSign, Filter,
+    AlertTriangle, IndianRupee, Filter,
     Archive, Search, ArrowRight, Inbox
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -118,7 +118,7 @@ const TrainerNotifications: React.FC = () => {
             case 'cancellation': return X;
             case 'member': return User;
             case 'progress': return TrendingUp;
-            case 'payment': return DollarSign;
+            case 'payment': return IndianRupee;
             case 'reminder': return Clock;
             case 'achievement': return Award;
             case 'request': return Target;
@@ -299,7 +299,7 @@ const TrainerNotifications: React.FC = () => {
                                 <span>Bookings</span>
                             </button>
                             <button onClick={() => setTypeFilter('payment')} className={typeFilter === 'payment' ? 'active' : ''}>
-                                <div className="tn-cat-icon green"><DollarSign size={14} /></div>
+                                <div className="tn-cat-icon green"><IndianRupee size={14} /></div>
                                 <span>Payments</span>
                             </button>
                             <button onClick={() => setTypeFilter('message')} className={typeFilter === 'message' ? 'active' : ''}>

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
     TrendingUp, TrendingDown, Users, Calendar, Clock, Download, ChevronDown,
     BarChart3, PieChart, Activity, Award, Target, RefreshCw,
-    DollarSign, Heart, Zap, Star, ArrowUpRight, ArrowDownRight,
+    IndianRupee, Heart, Zap, Star, ArrowUpRight, ArrowDownRight,
     Info, Eye,
     CheckCircle, XCircle, AlertCircle, Flame, Trophy, Medal, Crown, Loader2,
     type LucideIcon
@@ -297,7 +297,7 @@ const TrainerReports: React.FC = () => {
                     className={activeTab === 'earnings' ? 'active' : ''}
                     onClick={() => setActiveTab('earnings')}
                 >
-                    <DollarSign size={16} /> Earnings
+                    <IndianRupee size={16} /> Earnings
                 </button>
             </div>
 
@@ -706,7 +706,7 @@ const TrainerReports: React.FC = () => {
                                 <div className="trainer-reports__earnings-grid">
                                     <div className="trainer-reports__card">
                                         <div className="trainer-reports__card-header">
-                                            <h2><DollarSign size={18} /> Earnings Breakdown</h2>
+                                            <h2><IndianRupee size={18} /> Earnings Breakdown</h2>
                                         </div>
                                         <div className="trainer-reports__card-content">
                                             {earningsData.length > 0 ? (
@@ -740,7 +740,7 @@ const TrainerReports: React.FC = () => {
                                                 </div>
                                             ) : (
                                                 <div className="trainer-reports__empty-state">
-                                                    <DollarSign size={32} />
+                                                    <IndianRupee size={32} />
                                                     <p>No earnings data available</p>
                                                 </div>
                                             )}
@@ -776,7 +776,7 @@ const TrainerReports: React.FC = () => {
                             </>
                         ) : (
                             <div className="trainer-reports__empty-state-full">
-                                <DollarSign size={48} />
+                                <IndianRupee size={48} />
                                 <p>No earnings data available</p>
                             </div>
                         )}

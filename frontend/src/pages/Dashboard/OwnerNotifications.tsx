@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-    Bell, Users, DollarSign, AlertTriangle, Calendar,
+    Bell, Users, IndianRupee, AlertTriangle, Calendar,
     Package, Settings, FileText, Search, CheckCheck,
     Star, Trash2, Archive, Eye, Clock, TrendingUp,
     UserPlus, CreditCard, AlertCircle, Dumbbell, Inbox,
@@ -158,7 +158,7 @@ const OwnerNotifications: React.FC = () => {
     // Get icon for notification type
     const getIcon = (type: NotificationType) => {
         switch (type) {
-            case 'payment': return DollarSign;
+            case 'payment': return IndianRupee;
             case 'alert': return AlertTriangle;
             case 'member': return Users;
             case 'trainer': return Dumbbell;
@@ -321,7 +321,7 @@ const OwnerNotifications: React.FC = () => {
                         <span className="on-section-label">Categories</span>
                         <div className="on-category-list">
                             <button onClick={() => setTypeFilter('payment')} className={typeFilter === 'payment' ? 'active' : ''}>
-                                <div className="on-cat-icon green"><DollarSign size={14} /></div>
+                                <div className="on-cat-icon green"><IndianRupee size={14} /></div>
                                 <span>Revenue</span>
                             </button>
                             <button onClick={() => setTypeFilter('member')} className={typeFilter === 'member' ? 'active' : ''}>

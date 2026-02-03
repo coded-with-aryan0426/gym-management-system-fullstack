@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Badge, Button } from '../ui';
-import { Calendar, DollarSign, Users, Clock } from 'lucide-react';
+import { Calendar, IndianRupee, Users, Clock } from 'lucide-react';
 import type { MembershipPackageDTO } from '../../types/membershipPackage';
 import membershipPlanApi from '../../services/membershipPlanApi';
 import { toast } from 'react-hot-toast';
@@ -59,9 +59,9 @@ const MembershipAssignment: React.FC<MembershipAssignmentProps> = ({
   };
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'INR'
     }).format(price);
   };
 
@@ -142,9 +142,9 @@ const MembershipAssignment: React.FC<MembershipAssignmentProps> = ({
         >
           <option value="">Choose a membership plan</option>
           {membershipPlans.map((plan) => (
-            <option key={plan.packageId} value={plan.packageId.toString()}>
-              {plan.packageName} - ${plan.price}
-            </option>
+              <option key={plan.packageId} value={plan.packageId.toString()}>
+                {plan.packageName} - ₹{plan.price}
+              </option>
           ))}
         </select>
       </div>

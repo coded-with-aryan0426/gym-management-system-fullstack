@@ -115,7 +115,7 @@ class MembershipPlanApiService {
     }
 
     if (planData.price < 10 || planData.price > 10000) {
-      errors.push('Price must be between $10 and $10,000');
+      errors.push('Price must be between ₹10 and ₹10,000');
     }
 
     if (planData.includedPTSessions < 0) {
@@ -129,9 +129,9 @@ class MembershipPlanApiService {
    * Format price for display
    */
   formatPrice(price: number): string {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'INR'
     }).format(price);
   }
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { Equipment, EquipmentCategory, EquipmentStatus, EquipmentCondition } from '../../../types/equipment';
-import { X, Dumbbell, Heart, Zap, Flower2, Sparkles, Package, MapPin, Calendar, DollarSign, Hash, Check, Plus } from 'lucide-react';
+import { X, Dumbbell, Heart, Zap, Flower2, Sparkles, Package, MapPin, Calendar, IndianRupee, Hash, Check, Plus } from 'lucide-react';
 import '../EquipmentModals.css';
 
 interface EquipmentModalProps {
@@ -192,9 +192,9 @@ const EquipmentModal: React.FC<EquipmentModalProps> = ({ isOpen, onClose, onSubm
                             </div>
                         </div>
                         <div>
-                            <label className="eq-label">Cost ($)</label>
+                            <label className="eq-label">Cost (₹)</label>
                             <div className="eq-input-wrapper">
-                                <DollarSign size={14} className="eq-input-icon" />
+                                <IndianRupee size={14} className="eq-input-icon" />
                                 <input
                                     type="number"
                                     value={formData.purchaseCost || 0}
