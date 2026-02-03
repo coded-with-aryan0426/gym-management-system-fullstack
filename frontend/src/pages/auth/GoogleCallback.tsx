@@ -37,8 +37,8 @@ export default function GoogleCallback() {
                 }, window.location.origin);
                 window.close();
             } else {
-                // If no opener (direct navigation), redirect to login
-                window.location.href = '/login?error=popup_closed';
+                // If no opener (direct navigation), redirect to home
+                window.location.href = '/?openAuth=true';
             }
         } else {
             // No token found, might need to exchange code

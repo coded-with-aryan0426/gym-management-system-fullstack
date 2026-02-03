@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import {
     User, Lock, Activity, Save, Camera, Mail, Phone, Calendar,
     Shield, Heart, MapPin, Droplet, Target, Award, Sparkles,
@@ -12,6 +13,7 @@ import { toast } from 'react-hot-toast';
 import { memberProfileApi, type MemberProfileData, type MemberProfileUpdate } from '../../api/memberProfileApi';
 import api from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
+import { useAuthModal } from '../../contexts/AuthModalContext';
 import '../../styles/macos-member.css';
 import './MemberProfile.css';
 
@@ -51,6 +53,8 @@ const AchievementCard: React.FC<{ title: string; date: string; icon: React.React
 );
 
 const MemberProfile: React.FC = () => {
+    const navigate = useNavigate();
+    const { openAuthModal } = useAuthModal();
     const [profile, setProfile] = useState<MemberProfileData | null>(null);
     const [assignedTrainer, setAssignedTrainer] = useState<any | null>(null);
     const [loading, setLoading] = useState(true);
@@ -269,7 +273,7 @@ const MemberProfile: React.FC = () => {
                 <p>Please log in to view your profile</p>
                 <button 
                     className="macos-btn macos-btn--primary" 
-                    onClick={() => window.location.href = '/login'}
+                    onClick={() => { navigate('/'); openAuthModal('login'); }}
                     style={{ marginTop: '16px' }}
                 >
                     Go to Login

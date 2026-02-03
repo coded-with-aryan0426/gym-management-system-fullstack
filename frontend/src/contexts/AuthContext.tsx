@@ -111,7 +111,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
      */
     const logout = useCallback(() => {
         clearAuth();
-        window.location.href = '/login';
+        window.location.href = '/';
     }, [clearAuth]);
 
     const value: AuthContextType = {

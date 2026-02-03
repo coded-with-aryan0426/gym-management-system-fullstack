@@ -21,8 +21,6 @@ const Reports = lazy(() => import('./pages/Reports/Reports'));
 const Settings = lazy(() => import('./pages/Settings/Settings'));
 const OwnerNotifications = lazy(() => import('./pages/Dashboard/OwnerNotifications'));
 const LandingPage = lazy(() => import('./pages/LandingPage'));
-const LoginPage = lazy(() => import('./pages/LoginPage'));
-const SignupPage = lazy(() => import('./pages/SignupPage'));
 const UnauthorizedPage = lazy(() => import('./pages/UnauthorizedPage'));
 const ChangePasswordFirst = lazy(() => import('./pages/ChangePasswordFirst'));
 const GoogleCallback = lazy(() => import('./pages/auth/GoogleCallback'));
@@ -77,8 +75,6 @@ function App() {
               <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={<LandingPage />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/signup" element={<SignupPage />} />
                 <Route path="/unauthorized" element={<UnauthorizedPage />} />
                 <Route path="/change-password" element={<ChangePasswordFirst />} />
 

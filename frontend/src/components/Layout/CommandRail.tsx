@@ -87,7 +87,6 @@ const CommandRail: React.FC<CommandRailProps> = ({ isCollapsed = false, onToggle
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
   };
 
   return (

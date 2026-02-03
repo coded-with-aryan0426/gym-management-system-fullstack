@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { showToast } from '../../utils/showToast';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { getTrainerSettings, updateTrainerSettings, type TrainerSettingsDTO } from '../../services/trainerSettingsApi';
 import './TrainerSettings.css';
 
@@ -15,6 +16,7 @@ import './TrainerSettings.css';
 const TrainerSettings: React.FC = () => {
     const navigate = useNavigate();
     const { theme, setTheme } = useTheme();
+    const { logout } = useAuth();
     const [activeSection, setActiveSection] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -165,12 +167,8 @@ const TrainerSettings: React.FC = () => {
     const handleLogoutDevice = () => showToast('Device Removed', 'success', 'Session terminated securely');
 
     const handleLogout = () => {
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('user');
-        localStorage.removeItem('userRole');
-        sessionStorage.clear();
         showToast('Signed Out', 'info', 'See you next time!');
-        setTimeout(() => navigate('/login'), 800);
+        setTimeout(() => logout(), 800);
     };
 
     const renderSectionContent = () => {

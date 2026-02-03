@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useAuthModal } from '../../contexts/AuthModalContext';
 
 interface ProtectedRouteProps {
     allowedRoles: string[];
@@ -19,6 +20,7 @@ interface ProtectedRouteProps {
  */
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles }) => {
     const { user, isAuthenticated, isLoading } = useAuth();
+    const { openAuthModal } = useAuthModal();
     const location = useLocation();
 
     // Show loading state while auth is initializing
@@ -30,10 +32,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
         );
     }
 
-    // 401 - Not authenticated
+    // 401 - Not authenticated: redirect to home and open auth modal
     if (!isAuthenticated || !user) {
-        console.warn('[Auth] Not authenticated, redirecting to login');
-        return <Navigate to="/login" state={{ from: location }} replace />;
+        console.warn('[Auth] Not authenticated, redirecting to home');
+        return <Navigate to="/" state={{ from: location, openAuth: true }} replace />;
     }
 
     // Normalize user role (handle staffRole vs role, case insensitivity)

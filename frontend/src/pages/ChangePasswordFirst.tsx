@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../services/api';
 import { Logo } from '../components/ui/Logo';
+import { useAuthModal } from '../contexts/AuthModalContext';
 
 const colors = {
     bgPrimary: "#0D0D0D",
@@ -19,6 +20,7 @@ const colors = {
 const ChangePasswordFirst: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
+    const { openAuthModal } = useAuthModal();
 
     const [formData, setFormData] = useState({
         email: location.state?.email || '',
@@ -50,7 +52,8 @@ const ChangePasswordFirst: React.FC = () => {
             await api.changePasswordFirstLogin(formData);
             setSuccess("Password changed successfully! Redirecting...");
             setTimeout(() => {
-                navigate('/login');
+                navigate('/');
+                openAuthModal('login');
             }, 2000);
         } catch (err: any) {
             setError(err.response?.data?.error || "Failed to change password");

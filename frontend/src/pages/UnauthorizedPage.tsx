@@ -1,7 +1,9 @@
 import { useNavigate } from 'react-router-dom';
+import { useAuthModal } from '../contexts/AuthModalContext';
 
 const UnauthorizedPage = () => {
     const navigate = useNavigate();
+    const { openAuthModal } = useAuthModal();
 
     const handleGoBack = () => {
         const userStr = localStorage.getItem('user');
@@ -16,10 +18,12 @@ const UnauthorizedPage = () => {
             } else if (role === 'CUSTOMER' || role === 'MEMBER') {
                 navigate('/member');
             } else {
-                navigate('/login');
+                navigate('/');
+                openAuthModal('login');
             }
         } else {
-            navigate('/login');
+            navigate('/');
+            openAuthModal('login');
         }
     };
 

@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Bell, Settings, LogOut, ChevronDown, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import '../../styles/unified-design-system.css';
 
 type Role = 'admin' | 'trainer' | 'member';
@@ -49,15 +50,14 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     showSettings = true
 }) => {
     const navigate = useNavigate();
+    const { logout } = useAuth();
     const config = roleConfig[role];
     const firstName = userName.split(' ')[0];
     const initials = userName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
     const displayGreeting = greeting || getGreeting();
 
     const handleLogout = () => {
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
-        navigate('/login');
+        logout();
     };
 
     const getNotificationPath = () => {
