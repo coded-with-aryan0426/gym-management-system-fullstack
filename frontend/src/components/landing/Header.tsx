@@ -2,9 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { AppBar, Toolbar, Button, Box, useScrollTrigger, Typography, IconButton, Drawer, List, ListItem, ListItemButton, ListItemText, Divider } from '@mui/material';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Sun, Moon } from 'lucide-react';
 import { Logo } from '../ui/Logo';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTheme } from '../../contexts/ThemeContext';
 
 // Navigation items - scroll sections on homepage
 const scrollNavItems = [
@@ -25,6 +26,8 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { theme, toggleTheme } = useTheme();
+  const isDark = theme === 'dark';
 
   // Custom scroll listener for smoother control
   useEffect(() => {
@@ -68,30 +71,34 @@ export default function Header() {
 
   return (
     <>
-      <AppBar
-        position="fixed"
-        elevation={0}
-        sx={{
-          height: { xs: 64, md: 72 },
-          // Floating Dock Logic
-          width: scrolled ? 'calc(100% - 40px)' : '100%',
-          top: scrolled ? '20px' : '0',
-          left: scrolled ? '20px' : '0',
-          right: scrolled ? '20px' : '0',
-          borderRadius: scrolled ? '16px' : '0',
-          backgroundColor: scrolled ? 'rgba(10, 10, 10, 0.85)' : 'transparent',
-          backdropFilter: 'blur(16px)',
-            borderBottom: '1px solid rgba(255,255,255,0.08)',
-            boxShadow: scrolled ? '0 10px 30px rgba(0,0,0,0.5)' : 'none',
+        <AppBar
+          position="fixed"
+          elevation={0}
+          sx={{
+            height: { xs: 64, md: 72 },
+            // Floating Dock Logic
+            width: scrolled ? 'calc(100% - 40px)' : '100%',
+            top: scrolled ? '20px' : '0',
+            left: scrolled ? '20px' : '0',
+            right: scrolled ? '20px' : '0',
+            borderRadius: scrolled ? '16px' : '0',
+            backgroundColor: scrolled 
+              ? (isDark ? 'rgba(10, 10, 10, 0.85)' : 'rgba(255, 255, 255, 0.85)')
+              : 'transparent',
+            backdropFilter: 'blur(16px)',
+              borderBottom: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.08)',
+              boxShadow: scrolled 
+                ? (isDark ? '0 10px 30px rgba(0,0,0,0.5)' : '0 10px 30px rgba(0,0,0,0.1)')
+                : 'none',
 
-          // Transitions
-          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-          padding: { xs: '0 16px', sm: '0 24px', md: '0 40px' },
-          zIndex: 1200,
-          margin: '0 auto', // Center it when floating
-          maxWidth: scrolled ? '1400px' : '100%', // Optional: Limit animation width on ultra-wide screens
-        }}
-      >
+            // Transitions
+            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+            padding: { xs: '0 16px', sm: '0 24px', md: '0 40px' },
+            zIndex: 1200,
+            margin: '0 auto', // Center it when floating
+            maxWidth: scrolled ? '1400px' : '100%', // Optional: Limit animation width on ultra-wide screens
+          }}
+        >
         <Toolbar sx={{ height: '100%', justifyContent: 'space-between', minHeight: 'unset !important', padding: '0 !important' }}>
           {/* Logo */}
           <Box
@@ -102,63 +109,80 @@ export default function Header() {
           </Box>
 
           {/* Nav Links - Desktop Only */}
-          <Box sx={{ display: { xs: 'none', lg: 'flex' }, gap: 2 }}>
-            {/* Scroll sections */}
-            {scrollNavItems.map((item) => (
-              <Button
-                key={item.id}
-                variant="text"
-                onClick={() => scrollToSection(item.id)}
-                sx={{
-                  color: 'var(--color-gray-300)',
-                  fontSize: 14,
-                  fontWeight: 500,
-                  textTransform: 'none',
-                  transition: 'all 0.3s ease',
-                  padding: '8px 12px',
-                  '&:hover': {
-                    color: '#E63946',
-                    backgroundColor: 'rgba(230, 57, 70, 0.1)',
-                  }
-                }}
-              >
-                {item.label}
-              </Button>
-            ))}
+            <Box sx={{ display: { xs: 'none', lg: 'flex' }, gap: 2 }}>
+              {/* Scroll sections */}
+              {scrollNavItems.map((item) => (
+                <Button
+                  key={item.id}
+                  variant="text"
+                  onClick={() => scrollToSection(item.id)}
+                  sx={{
+                    color: isDark ? 'var(--color-gray-300)' : 'var(--text-secondary)',
+                    fontSize: 14,
+                    fontWeight: 500,
+                    textTransform: 'none',
+                    transition: 'all 0.3s ease',
+                    padding: '8px 12px',
+                    '&:hover': {
+                      color: '#E63946',
+                      backgroundColor: 'rgba(230, 57, 70, 0.1)',
+                    }
+                  }}
+                >
+                  {item.label}
+                </Button>
+              ))}
 
-            {/* Page links */}
-            {pageNavItems.map((item) => (
-              <Button
-                key={item.href}
-                variant="text"
-                onClick={() => navigateToPage(item.href)}
-                sx={{
-                  color: 'var(--color-gray-300)',
-                  fontSize: 14,
-                  fontWeight: 500,
-                  textTransform: 'none',
-                  transition: 'all 0.3s ease',
-                  padding: '8px 12px',
-                  '&:hover': {
-                    color: '#E63946',
-                    backgroundColor: 'rgba(230, 57, 70, 0.1)',
-                  }
-                }}
-              >
-                {item.label}
-              </Button>
-            ))}
-          </Box>
+              {/* Page links */}
+              {pageNavItems.map((item) => (
+                <Button
+                  key={item.href}
+                  variant="text"
+                  onClick={() => navigateToPage(item.href)}
+                  sx={{
+                    color: isDark ? 'var(--color-gray-300)' : 'var(--text-secondary)',
+                    fontSize: 14,
+                    fontWeight: 500,
+                    textTransform: 'none',
+                    transition: 'all 0.3s ease',
+                    padding: '8px 12px',
+                    '&:hover': {
+                      color: '#E63946',
+                      backgroundColor: 'rgba(230, 57, 70, 0.1)',
+                    }
+                  }}
+                >
+                  {item.label}
+                </Button>
+              ))}
+            </Box>
 
           {/* Right Side Actions */}
-          <Box sx={{ display: 'flex', gap: { xs: 1, md: 2 }, alignItems: 'center' }}>
-            {/* Login - Hidden on xs */}
-            <Button
+            <Box sx={{ display: 'flex', gap: { xs: 1, md: 2 }, alignItems: 'center' }}>
+              {/* Theme Toggle Button */}
+              <IconButton
+                onClick={toggleTheme}
+                sx={{
+                  color: isDark ? 'white' : 'var(--text-primary)',
+                  padding: '8px',
+                  borderRadius: '10px',
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+                  }
+                }}
+              >
+                {isDark ? <Sun size={20} /> : <Moon size={20} />}
+              </IconButton>
+
+              {/* Login - Hidden on xs */}
+              <Button
               variant="text"
               onClick={() => navigate('/login')}
               sx={{
                 display: { xs: 'none', sm: 'flex' },
-                color: 'white',
+                color: isDark ? 'white' : 'var(--text-primary)',
                 textTransform: 'none',
                 fontWeight: 500,
                 fontSize: { sm: 14, md: 16 },
@@ -202,10 +226,10 @@ export default function Header() {
               onClick={toggleMobileMenu}
               sx={{
                 display: { xs: 'flex', lg: 'none' },
-                color: 'white',
+                color: isDark ? 'white' : 'var(--text-primary)',
                 padding: '8px',
                 '&:hover': {
-                  backgroundColor: 'rgba(255,255,255,0.1)',
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
                 }
               }}
             >
@@ -224,8 +248,8 @@ export default function Header() {
           display: { xs: 'block', lg: 'none' },
           '& .MuiDrawer-paper': {
             width: { xs: '100%', sm: 320 },
-            backgroundColor: '#0A0A0A',
-            borderLeft: '1px solid rgba(255,255,255,0.1)',
+            backgroundColor: isDark ? '#0A0A0A' : '#FFFFFF',
+            borderLeft: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)',
           },
         }}
       >
@@ -236,28 +260,43 @@ export default function Header() {
             justifyContent: 'space-between',
             alignItems: 'center',
             padding: '16px 20px',
-            borderBottom: '1px solid rgba(255,255,255,0.1)',
+            borderBottom: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)',
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, cursor: 'pointer' }} onClick={() => { navigate('/'); setMobileMenuOpen(false); }}>
             <Logo size={40} />
           </Box>
-          <IconButton
-            onClick={() => setMobileMenuOpen(false)}
-            sx={{
-              color: 'white',
-              padding: '8px',
-              '&:hover': {
-                backgroundColor: 'rgba(230, 57, 70, 0.1)',
-              }
-            }}
-          >
-            <X size={24} />
-          </IconButton>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {/* Theme toggle in mobile menu */}
+            <IconButton
+              onClick={toggleTheme}
+              sx={{
+                color: isDark ? 'white' : 'var(--text-primary)',
+                padding: '8px',
+                '&:hover': {
+                  backgroundColor: isDark ? 'rgba(230, 57, 70, 0.1)' : 'rgba(230, 57, 70, 0.1)',
+                }
+              }}
+            >
+              {isDark ? <Sun size={20} /> : <Moon size={20} />}
+            </IconButton>
+            <IconButton
+              onClick={() => setMobileMenuOpen(false)}
+              sx={{
+                color: isDark ? 'white' : 'var(--text-primary)',
+                padding: '8px',
+                '&:hover': {
+                  backgroundColor: isDark ? 'rgba(230, 57, 70, 0.1)' : 'rgba(230, 57, 70, 0.1)',
+                }
+              }}
+            >
+              <X size={24} />
+            </IconButton>
+          </Box>
         </Box>
         <Box sx={{ padding: 3 }}>
           {/* Navigation Links - Scroll Sections */}
-          <Typography sx={{ fontSize: 12, color: 'var(--color-gray-500)', fontWeight: 600, letterSpacing: 1, mb: 2, textTransform: 'uppercase' }}>
+          <Typography sx={{ fontSize: 12, color: isDark ? 'var(--color-gray-500)' : 'var(--text-tertiary)', fontWeight: 600, letterSpacing: 1, mb: 2, textTransform: 'uppercase' }}>
             Explore
           </Typography>
           <List sx={{ padding: 0 }}>
@@ -278,7 +317,7 @@ export default function Header() {
                     primary={item.label}
                     primaryTypographyProps={{
                       sx: {
-                        color: 'white',
+                        color: isDark ? 'white' : 'var(--text-primary)',
                         fontSize: 16,
                         fontWeight: 500,
                         fontFamily: 'var(--font-heading)',
@@ -290,10 +329,10 @@ export default function Header() {
             ))}
           </List>
 
-          <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)', marginY: 2 }} />
+          <Divider sx={{ borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)', marginY: 2 }} />
 
           {/* Page Links */}
-          <Typography sx={{ fontSize: 12, color: 'var(--color-gray-500)', fontWeight: 600, letterSpacing: 1, mb: 2, textTransform: 'uppercase' }}>
+          <Typography sx={{ fontSize: 12, color: isDark ? 'var(--color-gray-500)' : 'var(--text-tertiary)', fontWeight: 600, letterSpacing: 1, mb: 2, textTransform: 'uppercase' }}>
             Company
           </Typography>
           <List sx={{ padding: 0 }}>
@@ -314,7 +353,7 @@ export default function Header() {
                     primary={item.label}
                     primaryTypographyProps={{
                       sx: {
-                        color: 'white',
+                        color: isDark ? 'white' : 'var(--text-primary)',
                         fontSize: 16,
                         fontWeight: 500,
                         fontFamily: 'var(--font-heading)',
@@ -326,7 +365,7 @@ export default function Header() {
             ))}
           </List>
 
-          <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)', marginY: 3 }} />
+          <Divider sx={{ borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)', marginY: 3 }} />
 
           {/* Mobile Login Button */}
           <Button
@@ -335,8 +374,8 @@ export default function Header() {
             onClick={() => navigateToPage('/login')}
             sx={{
               height: 52,
-              borderColor: 'rgba(255,255,255,0.2)',
-              color: 'white',
+              borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
+              color: isDark ? 'white' : 'var(--text-primary)',
               fontSize: 16,
               fontWeight: 600,
               textTransform: 'none',
