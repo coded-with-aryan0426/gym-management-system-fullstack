@@ -27,7 +27,7 @@ public class ProfileUpdateEvent extends ApplicationEvent {
         return updatedBy;
     }
     
-    public long getTimestamp() {
+    public long getEventTimestamp() {
         return timestamp;
     }
     

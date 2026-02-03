@@ -4,6 +4,7 @@ import com.gym.management.dto.MemberProfileDTO;
 import com.gym.management.dto.MemberProfileUpdateDTO;
 import com.gym.management.model.User;
 import com.gym.management.repository.UserRepository;
+import com.gym.management.event.ProfileUpdateEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -14,14 +14,17 @@ import Footer from './Footer';
 import ScrollToTop from './ScrollToTop';
 import { Box } from '@mui/material';
 import { useAuthModal } from '../../contexts/AuthModalContext';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export default function LandingPage() {
   const { openAuthModal } = useAuthModal();
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
 
   const handleOpenSignup = () => openAuthModal('signup');
 
   return (
-    <Box component="div" sx={{ backgroundColor: '#0A0A0A', minHeight: '100vh', overflowX: 'hidden' }}>
+    <Box component="div" sx={{ backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC', minHeight: '100vh', overflowX: 'hidden', transition: 'background-color 0.3s ease' }}>
       <Header />
       <main>
         <section id="hero">

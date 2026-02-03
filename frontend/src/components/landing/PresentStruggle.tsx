@@ -49,14 +49,14 @@ export default function PresentStruggle() {
             ref={containerRef}
             sx={{
                 backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC',
-                paddingY: { xs: '80px', md: '140px' },
+                paddingY: { xs: '48px', md: '72px' },
                 position: 'relative',
                 overflow: 'hidden',
                 transition: 'background-color 0.3s ease'
             }}
         >
             <Container maxWidth="lg">
-                <Grid container spacing={8} alignItems="center">
+                <Grid container spacing={5} alignItems="center">
                     {/* Left Side: Timeline */}
                     <Grid size={{ xs: 12, md: 6 }}>
                         <motion.div
@@ -67,10 +67,10 @@ export default function PresentStruggle() {
                             <Typography
                                 variant="h2"
                                 sx={{
-                                    fontSize: { xs: '32px', md: '48px' },
+                                    fontSize: { xs: '26px', md: '36px' },
                                     fontWeight: 800,
                                     color: isDark ? 'white' : '#0F172A',
-                                    marginBottom: 3,
+                                    marginBottom: 2,
                                     fontFamily: 'var(--font-heading)',
                                     lineHeight: 1.2
                                 }}
@@ -79,10 +79,10 @@ export default function PresentStruggle() {
                             </Typography>
                             <Typography
                                 sx={{
-                                    fontSize: '18px',
+                                    fontSize: '15px',
                                     color: isDark ? 'var(--color-gray-400)' : '#64748B',
-                                    marginBottom: 6,
-                                    maxWidth: '500px'
+                                    marginBottom: 4,
+                                    maxWidth: '450px'
                                 }}
                             >
                                 Even with some digital tools, the struggle remains real. Disconnected systems create a ceiling for your growth.
@@ -114,18 +114,18 @@ export default function PresentStruggle() {
 
                             {/* Timeline Items */}
                             {presentProblems.map((item, index) => (
-                                <Box key={item.id} sx={{ marginBottom: 6, position: 'relative' }}>
+                                <Box key={item.id} sx={{ marginBottom: 4, position: 'relative' }}>
                                     {/* Dot */}
                                     <Box
                                         sx={{
                                             position: 'absolute',
                                             left: -36,
-                                            top: 8,
-                                            width: 12,
-                                            height: 12,
+                                            top: 6,
+                                            width: 10,
+                                            height: 10,
                                             borderRadius: '50%',
                                             backgroundColor: '#E63946',
-                                            boxShadow: '0 0 10px rgba(230, 57, 70, 0.8)',
+                                            boxShadow: '0 0 8px rgba(230, 57, 70, 0.6)',
                                             zIndex: 2
                                         }}
                                     />
@@ -136,12 +136,12 @@ export default function PresentStruggle() {
                                         viewport={{ once: true }}
                                         transition={{ delay: index * 0.2 }}
                                     >
-                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, marginBottom: 1 }}>
-                                            <item.icon size={20} color="#E63946" />
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, marginBottom: 0.5 }}>
+                                            <item.icon size={16} color="#E63946" />
                                             <Typography
                                                 variant="h5"
                                                 sx={{
-                                                    fontSize: '20px',
+                                                    fontSize: '16px',
                                                     fontWeight: 700,
                                                     color: isDark ? 'white' : '#0F172A',
                                                     fontFamily: 'var(--font-heading)'
@@ -150,21 +150,21 @@ export default function PresentStruggle() {
                                                 {item.title}
                                             </Typography>
                                         </Box>
-                                        <Typography sx={{ color: isDark ? 'var(--color-gray-400)' : '#64748B', marginBottom: 2, fontSize: '15px' }}>
+                                        <Typography sx={{ color: isDark ? 'var(--color-gray-400)' : '#64748B', marginBottom: 1.5, fontSize: '13px' }}>
                                             {item.description}
                                         </Typography>
                                         <Box
                                             sx={{
-                                                padding: '12px 20px',
+                                                padding: '10px 14px',
                                                 backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
-                                                borderRadius: '12px',
+                                                borderRadius: '10px',
                                                 borderLeft: '2px inset #E63946'
                                             }}
                                         >
-                                            <Typography sx={{ color: isDark ? 'var(--color-gray-300)' : '#475569', fontSize: '14px', fontStyle: 'italic' }}>
+                                            <Typography sx={{ color: isDark ? 'var(--color-gray-300)' : '#475569', fontSize: '13px', fontStyle: 'italic' }}>
                                                 "{item.quote}"
                                             </Typography>
-                                            <Typography sx={{ color: '#E63946', fontSize: '12px', fontWeight: 700, marginTop: 1, textTransform: 'uppercase', letterSpacing: '1px' }}>
+                                            <Typography sx={{ color: '#E63946', fontSize: '11px', fontWeight: 700, marginTop: 0.5, textTransform: 'uppercase', letterSpacing: '1px' }}>
                                                 — {item.author}
                                             </Typography>
                                         </Box>

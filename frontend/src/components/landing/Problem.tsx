@@ -55,7 +55,7 @@ export default function Problem() {
             ref={containerRef}
             sx={{
                 backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC',
-                paddingY: { xs: '60px', sm: '80px', md: '100px', lg: '120px' },
+                paddingY: { xs: '40px', sm: '48px', md: '60px' },
                 paddingX: { xs: '16px', sm: '24px', md: '0' },
                 position: 'relative',
                 overflow: 'hidden',
@@ -79,7 +79,7 @@ export default function Problem() {
 
             <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
                 {/* Section Header */}
-                <Box sx={{ textAlign: 'center', marginBottom: { xs: 6, md: 8, lg: 10 } }}>
+                <Box sx={{ textAlign: 'center', marginBottom: { xs: 4, md: 5 } }}>
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -87,12 +87,12 @@ export default function Problem() {
                     >
                         <Typography
                             sx={{
-                                fontSize: '14px',
+                                fontSize: '12px',
                                 fontWeight: 600,
                                 textTransform: 'uppercase',
                                 letterSpacing: '2px',
                                 color: '#E63946',
-                                marginBottom: 2,
+                                marginBottom: 1.5,
                             }}
                         >
                             The Days of Struggle
@@ -100,14 +100,14 @@ export default function Problem() {
                         <Typography
                             variant="h2"
                             sx={{
-                                fontSize: { xs: '36px', md: '56px' },
+                                fontSize: { xs: '28px', md: '40px' },
                                 fontWeight: 800,
                                 fontFamily: 'var(--font-heading)',
                                 color: isDark ? 'white' : '#0F172A',
-                                maxWidth: 800,
+                                maxWidth: 700,
                                 margin: '0 auto',
-                                lineHeight: 1.1,
-                                letterSpacing: '-1px'
+                                lineHeight: 1.15,
+                                letterSpacing: '-0.5px'
                             }}
                         >
                             Remember These Days? <Box component="span" sx={{ color: '#E63946' }}>Chaotic.</Box>
@@ -140,7 +140,7 @@ export default function Problem() {
                         />
                     </Box>
 
-                    <Grid container spacing={6}>
+                    <Grid container spacing={4}>
                         {problems.map((item, index) => (
                             <Grid size={{ xs: 12, md: 4 }} key={item.id}>
                                 <motion.div
@@ -152,12 +152,12 @@ export default function Problem() {
                                     <Card
                                         sx={{
                                             backgroundColor: isDark ? '#1A1A1A' : '#FFFFFF',
-                                            borderLeft: '4px solid #E63946',
+                                            borderLeft: '3px solid #E63946',
                                             borderTop: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.08)',
                                             borderRight: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.08)',
                                             borderBottom: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.08)',
-                                            borderRadius: '16px',
-                                            padding: 4,
+                                            borderRadius: '12px',
+                                            padding: 3,
                                             height: '100%',
                                             transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                                             position: 'relative',
@@ -165,12 +165,12 @@ export default function Problem() {
                                             boxShadow: isDark ? 'none' : '0 2px 8px rgba(0,0,0,0.05)',
                                             '&:hover': {
                                                 backgroundColor: isDark ? '#222222' : '#F8FAFC',
-                                                transform: 'translateY(-8px)',
+                                                transform: 'translateY(-4px)',
                                                 boxShadow: isDark 
-                                                    ? '0 20px 40px rgba(0,0,0,0.4), 0 0 20px rgba(230, 57, 70, 0.1)'
-                                                    : '0 20px 40px rgba(0,0,0,0.1), 0 0 20px rgba(230, 57, 70, 0.05)',
+                                                    ? '0 15px 30px rgba(0,0,0,0.3), 0 0 15px rgba(230, 57, 70, 0.1)'
+                                                    : '0 15px 30px rgba(0,0,0,0.08), 0 0 15px rgba(230, 57, 70, 0.05)',
                                                 '& .icon-glow': {
-                                                    boxShadow: '0 0 30px rgba(230, 57, 70, 0.4)',
+                                                    boxShadow: '0 0 20px rgba(230, 57, 70, 0.3)',
                                                 }
                                             },
                                         }}
@@ -179,29 +179,29 @@ export default function Problem() {
                                         <Box
                                             className="icon-glow"
                                             sx={{
-                                                width: 64,
-                                                height: 64,
-                                                borderRadius: '12px',
+                                                width: 48,
+                                                height: 48,
+                                                borderRadius: '10px',
                                                 backgroundColor: item.iconBg,
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 justifyContent: 'center',
-                                                marginBottom: 3,
+                                                marginBottom: 2,
                                                 transition: 'all 0.3s ease',
                                             }}
                                         >
-                                            <item.icon size={32} color={item.iconColor} />
+                                            <item.icon size={24} color={item.iconColor} />
                                         </Box>
 
                                         {/* Headline */}
                                         <Typography
                                             variant="h4"
                                             sx={{
-                                                fontSize: '24px',
+                                                fontSize: '18px',
                                                 fontWeight: 700,
                                                 fontFamily: 'var(--font-heading)',
                                                 color: isDark ? 'white' : '#0F172A',
-                                                marginBottom: 2,
+                                                marginBottom: 1.5,
                                             }}
                                         >
                                             {item.headline}
@@ -210,10 +210,10 @@ export default function Problem() {
                                         {/* Agitation Text */}
                                         <Typography
                                             sx={{
-                                                fontSize: '16px',
-                                                lineHeight: 1.6,
+                                                fontSize: '14px',
+                                                lineHeight: 1.5,
                                                 color: isDark ? 'var(--color-gray-300)' : '#475569',
-                                                marginBottom: 4,
+                                                marginBottom: 2.5,
                                             }}
                                         >
                                             {item.agitation}
@@ -224,18 +224,18 @@ export default function Problem() {
                                             sx={{
                                                 display: 'flex',
                                                 alignItems: 'center',
-                                                gap: 1,
-                                                fontSize: '13px',
+                                                gap: 0.75,
+                                                fontSize: '11px',
                                                 fontWeight: 600,
                                                 color: '#E63946',
                                                 backgroundColor: 'rgba(230, 57, 70, 0.1)',
-                                                padding: '8px 16px',
-                                                borderRadius: '8px',
+                                                padding: '6px 12px',
+                                                borderRadius: '6px',
                                                 border: '1px solid rgba(230, 57, 70, 0.2)',
                                                 width: 'fit-content'
                                             }}
                                         >
-                                            <AlertCircle size={14} />
+                                            <AlertCircle size={12} />
                                             {item.stat}
                                         </Box>
                                     </Card>
@@ -254,26 +254,26 @@ export default function Problem() {
                 >
                     <Box
                         sx={{
-                            maxWidth: 800,
-                            margin: '96px auto 0',
-                            padding: 6,
+                            maxWidth: 700,
+                            margin: '48px auto 0',
+                            padding: 4,
                             backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)',
-                            borderLeft: '4px solid #E63946',
-                            borderRadius: '0 24px 24px 0',
+                            borderLeft: '3px solid #E63946',
+                            borderRadius: '0 16px 16px 0',
                             textAlign: 'center'
                         }}
                     >
                         <Typography
                             sx={{
-                                fontSize: '20px',
+                                fontSize: '16px',
                                 fontStyle: 'italic',
                                 color: isDark ? 'var(--color-gray-300)' : '#475569',
-                                lineHeight: 1.8,
+                                lineHeight: 1.6,
                                 fontWeight: 400
                             }}
                         >
                             "I built AthlonX because I was tired of using 5 different softwares just to keep my gym open. I wanted one dashboard that told me the truth about my business."
-                            <Box component="span" sx={{ display: 'block', marginTop: 3, fontStyle: 'normal', fontWeight: 700, color: isDark ? 'white' : '#0F172A', fontSize: '18px', letterSpacing: '0.5px' }}>
+                            <Box component="span" sx={{ display: 'block', marginTop: 2, fontStyle: 'normal', fontWeight: 700, color: isDark ? 'white' : '#0F172A', fontSize: '14px', letterSpacing: '0.5px' }}>
                                 — ARYAN, FOUNDER OF ATHLONX
                             </Box>
                         </Typography>

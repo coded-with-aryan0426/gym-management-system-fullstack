@@ -49,7 +49,7 @@ export default function SocialProof() {
         <Box
             sx={{
                 backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC',
-                paddingY: { xs: '80px', md: '120px' },
+                paddingY: { xs: '48px', md: '72px' },
                 borderTop: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.05)',
                 borderBottom: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.05)',
                 transition: 'background-color 0.3s ease'
@@ -57,15 +57,15 @@ export default function SocialProof() {
         >
             <Container maxWidth="lg">
                 {/* Section Header */}
-                <Box sx={{ textAlign: 'center', marginBottom: 8 }}>
+                <Box sx={{ textAlign: 'center', marginBottom: 5 }}>
                     <Typography
                         sx={{
-                            fontSize: '14px',
+                            fontSize: '13px',
                             fontWeight: 700,
                             textTransform: 'uppercase',
                             letterSpacing: '2px',
                             color: '#E63946',
-                            marginBottom: 2,
+                            marginBottom: 1.5,
                         }}
                     >
                         THE PROOF
@@ -73,7 +73,7 @@ export default function SocialProof() {
                     <Typography
                         variant="h2"
                         sx={{
-                            fontSize: { xs: '36px', md: '56px' },
+                            fontSize: { xs: '28px', md: '40px' },
                             fontWeight: 900,
                             fontFamily: 'var(--font-heading)',
                             color: isDark ? 'white' : '#0F172A',
@@ -173,22 +173,22 @@ export default function SocialProof() {
                                     <Avatar
                                         src={testimonial.avatar}
                                         alt={testimonial.name}
-                                        sx={{ width: 56, height: 56, border: '2px solid rgba(230, 57, 70, 0.3)' }}
+                                        sx={{ width: 48, height: 48, border: '2px solid rgba(230, 57, 70, 0.3)' }}
                                     />
                                     <Box>
                                         <Typography
                                             sx={{
-                                                fontSize: '16px',
+                                                fontSize: '15px',
                                                 fontWeight: 700,
-                                                color: 'white',
+                                                color: isDark ? 'white' : '#0F172A',
                                             }}
                                         >
                                             {testimonial.name}
                                         </Typography>
                                         <Typography
                                             sx={{
-                                                fontSize: '13px',
-                                                color: 'var(--color-gray-500)',
+                                                fontSize: '12px',
+                                                color: isDark ? 'var(--color-gray-500)' : '#64748B',
                                                 fontWeight: 500
                                             }}
                                         >

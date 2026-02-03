@@ -69,7 +69,7 @@ export default function EmpoweredFuture() {
         <Box
             sx={{
                 backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC',
-                paddingY: { xs: '100px', md: '160px' },
+                paddingY: { xs: '48px', md: '72px' },
                 position: 'relative',
                 overflow: 'hidden',
                 transition: 'background-color 0.3s ease'
@@ -103,7 +103,7 @@ export default function EmpoweredFuture() {
 
             <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
                 {/* Section Header */}
-                <Box sx={{ textAlign: 'center', marginBottom: { xs: 8, md: 12 } }}>
+                <Box sx={{ textAlign: 'center', marginBottom: { xs: 4, md: 6 } }}>
                     <motion.div
                         initial={{ opacity: 0, scale: 0.9 }}
                         whileInView={{ opacity: 1, scale: 1 }}
@@ -112,27 +112,27 @@ export default function EmpoweredFuture() {
                         <Typography
                             variant="h1"
                             sx={{
-                                fontSize: { xs: '40px', md: '72px' },
+                                fontSize: { xs: '32px', md: '48px' },
                                 fontWeight: 900,
                                 color: isDark ? 'white' : '#0F172A',
-                                marginBottom: 3,
+                                marginBottom: 2,
                                 fontFamily: 'var(--font-heading)',
-                                letterSpacing: '-2px',
-                                lineHeight: 1
+                                letterSpacing: '-1px',
+                                lineHeight: 1.1
                             }}
                         >
                             Welcome to Your <Box component="span" sx={{ color: '#E63946' }}>New Reality</Box>
                         </Typography>
                         <Typography
                             sx={{
-                                fontSize: { xs: '18px', md: '22px' },
+                                fontSize: { xs: '15px', md: '17px' },
                                 color: isDark ? 'var(--color-gray-400)' : '#64748B',
-                                maxWidth: '700px',
+                                maxWidth: '600px',
                                 margin: '0 auto',
                                 fontWeight: 400
                             }}
                         >
-                            One powerful platform. Complete control. Unprecedented growth. Stop managing chaos and start leading an empire.
+                            One powerful platform. Complete control. Unprecedented growth.
                         </Typography>
                     </motion.div>
                 </Box>
@@ -156,85 +156,89 @@ export default function EmpoweredFuture() {
                             viewport={{ once: true }}
                             transition={{ duration: 1.2, ease: "easeOut" }}
                         >
-                            <Box
-                                sx={{
-                                    position: 'relative',
-                                    perspective: '1000px',
-                                    padding: '2px',
-                                    background: 'linear-gradient(135deg, rgba(230, 57, 70, 0.5) 0%, rgba(255, 255, 255, 0.1) 100%)',
-                                    borderRadius: '32px',
-                                    boxShadow: '0 40px 100px rgba(0,0,0,0.8), 0 0 40px rgba(230, 57, 70, 0.2)'
-                                }}
-                            >
-                                <Paper
-                                    elevation={0}
-                                    sx={{
-                                        backgroundColor: '#0D0D0D',
-                                        borderRadius: '30px',
-                                        overflow: 'hidden',
-                                        border: '1px solid rgba(255,255,255,0.05)'
-                                    }}
-                                >
-                                    {/* Mock Dashboard UI */}
-                                    <Box sx={{ p: 4 }}>
-                                        {/* Dashboard Header */}
-                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 4 }}>
-                                            <Box>
-                                                <Typography sx={{ color: 'white', fontWeight: 700, fontSize: '18px' }}>Command Center</Typography>
-                                                <Typography sx={{ color: 'var(--color-gray-500)', fontSize: '12px' }}>Real-time Business Intelligence</Typography>
-                                            </Box>
-                                            <Box sx={{ display: 'flex', gap: 1.5 }}>
-                                                <Box sx={{ p: 1, borderRadius: '8px', bgcolor: 'rgba(255,255,255,0.03)' }}><Search size={16} color="#666" /></Box>
-                                                <Box sx={{ p: 1, borderRadius: '8px', bgcolor: 'rgba(255,255,255,0.03)' }}><Bell size={16} color="#E63946" /></Box>
-                                            </Box>
-                                        </Box>
+<Box
+                                            sx={{
+                                                position: 'relative',
+                                                perspective: '1000px',
+                                                padding: '2px',
+                                                background: isDark 
+                                                    ? 'linear-gradient(135deg, rgba(230, 57, 70, 0.5) 0%, rgba(255, 255, 255, 0.1) 100%)'
+                                                    : 'linear-gradient(135deg, rgba(230, 57, 70, 0.3) 0%, rgba(0, 0, 0, 0.05) 100%)',
+                                                borderRadius: '24px',
+                                                boxShadow: isDark 
+                                                    ? '0 40px 100px rgba(0,0,0,0.8), 0 0 40px rgba(230, 57, 70, 0.2)'
+                                                    : '0 20px 60px rgba(0,0,0,0.15), 0 0 20px rgba(230, 57, 70, 0.1)'
+                                            }}
+                                        >
+                                            <Paper
+                                                elevation={0}
+                                                sx={{
+                                                    backgroundColor: isDark ? '#0D0D0D' : '#FFFFFF',
+                                                    borderRadius: '22px',
+                                                    overflow: 'hidden',
+                                                    border: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.08)'
+                                                }}
+                                            >
+                                                {/* Mock Dashboard UI */}
+                                                <Box sx={{ p: 3 }}>
+                                                    {/* Dashboard Header */}
+                                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
+                                                        <Box>
+                                                            <Typography sx={{ color: isDark ? 'white' : '#0F172A', fontWeight: 700, fontSize: '16px' }}>Command Center</Typography>
+                                                            <Typography sx={{ color: isDark ? 'var(--color-gray-500)' : '#64748B', fontSize: '11px' }}>Real-time Business Intelligence</Typography>
+                                                        </Box>
+                                                        <Box sx={{ display: 'flex', gap: 1 }}>
+                                                            <Box sx={{ p: 0.75, borderRadius: '6px', bgcolor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)' }}><Search size={14} color={isDark ? "#666" : "#999"} /></Box>
+                                                            <Box sx={{ p: 0.75, borderRadius: '6px', bgcolor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)' }}><Bell size={14} color="#E63946" /></Box>
+                                                        </Box>
+                                                    </Box>
 
-                                        {/* Dashboard Stats */}
-                                        <Grid container spacing={2}>
-                                            <Grid size={{ xs: 6 }}>
-                                                <Box sx={{ p: 3, borderRadius: '20px', bgcolor: 'rgba(230, 57, 70, 0.05)', border: '1px solid rgba(230, 57, 70, 0.1)' }}>
-                                                    <Typography sx={{ color: 'var(--color-gray-400)', fontSize: '11px', fontWeight: 600, mb: 1 }}>ACTIVE MEMBERS</Typography>
-                                                    <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: 1 }}>
-                                                        <Typography sx={{ color: 'white', fontSize: '28px', fontWeight: 800 }}>1,284</Typography>
-                                                        <Typography sx={{ color: '#06D6A0', fontSize: '12px', fontWeight: 700, mb: 1 }}>+12%</Typography>
+                                                    {/* Dashboard Stats */}
+                                                    <Grid container spacing={1.5}>
+                                                        <Grid size={{ xs: 6 }}>
+                                                            <Box sx={{ p: 2, borderRadius: '12px', bgcolor: 'rgba(230, 57, 70, 0.05)', border: '1px solid rgba(230, 57, 70, 0.1)' }}>
+                                                                <Typography sx={{ color: isDark ? 'var(--color-gray-400)' : '#64748B', fontSize: '10px', fontWeight: 600, mb: 0.5 }}>ACTIVE MEMBERS</Typography>
+                                                                <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: 0.5 }}>
+                                                                    <Typography sx={{ color: isDark ? 'white' : '#0F172A', fontSize: '22px', fontWeight: 800 }}>1,284</Typography>
+                                                                    <Typography sx={{ color: '#06D6A0', fontSize: '11px', fontWeight: 700, mb: 0.5 }}>+12%</Typography>
+                                                                </Box>
+                                                            </Box>
+                                                        </Grid>
+                                                        <Grid size={{ xs: 6 }}>
+                                                            <Box sx={{ p: 2, borderRadius: '12px', bgcolor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)', border: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.05)' }}>
+                                                                <Typography sx={{ color: isDark ? 'var(--color-gray-400)' : '#64748B', fontSize: '10px', fontWeight: 600, mb: 0.5 }}>TODAY'S REVENUE</Typography>
+                                                                <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: 0.5 }}>
+                                                                    <Typography sx={{ color: isDark ? 'white' : '#0F172A', fontSize: '22px', fontWeight: 800 }}>₹42,850</Typography>
+                                                                    <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: '#06D6A0', mb: 1 }} />
+                                                                </Box>
+                                                            </Box>
+                                                        </Grid>
+                                                    </Grid>
+
+                                                    {/* Representative Graph */}
+                                                    <Box sx={{ mt: 2.5, height: '100px', position: 'relative' }}>
+                                                        <svg width="100%" height="100%" viewBox="0 0 400 100" preserveAspectRatio="none">
+                                                            <motion.path
+                                                                d="M0,80 Q50,90 100,50 T200,30 T300,60 T400,20"
+                                                                fill="none"
+                                                                stroke="#E63946"
+                                                                strokeWidth="3"
+                                                                initial={{ pathLength: 0 }}
+                                                                whileInView={{ pathLength: 1 }}
+                                                                transition={{ duration: 1.5, delay: 0.8 }}
+                                                            />
+                                                            <Box component="rect" width="100%" height="100%" fill="url(#grad1)" style={{ opacity: 0.1 }} />
+                                                        </svg>
+                                                    </Box>
+
+                                                    {/* Bottom Action Item */}
+                                                    <Box sx={{ mt: 2, display: 'flex', gap: 1.5 }}>
+                                                        <Box sx={{ flex: 1, height: '6px', borderRadius: '3px', bgcolor: 'rgba(230, 57, 70, 0.2)' }} />
+                                                        <Box sx={{ flex: 2, height: '6px', borderRadius: '3px', bgcolor: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)' }} />
                                                     </Box>
                                                 </Box>
-                                            </Grid>
-                                            <Grid size={{ xs: 6 }}>
-                                                <Box sx={{ p: 3, borderRadius: '20px', bgcolor: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                                    <Typography sx={{ color: 'var(--color-gray-400)', fontSize: '11px', fontWeight: 600, mb: 1 }}>TODAY'S REVENUE</Typography>
-                                                    <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: 1 }}>
-                                                        <Typography sx={{ color: 'white', fontSize: '28px', fontWeight: 800 }}>₹42,850</Typography>
-                                                        <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#06D6A0', mb: 1.5 }} />
-                                                    </Box>
-                                                </Box>
-                                            </Grid>
-                                        </Grid>
-
-                                        {/* Representative Graph */}
-                                        <Box sx={{ mt: 4, height: '140px', position: 'relative' }}>
-                                            <svg width="100%" height="100%" viewBox="0 0 400 100" preserveAspectRatio="none">
-                                                <motion.path
-                                                    d="M0,80 Q50,90 100,50 T200,30 T300,60 T400,20"
-                                                    fill="none"
-                                                    stroke="#E63946"
-                                                    strokeWidth="3"
-                                                    initial={{ pathLength: 0 }}
-                                                    whileInView={{ pathLength: 1 }}
-                                                    transition={{ duration: 1.5, delay: 0.8 }}
-                                                />
-                                                <Box component="rect" width="100%" height="100%" fill="url(#grad1)" style={{ opacity: 0.1 }} />
-                                            </svg>
+                                            </Paper>
                                         </Box>
-
-                                        {/* Bottom Action Item */}
-                                        <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
-                                            <Box sx={{ flex: 1, height: '8px', borderRadius: '4px', bgcolor: 'rgba(230, 57, 70, 0.2)' }} />
-                                            <Box sx={{ flex: 2, height: '8px', borderRadius: '4px', bgcolor: 'rgba(255, 255, 255, 0.05)' }} />
-                                        </Box>
-                                    </Box>
-                                </Paper>
-                            </Box>
                         </motion.div>
                     </Grid>
 

@@ -38,9 +38,9 @@ export default function Hero({ onSignupClick }: HeroProps) {
       <Box
         sx={{
           position: 'relative',
-          minHeight: { xs: 'auto', md: '100vh' },
-          paddingTop: { xs: '80px', sm: '100px', md: '120px' },
-          paddingBottom: { xs: '60px', md: '80px' },
+          minHeight: { xs: 'auto', md: 'auto' },
+          paddingTop: { xs: '70px', sm: '80px', md: '90px' },
+          paddingBottom: { xs: '40px', md: '60px' },
           overflow: 'hidden',
           backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC',
           transition: 'background-color 0.3s ease',
@@ -53,7 +53,7 @@ export default function Hero({ onSignupClick }: HeroProps) {
           padding: { xs: '0 16px', sm: '0 24px', md: '0 40px', lg: '0 60px' },
           display: 'flex',
           flexDirection: { xs: 'column', lg: 'row' },
-          gap: { xs: '40px', md: '48px', lg: '64px' },
+          gap: { xs: '24px', md: '32px', lg: '48px' },
           alignItems: 'center',
           width: '100%',
         }}
@@ -87,14 +87,14 @@ export default function Hero({ onSignupClick }: HeroProps) {
           <Typography
             variant="h1"
             sx={{
-              fontSize: { xs: '32px', sm: '40px', md: '56px', lg: '64px', xl: '72px' },
+              fontSize: { xs: '28px', sm: '36px', md: '44px', lg: '52px', xl: '56px' },
               fontWeight: 900,
               fontFamily: 'var(--font-heading)',
               lineHeight: 1.1,
-              letterSpacing: { xs: '-1px', md: '-2px' },
+              letterSpacing: { xs: '-0.5px', md: '-1px' },
               color: isDark ? 'white' : 'var(--text-primary)',
-              marginBottom: { xs: 2, md: 3 },
-              maxWidth: { lg: 700 },
+              marginBottom: { xs: 1.5, md: 2 },
+              maxWidth: { lg: 600 },
             }}
           >
             Run Your Gym Like a <GradientText>Machine</GradientText>. Not a Mess.
@@ -103,12 +103,12 @@ export default function Hero({ onSignupClick }: HeroProps) {
           <Typography
             variant="body1"
             sx={{
-              fontSize: { xs: '15px', sm: '16px', md: '18px', lg: '20px' },
+              fontSize: { xs: '14px', sm: '15px', md: '16px', lg: '17px' },
               fontWeight: 400,
-              lineHeight: 1.6,
+              lineHeight: 1.5,
               color: isDark ? 'var(--color-gray-400)' : 'var(--text-secondary)',
-              maxWidth: { xs: '100%', lg: 550 },
-              margin: { xs: '0 auto 24px', lg: '0 0 40px 0' },
+              maxWidth: { xs: '100%', lg: 500 },
+              margin: { xs: '0 auto 20px', lg: '0 0 28px 0' },
             }}
           >
             Stop drowning in spreadsheets and fragmented apps. Sync your billing,
@@ -119,14 +119,14 @@ export default function Hero({ onSignupClick }: HeroProps) {
           <Box sx={{
             display: 'flex',
             flexDirection: 'column',
-            gap: 2,
-            marginBottom: { xs: 4, md: 6 },
+            gap: 1.5,
+            marginBottom: { xs: 3, md: 4 },
             alignItems: { xs: 'center', lg: 'flex-start' },
           }}>
             <Box sx={{
               display: 'flex',
-              gap: 2,
-              maxWidth: { xs: '100%', sm: 520 },
+              gap: 1.5,
+              maxWidth: { xs: '100%', sm: 480 },
               width: '100%',
               flexDirection: { xs: 'column', sm: 'row' }
             }}>
@@ -136,10 +136,10 @@ export default function Hero({ onSignupClick }: HeroProps) {
                   fullWidth
                   sx={{
                     '& .MuiOutlinedInput-root': {
-                      height: { xs: 52, md: 60 },
+                      height: { xs: 46, md: 52 },
                       backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)',
-                      borderRadius: '12px',
-                      fontSize: { xs: '14px', md: '16px' },
+                      borderRadius: '10px',
+                      fontSize: { xs: '14px', md: '15px' },
                       color: isDark ? 'white' : 'var(--text-primary)',
                       '& fieldset': {
                         borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
@@ -155,7 +155,7 @@ export default function Hero({ onSignupClick }: HeroProps) {
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <Mail size={18} color={isDark ? "#666" : "#999"} />
+                        <Mail size={16} color={isDark ? "#666" : "#999"} />
                       </InputAdornment>
                     ),
                   }}
@@ -164,11 +164,11 @@ export default function Hero({ onSignupClick }: HeroProps) {
               <Button
                 variant="contained"
                 sx={{
-                  height: { xs: 52, md: 60 },
-                  minWidth: { xs: '100%', sm: 180, md: 200 },
+                  height: { xs: 46, md: 52 },
+                  minWidth: { xs: '100%', sm: 160, md: 180 },
                   background: 'var(--gradient-cta)',
-                  borderRadius: '12px',
-                  fontSize: { xs: '15px', md: '16px' },
+                  borderRadius: '10px',
+                  fontSize: { xs: '14px', md: '15px' },
                   fontWeight: 700,
                   textTransform: 'none',
                   color: 'white',
@@ -180,7 +180,7 @@ export default function Hero({ onSignupClick }: HeroProps) {
                     boxShadow: '0 8px 30px rgba(230, 57, 70, 0.5)',
                   },
                 }}
-                endIcon={<ArrowRight size={20} />}
+                endIcon={<ArrowRight size={18} />}
                 onClick={onSignupClick}
               >
                 Join the Future
@@ -189,13 +189,13 @@ export default function Hero({ onSignupClick }: HeroProps) {
 
             <Button
               variant="text"
-              startIcon={<Play size={18} />}
+              startIcon={<Play size={16} />}
               sx={{
                 color: isDark ? 'var(--color-gray-300)' : 'var(--text-secondary)',
-                fontSize: { xs: '13px', md: '14px' },
+                fontSize: { xs: '12px', md: '13px' },
                 fontWeight: 500,
                 textTransform: 'none',
-                padding: '8px 0',
+                padding: '6px 0',
                 justifyContent: { xs: 'center', lg: 'flex-start' },
                 width: 'fit-content',
                 '&:hover': {
@@ -213,10 +213,10 @@ export default function Hero({ onSignupClick }: HeroProps) {
             sx={{
               display: 'flex',
               alignItems: 'center',
-              gap: { xs: 1.5, sm: 2, md: 3 },
+              gap: { xs: 1, sm: 1.5, md: 2 },
               flexWrap: 'wrap',
               justifyContent: { xs: 'center', lg: 'flex-start' },
-              paddingTop: { xs: 3, md: 4 },
+              paddingTop: { xs: 2, md: 3 },
               borderTop: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)',
             }}
           >
@@ -230,12 +230,12 @@ export default function Hero({ onSignupClick }: HeroProps) {
                 }}
               >
                 <signal.icon
-                  size={16}
+                  size={14}
                   color="#06D6A0"
                 />
                 <Typography
                   sx={{
-                    fontSize: { xs: '11px', sm: '12px', md: '13px' },
+                    fontSize: { xs: '10px', sm: '11px', md: '12px' },
                     fontWeight: 500,
                     color: isDark ? 'var(--color-gray-300)' : 'var(--text-secondary)',
                     whiteSpace: 'nowrap',
