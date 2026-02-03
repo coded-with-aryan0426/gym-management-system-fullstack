@@ -4,8 +4,8 @@
  * Ensures consistent data synchronization across all roles
  */
 
-import { MemberProfileDTO, MemberProfileUpdateDTO } from '../types/member.types';
-import { apiClient } from './apiClient';
+import { MemberProfileDTO, MemberProfileUpdateDTO } from '../types/member';
+import { apiClient } from './api';
 import ProfileCacheManager from './profileCacheManager';
 
 class UnifiedProfileApiService {

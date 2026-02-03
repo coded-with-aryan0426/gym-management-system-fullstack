@@ -3,11 +3,13 @@ import { Smartphone, Download, Calendar, CreditCard, TrendingUp, CheckCircle, Ap
 import { motion } from 'framer-motion';
 import Header from '../../components/landing/Header';
 import Footer from '../../components/landing/Footer';
+import ScrollProgress from '../../components/landing/ScrollProgress';
 import './StaticPages.css';
 
 export default function MemberAppPage() {
     return (
         <Box className="static-page">
+            <ScrollProgress />
             <Header />
             <Box className="static-page__hero static-page__hero--member-app">
                 {/* Background Decor */}

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Send, Mail, Phone, MessageSquare, MapPin, Clock, Globe, ArrowRight } from 'lucide-react';
 import Header from '../../components/landing/Header';
 import Footer from '../../components/landing/Footer';
+import ScrollProgress from '../../components/landing/ScrollProgress';
 import { useTheme } from '../../contexts/ThemeContext';
 import './StaticPages.css';
 
@@ -41,6 +42,7 @@ export default function ContactPage() {
 
     return (
         <Box className="static-page">
+            <ScrollProgress />
             <Header />
             
             {/* Background Accents */}

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { FileText, Gavel, Scale, Ban, RefreshCw, AlertCircle, Clock, Globe, HelpCircle } from 'lucide-react';
 import Header from '../../components/landing/Header';
 import Footer from '../../components/landing/Footer';
+import ScrollProgress from '../../components/landing/ScrollProgress';
 import { useTheme } from '../../contexts/ThemeContext';
 import './StaticPages.css';
 
@@ -53,6 +54,7 @@ export default function TermsPage() {
 
     return (
         <Box className="static-page">
+            <ScrollProgress />
             <Header />
             
             {/* Background Accents */}

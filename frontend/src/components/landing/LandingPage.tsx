@@ -12,6 +12,7 @@ import Transformation from './Transformation';
 import SecondaryCTA from './SecondaryCTA';
 import Footer from './Footer';
 import ScrollToTop from './ScrollToTop';
+import ScrollProgress from './ScrollProgress';
 import { Box } from '@mui/material';
 import { useAuthModal } from '../../contexts/AuthModalContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -23,9 +24,10 @@ export default function LandingPage() {
 
   const handleOpenSignup = () => openAuthModal('signup');
 
-  return (
-    <Box component="div" sx={{ backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC', minHeight: '100vh', overflowX: 'hidden', transition: 'background-color 0.3s ease' }}>
-      <Header />
+return (
+      <Box component="div" sx={{ backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC', minHeight: '100vh', overflowX: 'hidden', transition: 'background-color 0.3s ease' }}>
+        <ScrollProgress />
+        <Header />
       <main>
         <section id="hero">
           <Hero onSignupClick={handleOpenSignup} />

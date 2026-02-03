@@ -1,8 +1,9 @@
 import { Box, Typography, Container, Avatar } from '@mui/material';
-import { motion, useScroll, useTransform, useSpring, useInView } from 'framer-motion';
-import { useRef, useEffect, useState } from 'react';
+import { motion, useInView } from 'framer-motion';
+import { useRef } from 'react';
 import Header from '../../components/landing/Header';
 import Footer from '../../components/landing/Footer';
+import ScrollProgress from '../../components/landing/ScrollProgress';
 import { useTheme } from '../../contexts/ThemeContext';
 import {
     Target,
@@ -267,9 +268,6 @@ function Milestone({ year, title, description, delay }: {
 export default function AboutPage() {
     const { theme } = useTheme();
     const isDark = theme === 'dark';
-    
-    const { scrollYProgress } = useScroll();
-    const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30 });
 
     const values = [
         { 
@@ -338,20 +336,7 @@ export default function AboutPage() {
             background: isDark ? '#0A0A0A' : '#F8FAFC',
             position: 'relative'
         }}>
-            {/* Progress Bar */}
-            <MotionBox
-                style={{ scaleX }}
-                sx={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    height: 3,
-                    background: 'linear-gradient(90deg, #DC2626 0%, #EF4444 100%)',
-                    transformOrigin: 'left',
-                    zIndex: 9999
-                }}
-            />
+            <ScrollProgress />
             
             <Header />
             

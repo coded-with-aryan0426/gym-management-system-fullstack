@@ -1,5 +1,5 @@
 import { MembershipPackageDTO } from '@/types/membershipPackage';
-import { apiClient } from './apiClient';
+import { apiClient } from './api';
 
 export interface MembershipPlanAnalytics {
   totalPlans: number;

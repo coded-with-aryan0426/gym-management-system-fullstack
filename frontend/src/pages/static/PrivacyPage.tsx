@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Shield, Lock, Eye, FileText, UserCheck, Bell, Globe, Mail, Clock } from 'lucide-react';
 import Header from '../../components/landing/Header';
 import Footer from '../../components/landing/Footer';
+import ScrollProgress from '../../components/landing/ScrollProgress';
 import { useTheme } from '../../contexts/ThemeContext';
 import './StaticPages.css';
 
@@ -53,6 +54,7 @@ export default function PrivacyPage() {
 
     return (
         <Box className="static-page">
+            <ScrollProgress />
             <Header />
             
             {/* Background Accents */}
