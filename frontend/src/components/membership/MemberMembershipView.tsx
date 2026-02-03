@@ -1,10 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Progress } from '@/components/ui/progress';
-import { Separator } from '@/components/ui/separator';
+import { Card, Badge, Button } from '../ui';
 import { 
   Calendar, 
   Clock, 
@@ -17,10 +12,10 @@ import {
   Download,
   RefreshCw
 } from 'lucide-react';
-import { MembershipPackageDTO } from '@/types/membershipPackage';
-import { MembershipDTO } from '@/types/membership';
-import membershipApi from '@/services/membershipApi';
-import { useToast } from '@/components/ui/use-toast';
+import { MembershipPackageDTO } from '../../types/membershipPackage';
+import { MembershipDTO } from '../../types/membership';
+import membershipApi from '../../services/membershipApi';
+import { toast } from 'react-hot-toast';
 
 interface MemberMembershipViewProps {
   memberId: number;
