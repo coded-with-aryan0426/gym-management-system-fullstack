@@ -241,12 +241,6 @@
   50% { opacity: 0.6; }
 }
 
-.members-controls__right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
 /* Filter Button */
 .members-filter-container {
   position: relative;
@@ -400,146 +394,7 @@
   border-color: #DC2626;
 }
 
-.filter-panel__body {
-  flex: 1;
-  padding: 20px 24px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
 
-.filter-section {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.filter-section__title {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin: 0;
-}
-
-.filter-options {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.filter-checkbox {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
-  background: var(--bg-primary);
-  border: 1px solid var(--border-primary);
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.filter-checkbox:hover {
-  border-color: var(--border-secondary);
-  background: var(--bg-tertiary);
-}
-
-.filter-checkbox input {
-  display: none;
-}
-
-.filter-checkbox__box {
-  width: 18px;
-  height: 18px;
-  border: 2px solid var(--border-secondary);
-  border-radius: 5px;
-  flex-shrink: 0;
-  transition: all 0.2s;
-  position: relative;
-}
-
-.filter-checkbox input:checked + .filter-checkbox__box {
-  background: #DC2626;
-  border-color: #DC2626;
-}
-
-.filter-checkbox input:checked + .filter-checkbox__box::after {
-  content: '';
-  position: absolute;
-  left: 5px;
-  top: 2px;
-  width: 4px;
-  height: 8px;
-  border: solid #fff;
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
-}
-
-.filter-checkbox__label {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex: 1;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-primary);
-}
-
-.filter-checkbox__meta {
-  font-size: 12px;
-  color: var(--text-tertiary);
-  font-weight: 500;
-}
-
-.filter-select {
-  width: 100%;
-  padding: 12px 14px;
-  background: var(--bg-primary);
-  border: 1px solid var(--border-primary);
-  border-radius: 10px;
-  color: var(--text-primary);
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s;
-  appearance: none;
-}
-
-.filter-select:hover {
-  border-color: var(--border-secondary);
-}
-
-.filter-select:focus {
-  outline: none;
-  border-color: #DC2626;
-  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
-}
-
-.filter-panel__footer {
-  padding: 20px 24px;
-  border-top: 1px solid var(--border-primary);
-}
-
-.filter-panel__apply {
-  width: 100%;
-  padding: 14px;
-  background: linear-gradient(135deg, #DC2626, #B91C1C);
-  border: none;
-  border-radius: 10px;
-  color: #fff;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);
-}
-
-.filter-panel__apply:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(220, 38, 38, 0.45);
-}
 
 /* ============================================
    ACTIVE FILTERS DISPLAY
@@ -1077,14 +932,13 @@
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
 }
 
-:root.theme-light .filter-panel {
+:root.theme-light .filter-dropdown {
   background: #fff;
-  border-left-color: rgba(0, 0, 0, 0.08);
-  box-shadow: -16px 0 48px rgba(0, 0, 0, 0.1);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
-:root.theme-light .filter-checkbox,
-:root.theme-light .filter-select {
+:root.theme-light .filter-dropdown__select {
   background: #F8FAFC;
   border-color: rgba(0, 0, 0, 0.08);
 }
@@ -1210,20 +1064,9 @@
     font-size: 10px;
   }
 
-  .filter-panel {
-    width: 100%;
-    border-radius: 20px 20px 0 0;
-    animation: slideUpMobile 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    max-height: 85vh;
-  }
-
-  @keyframes slideUpMobile {
-    from {
-      transform: translateY(100%);
-    }
-    to {
-      transform: translateY(0);
-    }
+  .filter-dropdown {
+    right: 0;
+    width: 200px;
   }
 
   .batch-bar {
@@ -1277,31 +1120,5 @@
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-/* Filter panel overlay */
-.filter-panel::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 340px;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(4px);
-  animation: fadeIn 0.3s ease;
-  pointer-events: none;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@media (max-width: 768px) {
-  .filter-panel::before {
-    right: 0;
-    background: rgba(0, 0, 0, 0.5);
   }
 }
