@@ -574,134 +574,96 @@ const Members: React.FC = () => {
               </div>
 
               <div className="members-filter-container" ref={filterPanelRef}>
-                <button
-                  className={`members-filter-btn ${isFilterPanelOpen ? 'members-filter-btn--open' : ''} ${activeFilterCount > 0 ? 'members-filter-btn--active' : ''}`}
-                  onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
-                >
-                  <FiFilter size={14} />
-                  {activeFilterCount > 0 && <span className="filter-count">{activeFilterCount}</span>}
+                  <button
+                    className={`members-filter-btn ${isFilterPanelOpen ? 'members-filter-btn--open' : ''} ${activeFilterCount > 0 ? 'members-filter-btn--active' : ''}`}
+                    onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
+                  >
+                    <FiFilter size={14} />
+                    {activeFilterCount > 0 && <span className="filter-count">{activeFilterCount}</span>}
+                  </button>
+
+                  {isFilterPanelOpen && (
+                    <div className="filter-dropdown">
+                      <div className="filter-dropdown__header">
+                        <span className="filter-dropdown__title">Filters</span>
+                        {activeFilterCount > 0 && (
+                          <button className="filter-dropdown__clear" onClick={handleResetFilters}>
+                            Clear
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="filter-dropdown__body">
+                        <div className="filter-dropdown__row">
+                          <label className="filter-dropdown__label">Status</label>
+                          <select
+                            className="filter-dropdown__select"
+                            value={filters.status[0] || ''}
+                            onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value ? [e.target.value] : [] }))}
+                          >
+                            <option value="">All</option>
+                            <option value="Active">Active</option>
+                            <option value="Expired">Expired</option>
+                          </select>
+                        </div>
+
+                        <div className="filter-dropdown__row">
+                          <label className="filter-dropdown__label">Plan</label>
+                          <select
+                            className="filter-dropdown__select"
+                            value={filters.plan[0] || ''}
+                            onChange={(e) => setFilters(prev => ({ ...prev, plan: e.target.value ? [e.target.value] : [] }))}
+                          >
+                            <option value="">All</option>
+                            <option value="Premium">Premium</option>
+                            <option value="Standard">Standard</option>
+                            <option value="Basic">Basic</option>
+                          </select>
+                        </div>
+
+                        <div className="filter-dropdown__row">
+                          <label className="filter-dropdown__label">Duration</label>
+                          <select
+                            className="filter-dropdown__select"
+                            value={filters.planDuration}
+                            onChange={(e) => setFilters(prev => ({ ...prev, planDuration: e.target.value }))}
+                          >
+                            <option value="">All</option>
+                            <option value="1 Month">1 Month</option>
+                            <option value="3 Months">3 Months</option>
+                            <option value="6 Months">6 Months</option>
+                            <option value="12 Months">12 Months</option>
+                          </select>
+                        </div>
+
+                        <div className="filter-dropdown__row">
+                          <label className="filter-dropdown__label">Joined</label>
+                          <select
+                            className="filter-dropdown__select"
+                            value={filters.joinedPeriod}
+                            onChange={(e) => setFilters(prev => ({ ...prev, joinedPeriod: e.target.value }))}
+                          >
+                            <option value="">All Time</option>
+                            <option value="today">Today</option>
+                            <option value="this-week">This Week</option>
+                            <option value="this-month">This Month</option>
+                            <option value="last-3-months">Last 3 Months</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+              <button className="members-btn members-btn--membership" onClick={() => setIsMembershipModalOpen(true)}>
+                  <FiPackage size={14} />
+                  <span>Plans</span>
                 </button>
 
-                {isFilterPanelOpen && (
-                  <div className="filter-panel">
-                    <div className="filter-panel__header">
-                      <h3>Filters</h3>
-                      {activeFilterCount > 0 && (
-                        <button className="filter-panel__clear" onClick={handleResetFilters}>
-                          Clear all
-                        </button>
-                      )}
-                      <button className="filter-panel__close" onClick={() => setIsFilterPanelOpen(false)}>
-                        <FiX size={18} />
-                      </button>
-                    </div>
-
-                    <div className="filter-panel__body">
-                      <div className="filter-section">
-                        <h4 className="filter-section__title">Status</h4>
-                        <div className="filter-options">
-                          {['Active', 'Expired'].map((status) => (
-                            <label key={status} className="filter-checkbox">
-                              <input
-                                type="checkbox"
-                                checked={filters.status.includes(status)}
-                                onChange={(e) => {
-                                  if (e.target.checked) {
-                                    setFilters(prev => ({ ...prev, status: [status] }))
-                                  } else {
-                                    setFilters(prev => ({ ...prev, status: [] }))
-                                  }
-                                }}
-                              />
-                              <span className="filter-checkbox__box" />
-                              <span className="filter-checkbox__label">{status}</span>
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="filter-section">
-                        <h4 className="filter-section__title">Plan Type</h4>
-                        <div className="filter-options">
-                          {[
-                            { name: 'Premium', price: '$49/mo' },
-                            { name: 'Standard', price: '$29/mo' },
-                            { name: 'Basic', price: '$19/mo' }
-                          ].map((plan) => (
-                            <label key={plan.name} className="filter-checkbox">
-                              <input
-                                type="checkbox"
-                                checked={filters.plan.includes(plan.name)}
-                                onChange={(e) => {
-                                  if (e.target.checked) {
-                                    setFilters(prev => ({ ...prev, plan: [plan.name] }))
-                                  } else {
-                                    setFilters(prev => ({ ...prev, plan: [] }))
-                                  }
-                                }}
-                              />
-                              <span className="filter-checkbox__box" />
-                              <span className="filter-checkbox__label">
-                                {plan.name}
-                                <span className="filter-checkbox__meta">{plan.price}</span>
-                              </span>
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="filter-section">
-                        <h4 className="filter-section__title">Plan Duration</h4>
-                        <select
-                          className="filter-select"
-                          value={filters.planDuration}
-                          onChange={(e) => setFilters(prev => ({ ...prev, planDuration: e.target.value }))}
-                        >
-                          <option value="">All Durations</option>
-                          <option value="1 Month">1 Month</option>
-                          <option value="3 Months">3 Months</option>
-                          <option value="6 Months">6 Months</option>
-                          <option value="12 Months">12 Months</option>
-                        </select>
-                      </div>
-
-                      <div className="filter-section">
-                        <h4 className="filter-section__title">Joined Date</h4>
-                        <select
-                          className="filter-select"
-                          value={filters.joinedPeriod}
-                          onChange={(e) => setFilters(prev => ({ ...prev, joinedPeriod: e.target.value }))}
-                        >
-                          <option value="">All Time</option>
-                          <option value="today">Today</option>
-                          <option value="this-week">This Week</option>
-                          <option value="this-month">This Month</option>
-                          <option value="last-3-months">Last 3 Months</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div className="filter-panel__footer">
-                      <button
-                        className="filter-panel__apply"
-                        onClick={() => setIsFilterPanelOpen(false)}
-                      >
-                        Apply Filters
-                        {activeFilterCount > 0 && ` (${filteredMembers.length})`}
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <button className="members-btn members-btn--secondary" onClick={() => setIsMembershipModalOpen(true)}>
-                <FiPackage size={14} />
-              </button>
-
-              <button className="members-btn members-btn--primary" onClick={() => setIsCreateModalOpen(true)}>
-                <FiUserPlus size={16} />
-                <span>Add</span>
-              </button>
+                <button className="members-btn members-btn--primary" onClick={() => setIsCreateModalOpen(true)}>
+                  <FiUserPlus size={14} />
+                  <span>Add</span>
+                </button>
             </div>
           </header>
         </Editable>
