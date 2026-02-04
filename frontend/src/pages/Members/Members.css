@@ -17,47 +17,28 @@
 }
 
 /* ============================================
-   HEADER SECTION
+   HEADER SECTION - Unified Single Line
    ============================================ */
 .members-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 16px;
-  padding-bottom: 4px;
-}
-
-.members-header__left {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.members-header__title-group {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  padding: 0;
 }
 
 .members-header__title {
-  font-size: 24px;
-  font-weight: 800;
+  font-size: 20px;
+  font-weight: 700;
   color: var(--text-primary);
   margin: 0;
-  letter-spacing: -0.03em;
-}
-
-.members-header__subtitle {
-  font-size: 13px;
-  color: var(--text-tertiary);
-  margin: 0;
-  font-weight: 500;
+  white-space: nowrap;
 }
 
 .members-header__right {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
+  margin-left: auto;
 }
 
 /* Search Input */
@@ -76,22 +57,22 @@
 }
 
 .members-search__input {
-  width: 180px;
-  height: 34px;
-  padding: 0 32px 0 34px;
+  width: 140px;
+  height: 32px;
+  padding: 0 28px 0 32px;
   background: var(--bg-secondary);
   border: 1px solid var(--border-primary);
   border-radius: 8px;
   color: var(--text-primary);
   font-size: 13px;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
 }
 
 .members-search__input:focus {
   outline: none;
-  width: 220px;
+  width: 180px;
   border-color: #DC2626;
-  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.12);
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.1);
 }
 
 .members-search__input::placeholder {
@@ -125,8 +106,8 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  height: 34px;
-  padding: 0 14px;
+  height: 32px;
+  padding: 0 12px;
   border-radius: 8px;
   font-size: 13px;
   font-weight: 600;
@@ -250,24 +231,24 @@
   align-items: center;
   gap: 2px;
   background: var(--bg-secondary);
-  padding: 3px;
-  border-radius: 8px;
+  padding: 2px;
+  border-radius: 6px;
   border: 1px solid var(--border-primary);
 }
 
 .members-tab {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
+  gap: 5px;
+  padding: 5px 10px;
   background: transparent;
   border: none;
-  border-radius: 6px;
+  border-radius: 5px;
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 }
 
 .members-tab:hover {
