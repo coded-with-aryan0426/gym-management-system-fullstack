@@ -548,62 +548,70 @@
 }
 
 /* ============================================
-   TABLE WRAPPER - Premium Design
+   TABLE WRAPPER - Premium Design (Responsive Height)
    ============================================ */
 .members-table-wrapper {
-  flex: 0 0 auto;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, transparent 100%);
-  border: 1px solid var(--border-primary);
-  border-radius: 8px;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: calc(100vh - 140px);
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
   overflow: hidden;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+}
+
+.members-table-wrapper .data-table {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
 }
 
 /* Premium Table Header Overrides */
 .members-table-wrapper .data-table__th {
-  background: linear-gradient(180deg, rgba(220, 38, 38, 0.04) 0%, rgba(220, 38, 38, 0.01) 100%);
-  color: var(--text-secondary);
-  font-size: 9px;
+  background: linear-gradient(180deg, rgba(99, 102, 241, 0.06) 0%, rgba(99, 102, 241, 0.02) 100%);
+  color: #A5B4FC;
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  padding: 8px 10px;
-  border-bottom: 1px solid rgba(220, 38, 38, 0.1);
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(99, 102, 241, 0.15);
 }
 
 /* Remove padding from table cells */
 .members-table-wrapper .data-table__td {
-  padding: 6px 10px;
+  padding: 10px 12px;
   height: auto;
 }
 
 /* Row Number Column - Premium */
 .members-table-wrapper .data-table__th--number {
-  color: rgba(220, 38, 38, 0.5);
-  font-size: 8px;
-  padding: 6px 8px;
+  color: rgba(99, 102, 241, 0.6);
+  font-size: 9px;
+  padding: 8px 10px;
 }
 
 .members-table-wrapper .row-number {
-  font-size: 9px;
-  font-weight: 700;
-  color: var(--text-tertiary);
-  background: rgba(255, 255, 255, 0.02);
-  border-radius: 3px;
-  padding: 2px 5px;
-  min-width: 20px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #94A3B8;
+  background: rgba(99, 102, 241, 0.08);
+  border-radius: 4px;
+  padding: 3px 6px;
+  min-width: 22px;
   transition: all 0.15s ease;
 }
 
 .members-table-wrapper .data-table__row:hover .row-number {
-  background: rgba(220, 38, 38, 0.1);
-  color: #DC2626;
+  background: rgba(99, 102, 241, 0.15);
+  color: #A5B4FC;
 }
 
 .members-table-wrapper .data-table__row--selected .row-number {
-  background: rgba(220, 38, 38, 0.15);
-  color: #DC2626;
+  background: rgba(99, 102, 241, 0.2);
+  color: #A5B4FC;
 }
 
 /* Premium Row Hover */
