@@ -9,11 +9,23 @@
 .members-page {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 8px 12px 12px;
+  gap: 4px;
+  padding: 6px 10px 10px;
   min-height: 100%;
   font-family: var(--font-family);
   background: var(--bg-primary);
+}
+
+/* Override Editable wrapper padding */
+.members-page > [data-component-id="members-page-header"] {
+  padding: 0 !important;
+}
+
+.members-table-wrapper > [data-component-id="members-page-table"] {
+  padding: 0 !important;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 /* ============================================
@@ -557,7 +569,7 @@
 .members-table-wrapper {
   flex: 1 1 auto;
   min-height: 0;
-  max-height: calc(100vh - 140px);
+  max-height: calc(100vh - 80px);
   display: flex;
   flex-direction: column;
   overflow: hidden;
