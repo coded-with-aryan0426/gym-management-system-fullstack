@@ -37,6 +37,9 @@ interface DataTableProps<T> {
     selectedIds?: Set<string | number>;
     onSelectionChange?: (selectedIds: Set<string | number>) => void;
     stickyHeader?: boolean;
+    // New premium features
+    showRowNumbers?: boolean;
+    hideCheckboxUntilHover?: boolean;
 }
 
 function DataTable<T>({
@@ -54,9 +57,13 @@ function DataTable<T>({
     selectedIds: externalSelectedIds,
     onSelectionChange,
     stickyHeader = false,
+    showRowNumbers = false,
+    hideCheckboxUntilHover = false,
 }: DataTableProps<T>) {
     const [isMobile, setIsMobile] = useState(false);
     const [internalSelectedIds, setInternalSelectedIds] = useState<Set<string | number>>(new Set());
+    const [hoveredRowId, setHoveredRowId] = useState<string | number | null>(null);
+    const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
 
     // Use external or internal selection state
     const selectedIds = externalSelectedIds ?? internalSelectedIds;
@@ -73,14 +80,27 @@ function DataTable<T>({
         }
     };
 
-    const handleSelectRow = (id: string | number, e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent) => {
+    const handleSelectRow = (id: string | number, index: number, e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent) => {
         e.stopPropagation();
         const newSelection = new Set(selectedIds);
-        if (newSelection.has(id)) {
-            newSelection.delete(id);
+        
+        // Support shift+click for range selection
+        if ('shiftKey' in e && e.shiftKey && lastSelectedIndex !== null) {
+            const start = Math.min(lastSelectedIndex, index);
+            const end = Math.max(lastSelectedIndex, index);
+            for (let i = start; i <= end; i++) {
+                const itemId = keyExtractor(data[i]);
+                newSelection.add(itemId);
+            }
         } else {
-            newSelection.add(id);
+            if (newSelection.has(id)) {
+                newSelection.delete(id);
+            } else {
+                newSelection.add(id);
+            }
+            setLastSelectedIndex(index);
         }
+        
         setInternalSelectedIds(newSelection);
         onSelectionChange?.(newSelection);
     };
@@ -98,6 +118,8 @@ function DataTable<T>({
         isMobile ? 'data-table--mobile' : '',
         compact ? 'data-table--compact' : '',
         stickyHeader ? 'data-table--sticky' : '',
+        hideCheckboxUntilHover ? 'data-table--hide-checkbox' : '',
+        selectedIds.size > 0 ? 'data-table--has-selection' : '',
     ].filter(Boolean).join(' ');
 
     if (loading) {
@@ -171,6 +193,9 @@ function DataTable<T>({
                 <table className="data-table__table">
                     <thead className="data-table__head">
                         <tr>
+                            {showRowNumbers && (
+                                <th className="data-table__th data-table__th--number" style={{ width: 48 }}>#</th>
+                            )}
                             {selectable && (
                                 <th className="data-table__th data-table__th--checkbox" style={{ width: 40 }}>
                                     <input
@@ -195,7 +220,7 @@ function DataTable<T>({
                     <tbody className="data-table__body">
                         {data.length === 0 ? (
                             <tr>
-                                <td colSpan={visibleColumns.length + (selectable ? 1 : 0)} className="data-table__empty-cell">
+                                <td colSpan={visibleColumns.length + (selectable ? 1 : 0) + (showRowNumbers ? 1 : 0)} className="data-table__empty-cell">
                                     {emptyMessage}
                                 </td>
                             </tr>
@@ -203,18 +228,29 @@ function DataTable<T>({
                             data.map((item, index) => {
                                 const id = keyExtractor(item);
                                 const isSelected = selectedIds.has(id);
+                                const isHovered = hoveredRowId === id;
+                                const rowNumber = pagination 
+                                    ? pagination.currentPage * pagination.pageSize + index + 1 
+                                    : index + 1;
                                 return (
                                     <tr
                                         key={id}
-                                        className={`data-table__row ${onRowClick ? 'data-table__row--clickable' : ''} ${isSelected ? 'data-table__row--selected' : ''}`}
+                                        className={`data-table__row ${onRowClick ? 'data-table__row--clickable' : ''} ${isSelected ? 'data-table__row--selected' : ''} ${isHovered ? 'data-table__row--hovered' : ''}`}
                                         onClick={() => onRowClick?.(item)}
+                                        onMouseEnter={() => setHoveredRowId(id)}
+                                        onMouseLeave={() => setHoveredRowId(null)}
                                     >
+                                        {showRowNumbers && (
+                                            <td className="data-table__td data-table__td--number">
+                                                <span className="row-number">{rowNumber}</span>
+                                            </td>
+                                        )}
                                         {selectable && (
                                             <td className="data-table__td data-table__td--checkbox" onClick={e => e.stopPropagation()}>
                                                 <input
                                                     type="checkbox"
                                                     checked={isSelected}
-                                                    onChange={(e) => handleSelectRow(id, e)}
+                                                    onChange={(e) => handleSelectRow(id, index, e)}
                                                     className="data-table__checkbox"
                                                 />
                                             </td>

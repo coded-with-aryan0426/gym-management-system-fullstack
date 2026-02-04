@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useEffect, useState, useMemo, useCallback, useRef } from "react"
-import { FiFilter, FiSearch, FiUserPlus, FiCalendar, FiRefreshCw, FiPackage, FiMessageSquare, FiX, FiUsers, FiTrendingUp, FiAlertTriangle, FiUserCheck } from "react-icons/fi"
+import { FiFilter, FiSearch, FiUserPlus, FiCalendar, FiRefreshCw, FiPackage, FiMessageSquare, FiX, FiUsers, FiTrendingUp, FiAlertTriangle, FiUserCheck, FiUser, FiCreditCard, FiClock, FiActivity } from "react-icons/fi"
 import { showToast } from "../../utils/showToast"
 import { useSearchParams } from "react-router-dom"
 import { Button, Badge, getStatusVariant, Avatar, DataTable, type Column } from "../../components"
@@ -420,8 +420,8 @@ const Members: React.FC = () => {
     },
     {
       key: "planName",
-      header: "Plan",
-      width: "140px",
+      header: "Membership",
+      width: "150px",
       render: (member) => {
         const planClass = member.planName?.toLowerCase() === 'premium' ? 'member-plan--premium'
           : member.planName?.toLowerCase() === 'standard' ? 'member-plan--standard'
@@ -438,11 +438,11 @@ const Members: React.FC = () => {
     },
     {
       key: "expiryDate",
-      header: "Expires",
-      width: "120px",
+      header: "Validity",
+      width: "130px",
       render: (member) => {
         const { date, daysLeft, isExpired } = getExpiryInfo(member)
-        if (!date) return <span className="member-date">-</span>
+        if (!date) return <span className="member-date member-date--none">No plan</span>
 
         const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 
@@ -459,24 +459,30 @@ const Members: React.FC = () => {
     {
       key: "status",
       header: "Status",
-      width: "100px",
+      width: "120px",
       render: (member) => {
         const { isExpired, daysLeft } = getExpiryInfo(member)
         let statusText = member.status || 'Unknown'
-        let variant = getStatusVariant(member.status)
+        let statusClass = 'status-badge'
 
         if (isExpired) {
           statusText = 'Lapsed'
-          variant = 'danger'
+          statusClass += ' status-badge--danger'
         } else if (daysLeft !== null && daysLeft <= 7 && daysLeft > 0) {
           statusText = 'Expiring'
-          variant = 'warning'
+          statusClass += ' status-badge--warning'
+        } else if ((member.status || '').toLowerCase() === 'active') {
+          statusText = 'Active'
+          statusClass += ' status-badge--success'
+        } else {
+          statusText = 'Inactive'
+          statusClass += ' status-badge--muted'
         }
 
         return (
           <div className="member-status-cell">
-            <span className={`status-indicator status-indicator--${variant}`}>
-              <span className="status-indicator__dot" />
+            <span className={statusClass}>
+              <span className="status-badge__dot" />
               {statusText}
             </span>
           </div>
@@ -486,7 +492,7 @@ const Members: React.FC = () => {
     {
       key: "actions",
       header: "",
-      width: "120px",
+      width: "100px",
       render: (member) => {
         const isHovered = hoveredRowId === member.userId
         return (
