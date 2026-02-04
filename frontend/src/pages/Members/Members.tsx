@@ -849,14 +849,13 @@ const Members: React.FC = () => {
         initialView="memberForm"
       />
 
-      <TieredPlanManagement
-        isOpen={isMembershipModalOpen}
-        onClose={() => setIsMembershipModalOpen(false)}
-        onSuccess={() => {
-          showToast('Membership plan saved successfully', 'success')
-          refreshMembers()
-        }}
-      />
+        <TieredPlanManagement
+          isOpen={isMembershipModalOpen}
+          onClose={() => setIsMembershipModalOpen(false)}
+          onSuccess={() => {
+            refreshMembers()
+          }}
+        />
     </div>
   )
 }
