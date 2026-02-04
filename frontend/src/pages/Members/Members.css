@@ -9,8 +9,8 @@
 .members-page {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 16px 20px 20px;
+  gap: 8px;
+  padding: 12px 20px 20px;
   min-height: 100%;
   font-family: var(--font-family);
   background: var(--bg-primary);
@@ -23,8 +23,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
-  padding-bottom: 8px;
+  gap: 16px;
+  padding-bottom: 4px;
 }
 
 .members-header__left {
@@ -69,29 +69,29 @@
 
 .members-search__icon {
   position: absolute;
-  left: 12px;
+  left: 10px;
   color: var(--text-tertiary);
-  font-size: 16px;
+  font-size: 14px;
   pointer-events: none;
 }
 
 .members-search__input {
-  width: 220px;
-  height: 40px;
-  padding: 0 36px 0 40px;
+  width: 180px;
+  height: 34px;
+  padding: 0 32px 0 34px;
   background: var(--bg-secondary);
   border: 1px solid var(--border-primary);
-  border-radius: 10px;
+  border-radius: 8px;
   color: var(--text-primary);
-  font-size: 14px;
+  font-size: 13px;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .members-search__input:focus {
   outline: none;
-  width: 280px;
+  width: 220px;
   border-color: #DC2626;
-  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.12);
 }
 
 .members-search__input::placeholder {
@@ -124,11 +124,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  height: 40px;
-  padding: 0 18px;
-  border-radius: 10px;
-  font-size: 14px;
+  gap: 6px;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 8px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -165,17 +165,17 @@
 .members-mini-stats {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .mini-stat {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
+  gap: 6px;
+  padding: 6px 12px;
   background: var(--bg-secondary);
   border: 1px solid var(--border-primary);
-  border-radius: 10px;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -212,14 +212,14 @@
 }
 
 .mini-stat__value {
-  font-size: 16px;
-  font-weight: 800;
+  font-size: 14px;
+  font-weight: 700;
   color: var(--text-primary);
   line-height: 1;
 }
 
 .mini-stat__label {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   color: var(--text-tertiary);
   text-transform: uppercase;
@@ -241,28 +241,28 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding: 8px 0;
+  gap: 12px;
+  padding: 4px 0;
 }
 
 .members-tabs {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   background: var(--bg-secondary);
-  padding: 4px;
-  border-radius: 10px;
+  padding: 3px;
+  border-radius: 8px;
   border: 1px solid var(--border-primary);
 }
 
 .members-tab {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
+  gap: 6px;
+  padding: 6px 12px;
   background: transparent;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   color: var(--text-secondary);
   font-size: 13px;
   font-weight: 600;
@@ -290,12 +290,12 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 22px;
-  height: 20px;
-  padding: 0 6px;
+  min-width: 18px;
+  height: 16px;
+  padding: 0 5px;
   background: rgba(255, 255, 255, 0.15);
-  border-radius: 10px;
-  font-size: 11px;
+  border-radius: 8px;
+  font-size: 10px;
   font-weight: 700;
 }
 
@@ -335,7 +335,7 @@
 .members-controls__right {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 /* Filter Button */
@@ -346,11 +346,11 @@
 .members-filter-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
+  gap: 6px;
+  padding: 8px 14px;
   background: var(--bg-secondary);
   border: 1px solid var(--border-primary);
-  border-radius: 10px;
+  border-radius: 8px;
   color: var(--text-secondary);
   font-size: 13px;
   font-weight: 600;
