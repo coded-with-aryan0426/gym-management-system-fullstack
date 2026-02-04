@@ -747,33 +747,35 @@ const Members: React.FC = () => {
       {/* Main Table */}
       <div className="members-table-wrapper">
         <Editable id="members-page-table" config={{ allowLayout: true, allowStyle: true, allowVisibility: true }}>
-          <DataTable
-            data={filteredMembers}
-            keyExtractor={(member) => member.userId}
-            columns={columns as Column<MemberDTO>[]}
-            loading={loading}
-            onRowClick={handleActionClick}
-            emptyMessage={
-              debouncedSearch || activeFilterCount > 0
-                ? "No members match your filters"
-                : "No members found. Add your first member!"
-            }
-            pagination={hasClientSideFilters ? undefined : {
-              currentPage,
-              totalPages,
-              totalCount,
-              pageSize,
-              onPageChange: setCurrentPage,
-              onPageSizeChange: (size) => {
-                setPageSize(size)
-                setCurrentPage(0)
-              },
-            }}
-            compact
-            selectable
-            stickyHeader
-            selectedIds={selectedMemberIds}
-            onSelectionChange={setSelectedMemberIds}
+            <DataTable
+              data={filteredMembers}
+              keyExtractor={(member) => member.userId}
+              columns={columns as Column<MemberDTO>[]}
+              loading={loading}
+              onRowClick={handleActionClick}
+              emptyMessage={
+                debouncedSearch || activeFilterCount > 0
+                  ? "No members match your filters"
+                  : "No members found. Add your first member!"
+              }
+              pagination={hasClientSideFilters ? undefined : {
+                currentPage,
+                totalPages,
+                totalCount,
+                pageSize,
+                onPageChange: setCurrentPage,
+                onPageSizeChange: (size) => {
+                  setPageSize(size)
+                  setCurrentPage(0)
+                },
+              }}
+              compact
+              selectable
+              stickyHeader
+              showRowNumbers
+              hideCheckboxUntilHover
+              selectedIds={selectedMemberIds}
+              onSelectionChange={setSelectedMemberIds}
             mobileCardRender={(member, index) => {
               const { daysLeft, isExpired } = getExpiryInfo(member)
               return (
