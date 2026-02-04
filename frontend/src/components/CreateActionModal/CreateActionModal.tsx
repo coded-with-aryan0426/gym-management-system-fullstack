@@ -273,18 +273,18 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
                             <div className="cam-progress">
                                 <div className={`cam-progress__step ${currentStep >= 1 ? 'cam-progress__step--active' : ''} ${currentStep > 1 ? 'cam-progress__step--complete' : ''}`}>
                                     <div className="cam-progress__circle">
-                                        {currentStep > 1 ? <Check size={12} /> : '1'}
+                                        {currentStep > 1 ? <Check size={10} /> : '1'}
                                     </div>
                                     <span>Personal Info</span>
                                 </div>
-                                <div className="cam-progress__line" />
+                                <div className={`cam-progress__line ${currentStep > 1 ? 'cam-progress__line--filled' : ''}`} />
                                 <div className={`cam-progress__step ${currentStep >= 2 ? 'cam-progress__step--active' : ''} ${currentStep > 2 ? 'cam-progress__step--complete' : ''}`}>
                                     <div className="cam-progress__circle">
-                                        {currentStep > 2 ? <Check size={12} /> : '2'}
+                                        {currentStep > 2 ? <Check size={10} /> : '2'}
                                     </div>
                                     <span>Select Plan</span>
                                 </div>
-                                <div className="cam-progress__line" />
+                                <div className={`cam-progress__line ${currentStep > 2 ? 'cam-progress__line--filled' : ''}`} />
                                 <div className={`cam-progress__step ${currentStep >= 3 ? 'cam-progress__step--active' : ''}`}>
                                     <div className="cam-progress__circle">3</div>
                                     <span>Duration</span>
@@ -305,7 +305,12 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
                                         exit={{ opacity: 0 }}
                                     >
                                         {/* Personal Info Section */}
-                                        <div className="cam-section cam-section--premium">
+                                        <motion.div 
+                                            className="cam-section cam-section--premium"
+                                            initial={{ opacity: 0, x: -20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{ duration: 0.3, delay: 0 }}
+                                        >
                                             <div className="cam-section__header">
                                                 <div className="cam-section__icon">
                                                     <User size={14} />
@@ -382,10 +387,15 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </motion.div>
 
                                         {/* Membership Plans Section - Tiered Cards */}
-                                        <div className="cam-section cam-section--premium cam-section--plans">
+                                        <motion.div 
+                                            className="cam-section cam-section--premium cam-section--plans"
+                                            initial={{ opacity: 0, x: -20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{ duration: 0.3, delay: 0.1 }}
+                                        >
                                             <div className="cam-section__header">
                                                 <div className="cam-section__icon cam-section__icon--accent">
                                                     <CreditCard size={14} />
@@ -436,9 +446,9 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
                                                             </div>
                                                         </button>
                                                     ))}
-                                                </div>
-                                            )}
-                                        </div>
+                                                    </div>
+                                                )}
+                                        </motion.div>
 
                                         {/* Duration Section - Variant Cards */}
                                         <AnimatePresence>
