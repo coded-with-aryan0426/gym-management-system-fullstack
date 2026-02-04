@@ -176,7 +176,7 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
             toast.error("Email is required")
             return
         }
-        if (isMember && !formData.packageId) {
+        if (isMember && !selectedVariantId) {
             toast.error("Please select a membership plan and duration")
             return
         }
@@ -193,9 +193,10 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
                 joinDate: formData.startDate
             }
 
-            if (isMember) {
+            if (isMember && selectedVariant) {
                 payload.startDate = formData.startDate
-                payload.packageId = parseInt(formData.packageId)
+                // Use variantId as packageId for backend compatibility
+                payload.packageId = selectedVariantId
             }
 
             await api.createUser(payload as any)
@@ -383,15 +384,15 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
                                             </div>
                                         </div>
 
-                                        {/* Membership Plans Section - Premium Cards */}
+                                        {/* Membership Plans Section - Tiered Cards */}
                                         <div className="cam-section cam-section--premium cam-section--plans">
                                             <div className="cam-section__header">
                                                 <div className="cam-section__icon cam-section__icon--accent">
                                                     <CreditCard size={14} />
                                                 </div>
                                                 <span>Select Membership Plan</span>
-                                                {selectedPlanName && (
-                                                    <span className="cam-section__badge">{selectedPlanName}</span>
+                                                {selectedPlan && (
+                                                    <span className="cam-section__badge">{selectedPlan.planName}</span>
                                                 )}
                                             </div>
                                             
@@ -400,7 +401,7 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
                                                     <div className="cam-spinner" />
                                                     <span>Loading plans...</span>
                                                 </div>
-                                            ) : planGroups.length === 0 ? (
+                                            ) : tieredPlans.length === 0 ? (
                                                 <div className="cam-plans-empty">
                                                     <Sparkles size={24} />
                                                     <span>No membership plans available</span>
@@ -408,26 +409,28 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
                                                 </div>
                                             ) : (
                                                 <div className="cam-plans-grid">
-                                                    {planGroups.map((group) => (
+                                                    {tieredPlans.map((plan, index) => (
                                                         <button
-                                                            key={group.name}
+                                                            key={plan.planId}
                                                             type="button"
-                                                            className={`cam-plan-card cam-plan-card--premium ${selectedPlanName === group.name ? "cam-plan-card--selected" : ""}`}
-                                                            onClick={() => handlePlanNameSelect(group.name)}
-                                                            style={{ '--plan-color': group.color } as React.CSSProperties}
+                                                            className={`cam-plan-card cam-plan-card--premium ${selectedPlanId === plan.planId ? "cam-plan-card--selected" : ""}`}
+                                                            onClick={() => handlePlanSelect(plan.planId!)}
+                                                            style={{ '--plan-color': PLAN_COLORS[index % PLAN_COLORS.length] } as React.CSSProperties}
                                                         >
                                                             <div className="cam-plan-card__color-bar" />
                                                             <div className="cam-plan-card__content">
                                                                 <div className="cam-plan-card__header">
-                                                                    <span className="cam-plan-card__name">{group.name}</span>
+                                                                    <span className="cam-plan-card__name">{plan.planName}</span>
                                                                     <div className="cam-plan-card__check">
-                                                                        {selectedPlanName === group.name && <Check size={14} />}
+                                                                        {selectedPlanId === plan.planId && <Check size={14} />}
                                                                     </div>
                                                                 </div>
                                                                 <div className="cam-plan-card__meta">
-                                                                    <span className="cam-plan-card__count">{group.plans.length} duration{group.plans.length > 1 ? 's' : ''}</span>
+                                                                    <span className="cam-plan-card__count">
+                                                                        {plan.variants?.length || 0} duration{(plan.variants?.length || 0) !== 1 ? 's' : ''}
+                                                                    </span>
                                                                     <span className="cam-plan-card__price">
-                                                                        From {formatPrice(Math.min(...group.plans.map(p => p.price)))}
+                                                                        From {formatPrice(Math.min(...(plan.variants?.map(v => v.price) || [0])))}
                                                                     </span>
                                                                 </div>
                                                             </div>
@@ -437,9 +440,9 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
                                             )}
                                         </div>
 
-                                        {/* Duration Section - Premium Cards */}
+                                        {/* Duration Section - Variant Cards */}
                                         <AnimatePresence>
-                                            {selectedPlanName && (
+                                            {selectedPlan && selectedPlan.variants && selectedPlan.variants.length > 0 && (
                                                 <motion.div
                                                     className="cam-section cam-section--premium cam-section--duration"
                                                     initial={{ opacity: 0, height: 0 }}
@@ -452,40 +455,44 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
                                                             <Clock size={14} />
                                                         </div>
                                                         <span>Select Duration</span>
-                                                        {selectedPlan && (
+                                                        {selectedVariant && (
                                                             <span className="cam-section__badge cam-section__badge--emerald">
-                                                                {formatDuration(selectedPlan.durationDays)}
+                                                                {formatDuration(selectedVariant.durationDays)}
                                                             </span>
                                                         )}
                                                     </div>
                                                     
                                                     <div className="cam-duration-grid cam-duration-grid--premium">
-                                                        {durationOptions.map((plan) => (
-                                                            <button
-                                                                key={plan.packageId}
-                                                                type="button"
-                                                                className={`cam-duration-card ${formData.packageId === plan.packageId.toString() ? "cam-duration-card--selected" : ""}`}
-                                                                onClick={() => handleDurationSelect(plan)}
-                                                                style={{ '--plan-color': selectedGroup?.color || '#DC2626' } as React.CSSProperties}
-                                                            >
-                                                                <div className="cam-duration-card__duration">
-                                                                    {formatDuration(plan.durationDays)}
-                                                                </div>
-                                                                <div className="cam-duration-card__price">
-                                                                    {formatPrice(plan.price)}
-                                                                </div>
-                                                                {plan.includedPTSessions > 0 && (
-                                                                    <div className="cam-duration-card__pt">
-                                                                        +{plan.includedPTSessions} PT Sessions
+                                                        {selectedPlan.variants.map((variant) => {
+                                                            const planIndex = tieredPlans.findIndex(p => p.planId === selectedPlanId)
+                                                            const planColor = PLAN_COLORS[planIndex % PLAN_COLORS.length]
+                                                            return (
+                                                                <button
+                                                                    key={variant.variantId}
+                                                                    type="button"
+                                                                    className={`cam-duration-card ${selectedVariantId === variant.variantId ? "cam-duration-card--selected" : ""}`}
+                                                                    onClick={() => handleVariantSelect(variant)}
+                                                                    style={{ '--plan-color': planColor } as React.CSSProperties}
+                                                                >
+                                                                    <div className="cam-duration-card__duration">
+                                                                        {formatDuration(variant.durationDays)}
                                                                     </div>
-                                                                )}
-                                                                {formData.packageId === plan.packageId.toString() && (
-                                                                    <div className="cam-duration-card__check">
-                                                                        <Check size={14} />
+                                                                    <div className="cam-duration-card__price">
+                                                                        {formatPrice(variant.price)}
                                                                     </div>
-                                                                )}
-                                                            </button>
-                                                        ))}
+                                                                    {variant.includedPTSessions > 0 && (
+                                                                        <div className="cam-duration-card__pt">
+                                                                            +{variant.includedPTSessions} PT Sessions
+                                                                        </div>
+                                                                    )}
+                                                                    {selectedVariantId === variant.variantId && (
+                                                                        <div className="cam-duration-card__check">
+                                                                            <Check size={14} />
+                                                                        </div>
+                                                                    )}
+                                                                </button>
+                                                            )
+                                                        })}
                                                     </div>
                                                 </motion.div>
                                             )}
@@ -493,7 +500,7 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
 
                                         {/* Summary - Premium */}
                                         <AnimatePresence>
-                                            {selectedPlan && (
+                                            {selectedVariant && (
                                                 <motion.div
                                                     className="cam-summary cam-summary--premium"
                                                     initial={{ opacity: 0, y: 10 }}
@@ -511,22 +518,22 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
                                                         </div>
                                                         <div className="cam-summary__row">
                                                             <span>Plan</span>
-                                                            <span>{selectedPlan.packageName}</span>
+                                                            <span>{selectedPlan?.planName}</span>
                                                         </div>
                                                         <div className="cam-summary__row">
                                                             <span>Duration</span>
-                                                            <span>{formatDuration(selectedPlan.durationDays)}</span>
+                                                            <span>{formatDuration(selectedVariant.durationDays)}</span>
                                                         </div>
-                                                        {selectedPlan.includedPTSessions > 0 && (
+                                                        {selectedVariant.includedPTSessions > 0 && (
                                                             <div className="cam-summary__row">
                                                                 <span>PT Sessions</span>
-                                                                <span>{selectedPlan.includedPTSessions} sessions included</span>
+                                                                <span>{selectedVariant.includedPTSessions} sessions included</span>
                                                             </div>
                                                         )}
                                                         <div className="cam-summary__divider" />
                                                         <div className="cam-summary__row cam-summary__row--total">
                                                             <span>Total Amount</span>
-                                                            <span>{formatPrice(selectedPlan.price)}</span>
+                                                            <span>{formatPrice(selectedVariant.price)}</span>
                                                         </div>
                                                     </div>
                                                 </motion.div>
@@ -636,7 +643,7 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
                                 type="submit" 
                                 className="cam-btn cam-btn--submit cam-btn--premium" 
                                 onClick={handleSubmit} 
-                                disabled={loading || (view === "memberForm" && !formData.packageId)}
+                                disabled={loading || (view === "memberForm" && !selectedVariantId)}
                             >
                                 {loading ? (
                                     <>
