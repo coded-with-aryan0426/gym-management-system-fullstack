@@ -2,19 +2,18 @@
 
 import type React from "react"
 import { useEffect, useState, useMemo, useCallback, useRef } from "react"
-import { FiFilter, FiSearch, FiUserPlus, FiCalendar, FiClock, FiRefreshCw, FiPackage } from "react-icons/fi"
+import { FiFilter, FiSearch, FiUserPlus, FiCalendar, FiRefreshCw, FiPackage, FiMessageSquare, FiX, FiUsers, FiTrendingUp, FiAlertTriangle, FiUserCheck } from "react-icons/fi"
 import { showToast } from "../../utils/showToast"
 import { useSearchParams } from "react-router-dom"
-import { Button, Badge, getStatusVariant, Avatar, DataTable, PageStatsBar, type Column } from "../../components"
+import { Button, Badge, getStatusVariant, Avatar, DataTable, type Column } from "../../components"
 import CreateActionModal from "../../components/CreateActionModal/CreateActionModal"
 import TieredPlanManagement from "../../components/admin/TieredPlanManagement"
-import { ActionMenuButton, SortButton } from "../../components/shared"
+import { ActionMenuButton } from "../../components/shared"
 import { useClickOutside } from "../../hooks"
 import EnhancedMemberActionModal from "../../components/MemberActionModal/EnhancedMemberActionModal"
 import api from "../../services/api"
 import type { MemberDTO, User } from "../../types"
 import { useMembers } from "../../contexts/MembersContext"
-import "../../styles/pageHeader.css"
 import "./Members.css"
 import Editable from "../../components/editor/Editable"
 
@@ -25,6 +24,8 @@ interface FilterState {
   expiryStatus: string
   joinedPeriod: string
 }
+
+type StatusFilter = 'all' | 'active' | 'expiring' | 'inactive'
 
 const Members: React.FC = () => {
   const { members: allMembers, loading: allMembersLoading, refreshMembers } = useMembers()
@@ -44,6 +45,8 @@ const Members: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const [selectedMemberIds, setSelectedMemberIds] = useState<Set<string | number>>(new Set())
+  const [activeStatusFilter, setActiveStatusFilter] = useState<StatusFilter>('all')
+  const [hoveredRowId, setHoveredRowId] = useState<string | number | null>(null)
 
   const handleActionClick = (member: MemberDTO) => {
     setSelectedMember(member)
@@ -176,8 +179,50 @@ const Members: React.FC = () => {
     return count
   }, [filters])
 
+  const getExpiryInfo = (member: MemberDTO) => {
+    const startDate = member.startDate ? new Date(member.startDate) : null
+    if (!startDate || !member.planDuration) return { date: null, daysLeft: null, isExpired: false }
+
+    const durationStr = member.planDuration.toLowerCase()
+    let expiryDate = new Date(startDate)
+
+    if (durationStr.includes('year')) {
+      const years = parseInt(durationStr) || 1
+      expiryDate.setMonth(expiryDate.getMonth() + years * 12)
+    } else if (durationStr.includes('month')) {
+      const months = parseInt(durationStr) || 1
+      expiryDate.setMonth(expiryDate.getMonth() + months)
+    } else if (durationStr.includes('day')) {
+      const days = parseInt(durationStr) || 30
+      expiryDate.setDate(expiryDate.getDate() + days)
+    }
+
+    const now = new Date()
+    const daysLeft = Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+    const isExpired = daysLeft < 0
+
+    return { date: expiryDate, daysLeft, isExpired }
+  }
+
   const filteredMembers = useMemo(() => {
     let result = members
+
+    // Apply status tab filter
+    if (activeStatusFilter !== 'all') {
+      result = result.filter(m => {
+        const { daysLeft, isExpired } = getExpiryInfo(m)
+        switch (activeStatusFilter) {
+          case 'active':
+            return (m.status || '').toLowerCase() === 'active' && !isExpired
+          case 'expiring':
+            return !isExpired && daysLeft !== null && daysLeft <= 7 && daysLeft > 0
+          case 'inactive':
+            return (m.status || '').toLowerCase() === 'expired' || isExpired
+          default:
+            return true
+        }
+      })
+    }
 
     if (filters.planDuration) {
       result = result.filter(m => m.planDuration === filters.planDuration)
@@ -249,7 +294,7 @@ const Members: React.FC = () => {
     }
 
     return result
-  }, [members, filters.planDuration, filters.expiryStatus, filters.joinedPeriod])
+  }, [members, filters.planDuration, filters.expiryStatus, filters.joinedPeriod, activeStatusFilter])
 
   const handleRenewPlan = async (member: MemberDTO, packageId?: number, amount?: number, customDuration?: number, skipTransaction?: boolean) => {
     try {
@@ -282,10 +327,6 @@ const Members: React.FC = () => {
     showToast(`Message sent to ${member.fullName}`, 'success')
   }
 
-  const handleFilterChange = (key: keyof FilterState, value: string) => {
-    setFilters((prev) => ({ ...prev, [key]: value }))
-  }
-
   const handleResetFilters = () => {
     setFilters({
       status: [],
@@ -294,37 +335,12 @@ const Members: React.FC = () => {
       expiryStatus: "",
       joinedPeriod: "",
     })
-  }
-
-  const getExpiryInfo = (member: MemberDTO) => {
-    const startDate = member.startDate ? new Date(member.startDate) : null
-    if (!startDate || !member.planDuration) return { date: null, daysLeft: null, isExpired: false }
-
-    const durationStr = member.planDuration.toLowerCase()
-    let expiryDate = new Date(startDate)
-
-    if (durationStr.includes('year')) {
-      const years = parseInt(durationStr) || 1
-      expiryDate.setMonth(expiryDate.getMonth() + years * 12)
-    } else if (durationStr.includes('month')) {
-      const months = parseInt(durationStr) || 1
-      expiryDate.setMonth(expiryDate.getMonth() + months)
-    } else if (durationStr.includes('day')) {
-      const days = parseInt(durationStr) || 30
-      expiryDate.setDate(expiryDate.getDate() + days)
-    }
-
-    const now = new Date()
-    const daysLeft = Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-    const isExpired = daysLeft < 0
-
-    return { date: expiryDate, daysLeft, isExpired }
+    setActiveStatusFilter('all')
   }
 
   const stats = useMemo(() => {
     const now = new Date()
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate())
     const activeCount = allMembers.filter(m => (m.status || '').toLowerCase() === 'active').length
     const expiredCount = allMembers.filter(m => (m.status || '').toLowerCase() === 'expired').length
 
@@ -339,12 +355,6 @@ const Members: React.FC = () => {
       return new Date(dateStr) >= startOfMonth
     }).length
 
-    const todayJoined = allMembers.filter(m => {
-      const dateStr = (m as any).joinDate || (m as any).createdAt || m.startDate
-      if (!dateStr) return false
-      return new Date(dateStr) >= startOfToday
-    }).length
-
     // Retention rate = active / (active + expired) * 100
     const retentionRate = (activeCount + expiredCount) > 0
       ? Math.round((activeCount / (activeCount + expiredCount)) * 100)
@@ -355,23 +365,30 @@ const Members: React.FC = () => {
       expiredCount,
       expiringSoon,
       newThisMonth,
-      todayJoined,
       total: allMembers.length,
       retentionRate
     }
   }, [allMembers])
 
-  // Helper to count words and enforce limit
-  const handleSearchChange = (value: string) => {
-    const words = value.trim() === '' ? [] : value.trim().split(/\s+/)
-    if (words.length <= 6) {
-      setSearchQuery(value)
+  const getStatusDotClass = (member: MemberDTO) => {
+    const { daysLeft, isExpired } = getExpiryInfo(member)
+    if (isExpired || (member.status || '').toLowerCase() === 'expired') {
+      return 'status-dot--expired'
     }
+    if (daysLeft !== null && daysLeft <= 7 && daysLeft > 0) {
+      return 'status-dot--expiring'
+    }
+    if ((member.status || '').toLowerCase() === 'active') {
+      return 'status-dot--active'
+    }
+    return 'status-dot--inactive'
   }
 
-  const getWordCount = (text: string) => {
-    const words = text.trim() === '' ? [] : text.trim().split(/\s+/)
-    return words.length
+  const getPlanIcon = (planName: string | undefined) => {
+    const plan = (planName || '').toLowerCase()
+    if (plan === 'premium') return '💎'
+    if (plan === 'standard') return '⭐'
+    return '📦'
   }
 
   const columns: Column<MemberDTO>[] = [
@@ -385,12 +402,15 @@ const Members: React.FC = () => {
           onClick={(e) => { e.stopPropagation(); handleActionClick(member) }}
           style={{ cursor: 'pointer' }}
         >
-          <Avatar
-            name={member.fullName}
-            size="sm"
-            avatarId={localStorage.getItem(`avatar_${member.userId}`) || (member as any).avatarId}
-            userId={member.userId}
-          />
+          <div className="member-avatar-wrapper">
+            <span className={`status-dot ${getStatusDotClass(member)}`} />
+            <Avatar
+              name={member.fullName}
+              size="sm"
+              avatarId={localStorage.getItem(`avatar_${member.userId}`) || (member as any).avatarId}
+              userId={member.userId}
+            />
+          </div>
           <div className="member-cell__info">
             <span className="member-name">{member.fullName}</span>
             <span className="member-email">{member.email}</span>
@@ -401,31 +421,37 @@ const Members: React.FC = () => {
     {
       key: "planName",
       header: "Plan",
-      width: "120px",
+      width: "140px",
       render: (member) => {
         const planClass = member.planName?.toLowerCase() === 'premium' ? 'member-plan--premium'
           : member.planName?.toLowerCase() === 'standard' ? 'member-plan--standard'
             : 'member-plan--basic'
         return (
           <div className="member-plan-cell">
-            <span className={`member-plan-badge ${planClass}`}>{member.planName}</span>
+            <span className={`member-plan-badge ${planClass}`}>
+              <span className="plan-icon">{getPlanIcon(member.planName)}</span>
+              {member.planName || 'No Plan'}
+            </span>
           </div>
         )
       },
     },
     {
       key: "expiryDate",
-      header: "Expiry",
+      header: "Expires",
       width: "120px",
       render: (member) => {
         const { date, daysLeft, isExpired } = getExpiryInfo(member)
         if (!date) return <span className="member-date">-</span>
+
+        const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 
         return (
           <div className="member-expiry-cell">
             <span className={`member-days-left ${isExpired ? 'member-days-left--expired' : daysLeft !== null && daysLeft <= 7 ? 'member-days-left--warning' : ''}`}>
               {isExpired ? `${Math.abs(daysLeft || 0)}d overdue` : `${daysLeft}d left`}
             </span>
+            <span className="member-expiry-date">{dateStr}</span>
           </div>
         )
       },
@@ -433,160 +459,268 @@ const Members: React.FC = () => {
     {
       key: "status",
       header: "Status",
-      width: "90px",
+      width: "100px",
       render: (member) => {
-        return <Badge variant={getStatusVariant(member.status)}>{member.status}</Badge>
+        const { isExpired, daysLeft } = getExpiryInfo(member)
+        let statusText = member.status || 'Unknown'
+        let variant = getStatusVariant(member.status)
+
+        if (isExpired) {
+          statusText = 'Lapsed'
+          variant = 'danger'
+        } else if (daysLeft !== null && daysLeft <= 7 && daysLeft > 0) {
+          statusText = 'Expiring'
+          variant = 'warning'
+        }
+
+        return (
+          <div className="member-status-cell">
+            <span className={`status-indicator status-indicator--${variant}`}>
+              <span className="status-indicator__dot" />
+              {statusText}
+            </span>
+          </div>
+        )
       },
     },
     {
       key: "actions",
       header: "",
-      width: "50px",
-      render: (member) => (
-        <div className="member-actions">
-          <ActionMenuButton onClick={(e) => { e.stopPropagation(); handleActionClick(member); }} />
-        </div>
-      ),
+      width: "120px",
+      render: (member) => {
+        const isHovered = hoveredRowId === member.userId
+        return (
+          <div className="member-actions">
+            <div className={`quick-actions ${isHovered ? 'quick-actions--visible' : ''}`}>
+              <button
+                className="quick-action-btn quick-action-btn--renew"
+                onClick={(e) => { e.stopPropagation(); handleActionClick(member); }}
+                title="Renew Plan"
+              >
+                <FiCalendar size={14} />
+              </button>
+              <button
+                className="quick-action-btn quick-action-btn--message"
+                onClick={(e) => { e.stopPropagation(); handleSendMessage(member); }}
+                title="Send Message"
+              >
+                <FiMessageSquare size={14} />
+              </button>
+            </div>
+            <ActionMenuButton onClick={(e) => { e.stopPropagation(); handleActionClick(member); }} />
+          </div>
+        )
+      },
     },
   ]
 
   return (
     <div className="members-page">
-      {/* Header with Search and Actions */}
+      {/* New Header Design */}
       <Editable id="members-page-header" config={{ allowLayout: true, allowStyle: true, allowVisibility: true }}>
-      <div className="members-page__header page-header">
-        <div className="members-page__title-section page-header__title">
-          <h1 className="members-page__title">Members</h1>
-          <div className="members-page__sort-indicator">
-            {sortType === 'newest' ? (
-              <span className="sort-badge sort-badge--newest" onClick={() => setSortType('alphabetical')} style={{ cursor: 'pointer' }}>
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <circle cx="12" cy="12" r="10" />
-                  <polyline points="12 6 12 12 16 14" />
-                </svg>
-                Newest
-              </span>
-            ) : (
-              <span className="sort-badge sort-badge--alpha" onClick={() => setSortType('newest')} style={{ cursor: 'pointer' }}>
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <path d="M3 6h18M3 12h12M3 18h6" />
-                </svg>
-                A → Z
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* Quick Actions - Grouped in the middle */}
-        <Editable id="members-page-quick-stats" config={{ allowLayout: true, allowStyle: true, allowVisibility: true }}>
-        <div className="members-quick-actions page-header__quick">
-          <button
-            className={`members-quick-btn ${filters.expiryStatus === 'expiring-soon' ? 'members-quick-btn--active' : ''}`}
-            onClick={() => setFilters(prev => ({
-              ...prev,
-              expiryStatus: prev.expiryStatus === 'expiring-soon' ? '' : 'expiring-soon'
-            }))}
-          >
-            <FiClock size={13} />
-            <span>Expiring Soon</span>
-            {stats.expiringSoon > 0 && <span className="members-quick-btn__count">{stats.expiringSoon}</span>}
-          </button>
-          <button
-            className={`members-quick-btn ${filters.joinedPeriod === 'today' ? 'members-quick-btn--active' : ''}`}
-            onClick={() => setFilters(prev => ({
-              ...prev,
-              joinedPeriod: prev.joinedPeriod === 'today' ? '' : 'today'
-            }))}
-          >
-            <FiCalendar size={13} />
-            <span>Joined Today</span>
-            {stats.todayJoined > 0 && <span className="members-quick-btn__count">{stats.todayJoined}</span>}
-          </button>
-          <button
-            className={`members-quick-btn ${filters.status[0] === 'Expired' ? 'members-quick-btn--active' : ''}`}
-            onClick={() => setFilters(prev => ({
-              ...prev,
-              status: prev.status[0] === 'Expired' ? [] : ['Expired']
-            }))}
-          >
-            <FiRefreshCw size={13} />
-            <span>Need Renewal</span>
-            {stats.expiredCount > 0 && <span className="members-quick-btn__count members-quick-btn__count--warning">{stats.expiredCount}</span>}
-          </button>
-        </div>
-        </Editable>
-
-        <div className="members-page__header-right page-header__actions">
-          <div className="members-search-box">
-            <FiSearch className="members-search-box__icon" />
-            <input
-              type="text"
-              placeholder="Search..."
-              value={searchQuery}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              className="members-search-box__input"
-            />
-            <div className={`search-word-count ${getWordCount(searchQuery) >= 6 ? 'search-word-count--limit' : ''}`}>
-              {getWordCount(searchQuery)}/6
+        <header className="members-header">
+          <div className="members-header__left">
+            <div className="members-header__title-group">
+              <h1 className="members-header__title">Members</h1>
+              <p className="members-header__subtitle">Manage your gym community</p>
             </div>
           </div>
+          <div className="members-header__right">
+            <div className="members-search">
+              <FiSearch className="members-search__icon" />
+              <input
+                type="text"
+                placeholder="Search members..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="members-search__input"
+              />
+              {searchQuery && (
+                <button className="members-search__clear" onClick={() => setSearchQuery('')}>
+                  <FiX size={14} />
+                </button>
+              )}
+            </div>
+            <button className="members-btn members-btn--primary" onClick={() => setIsCreateModalOpen(true)}>
+              <FiUserPlus size={16} />
+              <span>Add Member</span>
+            </button>
+          </div>
+        </header>
+      </Editable>
 
+      {/* Stats Cards Row */}
+      <Editable id="members-stats-cards" config={{ allowLayout: true, allowStyle: true, allowVisibility: true }}>
+        <div className="members-stats">
+          <div
+            className={`stat-card ${activeStatusFilter === 'all' ? 'stat-card--active' : ''}`}
+            onClick={() => setActiveStatusFilter('all')}
+          >
+            <div className="stat-card__icon stat-card__icon--total">
+              <FiUsers size={20} />
+            </div>
+            <div className="stat-card__content">
+              <span className="stat-card__value">{stats.total}</span>
+              <span className="stat-card__label">Total Members</span>
+            </div>
+          </div>
+          <div
+            className={`stat-card ${activeStatusFilter === 'active' ? 'stat-card--active' : ''}`}
+            onClick={() => setActiveStatusFilter(activeStatusFilter === 'active' ? 'all' : 'active')}
+          >
+            <div className="stat-card__icon stat-card__icon--active">
+              <FiUserCheck size={20} />
+            </div>
+            <div className="stat-card__content">
+              <span className="stat-card__value">{stats.activeCount}</span>
+              <span className="stat-card__label">Active</span>
+              <span className="stat-card__trend stat-card__trend--up">
+                <FiTrendingUp size={12} />
+                {stats.retentionRate}%
+              </span>
+            </div>
+          </div>
+          <div
+            className={`stat-card stat-card--warning ${activeStatusFilter === 'expiring' ? 'stat-card--active' : ''}`}
+            onClick={() => setActiveStatusFilter(activeStatusFilter === 'expiring' ? 'all' : 'expiring')}
+          >
+            <div className="stat-card__icon stat-card__icon--warning">
+              <FiAlertTriangle size={20} />
+            </div>
+            <div className="stat-card__content">
+              <span className="stat-card__value">{stats.expiringSoon}</span>
+              <span className="stat-card__label">Expiring Soon</span>
+              <span className="stat-card__meta">This Week</span>
+            </div>
+          </div>
+          <div className="stat-card stat-card--new">
+            <div className="stat-card__icon stat-card__icon--new">
+              <FiTrendingUp size={20} />
+            </div>
+            <div className="stat-card__content">
+              <span className="stat-card__value">{stats.newThisMonth}</span>
+              <span className="stat-card__label">New This Month</span>
+            </div>
+          </div>
+        </div>
+      </Editable>
+
+      {/* Table Controls */}
+      <div className="members-controls">
+        <div className="members-tabs">
+          <button
+            className={`members-tab ${activeStatusFilter === 'all' ? 'members-tab--active' : ''}`}
+            onClick={() => setActiveStatusFilter('all')}
+          >
+            All
+            <span className="members-tab__count">{stats.total}</span>
+          </button>
+          <button
+            className={`members-tab ${activeStatusFilter === 'active' ? 'members-tab--active' : ''}`}
+            onClick={() => setActiveStatusFilter('active')}
+          >
+            Active
+            <span className="members-tab__count members-tab__count--active">{stats.activeCount}</span>
+          </button>
+          <button
+            className={`members-tab ${activeStatusFilter === 'expiring' ? 'members-tab--active' : ''}`}
+            onClick={() => setActiveStatusFilter('expiring')}
+          >
+            Expiring
+            {stats.expiringSoon > 0 && (
+              <span className="members-tab__count members-tab__count--warning">{stats.expiringSoon}</span>
+            )}
+          </button>
+          <button
+            className={`members-tab ${activeStatusFilter === 'inactive' ? 'members-tab--active' : ''}`}
+            onClick={() => setActiveStatusFilter('inactive')}
+          >
+            Inactive
+            <span className="members-tab__count members-tab__count--inactive">{stats.expiredCount}</span>
+          </button>
+        </div>
+
+        <div className="members-controls__right">
           <div className="members-filter-container" ref={filterPanelRef}>
             <button
-              className={`btn-filters ${isFilterPanelOpen ? 'btn-filters--active' : ''} ${activeFilterCount > 0 ? 'btn-filters--has-filters' : ''}`}
+              className={`members-filter-btn ${isFilterPanelOpen ? 'members-filter-btn--open' : ''} ${activeFilterCount > 0 ? 'members-filter-btn--active' : ''}`}
               onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
             >
-              <FiFilter size={12} />
-              Filters
-              {activeFilterCount > 0 && ` (${activeFilterCount})`}
+              <FiFilter size={14} />
+              <span>Filters</span>
+              {activeFilterCount > 0 && <span className="filter-count">{activeFilterCount}</span>}
             </button>
+
             {isFilterPanelOpen && (
-              <div className="members-filter-panel">
+              <div className="filter-panel">
                 <div className="filter-panel__header">
-                  <span>Filters</span>
+                  <h3>Filters</h3>
                   {activeFilterCount > 0 && (
-                    <button className="filter-clear-btn" onClick={handleResetFilters}>
+                    <button className="filter-panel__clear" onClick={handleResetFilters}>
                       Clear all
                     </button>
                   )}
+                  <button className="filter-panel__close" onClick={() => setIsFilterPanelOpen(false)}>
+                    <FiX size={18} />
+                  </button>
                 </div>
 
-                <div className="filter-panel__content">
-                  <div className="filter-group">
-                    <label className="filter-label">Status</label>
-                    <select
-                      className="filter-select"
-                      value={filters.status[0] || ""}
-                      onChange={(e) => {
-                        const val = e.target.value
-                        setFilters(prev => ({ ...prev, status: val ? [val] : [] }))
-                      }}
-                    >
-                      <option value="">All Status</option>
-                      <option value="Active">Active</option>
-                      <option value="Expired">Expired</option>
-                    </select>
+                <div className="filter-panel__body">
+                  <div className="filter-section">
+                    <h4 className="filter-section__title">Status</h4>
+                    <div className="filter-options">
+                      {['Active', 'Expired'].map((status) => (
+                        <label key={status} className="filter-checkbox">
+                          <input
+                            type="checkbox"
+                            checked={filters.status.includes(status)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setFilters(prev => ({ ...prev, status: [status] }))
+                              } else {
+                                setFilters(prev => ({ ...prev, status: [] }))
+                              }
+                            }}
+                          />
+                          <span className="filter-checkbox__box" />
+                          <span className="filter-checkbox__label">{status}</span>
+                        </label>
+                      ))}
+                    </div>
                   </div>
 
-                  <div className="filter-group">
-                    <label className="filter-label">Plan</label>
-                    <select
-                      className="filter-select"
-                      value={filters.plan[0] || ""}
-                      onChange={(e) => {
-                        const val = e.target.value
-                        setFilters(prev => ({ ...prev, plan: val ? [val] : [] }))
-                      }}
-                    >
-                      <option value="">All Plans</option>
-                      <option value="Basic">Basic</option>
-                      <option value="Premium">Premium</option>
-                      <option value="Standard">Standard</option>
-                    </select>
+                  <div className="filter-section">
+                    <h4 className="filter-section__title">Plan Type</h4>
+                    <div className="filter-options">
+                      {[
+                        { name: 'Premium', price: '$49/mo' },
+                        { name: 'Standard', price: '$29/mo' },
+                        { name: 'Basic', price: '$19/mo' }
+                      ].map((plan) => (
+                        <label key={plan.name} className="filter-checkbox">
+                          <input
+                            type="checkbox"
+                            checked={filters.plan.includes(plan.name)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setFilters(prev => ({ ...prev, plan: [plan.name] }))
+                              } else {
+                                setFilters(prev => ({ ...prev, plan: [] }))
+                              }
+                            }}
+                          />
+                          <span className="filter-checkbox__box" />
+                          <span className="filter-checkbox__label">
+                            {plan.name}
+                            <span className="filter-checkbox__meta">{plan.price}</span>
+                          </span>
+                        </label>
+                      ))}
+                    </div>
                   </div>
 
-                  <div className="filter-group">
-                    <label className="filter-label">Plan Duration</label>
+                  <div className="filter-section">
+                    <h4 className="filter-section__title">Plan Duration</h4>
                     <select
                       className="filter-select"
                       value={filters.planDuration}
@@ -600,22 +734,8 @@ const Members: React.FC = () => {
                     </select>
                   </div>
 
-                  <div className="filter-group">
-                    <label className="filter-label">Expiry Status</label>
-                    <select
-                      className="filter-select"
-                      value={filters.expiryStatus}
-                      onChange={(e) => setFilters(prev => ({ ...prev, expiryStatus: e.target.value }))}
-                    >
-                      <option value="">All</option>
-                      <option value="expiring-soon">Expiring Soon (7 days)</option>
-                      <option value="expiring-month">Expiring This Month</option>
-                      <option value="already-expired">Already Expired</option>
-                    </select>
-                  </div>
-
-                  <div className="filter-group">
-                    <label className="filter-label">Joined</label>
+                  <div className="filter-section">
+                    <h4 className="filter-section__title">Joined Date</h4>
                     <select
                       className="filter-select"
                       value={filters.joinedPeriod}
@@ -629,100 +749,100 @@ const Members: React.FC = () => {
                     </select>
                   </div>
                 </div>
+
+                <div className="filter-panel__footer">
+                  <button
+                    className="filter-panel__apply"
+                    onClick={() => setIsFilterPanelOpen(false)}
+                  >
+                    Apply Filters
+                    {activeFilterCount > 0 && ` (${filteredMembers.length})`}
+                  </button>
+                </div>
               </div>
             )}
           </div>
 
-          <button className="members-action-btn" onClick={() => setIsMembershipModalOpen(true)}>
+          <button className="members-btn members-btn--secondary" onClick={() => setIsMembershipModalOpen(true)}>
             <FiPackage size={14} />
-            <span>Create Membership</span>
-          </button>
-          <button className="members-action-btn" onClick={() => setIsCreateModalOpen(true)}>
-            <FiUserPlus size={14} />
-            <span>Add Member</span>
+            <span>Plans</span>
           </button>
         </div>
       </div>
-      </Editable>
 
-
-
+      {/* Active Filters Display */}
       {activeFilterCount > 0 && (
-        <div className="members-active-filters">
+        <div className="active-filters">
           {filters.status.length > 0 && (
-            <span className="filter-chip">
+            <span className="active-filter">
               Status: {filters.status[0]}
-              <button onClick={() => setFilters(prev => ({ ...prev, status: [] }))}>×</button>
+              <button onClick={() => setFilters(prev => ({ ...prev, status: [] }))}>
+                <FiX size={12} />
+              </button>
             </span>
           )}
           {filters.plan.length > 0 && (
-            <span className="filter-chip">
+            <span className="active-filter">
               Plan: {filters.plan[0]}
-              <button onClick={() => setFilters(prev => ({ ...prev, plan: [] }))}>×</button>
+              <button onClick={() => setFilters(prev => ({ ...prev, plan: [] }))}>
+                <FiX size={12} />
+              </button>
             </span>
           )}
           {filters.planDuration && (
-            <span className="filter-chip">
+            <span className="active-filter">
               Duration: {filters.planDuration}
-              <button onClick={() => setFilters(prev => ({ ...prev, planDuration: "" }))}>×</button>
-            </span>
-          )}
-          {filters.expiryStatus && (
-            <span className="filter-chip">
-              Expiry: {filters.expiryStatus.replace(/-/g, ' ')}
-              <button onClick={() => setFilters(prev => ({ ...prev, expiryStatus: "" }))}>×</button>
+              <button onClick={() => setFilters(prev => ({ ...prev, planDuration: "" }))}>
+                <FiX size={12} />
+              </button>
             </span>
           )}
           {filters.joinedPeriod && (
-            <span className="filter-chip">
+            <span className="active-filter">
               Joined: {filters.joinedPeriod.replace(/-/g, ' ')}
-              <button onClick={() => setFilters(prev => ({ ...prev, joinedPeriod: "" }))}>×</button>
+              <button onClick={() => setFilters(prev => ({ ...prev, joinedPeriod: "" }))}>
+                <FiX size={12} />
+              </button>
             </span>
           )}
-          <button className="filter-clear-all" onClick={handleResetFilters}>Clear All</button>
+          <button className="active-filters__clear" onClick={handleResetFilters}>
+            Clear All
+          </button>
         </div>
       )}
 
-      {/* Titan Batch Action Bar */}
+      {/* Batch Actions Bar */}
       {selectedMemberIds.size > 0 && (
-        <div className="members-batch-actions">
-          <div className="batch-actions__info">
-            <span className="batch-actions__count">{selectedMemberIds.size} selected</span>
-            <button className="batch-actions__clear" onClick={() => setSelectedMemberIds(new Set())}>
-              Clear selection
+        <div className="batch-bar">
+          <div className="batch-bar__left">
+            <span className="batch-bar__count">{selectedMemberIds.size} selected</span>
+            <button className="batch-bar__clear" onClick={() => setSelectedMemberIds(new Set())}>
+              Clear
             </button>
           </div>
-          <div className="batch-actions__buttons">
-            <button className="batch-btn batch-btn--message" onClick={() => {
-              showToast(`Messaging ${selectedMemberIds.size} members`, 'success');
-              setSelectedMemberIds(new Set());
+          <div className="batch-bar__actions">
+            <button className="batch-action batch-action--message" onClick={() => {
+              showToast(`Messaging ${selectedMemberIds.size} members`, 'success')
+              setSelectedMemberIds(new Set())
             }}>
-              <span className="batch-btn__icon">✉️</span>
+              <FiMessageSquare size={16} />
               Message
             </button>
-            <button className="batch-btn batch-btn--export" onClick={() => {
-              showToast(`Exporting ${selectedMemberIds.size} members`, 'success');
-              setSelectedMemberIds(new Set());
-            }}>
-              <span className="batch-btn__icon">⬇️</span>
-              Export
-            </button>
-            <button className="batch-btn batch-btn--danger" onClick={() => {
+            <button className="batch-action batch-action--delete" onClick={() => {
               if (window.confirm(`Are you sure you want to delete ${selectedMemberIds.size} members?`)) {
-                showToast(`Deleted ${selectedMemberIds.size} members`, 'success');
-                setSelectedMemberIds(new Set());
+                showToast(`Deleted ${selectedMemberIds.size} members`, 'success')
+                setSelectedMemberIds(new Set())
               }
             }}>
-              <span className="batch-btn__icon">🗑️</span>
               Delete
             </button>
           </div>
         </div>
       )}
 
-      <div className="members-page__content page-content-with-stats">
+      {/* Main Table */}
+      <div className="members-table-wrapper">
         <Editable id="members-page-table" config={{ allowLayout: true, allowStyle: true, allowVisibility: true }}>
-        <div className="members-page__table-container">
           <DataTable
             data={filteredMembers}
             keyExtractor={(member) => member.userId}
@@ -751,76 +871,48 @@ const Members: React.FC = () => {
             selectedIds={selectedMemberIds}
             onSelectionChange={setSelectedMemberIds}
             mobileCardRender={(member, index) => {
-              const date = member.startDate ? new Date(member.startDate) : null
-              const dateStr = date
-                ? `${date.getDate().toString().padStart(2, '0')} ${date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()} ${date.getFullYear()}`
-                : '-'
               const { daysLeft, isExpired } = getExpiryInfo(member)
               return (
-                <div className="mobile-card">
-                  <div className="mobile-card__header">
-                    <div className="mobile-card__user">
-                      <Avatar name={member.fullName} size="md" />
-                      <div className="mobile-card__info">
-                        <span className="mobile-card__name">{member.fullName}</span>
-                        <span className="mobile-card__email">{member.email}</span>
+                <div className="member-card">
+                  <div className="member-card__header">
+                    <div className="member-card__user">
+                      <div className="member-avatar-wrapper">
+                        <span className={`status-dot ${getStatusDotClass(member)}`} />
+                        <Avatar name={member.fullName} size="md" />
                       </div>
-                    </div>
-                    <div className="mobile-card__status">
-                      <Badge variant={getStatusVariant(member.status)}>{member.status}</Badge>
-                    </div>
-                  </div>
-                  <div className="mobile-card__details">
-                    <div className="mobile-card__detail">
-                      <span className="mobile-card__detail-label">Plan</span>
-                      <span className="mobile-card__detail-value">{member.planName || '-'}</span>
-                    </div>
-                    <div className="mobile-card__detail">
-                      <span className="mobile-card__detail-label">Duration</span>
-                      <span className="mobile-card__detail-value">{member.planDuration || '-'}</span>
-                    </div>
-                    <div className="mobile-card__detail">
-                      <span className="mobile-card__detail-label">Joined</span>
-                      <span className="mobile-card__detail-value">{dateStr}</span>
-                    </div>
-                    {daysLeft !== null && (
-                      <div className="mobile-card__detail">
-                        <span className="mobile-card__detail-label">Expires</span>
-                        <span className={`mobile-card__detail-value ${isExpired ? 'text-red' : daysLeft <= 7 ? 'text-warning' : ''}`}>
-                          {isExpired ? `${Math.abs(daysLeft)}d overdue` : `${daysLeft}d left`}
+                      <div className="member-card__info">
+                        <span className="member-card__name">{member.fullName}</span>
+                        <span className="member-card__plan">
+                          {getPlanIcon(member.planName)} {member.planName || 'No Plan'}
+                          {daysLeft !== null && (
+                            <span className={`member-card__expiry ${isExpired ? 'member-card__expiry--expired' : daysLeft <= 7 ? 'member-card__expiry--warning' : ''}`}>
+                              {isExpired ? `${Math.abs(daysLeft)}d overdue` : `${daysLeft}d left`}
+                            </span>
+                          )}
                         </span>
                       </div>
-                    )}
+                    </div>
+                    <Badge variant={getStatusVariant(member.status)}>{member.status}</Badge>
                   </div>
-                  <div className="mobile-card__actions">
+                  <div className="member-card__actions">
+                    <button className="member-card__action" onClick={(e) => { e.stopPropagation(); handleActionClick(member); }}>
+                      <FiCalendar size={16} />
+                      Renew
+                    </button>
+                    <button className="member-card__action" onClick={(e) => { e.stopPropagation(); handleSendMessage(member); }}>
+                      <FiMessageSquare size={16} />
+                      Message
+                    </button>
                     <ActionMenuButton onClick={(e) => { e.stopPropagation(); handleActionClick(member); }} />
                   </div>
                 </div>
               )
             }}
           />
-        </div>
-        </Editable>
-
-        {/* Vertical Stats Bar - Right Side */}
-        <Editable id="members-page-stats" config={{ allowLayout: true, allowStyle: true, allowVisibility: true }}>
-        <PageStatsBar
-          variant="members"
-          title="Members"
-          showProgress
-          loading={allMembersLoading && allMembers.length === 0}
-          activePercent={stats.retentionRate}
-          stats={[
-            { key: 'total', label: 'Total', value: stats.total },
-            { key: 'active', label: 'Active', value: stats.activeCount, variant: 'active' },
-            { key: 'expired', label: 'Lapsed', value: stats.expiredCount, variant: 'inactive' },
-            { key: 'expiring', label: 'At Risk', value: stats.expiringSoon, variant: 'warning' },
-            { key: 'new', label: 'New', value: stats.newThisMonth, variant: 'new' },
-          ]}
-        />
         </Editable>
       </div>
 
+      {/* Modals */}
       {isActionModalOpen && selectedMember && (
         <EnhancedMemberActionModal
           isOpen={isActionModalOpen}
@@ -849,13 +941,13 @@ const Members: React.FC = () => {
         initialView="memberForm"
       />
 
-        <TieredPlanManagement
-          isOpen={isMembershipModalOpen}
-          onClose={() => setIsMembershipModalOpen(false)}
-          onSuccess={() => {
-            refreshMembers()
-          }}
-        />
+      <TieredPlanManagement
+        isOpen={isMembershipModalOpen}
+        onClose={() => setIsMembershipModalOpen(false)}
+        onSuccess={() => {
+          refreshMembers()
+        }}
+      />
     </div>
   )
 }
