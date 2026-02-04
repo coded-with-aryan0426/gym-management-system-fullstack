@@ -160,134 +160,78 @@
 }
 
 /* ============================================
-   STATS CARDS ROW
+   MINI STATS (Inline in Header)
    ============================================ */
-.members-stats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
+.members-mini-stats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.stat-card {
+.mini-stat {
   display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  padding: 18px 20px;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
   background: var(--bg-secondary);
   border: 1px solid var(--border-primary);
-  border-radius: 14px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
+  transition: all 0.2s ease;
 }
 
-.stat-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: transparent;
-  transition: background 0.25s;
-}
-
-.stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+.mini-stat:hover {
+  background: var(--bg-tertiary);
   border-color: var(--border-secondary);
 }
 
-.stat-card--active {
+.mini-stat--active {
   border-color: #DC2626;
-  box-shadow: 0 0 0 1px rgba(220, 38, 38, 0.2), 0 8px 24px rgba(220, 38, 38, 0.15);
+  background: rgba(220, 38, 38, 0.08);
+  box-shadow: 0 0 0 1px rgba(220, 38, 38, 0.15);
 }
 
-.stat-card--active::before {
-  background: linear-gradient(90deg, #DC2626, #EF4444);
-}
-
-.stat-card__icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
+.mini-stat__icon {
   flex-shrink: 0;
 }
 
-.stat-card__icon--total {
-  background: rgba(99, 102, 241, 0.12);
+.mini-stat__icon--total {
   color: #6366F1;
 }
 
-.stat-card__icon--active {
-  background: rgba(16, 185, 129, 0.12);
+.mini-stat__icon--active {
   color: #10B981;
 }
 
-.stat-card__icon--warning {
-  background: rgba(245, 158, 11, 0.12);
+.mini-stat__icon--warning {
   color: #F59E0B;
 }
 
-.stat-card__icon--new {
-  background: rgba(59, 130, 246, 0.12);
+.mini-stat__icon--new {
   color: #3B82F6;
 }
 
-.stat-card__content {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.stat-card__value {
-  font-size: 28px;
+.mini-stat__value {
+  font-size: 16px;
   font-weight: 800;
   color: var(--text-primary);
-  line-height: 1.1;
-  letter-spacing: -0.02em;
+  line-height: 1;
 }
 
-.stat-card__label {
-  font-size: 12px;
+.mini-stat__label {
+  font-size: 11px;
   font-weight: 600;
   color: var(--text-tertiary);
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.02em;
 }
 
-.stat-card__trend {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12px;
-  font-weight: 700;
-  margin-top: 4px;
-}
-
-.stat-card__trend--up {
-  color: #10B981;
-}
-
-.stat-card__trend--down {
-  color: #EF4444;
-}
-
-.stat-card__meta {
-  font-size: 11px;
-  color: var(--text-tertiary);
-  font-weight: 500;
-  margin-top: 2px;
-}
-
-/* Warning Card Animation */
-.stat-card--warning .stat-card__value {
+.mini-stat--warning .mini-stat__value {
   color: #F59E0B;
+}
+
+.mini-stat--new .mini-stat__value {
+  color: #3B82F6;
 }
 
 /* ============================================
@@ -1192,14 +1136,13 @@
   color: #1F2937;
 }
 
-:root.theme-light .stat-card {
+:root.theme-light .mini-stat {
   background: #fff;
   border-color: rgba(0, 0, 0, 0.08);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
-:root.theme-light .stat-card:hover {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+:root.theme-light .mini-stat:hover {
+  background: #F8FAFC;
 }
 
 :root.theme-light .members-tabs {
@@ -1251,27 +1194,35 @@
     gap: 14px;
   }
 
-  .members-stats {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
   .members-header {
     flex-wrap: wrap;
     gap: 16px;
   }
 
-  .members-header__right {
+  .members-mini-stats {
+    order: 3;
     width: 100%;
-    justify-content: space-between;
+    justify-content: flex-start;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .mini-stat {
+    flex: 1;
+    min-width: 100px;
+    justify-content: center;
+  }
+
+  .members-header__right {
+    gap: 10px;
   }
 
   .members-search__input {
-    width: 100%;
-    flex: 1;
+    width: 180px;
   }
 
   .members-search__input:focus {
-    width: 100%;
+    width: 220px;
   }
 
   .members-controls {
@@ -1308,16 +1259,44 @@
     gap: 12px;
   }
 
-  .members-header__right {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .members-search {
+  .members-header__left {
     width: 100%;
   }
 
+  .members-mini-stats {
+    order: 2;
+    gap: 6px;
+  }
+
+  .mini-stat {
+    padding: 6px 10px;
+    gap: 6px;
+  }
+
+  .mini-stat__value {
+    font-size: 14px;
+  }
+
+  .mini-stat__label {
+    display: none;
+  }
+
+  .members-header__right {
+    order: 3;
+    flex-direction: row;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .members-search {
+    flex: 1;
+  }
+
   .members-search__input {
+    width: 100%;
+  }
+
+  .members-search__input:focus {
     width: 100%;
   }
 
@@ -1330,15 +1309,6 @@
     padding: 0;
   }
 
-  .members-header__right {
-    flex-direction: row;
-    gap: 8px;
-  }
-
-  .members-search {
-    flex: 1;
-  }
-
   .members-btn--primary {
     width: auto;
     padding: 0 14px;
@@ -1346,24 +1316,6 @@
 
   .members-btn--primary span {
     display: inline;
-  }
-
-  .members-stats {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-  }
-
-  .stat-card {
-    padding: 14px 16px;
-  }
-
-  .stat-card__value {
-    font-size: 24px;
-  }
-
-  .stat-card__icon {
-    width: 38px;
-    height: 38px;
   }
 
   .members-tabs {
@@ -1416,20 +1368,21 @@
     font-size: 20px;
   }
 
-  .members-stats {
-    grid-template-columns: 1fr 1fr;
+  .members-mini-stats {
+    gap: 4px;
   }
 
-  .stat-card__label {
-    font-size: 10px;
+  .mini-stat {
+    padding: 5px 8px;
+    min-width: auto;
+    flex: 1;
   }
 
-  .stat-card__value {
-    font-size: 22px;
+  .mini-stat__value {
+    font-size: 13px;
   }
 
-  .stat-card__trend,
-  .stat-card__meta {
+  .mini-stat__icon {
     display: none;
   }
 
@@ -1463,8 +1416,8 @@
   }
 }
 
-/* Stat card hover elevation */
-.stat-card {
+/* Mini stat hover */
+.mini-stat {
   will-change: transform, box-shadow;
 }
 

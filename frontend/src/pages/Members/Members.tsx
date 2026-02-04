@@ -516,94 +516,80 @@ const Members: React.FC = () => {
 
   return (
     <div className="members-page">
-      {/* New Header Design */}
-      <Editable id="members-page-header" config={{ allowLayout: true, allowStyle: true, allowVisibility: true }}>
-        <header className="members-header">
-          <div className="members-header__left">
-            <div className="members-header__title-group">
-              <h1 className="members-header__title">Members</h1>
-              <p className="members-header__subtitle">Manage your gym community</p>
+      {/* Header with Inline Stats */}
+        <Editable id="members-page-header" config={{ allowLayout: true, allowStyle: true, allowVisibility: true }}>
+          <header className="members-header">
+            <div className="members-header__left">
+              <div className="members-header__title-group">
+                <h1 className="members-header__title">Members</h1>
+                <p className="members-header__subtitle">Manage your gym community</p>
+              </div>
             </div>
-          </div>
-          <div className="members-header__right">
-            <div className="members-search">
-              <FiSearch className="members-search__icon" />
-              <input
-                type="text"
-                placeholder="Search members..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="members-search__input"
-              />
-              {searchQuery && (
-                <button className="members-search__clear" onClick={() => setSearchQuery('')}>
-                  <FiX size={14} />
-                </button>
-              )}
-            </div>
-            <button className="members-btn members-btn--primary" onClick={() => setIsCreateModalOpen(true)}>
-              <FiUserPlus size={16} />
-              <span>Add Member</span>
-            </button>
-          </div>
-        </header>
-      </Editable>
 
-      {/* Stats Cards Row */}
-      <Editable id="members-stats-cards" config={{ allowLayout: true, allowStyle: true, allowVisibility: true }}>
-        <div className="members-stats">
-          <div
-            className={`stat-card ${activeStatusFilter === 'all' ? 'stat-card--active' : ''}`}
-            onClick={() => setActiveStatusFilter('all')}
-          >
-            <div className="stat-card__icon stat-card__icon--total">
-              <FiUsers size={20} />
+            {/* Inline Mini Stats */}
+            <Editable id="members-stats-cards" config={{ allowLayout: true, allowStyle: true, allowVisibility: true }}>
+              <div className="members-mini-stats">
+                <div
+                  className={`mini-stat ${activeStatusFilter === 'all' ? 'mini-stat--active' : ''}`}
+                  onClick={() => setActiveStatusFilter('all')}
+                  title="Total Members"
+                >
+                  <FiUsers size={14} className="mini-stat__icon mini-stat__icon--total" />
+                  <span className="mini-stat__value">{stats.total}</span>
+                  <span className="mini-stat__label">Total</span>
+                </div>
+                <div
+                  className={`mini-stat ${activeStatusFilter === 'active' ? 'mini-stat--active' : ''}`}
+                  onClick={() => setActiveStatusFilter(activeStatusFilter === 'active' ? 'all' : 'active')}
+                  title="Active Members"
+                >
+                  <FiUserCheck size={14} className="mini-stat__icon mini-stat__icon--active" />
+                  <span className="mini-stat__value">{stats.activeCount}</span>
+                  <span className="mini-stat__label">Active</span>
+                </div>
+                <div
+                  className={`mini-stat mini-stat--warning ${activeStatusFilter === 'expiring' ? 'mini-stat--active' : ''}`}
+                  onClick={() => setActiveStatusFilter(activeStatusFilter === 'expiring' ? 'all' : 'expiring')}
+                  title="Expiring This Week"
+                >
+                  <FiAlertTriangle size={14} className="mini-stat__icon mini-stat__icon--warning" />
+                  <span className="mini-stat__value">{stats.expiringSoon}</span>
+                  <span className="mini-stat__label">Expiring</span>
+                </div>
+                <div
+                  className="mini-stat mini-stat--new"
+                  title="New This Month"
+                >
+                  <FiTrendingUp size={14} className="mini-stat__icon mini-stat__icon--new" />
+                  <span className="mini-stat__value">{stats.newThisMonth}</span>
+                  <span className="mini-stat__label">New</span>
+                </div>
+              </div>
+            </Editable>
+
+            <div className="members-header__right">
+              <div className="members-search">
+                <FiSearch className="members-search__icon" />
+                <input
+                  type="text"
+                  placeholder="Search members..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="members-search__input"
+                />
+                {searchQuery && (
+                  <button className="members-search__clear" onClick={() => setSearchQuery('')}>
+                    <FiX size={14} />
+                  </button>
+                )}
+              </div>
+              <button className="members-btn members-btn--primary" onClick={() => setIsCreateModalOpen(true)}>
+                <FiUserPlus size={16} />
+                <span>Add Member</span>
+              </button>
             </div>
-            <div className="stat-card__content">
-              <span className="stat-card__value">{stats.total}</span>
-              <span className="stat-card__label">Total Members</span>
-            </div>
-          </div>
-          <div
-            className={`stat-card ${activeStatusFilter === 'active' ? 'stat-card--active' : ''}`}
-            onClick={() => setActiveStatusFilter(activeStatusFilter === 'active' ? 'all' : 'active')}
-          >
-            <div className="stat-card__icon stat-card__icon--active">
-              <FiUserCheck size={20} />
-            </div>
-            <div className="stat-card__content">
-              <span className="stat-card__value">{stats.activeCount}</span>
-              <span className="stat-card__label">Active</span>
-              <span className="stat-card__trend stat-card__trend--up">
-                <FiTrendingUp size={12} />
-                {stats.retentionRate}%
-              </span>
-            </div>
-          </div>
-          <div
-            className={`stat-card stat-card--warning ${activeStatusFilter === 'expiring' ? 'stat-card--active' : ''}`}
-            onClick={() => setActiveStatusFilter(activeStatusFilter === 'expiring' ? 'all' : 'expiring')}
-          >
-            <div className="stat-card__icon stat-card__icon--warning">
-              <FiAlertTriangle size={20} />
-            </div>
-            <div className="stat-card__content">
-              <span className="stat-card__value">{stats.expiringSoon}</span>
-              <span className="stat-card__label">Expiring Soon</span>
-              <span className="stat-card__meta">This Week</span>
-            </div>
-          </div>
-          <div className="stat-card stat-card--new">
-            <div className="stat-card__icon stat-card__icon--new">
-              <FiTrendingUp size={20} />
-            </div>
-            <div className="stat-card__content">
-              <span className="stat-card__value">{stats.newThisMonth}</span>
-              <span className="stat-card__label">New This Month</span>
-            </div>
-          </div>
-        </div>
-      </Editable>
+          </header>
+        </Editable>
 
       {/* Table Controls */}
       <div className="members-controls">
