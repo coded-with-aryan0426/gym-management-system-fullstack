@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, Plus, Edit, Trash2, Eye, LayoutGrid, List, Clock, Dumbbell, Check, 
   Star, Copy, Archive, MoreVertical, ChevronDown, Sparkles, Crown, Users,
-  TrendingUp, Package
+  TrendingUp, Package, Search, Filter, SlidersHorizontal, Zap
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import type { MembershipPlan, PlanVariant, PlanStatus, PlanCategory } from '../../types/membershipPackage';
@@ -33,11 +33,23 @@ const TieredPlanManagement: React.FC<TieredPlanManagementProps> = ({
   const [showWizard, setShowWizard] = useState(false);
   const [editingPlan, setEditingPlan] = useState<MembershipPlan | null>(null);
   const [expandedPlan, setExpandedPlan] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>(() => {
     const saved = localStorage.getItem('tieredPlanViewMode');
     return (saved as ViewMode) || 'grid';
   });
   const modalRef = useRef<HTMLDivElement>(null);
+
+  // Filter plans based on search query
+  const filteredPlans = useMemo(() => {
+    if (!searchQuery.trim()) return plans;
+    const query = searchQuery.toLowerCase();
+    return plans.filter(plan => 
+      plan.planName.toLowerCase().includes(query) ||
+      plan.description?.toLowerCase().includes(query) ||
+      plan.category.toLowerCase().includes(query)
+    );
+  }, [plans, searchQuery]);
 
   useEffect(() => {
     if (isOpen) {
@@ -258,51 +270,191 @@ const TieredPlanManagement: React.FC<TieredPlanManagementProps> = ({
             border: '1px solid rgba(255,255,255,0.06)',
           }}
         >
-          {/* Header */}
+          {/* Header - Enhanced with search and stats */}
           <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: '24px 28px',
+            padding: '20px 28px 16px',
             borderBottom: '1px solid rgba(255,255,255,0.06)',
             position: 'sticky',
             top: 0,
             background: 'linear-gradient(180deg, #141414 0%, #121212 100%)',
             zIndex: 10,
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            {/* Top Row: Title & Close */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-start',
+              marginBottom: 20,
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                <div style={{
+                  width: 44,
+                  height: 44,
+                  background: 'linear-gradient(135deg, rgba(220, 38, 38, 0.25) 0%, rgba(220, 38, 38, 0.08) 100%)',
+                  borderRadius: 12,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '1px solid rgba(220, 38, 38, 0.2)',
+                }}>
+                  <Crown size={22} style={{ color: '#DC2626' }} />
+                </div>
+                <div>
+                  <h2 style={{ 
+                    fontSize: 20, 
+                    fontWeight: 700, 
+                    color: '#F9FAFB', 
+                    margin: 0,
+                    letterSpacing: '-0.5px'
+                  }}>
+                    Membership Tiers
+                  </h2>
+                  <p style={{
+                    fontSize: 12,
+                    color: '#6B7280',
+                    margin: '2px 0 0 0',
+                  }}>
+                    {mode === 'selection' ? 'Select a tier and duration to assign' : 'Premium membership packages'}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={onClose}
+                style={{
+                  background: 'rgba(255,255,255,0.03)',
+                  border: '1px solid rgba(255,255,255,0.06)',
+                  color: '#6B7280',
+                  cursor: 'pointer',
+                  padding: 8,
+                  display: 'flex',
+                  borderRadius: 8,
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Stats Row */}
+            <div style={{
+              display: 'flex',
+              gap: 16,
+              marginBottom: 16,
+            }}>
               <div style={{
-                width: 48,
-                height: 48,
-                background: 'linear-gradient(135deg, rgba(220, 38, 38, 0.2) 0%, rgba(220, 38, 38, 0.05) 100%)',
-                borderRadius: 14,
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                border: '1px solid rgba(220, 38, 38, 0.2)',
+                gap: 10,
+                padding: '10px 14px',
+                background: 'rgba(255,255,255,0.03)',
+                borderRadius: 10,
+                border: '1px solid rgba(255,255,255,0.05)',
               }}>
-                <Crown size={24} style={{ color: '#DC2626' }} />
+                <div style={{
+                  width: 32,
+                  height: 32,
+                  background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.05) 100%)',
+                  borderRadius: 8,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                  <Package size={16} style={{ color: '#3B82F6' }} />
+                </div>
+                <div>
+                  <p style={{ fontSize: 18, fontWeight: 700, color: '#F9FAFB', margin: 0 }}>{plans.length}</p>
+                  <p style={{ fontSize: 10, color: '#6B7280', margin: 0, textTransform: 'uppercase', letterSpacing: '0.3px' }}>Total Tiers</p>
+                </div>
               </div>
-              <div>
-                <h2 style={{ 
-                  fontSize: 22, 
-                  fontWeight: 700, 
-                  color: '#F9FAFB', 
-                  margin: 0,
-                  letterSpacing: '-0.5px'
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: '10px 14px',
+                background: 'rgba(255,255,255,0.03)',
+                borderRadius: 10,
+                border: '1px solid rgba(255,255,255,0.05)',
+              }}>
+                <div style={{
+                  width: 32,
+                  height: 32,
+                  background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.05) 100%)',
+                  borderRadius: 8,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}>
-                  Membership Tiers
-                </h2>
-                <p style={{
-                  fontSize: 13,
-                  color: '#6B7280',
-                  margin: '4px 0 0 0',
+                  <Zap size={16} style={{ color: '#10B981' }} />
+                </div>
+                <div>
+                  <p style={{ fontSize: 18, fontWeight: 700, color: '#10B981', margin: 0 }}>{plans.filter(p => p.status === 'ACTIVE').length}</p>
+                  <p style={{ fontSize: 10, color: '#6B7280', margin: 0, textTransform: 'uppercase', letterSpacing: '0.3px' }}>Active</p>
+                </div>
+              </div>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: '10px 14px',
+                background: 'rgba(255,255,255,0.03)',
+                borderRadius: 10,
+                border: '1px solid rgba(255,255,255,0.05)',
+              }}>
+                <div style={{
+                  width: 32,
+                  height: 32,
+                  background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(245, 158, 11, 0.05) 100%)',
+                  borderRadius: 8,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}>
-                  {mode === 'selection' ? 'Select a tier and duration to assign' : 'Create and manage your premium membership packages'}
-                </p>
+                  <Star size={16} style={{ color: '#F59E0B' }} />
+                </div>
+                <div>
+                  <p style={{ fontSize: 18, fontWeight: 700, color: '#F59E0B', margin: 0 }}>{plans.filter(p => p.isRecommended).length}</p>
+                  <p style={{ fontSize: 10, color: '#6B7280', margin: 0, textTransform: 'uppercase', letterSpacing: '0.3px' }}>Featured</p>
+                </div>
               </div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+
+            {/* Search & Actions Row */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+            }}>
+              {/* Search Input */}
+              <div style={{
+                flex: 1,
+                position: 'relative',
+              }}>
+                <Search size={16} style={{
+                  position: 'absolute',
+                  left: 14,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: '#6B7280',
+                }} />
+                <input
+                  type="text"
+                  placeholder="Search tiers by name, category..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '12px 14px 12px 42px',
+                    background: 'rgba(255,255,255,0.03)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    borderRadius: 10,
+                    color: '#F9FAFB',
+                    fontSize: 13,
+                    outline: 'none',
+                    transition: 'all 0.2s ease',
+                  }}
+                />
+              </div>
+
               {/* View Toggle */}
               <div style={{
                 display: 'flex',
@@ -324,6 +476,7 @@ const TieredPlanManagement: React.FC<TieredPlanManagementProps> = ({
                     alignItems: 'center',
                     transition: 'all 0.2s ease',
                   }}
+                  title="Grid view"
                 >
                   <LayoutGrid size={16} />
                 </button>
@@ -340,67 +493,72 @@ const TieredPlanManagement: React.FC<TieredPlanManagementProps> = ({
                     alignItems: 'center',
                     transition: 'all 0.2s ease',
                   }}
+                  title="List view"
                 >
                   <List size={16} />
                 </button>
               </div>
-              <button
-                onClick={onClose}
-                style={{
-                  background: 'rgba(255,255,255,0.03)',
-                  border: '1px solid rgba(255,255,255,0.06)',
-                  color: '#6B7280',
-                  cursor: 'pointer',
-                  padding: 10,
-                  display: 'flex',
-                  borderRadius: 10,
-                  transition: 'all 0.2s ease',
-                }}
-              >
-                <X size={18} />
-              </button>
-            </div>
-          </div>
 
-          {/* Content */}
-          <div style={{ padding: '24px 28px' }}>
-            {/* Action Bar */}
-            {mode === 'management' && (
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: 24,
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                  <p style={{ fontSize: 14, color: '#9CA3AF', fontWeight: 500 }}>
-                    {plans.length} tier{plans.length !== 1 ? 's' : ''} total
-                  </p>
-                  <div style={{ width: 1, height: 16, background: 'rgba(255,255,255,0.1)' }} />
-                  <p style={{ fontSize: 13, color: '#6B7280' }}>
-                    {plans.filter(p => p.status === 'ACTIVE').length} active
-                  </p>
-                </div>
+              {/* Create Button */}
+              {mode === 'management' && (
                 <button
                   onClick={() => setShowWizard(true)}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: 8,
-                    padding: '12px 20px',
+                    padding: '12px 18px',
                     background: 'linear-gradient(135deg, #DC2626 0%, #B91C1C 100%)',
                     border: 'none',
-                    borderRadius: 12,
+                    borderRadius: 10,
                     color: '#fff',
-                    fontSize: 14,
+                    fontSize: 13,
                     fontWeight: 600,
                     cursor: 'pointer',
-                    boxShadow: '0 4px 20px rgba(220, 38, 38, 0.4)',
+                    boxShadow: '0 4px 16px rgba(220, 38, 38, 0.35)',
                     transition: 'all 0.2s ease',
                   }}
                 >
-                  <Plus size={18} />
+                  <Plus size={16} />
                   Create Tier
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Content */}
+          <div style={{ padding: '20px 28px' }}>
+            {/* Search Results Info */}
+            {searchQuery && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                marginBottom: 16,
+                padding: '10px 14px',
+                background: 'rgba(59, 130, 246, 0.08)',
+                borderRadius: 10,
+                border: '1px solid rgba(59, 130, 246, 0.15)',
+              }}>
+                <Search size={14} style={{ color: '#3B82F6' }} />
+                <span style={{ fontSize: 13, color: '#9CA3AF' }}>
+                  Found <strong style={{ color: '#F9FAFB' }}>{filteredPlans.length}</strong> result{filteredPlans.length !== 1 ? 's' : ''} for "<strong style={{ color: '#3B82F6' }}>{searchQuery}</strong>"
+                </span>
+                <button
+                  onClick={() => setSearchQuery('')}
+                  style={{
+                    marginLeft: 'auto',
+                    padding: '4px 10px',
+                    background: 'rgba(255,255,255,0.05)',
+                    border: 'none',
+                    borderRadius: 6,
+                    color: '#9CA3AF',
+                    fontSize: 11,
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Clear
                 </button>
               </div>
             )}
@@ -457,7 +615,7 @@ const TieredPlanManagement: React.FC<TieredPlanManagementProps> = ({
                 gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
                 gap: 20,
               }}>
-{plans.map((plan, index) => (
+{filteredPlans.map((plan, index) => (
                     <TierCard
                       key={plan.planId ?? `plan-${index}`}
                       plan={plan}
@@ -484,7 +642,7 @@ const TieredPlanManagement: React.FC<TieredPlanManagementProps> = ({
             {/* Plans List View */}
             {!loading && !error && viewMode === 'list' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-{plans.map((plan, index) => (
+{filteredPlans.map((plan, index) => (
                     <TierCardList
                       key={plan.planId ?? `plan-list-${index}`}
                       plan={plan}
@@ -509,53 +667,58 @@ const TieredPlanManagement: React.FC<TieredPlanManagementProps> = ({
             )}
 
             {/* Empty State */}
-            {!loading && !error && plans.length === 0 && (
+            {!loading && !error && filteredPlans.length === 0 && (
               <div style={{
                 textAlign: 'center',
-                padding: '100px 20px',
+                padding: '80px 20px',
                 color: '#6B7280',
               }}>
                 <div style={{
-                  width: 80,
-                  height: 80,
+                  width: 72,
+                  height: 72,
                   background: 'linear-gradient(135deg, rgba(220, 38, 38, 0.1) 0%, rgba(220, 38, 38, 0.02) 100%)',
-                  borderRadius: 20,
+                  borderRadius: 18,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  margin: '0 auto 24px',
+                  margin: '0 auto 20px',
                   border: '1px solid rgba(220, 38, 38, 0.1)',
                 }}>
-                  <Package size={36} style={{ color: '#DC2626' }} />
+                  {searchQuery ? <Search size={32} style={{ color: '#6B7280' }} /> : <Package size={32} style={{ color: '#DC2626' }} />}
                 </div>
-                <p style={{ fontSize: 18, fontWeight: 600, marginBottom: 8, color: '#9CA3AF' }}>
-                  {mode === 'selection' 
-                    ? 'No active membership tiers'
-                    : 'No membership tiers yet'
+                <p style={{ fontSize: 16, fontWeight: 600, marginBottom: 6, color: '#9CA3AF' }}>
+                  {searchQuery 
+                    ? 'No tiers match your search'
+                    : mode === 'selection' 
+                      ? 'No active membership tiers'
+                      : 'No membership tiers yet'
                   }
                 </p>
-                <p style={{ fontSize: 14, opacity: 0.8, marginBottom: 24 }}>
-                  {mode === 'management' && 'Create your first tier to start offering membership packages'}
+                <p style={{ fontSize: 13, opacity: 0.8, marginBottom: 20 }}>
+                  {searchQuery 
+                    ? 'Try adjusting your search terms'
+                    : mode === 'management' && 'Create your first tier to start offering membership packages'
+                  }
                 </p>
-                {mode === 'management' && (
+                {!searchQuery && mode === 'management' && (
                   <button
                     onClick={() => setShowWizard(true)}
                     style={{
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: 8,
-                      padding: '14px 28px',
+                      padding: '12px 24px',
                       background: 'linear-gradient(135deg, #DC2626 0%, #B91C1C 100%)',
                       border: 'none',
-                      borderRadius: 12,
+                      borderRadius: 10,
                       color: '#fff',
-                      fontSize: 14,
+                      fontSize: 13,
                       fontWeight: 600,
                       cursor: 'pointer',
-                      boxShadow: '0 4px 20px rgba(220, 38, 38, 0.4)',
+                      boxShadow: '0 4px 16px rgba(220, 38, 38, 0.35)',
                     }}
                   >
-                    <Plus size={18} />
+                    <Plus size={16} />
                     Create First Tier
                   </button>
                 )}
@@ -650,69 +813,90 @@ const TierCard: React.FC<TierCardProps> = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => { setIsHovered(false); setShowMenu(false); }}
       style={{
-        background: 'rgba(255,255,255,0.02)',
+        background: isHovered 
+          ? `linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%)`
+          : 'rgba(255,255,255,0.02)',
         border: `1px solid ${isHovered ? `${color}40` : 'rgba(255,255,255,0.06)'}`,
-        borderRadius: 20,
+        borderRadius: 18,
         overflow: 'hidden',
-        transition: 'all 0.3s ease',
-        transform: isHovered ? 'translateY(-4px)' : 'translateY(0)',
-        boxShadow: isHovered ? `0 12px 40px ${color}20` : 'none',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        transform: isHovered ? 'translateY(-6px) scale(1.01)' : 'translateY(0) scale(1)',
+        boxShadow: isHovered 
+          ? `0 20px 50px ${color}25, 0 10px 25px rgba(0,0,0,0.4)` 
+          : '0 4px 20px rgba(0,0,0,0.15)',
+        position: 'relative',
       }}
     >
+      {/* Gradient Glow Effect on Hover */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: 120,
+        background: `linear-gradient(180deg, ${color}12 0%, transparent 100%)`,
+        opacity: isHovered ? 1 : 0,
+        transition: 'opacity 0.3s ease',
+        pointerEvents: 'none',
+      }} />
+      
       {/* Color Bar */}
       <div style={{
-        height: 5,
-        background: `linear-gradient(90deg, ${color} 0%, ${color}80 100%)`,
+        height: 4,
+        background: `linear-gradient(90deg, ${color} 0%, ${color}90 50%, ${color}60 100%)`,
       }} />
 
       {/* Recommended Badge */}
       {plan.isRecommended && (
         <div style={{
           position: 'absolute',
-          top: 16,
-          right: 16,
+          top: 14,
+          right: 14,
           display: 'flex',
           alignItems: 'center',
           gap: 4,
-          padding: '4px 10px',
+          padding: '5px 10px',
           background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
-          borderRadius: 20,
-          fontSize: 10,
+          borderRadius: 16,
+          fontSize: 9,
           fontWeight: 700,
           color: '#fff',
           textTransform: 'uppercase',
           letterSpacing: '0.5px',
+          boxShadow: '0 4px 12px rgba(245, 158, 11, 0.4)',
+          zIndex: 5,
         }}>
-          <Star size={10} fill="#fff" />
+          <Star size={9} fill="#fff" />
           Best Value
         </div>
       )}
 
       {/* Header */}
-      <div style={{ padding: '20px 20px 0', position: 'relative' }}>
+      <div style={{ padding: '18px 18px 0', position: 'relative' }}>
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'flex-start',
-          marginBottom: 16,
+          marginBottom: 14,
         }}>
           <div style={{
-            width: 48,
-            height: 48,
-            background: `${color}15`,
-            borderRadius: 14,
+            width: 44,
+            height: 44,
+            background: `linear-gradient(135deg, ${color}25 0%, ${color}10 100%)`,
+            borderRadius: 12,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            border: `1px solid ${color}20`,
           }}>
-            <Crown size={24} style={{ color }} />
+            <Crown size={22} style={{ color }} />
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{
-              padding: '5px 12px',
+              padding: '4px 10px',
               background: statusColor.bg,
-              borderRadius: 8,
-              fontSize: 11,
+              borderRadius: 6,
+              fontSize: 10,
               fontWeight: 600,
               color: statusColor.text,
               textTransform: 'uppercase',
@@ -774,93 +958,94 @@ const TierCard: React.FC<TierCardProps> = ({
 
         <div style={{ marginBottom: 4 }}>
           <span style={{
-            fontSize: 10,
-            fontWeight: 600,
+            fontSize: 9,
+            fontWeight: 700,
             color: color,
             textTransform: 'uppercase',
-            letterSpacing: '0.5px',
+            letterSpacing: '0.8px',
           }}>
             {getCategoryLabel(plan.category)}
           </span>
         </div>
         <h3 style={{
-          fontSize: 20,
+          fontSize: 18,
           fontWeight: 700,
           color: '#F9FAFB',
-          margin: '0 0 4px 0',
-          letterSpacing: '-0.4px',
+          margin: '0 0 6px 0',
+          letterSpacing: '-0.3px',
         }}>
           {plan.planName}
         </h3>
         {plan.description && (
           <p style={{
-            fontSize: 13,
+            fontSize: 12,
             color: '#6B7280',
             margin: 0,
             lineHeight: 1.5,
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
           }}>
             {plan.description}
           </p>
         )}
 
-        <p style={{
-          fontSize: 32,
-          fontWeight: 800,
-          color: '#F9FAFB',
-          margin: '16px 0 0 0',
-          letterSpacing: '-1px',
-        }}>
-          {formatPrice(getStartingPrice(plan))}
-          <span style={{ fontSize: 14, fontWeight: 500, color: '#6B7280', marginLeft: 4 }}>
+        <div style={{ marginTop: 14 }}>
+          <span style={{
+            fontSize: 28,
+            fontWeight: 800,
+            color: '#F9FAFB',
+            letterSpacing: '-1px',
+          }}>
+            {formatPrice(getStartingPrice(plan))}
+          </span>
+          <span style={{ fontSize: 12, fontWeight: 500, color: '#6B7280', marginLeft: 4 }}>
             starting
           </span>
-        </p>
+        </div>
       </div>
 
       {/* Stats */}
       <div style={{
         display: 'flex',
-        gap: 20,
-        padding: '16px 20px',
+        gap: 12,
+        padding: '14px 18px',
         marginTop: 8,
         borderTop: '1px solid rgba(255,255,255,0.04)',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{
-            width: 28,
-            height: 28,
-            background: 'rgba(59, 130, 246, 0.1)',
-            borderRadius: 8,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-            <Clock size={14} style={{ color: '#3B82F6' }} />
-          </div>
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: 8,
+          flex: 1,
+          padding: '8px 10px',
+          background: 'rgba(59, 130, 246, 0.08)',
+          borderRadius: 8,
+        }}>
+          <Clock size={14} style={{ color: '#3B82F6' }} />
           <div>
-            <p style={{ fontSize: 14, fontWeight: 700, color: '#F9FAFB', margin: 0 }}>
+            <span style={{ fontSize: 14, fontWeight: 700, color: '#F9FAFB' }}>
               {getActiveVariantCount(plan)}
-            </p>
-            <p style={{ fontSize: 10, color: '#6B7280', margin: 0 }}>Durations</p>
+            </span>
+            <span style={{ fontSize: 10, color: '#6B7280', marginLeft: 4 }}>Durations</span>
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{
-            width: 28,
-            height: 28,
-            background: 'rgba(16, 185, 129, 0.1)',
-            borderRadius: 8,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-            <Check size={14} style={{ color: '#10B981' }} />
-          </div>
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: 8,
+          flex: 1,
+          padding: '8px 10px',
+          background: 'rgba(16, 185, 129, 0.08)',
+          borderRadius: 8,
+        }}>
+          <Check size={14} style={{ color: '#10B981' }} />
           <div>
-            <p style={{ fontSize: 14, fontWeight: 700, color: '#F9FAFB', margin: 0 }}>
+            <span style={{ fontSize: 14, fontWeight: 700, color: '#F9FAFB' }}>
               {plan.features?.filter(f => f.isIncluded).length || 0}
-            </p>
-            <p style={{ fontSize: 10, color: '#6B7280', margin: 0 }}>Features</p>
+            </span>
+            <span style={{ fontSize: 10, color: '#6B7280', marginLeft: 4 }}>Features</span>
           </div>
         </div>
       </div>
@@ -874,19 +1059,19 @@ const TierCard: React.FC<TierCardProps> = ({
           alignItems: 'center',
           justifyContent: 'center',
           gap: 6,
-          padding: '12px',
+          padding: '10px',
           background: 'rgba(255,255,255,0.02)',
           border: 'none',
           borderTop: '1px solid rgba(255,255,255,0.04)',
           color: '#9CA3AF',
-          fontSize: 12,
-          fontWeight: 500,
+          fontSize: 11,
+          fontWeight: 600,
           cursor: 'pointer',
           transition: 'all 0.2s ease',
         }}
       >
         {expanded ? 'Hide' : 'View'} Duration Options
-        <ChevronDown size={14} style={{ transform: expanded ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }} />
+        <ChevronDown size={12} style={{ transform: expanded ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }} />
       </button>
 
       {/* Expanded Variants */}
@@ -900,10 +1085,10 @@ const TierCard: React.FC<TierCardProps> = ({
             style={{ overflow: 'hidden' }}
           >
             <div style={{
-                padding: '0 20px 20px',
+                padding: '0 18px 18px',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: 10,
+                gap: 8,
               }}>
                 {plan.variants?.filter(v => v.isActive).map((variant, vIndex) => (
                   <div
@@ -912,43 +1097,43 @@ const TierCard: React.FC<TierCardProps> = ({
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    padding: '14px 16px',
+                    padding: '12px 14px',
                     background: 'rgba(255,255,255,0.03)',
                     border: '1px solid rgba(255,255,255,0.06)',
-                    borderRadius: 12,
+                    borderRadius: 10,
                     cursor: mode === 'selection' ? 'pointer' : 'default',
                     transition: 'all 0.2s ease',
                   }}
                   onClick={() => mode === 'selection' && onSelectVariant?.(plan, variant)}
                 >
                   <div>
-                    <p style={{ fontSize: 14, fontWeight: 600, color: '#F9FAFB', margin: 0 }}>
+                    <p style={{ fontSize: 13, fontWeight: 600, color: '#F9FAFB', margin: 0 }}>
                       {formatDuration(variant)}
                     </p>
                     {variant.includedPTSessions > 0 && (
-                      <p style={{ fontSize: 11, color: '#6B7280', margin: '4px 0 0' }}>
+                      <p style={{ fontSize: 10, color: '#6B7280', margin: '2px 0 0' }}>
                         +{variant.includedPTSessions} PT sessions
                       </p>
                     )}
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <p style={{ fontSize: 18, fontWeight: 700, color: '#F9FAFB', margin: 0 }}>
+                    <p style={{ fontSize: 16, fontWeight: 700, color: '#F9FAFB', margin: 0 }}>
                       {formatPrice(variant.price)}
                     </p>
                     {variant.discountPercent && variant.discountPercent > 0 && (
-                      <p style={{ fontSize: 11, color: '#10B981', margin: '2px 0 0' }}>
+                      <p style={{ fontSize: 10, color: '#10B981', margin: '2px 0 0' }}>
                         {variant.discountPercent}% off
                       </p>
                     )}
                   </div>
                   {mode === 'selection' && (
                     <div style={{
-                      marginLeft: 12,
-                      padding: '8px 14px',
+                      marginLeft: 10,
+                      padding: '6px 12px',
                       background: `linear-gradient(135deg, ${color} 0%, ${color}cc 100%)`,
-                      borderRadius: 8,
+                      borderRadius: 6,
                       color: '#fff',
-                      fontSize: 12,
+                      fontSize: 11,
                       fontWeight: 600,
                     }}>
                       Select
@@ -964,8 +1149,7 @@ const TierCard: React.FC<TierCardProps> = ({
       {/* Actions (Management Mode) */}
       {mode === 'management' && !expanded && (
         <div style={{
-          padding: '16px 20px',
-          borderTop: '1px solid rgba(255,255,255,0.04)',
+          padding: '12px 18px 16px',
           display: 'flex',
           gap: 8,
         }}>
@@ -976,32 +1160,36 @@ const TierCard: React.FC<TierCardProps> = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 6,
-              padding: '10px',
+              gap: 5,
+              padding: '9px',
               background: 'rgba(255,255,255,0.04)',
               border: '1px solid rgba(255,255,255,0.08)',
-              borderRadius: 10,
+              borderRadius: 8,
               color: '#9CA3AF',
-              fontSize: 12,
-              fontWeight: 500,
+              fontSize: 11,
+              fontWeight: 600,
               cursor: 'pointer',
               transition: 'all 0.2s ease',
             }}
           >
-            <Edit size={14} />
+            <Edit size={12} />
             Edit
           </button>
           <button
             onClick={() => onToggleStatus(plan)}
             style={{
               flex: 1,
-              padding: '10px',
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              borderRadius: 10,
-              color: '#9CA3AF',
-              fontSize: 12,
-              fontWeight: 500,
+              padding: '9px',
+              background: plan.status === 'ACTIVE' 
+                ? 'rgba(239, 68, 68, 0.08)' 
+                : 'rgba(16, 185, 129, 0.08)',
+              border: plan.status === 'ACTIVE'
+                ? '1px solid rgba(239, 68, 68, 0.15)'
+                : '1px solid rgba(16, 185, 129, 0.15)',
+              borderRadius: 8,
+              color: plan.status === 'ACTIVE' ? '#EF4444' : '#10B981',
+              fontSize: 11,
+              fontWeight: 600,
               cursor: 'pointer',
               transition: 'all 0.2s ease',
             }}
@@ -1055,9 +1243,11 @@ const TierCardList: React.FC<TierCardProps> = ({
       onMouseLeave={() => setIsHovered(false)}
       style={{
         background: 'rgba(255,255,255,0.02)',
-        border: `1px solid ${isHovered ? `${color}30` : 'rgba(255,255,255,0.06)'}`,
-        borderRadius: 16,
+        borderTop: `1px solid ${isHovered ? `${color}30` : 'rgba(255,255,255,0.06)'}`,
+        borderRight: `1px solid ${isHovered ? `${color}30` : 'rgba(255,255,255,0.06)'}`,
+        borderBottom: `1px solid ${isHovered ? `${color}30` : 'rgba(255,255,255,0.06)'}`,
         borderLeft: `4px solid ${color}`,
+        borderRadius: 16,
         overflow: 'hidden',
         transition: 'all 0.2s ease',
       }}
