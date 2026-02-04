@@ -8,16 +8,12 @@ import com.gym.management.model.User;
 import com.gym.management.model.Membership;
 import com.gym.management.model.MembershipStatus;
 import com.gym.management.model.Gym;
-import com.gym.management.model.TieredMembershipPlan;
-import com.gym.management.model.PlanVariant;
-import com.gym.management.model.PlanFeature;
 import com.gym.management.repository.MembershipRepository;
 import com.gym.management.repository.GymRepository;
 import com.gym.management.repository.MembershipPackageRepository;
 import com.gym.management.repository.PTSessionRepository;
 import com.gym.management.repository.RoleRepository;
 import com.gym.management.repository.UserRepository;
-import com.gym.management.repository.TieredMembershipPlanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -64,9 +60,6 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired
     private GymRepository gymRepository;
 
-    @Autowired
-    private TieredMembershipPlanRepository tieredPlanRepository;
-
     @Override
     public void run(String... args) throws Exception {
         // Initialize roles first (they are required for users)
@@ -87,11 +80,6 @@ public class DataInitializer implements CommandLineRunner {
         // Initialize sample PT sessions if none exist
         if (ptSessionRepository.count() == 0) {
             initializeSamplePTSessions();
-        }
-
-        // Initialize sample tiered membership plans if none exist
-        if (tieredPlanRepository.count() == 0) {
-            initializeTieredMembershipPlans();
         }
     }
 
