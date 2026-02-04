@@ -5,7 +5,7 @@ import {
   Star, Copy, Archive, MoreVertical, ChevronDown, Sparkles, Crown, Users,
   TrendingUp, Package, Search, Filter, SlidersHorizontal, Zap
 } from 'lucide-react';
-import { toast } from 'react-hot-toast';
+import { showToast } from '../../utils/showToast';
 import type { MembershipPlan, PlanVariant, PlanStatus, PlanCategory } from '../../types/membershipPackage';
 import membershipPlanApi from '../../services/membershipPlanApi';
 import TieredPlanWizard from './TieredPlanWizard';
@@ -98,8 +98,8 @@ const TieredPlanManagement: React.FC<TieredPlanManagementProps> = ({
         const errorMsg = err.response?.status === 500 
           ? 'Database tables not initialized. Please run database migrations.'
           : err.response?.data?.message || 'Failed to fetch membership plans';
-        setError(errorMsg);
-        toast.error('Failed to fetch membership plans');
+      setError(errorMsg);
+          showToast('Failed to fetch membership plans', 'error');
       } finally {
         setLoading(false);
       }
@@ -114,28 +114,28 @@ const TieredPlanManagement: React.FC<TieredPlanManagementProps> = ({
     if (!confirm('Are you sure you want to delete this membership tier? This action cannot be undone.')) return;
     
     try {
-      await membershipPlanApi.deleteTieredPlan(planId);
-      toast.success('Membership tier deleted successfully');
-      fetchPlans();
-      onSuccess?.();
-    } catch (err: any) {
-      const message = err.response?.data?.message || 'Failed to delete membership tier';
-      if (err.response?.status === 409) {
-        toast.error('Cannot delete this tier as it has active members.');
-      } else {
-        toast.error(message);
+        await membershipPlanApi.deleteTieredPlan(planId);
+        showToast('Membership tier deleted successfully', 'success');
+        fetchPlans();
+        onSuccess?.();
+      } catch (err: any) {
+        const message = err.response?.data?.message || 'Failed to delete membership tier';
+        if (err.response?.status === 409) {
+          showToast('Cannot delete this tier as it has active members.', 'error');
+        } else {
+          showToast(message, 'error');
+        }
       }
-    }
   };
 
   const handleDuplicate = async (planId: number) => {
     try {
       await membershipPlanApi.duplicateTieredPlan(planId);
-      toast.success('Membership tier duplicated successfully');
+      showToast('Membership tier duplicated successfully', 'success');
       fetchPlans();
       onSuccess?.();
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to duplicate tier');
+      showToast(err.response?.data?.message || 'Failed to duplicate tier', 'error');
     }
   };
 
@@ -144,37 +144,37 @@ const TieredPlanManagement: React.FC<TieredPlanManagementProps> = ({
       if (!plan.planId) return;
       if (plan.status === 'ACTIVE') {
         await membershipPlanApi.deactivateTieredPlan(plan.planId);
-        toast.success('Tier deactivated');
+        showToast('Tier deactivated', 'success');
       } else {
         await membershipPlanApi.activateTieredPlan(plan.planId);
-        toast.success('Tier activated');
+        showToast('Tier activated', 'success');
       }
       fetchPlans();
       onSuccess?.();
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to update tier status');
+      showToast(err.response?.data?.message || 'Failed to update tier status', 'error');
     }
   };
 
   const handleArchive = async (planId: number) => {
     try {
       await membershipPlanApi.archiveTieredPlan(planId);
-      toast.success('Tier archived');
+      showToast('Tier archived', 'success');
       fetchPlans();
       onSuccess?.();
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to archive tier');
+      showToast(err.response?.data?.message || 'Failed to archive tier', 'error');
     }
   };
 
   const handleToggleRecommended = async (planId: number) => {
     try {
       await membershipPlanApi.toggleTieredPlanRecommended(planId);
-      toast.success('Recommendation updated');
+      showToast('Recommendation updated', 'success');
       fetchPlans();
       onSuccess?.();
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to update recommendation');
+      showToast(err.response?.data?.message || 'Failed to update recommendation', 'error');
     }
   };
 
