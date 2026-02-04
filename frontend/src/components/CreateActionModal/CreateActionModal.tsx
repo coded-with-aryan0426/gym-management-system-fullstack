@@ -5,7 +5,7 @@ import ReactDOM from "react-dom"
 import { motion, AnimatePresence } from "framer-motion"
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-hot-toast"
-import { X, ChevronLeft, ChevronDown, User, Phone, Mail, Calendar, CreditCard, Clock, Check } from "lucide-react"
+import { X, ChevronLeft, ChevronDown, User, Phone, Mail, Calendar, CreditCard, Clock, Check, Sparkles, UserPlus } from "lucide-react"
 import api from "../../services/api"
 import membershipPlanApi from "../../services/membershipPlanApi"
 import type { MembershipPackageDTO } from "../../types/membershipPackage"
@@ -26,13 +26,27 @@ type ViewType = "memberForm" | "staffForm"
 type PlanGroup = {
     name: string
     plans: MembershipPackageDTO[]
+    color: string
 }
+
+// Premium color palette for plan groups
+const PLAN_COLORS = [
+    '#DC2626', // Crimson
+    '#10B981', // Emerald
+    '#3B82F6', // Blue
+    '#8B5CF6', // Violet
+    '#F59E0B', // Amber
+    '#EC4899', // Pink
+    '#06B6D4', // Cyan
+    '#84CC16', // Lime
+];
 
 const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, initialView = "memberForm" }) => {
     const navigate = useNavigate()
     const [view, setView] = useState<ViewType>(initialView)
     const [loading, setLoading] = useState(false)
     const [showConfirm, setShowConfirm] = useState(false)
+    const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1)
 
     // Membership plans
     const [membershipPlans, setMembershipPlans] = useState<MembershipPackageDTO[]>([])
@@ -83,9 +97,10 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
             grouped.get(name)?.push(plan)
         })
 
-        return Array.from(grouped.entries()).map(([name, plans]) => ({
+        return Array.from(grouped.entries()).map(([name, plans], index) => ({
             name,
-            plans: [...plans].sort((a, b) => (a.durationDays || 0) - (b.durationDays || 0))
+            plans: [...plans].sort((a, b) => (a.durationDays || 0) - (b.durationDays || 0)),
+            color: plans[0]?.planColor || PLAN_COLORS[index % PLAN_COLORS.length]
         }))
     }, [membershipPlans])
 
@@ -106,6 +121,7 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
             setSelectedPlanName("")
             setIsPlanOpen(true)
             setIsDurationOpen(false)
+            setCurrentStep(1)
             setFormData({
                 fullName: "",
                 email: "",
@@ -115,6 +131,21 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
             })
         }
     }, [isOpen, initialView])
+
+    // Update step based on form completion
+    useEffect(() => {
+        if (view === "memberForm") {
+            if (formData.packageId) {
+                setCurrentStep(3)
+            } else if (selectedPlanName) {
+                setCurrentStep(2)
+            } else if (formData.fullName && formData.phoneNumber && formData.email) {
+                setCurrentStep(2)
+            } else {
+                setCurrentStep(1)
+            }
+        }
+    }, [formData, selectedPlanName, view])
 
     const hasUnsavedData = () => {
         return formData.fullName || formData.email || formData.phoneNumber
@@ -246,25 +277,57 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
             {isOpen && (
                 <div className="cam-overlay" onClick={handleCloseRequest}>
                     <motion.div
-                        className="cam-modal"
+                        className="cam-modal cam-modal--premium"
                         onClick={(e) => e.stopPropagation()}
                         initial={{ opacity: 0, scale: 0.95, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
                         transition={{ type: "spring", stiffness: 300, damping: 30 }}
                     >
-                        {/* Header */}
-                        <div className="cam-header">
-                            <div className="cam-header__left">
-                                <button className="cam-back" onClick={handleCloseRequest}>
-                                    <ChevronLeft size={18} />
-                                </button>
-                                <h2 className="cam-title">{getTitle()}</h2>
+                        {/* Premium Header with Gradient */}
+                        <div className="cam-header cam-header--premium">
+                            <div className="cam-header__bg" />
+                            <div className="cam-header__content">
+                                <div className="cam-header__icon-wrap">
+                                    <UserPlus size={22} />
+                                </div>
+                                <div className="cam-header__text">
+                                    <h2 className="cam-title">{getTitle()}</h2>
+                                    <p className="cam-subtitle">
+                                        {view === "memberForm" 
+                                            ? "Register a new gym member with their membership plan" 
+                                            : "Add a new trainer to your team"}
+                                    </p>
+                                </div>
                             </div>
                             <button className="cam-close" onClick={handleCloseRequest}>
                                 <X size={18} />
                             </button>
                         </div>
+
+                        {/* Progress Steps (Member Form Only) */}
+                        {view === "memberForm" && (
+                            <div className="cam-progress">
+                                <div className={`cam-progress__step ${currentStep >= 1 ? 'cam-progress__step--active' : ''} ${currentStep > 1 ? 'cam-progress__step--complete' : ''}`}>
+                                    <div className="cam-progress__circle">
+                                        {currentStep > 1 ? <Check size={12} /> : '1'}
+                                    </div>
+                                    <span>Personal Info</span>
+                                </div>
+                                <div className="cam-progress__line" />
+                                <div className={`cam-progress__step ${currentStep >= 2 ? 'cam-progress__step--active' : ''} ${currentStep > 2 ? 'cam-progress__step--complete' : ''}`}>
+                                    <div className="cam-progress__circle">
+                                        {currentStep > 2 ? <Check size={12} /> : '2'}
+                                    </div>
+                                    <span>Select Plan</span>
+                                </div>
+                                <div className="cam-progress__line" />
+                                <div className={`cam-progress__step ${currentStep >= 3 ? 'cam-progress__step--active' : ''}`}>
+                                    <div className="cam-progress__circle">3</div>
+                                    <span>Duration</span>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Body */}
                         <div className="cam-body">
@@ -279,9 +342,11 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
                                         exit={{ opacity: 0 }}
                                     >
                                         {/* Personal Info Section */}
-                                        <div className="cam-section">
+                                        <div className="cam-section cam-section--premium">
                                             <div className="cam-section__header">
-                                                <User size={14} />
+                                                <div className="cam-section__icon">
+                                                    <User size={14} />
+                                                </div>
                                                 <span>Personal Information</span>
                                             </div>
                                             <div className="cam-grid">
@@ -298,6 +363,9 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
                                                             placeholder="Enter full name"
                                                             required
                                                         />
+                                                        {formData.fullName && (
+                                                            <Check size={14} className="cam-input-check" />
+                                                        )}
                                                     </div>
                                                 </div>
                                                 <div className="cam-field">
@@ -314,6 +382,9 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
                                                             maxLength={10}
                                                             required
                                                         />
+                                                        {formData.phoneNumber.length === 10 && (
+                                                            <Check size={14} className="cam-input-check" />
+                                                        )}
                                                     </div>
                                                 </div>
                                                 <div className="cam-field">
@@ -329,6 +400,9 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
                                                             placeholder="email@example.com"
                                                             required
                                                         />
+                                                        {formData.email.includes('@') && formData.email.includes('.') && (
+                                                            <Check size={14} className="cam-input-check" />
+                                                        )}
                                                     </div>
                                                 </div>
                                                 <div className="cam-field">
@@ -347,132 +421,155 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
                                             </div>
                                         </div>
 
-                                        {/* Membership Name Section */}
-                                        <div className="cam-section cam-section--dropdown">
-                                            <button
-                                                type="button"
-                                                className={`cam-dropdown-trigger ${isPlanOpen ? "cam-dropdown-trigger--open" : ""}`}
-                                                onClick={() => setIsPlanOpen(prev => !prev)}
-                                            >
-                                                <div className="cam-section__header">
+                                        {/* Membership Plans Section - Premium Cards */}
+                                        <div className="cam-section cam-section--premium cam-section--plans">
+                                            <div className="cam-section__header">
+                                                <div className="cam-section__icon cam-section__icon--accent">
                                                     <CreditCard size={14} />
-                                                    <span>Membership Name</span>
                                                 </div>
-                                                <div className="cam-dropdown-meta">
-                                                    <span className={`cam-dropdown-value ${selectedPlanName ? "" : "cam-dropdown-value--muted"}`}>
-                                                        {selectedPlanName || "Select membership"}
-                                                    </span>
-                                                </div>
-                                                <ChevronDown size={16} className="cam-dropdown-icon" />
-                                            </button>
-                                            <AnimatePresence initial={false}>
-                                                {isPlanOpen && (
-                                                    <motion.div
-                                                        className="cam-dropdown-body"
-                                                        initial={{ opacity: 0, height: 0 }}
-                                                        animate={{ opacity: 1, height: "auto" }}
-                                                        exit={{ opacity: 0, height: 0 }}
-                                                        transition={{ duration: 0.2 }}
-                                                    >
-                                                        {loadingPlans ? (
-                                                            <div className="cam-plans-loading">
-                                                                <div className="cam-spinner" />
-                                                                <span>Loading plans...</span>
-                                                            </div>
-                                                        ) : planGroups.length === 0 ? (
-                                                            <div className="cam-plans-empty">No membership plans available</div>
-                                                        ) : (
-                                                            <div className="cam-plans">
-                                                                {planGroups.map((group) => (
-                                                                    <button
-                                                                        key={group.name}
-                                                                        type="button"
-                                                                        className={`cam-plan-card ${selectedPlanName === group.name ? "cam-plan-card--selected" : ""}`}
-                                                                        onClick={() => handlePlanNameSelect(group.name)}
-                                                                    >
-                                                                        <div className="cam-plan-card__check">
-                                                                            {selectedPlanName === group.name && <Check size={12} />}
-                                                                        </div>
-                                                                        <div className="cam-plan-card__info">
-                                                                            <span className="cam-plan-card__name">{group.name}</span>
-                                                                        </div>
-                                                                    </button>
-                                                                ))}
-                                                            </div>
-                                                        )}
-                                                    </motion.div>
+                                                <span>Select Membership Plan</span>
+                                                {selectedPlanName && (
+                                                    <span className="cam-section__badge">{selectedPlanName}</span>
                                                 )}
-                                            </AnimatePresence>
-                                        </div>
-
-                                        {/* Duration Section */}
-                                        <div className="cam-section cam-section--dropdown">
-                                            <button
-                                                type="button"
-                                                className={`cam-dropdown-trigger ${isDurationOpen ? "cam-dropdown-trigger--open" : ""}`}
-                                                onClick={() => setIsDurationOpen(prev => !prev)}
-                                                disabled={!selectedPlanName}
-                                            >
-                                                <div className="cam-section__header">
-                                                    <Clock size={14} />
-                                                    <span>Duration & Price</span>
-                                                </div>
-                                                <div className="cam-dropdown-meta">
-                                                    <span className={`cam-dropdown-value ${selectedPlan ? "" : "cam-dropdown-value--muted"}`}>
-                                                        {selectedPlan ? `${formatDuration(selectedPlan.durationDays)} · ${formatPrice(selectedPlan.price)}` : "Select duration"}
-                                                    </span>
-                                                </div>
-                                                <ChevronDown size={16} className="cam-dropdown-icon" />
-                                            </button>
-                                            <AnimatePresence initial={false}>
-                                                {isDurationOpen && (
-                                                    <motion.div
-                                                        className="cam-dropdown-body"
-                                                        initial={{ opacity: 0, height: 0 }}
-                                                        animate={{ opacity: 1, height: "auto" }}
-                                                        exit={{ opacity: 0, height: 0 }}
-                                                        transition={{ duration: 0.2 }}
-                                                    >
-                                                        {selectedPlanName ? (
-                                                            <div className="cam-duration-grid cam-duration-grid--plans">
-                                                                {durationOptions.map((plan) => (
-                                                                    <button
-                                                                        key={plan.packageId}
-                                                                        type="button"
-                                                                        className={`cam-duration-btn cam-duration-btn--card ${formData.packageId === plan.packageId.toString() ? "cam-duration-btn--selected" : ""}`}
-                                                                        onClick={() => handleDurationSelect(plan)}
-                                                                    >
-                                                                        <span className="cam-duration-btn__label">{formatDuration(plan.durationDays)}</span>
-                                                                        <span className="cam-duration-btn__price">{formatPrice(plan.price)}</span>
-                                                                        {formData.packageId === plan.packageId.toString() && <Check size={12} />}
-                                                                    </button>
-                                                                ))}
-                                                            </div>
-                                                        ) : (
-                                                            <div className="cam-duration-empty">Select a membership name to view durations</div>
-                                                        )}
-                                                    </motion.div>
-                                                )}
-                                            </AnimatePresence>
-                                        </div>
-
-                                        {/* Summary */}
-                                        {selectedPlan && (
-                                            <div className="cam-summary">
-                                                <div className="cam-summary__row">
-                                                    <span>Plan</span>
-                                                    <span>{selectedPlan.packageName}</span>
-                                                </div>
-                                                <div className="cam-summary__row">
-                                                    <span>Duration</span>
-                                                    <span>{formatDuration(selectedPlan.durationDays)}</span>
-                                                </div>
-                                                <div className="cam-summary__row cam-summary__row--total">
-                                                    <span>Total</span>
-                                                    <span>{formatPrice(selectedPlan.price)}</span>
-                                                </div>
                                             </div>
-                                        )}
+                                            
+                                            {loadingPlans ? (
+                                                <div className="cam-plans-loading">
+                                                    <div className="cam-spinner" />
+                                                    <span>Loading plans...</span>
+                                                </div>
+                                            ) : planGroups.length === 0 ? (
+                                                <div className="cam-plans-empty">
+                                                    <Sparkles size={24} />
+                                                    <span>No membership plans available</span>
+                                                    <p>Create plans in Membership Management first</p>
+                                                </div>
+                                            ) : (
+                                                <div className="cam-plans-grid">
+                                                    {planGroups.map((group) => (
+                                                        <button
+                                                            key={group.name}
+                                                            type="button"
+                                                            className={`cam-plan-card cam-plan-card--premium ${selectedPlanName === group.name ? "cam-plan-card--selected" : ""}`}
+                                                            onClick={() => handlePlanNameSelect(group.name)}
+                                                            style={{ '--plan-color': group.color } as React.CSSProperties}
+                                                        >
+                                                            <div className="cam-plan-card__color-bar" />
+                                                            <div className="cam-plan-card__content">
+                                                                <div className="cam-plan-card__header">
+                                                                    <span className="cam-plan-card__name">{group.name}</span>
+                                                                    <div className="cam-plan-card__check">
+                                                                        {selectedPlanName === group.name && <Check size={14} />}
+                                                                    </div>
+                                                                </div>
+                                                                <div className="cam-plan-card__meta">
+                                                                    <span className="cam-plan-card__count">{group.plans.length} duration{group.plans.length > 1 ? 's' : ''}</span>
+                                                                    <span className="cam-plan-card__price">
+                                                                        From {formatPrice(Math.min(...group.plans.map(p => p.price)))}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Duration Section - Premium Cards */}
+                                        <AnimatePresence>
+                                            {selectedPlanName && (
+                                                <motion.div
+                                                    className="cam-section cam-section--premium cam-section--duration"
+                                                    initial={{ opacity: 0, height: 0 }}
+                                                    animate={{ opacity: 1, height: 'auto' }}
+                                                    exit={{ opacity: 0, height: 0 }}
+                                                    transition={{ duration: 0.25 }}
+                                                >
+                                                    <div className="cam-section__header">
+                                                        <div className="cam-section__icon cam-section__icon--emerald">
+                                                            <Clock size={14} />
+                                                        </div>
+                                                        <span>Select Duration</span>
+                                                        {selectedPlan && (
+                                                            <span className="cam-section__badge cam-section__badge--emerald">
+                                                                {formatDuration(selectedPlan.durationDays)}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    
+                                                    <div className="cam-duration-grid cam-duration-grid--premium">
+                                                        {durationOptions.map((plan) => (
+                                                            <button
+                                                                key={plan.packageId}
+                                                                type="button"
+                                                                className={`cam-duration-card ${formData.packageId === plan.packageId.toString() ? "cam-duration-card--selected" : ""}`}
+                                                                onClick={() => handleDurationSelect(plan)}
+                                                                style={{ '--plan-color': selectedGroup?.color || '#DC2626' } as React.CSSProperties}
+                                                            >
+                                                                <div className="cam-duration-card__duration">
+                                                                    {formatDuration(plan.durationDays)}
+                                                                </div>
+                                                                <div className="cam-duration-card__price">
+                                                                    {formatPrice(plan.price)}
+                                                                </div>
+                                                                {plan.includedPTSessions > 0 && (
+                                                                    <div className="cam-duration-card__pt">
+                                                                        +{plan.includedPTSessions} PT Sessions
+                                                                    </div>
+                                                                )}
+                                                                {formData.packageId === plan.packageId.toString() && (
+                                                                    <div className="cam-duration-card__check">
+                                                                        <Check size={14} />
+                                                                    </div>
+                                                                )}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
+
+                                        {/* Summary - Premium */}
+                                        <AnimatePresence>
+                                            {selectedPlan && (
+                                                <motion.div
+                                                    className="cam-summary cam-summary--premium"
+                                                    initial={{ opacity: 0, y: 10 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    exit={{ opacity: 0, y: 10 }}
+                                                >
+                                                    <div className="cam-summary__header">
+                                                        <Sparkles size={14} />
+                                                        <span>Order Summary</span>
+                                                    </div>
+                                                    <div className="cam-summary__body">
+                                                        <div className="cam-summary__row">
+                                                            <span>Member</span>
+                                                            <span>{formData.fullName || 'Not entered'}</span>
+                                                        </div>
+                                                        <div className="cam-summary__row">
+                                                            <span>Plan</span>
+                                                            <span>{selectedPlan.packageName}</span>
+                                                        </div>
+                                                        <div className="cam-summary__row">
+                                                            <span>Duration</span>
+                                                            <span>{formatDuration(selectedPlan.durationDays)}</span>
+                                                        </div>
+                                                        {selectedPlan.includedPTSessions > 0 && (
+                                                            <div className="cam-summary__row">
+                                                                <span>PT Sessions</span>
+                                                                <span>{selectedPlan.includedPTSessions} sessions included</span>
+                                                            </div>
+                                                        )}
+                                                        <div className="cam-summary__divider" />
+                                                        <div className="cam-summary__row cam-summary__row--total">
+                                                            <span>Total Amount</span>
+                                                            <span>{formatPrice(selectedPlan.price)}</span>
+                                                        </div>
+                                                    </div>
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
                                     </motion.form>
                                 )}
 
@@ -485,9 +582,11 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
                                         animate={{ opacity: 1 }}
                                         exit={{ opacity: 0 }}
                                     >
-                                        <div className="cam-section">
+                                        <div className="cam-section cam-section--premium">
                                             <div className="cam-section__header">
-                                                <User size={14} />
+                                                <div className="cam-section__icon">
+                                                    <User size={14} />
+                                                </div>
                                                 <span>Trainer Information</span>
                                             </div>
                                             <div className="cam-grid">
@@ -504,6 +603,9 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
                                                             placeholder="Enter full name"
                                                             required
                                                         />
+                                                        {formData.fullName && (
+                                                            <Check size={14} className="cam-input-check" />
+                                                        )}
                                                     </div>
                                                 </div>
                                                 <div className="cam-field">
@@ -520,6 +622,9 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
                                                             maxLength={10}
                                                             required
                                                         />
+                                                        {formData.phoneNumber.length === 10 && (
+                                                            <Check size={14} className="cam-input-check" />
+                                                        )}
                                                     </div>
                                                 </div>
                                                 <div className="cam-field">
@@ -535,6 +640,9 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
                                                             placeholder="email@example.com"
                                                             required
                                                         />
+                                                        {formData.email.includes('@') && formData.email.includes('.') && (
+                                                            <Check size={14} className="cam-input-check" />
+                                                        )}
                                                     </div>
                                                 </div>
                                                 <div className="cam-field">
@@ -557,19 +665,27 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
                             </AnimatePresence>
                         </div>
 
-                        {/* Footer */}
-                        <div className="cam-footer">
+                        {/* Premium Footer */}
+                        <div className="cam-footer cam-footer--premium">
                             <button type="button" className="cam-btn cam-btn--cancel" onClick={handleCloseRequest} disabled={loading}>
                                 Cancel
                             </button>
-                            <button type="submit" className="cam-btn cam-btn--submit" onClick={handleSubmit} disabled={loading}>
+                            <button 
+                                type="submit" 
+                                className="cam-btn cam-btn--submit cam-btn--premium" 
+                                onClick={handleSubmit} 
+                                disabled={loading || (view === "memberForm" && !formData.packageId)}
+                            >
                                 {loading ? (
                                     <>
                                         <div className="cam-spinner cam-spinner--sm" />
                                         Creating...
                                     </>
                                 ) : (
-                                    `Create ${view === "memberForm" ? "Member" : "Trainer"}`
+                                    <>
+                                        <UserPlus size={16} />
+                                        Create {view === "memberForm" ? "Member" : "Trainer"}
+                                    </>
                                 )}
                             </button>
                         </div>
