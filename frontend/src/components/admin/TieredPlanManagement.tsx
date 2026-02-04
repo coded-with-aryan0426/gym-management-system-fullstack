@@ -324,47 +324,56 @@ const TieredPlanManagement: React.FC<TieredPlanManagementProps> = ({
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 8,
+                  gap: 6,
                   flexShrink: 0,
                 }}>
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 6,
-                    padding: '6px 10px',
+                    gap: 5,
+                    padding: '5px 8px',
                     background: 'rgba(59, 130, 246, 0.08)',
                     borderRadius: 6,
                     border: '1px solid rgba(59, 130, 246, 0.12)',
                   }}>
-                    <Package size={12} style={{ color: '#3B82F6' }} />
-                    <span style={{ fontSize: 12, fontWeight: 700, color: '#F9FAFB' }}>{plans.length}</span>
-                    <span style={{ fontSize: 10, color: '#6B7280' }}>total</span>
+                    <Package size={11} style={{ color: '#3B82F6' }} />
+                    <span style={{ fontSize: 11, fontWeight: 700, color: '#F9FAFB' }}>{plans.length}</span>
                   </div>
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 6,
-                    padding: '6px 10px',
+                    gap: 5,
+                    padding: '5px 8px',
                     background: 'rgba(16, 185, 129, 0.08)',
                     borderRadius: 6,
                     border: '1px solid rgba(16, 185, 129, 0.12)',
                   }}>
-                    <Zap size={12} style={{ color: '#10B981' }} />
-                    <span style={{ fontSize: 12, fontWeight: 700, color: '#10B981' }}>{plans.filter(p => p.status === 'ACTIVE').length}</span>
-                    <span style={{ fontSize: 10, color: '#6B7280' }}>active</span>
+                    <Zap size={11} style={{ color: '#10B981' }} />
+                    <span style={{ fontSize: 11, fontWeight: 700, color: '#10B981' }}>{plans.filter(p => p.status === 'ACTIVE').length}</span>
                   </div>
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 6,
-                    padding: '6px 10px',
+                    gap: 5,
+                    padding: '5px 8px',
+                    background: 'rgba(239, 68, 68, 0.08)',
+                    borderRadius: 6,
+                    border: '1px solid rgba(239, 68, 68, 0.12)',
+                  }}>
+                    <X size={11} style={{ color: '#EF4444' }} />
+                    <span style={{ fontSize: 11, fontWeight: 700, color: '#EF4444' }}>{plans.filter(p => p.status !== 'ACTIVE').length}</span>
+                  </div>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 5,
+                    padding: '5px 8px',
                     background: 'rgba(245, 158, 11, 0.08)',
                     borderRadius: 6,
                     border: '1px solid rgba(245, 158, 11, 0.12)',
                   }}>
-                    <Star size={12} style={{ color: '#F59E0B' }} />
-                    <span style={{ fontSize: 12, fontWeight: 700, color: '#F59E0B' }}>{plans.filter(p => p.isRecommended).length}</span>
-                    <span style={{ fontSize: 10, color: '#6B7280' }}>featured</span>
+                    <Star size={11} style={{ color: '#F59E0B' }} />
+                    <span style={{ fontSize: 11, fontWeight: 700, color: '#F59E0B' }}>{plans.filter(p => p.isRecommended).length}</span>
                   </div>
                 </div>
 
@@ -1345,21 +1354,27 @@ const TierCardList: React.FC<TierCardProps> = ({
               <Edit size={13} />
               Edit
             </button>
-            <button
-              onClick={() => onToggleStatus(plan)}
-              style={{
-                padding: '10px 14px',
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                borderRadius: 10,
-                color: '#9CA3AF',
-                fontSize: 12,
-                fontWeight: 500,
-                cursor: 'pointer',
-              }}
-            >
-              {plan.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}
-            </button>
+              <button
+                onClick={() => onToggleStatus(plan)}
+                style={{
+                  padding: '10px 14px',
+                  background: plan.status === 'ACTIVE' 
+                    ? 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)'
+                    : 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                  border: 'none',
+                  borderRadius: 10,
+                  color: '#fff',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  boxShadow: plan.status === 'ACTIVE' 
+                    ? '0 4px 12px rgba(239, 68, 68, 0.3)'
+                    : '0 4px 12px rgba(16, 185, 129, 0.3)',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                {plan.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}
+              </button>
             <button
               onClick={() => plan.planId && onDelete(plan.planId)}
               style={{
