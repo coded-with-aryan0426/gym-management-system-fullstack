@@ -5,10 +5,18 @@
 
 .data-table {
   width: 100%;
-  overflow-x: auto;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.data-table__scroll-container {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
 }
 
 .data-table__table {
@@ -194,6 +202,7 @@
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, transparent 100%);
   gap: 12px;
   flex-wrap: wrap;
+  flex-shrink: 0;
 }
 
 .pagination__info {
@@ -319,6 +328,9 @@
   flex-direction: column;
   gap: 12px;
   padding: 12px;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
 }
 
 .data-table__card {

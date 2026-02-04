@@ -190,33 +190,34 @@ function DataTable<T>({
                     )}
                 </div>
             ) : (
-                <table className="data-table__table">
-                    <thead className="data-table__head">
-                        <tr>
-                            {showRowNumbers && (
-                                <th className="data-table__th data-table__th--number" style={{ width: 48 }}>#</th>
-                            )}
-                            {selectable && (
-                                <th className="data-table__th data-table__th--checkbox" style={{ width: 40 }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={data.length > 0 && selectedIds.size === data.length}
-                                        onChange={handleSelectAll}
-                                        className="data-table__checkbox"
-                                    />
-                                </th>
-                            )}
-                            {visibleColumns.map((col) => (
-                                <th
-                                    key={col.key}
-                                    className="data-table__th"
-                                    style={{ width: col.width }}
-                                >
-                                    {col.header}
-                                </th>
-                            ))}
-                        </tr>
-                    </thead>
+                <div className="data-table__scroll-container">
+                    <table className="data-table__table">
+                        <thead className="data-table__head">
+                            <tr>
+                                {showRowNumbers && (
+                                    <th className="data-table__th data-table__th--number" style={{ width: 48 }}>#</th>
+                                )}
+                                {selectable && (
+                                    <th className="data-table__th data-table__th--checkbox" style={{ width: 40 }}>
+                                        <input
+                                            type="checkbox"
+                                            checked={data.length > 0 && selectedIds.size === data.length}
+                                            onChange={handleSelectAll}
+                                            className="data-table__checkbox"
+                                        />
+                                    </th>
+                                )}
+                                {visibleColumns.map((col) => (
+                                    <th
+                                        key={col.key}
+                                        className="data-table__th"
+                                        style={{ width: col.width }}
+                                    >
+                                        {col.header}
+                                    </th>
+                                ))}
+                            </tr>
+                        </thead>
                     <tbody className="data-table__body">
                         {data.length === 0 ? (
                             <tr>
@@ -262,13 +263,14 @@ function DataTable<T>({
                                                     : (item as Record<string, unknown>)[col.key] as React.ReactNode
                                                 }
                                             </td>
-                                        ))}
-                                    </tr>
-                                );
-                            })
-                        )}
-                    </tbody>
-                </table>
+                                            ))}
+                                        </tr>
+                                    );
+                                })
+                            )}
+                        </tbody>
+                    </table>
+                </div>
             )}
 
             {/* Pagination Controls */}
