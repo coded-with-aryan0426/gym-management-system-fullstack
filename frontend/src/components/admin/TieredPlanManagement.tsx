@@ -73,21 +73,25 @@ const TieredPlanManagement: React.FC<TieredPlanManagementProps> = ({
     };
   }, [isOpen, onClose, showWizard]);
 
-  const fetchPlans = async () => {
-    try {
-      setLoading(true);
-      const response = mode === 'selection' 
-        ? await membershipPlanApi.getActiveTieredPlans()
-        : await membershipPlanApi.getAllTieredPlans();
-      setPlans(response.data);
-      setError(null);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to fetch membership plans');
-      toast.error('Failed to fetch membership plans');
-    } finally {
-      setLoading(false);
-    }
-  };
+    const fetchPlans = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = mode === 'selection' 
+          ? await membershipPlanApi.getActiveTieredPlans()
+          : await membershipPlanApi.getAllTieredPlans();
+        setPlans(response.data || []);
+      } catch (err: any) {
+        console.error('Failed to fetch tiered plans:', err);
+        const errorMsg = err.response?.status === 500 
+          ? 'Database tables not initialized. Please run database migrations.'
+          : err.response?.data?.message || 'Failed to fetch membership plans';
+        setError(errorMsg);
+        toast.error('Failed to fetch membership plans');
+      } finally {
+        setLoading(false);
+      }
+    };
 
   const handleEdit = (plan: MembershipPlan) => {
     setEditingPlan(plan);
@@ -421,29 +425,30 @@ const TieredPlanManagement: React.FC<TieredPlanManagementProps> = ({
             )}
 
             {/* Error State */}
-            {error && !loading && (
-              <div style={{
-                textAlign: 'center',
-                padding: '80px 20px',
-                color: '#DC2626',
-              }}>
-                <p style={{ marginBottom: 16 }}>{error}</p>
-                <button
-                  onClick={fetchPlans}
-                  style={{
-                    padding: '12px 24px',
-                    background: 'rgba(220, 38, 38, 0.1)',
-                    border: '1px solid rgba(220, 38, 38, 0.2)',
-                    borderRadius: 10,
-                    color: '#DC2626',
-                    cursor: 'pointer',
-                    fontWeight: 500,
-                  }}
-                >
-                  Retry
-                </button>
-              </div>
-            )}
+              {error && !loading && (
+                <div style={{
+                  textAlign: 'center',
+                  padding: '80px 20px',
+                  color: '#DC2626',
+                }}>
+                  <p style={{ marginBottom: 8, fontSize: 16, fontWeight: 600 }}>An unexpected error occurred.</p>
+                  <p style={{ marginBottom: 16, fontSize: 13, color: '#9CA3AF' }}>{error}</p>
+                  <button
+                    onClick={fetchPlans}
+                    style={{
+                      padding: '12px 24px',
+                      background: 'rgba(220, 38, 38, 0.1)',
+                      border: '1px solid rgba(220, 38, 38, 0.2)',
+                      borderRadius: 10,
+                      color: '#DC2626',
+                      cursor: 'pointer',
+                      fontWeight: 500,
+                    }}
+                  >
+                    Retry
+                  </button>
+                </div>
+              )}
 
             {/* Plans Grid View */}
             {!loading && !error && viewMode === 'grid' && (
@@ -452,10 +457,10 @@ const TieredPlanManagement: React.FC<TieredPlanManagementProps> = ({
                 gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
                 gap: 20,
               }}>
-                {plans.map((plan) => (
-                  <TierCard
-                    key={plan.planId}
-                    plan={plan}
+{plans.map((plan, index) => (
+                    <TierCard
+                      key={plan.planId ?? `plan-${index}`}
+                      plan={plan}
                     mode={mode}
                     expanded={expandedPlan === plan.planId}
                     onToggleExpand={() => setExpandedPlan(expandedPlan === plan.planId ? null : plan.planId!)}
@@ -479,10 +484,10 @@ const TieredPlanManagement: React.FC<TieredPlanManagementProps> = ({
             {/* Plans List View */}
             {!loading && !error && viewMode === 'list' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                {plans.map((plan) => (
-                  <TierCardList
-                    key={plan.planId}
-                    plan={plan}
+{plans.map((plan, index) => (
+                    <TierCardList
+                      key={plan.planId ?? `plan-list-${index}`}
+                      plan={plan}
                     mode={mode}
                     expanded={expandedPlan === plan.planId}
                     onToggleExpand={() => setExpandedPlan(expandedPlan === plan.planId ? null : plan.planId!)}
@@ -895,14 +900,14 @@ const TierCard: React.FC<TierCardProps> = ({
             style={{ overflow: 'hidden' }}
           >
             <div style={{
-              padding: '0 20px 20px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 10,
-            }}>
-              {plan.variants?.filter(v => v.isActive).map((variant) => (
-                <div
-                  key={variant.variantId}
+                padding: '0 20px 20px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 10,
+              }}>
+                {plan.variants?.filter(v => v.isActive).map((variant, vIndex) => (
+                  <div
+                    key={variant.variantId ?? `variant-${vIndex}`}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -1230,17 +1235,17 @@ const TierCardList: React.FC<TierCardProps> = ({
             transition={{ duration: 0.25 }}
             style={{ overflow: 'hidden' }}
           >
-            <div style={{
-              padding: '0 20px 20px',
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-              gap: 10,
-              borderTop: '1px solid rgba(255,255,255,0.04)',
-              paddingTop: 16,
-            }}>
-              {plan.variants?.filter(v => v.isActive).map((variant) => (
-                <div
-                  key={variant.variantId}
+              <div style={{
+                padding: '0 20px 20px',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                gap: 10,
+                borderTop: '1px solid rgba(255,255,255,0.04)',
+                paddingTop: 16,
+              }}>
+                {plan.variants?.filter(v => v.isActive).map((variant, vIndex) => (
+                  <div
+                    key={variant.variantId ?? `list-variant-${vIndex}`}
                   style={{
                     padding: '14px 16px',
                     background: 'rgba(255,255,255,0.03)',

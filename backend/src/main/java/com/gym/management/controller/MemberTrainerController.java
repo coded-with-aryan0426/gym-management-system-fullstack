@@ -6,7 +6,6 @@ import com.gym.management.model.User;
 import com.gym.management.repository.TrainerDetailsRepository;
 import com.gym.management.repository.UserRepository;
 import com.gym.management.repository.SessionRatingRepository;
-import com.gym.management.repository.PTSessionRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -37,26 +36,28 @@ public class MemberTrainerController {
     @GetMapping("/assigned")
     public ResponseEntity<List<TrainerProfileDTO>> getAssignedTrainers(@RequestHeader("Authorization") String token) {
         // In a real app, we'd get the user from the token
-        // For now, let's assume we can get the current user. 
+        // For now, let's assume we can get the current user.
         // We'll need a way to identify the current logged-in user.
         // Let's use the security context.
-        String username = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
+        String username = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication().getName();
         User currentUser = userRepository.findByUsername(username).orElse(null);
-        
+
         if (currentUser == null || currentUser.getTrainers() == null) {
             return ResponseEntity.ok(Collections.emptyList());
         }
-        
+
         List<TrainerProfileDTO> dtos = currentUser.getTrainers().stream()
                 .map(this::mapToDiscoveryDTO)
                 .collect(Collectors.toList());
-                
+
         return ResponseEntity.ok(dtos);
     }
 
     @PostMapping("/{trainerId}/request")
     public ResponseEntity<Map<String, String>> requestTrainer(@PathVariable Long trainerId) {
-        String username = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
+        String username = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication().getName();
         User currentUser = userRepository.findByUsername(username).orElse(null);
         User trainer = userRepository.findById(trainerId).orElse(null);
 
@@ -69,36 +70,40 @@ public class MemberTrainerController {
         currentUser.getTrainers().add(trainer);
         userRepository.save(currentUser);
 
-        return ResponseEntity.ok(Map.of("message", "Trainer request successful! " + trainer.getFullName() + " has been assigned."));
+        return ResponseEntity
+                .ok(Map.of("message", "Trainer request successful! " + trainer.getFullName() + " has been assigned."));
     }
 
     @GetMapping
     public ResponseEntity<List<TrainerProfileDTO>> getAllTrainers() {
         List<User> trainers = userRepository.findByRoleName("TRAINER");
-        
+
         List<TrainerProfileDTO> dtos = trainers.stream()
                 .map(this::mapToDiscoveryDTO)
                 .collect(Collectors.toList());
-                
+
         return ResponseEntity.ok(dtos);
     }
 
     private TrainerProfileDTO mapToDiscoveryDTO(User trainer) {
         TrainerDetails details = trainerDetailsRepository.findById(trainer.getUserId()).orElse(null);
-        
+
         // Default specializations based on some criteria or just defaults
         List<String> defaultSpecs = List.of("Fitness Coaching", "Personal Training");
-        
+
         TrainerProfileDTO.TrainerProfileDTOBuilder builder = TrainerProfileDTO.builder()
                 .userId(trainer.getUserId())
                 .name(trainer.getFullName())
                 .email(trainer.getEmail())
                 .phone(trainer.getPhone())
-                .bio(details != null && details.getBio() != null ? details.getBio() : "Elite fitness professional specializing in personalized training programs and nutritional guidance.")
-                .specializations(details != null && details.getSpecializations() != null && !details.getSpecializations().isEmpty()
-                        ? List.of(details.getSpecializations().split(","))
-                        : defaultSpecs)
-                .experienceYears(details != null && details.getExperienceYears() != null ? details.getExperienceYears() : 2);
+                .bio(details != null && details.getBio() != null ? details.getBio()
+                        : "Elite fitness professional specializing in personalized training programs and nutritional guidance.")
+                .specializations(details != null && details.getSpecializations() != null
+                        && !details.getSpecializations().isEmpty()
+                                ? List.of(details.getSpecializations().split(","))
+                                : defaultSpecs)
+                .experienceYears(
+                        details != null && details.getExperienceYears() != null ? details.getExperienceYears() : 2);
 
         if (details != null) {
             // Skills
@@ -106,7 +111,8 @@ public class MemberTrainerController {
                 try {
                     List<TrainerProfileDTO.SkillDTO> skills = objectMapper.readValue(
                             details.getSkillsJson(),
-                            new com.fasterxml.jackson.core.type.TypeReference<List<TrainerProfileDTO.SkillDTO>>() {});
+                            new com.fasterxml.jackson.core.type.TypeReference<List<TrainerProfileDTO.SkillDTO>>() {
+                            });
                     builder.skills(skills);
                 } catch (Exception e) {
                     builder.skills(getDefaultSkills());
@@ -120,7 +126,8 @@ public class MemberTrainerController {
                 try {
                     List<TrainerProfileDTO.AvailabilityDTO> availability = objectMapper.readValue(
                             details.getAvailabilityJson(),
-                            new com.fasterxml.jackson.core.type.TypeReference<List<TrainerProfileDTO.AvailabilityDTO>>() {});
+                            new com.fasterxml.jackson.core.type.TypeReference<List<TrainerProfileDTO.AvailabilityDTO>>() {
+                            });
                     builder.availability(availability);
                 } catch (Exception e) {
                     builder.availability(Collections.emptyList());
@@ -134,7 +141,8 @@ public class MemberTrainerController {
                 try {
                     List<TrainerProfileDTO.CertificationDTO> certs = objectMapper.readValue(
                             details.getCertificationsJson(),
-                            new com.fasterxml.jackson.core.type.TypeReference<List<TrainerProfileDTO.CertificationDTO>>() {});
+                            new com.fasterxml.jackson.core.type.TypeReference<List<TrainerProfileDTO.CertificationDTO>>() {
+                            });
                     builder.certifications(certs);
                 } catch (Exception e) {
                     builder.certifications(Collections.emptyList());
@@ -151,11 +159,13 @@ public class MemberTrainerController {
         // Stats for discovery
         Double avgRating = sessionRatingRepository.findAverageRatingByTrainer(trainer.getUserId());
         long reviewsVal = sessionRatingRepository.countByTrainerUserId(trainer.getUserId());
-        
+
         // Fallback stats for discovery if zero
         double displayRating = avgRating != null ? Math.round(avgRating * 10.0) / 10.0 : 4.8;
         int displayReviews = (int) (reviewsVal > 0 ? reviewsVal : 12);
-        String displayExp = (details != null && details.getExperienceYears() != null) ? details.getExperienceYears() + " Yrs" : "3+ Yrs";
+        String displayExp = (details != null && details.getExperienceYears() != null)
+                ? details.getExperienceYears() + " Yrs"
+                : "3+ Yrs";
 
         builder.stats(TrainerProfileDTO.ProfileStatsDTO.builder()
                 .rating(displayRating)
@@ -169,8 +179,9 @@ public class MemberTrainerController {
 
     private List<TrainerProfileDTO.SkillDTO> getDefaultSkills() {
         return List.of(
-            TrainerProfileDTO.SkillDTO.builder().name("Strength Training").category("Strength Training").level("Expert").isPrimary(true).build(),
-            TrainerProfileDTO.SkillDTO.builder().name("Fat Loss").category("Weight Loss").level("Advanced").isPrimary(true).build()
-        );
+                TrainerProfileDTO.SkillDTO.builder().name("Strength Training").category("Strength Training")
+                        .level("Expert").isPrimary(true).build(),
+                TrainerProfileDTO.SkillDTO.builder().name("Fat Loss").category("Weight Loss").level("Advanced")
+                        .isPrimary(true).build());
     }
 }

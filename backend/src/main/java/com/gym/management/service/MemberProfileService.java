@@ -14,7 +14,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -22,8 +21,6 @@ public class MemberProfileService {
 
     private final UserRepository userRepository;
     private final MembershipRepository membershipRepository;
-    private final WorkoutLogRepository workoutLogRepository;
-    private final MemberAchievementRepository memberAchievementRepository;
 
     public MemberProfileDTO getMemberProfile(Long userId) {
         User user = userRepository.findById(userId)
@@ -142,8 +139,9 @@ public class MemberProfileService {
                         int daysRemaining = (int) ChronoUnit.DAYS.between(LocalDate.now(), membership.getEndDate());
                         return MemberProfileDTO.MembershipInfoDTO.builder()
                                 .membershipId(membership.getId())
-                                .planName(membership.getMembershipPackage() != null ? 
-                                        membership.getMembershipPackage().getPackageName() : "Unknown")
+                                .planName(membership.getMembershipPackage() != null
+                                        ? membership.getMembershipPackage().getPackageName()
+                                        : "Unknown")
                                 .planType(null)
                                 .startDate(membership.getStartDate())
                                 .endDate(membership.getEndDate())
@@ -159,42 +157,6 @@ public class MemberProfileService {
 
     private List<MemberProfileDTO.AchievementDTO> getAchievementsSafe(Long userId) {
         return Collections.emptyList();
-    }
-
-    private int calculateStreak(Long userId) {
-        List<LocalDate> workoutDates = workoutLogRepository.findWorkoutDatesByUserId(userId);
-        if (workoutDates.isEmpty()) {
-            return 0;
-        }
-
-        LocalDate today = LocalDate.now();
-        LocalDate yesterday = today.minusDays(1);
-        
-        if (!workoutDates.contains(today) && !workoutDates.contains(yesterday)) {
-            return 0;
-        }
-
-        int streak = 0;
-        LocalDate checkDate = workoutDates.contains(today) ? today : yesterday;
-        
-        for (LocalDate date : workoutDates) {
-            if (date.equals(checkDate)) {
-                streak++;
-                checkDate = checkDate.minusDays(1);
-            } else if (date.isBefore(checkDate)) {
-                break;
-            }
-        }
-
-        return streak;
-    }
-
-    private String calculateMemberLevel(long totalWorkouts) {
-        if (totalWorkouts >= 200) return "Platinum";
-        if (totalWorkouts >= 100) return "Gold";
-        if (totalWorkouts >= 50) return "Silver";
-        if (totalWorkouts >= 20) return "Bronze";
-        return "Beginner";
     }
 
     private List<String> parseFitnessGoals(String fitnessGoals) {

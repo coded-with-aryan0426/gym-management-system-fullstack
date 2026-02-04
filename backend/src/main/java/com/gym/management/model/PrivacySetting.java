@@ -24,11 +24,14 @@ public class PrivacySetting {
     private User user;
 
     @Column(name = "profile_visibility")
+    @Builder.Default
     private String profileVisibility = "PUBLIC";
 
     @Column(name = "show_progress_photos")
+    @Builder.Default
     private Boolean showProgressPhotos = true;
 
     @Column(name = "allow_trainer_access")
+    @Builder.Default
     private Boolean allowTrainerAccess = true;
 }

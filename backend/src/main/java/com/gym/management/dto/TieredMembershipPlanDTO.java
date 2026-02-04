@@ -51,10 +51,12 @@ public class TieredMembershipPlanDTO {
     // Variants (duration/pricing options)
     @Valid
     @Size(min = 1, message = "At least one variant is required")
+    @Builder.Default
     private List<PlanVariantDTO> variants = new ArrayList<>();
 
     // Features (amenities/access)
     @Valid
+    @Builder.Default
     private List<PlanFeatureDTO> features = new ArrayList<>();
 
     // Computed fields for UI
@@ -75,7 +77,7 @@ public class TieredMembershipPlanDTO {
     @AllArgsConstructor
     @Builder
     public static class PlanVariantDTO {
-        
+
         private Long variantId;
 
         @NotNull(message = "Duration value is required")
@@ -110,7 +112,7 @@ public class TieredMembershipPlanDTO {
     @AllArgsConstructor
     @Builder
     public static class PlanFeatureDTO {
-        
+
         private Long featureId;
 
         @NotBlank(message = "Feature name is required")
@@ -135,7 +137,8 @@ public class TieredMembershipPlanDTO {
      * Convert Entity to DTO
      */
     public static TieredMembershipPlanDTO fromEntity(TieredMembershipPlan entity) {
-        if (entity == null) return null;
+        if (entity == null)
+            return null;
 
         TieredMembershipPlanDTO dto = TieredMembershipPlanDTO.builder()
                 .planId(entity.getPlanId())
@@ -212,13 +215,13 @@ public class TieredMembershipPlanDTO {
                 PlanVariant variant = new PlanVariant();
                 variant.setVariantId(variantDTO.getVariantId());
                 variant.setDurationValue(variantDTO.getDurationValue());
-                variant.setDurationUnit(variantDTO.getDurationUnit() != null ? 
-                        variantDTO.getDurationUnit() : PlanVariant.DurationUnit.MONTHS);
+                variant.setDurationUnit(variantDTO.getDurationUnit() != null ? variantDTO.getDurationUnit()
+                        : PlanVariant.DurationUnit.MONTHS);
                 variant.setPrice(variantDTO.getPrice());
                 variant.setOriginalPrice(variantDTO.getOriginalPrice());
                 variant.setDiscountPercent(variantDTO.getDiscountPercent());
-                variant.setIncludedPTSessions(variantDTO.getIncludedPTSessions() != null ? 
-                        variantDTO.getIncludedPTSessions() : 0);
+                variant.setIncludedPTSessions(
+                        variantDTO.getIncludedPTSessions() != null ? variantDTO.getIncludedPTSessions() : 0);
                 variant.setIsPopular(variantDTO.getIsPopular() != null ? variantDTO.getIsPopular() : false);
                 variant.setIsActive(variantDTO.getIsActive() != null ? variantDTO.getIsActive() : true);
                 variant.setSortOrder(variantDTO.getSortOrder() != null ? variantDTO.getSortOrder() : 0);
@@ -234,8 +237,8 @@ public class TieredMembershipPlanDTO {
                 feature.setFeatureId(featureDTO.getFeatureId());
                 feature.setName(featureDTO.getName());
                 feature.setDescription(featureDTO.getDescription());
-                feature.setCategory(featureDTO.getCategory() != null ? 
-                        featureDTO.getCategory() : PlanFeature.FeatureCategory.ACCESS);
+                feature.setCategory(featureDTO.getCategory() != null ? featureDTO.getCategory()
+                        : PlanFeature.FeatureCategory.ACCESS);
                 feature.setIsIncluded(featureDTO.getIsIncluded() != null ? featureDTO.getIsIncluded() : true);
                 feature.setSortOrder(featureDTO.getSortOrder() != null ? featureDTO.getSortOrder() : 0);
                 entity.addFeature(feature);

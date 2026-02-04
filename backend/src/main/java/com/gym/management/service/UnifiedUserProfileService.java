@@ -20,35 +20,36 @@ import org.springframework.context.ApplicationEventPublisher;
 @Service
 @RequiredArgsConstructor
 public class UnifiedUserProfileService {
-    
+
     private final UserRepository userRepository;
     private final MemberProfileService memberProfileService;
     private final ApplicationEventPublisher eventPublisher;
-    
+
     /**
      * SINGLE POINT OF ENTRY for all user profile updates
-     * Replaces both MemberProfileService.updateMemberProfile() and UserService.updateUser()
+     * Replaces both MemberProfileService.updateMemberProfile() and
+     * UserService.updateUser()
      */
     @Transactional
-    @CacheEvict(value = {"userProfiles", "memberProfiles", "userCache"}, key = "#userId")
+    @CacheEvict(value = { "userProfiles", "memberProfiles", "userCache" }, key = "#userId")
     public MemberProfileDTO updateUserProfile(Long userId, MemberProfileUpdateDTO updateDTO, String updatedBy) {
         // Validate user exists
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
-        
+
         // Apply all updates in single transaction
         applyProfileUpdates(user, updateDTO);
-        
+
         // Save with optimistic locking
-        User updatedUser = userRepository.save(user);
-        
+        userRepository.save(user);
+
         // Publish update event for cache invalidation
         publishProfileUpdateEvent(userId, updatedBy);
-        
+
         // Return unified response
         return memberProfileService.getMemberProfile(userId);
     }
-    
+
     /**
      * Get user profile with caching
      */
@@ -56,7 +57,7 @@ public class UnifiedUserProfileService {
     public MemberProfileDTO getUserProfile(Long userId) {
         return memberProfileService.getMemberProfile(userId);
     }
-    
+
     /**
      * Apply updates to user entity
      */
@@ -113,7 +114,7 @@ public class UnifiedUserProfileService {
             user.setBodyFat(updateDTO.getBodyFat());
         }
     }
-    
+
     /**
      * Publish profile update event for cache invalidation
      */

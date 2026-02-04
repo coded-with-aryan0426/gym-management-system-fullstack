@@ -30,8 +30,10 @@ public class MemberPreference {
     private String skillLevel;
 
     @Column(name = "theme")
+    @Builder.Default
     private String theme = "LIGHT";
 
     @Column(name = "language")
+    @Builder.Default
     private String language = "en";
 }

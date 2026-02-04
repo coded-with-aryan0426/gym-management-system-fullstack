@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -19,28 +18,28 @@ public class MembershipPackageService {
 
     // Premium color palette for membership plans
     private static final String[] PLAN_COLORS = {
-        "#DC2626", // Red
-        "#EA580C", // Orange
-        "#D97706", // Amber
-        "#CA8A04", // Yellow
-        "#65A30D", // Lime
-        "#16A34A", // Green
-        "#059669", // Emerald
-        "#0D9488", // Teal
-        "#0891B2", // Cyan
-        "#0284C7", // Sky
-        "#2563EB", // Blue
-        "#4F46E5", // Indigo
-        "#7C3AED", // Violet
-        "#9333EA", // Purple
-        "#C026D3", // Fuchsia
-        "#DB2777", // Pink
-        "#E11D48", // Rose
+            "#DC2626", // Red
+            "#EA580C", // Orange
+            "#D97706", // Amber
+            "#CA8A04", // Yellow
+            "#65A30D", // Lime
+            "#16A34A", // Green
+            "#059669", // Emerald
+            "#0D9488", // Teal
+            "#0891B2", // Cyan
+            "#0284C7", // Sky
+            "#2563EB", // Blue
+            "#4F46E5", // Indigo
+            "#7C3AED", // Violet
+            "#9333EA", // Purple
+            "#C026D3", // Fuchsia
+            "#DB2777", // Pink
+            "#E11D48", // Rose
     };
 
     @Autowired
     private MembershipPackageRepository membershipPackageRepository;
-    
+
     @Autowired
     private MembershipRepository membershipRepository;
 
@@ -66,7 +65,8 @@ public class MembershipPackageService {
     }
 
     public MembershipPackageDTO createPackage(MembershipPackageDTO dto) {
-        if (membershipPackageRepository.existsByPackageNameAndDurationDays(dto.getPackageName(), dto.getDurationDays())) {
+        if (membershipPackageRepository.existsByPackageNameAndDurationDays(dto.getPackageName(),
+                dto.getDurationDays())) {
             throw new IllegalArgumentException("Package with this name and duration already exists");
         }
 
@@ -76,7 +76,7 @@ public class MembershipPackageService {
         pkg.setDurationDays(dto.getDurationDays());
         pkg.setIncludedPTSessions(dto.getIncludedPTSessions());
         pkg.setIsActive(dto.getIsActive() != null ? dto.getIsActive() : true);
-        
+
         // Assign unique color
         pkg.setPlanColor(assignUniqueColor());
 
@@ -92,13 +92,13 @@ public class MembershipPackageService {
                 .map(MembershipPackage::getPlanColor)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
-        
+
         for (String color : PLAN_COLORS) {
             if (!usedColors.contains(color)) {
                 return color;
             }
         }
-        
+
         // If all colors are used, generate a random one
         Random random = new Random();
         return String.format("#%06X", random.nextInt(0xFFFFFF + 1));
@@ -113,7 +113,8 @@ public class MembershipPackageService {
         Integer nextDuration = dto.getDurationDays() != null ? dto.getDurationDays() : pkg.getDurationDays();
 
         if (nextName != null && nextDuration != null
-                && membershipPackageRepository.existsByPackageNameAndDurationDaysAndPackageIdNot(nextName, nextDuration, packageId)) {
+                && membershipPackageRepository.existsByPackageNameAndDurationDaysAndPackageIdNot(nextName, nextDuration,
+                        packageId)) {
             throw new IllegalArgumentException("Package with this name and duration already exists");
         }
 
@@ -139,22 +140,24 @@ public class MembershipPackageService {
 
     public void deletePackage(Long packageId) {
         Objects.requireNonNull(packageId, "Package ID must not be null");
-        
+
         // Verify package exists before deletion
-        MembershipPackage pkg = membershipPackageRepository.findById(packageId)
-                .orElseThrow(() -> new IllegalArgumentException("Package not found"));
+        if (!membershipPackageRepository.existsById(packageId)) {
+            throw new IllegalArgumentException("Package not found");
+        }
 
         // Check if any members are using this package
         long memberCount = membershipRepository.countByMembershipPackagePackageId(packageId);
         if (memberCount > 0) {
             throw new IllegalStateException(
-                    "Cannot delete this membership plan. It is currently assigned to " + memberCount + 
-                    " member" + (memberCount > 1 ? "s" : "") + ". Please reassign or remove these members first.");
+                    "Cannot delete this membership plan. It is currently assigned to " + memberCount +
+                            " member" + (memberCount > 1 ? "s" : "")
+                            + ". Please reassign or remove these members first.");
         }
 
         membershipPackageRepository.deleteById(packageId);
     }
-    
+
     /**
      * DEACTIVATE MEMBERSHIP PACKAGE
      * Soft delete by setting inactive
@@ -163,11 +166,11 @@ public class MembershipPackageService {
         Objects.requireNonNull(packageId, "Package ID must not be null");
         MembershipPackage pkg = membershipPackageRepository.findById(packageId)
                 .orElseThrow(() -> new IllegalArgumentException("Package not found"));
-        
+
         pkg.setIsActive(false);
         membershipPackageRepository.save(pkg);
     }
-    
+
     /**
      * ACTIVATE MEMBERSHIP PACKAGE
      * Reactivate inactive package
@@ -176,7 +179,7 @@ public class MembershipPackageService {
         Objects.requireNonNull(packageId, "Package ID must not be null");
         MembershipPackage pkg = membershipPackageRepository.findById(packageId)
                 .orElseThrow(() -> new IllegalArgumentException("Package not found"));
-        
+
         pkg.setIsActive(true);
         membershipPackageRepository.save(pkg);
     }
@@ -192,8 +195,8 @@ public class MembershipPackageService {
         }
 
         Map<String, List<MembershipPackage>> groupedPackages = allPackages.stream()
-                .collect(Collectors.groupingBy(pkg ->
-                        pkg.getPackageName().trim().toLowerCase() + "|" + pkg.getDurationDays()));
+                .collect(Collectors
+                        .groupingBy(pkg -> pkg.getPackageName().trim().toLowerCase() + "|" + pkg.getDurationDays()));
 
         List<Long> duplicateIdsToDelete = new ArrayList<>();
 
@@ -219,7 +222,7 @@ public class MembershipPackageService {
             membershipPackageRepository.deleteAllById(duplicateIdsToDelete);
         }
     }
-    
+
     /**
      * GET MEMBERSHIP PLAN ANALYTICS
      * Provides comprehensive analytics for membership plans
@@ -227,122 +230,120 @@ public class MembershipPackageService {
     public MembershipPlanAnalyticsDTO getPlanAnalytics() {
         List<MembershipPackage> allPackages = membershipPackageRepository.findAll();
         List<MembershipPackage> activePackages = membershipPackageRepository.findActivePackages();
-        
+
         // Basic counts
         long totalPlans = allPackages.size();
         long activePlans = activePackages.size();
         long inactivePlans = totalPlans - activePlans;
-        
+
         // Price analytics
         Double averagePrice = allPackages.stream()
                 .mapToDouble(MembershipPackage::getPrice)
                 .average()
                 .orElse(0.0);
-        
+
         // Revenue calculation (simplified - would need actual membership data)
         Double totalRevenue = calculateTotalRevenue();
-        
+
         // Plans by status
         Map<String, Long> plansByStatus = allPackages.stream()
                 .collect(Collectors.groupingBy(
                         pkg -> pkg.getIsActive() ? "ACTIVE" : "INACTIVE",
-                        Collectors.counting()
-                ));
-        
+                        Collectors.counting()));
+
         // Revenue by plan (simplified)
         Map<String, Double> revenueByPlan = calculateRevenueByPlan();
-        
+
         // Member count by plan (simplified)
         Map<String, Long> memberCountByPlan = calculateMemberCountByPlan();
-        
+
         // Average duration by plan
         Map<String, Double> averageDurationByPlan = allPackages.stream()
                 .collect(Collectors.toMap(
                         MembershipPackage::getPackageName,
                         pkg -> (double) pkg.getDurationDays(),
-                        (a, b) -> a
-                ));
-        
+                        (a, b) -> a));
+
         // Popular plans (simplified)
         String mostPopularPlan = findMostPopularPlan(memberCountByPlan);
         String highestRevenuePlan = findHighestRevenuePlan(revenueByPlan);
         String longestDurationPlan = findLongestDurationPlan(averageDurationByPlan);
-        
+
         // Growth metrics (simplified)
         Long plansCreatedThisMonth = calculatePlansCreatedThisMonth();
         Long plansCreatedLastMonth = calculatePlansCreatedLastMonth();
         Double monthOverMonthGrowth = calculateMonthOverMonthGrowth(plansCreatedThisMonth, plansCreatedLastMonth);
-        
+
         return new MembershipPlanAnalyticsDTO(
                 totalPlans, activePlans, inactivePlans, averagePrice, totalRevenue,
                 plansByStatus, revenueByPlan, memberCountByPlan, averageDurationByPlan,
                 mostPopularPlan, highestRevenuePlan, longestDurationPlan,
-                plansCreatedThisMonth, plansCreatedLastMonth, monthOverMonthGrowth
-        );
+                plansCreatedThisMonth, plansCreatedLastMonth, monthOverMonthGrowth);
     }
-    
+
     // Helper methods for analytics
-    
+
     private Double calculateTotalRevenue() {
-        // Simplified calculation - in real implementation would sum actual membership payments
+        // Simplified calculation - in real implementation would sum actual membership
+        // payments
         return membershipRepository.findAll().stream()
-                .mapToDouble(membership -> membership.getMembershipPackage() != null ? 
-                        membership.getMembershipPackage().getPrice() : 0.0)
+                .mapToDouble(membership -> membership.getMembershipPackage() != null
+                        ? membership.getMembershipPackage().getPrice()
+                        : 0.0)
                 .sum();
     }
-    
+
     private Map<String, Double> calculateRevenueByPlan() {
         // Simplified calculation - would need actual payment data
         return membershipRepository.findAll().stream()
                 .filter(membership -> membership.getMembershipPackage() != null)
                 .collect(Collectors.groupingBy(
                         membership -> membership.getMembershipPackage().getPackageName(),
-                        Collectors.summingDouble(membership -> membership.getMembershipPackage().getPrice())
-                ));
+                        Collectors.summingDouble(membership -> membership.getMembershipPackage().getPrice())));
     }
-    
+
     private Map<String, Long> calculateMemberCountByPlan() {
         return membershipRepository.findAll().stream()
                 .filter(membership -> membership.getMembershipPackage() != null)
                 .collect(Collectors.groupingBy(
                         membership -> membership.getMembershipPackage().getPackageName(),
-                        Collectors.counting()
-                ));
+                        Collectors.counting()));
     }
-    
+
     private String findMostPopularPlan(Map<String, Long> memberCountByPlan) {
         return memberCountByPlan.entrySet().stream()
                 .max(Map.Entry.comparingByValue())
                 .map(Map.Entry::getKey)
                 .orElse("None");
     }
-    
+
     private String findHighestRevenuePlan(Map<String, Double> revenueByPlan) {
         return revenueByPlan.entrySet().stream()
                 .max(Map.Entry.comparingByValue())
                 .map(Map.Entry::getKey)
                 .orElse("None");
     }
-    
+
     private String findLongestDurationPlan(Map<String, Double> averageDurationByPlan) {
         return averageDurationByPlan.entrySet().stream()
                 .max(Map.Entry.comparingByValue())
                 .map(Map.Entry::getKey)
                 .orElse("None");
     }
-    
+
     private Long calculatePlansCreatedThisMonth() {
         // Simplified - would need creation date tracking
         return membershipPackageRepository.count();
     }
-    
+
     private Long calculatePlansCreatedLastMonth() {
         // Simplified - would need creation date tracking
         return Math.max(0, membershipPackageRepository.count() - 2);
     }
-    
+
     private Double calculateMonthOverMonthGrowth(Long thisMonth, Long lastMonth) {
-        if (lastMonth == 0) return 0.0;
+        if (lastMonth == 0)
+            return 0.0;
         return ((double) (thisMonth - lastMonth) / lastMonth) * 100;
     }
 
