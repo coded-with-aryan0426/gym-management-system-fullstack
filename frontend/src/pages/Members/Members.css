@@ -9,7 +9,7 @@
 .members-page {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   padding: 10px 16px 16px;
   min-height: 100%;
   font-family: var(--font-family);
@@ -551,13 +551,11 @@
    TABLE WRAPPER - Premium Design
    ============================================ */
 .members-table-wrapper {
-  flex: 1;
-  background: linear-gradient(180deg, var(--bg-secondary) 0%, rgba(var(--bg-secondary-rgb), 0.95) 100%);
+  flex: 0 0 auto;
+  background: var(--bg-secondary);
   border: 1px solid var(--border-primary);
-  border-radius: 12px;
+  border-radius: 10px;
   overflow: hidden;
-  min-height: 400px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
 }
 
 /* Premium Table Header Overrides */
@@ -570,6 +568,12 @@
   text-transform: uppercase;
   padding: 10px 12px;
   border-bottom: 1px solid rgba(220, 38, 38, 0.1);
+}
+
+/* Remove padding from table cells */
+.members-table-wrapper .data-table__td {
+  padding: 8px 12px;
+  height: auto;
 }
 
 /* Row Number Column - Premium */
@@ -711,7 +715,7 @@
   text-overflow: ellipsis;
 }
 
-/* Plan Cell */
+/* Plan Cell - Premium 3D Glassmorphism */
 .member-plan-cell {
   display: flex;
   align-items: center;
@@ -721,12 +725,20 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 4px 10px;
+  padding: 5px 10px;
   border-radius: 6px;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.04em;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transform-style: preserve-3d;
+  transition: all 0.2s ease;
+}
+
+.member-plan-badge:hover {
+  transform: translateY(-1px) scale(1.02);
 }
 
 .plan-icon {
@@ -734,24 +746,36 @@
   line-height: 1;
 }
 
+/* Basic Plan - Gray Glass */
 .member-plan--basic {
-  background: rgba(107, 114, 128, 0.08);
+  background: linear-gradient(135deg, rgba(107, 114, 128, 0.15) 0%, rgba(107, 114, 128, 0.05) 100%);
   color: #9CA3AF;
-  border: 1px solid rgba(107, 114, 128, 0.15);
+  border: 1px solid rgba(107, 114, 128, 0.2);
+  box-shadow: 
+    0 2px 6px rgba(107, 114, 128, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
+/* Standard Plan - Blue Glass 3D */
 .member-plan--standard {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05));
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.08) 100%);
   color: #60A5FA;
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  box-shadow: 
+    0 2px 8px rgba(59, 130, 246, 0.25),
+    0 4px 16px rgba(59, 130, 246, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
+/* Premium Plan - Gold Glass 3D */
 .member-plan--premium {
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(251, 191, 36, 0.1));
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.2) 0%, rgba(245, 158, 11, 0.1) 100%);
   color: #FBBF24;
-  border: 1px solid rgba(245, 158, 11, 0.25);
-  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  box-shadow: 
+    0 2px 8px rgba(251, 191, 36, 0.3),
+    0 4px 16px rgba(251, 191, 36, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 /* Expiry Cell */
@@ -785,7 +809,7 @@
   color: var(--text-tertiary);
 }
 
-/* Status Cell */
+/* Status Cell - Premium 3D Glassmorphism */
 .member-status-cell {
   display: flex;
   align-items: center;
@@ -795,12 +819,21 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
-  padding: 4px 10px;
+  padding: 5px 12px;
   border-radius: 20px;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.05em;
+  position: relative;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transform-style: preserve-3d;
+  transition: all 0.2s ease;
+}
+
+.status-indicator:hover {
+  transform: translateY(-1px) scale(1.02);
 }
 
 .status-indicator__dot {
@@ -810,38 +843,64 @@
   flex-shrink: 0;
 }
 
+/* Active Status - Green Glassmorphism 3D */
 .status-indicator--success {
-  background: rgba(16, 185, 129, 0.1);
-  color: #10B981;
-  border: 1px solid rgba(16, 185, 129, 0.2);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.08) 100%);
+  color: #34D399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  box-shadow: 
+    0 2px 8px rgba(16, 185, 129, 0.25),
+    0 4px 16px rgba(16, 185, 129, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .status-indicator--success .status-indicator__dot {
   background: #10B981;
-  box-shadow: 0 0 6px rgba(16, 185, 129, 0.5);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.8), 0 0 16px rgba(16, 185, 129, 0.4);
 }
 
+/* Warning Status - Amber Glassmorphism 3D */
 .status-indicator--warning {
-  background: rgba(245, 158, 11, 0.1);
-  color: #F59E0B;
-  border: 1px solid rgba(245, 158, 11, 0.2);
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(245, 158, 11, 0.08) 100%);
+  color: #FBBF24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  box-shadow: 
+    0 2px 8px rgba(245, 158, 11, 0.25),
+    0 4px 16px rgba(245, 158, 11, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .status-indicator--warning .status-indicator__dot {
   background: #F59E0B;
-  animation: pulse-dot 1.5s ease-in-out infinite;
-  box-shadow: 0 0 6px rgba(245, 158, 11, 0.5);
+  animation: pulse-glow-warning 1.5s ease-in-out infinite;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.8), 0 0 16px rgba(245, 158, 11, 0.4);
 }
 
+@keyframes pulse-glow-warning {
+  0%, 100% { 
+    box-shadow: 0 0 8px rgba(245, 158, 11, 0.8), 0 0 16px rgba(245, 158, 11, 0.4);
+    transform: scale(1);
+  }
+  50% { 
+    box-shadow: 0 0 12px rgba(245, 158, 11, 1), 0 0 24px rgba(245, 158, 11, 0.6);
+    transform: scale(1.15);
+  }
+}
+
+/* Inactive/Danger Status - Red Glassmorphism 3D */
 .status-indicator--danger {
-  background: rgba(239, 68, 68, 0.1);
-  color: #EF4444;
-  border: 1px solid rgba(239, 68, 68, 0.2);
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0.08) 100%);
+  color: #F87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  box-shadow: 
+    0 2px 8px rgba(239, 68, 68, 0.25),
+    0 4px 16px rgba(239, 68, 68, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .status-indicator--danger .status-indicator__dot {
   background: #EF4444;
-  box-shadow: 0 0 6px rgba(239, 68, 68, 0.5);
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.8), 0 0 16px rgba(239, 68, 68, 0.4);
 }
 
 /* Actions Cell */
