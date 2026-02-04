@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, ChevronLeft, ChevronRight, Check, Crown, Clock, Sparkles, 
-  Settings, Eye, Plus, Trash2, Dumbbell, Star, AlertCircle
+  Settings, Eye, Plus, Trash2, Dumbbell, Star, AlertCircle, Palette
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import type { 
@@ -543,41 +543,117 @@ const TieredPlanWizard: React.FC<TieredPlanWizardProps> = ({
                         </div>
                       </div>
 
-                      {/* Color */}
-                      <div>
-                        <label style={labelStyle}>Brand Color</label>
-                        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                          {COLOR_PALETTE.map((color) => (
-                            <button
-                              key={color}
-                              type="button"
-                              onClick={() => setState(prev => ({
-                                ...prev,
-                                basicInfo: { ...prev.basicInfo, planColor: color }
-                              }))}
-                              style={{
-                                width: 44,
-                                height: 44,
-                                borderRadius: 12,
-                                background: color,
-                                border: state.basicInfo.planColor === color 
-                                  ? '3px solid #fff' 
-                                  : '3px solid transparent',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                boxShadow: state.basicInfo.planColor === color 
-                                  ? `0 0 20px ${color}60` 
-                                  : 'none',
-                                transition: 'all 0.2s ease',
-                              }}
-                            >
-                              {state.basicInfo.planColor === color && <Check size={18} color="#fff" />}
-                            </button>
-                          ))}
+                        {/* Color */}
+                        <div>
+                          <label style={labelStyle}>Brand Color</label>
+                          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+                            {COLOR_PALETTE.map((color) => (
+                              <button
+                                key={color}
+                                type="button"
+                                onClick={() => setState(prev => ({
+                                  ...prev,
+                                  basicInfo: { ...prev.basicInfo, planColor: color }
+                                }))}
+                                style={{
+                                  width: 44,
+                                  height: 44,
+                                  borderRadius: 12,
+                                  background: color,
+                                  border: state.basicInfo.planColor === color 
+                                    ? '3px solid #fff' 
+                                    : '3px solid transparent',
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  boxShadow: state.basicInfo.planColor === color 
+                                    ? `0 0 20px ${color}60` 
+                                    : 'none',
+                                  transition: 'all 0.2s ease',
+                                }}
+                              >
+                                {state.basicInfo.planColor === color && <Check size={18} color="#fff" />}
+                              </button>
+                            ))}
+                            
+                            {/* Custom Color Picker */}
+                            <div style={{ position: 'relative' }}>
+                              <input
+                                type="color"
+                                value={state.basicInfo.planColor}
+                                onChange={(e) => setState(prev => ({
+                                  ...prev,
+                                  basicInfo: { ...prev.basicInfo, planColor: e.target.value }
+                                }))}
+                                style={{
+                                  position: 'absolute',
+                                  width: 44,
+                                  height: 44,
+                                  opacity: 0,
+                                  cursor: 'pointer',
+                                  zIndex: 2,
+                                }}
+                                title="Pick any color"
+                              />
+                              <button
+                                type="button"
+                                style={{
+                                  width: 44,
+                                  height: 44,
+                                  borderRadius: 12,
+                                  background: !COLOR_PALETTE.includes(state.basicInfo.planColor)
+                                    ? state.basicInfo.planColor
+                                    : 'linear-gradient(135deg, #FF6B6B 0%, #FFE66D 25%, #4ECDC4 50%, #6B5B95 75%, #FF6B6B 100%)',
+                                  border: !COLOR_PALETTE.includes(state.basicInfo.planColor)
+                                    ? '3px solid #fff'
+                                    : '3px solid transparent',
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  boxShadow: !COLOR_PALETTE.includes(state.basicInfo.planColor)
+                                    ? `0 0 20px ${state.basicInfo.planColor}60`
+                                    : 'none',
+                                  transition: 'all 0.2s ease',
+                                  position: 'relative',
+                                }}
+                                title="Custom color"
+                              >
+                                {!COLOR_PALETTE.includes(state.basicInfo.planColor) ? (
+                                  <Check size={18} color="#fff" />
+                                ) : (
+                                  <Palette size={18} color="#fff" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.5))' }} />
+                                )}
+                              </button>
+                            </div>
+                          </div>
+                          
+                          {/* Show custom color hex value */}
+                          {!COLOR_PALETTE.includes(state.basicInfo.planColor) && (
+                            <div style={{ 
+                              marginTop: 12, 
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              gap: 8 
+                            }}>
+                              <div style={{
+                                width: 20,
+                                height: 20,
+                                borderRadius: 6,
+                                background: state.basicInfo.planColor,
+                                border: '2px solid rgba(255,255,255,0.2)',
+                              }} />
+                              <span style={{ 
+                                fontSize: 12, 
+                                color: '#9CA3AF',
+                                fontFamily: 'monospace',
+                              }}>
+                                Custom: {state.basicInfo.planColor.toUpperCase()}
+                              </span>
+                            </div>
+                          )}
                         </div>
-                      </div>
                     </motion.div>
                   )}
 
