@@ -34,4 +34,7 @@ public class MembershipPackageDTO {
     private Integer includedPTSessions;
 
     private Boolean isActive;
+
+    @Size(max = 7, message = "Plan color must be a valid hex color code")
+    private String planColor;
 }

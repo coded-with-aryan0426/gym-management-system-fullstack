@@ -5,4 +5,5 @@ export type MembershipPackageDTO = {
   durationDays: number;
   includedPTSessions: number;
   isActive?: boolean;
+  planColor?: string;
 };

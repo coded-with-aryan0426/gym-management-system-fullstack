@@ -41,6 +41,9 @@ public class MembershipPackage {
     @Column(name = "is_active")
     private Boolean isActive;
 
+    @Column(name = "plan_color", length = 7)
+    private String planColor;
+
     @PrePersist
     protected void onCreate() {
         if (includedPTSessions == null) {
@@ -50,6 +53,9 @@ public class MembershipPackage {
             isActive = true;
         }
     }
+
+    public String getPlanColor() { return planColor; }
+    public void setPlanColor(String planColor) { this.planColor = planColor; }
 
     public Integer getDurationMonths() { return durationMonths; }
     public void setDurationMonths(Integer durationMonths) { this.durationMonths = durationMonths; }

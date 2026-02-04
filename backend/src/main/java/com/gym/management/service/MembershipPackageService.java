@@ -17,6 +17,27 @@ import java.util.stream.Collectors;
 @Transactional
 public class MembershipPackageService {
 
+    // Premium color palette for membership plans
+    private static final String[] PLAN_COLORS = {
+        "#DC2626", // Red
+        "#EA580C", // Orange
+        "#D97706", // Amber
+        "#CA8A04", // Yellow
+        "#65A30D", // Lime
+        "#16A34A", // Green
+        "#059669", // Emerald
+        "#0D9488", // Teal
+        "#0891B2", // Cyan
+        "#0284C7", // Sky
+        "#2563EB", // Blue
+        "#4F46E5", // Indigo
+        "#7C3AED", // Violet
+        "#9333EA", // Purple
+        "#C026D3", // Fuchsia
+        "#DB2777", // Pink
+        "#E11D48", // Rose
+    };
+
     @Autowired
     private MembershipPackageRepository membershipPackageRepository;
     
@@ -55,9 +76,32 @@ public class MembershipPackageService {
         pkg.setDurationDays(dto.getDurationDays());
         pkg.setIncludedPTSessions(dto.getIncludedPTSessions());
         pkg.setIsActive(dto.getIsActive() != null ? dto.getIsActive() : true);
+        
+        // Assign unique color
+        pkg.setPlanColor(assignUniqueColor());
 
         MembershipPackage saved = membershipPackageRepository.save(pkg);
         return convertToDTO(saved);
+    }
+
+    /**
+     * Assigns a unique color from the palette that isn't currently in use
+     */
+    private String assignUniqueColor() {
+        Set<String> usedColors = membershipPackageRepository.findAll().stream()
+                .map(MembershipPackage::getPlanColor)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        
+        for (String color : PLAN_COLORS) {
+            if (!usedColors.contains(color)) {
+                return color;
+            }
+        }
+        
+        // If all colors are used, generate a random one
+        Random random = new Random();
+        return String.format("#%06X", random.nextInt(0xFFFFFF + 1));
     }
 
     public MembershipPackageDTO updatePackage(Long packageId, MembershipPackageDTO dto) {
@@ -310,6 +354,7 @@ public class MembershipPackageService {
         dto.setDurationDays(pkg.getDurationDays());
         dto.setIncludedPTSessions(pkg.getIncludedPTSessions());
         dto.setIsActive(pkg.getIsActive());
+        dto.setPlanColor(pkg.getPlanColor() != null ? pkg.getPlanColor() : assignUniqueColor());
         return dto;
     }
 }

@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Plus, Edit, Trash2, Eye, TrendingUp, Users, Calendar, IndianRupee } from 'lucide-react';
+import { X, Plus, Edit, Trash2, Eye, LayoutGrid, List, Clock, Dumbbell, Check } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { Badge, Button } from '../ui';
-import { Input } from '../base';
 import type { MembershipPackageDTO } from '../../types/membershipPackage';
 import membershipPlanApi from '../../services/membershipPlanApi';
 
@@ -13,6 +11,8 @@ interface MembershipPlanManagementProps {
   onPlanSelect?: (plan: MembershipPackageDTO) => void;
   mode?: 'management' | 'selection';
 }
+
+type ViewMode = 'grid' | 'list';
 
 const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
   isOpen,
@@ -26,7 +26,10 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [editingPlan, setEditingPlan] = useState<MembershipPackageDTO | null>(null);
-  const [analytics, setAnalytics] = useState<any>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    const saved = localStorage.getItem('membershipPlanViewMode');
+    return (saved as ViewMode) || 'grid';
+  });
   const modalRef = useRef<HTMLDivElement>(null);
 
   // Form state
@@ -41,11 +44,12 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
   useEffect(() => {
     if (isOpen) {
       fetchPlans();
-      if (mode === 'management') {
-        fetchAnalytics();
-      }
     }
   }, [isOpen, mode]);
+
+  useEffect(() => {
+    localStorage.setItem('membershipPlanViewMode', viewMode);
+  }, [viewMode]);
 
   // Handle escape key and click outside
   useEffect(() => {
@@ -88,47 +92,37 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
     }
   };
 
-  const fetchAnalytics = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
     try {
-      const response = await membershipPlanApi.getAnalytics();
-      setAnalytics(response.data);
-    } catch (err) {
-      console.error('Failed to fetch analytics:', err);
+      const planData = {
+        ...formData,
+        price: parseFloat(formData.price),
+        durationDays: parseInt(formData.durationDays),
+        includedPTSessions: parseInt(formData.includedPTSessions)
+      };
+
+      if (editingPlan && editingPlan.packageId !== undefined) {
+        await membershipPlanApi.updatePlan(editingPlan.packageId, planData);
+        toast.success('Membership plan updated successfully');
+      } else {
+        await membershipPlanApi.createPlan(planData);
+        toast.success('Membership plan created successfully');
+      }
+      
+      resetForm();
+      fetchPlans();
+      onSuccess?.();
+    } catch (err: any) {
+      const message = err.response?.data?.message || 'Failed to save membership plan';
+      if (message.includes('already exists')) {
+        toast.error('This membership plan already exists. Please use a different name or duration.');
+      } else {
+        toast.error(message);
+      }
     }
   };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-      e.preventDefault();
-      
-      try {
-        const planData = {
-          ...formData,
-          price: parseFloat(formData.price),
-          durationDays: parseInt(formData.durationDays),
-          includedPTSessions: parseInt(formData.includedPTSessions)
-        };
-
-        if (editingPlan && editingPlan.packageId !== undefined) {
-          await membershipPlanApi.updatePlan(editingPlan.packageId, planData);
-          toast.success('Membership plan updated successfully');
-        } else {
-          await membershipPlanApi.createPlan(planData);
-          toast.success('Membership plan created successfully');
-        }
-        
-        resetForm();
-        fetchPlans();
-        fetchAnalytics();
-        onSuccess?.();
-      } catch (err: any) {
-        const message = err.response?.data?.message || 'Failed to save membership plan';
-        if (message.includes('already exists')) {
-          toast.error('This membership plan already exists. Please use a different name or duration.');
-        } else {
-          toast.error(message);
-        }
-      }
-    };
 
   const handleEdit = (plan: MembershipPackageDTO) => {
     setEditingPlan(plan);
@@ -149,7 +143,6 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
       await membershipPlanApi.deletePlan(planId);
       toast.success('Membership plan deleted successfully');
       fetchPlans();
-      fetchAnalytics();
       onSuccess?.();
     } catch (err: any) {
       const message = err.response?.data?.message || 'Failed to delete membership plan';
@@ -177,7 +170,6 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
         toast.success('Membership plan activated');
       }
       fetchPlans();
-      fetchAnalytics();
       onSuccess?.();
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed to update plan status');
@@ -216,6 +208,11 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
     }
   };
 
+  const getDefaultColor = (index: number) => {
+    const colors = ['#DC2626', '#EA580C', '#D97706', '#16A34A', '#0891B2', '#2563EB', '#7C3AED', '#DB2777'];
+    return colors[index % colors.length];
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -225,8 +222,8 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
         style={{
           position: 'fixed',
           inset: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.6)',
-          backdropFilter: 'blur(4px)',
+          backgroundColor: 'rgba(0, 0, 0, 0.75)',
+          backdropFilter: 'blur(8px)',
           zIndex: 9998,
           animation: 'fadeIn 0.2s ease',
         }}
@@ -247,14 +244,14 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
         <div
           ref={modalRef}
           style={{
-            background: 'var(--bg-secondary, #1A1A1A)',
-            borderRadius: 16,
+            background: 'linear-gradient(180deg, #141414 0%, #0a0a0a 100%)',
+            borderRadius: 20,
             width: '100%',
-            maxWidth: 900,
+            maxWidth: 960,
             maxHeight: '90vh',
             overflowY: 'auto',
-            boxShadow: '0 25px 60px -12px rgba(0, 0, 0, 0.9), 0 0 40px rgba(220, 38, 38, 0.1)',
-            border: '1px solid rgba(255,255,255,0.08)',
+            boxShadow: '0 25px 80px -12px rgba(0, 0, 0, 0.95), 0 0 60px rgba(220, 38, 38, 0.08)',
+            border: '1px solid rgba(255,255,255,0.06)',
             animation: 'modalSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
           }}
         >
@@ -263,122 +260,120 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            padding: '16px 20px',
-            borderBottom: '1px solid rgba(255,255,255,0.08)',
+            padding: '20px 24px',
+            borderBottom: '1px solid rgba(255,255,255,0.06)',
             position: 'sticky',
             top: 0,
-            background: 'var(--bg-secondary, #1A1A1A)',
+            background: 'linear-gradient(180deg, #141414 0%, #121212 100%)',
             zIndex: 10,
           }}>
             <div>
               <h2 style={{ 
-                fontSize: 18, 
+                fontSize: 20, 
                 fontWeight: 700, 
-                color: 'var(--text-primary, #F9FAFB)', 
+                color: '#F9FAFB', 
                 margin: 0,
-                letterSpacing: '-0.3px'
+                letterSpacing: '-0.4px'
               }}>
                 Membership Plans
               </h2>
               <p style={{
                 fontSize: 13,
-                color: 'var(--text-secondary, #9CA3AF)',
+                color: '#6B7280',
                 margin: '4px 0 0 0',
               }}>
-                Create and manage your gym membership packages
+                {mode === 'selection' ? 'Select a plan to assign' : 'Create and manage your gym membership packages'}
               </p>
             </div>
-            <button
-              onClick={onClose}
-              style={{
-                background: 'rgba(255,255,255,0.05)',
-                border: 'none',
-                color: 'var(--text-tertiary, #6B7280)',
-                cursor: 'pointer',
-                padding: 8,
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              {/* View Toggle */}
+              <div style={{
                 display: 'flex',
+                background: 'rgba(255,255,255,0.03)',
                 borderRadius: 8,
-                transition: 'all 0.2s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
-              }}
-            >
-              <X size={18} />
-            </button>
+                padding: 3,
+                border: '1px solid rgba(255,255,255,0.06)',
+              }}>
+                <button
+                  onClick={() => setViewMode('grid')}
+                  style={{
+                    padding: '6px 10px',
+                    background: viewMode === 'grid' ? 'rgba(220, 38, 38, 0.15)' : 'transparent',
+                    border: 'none',
+                    borderRadius: 6,
+                    color: viewMode === 'grid' ? '#DC2626' : '#6B7280',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  <LayoutGrid size={16} />
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  style={{
+                    padding: '6px 10px',
+                    background: viewMode === 'list' ? 'rgba(220, 38, 38, 0.15)' : 'transparent',
+                    border: 'none',
+                    borderRadius: 6,
+                    color: viewMode === 'list' ? '#DC2626' : '#6B7280',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  <List size={16} />
+                </button>
+              </div>
+              <button
+                onClick={onClose}
+                style={{
+                  background: 'rgba(255,255,255,0.03)',
+                  border: '1px solid rgba(255,255,255,0.06)',
+                  color: '#6B7280',
+                  cursor: 'pointer',
+                  padding: 8,
+                  display: 'flex',
+                  borderRadius: 8,
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                <X size={18} />
+              </button>
+            </div>
           </div>
 
           {/* Content */}
-          <div style={{ padding: '20px' }}>
-            {/* Analytics Cards */}
-            {mode === 'management' && analytics && (
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(4, 1fr)',
-                gap: 12,
-                marginBottom: 20,
-              }}>
-                <StatCard 
-                  icon={<Calendar size={20} />}
-                  label="Total Plans"
-                  value={analytics.totalPlans || 0}
-                  color="#3B82F6"
-                />
-                <StatCard 
-                  icon={<Users size={20} />}
-                  label="Active Plans"
-                  value={analytics.activePlans || 0}
-                  color="#10B981"
-                />
-                <StatCard 
-                  icon={<IndianRupee size={20} />}
-                  label="Avg Price"
-                  value={formatPrice(analytics.averagePrice || 0)}
-                  color="#F59E0B"
-                />
-                <StatCard 
-                  icon={<TrendingUp size={20} />}
-                  label="Total Revenue"
-                  value={formatPrice(analytics.totalRevenue || 0)}
-                  color="#8B5CF6"
-                />
-              </div>
-            )}
-
+          <div style={{ padding: '20px 24px' }}>
             {/* Action Bar */}
             {mode === 'management' && !showForm && (
               <div style={{
                 display: 'flex',
-                justifyContent: 'flex-end',
-                marginBottom: 16,
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: 20,
               }}>
+                <p style={{ fontSize: 13, color: '#6B7280' }}>
+                  {plans.length} plan{plans.length !== 1 ? 's' : ''} total
+                </p>
                 <button
                   onClick={() => setShowForm(true)}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: 6,
-                    padding: '10px 16px',
+                    padding: '10px 18px',
                     background: 'linear-gradient(135deg, #DC2626 0%, #B91C1C 100%)',
                     border: 'none',
-                    borderRadius: 8,
+                    borderRadius: 10,
                     color: '#fff',
                     fontSize: 13,
                     fontWeight: 600,
                     cursor: 'pointer',
-                    boxShadow: '0 4px 12px rgba(220, 38, 38, 0.3)',
+                    boxShadow: '0 4px 16px rgba(220, 38, 38, 0.35)',
                     transition: 'all 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-1px)';
-                    e.currentTarget.style.boxShadow = '0 6px 16px rgba(220, 38, 38, 0.4)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(220, 38, 38, 0.3)';
                   }}
                 >
                   <Plus size={16} />
@@ -393,12 +388,12 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                padding: '60px 0',
+                padding: '80px 0',
               }}>
                 <div style={{
-                  width: 32,
-                  height: 32,
-                  border: '3px solid rgba(220, 38, 38, 0.2)',
+                  width: 36,
+                  height: 36,
+                  border: '3px solid rgba(220, 38, 38, 0.15)',
                   borderTopColor: '#DC2626',
                   borderRadius: '50%',
                   animation: 'spin 0.8s linear infinite',
@@ -410,20 +405,20 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
             {error && !loading && (
               <div style={{
                 textAlign: 'center',
-                padding: '40px 20px',
+                padding: '60px 20px',
                 color: '#DC2626',
               }}>
-                <p>{error}</p>
+                <p style={{ marginBottom: 12 }}>{error}</p>
                 <button
                   onClick={fetchPlans}
                   style={{
-                    marginTop: 12,
-                    padding: '8px 16px',
+                    padding: '10px 20px',
                     background: 'rgba(220, 38, 38, 0.1)',
-                    border: '1px solid rgba(220, 38, 38, 0.3)',
-                    borderRadius: 6,
+                    border: '1px solid rgba(220, 38, 38, 0.2)',
+                    borderRadius: 8,
                     color: '#DC2626',
                     cursor: 'pointer',
+                    fontWeight: 500,
                   }}
                 >
                   Retry
@@ -434,17 +429,17 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
             {/* Create/Edit Form */}
             {showForm && !loading && (
               <div style={{
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                borderRadius: 12,
-                padding: 20,
-                marginBottom: 20,
+                background: 'rgba(255,255,255,0.02)',
+                border: '1px solid rgba(255,255,255,0.06)',
+                borderRadius: 14,
+                padding: 24,
+                marginBottom: 24,
               }}>
                 <h3 style={{
                   fontSize: 15,
                   fontWeight: 600,
-                  color: 'var(--text-primary, #F9FAFB)',
-                  marginBottom: 16,
+                  color: '#F9FAFB',
+                  marginBottom: 20,
                 }}>
                   {editingPlan ? 'Edit Membership Plan' : 'Create New Plan'}
                 </h3>
@@ -459,8 +454,8 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
                         display: 'block',
                         fontSize: 11,
                         fontWeight: 600,
-                        color: 'var(--text-secondary, #9CA3AF)',
-                        marginBottom: 6,
+                        color: '#9CA3AF',
+                        marginBottom: 8,
                         textTransform: 'uppercase',
                         letterSpacing: '0.5px',
                       }}>
@@ -474,11 +469,11 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
                         required
                         style={{
                           width: '100%',
-                          padding: '10px 12px',
-                          background: 'rgba(255,255,255,0.03)',
-                          border: '1px solid rgba(255,255,255,0.1)',
-                          borderRadius: 8,
-                          color: 'var(--text-primary, #F9FAFB)',
+                          padding: '12px 14px',
+                          background: 'rgba(0,0,0,0.3)',
+                          border: '1px solid rgba(255,255,255,0.08)',
+                          borderRadius: 10,
+                          color: '#F9FAFB',
                           fontSize: 14,
                           outline: 'none',
                           boxSizing: 'border-box',
@@ -490,8 +485,8 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
                         display: 'block',
                         fontSize: 11,
                         fontWeight: 600,
-                        color: 'var(--text-secondary, #9CA3AF)',
-                        marginBottom: 6,
+                        color: '#9CA3AF',
+                        marginBottom: 8,
                         textTransform: 'uppercase',
                         letterSpacing: '0.5px',
                       }}>
@@ -506,11 +501,11 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
                         min="0"
                         style={{
                           width: '100%',
-                          padding: '10px 12px',
-                          background: 'rgba(255,255,255,0.03)',
-                          border: '1px solid rgba(255,255,255,0.1)',
-                          borderRadius: 8,
-                          color: 'var(--text-primary, #F9FAFB)',
+                          padding: '12px 14px',
+                          background: 'rgba(0,0,0,0.3)',
+                          border: '1px solid rgba(255,255,255,0.08)',
+                          borderRadius: 10,
+                          color: '#F9FAFB',
                           fontSize: 14,
                           outline: 'none',
                           boxSizing: 'border-box',
@@ -522,8 +517,8 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
                         display: 'block',
                         fontSize: 11,
                         fontWeight: 600,
-                        color: 'var(--text-secondary, #9CA3AF)',
-                        marginBottom: 6,
+                        color: '#9CA3AF',
+                        marginBottom: 8,
                         textTransform: 'uppercase',
                         letterSpacing: '0.5px',
                       }}>
@@ -538,11 +533,11 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
                         min="1"
                         style={{
                           width: '100%',
-                          padding: '10px 12px',
-                          background: 'rgba(255,255,255,0.03)',
-                          border: '1px solid rgba(255,255,255,0.1)',
-                          borderRadius: 8,
-                          color: 'var(--text-primary, #F9FAFB)',
+                          padding: '12px 14px',
+                          background: 'rgba(0,0,0,0.3)',
+                          border: '1px solid rgba(255,255,255,0.08)',
+                          borderRadius: 10,
+                          color: '#F9FAFB',
                           fontSize: 14,
                           outline: 'none',
                           boxSizing: 'border-box',
@@ -554,8 +549,8 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
                         display: 'block',
                         fontSize: 11,
                         fontWeight: 600,
-                        color: 'var(--text-secondary, #9CA3AF)',
-                        marginBottom: 6,
+                        color: '#9CA3AF',
+                        marginBottom: 8,
                         textTransform: 'uppercase',
                         letterSpacing: '0.5px',
                       }}>
@@ -570,11 +565,11 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
                         min="0"
                         style={{
                           width: '100%',
-                          padding: '10px 12px',
-                          background: 'rgba(255,255,255,0.03)',
-                          border: '1px solid rgba(255,255,255,0.1)',
-                          borderRadius: 8,
-                          color: 'var(--text-primary, #F9FAFB)',
+                          padding: '12px 14px',
+                          background: 'rgba(0,0,0,0.3)',
+                          border: '1px solid rgba(255,255,255,0.08)',
+                          borderRadius: 10,
+                          color: '#F9FAFB',
                           fontSize: 14,
                           outline: 'none',
                           boxSizing: 'border-box',
@@ -585,18 +580,18 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
                   <div style={{
                     display: 'flex',
                     justifyContent: 'flex-end',
-                    gap: 10,
-                    marginTop: 20,
+                    gap: 12,
+                    marginTop: 24,
                   }}>
                     <button
                       type="button"
                       onClick={resetForm}
                       style={{
-                        padding: '10px 16px',
+                        padding: '10px 20px',
                         background: 'transparent',
-                        border: '1px solid rgba(255,255,255,0.15)',
-                        borderRadius: 8,
-                        color: 'var(--text-secondary, #9CA3AF)',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        borderRadius: 10,
+                        color: '#9CA3AF',
                         fontSize: 13,
                         fontWeight: 500,
                         cursor: 'pointer',
@@ -607,10 +602,10 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
                     <button
                       type="submit"
                       style={{
-                        padding: '10px 20px',
+                        padding: '10px 24px',
                         background: 'linear-gradient(135deg, #DC2626 0%, #B91C1C 100%)',
                         border: 'none',
-                        borderRadius: 8,
+                        borderRadius: 10,
                         color: '#fff',
                         fontSize: 13,
                         fontWeight: 600,
@@ -625,17 +620,38 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
               </div>
             )}
 
-            {/* Plans Grid */}
-            {!loading && !error && (
+            {/* Plans Grid View */}
+            {!loading && !error && viewMode === 'grid' && (
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
                 gap: 16,
               }}>
-                {plans.map((plan) => (
-                  <PlanCard
+                {plans.map((plan, index) => (
+                  <PlanCardGrid
                     key={plan.packageId}
                     plan={plan}
+                    color={plan.planColor || getDefaultColor(index)}
+                    mode={mode}
+                    formatPrice={formatPrice}
+                    formatDuration={formatDuration}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    onToggleStatus={handleToggleStatus}
+                    onSelect={onPlanSelect}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Plans List View */}
+            {!loading && !error && viewMode === 'list' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {plans.map((plan, index) => (
+                  <PlanCardList
+                    key={plan.packageId}
+                    plan={plan}
+                    color={plan.planColor || getDefaultColor(index)}
                     mode={mode}
                     formatPrice={formatPrice}
                     formatDuration={formatDuration}
@@ -652,22 +668,22 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
             {!loading && !error && plans.length === 0 && (
               <div style={{
                 textAlign: 'center',
-                padding: '60px 20px',
-                color: 'var(--text-secondary, #9CA3AF)',
+                padding: '80px 20px',
+                color: '#6B7280',
               }}>
                 <div style={{
-                  width: 64,
-                  height: 64,
-                  background: 'rgba(220, 38, 38, 0.1)',
-                  borderRadius: '50%',
+                  width: 72,
+                  height: 72,
+                  background: 'rgba(220, 38, 38, 0.08)',
+                  borderRadius: 16,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  margin: '0 auto 16px',
+                  margin: '0 auto 20px',
                 }}>
-                  <Calendar size={28} style={{ color: '#DC2626' }} />
+                  <Dumbbell size={32} style={{ color: '#DC2626' }} />
                 </div>
-                <p style={{ fontSize: 15, fontWeight: 500, marginBottom: 4 }}>
+                <p style={{ fontSize: 16, fontWeight: 600, marginBottom: 6, color: '#9CA3AF' }}>
                   {mode === 'selection' 
                     ? 'No active membership plans available'
                     : 'No membership plans yet'
@@ -688,81 +704,28 @@ const MembershipPlanManagement: React.FC<MembershipPlanManagementProps> = ({
           to { opacity: 1; }
         }
         @keyframes modalSlideIn {
-          from { opacity: 0; transform: scale(0.95) translateY(-10px); }
+          from { opacity: 0; transform: scale(0.96) translateY(-8px); }
           to { opacity: 1; transform: scale(1) translateY(0); }
         }
         @keyframes spin {
           to { transform: rotate(360deg); }
         }
         input:focus {
-          border-color: #DC2626 !important;
-          box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12) !important;
+          border-color: rgba(220, 38, 38, 0.5) !important;
+          box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1) !important;
         }
         input::placeholder {
-          color: rgba(255,255,255,0.3);
+          color: rgba(255,255,255,0.25);
         }
       `}</style>
     </>
   );
 };
 
-// Stat Card Component
-const StatCard: React.FC<{
-  icon: React.ReactNode;
-  label: string;
-  value: string | number;
-  color: string;
-}> = ({ icon, label, value, color }) => (
-  <div style={{
-    background: 'rgba(255,255,255,0.03)',
-    border: '1px solid rgba(255,255,255,0.06)',
-    borderRadius: 10,
-    padding: 14,
-  }}>
-    <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-    }}>
-      <div>
-        <p style={{
-          fontSize: 11,
-          fontWeight: 500,
-          color: 'var(--text-secondary, #9CA3AF)',
-          margin: 0,
-          textTransform: 'uppercase',
-          letterSpacing: '0.3px',
-        }}>
-          {label}
-        </p>
-        <p style={{
-          fontSize: 18,
-          fontWeight: 700,
-          color: 'var(--text-primary, #F9FAFB)',
-          margin: '4px 0 0 0',
-        }}>
-          {value}
-        </p>
-      </div>
-      <div style={{
-        width: 40,
-        height: 40,
-        background: `${color}15`,
-        borderRadius: 10,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: color,
-      }}>
-        {icon}
-      </div>
-    </div>
-  </div>
-);
-
-// Plan Card Component
-const PlanCard: React.FC<{
+// Grid Card Component
+const PlanCardGrid: React.FC<{
   plan: MembershipPackageDTO;
+  color: string;
   mode: 'management' | 'selection';
   formatPrice: (price: number) => string;
   formatDuration: (days: number) => string;
@@ -770,121 +733,156 @@ const PlanCard: React.FC<{
   onDelete: (id: number) => void;
   onToggleStatus: (plan: MembershipPackageDTO) => void;
   onSelect?: (plan: MembershipPackageDTO) => void;
-}> = ({ plan, mode, formatPrice, formatDuration, onEdit, onDelete, onToggleStatus, onSelect }) => {
-  const getPlanGradient = (name: string) => {
-    const lower = name.toLowerCase();
-    if (lower.includes('premium') || lower.includes('gold')) {
-      return 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)';
-    } else if (lower.includes('standard') || lower.includes('silver')) {
-      return 'linear-gradient(135deg, #6366F1 0%, #4F46E5 100%)';
-    } else {
-      return 'linear-gradient(135deg, #10B981 0%, #059669 100%)';
-    }
-  };
+}> = ({ plan, color, mode, formatPrice, formatDuration, onEdit, onDelete, onToggleStatus, onSelect }) => {
+  const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <div style={{
-      background: 'rgba(255,255,255,0.03)',
-      border: '1px solid rgba(255,255,255,0.08)',
-      borderRadius: 12,
-      overflow: 'hidden',
-      transition: 'all 0.2s ease',
-    }}>
-      {/* Plan Header */}
+    <div
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{
+        background: 'rgba(255,255,255,0.02)',
+        border: `1px solid ${isHovered ? `${color}40` : 'rgba(255,255,255,0.06)'}`,
+        borderRadius: 16,
+        overflow: 'hidden',
+        transition: 'all 0.25s ease',
+        transform: isHovered ? 'translateY(-2px)' : 'translateY(0)',
+        boxShadow: isHovered ? `0 8px 30px ${color}15` : 'none',
+      }}
+    >
+      {/* Color Bar */}
       <div style={{
-        background: getPlanGradient(plan.packageName),
-        padding: '16px 16px 12px',
-        position: 'relative',
-      }}>
+        height: 4,
+        background: `linear-gradient(90deg, ${color} 0%, ${color}80 100%)`,
+      }} />
+
+      {/* Header */}
+      <div style={{ padding: '20px 20px 0' }}>
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'flex-start',
+          marginBottom: 16,
         }}>
-          <h3 style={{
-            fontSize: 16,
-            fontWeight: 700,
-            color: '#fff',
-            margin: 0,
+          <div style={{
+            width: 40,
+            height: 40,
+            background: `${color}15`,
+            borderRadius: 10,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}>
-            {plan.packageName}
-          </h3>
+            <Dumbbell size={20} style={{ color }} />
+          </div>
           <span style={{
-            padding: '3px 8px',
-            background: plan.isActive ? 'rgba(16, 185, 129, 0.9)' : 'rgba(239, 68, 68, 0.9)',
-            borderRadius: 4,
-            fontSize: 10,
+            padding: '4px 10px',
+            background: plan.isActive ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)',
+            borderRadius: 6,
+            fontSize: 11,
             fontWeight: 600,
-            color: '#fff',
+            color: plan.isActive ? '#10B981' : '#EF4444',
             textTransform: 'uppercase',
+            letterSpacing: '0.3px',
           }}>
             {plan.isActive ? 'Active' : 'Inactive'}
           </span>
         </div>
+
+        <h3 style={{
+          fontSize: 17,
+          fontWeight: 700,
+          color: '#F9FAFB',
+          margin: '0 0 4px 0',
+          letterSpacing: '-0.3px',
+        }}>
+          {plan.packageName}
+        </h3>
+
         <p style={{
-          fontSize: 24,
+          fontSize: 28,
           fontWeight: 800,
-          color: '#fff',
+          color: '#F9FAFB',
           margin: '8px 0 0 0',
+          letterSpacing: '-0.5px',
         }}>
           {formatPrice(plan.price)}
+          <span style={{ fontSize: 13, fontWeight: 500, color: '#6B7280', marginLeft: 4 }}>
+            /{formatDuration(plan.durationDays)}
+          </span>
         </p>
       </div>
 
-      {/* Plan Details */}
-      <div style={{ padding: 16 }}>
+      {/* Features */}
+      <div style={{ padding: '16px 20px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}>
-            <span style={{
-              fontSize: 12,
-              color: 'var(--text-secondary, #9CA3AF)',
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{
+              width: 24,
+              height: 24,
+              background: 'rgba(16, 185, 129, 0.1)',
+              borderRadius: 6,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}>
-              Duration
-            </span>
-            <span style={{
-              fontSize: 13,
-              fontWeight: 600,
-              color: 'var(--text-primary, #F9FAFB)',
-            }}>
-              {formatDuration(plan.durationDays)}
+              <Check size={14} style={{ color: '#10B981' }} />
+            </div>
+            <span style={{ fontSize: 13, color: '#9CA3AF' }}>
+              {formatDuration(plan.durationDays)} access
             </span>
           </div>
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}>
-            <span style={{
-              fontSize: 12,
-              color: 'var(--text-secondary, #9CA3AF)',
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{
+              width: 24,
+              height: 24,
+              background: plan.includedPTSessions > 0 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(107, 114, 128, 0.1)',
+              borderRadius: 6,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}>
-              PT Sessions
-            </span>
-            <span style={{
-              fontSize: 13,
-              fontWeight: 600,
-              color: 'var(--text-primary, #F9FAFB)',
-            }}>
-              {plan.includedPTSessions}
+              <Dumbbell size={14} style={{ color: plan.includedPTSessions > 0 ? '#10B981' : '#6B7280' }} />
+            </div>
+            <span style={{ fontSize: 13, color: '#9CA3AF' }}>
+              {plan.includedPTSessions > 0 ? `${plan.includedPTSessions} PT sessions` : 'No PT sessions'}
             </span>
           </div>
         </div>
+      </div>
 
-        {/* Actions */}
-        <div style={{
-          display: 'flex',
-          gap: 8,
-          marginTop: 16,
-          paddingTop: 16,
-          borderTop: '1px solid rgba(255,255,255,0.06)',
-        }}>
-          {mode === 'selection' ? (
+      {/* Actions */}
+      <div style={{
+        padding: '16px 20px 20px',
+        borderTop: '1px solid rgba(255,255,255,0.04)',
+      }}>
+        {mode === 'selection' ? (
+          <button
+            onClick={() => onSelect?.(plan)}
+            style={{
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+              padding: '12px',
+              background: `linear-gradient(135deg, ${color} 0%, ${color}cc 100%)`,
+              border: 'none',
+              borderRadius: 10,
+              color: '#fff',
+              fontSize: 14,
+              fontWeight: 600,
+              cursor: 'pointer',
+              boxShadow: `0 4px 12px ${color}30`,
+            }}
+          >
+            <Eye size={16} />
+            Select Plan
+          </button>
+        ) : (
+          <div style={{ display: 'flex', gap: 8 }}>
             <button
-              onClick={() => onSelect?.(plan)}
+              onClick={() => onEdit(plan)}
               style={{
                 flex: 1,
                 display: 'flex',
@@ -892,78 +890,223 @@ const PlanCard: React.FC<{
                 justifyContent: 'center',
                 gap: 6,
                 padding: '10px',
-                background: 'linear-gradient(135deg, #DC2626 0%, #B91C1C 100%)',
-                border: 'none',
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.08)',
                 borderRadius: 8,
-                color: '#fff',
-                fontSize: 13,
-                fontWeight: 600,
+                color: '#9CA3AF',
+                fontSize: 12,
+                fontWeight: 500,
                 cursor: 'pointer',
+                transition: 'all 0.2s ease',
               }}
             >
-              <Eye size={14} />
-              Select Plan
+              <Edit size={14} />
+              Edit
             </button>
-          ) : (
-            <>
-              <button
-                onClick={() => onEdit(plan)}
-                style={{
-                  flex: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 4,
-                  padding: '8px',
-                  background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: 6,
-                  color: 'var(--text-secondary, #9CA3AF)',
-                  fontSize: 12,
-                  fontWeight: 500,
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                }}
-              >
-                <Edit size={13} />
-                Edit
-              </button>
-              <button
-                onClick={() => onToggleStatus(plan)}
-                style={{
-                  flex: 1,
-                  padding: '8px',
-                  background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: 6,
-                  color: 'var(--text-secondary, #9CA3AF)',
-                  fontSize: 12,
-                  fontWeight: 500,
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                }}
-              >
-                {plan.isActive ? 'Deactivate' : 'Activate'}
-              </button>
-              <button
-                onClick={() => plan.packageId !== undefined && onDelete(plan.packageId)}
-                style={{
-                  padding: '8px 10px',
-                  background: 'rgba(239, 68, 68, 0.1)',
-                  border: '1px solid rgba(239, 68, 68, 0.2)',
-                  borderRadius: 6,
-                  color: '#EF4444',
-                  fontSize: 12,
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                }}
-              >
-                <Trash2 size={13} />
-              </button>
-            </>
-          )}
+            <button
+              onClick={() => onToggleStatus(plan)}
+              style={{
+                flex: 1,
+                padding: '10px',
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: 8,
+                color: '#9CA3AF',
+                fontSize: 12,
+                fontWeight: 500,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              {plan.isActive ? 'Disable' : 'Enable'}
+            </button>
+            <button
+              onClick={() => plan.packageId !== undefined && onDelete(plan.packageId)}
+              style={{
+                padding: '10px 12px',
+                background: 'rgba(239, 68, 68, 0.08)',
+                border: '1px solid rgba(239, 68, 68, 0.15)',
+                borderRadius: 8,
+                color: '#EF4444',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              <Trash2 size={14} />
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// List Card Component
+const PlanCardList: React.FC<{
+  plan: MembershipPackageDTO;
+  color: string;
+  mode: 'management' | 'selection';
+  formatPrice: (price: number) => string;
+  formatDuration: (days: number) => string;
+  onEdit: (plan: MembershipPackageDTO) => void;
+  onDelete: (id: number) => void;
+  onToggleStatus: (plan: MembershipPackageDTO) => void;
+  onSelect?: (plan: MembershipPackageDTO) => void;
+}> = ({ plan, color, mode, formatPrice, formatDuration, onEdit, onDelete, onToggleStatus, onSelect }) => {
+  const [isHovered, setIsHovered] = useState(false);
+
+  return (
+    <div
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 16,
+        padding: '16px 20px',
+        background: 'rgba(255,255,255,0.02)',
+        border: `1px solid ${isHovered ? `${color}30` : 'rgba(255,255,255,0.06)'}`,
+        borderRadius: 12,
+        transition: 'all 0.2s ease',
+        borderLeft: `3px solid ${color}`,
+      }}
+    >
+      {/* Icon */}
+      <div style={{
+        width: 44,
+        height: 44,
+        background: `${color}12`,
+        borderRadius: 10,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexShrink: 0,
+      }}>
+        <Dumbbell size={20} style={{ color }} />
+      </div>
+
+      {/* Info */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <h3 style={{
+            fontSize: 15,
+            fontWeight: 700,
+            color: '#F9FAFB',
+            margin: 0,
+          }}>
+            {plan.packageName}
+          </h3>
+          <span style={{
+            padding: '3px 8px',
+            background: plan.isActive ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+            borderRadius: 4,
+            fontSize: 10,
+            fontWeight: 600,
+            color: plan.isActive ? '#10B981' : '#EF4444',
+            textTransform: 'uppercase',
+          }}>
+            {plan.isActive ? 'Active' : 'Inactive'}
+          </span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 6 }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: '#6B7280' }}>
+            <Clock size={12} />
+            {formatDuration(plan.durationDays)}
+          </span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: '#6B7280' }}>
+            <Dumbbell size={12} />
+            {plan.includedPTSessions} PT sessions
+          </span>
         </div>
       </div>
+
+      {/* Price */}
+      <div style={{ textAlign: 'right', marginRight: 16 }}>
+        <p style={{
+          fontSize: 20,
+          fontWeight: 800,
+          color: '#F9FAFB',
+          margin: 0,
+        }}>
+          {formatPrice(plan.price)}
+        </p>
+      </div>
+
+      {/* Actions */}
+      {mode === 'selection' ? (
+        <button
+          onClick={() => onSelect?.(plan)}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '10px 16px',
+            background: `linear-gradient(135deg, ${color} 0%, ${color}cc 100%)`,
+            border: 'none',
+            borderRadius: 8,
+            color: '#fff',
+            fontSize: 13,
+            fontWeight: 600,
+            cursor: 'pointer',
+          }}
+        >
+          Select
+        </button>
+      ) : (
+        <div style={{ display: 'flex', gap: 6 }}>
+          <button
+            onClick={() => onEdit(plan)}
+            style={{
+              padding: '8px 12px',
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: 6,
+              color: '#9CA3AF',
+              fontSize: 12,
+              fontWeight: 500,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4,
+            }}
+          >
+            <Edit size={13} />
+            Edit
+          </button>
+          <button
+            onClick={() => onToggleStatus(plan)}
+            style={{
+              padding: '8px 12px',
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: 6,
+              color: '#9CA3AF',
+              fontSize: 12,
+              fontWeight: 500,
+              cursor: 'pointer',
+            }}
+          >
+            {plan.isActive ? 'Disable' : 'Enable'}
+          </button>
+          <button
+            onClick={() => plan.packageId !== undefined && onDelete(plan.packageId)}
+            style={{
+              padding: '8px 10px',
+              background: 'rgba(239, 68, 68, 0.08)',
+              border: '1px solid rgba(239, 68, 68, 0.15)',
+              borderRadius: 6,
+              color: '#EF4444',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
+            <Trash2 size={13} />
+          </button>
+        </div>
+      )}
     </div>
   );
 };
