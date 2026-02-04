@@ -1,6 +1,18 @@
-import type { MembershipPackageDTO } from '../types/membershipPackage';
+import type { 
+  MembershipPackageDTO, 
+  MembershipPlan, 
+  PlanVariant, 
+  PlanFeature,
+  PlanCategory,
+  PlanStatus,
+  DurationUnit,
+  FeatureCategory
+} from '../types/membershipPackage';
 import { apiClient } from './api';
 
+// ==========================================
+// LEGACY ANALYTICS (for flat plans)
+// ==========================================
 export interface MembershipPlanAnalytics {
   totalPlans: number;
   activePlans: number;
@@ -17,6 +29,34 @@ export interface MembershipPlanAnalytics {
   plansCreatedThisMonth: number;
   plansCreatedLastMonth: number;
   monthOverMonthGrowth: number;
+}
+
+// ==========================================
+// TIERED PLAN API TYPES
+// ==========================================
+export interface TieredPlanStatistics {
+  totalPlans: number;
+  activePlans: number;
+  totalVariants: number;
+  activeVariants: number;
+  totalMembers: number;
+  plansByCategory: Record<PlanCategory, number>;
+  plansByStatus: Record<PlanStatus, number>;
+}
+
+export interface CreateTieredPlanRequest {
+  planName: string;
+  description?: string;
+  category: PlanCategory;
+  planColor?: string;
+  iconName?: string;
+  isRecommended?: boolean;
+  variants: Omit<PlanVariant, 'variantId' | 'durationDays'>[];
+  features: Omit<PlanFeature, 'featureId'>[];
+}
+
+export interface UpdateTieredPlanRequest extends CreateTieredPlanRequest {
+  status: PlanStatus;
 }
 
 class MembershipPlanApiService {
@@ -178,6 +218,169 @@ class MembershipPlanApiService {
       valuePerDay2,
       betterValue: valuePerDay1 < valuePerDay2 ? 'plan1' : valuePerDay2 < valuePerDay1 ? 'plan2' : 'equal'
     };
+  }
+
+  // ==========================================
+  // TIERED PLAN API METHODS
+  // ==========================================
+
+  /**
+   * Get all tiered membership plans
+   */
+  async getAllTieredPlans(): Promise<{ data: MembershipPlan[] }> {
+    return apiClient.get<MembershipPlan[]>('/admin/tiered-plans');
+  }
+
+  /**
+   * Get active tiered plans (for member assignment)
+   */
+  async getActiveTieredPlans(): Promise<{ data: MembershipPlan[] }> {
+    return apiClient.get<MembershipPlan[]>('/admin/tiered-plans/active');
+  }
+
+  /**
+   * Get a single tiered plan by ID
+   */
+  async getTieredPlanById(planId: number): Promise<{ data: MembershipPlan }> {
+    return apiClient.get<MembershipPlan>(`/admin/tiered-plans/${planId}`);
+  }
+
+  /**
+   * Get plans by category
+   */
+  async getTieredPlansByCategory(category: PlanCategory): Promise<{ data: MembershipPlan[] }> {
+    return apiClient.get<MembershipPlan[]>(`/admin/tiered-plans/category/${category}`);
+  }
+
+  /**
+   * Get tiered plan statistics
+   */
+  async getTieredPlanStatistics(): Promise<{ data: TieredPlanStatistics }> {
+    return apiClient.get<TieredPlanStatistics>('/admin/tiered-plans/statistics');
+  }
+
+  /**
+   * Create a new tiered plan
+   */
+  async createTieredPlan(data: CreateTieredPlanRequest): Promise<{ data: MembershipPlan }> {
+    return apiClient.post<MembershipPlan>('/admin/tiered-plans', data);
+  }
+
+  /**
+   * Update an existing tiered plan
+   */
+  async updateTieredPlan(planId: number, data: UpdateTieredPlanRequest): Promise<{ data: MembershipPlan }> {
+    return apiClient.put<MembershipPlan>(`/admin/tiered-plans/${planId}`, data);
+  }
+
+  /**
+   * Duplicate a tiered plan
+   */
+  async duplicateTieredPlan(planId: number): Promise<{ data: MembershipPlan }> {
+    return apiClient.post<MembershipPlan>(`/admin/tiered-plans/${planId}/duplicate`);
+  }
+
+  /**
+   * Update plan status (ACTIVE, INACTIVE, DRAFT, ARCHIVED)
+   */
+  async updateTieredPlanStatus(planId: number, status: PlanStatus): Promise<{ data: MembershipPlan }> {
+    return apiClient.patch<MembershipPlan>(`/admin/tiered-plans/${planId}/status?status=${status}`);
+  }
+
+  /**
+   * Activate a tiered plan
+   */
+  async activateTieredPlan(planId: number): Promise<{ data: MembershipPlan }> {
+    return apiClient.patch<MembershipPlan>(`/admin/tiered-plans/${planId}/activate`);
+  }
+
+  /**
+   * Deactivate a tiered plan
+   */
+  async deactivateTieredPlan(planId: number): Promise<{ data: MembershipPlan }> {
+    return apiClient.patch<MembershipPlan>(`/admin/tiered-plans/${planId}/deactivate`);
+  }
+
+  /**
+   * Archive a tiered plan
+   */
+  async archiveTieredPlan(planId: number): Promise<{ data: MembershipPlan }> {
+    return apiClient.patch<MembershipPlan>(`/admin/tiered-plans/${planId}/archive`);
+  }
+
+  /**
+   * Toggle recommended status
+   */
+  async toggleTieredPlanRecommended(planId: number): Promise<{ data: MembershipPlan }> {
+    return apiClient.patch<MembershipPlan>(`/admin/tiered-plans/${planId}/toggle-recommended`);
+  }
+
+  /**
+   * Reorder plans
+   */
+  async reorderTieredPlans(planIds: number[]): Promise<void> {
+    return apiClient.patch('/admin/tiered-plans/reorder', planIds);
+  }
+
+  /**
+   * Delete a tiered plan
+   */
+  async deleteTieredPlan(planId: number): Promise<void> {
+    return apiClient.delete(`/admin/tiered-plans/${planId}`);
+  }
+
+  // ==========================================
+  // TIERED PLAN HELPER METHODS
+  // ==========================================
+
+  /**
+   * Format variant duration for display
+   */
+  formatVariantDuration(variant: PlanVariant): string {
+    const unitLabels: Record<DurationUnit, [string, string]> = {
+      DAYS: ['Day', 'Days'],
+      WEEKS: ['Week', 'Weeks'],
+      MONTHS: ['Month', 'Months'],
+      YEARS: ['Year', 'Years'],
+    };
+    const [singular, plural] = unitLabels[variant.durationUnit];
+    return `${variant.durationValue} ${variant.durationValue === 1 ? singular : plural}`;
+  }
+
+  /**
+   * Get the starting (lowest) price from a plan's variants
+   */
+  getStartingPrice(plan: MembershipPlan): number {
+    if (!plan.variants || plan.variants.length === 0) return 0;
+    return Math.min(...plan.variants.filter(v => v.isActive).map(v => v.price));
+  }
+
+  /**
+   * Get category label
+   */
+  getCategoryLabel(category: PlanCategory): string {
+    const labels: Record<PlanCategory, string> = {
+      STANDARD: 'Standard',
+      PREMIUM: 'Premium',
+      VIP: 'VIP Elite',
+      CORPORATE: 'Corporate',
+      STUDENT: 'Student',
+      CUSTOM: 'Custom',
+    };
+    return labels[category] || category;
+  }
+
+  /**
+   * Get status badge color
+   */
+  getStatusColor(status: PlanStatus): { bg: string; text: string } {
+    const colors: Record<PlanStatus, { bg: string; text: string }> = {
+      ACTIVE: { bg: 'rgba(16, 185, 129, 0.12)', text: '#10B981' },
+      INACTIVE: { bg: 'rgba(239, 68, 68, 0.12)', text: '#EF4444' },
+      DRAFT: { bg: 'rgba(245, 158, 11, 0.12)', text: '#F59E0B' },
+      ARCHIVED: { bg: 'rgba(107, 114, 128, 0.12)', text: '#6B7280' },
+    };
+    return colors[status] || colors.INACTIVE;
   }
 }
 
