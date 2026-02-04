@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -16,6 +18,8 @@ import java.util.Set;
 @Entity
 @Table(name = "membership_plans")
 @Data
+@EqualsAndHashCode(exclude = {"variants", "features"})
+@ToString(exclude = {"variants", "features"})
 @NoArgsConstructor
 @AllArgsConstructor
 public class TieredMembershipPlan {

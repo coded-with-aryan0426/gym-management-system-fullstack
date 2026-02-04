@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 /**
  * PLAN FEATURE
@@ -13,6 +15,8 @@ import lombok.AllArgsConstructor;
 @Entity
 @Table(name = "plan_features")
 @Data
+@EqualsAndHashCode(exclude = "plan")
+@ToString(exclude = "plan")
 @NoArgsConstructor
 @AllArgsConstructor
 public class PlanFeature {

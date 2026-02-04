@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 /**
  * PLAN VARIANT
@@ -15,6 +17,8 @@ import lombok.AllArgsConstructor;
     @UniqueConstraint(columnNames = {"plan_id", "duration_value", "duration_unit"}, name = "uk_plan_variant_duration")
 })
 @Data
+@EqualsAndHashCode(exclude = "plan")
+@ToString(exclude = "plan")
 @NoArgsConstructor
 @AllArgsConstructor
 public class PlanVariant {
