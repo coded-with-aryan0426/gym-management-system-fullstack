@@ -5,8 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * TIERED MEMBERSHIP PLAN
@@ -60,12 +60,12 @@ public class TieredMembershipPlan {
     // One-to-Many: Plan has multiple duration variants
     @OneToMany(mappedBy = "plan", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @OrderBy("sortOrder ASC")
-    private List<PlanVariant> variants = new ArrayList<>();
+    private Set<PlanVariant> variants = new HashSet<>();
 
     // One-to-Many: Plan has multiple features
     @OneToMany(mappedBy = "plan", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @OrderBy("sortOrder ASC")
-    private List<PlanFeature> features = new ArrayList<>();
+    private Set<PlanFeature> features = new HashSet<>();
 
     @PrePersist
     protected void onCreate() {
