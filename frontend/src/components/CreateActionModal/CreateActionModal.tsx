@@ -5,10 +5,10 @@ import ReactDOM from "react-dom"
 import { motion, AnimatePresence } from "framer-motion"
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-hot-toast"
-import { X, ChevronLeft, ChevronDown, User, Phone, Mail, Calendar, CreditCard, Clock, Check, Sparkles, UserPlus } from "lucide-react"
+import { X, ChevronLeft, ChevronDown, User, Phone, Mail, Calendar, CreditCard, Clock, Check, Sparkles, UserPlus, Crown } from "lucide-react"
 import api from "../../services/api"
 import membershipPlanApi from "../../services/membershipPlanApi"
-import type { MembershipPackageDTO } from "../../types/membershipPackage"
+import type { MembershipPlan, PlanVariant } from "../../types/membershipPackage"
 import { useMembers } from "../../contexts/MembersContext"
 import { useTrainers } from "../../contexts/TrainerContext"
 import "./CreateActionModal.css"
@@ -22,12 +22,6 @@ interface CreateActionModalProps {
 }
 
 type ViewType = "memberForm" | "staffForm"
-
-type PlanGroup = {
-    name: string
-    plans: MembershipPackageDTO[]
-    color: string
-}
 
 // Premium color palette for plan groups
 const PLAN_COLORS = [
@@ -48,85 +42,58 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
     const [showConfirm, setShowConfirm] = useState(false)
     const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1)
 
-    // Membership plans
-    const [membershipPlans, setMembershipPlans] = useState<MembershipPackageDTO[]>([])
+    // Tiered membership plans
+    const [tieredPlans, setTieredPlans] = useState<MembershipPlan[]>([])
     const [loadingPlans, setLoadingPlans] = useState(false)
-    const [selectedPlanName, setSelectedPlanName] = useState<string>("")
-    const [isPlanOpen, setIsPlanOpen] = useState(true)
-    const [isDurationOpen, setIsDurationOpen] = useState(false)
+    const [selectedPlanId, setSelectedPlanId] = useState<number | null>(null)
+    const [selectedVariantId, setSelectedVariantId] = useState<number | null>(null)
 
     // Form state
     const [formData, setFormData] = useState({
         fullName: "",
         email: "",
         phoneNumber: "",
-        packageId: "",
         startDate: new Date().toISOString().split('T')[0],
     })
 
     const { refreshMembers } = useMembers()
     const { refreshTrainers: refreshStaff } = useTrainers()
 
-    // Fetch membership plans
+    // Selected plan and variant
+    const selectedPlan = tieredPlans.find(p => p.planId === selectedPlanId)
+    const selectedVariant = selectedPlan?.variants?.find(v => v.variantId === selectedVariantId)
+
+    // Fetch tiered membership plans
     useEffect(() => {
         if (isOpen && view === "memberForm") {
-            fetchPlans()
+            fetchTieredPlans()
         }
     }, [isOpen, view])
 
-    const fetchPlans = async () => {
+    const fetchTieredPlans = async () => {
         setLoadingPlans(true)
         try {
-            const response = await membershipPlanApi.getPlansForAssignment()
-            setMembershipPlans(response.data)
+            const response = await membershipPlanApi.getActiveTieredPlans()
+            setTieredPlans(response.data)
         } catch (err) {
-            console.error("Failed to fetch plans:", err)
+            console.error("Failed to fetch tiered plans:", err)
             toast.error("Failed to load membership plans")
         } finally {
             setLoadingPlans(false)
         }
     }
 
-    const planGroups = useMemo<PlanGroup[]>(() => {
-        const grouped = new Map<string, MembershipPackageDTO[]>()
-        membershipPlans.forEach((plan) => {
-            const name = plan.packageName?.trim() || "Plan"
-            if (!grouped.has(name)) {
-                grouped.set(name, [])
-            }
-            grouped.get(name)?.push(plan)
-        })
-
-        return Array.from(grouped.entries()).map(([name, plans], index) => ({
-            name,
-            plans: [...plans].sort((a, b) => (a.durationDays || 0) - (b.durationDays || 0)),
-            color: plans[0]?.planColor || PLAN_COLORS[index % PLAN_COLORS.length]
-        }))
-    }, [membershipPlans])
-
-    const selectedGroup = planGroups.find((group) => group.name === selectedPlanName)
-    const durationOptions = selectedGroup?.plans ?? []
-    const selectedPlan = membershipPlans.find(p => p.packageId.toString() === formData.packageId)
-
-    useEffect(() => {
-        if (!selectedPlanName) {
-            setIsDurationOpen(false)
-        }
-    }, [selectedPlanName])
-
     // Reset on open
     useEffect(() => {
         if (isOpen) {
             setView(initialView)
-            setSelectedPlanName("")
-            setIsPlanOpen(true)
-            setIsDurationOpen(false)
+            setSelectedPlanId(null)
+            setSelectedVariantId(null)
             setCurrentStep(1)
             setFormData({
                 fullName: "",
                 email: "",
                 phoneNumber: "",
-                packageId: "",
                 startDate: new Date().toISOString().split('T')[0],
             })
         }
@@ -135,9 +102,9 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
     // Update step based on form completion
     useEffect(() => {
         if (view === "memberForm") {
-            if (formData.packageId) {
+            if (selectedVariantId) {
                 setCurrentStep(3)
-            } else if (selectedPlanName) {
+            } else if (selectedPlanId) {
                 setCurrentStep(2)
             } else if (formData.fullName && formData.phoneNumber && formData.email) {
                 setCurrentStep(2)
@@ -145,7 +112,7 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
                 setCurrentStep(1)
             }
         }
-    }, [formData, selectedPlanName, view])
+    }, [formData, selectedPlanId, selectedVariantId, view])
 
     const hasUnsavedData = () => {
         return formData.fullName || formData.email || formData.phoneNumber
@@ -161,16 +128,13 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
         setFormData(prev => ({ ...prev, [name]: value }))
     }
 
-    const handlePlanNameSelect = (name: string) => {
-        setSelectedPlanName(name)
-        setFormData(prev => ({ ...prev, packageId: "" }))
-        setIsPlanOpen(false)
-        setIsDurationOpen(true)
+    const handlePlanSelect = (planId: number) => {
+        setSelectedPlanId(planId)
+        setSelectedVariantId(null)
     }
 
-    const handleDurationSelect = (plan: MembershipPackageDTO) => {
-        setFormData(prev => ({ ...prev, packageId: plan.packageId.toString() }))
-        setIsDurationOpen(false)
+    const handleVariantSelect = (variant: PlanVariant) => {
+        setSelectedVariantId(variant.variantId ?? null)
     }
 
     const handleCloseRequest = () => {
@@ -183,14 +147,12 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
 
     const discardAndClose = () => {
         setShowConfirm(false)
-        setSelectedPlanName("")
-        setIsPlanOpen(true)
-        setIsDurationOpen(false)
+        setSelectedPlanId(null)
+        setSelectedVariantId(null)
         setFormData({
             fullName: "",
             email: "",
             phoneNumber: "",
-            packageId: "",
             startDate: new Date().toISOString().split('T')[0],
         })
         onClose()

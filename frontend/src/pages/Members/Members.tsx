@@ -7,7 +7,7 @@ import { showToast } from "../../utils/showToast"
 import { useSearchParams } from "react-router-dom"
 import { Button, Badge, getStatusVariant, Avatar, DataTable, PageStatsBar, type Column } from "../../components"
 import CreateActionModal from "../../components/CreateActionModal/CreateActionModal"
-import MembershipPlanManagement from "../../components/admin/MembershipPlanManagement"
+import TieredPlanManagement from "../../components/admin/TieredPlanManagement"
 import { ActionMenuButton, SortButton } from "../../components/shared"
 import { useClickOutside } from "../../hooks"
 import EnhancedMemberActionModal from "../../components/MemberActionModal/EnhancedMemberActionModal"
@@ -849,7 +849,7 @@ const Members: React.FC = () => {
         initialView="memberForm"
       />
 
-      <MembershipPlanManagement
+      <TieredPlanManagement
         isOpen={isMembershipModalOpen}
         onClose={() => setIsMembershipModalOpen(false)}
         onSuccess={() => {
