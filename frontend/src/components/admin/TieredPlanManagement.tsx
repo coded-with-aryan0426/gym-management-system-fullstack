@@ -270,261 +270,225 @@ const TieredPlanManagement: React.FC<TieredPlanManagementProps> = ({
             border: '1px solid rgba(255,255,255,0.06)',
           }}
         >
-          {/* Header - Enhanced with search and stats */}
-          <div style={{
-            padding: '20px 28px 16px',
-            borderBottom: '1px solid rgba(255,255,255,0.06)',
-            position: 'sticky',
-            top: 0,
-            background: 'linear-gradient(180deg, #141414 0%, #121212 100%)',
-            zIndex: 10,
-          }}>
-            {/* Top Row: Title & Close */}
+          {/* Header - Compact with stats inline */}
             <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'flex-start',
-              marginBottom: 20,
+              padding: '14px 24px',
+              borderBottom: '1px solid rgba(255,255,255,0.06)',
+              position: 'sticky',
+              top: 0,
+              background: 'linear-gradient(180deg, #141414 0%, #121212 100%)',
+              zIndex: 10,
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              {/* Single Row: Title + Stats + Search + Actions */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 16,
+              }}>
+                {/* Title */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+                  <div style={{
+                    width: 36,
+                    height: 36,
+                    background: 'linear-gradient(135deg, rgba(220, 38, 38, 0.25) 0%, rgba(220, 38, 38, 0.08) 100%)',
+                    borderRadius: 10,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    border: '1px solid rgba(220, 38, 38, 0.2)',
+                  }}>
+                    <Crown size={18} style={{ color: '#DC2626' }} />
+                  </div>
+                  <div>
+                    <h2 style={{ 
+                      fontSize: 16, 
+                      fontWeight: 700, 
+                      color: '#F9FAFB', 
+                      margin: 0,
+                      letterSpacing: '-0.3px',
+                      lineHeight: 1.2,
+                    }}>
+                      Membership Tiers
+                    </h2>
+                    <p style={{
+                      fontSize: 11,
+                      color: '#6B7280',
+                      margin: 0,
+                    }}>
+                      {mode === 'selection' ? 'Select tier to assign' : 'Manage plans'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Compact Stats Pills */}
                 <div style={{
-                  width: 44,
-                  height: 44,
-                  background: 'linear-gradient(135deg, rgba(220, 38, 38, 0.25) 0%, rgba(220, 38, 38, 0.08) 100%)',
-                  borderRadius: 12,
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  border: '1px solid rgba(220, 38, 38, 0.2)',
+                  gap: 8,
+                  flexShrink: 0,
                 }}>
-                  <Crown size={22} style={{ color: '#DC2626' }} />
-                </div>
-                <div>
-                  <h2 style={{ 
-                    fontSize: 20, 
-                    fontWeight: 700, 
-                    color: '#F9FAFB', 
-                    margin: 0,
-                    letterSpacing: '-0.5px'
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    padding: '6px 10px',
+                    background: 'rgba(59, 130, 246, 0.08)',
+                    borderRadius: 6,
+                    border: '1px solid rgba(59, 130, 246, 0.12)',
                   }}>
-                    Membership Tiers
-                  </h2>
-                  <p style={{
-                    fontSize: 12,
+                    <Package size={12} style={{ color: '#3B82F6' }} />
+                    <span style={{ fontSize: 12, fontWeight: 700, color: '#F9FAFB' }}>{plans.length}</span>
+                    <span style={{ fontSize: 10, color: '#6B7280' }}>total</span>
+                  </div>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    padding: '6px 10px',
+                    background: 'rgba(16, 185, 129, 0.08)',
+                    borderRadius: 6,
+                    border: '1px solid rgba(16, 185, 129, 0.12)',
+                  }}>
+                    <Zap size={12} style={{ color: '#10B981' }} />
+                    <span style={{ fontSize: 12, fontWeight: 700, color: '#10B981' }}>{plans.filter(p => p.status === 'ACTIVE').length}</span>
+                    <span style={{ fontSize: 10, color: '#6B7280' }}>active</span>
+                  </div>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    padding: '6px 10px',
+                    background: 'rgba(245, 158, 11, 0.08)',
+                    borderRadius: 6,
+                    border: '1px solid rgba(245, 158, 11, 0.12)',
+                  }}>
+                    <Star size={12} style={{ color: '#F59E0B' }} />
+                    <span style={{ fontSize: 12, fontWeight: 700, color: '#F59E0B' }}>{plans.filter(p => p.isRecommended).length}</span>
+                    <span style={{ fontSize: 10, color: '#6B7280' }}>featured</span>
+                  </div>
+                </div>
+
+                {/* Search Input - Compact */}
+                <div style={{
+                  flex: 1,
+                  position: 'relative',
+                  maxWidth: 280,
+                }}>
+                  <Search size={14} style={{
+                    position: 'absolute',
+                    left: 10,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
                     color: '#6B7280',
-                    margin: '2px 0 0 0',
-                  }}>
-                    {mode === 'selection' ? 'Select a tier and duration to assign' : 'Premium membership packages'}
-                  </p>
+                  }} />
+                  <input
+                    type="text"
+                    placeholder="Search tiers..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '8px 10px 8px 32px',
+                      background: 'rgba(255,255,255,0.03)',
+                      border: '1px solid rgba(255,255,255,0.08)',
+                      borderRadius: 8,
+                      color: '#F9FAFB',
+                      fontSize: 12,
+                      outline: 'none',
+                      transition: 'all 0.2s ease',
+                    }}
+                  />
                 </div>
-              </div>
-              <button
-                onClick={onClose}
-                style={{
+
+                {/* View Toggle - Compact */}
+                <div style={{
+                  display: 'flex',
                   background: 'rgba(255,255,255,0.03)',
+                  borderRadius: 8,
+                  padding: 3,
                   border: '1px solid rgba(255,255,255,0.06)',
-                  color: '#6B7280',
-                  cursor: 'pointer',
-                  padding: 8,
-                  display: 'flex',
-                  borderRadius: 8,
-                  transition: 'all 0.2s ease',
-                }}
-              >
-                <X size={16} />
-              </button>
-            </div>
+                }}>
+                  <button
+                    onClick={() => setViewMode('grid')}
+                    style={{
+                      padding: '6px 10px',
+                      background: viewMode === 'grid' ? 'rgba(220, 38, 38, 0.15)' : 'transparent',
+                      border: 'none',
+                      borderRadius: 6,
+                      color: viewMode === 'grid' ? '#DC2626' : '#6B7280',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      transition: 'all 0.2s ease',
+                    }}
+                    title="Grid view"
+                  >
+                    <LayoutGrid size={14} />
+                  </button>
+                  <button
+                    onClick={() => setViewMode('list')}
+                    style={{
+                      padding: '6px 10px',
+                      background: viewMode === 'list' ? 'rgba(220, 38, 38, 0.15)' : 'transparent',
+                      border: 'none',
+                      borderRadius: 6,
+                      color: viewMode === 'list' ? '#DC2626' : '#6B7280',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      transition: 'all 0.2s ease',
+                    }}
+                    title="List view"
+                  >
+                    <List size={14} />
+                  </button>
+                </div>
 
-            {/* Stats Row */}
-            <div style={{
-              display: 'flex',
-              gap: 16,
-              marginBottom: 16,
-            }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-                padding: '10px 14px',
-                background: 'rgba(255,255,255,0.03)',
-                borderRadius: 10,
-                border: '1px solid rgba(255,255,255,0.05)',
-              }}>
-                <div style={{
-                  width: 32,
-                  height: 32,
-                  background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.05) 100%)',
-                  borderRadius: 8,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}>
-                  <Package size={16} style={{ color: '#3B82F6' }} />
-                </div>
-                <div>
-                  <p style={{ fontSize: 18, fontWeight: 700, color: '#F9FAFB', margin: 0 }}>{plans.length}</p>
-                  <p style={{ fontSize: 10, color: '#6B7280', margin: 0, textTransform: 'uppercase', letterSpacing: '0.3px' }}>Total Tiers</p>
-                </div>
-              </div>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-                padding: '10px 14px',
-                background: 'rgba(255,255,255,0.03)',
-                borderRadius: 10,
-                border: '1px solid rgba(255,255,255,0.05)',
-              }}>
-                <div style={{
-                  width: 32,
-                  height: 32,
-                  background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.05) 100%)',
-                  borderRadius: 8,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}>
-                  <Zap size={16} style={{ color: '#10B981' }} />
-                </div>
-                <div>
-                  <p style={{ fontSize: 18, fontWeight: 700, color: '#10B981', margin: 0 }}>{plans.filter(p => p.status === 'ACTIVE').length}</p>
-                  <p style={{ fontSize: 10, color: '#6B7280', margin: 0, textTransform: 'uppercase', letterSpacing: '0.3px' }}>Active</p>
-                </div>
-              </div>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-                padding: '10px 14px',
-                background: 'rgba(255,255,255,0.03)',
-                borderRadius: 10,
-                border: '1px solid rgba(255,255,255,0.05)',
-              }}>
-                <div style={{
-                  width: 32,
-                  height: 32,
-                  background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(245, 158, 11, 0.05) 100%)',
-                  borderRadius: 8,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}>
-                  <Star size={16} style={{ color: '#F59E0B' }} />
-                </div>
-                <div>
-                  <p style={{ fontSize: 18, fontWeight: 700, color: '#F59E0B', margin: 0 }}>{plans.filter(p => p.isRecommended).length}</p>
-                  <p style={{ fontSize: 10, color: '#6B7280', margin: 0, textTransform: 'uppercase', letterSpacing: '0.3px' }}>Featured</p>
-                </div>
-              </div>
-            </div>
+                {/* Create Button - Compact */}
+                {mode === 'management' && (
+                  <button
+                    onClick={() => setShowWizard(true)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      padding: '8px 14px',
+                      background: 'linear-gradient(135deg, #DC2626 0%, #B91C1C 100%)',
+                      border: 'none',
+                      borderRadius: 8,
+                      color: '#fff',
+                      fontSize: 12,
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      boxShadow: '0 4px 12px rgba(220, 38, 38, 0.3)',
+                      transition: 'all 0.2s ease',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Plus size={14} />
+                    Create Tier
+                  </button>
+                )}
 
-            {/* Search & Actions Row */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12,
-            }}>
-              {/* Search Input */}
-              <div style={{
-                flex: 1,
-                position: 'relative',
-              }}>
-                <Search size={16} style={{
-                  position: 'absolute',
-                  left: 14,
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  color: '#6B7280',
-                }} />
-                <input
-                  type="text"
-                  placeholder="Search tiers by name, category..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                {/* Close Button */}
+                <button
+                  onClick={onClose}
                   style={{
-                    width: '100%',
-                    padding: '12px 14px 12px 42px',
                     background: 'rgba(255,255,255,0.03)',
-                    border: '1px solid rgba(255,255,255,0.08)',
-                    borderRadius: 10,
-                    color: '#F9FAFB',
-                    fontSize: 13,
-                    outline: 'none',
-                    transition: 'all 0.2s ease',
-                  }}
-                />
-              </div>
-
-              {/* View Toggle */}
-              <div style={{
-                display: 'flex',
-                background: 'rgba(255,255,255,0.03)',
-                borderRadius: 10,
-                padding: 4,
-                border: '1px solid rgba(255,255,255,0.06)',
-              }}>
-                <button
-                  onClick={() => setViewMode('grid')}
-                  style={{
-                    padding: '8px 12px',
-                    background: viewMode === 'grid' ? 'rgba(220, 38, 38, 0.15)' : 'transparent',
-                    border: 'none',
-                    borderRadius: 8,
-                    color: viewMode === 'grid' ? '#DC2626' : '#6B7280',
+                    border: '1px solid rgba(255,255,255,0.06)',
+                    color: '#6B7280',
                     cursor: 'pointer',
+                    padding: 7,
                     display: 'flex',
-                    alignItems: 'center',
+                    borderRadius: 6,
                     transition: 'all 0.2s ease',
+                    flexShrink: 0,
                   }}
-                  title="Grid view"
                 >
-                  <LayoutGrid size={16} />
-                </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  style={{
-                    padding: '8px 12px',
-                    background: viewMode === 'list' ? 'rgba(220, 38, 38, 0.15)' : 'transparent',
-                    border: 'none',
-                    borderRadius: 8,
-                    color: viewMode === 'list' ? '#DC2626' : '#6B7280',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    transition: 'all 0.2s ease',
-                  }}
-                  title="List view"
-                >
-                  <List size={16} />
+                  <X size={14} />
                 </button>
               </div>
-
-              {/* Create Button */}
-              {mode === 'management' && (
-                <button
-                  onClick={() => setShowWizard(true)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    padding: '12px 18px',
-                    background: 'linear-gradient(135deg, #DC2626 0%, #B91C1C 100%)',
-                    border: 'none',
-                    borderRadius: 10,
-                    color: '#fff',
-                    fontSize: 13,
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    boxShadow: '0 4px 16px rgba(220, 38, 38, 0.35)',
-                    transition: 'all 0.2s ease',
-                  }}
-                >
-                  <Plus size={16} />
-                  Create Tier
-                </button>
-              )}
             </div>
-          </div>
 
           {/* Content */}
           <div style={{ padding: '20px 28px' }}>
