@@ -560,9 +560,6 @@
   max-height: calc(100vh - 140px);
   display: flex;
   flex-direction: column;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
   overflow: hidden;
 }
 
@@ -1118,12 +1115,6 @@
 :root.theme-light .members-tabs {
   background: #fff;
   border-color: rgba(0, 0, 0, 0.08);
-}
-
-:root.theme-light .members-table-wrapper {
-  background: #fff;
-  border-color: rgba(0, 0, 0, 0.08);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
 }
 
 :root.theme-light .members-table-wrapper .data-table__th {

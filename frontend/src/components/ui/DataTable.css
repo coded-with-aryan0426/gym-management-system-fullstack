@@ -6,6 +6,9 @@
 .data-table {
   width: 100%;
   overflow-x: auto;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
 }
 
 .data-table__table {
@@ -729,4 +732,13 @@
     overflow-x: auto;
     padding-bottom: 4px;
   }
+}
+
+/* ============================================================================
+   Light Theme
+   ============================================================================ */
+:root.theme-light .data-table {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
 }
