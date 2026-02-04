@@ -69,8 +69,8 @@
 }
 
 .data-table__row:hover .row-number {
-  background: rgba(220, 38, 38, 0.1);
-  color: #DC2626;
+  background: rgba(99, 102, 241, 0.1);
+  color: #A5B4FC;
 }
 
 /* Body */
@@ -235,14 +235,15 @@
 }
 
 .pagination__page--active {
-  background: var(--color-crimson) !important;
-  border-color: var(--color-crimson) !important;
+  background: linear-gradient(135deg, #6366F1, #4F46E5) !important;
+  border-color: #6366F1 !important;
   color: white !important;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
 }
 
 .pagination__page--active:hover {
-  background: var(--color-crimson) !important;
-  border-color: var(--color-crimson) !important;
+  background: linear-gradient(135deg, #4F46E5, #4338CA) !important;
+  border-color: #4F46E5 !important;
   color: white !important;
 }
 
@@ -281,8 +282,8 @@
 
 .pagination__size select:focus {
   outline: none;
-  border-color: var(--color-crimson);
-  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.1);
+  border-color: #6366F1;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
 }
 
 /* ============================================================================
@@ -541,9 +542,9 @@
 }
 
 .data-table__checkbox:checked {
-  background: linear-gradient(135deg, #DC2626, #B91C1C);
+  background: linear-gradient(135deg, #6366F1, #4F46E5);
   border-color: transparent;
-  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.3);
+  box-shadow: 0 2px 6px rgba(99, 102, 241, 0.3);
 }
 
 .data-table__checkbox:checked::after {
@@ -564,7 +565,7 @@
 
 .data-table__checkbox:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
 }
 
 /* Hide checkbox until hover (when enabled) */
@@ -588,16 +589,16 @@
 
 /* Selected Row State */
 .data-table__row--selected {
-  background: rgba(220, 38, 38, 0.06) !important;
+  background: rgba(99, 102, 241, 0.06) !important;
 }
 
 .data-table__row--selected:hover {
-  background: rgba(220, 38, 38, 0.1) !important;
+  background: rgba(99, 102, 241, 0.1) !important;
 }
 
 .data-table__row--selected .row-number {
-  background: rgba(220, 38, 38, 0.15);
-  color: #DC2626;
+  background: rgba(99, 102, 241, 0.15);
+  color: #A5B4FC;
 }
 
 /* Batch Action Bar Animation */

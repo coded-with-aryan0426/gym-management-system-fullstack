@@ -496,7 +496,7 @@
 .batch-bar__count {
   font-size: 14px;
   font-weight: 700;
-  color: #DC2626;
+  color: #A5B4FC;
 }
 
 .batch-bar__clear {
@@ -629,28 +629,28 @@
 }
 
 .members-table-wrapper .data-table__row:hover {
-  background: rgba(220, 38, 38, 0.03);
+  background: rgba(99, 102, 241, 0.03);
 }
 
 .members-table-wrapper .data-table__row--selected {
-  background: rgba(220, 38, 38, 0.05) !important;
-  border-left: 2px solid #DC2626;
+  background: rgba(99, 102, 241, 0.06) !important;
+  border-left: 2px solid #6366F1;
 }
 
 .members-table-wrapper .data-table__row--selected:hover {
-  background: rgba(220, 38, 38, 0.08) !important;
+  background: rgba(99, 102, 241, 0.1) !important;
 }
 
 /* Pagination Styling */
 .members-table-wrapper .data-table__pagination {
-  background: linear-gradient(180deg, rgba(220, 38, 38, 0.03) 0%, transparent 100%);
-  border-top: 1px solid rgba(220, 38, 38, 0.08);
+  background: linear-gradient(180deg, rgba(99, 102, 241, 0.03) 0%, transparent 100%);
+  border-top: 1px solid rgba(99, 102, 241, 0.08);
   padding: 6px 10px;
 }
 
 .members-table-wrapper .pagination__page--active {
-  background: linear-gradient(135deg, #DC2626, #B91C1C) !important;
-  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+  background: linear-gradient(135deg, #6366F1, #4F46E5) !important;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
 }
 
 /* ============================================
@@ -1099,9 +1099,9 @@
 }
 
 .member-card__action:hover {
-  background: rgba(220, 38, 38, 0.1);
-  border-color: rgba(220, 38, 38, 0.2);
-  color: #DC2626;
+  background: rgba(99, 102, 241, 0.1);
+  border-color: rgba(99, 102, 241, 0.2);
+  color: #A5B4FC;
 }
 
 /* ============================================
@@ -1127,16 +1127,16 @@
 }
 
 :root.theme-light .members-table-wrapper .data-table__th {
-  background: linear-gradient(180deg, rgba(220, 38, 38, 0.02) 0%, transparent 100%);
-  border-bottom-color: rgba(220, 38, 38, 0.08);
+  background: linear-gradient(180deg, rgba(99, 102, 241, 0.04) 0%, transparent 100%);
+  border-bottom-color: rgba(99, 102, 241, 0.1);
 }
 
 :root.theme-light .members-table-wrapper .data-table__row:hover {
-  background: rgba(220, 38, 38, 0.03);
+  background: rgba(99, 102, 241, 0.04);
 }
 
 :root.theme-light .members-table-wrapper .data-table__row--selected {
-  background: rgba(220, 38, 38, 0.05) !important;
+  background: rgba(99, 102, 241, 0.08) !important;
 }
 
 :root.theme-light .members-table-wrapper .row-number {
@@ -1144,7 +1144,8 @@
 }
 
 :root.theme-light .members-table-wrapper .data-table__row:hover .row-number {
-  background: rgba(220, 38, 38, 0.08);
+  background: rgba(99, 102, 241, 0.1);
+  color: #6366F1;
 }
 
 :root.theme-light .filter-dropdown {
@@ -1178,7 +1179,7 @@
 }
 
 :root.theme-light .data-table__row:hover .member-name {
-  color: #DC2626;
+  color: #6366F1;
 }
 
 /* ============================================
