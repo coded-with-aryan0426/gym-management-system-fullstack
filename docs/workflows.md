@@ -5,58 +5,48 @@
 ### 1.1 Registration Flow
 
 ```mermaid
-flowchart LR
-    subgraph Input
-        A[Start] --> B{Method}
-    end
+flowchart TB
+    A[Start] --> B{Method}
     
-    subgraph EmailPath[Email Registration]
-        B -->|Email| C[Form]
-        C --> D{Valid?}
-        D -->|No| C
-        D -->|Yes| E{Exists?}
-        E -->|Yes| C
-        E -->|No| F[Hash PWD]
-    end
+    B -->|Email| C[Fill Form]
+    B -->|Google| D[OAuth]
+    B -->|Facebook| D
     
-    subgraph OAuthPath[OAuth]
-        B -->|Google| G[Google]
-        B -->|Facebook| H[Facebook]
-        G --> I[Auth]
-        H --> I
-        I --> J{Linked?}
-        J -->|No| F
-        J -->|Yes| K[Login]
-    end
+    C --> E{Valid?}
+    E -->|No| C
+    E -->|Yes| F{Exists?}
+    F -->|Yes| C
+    F -->|No| G[Hash Password]
     
-    subgraph Finish
-        F --> L[Create User]
-        L --> M[Assign Role]
-        M --> N[Save]
-        N --> O[JWT]
-        K --> O
-        O --> P[Dashboard]
-    end
+    D --> H{Linked?}
+    H -->|Yes| I[Login]
+    H -->|No| G
+    
+    G --> J[Create User]
+    J --> K[Assign Role]
+    K --> L[Generate JWT]
+    I --> L
+    L --> M[Dashboard]
 ```
 
 ### 1.2 Login with 2FA
 
 ```mermaid
-flowchart LR
-    A[Credentials] --> B{Valid?}
+flowchart TB
+    A[Enter Credentials] --> B{Valid?}
     B -->|No| A
     B -->|Yes| C{Locked?}
-    C -->|Yes| D[Blocked]
-    C -->|No| E{2FA?}
-    E -->|No| F[JWT]
+    C -->|Yes| D[Account Blocked]
+    C -->|No| E{2FA Enabled?}
+    E -->|No| F[Generate JWT]
     E -->|Yes| G[Send OTP]
     G --> H[Enter OTP]
     H --> I{Verify}
     I -->|No| J{Retry?}
     J -->|Yes| H
-    J -->|No| K[Lock]
+    J -->|No| K[Lock Account]
     I -->|Yes| F
-    F --> L[Dashboard]
+    F --> L[Go to Dashboard]
 ```
 
 ---
@@ -66,31 +56,31 @@ flowchart LR
 ### 2.1 Purchase Flow
 
 ```mermaid
-flowchart LR
-    A[Login] --> B[Browse]
-    B --> C[Select]
-    C --> D{Member?}
-    D -->|Active| E[Upgrade]
-    D -->|No| F[Request]
-    E --> F
-    F --> G[Pending]
+flowchart TB
+    A[Login] --> B[Browse Packages]
+    B --> C[Select Package]
+    C --> D{Active Member?}
+    D -->|Yes| E[Upgrade Request]
+    D -->|No| F[New Request]
+    E --> G[Pending Approval]
+    F --> G
     G --> H[Notify Owner]
     H --> I{Decision}
-    I -->|Approve| J[Active]
-    I -->|Reject| K[Rejected]
-    J --> L[Confirm]
+    I -->|Approve| J[Activate Membership]
+    I -->|Reject| K[Send Rejection]
+    J --> L[Confirmation Email]
 ```
 
 ### 2.2 Expiry Handling
 
 ```mermaid
-flowchart LR
-    A[Scheduler] --> B[Query All]
+flowchart TB
+    A[Daily Scheduler] --> B[Query All Memberships]
     B --> C{Expired?}
     C -->|No| D[Skip]
     C -->|Yes| E[Update Status]
-    E --> F[Revoke]
-    F --> G[Notify]
+    E --> F[Revoke Access]
+    F --> G[Notify Member]
     G --> H{Grace Period?}
     H -->|Yes| I[Limited Access]
     H -->|No| J[Full Block]
@@ -103,32 +93,32 @@ flowchart LR
 ### 3.1 Trainer Assignment
 
 ```mermaid
-flowchart LR
+flowchart TB
     A[Browse Trainers] --> B[View Profile]
-    B --> C[Request]
+    B --> C[Send Request]
     C --> D[Notify Trainer]
     D --> E{Response}
-    E -->|Accept| F[Add Client]
-    F --> G[Enable Chat]
-    G --> H[Notify Member]
-    E -->|Decline| I[Suggest Others]
-    E -->|Timeout| I
+    E -->|Accept| F[Add to Client List]
+    E -->|Decline| G[Suggest Others]
+    E -->|Timeout| G
+    F --> H[Enable Chat]
+    H --> I[Notify Member]
 ```
 
 ### 3.2 Progress Tracking
 
 ```mermaid
-flowchart LR
-    A[Trainer Views] --> B[Dashboard]
-    B --> C{Action}
-    C -->|Measure| D[Metrics]
-    C -->|Note| E[Progress Note]
-    C -->|Photo| F[Upload]
-    C -->|Goal| G[Set Target]
-    D --> H[Update Chart]
-    E --> H
-    F --> H
-    G --> H
+flowchart TB
+    A[Trainer Opens Dashboard] --> B{Select Action}
+    B -->|Metrics| C[Record Measurements]
+    B -->|Notes| D[Add Progress Notes]
+    B -->|Photos| E[Upload Photos]
+    B -->|Goals| F[Set Targets]
+    C --> G[Update Chart]
+    D --> G
+    E --> G
+    F --> G
+    G --> H[Save to DB]
 ```
 
 ---
@@ -138,13 +128,13 @@ flowchart LR
 ### 4.1 Session Creation
 
 ```mermaid
-flowchart LR
-    A[Select Trainer] --> B[Calendar]
-    B --> C[Pick Slot]
+flowchart TB
+    A[Select Trainer] --> B[Open Calendar]
+    B --> C[Pick Time Slot]
     C --> D{Available?}
     D -->|No| B
-    D -->|Yes| E[Confirm]
-    E --> F[Create]
+    D -->|Yes| E[Confirm Booking]
+    E --> F[Create Session]
     F --> G[Deduct Credits]
     G --> H[Notify Both]
     H --> I[Add to Calendar]
@@ -153,17 +143,17 @@ flowchart LR
 ### 4.2 Session Lifecycle
 
 ```mermaid
-flowchart LR
+flowchart TB
     A[Created] --> B[Scheduled]
     B --> C{Action}
-    C -->|Cancel| D{Notice?}
-    D -->|24h+| E[Refund]
-    D -->|Less| F[No-Show]
+    C -->|Cancel| D{24h Notice?}
+    D -->|Yes| E[Full Refund]
+    D -->|No| F[Mark No-Show]
     C -->|Start| G[In Progress]
-    G --> H[Complete]
-    H --> I[Notes]
-    I --> J[Rate]
-    J --> K[Update Rating]
+    G --> H[Mark Complete]
+    H --> I[Add Notes]
+    I --> J[Request Rating]
+    J --> K[Update Trainer Rating]
 ```
 
 ---
@@ -173,76 +163,75 @@ flowchart LR
 ### 5.1 Conversation
 
 ```mermaid
-flowchart LR
+flowchart TB
     A[Open Chat] --> B{Exists?}
-    B -->|Yes| C[Load]
+    B -->|Yes| C[Load History]
     B -->|No| D[Select User]
     D --> E{Allowed?}
-    E -->|No| F[Error]
-    E -->|Yes| G[Create]
-    C --> H[WebSocket]
+    E -->|No| F[Show Error]
+    E -->|Yes| G[Create Conversation]
+    C --> H[Connect WebSocket]
     G --> H
-    H --> I[Chat UI]
+    H --> I[Show Chat UI]
 ```
 
-### 5.2 Message Sending
+### 5.2 Message Flow
 
 ```mermaid
-flowchart LR
-    A[Type Msg] --> B{File?}
-    B -->|Yes| C[Upload]
+flowchart TB
+    A[Type Message] --> B{Has Attachment?}
+    B -->|Yes| C[Upload File]
     C --> D[Get URL]
-    D --> E[Create Msg]
+    D --> E[Create Message]
     B -->|No| E
-    E --> F[Save DB]
-    F --> G[Broadcast]
-    G --> H[Update UI]
-    G --> I{Online?}
-    I -->|Yes| J[Show]
-    I -->|No| K[Notify]
+    E --> F[Save to DB]
+    F --> G[Broadcast via WS]
+    G --> H{Recipient Online?}
+    H -->|Yes| I[Show in Chat]
+    H -->|No| J[Send Push Notification]
 ```
 
-### 5.3 Real-time Updates
-
-**Sender Side:**
+### 5.3 Message Delivery Status
 
 ```mermaid
-flowchart LR
-    A[Send] --> B[Pending] --> C{OK?}
-    C -->|Yes| D[Done]
-    C -->|No| E[Retry] --> A
+flowchart TB
+    subgraph Sender
+        S1[Send] --> S2[Pending]
+        S2 --> S3{ACK?}
+        S3 -->|Yes| S4[Delivered]
+        S3 -->|No| S5[Retry]
+        S5 --> S1
+    end
+    
+    subgraph Server
+        V1[Receive] --> V2[Validate]
+        V2 --> V3[Persist]
+        V3 --> V4[Broadcast]
+    end
+    
+    subgraph Recipient
+        R1[WS Event] --> R2{Chat Open?}
+        R2 -->|Yes| R3[Display]
+        R2 -->|No| R4[Badge + Toast]
+    end
 ```
 
-**Server Side:**
-
-```mermaid
-flowchart LR
-    A[Receive] --> B[Validate] --> C[Save] --> D[Broadcast]
-```
-
-**Recipient Side:**
-
-```mermaid
-flowchart LR
-    A[WS Event] --> B[Parse] --> C{Open?}
-    C -->|Yes| D[Show] --> E[Read]
-    C -->|No| F[Badge] --> G[Toast]
-```
+---
 
 ## 6. Notifications
 
 ```mermaid
-flowchart LR
-    A[Event] --> B{Type}
-    B -->|Session| C[Session Notif]
-    B -->|Message| D[Msg Notif]
-    B -->|Member| E[Member Notif]
-    C --> F[Save DB]
+flowchart TB
+    A[System Event] --> B{Event Type}
+    B -->|Session| C[Session Notification]
+    B -->|Message| D[Message Notification]
+    B -->|Membership| E[Membership Notification]
+    C --> F[Save to DB]
     D --> F
     E --> F
-    F --> G{Online?}
-    G -->|Yes| H[Push WS]
-    G -->|No| I{Email?}
+    F --> G{User Online?}
+    G -->|Yes| H[Push via WebSocket]
+    G -->|No| I{Email Enabled?}
     I -->|Yes| J[Send Email]
-    I -->|No| K[Queue]
+    I -->|No| K[Queue for Later]
 ```
