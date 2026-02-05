@@ -73,7 +73,7 @@ public class UnifiedProfileController {
         boolean hasPermission = false;
 
         // Check if user is updating their own profile
-        // Note: currentUserEmail could be used for actual user ID lookup
+        // This would need to be enhanced with actual user ID lookup
         // For now, we'll allow all authenticated users
 
         // Owners and admins can update any profile

@@ -100,36 +100,39 @@ erDiagram
 
 ```mermaid
 erDiagram
-    MEMBERSHIP_PACKAGES ||--o{ MEMBERSHIPS : "used_in"
-    MEMBERSHIPS ||--o{ TRANSACTIONS : "generates"
-
     MEMBERSHIP_PACKAGES {
         bigint package_id PK
         bigint gym_id FK
-        varchar name
+        varchar package_name
         decimal price
-        int duration
-        int sessions
+        integer duration_days
+        integer pt_sessions
+        boolean is_active
     }
 
     MEMBERSHIPS {
-        bigint id PK
+        bigint membership_id PK
         bigint gym_id FK
         bigint user_id FK
-        bigint pkg_id FK
+        bigint package_id FK
         varchar status
-        date start
-        date end
+        date start_date
+        date end_date
+        timestamp created_at
     }
 
     TRANSACTIONS {
-        bigint id PK
-        bigint member_id FK
+        bigint transaction_id PK
+        bigint membership_id FK
         bigint user_id FK
         decimal amount
         varchar type
         varchar status
+        timestamp created_at
     }
+
+    MEMBERSHIP_PACKAGES ||--o{ MEMBERSHIPS : used_in
+    MEMBERSHIPS ||--o{ TRANSACTIONS : generates
 ```
 
 ---
@@ -138,42 +141,47 @@ erDiagram
 
 ```mermaid
 erDiagram
-    TRAINER_ASSIGNMENTS ||--o{ PT_SESSIONS : "schedules"
-    PT_SESSIONS ||--o| SESSION_RATINGS : "rated"
-    PT_SESSIONS ||--o{ PROGRESS_TRACKING : "tracks"
-
     TRAINER_ASSIGNMENTS {
-        bigint id PK
-        bigint trainer FK
-        bigint member FK
+        bigint assignment_id PK
+        bigint trainer_id FK
+        bigint member_id FK
         varchar status
-        timestamp date
+        timestamp assigned_at
     }
 
     PT_SESSIONS {
-        bigint id PK
-        bigint trainer FK
-        bigint member FK
-        bigint gym FK
-        timestamp date
-        int duration
+        bigint session_id PK
+        bigint trainer_id FK
+        bigint member_id FK
+        bigint gym_id FK
+        timestamp session_date
+        integer duration_min
         varchar status
+        clob progress_notes
+        clob workout_plan
     }
 
     SESSION_RATINGS {
-        bigint id PK
-        bigint session FK
-        int rating
-        text feedback
+        bigint rating_id PK
+        bigint session_id FK
+        bigint trainer_id FK
+        bigint member_id FK
+        integer rating
+        varchar feedback
     }
 
     PROGRESS_TRACKING {
-        bigint id PK
-        bigint member FK
-        date date
+        bigint progress_id PK
+        bigint member_id FK
+        bigint trainer_id FK
+        date record_date
         decimal weight
-        decimal fat
+        decimal body_fat
+        clob notes
     }
+
+    TRAINER_ASSIGNMENTS ||--o{ PT_SESSIONS : schedules
+    PT_SESSIONS ||--o| SESSION_RATINGS : rated
 ```
 
 ---

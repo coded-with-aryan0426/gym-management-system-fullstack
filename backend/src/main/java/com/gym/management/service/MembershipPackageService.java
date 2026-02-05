@@ -142,9 +142,8 @@ public class MembershipPackageService {
         Objects.requireNonNull(packageId, "Package ID must not be null");
 
         // Verify package exists before deletion
-        if (!membershipPackageRepository.existsById(packageId)) {
-            throw new IllegalArgumentException("Package not found");
-        }
+        membershipPackageRepository.findById(packageId)
+                .orElseThrow(() -> new IllegalArgumentException("Package not found"));
 
         // Check if any members are using this package
         long memberCount = membershipRepository.countByMembershipPackagePackageId(packageId);

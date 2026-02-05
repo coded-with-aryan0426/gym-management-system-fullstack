@@ -1,134 +1,123 @@
 # UML Diagrams - Gym Management System
 
-## 1. Class Diagram - Core User & Auth
+## 1. Class Diagram (Core Entities)
 
 ```mermaid
 classDiagram
     class User {
         +Long userId
         +String username
-        +String email
+        +String password
         +String fullName
+        +String email
         +String phone
         +String avatarId
+        +AuthProvider authProvider
         +Boolean twoFactorEnabled
+        +LocalDateTime createdAt
+        +String status
         +Set~Role~ roles
+        +Set~User~ trainers
+        +Set~User~ customers
     }
 
-    class Role {
-        +Long roleId
-        +String roleName
-        +Set~Permission~ permissions
-    }
-
-    class Permission {
-        +Long id
-        +String module
-        +String action
-    }
-
-    User "1" --> "*" Role : has
-    Role "*" --> "*" Permission : grants
-```
-
----
-
-## 2. Class Diagram - Gym & Membership
-
-```mermaid
-classDiagram
     class Gym {
         +Long gymId
         +String name
         +String address
         +String city
-        +User owner
+        +String phone
+        +String email
+        +SubscriptionPlan subscriptionPlan
         +Boolean isPublic
+        +String inviteCode
+        +User owner
     }
 
     class Membership {
         +Long id
         +Gym gym
         +User user
-        +Package package
-        +Status status
-        +Date start
-        +Date end
+        +MembershipPackage package
+        +MembershipStatus status
+        +LocalDate startDate
+        +LocalDate endDate
+        +isActive() boolean
     }
 
     class MembershipPackage {
-        +Long id
-        +String name
+        +Long packageId
+        +String packageName
         +Double price
-        +Integer days
-        +Integer sessions
+        +Integer durationDays
+        +Integer includedPTSessions
+        +Boolean isActive
     }
 
-    Gym "1" --> "*" Membership : has
-    Membership "*" --> "1" MembershipPackage : uses
-```
-
----
-
-## 3. Class Diagram - Training & Sessions
-
-```mermaid
-classDiagram
     class PTSession {
         +Long sessionId
         +User trainer
         +User member
-        +DateTime sessionDate
-        +Integer duration
-        +String status
-        +String notes
+        +LocalDateTime sessionDate
+        +Integer durationMinutes
+        +SessionStatus status
+        +String progressNotes
+        +String workoutPlan
+        +Boolean isRecurring
+    }
+
+    class Role {
+        +Long roleId
+        +String roleName
+    }
+
+    class Permission {
+        +Long permissionId
+        +String module
+        +RoleAction action
+        +String description
+    }
+
+    class Conversation {
+        +Long conversationId
+        +String name
+        +Boolean isGroup
+        +User createdBy
+        +Set~Message~ messages
+    }
+
+    class Message {
+        +Long messageId
+        +Conversation conversation
+        +User sender
+        +String content
+        +Boolean isEdited
+        +Boolean isDeleted
+        +LocalDateTime createdAt
     }
 
     class Equipment {
-        +Long id
+        +Long equipmentId
         +String name
         +String category
         +Integer quantity
         +String status
+        +LocalDate purchaseDate
+        +LocalDate lastMaintenance
     }
 
     class GymClass {
         +Long classId
         +String name
+        +String description
         +User instructor
         +Integer capacity
-        +DateTime startTime
-    }
-
-    PTSession "*" --> "1" User : trainer
-    PTSession "*" --> "1" User : member
-    GymClass "*" --> "1" User : instructor
-```
-
----
-
-## 4. Class Diagram - Communication
-
-```mermaid
-classDiagram
-    class Conversation {
-        +Long id
-        +String name
-        +Boolean isGroup
-        +User createdBy
-    }
-
-    class Message {
-        +Long id
-        +Conversation conversation
-        +User sender
-        +String content
-        +Boolean isEdited
-        +DateTime createdAt
+        +LocalDateTime startTime
+        +Integer durationMinutes
     }
 
     class Notification {
-        +Long id
+        +Long notificationId
         +User user
         +String title
         +String message
@@ -136,18 +125,31 @@ classDiagram
         +Boolean isRead
     }
 
-    Conversation "1" --> "*" Message : contains
+    %% Relationships
+    User "1" --> "*" Role : has
+    User "1" --> "*" User : trains
+    User "*" --> "*" User : customers
+    Gym "1" --> "1" User : owner
+    Gym "1" --> "*" Membership : memberships
+    Membership "*" --> "1" User : member
+    Membership "*" --> "1" MembershipPackage : package
+    PTSession "*" --> "1" User : trainer
+    PTSession "*" --> "1" User : member
+    Conversation "*" --> "*" User : participants
+    Conversation "1" --> "*" Message : messages
     Message "*" --> "1" User : sender
+    GymClass "*" --> "1" User : instructor
     Notification "*" --> "1" User : recipient
+    Role "*" --> "*" Permission : has
 ```
 
 ---
 
-## 5. Use Case Diagram
+## 2. Use Case Diagram
 
 ```mermaid
-flowchart TB
-    subgraph Actors
+flowchart LR
+    subgraph Users[Actors]
         M((Member))
         T((Trainer))
         O((Owner))
@@ -158,53 +160,58 @@ flowchart TB
         UC1[Register]
         UC2[Login]
         UC3[OAuth]
-        UC4[2FA]
+        UC4[Reset PWD]
+        UC5[2FA]
     end
 
-    subgraph MemberActions[Member Functions]
-        UC5[Dashboard]
-        UC6[Book Session]
-        UC7[Track Progress]
-        UC8[Membership]
-        UC9[Chat]
+    subgraph MemberUC[Member Functions]
+        UC6[Dashboard]
+        UC7[Browse Trainers]
+        UC8[Book Session]
+        UC9[Track Progress]
+        UC10[Membership]
+        UC11[Chat]
     end
 
-    subgraph TrainerActions[Trainer Functions]
-        UC10[Schedule]
-        UC11[View Members]
-        UC12[Create Plans]
-        UC13[Add Notes]
+    subgraph TrainerUC[Trainer Functions]
+        UC12[Schedule]
+        UC13[View Members]
+        UC14[Plans]
+        UC15[Notes]
+        UC16[Reports]
     end
 
-    subgraph OwnerActions[Owner Functions]
-        UC14[Settings]
-        UC15[Manage Staff]
-        UC16[Equipment]
-        UC17[Analytics]
-        UC18[Approve Members]
+    subgraph OwnerUC[Owner Functions]
+        UC17[Settings]
+        UC18[Staff]
+        UC19[Equipment]
+        UC20[Analytics]
+        UC21[Packages]
+        UC22[Approve]
     end
 
-    subgraph SystemActions[System Functions]
-        UC19[Notifications]
-        UC20[Auto-Expire]
-        UC21[Reports]
+    subgraph SysUC[System Functions]
+        UC23[Notify]
+        UC24[Payments]
+        UC25[Reports]
+        UC26[Auto-Expire]
     end
 
     M --> Auth
-    M --> MemberActions
+    M --> MemberUC
     T --> UC2
-    T --> TrainerActions
-    T --> UC9
+    T --> TrainerUC
+    T --> UC11
     O --> UC2
-    O --> OwnerActions
-    S --> SystemActions
+    O --> OwnerUC
+    S --> SysUC
 ```
 
 ---
 
-## 6. Sequence Diagrams
+## 3. Sequence Diagrams
 
-### 6.1 User Authentication Flow
+### 3.1 User Authentication Flow
 
 ```mermaid
 sequenceDiagram
@@ -212,158 +219,170 @@ sequenceDiagram
     participant F as Frontend
     participant A as AuthController
     participant S as AuthService
+    participant J as JwtProvider
     participant D as Database
 
     U->>F: Enter credentials
     F->>A: POST /api/auth/login
-    A->>S: authenticate()
+    A->>S: authenticate(username, password)
     S->>D: findByUsername()
     D-->>S: User entity
     S->>S: validatePassword()
-    alt Valid
-        S-->>A: JWT Token
-        A-->>F: 200 OK
-        F-->>U: Dashboard
-    else Invalid
-        S-->>A: 401 Error
-        A-->>F: Unauthorized
-        F-->>U: Error message
+    alt Password Valid
+        S->>J: generateToken(user)
+        J-->>S: JWT Token
+        S-->>A: AuthResponse(token, user)
+        A-->>F: 200 OK + JWT
+        F->>F: Store token in localStorage
+        F-->>U: Redirect to Dashboard
+    else Password Invalid
+        S-->>A: AuthException
+        A-->>F: 401 Unauthorized
+        F-->>U: Show Error
     end
 ```
 
-### 6.2 Membership Purchase Flow
+### 3.2 Membership Purchase Flow
 
 ```mermaid
 sequenceDiagram
     participant M as Member
     participant F as Frontend
-    participant C as Controller
-    participant S as Service
+    participant C as MembershipController
+    participant S as MembershipService
+    participant P as MembershipPackageService
     participant D as Database
 
     M->>F: Select Package
     F->>C: GET /api/packages
-    C->>S: getActivePackages()
-    S->>D: findActive()
-    D-->>S: List
-    S-->>C: PackageDTOs
-    C-->>F: Packages
-    F-->>M: Display
+    C->>P: getActivePackages()
+    P->>D: findActivePackages()
+    D-->>P: List<Package>
+    P-->>C: PackageDTOs
+    C-->>F: Available Packages
+    F-->>M: Display Packages
 
     M->>F: Confirm Purchase
     F->>C: POST /api/memberships
-    C->>S: createMembership()
-    S->>D: save()
-    S-->>C: Created
-    C-->>F: 201 Success
-    F-->>M: Confirmation
+    C->>S: createMembership(userId, packageId)
+    S->>D: save(membership)
+    D-->>S: Saved Membership
+    S-->>C: MembershipDTO
+    C-->>F: 201 Created
+    F-->>M: Success Notification
 ```
 
-### 6.3 PT Session Booking Flow
+### 3.3 PT Session Booking Flow
 
 ```mermaid
 sequenceDiagram
     participant M as Member
     participant F as Frontend
-    participant C as Controller
-    participant S as Service
+    participant C as PTSessionController
+    participant S as PTSessionService
     participant N as NotificationService
     participant D as Database
 
     M->>F: Select Trainer & Time
     F->>C: POST /api/pt-sessions
-    C->>S: bookSession()
-    S->>D: checkAvailability()
+    C->>S: bookSession(trainerId, memberId, dateTime)
+    S->>D: checkTrainerAvailability()
     D-->>S: Available
-    S->>D: save(session)
-    S->>N: notifyTrainer()
-    S-->>C: SessionDTO
+    S->>D: save(ptSession)
+    D-->>S: Saved Session
+    S->>N: notifyTrainer(session)
+    N->>D: save(notification)
+    S-->>C: PTSessionDTO
     C-->>F: 201 Created
     F-->>M: Booking Confirmed
 ```
 
 ---
 
-## 7. Activity Diagrams
+## 4. Activity Diagrams
 
-### 7.1 User Registration Process
+### 4.1 User Registration Process
 
 ```mermaid
-flowchart TB
-    A[Start] --> B{Auth Method}
-    B -->|Email| C[Enter Details]
+flowchart TD
+    A[Start] --> B{Choose Auth Method}
+    B -->|Email/Password| C[Enter Registration Details]
     B -->|OAuth| D[Select Provider]
     
-    C --> E{Valid?}
-    E -->|No| F[Show Errors] --> C
-    E -->|Yes| G{Email Exists?}
+    C --> E{Validate Input}
+    E -->|Invalid| F[Show Errors]
+    F --> C
+    E -->|Valid| G[Check Email Exists]
     
-    D --> H[Authorize]
-    H --> I{User Exists?}
-    I -->|Yes| J[Link Account]
-    I -->|No| K[Create User]
+    D --> H[Redirect to Provider]
+    H --> I[Authorize & Return]
+    I --> J{User Exists?}
+    J -->|Yes| K[Link Account]
+    J -->|No| L[Create New User]
     
-    G -->|Yes| L[Email Error] --> C
-    G -->|No| M[Hash Password]
-    M --> N[Create User]
-    N --> O[Assign Role]
+    G -->|Exists| M[Show Email Exists Error]
+    M --> C
+    G -->|Not Exists| N[Hash Password]
+    N --> O[Create User]
+    O --> P[Assign Default Role]
     
-    J --> O
-    K --> O
+    K --> P
+    L --> P
     
-    O --> P[Welcome Email]
-    P --> Q[Dashboard]
-    Q --> R[End]
+    P --> Q[Send Welcome Email]
+    Q --> R[Redirect to Dashboard]
+    R --> S[End]
 ```
 
-### 7.2 Membership Approval Workflow
+### 4.2 Membership Approval Workflow
 
 ```mermaid
-flowchart TB
-    A[New Request] --> B[Status: PENDING]
-    B --> C{Owner Decision}
+flowchart TD
+    A[New Membership Request] --> B[Status: PENDING]
+    B --> C{Owner Reviews}
     
-    C -->|Approve| D[Status: ACTIVE]
+    C -->|Approve| D[Update Status: ACTIVE]
     D --> E[Calculate End Date]
-    E --> F[Assign Benefits]
-    F --> G[Approval Email]
-    G --> H[Access Granted]
+    E --> F[Assign Package Benefits]
+    F --> G[Send Approval Email]
+    G --> H[Member Gets Access]
     
-    C -->|Reject| I[Status: REJECTED]
-    I --> J[Log Reason]
-    J --> K[Rejection Email]
-    K --> L[Notified]
+    C -->|Reject| I[Update Status: REJECTED]
+    I --> J[Log Rejection Reason]
+    J --> K[Send Rejection Email]
+    K --> L[Member Notified]
     
-    C -->|Need Info| M[Status: PENDING_INFO]
-    M --> N[Request Info]
-    N --> O[Member Responds]
+    C -->|Request Info| M[Status: PENDING_INFO]
+    M --> N[Send Info Request]
+    N --> O[Member Provides Info]
     O --> C
     
     H --> P[End]
     L --> P
 ```
 
-### 7.3 Chat Message Flow
+### 4.3 Chat Message Flow
 
 ```mermaid
-flowchart TB
-    A[Type Message] --> B[Click Send]
-    B --> C{Valid?}
-    C -->|Empty| D[Error] --> A
-    C -->|OK| E{Attachments?}
+flowchart TD
+    A[User Types Message] --> B[Click Send]
+    B --> C{Validate Content}
+    C -->|Empty| D[Show Error]
+    D --> A
+    C -->|Valid| E{Has Attachments?}
     
     E -->|Yes| F[Upload Files]
-    F --> G[Get URLs]
+    F --> G[Get File URLs]
     G --> H[Create Message]
     
     E -->|No| H
     
-    H --> I[Save to DB]
-    I --> J[Broadcast WS]
-    J --> K[Update Sender UI]
+    H --> I[Save to Database]
+    I --> J[Broadcast via WebSocket]
+    J --> K[Update UI for Sender]
     J --> L[Push to Recipients]
     L --> M[Show Notification]
-    M --> N[Update Badge]
+    M --> N[Update Unread Count]
     N --> O[End]
     K --> O
 ```
