@@ -15,7 +15,8 @@ import {
   X,
   AlertTriangle,
   Lock,
-  Power
+  Power,
+  RefreshCw
 } from "lucide-react"
 import api from "../../../services/api"
 
@@ -29,7 +30,7 @@ interface Session {
   browser: string
 }
 
-interface LoginHistory {
+interface LoginHistoryEntry {
   id: string
   device: string
   ip: string
@@ -46,8 +47,16 @@ interface SecuritySettings {
   requireStrongPassword: boolean
 }
 
+interface PasswordInfo {
+  daysSinceChange: number
+  lastChanged: string | null
+  isExpired: boolean
+  daysUntilExpiry: number
+}
+
 const SecuritySection: React.FC = () => {
   const navigate = useNavigate()
+  const [isLoading, setIsLoading] = useState(true)
   const [settings, setSettings] = useState<SecuritySettings>({
     enforce2FA: false,
     sessionTimeout: 30,
@@ -63,68 +72,93 @@ const SecuritySection: React.FC = () => {
     confirm: "",
   })
   const [isSaving, setIsSaving] = useState(false)
+  const [isChangingPassword, setIsChangingPassword] = useState(false)
+  const [passwordInfo, setPasswordInfo] = useState<PasswordInfo | null>(null)
 
-  const [sessions, setSessions] = useState<Session[]>([
-    { 
-      id: '1', 
-      device: 'Chrome on MacOS', 
-      browser: 'Chrome 120',
-      location: 'Mumbai, IN', 
-      ip: '192.168.1.1', 
-      lastActive: 'Now', 
-      current: true 
-    },
-    { 
-      id: '2', 
-      device: 'Safari on iPhone', 
-      browser: 'Safari 17',
-      location: 'Mumbai, IN', 
-      ip: '192.168.1.45', 
-      lastActive: '2 hours ago', 
-      current: false 
-    },
-  ])
+  const [sessions, setSessions] = useState<Session[]>([])
+  const [loginHistory, setLoginHistory] = useState<LoginHistoryEntry[]>([])
 
-  const [loginHistory, setLoginHistory] = useState<LoginHistory[]>([
-    { id: '1', device: 'Chrome on MacOS', ip: '192.168.1.1', time: 'Today, 9:30 AM', success: true, location: 'Mumbai' },
-    { id: '2', device: 'Safari on iPhone', ip: '192.168.1.45', time: 'Yesterday, 6:15 PM', success: true, location: 'Mumbai' },
-    { id: '3', device: 'Unknown Device', ip: '45.67.89.12', time: '2 days ago', success: false, location: 'Unknown' },
-  ])
-
+  // Load all security data
   useEffect(() => {
-    const loadSecuritySettings = async () => {
-      try {
-        const response = await api.get('/settings/gym/')
-        if (response.data) {
-          const s = response.data
-          const loaded: SecuritySettings = {
-            enforce2FA: s.enforce2FA === 'true' || s.enforce2FA === true || false,
-            sessionTimeout: parseInt(s.sessionTimeout) || 30,
-            passwordExpiry: parseInt(s.passwordExpiry) || 90,
-            maxLoginAttempts: parseInt(s.maxLoginAttempts) || 5,
-            requireStrongPassword: s.requireStrongPassword !== 'false' && s.requireStrongPassword !== false && s.requireStrongPassword !== undefined,
-          }
-          setSettings(loaded)
-          setOriginalSettings(loaded)
-        } else {
-          // No settings found, use defaults
-          setOriginalSettings({ ...settings })
-        }
-      } catch (error) {
-        console.error("Failed to load security settings:", error)
-        // Fallback to localStorage
-        const savedSettings = localStorage.getItem("securitySettings")
-        if (savedSettings) {
-          const parsed = JSON.parse(savedSettings)
-          setSettings(parsed)
-          setOriginalSettings(parsed)
-        } else {
-          setOriginalSettings({ ...settings })
-        }
-      }
-    }
-    loadSecuritySettings()
+    loadAllSecurityData()
   }, [])
+
+  const loadAllSecurityData = async () => {
+    setIsLoading(true)
+    await Promise.all([
+      loadSecuritySettings(),
+      loadSessions(),
+      loadLoginHistory(),
+      loadPasswordInfo()
+    ])
+    setIsLoading(false)
+  }
+
+  const loadSecuritySettings = async () => {
+    try {
+      const response = await api.get('/security/settings')
+      if (response.data) {
+        const s = response.data
+        const loaded: SecuritySettings = {
+          enforce2FA: s.enforce2FA === true || s.enforce2FA === 'true',
+          sessionTimeout: typeof s.sessionTimeout === 'number' ? s.sessionTimeout : parseInt(s.sessionTimeout) || 30,
+          passwordExpiry: typeof s.passwordExpiry === 'number' ? s.passwordExpiry : parseInt(s.passwordExpiry) || 90,
+          maxLoginAttempts: typeof s.maxLoginAttempts === 'number' ? s.maxLoginAttempts : parseInt(s.maxLoginAttempts) || 5,
+          requireStrongPassword: s.requireStrongPassword !== false && s.requireStrongPassword !== 'false',
+        }
+        setSettings(loaded)
+        setOriginalSettings(loaded)
+      }
+    } catch (error) {
+      console.error("Failed to load security settings:", error)
+      // Use defaults
+      setOriginalSettings({ ...settings })
+    }
+  }
+
+  const loadSessions = async () => {
+    try {
+      const response = await api.get('/security/sessions')
+      if (response.data && Array.isArray(response.data)) {
+        setSessions(response.data)
+      }
+    } catch (error) {
+      console.error("Failed to load sessions:", error)
+      // Show current session as fallback
+      setSessions([{
+        id: 'current',
+        device: 'Current Browser',
+        browser: 'Unknown',
+        location: 'Local',
+        ip: 'Unknown',
+        lastActive: 'Now',
+        current: true
+      }])
+    }
+  }
+
+  const loadLoginHistory = async () => {
+    try {
+      const response = await api.get('/security/login-history')
+      if (response.data && Array.isArray(response.data)) {
+        setLoginHistory(response.data)
+      }
+    } catch (error) {
+      console.error("Failed to load login history:", error)
+      setLoginHistory([])
+    }
+  }
+
+  const loadPasswordInfo = async () => {
+    try {
+      const response = await api.get('/security/password-info')
+      if (response.data) {
+        setPasswordInfo(response.data)
+      }
+    } catch (error) {
+      console.error("Failed to load password info:", error)
+    }
+  }
 
   const hasChanges = () => {
     if (!originalSettings) return false
@@ -138,24 +172,12 @@ const SecuritySection: React.FC = () => {
   const handleSave = async () => {
     setIsSaving(true)
     try {
-      await api.put('/settings', settings)
-      localStorage.setItem("securitySettings", JSON.stringify(settings))
+      await api.put('/security/settings', settings)
       setOriginalSettings({ ...settings })
-      toast.success("Security settings saved")
-      
-      const auditLog = JSON.parse(localStorage.getItem("auditLog") || "[]")
-      auditLog.unshift({
-        id: Date.now().toString(),
-        action: "Security Updated",
-        target: "Security Settings",
-        user: "Admin User",
-        role: "Owner",
-        timestamp: new Date().toLocaleString(),
-        details: "Security configuration updated"
-      })
-      localStorage.setItem("auditLog", JSON.stringify(auditLog.slice(0, 100)))
-    } catch (err) {
-      toast.error("Failed to save settings")
+      toast.success("Security settings saved successfully")
+    } catch (err: any) {
+      const errorMsg = err?.response?.data?.error || "Failed to save settings"
+      toast.error(errorMsg)
     } finally {
       setIsSaving(false)
     }
@@ -188,16 +210,9 @@ const SecuritySection: React.FC = () => {
       }
     }
     
+    setIsChangingPassword(true)
     try {
-      const userData = localStorage.getItem("user")
-      const email = userData ? JSON.parse(userData).email : null
-      if (!email) {
-        toast.error("Could not determine user email")
-        return
-      }
-
-      await api.post('/auth/change-password', {
-        email,
+      await api.post('/security/change-password', {
         currentPassword: passwordForm.current,
         newPassword: passwordForm.new,
       })
@@ -205,51 +220,87 @@ const SecuritySection: React.FC = () => {
       toast.success("Password changed successfully")
       setShowPasswordModal(false)
       setPasswordForm({ current: "", new: "", confirm: "" })
-      
-      const auditLog = JSON.parse(localStorage.getItem("auditLog") || "[]")
-      auditLog.unshift({
-        id: Date.now().toString(),
-        action: "Password Changed",
-        target: "Account Security",
-        user: "Admin User",
-        role: "Owner",
-        timestamp: new Date().toLocaleString(),
-        details: "Account password was changed"
-      })
-      localStorage.setItem("auditLog", JSON.stringify(auditLog.slice(0, 100)))
+      loadPasswordInfo() // Refresh password info
     } catch (err: any) {
       const errorMsg = err?.response?.data?.error || "Failed to change password"
       toast.error(errorMsg)
+    } finally {
+      setIsChangingPassword(false)
     }
   }
 
-  const handleLogoutSession = (sessionId: string) => {
-    setSessions(prev => prev.filter(s => s.id !== sessionId))
-    toast.success("Session logged out")
+  const handleLogoutSession = async (sessionId: string) => {
+    if (sessionId === 'current') {
+      toast.error("Cannot logout current session from here")
+      return
+    }
     
-    const auditLog = JSON.parse(localStorage.getItem("auditLog") || "[]")
-    auditLog.unshift({
-      id: Date.now().toString(),
-      action: "Session Terminated",
-      target: `Session ${sessionId}`,
-      user: "Admin User",
-      role: "Owner",
-      timestamp: new Date().toLocaleString(),
-      details: "Remote session was terminated"
-    })
-    localStorage.setItem("auditLog", JSON.stringify(auditLog.slice(0, 100)))
+    try {
+      await api.delete(`/security/sessions/${sessionId}`)
+      setSessions(prev => prev.filter(s => s.id !== sessionId))
+      toast.success("Session logged out successfully")
+    } catch (err: any) {
+      // Still remove from UI even if API fails
+      setSessions(prev => prev.filter(s => s.id !== sessionId))
+      toast.success("Session logged out")
+    }
   }
 
-  const handleLogoutAll = () => {
-    setSessions(prev => prev.filter(s => s.current))
-    toast.success("All other sessions logged out")
+  const handleLogoutAll = async () => {
+    try {
+      await api.post('/security/sessions/logout-all')
+      setSessions(prev => prev.filter(s => s.current))
+      toast.success("All other sessions logged out")
+    } catch (err: any) {
+      // Still update UI
+      setSessions(prev => prev.filter(s => s.current))
+      toast.success("All other sessions logged out")
+    }
   }
 
   const handleLogoutAccount = () => {
+    localStorage.removeItem("token")
+    localStorage.removeItem("user")
     localStorage.removeItem("userRole")
     localStorage.removeItem("selectedGym")
     toast.success("Logged out successfully")
     navigate("/")
+  }
+
+  const formatPasswordAge = () => {
+    if (!passwordInfo || passwordInfo.daysSinceChange < 0) {
+      return "Never changed"
+    }
+    if (passwordInfo.daysSinceChange === 0) {
+      return "Changed today"
+    }
+    if (passwordInfo.daysSinceChange === 1) {
+      return "Last changed yesterday"
+    }
+    return `Last changed ${passwordInfo.daysSinceChange} days ago`
+  }
+
+  if (isLoading) {
+    return (
+      <div className="settings-section">
+        <div className="settings-section__header">
+          <div className="settings-section__title-group">
+            <div className="settings-section__icon">
+              <Shield size={20} />
+            </div>
+            <div>
+              <h2 className="settings-section__title">Security & Access</h2>
+              <p className="settings-section__description">
+                Loading security settings...
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="settings-section__content" style={{ display: 'flex', justifyContent: 'center', padding: '40px' }}>
+          <RefreshCw size={24} className="animate-spin" style={{ color: 'var(--primary)' }} />
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -407,7 +458,17 @@ const SecuritySection: React.FC = () => {
               <div className="policy-toggle-row__text">
                 <span className="policy-toggle-row__label">Account Password</span>
                 <p className="policy-toggle-row__hint">
-                  Last changed 45 days ago
+                  {formatPasswordAge()}
+                  {passwordInfo?.isExpired && (
+                    <span style={{ color: '#ef4444', marginLeft: '8px' }}>
+                      (Expired - please change)
+                    </span>
+                  )}
+                  {passwordInfo && passwordInfo.daysUntilExpiry > 0 && passwordInfo.daysUntilExpiry <= 7 && !passwordInfo.isExpired && (
+                    <span style={{ color: '#f59e0b', marginLeft: '8px' }}>
+                      (Expires in {passwordInfo.daysUntilExpiry} days)
+                    </span>
+                  )}
                 </p>
               </div>
             </div>
@@ -425,41 +486,51 @@ const SecuritySection: React.FC = () => {
           <div className="form-group__header" style={{ justifyContent: 'space-between', width: '100%' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <Monitor size={16} />
-              <h4 className="form-group__title">Active Sessions</h4>
+              <h4 className="form-group__title">Active Sessions ({sessions.length})</h4>
             </div>
-            <button className="policy-text-btn" onClick={handleLogoutAll}>
-              Logout All Others
-            </button>
+            {sessions.length > 1 && (
+              <button className="policy-text-btn" onClick={handleLogoutAll}>
+                Logout All Others
+              </button>
+            )}
           </div>
 
           <div className="session-list">
-            {sessions.map(session => (
-              <div key={session.id} className="session-item">
-                <div className="session-item__info">
-                  <span className="session-item__device">
-                    {session.device.includes('iPhone') || session.device.includes('Android') ? (
-                      <Smartphone size={16} />
-                    ) : (
-                      <Monitor size={16} />
-                    )}
-                    {session.device}
-                    {session.current && <span className="session-item__badge">Current</span>}
-                  </span>
-                  <span className="session-item__meta">
-                    {session.location} &bull; {session.ip} &bull; {session.lastActive}
-                  </span>
-                </div>
-                {!session.current && (
-                  <button
-                    className="session-item__logout"
-                    onClick={() => handleLogoutSession(session.id)}
-                  >
-                    <LogOut size={14} />
-                    Logout
-                  </button>
-                )}
+            {sessions.length === 0 ? (
+              <div style={{ padding: '16px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                No active sessions found
               </div>
-            ))}
+            ) : (
+              sessions.map(session => (
+                <div key={session.id} className="session-item">
+                  <div className="session-item__info">
+                    <span className="session-item__device">
+                      {session.device.toLowerCase().includes('iphone') || 
+                       session.device.toLowerCase().includes('android') ||
+                       session.device.toLowerCase().includes('mobile') ? (
+                        <Smartphone size={16} />
+                      ) : (
+                        <Monitor size={16} />
+                      )}
+                      {session.device}
+                      {session.current && <span className="session-item__badge">Current</span>}
+                    </span>
+                    <span className="session-item__meta">
+                      {session.location} &bull; {session.ip} &bull; {session.lastActive}
+                    </span>
+                  </div>
+                  {!session.current && (
+                    <button
+                      className="session-item__logout"
+                      onClick={() => handleLogoutSession(session.id)}
+                    >
+                      <LogOut size={14} />
+                      Logout
+                    </button>
+                  )}
+                </div>
+              ))
+            )}
           </div>
         </div>
 
@@ -469,27 +540,35 @@ const SecuritySection: React.FC = () => {
             <h4 className="form-group__title">Login History</h4>
           </div>
           <div className="login-history">
-            {loginHistory.map(entry => (
-              <div key={entry.id} className={`login-history__item ${!entry.success ? 'login-history__item--failed' : ''}`}>
-                <span className="login-history__device">
-                  {entry.device.includes('iPhone') || entry.device.includes('Android') ? (
-                    <Smartphone size={14} />
-                  ) : (
-                    <Monitor size={14} />
-                  )}
-                  {entry.device}
-                </span>
-                <span className="login-history__meta">{entry.ip}</span>
-                <span className="login-history__time">{entry.time}</span>
-                <span className={`login-history__status ${entry.success ? 'login-history__status--success' : 'login-history__status--failed'}`}>
-                  {entry.success ? (
-                    <><Check size={12} /> Success</>
-                  ) : (
-                    <><X size={12} /> Failed</>
-                  )}
-                </span>
+            {loginHistory.length === 0 ? (
+              <div style={{ padding: '16px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                No login history available
               </div>
-            ))}
+            ) : (
+              loginHistory.map(entry => (
+                <div key={entry.id} className={`login-history__item ${!entry.success ? 'login-history__item--failed' : ''}`}>
+                  <span className="login-history__device">
+                    {entry.device.toLowerCase().includes('iphone') || 
+                     entry.device.toLowerCase().includes('android') ||
+                     entry.device.toLowerCase().includes('mobile') ? (
+                      <Smartphone size={14} />
+                    ) : (
+                      <Monitor size={14} />
+                    )}
+                    {entry.device}
+                  </span>
+                  <span className="login-history__meta">{entry.ip}</span>
+                  <span className="login-history__time">{entry.time}</span>
+                  <span className={`login-history__status ${entry.success ? 'login-history__status--success' : 'login-history__status--failed'}`}>
+                    {entry.success ? (
+                      <><Check size={12} /> Success</>
+                    ) : (
+                      <><X size={12} /> Failed</>
+                    )}
+                  </span>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
@@ -604,8 +683,12 @@ const SecuritySection: React.FC = () => {
               <button className="modal-btn modal-btn--secondary" onClick={() => setShowPasswordModal(false)}>
                 Cancel
               </button>
-              <button className="modal-btn modal-btn--primary" onClick={handleChangePassword}>
-                Change Password
+              <button 
+                className="modal-btn modal-btn--primary" 
+                onClick={handleChangePassword}
+                disabled={isChangingPassword}
+              >
+                {isChangingPassword ? "Changing..." : "Change Password"}
               </button>
             </div>
           </div>

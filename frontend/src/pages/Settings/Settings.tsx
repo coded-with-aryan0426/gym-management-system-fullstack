@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
     User,
@@ -39,7 +39,15 @@ const settingsCategories = [
 ]
 
 const Settings: React.FC = () => {
-    const [activeSection, setActiveSection] = useState('profile')
+    const [activeSection, setActiveSection] = useState(() => {
+        // Restore last active section from sessionStorage
+        return sessionStorage.getItem('settings_active_section') || 'profile'
+    })
+
+    // Persist active section to sessionStorage when it changes
+    useEffect(() => {
+        sessionStorage.setItem('settings_active_section', activeSection)
+    }, [activeSection])
 
     const renderSection = () => {
         switch (activeSection) {

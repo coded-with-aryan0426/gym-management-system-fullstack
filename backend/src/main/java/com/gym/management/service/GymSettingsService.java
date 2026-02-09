@@ -103,12 +103,24 @@ public class GymSettingsService {
     }
 
     public Map<String, String> getAllSettings() {
-        List<GymSettings> allSettings = gymSettingsRepository.findAll();
-        Map<String, String> settingsMap = new HashMap<>();
-        for (GymSettings setting : allSettings) {
-            settingsMap.put(setting.getSettingKey(), setting.getSettingValue());
+        try {
+            // Use a more specific query to avoid massive joins
+            List<GymSettings> allSettings = gymSettingsRepository.findBySettingTypeOrderByKey("GENERAL");
+            if (allSettings.isEmpty()) {
+                // If no GENERAL settings, try to get all settings using a simpler approach
+                allSettings = gymSettingsRepository.findBySettingTypeOrderByKey("OWNER_PROFILE");
+            }
+            
+            Map<String, String> settingsMap = new HashMap<>();
+            for (GymSettings setting : allSettings) {
+                settingsMap.put(setting.getSettingKey(), setting.getSettingValue());
+            }
+            return settingsMap;
+        } catch (Exception e) {
+            // Fallback: return empty map if there's any issue
+            System.err.println("Error loading settings: " + e.getMessage());
+            return new HashMap<>();
         }
-        return settingsMap;
     }
 
     public void updateAllSettings(Map<String, Object> settings) {

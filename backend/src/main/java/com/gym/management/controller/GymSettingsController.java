@@ -54,15 +54,17 @@ public class GymSettingsController {
 
         // Registration data (from User entity)
         try {
-            Optional<User> userOpt = userRepository.findById(userId);
-            if (userOpt.isPresent()) {
-                User user = userOpt.get();
-                profile.put("ownerName", user.getFullName() != null ? user.getFullName() : "");
-                profile.put("email", user.getEmail() != null ? user.getEmail() : "");
-                profile.put("phone", user.getPhone() != null ? user.getPhone() : "");
-            }
+            // Use a custom query to avoid eager loading issues
+            String ownerName = userRepository.findFullNameByUserId(userId);
+            String email = userRepository.findEmailByUserId(userId);
+            String phone = userRepository.findPhoneByUserId(userId);
+            
+            profile.put("ownerName", ownerName != null ? ownerName : "");
+            profile.put("email", email != null ? email : "");
+            profile.put("phone", phone != null ? phone : "");
         } catch (Exception e) {
-            // phone column may not exist yet — return empty values
+            System.err.println("Error loading user data: " + e.getMessage());
+            // Fallback to empty values
             profile.put("ownerName", "");
             profile.put("email", "");
             profile.put("phone", "");

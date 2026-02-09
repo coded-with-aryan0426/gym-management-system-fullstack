@@ -48,6 +48,16 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
         java.util.Optional<User> findByFacebookId(String facebookId);
 
+        // Custom queries to avoid eager loading issues
+        @Query("SELECT u.fullName FROM User u WHERE u.userId = :userId")
+        String findFullNameByUserId(@Param("userId") Long userId);
+
+        @Query("SELECT u.email FROM User u WHERE u.userId = :userId")
+        String findEmailByUserId(@Param("userId") Long userId);
+
+        @Query("SELECT u.phone FROM User u WHERE u.userId = :userId")
+        String findPhoneByUserId(@Param("userId") Long userId);
+
         java.util.Optional<User> findByPhoneNumberPersisted(String phoneNumber);
 
         // Alias for backward compatibility
