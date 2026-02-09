@@ -60,7 +60,7 @@ const MembershipPoliciesSection: React.FC = () => {
     const fetchMembershipPolicies = async () => {
         try {
             setLoading(true)
-            const response = await api.get('/api/gym-settings')
+            const response = await api.get('/api/settings')
             if (response.data) {
                 const settings = response.data
                 const membershipSettings: MembershipPolicy = {
@@ -99,7 +99,7 @@ const MembershipPoliciesSection: React.FC = () => {
     const handleSave = async () => {
         try {
             setSaving(true)
-            await api.put('/api/gym-settings', policies)
+            await api.put('/api/settings', policies)
             setOriginalPolicies(policies)
             setHasChanges(false)
             toast.success("Membership policies saved successfully")

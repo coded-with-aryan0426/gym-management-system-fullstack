@@ -269,6 +269,37 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "Password changed successfully. Please login again."));
     }
 
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody Map<String, String> request) {
+        try {
+            String email = request.get("email");
+            String currentPassword = request.get("currentPassword");
+            String newPassword = request.get("newPassword");
+
+            if (email == null || currentPassword == null || newPassword == null) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Email, current password, and new password are required"));
+            }
+
+            Optional<User> userOpt = userRepository.findByEmail(email);
+            if (userOpt.isEmpty()) {
+                return ResponseEntity.status(404).body(Map.of("error", "User not found"));
+            }
+
+            User user = userOpt.get();
+            if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+                return ResponseEntity.status(401).body(Map.of("error", "Incorrect current password"));
+            }
+
+            user.setPassword(passwordEncoder.encode(newPassword));
+            user.setPasswordChangedAt(java.time.LocalDateTime.now());
+            userRepository.save(user);
+
+            return ResponseEntity.ok(Map.of("message", "Password changed successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Failed to change password", "details", e.getMessage()));
+        }
+    }
+
     /**
      * Emergency password reset - allows resetting password for any user by email
      * This is a PUBLIC endpoint for recovery purposes.

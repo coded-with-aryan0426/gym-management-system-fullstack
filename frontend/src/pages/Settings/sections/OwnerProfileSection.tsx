@@ -15,7 +15,7 @@ import {
   AlertCircle,
   Check
 } from "lucide-react"
-import api, { gymSettingsApi } from "../../../services/api"
+import api from "../../../services/api"
 
 interface OwnerProfile {
   legalName: string
@@ -55,9 +55,6 @@ const OwnerProfileSection: React.FC = () => {
   const loadProfile = useCallback(async () => {
     setIsLoading(true)
     try {
-      const userData = localStorage.getItem("user")
-      const gymData = localStorage.getItem("activeGym")
-      
       let loaded: OwnerProfile = {
         legalName: "",
         gymName: "",
@@ -71,22 +68,44 @@ const OwnerProfileSection: React.FC = () => {
         businessType: "sole_proprietor",
       }
 
-      if (userData) {
-        const user = JSON.parse(userData)
-        loaded.legalName = user.fullName || ""
-        loaded.email = user.email || ""
-        loaded.phone = user.phone || ""
-      }
+      // Try loading from backend first
+      try {
+        const response = await api.get('/api/settings')
+        if (response.data) {
+          const s = response.data
+          loaded.legalName = s.ownerLegalName || ""
+          loaded.gymName = s.gymName || ""
+          loaded.email = s.ownerEmail || ""
+          loaded.phone = s.ownerPhone || ""
+          loaded.address = s.gymAddress || ""
+          loaded.city = s.gymCity || ""
+          loaded.state = s.gymState || ""
+          loaded.zipCode = s.gymZipCode || ""
+          loaded.taxId = s.taxId || ""
+          loaded.businessType = s.businessType || "sole_proprietor"
+        }
+      } catch {
+        // Fallback to localStorage if backend unavailable
+        const userData = localStorage.getItem("user")
+        const gymData = localStorage.getItem("activeGym")
 
-      if (gymData) {
-        const gym = JSON.parse(gymData)
-        loaded.gymName = gym.name || ""
-        loaded.address = gym.address || ""
-        loaded.city = gym.city || ""
-        loaded.state = gym.state || ""
-        loaded.zipCode = gym.zipCode || ""
-        loaded.taxId = gym.taxId || ""
-        loaded.businessType = gym.businessType || "sole_proprietor"
+        if (userData) {
+          const user = JSON.parse(userData)
+          loaded.legalName = user.fullName || ""
+          loaded.email = user.email || ""
+          loaded.phone = user.phone || ""
+        }
+
+        if (gymData) {
+          const gym = JSON.parse(gymData)
+          loaded.gymName = gym.name || ""
+          loaded.address = gym.address || ""
+          loaded.city = gym.city || ""
+          loaded.state = gym.state || ""
+          loaded.zipCode = gym.zipCode || ""
+          loaded.taxId = gym.taxId || ""
+          loaded.businessType = gym.businessType || "sole_proprietor"
+        }
       }
 
       setProfile(loaded)
@@ -163,6 +182,21 @@ const OwnerProfileSection: React.FC = () => {
 
     setIsSaving(true)
     try {
+      // Save to backend
+      await api.put('/api/settings', {
+        ownerLegalName: profile.legalName,
+        gymName: profile.gymName,
+        ownerEmail: profile.email,
+        ownerPhone: profile.phone,
+        gymAddress: profile.address,
+        gymCity: profile.city,
+        gymState: profile.state,
+        gymZipCode: profile.zipCode,
+        taxId: profile.taxId,
+        businessType: profile.businessType,
+      })
+
+      // Also update localStorage for other components that read from it
       const userData = localStorage.getItem("user")
       if (userData) {
         const user = JSON.parse(userData)

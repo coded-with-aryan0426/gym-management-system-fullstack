@@ -81,7 +81,7 @@ const RolesSection: React.FC = () => {
     const fetchPermissions = async () => {
         try {
             setLoading(true)
-            const response = await api.get('/api/gym-settings')
+            const response = await api.get('/api/settings')
             if (response.data && response.data.rolesAndPermissions) {
                 const fetched = typeof response.data.rolesAndPermissions === 'string' 
                     ? JSON.parse(response.data.rolesAndPermissions)
@@ -121,7 +121,7 @@ const RolesSection: React.FC = () => {
     const handleSave = async () => {
         try {
             setSaving(true)
-            await api.put('/api/gym-settings', { rolesAndPermissions: JSON.stringify(rolePermissions) })
+            await api.put('/api/settings', { rolesAndPermissions: JSON.stringify(rolePermissions) })
             setOriginalPermissions(JSON.parse(JSON.stringify(rolePermissions)))
             setHasChanges(false)
             toast.success("Role permissions saved successfully")

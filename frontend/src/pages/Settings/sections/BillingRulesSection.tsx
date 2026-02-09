@@ -56,7 +56,7 @@ const BillingRulesSection: React.FC = () => {
     const fetchBillingSettings = async () => {
         try {
             setLoading(true)
-            const response = await api.get('/api/gym-settings')
+            const response = await api.get('/api/settings')
             if (response.data) {
                 const fetched = response.data
                 const billingSettings: BillingSettings = {
@@ -94,7 +94,7 @@ const BillingRulesSection: React.FC = () => {
     const handleSave = async () => {
         try {
             setSaving(true)
-            await api.put('/api/gym-settings', settings)
+            await api.put('/api/settings', settings)
             setOriginalSettings(settings)
             setHasChanges(false)
             showToast("Billing settings saved successfully", "success")

@@ -15,7 +15,6 @@ import {
     Activity,
     Info
 } from "lucide-react"
-import api from "../../../services/api"
 
 interface AuditLogEntry {
     id: string
@@ -43,23 +42,36 @@ const AuditLogSection: React.FC = () => {
     const fetchAuditLogs = async () => {
         try {
             setLoading(true)
-            // Mocking audit logs for now as there's no dedicated endpoint yet
-            // In a real app: const response = await api.get('/api/audit-logs')
-            setTimeout(() => {
-                const mockLogs: AuditLogEntry[] = [
-                    { id: '1', timestamp: '2024-03-18 10:45:22', userId: 'admin', userName: 'John Doe', action: 'UPDATE', entity: 'Gym Settings', details: 'Updated Billing Rules', ipAddress: '192.168.1.1' },
-                    { id: '2', timestamp: '2024-03-18 09:30:15', userId: 'manager', userName: 'Sarah Smith', action: 'CREATE', entity: 'Member', details: 'Added Mike Johnson', ipAddress: '192.168.1.5' },
-                    { id: '3', timestamp: '2024-03-17 16:20:00', userId: 'admin', userName: 'John Doe', action: 'DELETE', entity: 'Plan', details: 'Removed Gold Package', ipAddress: '192.168.1.1' },
-                    { id: '4', timestamp: '2024-03-17 14:15:33', userId: 'staff', userName: 'Alex Brown', action: 'UPDATE', entity: 'Member', details: 'Renewed membership for Jane Doe', ipAddress: '192.168.1.12' },
-                    { id: '5', timestamp: '2024-03-17 08:00:05', userId: 'admin', userName: 'John Doe', action: 'UPDATE', entity: 'Roles', details: 'Modified Manager permissions', ipAddress: '192.168.1.1' },
-                ]
-                setLogs(mockLogs)
-                setLoading(false)
-            }, 800)
+            // Read audit logs from localStorage (populated by other settings sections)
+            const storedLogs = JSON.parse(localStorage.getItem("auditLog") || "[]")
+            
+            if (storedLogs.length > 0) {
+                const mappedLogs: AuditLogEntry[] = storedLogs.map((log: any, index: number) => ({
+                    id: log.id || String(index),
+                    timestamp: log.timestamp || new Date().toLocaleString(),
+                    userId: log.user || 'unknown',
+                    userName: log.user || 'Unknown User',
+                    action: mapAction(log.action),
+                    entity: log.target || 'System',
+                    details: log.details || log.action || '',
+                    ipAddress: log.ipAddress || '-',
+                }))
+                setLogs(mappedLogs)
+            }
         } catch (error) {
             console.error('Failed to fetch audit logs:', error)
+        } finally {
             setLoading(false)
         }
+    }
+
+    const mapAction = (action: string): 'CREATE' | 'UPDATE' | 'DELETE' | 'LOGIN' | 'LOGOUT' => {
+        const lower = (action || '').toLowerCase()
+        if (lower.includes('creat') || lower.includes('add')) return 'CREATE'
+        if (lower.includes('delet') || lower.includes('remov') || lower.includes('terminat')) return 'DELETE'
+        if (lower.includes('login') || lower.includes('logged in')) return 'LOGIN'
+        if (lower.includes('logout') || lower.includes('logged out') || lower.includes('sign out')) return 'LOGOUT'
+        return 'UPDATE'
     }
 
     const filteredLogs = logs.filter(log => {

@@ -54,7 +54,7 @@ const StaffRulesSection: React.FC = () => {
     const fetchStaffRules = async () => {
         try {
             setLoading(true)
-            const response = await api.get('/api/gym-settings')
+            const response = await api.get('/api/settings')
             if (response.data) {
                 const fetched = response.data
                 const staffRules: StaffRules = {
@@ -89,7 +89,7 @@ const StaffRulesSection: React.FC = () => {
     const handleSave = async () => {
         try {
             setSaving(true)
-            await api.put('/api/gym-settings', rules)
+            await api.put('/api/settings', rules)
             setOriginalRules(rules)
             setHasChanges(false)
             toast.success("Staff rules saved successfully")

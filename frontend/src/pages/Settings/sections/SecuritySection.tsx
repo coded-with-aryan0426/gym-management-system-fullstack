@@ -17,6 +17,7 @@ import {
   Lock,
   Power
 } from "lucide-react"
+import api from "../../../services/api"
 
 interface Session {
   id: string
@@ -91,14 +92,34 @@ const SecuritySection: React.FC = () => {
   ])
 
   useEffect(() => {
-    const savedSettings = localStorage.getItem("securitySettings")
-    if (savedSettings) {
-      const parsed = JSON.parse(savedSettings)
-      setSettings(parsed)
-      setOriginalSettings(parsed)
-    } else {
-      setOriginalSettings({ ...settings })
+    const loadSecuritySettings = async () => {
+      try {
+        const response = await api.get('/api/settings')
+        if (response.data) {
+          const s = response.data
+          const loaded: SecuritySettings = {
+            enforce2FA: s.enforce2FA === 'true' || s.enforce2FA === true,
+            sessionTimeout: parseInt(s.sessionTimeout) || 30,
+            passwordExpiry: parseInt(s.passwordExpiry) || 90,
+            maxLoginAttempts: parseInt(s.maxLoginAttempts) || 5,
+            requireStrongPassword: s.requireStrongPassword !== 'false' && s.requireStrongPassword !== false,
+          }
+          setSettings(loaded)
+          setOriginalSettings(loaded)
+        }
+      } catch {
+        // Fallback to localStorage
+        const savedSettings = localStorage.getItem("securitySettings")
+        if (savedSettings) {
+          const parsed = JSON.parse(savedSettings)
+          setSettings(parsed)
+          setOriginalSettings(parsed)
+        } else {
+          setOriginalSettings({ ...settings })
+        }
+      }
     }
+    loadSecuritySettings()
   }, [])
 
   const hasChanges = () => {
@@ -113,6 +134,7 @@ const SecuritySection: React.FC = () => {
   const handleSave = async () => {
     setIsSaving(true)
     try {
+      await api.put('/api/settings', settings)
       localStorage.setItem("securitySettings", JSON.stringify(settings))
       setOriginalSettings({ ...settings })
       toast.success("Security settings saved")
@@ -141,7 +163,7 @@ const SecuritySection: React.FC = () => {
     }
   }
 
-  const handleChangePassword = () => {
+  const handleChangePassword = async () => {
     if (passwordForm.new !== passwordForm.confirm) {
       toast.error("Passwords do not match")
       return
@@ -162,21 +184,39 @@ const SecuritySection: React.FC = () => {
       }
     }
     
-    toast.success("Password changed successfully")
-    setShowPasswordModal(false)
-    setPasswordForm({ current: "", new: "", confirm: "" })
-    
-    const auditLog = JSON.parse(localStorage.getItem("auditLog") || "[]")
-    auditLog.unshift({
-      id: Date.now().toString(),
-      action: "Password Changed",
-      target: "Account Security",
-      user: "Admin User",
-      role: "Owner",
-      timestamp: new Date().toLocaleString(),
-      details: "Account password was changed"
-    })
-    localStorage.setItem("auditLog", JSON.stringify(auditLog.slice(0, 100)))
+    try {
+      const userData = localStorage.getItem("user")
+      const email = userData ? JSON.parse(userData).email : null
+      if (!email) {
+        toast.error("Could not determine user email")
+        return
+      }
+
+      await api.post('/api/auth/change-password', {
+        email,
+        currentPassword: passwordForm.current,
+        newPassword: passwordForm.new,
+      })
+
+      toast.success("Password changed successfully")
+      setShowPasswordModal(false)
+      setPasswordForm({ current: "", new: "", confirm: "" })
+      
+      const auditLog = JSON.parse(localStorage.getItem("auditLog") || "[]")
+      auditLog.unshift({
+        id: Date.now().toString(),
+        action: "Password Changed",
+        target: "Account Security",
+        user: "Admin User",
+        role: "Owner",
+        timestamp: new Date().toLocaleString(),
+        details: "Account password was changed"
+      })
+      localStorage.setItem("auditLog", JSON.stringify(auditLog.slice(0, 100)))
+    } catch (err: any) {
+      const errorMsg = err?.response?.data?.error || "Failed to change password"
+      toast.error(errorMsg)
+    }
   }
 
   const handleLogoutSession = (sessionId: string) => {
