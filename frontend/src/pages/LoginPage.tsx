@@ -184,6 +184,7 @@ export default function LoginPage() {
                 username: data.username,
                 email: data.email,
                 fullName: data.fullName,
+                phone: data.phone,
                 role: data.staffRole || data.role || 'CUSTOMER',
                 staffRole: data.staffRole,
                 token: data.token,

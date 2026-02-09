@@ -113,11 +113,29 @@ public class GymSettingsService {
 
     public void updateAllSettings(Map<String, Object> settings) {
         for (Map.Entry<String, Object> entry : settings.entrySet()) {
-            saveSetting(entry.getKey(), entry.getValue() != null ? entry.getValue().toString() : null, "GENERAL");
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            
+            // Skip null or empty values to avoid database constraint violations
+            if (value == null || (value instanceof String && ((String) value).trim().isEmpty())) {
+                // If setting already exists, we might want to delete it or just skip
+                // For now, let's skip to avoid the constraint violation
+                continue;
+            }
+            
+            saveSetting(key, value.toString(), "GENERAL");
         }
     }
 
     private void saveSetting(String key, String value, String type) {
+        // Skip if value is null or empty to avoid database constraint violations
+        if (value == null || value.trim().isEmpty()) {
+            System.out.println("Skipping setting save for key '" + key + "': value is null or empty");
+            return;
+        }
+        
+        System.out.println("Saving setting: key='" + key + "', value='" + value + "', type='" + type + "'");
+        
         GymSettings setting = gymSettingsRepository.findBySettingKey(key)
                 .orElse(new GymSettings());
 
@@ -126,6 +144,7 @@ public class GymSettingsService {
         setting.setSettingType(type);
 
         gymSettingsRepository.save(setting);
+        System.out.println("Setting saved successfully for key: " + key);
     }
 
     private GymHoursDTO convertToGymHoursDTO(GymSettings setting) {

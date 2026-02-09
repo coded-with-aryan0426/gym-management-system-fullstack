@@ -68,45 +68,53 @@ const OwnerProfileSection: React.FC = () => {
         businessType: "sole_proprietor",
       }
 
-      // Try loading from backend first
-      try {
-        const response = await api.get('/settings')
-        if (response.data) {
-          const s = response.data
-          loaded.legalName = s.ownerLegalName || ""
-          loaded.gymName = s.gymName || ""
-          loaded.email = s.ownerEmail || ""
-          loaded.phone = s.ownerPhone || ""
-          loaded.address = s.gymAddress || ""
-          loaded.city = s.gymCity || ""
-          loaded.state = s.gymState || ""
-          loaded.zipCode = s.gymZipCode || ""
-          loaded.taxId = s.taxId || ""
-          loaded.businessType = s.businessType || "sole_proprietor"
+        // Try loading from dedicated owner-profile endpoint
+        try {
+          const response = await api.get('/settings/gym/owner-profile')
+          if (response.data) {
+            const s = response.data
+            loaded.legalName = s.ownerName || ""
+            loaded.gymName = s.gymName || ""
+            loaded.email = s.email || ""
+            loaded.phone = s.phone || ""
+            loaded.address = s.address || ""
+            loaded.city = s.city || ""
+            loaded.state = s.state || ""
+            loaded.zipCode = s.zipCode || ""
+            loaded.taxId = s.taxId || ""
+            loaded.businessType = s.businessType || "sole_proprietor"
+          }
+        } catch {
+          // Fallback to localStorage if backend unavailable
+          const userData = localStorage.getItem("user")
+          const gymData = localStorage.getItem("activeGym")
+
+          if (userData) {
+            const user = JSON.parse(userData)
+            loaded.legalName = user.fullName || ""
+            loaded.email = user.email || ""
+            loaded.phone = user.phone || ""
+          }
+
+          if (gymData) {
+            const gym = JSON.parse(gymData)
+            loaded.gymName = gym.name || ""
+            loaded.address = gym.address || ""
+            loaded.city = gym.city || ""
+            loaded.state = gym.state || ""
+          }
         }
-      } catch {
-        // Fallback to localStorage if backend unavailable
-        const userData = localStorage.getItem("user")
+
+        // Always try to load gym name from localStorage as fallback
+        // This ensures the gym name is populated even if backend doesn't have it
         const gymData = localStorage.getItem("activeGym")
-
-        if (userData) {
-          const user = JSON.parse(userData)
-          loaded.legalName = user.fullName || ""
-          loaded.email = user.email || ""
-          loaded.phone = user.phone || ""
-        }
-
-        if (gymData) {
+        if (gymData && !loaded.gymName) {
           const gym = JSON.parse(gymData)
-          loaded.gymName = gym.name || ""
-          loaded.address = gym.address || ""
-          loaded.city = gym.city || ""
-          loaded.state = gym.state || ""
-          loaded.zipCode = gym.zipCode || ""
-          loaded.taxId = gym.taxId || ""
-          loaded.businessType = gym.businessType || "sole_proprietor"
+          loaded.gymName = gym.name || loaded.gymName
+          loaded.address = loaded.address || gym.address || ""
+          loaded.city = loaded.city || gym.city || ""
+          loaded.state = loaded.state || gym.state || ""
         }
-      }
 
       setProfile(loaded)
       setOriginalProfile(loaded)
@@ -137,17 +145,62 @@ const OwnerProfileSection: React.FC = () => {
         if (!emailRegex.test(value)) return "Invalid email format"
         break
       case 'phone':
-        if (value && !/^[\d\s+\-()]{10,}$/.test(value.replace(/\s/g, ''))) {
-          return "Invalid phone number"
+        if (value && value.trim() !== '') {
+          // Remove all non-digit characters for validation
+          const digitsOnly = value.replace(/\D/g, '')
+          // Indian phone: 10 digits, or +91 followed by 10 digits (total 12 digits)
+          if (digitsOnly.length !== 10 && !(digitsOnly.length === 12 && digitsOnly.startsWith('91'))) {
+            return "Phone must be 10 digits (or +91 prefix)"
+          }
+          // Check if starts with valid digit (6-9 for Indian mobiles)
+          const mainNumber = digitsOnly.length === 12 ? digitsOnly.slice(2) : digitsOnly
+          if (!/^[6-9]/.test(mainNumber)) {
+            return "Phone must start with 6-9"
+          }
         }
         break
     }
     return ""
   }
 
+  const formatPhoneNumber = (value: string): string => {
+    // Remove all non-digit characters
+    const digits = value.replace(/\D/g, '')
+    
+    if (digits.length === 0) return ''
+    
+    // Handle +91 prefix
+    if (digits.startsWith('91') && digits.length > 2) {
+      const mainNumber = digits.slice(2)
+      if (mainNumber.length <= 5) {
+        return `+91 ${mainNumber}`
+      } else if (mainNumber.length <= 10) {
+        return `+91 ${mainNumber.slice(0, 5)} ${mainNumber.slice(5)}`
+      } else {
+        return `+91 ${mainNumber.slice(0, 5)} ${mainNumber.slice(5, 10)}`
+      }
+    }
+    
+    // Handle 10-digit Indian numbers
+    if (digits.length <= 5) {
+      return digits
+    } else if (digits.length <= 10) {
+      return `${digits.slice(0, 5)} ${digits.slice(5)}`
+    } else {
+      return `${digits.slice(0, 5)} ${digits.slice(5, 10)}`
+    }
+  }
+
   const handleInputChange = (field: keyof OwnerProfile, value: string) => {
-    setProfile(prev => ({ ...prev, [field]: value }))
-    const error = validateField(field, value)
+    let formattedValue = value
+    
+    // Apply phone formatting for phone field
+    if (field === 'phone') {
+      formattedValue = formatPhoneNumber(value)
+    }
+    
+    setProfile(prev => ({ ...prev, [field]: formattedValue }))
+    const error = validateField(field, formattedValue)
     setErrors(prev => ({ ...prev, [field]: error }))
   }
 
@@ -180,21 +233,38 @@ const OwnerProfileSection: React.FC = () => {
       return
     }
 
+    // Debug: Log profile data before sending
+    console.log("Profile data before save:", {
+      gymName: profile.gymName,
+      gymNameLength: profile.gymName?.length,
+      gymNameTrimmed: profile.gymName?.trim(),
+      isGymNameEmpty: !profile.gymName || profile.gymName.trim().length === 0
+    })
+
     setIsSaving(true)
     try {
-      // Save to backend
-      await api.put('/settings', {
-        ownerLegalName: profile.legalName,
-        gymName: profile.gymName,
-        ownerEmail: profile.email,
-        ownerPhone: profile.phone,
-        gymAddress: profile.address,
-        gymCity: profile.city,
-        gymState: profile.state,
-        gymZipCode: profile.zipCode,
-        taxId: profile.taxId,
-        businessType: profile.businessType,
-      })
+        // Prepare data for backend
+        const requestData = {
+          ownerName: profile.legalName,
+          gymName: profile.gymName,
+          email: profile.email,
+          phone: profile.phone,
+          address: profile.address,
+          city: profile.city,
+          state: profile.state,
+          zipCode: profile.zipCode,
+          taxId: profile.taxId,
+          businessType: profile.businessType,
+          // Add gym-specific fields that backend expects
+          gymPhone: profile.phone, // Backend expects gymPhone for gym phone
+          gymEmail: profile.email, // Backend expects gymEmail for gym email
+        }
+        
+        // Debug: Log the request data
+        console.log("Sending profile update request:", JSON.stringify(requestData, null, 2))
+        
+        // Save to backend via owner-profile endpoint
+        await api.put('/settings/gym/owner-profile', requestData)
 
       // Also update localStorage for other components that read from it
       const userData = localStorage.getItem("user")
@@ -206,18 +276,15 @@ const OwnerProfileSection: React.FC = () => {
         localStorage.setItem("user", JSON.stringify(user))
       }
 
-      const gymData = localStorage.getItem("activeGym")
-      if (gymData) {
-        const gym = JSON.parse(gymData)
-        gym.name = profile.gymName
-        gym.address = profile.address
-        gym.city = profile.city
-        gym.state = profile.state
-        gym.zipCode = profile.zipCode
-        gym.taxId = profile.taxId
-        gym.businessType = profile.businessType
-        localStorage.setItem("activeGym", JSON.stringify(gym))
-      }
+        const gymData = localStorage.getItem("activeGym")
+        if (gymData) {
+          const gym = JSON.parse(gymData)
+          gym.name = profile.gymName
+          gym.address = profile.address
+          gym.city = profile.city
+          gym.state = profile.state
+          localStorage.setItem("activeGym", JSON.stringify(gym))
+        }
 
       setOriginalProfile({ ...profile })
       toast.success("Profile updated successfully")
@@ -234,9 +301,28 @@ const OwnerProfileSection: React.FC = () => {
       })
       localStorage.setItem("auditLog", JSON.stringify(auditLog.slice(0, 100)))
       
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to save profile:", err)
-      toast.error("Failed to update profile")
+      
+      // Enhanced error logging for debugging
+      if (err.response) {
+        console.error("Error response:", err.response)
+        console.error("Error status:", err.response.status)
+        console.error("Error data:", err.response.data)
+        console.error("Error headers:", err.response.headers)
+        
+        // Show more specific error message
+        const errorMessage = err.response.data?.message || 
+                           err.response.data?.error || 
+                           `Server error: ${err.response.status} ${err.response.statusText}`
+        toast.error(`Failed to update profile: ${errorMessage}`)
+      } else if (err.request) {
+        console.error("Error request:", err.request)
+        toast.error("Failed to update profile: No response from server")
+      } else {
+        console.error("Error message:", err.message)
+        toast.error(`Failed to update profile: ${err.message}`)
+      }
     } finally {
       setIsSaving(false)
     }
@@ -439,12 +525,19 @@ const OwnerProfileSection: React.FC = () => {
                 className={`dense-input ${errors.phone ? 'dense-input--error' : ''}`}
                 value={profile.phone}
                 onChange={(e) => handleInputChange('phone', e.target.value)}
-                placeholder="+91 98765 43210"
+                placeholder="98765 43210 or +91 98765 43210"
+                maxLength={16}
               />
               {errors.phone && (
                 <div className="field-error">
                   <AlertCircle size={12} />
                   {errors.phone}
+                </div>
+              )}
+              {!errors.phone && profile.phone && (
+                <div className="field-hint">
+                  <Check size={12} />
+                  Valid phone number
                 </div>
               )}
             </div>

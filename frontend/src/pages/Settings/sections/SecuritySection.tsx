@@ -94,20 +94,24 @@ const SecuritySection: React.FC = () => {
   useEffect(() => {
     const loadSecuritySettings = async () => {
       try {
-        const response = await api.get('/settings')
+        const response = await api.get('/settings/gym/')
         if (response.data) {
           const s = response.data
           const loaded: SecuritySettings = {
-            enforce2FA: s.enforce2FA === 'true' || s.enforce2FA === true,
+            enforce2FA: s.enforce2FA === 'true' || s.enforce2FA === true || false,
             sessionTimeout: parseInt(s.sessionTimeout) || 30,
             passwordExpiry: parseInt(s.passwordExpiry) || 90,
             maxLoginAttempts: parseInt(s.maxLoginAttempts) || 5,
-            requireStrongPassword: s.requireStrongPassword !== 'false' && s.requireStrongPassword !== false,
+            requireStrongPassword: s.requireStrongPassword !== 'false' && s.requireStrongPassword !== false && s.requireStrongPassword !== undefined,
           }
           setSettings(loaded)
           setOriginalSettings(loaded)
+        } else {
+          // No settings found, use defaults
+          setOriginalSettings({ ...settings })
         }
-      } catch {
+      } catch (error) {
+        console.error("Failed to load security settings:", error)
         // Fallback to localStorage
         const savedSettings = localStorage.getItem("securitySettings")
         if (savedSettings) {

@@ -88,10 +88,17 @@ public class AuthController {
             user.setRoles(new HashSet<>(Collections.singletonList(ownerRole)));
         }
 
-        userRepository.save(user);
+        user = userRepository.save(user);
 
-        // Auto-login (generate token) or redirect?
-        // Let's return success and let them login
+        // Create gym record from registration data
+        if (request.getGymName() != null && !request.getGymName().trim().isEmpty()) {
+            Gym gym = new Gym();
+            gym.setName(request.getGymName().trim());
+            gym.setOwner(user);
+            gym.setCreatedBy(user.getUserId());
+            gymRepository.save(gym);
+        }
+
         return ResponseEntity.ok(Map.of("message", "Registration successful. Please login."));
     }
 
@@ -184,6 +191,7 @@ public class AuthController {
         response.setUsername(user.getUsername());
         response.setFullName(user.getFullName());
         response.setEmail(user.getEmail());
+        response.setPhone(user.getPhone());
         response.setContext("STAFF");
         response.setStaffRole(userRole);
         response.setHasStaffAccess(true);
@@ -191,7 +199,16 @@ public class AuthController {
         response.setIsFirstLogin(false);
         response.setOtpSent(false); // No OTP sent
 
-        String token = tokenProvider.generateTokenFromUser(user, "STAFF", null, userRole, null, null, null, null);
+        // Include gym data for OWNER
+        if ("OWNER".equals(userRole)) {
+            gymRepository.findFirstByOwnerUserIdOrderByCreatedAtDesc(user.getUserId())
+                .ifPresent(gym -> {
+                    response.setActiveGymId(gym.getGymId());
+                    response.setActiveGymName(gym.getName());
+                });
+        }
+
+        String token = tokenProvider.generateTokenFromUser(user, "STAFF", response.getActiveGymId(), userRole, null, null, null, null);
         response.setToken(token);
 
         return ResponseEntity.ok(response);
@@ -232,13 +249,23 @@ public class AuthController {
         response.setUsername(user.getUsername());
         response.setFullName(user.getFullName());
         response.setEmail(user.getEmail());
+        response.setPhone(user.getPhone());
         response.setContext("STAFF");
         response.setStaffRole(userRole);
         response.setHasStaffAccess(true);
         response.setHasMemberAccess(true);
         response.setIsFirstLogin(Boolean.TRUE.equals(user.getIsFirstLogin()));
 
-        String token = tokenProvider.generateTokenFromUser(user, "STAFF", null, userRole, null, null, null, null);
+        // Include gym data for OWNER
+        if ("OWNER".equals(userRole)) {
+            gymRepository.findFirstByOwnerUserIdOrderByCreatedAtDesc(user.getUserId())
+                .ifPresent(gym -> {
+                    response.setActiveGymId(gym.getGymId());
+                    response.setActiveGymName(gym.getName());
+                });
+        }
+
+        String token = tokenProvider.generateTokenFromUser(user, "STAFF", response.getActiveGymId(), userRole, null, null, null, null);
         response.setToken(token);
 
         return ResponseEntity.ok(response);

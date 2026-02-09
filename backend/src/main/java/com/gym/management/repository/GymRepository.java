@@ -17,4 +17,6 @@ public interface GymRepository extends JpaRepository<Gym, Long> {
     List<Gym> findByNameContainingIgnoreCase(String name);
     
     boolean existsByInviteCode(String inviteCode);
+
+    Optional<Gym> findFirstByOwnerUserIdOrderByCreatedAtDesc(Long userId);
 }

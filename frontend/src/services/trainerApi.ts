@@ -396,7 +396,7 @@ export const trainerApi = {
     },
 
     async createPTSession(data: CreateSessionRequest): Promise<TrainerSession> {
-        const response = await apiClient.post('/api/pt-sessions', {
+        const response = await apiClient.post('/pt-sessions', {
             trainerId: (await trainerApi.getProfile()).userId, // Dynamically get ID or trust backend to infer from context if enabled
             ...data
         });
