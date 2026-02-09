@@ -70,7 +70,7 @@ const OwnerProfileSection: React.FC = () => {
 
       // Try loading from backend first
       try {
-        const response = await api.get('/api/settings')
+        const response = await api.get('/settings')
         if (response.data) {
           const s = response.data
           loaded.legalName = s.ownerLegalName || ""
@@ -183,7 +183,7 @@ const OwnerProfileSection: React.FC = () => {
     setIsSaving(true)
     try {
       // Save to backend
-      await api.put('/api/settings', {
+      await api.put('/settings', {
         ownerLegalName: profile.legalName,
         gymName: profile.gymName,
         ownerEmail: profile.email,

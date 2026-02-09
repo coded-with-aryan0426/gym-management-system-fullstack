@@ -60,7 +60,7 @@ const NotificationsSection: React.FC = () => {
     const fetchNotificationSettings = async () => {
         try {
             setLoading(true)
-            const response = await api.get('/api/settings')
+            const response = await api.get('/settings')
             if (response.data) {
                 const fetched = response.data
                 const notificationSettings: NotificationSettings = {
@@ -101,7 +101,7 @@ const NotificationsSection: React.FC = () => {
     const handleSave = async () => {
         try {
             setSaving(true)
-            await api.put('/api/settings', settings)
+            await api.put('/settings', settings)
             setOriginalSettings(settings)
             setHasChanges(false)
             toast.success("Notification settings saved successfully")

@@ -97,6 +97,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/dashboard/**").hasAnyRole("OWNER", "ADMIN")
                         .requestMatchers("/api/stats/**").hasAnyRole("OWNER", "ADMIN")
                         .requestMatchers("/api/settings/**").hasAnyRole("OWNER", "ADMIN")
+                        .requestMatchers("/api/audit-logs/**").hasAnyRole("OWNER", "ADMIN")
                         .requestMatchers("/api/staff/**").hasAnyRole("OWNER", "ADMIN")
                         .requestMatchers("/api/finance/**").hasAnyRole("OWNER", "ADMIN")
                         .requestMatchers("/api/reports/**").hasAnyRole("OWNER", "ADMIN")

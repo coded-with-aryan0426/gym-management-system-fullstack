@@ -94,7 +94,7 @@ const SecuritySection: React.FC = () => {
   useEffect(() => {
     const loadSecuritySettings = async () => {
       try {
-        const response = await api.get('/api/settings')
+        const response = await api.get('/settings')
         if (response.data) {
           const s = response.data
           const loaded: SecuritySettings = {
@@ -134,7 +134,7 @@ const SecuritySection: React.FC = () => {
   const handleSave = async () => {
     setIsSaving(true)
     try {
-      await api.put('/api/settings', settings)
+      await api.put('/settings', settings)
       localStorage.setItem("securitySettings", JSON.stringify(settings))
       setOriginalSettings({ ...settings })
       toast.success("Security settings saved")
@@ -192,7 +192,7 @@ const SecuritySection: React.FC = () => {
         return
       }
 
-      await api.post('/api/auth/change-password', {
+      await api.post('/auth/change-password', {
         email,
         currentPassword: passwordForm.current,
         newPassword: passwordForm.new,

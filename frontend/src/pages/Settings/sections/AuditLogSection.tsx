@@ -15,6 +15,7 @@ import {
     Activity,
     Info
 } from "lucide-react"
+import api from "../../../services/api"
 
 interface AuditLogEntry {
     id: string
@@ -25,6 +26,18 @@ interface AuditLogEntry {
     entity: string
     details: string
     ipAddress: string
+}
+
+interface BackendAuditLog {
+    id: number
+    action: string
+    target: string
+    userName: string
+    userRole: string
+    details: string
+    ipAddress: string
+    timestamp: string
+    userId: number | null
 }
 
 const AuditLogSection: React.FC = () => {
@@ -42,7 +55,29 @@ const AuditLogSection: React.FC = () => {
     const fetchAuditLogs = async () => {
         try {
             setLoading(true)
-            // Read audit logs from localStorage (populated by other settings sections)
+            
+            // Try to fetch from backend API first
+            try {
+                const response = await api.get('/audit-logs')
+                if (response.data && response.data.length > 0) {
+                    const mappedLogs: AuditLogEntry[] = response.data.map((log: BackendAuditLog) => ({
+                        id: String(log.id),
+                        timestamp: log.timestamp ? new Date(log.timestamp).toLocaleString() : new Date().toLocaleString(),
+                        userId: log.userId ? String(log.userId) : 'unknown',
+                        userName: log.userName || 'Unknown User',
+                        action: mapAction(log.action),
+                        entity: log.target || 'System',
+                        details: log.details || log.action || '',
+                        ipAddress: log.ipAddress || '-',
+                    }))
+                    setLogs(mappedLogs)
+                    return
+                }
+            } catch (apiError) {
+                console.log('Backend audit logs not available, falling back to localStorage')
+            }
+            
+            // Fallback to localStorage
             const storedLogs = JSON.parse(localStorage.getItem("auditLog") || "[]")
             
             if (storedLogs.length > 0) {
@@ -57,11 +92,35 @@ const AuditLogSection: React.FC = () => {
                     ipAddress: log.ipAddress || '-',
                 }))
                 setLogs(mappedLogs)
+                
+                // Sync localStorage logs to backend (optional - background sync)
+                syncLogsToBackend(storedLogs)
             }
         } catch (error) {
             console.error('Failed to fetch audit logs:', error)
         } finally {
             setLoading(false)
+        }
+    }
+    
+    const syncLogsToBackend = async (localLogs: any[]) => {
+        try {
+            const logsToSync = localLogs.map((log: any) => ({
+                action: log.action || 'UPDATE',
+                target: log.target || 'System',
+                userName: log.user || 'Unknown',
+                userRole: log.role || 'OWNER',
+                details: log.details || log.action || '',
+                ipAddress: log.ipAddress || null,
+                timestamp: log.timestamp ? new Date(log.timestamp).toISOString() : new Date().toISOString()
+            }))
+            
+            await api.post('/audit-logs/batch', logsToSync)
+            // Clear localStorage after successful sync
+            localStorage.removeItem("auditLog")
+        } catch (error) {
+            // Silently fail - logs remain in localStorage for next sync attempt
+            console.log('Background sync to backend failed, logs kept in localStorage')
         }
     }
 
