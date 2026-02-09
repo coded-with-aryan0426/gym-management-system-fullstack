@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FileText, IndianRupee, AlertCircle, Activity, ClipboardCheck, Wrench, Shield, User, CheckCircle } from 'lucide-react';
+import { FileText, IndianRupee, AlertCircle, Activity, ClipboardCheck, Wrench, Shield, User, CheckCircle, ArrowRight, Zap } from 'lucide-react';
 import { formatCurrency, formatDate } from '../../../../utils/formatters';
 import type { EquipmentMaintenance, MaintenanceType, MaintenanceStatus } from '../../../../types/equipmentMaintenance';
 
@@ -20,14 +20,14 @@ export const MaintenanceOverview: React.FC<MaintenanceOverviewProps> = ({ stats,
 
     const getTypeStyles = (type: MaintenanceType) => {
         const colors: Record<string, string> = {
-            PREVENTIVE: 'var(--modal-success)',
-            REPAIR: 'var(--modal-danger)',
-            INSPECTION: 'var(--accent-primary)'
+            PREVENTIVE: '#22c55e',
+            REPAIR: '#ef4444',
+            INSPECTION: '#3b82f6'
         };
         const bgs: Record<string, string> = {
-            PREVENTIVE: 'var(--modal-success-bg)',
-            REPAIR: 'var(--modal-danger-bg)',
-            INSPECTION: 'var(--modal-info-bg)'
+            PREVENTIVE: 'rgba(34, 197, 94, 0.1)',
+            REPAIR: 'rgba(239, 68, 68, 0.1)',
+            INSPECTION: 'rgba(59, 130, 246, 0.1)'
         };
         return { color: colors[type] || 'var(--text-secondary)', bg: bgs[type] || 'var(--bg-surface-secondary)' };
     };
@@ -52,113 +52,141 @@ export const MaintenanceOverview: React.FC<MaintenanceOverviewProps> = ({ stats,
             variants={container}
             initial="hidden"
             animate="show"
-            className="space-y-6"
+            className="space-y-10"
         >
             {/* KPI Grid */}
-            <div>
-                <h3 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-3">Overview KPIs</h3>
-                <div className="grid grid-cols-4 gap-3">
+            <section>
+                <h3 className="eq-section-title">Fleet Vitality KPIs</h3>
+                <div className="maintenance-stat-grid mt-4">
                     {[
-                        { label: 'Total Logs', value: stats.total, icon: FileText, bgColor: 'rgba(59, 130, 246, 0.1)', iconColor: '#3b82f6' },
-                        { label: 'Total Cost', value: formatCurrency(stats.totalCost), icon: IndianRupee, bgColor: 'rgba(34, 197, 94, 0.1)', iconColor: '#22c55e' },
-                        { label: 'Overdue', value: stats.overdue, icon: AlertCircle, bgColor: 'rgba(239, 68, 68, 0.1)', iconColor: '#ef4444', pulse: stats.overdue > 0 },
-                        { label: 'Health', value: `${stats.health}%`, icon: Activity, bgColor: 'rgba(168, 85, 247, 0.1)', iconColor: '#a855f7' }
-                    ].map(({ label, value, icon: Icon, bgColor, iconColor, pulse }) => (
+                        { label: 'Service Logs', value: stats.total, icon: FileText, color: '#3b82f6' },
+                        { label: 'Expenditure', value: formatCurrency(stats.totalCost), icon: IndianRupee, color: '#22c55e' },
+                        { label: 'Critical Overdue', value: stats.overdue, icon: AlertCircle, color: '#ef4444', highlight: stats.overdue > 0 },
+                        { label: 'Health Score', value: `${stats.health}%`, icon: Zap, color: '#a855f7' }
+                    ].map(({ label, value, icon: Icon, color, highlight }) => (
                         <motion.div
                             variants={item}
                             key={label}
-                            whileHover={{ y: -4, boxShadow: '0 12px 24px -8px rgba(0,0,0,0.15)' }}
-                            className={`p-3 rounded-xl bg-[var(--bg-surface-secondary)] border border-[var(--border-color)] flex items-center gap-3 transition-all cursor-default ${pulse ? 'animate-pulse' : ''}`}
-                            style={{ boxShadow: '0 4px 12px -4px rgba(0,0,0,0.08)' }}
+                            className={`maintenance-stat-card group hover:border-[var(--accent-primary)] transition-all cursor-default ${highlight ? 'border-red-500/50 bg-red-500/5' : ''}`}
                         >
-                            <div
-                                className="w-8 h-8 rounded-lg flex items-center justify-center shadow-sm"
-                                style={{ backgroundColor: bgColor }}
-                            >
-                                <Icon size={14} style={{ color: iconColor }} />
+                            <div className="flex justify-between items-start mb-2">
+                                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[var(--bg-surface)] border border-[var(--border-color)] group-hover:border-[var(--accent-primary)] transition-colors">
+                                    <Icon size={18} style={{ color }} />
+                                </div>
+                                {highlight && (
+                                    <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+                                )}
                             </div>
-                            <div>
-                                <p className="text-[10px] font-semibold text-[var(--text-secondary)] uppercase tracking-wide">{label}</p>
-                                <p className="text-sm font-bold text-[var(--text-primary)]">{value}</p>
-                            </div>
+                            <p className="maintenance-stat-val">{value}</p>
+                            <p className="maintenance-stat-label">{label}</p>
                         </motion.div>
                     ))}
                 </div>
-            </div>
+            </section>
 
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-5 gap-10">
                 {/* Recent Activity */}
-                <div className="col-span-2 space-y-3">
+                <div className="col-span-3 space-y-4">
                     <div className="flex items-center justify-between">
-                        <h3 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">Recent Activity</h3>
-                        <button onClick={() => setActiveTab('history')} className="text-[10px] font-semibold text-[var(--accent-primary)] hover:underline">View All</button>
+                        <h3 className="eq-section-title flex-none">Service Timeline</h3>
+                        <button 
+                            onClick={() => setActiveTab('history')} 
+                            className="flex items-center gap-1.5 text-[11px] font-bold text-[var(--accent-primary)] uppercase tracking-wider hover:gap-2.5 transition-all"
+                        >
+                            View Full History <ArrowRight size={14} />
+                        </button>
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="maintenance-timeline mt-4">
                         {history.length === 0 ? (
-                            <div className="p-6 rounded-xl border border-dashed border-[var(--border-color)] flex flex-col items-center justify-center text-[var(--text-secondary)] space-y-2">
-                                <ClipboardCheck size={20} className="opacity-30" />
-                                <p className="text-xs">No records found</p>
+                            <div className="p-12 rounded-3xl border-2 border-dashed border-[var(--border-color)] flex flex-col items-center justify-center text-[var(--text-secondary)] space-y-4">
+                                <div className="w-16 h-16 rounded-full bg-[var(--bg-surface-secondary)] flex items-center justify-center">
+                                    <ClipboardCheck size={32} className="opacity-20" />
+                                </div>
+                                <div className="text-center">
+                                    <p className="font-bold text-sm">No Maintenance Data</p>
+                                    <p className="text-[11px] opacity-60 mt-1">Start logging service records to track asset health.</p>
+                                </div>
                             </div>
                         ) : (
-                            history.slice(0, 3).map(r => {
+                            history.slice(0, 4).map(r => {
                                 const styles = getTypeStyles(r.maintenanceType);
                                 return (
-                                    <motion.div
-                                        variants={item}
-                                        key={r.id}
-                                        className="p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-color)] hover:border-[var(--accent-primary)] transition-colors group flex items-start gap-3 hover:shadow-sm"
-                                    >
-                                        <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 shadow-sm" style={{ backgroundColor: styles.bg }}>
-                                            {r.maintenanceType === 'REPAIR' ? <Wrench size={14} style={{ color: styles.color }} /> :
-                                                r.maintenanceType === 'PREVENTIVE' ? <Shield size={14} style={{ color: styles.color }} /> :
-                                                    <ClipboardCheck size={14} style={{ color: styles.color }} />}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex justify-between items-start">
-                                                <h4 className="text-sm font-medium text-[var(--text-primary)] truncate">{r.description}</h4>
-                                                <span className="text-[10px] font-mono text-[var(--text-secondary)] bg-[var(--bg-surface-secondary)] px-1.5 py-0.5 rounded border border-[var(--border-color)]">{formatDate(r.maintenanceDate)}</span>
+                                    <div key={r.id} className="timeline-item">
+                                        <motion.div
+                                            variants={item}
+                                            className="p-5 rounded-2xl bg-[var(--bg-surface-secondary)] border border-[var(--border-color)] hover:border-[var(--accent-primary)] transition-all group flex items-start gap-5 hover:shadow-xl hover:shadow-black/10"
+                                        >
+                                            <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-inner" style={{ backgroundColor: styles.bg }}>
+                                                {r.maintenanceType === 'REPAIR' ? <Wrench size={20} style={{ color: styles.color }} /> :
+                                                    r.maintenanceType === 'PREVENTIVE' ? <Shield size={20} style={{ color: styles.color }} /> :
+                                                        <ClipboardCheck size={20} style={{ color: styles.color }} />}
                                             </div>
-                                            <div className="flex items-center gap-3 mt-1 text-[11px] text-[var(--text-secondary)]">
-                                                <span className="flex items-center gap-1"><User size={10} /> {r.technicianName}</span>
-                                                <span className="flex items-center gap-1"><IndianRupee size={10} /> {formatCurrency(r.cost)}</span>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex justify-between items-start">
+                                                    <div>
+                                                        <h4 className="text-sm font-bold text-[var(--text-primary)] leading-tight">{r.description}</h4>
+                                                        <p className="text-[11px] text-[var(--text-secondary)] font-medium mt-1">{r.technicianName} • <span className="opacity-70">{r.maintenanceType}</span></p>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <p className="text-[10px] font-black text-[var(--text-secondary)] bg-[var(--bg-surface)] px-2 py-1 rounded-lg border border-[var(--border-color)] uppercase tracking-tighter">{formatDate(r.maintenanceDate)}</p>
+                                                        <p className="text-xs font-bold text-[var(--text-primary)] mt-2">{formatCurrency(r.cost)}</p>
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </motion.div>
+                                        </motion.div>
+                                    </div>
                                 );
                             })
                         )}
                     </div>
                 </div>
 
-                {/* Upcoming */}
-                <div className="space-y-3">
-                    <h3 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">Upcoming</h3>
-                    <div className="space-y-2">
-                        {stats.scheduled === 0 ? (
-                            <div className="p-6 rounded-xl border border-dashed border-[var(--border-color)] flex flex-col items-center justify-center text-[var(--text-secondary)] space-y-2 h-full">
-                                <CheckCircle size={20} className="opacity-30" />
-                                <p className="text-xs">All caught up!</p>
-                            </div>
-                        ) : (
-                            history.filter(r => r.status === 'SCHEDULED').slice(0, 3).map(r => {
-                                const typeStyles = getTypeStyles(r.maintenanceType);
-                                return (
-                                    <motion.div
-                                        variants={item}
-                                        key={r.id}
-                                        className="p-3 rounded-xl bg-[var(--bg-surface-secondary)] border border-[var(--border-color)] hover:shadow-sm transition-shadow"
-                                    >
-                                        <div className="flex justify-between items-center mb-2">
-                                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded border border-white/5" style={{ backgroundColor: typeStyles.bg, color: typeStyles.color }}>{r.maintenanceType}</span>
-                                            <span className="text-[10px] text-[var(--text-secondary)]">{formatDate(r.maintenanceDate)}</span>
-                                        </div>
-                                        <p className="text-xs font-medium text-[var(--text-primary)] line-clamp-2">{r.description}</p>
-                                    </motion.div>
-                                );
-                            })
-                        )}
-                    </div>
+                {/* Upcoming / Sidebar stats */}
+                <div className="col-span-2 space-y-6">
+                    <section className="space-y-4">
+                        <h3 className="eq-section-title">Maintenance Queue</h3>
+                        <div className="space-y-3">
+                            {stats.scheduled === 0 ? (
+                                <div className="p-8 rounded-3xl bg-green-500/5 border border-green-500/10 flex flex-col items-center justify-center text-center">
+                                    <div className="w-12 h-12 rounded-2xl bg-green-500/10 flex items-center justify-center text-green-500 mb-3">
+                                        <CheckCircle size={24} />
+                                    </div>
+                                    <p className="text-xs font-bold text-green-600">All Scheduled Tasks Clear</p>
+                                    <p className="text-[10px] text-green-600/60 mt-1 uppercase font-black tracking-widest">Everything is running smooth</p>
+                                </div>
+                            ) : (
+                                history.filter(r => r.status === 'SCHEDULED').slice(0, 3).map(r => {
+                                    const typeStyles = getTypeStyles(r.maintenanceType);
+                                    return (
+                                        <motion.div
+                                            variants={item}
+                                            key={r.id}
+                                            className="p-4 rounded-2xl bg-gradient-to-br from-[var(--bg-surface-secondary)] to-[var(--bg-surface)] border border-[var(--border-color)] hover:border-[var(--accent-primary)] shadow-sm transition-all"
+                                        >
+                                            <div className="flex justify-between items-center mb-3">
+                                                <span className="text-[9px] font-black px-2 py-0.5 rounded-lg border border-white/5 uppercase tracking-widest" style={{ backgroundColor: typeStyles.bg, color: typeStyles.color }}>{r.maintenanceType}</span>
+                                                <span className="text-[10px] font-bold text-[var(--text-secondary)] flex items-center gap-1"><Calendar size={12} /> {formatDate(r.maintenanceDate)}</span>
+                                            </div>
+                                            <p className="text-xs font-bold text-[var(--text-primary)] leading-relaxed line-clamp-2">{r.description}</p>
+                                        </motion.div>
+                                    );
+                                })
+                            )}
+                        </div>
+                    </section>
+
+                    <section className="p-6 rounded-3xl bg-[var(--bg-surface-secondary)] border border-[var(--border-color)] overflow-hidden relative">
+                        <div className="relative z-10">
+                            <h3 className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)] opacity-60">Insight</h3>
+                            <p className="text-xs font-bold text-[var(--text-primary)] mt-3 leading-relaxed">
+                                {stats.health > 80 ? 'The asset is in prime condition. Continue with preventive schedule.' : 
+                                 stats.health > 50 ? 'Performance is within limits, but efficiency may be decreasing.' : 
+                                 'Critical maintenance required to prevent permanent failure.'}
+                            </p>
+                        </div>
+                        <Activity size={80} className="absolute -right-4 -bottom-4 text-[var(--accent-primary)] opacity-5 rotate-12" />
+                    </section>
                 </div>
             </div>
         </motion.div>

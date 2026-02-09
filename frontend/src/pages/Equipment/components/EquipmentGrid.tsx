@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import type { Equipment } from '../../../types/equipment';
 import EquipmentCard from './EquipmentCard';
 
@@ -26,18 +27,43 @@ const EquipmentGrid: React.FC<EquipmentGridProps> = ({ equipmentList, density = 
         list: 'grid-cols-1'
     };
 
+    const container = {
+        hidden: { opacity: 0 },
+        show: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.1
+            }
+        }
+    };
+
     return (
-        <div className={`grid ${gridCols[density]} gap-4 transition-all duration-300`}>
-            {equipmentList.map(equipment => (
-                <EquipmentCard
-                    key={equipment.id}
-                    equipment={equipment}
-                    density={density === 'list' ? 'comfortable' : density}
-                    onEdit={onEdit}
-                    onMaintenance={onMaintenance}
-                />
-            ))}
-        </div>
+        <motion.div 
+            variants={container}
+            initial="hidden"
+            animate="show"
+            className={`grid ${gridCols[density]} gap-6 transition-all duration-300`}
+        >
+            <AnimatePresence mode="popLayout">
+                {equipmentList.map(equipment => (
+                    <motion.div
+                        key={equipment.id}
+                        layout
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        transition={{ duration: 0.3 }}
+                    >
+                        <EquipmentCard
+                            equipment={equipment}
+                            density={density === 'list' ? 'comfortable' : density}
+                            onEdit={onEdit}
+                            onMaintenance={onMaintenance}
+                        />
+                    </motion.div>
+                ))}
+            </AnimatePresence>
+        </motion.div>
     );
 };
 
