@@ -67,6 +67,117 @@ public class UserService {
     @Autowired
     private com.gym.management.repository.MembershipRepository membershipRepository;
 
+    /**
+     * Get distinct plan names from all members' active memberships.
+     * Used for dynamic filter generation on the frontend.
+     */
+    @Transactional(readOnly = true)
+    public List<String> getDistinctMemberPlanNames() {
+        List<com.gym.management.model.Membership> allMemberships = membershipRepository.findAll();
+        return allMemberships.stream()
+                .filter(m -> m.getMembershipPackage() != null)
+                .map(m -> m.getMembershipPackage().getPackageName())
+                .distinct()
+                .sorted(String.CASE_INSENSITIVE_ORDER)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Randomly assign membership packages to all members who have no package or have null package.
+     * This is a migration/normalization endpoint to align legacy members with the new membership system.
+     * Returns a summary of changes made.
+     */
+    @Transactional
+    public Map<String, Object> randomlyAssignMembershipPackages() {
+        List<com.gym.management.model.MembershipPackage> activePackages = membershipPackageRepository.findActivePackages();
+        if (activePackages.isEmpty()) {
+            throw new RuntimeException("No active membership packages available for assignment");
+        }
+
+        // Get all members (users with CUSTOMER/MEMBER roles)
+        Set<Long> seenIds = new HashSet<>();
+        List<User> allCustomers = new ArrayList<>();
+        String[] memberRoles = { "CUSTOMER", "MEMBER", "ROLE_CUSTOMER", "ROLE_MEMBER" };
+        for (String roleName : memberRoles) {
+            List<User> users = userRepository.findByRoleName(roleName);
+            for (User u : users) {
+                if (seenIds.add(u.getUserId()))
+                    allCustomers.add(u);
+            }
+        }
+
+        Random random = new Random();
+        int assignedCount = 0;
+        int skippedCount = 0;
+        List<Map<String, Object>> log = new ArrayList<>();
+
+        for (User user : allCustomers) {
+            List<com.gym.management.model.Membership> memberships = membershipRepository.findByUserUserId(user.getUserId());
+
+            com.gym.management.model.Membership membership;
+            
+            if (memberships.isEmpty()) {
+                // Create a new membership record for legacy members without one
+                try {
+                    com.gym.management.model.Gym defaultGym = gymRepository.findById(1L)
+                            .orElseThrow(() -> new RuntimeException("Default gym not found"));
+                    membership = new com.gym.management.model.Membership();
+                    membership.setUser(user);
+                    membership.setGym(defaultGym);
+                } catch (Exception e) {
+                    skippedCount++;
+                    continue;
+                }
+            } else {
+                // Find the active or first membership
+                membership = memberships.stream()
+                        .filter(m -> m.getStatus() == MembershipStatus.ACTIVE)
+                        .findFirst()
+                        .orElse(memberships.get(0));
+            }
+
+            // Assign a random package
+            com.gym.management.model.MembershipPackage randomPackage = activePackages.get(random.nextInt(activePackages.size()));
+            String oldPlanName = membership.getMembershipPackage() != null
+                    ? membership.getMembershipPackage().getPackageName()
+                    : "null";
+
+            membership.setMembershipPackage(randomPackage);
+
+            // Set dates if missing
+            if (membership.getStartDate() == null) {
+                membership.setStartDate(LocalDate.now());
+            }
+            if (membership.getEndDate() == null) {
+                int durationDays = randomPackage.getDurationDays() != null ? randomPackage.getDurationDays() : 30;
+                membership.setEndDate(membership.getStartDate().plusDays(durationDays));
+            }
+
+            if (membership.getStatus() == null || membership.getStatus() == MembershipStatus.PENDING) {
+                membership.setStatus(MembershipStatus.ACTIVE);
+            }
+
+            membershipRepository.save(membership);
+            assignedCount++;
+
+            Map<String, Object> entry = new HashMap<>();
+            entry.put("userId", user.getUserId());
+            entry.put("fullName", user.getFullName());
+            entry.put("oldPlan", oldPlanName);
+            entry.put("newPlan", randomPackage.getPackageName());
+            entry.put("packageId", randomPackage.getPackageId());
+            log.add(entry);
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("totalMembers", allCustomers.size());
+        result.put("assigned", assignedCount);
+        result.put("skipped", skippedCount);
+        result.put("availablePackages", activePackages.stream().map(p -> p.getPackageName()).collect(Collectors.toList()));
+        result.put("log", log);
+        return result;
+    }
+
     @Transactional(readOnly = true)
     public List<com.gym.management.dto.MemberDTO> getAllMembers() {
         // Query all possible member role names (legacy support for different naming

@@ -62,6 +62,16 @@ const api = {
     return response.data;
   },
 
+  async getMemberPlanNames(): Promise<string[]> {
+    const response = await apiClient.get<string[]>('/users/members/plan-names');
+    return response.data;
+  },
+
+  async assignRandomMembershipPackages(): Promise<Record<string, unknown>> {
+    const response = await apiClient.post<Record<string, unknown>>('/users/members/assign-random-packages');
+    return response.data;
+  },
+
   // Paginated Members
   async getMembersPaginated(
     page: number = 0,

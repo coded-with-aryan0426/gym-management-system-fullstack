@@ -47,6 +47,14 @@ const Members: React.FC = () => {
   const [selectedMemberIds, setSelectedMemberIds] = useState<Set<string | number>>(new Set())
   const [activeStatusFilter, setActiveStatusFilter] = useState<StatusFilter>('all')
   const [hoveredRowId, setHoveredRowId] = useState<string | number | null>(null)
+  const [planNames, setPlanNames] = useState<string[]>([])
+
+  // Fetch dynamic plan names for filter dropdown
+  useEffect(() => {
+    api.getMemberPlanNames()
+      .then(names => setPlanNames(names))
+      .catch(err => console.error('[Members] Failed to load plan names:', err))
+  }, [])
 
   const handleActionClick = (member: MemberDTO) => {
     setSelectedMember(member)
@@ -160,7 +168,7 @@ const Members: React.FC = () => {
 
   useEffect(() => {
     setCurrentPage(0)
-  }, [debouncedSearch, filters])
+  }, [debouncedSearch, filters, activeStatusFilter])
 
   const totalPages = useMemo(() => {
     if (hasClientSideFilters) {
@@ -204,11 +212,33 @@ const Members: React.FC = () => {
     return { date: expiryDate, daysLeft, isExpired }
   }
 
+  // Determine if we're using a tab filter that requires all members (unified list)
+  const isUsingTabFilter = activeStatusFilter !== 'all'
+
   const filteredMembers = useMemo(() => {
-    let result = members
+    // When a tab filter is active, use allMembers to get a unified list across all pages
+    // When 'all' tab, use the server-paginated members
+    let result = isUsingTabFilter ? [...allMembers] : members
+
+    // Apply search filter when using allMembers (tab filter mode)
+    if (isUsingTabFilter && debouncedSearch) {
+      const q = debouncedSearch.toLowerCase()
+      result = result.filter(m =>
+        m.fullName?.toLowerCase().includes(q) ||
+        m.email?.toLowerCase().includes(q)
+      )
+    }
+
+    // Apply server-side filters when using allMembers
+    if (isUsingTabFilter && filters.status.length > 0) {
+      result = result.filter(m => m.status?.toUpperCase() === filters.status[0].toUpperCase())
+    }
+    if (isUsingTabFilter && filters.plan.length > 0) {
+      result = result.filter(m => m.planName?.toLowerCase() === filters.plan[0].toLowerCase())
+    }
 
     // Apply status tab filter
-    if (activeStatusFilter !== 'all') {
+    if (isUsingTabFilter) {
       result = result.filter(m => {
         const { daysLeft, isExpired } = getExpiryInfo(m)
         switch (activeStatusFilter) {
@@ -217,7 +247,9 @@ const Members: React.FC = () => {
           case 'expiring':
             return !isExpired && daysLeft !== null && daysLeft <= 7 && daysLeft > 0
           case 'inactive':
-            return (m.status || '').toLowerCase() === 'expired' || isExpired
+            return (m.status || '').toLowerCase() === 'expired' || 
+                   (m.status || '').toLowerCase() === 'inactive' || 
+                   isExpired
           default:
             return true
         }
@@ -294,7 +326,20 @@ const Members: React.FC = () => {
     }
 
     return result
-  }, [members, filters.planDuration, filters.expiryStatus, filters.joinedPeriod, activeStatusFilter])
+  }, [members, allMembers, isUsingTabFilter, debouncedSearch, filters.status, filters.plan, filters.planDuration, filters.expiryStatus, filters.joinedPeriod, activeStatusFilter])
+
+  // Client-side pagination for tab-filtered results
+  const paginatedFilteredMembers = useMemo(() => {
+    if (!isUsingTabFilter) return filteredMembers
+    const start = currentPage * pageSize
+    return filteredMembers.slice(start, start + pageSize)
+  }, [filteredMembers, isUsingTabFilter, currentPage, pageSize])
+
+  // Total count and pages for tab-filtered mode
+  const tabFilterTotalCount = isUsingTabFilter ? filteredMembers.length : totalCount
+  const tabFilterTotalPages = isUsingTabFilter
+    ? Math.ceil(filteredMembers.length / pageSize)
+    : totalPages
 
   const handleRenewPlan = async (member: MemberDTO, packageId?: number, amount?: number, customDuration?: number, skipTransaction?: boolean) => {
     try {
@@ -341,12 +386,24 @@ const Members: React.FC = () => {
   const stats = useMemo(() => {
     const now = new Date()
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-    const activeCount = allMembers.filter(m => (m.status || '').toLowerCase() === 'active').length
-    const expiredCount = allMembers.filter(m => (m.status || '').toLowerCase() === 'expired').length
+    
+    // Active: status is active AND not expired
+    const activeCount = allMembers.filter(m => {
+      const { isExpired } = getExpiryInfo(m)
+      return (m.status || '').toLowerCase() === 'active' && !isExpired
+    }).length
 
     const expiringSoon = allMembers.filter(m => {
       const { daysLeft, isExpired } = getExpiryInfo(m)
       return !isExpired && daysLeft !== null && daysLeft <= 7 && daysLeft > 0
+    }).length
+
+    // Inactive: expired status, inactive status, or membership date expired
+    const inactiveCount = allMembers.filter(m => {
+      const { isExpired } = getExpiryInfo(m)
+      return (m.status || '').toLowerCase() === 'expired' || 
+             (m.status || '').toLowerCase() === 'inactive' || 
+             isExpired
     }).length
 
     const newThisMonth = allMembers.filter(m => {
@@ -355,14 +412,13 @@ const Members: React.FC = () => {
       return new Date(dateStr) >= startOfMonth
     }).length
 
-    // Retention rate = active / (active + expired) * 100
-    const retentionRate = (activeCount + expiredCount) > 0
-      ? Math.round((activeCount / (activeCount + expiredCount)) * 100)
+    const retentionRate = (activeCount + inactiveCount) > 0
+      ? Math.round((activeCount / (activeCount + inactiveCount)) * 100)
       : 100
 
     return {
       activeCount,
-      expiredCount,
+      expiredCount: inactiveCount,
       expiringSoon,
       newThisMonth,
       total: allMembers.length,
@@ -386,9 +442,19 @@ const Members: React.FC = () => {
 
   const getPlanIcon = (planName: string | undefined) => {
     const plan = (planName || '').toLowerCase()
-    if (plan === 'premium') return '💎'
-    if (plan === 'standard') return '⭐'
-    return '📦'
+    if (plan.includes('premium') || plan.includes('vip')) return '💎'
+    if (plan.includes('standard') || plan.includes('gold')) return '⭐'
+    if (plan.includes('basic') || plan.includes('starter')) return '📦'
+    if (plan.includes('student')) return '🎓'
+    if (plan.includes('corporate')) return '🏢'
+    return '📋'
+  }
+
+  const getPlanClass = (planName: string | undefined) => {
+    const plan = (planName || '').toLowerCase()
+    if (plan.includes('premium') || plan.includes('vip')) return 'member-plan--premium'
+    if (plan.includes('standard') || plan.includes('gold')) return 'member-plan--standard'
+    return 'member-plan--basic'
   }
 
   const columns: Column<MemberDTO>[] = [
@@ -423,18 +489,15 @@ const Members: React.FC = () => {
       header: "Membership",
       width: "150px",
       render: (member) => {
-        const planClass = member.planName?.toLowerCase() === 'premium' ? 'member-plan--premium'
-          : member.planName?.toLowerCase() === 'standard' ? 'member-plan--standard'
-            : 'member-plan--basic'
-        return (
-          <div className="member-plan-cell">
-            <span className={`member-plan-badge ${planClass}`}>
-              <span className="plan-icon">{getPlanIcon(member.planName)}</span>
-              {member.planName || 'No Plan'}
-            </span>
-          </div>
-        )
-      },
+          return (
+            <div className="member-plan-cell">
+              <span className={`member-plan-badge ${getPlanClass(member.planName)}`}>
+                <span className="plan-icon">{getPlanIcon(member.planName)}</span>
+                {member.planName || 'No Plan'}
+              </span>
+            </div>
+          )
+        },
     },
     {
       key: "expiryDate",
@@ -614,18 +677,18 @@ const Members: React.FC = () => {
                         </div>
 
                         <div className="filter-dropdown__row">
-                          <label className="filter-dropdown__label">Plan</label>
-                          <select
-                            className="filter-dropdown__select"
-                            value={filters.plan[0] || ''}
-                            onChange={(e) => setFilters(prev => ({ ...prev, plan: e.target.value ? [e.target.value] : [] }))}
-                          >
-                            <option value="">All</option>
-                            <option value="Premium">Premium</option>
-                            <option value="Standard">Standard</option>
-                            <option value="Basic">Basic</option>
-                          </select>
-                        </div>
+                            <label className="filter-dropdown__label">Plan</label>
+                            <select
+                              className="filter-dropdown__select"
+                              value={filters.plan[0] || ''}
+                              onChange={(e) => setFilters(prev => ({ ...prev, plan: e.target.value ? [e.target.value] : [] }))}
+                            >
+                              <option value="">All</option>
+                              {planNames.map(name => (
+                                <option key={name} value={name}>{name}</option>
+                              ))}
+                            </select>
+                          </div>
 
                         <div className="filter-dropdown__row">
                           <label className="filter-dropdown__label">Duration</label>
@@ -748,27 +811,28 @@ const Members: React.FC = () => {
       <div className="members-table-wrapper">
         <Editable id="members-page-table" config={{ allowLayout: true, allowStyle: true, allowVisibility: true }}>
             <DataTable
-              data={filteredMembers}
-              keyExtractor={(member) => member.userId}
-              columns={columns as Column<MemberDTO>[]}
-              loading={loading}
-              onRowClick={handleActionClick}
-              emptyMessage={
-                debouncedSearch || activeFilterCount > 0
-                  ? "No members match your filters"
-                  : "No members found. Add your first member!"
-              }
-              pagination={hasClientSideFilters ? undefined : {
-                currentPage,
-                totalPages,
-                totalCount,
-                pageSize,
-                onPageChange: setCurrentPage,
-                onPageSizeChange: (size) => {
-                  setPageSize(size)
-                  setCurrentPage(0)
-                },
-              }}
+                data={paginatedFilteredMembers}
+                keyExtractor={(member) => member.userId}
+                columns={columns as Column<MemberDTO>[]}
+                loading={isUsingTabFilter ? allMembersLoading : loading}
+                onRowClick={handleActionClick}
+                emptyMessage={
+                  debouncedSearch || activeFilterCount > 0 || isUsingTabFilter
+                    ? "No members match your filters"
+                    : "No members found. Add your first member!"
+                }
+                pagination={hasClientSideFilters && !isUsingTabFilter ? undefined : {
+                  currentPage,
+                  totalPages: tabFilterTotalPages,
+                  totalCount: tabFilterTotalCount,
+                  pageSize,
+                  pageSizeOptions: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+                  onPageChange: setCurrentPage,
+                  onPageSizeChange: (size) => {
+                    setPageSize(size)
+                    setCurrentPage(0)
+                  },
+                }}
               compact
               selectable
               stickyHeader
@@ -847,13 +911,14 @@ const Members: React.FC = () => {
         initialView="memberForm"
       />
 
-      <TieredPlanManagement
-        isOpen={isMembershipModalOpen}
-        onClose={() => setIsMembershipModalOpen(false)}
-        onSuccess={() => {
-          refreshMembers()
-        }}
-      />
+    <TieredPlanManagement
+          isOpen={isMembershipModalOpen}
+          onClose={() => setIsMembershipModalOpen(false)}
+          onSuccess={() => {
+            refreshMembers()
+            api.getMemberPlanNames().then(setPlanNames).catch(() => {})
+          }}
+        />
     </div>
   )
 }

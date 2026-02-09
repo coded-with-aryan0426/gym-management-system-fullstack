@@ -24,6 +24,28 @@ public class UserController {
         return userService.getAllUsers();
     }
 
+    @GetMapping("/members/plan-names")
+    public ResponseEntity<?> getDistinctPlanNames() {
+        try {
+            return ResponseEntity.ok(userService.getDistinctMemberPlanNames());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500)
+                    .body(java.util.Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/members/assign-random-packages")
+    public ResponseEntity<?> assignRandomMembershipPackages() {
+        try {
+            return ResponseEntity.ok(userService.randomlyAssignMembershipPackages());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500)
+                    .body(java.util.Map.of("error", e.getMessage()));
+        }
+    }
+
     @GetMapping("/members")
     public ResponseEntity<?> getMembers() {
         try {
