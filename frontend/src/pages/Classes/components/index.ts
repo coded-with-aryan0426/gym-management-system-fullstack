@@ -3,6 +3,7 @@ export { default as ScheduleFilters } from './ScheduleFilters'
 export { default as DaySection } from './DaySection'
 export { default as ClassCard } from './ClassCard'
 export { default as ClassFormDrawer } from './ClassFormDrawer'
+export { default as StatsDashboard } from './StatsDashboard'
 export * from './WeeklyCalendar'
 export * from './AddClassModal'
 

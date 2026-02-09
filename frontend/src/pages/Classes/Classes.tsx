@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useMemo, useRef } from "react"
 import { toast } from "react-hot-toast"
 import api, { ptSessionApi } from "../../services/api"
-import { ScheduleHeader, ScheduleFilters, WeeklyCalendar, AddClassModal, type ClassData } from "./components"
+import { ScheduleHeader, ScheduleFilters, WeeklyCalendar, AddClassModal, StatsDashboard, type ClassData } from "./components"
 import { useClasses } from "../../contexts/ClassesContext"
 import "./Classes.css"
 import type { User } from "../../types/user"
@@ -395,6 +395,8 @@ const Classes: React.FC = () => {
           }}
         />
       </ScheduleHeader>
+
+      <StatsDashboard stats={enhancedStats} />
 
       <div className="classes-page__content">
         <WeeklyCalendar

@@ -1,6 +1,7 @@
-import React from 'react';
-import { format, addDays, startOfWeek, isSameDay } from 'date-fns';
-import { motion } from 'framer-motion';
+import React, { useState } from 'react';
+import { format, addDays, startOfWeek, isSameDay, isBefore, startOfDay } from 'date-fns';
+import { motion, AnimatePresence } from 'framer-motion';
+import { CalendarX, Plus, Clock } from 'lucide-react';
 import type { ClassData } from './index';
 
 interface WeeklyCalendarProps {

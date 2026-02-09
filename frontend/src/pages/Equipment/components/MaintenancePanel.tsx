@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Plus, TrendingUp, Calendar, LayoutDashboard, History, CalendarDays, BarChart3, Settings2 } from 'lucide-react';
+import { X, Plus, TrendingUp, Calendar, LayoutDashboard, History, CalendarDays, BarChart3 } from 'lucide-react';
 import { equipmentApi } from '../../../services/equipmentApi';
 import { getEquipmentIcon } from '../../../utils/iconMapping';
 import { formatDate } from '../../../utils/formatters';
 import type { Equipment } from '../../../types/equipment';
 import type { EquipmentMaintenance, MaintenanceType, MaintenanceStatus } from '../../../types/equipmentMaintenance';
 
-// Sub-components
 import { MaintenanceOverview } from './tabs/MaintenanceOverview';
 import { MaintenanceHistory } from './tabs/MaintenanceHistory';
 import { MaintenanceSchedule } from './tabs/MaintenanceSchedule';
@@ -117,177 +116,124 @@ const MaintenancePanel: React.FC<MaintenancePanelProps> = ({ equipment, isOpen, 
         { id: 'analysis', label: 'Analytics', icon: BarChart3 },
     ];
 
+    const statusColor = equipment.status === 'ACTIVE' ? '#22c55e' :
+        equipment.status === 'MAINTENANCE' ? '#eab308' : '#ef4444';
+
     return (
         <AnimatePresence>
             {isOpen && (
                 <div className="eq-modal-overlay" onClick={onClose}>
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: 30 }}
+                        initial={{ opacity: 0, scale: 0.96, y: 10 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: 30 }}
-                        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                        exit={{ opacity: 0, scale: 0.96, y: 10 }}
+                        transition={{ duration: 0.2, ease: 'easeOut' }}
                         className="eq-modal eq-modal--xl"
                         onClick={e => e.stopPropagation()}
                     >
-                        {/* HEADER */}
+                        {/* HEADER - compact */}
                         <header className="eq-modal__header">
-                            <div className="flex items-center gap-6">
-                                <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-[var(--bg-surface-secondary)] to-[var(--bg-surface)] border border-[var(--border-color)] flex items-center justify-center text-[var(--accent-primary)] shadow-xl shadow-black/30 group transition-transform hover:scale-105">
-                                    {getEquipmentIcon(equipment.category, equipment.name, 32)}
+                            <div className="flex items-center gap-3">
+                                <div className="w-9 h-9 rounded-lg bg-[var(--bg-surface-secondary)] border border-[var(--border-color)] flex items-center justify-center text-[var(--accent-primary)]">
+                                    {getEquipmentIcon(equipment.category, equipment.name, 20)}
                                 </div>
-                                <div>
-                                    <div className="flex items-center gap-3">
-                                        <h1 className="text-2xl font-bold text-[var(--text-primary)] tracking-tight">{equipment.name}</h1>
-                                        <div className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${
-                                            equipment.status === 'ACTIVE' ? 'bg-green-500/10 text-green-500 border border-green-500/20 shadow-[0_0_15px_rgba(34,197,94,0.2)]' :
-                                            equipment.status === 'MAINTENANCE' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20 shadow-[0_0_15px_rgba(234,179,8,0.2)]' :
-                                            'bg-red-500/10 text-red-500 border border-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.2)]'
-                                        }`}>{equipment.status}</div>
-                                    </div>
-                                    <p className="text-sm text-[var(--text-secondary)] font-medium mt-1.5 flex items-center gap-2">
-                                        <span className="opacity-80">{equipment.brand}</span>
-                                        <span className="w-1 h-1 rounded-full bg-[var(--border-color)]"></span>
-                                        <span className="font-mono opacity-60 text-xs">{equipment.serialNumber || `SN-${equipment.id}`}</span>
-                                    </p>
+                                <div className="flex items-center gap-3">
+                                    <h1 className="eq-modal__title">{equipment.name}</h1>
+                                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border" style={{
+                                        color: statusColor,
+                                        borderColor: `${statusColor}40`,
+                                        backgroundColor: `${statusColor}10`
+                                    }}>{equipment.status}</span>
+                                    <span className="text-xs text-[var(--text-secondary)]">{equipment.brand}</span>
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-4">
-                                <motion.button
-                                    whileHover={{ scale: 1.02, translateY: -1 }}
-                                    whileTap={{ scale: 0.98 }}
+                            <div className="flex items-center gap-2">
+                                <button
                                     onClick={() => setShowAddForm(true)}
-                                    className="eq-btn eq-btn--primary h-11 px-6 bg-gradient-to-r from-blue-600 to-indigo-600"
+                                    className="eq-btn eq-btn--primary h-8 px-4 text-xs"
                                 >
-                                    <Plus size={18} strokeWidth={3} /> <span className="font-bold">New Log</span>
-                                </motion.button>
-
+                                    <Plus size={14} /> New Log
+                                </button>
                                 <button onClick={onClose} className="eq-modal__close">
-                                    <X size={20} />
+                                    <X size={16} />
                                 </button>
                             </div>
                         </header>
 
-                        <div className="eq-modal-layout">
-                            {/* NAVIGATION SIDEBAR */}
-                            <aside className="w-[260px] bg-[var(--bg-surface-secondary)] border-right border-[var(--border-color)] flex flex-col p-6 gap-8">
-                                <section>
-                                    <h3 className="eq-section-title">Navigation</h3>
-                                    <nav className="flex flex-col gap-1.5 mt-4">
-                                        {navItems.map(item => (
-                                            <button
-                                                key={item.id}
-                                                onClick={() => { setActiveTab(item.id); setShowAddForm(false); }}
-                                                className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all duration-300 ${
-                                                    activeTab === item.id && !showAddForm 
-                                                    ? 'bg-[var(--bg-surface)] text-[var(--accent-primary)] shadow-lg shadow-black/10 border border-[var(--border-color)]' 
-                                                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)]/50'
-                                                }`}
-                                            >
-                                                <item.icon size={18} strokeWidth={activeTab === item.id ? 2.5 : 2} />
-                                                {item.label}
-                                                {activeTab === item.id && (
-                                                    <motion.div layoutId="active-tab-glow" className="ml-auto w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)] shadow-[0_0_8px_var(--accent-primary)]" />
-                                                )}
-                                            </button>
-                                        ))}
-                                    </nav>
-                                </section>
-
-                                <section>
-                                    <h3 className="eq-section-title">Maintenance Profile</h3>
-                                    <div className="mt-4 p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-color)] space-y-4">
-                                        <div className="flex flex-col gap-1">
-                                            <span className="text-[10px] uppercase tracking-widest text-[var(--text-secondary)] font-bold opacity-60">Asset Health</span>
-                                            <div className="flex items-center gap-3">
-                                                <div className="flex-1 h-2 bg-[var(--bg-surface-secondary)] rounded-full overflow-hidden">
-                                                    <motion.div 
-                                                        initial={{ width: 0 }}
-                                                        animate={{ width: `${stats.health}%` }}
-                                                        className={`h-full ${stats.health > 80 ? 'bg-green-500' : stats.health > 50 ? 'bg-amber-500' : 'bg-red-500'}`}
-                                                    />
-                                                </div>
-                                                <span className="text-xs font-bold font-mono">{stats.health}%</span>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-3 pt-2 border-t border-[var(--border-color)]">
-                                            <div className="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500">
-                                                <Settings2 size={16} />
-                                            </div>
-                                            <div className="flex flex-col">
-                                                <span className="text-[10px] font-bold text-[var(--text-secondary)]">Last Service</span>
-                                                <span className="text-xs font-semibold">{equipment.lastMaintenanceDate ? formatDate(equipment.lastMaintenanceDate) : 'None'}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </section>
-                            </aside>
-
-                            {/* MAIN CONTENT AREA */}
-                            <main className="flex-1 overflow-hidden relative bg-[var(--bg-surface)]">
-                                <AnimatePresence mode="wait">
-                                    {showAddForm ? (
-                                        <motion.div
-                                            key="form"
-                                            className="absolute inset-0 z-30 bg-[var(--bg-surface)]"
-                                            initial={{ x: '100%' }}
-                                            animate={{ x: 0 }}
-                                            exit={{ x: '100%' }}
-                                            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-                                        >
-                                            <MaintenanceForm
-                                                newLog={newLog}
-                                                setNewLog={setNewLog}
-                                                onSubmit={handleSubmit}
-                                                onCancel={() => setShowAddForm(false)}
-                                                isLoading={isSubmitting}
-                                            />
-                                        </motion.div>
-                                    ) : (
-                                        <motion.div
-                                            key={activeTab}
-                                            initial={{ opacity: 0, y: 15 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            exit={{ opacity: 0, y: -15 }}
-                                            transition={{ duration: 0.3, ease: 'easeOut' }}
-                                            className="h-full overflow-y-auto custom-scrollbar p-10"
-                                        >
-                                            {activeTab === 'overview' && (
-                                                <MaintenanceOverview stats={stats} history={history} setActiveTab={setActiveTab} />
-                                            )}
-                                            {activeTab === 'history' && (
-                                                <MaintenanceHistory history={history} />
-                                            )}
-                                            {activeTab === 'schedule' && (
-                                                <MaintenanceSchedule calendarEvents={calendarEvents} />
-                                            )}
-                                            {activeTab === 'analysis' && (
-                                                <MaintenanceAnalysis stats={stats} history={history} chartData={chartData} />
-                                            )}
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
-                            </main>
-                        </div>
-
-                        {/* STATUS BAR FOOTER */}
-                        <footer className="h-14 px-8 border-t border-[var(--border-color)] bg-[var(--bg-surface-secondary)] flex items-center justify-between z-20">
-                            <div className="flex items-center gap-8">
-                                <div className="flex items-center gap-2.5 text-xs font-bold text-[var(--text-secondary)]">
-                                    <TrendingUp size={16} className="text-[var(--accent-primary)]" />
-                                    <span>Reliability Index: <span className="text-[var(--text-primary)]">{stats.health > 90 ? 'Excellent' : stats.health > 70 ? 'Optimal' : 'Needs Attention'}</span></span>
-                                </div>
+                        {/* TAB BAR - horizontal, below header */}
+                        <div className="px-5 py-2 border-b border-[var(--border-color)] bg-[var(--bg-surface)] flex items-center justify-between">
+                            <div className="eq-tab-bar">
+                                {navItems.map(item => (
+                                    <button
+                                        key={item.id}
+                                        onClick={() => { setActiveTab(item.id); setShowAddForm(false); }}
+                                        className={`eq-tab-btn ${activeTab === item.id && !showAddForm ? 'eq-tab-btn--active' : ''}`}
+                                    >
+                                        <item.icon size={14} />
+                                        {item.label}
+                                    </button>
+                                ))}
+                            </div>
+                            <div className="flex items-center gap-4 text-xs text-[var(--text-secondary)]">
+                                <span className="flex items-center gap-1.5">
+                                    <TrendingUp size={13} className="text-[var(--accent-primary)]" />
+                                    Health: <strong className="text-[var(--text-primary)]">{stats.health}%</strong>
+                                </span>
                                 {equipment.nextMaintenanceDueDate && (
-                                    <div className="flex items-center gap-2.5 px-3 py-1.5 bg-amber-500/10 text-amber-500 rounded-xl border border-amber-500/20 text-[10px] font-black uppercase tracking-widest">
-                                        <Calendar size={14} strokeWidth={3} />
-                                        <span>Next service: {formatDate(equipment.nextMaintenanceDueDate)}</span>
-                                    </div>
+                                    <span className="flex items-center gap-1.5 px-2 py-1 bg-amber-500/10 text-amber-500 rounded-md border border-amber-500/20 text-[10px] font-bold">
+                                        <Calendar size={12} />
+                                        Next: {formatDate(equipment.nextMaintenanceDueDate)}
+                                    </span>
                                 )}
                             </div>
-                            <div className="text-[10px] text-[var(--text-secondary)] font-black uppercase tracking-[0.2em] opacity-30 select-none">
-                                Fleet Management Engine 4.0
-                            </div>
-                        </footer>
+                        </div>
+
+                        {/* CONTENT AREA */}
+                        <div className="flex-1 overflow-hidden relative" style={{ minHeight: '400px' }}>
+                            <AnimatePresence mode="wait">
+                                {showAddForm ? (
+                                    <motion.div
+                                        key="form"
+                                        className="absolute inset-0 z-30 bg-[var(--bg-surface)]"
+                                        initial={{ x: '100%' }}
+                                        animate={{ x: 0 }}
+                                        exit={{ x: '100%' }}
+                                        transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+                                    >
+                                        <MaintenanceForm
+                                            newLog={newLog}
+                                            setNewLog={setNewLog}
+                                            onSubmit={handleSubmit}
+                                            onCancel={() => setShowAddForm(false)}
+                                            isLoading={isSubmitting}
+                                        />
+                                    </motion.div>
+                                ) : (
+                                    <motion.div
+                                        key={activeTab}
+                                        initial={{ opacity: 0, y: 8 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -8 }}
+                                        transition={{ duration: 0.2 }}
+                                        className="h-full overflow-y-auto custom-scrollbar p-5"
+                                    >
+                                        {activeTab === 'overview' && (
+                                            <MaintenanceOverview stats={stats} history={history} setActiveTab={setActiveTab} />
+                                        )}
+                                        {activeTab === 'history' && (
+                                            <MaintenanceHistory history={history} />
+                                        )}
+                                        {activeTab === 'schedule' && (
+                                            <MaintenanceSchedule calendarEvents={calendarEvents} />
+                                        )}
+                                        {activeTab === 'analysis' && (
+                                            <MaintenanceAnalysis stats={stats} history={history} chartData={chartData} />
+                                        )}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
                     </motion.div>
                 </div>
             )}
