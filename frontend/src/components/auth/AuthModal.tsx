@@ -1064,7 +1064,33 @@ export default function AuthModal() {
 }
 
 // Input Field Component - Compact
-const InputField = ({ label, type = "text", value, onChange, error, placeholder, isValid, maxLength, colors, isDark }: any) => (
+interface Colors {
+    bgPrimary: string;
+    bgSecondary: string;
+    bgTertiary: string;
+    borderPrimary: string;
+    textPrimary: string;
+    textSecondary: string;
+    textTertiary: string;
+    crimson: string;
+    crimsonHover: string;
+    emerald: string;
+}
+
+interface InputFieldProps {
+    label: string;
+    type?: string;
+    value: string;
+    onChange: (val: string) => void;
+    error?: string;
+    placeholder?: string;
+    isValid?: boolean;
+    maxLength?: number;
+    colors: Colors;
+    isDark: boolean;
+}
+
+const InputField = ({ label, type = "text", value, onChange, error, placeholder, isValid, maxLength, colors, isDark }: InputFieldProps) => (
     <div style={{ width: "100%" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: 'center', marginBottom: 4 }}>
             <label style={{ fontSize: 10, fontWeight: 600, color: colors.textSecondary, textTransform: "uppercase", letterSpacing: "0.5px" }}>{label}</label>
@@ -1107,8 +1133,19 @@ const InputField = ({ label, type = "text", value, onChange, error, placeholder,
     </div>
 );
 
+interface PasswordFieldProps {
+    label: string;
+    value: string;
+    onChange: (val: string) => void;
+    error?: string;
+    show: boolean;
+    onToggle: () => void;
+    colors: Colors;
+    isDark: boolean;
+}
+
 // Password Field Component - Compact
-const PasswordField = ({ label, value, onChange, error, show, onToggle, colors, isDark }: any) => (
+const PasswordField = ({ label, value, onChange, error, show, onToggle, colors, isDark }: PasswordFieldProps) => (
     <div style={{ width: "100%" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: 'center', marginBottom: 4 }}>
             <label style={{ fontSize: 10, fontWeight: 600, color: colors.textSecondary, textTransform: "uppercase", letterSpacing: "0.5px" }}>{label}</label>

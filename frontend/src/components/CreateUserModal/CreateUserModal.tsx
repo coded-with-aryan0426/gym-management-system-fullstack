@@ -27,7 +27,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClose, onSu
   const [step, setStep] = useState<ModalStep>("CATEGORY")
   const [role, setRole] = useState<"CUSTOMER" | "TRAINER" | "STAFF" | null>(null)
   const [availablePlans, setAvailablePlans] = useState<MembershipPackageDTO[]>([])
-  const [selectedMembershipId, setSelectedMembershipId] = useState<number | null>(null)
+  const [selectedMembershipId, setSelectedMembershipId] = useState<number | undefined>(undefined)
 
   const [formData, setFormData] = useState({
     username: "",
