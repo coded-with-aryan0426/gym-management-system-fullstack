@@ -94,7 +94,7 @@ const SecuritySection: React.FC = () => {
   useEffect(() => {
     const loadSecuritySettings = async () => {
       try {
-        const response = await api.get('/settings')
+        const response = await api.get('/settings/gym')
         if (response.data) {
           const s = response.data
           const loaded: SecuritySettings = {
