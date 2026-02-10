@@ -104,106 +104,6 @@ interface AuditFilters {
 
 type TabType = 'activity' | 'sessions' | 'security' | 'analytics';
 
-// Mock data generators
-const generateMockLogs = (): AuditLogEntry[] => {
-  const actions: { action: ActionType; entity: EntityType; details: string; severity: SeverityLevel }[] = [
-    { action: 'LOGIN', entity: 'USER', details: 'User logged in successfully', severity: 'info' },
-    { action: 'LOGOUT', entity: 'USER', details: 'User logged out', severity: 'info' },
-    { action: 'LOGIN_FAILED', entity: 'SECURITY', details: 'Failed login attempt - invalid password', severity: 'high' },
-    { action: 'CREATE', entity: 'MEMBER', details: 'New member registration: John Doe', severity: 'low' },
-    { action: 'UPDATE', entity: 'MEMBER', details: 'Member profile updated', severity: 'low' },
-    { action: 'DELETE', entity: 'MEMBER', details: 'Member account deleted', severity: 'medium' },
-    { action: 'PAYMENT_RECEIVED', entity: 'PAYMENT', details: 'Payment of ₹5,000 received for Premium membership', severity: 'info' },
-    { action: 'MEMBERSHIP_ACTIVATED', entity: 'MEMBERSHIP', details: 'Premium membership activated for 12 months', severity: 'info' },
-    { action: 'MEMBERSHIP_EXPIRED', entity: 'MEMBERSHIP', details: 'Membership expired for member #1234', severity: 'medium' },
-    { action: 'SETTINGS_CHANGE', entity: 'SETTINGS', details: 'Notification settings updated', severity: 'low' },
-    { action: 'PASSWORD_CHANGE', entity: 'SECURITY', details: 'User password changed', severity: 'medium' },
-    { action: 'PERMISSION_CHANGE', entity: 'SECURITY', details: 'User role changed from Staff to Trainer', severity: 'high' },
-    { action: 'MEMBER_CHECKIN', entity: 'MEMBER', details: 'Member check-in at Main Entrance', severity: 'info' },
-    { action: 'CREATE', entity: 'CLASS', details: 'New class "Morning Yoga" created', severity: 'low' },
-    { action: 'BACKUP_CREATED', entity: 'SYSTEM', details: 'Automated backup completed successfully', severity: 'info' },
-    { action: 'SECURITY_ALERT', entity: 'SECURITY', details: 'Multiple failed login attempts detected', severity: 'critical' },
-    { action: 'EMAIL_SENT', entity: 'NOTIFICATION', details: 'Bulk email sent to 150 members', severity: 'info' },
-    { action: 'REFUND_ISSUED', entity: 'PAYMENT', details: 'Refund of ₹2,500 processed', severity: 'medium' },
-  ];
-
-  const users = [
-    { id: '1', name: 'Rahul Sharma', role: 'Owner' },
-    { id: '2', name: 'Priya Patel', role: 'Admin' },
-    { id: '3', name: 'Amit Kumar', role: 'Trainer' },
-    { id: '4', name: 'Neha Singh', role: 'Staff' },
-    { id: '5', name: 'Vikram Reddy', role: 'Manager' },
-  ];
-
-  const devices = [
-    { type: 'desktop' as const, browser: 'Chrome 120', os: 'Windows 11' },
-    { type: 'mobile' as const, browser: 'Safari 17', os: 'iOS 17' },
-    { type: 'tablet' as const, browser: 'Firefox 121', os: 'Android 14' },
-    { type: 'desktop' as const, browser: 'Edge 120', os: 'macOS 14' },
-  ];
-
-  const locations = ['Mumbai, India', 'Delhi, India', 'Bangalore, India', 'Chennai, India', 'Pune, India'];
-
-  const logs: AuditLogEntry[] = [];
-  const now = new Date();
-
-  for (let i = 0; i < 100; i++) {
-    const actionData = actions[Math.floor(Math.random() * actions.length)];
-    const user = users[Math.floor(Math.random() * users.length)];
-    const device = devices[Math.floor(Math.random() * devices.length)];
-    const location = locations[Math.floor(Math.random() * locations.length)];
-    
-    const timestamp = new Date(now.getTime() - Math.random() * 7 * 24 * 60 * 60 * 1000);
-    
-    logs.push({
-      id: `log-${i + 1}`,
-      timestamp: timestamp.toISOString(),
-      userId: user.id,
-      userName: user.name,
-      userRole: user.role,
-      action: actionData.action,
-      entity: actionData.entity,
-      details: actionData.details,
-      ipAddress: `192.168.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
-      location,
-      device,
-      sessionId: `session-${Math.floor(Math.random() * 1000)}`,
-      severity: actionData.severity,
-    });
-  }
-
-  return logs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-};
-
-const generateMockSessions = (): UserSession[] => {
-  const users = [
-    { id: '1', name: 'Rahul Sharma', role: 'Owner' },
-    { id: '2', name: 'Priya Patel', role: 'Admin' },
-    { id: '3', name: 'Amit Kumar', role: 'Trainer' },
-    { id: '4', name: 'Neha Singh', role: 'Staff' },
-  ];
-
-  const statuses: SessionStatus[] = ['online', 'offline', 'idle', 'away'];
-  const devices = [
-    { type: 'desktop' as const, browser: 'Chrome 120', os: 'Windows 11' },
-    { type: 'mobile' as const, browser: 'Safari 17', os: 'iOS 17' },
-  ];
-
-  return users.map((user, index) => ({
-    id: `session-${index}`,
-    odId: user.id,
-    userName: user.name,
-    userRole: user.role,
-    status: statuses[index % statuses.length],
-    loginTime: new Date(Date.now() - Math.random() * 8 * 60 * 60 * 1000).toISOString(),
-    lastActivity: new Date(Date.now() - Math.random() * 30 * 60 * 1000).toISOString(),
-    duration: Math.floor(Math.random() * 480),
-    ipAddress: `192.168.1.${100 + index}`,
-    location: 'Mumbai, India',
-    device: devices[index % devices.length],
-  }));
-};
-
 const AuditLogSection: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('activity');
   const [logs, setLogs] = useState<AuditLogEntry[]>([]);
@@ -284,72 +184,76 @@ const AuditLogSection: React.FC = () => {
       // Get gym ID from localStorage or context
       const gymId = localStorage.getItem('activeGymId') || '41';
       
-      // Fetch audit logs
-      try {
-        const logsResponse = await api.get(`/audit-logs?gymId=${gymId}&page=${page - 1}&size=${itemsPerPage}`);
-        if (logsResponse.data && logsResponse.data.logs && logsResponse.data.logs.length > 0) {
-          const mappedLogs = logsResponse.data.logs.map((log: any) => ({
-            id: log.id?.toString() || `log-${Math.random()}`,
-            timestamp: log.timestamp,
-            userId: log.userId?.toString() || '',
-            userName: log.userName || 'Unknown',
-            userRole: log.userRole || 'Unknown',
-            userAvatar: log.userAvatar,
-            action: log.action || 'UNKNOWN',
-            entity: log.entity || 'SYSTEM',
-            entityId: log.entityId,
-            entityName: log.entityName,
-            details: log.details || '',
-            changes: log.changes ? JSON.parse(log.changes) : undefined,
-            ipAddress: log.ipAddress || 'Unknown',
-            location: log.location,
-            device: log.deviceType ? {
-              type: log.deviceType,
-              browser: log.browser || 'Unknown',
-              os: log.os || 'Unknown'
-            } : undefined,
-            sessionId: log.sessionId,
-            severity: log.severity || 'info',
-            metadata: log.metadata ? JSON.parse(log.metadata) : undefined,
-          }));
-          setLogs(mappedLogs);
-        } else {
-          setLogs(generateMockLogs());
+        // Fetch audit logs
+        try {
+          const logsResponse = await api.get(`/audit-logs?gymId=${gymId}&page=${page - 1}&size=${itemsPerPage}`);
+          if (logsResponse.data && logsResponse.data.logs && logsResponse.data.logs.length > 0) {
+            const mappedLogs = logsResponse.data.logs.map((log: any) => ({
+              id: log.id?.toString() || `log-${Math.random()}`,
+              timestamp: log.timestamp,
+              userId: log.userId?.toString() || '',
+              userName: log.userName || 'Unknown',
+              userRole: log.userRole || 'Unknown',
+              userAvatar: log.userAvatar,
+              action: log.action || 'UNKNOWN',
+              entity: log.entity || 'SYSTEM',
+              entityId: log.entityId,
+              entityName: log.entityName,
+              details: log.details || '',
+              changes: log.changes ? JSON.parse(log.changes) : undefined,
+              ipAddress: log.ipAddress || 'Unknown',
+              location: log.location,
+              device: log.deviceType ? {
+                type: log.deviceType,
+                browser: log.browser || 'Unknown',
+                os: log.os || 'Unknown'
+              } : undefined,
+              sessionId: log.sessionId,
+              severity: log.severity || 'info',
+              metadata: log.metadata ? JSON.parse(log.metadata) : undefined,
+            }));
+            setLogs(mappedLogs);
+          } else {
+            // No logs from API - show empty state
+            setLogs([]);
+          }
+        } catch (err) {
+          console.error('Failed to fetch audit logs:', err);
+          // API failed - show empty state instead of mock data
+          setLogs([]);
         }
-      } catch (err) {
-        console.log('Using mock logs data:', err);
-        setLogs(generateMockLogs());
-      }
       
-      // Fetch user sessions
-      try {
-        const sessionsResponse = await api.get(`/audit-logs/sessions?gymId=${gymId}`);
-        if (sessionsResponse.data && sessionsResponse.data.length > 0) {
-          const mappedSessions = sessionsResponse.data.map((session: any) => ({
-            id: session.id?.toString() || `session-${Math.random()}`,
-            odId: session.userId?.toString() || '',
-            userName: session.userName || 'Unknown',
-            userRole: session.userRole || 'Unknown',
-            status: session.status || 'offline',
-            loginTime: session.loginTime,
-            lastActivity: session.lastActivityTime || session.loginTime,
-            duration: typeof session.duration === 'string' ? parseDuration(session.duration) : (session.duration || 0),
-            ipAddress: session.ipAddress || 'Unknown',
-            location: session.location,
-            device: session.deviceType ? {
-              type: session.deviceType,
-              browser: session.browser || 'Unknown',
-              os: session.os || 'Unknown'
-            } : undefined,
-          }));
-          setSessions(mappedSessions);
-        } else {
-          setSessions(generateMockSessions());
+        // Fetch user sessions
+        try {
+          const sessionsResponse = await api.get(`/audit-logs/sessions?gymId=${gymId}`);
+          if (sessionsResponse.data && sessionsResponse.data.length > 0) {
+            const mappedSessions = sessionsResponse.data.map((session: any) => ({
+              id: session.id?.toString() || `session-${Math.random()}`,
+              odId: session.userId?.toString() || '',
+              userName: session.userName || 'Unknown',
+              userRole: session.userRole || 'Unknown',
+              status: session.status || 'offline',
+              loginTime: session.loginTime,
+              lastActivity: session.lastActivityTime || session.loginTime,
+              duration: typeof session.duration === 'string' ? parseDuration(session.duration) : (session.duration || 0),
+              ipAddress: session.ipAddress || 'Unknown',
+              location: session.location,
+              device: session.deviceType ? {
+                type: session.deviceType,
+                browser: session.browser || 'Unknown',
+                os: session.os || 'Unknown'
+              } : undefined,
+            }));
+            setSessions(mappedSessions);
+          } else {
+            // No sessions from API - show empty state
+            setSessions([]);
+          }
+        } catch (err) {
+          console.error('Failed to fetch sessions:', err);
+          // API failed - show empty state instead of mock data
+          setSessions([]);
         }
-      } catch (err) {
-        console.log('Using mock sessions data:', err);
-        setSessions(generateMockSessions());
-      }
 
       // Fetch stats
       try {
@@ -828,13 +732,13 @@ const AuditLogSection: React.FC = () => {
                 </div>
               ))}
               
-              {paginatedLogs.length === 0 && (
-                <div className="audit-empty-state">
-                  <History size={48} />
-                  <h3>No logs found</h3>
-                  <p>Try adjusting your filters or search criteria</p>
-                </div>
-              )}
+                {paginatedLogs.length === 0 && (
+                  <div className="audit-empty-state">
+                    <History size={48} />
+                    <h3>No audit logs yet</h3>
+                    <p>Audit logs will appear here as users interact with the system. Login events, data changes, and security events will be tracked automatically.</p>
+                  </div>
+                )}
             </div>
 
             {/* Pagination */}
@@ -873,59 +777,67 @@ const AuditLogSection: React.FC = () => {
           </div>
         )}
 
-        {/* Sessions Tab */}
-        {activeTab === 'sessions' && (
-          <div className="audit-sessions-tab">
-            <div className="audit-sessions-list">
-              {sessions.map(session => (
-                <div key={session.id} className="audit-session-card">
-                  <div className="audit-session-header">
-                    <div className="audit-session-user">
-                      <div className="audit-session-avatar">
-                        {session.userName.charAt(0)}
-                      </div>
-                      <div className="audit-session-info">
-                        <span className="audit-session-name">{session.userName}</span>
-                        <span className="audit-session-role">{session.userRole}</span>
-                      </div>
-                    </div>
-                    <div className={`audit-session-status ${getSessionStatusClass(session.status)}`}>
-                      {session.status === 'online' && <Wifi size={10} />}
-                      {session.status === 'offline' && <WifiOff size={10} />}
-                      {session.status === 'idle' && <Clock size={10} />}
-                      {session.status === 'away' && <Eye size={10} />}
-                      {session.status}
-                    </div>
+          {/* Sessions Tab */}
+          {activeTab === 'sessions' && (
+            <div className="audit-sessions-tab">
+              <div className="audit-sessions-list">
+                {sessions.length === 0 ? (
+                  <div className="audit-empty-state">
+                    <Users size={48} />
+                    <h3>No active sessions</h3>
+                    <p>User sessions will appear here when users log in to the system.</p>
                   </div>
-                  <div className="audit-session-details">
-                    <div className="audit-session-detail">
-                      <LogIn size={12} />
-                      <span>Login: {formatTimestamp(session.loginTime)}</span>
-                    </div>
-                    <div className="audit-session-detail">
-                      <Activity size={12} />
-                      <span>Last Activity: {formatTimestamp(session.lastActivity)}</span>
-                    </div>
-                    <div className="audit-session-detail">
-                      <Timer size={12} />
-                      <span>Duration: {formatDuration(session.duration)}</span>
-                    </div>
-                    <div className="audit-session-detail">
-                      <Globe size={12} />
-                      <span>{session.ipAddress}</span>
-                    </div>
-                    {session.device && (
-                      <div className="audit-session-detail">
-                        {getDeviceIcon(session.device.type)}
-                        <span>{session.device.browser} / {session.device.os}</span>
+                ) : (
+                  sessions.map(session => (
+                    <div key={session.id} className="audit-session-card">
+                      <div className="audit-session-header">
+                        <div className="audit-session-user">
+                          <div className="audit-session-avatar">
+                            {session.userName.charAt(0)}
+                          </div>
+                          <div className="audit-session-info">
+                            <span className="audit-session-name">{session.userName}</span>
+                            <span className="audit-session-role">{session.userRole}</span>
+                          </div>
+                        </div>
+                        <div className={`audit-session-status ${getSessionStatusClass(session.status)}`}>
+                          {session.status === 'online' && <Wifi size={10} />}
+                          {session.status === 'offline' && <WifiOff size={10} />}
+                          {session.status === 'idle' && <Clock size={10} />}
+                          {session.status === 'away' && <Eye size={10} />}
+                          {session.status}
+                        </div>
                       </div>
-                    )}
-                  </div>
-                </div>
-              ))}
+                      <div className="audit-session-details">
+                        <div className="audit-session-detail">
+                          <LogIn size={12} />
+                          <span>Login: {formatTimestamp(session.loginTime)}</span>
+                        </div>
+                        <div className="audit-session-detail">
+                          <Activity size={12} />
+                          <span>Last Activity: {formatTimestamp(session.lastActivity)}</span>
+                        </div>
+                        <div className="audit-session-detail">
+                          <Timer size={12} />
+                          <span>Duration: {formatDuration(session.duration)}</span>
+                        </div>
+                        <div className="audit-session-detail">
+                          <Globe size={12} />
+                          <span>{session.ipAddress}</span>
+                        </div>
+                        {session.device && (
+                          <div className="audit-session-detail">
+                            {getDeviceIcon(session.device.type)}
+                            <span>{session.device.browser} / {session.device.os}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
         {/* Security Tab */}
         {activeTab === 'security' && (

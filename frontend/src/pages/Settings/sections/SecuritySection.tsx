@@ -131,13 +131,21 @@ const SecuritySection: React.FC = () => {
     setSettings(prev => ({ ...prev, [key]: value }))
   }
 
-  const handleSave = async () => {
-    setIsSaving(true)
-    try {
-      await api.put('/settings/gym/', settings)
-      localStorage.setItem("securitySettings", JSON.stringify(settings))
-      setOriginalSettings({ ...settings })
-      toast.success("Security settings saved")
+    const handleSave = async () => {
+      setIsSaving(true)
+      try {
+        // Convert all settings to string format for the backend
+        const settingsToSave = {
+          enforce2FA: String(settings.enforce2FA),
+          sessionTimeout: String(settings.sessionTimeout),
+          passwordExpiry: String(settings.passwordExpiry),
+          maxLoginAttempts: String(settings.maxLoginAttempts),
+          requireStrongPassword: String(settings.requireStrongPassword),
+        }
+        await api.put('/settings/gym', settingsToSave)
+        localStorage.setItem("securitySettings", JSON.stringify(settings))
+        setOriginalSettings({ ...settings })
+        toast.success("Security settings saved")
       
       const auditLog = JSON.parse(localStorage.getItem("auditLog") || "[]")
       auditLog.unshift({
