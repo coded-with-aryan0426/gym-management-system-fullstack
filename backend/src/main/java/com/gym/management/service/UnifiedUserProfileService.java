@@ -4,6 +4,7 @@ import com.gym.management.dto.MemberProfileDTO;
 import com.gym.management.dto.MemberProfileUpdateDTO;
 import com.gym.management.model.User;
 import com.gym.management.repository.UserRepository;
+import com.gym.management.repository.MembershipRepository;
 import com.gym.management.event.ProfileUpdateEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,9 @@ public class UnifiedUserProfileService {
     
     @Autowired
     private AuditLogService auditLogService;
+    
+    @Autowired
+    private MembershipRepository membershipRepository;
 
     /**
      * SINGLE POINT OF ENTRY for all user profile updates
@@ -85,14 +89,16 @@ public class UnifiedUserProfileService {
 
         // Log the profile update to audit log
         if (!changes.isEmpty()) {
-            // Determine gym ID (from the first membership or default to 41)
-            Long gymId = 41L; // Default gym ID
+            // Determine gym ID from context or default
+            Long gymId = null;
             try {
-                if (user.getMemberships() != null && !user.getMemberships().isEmpty()) {
-                    gymId = user.getMemberships().iterator().next().getGym().getGymId();
+                // Get gym ID from the first membership if available
+                var memberships = membershipRepository.findByUserUserId(userId);
+                if (memberships != null && !memberships.isEmpty()) {
+                    gymId = memberships.get(0).getGym() != null ? memberships.get(0).getGym().getGymId() : null;
                 }
             } catch (Exception e) {
-                // Use default
+                // Use null, audit service will handle it
             }
             
             String changesJson = String.join("; ", changes);

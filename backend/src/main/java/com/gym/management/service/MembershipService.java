@@ -97,13 +97,14 @@ public class MembershipService {
             String changes = String.format("{\"packageName\": \"%s\", \"months\": %d, \"startDate\": \"%s\", \"endDate\": \"%s\"}",
                 pkg.getPackageName(), months, newStartDate, newEndDate);
             auditLogService.logUpdate(
-                user,
-                membership.getGym() != null ? membership.getGym().getGymId() : null,
-                "MEMBERSHIP",
-                saved.getId().toString(),
-                user.getFullName() + " - " + pkg.getPackageName(),
-                "Membership renewed",
-                changes
+                "MEMBERSHIP",                                        // entity
+                saved.getId().toString(),                            // entityId
+                user.getFullName() + " - " + pkg.getPackageName(),   // entityName
+                user.getUserId(),                                    // userId
+                membership.getGym() != null ? membership.getGym().getGymId() : null, // gymId
+                "Membership renewed",                                // details
+                changes,                                             // changes
+                null                                                 // ipAddress
             );
         } catch (Exception e) {
             System.err.println("Failed to log membership renewal: " + e.getMessage());

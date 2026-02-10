@@ -241,13 +241,14 @@ public class MemberProfileService {
         if (!firstBefore) { // Only log if there were actual changes
             try {
                 auditLogService.logUpdate(
-                    user,
-                    null, // gymId - member profile updates are not gym specific
-                    "MEMBER",
-                    user.getUserId().toString(),
-                    user.getFullName(),
-                    "Member profile updated",
-                    changes.toString()
+                    "MEMBER",                           // entity
+                    user.getUserId().toString(),        // entityId
+                    user.getFullName(),                 // entityName
+                    user.getUserId(),                   // userId
+                    null,                               // gymId - member profile updates are not gym specific
+                    "Member profile updated",           // details
+                    changes.toString(),                 // changes
+                    null                                // ipAddress
                 );
             } catch (Exception e) {
                 System.err.println("Failed to log member profile update: " + e.getMessage());

@@ -163,13 +163,14 @@ public class GymSettingsService {
                 User currentUser = getCurrentUser();
                 if (currentUser != null) {
                     auditLogService.logUpdate(
-                        currentUser,
-                        null,
-                        "SETTINGS",
-                        "general",
-                        "General Settings",
-                        "Gym settings updated",
-                        changes.toString()
+                        "SETTINGS",                         // entity
+                        "general",                          // entityId
+                        "General Settings",                 // entityName
+                        currentUser.getUserId(),            // userId
+                        null,                               // gymId
+                        "Gym settings updated",             // details
+                        changes.toString(),                 // changes
+                        null                                // ipAddress
                     );
                 }
             } catch (Exception e) {
