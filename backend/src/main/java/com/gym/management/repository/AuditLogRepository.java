@@ -25,6 +25,11 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
     List<AuditLog> findTop100ByOrderByTimestampDesc();
 
     /**
+     * Find audit logs by gym with pagination
+     */
+    Page<AuditLog> findByGymGymIdOrderByTimestampDesc(Long gymId, Pageable pageable);
+
+    /**
      * Find audit logs by user name
      * @param userName The user name to search for
      * @return List of audit logs for the user
@@ -50,6 +55,26 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
             @Param("endDate") LocalDateTime endDate);
 
     /**
+     * Find audit logs by gym and date range
+     */
+    @Query("SELECT a FROM AuditLog a WHERE a.gym.gymId = :gymId AND a.timestamp BETWEEN :startDate AND :endDate ORDER BY a.timestamp DESC")
+    Page<AuditLog> findByGymAndTimestampBetween(
+            @Param("gymId") Long gymId,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            Pageable pageable);
+
+    /**
+     * Find audit logs by severity
+     */
+    Page<AuditLog> findBySeverityOrderByTimestampDesc(String severity, Pageable pageable);
+
+    /**
+     * Find audit logs by gym and severity
+     */
+    Page<AuditLog> findByGymGymIdAndSeverityOrderByTimestampDesc(Long gymId, String severity, Pageable pageable);
+
+    /**
      * Search audit logs by action or user name (case insensitive)
      * @param action The action to search
      * @param userName The user name to search
@@ -60,11 +85,63 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
             String action, String userName, Pageable pageable);
 
     /**
+     * Search audit logs by gym
+     */
+    @Query("SELECT a FROM AuditLog a WHERE a.gym.gymId = :gymId AND (LOWER(a.action) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(a.userName) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(a.details) LIKE LOWER(CONCAT('%', :query, '%'))) ORDER BY a.timestamp DESC")
+    Page<AuditLog> searchByGym(@Param("gymId") Long gymId, @Param("query") String query, Pageable pageable);
+
+    /**
      * Count audit logs by action type
      * @param action The action type
      * @return Count of logs with that action
      */
     Long countByAction(String action);
+
+    /**
+     * Count audit logs by gym and action
+     */
+    Long countByGymGymIdAndAction(Long gymId, String action);
+
+    /**
+     * Count today's logs
+     */
+    @Query("SELECT COUNT(a) FROM AuditLog a WHERE a.timestamp >= :startOfDay")
+    Long countTodayLogs(@Param("startOfDay") LocalDateTime startOfDay);
+
+    /**
+     * Count today's logs by gym
+     */
+    @Query("SELECT COUNT(a) FROM AuditLog a WHERE a.gym.gymId = :gymId AND a.timestamp >= :startOfDay")
+    Long countTodayLogsByGym(@Param("gymId") Long gymId, @Param("startOfDay") LocalDateTime startOfDay);
+
+    /**
+     * Count security alerts (high and critical severity)
+     */
+    @Query("SELECT COUNT(a) FROM AuditLog a WHERE a.severity IN ('high', 'critical')")
+    Long countSecurityAlerts();
+
+    /**
+     * Count security alerts by gym
+     */
+    @Query("SELECT COUNT(a) FROM AuditLog a WHERE a.gym.gymId = :gymId AND a.severity IN ('high', 'critical')")
+    Long countSecurityAlertsByGym(@Param("gymId") Long gymId);
+
+    /**
+     * Get action counts for analytics
+     */
+    @Query("SELECT a.action, COUNT(a) FROM AuditLog a WHERE a.gym.gymId = :gymId GROUP BY a.action ORDER BY COUNT(a) DESC")
+    List<Object[]> getActionCountsByGym(@Param("gymId") Long gymId);
+
+    /**
+     * Get severity counts for analytics
+     */
+    @Query("SELECT a.severity, COUNT(a) FROM AuditLog a WHERE a.gym.gymId = :gymId GROUP BY a.severity")
+    List<Object[]> getSeverityCountsByGym(@Param("gymId") Long gymId);
+
+    /**
+     * Count logs by gym
+     */
+    Long countByGymGymId(Long gymId);
 
     /**
      * Find audit logs by user role
@@ -79,4 +156,9 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
      * @param cutoffDate The date before which logs should be deleted
      */
     void deleteByTimestampBefore(LocalDateTime cutoffDate);
+
+    /**
+     * Delete audit logs by gym older than a specific date
+     */
+    void deleteByGymGymIdAndTimestampBefore(Long gymId, LocalDateTime cutoffDate);
 }
