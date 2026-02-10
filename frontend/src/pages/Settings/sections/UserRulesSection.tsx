@@ -1,13 +1,3 @@
-import React, { useState, useEffect } from 'react';
-import { Users, GraduationCap, UserCheck, Shield, Clock, Calendar, DollarSign, Award, UserPlus, Fingerprint, BookOpen, Gift, Bell, FileCheck, Briefcase, Target, Medal, ClipboardCheck, Heart, CreditCard, MapPin, Dumbbell } from 'lucide-react';
-import api from '../../../services/api';
-
-type UserRole = 'staff' | 'trainer' | 'member';
-
-interface TabConfig {
-  id: string;
-  label: string;"use client"
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Users, GraduationCap, UserCheck, Shield, Clock, Calendar, DollarSign, Award, 
