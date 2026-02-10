@@ -861,7 +861,7 @@ const UserRulesSection: React.FC = () => {
   if (loading) {
     return (
       <div className="settings-section">
-        <div className="settings-section__header">
+        <div className="settings-section__header settings-section__header--with-switcher">
           <div className="settings-section__title-group">
             <div className="settings-section__icon"><Users size={20} /></div>
             <div>
@@ -876,7 +876,7 @@ const UserRulesSection: React.FC = () => {
 
   return (
     <div className="settings-section">
-      <div className="settings-section__header">
+      <div className="settings-section__header settings-section__header--with-switcher">
         <div className="settings-section__title-group">
           <div className="settings-section__icon"><Users size={20} /></div>
           <div>
@@ -884,45 +884,48 @@ const UserRulesSection: React.FC = () => {
             <p className="settings-section__description">Manage rules for staff, trainers, and members</p>
           </div>
         </div>
-        {hasChanges && (
-          <button className="settings-save-btn" onClick={() => setShowConfirm(true)}>
-            Save Changes
-          </button>
-        )}
+        
+        <div className="settings-section__header-actions">
+          {/* Role Switcher in Header */}
+          <div className="role-switcher role-switcher--inline">
+            <div className="role-switcher__track">
+              <div 
+                className="role-switcher__indicator" 
+                style={{ transform: `translateX(${activeRole === 'staff' ? 0 : activeRole === 'trainer' ? 100 : 200}%)` }}
+              />
+              <button 
+                className={`role-switcher__btn ${activeRole === 'staff' ? 'active' : ''}`}
+                onClick={() => handleRoleChange('staff')}
+              >
+                <Briefcase size={14} />
+                <span>Staff</span>
+              </button>
+              <button 
+                className={`role-switcher__btn ${activeRole === 'trainer' ? 'active' : ''}`}
+                onClick={() => handleRoleChange('trainer')}
+              >
+                <GraduationCap size={14} />
+                <span>Trainer</span>
+              </button>
+              <button 
+                className={`role-switcher__btn ${activeRole === 'member' ? 'active' : ''}`}
+                onClick={() => handleRoleChange('member')}
+              >
+                <UserCheck size={14} />
+                <span>Member</span>
+              </button>
+            </div>
+          </div>
+
+          {hasChanges && (
+            <button className="settings-save-btn" onClick={() => setShowConfirm(true)}>
+              Save Changes
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="settings-section__content">
-        {/* Role Switcher */}
-        <div className="role-switcher">
-          <div className="role-switcher__track">
-            <div 
-              className="role-switcher__indicator" 
-              style={{ transform: `translateX(${activeRole === 'staff' ? 0 : activeRole === 'trainer' ? 100 : 200}%)` }}
-            />
-            <button 
-              className={`role-switcher__btn ${activeRole === 'staff' ? 'active' : ''}`}
-              onClick={() => handleRoleChange('staff')}
-            >
-              <Briefcase size={16} />
-              <span>Staff</span>
-            </button>
-            <button 
-              className={`role-switcher__btn ${activeRole === 'trainer' ? 'active' : ''}`}
-              onClick={() => handleRoleChange('trainer')}
-            >
-              <GraduationCap size={16} />
-              <span>Trainer</span>
-            </button>
-            <button 
-              className={`role-switcher__btn ${activeRole === 'member' ? 'active' : ''}`}
-              onClick={() => handleRoleChange('member')}
-            >
-              <UserCheck size={16} />
-              <span>Member</span>
-            </button>
-          </div>
-        </div>
-
         {/* Tabs */}
         <div className={`role-content ${slideDirection ? `slide-${slideDirection}` : ''}`}>
           <div className="settings-tabs">
