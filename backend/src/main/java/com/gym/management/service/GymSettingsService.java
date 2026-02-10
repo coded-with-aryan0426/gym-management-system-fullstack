@@ -6,9 +6,11 @@ import com.gym.management.dto.BlackoutDayDTO;
 import com.gym.management.model.GymSettings;
 import com.gym.management.model.BlackoutDay;
 import com.gym.management.model.User;
+import com.gym.management.model.Gym;
 import com.gym.management.repository.GymSettingsRepository;
 import com.gym.management.repository.BlackoutDayRepository;
 import com.gym.management.repository.UserRepository;
+import com.gym.management.repository.GymRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -36,6 +38,9 @@ public class GymSettingsService {
     
     @Autowired
     private UserRepository userRepository;
+    
+    @Autowired
+    private GymRepository gymRepository;
 
     public List<GymHoursDTO> getGymHours() {
         List<GymSettings> settings = gymSettingsRepository.findBySettingType("GYM_HOURS");
@@ -134,49 +139,215 @@ public class GymSettingsService {
     }
 
     public void updateAllSettings(Map<String, Object> settings) {
-        StringBuilder changes = new StringBuilder();
-        changes.append("{");
-        boolean first = true;
+        User currentUser = getCurrentUser();
+        Long gymId = getCurrentUserGymId(currentUser);
+        
+        // Group changes by category for better logging
+        Map<String, Map<String, Object>> categorizedChanges = new HashMap<>();
+        categorizedChanges.put("security", new HashMap<>());
+        categorizedChanges.put("appearance", new HashMap<>());
+        categorizedChanges.put("notifications", new HashMap<>());
+        categorizedChanges.put("userRules", new HashMap<>());
+        categorizedChanges.put("general", new HashMap<>());
         
         for (Map.Entry<String, Object> entry : settings.entrySet()) {
             String key = entry.getKey();
-            Object value = entry.getValue();
+            Object newValue = entry.getValue();
             
-            // Skip null or empty values to avoid database constraint violations
-            if (value == null || (value instanceof String && ((String) value).trim().isEmpty())) {
-                // If setting already exists, we might want to delete it or just skip
-                // For now, let's skip to avoid the constraint violation
+            // Skip null or empty values
+            if (newValue == null || (newValue instanceof String && ((String) newValue).trim().isEmpty())) {
                 continue;
             }
             
-            if (!first) changes.append(", ");
-            changes.append("\"").append(key).append("\": \"").append(value.toString()).append("\"");
-            first = false;
+            // Get the old value before updating
+            String oldValue = gymSettingsRepository.findBySettingKey(key)
+                    .map(GymSettings::getSettingValue)
+                    .orElse(null);
             
-            saveSetting(key, value.toString(), "GENERAL");
+            String newValueStr = newValue.toString();
+            
+            // Only log if value actually changed
+            if (oldValue == null || !oldValue.equals(newValueStr)) {
+                // Categorize the change
+                String category = categorizeSettingKey(key);
+                Map<String, Object> changeDetail = new HashMap<>();
+                changeDetail.put("old", oldValue);
+                changeDetail.put("new", newValueStr);
+                categorizedChanges.get(category).put(key, changeDetail);
+            }
+            
+            // Save the setting
+            saveSetting(key, newValueStr, "GENERAL");
         }
-        changes.append("}");
         
-        // Log the settings update
-        if (!first) {
-            try {
-                User currentUser = getCurrentUser();
-                if (currentUser != null) {
+        // Log each category of changes separately for micro-level tracking
+        for (Map.Entry<String, Map<String, Object>> categoryEntry : categorizedChanges.entrySet()) {
+            String category = categoryEntry.getKey();
+            Map<String, Object> changes = categoryEntry.getValue();
+            
+            if (!changes.isEmpty() && currentUser != null) {
+                try {
+                    String entityName = getCategoryDisplayName(category);
+                    String changesJson = buildChangesJson(changes);
+                    String details = buildChangeDetails(category, changes);
+                    
                     auditLogService.logUpdate(
                         "SETTINGS",                         // entity
-                        "general",                          // entityId
-                        "General Settings",                 // entityName
+                        category,                           // entityId (category name)
+                        entityName,                         // entityName
                         currentUser.getUserId(),            // userId
-                        null,                               // gymId
-                        "Gym settings updated",             // details
-                        changes.toString(),                 // changes
+                        gymId,                              // gymId
+                        details,                            // details (human readable)
+                        changesJson,                        // changes (JSON with old/new)
                         null                                // ipAddress
                     );
+                } catch (Exception e) {
+                    System.err.println("Failed to log " + category + " settings update: " + e.getMessage());
                 }
-            } catch (Exception e) {
-                System.err.println("Failed to log settings update: " + e.getMessage());
             }
         }
+    }
+    
+    private Long getCurrentUserGymId(User user) {
+        if (user == null) return null;
+        try {
+            // First try to find gym where user is owner
+            return gymRepository.findFirstByOwnerUserIdOrderByCreatedAtDesc(user.getUserId())
+                    .map(Gym::getGymId)
+                    .orElse(null);
+        } catch (Exception e) {
+            System.err.println("Failed to get user's gym ID: " + e.getMessage());
+            return null;
+        }
+    }
+    
+    private String categorizeSettingKey(String key) {
+        // Security settings
+        if (key.contains("password") || key.contains("Password") || 
+            key.contains("2fa") || key.contains("twoFactor") ||
+            key.contains("session") || key.contains("Session") ||
+            key.contains("login") || key.contains("Login") ||
+            key.contains("security") || key.contains("Security") ||
+            key.contains("lockout") || key.contains("Lockout")) {
+            return "security";
+        }
+        // Appearance settings
+        if (key.contains("theme") || key.contains("Theme") ||
+            key.contains("color") || key.contains("Color") ||
+            key.contains("dark") || key.contains("Dark") ||
+            key.contains("light") || key.contains("Light") ||
+            key.contains("appearance") || key.contains("Appearance") ||
+            key.contains("font") || key.contains("Font") ||
+            key.contains("accent") || key.contains("Accent")) {
+            return "appearance";
+        }
+        // Notification settings
+        if (key.contains("notification") || key.contains("Notification") ||
+            key.contains("email") || key.contains("Email") ||
+            key.contains("sms") || key.contains("Sms") ||
+            key.contains("push") || key.contains("Push") ||
+            key.contains("alert") || key.contains("Alert")) {
+            return "notifications";
+        }
+        // User rules settings
+        if (key.contains("rule") || key.contains("Rule") ||
+            key.contains("permission") || key.contains("Permission") ||
+            key.contains("access") || key.contains("Access") ||
+            key.contains("member") || key.contains("Member") ||
+            key.contains("staff") || key.contains("Staff") ||
+            key.contains("freeze") || key.contains("Freeze") ||
+            key.contains("cancel") || key.contains("Cancel") ||
+            key.contains("gracePeriod") || key.contains("GracePeriod")) {
+            return "userRules";
+        }
+        return "general";
+    }
+    
+    private String getCategoryDisplayName(String category) {
+        switch (category) {
+            case "security": return "Security Settings";
+            case "appearance": return "Appearance Settings";
+            case "notifications": return "Notification Settings";
+            case "userRules": return "User Rules & Permissions";
+            default: return "General Settings";
+        }
+    }
+    
+    private String buildChangesJson(Map<String, Object> changes) {
+        StringBuilder json = new StringBuilder("{");
+        boolean first = true;
+        for (Map.Entry<String, Object> entry : changes.entrySet()) {
+            if (!first) json.append(", ");
+            first = false;
+            
+            @SuppressWarnings("unchecked")
+            Map<String, Object> changeDetail = (Map<String, Object>) entry.getValue();
+            String oldVal = changeDetail.get("old") != null ? changeDetail.get("old").toString() : "null";
+            String newVal = changeDetail.get("new") != null ? changeDetail.get("new").toString() : "null";
+            
+            // Escape quotes in values
+            oldVal = oldVal.replace("\"", "\\\"");
+            newVal = newVal.replace("\"", "\\\"");
+            
+            json.append("\"").append(entry.getKey()).append("\": {")
+                .append("\"from\": \"").append(oldVal).append("\", ")
+                .append("\"to\": \"").append(newVal).append("\"}");
+        }
+        json.append("}");
+        return json.toString();
+    }
+    
+    private String buildChangeDetails(String category, Map<String, Object> changes) {
+        StringBuilder details = new StringBuilder();
+        details.append(getCategoryDisplayName(category)).append(": ");
+        
+        int count = changes.size();
+        if (count == 1) {
+            String key = changes.keySet().iterator().next();
+            @SuppressWarnings("unchecked")
+            Map<String, Object> changeDetail = (Map<String, Object>) changes.get(key);
+            String oldVal = changeDetail.get("old") != null ? changeDetail.get("old").toString() : "none";
+            String newVal = changeDetail.get("new") != null ? changeDetail.get("new").toString() : "none";
+            details.append(formatSettingName(key))
+                   .append(" changed from '").append(truncateValue(oldVal))
+                   .append("' to '").append(truncateValue(newVal)).append("'");
+        } else {
+            details.append(count).append(" settings changed (");
+            boolean first = true;
+            for (String key : changes.keySet()) {
+                if (!first) details.append(", ");
+                first = false;
+                details.append(formatSettingName(key));
+            }
+            details.append(")");
+        }
+        
+        return details.toString();
+    }
+    
+    private String formatSettingName(String key) {
+        // Convert camelCase or snake_case to readable format
+        String formatted = key.replaceAll("([a-z])([A-Z])", "$1 $2")
+                             .replaceAll("_", " ");
+        // Capitalize first letter of each word
+        String[] words = formatted.split(" ");
+        StringBuilder result = new StringBuilder();
+        for (String word : words) {
+            if (word.length() > 0) {
+                if (result.length() > 0) result.append(" ");
+                result.append(Character.toUpperCase(word.charAt(0)))
+                      .append(word.substring(1).toLowerCase());
+            }
+        }
+        return result.toString();
+    }
+    
+    private String truncateValue(String value) {
+        if (value == null) return "none";
+        if (value.length() > 50) {
+            return value.substring(0, 47) + "...";
+        }
+        return value;
     }
     
     private User getCurrentUser() {

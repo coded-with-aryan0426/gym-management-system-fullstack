@@ -31,6 +31,7 @@ public class AuthService {
     private final JwtTokenProvider tokenProvider;
     private final UserRepository userRepository;
     private final PermissionService permissionService;
+    private final AuditLogService auditLogService;
 
     /**
      * Authenticate user and generate JWT token with roles and permissions
@@ -89,10 +90,46 @@ public class AuthService {
             response.setIsFirstLogin(user.getIsFirstLogin());
 
             log.info("User {} authenticated successfully with roles: {}", username, roleNames);
+            
+            // Log successful login
+            try {
+                auditLogService.logAction(
+                    "LOGIN",
+                    "USER",
+                    user.getUserId().toString(),
+                    user.getFullName(),
+                    user.getUserId(),
+                    null, // gymId
+                    "User logged in successfully with roles: " + roleNames,
+                    "{\"roles\": \"" + roleNames + "\", \"primaryRole\": \"" + primaryRoleName + "\"}",
+                    null
+                );
+            } catch (Exception logEx) {
+                log.warn("Failed to log login event: {}", logEx.getMessage());
+            }
+            
             return response;
 
         } catch (Exception e) {
             log.error("Authentication failed for user: {}", authRequest.getUsername(), e);
+            
+            // Log failed login attempt
+            try {
+                auditLogService.logAction(
+                    "LOGIN_FAILED",
+                    "USER",
+                    authRequest.getUsername(),
+                    authRequest.getUsername(),
+                    null,
+                    null,
+                    "Login failed: " + e.getMessage(),
+                    "{\"username\": \"" + authRequest.getUsername() + "\", \"reason\": \"" + e.getMessage().replace("\"", "'") + "\"}",
+                    null
+                );
+            } catch (Exception logEx) {
+                log.warn("Failed to log failed login event: {}", logEx.getMessage());
+            }
+            
             throw new RuntimeException("Authentication failed: " + e.getMessage());
         }
     }
@@ -258,6 +295,29 @@ public class AuthService {
      * Logout user (clear security context)
      */
     public void logout() {
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.getPrincipal() instanceof org.springframework.security.core.userdetails.UserDetails) {
+                String username = ((org.springframework.security.core.userdetails.UserDetails) auth.getPrincipal()).getUsername();
+                User user = userRepository.findByEmail(username).orElse(null);
+                if (user != null) {
+                    auditLogService.logAction(
+                        "LOGOUT",
+                        "USER",
+                        user.getUserId().toString(),
+                        user.getFullName(),
+                        user.getUserId(),
+                        null,
+                        "User logged out",
+                        null,
+                        null
+                    );
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Failed to log logout event: {}", e.getMessage());
+        }
+        
         SecurityContextHolder.clearContext();
         log.info("User logged out successfully");
     }

@@ -157,6 +157,15 @@ public class AuditLogService {
         return convertToDTO(saved);
     }
 
+    /**
+     * Log an action with simplified parameters (for AuthService and similar)
+     */
+    public AuditLog logAction(String action, String entity, String entityId, String entityName,
+                              Long userId, Long gymId, String details, String changes, String ipAddress) {
+        return logAction(action, entity, entityId, entityName, userId, gymId, 
+                details, "info", ipAddress, null, null, null, null, changes);
+    }
+
     // ==================== LOGIN/LOGOUT TRACKING ====================
 
     /**
