@@ -199,8 +199,15 @@ const AuditLogSection: React.FC = () => {
               entity: log.entity || 'SYSTEM',
               entityId: log.entityId,
               entityName: log.entityName,
-              details: log.details || '',
-              changes: log.changes ? JSON.parse(log.changes) : undefined,
+                details: log.details || '',
+                changes: log.changes ? (() => {
+                  try {
+                    return JSON.parse(log.changes);
+                  } catch {
+                    // Handle Java Map.toString() format like {key=value}
+                    return { raw: log.changes };
+                  }
+                })() : undefined,
               ipAddress: log.ipAddress || 'Unknown',
               location: log.location,
               device: log.deviceType ? {
@@ -209,8 +216,14 @@ const AuditLogSection: React.FC = () => {
                 os: log.os || 'Unknown'
               } : undefined,
               sessionId: log.sessionId,
-              severity: log.severity || 'info',
-              metadata: log.metadata ? JSON.parse(log.metadata) : undefined,
+                severity: log.severity || 'info',
+                metadata: log.metadata ? (() => {
+                  try {
+                    return JSON.parse(log.metadata);
+                  } catch {
+                    return { raw: log.metadata };
+                  }
+                })() : undefined,
             }));
             setLogs(mappedLogs);
           } else {

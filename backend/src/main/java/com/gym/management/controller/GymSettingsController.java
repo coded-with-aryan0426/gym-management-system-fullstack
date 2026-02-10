@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
 @RequestMapping("/api/settings/gym")
@@ -243,32 +244,33 @@ public class GymSettingsController {
                 }
             }
 
-            // Log the profile update to audit log
-            try {
-                StringBuilder changes = new StringBuilder();
-                changes.append("{");
-                boolean first = true;
-                for (Map.Entry<String, Object> entry : data.entrySet()) {
-                    if (entry.getValue() != null) {
-                        if (!first) changes.append(", ");
-                        changes.append("\"").append(entry.getKey()).append("\": \"").append(entry.getValue()).append("\"");
-                        first = false;
-                    }
-                }
-                changes.append("}");
-                
-                auditLogService.logUpdate(
-                    user,
-                    gymOpt.map(Gym::getGymId).orElse(null),
-                    "USER",
-                    user.getUserId().toString(),
-                    user.getFullName(),
-                    "Owner profile updated",
-                    changes.toString()
-                );
-            } catch (Exception auditEx) {
-                System.err.println("Failed to log owner profile update: " + auditEx.getMessage());
-            }
+              // Log the profile update to audit log
+              try {
+                  Long gymId = gymRepository.findFirstByOwnerUserIdOrderByCreatedAtDesc(userId)
+                      .map(Gym::getGymId).orElse(null);
+                  
+                  // Convert changes to proper JSON format
+                  String changesJson;
+                  try {
+                      ObjectMapper mapper = new ObjectMapper();
+                      changesJson = mapper.writeValueAsString(data);
+                  } catch (Exception e) {
+                      changesJson = "{}";
+                  }
+                  
+                  auditLogService.logUpdate(
+                      "PROFILE",                           // entity
+                      user.getUserId().toString(),         // entityId
+                      user.getFullName(),                  // entityName
+                      userId,                              // userId
+                      gymId,                               // gymId
+                      "Owner profile updated",             // details
+                      changesJson,                         // changes (proper JSON)
+                      null                                 // ipAddress
+                  );
+              } catch (Exception auditEx) {
+                  System.err.println("Failed to log owner profile update: " + auditEx.getMessage());
+              }
             
             return ResponseEntity.ok(Map.of("message", "Profile updated successfully"));
         } catch (Exception e) {
