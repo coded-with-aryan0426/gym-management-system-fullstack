@@ -281,27 +281,112 @@ const AuditLogSection: React.FC = () => {
     try {
       setLoading(true);
       
-      // Try to fetch from backend
+      // Get gym ID from localStorage or context
+      const gymId = localStorage.getItem('activeGymId') || '41';
+      
+      // Fetch audit logs
       try {
-        const response = await api.get('/audit-logs');
-        if (response.data && response.data.length > 0) {
-          const mappedLogs = response.data.map((log: any) => ({
-            ...log,
+        const logsResponse = await api.get(`/audit-logs?gymId=${gymId}&page=${page - 1}&size=${itemsPerPage}`);
+        if (logsResponse.data && logsResponse.data.logs && logsResponse.data.logs.length > 0) {
+          const mappedLogs = logsResponse.data.logs.map((log: any) => ({
+            id: log.id?.toString() || `log-${Math.random()}`,
+            timestamp: log.timestamp,
+            userId: log.userId?.toString() || '',
+            userName: log.userName || 'Unknown',
+            userRole: log.userRole || 'Unknown',
+            userAvatar: log.userAvatar,
+            action: log.action || 'UNKNOWN',
+            entity: log.entity || 'SYSTEM',
+            entityId: log.entityId,
+            entityName: log.entityName,
+            details: log.details || '',
+            changes: log.changes ? JSON.parse(log.changes) : undefined,
+            ipAddress: log.ipAddress || 'Unknown',
+            location: log.location,
+            device: log.deviceType ? {
+              type: log.deviceType,
+              browser: log.browser || 'Unknown',
+              os: log.os || 'Unknown'
+            } : undefined,
+            sessionId: log.sessionId,
             severity: log.severity || 'info',
+            metadata: log.metadata ? JSON.parse(log.metadata) : undefined,
           }));
           setLogs(mappedLogs);
         } else {
           setLogs(generateMockLogs());
         }
-      } catch {
+      } catch (err) {
+        console.log('Using mock logs data:', err);
         setLogs(generateMockLogs());
       }
       
-      setSessions(generateMockSessions());
-      calculateStats();
+      // Fetch user sessions
+      try {
+        const sessionsResponse = await api.get(`/audit-logs/sessions?gymId=${gymId}`);
+        if (sessionsResponse.data && sessionsResponse.data.length > 0) {
+          const mappedSessions = sessionsResponse.data.map((session: any) => ({
+            id: session.id?.toString() || `session-${Math.random()}`,
+            odId: session.userId?.toString() || '',
+            userName: session.userName || 'Unknown',
+            userRole: session.userRole || 'Unknown',
+            status: session.status || 'offline',
+            loginTime: session.loginTime,
+            lastActivity: session.lastActivityTime || session.loginTime,
+            duration: typeof session.duration === 'string' ? parseDuration(session.duration) : (session.duration || 0),
+            ipAddress: session.ipAddress || 'Unknown',
+            location: session.location,
+            device: session.deviceType ? {
+              type: session.deviceType,
+              browser: session.browser || 'Unknown',
+              os: session.os || 'Unknown'
+            } : undefined,
+          }));
+          setSessions(mappedSessions);
+        } else {
+          setSessions(generateMockSessions());
+        }
+      } catch (err) {
+        console.log('Using mock sessions data:', err);
+        setSessions(generateMockSessions());
+      }
+
+      // Fetch stats
+      try {
+        const statsResponse = await api.get(`/audit-logs/stats?gymId=${gymId}`);
+        if (statsResponse.data) {
+          const apiStats = statsResponse.data;
+          setStats({
+            totalLogs: apiStats.totalLogs || 0,
+            todayLogs: apiStats.todayLogs || 0,
+            loginCount: 0,
+            errorCount: 0,
+            activeUsers: apiStats.onlineUsers || 0,
+            avgSessionDuration: typeof apiStats.avgSessionTime === 'string' ? parseDuration(apiStats.avgSessionTime) : (apiStats.avgSessionTime || 0),
+            topActions: (apiStats.topActions || []).map((a: any) => ({ action: a.action, count: a.count })),
+            securityAlerts: apiStats.securityAlerts || 0,
+          });
+        }
+      } catch (err) {
+        console.log('Stats fetch failed, calculating from logs:', err);
+        calculateStats();
+      }
     } finally {
       setLoading(false);
     }
+  };
+  
+  // Helper function to parse duration string (e.g., "2h 30m") to minutes
+  const parseDuration = (durationStr: string): number => {
+    if (!durationStr) return 0;
+    let minutes = 0;
+    const hoursMatch = durationStr.match(/(\d+)h/);
+    const minsMatch = durationStr.match(/(\d+)m/);
+    const daysMatch = durationStr.match(/(\d+)d/);
+    if (daysMatch) minutes += parseInt(daysMatch[1]) * 24 * 60;
+    if (hoursMatch) minutes += parseInt(hoursMatch[1]) * 60;
+    if (minsMatch) minutes += parseInt(minsMatch[1]);
+    return minutes;
   };
 
   const refreshData = async () => {

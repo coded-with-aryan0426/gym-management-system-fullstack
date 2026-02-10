@@ -25,13 +25,13 @@ public class UserSessionDTO {
     private String status; // online, offline, idle, away
     private LocalDateTime loginTime;
     private LocalDateTime logoutTime;
-    private LocalDateTime lastActivity;
-    private Long duration; // in seconds
+    private LocalDateTime lastActivityTime;
+    private String duration; // formatted string like "2h 30m"
     private String ipAddress;
     private String location;
     private String deviceType;
     private String browser;
     private String os;
-    private String sessionId;
+    private String sessionToken;
     private Long gymId;
 }

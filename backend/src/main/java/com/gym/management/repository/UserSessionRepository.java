@@ -88,4 +88,16 @@ public interface UserSessionRepository extends JpaRepository<UserSession, Long> 
     void cleanupExpiredSessions(@Param("now") LocalDateTime now, @Param("cutoff") LocalDateTime cutoff);
 
     Long countByUserUserIdAndIsActive(Long userId, Boolean isActive);
+
+    // Additional methods for audit log
+    List<UserSession> findByGymGymIdOrderByCreatedAtDesc(Long gymId);
+
+    List<UserSession> findByGymGymIdAndStatusOrderByCreatedAtDesc(Long gymId, String status);
+
+    List<UserSession> findByUserUserIdAndStatus(Long userId, String status);
+
+    Long countByGymGymIdAndStatus(Long gymId, String status);
+
+    @Query("SELECT AVG(TIMESTAMPDIFF(MINUTE, s.createdAt, COALESCE(s.logoutAt, CURRENT_TIMESTAMP))) FROM UserSession s WHERE s.gym.gymId = :gymId AND s.createdAt > :since")
+    Double calculateAverageSessionDurationByGym(@Param("gymId") Long gymId, @Param("since") LocalDateTime since);
 }
