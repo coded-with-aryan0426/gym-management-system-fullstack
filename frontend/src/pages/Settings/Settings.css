@@ -2544,3 +2544,240 @@ body.light-mode .confirm-dialog__summary {
   font-size: 13px;
   margin: 0;
 }
+
+/* =============================================================================
+   Role Switcher - Animated Segmented Control
+   ============================================================================= */
+
+.role-switcher {
+  margin-bottom: 20px;
+}
+
+.role-switcher__track {
+  display: flex;
+  position: relative;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--settings-border);
+  border-radius: 12px;
+  padding: 4px;
+  gap: 4px;
+}
+
+.role-switcher__indicator {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: calc(33.333% - 4px);
+  height: calc(100% - 8px);
+  background: linear-gradient(135deg, var(--settings-accent-red) 0%, #dc2626 100%);
+  border-radius: 8px;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(230, 57, 70, 0.3);
+  z-index: 0;
+}
+
+.role-switcher__btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--settings-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.role-switcher__btn:hover:not(.active) {
+  color: var(--settings-text-primary);
+}
+
+.role-switcher__btn.active {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.role-switcher__btn svg {
+  transition: transform 0.2s ease;
+}
+
+.role-switcher__btn:hover svg {
+  transform: scale(1.1);
+}
+
+/* Slide Animation for Role Content */
+.role-content {
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.role-content.slide-left {
+  animation: slideOutLeft 0.15s ease forwards;
+}
+
+.role-content.slide-right {
+  animation: slideOutRight 0.15s ease forwards;
+}
+
+@keyframes slideOutLeft {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Light Mode - Role Switcher */
+:root.theme-light .role-switcher__track,
+[data-theme="light"] .role-switcher__track,
+body.light-mode .role-switcher__track {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: var(--border-primary, #CBD5E1);
+}
+
+:root.theme-light .role-switcher__indicator,
+[data-theme="light"] .role-switcher__indicator,
+body.light-mode .role-switcher__indicator {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.25);
+}
+
+:root.theme-light .role-switcher__btn,
+[data-theme="light"] .role-switcher__btn,
+body.light-mode .role-switcher__btn {
+  color: var(--text-secondary, #64748B);
+}
+
+:root.theme-light .role-switcher__btn:hover:not(.active),
+[data-theme="light"] .role-switcher__btn:hover:not(.active),
+body.light-mode .role-switcher__btn:hover:not(.active) {
+  color: var(--text-primary, #0F172A);
+}
+
+/* =============================================================================
+   Enhanced Confirmation Dialog Styles
+   ============================================================================= */
+
+.change-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--settings-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.change-values {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.change-old {
+  color: var(--settings-accent-danger);
+  text-decoration: line-through;
+  opacity: 0.8;
+  background: rgba(239, 68, 68, 0.08);
+  padding: 4px 10px;
+  border-radius: 6px;
+  max-width: 45%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.change-arrow {
+  color: var(--settings-text-tertiary);
+  flex-shrink: 0;
+}
+
+.change-new {
+  color: var(--settings-accent-success);
+  font-weight: 600;
+  background: rgba(16, 185, 129, 0.08);
+  padding: 4px 10px;
+  border-radius: 6px;
+  max-width: 45%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.changes-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  background: rgba(230, 57, 70, 0.08);
+  border: 1px solid rgba(230, 57, 70, 0.2);
+  border-radius: 8px;
+}
+
+.changes-count {
+  font-size: 13px;
+  color: var(--settings-accent-red);
+  font-weight: 600;
+}
+
+/* Light Mode - Enhanced Changes */
+:root.theme-light .change-old,
+[data-theme="light"] .change-old,
+body.light-mode .change-old {
+  background: rgba(239, 68, 68, 0.06);
+}
+
+:root.theme-light .change-new,
+[data-theme="light"] .change-new,
+body.light-mode .change-new {
+  background: rgba(16, 185, 129, 0.06);
+}
+
+:root.theme-light .changes-summary,
+[data-theme="light"] .changes-summary,
+body.light-mode .changes-summary {
+  background: rgba(220, 38, 38, 0.06);
+  border-color: rgba(220, 38, 38, 0.15);
+}
