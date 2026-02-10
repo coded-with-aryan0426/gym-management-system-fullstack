@@ -791,6 +791,22 @@ body.light-mode .info-icon[data-tooltip]:hover::after {
   border-bottom: 1px solid var(--settings-border-subtle);
 }
 
+/* When header has toggle on right */
+.form-group__header .policy-toggle {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.form-group__header .form-group__title {
+  flex: 1;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  margin: 0;
+  color: inherit;
+}
+
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -2063,15 +2079,15 @@ select.dense-input option {
 .settings-tab {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
+  gap: 5px;
+  padding: 6px 10px;
   border: 1px solid transparent;
   background: transparent;
   color: var(--settings-text-tertiary);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 500;
   cursor: pointer;
-  border-radius: 7px;
+  border-radius: 6px;
   transition: all 0.2s ease;
   white-space: nowrap;
   position: relative;
@@ -2101,8 +2117,8 @@ select.dense-input option {
 
 .settings-tab svg {
   flex-shrink: 0;
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   transition: transform 0.2s ease;
 }
 
@@ -3419,88 +3435,36 @@ body.light-mode .role-switcher__indicator {
    Notifications Section Styles
    ============================================================================= */
 
-/* Channel Section Card */
-.channel-section {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid var(--settings-border);
-  border-radius: 12px;
-  margin-bottom: 16px;
-  overflow: hidden;
-}
-
-.channel-section:last-child {
-  margin-bottom: 0;
-}
-
-.channel-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 18px;
-  background: rgba(255, 255, 255, 0.02);
-  border-bottom: 1px solid transparent;
-  transition: all 0.2s ease;
-}
-
-.channel-header.expanded {
-  border-bottom-color: var(--settings-border);
-}
-
-.channel-header-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.channel-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  background: rgba(230, 57, 70, 0.1);
-  border-radius: 8px;
-  color: var(--settings-accent-red);
-}
-
-.channel-icon svg {
-  width: 16px;
-  height: 16px;
-}
-
-.channel-title {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--settings-text-primary);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.channel-content {
-  padding: 18px;
-  animation: fadeIn 0.2s ease;
-}
-
-.channel-content.collapsed {
-  display: none;
-}
-
-/* Channel Configuration Grid */
-.channel-config-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
+/* Notification Section Container - Prevent Overflow */
+.channels-tab,
+.member-notifications-tab,
+.staff-notifications-tab,
+.templates-tab,
+.automation-tab,
+.system-alerts-tab {
   width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
   box-sizing: border-box;
 }
 
-@media (max-width: 900px) {
+/* Channel Configuration Grid - Fixed Layout */
+.channel-config-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 12px;
+}
+
+@media (max-width: 1100px) {
   .channel-config-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media (max-width: 500px) {
+@media (max-width: 600px) {
   .channel-config-grid {
     grid-template-columns: 1fr;
   }
@@ -3510,6 +3474,7 @@ body.light-mode .role-switcher__indicator {
   display: flex;
   flex-direction: column;
   gap: 5px;
+  min-width: 0;
 }
 
 .config-field--full {
@@ -3527,13 +3492,15 @@ body.light-mode .role-switcher__indicator {
 .config-field input,
 .config-field select,
 .config-field textarea {
-  padding: 9px 11px;
+  padding: 8px 10px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--settings-border);
-  border-radius: 8px;
+  border-radius: 6px;
   color: var(--settings-text-primary);
-  font-size: 13px;
+  font-size: 12px;
   transition: all 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .config-field input:focus,
@@ -3542,12 +3509,12 @@ body.light-mode .role-switcher__indicator {
   outline: none;
   border-color: var(--settings-accent-red);
   background: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.1);
+  box-shadow: 0 0 0 2px rgba(230, 57, 70, 0.1);
 }
 
 .config-field textarea {
   resize: vertical;
-  min-height: 60px;
+  min-height: 50px;
 }
 
 /* Inline Config */
@@ -3633,132 +3600,93 @@ body.light-mode .role-switcher__indicator {
   box-shadow: 0 2px 8px rgba(230, 57, 70, 0.3);
 }
 
-/* Push Options */
+/* Push Options - Contained Grid Layout */
 .push-options {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 10px;
-  margin-top: 14px;
-  padding: 14px;
-  background: rgba(255, 255, 255, 0.02);
-  border-radius: 10px;
-  border: 1px solid var(--settings-border);
+  margin-top: 12px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.push-option-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 14px;
+@media (max-width: 900px) {
+  .push-options {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .push-options {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Policy toggle row inside push-options (full width per cell) */
+.push-options .policy-toggle-row {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--settings-border);
-  border-radius: 10px;
-  transition: all 0.2s ease;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 0;
 }
 
-.push-option-card:hover {
+.push-options .policy-toggle-row:hover {
   background: rgba(255, 255, 255, 0.05);
   border-color: rgba(255, 255, 255, 0.15);
 }
 
-.push-option-info {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.push-options .policy-toggle-row__icon {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
 }
 
-.push-option-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
-  color: var(--settings-text-secondary);
-}
-
-.push-option-icon svg {
+.push-options .policy-toggle-row__icon svg {
   width: 14px;
   height: 14px;
 }
 
-.push-option-text h4 {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--settings-text-primary);
-  margin: 0 0 2px 0;
+.push-options .policy-toggle-row__label {
+  font-size: 11px;
 }
 
-.push-option-text p {
-  font-size: 10px;
-  color: var(--settings-text-tertiary);
-  margin: 0;
+.push-options .policy-toggle-row__hint {
+  font-size: 9px;
 }
 
-/* In-app notification config cards */
-.inapp-config-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 14px;
-  align-items: stretch;
-}
-
-.inapp-config-row > .config-field {
-  flex: 1 1 150px;
-  min-width: 140px;
-}
-
-.inapp-config-row > .policy-toggle-row {
-  flex: 1 1 180px;
-  min-width: 160px;
-}
-
-.inapp-toggle-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 14px;
+/* In-app notification config - Grid layout for mixed content */
+.channel-config-grid .policy-toggle-row {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--settings-border);
-  border-radius: 10px;
-  min-width: 160px;
-}
-
-.inapp-toggle-info {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.inapp-toggle-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  background: rgba(255, 255, 255, 0.05);
   border-radius: 8px;
-  color: var(--settings-text-secondary);
+  padding: 10px 12px;
+  margin: 0;
+  min-width: 0;
 }
 
-.inapp-toggle-icon svg {
+.channel-config-grid .policy-toggle-row:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.channel-config-grid .policy-toggle-row__icon {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+}
+
+.channel-config-grid .policy-toggle-row__icon svg {
   width: 14px;
   height: 14px;
 }
 
-.inapp-toggle-text h4 {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--settings-text-primary);
-  margin: 0 0 2px 0;
+.channel-config-grid .policy-toggle-row__label {
+  font-size: 11px;
 }
 
-.inapp-toggle-text p {
-  font-size: 10px;
-  color: var(--settings-text-tertiary);
-  margin: 0;
+.channel-config-grid .policy-toggle-row__hint {
+  font-size: 9px;
 }
 
 /* Quiet Hours Section */
