@@ -797,6 +797,147 @@ body.light-mode .info-icon[data-tooltip]:hover::after {
   gap: 12px 16px;
 }
 
+/* =============================================================================
+   Settings Form Grid - User Rules Section
+   ============================================================================= */
+
+.settings-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.settings-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--settings-border-subtle);
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.settings-form-group:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--settings-border);
+}
+
+.settings-form-group > label:first-child {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--settings-text-primary);
+  letter-spacing: -0.01em;
+}
+
+.settings-form-group .input-hint {
+  font-size: 11px;
+  color: var(--settings-text-tertiary);
+  margin-top: -6px;
+  line-height: 1.4;
+}
+
+.settings-input,
+.settings-select {
+  width: 100%;
+  padding: 10px 14px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--settings-border);
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--settings-text-primary);
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.settings-input:hover,
+.settings-select:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.settings-input:focus,
+.settings-select:focus {
+  border-color: var(--settings-accent-red);
+  box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.15);
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.settings-input::placeholder {
+  color: var(--settings-text-tertiary);
+}
+
+.settings-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666666' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+  padding-right: 36px;
+  cursor: pointer;
+}
+
+.settings-select option {
+  background: #1a1a1a;
+  color: var(--settings-text-primary);
+  padding: 10px;
+}
+
+/* Light Mode - Settings Form */
+:root.theme-light .settings-form-group,
+[data-theme="light"] .settings-form-group,
+body.light-mode .settings-form-group {
+  background: #F8FAFC;
+  border-color: var(--border-primary, #CBD5E1);
+}
+
+:root.theme-light .settings-form-group:hover,
+[data-theme="light"] .settings-form-group:hover,
+body.light-mode .settings-form-group:hover {
+  background: #F1F5F9;
+}
+
+:root.theme-light .settings-input,
+:root.theme-light .settings-select,
+[data-theme="light"] .settings-input,
+[data-theme="light"] .settings-select,
+body.light-mode .settings-input,
+body.light-mode .settings-select {
+  background: #ffffff;
+  border-color: var(--border-primary, #CBD5E1);
+  color: var(--text-primary, #0F172A);
+}
+
+:root.theme-light .settings-input:focus,
+:root.theme-light .settings-select:focus,
+[data-theme="light"] .settings-input:focus,
+[data-theme="light"] .settings-select:focus,
+body.light-mode .settings-input:focus,
+body.light-mode .settings-select:focus {
+  border-color: var(--settings-accent-red);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+  background: #ffffff;
+}
+
+:root.theme-light .settings-select option,
+[data-theme="light"] .settings-select option,
+body.light-mode .settings-select option {
+  background: #ffffff;
+}
+
+/* Responsive - Settings Form Grid */
+@media (max-width: 768px) {
+  .settings-form-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .settings-form-group {
+    padding: 14px;
+  }
+}
+
 .field-wrapper {
   display: flex;
   flex-direction: column;
@@ -1842,6 +1983,40 @@ select.dense-input option {
    Settings Tabs - Enterprise Horizontal Tab Navigation
    ============================================================================= */
 
+.settings-tabs-wrapper {
+  position: relative;
+  margin-bottom: 24px;
+}
+
+/* Scroll shadow indicators */
+.settings-tabs-wrapper::before,
+.settings-tabs-wrapper::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 40px;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.settings-tabs-wrapper::before {
+  left: 0;
+  background: linear-gradient(90deg, var(--settings-card-bg) 0%, transparent 100%);
+}
+
+.settings-tabs-wrapper::after {
+  right: 0;
+  background: linear-gradient(-90deg, var(--settings-card-bg) 0%, transparent 100%);
+}
+
+.settings-tabs-wrapper.can-scroll-left::before,
+.settings-tabs-wrapper.can-scroll-right::after {
+  opacity: 1;
+}
+
 .settings-tabs-container {
   margin: 0 20px 20px 20px;
   position: relative;
@@ -1849,46 +2024,57 @@ select.dense-input option {
 
 .settings-tabs {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  padding: 6px;
+  gap: 8px;
+  padding: 8px;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--settings-border);
-  border-radius: 12px;
+  border-radius: 14px;
   position: relative;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.settings-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .settings-tabs::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(230, 57, 70, 0.02) 0%, transparent 50%);
-  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(230, 57, 70, 0.03) 0%, transparent 50%);
+  border-radius: 14px;
   pointer-events: none;
 }
 
 .settings-tab {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  border: none;
+  gap: 10px;
+  padding: 12px 18px;
+  border: 1px solid transparent;
   background: transparent;
   color: var(--settings-text-tertiary);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  border-radius: 8px;
+  border-radius: 10px;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
   position: relative;
   z-index: 1;
+  flex-shrink: 0;
 }
 
 .settings-tab:hover {
   background: rgba(255, 255, 255, 0.06);
   color: var(--settings-text-secondary);
-  transform: translateY(-1px);
+  border-color: var(--settings-border-subtle);
+  transform: translateY(-2px);
 }
 
 .settings-tab.active,
@@ -1896,24 +2082,25 @@ select.dense-input option {
   background: linear-gradient(135deg, var(--settings-accent-red) 0%, #dc2626 100%);
   color: #ffffff;
   font-weight: 600;
-  box-shadow: 0 2px 8px rgba(230, 57, 70, 0.35);
+  box-shadow: 0 4px 12px rgba(230, 57, 70, 0.35), 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-color: transparent;
 }
 
 .settings-tab.active:hover,
 .settings-tab--active:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(230, 57, 70, 0.45);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(230, 57, 70, 0.45), 0 3px 6px rgba(0, 0, 0, 0.15);
 }
 
 .settings-tab svg {
   flex-shrink: 0;
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
   transition: transform 0.2s ease;
 }
 
 .settings-tab:hover svg {
-  transform: scale(1.1);
+  transform: scale(1.15);
 }
 
 .settings-tab.active svg,
@@ -1921,25 +2108,47 @@ select.dense-input option {
   color: #ffffff;
 }
 
+/* Tab text label */
+.settings-tab span {
+  line-height: 1.2;
+}
+
 /* Tab Icon Badge for notifications */
 .settings-tab__badge {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
   background: var(--settings-accent-red);
   color: #ffffff;
   font-size: 10px;
   font-weight: 700;
-  border-radius: 9px;
-  margin-left: 4px;
+  border-radius: 10px;
+  margin-left: 6px;
 }
 
 .settings-tab.active .settings-tab__badge,
 .settings-tab--active .settings-tab__badge {
   background: rgba(255, 255, 255, 0.25);
+}
+
+/* Tab Content Area */
+.settings-tab-content {
+  padding: 4px;
+  animation: fadeInUp 0.3s ease;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Light Mode - Tabs */
@@ -1965,8 +2174,10 @@ body.light-mode .settings-tab {
 :root.theme-light .settings-tab:hover,
 [data-theme="light"] .settings-tab:hover,
 body.light-mode .settings-tab:hover {
-  background: #F1F5F9;
+  background: #ffffff;
   color: #334155;
+  border-color: #E2E8F0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 :root.theme-light .settings-tab.active,
@@ -1977,25 +2188,39 @@ body.light-mode .settings-tab.active,
 body.light-mode .settings-tab--active {
   background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
   color: #ffffff;
-  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3), 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+:root.theme-light .settings-tabs-wrapper::before,
+[data-theme="light"] .settings-tabs-wrapper::before,
+body.light-mode .settings-tabs-wrapper::before {
+  background: linear-gradient(90deg, #ffffff 0%, transparent 100%);
+}
+
+:root.theme-light .settings-tabs-wrapper::after,
+[data-theme="light"] .settings-tabs-wrapper::after,
+body.light-mode .settings-tabs-wrapper::after {
+  background: linear-gradient(-90deg, #ffffff 0%, transparent 100%);
 }
 
 /* Responsive - Tabs */
 @media (max-width: 900px) {
   .settings-tabs {
-    gap: 4px;
-    padding: 4px;
+    gap: 6px;
+    padding: 6px;
+    border-radius: 12px;
   }
   
   .settings-tab {
-    padding: 8px 12px;
+    padding: 10px 14px;
     font-size: 12px;
-    gap: 6px;
+    gap: 8px;
+    border-radius: 8px;
   }
   
   .settings-tab svg {
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
   }
 }
 
