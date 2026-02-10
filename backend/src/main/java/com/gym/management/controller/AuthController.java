@@ -4,12 +4,14 @@ import com.gym.management.dto.*;
 import com.gym.management.model.*;
 import com.gym.management.repository.*;
 import com.gym.management.security.JwtTokenProvider;
+import com.gym.management.service.AuditLogService;
 import com.gym.management.service.OtpService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.*;
 
 @RestController
@@ -40,6 +42,9 @@ public class AuthController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private AuditLogService auditLogService;
 
     /**
      * V1 Simplified Login - No gym dependency
@@ -150,7 +155,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AuthRequest request) {
+    public ResponseEntity<?> login(@RequestBody AuthRequest request, HttpServletRequest httpRequest) {
         Optional<User> userOpt = userRepository.findByUsername(request.getUsername());
 
         if (userOpt.isEmpty()) {
@@ -162,12 +167,16 @@ public class AuthController {
         }
 
         if (userOpt.isEmpty()) {
+            // Log failed login
+            try { auditLogService.logFailedLogin(request.getUsername(), getClientIP(httpRequest), "User not found"); } catch (Exception ignored) {}
             return ResponseEntity.status(401).body(Map.of("error", "User not found"));
         }
 
         User user = userOpt.get();
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            // Log failed login
+            try { auditLogService.logFailedLogin(request.getUsername(), getClientIP(httpRequest), "Invalid password"); } catch (Exception ignored) {}
             return ResponseEntity.status(401).body(Map.of("error", "Invalid password"));
         }
 
@@ -210,6 +219,17 @@ public class AuthController {
 
         String token = tokenProvider.generateTokenFromUser(user, "STAFF", response.getActiveGymId(), userRole, null, null, null, null);
         response.setToken(token);
+
+        // Log successful login and create session
+        try {
+            String ip = getClientIP(httpRequest);
+            String userAgent = httpRequest.getHeader("User-Agent");
+            String deviceType = userAgent != null && (userAgent.contains("Mobile") || userAgent.contains("Android")) ? "mobile" : "desktop";
+            String browser = extractBrowser(userAgent);
+            String os = extractOS(userAgent);
+            auditLogService.logLogin(user.getUserId(), response.getActiveGymId(), ip, deviceType, browser, os, null);
+            auditLogService.createSession(user.getUserId(), response.getActiveGymId(), ip, deviceType, browser, os);
+        } catch (Exception ignored) {}
 
         return ResponseEntity.ok(response);
     }
@@ -615,5 +635,36 @@ public class AuthController {
         }
 
         return userRole;
+    }
+
+    private String getClientIP(HttpServletRequest request) {
+        String xForwardedFor = request.getHeader("X-Forwarded-For");
+        if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
+            return xForwardedFor.split(",")[0].trim();
+        }
+        String xRealIp = request.getHeader("X-Real-IP");
+        if (xRealIp != null && !xRealIp.isEmpty()) {
+            return xRealIp;
+        }
+        return request.getRemoteAddr();
+    }
+
+    private String extractBrowser(String userAgent) {
+        if (userAgent == null) return "Unknown";
+        if (userAgent.contains("Chrome") && !userAgent.contains("Edg")) return "Chrome";
+        if (userAgent.contains("Firefox")) return "Firefox";
+        if (userAgent.contains("Safari") && !userAgent.contains("Chrome")) return "Safari";
+        if (userAgent.contains("Edg")) return "Edge";
+        return "Other";
+    }
+
+    private String extractOS(String userAgent) {
+        if (userAgent == null) return "Unknown";
+        if (userAgent.contains("Windows")) return "Windows";
+        if (userAgent.contains("Mac OS")) return "macOS";
+        if (userAgent.contains("Linux") && !userAgent.contains("Android")) return "Linux";
+        if (userAgent.contains("Android")) return "Android";
+        if (userAgent.contains("iPhone") || userAgent.contains("iPad")) return "iOS";
+        return "Other";
     }
 }

@@ -318,10 +318,10 @@ public class AuditLogService {
         // Get online users count
         Long onlineUsers = userSessionRepository.countByGymGymIdAndStatus(gymId, "online");
         
-        // Calculate average session time (last 7 days)
+        // Calculate average session time (last 7 days) - duration stored in seconds
         LocalDateTime weekAgo = LocalDateTime.now().minusDays(7);
-        Double avgSessionMinutes = userSessionRepository.calculateAverageSessionDurationByGym(gymId, weekAgo);
-        String avgSessionTime = formatDuration(avgSessionMinutes != null ? avgSessionMinutes.longValue() : 0);
+        Double avgSessionSeconds = userSessionRepository.calculateAverageSessionDurationByGym(gymId, weekAgo);
+        String avgSessionTime = formatDuration(avgSessionSeconds != null ? avgSessionSeconds.longValue() / 60 : 0);
 
         // Get action counts for top actions
         List<Object[]> actionCounts = auditLogRepository.getActionCountsByGym(gymId);

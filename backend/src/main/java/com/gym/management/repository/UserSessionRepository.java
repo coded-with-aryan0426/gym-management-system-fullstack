@@ -98,6 +98,6 @@ public interface UserSessionRepository extends JpaRepository<UserSession, Long> 
 
     Long countByGymGymIdAndStatus(Long gymId, String status);
 
-    @Query("SELECT AVG(TIMESTAMPDIFF(MINUTE, s.createdAt, COALESCE(s.logoutAt, CURRENT_TIMESTAMP))) FROM UserSession s WHERE s.gym.gymId = :gymId AND s.createdAt > :since")
+    @Query("SELECT AVG(s.duration) FROM UserSession s WHERE s.gym.gymId = :gymId AND s.createdAt > :since AND s.duration IS NOT NULL AND s.duration > 0")
     Double calculateAverageSessionDurationByGym(@Param("gymId") Long gymId, @Param("since") LocalDateTime since);
 }
