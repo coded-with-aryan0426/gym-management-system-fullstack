@@ -12,7 +12,9 @@ import {
     Briefcase,
     Bell,
     FileText,
-    Palette
+    Palette,
+    Dumbbell,
+    UserCheck
 } from "lucide-react"
 import "./Settings.css"
 
@@ -21,7 +23,9 @@ import SecuritySection from "./sections/SecuritySection"
 import RolesSection from "./sections/RolesSection"
 import BillingRulesSection from "./sections/BillingRulesSection"
 import MembershipPoliciesSection from "./sections/MembershipPoliciesSection"
-import StaffRulesSection from "./sections/TrainerRulesSection"
+import StaffRulesSection from "./sections/StaffRulesSection"
+import TrainerRulesSection from "./sections/TrainerRulesSection"
+import MemberRulesSection from "./sections/MemberRulesSection"
 import NotificationsSection from "./sections/NotificationsSection"
 import AuditLogSection from "./sections/AuditLogSection"
 import ThemeSection from "./sections/ThemeSection"
@@ -33,7 +37,9 @@ const settingsCategories = [
     { id: 'roles', label: 'Roles & Permissions', icon: Users, desc: 'Access control matrix' },
     { id: 'billing', label: 'Billing Rules', icon: CreditCard, desc: 'Taxes & Late fees' },
     { id: 'membership', label: 'Membership Policies', icon: ClipboardList, desc: 'Freezes & Cancellations' },
-    { id: 'staff', label: 'Staff & Trainer Rules', icon: Briefcase, desc: 'Operations & Attendance' },
+    { id: 'staff', label: 'Staff Rules', icon: Briefcase, desc: 'Shifts & Attendance' },
+    { id: 'trainer', label: 'Trainer Rules', icon: Dumbbell, desc: 'Sessions & Compensation' },
+    { id: 'member', label: 'Member Rules', icon: UserCheck, desc: 'Access & Behavior policies' },
     { id: 'notifications', label: 'Notifications', icon: Bell, desc: 'Alerts & Reminders' },
     { id: 'audit', label: 'Audit Logs', icon: FileText, desc: 'System activity history' },
 ]
@@ -58,6 +64,8 @@ const Settings: React.FC = () => {
             case 'billing': return <BillingRulesSection />
             case 'membership': return <MembershipPoliciesSection />
             case 'staff': return <StaffRulesSection />
+            case 'trainer': return <TrainerRulesSection />
+            case 'member': return <MemberRulesSection />
             case 'notifications': return <NotificationsSection />
             case 'audit': return <AuditLogSection />
             default: return <OwnerProfileSection />

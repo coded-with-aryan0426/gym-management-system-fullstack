@@ -882,33 +882,42 @@ const TrainerRulesSection: React.FC = () => {
                                 <h4 className="form-group__title">Required Certifications</h4>
                             </div>
 
-                            <div className="reminder-days-container">
-                                {rules.requiredCertifications.map((cert, index) => (
-                                    <span key={index} className="reminder-day-tag">
-                                        {cert}
-                                        <button onClick={() => removeCertification(cert)}>
-                                            <X size={12} />
-                                        </button>
-                                    </span>
-                                ))}
-                            </div>
+                            <div className="cert-tags-container">
+                                <div className="cert-tags">
+                                    {rules.requiredCertifications.map((cert, index) => (
+                                        <span key={index} className="cert-tag cert-tag--required">
+                                            {cert}
+                                            <button onClick={() => removeCertification(cert)}>
+                                                <X size={14} />
+                                            </button>
+                                        </span>
+                                    ))}
+                                    {rules.requiredCertifications.length === 0 && (
+                                        <span style={{ color: 'var(--settings-text-tertiary)', fontSize: '13px' }}>
+                                            No certifications required
+                                        </span>
+                                    )}
+                                </div>
 
-                            <div className="reminder-input-row" style={{ marginTop: '12px' }}>
-                                <input
-                                    type="text"
-                                    className="dense-input"
-                                    value={newCertification}
-                                    onChange={(e) => setNewCertification(e.target.value)}
-                                    placeholder="Enter certification name"
-                                    onKeyDown={(e) => e.key === 'Enter' && addCertification()}
-                                />
-                                <button 
-                                    className="add-btn"
-                                    onClick={addCertification}
-                                    disabled={!newCertification.trim()}
-                                >
-                                    Add
-                                </button>
+                                <div className="cert-add-row">
+                                    <input
+                                        type="text"
+                                        className="dense-input"
+                                        value={newCertification}
+                                        onChange={(e) => setNewCertification(e.target.value)}
+                                        placeholder="Enter certification name (e.g., CPR, First Aid)"
+                                        onKeyDown={(e) => e.key === 'Enter' && addCertification()}
+                                        style={{ maxWidth: '300px' }}
+                                    />
+                                    <button 
+                                        className="cert-add-btn"
+                                        onClick={addCertification}
+                                        disabled={!newCertification.trim()}
+                                    >
+                                        <Award size={14} />
+                                        Add Certification
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </>

@@ -2254,3 +2254,293 @@ body.light-mode .change-item {
   flex-direction: column;
   gap: 8px;
 }
+
+/* =============================================================================
+   Certification/Requirement Tags
+   ============================================================================= */
+
+.cert-tags-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cert-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cert-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  color: var(--settings-accent-blue);
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 20px;
+  transition: all 0.2s ease;
+}
+
+.cert-tag:hover {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.4);
+}
+
+.cert-tag button {
+  background: none;
+  border: none;
+  color: rgba(59, 130, 246, 0.6);
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s ease;
+}
+
+.cert-tag button:hover {
+  color: var(--settings-accent-danger);
+}
+
+.cert-tag--required {
+  background: rgba(230, 57, 70, 0.1);
+  border-color: rgba(230, 57, 70, 0.25);
+  color: var(--settings-accent-red);
+}
+
+.cert-tag--required button {
+  color: rgba(230, 57, 70, 0.6);
+}
+
+.cert-tag--required button:hover {
+  color: var(--settings-accent-danger);
+}
+
+.cert-tag--optional {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.25);
+  color: var(--settings-accent-success);
+}
+
+.cert-tag--optional button {
+  color: rgba(16, 185, 129, 0.6);
+}
+
+.cert-add-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.cert-add-row .dense-input {
+  flex: 1;
+  max-width: 250px;
+}
+
+.cert-add-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: transparent;
+  border: 1px dashed var(--settings-border);
+  color: var(--settings-text-tertiary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.cert-add-btn:hover {
+  border-color: var(--settings-accent-blue);
+  color: var(--settings-accent-blue);
+  background: rgba(59, 130, 246, 0.04);
+}
+
+/* Light Mode - Certification Tags */
+:root.theme-light .cert-tag,
+[data-theme="light"] .cert-tag,
+body.light-mode .cert-tag {
+  background: rgba(59, 130, 246, 0.08);
+  border-color: rgba(59, 130, 246, 0.2);
+}
+
+:root.theme-light .cert-tag--required,
+[data-theme="light"] .cert-tag--required,
+body.light-mode .cert-tag--required {
+  background: rgba(220, 38, 38, 0.08);
+  border-color: rgba(220, 38, 38, 0.2);
+}
+
+/* =============================================================================
+   Changes List in Confirmation Dialog - Improvements
+   ============================================================================= */
+
+.changes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.changes-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.changes-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 3px;
+}
+
+.changes-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+
+.changes-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.change-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--settings-border-subtle);
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.change-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--settings-border);
+}
+
+.change-item__field {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--settings-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.change-item__values {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.change-item__old {
+  color: var(--settings-accent-danger);
+  text-decoration: line-through;
+  opacity: 0.8;
+  background: rgba(239, 68, 68, 0.08);
+  padding: 4px 10px;
+  border-radius: 6px;
+  max-width: 45%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.change-item__arrow {
+  color: var(--settings-text-tertiary);
+  flex-shrink: 0;
+}
+
+.change-item__new {
+  color: var(--settings-accent-success);
+  font-weight: 600;
+  background: rgba(16, 185, 129, 0.08);
+  padding: 4px 10px;
+  border-radius: 6px;
+  max-width: 45%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Confirmation Dialog - Summary count */
+.confirm-dialog__summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  background: rgba(230, 57, 70, 0.08);
+  border: 1px solid rgba(230, 57, 70, 0.2);
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--settings-accent-red);
+  font-weight: 500;
+}
+
+.confirm-dialog__summary svg {
+  flex-shrink: 0;
+}
+
+/* Light Mode - Changes List */
+:root.theme-light .change-item,
+[data-theme="light"] .change-item,
+body.light-mode .change-item {
+  background: #F8FAFC;
+  border-color: var(--border-primary, #CBD5E1);
+}
+
+:root.theme-light .change-item:hover,
+[data-theme="light"] .change-item:hover,
+body.light-mode .change-item:hover {
+  background: #F1F5F9;
+}
+
+:root.theme-light .change-item__old,
+[data-theme="light"] .change-item__old,
+body.light-mode .change-item__old {
+  background: rgba(239, 68, 68, 0.06);
+}
+
+:root.theme-light .change-item__new,
+[data-theme="light"] .change-item__new,
+body.light-mode .change-item__new {
+  background: rgba(16, 185, 129, 0.06);
+}
+
+:root.theme-light .confirm-dialog__summary,
+[data-theme="light"] .confirm-dialog__summary,
+body.light-mode .confirm-dialog__summary {
+  background: rgba(220, 38, 38, 0.06);
+  border-color: rgba(220, 38, 38, 0.15);
+}
+
+/* =============================================================================
+   Empty State for Changes
+   ============================================================================= */
+
+.changes-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  color: var(--settings-text-tertiary);
+  text-align: center;
+  gap: 8px;
+}
+
+.changes-empty svg {
+  opacity: 0.5;
+}
+
+.changes-empty p {
+  font-size: 13px;
+  margin: 0;
+}
