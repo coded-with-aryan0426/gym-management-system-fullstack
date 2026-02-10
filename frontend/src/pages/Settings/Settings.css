@@ -2018,17 +2018,17 @@ select.dense-input option {
 }
 
 .settings-tabs-container {
-  margin: 0 20px 20px 20px;
+  margin: 0 0 16px 0;
   position: relative;
 }
 
 .settings-tabs {
   display: flex;
-  gap: 8px;
-  padding: 8px;
+  gap: 4px;
+  padding: 4px;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--settings-border);
-  border-radius: 14px;
+  border-radius: 10px;
   position: relative;
   overflow-x: auto;
   overflow-y: hidden;
@@ -2046,24 +2046,24 @@ select.dense-input option {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(230, 57, 70, 0.03) 0%, transparent 50%);
-  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(230, 57, 70, 0.02) 0%, transparent 50%);
+  border-radius: 10px;
   pointer-events: none;
 }
 
 .settings-tab {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 18px;
+  gap: 6px;
+  padding: 8px 12px;
   border: 1px solid transparent;
   background: transparent;
   color: var(--settings-text-tertiary);
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 500;
   cursor: pointer;
-  border-radius: 10px;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 7px;
+  transition: all 0.2s ease;
   white-space: nowrap;
   position: relative;
   z-index: 1;
@@ -2071,10 +2071,9 @@ select.dense-input option {
 }
 
 .settings-tab:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.05);
   color: var(--settings-text-secondary);
   border-color: var(--settings-border-subtle);
-  transform: translateY(-2px);
 }
 
 .settings-tab.active,
@@ -2082,20 +2081,19 @@ select.dense-input option {
   background: linear-gradient(135deg, var(--settings-accent-red) 0%, #dc2626 100%);
   color: #ffffff;
   font-weight: 600;
-  box-shadow: 0 4px 12px rgba(230, 57, 70, 0.35), 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(230, 57, 70, 0.3);
   border-color: transparent;
 }
 
 .settings-tab.active:hover,
 .settings-tab--active:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(230, 57, 70, 0.45), 0 3px 6px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(230, 57, 70, 0.4);
 }
 
 .settings-tab svg {
   flex-shrink: 0;
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   transition: transform 0.2s ease;
 }
 
@@ -2206,16 +2204,16 @@ body.light-mode .settings-tabs-wrapper::after {
 /* Responsive - Tabs */
 @media (max-width: 900px) {
   .settings-tabs {
-    gap: 6px;
-    padding: 6px;
-    border-radius: 12px;
+    gap: 4px;
+    padding: 4px;
+    border-radius: 10px;
   }
   
   .settings-tab {
-    padding: 10px 14px;
-    font-size: 12px;
-    gap: 8px;
-    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 11px;
+    gap: 6px;
+    border-radius: 7px;
   }
   
   .settings-tab svg {
@@ -2226,19 +2224,19 @@ body.light-mode .settings-tabs-wrapper::after {
 
 @media (max-width: 600px) {
   .settings-tabs-container {
-    margin: 0 12px 16px 12px;
+    margin: 0 0 12px 0;
   }
   
   .settings-tabs {
-    gap: 4px;
-    padding: 4px;
-    border-radius: 10px;
+    gap: 2px;
+    padding: 3px;
+    border-radius: 8px;
   }
   
   .settings-tab {
-    padding: 8px 10px;
-    font-size: 11px;
-    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 10px;
+    border-radius: 5px;
     flex: 1 1 auto;
     justify-content: center;
     min-width: 0;
@@ -2538,6 +2536,79 @@ body.light-mode .settings-tabs-wrapper::after {
 .confirm-dialog__btn--confirm:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* Confirmation Dialog Footer */
+.confirm-dialog__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--settings-border);
+}
+
+/* Button styles for dialogs */
+.btn-cancel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: transparent;
+  border: 1px solid var(--settings-border);
+  color: var(--settings-text-secondary);
+}
+
+.btn-cancel:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--settings-text-primary);
+  border-color: var(--settings-text-tertiary);
+}
+
+.btn-confirm {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: linear-gradient(135deg, var(--settings-accent-red) 0%, #c1121f 100%);
+  border: none;
+  color: white;
+  box-shadow: 0 2px 8px rgba(230, 57, 70, 0.3);
+}
+
+.btn-confirm:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(230, 57, 70, 0.4);
+}
+
+.btn-confirm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Light Mode - Buttons */
+:root.theme-light .btn-cancel,
+[data-theme="light"] .btn-cancel,
+body.light-mode .btn-cancel {
+  background: #F8FAFC;
+  border-color: var(--border-primary, #CBD5E1);
+  color: #475569;
+}
+
+:root.theme-light .btn-cancel:hover,
+[data-theme="light"] .btn-cancel:hover,
+body.light-mode .btn-cancel:hover {
+  background: #F1F5F9;
+  color: #0F172A;
 }
 
 /* Light Mode - Confirmation Dialog */
