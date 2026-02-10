@@ -282,16 +282,19 @@ public class GymSettingsService {
             
             @SuppressWarnings("unchecked")
             Map<String, Object> changeDetail = (Map<String, Object>) entry.getValue();
-            String oldVal = changeDetail.get("old") != null ? changeDetail.get("old").toString() : "null";
-            String newVal = changeDetail.get("new") != null ? changeDetail.get("new").toString() : "null";
+            String oldVal = changeDetail.get("old") != null ? changeDetail.get("old").toString() : null;
+            String newVal = changeDetail.get("new") != null ? changeDetail.get("new").toString() : null;
             
             // Escape quotes in values
-            oldVal = oldVal.replace("\"", "\\\"");
-            newVal = newVal.replace("\"", "\\\"");
+            if (oldVal != null) oldVal = oldVal.replace("\"", "\\\"");
+            if (newVal != null) newVal = newVal.replace("\"", "\\\"");
             
             json.append("\"").append(entry.getKey()).append("\": {")
-                .append("\"from\": \"").append(oldVal).append("\", ")
-                .append("\"to\": \"").append(newVal).append("\"}");
+                .append("\"field\": \"").append(entry.getKey()).append("\", ")
+                .append("\"type\": \"String\", ")
+                .append("\"oldValue\": ").append(oldVal != null ? "\"" + oldVal + "\"" : "null").append(", ")
+                .append("\"newValue\": ").append(newVal != null ? "\"" + newVal + "\"" : "null").append(", ")
+                .append("\"changed\": true}");
         }
         json.append("}");
         return json.toString();

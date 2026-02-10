@@ -27,7 +27,7 @@ public interface MembershipRepository extends JpaRepository<Membership, Long> {
 
     Optional<Membership> findTopByUserUserIdAndStatusOrderByEndDateDesc(Long userId, MembershipStatus status);
 
-    @org.springframework.data.jpa.repository.Query("SELECT m FROM Membership m WHERE m.status = 'ACTIVE' AND m.endDate BETWEEN :startDate AND :endDate ORDER BY m.endDate ASC")
+    @org.springframework.data.jpa.repository.Query("SELECT m FROM Membership m LEFT JOIN FETCH m.membershipPackage JOIN FETCH m.user WHERE m.status = 'ACTIVE' AND m.endDate BETWEEN :startDate AND :endDate ORDER BY m.endDate ASC")
     List<Membership> findExpiringMemberships(
             @org.springframework.data.repository.query.Param("startDate") java.time.LocalDate startDate,
             @org.springframework.data.repository.query.Param("endDate") java.time.LocalDate endDate);

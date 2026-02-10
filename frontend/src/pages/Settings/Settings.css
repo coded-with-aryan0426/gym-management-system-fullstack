@@ -5405,6 +5405,210 @@ body.light-mode .audit-log-expanded {
   background: #F8FAFC;
 }
 
+/* Field Changes Display */
+.audit-business-context {
+  margin-top: 16px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.audit-context-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--settings-text-secondary);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.audit-context-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.audit-context-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.audit-context-label {
+  font-size: 10px;
+  color: var(--settings-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.audit-context-value {
+  font-size: 12px;
+  color: var(--settings-text-primary);
+  font-weight: 500;
+}
+
+.audit-field-changes {
+  margin-top: 16px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.audit-changes-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--settings-text-secondary);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.audit-field-changes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.audit-field-change {
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 6px;
+  border-left: 3px solid var(--settings-accent-blue);
+  transition: all 0.2s ease;
+}
+
+.audit-field-change:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.audit-field-change--modified {
+  border-left-color: var(--settings-accent-amber);
+}
+
+.audit-field-change--sensitive {
+  border-left-color: var(--settings-accent-red);
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.audit-field-change-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.audit-field-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--settings-text-primary);
+}
+
+.audit-field-type {
+  font-size: 10px;
+  color: var(--settings-text-tertiary);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.audit-sensitive-badge {
+  font-size: 9px;
+  color: var(--settings-accent-red);
+  background: rgba(239, 68, 68, 0.2);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.audit-field-change-values {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.audit-field-value {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.audit-value-label {
+  font-size: 10px;
+  color: var(--settings-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.audit-value-content {
+  font-size: 11px;
+  color: var(--settings-text-secondary);
+  font-family: 'SF Mono', 'Monaco', 'Menlo', monospace;
+  word-break: break-all;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 4px 6px;
+  border-radius: 3px;
+}
+
+.audit-field-value--old .audit-value-content {
+  color: var(--settings-text-tertiary);
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+.audit-field-value--new .audit-value-content {
+  color: var(--settings-accent-success);
+  font-weight: 500;
+}
+
+.audit-field-changes-empty {
+  text-align: center;
+  padding: 20px;
+  color: var(--settings-text-tertiary);
+}
+
+.audit-changes-empty-text {
+  font-size: 12px;
+  font-style: italic;
+}
+
+/* Light Mode - Field Changes */
+:root.theme-light .audit-business-context,
+[data-theme="light"] .audit-business-context,
+body.light-mode .audit-business-context {
+  background: #F8FAFC;
+  border-color: #E2E8F0;
+}
+
+:root.theme-light .audit-field-changes,
+[data-theme="light"] .audit-field-changes,
+body.light-mode .audit-field-changes {
+  background: #F8FAFC;
+  border-color: #E2E8F0;
+}
+
+:root.theme-light .audit-field-change,
+[data-theme="light"] .audit-field-change,
+body.light-mode .audit-field-change {
+  background: #FFFFFF;
+  border-color: #E2E8F0;
+}
+
+:root.theme-light .audit-field-change:hover,
+[data-theme="light"] .audit-field-change:hover,
+body.light-mode .audit-field-change:hover {
+  background: #F1F5F9;
+}
+
+:root.theme-light .audit-field-change--sensitive,
+[data-theme="light"] .audit-field-change--sensitive,
+body.light-mode .audit-field-change--sensitive {
+  background: rgba(239, 68, 68, 0.05);
+}
+
 /* Responsive - Audit Log */
 @media (max-width: 1200px) {
   .audit-stats-grid {

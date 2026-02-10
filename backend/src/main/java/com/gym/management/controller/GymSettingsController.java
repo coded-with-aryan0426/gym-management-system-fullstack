@@ -9,6 +9,7 @@ import com.gym.management.repository.GymRepository;
 import com.gym.management.repository.UserRepository;
 import com.gym.management.security.CustomUserDetails;
 import com.gym.management.service.GymSettingsService;
+import com.gym.management.annotation.Loggable;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -108,6 +109,16 @@ public class GymSettingsController {
     }
 
     @PutMapping("/owner-profile")
+    @Loggable(
+        action = "OWNER_PROFILE_UPDATE",
+        entity = "User",
+        severity = "info",
+        logParameters = true,
+        logReturnValue = false,
+        trackChanges = true,
+        detailsTemplate = "Owner profile updated",
+        excludeFields = {"password", "ssn"}
+    )
     public ResponseEntity<?> updateOwnerProfile(@RequestBody Map<String, Object> data) {
         try {
             // Debug: Log received data

@@ -17,7 +17,7 @@ public interface CheckInRepository extends JpaRepository<CheckIn, Long> {
     List<CheckIn> findActiveCheckIns();
 
     // Find check-ins for today
-    @Query("SELECT c FROM CheckIn c WHERE c.checkInTime >= :startOfDay ORDER BY c.checkInTime DESC")
+    @Query("SELECT c FROM CheckIn c JOIN FETCH c.user WHERE c.checkInTime >= :startOfDay ORDER BY c.checkInTime DESC")
     List<CheckIn> findTodayCheckIns(@Param("startOfDay") LocalDateTime startOfDay);
 
     // Count active check-ins

@@ -30,9 +30,69 @@ type EntityType =
   | 'SETTINGS' | 'SYSTEM' | 'SECURITY' | 'NOTIFICATION'
   | 'REPORT' | 'EQUIPMENT' | 'SCHEDULE';
 
-type SeverityLevel = 'info' | 'low' | 'medium' | 'high' | 'critical';
+type SeverityLevel = 'info' | 'info' | 'low' | 'medium' | 'high' | 'critical';
 
 type SessionStatus = 'online' | 'offline' | 'idle' | 'away';
+
+// Component to display field-level changes
+const FieldChangesDisplay: React.FC<{ changes: any[] | Record<string, any> }> = ({ changes }) => {
+  const renderFieldChange = (fieldName: string, change: any) => {
+    const isSensitive = change.sensitive || fieldName.toLowerCase().includes('password') || fieldName.toLowerCase().includes('secret');
+    
+    return (
+      <div key={fieldName} className={`audit-field-change ${change.changed ? 'audit-field-change--modified' : ''} ${isSensitive ? 'audit-field-change--sensitive' : ''}`}>
+        <div className="audit-field-change-header">
+          <span className="audit-field-name">{fieldName}</span>
+          {change.type && <span className="audit-field-type">({change.type})</span>}
+          {isSensitive && <span className="audit-sensitive-badge">SENSITIVE</span>}
+        </div>
+        <div className="audit-field-change-values">
+          <div className="audit-field-value audit-field-value--old">
+            <span className="audit-value-label">Old:</span>
+            <span className="audit-value-content">
+              {isSensitive ? '***MASKED***' : (change.oldValue ?? 'null')}
+            </span>
+          </div>
+          <div className="audit-field-value audit-field-value--new">
+            <span className="audit-value-label">New:</span>
+            <span className="audit-value-content">
+              {isSensitive ? '***MASKED***' : (change.newValue ?? 'null')}
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Handle different change formats
+  if (Array.isArray(changes)) {
+    return (
+      <div className="audit-field-changes-list">
+        {changes.map((change, index) => renderFieldChange(change.field || `field_${index}`, change))}
+      </div>
+    );
+  } else if (typeof changes === 'object') {
+    // Handle object format where keys are field names
+    return (
+      <div className="audit-field-changes-list">
+        {Object.entries(changes).map(([fieldName, change]) => {
+          if (typeof change === 'object' && change !== null) {
+            return renderFieldChange(fieldName, change);
+          } else {
+            // Handle simple key-value format
+            return renderFieldChange(fieldName, { oldValue: change, newValue: change, changed: true });
+          }
+        })}
+      </div>
+    );
+  }
+  
+  return (
+    <div className="audit-field-changes-empty">
+      <span className="audit-changes-empty-text">No detailed changes available</span>
+    </div>
+  );
+};
 
 interface AuditLogEntry {
   id: string;
@@ -50,7 +110,10 @@ interface AuditLogEntry {
     field: string;
     oldValue: string | number | boolean;
     newValue: string | number | boolean;
-  }[];
+    type?: string;
+    changed?: boolean;
+    sensitive?: boolean;
+  }[] | Record<string, any>;
   ipAddress: string;
   location?: string;
   device?: {
@@ -61,6 +124,13 @@ interface AuditLogEntry {
   sessionId?: string;
   severity: SeverityLevel;
   metadata?: Record<string, any>;
+  executionTime?: number;
+  requestId?: string;
+  businessContext?: {
+    operation: string;
+    impact: string;
+    affectedEntities: string[];
+  };
 }
 
 interface UserSession {
@@ -186,7 +256,7 @@ const AuditLogSection: React.FC = () => {
       
         // Fetch audit logs
         try {
-          const logsResponse = await api.get(`/audit-logs?gymId=${gymId}&page=${page - 1}&size=${itemsPerPage}`);
+          const logsResponse = await api.get(`/audit-logs?gymId=${gymId}&page=${page - 1}&size=${itemsPerPage}&includeChanges=true&includeMetrics=true`);
           if (logsResponse.data && logsResponse.data.logs && logsResponse.data.logs.length > 0) {
             const mappedLogs = logsResponse.data.logs.map((log: any) => ({
               id: log.id?.toString() || `log-${Math.random()}`,
@@ -199,15 +269,15 @@ const AuditLogSection: React.FC = () => {
               entity: log.entity || 'SYSTEM',
               entityId: log.entityId,
               entityName: log.entityName,
-                details: log.details || '',
-                changes: log.changes ? (() => {
-                  try {
-                    return JSON.parse(log.changes);
-                  } catch {
-                    // Handle Java Map.toString() format like {key=value}
-                    return { raw: log.changes };
-                  }
-                })() : undefined,
+              details: log.details || '',
+              changes: log.changes ? (() => {
+                try {
+                  return JSON.parse(log.changes);
+                } catch {
+                  // Handle Java Map.toString() format like {key=value}
+                  return { raw: log.changes };
+                }
+              })() : undefined,
               ipAddress: log.ipAddress || 'Unknown',
               location: log.location,
               device: log.deviceType ? {
@@ -216,14 +286,24 @@ const AuditLogSection: React.FC = () => {
                 os: log.os || 'Unknown'
               } : undefined,
               sessionId: log.sessionId,
-                severity: log.severity || 'info',
-                metadata: log.metadata ? (() => {
-                  try {
-                    return JSON.parse(log.metadata);
-                  } catch {
-                    return { raw: log.metadata };
-                  }
-                })() : undefined,
+              severity: log.severity || 'info',
+              metadata: log.metadata ? (() => {
+                try {
+                  return JSON.parse(log.metadata);
+                } catch {
+                  return { raw: log.metadata };
+                }
+              })() : undefined,
+              // Enhanced audit log fields
+              executionTime: log.executionTime || log.execution_time,
+              requestId: log.requestId || log.request_id,
+              businessContext: log.businessContext || log.business_context ? (() => {
+                try {
+                  return JSON.parse(log.businessContext || log.business_context);
+                } catch {
+                  return log.businessContext || log.business_context;
+                }
+              })() : undefined,
             }));
             setLogs(mappedLogs);
           } else {
@@ -734,12 +814,57 @@ const AuditLogSection: React.FC = () => {
                             <span className="audit-detail-value">{log.sessionId}</span>
                           </div>
                         )}
+                        {log.executionTime && (
+                          <div className="audit-detail-item">
+                            <Timer size={12} />
+                            <span className="audit-detail-label">Execution Time</span>
+                            <span className="audit-detail-value">{log.executionTime}ms</span>
+                          </div>
+                        )}
+                        {log.requestId && (
+                          <div className="audit-detail-item">
+                            <Key size={12} />
+                            <span className="audit-detail-label">Request ID</span>
+                            <span className="audit-detail-value">{log.requestId}</span>
+                          </div>
+                        )}
                         <div className="audit-detail-item">
                           <Calendar size={12} />
                           <span className="audit-detail-label">Full Timestamp</span>
                           <span className="audit-detail-value">{new Date(log.timestamp).toLocaleString()}</span>
                         </div>
                       </div>
+                      
+                      {/* Business Context */}
+                      {log.businessContext && (
+                        <div className="audit-business-context">
+                          <h4 className="audit-context-title">Business Context</h4>
+                          <div className="audit-context-grid">
+                            <div className="audit-context-item">
+                              <span className="audit-context-label">Operation</span>
+                              <span className="audit-context-value">{log.businessContext.operation}</span>
+                            </div>
+                            <div className="audit-context-item">
+                              <span className="audit-context-label">Impact</span>
+                              <span className="audit-context-value">{log.businessContext.impact}</span>
+                            </div>
+                            {log.businessContext.affectedEntities.length > 0 && (
+                              <div className="audit-context-item">
+                                <span className="audit-context-label">Affected Entities</span>
+                                <span className="audit-context-value">{log.businessContext.affectedEntities.join(', ')}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Field-level Changes */}
+                      {log.changes && (
+                        <div className="audit-field-changes">
+                          <h4 className="audit-changes-title">Field Changes</h4>
+                          <FieldChangesDisplay changes={log.changes} />
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
