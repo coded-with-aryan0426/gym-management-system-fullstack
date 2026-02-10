@@ -146,28 +146,68 @@ const BillingRulesSection: React.FC = () => {
     const fetchBillingSettings = async () => {
         try {
             setLoading(true)
-            const response = await api.get<BillingSettings>('/billing/settings')
+            const response = await api.get('/settings/gym')
             if (response.data) {
-                const fetched = response.data
-                // Ensure arrays are properly formatted
+                const data = response.data
+                
+                const parseBoolean = (val: any): boolean => val === true || val === 'true'
+                const parseNumber = (val: any, defaultVal: number): number => {
+                    const num = parseFloat(val)
+                    return isNaN(num) ? defaultVal : num
+                }
+                const parseArray = (val: any, defaultVal: number[]): number[] => {
+                    if (Array.isArray(val)) return val
+                    if (typeof val === 'string' && val) {
+                        return val.split(',').map(Number).filter(n => !isNaN(n))
+                    }
+                    return defaultVal
+                }
+                
                 const billingSettings: BillingSettings = {
-                    ...defaultSettings,
-                    ...fetched,
-                    paymentReminderDays: Array.isArray(fetched.paymentReminderDays) 
-                        ? fetched.paymentReminderDays 
-                        : [7, 3, 1],
-                    overdueReminderDays: Array.isArray(fetched.overdueReminderDays) 
-                        ? fetched.overdueReminderDays 
-                        : [1, 3, 7],
+                    currency: data.currency || 'INR',
+                    currencySymbol: data.currencySymbol || '₹',
+                    taxEnabled: parseBoolean(data.taxEnabled),
+                    taxPercentage: parseNumber(data.taxPercentage, 18),
+                    taxName: data.taxName || 'GST',
+                    taxNumber: data.taxNumber || '',
+                    lateFeeEnabled: parseBoolean(data.lateFeeEnabled),
+                    lateFeeAmount: parseNumber(data.lateFeeAmount, 50),
+                    lateFeeType: data.lateFeeType || 'FIXED',
+                    lateFeePercentage: parseNumber(data.lateFeePercentage, 5),
+                    gracePeriodDays: parseNumber(data.gracePeriodDays, 3),
+                    maxLateFeeAmount: data.maxLateFeeAmount ? parseNumber(data.maxLateFeeAmount, 0) : null,
+                    invoicePrefix: data.invoicePrefix || 'GYM-',
+                    autoInvoiceEnabled: parseBoolean(data.autoInvoiceEnabled ?? true),
+                    invoiceNotes: data.invoiceNotes || '',
+                    invoiceFooter: data.invoiceFooter || '',
+                    nextInvoiceNumber: parseNumber(data.nextInvoiceNumber, 1),
+                    allowPartialPayments: parseBoolean(data.allowPartialPayments),
+                    minPartialPaymentPercentage: parseNumber(data.minPartialPaymentPercentage, 25),
+                    allowOnlinePayments: parseBoolean(data.allowOnlinePayments ?? true),
+                    allowCashPayments: parseBoolean(data.allowCashPayments ?? true),
+                    allowBankTransfer: parseBoolean(data.allowBankTransfer ?? true),
+                    allowCardPayments: parseBoolean(data.allowCardPayments ?? true),
+                    allowUpiPayments: parseBoolean(data.allowUpiPayments ?? true),
+                    paymentReminderEnabled: parseBoolean(data.paymentReminderEnabled ?? true),
+                    paymentReminderDays: parseArray(data.paymentReminderDays, [7, 3, 1]),
+                    overdueReminderEnabled: parseBoolean(data.overdueReminderEnabled ?? true),
+                    overdueReminderDays: parseArray(data.overdueReminderDays, [1, 3, 7]),
+                    refundPolicyEnabled: parseBoolean(data.refundPolicyEnabled),
+                    refundPeriodDays: parseNumber(data.refundPeriodDays, 7),
+                    refundPercentage: parseNumber(data.refundPercentage, 100),
+                    refundDeductionAmount: parseNumber(data.refundDeductionAmount, 0),
+                    autoDiscountEnabled: parseBoolean(data.autoDiscountEnabled),
+                    earlyPaymentDiscountPercentage: parseNumber(data.earlyPaymentDiscountPercentage, 5),
+                    earlyPaymentDays: parseNumber(data.earlyPaymentDays, 5),
+                    prorateEnabled: parseBoolean(data.prorateEnabled ?? true),
+                    prorateMethod: data.prorateMethod || 'DAILY',
                 }
                 setSettings(billingSettings)
                 setOriginalSettings(billingSettings)
             }
         } catch (error: any) {
             console.error('Failed to fetch billing settings:', error)
-            // Use defaults if API fails
             setOriginalSettings(defaultSettings)
-            showToast("Using default billing settings", "info")
         } finally {
             setLoading(false)
         }
@@ -279,7 +319,47 @@ const BillingRulesSection: React.FC = () => {
             setSaving(true)
             setShowConfirmDialog(false)
             
-            await api.put('/billing/settings', settings)
+            // Convert to string key-value format for GymSettings endpoint
+            const settingsToSave = {
+                currency: settings.currency,
+                currencySymbol: settings.currencySymbol,
+                taxEnabled: String(settings.taxEnabled),
+                taxPercentage: String(settings.taxPercentage),
+                taxName: settings.taxName,
+                taxNumber: settings.taxNumber,
+                lateFeeEnabled: String(settings.lateFeeEnabled),
+                lateFeeAmount: String(settings.lateFeeAmount),
+                lateFeeType: settings.lateFeeType,
+                lateFeePercentage: String(settings.lateFeePercentage),
+                gracePeriodDays: String(settings.gracePeriodDays),
+                maxLateFeeAmount: settings.maxLateFeeAmount ? String(settings.maxLateFeeAmount) : '',
+                invoicePrefix: settings.invoicePrefix,
+                autoInvoiceEnabled: String(settings.autoInvoiceEnabled),
+                invoiceNotes: settings.invoiceNotes,
+                invoiceFooter: settings.invoiceFooter,
+                allowPartialPayments: String(settings.allowPartialPayments),
+                minPartialPaymentPercentage: String(settings.minPartialPaymentPercentage),
+                allowOnlinePayments: String(settings.allowOnlinePayments),
+                allowCashPayments: String(settings.allowCashPayments),
+                allowBankTransfer: String(settings.allowBankTransfer),
+                allowCardPayments: String(settings.allowCardPayments),
+                allowUpiPayments: String(settings.allowUpiPayments),
+                paymentReminderEnabled: String(settings.paymentReminderEnabled),
+                paymentReminderDays: settings.paymentReminderDays.join(','),
+                overdueReminderEnabled: String(settings.overdueReminderEnabled),
+                overdueReminderDays: settings.overdueReminderDays.join(','),
+                refundPolicyEnabled: String(settings.refundPolicyEnabled),
+                refundPeriodDays: String(settings.refundPeriodDays),
+                refundPercentage: String(settings.refundPercentage),
+                refundDeductionAmount: String(settings.refundDeductionAmount),
+                autoDiscountEnabled: String(settings.autoDiscountEnabled),
+                earlyPaymentDiscountPercentage: String(settings.earlyPaymentDiscountPercentage),
+                earlyPaymentDays: String(settings.earlyPaymentDays),
+                prorateEnabled: String(settings.prorateEnabled),
+                prorateMethod: settings.prorateMethod,
+            }
+            
+            await api.put('/settings/gym', settingsToSave)
             
             setOriginalSettings({ ...settings })
             setHasChanges(false)
