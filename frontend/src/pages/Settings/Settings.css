@@ -992,11 +992,12 @@ body.light-mode .settings-select option {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 18px;
+  padding: 12px 14px;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--settings-border-subtle);
-  border-radius: 12px;
+  border-radius: 10px;
   transition: all 0.2s ease;
+  min-width: 0;
 }
 
 .policy-toggle-row:hover {
@@ -1006,19 +1007,27 @@ body.light-mode .settings-select option {
 
 .policy-toggle-row__info {
   display: flex;
-  gap: 16px;
+  gap: 10px;
   align-items: center;
+  min-width: 0;
+  flex: 1;
 }
 
 .policy-toggle-row__icon {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.05);
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--settings-text-tertiary);
+  flex-shrink: 0;
+}
+
+.policy-toggle-row__icon svg {
+  width: 14px;
+  height: 14px;
 }
 
 .policy-toggle-row__text {
@@ -3410,18 +3419,97 @@ body.light-mode .role-switcher__indicator {
    Notifications Section Styles
    ============================================================================= */
 
+/* Channel Section Card */
+.channel-section {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--settings-border);
+  border-radius: 12px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.channel-section:last-child {
+  margin-bottom: 0;
+}
+
+.channel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.channel-header.expanded {
+  border-bottom-color: var(--settings-border);
+}
+
+.channel-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.channel-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(230, 57, 70, 0.1);
+  border-radius: 8px;
+  color: var(--settings-accent-red);
+}
+
+.channel-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.channel-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--settings-text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.channel-content {
+  padding: 18px;
+  animation: fadeIn 0.2s ease;
+}
+
+.channel-content.collapsed {
+  display: none;
+}
+
 /* Channel Configuration Grid */
 .channel-config-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-  padding: 16px 0;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 900px) {
+  .channel-config-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 500px) {
+  .channel-config-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .config-field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
 }
 
 .config-field--full {
@@ -3429,9 +3517,9 @@ body.light-mode .role-switcher__indicator {
 }
 
 .config-field label {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--settings-text-secondary);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--settings-text-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -3439,7 +3527,7 @@ body.light-mode .role-switcher__indicator {
 .config-field input,
 .config-field select,
 .config-field textarea {
-  padding: 10px 12px;
+  padding: 9px 11px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--settings-border);
   border-radius: 8px;
@@ -3547,13 +3635,218 @@ body.light-mode .role-switcher__indicator {
 
 /* Push Options */
 .push-options {
-  padding-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 10px;
+  border: 1px solid var(--settings-border);
+}
+
+.push-option-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--settings-border);
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.push-option-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.push-option-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.push-option-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  color: var(--settings-text-secondary);
+}
+
+.push-option-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.push-option-text h4 {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--settings-text-primary);
+  margin: 0 0 2px 0;
+}
+
+.push-option-text p {
+  font-size: 10px;
+  color: var(--settings-text-tertiary);
+  margin: 0;
+}
+
+/* In-app notification config cards */
+.inapp-config-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 14px;
+  align-items: stretch;
+}
+
+.inapp-config-row > .config-field {
+  flex: 1 1 150px;
+  min-width: 140px;
+}
+
+.inapp-config-row > .policy-toggle-row {
+  flex: 1 1 180px;
+  min-width: 160px;
+}
+
+.inapp-toggle-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--settings-border);
+  border-radius: 10px;
+  min-width: 160px;
+}
+
+.inapp-toggle-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.inapp-toggle-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  color: var(--settings-text-secondary);
+}
+
+.inapp-toggle-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.inapp-toggle-text h4 {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--settings-text-primary);
+  margin: 0 0 2px 0;
+}
+
+.inapp-toggle-text p {
+  font-size: 10px;
+  color: var(--settings-text-tertiary);
+  margin: 0;
+}
+
+/* Quiet Hours Section */
+.quiet-hours-section {
+  margin-top: 14px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--settings-border);
+  border-radius: 10px;
+}
+
+.quiet-hours-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.quiet-hours-icon {
+  color: var(--settings-text-secondary);
+}
+
+.quiet-hours-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.quiet-hours-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--settings-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.quiet-hours-config {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 14px;
+  align-items: end;
+}
+
+@media (max-width: 768px) {
+  .quiet-hours-config {
+    grid-template-columns: 1fr;
+  }
+}
+
+.exclude-urgent-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--settings-border);
+  border-radius: 10px;
+  min-width: 200px;
+}
+
+.exclude-urgent-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.exclude-urgent-info svg {
+  color: #f59e0b;
+  width: 16px;
+  height: 16px;
+}
+
+.exclude-urgent-text h4 {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--settings-text-primary);
+  margin: 0 0 2px 0;
+}
+
+.exclude-urgent-text p {
+  font-size: 9px;
+  color: var(--settings-text-tertiary);
+  margin: 0;
 }
 
 /* Notification Subsections */
 .notification-subsection {
-  margin-bottom: 24px;
-  padding-bottom: 24px;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
   border-bottom: 1px solid var(--settings-border);
 }
 
@@ -3567,10 +3860,10 @@ body.light-mode .role-switcher__indicator {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--settings-text-primary);
-  margin-bottom: 16px;
+  margin-bottom: 14px;
   padding-bottom: 8px;
   border-bottom: 2px solid var(--settings-accent-red);
 }
