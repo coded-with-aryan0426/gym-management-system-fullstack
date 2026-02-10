@@ -25,6 +25,9 @@ public class MembershipService {
 
     @Autowired
     private UserRepository userRepository;
+    
+    @Autowired
+    private AuditLogService auditLogService;
 
     @Transactional
     public Membership renewMembership(Long userId, Long packageId, Integer customMonths) {
@@ -87,6 +90,25 @@ public class MembershipService {
         membership.setMembershipPackage(pkg);
         membership.setStatus(MembershipStatus.ACTIVE);
 
-        return membershipRepository.save(membership);
+        Membership saved = membershipRepository.save(membership);
+        
+        // Log the membership renewal
+        try {
+            String changes = String.format("{\"packageName\": \"%s\", \"months\": %d, \"startDate\": \"%s\", \"endDate\": \"%s\"}",
+                pkg.getPackageName(), months, newStartDate, newEndDate);
+            auditLogService.logUpdate(
+                user,
+                membership.getGym() != null ? membership.getGym().getGymId() : null,
+                "MEMBERSHIP",
+                saved.getId().toString(),
+                user.getFullName() + " - " + pkg.getPackageName(),
+                "Membership renewed",
+                changes
+            );
+        } catch (Exception e) {
+            System.err.println("Failed to log membership renewal: " + e.getMessage());
+        }
+        
+        return saved;
     }
 }

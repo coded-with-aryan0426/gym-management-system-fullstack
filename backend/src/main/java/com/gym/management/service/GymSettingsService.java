@@ -5,9 +5,13 @@ import com.gym.management.dto.PTConfigDTO;
 import com.gym.management.dto.BlackoutDayDTO;
 import com.gym.management.model.GymSettings;
 import com.gym.management.model.BlackoutDay;
+import com.gym.management.model.User;
 import com.gym.management.repository.GymSettingsRepository;
 import com.gym.management.repository.BlackoutDayRepository;
+import com.gym.management.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +30,12 @@ public class GymSettingsService {
 
     @Autowired
     private BlackoutDayRepository blackoutDayRepository;
+    
+    @Autowired
+    private AuditLogService auditLogService;
+    
+    @Autowired
+    private UserRepository userRepository;
 
     public List<GymHoursDTO> getGymHours() {
         List<GymSettings> settings = gymSettingsRepository.findBySettingType("GYM_HOURS");
@@ -124,6 +134,10 @@ public class GymSettingsService {
     }
 
     public void updateAllSettings(Map<String, Object> settings) {
+        StringBuilder changes = new StringBuilder();
+        changes.append("{");
+        boolean first = true;
+        
         for (Map.Entry<String, Object> entry : settings.entrySet()) {
             String key = entry.getKey();
             Object value = entry.getValue();
@@ -135,8 +149,46 @@ public class GymSettingsService {
                 continue;
             }
             
+            if (!first) changes.append(", ");
+            changes.append("\"").append(key).append("\": \"").append(value.toString()).append("\"");
+            first = false;
+            
             saveSetting(key, value.toString(), "GENERAL");
         }
+        changes.append("}");
+        
+        // Log the settings update
+        if (!first) {
+            try {
+                User currentUser = getCurrentUser();
+                if (currentUser != null) {
+                    auditLogService.logUpdate(
+                        currentUser,
+                        null,
+                        "SETTINGS",
+                        "general",
+                        "General Settings",
+                        "Gym settings updated",
+                        changes.toString()
+                    );
+                }
+            } catch (Exception e) {
+                System.err.println("Failed to log settings update: " + e.getMessage());
+            }
+        }
+    }
+    
+    private User getCurrentUser() {
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.getPrincipal() instanceof org.springframework.security.core.userdetails.UserDetails) {
+                String username = ((org.springframework.security.core.userdetails.UserDetails) auth.getPrincipal()).getUsername();
+                return userRepository.findByEmail(username).orElse(null);
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to get current user: " + e.getMessage());
+        }
+        return null;
     }
 
     private void saveSetting(String key, String value, String type) {

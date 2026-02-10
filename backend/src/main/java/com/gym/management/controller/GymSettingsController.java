@@ -40,6 +40,9 @@ public class GymSettingsController {
 
     @Autowired
     private GymRepository gymRepository;
+    
+    @Autowired
+    private com.gym.management.service.AuditLogService auditLogService;
 
     // ==================== Owner Profile ====================
 
@@ -240,6 +243,33 @@ public class GymSettingsController {
                 }
             }
 
+            // Log the profile update to audit log
+            try {
+                StringBuilder changes = new StringBuilder();
+                changes.append("{");
+                boolean first = true;
+                for (Map.Entry<String, Object> entry : data.entrySet()) {
+                    if (entry.getValue() != null) {
+                        if (!first) changes.append(", ");
+                        changes.append("\"").append(entry.getKey()).append("\": \"").append(entry.getValue()).append("\"");
+                        first = false;
+                    }
+                }
+                changes.append("}");
+                
+                auditLogService.logUpdate(
+                    user,
+                    gymOpt.map(Gym::getGymId).orElse(null),
+                    "USER",
+                    user.getUserId().toString(),
+                    user.getFullName(),
+                    "Owner profile updated",
+                    changes.toString()
+                );
+            } catch (Exception auditEx) {
+                System.err.println("Failed to log owner profile update: " + auditEx.getMessage());
+            }
+            
             return ResponseEntity.ok(Map.of("message", "Profile updated successfully"));
         } catch (Exception e) {
             // Log the error and return a proper error response
