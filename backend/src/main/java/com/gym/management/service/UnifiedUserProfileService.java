@@ -11,6 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * UNIFIED USER PROFILE SERVICE
@@ -24,6 +28,9 @@ public class UnifiedUserProfileService {
     private final UserRepository userRepository;
     private final MemberProfileService memberProfileService;
     private final ApplicationEventPublisher eventPublisher;
+    
+    @Autowired
+    private AuditLogService auditLogService;
 
     /**
      * SINGLE POINT OF ENTRY for all user profile updates
@@ -37,11 +44,69 @@ public class UnifiedUserProfileService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
 
+        // Capture old values for audit log
+        List<String> changes = new ArrayList<>();
+        if (updateDTO.getFullName() != null && !updateDTO.getFullName().equals(user.getFullName())) {
+            changes.add(String.format("Name: '%s' → '%s'", user.getFullName(), updateDTO.getFullName()));
+        }
+        if (updateDTO.getPhone() != null && !updateDTO.getPhone().equals(user.getPhone())) {
+            changes.add(String.format("Phone: '%s' → '%s'", user.getPhone(), updateDTO.getPhone()));
+        }
+        if (updateDTO.getAvatarId() != null && !updateDTO.getAvatarId().equals(user.getAvatarId())) {
+            changes.add("Avatar updated");
+        }
+        if (updateDTO.getDateOfBirth() != null && !updateDTO.getDateOfBirth().equals(user.getDateOfBirth())) {
+            changes.add(String.format("Date of Birth: '%s' → '%s'", user.getDateOfBirth(), updateDTO.getDateOfBirth()));
+        }
+        if (updateDTO.getGender() != null && !updateDTO.getGender().equals(user.getGender())) {
+            changes.add(String.format("Gender: '%s' → '%s'", user.getGender(), updateDTO.getGender()));
+        }
+        if (updateDTO.getAddress() != null && !updateDTO.getAddress().equals(user.getAddress())) {
+            changes.add("Address updated");
+        }
+        if (updateDTO.getEmergencyContactName() != null && !updateDTO.getEmergencyContactName().equals(user.getEmergencyContactName())) {
+            changes.add(String.format("Emergency Contact: '%s' → '%s'", user.getEmergencyContactName(), updateDTO.getEmergencyContactName()));
+        }
+        if (updateDTO.getFitnessGoals() != null) {
+            changes.add("Fitness goals updated");
+        }
+        if (updateDTO.getHeight() != null && !updateDTO.getHeight().equals(user.getHeight())) {
+            changes.add(String.format("Height: %s → %s", user.getHeight(), updateDTO.getHeight()));
+        }
+        if (updateDTO.getWeight() != null && !updateDTO.getWeight().equals(user.getWeight())) {
+            changes.add(String.format("Weight: %s → %s", user.getWeight(), updateDTO.getWeight()));
+        }
+
         // Apply all updates in single transaction
         applyProfileUpdates(user, updateDTO);
 
         // Save with optimistic locking
         userRepository.save(user);
+
+        // Log the profile update to audit log
+        if (!changes.isEmpty()) {
+            // Determine gym ID (from the first membership or default to 41)
+            Long gymId = 41L; // Default gym ID
+            try {
+                if (user.getMemberships() != null && !user.getMemberships().isEmpty()) {
+                    gymId = user.getMemberships().iterator().next().getGym().getGymId();
+                }
+            } catch (Exception e) {
+                // Use default
+            }
+            
+            String changesJson = String.join("; ", changes);
+            auditLogService.logUpdate(
+                "Profile",
+                userId.toString(),
+                user.getFullName(),
+                userId,
+                gymId,
+                "Profile updated by " + (updatedBy != null ? updatedBy : "user"),
+                changesJson,
+                null
+            );
+        }
 
         // Publish update event for cache invalidation
         publishProfileUpdateEvent(userId, updatedBy);

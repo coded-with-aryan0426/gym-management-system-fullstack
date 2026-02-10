@@ -667,4 +667,27 @@ public class AuthController {
         if (userAgent.contains("iPhone") || userAgent.contains("iPad")) return "iOS";
         return "Other";
     }
+
+    /**
+     * Logout endpoint - ends user session and logs the event
+     */
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestBody Map<String, Object> request, HttpServletRequest httpRequest) {
+        try {
+            Long userId = request.get("userId") != null ? Long.valueOf(request.get("userId").toString()) : null;
+            Long gymId = request.get("gymId") != null ? Long.valueOf(request.get("gymId").toString()) : null;
+            
+            if (userId != null) {
+                String ip = getClientIP(httpRequest);
+                // Log logout event
+                auditLogService.logLogout(userId, gymId, ip, null);
+                // End user session
+                auditLogService.endSession(userId);
+            }
+            
+            return ResponseEntity.ok(Map.of("message", "Logged out successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.ok(Map.of("message", "Logged out")); // Still return success even if logging fails
+        }
+    }
 }

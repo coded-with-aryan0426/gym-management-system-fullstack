@@ -95,7 +95,7 @@ public class AuditLogService {
             if (user != null) {
                 log.setUser(user);
                 log.setUserName(user.getFullName() != null ? user.getFullName() : user.getUsername());
-                log.setUserAvatar(user.getProfileImage());
+                log.setUserAvatar(user.getAvatarId());
                 String roleName = "UNKNOWN";
                 if (user.getRoles() != null && !user.getRoles().isEmpty()) {
                     roleName = user.getRoles().iterator().next().getRoleName();
@@ -525,7 +525,7 @@ public class AuditLogService {
                 .id(session.getSessionId())
                 .userId(user != null ? user.getUserId() : null)
                 .userName(user != null ? (user.getFullName() != null ? user.getFullName() : user.getUsername()) : "Unknown")
-                .userAvatar(user != null ? user.getProfileImage() : null)
+                .userAvatar(user != null ? user.getAvatarId() : null)
                 .userRole(user != null && user.getRoles() != null && !user.getRoles().isEmpty() ? 
                         user.getRoles().iterator().next().getRoleName() : "UNKNOWN")
                 .status(session.getStatus())

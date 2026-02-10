@@ -32,6 +32,9 @@ public class UserService {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private AuditLogService auditLogService;
+
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -440,6 +443,15 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            // Log failed password change attempt
+            auditLogService.logSecurityEvent(
+                "PASSWORD_CHANGE_FAILED",
+                "Failed password change attempt - incorrect current password",
+                userId,
+                1L,
+                "medium",
+                null
+            );
             throw new RuntimeException("Incorrect current password");
         }
 
@@ -447,6 +459,16 @@ public class UserService {
         user.setIsFirstLogin(false);
         user.setPasswordChangedAt(LocalDateTime.now());
         userRepository.save(user);
+        
+        // Log successful password change
+        auditLogService.logSecurityEvent(
+            "PASSWORD_CHANGED",
+            "User changed their password",
+            userId,
+            1L,
+            "info",
+            null
+        );
     }
 
     public User getUserById(Long id) {
@@ -520,6 +542,19 @@ public class UserService {
             emailService.sendWelcomeCredentials(user.getEmail(), user.getFullName(), generatedPassword, roleName);
         }
 
+        // Log user creation in audit log
+        String roleName = savedUser.getRoles() != null && !savedUser.getRoles().isEmpty() 
+            ? savedUser.getRoles().iterator().next().getRoleName() : "USER";
+        auditLogService.logCreate(
+            "User",
+            savedUser.getUserId().toString(),
+            savedUser.getFullName(),
+            savedUser.getUserId(),
+            1L, // Default gym ID
+            String.format("New %s created: %s (%s)", roleName, savedUser.getFullName(), savedUser.getEmail()),
+            null
+        );
+
         // Create Membership if this is a CUSTOMER with packageId
         if (isCustomer && user.getPackageId() != null) {
             try {
@@ -581,46 +616,78 @@ public class UserService {
         Objects.requireNonNull(id, "User ID must not be null");
         User existingUser = userRepository.findById(id).orElse(null);
         if (existingUser != null) {
+            // Track changes for audit log
+            List<String> changes = new ArrayList<>();
+            
             // Update fields
-            if (user.getUsername() != null) {
+            if (user.getUsername() != null && !user.getUsername().equals(existingUser.getUsername())) {
+                changes.add(String.format("Username: '%s' → '%s'", existingUser.getUsername(), user.getUsername()));
                 existingUser.setUsername(user.getUsername());
             }
-            if (user.getFullName() != null) {
+            if (user.getFullName() != null && !user.getFullName().equals(existingUser.getFullName())) {
+                changes.add(String.format("Name: '%s' → '%s'", existingUser.getFullName(), user.getFullName()));
                 existingUser.setFullName(user.getFullName());
             }
-            if (user.getEmail() != null) {
+            if (user.getEmail() != null && !user.getEmail().equals(existingUser.getEmail())) {
+                changes.add(String.format("Email: '%s' → '%s'", existingUser.getEmail(), user.getEmail()));
                 existingUser.setEmail(user.getEmail());
             }
             if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+                changes.add("Password changed");
                 existingUser.setPassword(user.getPassword());
             }
             // Update roles if provided
             if (user.getRoles() != null && !user.getRoles().isEmpty()) {
+                changes.add("Roles updated");
                 existingUser.setRoles(user.getRoles());
             }
             // Update phone if provided (from either phone or phoneNumber transient field)
-            if (user.getPhone() != null) {
+            if (user.getPhone() != null && !user.getPhone().equals(existingUser.getPhone())) {
+                changes.add(String.format("Phone: '%s' → '%s'", existingUser.getPhone(), user.getPhone()));
                 existingUser.setPhone(user.getPhone());
-            } else if (user.getPhoneNumber() != null) {
+            } else if (user.getPhoneNumber() != null && !user.getPhoneNumber().equals(existingUser.getPhone())) {
+                changes.add(String.format("Phone: '%s' → '%s'", existingUser.getPhone(), user.getPhoneNumber()));
                 existingUser.setPhone(user.getPhoneNumber());
             }
             // Update join date if provided
             if (user.getJoinDate() != null) {
+                changes.add("Join date updated");
                 existingUser.setCreatedAt(user.getJoinDate().atStartOfDay());
             }
             // Update leaving date if provided
             if (user.getLeavingDate() != null) {
+                changes.add("Leaving date updated");
                 existingUser.setLeavingDate(user.getLeavingDate());
             }
             // Update status if provided
-            if (user.getStatus() != null) {
+            if (user.getStatus() != null && !user.getStatus().equals(existingUser.getStatus())) {
+                changes.add(String.format("Status: '%s' → '%s'", existingUser.getStatus(), user.getStatus()));
                 existingUser.setStatus(user.getStatus());
             }
             // Update avatarId if provided
-            if (user.getAvatarId() != null) {
+            if (user.getAvatarId() != null && !user.getAvatarId().equals(existingUser.getAvatarId())) {
+                changes.add("Avatar updated");
                 existingUser.setAvatarId(user.getAvatarId());
             }
-            return userRepository.save(existingUser);
+            
+            User updatedUser = userRepository.save(existingUser);
+            
+            // Log the update in audit log
+            if (!changes.isEmpty()) {
+                String changesStr = String.join("; ", changes);
+                auditLogService.logUpdate(
+                    "User",
+                    id.toString(),
+                    existingUser.getFullName(),
+                    id,
+                    1L, // Default gym ID
+                    "User profile updated",
+                    changesStr,
+                    null
+                );
+            }
+            
+            return updatedUser;
         }
         return null;
     }
@@ -635,6 +702,12 @@ public class UserService {
         if (user == null) {
             return; // Or throw exception
         }
+
+        // Capture user info for audit log before deletion
+        String userName = user.getFullName();
+        String userEmail = user.getEmail();
+        String userRole = user.getRoles() != null && !user.getRoles().isEmpty() 
+            ? user.getRoles().iterator().next().getRoleName() : "USER";
 
         // 1. Clear ManyToMany relationships (Trainer <-> Customer)
         // We need to remove this user from others' lists to avoid FK constraint issues
@@ -670,6 +743,17 @@ public class UserService {
 
         // 4. Finally Delete User
         userRepository.deleteById(id);
+
+        // Log the deletion in audit log
+        auditLogService.logDelete(
+            "User",
+            id.toString(),
+            userName,
+            null, // We don't know who deleted, could be passed as param
+            1L, // Default gym ID
+            String.format("%s deleted: %s (%s)", userRole, userName, userEmail),
+            null
+        );
     }
 
     @Transactional
