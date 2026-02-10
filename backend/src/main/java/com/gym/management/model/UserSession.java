@@ -25,7 +25,8 @@ import java.time.Duration;
 public class UserSession {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_session_seq")
+    @SequenceGenerator(name = "user_session_seq", sequenceName = "USER_SESSION_SEQ", allocationSize = 1)
     @Column(name = "session_id")
     private Long sessionId;
 
@@ -61,7 +62,7 @@ public class UserSession {
     @Column(name = "location", length = 255)
     private String location;
 
-    @Column(name = "user_agent", columnDefinition = "TEXT")
+    @Column(name = "user_agent", columnDefinition = "CLOB")
     private String userAgent;
 
     @Column(name = "created_at", nullable = false)

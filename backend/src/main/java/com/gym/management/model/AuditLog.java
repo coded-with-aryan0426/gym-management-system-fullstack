@@ -27,7 +27,8 @@ import java.time.LocalDateTime;
 public class AuditLog {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "audit_log_seq")
+    @SequenceGenerator(name = "audit_log_seq", sequenceName = "AUDIT_LOG_SEQ", allocationSize = 1)
     @Column(name = "audit_id")
     private Long auditId;
 
@@ -55,10 +56,10 @@ public class AuditLog {
     @Column(name = "user_avatar", length = 500)
     private String userAvatar;
 
-    @Column(name = "details", columnDefinition = "TEXT")
+    @Column(name = "details", columnDefinition = "CLOB")
     private String details;
 
-    @Column(name = "changes", columnDefinition = "TEXT")
+    @Column(name = "changes", columnDefinition = "CLOB")
     private String changes; // JSON string for field changes
 
     @Column(name = "ip_address", length = 50)
@@ -82,7 +83,7 @@ public class AuditLog {
     @Column(name = "severity", length = 20)
     private String severity = "info"; // info, low, medium, high, critical
 
-    @Column(name = "metadata", columnDefinition = "TEXT")
+    @Column(name = "metadata", columnDefinition = "CLOB")
     private String metadata; // JSON for additional data
 
     @Column(name = "timestamp", nullable = false)
