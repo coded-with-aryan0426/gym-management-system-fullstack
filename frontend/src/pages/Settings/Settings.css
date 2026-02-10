@@ -3773,8 +3773,8 @@ body.light-mode .role-switcher__indicator {
 
 /* Notification Subsections */
 .notification-subsection {
-  margin-bottom: 20px;
-  padding-bottom: 20px;
+  margin-bottom: 28px;
+  padding-bottom: 28px;
   border-bottom: 1px solid var(--settings-border);
 }
 
@@ -3787,13 +3787,52 @@ body.light-mode .role-switcher__indicator {
 .subsection-title {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
+  gap: 10px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--settings-text-primary);
-  margin-bottom: 14px;
-  padding-bottom: 8px;
+  margin-bottom: 18px;
+  padding-bottom: 10px;
   border-bottom: 2px solid var(--settings-accent-red);
+}
+
+.subsection-title svg {
+  color: var(--settings-accent-red);
+}
+
+/* Better spacing for notification tabs */
+.notification-channels-tab .form-group,
+.member-notifications-tab .form-group,
+.staff-notifications-tab .form-group,
+.system-alerts-tab .form-group {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--settings-border);
+  border-radius: 12px;
+}
+
+.notification-channels-tab .form-group:last-child,
+.member-notifications-tab .form-group:last-child,
+.staff-notifications-tab .form-group:last-child,
+.system-alerts-tab .form-group:last-child {
+  margin-bottom: 0;
+}
+
+/* Better spacing for policy toggle rows in notification tabs */
+.notification-channels-tab .policy-toggle-row,
+.member-notifications-tab .policy-toggle-row,
+.staff-notifications-tab .policy-toggle-row,
+.system-alerts-tab .policy-toggle-row {
+  margin-bottom: 10px;
+  padding: 14px 16px;
+}
+
+.notification-channels-tab .policy-toggle-row:last-child,
+.member-notifications-tab .policy-toggle-row:last-child,
+.staff-notifications-tab .policy-toggle-row:last-child,
+.system-alerts-tab .policy-toggle-row:last-child {
+  margin-bottom: 0;
 }
 
 /* Templates Tab */

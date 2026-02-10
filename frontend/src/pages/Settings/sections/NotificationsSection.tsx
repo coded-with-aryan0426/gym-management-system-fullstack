@@ -9,7 +9,7 @@ import {
   Settings, FileText, Send, Gift, Megaphone, Shield, Activity, Target,
   BellRing, MessageCircle, ChevronRight, Plus, Trash2, Edit3, Copy,
   Play, Pause, ToggleLeft, ToggleRight, Sparkles, Heart, Star, TrendingUp,
-  AlertTriangle, Info, X, Check, RefreshCw, Eye, Volume2, VolumeX
+  AlertTriangle, Info, X, Check, RefreshCw, Eye, Volume2, VolumeX, Award
 } from "lucide-react"
 import api from "../../../services/api"
 
