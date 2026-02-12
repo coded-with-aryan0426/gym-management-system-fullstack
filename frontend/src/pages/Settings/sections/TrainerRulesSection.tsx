@@ -348,10 +348,10 @@ const TrainerRulesSection: React.FC = () => {
     }
 
     return (
-        <div className="settings-section">
+        <div className="settings-section" style={{ "--section-accent": "#8b5cf6" } as React.CSSProperties}>
             <div className="settings-section__header">
                 <div className="settings-section__title-group">
-                    <div className="settings-section__icon">
+                    <div className="settings-section__icon" style={{ background: 'linear-gradient(135deg, #6366f1, #4f46e5)' }}>
                         <Dumbbell size={20} />
                     </div>
                     <div>

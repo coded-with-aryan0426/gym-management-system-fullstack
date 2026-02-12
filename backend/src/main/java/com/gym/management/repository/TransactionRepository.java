@@ -70,6 +70,31 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
         List<Transaction> findTop10ByOrderByDateTimeDesc();
 
+        // Pending transactions
+        @Query("SELECT t FROM Transaction t WHERE t.status = 'Pending' AND t.dateTime BETWEEN :startDate AND :endDate ORDER BY t.amount DESC")
+        List<Transaction> findPendingTransactions(
+                        @Param("startDate") LocalDateTime startDate,
+                        @Param("endDate") LocalDateTime endDate);
+
+        // Count pending
+        @Query("SELECT COUNT(t) FROM Transaction t WHERE t.status = 'Pending' AND t.dateTime BETWEEN :startDate AND :endDate")
+        Long countPendingTransactions(
+                        @Param("startDate") LocalDateTime startDate,
+                        @Param("endDate") LocalDateTime endDate);
+
+        // Category-wise transaction count
+        @Query("SELECT t.category, COUNT(t), SUM(t.amount) FROM Transaction t WHERE t.type = :type AND t.dateTime BETWEEN :startDate AND :endDate GROUP BY t.category ORDER BY SUM(t.amount) DESC")
+        List<Object[]> getCategoryStats(
+                        @Param("type") String type,
+                        @Param("startDate") LocalDateTime startDate,
+                        @Param("endDate") LocalDateTime endDate);
+
+        // Daily totals for trend
+        @Query("SELECT FUNCTION('DATE', t.dateTime), t.type, SUM(t.amount) FROM Transaction t WHERE t.status = 'Completed' AND t.dateTime BETWEEN :startDate AND :endDate GROUP BY FUNCTION('DATE', t.dateTime), t.type ORDER BY FUNCTION('DATE', t.dateTime)")
+        List<Object[]> getDailyTotals(
+                        @Param("startDate") LocalDateTime startDate,
+                        @Param("endDate") LocalDateTime endDate);
+
         // LEGACY METHODS (Preserved to prevent compilation errors in legacy code)
         @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t WHERE t.type = 'INCOME' AND t.status = 'Completed' AND t.dateTime BETWEEN :startDate AND :endDate")
         BigDecimal getTotalRevenue(

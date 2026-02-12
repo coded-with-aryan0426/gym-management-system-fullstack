@@ -1,34 +1,34 @@
 import type React from "react"
 import { useEffect, useState, useCallback, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 import {
-  IndianRupee,
   Users,
   Activity,
-  CreditCard,
   TrendingUp,
+  TrendingDown,
   ArrowUpRight,
-  ArrowDownRight,
   Calendar,
-  MoreVertical,
-  Plus,
   UserPlus,
   CheckCircle2,
   AlertCircle,
   Clock,
-  PieChart as PieChartIcon,
-  ShoppingCart,
-  Printer,
-  Bell,
-  Search,
-  ChevronDown,
-  Facebook,
-  Linkedin,
-  Instagram,
-  Ghost,
-  Target,
-  Globe
+  Dumbbell,
+  CreditCard,
+  Zap,
+  Eye,
+  Gift,
+  Wallet,
+  UserCheck,
+  Timer,
+  BarChart3,
+  ArrowRight,
+  Sparkles,
+  CircleDot,
+  Crown,
+  Star,
+  AlertTriangle,
+  RefreshCw
 } from 'lucide-react'
 import {
   AreaChart,
@@ -42,15 +42,12 @@ import {
   Pie,
   Cell,
   BarChart,
-  Bar,
-  LineChart,
-  Line
+  Bar
 } from 'recharts'
 import api from "../../services/api"
-import { toast } from "react-hot-toast"
+import { useCurrency } from "../../contexts/CurrencyContext"
 import "./Dashboard.css"
 
-// Types
 interface DashboardData {
   todayRevenue: number
   revenueChange: number
@@ -61,9 +58,14 @@ interface DashboardData {
   totalMembers: number
   newSignups: number
   totalTrainers: number
+  totalSessionsToday?: number
   monthlyRevenue: number
   trainerSchedule: any[]
   expiringMembers: any[]
+  overduePayments?: any[]
+  topTrainers?: any[]
+  bestPlans?: any[]
+  stockAlerts?: any[]
   recentActivity: any[]
   birthdays: any[]
 }
@@ -71,8 +73,9 @@ interface DashboardData {
 const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [data, setData] = useState<DashboardData | null>(null)
-  const [activeTab, setActiveTab] = useState<'revenue' | 'attendance'>('revenue')
+  const [now, setNow] = useState(new Date())
   const navigate = useNavigate()
+  const { formatPrice } = useCurrency()
 
   const loadDashboardData = useCallback(async () => {
     try {
@@ -91,323 +94,432 @@ const Dashboard: React.FC = () => {
     return () => clearInterval(interval)
   }, [loadDashboardData])
 
-  const handleQuickCheckIn = () => {
-    toast.success("Quick Check-in initiated. Scan QR code or enter Member ID.")
-  }
+  // Live clock
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 60000)
+    return () => clearInterval(t)
+  }, [])
 
-  const handleAddMember = () => {
-    navigate('/members?action=create')
-  }
+  const greeting = useMemo(() => {
+    const h = now.getHours()
+    if (h < 12) return "Good Morning"
+    if (h < 17) return "Good Afternoon"
+    return "Good Evening"
+  }, [now])
 
-  // Mock data for charts to match "Enterprise" look
-  const weeklySalesData = useMemo(() => [
-    { name: 'Mon', value: 4000 },
-    { name: 'Tue', value: 3000 },
-    { name: 'Wed', value: 2000 },
-    { name: 'Thu', value: 2780 },
-    { name: 'Fri', value: 1890 },
-    { name: 'Sat', value: 2390 },
-    { name: 'Sun', value: 3490 },
-  ], [])
+  const dateStr = useMemo(() => {
+    return now.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' })
+  }, [now])
 
-  const salesViewsData = useMemo(() => [
-    { name: 'Jan', sales: 40, views: 24 },
-    { name: 'Feb', sales: 30, views: 13 },
-    { name: 'Mar', sales: 20, views: 98 },
-    { name: 'Apr', sales: 27, views: 39 },
-    { name: 'May', sales: 18, views: 48 },
-    { name: 'Jun', sales: 23, views: 38 },
-    { name: 'Jul', sales: 34, views: 43 },
-    { name: 'Aug', sales: 20, views: 30 },
-    { name: 'Sep', sales: 30, views: 40 },
-  ], [])
+  // Revenue sparkline data (mock weekly trend)
+  const revenueSparkline = useMemo(() => {
+    const base = data?.monthlyRevenue || 50000
+    return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d, i) => ({
+      day: d,
+      value: Math.round(base / 7 * (0.6 + Math.random() * 0.8))
+    }))
+  }, [data?.monthlyRevenue])
 
-  const campaignData = [
-    { name: 'Facebook', value: 55, color: '#3B82F6', icon: Facebook },
-    { name: 'LinkedIn', value: 67, color: '#0A66C2', icon: Linkedin },
-    { name: 'Instagram', value: 78, color: '#E1306C', icon: Instagram },
-    { name: 'Snapchat', value: 46, color: '#FFFC00', icon: Ghost },
-    { name: 'Google', value: 38, color: '#4285F4', icon: Target },
-    { name: 'Website', value: 15, color: '#10B981', icon: Globe },
-  ]
+  // Membership distribution for donut
+  const membershipDistribution = useMemo(() => [
+    { name: 'Active', value: data?.totalMembers ? Math.round(data.totalMembers * 0.72) : 65, color: '#10b981' },
+    { name: 'Expiring', value: data?.expiringMembers?.length || 8, color: '#f59e0b' },
+    { name: 'Frozen', value: data?.totalMembers ? Math.round(data.totalMembers * 0.08) : 5, color: '#6366f1' },
+    { name: 'Expired', value: data?.totalMembers ? Math.round(data.totalMembers * 0.12) : 12, color: '#ef4444' },
+  ], [data])
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(value)
-  }
+  // Attendance trend (last 7 days mock)
+  const attendanceTrend = useMemo(() => {
+    const base = data?.checkIns || 30
+    return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d) => ({
+      day: d,
+      count: Math.round(base * (0.5 + Math.random() * 1))
+    }))
+  }, [data?.checkIns])
+
+  const isPositive = (data?.revenueChange || 0) >= 0
 
   if (loading && !data) {
     return (
-      <div className="dashboard-loading">
-        <motion.div 
+      <div className="dash-loading">
+        <motion.div
           animate={{ rotate: 360 }}
           transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-          className="loading-spinner"
+          className="dash-loading__spinner"
         />
-        <span>Initializing Enterprise Analytics...</span>
+        <span>Loading Dashboard...</span>
       </div>
     )
   }
 
   return (
-    <div className="dashboard-v4">
-      <div className="dash-content">
-        {/* ROW 1: LARGE KPI + MINI KPI GRID */}
-        <div className="main-grid">
-          <div className="card-large-kpi glass">
-            <div className="kpi-header">
-              <div className="kpi-info">
-                <h2>{formatCurrency(data?.monthlyRevenue || 0)}</h2>
-                <span className="label">Avg Monthly Revenue</span>
-              </div>
-              <div className="kpi-trend neg">
-                <ArrowDownRight size={14} /> 8.6%
-              </div>
-            </div>
-            <div className="kpi-chart">
-              <ResponsiveContainer width="100%" height={100}>
-                <AreaChart data={weeklySalesData}>
-                  <defs>
-                    <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#10B981" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <Area 
-                    type="monotone" 
-                    dataKey="value" 
-                    stroke="#10B981" 
-                    fillOpacity={1} 
-                    fill="url(#colorValue)" 
-                    strokeWidth={2}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          <div className="kpi-mini-grid">
-            <MiniKPICard icon={ShoppingCart} label="Daily Sales" value={formatCurrency(data?.todayRevenue || 0)} color="blue" />
-            <MiniKPICard icon={Printer} label="Monthly Goal" value="₹96,147" color="emerald" />
-            <MiniKPICard icon={Bell} label="Notifications" value="846" color="rose" />
-            <MiniKPICard icon={CreditCard} label="Pending Dues" value={formatCurrency(data?.pendingPaymentsAmount || 0)} color="cyan" />
-          </div>
-
-          {/* ROW 2: STATS & CHARTS */}
-          <div className="card-users-stats glass">
-            <div className="card-header">
-              <div className="header-info">
-                <h3>{data?.totalMembers || 0}</h3>
-                <span className="label">Total Members</span>
-              </div>
-              <MoreVertical size={16} />
-            </div>
-            <div className="chart-wrapper">
-              <ResponsiveContainer width="100%" height={120}>
-                <BarChart data={salesViewsData.slice(0, 7)}>
-                  <Bar dataKey="sales" fill="#EF4444" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="card-footer">
-              <span className="trend pos">12.5%</span> from last month
-            </div>
-          </div>
-
-          <div className="card-active-users glass">
-            <div className="card-header">
-              <div className="header-info">
-                <h3>{data?.liveMembers || 0}</h3>
-                <span className="label">Active Now</span>
-              </div>
-              <MoreVertical size={16} />
-            </div>
-            <div className="gauge-wrapper">
-              <ResponsiveContainer width="100%" height={120}>
-                <PieChart>
-                  <Pie
-                    data={[
-                      { value: data?.liveMembers || 0 },
-                      { value: (data?.totalMembers || 100) - (data?.liveMembers || 0) }
-                    ]}
-                    cx="50%"
-                    cy="80%"
-                    startAngle={180}
-                    endAngle={0}
-                    innerRadius={50}
-                    outerRadius={70}
-                    paddingAngle={0}
-                    dataKey="value"
-                  >
-                    <Cell fill="url(#gaugeGradient)" />
-                    <Cell fill="rgba(255,255,255,0.05)" />
-                  </Pie>
-                  <defs>
-                    <linearGradient id="gaugeGradient" x1="0" y1="0" x2="1" y2="0">
-                      <stop offset="0%" stopColor="#3B82F6" />
-                      <stop offset="100%" stopColor="#EC4899" />
-                    </linearGradient>
-                  </defs>
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="gauge-value">
-                {Math.round(((data?.liveMembers || 0) / (data?.totalMembers || 1)) * 100)}%
-              </div>
-            </div>
-            <div className="card-footer">
-              {data?.newSignups || 0} new signups today
-            </div>
-          </div>
-
-          <div className="card-sales-views glass col-span-2">
-            <div className="card-header">
-              <h3>Sales & Views</h3>
-              <MoreVertical size={16} />
-            </div>
-            <div className="chart-wrapper">
-              <ResponsiveContainer width="100%" height={200}>
-                <BarChart data={salesViewsData} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 10 }} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 10 }} />
-                  <Tooltip 
-                    cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-                    contentStyle={{ backgroundColor: '#111827', border: 'none', borderRadius: '8px' }}
-                  />
-                  <Bar dataKey="views" fill="#3B82F6" radius={[2, 2, 0, 0]} barSize={6} />
-                  <Bar dataKey="sales" fill="#1D4ED8" radius={[2, 2, 0, 0]} barSize={6} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="sales-summary-footer">
-              <div className="sum-item">
-                <span className="label">Monthly</span>
-                <div className="val">₹{data?.monthlyRevenue?.toLocaleString()} <span className="trend pos">16.5%</span></div>
-              </div>
-              <div className="sum-divider" />
-              <div className="sum-item">
-                <span className="label">Yearly</span>
-                <div className="val">₹{(data?.monthlyRevenue || 0) * 12 + 500000} <span className="trend pos">24.9%</span></div>
-              </div>
-            </div>
-          </div>
-
-          {/* ROW 3: CAMPAIGNS & ACTIVITIES */}
-          <div className="card-campaign glass">
-            <div className="card-header">
-              <h3>Campaign</h3>
-              <MoreVertical size={16} />
-            </div>
-            <div className="campaign-list">
-              {campaignData.map(item => (
-                <div key={item.name} className="campaign-item">
-                  <div className="item-left">
-                    <div className="icon-box" style={{ backgroundColor: `${item.color}20`, color: item.color }}>
-                      <item.icon size={14} />
-                    </div>
-                    <span className="name">{item.name}</span>
-                  </div>
-                  <div className="item-right">
-                    <span className="percentage">{item.value}%</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <section className="activity-section glass">
-            <div className="section-header">
-              <h3><Clock size={16} /> Live Activity</h3>
-              <button className="view-all" onClick={() => navigate('/reports')}>View All</button>
-            </div>
-            <div className="activity-list compact">
-              {data?.recentActivity?.slice(0, 4).map((activity, i) => (
-                <div key={i} className="activity-item">
-                  <div className={`activity-icon ${activity.type}`}>
-                    {activity.type === 'checkin' ? <CheckCircle2 size={12} /> : <AlertCircle size={12} />}
-                  </div>
-                  <div className="activity-content">
-                    <p><strong>{activity.name}</strong> {activity.type === 'checkin' ? 'in' : 'alert'}</p>
-                    <span>{activity.date}</span>
-                  </div>
-                </div>
-              ))}
-              {(!data?.recentActivity || data.recentActivity.length === 0) && (
-                <div className="empty-state">No activity</div>
-              )}
-            </div>
-          </section>
-
-          <section className="expiring-section glass">
-            <div className="section-header">
-              <h3><AlertCircle size={16} /> Expiring</h3>
-              <span className="badge">7 Days</span>
-            </div>
-            <div className="member-list compact">
-              {data?.expiringMembers?.slice(0, 4).map((member, i) => (
-                <div key={i} className="member-item-v3">
-                  <div className="member-info">
-                    <span className="member-name">{member.name}</span>
-                    <span className="member-plan">{member.plan}</span>
-                  </div>
-                  <div className={`days-left ${member.daysLeft <= 2 ? 'urgent' : ''}`}>
-                    {member.daysLeft}d
-                  </div>
-                </div>
-              ))}
-              {(!data?.expiringMembers || data.expiringMembers.length === 0) && (
-                <div className="empty-state">No expirations</div>
-              )}
-            </div>
-          </section>
-
-          <section className="quick-actions glass">
-             <div className="section-header">
-              <h3>Quick Actions</h3>
-            </div>
-            <div className="action-grid-compact">
-               <button className="action-btn-sm" onClick={handleAddMember} title="Add Member">
-                  <UserPlus size={18} />
-               </button>
-               <button className="action-btn-sm" onClick={handleQuickCheckIn} title="Check-in">
-                  <CheckCircle2 size={18} />
-               </button>
-               <button className="action-btn-sm" onClick={() => navigate('/financials')} title="Payments">
-                  <IndianRupee size={18} />
-               </button>
-               <button className="action-btn-sm" onClick={() => navigate('/settings')} title="Settings">
-                  <MoreVertical size={18} />
-               </button>
-            </div>
-          </section>
+    <div className="dash">
+      {/* Header */}
+      <header className="dash__header">
+        <div className="dash__header-left">
+          <h1 className="dash__greeting">{greeting}</h1>
+          <p className="dash__date">{dateStr}</p>
         </div>
+        <div className="dash__header-right">
+          <button className="dash__refresh-btn" onClick={loadDashboardData} title="Refresh">
+            <RefreshCw size={14} />
+          </button>
+          <div className="dash__live-badge">
+            <span className="dash__live-dot" /> Live
+          </div>
+        </div>
+      </header>
+
+      {/* KPI Row */}
+      <div className="dash__kpi-row">
+        <KPICard
+          icon={<Wallet size={18} />}
+          label="Today's Revenue"
+          value={formatPrice(data?.todayRevenue || 0)}
+          change={data?.revenueChange || 0}
+          color="emerald"
+        />
+        <KPICard
+          icon={<Eye size={18} />}
+          label="Live on Floor"
+          value={String(data?.liveMembers || 0)}
+          sub={`${data?.checkIns || 0} check-ins today`}
+          color="blue"
+        />
+        <KPICard
+          icon={<Users size={18} />}
+          label="Total Members"
+          value={String(data?.totalMembers || 0)}
+          sub={`+${data?.newSignups || 0} new today`}
+          color="violet"
+        />
+        <KPICard
+          icon={<Dumbbell size={18} />}
+          label="Sessions Today"
+          value={String(data?.totalSessionsToday || 0)}
+          sub={`${data?.totalTrainers || 0} trainers active`}
+          color="amber"
+        />
+        <KPICard
+          icon={<CreditCard size={18} />}
+          label="Pending Dues"
+          value={formatPrice(data?.pendingPaymentsAmount || 0)}
+          sub={`${data?.pendingPaymentsCount || 0} members`}
+          color="rose"
+          alert
+        />
+      </div>
+
+      {/* Main Grid */}
+      <div className="dash__grid">
+        {/* Revenue Chart */}
+        <section className="dash__card dash__card--revenue">
+          <div className="dash__card-head">
+            <div>
+              <h3 className="dash__card-title">Revenue Overview</h3>
+              <p className="dash__card-sub">Weekly earnings trend</p>
+            </div>
+            <div className="dash__card-stat">
+              <span className="dash__card-stat-value">{formatPrice(data?.monthlyRevenue || 0)}</span>
+              <span className={`dash__card-stat-badge ${isPositive ? 'pos' : 'neg'}`}>
+                {isPositive ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
+                {Math.abs(data?.revenueChange || 0).toFixed(1)}%
+              </span>
+            </div>
+          </div>
+          <div className="dash__chart">
+            <ResponsiveContainer width="100%" height={180}>
+              <AreaChart data={revenueSparkline} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#10b981" stopOpacity={0.25} />
+                    <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.04)" />
+                <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 10 }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 10 }} />
+                <Tooltip
+                  contentStyle={{ backgroundColor: '#18181b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, fontSize: 12 }}
+                  formatter={(val: number) => [formatPrice(val), 'Revenue']}
+                />
+                <Area type="monotone" dataKey="value" stroke="#10b981" strokeWidth={2} fill="url(#revGrad)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </section>
+
+        {/* Attendance Chart */}
+        <section className="dash__card dash__card--attendance">
+          <div className="dash__card-head">
+            <div>
+              <h3 className="dash__card-title">Attendance</h3>
+              <p className="dash__card-sub">Daily check-ins this week</p>
+            </div>
+            <div className="dash__card-highlight">
+              <Activity size={14} />
+              <span>{data?.checkIns || 0} today</span>
+            </div>
+          </div>
+          <div className="dash__chart">
+            <ResponsiveContainer width="100%" height={180}>
+              <BarChart data={attendanceTrend} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.04)" />
+                <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 10 }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 10 }} />
+                <Tooltip
+                  contentStyle={{ backgroundColor: '#18181b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, fontSize: 12 }}
+                  cursor={{ fill: 'rgba(59,130,246,0.08)' }}
+                />
+                <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={20} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </section>
+
+        {/* Membership Donut */}
+        <section className="dash__card dash__card--membership">
+          <div className="dash__card-head">
+            <div>
+              <h3 className="dash__card-title">Membership Mix</h3>
+              <p className="dash__card-sub">Current status breakdown</p>
+            </div>
+          </div>
+          <div className="dash__donut-wrap">
+            <ResponsiveContainer width="100%" height={160}>
+              <PieChart>
+                <Pie
+                  data={membershipDistribution}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={45}
+                  outerRadius={65}
+                  paddingAngle={3}
+                  dataKey="value"
+                  strokeWidth={0}
+                >
+                  {membershipDistribution.map((entry, i) => (
+                    <Cell key={i} fill={entry.color} />
+                  ))}
+                </Pie>
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="dash__donut-center">
+              <span className="dash__donut-total">{data?.totalMembers || 0}</span>
+              <span className="dash__donut-label">Total</span>
+            </div>
+          </div>
+          <div className="dash__legend">
+            {membershipDistribution.map(item => (
+              <div key={item.name} className="dash__legend-item">
+                <span className="dash__legend-dot" style={{ background: item.color }} />
+                <span className="dash__legend-name">{item.name}</span>
+                <span className="dash__legend-val">{item.value}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Trainer Schedule */}
+        <section className="dash__card dash__card--trainers">
+          <div className="dash__card-head">
+            <div>
+              <h3 className="dash__card-title">Trainer Schedule</h3>
+              <p className="dash__card-sub">Today's sessions</p>
+            </div>
+            <button className="dash__link-btn" onClick={() => navigate('/trainers')}>
+              View All <ArrowRight size={12} />
+            </button>
+          </div>
+          <div className="dash__trainer-list">
+            {data?.trainerSchedule?.map((trainer, i) => (
+              <div key={i} className="dash__trainer-row">
+                <div className="dash__trainer-avatar">{trainer.initials}</div>
+                <div className="dash__trainer-info">
+                  <span className="dash__trainer-name">{trainer.name}</span>
+                  <span className="dash__trainer-meta">{trainer.sessionsToday} sessions &middot; {trainer.availableSlots} slots free</span>
+                </div>
+                <div className="dash__trainer-slots">
+                  {trainer.slots?.slice(0, 3).map((slot: any, j: number) => (
+                    <span key={j} className={`dash__slot dash__slot--${slot.status}`} title={slot.memberName || slot.time}>
+                      {slot.time?.replace(' AM', 'a').replace(' PM', 'p')}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+            {(!data?.trainerSchedule || data.trainerSchedule.length === 0) && (
+              <div className="dash__empty">No trainers scheduled today</div>
+            )}
+          </div>
+        </section>
+
+        {/* Expiring Memberships */}
+        <section className="dash__card dash__card--expiring">
+          <div className="dash__card-head">
+            <div>
+              <h3 className="dash__card-title">
+                <AlertTriangle size={14} className="dash__icon-warn" /> Expiring Soon
+              </h3>
+              <p className="dash__card-sub">Next 7 days</p>
+            </div>
+            <span className="dash__badge-count">{data?.expiringMembers?.length || 0}</span>
+          </div>
+          <div className="dash__expire-list">
+            {data?.expiringMembers?.slice(0, 5).map((member, i) => (
+              <div key={i} className="dash__expire-row">
+                <div className="dash__expire-info">
+                  <span className="dash__expire-name">{member.name}</span>
+                  <span className="dash__expire-plan">{member.plan}</span>
+                </div>
+                <span className={`dash__expire-days ${member.daysLeft <= 2 ? 'urgent' : member.daysLeft <= 4 ? 'warn' : ''}`}>
+                  {member.daysLeft}d
+                </span>
+              </div>
+            ))}
+            {(!data?.expiringMembers || data.expiringMembers.length === 0) && (
+              <div className="dash__empty">No memberships expiring</div>
+            )}
+          </div>
+        </section>
+
+        {/* Live Activity Feed */}
+        <section className="dash__card dash__card--activity">
+          <div className="dash__card-head">
+            <div>
+              <h3 className="dash__card-title">
+                <Zap size={14} className="dash__icon-zap" /> Live Activity
+              </h3>
+              <p className="dash__card-sub">Real-time updates</p>
+            </div>
+            <button className="dash__link-btn" onClick={() => navigate('/reports')}>
+              View All <ArrowRight size={12} />
+            </button>
+          </div>
+          <div className="dash__activity-list">
+            {data?.recentActivity?.slice(0, 5).map((act, i) => (
+              <div key={i} className="dash__activity-row">
+                <div className={`dash__activity-icon dash__activity-icon--${act.type}`}>
+                  {act.type === 'checkin' && <UserCheck size={12} />}
+                  {act.type === 'signup' && <UserPlus size={12} />}
+                  {act.type === 'cancel' && <AlertCircle size={12} />}
+                  {(!act.type || act.type === 'freeze') && <Timer size={12} />}
+                </div>
+                <div className="dash__activity-content">
+                  <span className="dash__activity-name">{act.name}</span>
+                  <span className="dash__activity-desc">
+                    {act.type === 'checkin' && 'Checked in'}
+                    {act.type === 'signup' && 'New signup'}
+                    {act.type === 'cancel' && 'Cancelled'}
+                    {act.type === 'freeze' && 'Membership frozen'}
+                  </span>
+                </div>
+                <span className="dash__activity-time">{act.date}</span>
+              </div>
+            ))}
+            {(!data?.recentActivity || data.recentActivity.length === 0) && (
+              <div className="dash__empty">No recent activity</div>
+            )}
+          </div>
+        </section>
+
+        {/* Birthdays */}
+        <section className="dash__card dash__card--birthdays">
+          <div className="dash__card-head">
+            <div>
+              <h3 className="dash__card-title">
+                <Gift size={14} className="dash__icon-gift" /> Birthdays Today
+              </h3>
+            </div>
+          </div>
+          <div className="dash__birthday-list">
+            {data?.birthdays?.map((b, i) => (
+              <div key={i} className="dash__birthday-chip">
+                <div className="dash__birthday-avatar">{b.initials}</div>
+                <span>{b.name}</span>
+              </div>
+            ))}
+            {(!data?.birthdays || data.birthdays.length === 0) && (
+              <div className="dash__empty">No birthdays today</div>
+            )}
+          </div>
+        </section>
+
+        {/* Quick Actions */}
+        <section className="dash__card dash__card--actions">
+          <div className="dash__card-head">
+            <div>
+              <h3 className="dash__card-title">Quick Actions</h3>
+            </div>
+          </div>
+          <div className="dash__action-grid">
+            <button className="dash__action-btn dash__action-btn--primary" onClick={() => navigate('/members?action=create')}>
+              <UserPlus size={16} />
+              <span>Add Member</span>
+            </button>
+            <button className="dash__action-btn" onClick={() => { navigate('/members') }}>
+              <CheckCircle2 size={16} />
+              <span>Check-in</span>
+            </button>
+            <button className="dash__action-btn" onClick={() => navigate('/financials')}>
+              <Wallet size={16} />
+              <span>Payments</span>
+            </button>
+            <button className="dash__action-btn" onClick={() => navigate('/reports')}>
+              <BarChart3 size={16} />
+              <span>Reports</span>
+            </button>
+            <button className="dash__action-btn" onClick={() => navigate('/classes')}>
+              <Calendar size={16} />
+              <span>Classes</span>
+            </button>
+            <button className="dash__action-btn" onClick={() => navigate('/equipment')}>
+              <Dumbbell size={16} />
+              <span>Equipment</span>
+            </button>
+          </div>
+        </section>
       </div>
     </div>
   )
 }
 
-interface MiniKPICardProps {
-  icon: any
+/* ── Sub-components ── */
+
+interface KPICardProps {
+  icon: React.ReactNode
   label: string
   value: string
+  change?: number
+  sub?: string
   color: string
+  alert?: boolean
 }
 
-const MiniKPICard: React.FC<MiniKPICardProps> = ({ icon: Icon, label, value, color }) => {
+const KPICard: React.FC<KPICardProps> = ({ icon, label, value, change, sub, color, alert: isAlert }) => {
+  const hasChange = change !== undefined && change !== null
+  const isPos = (change || 0) >= 0
+
   return (
-    <div className="mini-kpi-card glass">
-      <div className={`icon-wrapper ${color}`}>
-        <Icon size={20} />
+    <motion.div
+      className={`dash__kpi dash__kpi--${color} ${isAlert ? 'dash__kpi--alert' : ''}`}
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      <div className="dash__kpi-icon">{icon}</div>
+      <div className="dash__kpi-body">
+        <span className="dash__kpi-value">{value}</span>
+        <span className="dash__kpi-label">{label}</span>
+        {hasChange && (
+          <span className={`dash__kpi-change ${isPos ? 'pos' : 'neg'}`}>
+            {isPos ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
+            {Math.abs(change).toFixed(1)}%
+          </span>
+        )}
+        {sub && <span className="dash__kpi-sub">{sub}</span>}
       </div>
-      <div className="kpi-content">
-        <h3>{value}</h3>
-        <span className="label">{label}</span>
-      </div>
-    </div>
+    </motion.div>
   )
 }
 

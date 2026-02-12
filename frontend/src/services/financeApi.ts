@@ -7,6 +7,7 @@ interface FinancialStats {
     netProfit: number;
     profitMargin: number;
     pendingPayments: number;
+    pendingCount?: number;
     revenueChange?: number;
     expensesChange?: number;
 }
@@ -66,6 +67,26 @@ export const financeApi = {
 
     getChartData: async (period: string = 'month') => {
         const response = await apiClient.get(`/finance/chart?period=${period}`);
+        return response.data;
+    },
+
+    getPendingTransactions: async (period: string = 'month') => {
+        const response = await apiClient.get(`/finance/pending?period=${period}`);
+        return response.data;
+    },
+
+    getCategoryStats: async (type: string = 'INCOME', period: string = 'month') => {
+        const response = await apiClient.get(`/finance/category-stats?type=${type}&period=${period}`);
+        return response.data;
+    },
+
+    getDailyTrend: async (period: string = 'month') => {
+        const response = await apiClient.get(`/finance/daily-trend?period=${period}`);
+        return response.data;
+    },
+
+    getTopTransactions: async (type: string = 'INCOME', period: string = 'month', limit: number = 5) => {
+        const response = await apiClient.get(`/finance/top-transactions?type=${type}&period=${period}&limit=${limit}`);
         return response.data;
     }
 };

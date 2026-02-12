@@ -32,6 +32,8 @@
     "axios": "^1.13.2",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.23.25",
+    "jspdf": "^4.1.0",
+    "jspdf-autotable": "^5.0.7",
     "lodash": "^4.17.21",
     "lottie-react": "^2.4.1",
     "lucide-react": "^0.555.0",

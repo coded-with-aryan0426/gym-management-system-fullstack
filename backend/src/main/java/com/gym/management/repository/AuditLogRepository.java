@@ -139,6 +139,12 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
     List<Object[]> getSeverityCountsByGym(@Param("gymId") Long gymId);
 
     /**
+     * Get daily activity counts for last N days
+     */
+    @Query("SELECT CAST(a.timestamp AS date), COUNT(a) FROM AuditLog a WHERE a.gym.gymId = :gymId AND a.timestamp >= :since GROUP BY CAST(a.timestamp AS date) ORDER BY CAST(a.timestamp AS date)")
+    List<Object[]> getDailyActivityByGym(@Param("gymId") Long gymId, @Param("since") LocalDateTime since);
+
+    /**
      * Count logs by gym
      */
     Long countByGymGymId(Long gymId);

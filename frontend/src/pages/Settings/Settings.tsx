@@ -26,15 +26,15 @@ import AuditLogSection from "./sections/AuditLogSection"
 import ThemeSection from "./sections/ThemeSection"
 
 const settingsCategories = [
-    { id: 'profile', label: 'Owner Profile', icon: User, desc: 'Personal & Gym details' },
-    { id: 'appearance', label: 'Appearance', icon: Palette, desc: 'Theme & Display' },
-    { id: 'security', label: 'Security & Access', icon: Shield, desc: 'Login & Data safety' },
-    { id: 'roles', label: 'Roles & Permissions', icon: Users, desc: 'Access control matrix' },
-    { id: 'billing', label: 'Billing Rules', icon: CreditCard, desc: 'Taxes & Late fees' },
-    { id: 'membership', label: 'Membership Policies', icon: ClipboardList, desc: 'Freezes & Cancellations' },
-    { id: 'userrules', label: 'User Rules', icon: Users, desc: 'Staff, Trainer & Member policies' },
-    { id: 'notifications', label: 'Notifications', icon: Bell, desc: 'Alerts & Reminders' },
-    { id: 'audit', label: 'Audit Logs', icon: FileText, desc: 'System activity history' },
+    { id: 'profile', label: 'Owner Profile', icon: User, desc: 'Personal & Gym details', color: '#3b82f6' },
+    { id: 'appearance', label: 'Appearance', icon: Palette, desc: 'Theme & Display', color: '#a855f7' },
+    { id: 'security', label: 'Security & Access', icon: Shield, desc: 'Login & Data safety', color: '#ef4444' },
+    { id: 'roles', label: 'Roles & Permissions', icon: Users, desc: 'Access control matrix', color: '#f59e0b' },
+    { id: 'billing', label: 'Billing Rules', icon: CreditCard, desc: 'Taxes & Late fees', color: '#10b981' },
+    { id: 'membership', label: 'Membership Policies', icon: ClipboardList, desc: 'Freezes & Cancellations', color: '#06b6d4' },
+    { id: 'userrules', label: 'User Rules', icon: Users, desc: 'Staff, Trainer & Member policies', color: '#8b5cf6' },
+    { id: 'notifications', label: 'Notifications', icon: Bell, desc: 'Alerts & Reminders', color: '#f97316' },
+    { id: 'audit', label: 'Audit Logs', icon: FileText, desc: 'System activity history', color: '#14b8a6' },
 ]
 
 const Settings: React.FC = () => {
@@ -80,8 +80,18 @@ const Settings: React.FC = () => {
                                 whileTap={{ scale: 0.99 }}
                                 transition={{ type: "spring", stiffness: 400, damping: 25 }}
                             >
-                                <div className="settings-nav-item__icon">
-                                    <Icon size={18} />
+                                <div
+                                    className="settings-nav-item__icon"
+                                    style={isActive ? {
+                                        background: `linear-gradient(135deg, ${category.color}, ${category.color}dd)`,
+                                        color: '#fff',
+                                        boxShadow: `0 3px 10px ${category.color}55`
+                                    } : {
+                                        color: category.color,
+                                        background: `${category.color}15`
+                                    }}
+                                >
+                                    <Icon size={16} />
                                 </div>
                                 <div className="settings-nav-item__text">
                                     <div className="settings-nav-item__label">{category.label}</div>

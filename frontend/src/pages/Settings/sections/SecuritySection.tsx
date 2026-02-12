@@ -258,11 +258,11 @@ const SecuritySection: React.FC = () => {
   }
 
   return (
-    <div className="settings-section">
+    <div className="settings-section" style={{ "--section-accent": "#ef4444" } as React.CSSProperties}>
       <div className="settings-section__header">
         <div className="settings-section__title-group">
-          <div className="settings-section__icon">
-            <Shield size={20} />
+            <div className="settings-section__icon" style={{ background: 'linear-gradient(135deg, #ef4444, #dc2626)' }}>
+              <Shield size={20} />
           </div>
           <div>
             <h2 className="settings-section__title">Security & Access</h2>

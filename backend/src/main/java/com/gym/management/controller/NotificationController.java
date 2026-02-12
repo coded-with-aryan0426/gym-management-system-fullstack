@@ -16,32 +16,43 @@ public class NotificationController {
     @Autowired
     private com.gym.management.service.NotificationService notificationService;
 
-    /**
-     * Get notifications for a user with optional filter
-     */
     @GetMapping("/user/{userId}")
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public ResponseEntity<List<Notification>> getUserNotifications(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "all") String filter) {
-        System.out.println("Fetching notifications for userId: " + userId + ", filter: " + filter);
         List<Notification> notifications = notificationService.getUserNotifications(userId, filter);
-        System.out.println("Found " + notifications.size() + " notifications for userId: " + userId);
         return ResponseEntity.ok(notifications);
     }
 
-    /**
-     * Get unread notification count for a user
-     */
+    @GetMapping("/user/{userId}/by-type")
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public ResponseEntity<List<Notification>> getByType(
+            @PathVariable Long userId,
+            @RequestParam String type) {
+        return ResponseEntity.ok(notificationService.getByType(userId, type));
+    }
+
+    @GetMapping("/user/{userId}/by-priority")
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public ResponseEntity<List<Notification>> getByPriority(
+            @PathVariable Long userId,
+            @RequestParam String priority) {
+        return ResponseEntity.ok(notificationService.getByPriority(userId, priority));
+    }
+
     @GetMapping("/user/{userId}/unread-count")
     public ResponseEntity<Map<String, Long>> getUnreadCount(@PathVariable Long userId) {
         Long count = notificationService.getUnreadCount(userId);
         return ResponseEntity.ok(Map.of("count", count));
     }
 
-    /**
-     * Mark a notification as read
-     */
+    @GetMapping("/user/{userId}/stats")
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public ResponseEntity<Map<String, Object>> getStats(@PathVariable Long userId) {
+        return ResponseEntity.ok(notificationService.getStats(userId));
+    }
+
     @PutMapping("/{notificationId}/read")
     public ResponseEntity<?> markAsRead(@PathVariable Long notificationId) {
         Optional<Notification> updated = notificationService.markAsRead(notificationId);
@@ -49,9 +60,6 @@ public class NotificationController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    /**
-     * Toggle Star status
-     */
     @PutMapping("/{notificationId}/star")
     public ResponseEntity<?> toggleStar(@PathVariable Long notificationId) {
         Optional<Notification> updated = notificationService.toggleStar(notificationId);
@@ -59,9 +67,6 @@ public class NotificationController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    /**
-     * Archive notification
-     */
     @PutMapping("/{notificationId}/archive")
     public ResponseEntity<?> archiveNotification(@PathVariable Long notificationId) {
         Optional<Notification> updated = notificationService.archiveNotification(notificationId);
@@ -69,9 +74,13 @@ public class NotificationController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    /**
-     * Delete notification
-     */
+    @PutMapping("/{notificationId}/unarchive")
+    public ResponseEntity<?> unarchiveNotification(@PathVariable Long notificationId) {
+        Optional<Notification> updated = notificationService.unarchiveNotification(notificationId);
+        return updated.map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     @DeleteMapping("/{notificationId}")
     public ResponseEntity<?> deleteNotification(@PathVariable Long notificationId) {
         if (notificationService.deleteNotification(notificationId)) {
@@ -80,9 +89,6 @@ public class NotificationController {
         return ResponseEntity.notFound().build();
     }
 
-    /**
-     * Bulk actions
-     */
     @PostMapping("/bulk-action")
     public ResponseEntity<?> bulkAction(@RequestBody Map<String, Object> request) {
         String action = (String) request.get("action");
@@ -93,15 +99,11 @@ public class NotificationController {
         }
 
         try {
-            // Safely convert to Long list
             List<Long> longIds = rawIds.stream()
                     .map(id -> {
-                        if (id instanceof Integer)
-                            return ((Integer) id).longValue();
-                        if (id instanceof Long)
-                            return (Long) id;
-                        if (id instanceof String)
-                            return Long.parseLong((String) id);
+                        if (id instanceof Integer) return ((Integer) id).longValue();
+                        if (id instanceof Long) return (Long) id;
+                        if (id instanceof String) return Long.parseLong((String) id);
                         throw new IllegalArgumentException("Invalid ID format");
                     })
                     .collect(java.util.stream.Collectors.toList());
@@ -109,7 +111,7 @@ public class NotificationController {
             notificationService.performBulkAction(action, longIds);
             return ResponseEntity.ok(Map.of("message", "Bulk action completed"));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Invalid ID format in list"));
+            return ResponseEntity.badRequest().body(Map.of("error", "Invalid ID format"));
         }
     }
 
@@ -117,15 +119,5 @@ public class NotificationController {
     public ResponseEntity<?> markAllAsRead(@PathVariable Long userId) {
         notificationService.markAllAsRead(userId);
         return ResponseEntity.ok(Map.of("message", "All notifications marked as read"));
-    }
-
-    /**
-     * Create a new notification (Internal/Admin)
-     */
-    @PostMapping
-    public ResponseEntity<?> createNotification(@RequestBody Map<String, Object> request) {
-        // Basic implementation for testing/seeding
-        // In real app, this would use a proper DTO and user lookup
-        return ResponseEntity.ok(Map.of("message", "Notification created (Stub)"));
     }
 }

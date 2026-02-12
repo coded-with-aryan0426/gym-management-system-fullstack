@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useRef, useState } from "react"
+import React, { useRef, useState, useEffect } from "react"
 import { NavLink, useNavigate, useLocation } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion"
 import {
@@ -18,10 +18,17 @@ import {
   LogOut,
   Moon,
   Sun,
-  UserCircle,
   Monitor,
   Wrench,
-  ShieldCheck
+  ShieldCheck,
+  Clock,
+  Shield,
+  Crown,
+  CircleDot,
+  Mail,
+  ChevronUp,
+  Sparkles,
+  HelpCircle
 } from "lucide-react"
 import { useAuth } from "../../contexts/AuthContext"
 import { useTheme } from "../../contexts/ThemeContext"
@@ -47,7 +54,7 @@ const defaultNavItems: NavItem[] = [
   { path: "/classes", label: "Classes", id: "classes", icon: <Calendar size={18} />, color: "#34d399" },
   { path: "/pt-sessions", label: "Sessions", id: "sessions", icon: <User size={18} />, color: "#f472b6" },
   { path: "/financials", label: "Finance", id: "billing", icon: <CreditCard size={18} />, color: "#a78bfa" },
-  { path: "/reports", label: "Reports", id: "reports", icon: <FileText size={18} />, color: "#f472b6" },
+  { path: "/reports", label: "Reports", id: "reports", icon: <FileText size={18} />, color: "#fb923c" },
 ];
 
 interface CommandRailProps {
@@ -60,23 +67,59 @@ const CommandRail: React.FC<CommandRailProps> = ({ isCollapsed = false, onToggle
   const { user, logout } = useAuth();
   const { themeMode, setThemeMode } = useTheme();
   const navigate = useNavigate();
-    const role = (user?.role || 'MEMBER').toUpperCase();
-    const [isSlideUpOpen, setIsSlideUpOpen] = useState(false);
-    const location = useLocation();
-  
+  const role = (user?.role || 'MEMBER').toUpperCase();
+  const [isSlideUpOpen, setIsSlideUpOpen] = useState(false);
+  const [hoveredLink, setHoveredLink] = useState<string | null>(null);
+  const location = useLocation();
+
+  const [currentTime, setCurrentTime] = useState(new Date());
     const profileMenuRef = useRef<HTMLDivElement>(null);
     useClickOutside(profileMenuRef, () => setIsSlideUpOpen(false), isSlideUpOpen);
-  
+
+    useEffect(() => {
+      const timer = setInterval(() => setCurrentTime(new Date()), 60000);
+      return () => clearInterval(timer);
+    }, []);
+
     const getSettingsPath = () => {
       if (role === 'TRAINER') return '/trainer/settings';
       if (role === 'MEMBER' || role === 'CUSTOMER') return '/member/settings';
       return '/settings';
     };
-  
+
     const getNotificationsPath = () => {
       if (role === 'TRAINER') return '/trainer/notifications';
       if (role === 'MEMBER' || role === 'CUSTOMER') return '/member/notifications';
       return '/notifications';
+    };
+
+    const getRoleBadgeClass = () => {
+      if (role === 'OWNER') return 'role-badge--owner';
+      if (role === 'ADMIN') return 'role-badge--admin';
+      if (role === 'TRAINER') return 'role-badge--trainer';
+      return 'role-badge--member';
+    };
+
+    const getRoleIcon = () => {
+      if (role === 'OWNER') return <Crown size={10} />;
+      if (role === 'ADMIN') return <Shield size={10} />;
+      if (role === 'TRAINER') return <Dumbbell size={10} />;
+      return <User size={10} />;
+    };
+
+    const getGreeting = () => {
+      const hour = currentTime.getHours();
+      if (hour < 12) return 'Good Morning';
+      if (hour < 17) return 'Good Afternoon';
+      return 'Good Evening';
+    };
+
+    const formatTime = () => {
+      return currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    };
+
+    const formatDate = () => {
+      return currentTime.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
     };
 
   const itemsToRender = navItems === defaultNavItems ? navItems.filter(item => {
@@ -105,128 +148,183 @@ const CommandRail: React.FC<CommandRailProps> = ({ isCollapsed = false, onToggle
                 to={item.path}
                 end={item.end}
                 className={({ isActive }) => `command-rail__link ${isActive ? "command-rail__link--active" : ""}`}
-                title={isCollapsed ? item.label : undefined}
-                style={{ color: isActive ? item.color : 'var(--text-secondary)' } as React.CSSProperties}
+                style={{ color: isActive ? item.color : undefined } as React.CSSProperties}
+                onMouseEnter={() => isCollapsed && setHoveredLink(item.path)}
+                onMouseLeave={() => setHoveredLink(null)}
               >
                 <span className="command-rail__icon">
                   {item.icon && React.cloneElement(item.icon as React.ReactElement, { 
                     size: isActive ? 20 : 18,
-                    strokeWidth: isActive ? 2.5 : 2
+                    strokeWidth: isActive ? 2.4 : 2
                   })}
                 </span>
-                <AnimatePresence mode="wait">
-                  {!isCollapsed && (
-                    <motion.span
-                      className="command-rail__label"
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -10 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      {item.label}
-                    </motion.span>
-                  )}
-                </AnimatePresence>
+                {!isCollapsed && (
+                  <span className="command-rail__label">{item.label}</span>
+                )}
+                {isCollapsed && hoveredLink === item.path && (
+                  <div className="command-rail__tooltip">{item.label}</div>
+                )}
               </NavLink>
             );
           })}
         </div>
       </nav>
 
-      <div className="command-rail__footer">
-        <div className="command-rail__user-menu" ref={profileMenuRef} style={{ position: 'relative' }}>
-          <button
-            className={`command-rail__user-trigger ${isSlideUpOpen ? 'active' : ''}`}
-            onClick={() => setIsSlideUpOpen(!isSlideUpOpen)}
-          >
-            <div className="command-rail__user-avatar">
-              <Avatar name={user?.fullName || "User"} size="sm" />
-            </div>
-            {!isCollapsed && (
-              <>
-                <div className="command-rail__user-info" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', flex: 1, overflow: 'hidden' }}>
-                  <span className="command-rail__user-name" style={{ width: '100%', textAlign: 'left' }}>{user?.fullName || "User"}</span>
-                  <span className="command-rail__user-role">
-                    <ShieldCheck size={10} style={{ marginRight: 4 }} />
-                    {role}
-                  </span>
-                </div>
-                <ChevronRight size={14} style={{ opacity: 0.5, transform: isSlideUpOpen ? 'rotate(-90deg)' : 'none', transition: 'transform 0.3s' }} />
-              </>
-            )}
-          </button>
-
-          <AnimatePresence>
-            {isSlideUpOpen && (
-              <motion.div 
-                className="command-rail__slide-panel"
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                animate={{ opacity: 1, y: -8, scale: 1 }}
-                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                  style={{ 
-                    bottom: '100%', 
-                    left: '0', 
-                    width: '220px', 
-                    position: 'absolute' 
-                  }}
-                >
-                  <div className="slide-panel__header">
-                    <div className="slide-panel__header-avatar">
-                      <Avatar name={user?.fullName || "User"} size="md" />
-                    </div>
-                    <div className="slide-panel__header-info">
-                      <span className="slide-panel__title">{user?.fullName || "User"}</span>
-                      <span className="slide-panel__subtitle">{user?.email || "Account Settings"}</span>
-                    </div>
+        <div className="command-rail__footer">
+            <div className="command-rail__user-menu" ref={profileMenuRef}>
+            <button
+              className={`command-rail__user-trigger ${isSlideUpOpen ? 'active' : ''}`}
+              onClick={() => setIsSlideUpOpen(!isSlideUpOpen)}
+            >
+              <div className="command-rail__user-avatar">
+                <Avatar name={user?.fullName || "User"} size="sm" />
+              </div>
+              {!isCollapsed && (
+                <>
+                  <div className="command-rail__user-info">
+                    <span className="command-rail__user-name">{user?.fullName || "User"}</span>
+                    <span className="command-rail__user-role">
+                      <ShieldCheck size={10} />
+                      {role}
+                    </span>
                   </div>
-                    <div className="slide-panel__content">
-                      <button className="slide-panel__item" onClick={() => { setIsSlideUpOpen(false); navigate(getSettingsPath()); }}>
-                        <Settings size={14} />
-                        <span>Settings</span>
-                      </button>
+                  <ChevronRight 
+                    size={14} 
+                    className={`command-rail__chevron ${isSlideUpOpen ? 'command-rail__chevron--open' : ''}`}
+                  />
+                </>
+              )}
+            </button>
 
-                      <button className="slide-panel__item" onClick={() => { setIsSlideUpOpen(false); navigate(getNotificationsPath()); }}>
-                        <Bell size={14} />
-                        <span>Notifications</span>
-                      </button>
-                    
-                    <div className="slide-panel__divider" />
-                  
-                  <div className="theme-switcher">
-                    <button 
-                      className={`theme-switcher__btn ${themeMode === 'light' ? 'theme-switcher__btn--active' : ''}`}
-                      onClick={() => setThemeMode('light')}
-                      title="Light Mode"
-                    >
-                      <Sun size={14} />
-                    </button>
-                    <button 
-                      className={`theme-switcher__btn ${themeMode === 'dark' ? 'theme-switcher__btn--active' : ''}`}
-                      onClick={() => setThemeMode('dark')}
-                      title="Dark Mode"
-                    >
-                      <Moon size={14} />
-                    </button>
-                    <button 
-                      className={`theme-switcher__btn ${themeMode === 'system' ? 'theme-switcher__btn--active' : ''}`}
-                      onClick={() => setThemeMode('system')}
-                      title="System Theme"
-                    >
-                      <Monitor size={14} />
-                    </button>
-                  </div>
+              <AnimatePresence>
+                {isSlideUpOpen && (
+                  <motion.div 
+                    className={`command-rail__slide-panel ${isCollapsed ? 'command-rail__slide-panel--collapsed' : ''}`}
+                    initial={{ opacity: 0, y: 12, scale: 0.96 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 12, scale: 0.96 }}
+                    transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+                  >
+                  {/* Premium Header */}
+                    <div className="slide-panel__header-premium">
+                      <div className="slide-panel__header-bg" />
+                      <div className="slide-panel__header-content">
+                        <div className="slide-panel__avatar-wrapper">
+                          <Avatar name={user?.fullName || "User"} size="lg" />
+                          <span className="slide-panel__status-dot" />
+                        </div>
+                        <div className="slide-panel__header-info">
+                          <span className="slide-panel__greeting">
+                            <Sparkles size={11} />
+                            {getGreeting()}
+                          </span>
+                          <span className="slide-panel__title">{user?.fullName || "User"}</span>
+                          <span className="slide-panel__email">
+                            <Mail size={11} />
+                            {user?.email || "—"}
+                          </span>
+                          <span className={`slide-panel__role-badge ${getRoleBadgeClass()}`}>
+                            {getRoleIcon()}
+                            {role}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
 
-                  <div className="slide-panel__divider" />
-                  
-                  <button className="slide-panel__item text-red" onClick={handleLogout}>
-                    <LogOut size={14} />
-                    <span>Logout</span>
-                  </button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+                    {/* Live clock strip */}
+                    <div className="slide-panel__clock-strip">
+                      <div className="slide-panel__clock-item">
+                        <Clock size={12} />
+                        <span>{formatTime()}</span>
+                      </div>
+                      <div className="slide-panel__clock-divider" />
+                      <div className="slide-panel__clock-item">
+                        <Calendar size={12} />
+                        <span>{formatDate()}</span>
+                      </div>
+                      <div className="slide-panel__clock-divider" />
+                      <div className="slide-panel__clock-item slide-panel__clock-status">
+                        <CircleDot size={10} />
+                        <span>Online</span>
+                      </div>
+                    </div>
+
+                    {/* Quick Navigation */}
+                    <div className="slide-panel__section">
+                      <span className="slide-panel__section-label">Quick Navigation</span>
+                      <div className="slide-panel__nav-list">
+                        <button className="slide-panel__nav-item" onClick={() => { setIsSlideUpOpen(false); navigate(getSettingsPath()); }}>
+                          <div className="slide-panel__nav-icon slide-panel__nav-icon--settings">
+                            <Settings size={15} />
+                          </div>
+                          <div className="slide-panel__nav-text">
+                            <span className="slide-panel__nav-title">Settings</span>
+                            <span className="slide-panel__nav-desc">Preferences & configuration</span>
+                          </div>
+                          <ChevronRight size={14} className="slide-panel__nav-arrow" />
+                        </button>
+                        <button className="slide-panel__nav-item" onClick={() => { setIsSlideUpOpen(false); navigate(getNotificationsPath()); }}>
+                          <div className="slide-panel__nav-icon slide-panel__nav-icon--notifications">
+                            <Bell size={15} />
+                          </div>
+                          <div className="slide-panel__nav-text">
+                            <span className="slide-panel__nav-title">Notifications</span>
+                            <span className="slide-panel__nav-desc">Alerts & updates</span>
+                          </div>
+                          <ChevronRight size={14} className="slide-panel__nav-arrow" />
+                        </button>
+                        <button className="slide-panel__nav-item" onClick={() => { setIsSlideUpOpen(false); navigate('/help'); }}>
+                          <div className="slide-panel__nav-icon slide-panel__nav-icon--help">
+                            <HelpCircle size={15} />
+                          </div>
+                          <div className="slide-panel__nav-text">
+                            <span className="slide-panel__nav-title">Help & Support</span>
+                            <span className="slide-panel__nav-desc">FAQs & contact</span>
+                          </div>
+                          <ChevronRight size={14} className="slide-panel__nav-arrow" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Appearance */}
+                    <div className="slide-panel__section">
+                      <span className="slide-panel__section-label">Appearance</span>
+                      <div className="theme-switcher">
+                        <button 
+                          className={`theme-switcher__btn ${themeMode === 'light' ? 'theme-switcher__btn--active' : ''}`}
+                          onClick={() => setThemeMode('light')}
+                        >
+                          <Sun size={14} />
+                          <span className="theme-switcher__label">Light</span>
+                        </button>
+                        <button 
+                          className={`theme-switcher__btn ${themeMode === 'dark' ? 'theme-switcher__btn--active' : ''}`}
+                          onClick={() => setThemeMode('dark')}
+                        >
+                          <Moon size={14} />
+                          <span className="theme-switcher__label">Dark</span>
+                        </button>
+                        <button 
+                          className={`theme-switcher__btn ${themeMode === 'system' ? 'theme-switcher__btn--active' : ''}`}
+                          onClick={() => setThemeMode('system')}
+                        >
+                          <Monitor size={14} />
+                          <span className="theme-switcher__label">Auto</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Logout */}
+                    <div className="slide-panel__footer-actions">
+                      <button className="slide-panel__logout-btn" onClick={handleLogout}>
+                        <LogOut size={15} />
+                        <span>Sign Out</span>
+                      </button>
+                    </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
         <button
           className="command-rail__toggle"

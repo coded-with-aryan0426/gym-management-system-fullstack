@@ -1,0 +1,119 @@
+.monthly-comparison {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.mc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-primary);
+}
+
+.mc-title {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.mc-chart-container {
+    flex: 1;
+    padding: 8px 8px 0;
+    min-height: 200px;
+}
+
+.mc-tooltip {
+    background: rgba(9, 9, 11, 0.95);
+    border: 1px solid var(--border-secondary);
+    border-radius: 6px;
+    padding: 8px 10px;
+    min-width: 140px;
+}
+
+.mc-tt-label {
+    font-size: 0.6875rem;
+    color: var(--text-tertiary);
+    margin-bottom: 6px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--border-secondary);
+}
+
+.mc-tt-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    padding: 2px 0;
+}
+
+.mc-tt-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.mc-tt-dot.emerald { background: #10B981; }
+.mc-tt-dot.crimson { background: #EF4444; }
+
+.mc-tt-divider {
+    height: 1px;
+    background: var(--border-secondary);
+    margin: 4px 0;
+}
+
+.mc-tt-profit {
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.mc-tt-profit.positive { color: var(--color-emerald); }
+.mc-tt-profit.negative { color: var(--color-crimson); }
+
+.mc-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    padding: 10px 12px;
+    border-top: 1px solid var(--border-primary);
+}
+
+.mc-stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.mc-stat-label {
+    font-size: 0.5625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-tertiary);
+    text-align: center;
+}
+
+.mc-stat-value {
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.mc-stat-value.income { color: var(--color-emerald); }
+.mc-stat-value.expense { color: var(--color-crimson); }
+.mc-stat-value.small { 
+    font-size: 0.6875rem; 
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+@media (max-width: 640px) {
+    .mc-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

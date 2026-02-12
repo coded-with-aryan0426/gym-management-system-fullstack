@@ -344,6 +344,27 @@ public class AuditLogService {
                 })
                 .collect(Collectors.toList());
 
+        // Build action counts map
+        Map<String, Long> actionCountsMap = new java.util.LinkedHashMap<>();
+        for (Object[] row : actionCounts) {
+            actionCountsMap.put(String.valueOf(row[0]), ((Number) row[1]).longValue());
+        }
+
+        // Build severity counts map
+        List<Object[]> severityCounts = auditLogRepository.getSeverityCountsByGym(gymId);
+        Map<String, Long> severityCountsMap = new java.util.LinkedHashMap<>();
+        for (Object[] row : severityCounts) {
+            severityCountsMap.put(String.valueOf(row[0]), ((Number) row[1]).longValue());
+        }
+
+        // Build daily activity for last 14 days
+        LocalDateTime fourteenDaysAgo = LocalDateTime.now().minusDays(14);
+        List<Object[]> dailyRows = auditLogRepository.getDailyActivityByGym(gymId, fourteenDaysAgo);
+        Map<String, Long> dailyActivity = new java.util.LinkedHashMap<>();
+        for (Object[] row : dailyRows) {
+            dailyActivity.put(String.valueOf(row[0]), ((Number) row[1]).longValue());
+        }
+
         return AuditStatsDTO.builder()
                 .totalLogs(totalLogs != null ? totalLogs : 0L)
                 .todayLogs(todayLogs != null ? todayLogs : 0L)
@@ -351,6 +372,9 @@ public class AuditLogService {
                 .avgSessionTime(avgSessionTime)
                 .securityAlerts(securityAlerts != null ? securityAlerts.intValue() : 0)
                 .topActions(topActions)
+                .actionCounts(actionCountsMap)
+                .severityCounts(severityCountsMap)
+                .dailyActivity(dailyActivity)
                 .build();
     }
 

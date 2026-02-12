@@ -1290,10 +1290,10 @@ const UserRulesSection: React.FC = () => {
   }
 
   return (
-    <div className="settings-section">
+    <div className="settings-section" style={{ "--section-accent": "#8b5cf6" } as React.CSSProperties}>
       <div className="settings-section__header">
         <div className="settings-section__title-group">
-          <div className="settings-section__icon"><Users size={20} /></div>
+            <div className="settings-section__icon" style={{ background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)' }}><Users size={20} /></div>
           <div>
             <h2 className="settings-section__title">User Rules</h2>
             <p className="settings-section__description">Configure rules for staff, trainers, and members</p>

@@ -1,0 +1,156 @@
+.cashflow-waterfall {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.waterfall-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-primary);
+}
+
+.waterfall-title {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.waterfall-legend {
+    display: flex;
+    gap: 12px;
+}
+
+.wl-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.6875rem;
+    color: var(--text-tertiary);
+}
+
+.wl-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+}
+
+.wl-item.income .wl-dot { background: #10B981; }
+.wl-item.expense .wl-dot { background: #EF4444; }
+.wl-item.total .wl-dot { background: #3B82F6; }
+
+.waterfall-chart-container {
+    flex: 1;
+    padding: 8px 8px 0;
+    min-height: 220px;
+}
+
+.waterfall-tooltip {
+    background: rgba(9, 9, 11, 0.95);
+    border: 1px solid var(--border-secondary);
+    border-radius: 6px;
+    padding: 8px 10px;
+}
+
+.wt-label {
+    font-size: 0.6875rem;
+    color: var(--text-tertiary);
+    margin-bottom: 4px;
+}
+
+.wt-value {
+    font-size: 0.875rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.wt-value.income { color: #10B981; }
+.wt-value.expense { color: #EF4444; }
+.wt-value.total { color: #3B82F6; }
+
+.wt-cumulative {
+    font-size: 0.625rem;
+    color: var(--text-tertiary);
+    margin-top: 2px;
+}
+
+.waterfall-story {
+    padding: 10px 16px;
+    border-top: 1px solid var(--border-primary);
+}
+
+.story-flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.flow-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 14px;
+    border-radius: 8px;
+    min-width: 90px;
+}
+
+.flow-item.income {
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.flow-item.expense {
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.flow-item.profit {
+    background: rgba(59, 130, 246, 0.08);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.flow-item.loss {
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.flow-label {
+    font-size: 0.625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-tertiary);
+}
+
+.flow-value {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+.flow-detail {
+    font-size: 0.625rem;
+    color: var(--text-tertiary);
+    margin-top: 1px;
+}
+
+.flow-arrow {
+    font-size: 1.125rem;
+    color: var(--text-tertiary);
+    font-weight: 300;
+}
+
+@media (max-width: 640px) {
+    .story-flow {
+        flex-wrap: wrap;
+    }
+    .flow-item {
+        min-width: 70px;
+        padding: 6px 10px;
+    }
+}

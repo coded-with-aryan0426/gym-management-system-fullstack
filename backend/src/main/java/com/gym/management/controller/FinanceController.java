@@ -67,4 +67,31 @@ public class FinanceController {
     public ResponseEntity<List<Map<String, Object>>> getChartData(@RequestParam(defaultValue = "month") String period) {
         return ResponseEntity.ok(financeService.getChartData(period));
     }
+
+    @GetMapping("/pending")
+    public ResponseEntity<List<Transaction>> getPendingTransactions(
+            @RequestParam(defaultValue = "month") String period) {
+        return ResponseEntity.ok(financeService.getPendingTransactions(period));
+    }
+
+    @GetMapping("/category-stats")
+    public ResponseEntity<List<Map<String, Object>>> getCategoryStats(
+            @RequestParam(defaultValue = "INCOME") String type,
+            @RequestParam(defaultValue = "month") String period) {
+        return ResponseEntity.ok(financeService.getCategoryStats(type, period));
+    }
+
+    @GetMapping("/daily-trend")
+    public ResponseEntity<List<Map<String, Object>>> getDailyTrend(
+            @RequestParam(defaultValue = "month") String period) {
+        return ResponseEntity.ok(financeService.getDailyTrend(period));
+    }
+
+    @GetMapping("/top-transactions")
+    public ResponseEntity<List<Transaction>> getTopTransactions(
+            @RequestParam(defaultValue = "INCOME") String type,
+            @RequestParam(defaultValue = "month") String period,
+            @RequestParam(defaultValue = "5") int limit) {
+        return ResponseEntity.ok(financeService.getTopTransactions(type, period, limit));
+    }
 }

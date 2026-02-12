@@ -26,6 +26,7 @@ interface AuthContextType {
     isLoading: boolean;
     login: (token: string, userData: User) => void;
     logout: () => void;
+    updateUser: (updates: Partial<User>) => void;
     getStorageKey: (key: string) => string;
 }
 
@@ -108,6 +109,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }, []);
 
     /**
+     * Update user data in state + storage (e.g. after profile edit)
+     */
+    const updateUser = useCallback((updates: Partial<User>) => {
+        setUser(prev => {
+            if (!prev) return prev;
+            const updated = { ...prev, ...updates };
+            localStorage.setItem(getStorageKey('user'), JSON.stringify(updated));
+            return updated;
+        });
+    }, []);
+
+    /**
      * Logout - clears only THIS port's session (other ports remain logged in)
      */
     const logout = useCallback(() => {
@@ -121,7 +134,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         isLoading,
         login,
         logout,
-        getStorageKey, // Expose for other services to use
+        updateUser,
+        getStorageKey,
     };
 
     return (

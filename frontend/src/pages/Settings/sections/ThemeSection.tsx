@@ -29,10 +29,10 @@ const ThemeSection: React.FC = () => {
     ]
 
     return (
-        <div className="settings-section">
+        <div className="settings-section" style={{ "--section-accent": "#a855f7" } as React.CSSProperties}>
             <div className="settings-section__header">
                 <div className="settings-section__title-group">
-                    <div className="settings-section__icon">
+                    <div className="settings-section__icon" style={{ background: 'linear-gradient(135deg, #a855f7, #7c3aed)' }}>
                         <Palette size={20} />
                     </div>
                     <div>

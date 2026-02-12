@@ -3,6 +3,7 @@
 import type React from "react"
 import { useState, useEffect, useCallback } from "react"
 import { toast } from "react-hot-toast"
+import { useAuth } from "../../../contexts/AuthContext"
 import { 
   Info, 
   Save, 
@@ -35,6 +36,7 @@ interface ValidationErrors {
 }
 
 const OwnerProfileSection: React.FC = () => {
+  const { updateUser } = useAuth()
   const [profile, setProfile] = useState<OwnerProfile>({
     legalName: "",
     gymName: "",
@@ -266,15 +268,12 @@ const OwnerProfileSection: React.FC = () => {
         // Save to backend via owner-profile endpoint
         await api.put('/settings/gym/owner-profile', requestData)
 
-      // Also update localStorage for other components that read from it
-      const userData = localStorage.getItem("user")
-      if (userData) {
-        const user = JSON.parse(userData)
-        user.fullName = profile.legalName
-        user.email = profile.email
-        user.phone = profile.phone
-        localStorage.setItem("user", JSON.stringify(user))
-      }
+      // Update auth context so sidebar and all components reflect changes immediately
+      updateUser({
+        fullName: profile.legalName,
+        email: profile.email,
+        phone: profile.phone,
+      })
 
         const gymData = localStorage.getItem("activeGym")
         if (gymData) {
@@ -347,12 +346,12 @@ const OwnerProfileSection: React.FC = () => {
   }
 
   return (
-    <div className="settings-section">
+    <div className="settings-section" style={{ "--section-accent": "#3b82f6" } as React.CSSProperties}>
       <div className="settings-section__header">
         <div className="settings-section__title-group">
-          <div className="settings-section__icon">
-            <User size={20} />
-          </div>
+            <div className="settings-section__icon" style={{ background: 'linear-gradient(135deg, #3b82f6, #2563eb)' }}>
+              <User size={20} />
+            </div>
           <div>
             <h2 className="settings-section__title">Owner Profile</h2>
             <p className="settings-section__description">

@@ -109,16 +109,6 @@ public class GymSettingsController {
     }
 
     @PutMapping("/owner-profile")
-    @Loggable(
-        action = "OWNER_PROFILE_UPDATE",
-        entity = "User",
-        severity = "info",
-        logParameters = true,
-        logReturnValue = false,
-        trackChanges = true,
-        detailsTemplate = "Owner profile updated",
-        excludeFields = {"password", "ssn"}
-    )
     public ResponseEntity<?> updateOwnerProfile(@RequestBody Map<String, Object> data) {
         try {
             // Debug: Log received data

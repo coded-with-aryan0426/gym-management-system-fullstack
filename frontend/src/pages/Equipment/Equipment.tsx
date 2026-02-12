@@ -5,8 +5,7 @@ import { equipmentApi } from '../../services/equipmentApi';
 import EquipmentGrid from './components/EquipmentGrid';
 import EquipmentModal from './components/EquipmentModal';
 import MaintenancePanel from './components/MaintenancePanel';
-import { Plus, Search, X, LayoutGrid, Layout, Maximize2, ChevronDown, Activity, Wrench, AlertTriangle } from 'lucide-react';
-import Button from '../../components/Form/Button';
+import { Plus, Search, X, LayoutGrid, Layout, Maximize2, ChevronDown, Activity, Wrench, AlertTriangle, Package } from 'lucide-react';
 import './Equipment.css';
 
 type GridDensity = 'compact' | 'comfortable' | 'spacious';
@@ -20,7 +19,6 @@ const EquipmentPage: React.FC = () => {
     const [activeStatusFilter, setActiveStatusFilter] = useState<EquipmentStatus | 'ALL' | null>('ALL');
     const [selectedCategory, setSelectedCategory] = useState<EquipmentCategory | 'ALL'>('ALL');
     const [selectedLocation, setSelectedLocation] = useState<string | 'ALL'>('ALL');
-    const [selectedBrand, setSelectedBrand] = useState<string | 'ALL'>('ALL');
     const [gridDensity, setGridDensity] = useState<GridDensity>('comfortable');
 
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -94,18 +92,25 @@ const EquipmentPage: React.FC = () => {
             const matchesStatus = activeStatusFilter === 'ALL' || activeStatusFilter === null || item.status === activeStatusFilter;
             const matchesCategory = selectedCategory === 'ALL' || item.category === selectedCategory;
             const matchesLocation = selectedLocation === 'ALL' || item.location === selectedLocation;
-            const matchesBrand = selectedBrand === 'ALL' || item.brand === selectedBrand;
 
-            return matchesSearch && matchesStatus && matchesCategory && matchesLocation && matchesBrand;
+            return matchesSearch && matchesStatus && matchesCategory && matchesLocation;
         });
-    }, [equipmentList, searchQuery, activeStatusFilter, selectedCategory, selectedLocation, selectedBrand]);
+    }, [equipmentList, searchQuery, activeStatusFilter, selectedCategory, selectedLocation]);
 
     const categories: (EquipmentCategory | 'ALL')[] = ['ALL', 'CARDIO', 'STRENGTH', 'FUNCTIONAL', 'YOGA', 'RECOVERY'];
 
     const statItems = [
+        { label: 'Total', value: stats.total, color: 'var(--accent-primary)', icon: Package },
         { label: 'Active', value: stats.active, color: 'var(--status-active)', icon: Activity },
         { label: 'Repair', value: stats.maintenance, color: 'var(--status-maintenance)', icon: Wrench },
         { label: 'Offline', value: stats.outOfOrder, color: 'var(--status-outoforder)', icon: AlertTriangle }
+    ];
+
+    const statusFilters: { key: EquipmentStatus | 'ALL'; label: string; color: string; count: number }[] = [
+        { key: 'ALL', label: 'All', color: 'var(--accent-primary)', count: stats.total },
+        { key: 'ACTIVE', label: 'Active', color: 'var(--status-active)', count: stats.active },
+        { key: 'MAINTENANCE', label: 'In Service', color: 'var(--status-maintenance)', count: stats.maintenance },
+        { key: 'OUT_OF_ORDER', label: 'Offline', color: 'var(--status-outoforder)', count: stats.outOfOrder },
     ];
 
     return (
@@ -127,7 +132,7 @@ const EquipmentPage: React.FC = () => {
                         {statItems.map((stat, i) => (
                             <div key={i} className="stat-pill-v2">
                                 <div className="stat-icon-wrapper" style={{ backgroundColor: `${stat.color}15` }}>
-                                    <stat.icon size={14} style={{ color: stat.color }} />
+                                    <stat.icon size={15} style={{ color: stat.color }} />
                                 </div>
                                 <div className="stat-content">
                                     <span className="stat-value" style={{ color: stat.color }}>{stat.value}</span>
@@ -198,26 +203,44 @@ const EquipmentPage: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Categories Navigation */}
-                <div className="category-nav-v2">
-                    {categories.map((cat) => (
-                        <button
-                            key={cat}
-                            onClick={() => setSelectedCategory(cat)}
-                            className={`nav-item-v2 ${selectedCategory === cat ? 'active' : ''}`}
-                        >
-                            {cat === 'ALL' ? 'All' : cat.charAt(0) + cat.slice(1).toLowerCase()}
-                            {selectedCategory === cat && (
-                                <motion.div
-                                    layoutId="activeTab"
-                                    className="nav-indicator-v2"
-                                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                                />
-                            )}
-                        </button>
-                    ))}
+                {/* Category + Status Filters */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+                    <div className="category-nav-v2">
+                        {categories.map((cat) => (
+                            <button
+                                key={cat}
+                                onClick={() => setSelectedCategory(cat)}
+                                className={`nav-item-v2 ${selectedCategory === cat ? 'active' : ''}`}
+                            >
+                                {cat === 'ALL' ? 'All' : cat.charAt(0) + cat.slice(1).toLowerCase()}
+                            </button>
+                        ))}
+                    </div>
+
+                    <div className="status-filters">
+                        {statusFilters.map((sf) => (
+                            <button
+                                key={sf.key}
+                                onClick={() => setActiveStatusFilter(sf.key)}
+                                className={`status-chip ${activeStatusFilter === sf.key ? 'active' : ''}`}
+                            >
+                                {sf.key !== 'ALL' && <span className="chip-dot" style={{ backgroundColor: sf.color }} />}
+                                {sf.label}
+                                <span className="chip-count">{sf.count}</span>
+                            </button>
+                        ))}
+                    </div>
                 </div>
             </div>
+
+            {/* Results Count */}
+            {!loading && (
+                <div className="results-bar">
+                    <span className="results-count">
+                        Showing <strong>{filteredList.length}</strong> of <strong>{equipmentList.length}</strong> equipment
+                    </span>
+                </div>
+            )}
 
             {/* Grid Content */}
             <AnimatePresence mode="wait">
@@ -234,6 +257,19 @@ const EquipmentPage: React.FC = () => {
                         </div>
                         <p className="mt-4 text-xs font-medium text-[var(--text-secondary)]">Loading equipment...</p>
                     </motion.div>
+                ) : error ? (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="flex flex-col items-center justify-center py-24 rounded-xl border border-dashed border-red-500/20 bg-red-500/5"
+                    >
+                        <AlertTriangle size={28} className="text-red-400 mb-3 opacity-60" />
+                        <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-1">Error Loading Equipment</h3>
+                        <p className="text-xs text-[var(--text-secondary)] mb-4">{error}</p>
+                        <button onClick={loadData} className="btn-primary-premium" style={{ height: '36px', fontSize: '0.75rem' }}>
+                            Retry
+                        </button>
+                    </motion.div>
                 ) : filteredList.length === 0 ? (
                     <motion.div
                         initial={{ opacity: 0, scale: 0.98 }}
@@ -247,13 +283,18 @@ const EquipmentPage: React.FC = () => {
                         <p className="text-sm text-[var(--text-secondary)] text-center max-w-sm mb-6">
                             Try adjusting your filters or search query.
                         </p>
-                        <Button variant="secondary" onClick={() => {
-                            setSearchQuery('');
-                            setSelectedCategory('ALL');
-                            setSelectedLocation('ALL');
-                        }}>
-                            Clear Filters
-                        </Button>
+                        <button
+                            onClick={() => {
+                                setSearchQuery('');
+                                setSelectedCategory('ALL');
+                                setSelectedLocation('ALL');
+                                setActiveStatusFilter('ALL');
+                            }}
+                            className="btn-primary-premium"
+                            style={{ height: '36px', fontSize: '0.75rem', background: 'var(--bg-surface-secondary)', color: 'var(--text-primary)', boxShadow: 'none', border: '1px solid var(--border-color)' }}
+                        >
+                            Clear All Filters
+                        </button>
                     </motion.div>
                 ) : (
                     <EquipmentGrid
@@ -268,7 +309,7 @@ const EquipmentPage: React.FC = () => {
 
             <EquipmentModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} onSubmit={handleAdd} />
             <EquipmentModal isOpen={!!editingEquipment} onClose={() => setEditingEquipment(null)} onSubmit={handleEdit} initialData={editingEquipment} />
-            <MaintenancePanel isOpen={!!maintenanceEquipment} onClose={() => setMaintenanceEquipment(null)} equipment={maintenanceEquipment} />
+            <MaintenancePanel isOpen={!!maintenanceEquipment} onClose={() => { setMaintenanceEquipment(null); loadData(); }} equipment={maintenanceEquipment} />
         </div>
     );
 };

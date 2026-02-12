@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -18,21 +20,52 @@ public class NotificationService {
     @Transactional(readOnly = true)
     public List<Notification> getUserNotifications(Long userId, String filter) {
         switch (filter) {
+            case "unread":
+                return notificationRepository.findByUserUserIdAndIsReadFalseAndIsArchivedFalseOrderByCreatedAtDesc(userId);
             case "starred":
                 return notificationRepository.findByUserUserIdAndIsStarredTrueOrderByCreatedAtDesc(userId);
             case "archived":
                 return notificationRepository.findByUserUserIdAndIsArchivedTrueOrderByCreatedAtDesc(userId);
             case "all":
             default:
-                // "all" typically excludes archived in main views unless explicitly requested,
-                // but checking the repo method: findByUserUserIdAndIsArchivedFalse...
                 return notificationRepository.findByUserUserIdAndIsArchivedFalseOrderByCreatedAtDesc(userId);
         }
     }
 
     @Transactional(readOnly = true)
+    public List<Notification> getByType(Long userId, String type) {
+        return notificationRepository.findByUserUserIdAndTypeAndIsArchivedFalseOrderByCreatedAtDesc(userId, type);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Notification> getByPriority(Long userId, String priority) {
+        return notificationRepository.findByUserUserIdAndPriorityAndIsArchivedFalseOrderByCreatedAtDesc(userId, priority);
+    }
+
+    @Transactional(readOnly = true)
     public Long getUnreadCount(Long userId) {
         return notificationRepository.countUnreadByUserId(userId);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, Object> getStats(Long userId) {
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("total", notificationRepository.countByUserId(userId));
+        stats.put("unread", notificationRepository.countUnreadByUserId(userId));
+        stats.put("starred", notificationRepository.countStarredByUserId(userId));
+        stats.put("archived", notificationRepository.countArchivedByUserId(userId));
+        stats.put("urgent", notificationRepository.countUrgentByUserId(userId));
+
+        // Type counts
+        Map<String, Long> typeCounts = new HashMap<>();
+        List<Object[]> rawTypeCounts = notificationRepository.countByTypeForUser(userId);
+        for (Object[] row : rawTypeCounts) {
+            String type = (String) row[0];
+            Long count = (Long) row[1];
+            if (type != null) typeCounts.put(type, count);
+        }
+        stats.put("typeCounts", typeCounts);
+        return stats;
     }
 
     public void markAllAsRead(Long userId) {
@@ -54,6 +87,10 @@ public class NotificationService {
         });
     }
 
+    public Optional<Notification> unarchiveNotification(Long notificationId) {
+        return updateNotification(notificationId, n -> n.setIsArchived(false));
+    }
+
     public boolean deleteNotification(Long notificationId) {
         if (notificationRepository.existsById(notificationId)) {
             notificationRepository.deleteById(notificationId);
@@ -70,13 +107,25 @@ public class NotificationService {
                 case "read":
                     n.setIsRead(true);
                     break;
+                case "unread":
+                    n.setIsRead(false);
+                    break;
+                case "star":
+                    n.setIsStarred(true);
+                    break;
+                case "unstar":
+                    n.setIsStarred(false);
+                    break;
                 case "archive":
                     n.setIsArchived(true);
                     n.setIsRead(true);
                     break;
+                case "unarchive":
+                    n.setIsArchived(false);
+                    break;
                 case "delete":
                     notificationRepository.delete(n);
-                    continue; // Skip save
+                    continue;
             }
             notificationRepository.save(n);
         }

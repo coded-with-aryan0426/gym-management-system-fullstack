@@ -54,16 +54,10 @@ public class EnhancedAuditLoggingAspect {
     private final ThreadLocal<Boolean> isLogging = ThreadLocal.withInitial(() -> false);
 
     /**
-     * Pointcut for all @Loggable annotated methods
+     * Pointcut for all @Loggable annotated methods or methods in @Loggable classes
      */
-    @Pointcut("@annotation(loggable)")
-    public void loggableMethod(Loggable loggable) {}
-
-    /**
-     * Pointcut for all methods in @Loggable annotated classes
-     */
-    @Pointcut("@within(loggable)")
-    public void loggableClass(Loggable loggable) {}
+    @Pointcut("@annotation(com.gym.management.annotation.Loggable) || @within(com.gym.management.annotation.Loggable)")
+    public void loggablePointcut() {}
 
     /**
      * Pointcut for service layer methods
@@ -86,8 +80,14 @@ public class EnhancedAuditLoggingAspect {
     /**
      * Around advice for comprehensive logging
      */
-    @Around("loggableMethod(loggable) || loggableClass(loggable)")
-    public Object logAround(ProceedingJoinPoint joinPoint, Loggable loggable) throws Throwable {
+    @Around("loggablePointcut()")
+    public Object logAround(ProceedingJoinPoint joinPoint) throws Throwable {
+        // Resolve the @Loggable annotation from method or class
+        Loggable loggable = resolveLoggable(joinPoint);
+        if (loggable == null) {
+            // No annotation found, just proceed without logging
+            return joinPoint.proceed();
+        }
         String methodSignature = joinPoint.getSignature().toShortString();
         String requestId = generateRequestId();
         
@@ -445,6 +445,29 @@ public class EnhancedAuditLoggingAspect {
         return methodName.matches(".*(create|update|delete|save|remove|add|modify|change).*") ||
                methodName.matches(".*(login|logout|authenticate|authorize).*") ||
                methodName.matches(".*(approve|reject|cancel|complete).*");
+    }
+
+    /**
+     * Resolve @Loggable annotation from the method first, then the class
+     */
+    private Loggable resolveLoggable(JoinPoint joinPoint) {
+        try {
+            org.aspectj.lang.reflect.MethodSignature signature = 
+                (org.aspectj.lang.reflect.MethodSignature) joinPoint.getSignature();
+            java.lang.reflect.Method method = signature.getMethod();
+            
+            // Method-level annotation takes priority
+            Loggable annotation = method.getAnnotation(Loggable.class);
+            if (annotation != null) {
+                return annotation;
+            }
+            
+            // Fall back to class-level annotation
+            return joinPoint.getTarget().getClass().getAnnotation(Loggable.class);
+        } catch (Exception e) {
+            logger.debug("Failed to resolve @Loggable annotation: {}", e.getMessage());
+            return null;
+        }
     }
 
     private boolean isEntity(Object obj) {

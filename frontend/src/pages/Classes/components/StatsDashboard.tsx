@@ -1,14 +1,11 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import {
   Calendar,
   Clock,
   Users,
-  TrendingUp,
-  Zap,
-  DoorOpen,
   Activity,
-  Award
+  Zap,
+  Award,
 } from 'lucide-react';
 
 interface StatsDashboardProps {
@@ -31,28 +28,11 @@ interface StatsDashboardProps {
   };
 }
 
-const cardVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: {
-      delay: i * 0.1,
-      duration: 0.4,
-      ease: [0.4, 0, 0.2, 1]
-    }
-  })
-};
-
 export const StatsDashboard: React.FC<StatsDashboardProps> = ({ stats }) => {
   const {
     todayTotal,
-    todayEnrolled,
-    todayCapacity,
     todayOccupancy,
     weekTotal,
-    weekEnrolled,
-    weekCapacity,
     occupancyRate,
     upcomingToday,
     inProgressNow,
@@ -63,206 +43,110 @@ export const StatsDashboard: React.FC<StatsDashboardProps> = ({ stats }) => {
   } = stats;
 
   return (
-    <div className="stats-dashboard">
-      {/* Row 1: Primary Stats */}
-      <div className="stats-dashboard__row">
-        {/* Today's Classes */}
-        <motion.div
-          className="stats-card stats-card--today"
-          custom={0}
-          initial="hidden"
-          animate="visible"
-          variants={cardVariants}
-        >
-          <div className="stats-card__header">
-            <div className="stats-card__icon stats-card__icon--today">
-              <Calendar size={18} />
-            </div>
-            <span className="stats-card__label">Today&apos;s Classes</span>
-            {inProgressNow > 0 && (
-              <div className="stats-card__live-badge">
-                <span className="live-dot" />
-                {inProgressNow} LIVE
-              </div>
-            )}
-          </div>
-          <div className="stats-card__content">
-            <div className="stats-card__main-value">{todayTotal}</div>
-            <span className="stats-card__sub-label">
-              {upcomingToday > 0 ? `${upcomingToday} upcoming` : 'All done for today'}
-            </span>
-          </div>
-          <div className="stats-card__footer">
-            <div className="stats-card__detail">
-              <span className="detail-value">{todayEnrolled}</span>
-              <span className="detail-label">Booked</span>
-            </div>
-            <div className="stats-card__detail">
-              <span className="detail-value">{todayCapacity - todayEnrolled}</span>
-              <span className="detail-label">Available</span>
-            </div>
-            <div className="stats-card__progress-mini">
-              <div className="progress-mini__bar">
-                <div
-                  className="progress-mini__fill"
-                  style={{ width: `${todayOccupancy}%` }}
-                />
-              </div>
-              <span className="progress-mini__text">{todayOccupancy}%</span>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Week Overview */}
-        <motion.div
-          className="stats-card stats-card--week"
-          custom={1}
-          initial="hidden"
-          animate="visible"
-          variants={cardVariants}
-        >
-          <div className="stats-card__header">
-            <div className="stats-card__icon stats-card__icon--week">
-              <Clock size={18} />
-            </div>
-            <span className="stats-card__label">This Week</span>
-          </div>
-          <div className="stats-card__content">
-            <div className="stats-card__main-value">{weekTotal}</div>
-            <span className="stats-card__sub-label">
-              {uniqueTrainers} trainer{uniqueTrainers !== 1 ? 's' : ''} scheduled
-            </span>
-          </div>
-          <div className="stats-card__footer">
-            <div className="stats-card__detail">
-              <span className="detail-value">{weekEnrolled}</span>
-              <span className="detail-label">Total Bookings</span>
-            </div>
-            <div className="stats-card__detail">
-              <span className="detail-value">{fullClasses}</span>
-              <span className="detail-label">Full Classes</span>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Occupancy Rate */}
-        <motion.div
-          className="stats-card stats-card--occupancy"
-          custom={2}
-          initial="hidden"
-          animate="visible"
-          variants={cardVariants}
-        >
-          <div className="stats-card__header">
-            <div className="stats-card__icon stats-card__icon--occupancy">
-              <Users size={18} />
-            </div>
-            <span className="stats-card__label">Occupancy Rate</span>
-          </div>
-          <div className="stats-card__content">
-            <div className="stats-card__main-value stats-card__main-value--gradient">
-              {occupancyRate}%
-            </div>
-            <span className="stats-card__sub-label">
-              {weekEnrolled} of {weekCapacity} spots filled
-            </span>
-          </div>
-          <div className="stats-card__occupancy-bar">
-            <div
-              className="occupancy-bar__fill"
-              style={{ width: `${occupancyRate}%` }}
-            >
-              {occupancyRate > 80 && <div className="occupancy-bar__glow" />}
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Most Popular */}
-        <motion.div
-          className="stats-card stats-card--popular"
-          custom={3}
-          initial="hidden"
-          animate="visible"
-          variants={cardVariants}
-        >
-          <div className="stats-card__header">
-            <div className="stats-card__icon stats-card__icon--popular">
-              <Award size={18} />
-            </div>
-            <span className="stats-card__label">Most Popular</span>
-          </div>
-          <div className="stats-card__content">
-            <div className="stats-card__main-value stats-card__main-value--text">
-              {mostPopularType}
-            </div>
-            <span className="stats-card__sub-label">
-              {availableSpots} spots available across all classes
-            </span>
-          </div>
-          <div className="stats-card__footer">
-            <div className="stats-card__detail">
-              <span className="detail-value">
-                <DoorOpen size={14} style={{ display: 'inline', verticalAlign: 'middle' }} />
-                {' '}{availableSpots}
-              </span>
-              <span className="detail-label">Open Spots</span>
-            </div>
-          </div>
-        </motion.div>
+    <div className="compact-stats-bar">
+      {/* Today */}
+      <div className="compact-stat">
+        <div className="compact-stat__icon compact-stat__icon--green">
+          <Calendar size={14} />
+        </div>
+        <div className="compact-stat__info">
+          <span className="compact-stat__value">{todayTotal}</span>
+          <span className="compact-stat__label">Today</span>
+        </div>
+        {inProgressNow > 0 && (
+          <span className="compact-stat__live">
+            <span className="compact-stat__live-dot" />
+            {inProgressNow} Live
+          </span>
+        )}
       </div>
 
-      {/* Row 2: Live Activity & Quick Insights */}
-      <div className="stats-dashboard__row stats-dashboard__row--compact">
-        {/* Live Activity */}
-        <motion.div
-          className="stats-mini-card"
-          custom={4}
-          initial="hidden"
-          animate="visible"
-          variants={cardVariants}
-        >
-          <div className="stats-mini-card__icon">
-            <Activity size={16} />
-          </div>
-          <div className="stats-mini-card__content">
-            <span className="stats-mini-card__value">{inProgressNow}</span>
-            <span className="stats-mini-card__label">In Progress</span>
-          </div>
-        </motion.div>
+      <div className="compact-stat-divider" />
 
-        {/* Quick Stats */}
-        <motion.div
-          className="stats-mini-card"
-          custom={5}
-          initial="hidden"
-          animate="visible"
-          variants={cardVariants}
-        >
-          <div className="stats-mini-card__icon stats-mini-card__icon--success">
-            <Zap size={16} />
-          </div>
-          <div className="stats-mini-card__content">
-            <span className="stats-mini-card__value">{availableSpots}</span>
-            <span className="stats-mini-card__label">Available Spots</span>
-          </div>
-        </motion.div>
-
-        <motion.div
-          className="stats-mini-card"
-          custom={6}
-          initial="hidden"
-          animate="visible"
-          variants={cardVariants}
-        >
-          <div className="stats-mini-card__icon stats-mini-card__icon--warning">
-            <TrendingUp size={16} />
-          </div>
-          <div className="stats-mini-card__content">
-            <span className="stats-mini-card__value">{fullClasses}</span>
-            <span className="stats-mini-card__label">Full Classes</span>
-          </div>
-        </motion.div>
+      {/* This Week */}
+      <div className="compact-stat">
+        <div className="compact-stat__icon compact-stat__icon--blue">
+          <Clock size={14} />
+        </div>
+        <div className="compact-stat__info">
+          <span className="compact-stat__value">{weekTotal}</span>
+          <span className="compact-stat__label">This Week</span>
+        </div>
       </div>
+
+      <div className="compact-stat-divider" />
+
+      {/* Occupancy */}
+      <div className="compact-stat">
+        <div className="compact-stat__icon compact-stat__icon--purple">
+          <Users size={14} />
+        </div>
+        <div className="compact-stat__info">
+          <span className="compact-stat__value">{occupancyRate}%</span>
+          <span className="compact-stat__label">Occupancy</span>
+        </div>
+        <div className="compact-stat__mini-bar">
+          <div
+            className="compact-stat__mini-fill"
+            style={{
+              width: `${occupancyRate}%`,
+              background: occupancyRate > 80
+                ? 'linear-gradient(90deg, #f59e0b, #ef4444)'
+                : occupancyRate > 50
+                  ? 'linear-gradient(90deg, #3b82f6, #8b5cf6)'
+                  : 'linear-gradient(90deg, #10b981, #3b82f6)',
+            }}
+          />
+        </div>
+      </div>
+
+      <div className="compact-stat-divider" />
+
+      {/* Upcoming */}
+      <div className="compact-stat">
+        <div className="compact-stat__icon compact-stat__icon--amber">
+          <Zap size={14} />
+        </div>
+        <div className="compact-stat__info">
+          <span className="compact-stat__value">{upcomingToday}</span>
+          <span className="compact-stat__label">Upcoming</span>
+        </div>
+      </div>
+
+      <div className="compact-stat-divider" />
+
+      {/* Available Spots */}
+      <div className="compact-stat">
+        <div className="compact-stat__icon compact-stat__icon--emerald">
+          <Activity size={14} />
+        </div>
+        <div className="compact-stat__info">
+          <span className="compact-stat__value">{availableSpots}</span>
+          <span className="compact-stat__label">Open Spots</span>
+        </div>
+      </div>
+
+      <div className="compact-stat-divider" />
+
+      {/* Trainers */}
+      <div className="compact-stat">
+        <div className="compact-stat__icon compact-stat__icon--rose">
+          <Award size={14} />
+        </div>
+        <div className="compact-stat__info">
+          <span className="compact-stat__value">{uniqueTrainers}</span>
+          <span className="compact-stat__label">Trainers</span>
+        </div>
+      </div>
+
+      {fullClasses > 0 && (
+        <>
+          <div className="compact-stat-divider" />
+          <div className="compact-stat compact-stat--alert">
+            <span className="compact-stat__alert-value">{fullClasses} Full</span>
+          </div>
+        </>
+      )}
     </div>
   );
 };

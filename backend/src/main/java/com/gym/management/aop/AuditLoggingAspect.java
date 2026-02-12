@@ -28,7 +28,7 @@ import java.util.*;
  * Provides comprehensive tracking of all application operations
  */
 @Aspect
-@Component
+// @Component  -- Disabled: EnhancedAuditLoggingAspect handles all @Loggable logging
 public class AuditLoggingAspect {
 
     private static final Logger logger = LoggerFactory.getLogger(AuditLoggingAspect.class);

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -21,6 +22,26 @@ import java.util.stream.Collectors;
 public class FinanceService {
 
     private final TransactionRepository transactionRepository;
+
+    private LocalDateTime[] getDateRange(String period) {
+        LocalDateTime endDate = LocalDateTime.now();
+        LocalDateTime startDate = switch (period) {
+            case "day" -> LocalDate.now().atStartOfDay();
+            case "week" -> LocalDate.now().minusWeeks(1).atStartOfDay();
+            case "month" -> LocalDate.now().minusMonths(1).atStartOfDay();
+            case "year" -> LocalDate.now().minusYears(1).atStartOfDay();
+            default -> LocalDate.now().minusMonths(1).atStartOfDay();
+        };
+        return new LocalDateTime[] { startDate, endDate };
+    }
+
+    private LocalDateTime[] getPreviousDateRange(String period) {
+        LocalDateTime[] current = getDateRange(period);
+        long durationMillis = java.time.Duration.between(current[0], current[1]).toMillis();
+        LocalDateTime prevEnd = current[0];
+        LocalDateTime prevStart = prevEnd.minus(java.time.Duration.ofMillis(durationMillis));
+        return new LocalDateTime[] { prevStart, prevEnd };
+    }
 
     public Page<Transaction> getTransactions(String status, String category, String search, Pageable pageable) {
         return transactionRepository.findAllWithFilters(
@@ -63,24 +84,33 @@ public class FinanceService {
     }
 
     public Map<String, Object> getFinancialStats(String period) {
-        LocalDateTime endDate = LocalDateTime.now();
-        LocalDateTime startDate = switch (period) {
-            case "day" -> LocalDate.now().atStartOfDay();
-            case "week" -> LocalDate.now().minusWeeks(1).atStartOfDay();
-            case "month" -> LocalDate.now().minusMonths(1).atStartOfDay();
-            case "year" -> LocalDate.now().minusYears(1).atStartOfDay();
-            default -> LocalDate.now().minusMonths(1).atStartOfDay();
-        };
+        LocalDateTime[] range = getDateRange(period);
+        LocalDateTime[] prevRange = getPreviousDateRange(period);
 
         BigDecimal totalRevenue = transactionRepository.sumAmountByTypeAndStatusAndDateRange("INCOME", "Completed",
-                startDate, endDate);
+                range[0], range[1]);
         BigDecimal totalExpenses = transactionRepository.sumAmountByTypeAndStatusAndDateRange("EXPENSE", "Completed",
-                startDate, endDate);
-        BigDecimal pendingDues = transactionRepository.sumAmountByStatusAndDateRange("Pending", startDate, endDate);
+                range[0], range[1]);
+        BigDecimal pendingDues = transactionRepository.sumAmountByStatusAndDateRange("Pending", range[0], range[1]);
+        Long pendingCount = transactionRepository.countPendingTransactions(range[0], range[1]);
+
+        // Previous period for comparison
+        BigDecimal prevRevenue = transactionRepository.sumAmountByTypeAndStatusAndDateRange("INCOME", "Completed",
+                prevRange[0], prevRange[1]);
+        BigDecimal prevExpenses = transactionRepository.sumAmountByTypeAndStatusAndDateRange("EXPENSE", "Completed",
+                prevRange[0], prevRange[1]);
 
         BigDecimal netProfit = totalRevenue.subtract(totalExpenses);
         double profitMargin = totalRevenue.compareTo(BigDecimal.ZERO) > 0
-                ? netProfit.divide(totalRevenue, 4, java.math.RoundingMode.HALF_UP).doubleValue() * 100
+                ? netProfit.divide(totalRevenue, 4, RoundingMode.HALF_UP).doubleValue() * 100
+                : 0.0;
+
+        // Calculate percentage changes
+        double revenueChange = prevRevenue.compareTo(BigDecimal.ZERO) > 0
+                ? totalRevenue.subtract(prevRevenue).divide(prevRevenue, 4, RoundingMode.HALF_UP).doubleValue() * 100
+                : 0.0;
+        double expensesChange = prevExpenses.compareTo(BigDecimal.ZERO) > 0
+                ? totalExpenses.subtract(prevExpenses).divide(prevExpenses, 4, RoundingMode.HALF_UP).doubleValue() * 100
                 : 0.0;
 
         Map<String, Object> stats = new HashMap<>();
@@ -89,36 +119,27 @@ public class FinanceService {
         stats.put("netProfit", netProfit);
         stats.put("profitMargin", Math.round(profitMargin));
         stats.put("pendingPayments", pendingDues);
-
-        stats.put("revenueChange", 0);
-        stats.put("expensesChange", 0);
+        stats.put("pendingCount", pendingCount);
+        stats.put("revenueChange", Math.round(revenueChange));
+        stats.put("expensesChange", Math.round(expensesChange));
 
         return stats;
     }
 
     public List<Object[]> getRevenueBreakdown(String period) {
-        LocalDateTime endDate = LocalDateTime.now();
-        LocalDateTime startDate = LocalDate.now().minusMonths(1).atStartOfDay();
-        return transactionRepository.getRevenueByCategory(startDate, endDate);
+        LocalDateTime[] range = getDateRange(period);
+        return transactionRepository.getRevenueByCategory(range[0], range[1]);
     }
 
     public List<Object[]> getExpenseBreakdown(String period) {
-        LocalDateTime endDate = LocalDateTime.now();
-        LocalDateTime startDate = LocalDate.now().minusMonths(1).atStartOfDay();
-        return transactionRepository.getExpenseByCategory(startDate, endDate);
+        LocalDateTime[] range = getDateRange(period);
+        return transactionRepository.getExpenseByCategory(range[0], range[1]);
     }
 
     public List<Map<String, Object>> getChartData(String period) {
-        LocalDateTime endDate = LocalDateTime.now();
-        LocalDateTime startDate = switch (period) {
-            case "day" -> LocalDate.now().atStartOfDay();
-            case "week" -> LocalDate.now().minusWeeks(1).atStartOfDay();
-            case "month" -> LocalDate.now().minusMonths(1).atStartOfDay();
-            case "year" -> LocalDate.now().minusYears(1).atStartOfDay();
-            default -> LocalDate.now().minusMonths(1).atStartOfDay();
-        };
+        LocalDateTime[] range = getDateRange(period);
 
-        List<Transaction> transactions = transactionRepository.findByDateRange(startDate, endDate);
+        List<Transaction> transactions = transactionRepository.findByDateRange(range[0], range[1]);
 
         Map<String, Map<String, BigDecimal>> grouped = new java.util.TreeMap<>();
 
@@ -148,6 +169,63 @@ public class FinanceService {
                     point.put("expenses", entry.getValue().get("expenses"));
                     return point;
                 })
+                .collect(Collectors.toList());
+    }
+
+    public List<Transaction> getPendingTransactions(String period) {
+        LocalDateTime[] range = getDateRange(period);
+        return transactionRepository.findPendingTransactions(range[0], range[1]);
+    }
+
+    public List<Map<String, Object>> getCategoryStats(String type, String period) {
+        LocalDateTime[] range = getDateRange(period);
+        List<Object[]> results = transactionRepository.getCategoryStats(type, range[0], range[1]);
+        return results.stream().map(r -> {
+            Map<String, Object> m = new HashMap<>();
+            m.put("category", r[0]);
+            m.put("count", r[1]);
+            m.put("total", r[2]);
+            return m;
+        }).collect(Collectors.toList());
+    }
+
+    public List<Map<String, Object>> getDailyTrend(String period) {
+        LocalDateTime[] range = getDateRange(period);
+        List<Object[]> results = transactionRepository.getDailyTotals(range[0], range[1]);
+
+        Map<String, Map<String, BigDecimal>> grouped = new java.util.TreeMap<>();
+        for (Object[] r : results) {
+            String date = r[0].toString();
+            String type = (String) r[1];
+            BigDecimal amount = (BigDecimal) r[2];
+            grouped.putIfAbsent(date, new HashMap<>());
+            Map<String, BigDecimal> dayData = grouped.get(date);
+            dayData.putIfAbsent("revenue", BigDecimal.ZERO);
+            dayData.putIfAbsent("expenses", BigDecimal.ZERO);
+            if ("INCOME".equals(type)) {
+                dayData.put("revenue", dayData.get("revenue").add(amount));
+            } else if ("EXPENSE".equals(type)) {
+                dayData.put("expenses", dayData.get("expenses").add(amount));
+            }
+        }
+
+        return grouped.entrySet().stream().map(entry -> {
+            Map<String, Object> point = new HashMap<>();
+            point.put("date", entry.getKey());
+            point.put("revenue", entry.getValue().get("revenue"));
+            point.put("expenses", entry.getValue().get("expenses"));
+            point.put("profit", entry.getValue().get("revenue").subtract(entry.getValue().get("expenses")));
+            return point;
+        }).collect(Collectors.toList());
+    }
+
+    public List<Transaction> getTopTransactions(String type, String period, int limit) {
+        LocalDateTime[] range = getDateRange(period);
+        List<Transaction> all = transactionRepository.findByDateRange(range[0], range[1]);
+        return all.stream()
+                .filter(t -> type.equals(t.getType()) && "Completed".equals(t.getStatus()))
+                .sorted((a, b) -> b.getAmount().compareTo(a.getAmount()))
+                .limit(limit)
                 .collect(Collectors.toList());
     }
 }
