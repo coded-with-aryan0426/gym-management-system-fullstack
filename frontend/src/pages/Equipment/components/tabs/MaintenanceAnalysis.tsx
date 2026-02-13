@@ -1,5 +1,5 @@
 import React from 'react';
-import { BarChart3, TrendingUp, IndianRupee } from 'lucide-react';
+import { BarChart3, TrendingUp, IndianRupee, Shield, Wrench, ClipboardCheck, Activity } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 import { formatCurrency } from '../../../../utils/formatters';
 import type { MaintenanceType } from '../../../../types/equipmentMaintenance';
@@ -11,19 +11,20 @@ interface MaintenanceAnalysisProps {
 }
 
 export const MaintenanceAnalysis: React.FC<MaintenanceAnalysisProps> = ({ stats, history, chartData }) => {
-    const getTypeColor = (type: MaintenanceType) => {
-        const c: Record<string, string> = { PREVENTIVE: '#22c55e', REPAIR: '#ef4444', INSPECTION: '#3b82f6' };
-        return c[type] || '#8896AB';
+    const typeConfig: Record<string, { color: string; bg: string; border: string; icon: React.ReactNode; label: string }> = {
+        PREVENTIVE: { color: '#22c55e', bg: 'rgba(34, 197, 94, 0.08)', border: 'rgba(34, 197, 94, 0.18)', icon: <Shield size={16} />, label: 'Preventive' },
+        REPAIR: { color: '#ef4444', bg: 'rgba(239, 68, 68, 0.08)', border: 'rgba(239, 68, 68, 0.18)', icon: <Wrench size={16} />, label: 'Repair' },
+        INSPECTION: { color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.08)', border: 'rgba(59, 130, 246, 0.18)', icon: <ClipboardCheck size={16} />, label: 'Inspection' }
     };
 
-    const healthColor = stats.health > 70 ? '#22c55e' : stats.health > 40 ? '#eab308' : '#ef4444';
+    const healthColor = stats.health > 70 ? '#22c55e' : stats.health > 40 ? '#f59e0b' : '#ef4444';
 
     if (history.length === 0) {
         return (
-            <div className="h-56 flex flex-col items-center justify-center text-[var(--text-secondary)]">
-                <BarChart3 size={32} className="mb-3 opacity-20" />
-                <p className="text-sm font-semibold">Not enough data</p>
-                <p className="text-xs text-[var(--text-secondary)] mt-0.5">Add maintenance records to see analytics</p>
+            <div className="empty-state" style={{ minHeight: '240px' }}>
+                <div className="empty-state__icon"><BarChart3 size={22} /></div>
+                <p className="empty-state__title">Not enough data</p>
+                <p className="empty-state__desc">Add maintenance records to see analytics and cost insights</p>
             </div>
         );
     }
@@ -34,112 +35,156 @@ export const MaintenanceAnalysis: React.FC<MaintenanceAnalysisProps> = ({ stats,
     const repairCount = history.filter((r: any) => r.maintenanceType === 'REPAIR').length;
     const inspectionCount = history.filter((r: any) => r.maintenanceType === 'INSPECTION').length;
 
-    return (
-        <div className="space-y-5">
-            {/* Top stats */}
-            <div className="grid grid-cols-3 gap-3">
-                <div className="p-4 bg-[var(--bg-surface-secondary)] border border-[var(--border-color)] rounded-xl text-center">
-                    <IndianRupee size={16} className="text-green-500 mx-auto mb-1.5" />
-                    <p className="text-lg font-bold text-[var(--text-primary)]">{formatCurrency(totalCost)}</p>
-                    <p className="text-[9px] text-[var(--text-secondary)] uppercase tracking-wider font-bold mt-0.5">Total Spent</p>
-                </div>
-                <div className="p-4 bg-[var(--bg-surface-secondary)] border border-[var(--border-color)] rounded-xl text-center">
-                    <IndianRupee size={16} className="text-blue-500 mx-auto mb-1.5" />
-                    <p className="text-lg font-bold text-[var(--text-primary)]">{formatCurrency(avgCost)}</p>
-                    <p className="text-[9px] text-[var(--text-secondary)] uppercase tracking-wider font-bold mt-0.5">Avg per Service</p>
-                </div>
-                <div className="p-4 bg-[var(--bg-surface-secondary)] border border-[var(--border-color)] rounded-xl text-center">
-                    <TrendingUp size={16} className="mx-auto mb-1.5" style={{ color: healthColor }} />
-                    <p className="text-lg font-bold text-[var(--text-primary)]">{stats.health}%</p>
-                    <p className="text-[9px] text-[var(--text-secondary)] uppercase tracking-wider font-bold mt-0.5">Health Score</p>
-                </div>
-            </div>
+    const kpis = [
+        { label: 'Total Spent', value: formatCurrency(totalCost), icon: IndianRupee, color: '#22c55e' },
+        { label: 'Avg / Service', value: formatCurrency(avgCost), icon: IndianRupee, color: '#3b82f6' },
+        { label: 'Health Score', value: `${stats.health}%`, icon: Activity, color: healthColor },
+    ];
 
-            {/* Charts row */}
-            <div className="grid grid-cols-2 gap-4">
-                {/* Health Ring */}
-                <div className="p-5 bg-[var(--bg-surface-secondary)] border border-[var(--border-color)] rounded-xl">
-                    <h3 className="text-xs font-bold text-[var(--text-primary)] mb-4">Equipment Health</h3>
-                    <div className="flex items-center justify-center">
-                        <div className="relative w-32 h-32">
-                            <svg className="w-full h-full -rotate-90">
-                                <circle cx="64" cy="64" r="52" fill="none" className="stroke-[var(--border-color)]" strokeWidth="8" />
-                                <circle
-                                    cx="64" cy="64" r="52" fill="none"
-                                    stroke={healthColor}
-                                    strokeWidth="8" strokeLinecap="round"
-                                    strokeDasharray={`${stats.health * 3.27} 327`}
-                                    style={{ transition: 'stroke-dasharray 0.8s ease' }}
-                                />
-                            </svg>
-                            <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                <span className="text-3xl font-bold text-[var(--text-primary)]">{stats.health}</span>
-                                <span className="text-[9px] text-[var(--text-secondary)] uppercase tracking-wider font-bold">Score</span>
-                            </div>
+    const breakdownItems = [
+        { type: 'PREVENTIVE' as MaintenanceType, count: preventiveCount },
+        { type: 'REPAIR' as MaintenanceType, count: repairCount },
+        { type: 'INSPECTION' as MaintenanceType, count: inspectionCount }
+    ];
+
+    return (
+        <div className="maint-analytics">
+            {/* KPI Row */}
+            <div className="maint-analytics__kpis">
+                {kpis.map(({ label, value, icon: Icon, color }) => (
+                    <div key={label} className="maint-analytics__kpi">
+                        <div className="maint-analytics__kpi-icon" style={{ color, backgroundColor: `${color}10`, borderColor: `${color}20` }}>
+                            <Icon size={16} />
+                        </div>
+                        <div className="maint-analytics__kpi-info">
+                            <span className="maint-analytics__kpi-val">{value}</span>
+                            <span className="maint-analytics__kpi-label">{label}</span>
                         </div>
                     </div>
+                ))}
+            </div>
+
+            {/* Charts Row */}
+            <div className="maint-analytics__charts">
+                {/* Health Ring */}
+                <div className="maint-analytics__chart-card">
+                    <h3 className="maint-analytics__chart-title">
+                        <TrendingUp size={14} /> Equipment Health
+                    </h3>
+                    <div className="maint-analytics__health-ring-wrap">
+                        <svg viewBox="0 0 120 120" className="maint-analytics__health-svg">
+                            <circle cx="60" cy="60" r="48" fill="none" stroke="var(--glass-border)" strokeWidth="7" />
+                            <circle
+                                cx="60" cy="60" r="48" fill="none"
+                                stroke={healthColor}
+                                strokeWidth="7" strokeLinecap="round"
+                                strokeDasharray={`${stats.health * 3.015} 301.5`}
+                                style={{ transition: 'stroke-dasharray 0.8s ease', transform: 'rotate(-90deg)', transformOrigin: 'center' }}
+                            />
+                        </svg>
+                        <div className="maint-analytics__health-center">
+                            <span className="maint-analytics__health-num" style={{ color: healthColor }}>{stats.health}</span>
+                            <span className="maint-analytics__health-unit">/ 100</span>
+                        </div>
+                    </div>
+                    <p className="maint-analytics__health-desc">
+                        {stats.health > 80 ? 'Excellent condition' : stats.health > 50 ? 'Within acceptable range' : 'Needs immediate attention'}
+                    </p>
                 </div>
 
-                {/* Distribution */}
-                <div className="p-5 bg-[var(--bg-surface-secondary)] border border-[var(--border-color)] rounded-xl">
-                    <h3 className="text-xs font-bold text-[var(--text-primary)] mb-4">Type Distribution</h3>
+                {/* Pie Chart */}
+                <div className="maint-analytics__chart-card">
+                    <h3 className="maint-analytics__chart-title">
+                        <BarChart3 size={14} /> Type Distribution
+                    </h3>
                     {chartData.length > 0 ? (
-                        <div className="h-40">
-                            <ResponsiveContainer width="100%" height="100%">
+                        <div className="maint-analytics__pie-wrap">
+                            <ResponsiveContainer width="100%" height={160}>
                                 <PieChart>
                                     <Pie
                                         data={chartData}
                                         cx="50%"
                                         cy="50%"
-                                        innerRadius={32}
-                                        outerRadius={60}
+                                        innerRadius={36}
+                                        outerRadius={64}
                                         dataKey="value"
                                         paddingAngle={4}
                                         stroke="none"
                                     >
                                         {chartData.map((entry, i) => (
-                                            <Cell key={i} fill={getTypeColor(entry.name as MaintenanceType)} />
+                                            <Cell key={i} fill={typeConfig[entry.name]?.color || '#8896AB'} />
                                         ))}
                                     </Pie>
                                     <Tooltip
                                         contentStyle={{
                                             backgroundColor: 'var(--bg-surface)',
-                                            border: '1px solid var(--border-color)',
+                                            border: '1px solid var(--glass-border)',
                                             borderRadius: '10px',
                                             fontSize: '11px',
                                             color: 'var(--text-primary)',
-                                            boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
-                                            padding: '8px 12px'
+                                            boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+                                            padding: '8px 14px'
                                         }}
                                     />
                                 </PieChart>
                             </ResponsiveContainer>
+                            {/* Legend */}
+                            <div className="maint-analytics__legend">
+                                {chartData.map(entry => {
+                                    const cfg = typeConfig[entry.name];
+                                    return cfg ? (
+                                        <div key={entry.name} className="maint-analytics__legend-item">
+                                            <span className="maint-analytics__legend-dot" style={{ backgroundColor: cfg.color }} />
+                                            <span className="maint-analytics__legend-label">{cfg.label}</span>
+                                            <span className="maint-analytics__legend-val">{entry.value}</span>
+                                        </div>
+                                    ) : null;
+                                })}
+                            </div>
                         </div>
                     ) : (
-                        <div className="h-40 flex items-center justify-center text-[var(--text-secondary)] text-xs">No data</div>
+                        <div className="maint-analytics__no-data">No data available</div>
                     )}
                 </div>
             </div>
 
-            {/* Summary cards */}
-            <div className="p-4 bg-[var(--bg-surface-secondary)] border border-[var(--border-color)] rounded-xl">
-                <h3 className="text-xs font-bold text-[var(--text-primary)] mb-3">Breakdown by Type</h3>
-                <div className="grid grid-cols-3 gap-3">
-                    {[
-                        { type: 'PREVENTIVE' as MaintenanceType, count: preventiveCount, color: '#22c55e' },
-                        { type: 'REPAIR' as MaintenanceType, count: repairCount, color: '#ef4444' },
-                        { type: 'INSPECTION' as MaintenanceType, count: inspectionCount, color: '#3b82f6' }
-                    ].map(({ type, count, color }) => (
-                        <div key={type} className="p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-color)] text-center">
-                            <div className="w-8 h-8 rounded-lg mx-auto mb-2 flex items-center justify-center" style={{ backgroundColor: `${color}12` }}>
-                                <span className="text-sm font-bold" style={{ color }}>{count}</span>
+            {/* Breakdown Grid */}
+            <div className="maint-analytics__breakdown">
+                <h3 className="eq-section-title">Breakdown by Type</h3>
+                <div className="maint-analytics__breakdown-grid">
+                    {breakdownItems.map(({ type, count }) => {
+                        const cfg = typeConfig[type];
+                        const pct = history.length > 0 ? Math.round((count / history.length) * 100) : 0;
+                        const cost = history.filter((r: any) => r.maintenanceType === type).reduce((s: number, r: any) => s + (r.cost || 0), 0);
+                        return (
+                            <div key={type} className="maint-breakdown-card" style={{ '--bd-color': cfg.color } as React.CSSProperties}>
+                                <div className="maint-breakdown-card__header">
+                                    <div className="maint-breakdown-card__icon" style={{ color: cfg.color, backgroundColor: cfg.bg, borderColor: cfg.border }}>
+                                        {cfg.icon}
+                                    </div>
+                                    <span className="maint-breakdown-card__label">{cfg.label}</span>
+                                </div>
+                                <div className="maint-breakdown-card__stats">
+                                    <div className="maint-breakdown-card__stat">
+                                        <span className="maint-breakdown-card__stat-val">{count}</span>
+                                        <span className="maint-breakdown-card__stat-label">Records</span>
+                                    </div>
+                                    <div className="maint-breakdown-card__stat">
+                                        <span className="maint-breakdown-card__stat-val">{pct}%</span>
+                                        <span className="maint-breakdown-card__stat-label">Share</span>
+                                    </div>
+                                    <div className="maint-breakdown-card__stat">
+                                        <span className="maint-breakdown-card__stat-val">{formatCurrency(cost)}</span>
+                                        <span className="maint-breakdown-card__stat-label">Cost</span>
+                                    </div>
+                                </div>
+                                {/* Progress bar */}
+                                <div className="maint-breakdown-card__bar">
+                                    <div className="maint-breakdown-card__bar-fill" style={{ width: `${pct}%`, backgroundColor: cfg.color }} />
+                                </div>
                             </div>
-                            <p className="text-[9px] text-[var(--text-secondary)] uppercase tracking-wide font-bold">{type}</p>
-                            <p className="text-[10px] text-[var(--text-secondary)] mt-0.5">
-                                {history.length > 0 ? Math.round((count / history.length) * 100) : 0}% of total
-                            </p>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             </div>
         </div>

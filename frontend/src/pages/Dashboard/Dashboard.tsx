@@ -7,7 +7,7 @@ import {
   Activity,
   TrendingUp,
   TrendingDown,
-  ArrowUpRight,
+  ArrowRight,
   Calendar,
   UserPlus,
   CheckCircle2,
@@ -22,15 +22,14 @@ import {
   UserCheck,
   Timer,
   BarChart3,
-  ArrowRight,
-  Sparkles,
+  RefreshCw,
   CircleDot,
-  Crown,
-  Star,
   AlertTriangle,
-  TrendingUp as TrendingUpIcon,
-  TrendingDown as TrendingDownIcon,
-  RefreshCw
+  ChevronRight,
+  Target,
+  Flame,
+  ShieldAlert,
+  Layers
 } from 'lucide-react'
 import {
   AreaChart,
@@ -77,33 +76,26 @@ const Dashboard: React.FC = () => {
   const [data, setData] = useState<DashboardData | null>(null)
   const [analyticsData, setAnalyticsData] = useState<any>(null)
   const [now, setNow] = useState(new Date())
+  const [refreshing, setRefreshing] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const navigate = useNavigate()
   const { formatPrice } = useCurrency()
 
   const loadDashboardData = useCallback(async () => {
     try {
+      setRefreshing(true)
+      setError(null)
       const response = await api.getOwnerDashboard()
       setData(response)
-      
-      // Load real analytics data
+
       const today = new Date()
       const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)
       const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000)
-      
       const fromDate = weekAgo.toISOString().split('T')[0]
       const toDate = today.toISOString().split('T')[0]
       const monthFromDate = monthAgo.toISOString().split('T')[0]
-      
-      const [
-        dailyRevenue,
-        dailyAttendance,
-        membershipBreakdown,
-        revenueBySource,
-        overduePayments,
-        todaysClasses,
-        occupancy,
-        monthlyProgress
-      ] = await Promise.all([
+
+      const results = await Promise.allSettled([
         api.getDailyRevenue(fromDate, toDate),
         api.getDailyAttendance(fromDate, toDate),
         api.getMembershipBreakdown(),
@@ -113,31 +105,34 @@ const Dashboard: React.FC = () => {
         api.getOccupancy(),
         api.getMonthlyProgress()
       ])
-      
+
+      const getValue = (r: PromiseSettledResult<any>) => r.status === 'fulfilled' ? r.value : null
+
       setAnalyticsData({
-        dailyRevenue,
-        dailyAttendance,
-        membershipBreakdown,
-        revenueBySource,
-        overduePayments,
-        todaysClasses,
-        occupancy,
-        monthlyProgress
+        dailyRevenue: getValue(results[0]),
+        dailyAttendance: getValue(results[1]),
+        membershipBreakdown: getValue(results[2]),
+        revenueBySource: getValue(results[3]),
+        overduePayments: getValue(results[4]),
+        todaysClasses: getValue(results[5]),
+        occupancy: getValue(results[6]),
+        monthlyProgress: getValue(results[7])
       })
     } catch (err) {
       console.error("[Dashboard] Failed to fetch data", err)
+      setError("Failed to load dashboard data")
     } finally {
       setLoading(false)
+      setRefreshing(false)
     }
   }, [])
 
   useEffect(() => {
     loadDashboardData()
-    const interval = setInterval(loadDashboardData, 15000)
+    const interval = setInterval(loadDashboardData, 30000)
     return () => clearInterval(interval)
   }, [loadDashboardData])
 
-  // Live clock
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 60000)
     return () => clearInterval(t)
@@ -154,7 +149,7 @@ const Dashboard: React.FC = () => {
     return now.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' })
   }, [now])
 
-  // Revenue sparkline data (real weekly trend)
+  // Revenue sparkline data
   const revenueSparkline = useMemo(() => {
     if (analyticsData?.dailyRevenue) {
       return analyticsData.dailyRevenue.map((item: any) => ({
@@ -162,26 +157,24 @@ const Dashboard: React.FC = () => {
         value: Math.round(item.revenue)
       }))
     }
-    // Fallback to mock data if analytics not loaded yet
     const base = data?.monthlyRevenue || 50000
-    return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d, i) => ({
+    return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d) => ({
       day: d,
       value: Math.round(base / 7 * (0.6 + Math.random() * 0.8))
     }))
   }, [analyticsData?.dailyRevenue, data?.monthlyRevenue])
 
-  // Membership distribution for donut (real data)
+  // Membership distribution
   const membershipDistribution = useMemo(() => {
     if (analyticsData?.membershipBreakdown) {
-      const breakdown = analyticsData.membershipBreakdown
+      const b = analyticsData.membershipBreakdown
       return [
-        { name: 'Active', value: breakdown.active || 0, color: '#10b981' },
-        { name: 'Expiring', value: breakdown.expiring || 0, color: '#f59e0b' },
-        { name: 'Frozen', value: breakdown.frozen || 0, color: '#6366f1' },
-        { name: 'Expired', value: breakdown.expired || 0, color: '#ef4444' },
+        { name: 'Active', value: b.active || 0, color: '#10b981' },
+        { name: 'Expiring', value: b.expiring || 0, color: '#f59e0b' },
+        { name: 'Frozen', value: b.frozen || 0, color: '#6366f1' },
+        { name: 'Expired', value: b.expired || 0, color: '#ef4444' },
       ]
     }
-    // Fallback to mock data if analytics not loaded yet
     return [
       { name: 'Active', value: data?.totalMembers ? Math.round(data.totalMembers * 0.72) : 65, color: '#10b981' },
       { name: 'Expiring', value: data?.expiringMembers?.length || 8, color: '#f59e0b' },
@@ -190,7 +183,7 @@ const Dashboard: React.FC = () => {
     ]
   }, [analyticsData?.membershipBreakdown, data])
 
-  // Attendance trend (real data)
+  // Attendance trend
   const attendanceTrend = useMemo(() => {
     if (analyticsData?.dailyAttendance) {
       return analyticsData.dailyAttendance.map((item: any) => ({
@@ -198,7 +191,6 @@ const Dashboard: React.FC = () => {
         count: item.checkIns || 0
       }))
     }
-    // Fallback to mock data if analytics not loaded yet
     const base = data?.checkIns || 30
     return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d) => ({
       day: d,
@@ -206,7 +198,34 @@ const Dashboard: React.FC = () => {
     }))
   }, [analyticsData?.dailyAttendance, data?.checkIns])
 
+  // Revenue breakdown — capped to top 6
+  const revenueBreakdown = useMemo(() => {
+    if (!analyticsData?.revenueBySource || analyticsData.revenueBySource.length === 0) return []
+    const sources = analyticsData.revenueBySource.slice(0, 6)
+    const total = sources.reduce((s: number, r: any) => s + (r.total || 0), 0)
+    const colors = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#f43f5e', '#06b6d4']
+    return sources.map((s: any, i: number) => ({
+      label: s.category || 'Other',
+      value: s.total || 0,
+      pct: total > 0 ? Math.round((s.total / total) * 100) : 0,
+      color: colors[i % colors.length]
+    }))
+  }, [analyticsData?.revenueBySource])
+
+  const revenueTotal = useMemo(() => {
+    return revenueBreakdown.reduce((s: number, r: any) => s + r.value, 0)
+  }, [revenueBreakdown])
+
   const isPositive = (data?.revenueChange || 0) >= 0
+
+  // Occupancy helpers
+  const occupancy = analyticsData?.occupancy
+  const occPct = occupancy ? Math.round(occupancy.percentage) : 0
+  const occLevel = occPct < 60 ? 'low' : occPct < 80 ? 'medium' : 'high'
+
+  // Monthly progress
+  const progress = analyticsData?.monthlyProgress
+  const progressPct = progress ? Math.min(100, Math.round((progress.current / progress.target) * 100)) : 0
 
   if (loading && !data) {
     return (
@@ -230,241 +249,198 @@ const Dashboard: React.FC = () => {
           <p className="dash__date">{dateStr}</p>
         </div>
         <div className="dash__header-right">
-          <button className="dash__refresh-btn" onClick={loadDashboardData} title="Refresh">
+          <button
+            className={`dash__refresh-btn ${refreshing ? 'dash__refresh-btn--spinning' : ''}`}
+            onClick={loadDashboardData}
+            title="Refresh"
+            disabled={refreshing}
+          >
             <RefreshCw size={14} />
           </button>
-          <div className="dash__live-badge">
-            <span className="dash__live-dot" /> Live
+          <div className="dash__live-pill">
+            <span className="dash__live-dot" />
+            <span>LIVE</span>
           </div>
         </div>
       </header>
 
+      {/* Error Banner */}
+      {error && (
+        <div className="dash__error">
+          <AlertCircle size={14} />
+          <span>{error}</span>
+          <button onClick={loadDashboardData}>Retry</button>
+        </div>
+      )}
+
       {/* KPI Row */}
       <div className="dash__kpi-row">
-        <KPICard
-          icon={<Wallet size={18} />}
-          label="Today's Revenue"
-          value={formatPrice(data?.todayRevenue || 0)}
-          change={data?.revenueChange || 0}
-          color="emerald"
-        />
-        <KPICard
-          icon={<Eye size={18} />}
-          label="Live on Floor"
-          value={String(data?.liveMembers || 0)}
-          sub={`${data?.checkIns || 0} check-ins today`}
-          color="blue"
-        />
-        <KPICard
-          icon={<Users size={18} />}
-          label="Total Members"
-          value={String(data?.totalMembers || 0)}
-          sub={`+${data?.newSignups || 0} new today`}
-          color="violet"
-        />
-        <KPICard
-          icon={<Dumbbell size={18} />}
-          label="Sessions Today"
-          value={String(data?.totalSessionsToday || 0)}
-          sub={`${data?.totalTrainers || 0} trainers active`}
-          color="amber"
-        />
-        <KPICard
-          icon={<CreditCard size={18} />}
-          label="Pending Dues"
-          value={formatPrice(data?.pendingPaymentsAmount || 0)}
-          sub={`${data?.pendingPaymentsCount || 0} members`}
-          color="rose"
-          alert
-        />
+        <KPICard icon={<Wallet size={18} />} label="Today's Revenue" value={formatPrice(data?.todayRevenue || 0)} change={data?.revenueChange || 0} color="emerald" />
+        <KPICard icon={<Eye size={18} />} label="Live on Floor" value={String(data?.liveMembers || 0)} sub={`${data?.checkIns || 0} check-ins today`} color="blue" />
+        <KPICard icon={<Users size={18} />} label="Total Members" value={String(data?.totalMembers || 0)} sub={`+${data?.newSignups || 0} new today`} color="violet" />
+        <KPICard icon={<Dumbbell size={18} />} label="Sessions Today" value={String(data?.totalSessionsToday || 0)} sub={`${data?.totalTrainers || 0} trainers active`} color="amber" />
+        <KPICard icon={<CreditCard size={18} />} label="Pending Dues" value={formatPrice(data?.pendingPaymentsAmount || 0)} sub={`${data?.pendingPaymentsCount || 0} members`} color="rose" alert />
       </div>
 
-      {/* Main Grid */}
+      {/* ── 12-column grid ── */}
       <div className="dash__grid">
-        {/* Overdue Payments Widget */}
-        {analyticsData?.overduePayments && analyticsData.overduePayments.length > 0 && (
-          <section className="dash__card dash__card--overdue">
-            <div className="dash__card-head">
-              <div>
-                <h3 className="dash__card-title">
-                  <AlertCircle size={14} className="dash__icon-alert" /> Overdue Payments
-                </h3>
-                <p className="dash__card-sub">Members with pending dues</p>
-              </div>
-              <span className="dash__badge-count">{analyticsData.overduePayments.length}</span>
-            </div>
-            <div className="dash__overdue-list">
-              {analyticsData.overduePayments.slice(0, 3).map((payment: any, i: number) => (
-                <div key={i} className="dash__overdue-row">
-                  <div className="dash__overdue-info">
-                    <span className="dash__overdue-name">{payment.memberName}</span>
-                    <span className="dash__overdue-plan">{payment.planName}</span>
-                  </div>
-                  <div className="dash__overdue-amount">
-                    <span className="dash__overdue-days">{payment.daysOverdue}d overdue</span>
-                    <span className="dash__overdue-price">{formatPrice(payment.amount)}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-            {analyticsData.overduePayments.length > 3 && (
-              <button className="dash__link-btn" onClick={() => navigate('/financials?filter=overdue')}>
-                View All <ArrowRight size={12} />
-              </button>
-            )}
-          </section>
-        )}
 
-        {/* Today's Classes Widget */}
-        {analyticsData?.todaysClasses && analyticsData.todaysClasses.length > 0 && (
-          <section className="dash__card dash__card--classes">
-            <div className="dash__card-head">
-              <div>
-                <h3 className="dash__card-title">
-                  <Calendar size={14} /> Today's Classes
-                </h3>
-                <p className="dash__card-sub">Group fitness sessions</p>
-              </div>
-              <span className="dash__badge-count">{analyticsData.todaysClasses.length}</span>
-            </div>
-            <div className="dash__classes-list">
-              {analyticsData.todaysClasses.slice(0, 3).map((classItem: any, i: number) => (
-                <div key={i} className={`dash__class-row dash__class-row--${classItem.status.toLowerCase()}`}>
-                  <div className="dash__class-time">
-                    {new Date(classItem.startTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
-                  </div>
-                  <div className="dash__class-info">
-                    <span className="dash__class-name">{classItem.name}</span>
-                    <span className="dash__class-meta">{classItem.trainer} &middot; {classItem.enrolled}/{classItem.capacity}</span>
-                  </div>
-                  <div className="dash__class-status">
-                    {classItem.status === 'IN_PROGRESS' && <span className="dash__live-badge">LIVE</span>}
-                    {classItem.status === 'UPCOMING' && <span className="dash__upcoming-badge">Upcoming</span>}
-                    {classItem.status === 'COMPLETED' && <span className="dash__completed-badge">Done</span>}
-                  </div>
-                </div>
-              ))}
-            </div>
-            {analyticsData.todaysClasses.length > 3 && (
-              <button className="dash__link-btn" onClick={() => navigate('/classes')}>
-                View All <ArrowRight size={12} />
-              </button>
-            )}
-          </section>
-        )}
-
-        {/* Occupancy Meter */}
-        {analyticsData?.occupancy && (
+        {/* Occupancy Gauge — 3 cols */}
+        {occupancy && (
           <section className="dash__card dash__card--occupancy">
             <div className="dash__card-head">
+              <div className="dash__card-icon dash__card-icon--violet"><Activity size={14} /></div>
               <div>
-                <h3 className="dash__card-title">
-                  <Activity size={14} /> Gym Occupancy
-                </h3>
+                <h3 className="dash__card-title">Gym Occupancy</h3>
                 <p className="dash__card-sub">Current capacity usage</p>
               </div>
-              <div className="dash__occupancy-gauge">
-                <div className={`dash__occupancy-percentage dash__occupancy-percentage--${
-                  analyticsData.occupancy.percentage < 60 ? 'low' : 
-                  analyticsData.occupancy.percentage < 80 ? 'medium' : 'high'
-                }`}>
-                  {Math.round(analyticsData.occupancy.percentage)}%
+            </div>
+            <div className="dash__occ-body">
+              <div className="dash__occ-gauge">
+                <svg viewBox="0 0 120 120" className="dash__occ-ring">
+                  <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="10" />
+                  <circle
+                    cx="60" cy="60" r="52" fill="none"
+                    stroke={occLevel === 'low' ? '#10b981' : occLevel === 'medium' ? '#f59e0b' : '#f43f5e'}
+                    strokeWidth="10" strokeLinecap="round"
+                    strokeDasharray={`${occPct * 3.27} 327`}
+                    transform="rotate(-90 60 60)"
+                    className="dash__occ-ring-fill"
+                  />
+                </svg>
+                <div className="dash__occ-center">
+                  <span className={`dash__occ-pct dash__occ-pct--${occLevel}`}>{occPct}%</span>
+                </div>
+              </div>
+              <div className="dash__occ-meta">
+                <div className="dash__occ-stat">
+                  <span className="dash__occ-stat-label">Current</span>
+                  <span className="dash__occ-stat-value">{occupancy.currentCount}</span>
+                </div>
+                <div className="dash__occ-stat">
+                  <span className="dash__occ-stat-label">Capacity</span>
+                  <span className="dash__occ-stat-value">{occupancy.maxCapacity}</span>
+                </div>
+                <div className="dash__occ-stat">
+                  <span className="dash__occ-stat-label">Trend</span>
+                  <span className={`dash__occ-trend dash__occ-trend--${occupancy.trend}`}>
+                    {occupancy.trend === 'rising' && <TrendingUp size={11} />}
+                    {occupancy.trend === 'falling' && <TrendingDown size={11} />}
+                    {occupancy.trend === 'stable' && <CircleDot size={11} />}
+                    {occupancy.trend}
+                  </span>
                 </div>
               </div>
             </div>
-            <div className="dash__occupancy-details">
-              <div className="dash__occupancy-item">
-                <span className="dash__occupancy-label">Current</span>
-                <span className="dash__occupancy-value">{analyticsData.occupancy.currentCount}</span>
-              </div>
-              <div className="dash__occupancy-item">
-                <span className="dash__occupancy-label">Capacity</span>
-                <span className="dash__occupancy-value">{analyticsData.occupancy.maxCapacity}</span>
-              </div>
-              <div className="dash__occupancy-item">
-                <span className="dash__occupancy-label">Trend</span>
-                <span className={`dash__occupancy-trend dash__occupancy-trend--${analyticsData.occupancy.trend}`}>
-                  {analyticsData.occupancy.trend === 'rising' && <TrendingUp size={12} />}
-                  {analyticsData.occupancy.trend === 'falling' && <TrendingDown size={12} />}
-                  {analyticsData.occupancy.trend === 'stable' && <CircleDot size={12} />}
-                  {analyticsData.occupancy.trend}
-                </span>
-              </div>
-            </div>
           </section>
         )}
 
-        {/* Monthly Progress */}
-        {analyticsData?.monthlyProgress && (
+        {/* Monthly Progress — 3 cols */}
+        {progress && (
           <section className="dash__card dash__card--progress">
             <div className="dash__card-head">
+              <div className="dash__card-icon dash__card-icon--cyan"><Target size={14} /></div>
               <div>
-                <h3 className="dash__card-title">
-                  <TrendingUp size={14} /> Monthly Progress
-                </h3>
+                <h3 className="dash__card-title">Monthly Progress</h3>
                 <p className="dash__card-sub">Revenue target tracking</p>
               </div>
-              <div className="dash__progress-status">
-                <span className={`dash__progress-badge dash__progress-badge--${analyticsData.monthlyProgress.status.toLowerCase()}`}>
-                  {analyticsData.monthlyProgress.status.replace('_', ' ')}
-                </span>
-              </div>
+              <span className={`dash__status-chip dash__status-chip--${(progress.status || 'behind').toLowerCase().replace(' ', '_')}`}>
+                {progress.status?.replace('_', ' ') || 'Behind'}
+              </span>
             </div>
-            <div className="dash__progress-bar">
-              <div 
-                className="dash__progress-fill" 
-                style={{ width: `${Math.min(100, (analyticsData.monthlyProgress.current / analyticsData.monthlyProgress.target) * 100)}%` }}
-              />
+            <div className="dash__prog-body">
+              <div className="dash__prog-bar-wrap">
+                <div className="dash__prog-bar">
+                  <div className="dash__prog-fill" style={{ width: `${progressPct}%` }} />
+                </div>
+                <span className="dash__prog-pct">{progressPct}%</span>
+              </div>
+              <div className="dash__prog-stats">
+                <div className="dash__prog-stat">
+                  <span className="dash__prog-stat-label">Current</span>
+                  <span className="dash__prog-stat-value">{formatPrice(progress.current)}</span>
+                </div>
+                <div className="dash__prog-stat">
+                  <span className="dash__prog-stat-label">Target</span>
+                  <span className="dash__prog-stat-value">{formatPrice(progress.target)}</span>
+                </div>
+                <div className="dash__prog-stat">
+                  <span className="dash__prog-stat-label">Days Left</span>
+                  <span className="dash__prog-stat-value">{progress.daysRemaining}</span>
+                </div>
+              </div>
+              {progress.projectedEnd && (
+                <div className="dash__prog-projected">
+                  Projected: <strong>{formatPrice(progress.projectedEnd)}</strong>
+                </div>
+              )}
             </div>
-            <div className="dash__progress-details">
-              <div className="dash__progress-item">
-                <span className="dash__progress-label">Current</span>
-                <span className="dash__progress-value">{formatPrice(analyticsData.monthlyProgress.current)}</span>
-              </div>
-              <div className="dash__progress-item">
-                <span className="dash__progress-label">Target</span>
-                <span className="dash__progress-value">{formatPrice(analyticsData.monthlyProgress.target)}</span>
-              </div>
-              <div className="dash__progress-item">
-                <span className="dash__progress-label">Days Left</span>
-                <span className="dash__progress-value">{analyticsData.monthlyProgress.daysRemaining}</span>
-              </div>
-            </div>
-            {analyticsData.monthlyProgress.projectedEnd && (
-              <div className="dash__progress-projection">
-                <span className="dash__progress-projection-label">Projected:</span>
-                <span className="dash__progress-projection-value">{formatPrice(analyticsData.monthlyProgress.projectedEnd)}</span>
-              </div>
-            )}
           </section>
         )}
 
-        {/* Revenue Breakdown */}
-        {analyticsData?.revenueBySource && analyticsData.revenueBySource.length > 0 && (
+        {/* Revenue Breakdown — 3 cols, CAPPED */}
+        {revenueBreakdown.length > 0 && (
           <section className="dash__card dash__card--breakdown">
             <div className="dash__card-head">
+              <div className="dash__card-icon dash__card-icon--indigo"><Layers size={14} /></div>
               <div>
-                <h3 className="dash__card-title">
-                  <Wallet size={14} /> Revenue Breakdown
-                </h3>
-                <p className="dash__card-sub">By source - Last 30 days</p>
+                <h3 className="dash__card-title">Revenue Breakdown</h3>
+                <p className="dash__card-sub">By source &middot; Last 30 days</p>
               </div>
+              <span className="dash__bkdn-total">{formatPrice(revenueTotal)}</span>
             </div>
-            <div className="dash__breakdown-chart">
-              {analyticsData.revenueBySource.map((source: any, i: number) => (
-                <div key={i} className="dash__breakdown-item">
-                  <div className="dash__breakdown-bar" style={{ width: `${(source.total / Math.max(...analyticsData.revenueBySource.map((s: any) => s.total))) * 100}%` }}>
-                    <span className="dash__breakdown-label">{source.category || 'Other'}</span>
-                    <span className="dash__breakdown-value">{formatPrice(source.total)}</span>
+            <div className="dash__bkdn-list">
+              {revenueBreakdown.map((item: any, i: number) => (
+                <div key={i} className="dash__bkdn-row">
+                  <span className="dash__bkdn-dot" style={{ background: item.color }} />
+                  <span className="dash__bkdn-label">{item.label}</span>
+                  <div className="dash__bkdn-bar-track">
+                    <div className="dash__bkdn-bar-fill" style={{ width: `${item.pct}%`, background: item.color }} />
                   </div>
+                  <span className="dash__bkdn-pct">{item.pct}%</span>
+                  <span className="dash__bkdn-amount">{formatPrice(item.value)}</span>
                 </div>
               ))}
             </div>
           </section>
         )}
-        {/* Revenue Chart */}
+
+        {/* Attendance Bar Chart — 3 cols */}
+        <section className="dash__card dash__card--attendance">
+          <div className="dash__card-head">
+            <div className="dash__card-icon dash__card-icon--blue"><BarChart3 size={14} /></div>
+            <div>
+              <h3 className="dash__card-title">Attendance</h3>
+              <p className="dash__card-sub">Daily check-ins this week</p>
+            </div>
+            <div className="dash__card-highlight">
+              <Activity size={13} />
+              <span>{data?.checkIns || 0} today</span>
+            </div>
+          </div>
+          <div className="dash__chart-area">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={attendanceTrend} margin={{ top: 8, right: 4, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#3b82f6" stopOpacity={1} />
+                    <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.4} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.04)" />
+                <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.35)', fontSize: 10 }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.35)', fontSize: 10 }} />
+                <Tooltip contentStyle={{ backgroundColor: '#1c1c1f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, fontSize: 12, boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }} cursor={{ fill: 'rgba(59,130,246,0.06)' }} />
+                <Bar dataKey="count" fill="url(#barGrad)" radius={[5, 5, 0, 0]} barSize={20} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </section>
+
+        {/* Revenue Area Chart — 6 cols */}
         <section className="dash__card dash__card--revenue">
           <div className="dash__card-head">
+            <div className="dash__card-icon dash__card-icon--emerald"><TrendingUp size={14} /></div>
             <div>
               <h3 className="dash__card-title">Revenue Overview</h3>
               <p className="dash__card-sub">Weekly earnings trend</p>
@@ -472,116 +448,117 @@ const Dashboard: React.FC = () => {
             <div className="dash__card-stat">
               <span className="dash__card-stat-value">{formatPrice(data?.monthlyRevenue || 0)}</span>
               <span className={`dash__card-stat-badge ${isPositive ? 'pos' : 'neg'}`}>
-                {isPositive ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
+                {isPositive ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
                 {Math.abs(data?.revenueChange || 0).toFixed(1)}%
               </span>
             </div>
           </div>
-          <div className="dash__chart">
-            <ResponsiveContainer width="100%" height={180}>
-              <AreaChart data={revenueSparkline} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+          <div className="dash__chart-area">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={revenueSparkline} margin={{ top: 8, right: 8, left: -15, bottom: 0 }}>
                 <defs>
                   <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#10b981" stopOpacity={0.25} />
+                    <stop offset="0%" stopColor="#10b981" stopOpacity={0.3} />
                     <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.04)" />
-                <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 10 }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 10 }} />
-                <Tooltip
-                  contentStyle={{ backgroundColor: '#18181b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, fontSize: 12 }}
-                  formatter={(val: number) => [formatPrice(val), 'Revenue']}
-                />
-                <Area type="monotone" dataKey="value" stroke="#10b981" strokeWidth={2} fill="url(#revGrad)" />
+                <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.35)', fontSize: 10 }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.35)', fontSize: 10 }} />
+                <Tooltip contentStyle={{ backgroundColor: '#1c1c1f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, fontSize: 12, boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }} formatter={(val: number) => [formatPrice(val), 'Revenue']} cursor={{ stroke: 'rgba(16,185,129,0.2)', strokeWidth: 1 }} />
+                <Area type="monotone" dataKey="value" stroke="#10b981" strokeWidth={2.5} fill="url(#revGrad)" dot={false} activeDot={{ r: 5, fill: '#10b981', stroke: '#fff', strokeWidth: 2 }} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </section>
 
-        {/* Attendance Chart */}
-        <section className="dash__card dash__card--attendance">
-          <div className="dash__card-head">
-            <div>
-              <h3 className="dash__card-title">Attendance</h3>
-              <p className="dash__card-sub">Daily check-ins this week</p>
-            </div>
-            <div className="dash__card-highlight">
-              <Activity size={14} />
-              <span>{data?.checkIns || 0} today</span>
-            </div>
-          </div>
-          <div className="dash__chart">
-            <ResponsiveContainer width="100%" height={180}>
-              <BarChart data={attendanceTrend} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.04)" />
-                <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 10 }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 10 }} />
-                <Tooltip
-                  contentStyle={{ backgroundColor: '#18181b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, fontSize: 12 }}
-                  cursor={{ fill: 'rgba(59,130,246,0.08)' }}
-                />
-                <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={20} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </section>
-
-        {/* Membership Donut */}
+        {/* Membership Breakdown — 7 cols, big & informative */}
         <section className="dash__card dash__card--membership">
           <div className="dash__card-head">
+            <div className="dash__card-icon dash__card-icon--emerald"><Users size={14} /></div>
             <div>
-              <h3 className="dash__card-title">Membership Mix</h3>
-              <p className="dash__card-sub">Current status breakdown</p>
+              <h3 className="dash__card-title">Membership Breakdown</h3>
+              <p className="dash__card-sub">Current status distribution</p>
             </div>
+            <button className="dash__link-btn" onClick={() => navigate('/members')}>
+              View All <ArrowRight size={11} />
+            </button>
           </div>
-          <div className="dash__donut-wrap">
-            <ResponsiveContainer width="100%" height={160}>
-              <PieChart>
-                <Pie
-                  data={membershipDistribution}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={45}
-                  outerRadius={65}
-                  paddingAngle={3}
-                  dataKey="value"
-                  strokeWidth={0}
-                >
-                  {membershipDistribution.map((entry, i) => (
-                    <Cell key={i} fill={entry.color} />
-                  ))}
-                </Pie>
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="dash__donut-center">
-              <span className="dash__donut-total">{data?.totalMembers || 0}</span>
-              <span className="dash__donut-label">Total</span>
-            </div>
-          </div>
-          <div className="dash__legend">
-            {membershipDistribution.map(item => (
-              <div key={item.name} className="dash__legend-item">
-                <span className="dash__legend-dot" style={{ background: item.color }} />
-                <span className="dash__legend-name">{item.name}</span>
-                <span className="dash__legend-val">{item.value}</span>
+          <div className="dash__mem-body">
+            <div className="dash__mem-chart">
+              <div className="dash__mem-donut-wrap">
+                <ResponsiveContainer width="100%" height={220}>
+                    <PieChart>
+                      <Pie
+                        data={membershipDistribution}
+                        cx="50%" cy="50%"
+                        innerRadius={62} outerRadius={90}
+                        paddingAngle={3} dataKey="value" strokeWidth={0}
+                      >
+                      {membershipDistribution.map((entry, i) => (
+                        <Cell key={i} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip contentStyle={{ backgroundColor: '#1c1c1f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, fontSize: 12, boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }} />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="dash__donut-center">
+                  <span className="dash__donut-total">{data?.totalMembers || 0}</span>
+                  <span className="dash__donut-label">TOTAL</span>
+                </div>
               </div>
-            ))}
+            </div>
+            <div className="dash__mem-stats">
+              {membershipDistribution.map(item => {
+                const total = data?.totalMembers || 1
+                const pct = Math.round((item.value / total) * 100)
+                return (
+                  <div key={item.name} className="dash__mem-stat-row">
+                    <div className="dash__mem-stat-head">
+                      <span className="dash__mem-stat-dot" style={{ background: item.color }} />
+                      <span className="dash__mem-stat-name">{item.name}</span>
+                      <span className="dash__mem-stat-count">{item.value}</span>
+                      <span className="dash__mem-stat-pct" style={{ color: item.color }}>{pct}%</span>
+                    </div>
+                    <div className="dash__mem-stat-bar">
+                      <div className="dash__mem-stat-fill" style={{ width: `${pct}%`, background: item.color }} />
+                    </div>
+                  </div>
+                )
+              })}
+              <div className="dash__mem-summary">
+                <div className="dash__mem-summary-item">
+                  <span className="dash__mem-summary-label">New this month</span>
+                  <span className="dash__mem-summary-val">+{data?.newSignups || 0}</span>
+                </div>
+                <div className="dash__mem-summary-item">
+                  <span className="dash__mem-summary-label">Expiring soon</span>
+                  <span className="dash__mem-summary-val dash__mem-summary-val--warn">{data?.expiringMembers?.length || 0}</span>
+                </div>
+                <div className="dash__mem-summary-item">
+                  <span className="dash__mem-summary-label">Retention rate</span>
+                  <span className="dash__mem-summary-val dash__mem-summary-val--good">
+                    {data?.totalMembers ? Math.round(((membershipDistribution[0]?.value || 0) / data.totalMembers) * 100) : 0}%
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
-        {/* Trainer Schedule */}
+        {/* Trainer Schedule — 5 cols */}
         <section className="dash__card dash__card--trainers">
           <div className="dash__card-head">
+            <div className="dash__card-icon dash__card-icon--violet"><Dumbbell size={14} /></div>
             <div>
               <h3 className="dash__card-title">Trainer Schedule</h3>
               <p className="dash__card-sub">Today's sessions</p>
             </div>
             <button className="dash__link-btn" onClick={() => navigate('/trainers')}>
-              View All <ArrowRight size={12} />
+              View All <ArrowRight size={11} />
             </button>
           </div>
-          <div className="dash__trainer-list">
+          <div className="dash__list-scroll">
             {data?.trainerSchedule?.map((trainer, i) => (
               <div key={i} className="dash__trainer-row">
                 <div className="dash__trainer-avatar">{trainer.initials}</div>
@@ -604,19 +581,18 @@ const Dashboard: React.FC = () => {
           </div>
         </section>
 
-        {/* Expiring Memberships */}
+        {/* Expiring Memberships — 4 cols */}
         <section className="dash__card dash__card--expiring">
           <div className="dash__card-head">
+            <div className="dash__card-icon dash__card-icon--amber"><AlertTriangle size={14} /></div>
             <div>
-              <h3 className="dash__card-title">
-                <AlertTriangle size={14} className="dash__icon-warn" /> Expiring Soon
-              </h3>
+              <h3 className="dash__card-title">Expiring Soon</h3>
               <p className="dash__card-sub">Next 7 days</p>
             </div>
-            <span className="dash__badge-count">{data?.expiringMembers?.length || 0}</span>
+            <span className="dash__count-badge">{data?.expiringMembers?.length || 0}</span>
           </div>
-          <div className="dash__expire-list">
-            {data?.expiringMembers?.slice(0, 5).map((member, i) => (
+          <div className="dash__list-scroll">
+            {data?.expiringMembers?.slice(0, 6).map((member, i) => (
               <div key={i} className="dash__expire-row">
                 <div className="dash__expire-info">
                   <span className="dash__expire-name">{member.name}</span>
@@ -633,20 +609,19 @@ const Dashboard: React.FC = () => {
           </div>
         </section>
 
-        {/* Live Activity Feed */}
+        {/* Live Activity Feed — 4 cols */}
         <section className="dash__card dash__card--activity">
           <div className="dash__card-head">
+            <div className="dash__card-icon dash__card-icon--cyan"><Zap size={14} /></div>
             <div>
-              <h3 className="dash__card-title">
-                <Zap size={14} className="dash__icon-zap" /> Live Activity
-              </h3>
+              <h3 className="dash__card-title">Live Activity</h3>
               <p className="dash__card-sub">Real-time updates</p>
             </div>
             <button className="dash__link-btn" onClick={() => navigate('/reports')}>
-              View All <ArrowRight size={12} />
+              View All <ArrowRight size={11} />
             </button>
           </div>
-          <div className="dash__activity-list">
+          <div className="dash__list-scroll">
             {data?.recentActivity?.slice(0, 5).map((act, i) => (
               <div key={i} className="dash__activity-row">
                 <div className={`dash__activity-icon dash__activity-icon--${act.type}`}>
@@ -673,13 +648,12 @@ const Dashboard: React.FC = () => {
           </div>
         </section>
 
-        {/* Birthdays */}
+        {/* Birthdays — 4 cols */}
         <section className="dash__card dash__card--birthdays">
           <div className="dash__card-head">
+            <div className="dash__card-icon dash__card-icon--amber"><Gift size={14} /></div>
             <div>
-              <h3 className="dash__card-title">
-                <Gift size={14} className="dash__icon-gift" /> Birthdays Today
-              </h3>
+              <h3 className="dash__card-title">Birthdays Today</h3>
             </div>
           </div>
           <div className="dash__birthday-list">
@@ -695,40 +669,106 @@ const Dashboard: React.FC = () => {
           </div>
         </section>
 
-        {/* Quick Actions */}
-        <section className="dash__card dash__card--actions">
+        {/* Quick Actions — 4 cols */}
+        <section className="dash__card dash__card--quick-actions">
           <div className="dash__card-head">
+            <div className="dash__card-icon dash__card-icon--blue"><Flame size={14} /></div>
             <div>
               <h3 className="dash__card-title">Quick Actions</h3>
             </div>
           </div>
           <div className="dash__action-grid">
             <button className="dash__action-btn dash__action-btn--primary" onClick={() => navigate('/members?action=create')}>
-              <UserPlus size={16} />
-              <span>Add Member</span>
+              <UserPlus size={18} /><span>Add Member</span>
             </button>
-            <button className="dash__action-btn" onClick={() => { navigate('/members') }}>
-              <CheckCircle2 size={16} />
-              <span>Check-in</span>
+            <button className="dash__action-btn" onClick={() => navigate('/members')}>
+              <CheckCircle2 size={18} /><span>Check-in</span>
             </button>
             <button className="dash__action-btn" onClick={() => navigate('/financials')}>
-              <Wallet size={16} />
-              <span>Payments</span>
+              <Wallet size={18} /><span>Payments</span>
             </button>
             <button className="dash__action-btn" onClick={() => navigate('/reports')}>
-              <BarChart3 size={16} />
-              <span>Reports</span>
+              <BarChart3 size={18} /><span>Reports</span>
             </button>
             <button className="dash__action-btn" onClick={() => navigate('/classes')}>
-              <Calendar size={16} />
-              <span>Classes</span>
+              <Calendar size={18} /><span>Classes</span>
             </button>
             <button className="dash__action-btn" onClick={() => navigate('/equipment')}>
-              <Dumbbell size={16} />
-              <span>Equipment</span>
+              <Dumbbell size={18} /><span>Equipment</span>
             </button>
           </div>
         </section>
+
+        {/* Overdue Payments — if present, 4 cols */}
+        {analyticsData?.overduePayments && analyticsData.overduePayments.length > 0 && (
+          <section className="dash__card dash__card--overdue">
+            <div className="dash__card-head">
+              <div className="dash__card-icon dash__card-icon--rose"><ShieldAlert size={14} /></div>
+              <div>
+                <h3 className="dash__card-title">Overdue Payments</h3>
+                <p className="dash__card-sub">Members with pending dues</p>
+              </div>
+              <span className="dash__count-badge dash__count-badge--rose">{analyticsData.overduePayments.length}</span>
+            </div>
+            <div className="dash__list-scroll">
+              {analyticsData.overduePayments.slice(0, 5).map((payment: any, i: number) => (
+                <div key={i} className="dash__overdue-row">
+                  <div className="dash__overdue-info">
+                    <span className="dash__overdue-name">{payment.memberName}</span>
+                    <span className="dash__overdue-plan">{payment.planName}</span>
+                  </div>
+                  <div className="dash__overdue-right">
+                    <span className="dash__overdue-days">{payment.daysOverdue}d overdue</span>
+                    <span className="dash__overdue-price">{formatPrice(payment.amount)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {analyticsData.overduePayments.length > 5 && (
+              <button className="dash__link-btn dash__link-btn--bottom" onClick={() => navigate('/financials?filter=overdue')}>
+                View All Overdue <ArrowRight size={11} />
+              </button>
+            )}
+          </section>
+        )}
+
+        {/* Today's Classes — if present, 4 cols */}
+        {analyticsData?.todaysClasses && analyticsData.todaysClasses.length > 0 && (
+          <section className="dash__card dash__card--classes">
+            <div className="dash__card-head">
+              <div className="dash__card-icon dash__card-icon--blue"><Calendar size={14} /></div>
+              <div>
+                <h3 className="dash__card-title">Today's Classes</h3>
+                <p className="dash__card-sub">Group fitness sessions</p>
+              </div>
+              <span className="dash__count-badge dash__count-badge--blue">{analyticsData.todaysClasses.length}</span>
+            </div>
+            <div className="dash__list-scroll">
+              {analyticsData.todaysClasses.slice(0, 4).map((cls: any, i: number) => (
+                <div key={i} className={`dash__class-row dash__class-row--${(cls.status || '').toLowerCase()}`}>
+                  <div className="dash__class-time">
+                    {new Date(cls.startTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                  </div>
+                  <div className="dash__class-info">
+                    <span className="dash__class-name">{cls.name}</span>
+                    <span className="dash__class-meta">{cls.trainer} &middot; {cls.enrolled}/{cls.capacity}</span>
+                  </div>
+                  <div className="dash__class-badge-wrap">
+                    {cls.status === 'IN_PROGRESS' && <span className="dash__badge dash__badge--live">LIVE</span>}
+                    {cls.status === 'UPCOMING' && <span className="dash__badge dash__badge--upcoming">Upcoming</span>}
+                    {cls.status === 'COMPLETED' && <span className="dash__badge dash__badge--done">Done</span>}
+                  </div>
+                </div>
+              ))}
+            </div>
+            {analyticsData.todaysClasses.length > 4 && (
+              <button className="dash__link-btn dash__link-btn--bottom" onClick={() => navigate('/classes')}>
+                View All Classes <ArrowRight size={11} />
+              </button>
+            )}
+          </section>
+        )}
+
       </div>
     </div>
   )

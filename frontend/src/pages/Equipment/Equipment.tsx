@@ -5,7 +5,7 @@ import { equipmentApi } from '../../services/equipmentApi';
 import EquipmentGrid from './components/EquipmentGrid';
 import EquipmentModal from './components/EquipmentModal';
 import MaintenancePanel from './components/MaintenancePanel';
-import { Plus, Search, X, LayoutGrid, Layout, Maximize2, ChevronDown, Activity, Wrench, AlertTriangle, Package } from 'lucide-react';
+import { Plus, Search, X, LayoutGrid, Layout, Maximize2, ChevronDown, Activity, Wrench, AlertTriangle, Package, RefreshCw, Filter } from 'lucide-react';
 import './Equipment.css';
 
 type GridDensity = 'compact' | 'comfortable' | 'spacious';
@@ -88,14 +88,36 @@ const EquipmentPage: React.FC = () => {
             const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 item.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 item.category.toLowerCase().includes(searchQuery.toLowerCase());
-
             const matchesStatus = activeStatusFilter === 'ALL' || activeStatusFilter === null || item.status === activeStatusFilter;
             const matchesCategory = selectedCategory === 'ALL' || item.category === selectedCategory;
             const matchesLocation = selectedLocation === 'ALL' || item.location === selectedLocation;
-
             return matchesSearch && matchesStatus && matchesCategory && matchesLocation;
         });
     }, [equipmentList, searchQuery, activeStatusFilter, selectedCategory, selectedLocation]);
+
+    // Count active filters
+    const activeFilterCount = [
+        searchQuery ? 1 : 0,
+        activeStatusFilter !== 'ALL' ? 1 : 0,
+        selectedCategory !== 'ALL' ? 1 : 0,
+        selectedLocation !== 'ALL' ? 1 : 0,
+    ].reduce((a, b) => a + b, 0);
+
+    const clearAllFilters = () => {
+        setSearchQuery('');
+        setSelectedCategory('ALL');
+        setSelectedLocation('ALL');
+        setActiveStatusFilter('ALL');
+    };
+
+    // Compute extra stats from data
+    const totalValue = useMemo(() =>
+        equipmentList.reduce((sum, eq) => sum + (eq.purchaseCost || 0), 0),
+    [equipmentList]);
+
+    const overdueCount = useMemo(() =>
+        equipmentList.filter(eq => eq.nextMaintenanceDueDate && new Date(eq.nextMaintenanceDueDate) < new Date() && eq.status !== 'MAINTENANCE').length,
+    [equipmentList]);
 
     const categories: (EquipmentCategory | 'ALL')[] = ['ALL', 'CARDIO', 'STRENGTH', 'FUNCTIONAL', 'YOGA', 'RECOVERY'];
 
@@ -124,13 +146,22 @@ const EquipmentPage: React.FC = () => {
             >
                 <div className="header-left">
                     <h1 className="header-title">Equipment</h1>
-                    <p className="header-subtitle">Manage and monitor your fitness equipment fleet</p>
+                    <p className="header-subtitle">
+                        Manage and monitor your fitness equipment fleet
+                        {totalValue > 0 && (
+                            <> — <strong style={{ color: 'var(--accent-primary)' }}>₹{totalValue.toLocaleString('en-IN')}</strong> total asset value</>
+                        )}
+                    </p>
                 </div>
 
                 <div className="header-right">
                     <div className="stats-summary-premium">
                         {statItems.map((stat, i) => (
-                            <div key={i} className="stat-pill-v2">
+                            <div
+                                key={i}
+                                className="stat-pill-v2"
+                                style={{ '--_pill-color': stat.color } as React.CSSProperties}
+                            >
                                 <div className="stat-icon-wrapper" style={{ backgroundColor: `${stat.color}15` }}>
                                     <stat.icon size={15} style={{ color: stat.color }} />
                                 </div>
@@ -143,6 +174,26 @@ const EquipmentPage: React.FC = () => {
                     </div>
                 </div>
             </motion.div>
+
+            {/* Overdue alert */}
+            {overdueCount > 0 && (
+                <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    className="flex items-center gap-3 px-4 py-2.5 mb-4 rounded-xl border border-[rgba(239,68,68,0.2)] bg-[rgba(239,68,68,0.06)]"
+                >
+                    <AlertTriangle size={16} className="text-red-400 flex-shrink-0" />
+                    <span className="text-xs font-semibold text-red-300">
+                        {overdueCount} equipment{overdueCount > 1 ? 's are' : ' is'} overdue for maintenance
+                    </span>
+                    <button
+                        onClick={() => setActiveStatusFilter('ACTIVE')}
+                        className="ml-auto text-[10px] font-bold text-red-400 hover:text-red-300 uppercase tracking-wider"
+                    >
+                        View
+                    </button>
+                </motion.div>
+            )}
 
             {/* Controls & Filters Area */}
             <div className="toolbar-section">
@@ -194,6 +245,15 @@ const EquipmentPage: React.FC = () => {
                         </div>
 
                         <button
+                            onClick={loadData}
+                            className="toggle-btn-v2"
+                            title="Refresh"
+                            style={{ width: 42, height: 42, borderRadius: 12, background: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
+                        >
+                            <RefreshCw size={15} />
+                        </button>
+
+                        <button
                             className="btn-primary-premium"
                             onClick={() => setIsAddModalOpen(true)}
                         >
@@ -204,7 +264,7 @@ const EquipmentPage: React.FC = () => {
                 </div>
 
                 {/* Category + Status Filters */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+                <div className="filter-row">
                     <div className="category-nav-v2">
                         {categories.map((cat) => (
                             <button
@@ -238,6 +298,20 @@ const EquipmentPage: React.FC = () => {
                 <div className="results-bar">
                     <span className="results-count">
                         Showing <strong>{filteredList.length}</strong> of <strong>{equipmentList.length}</strong> equipment
+                        {activeFilterCount > 0 && (
+                            <>
+                                <span className="active-filters-count">
+                                    <Filter size={8} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 2 }} />
+                                    {activeFilterCount}
+                                </span>
+                                <button
+                                    onClick={clearAllFilters}
+                                    className="ml-2 text-[11px] font-semibold text-[var(--accent-primary)] hover:underline cursor-pointer bg-transparent border-none"
+                                >
+                                    Clear filters
+                                </button>
+                            </>
+                        )}
                     </span>
                 </div>
             )}
@@ -246,55 +320,68 @@ const EquipmentPage: React.FC = () => {
             <AnimatePresence mode="wait">
                 {loading ? (
                     <motion.div
+                        key="loading"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="flex flex-col items-center justify-center py-24"
+                        className="eq-loading-state"
                     >
-                        <div className="relative w-10 h-10">
-                            <div className="absolute inset-0 border-2 border-[var(--accent-primary)]/20 rounded-full" />
-                            <div className="absolute inset-0 border-2 border-[var(--accent-primary)] border-t-transparent rounded-full animate-spin" />
+                        <div className="eq-spinner">
+                            <div className="eq-spinner__glow" />
+                            <div className="eq-spinner__ring" />
                         </div>
                         <p className="mt-4 text-xs font-medium text-[var(--text-secondary)]">Loading equipment...</p>
                     </motion.div>
                 ) : error ? (
                     <motion.div
+                        key="error"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="flex flex-col items-center justify-center py-24 rounded-xl border border-dashed border-red-500/20 bg-red-500/5"
+                        className="eq-error-state"
                     >
                         <AlertTriangle size={28} className="text-red-400 mb-3 opacity-60" />
                         <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-1">Error Loading Equipment</h3>
                         <p className="text-xs text-[var(--text-secondary)] mb-4">{error}</p>
                         <button onClick={loadData} className="btn-primary-premium" style={{ height: '36px', fontSize: '0.75rem' }}>
+                            <RefreshCw size={14} />
                             Retry
                         </button>
                     </motion.div>
                 ) : filteredList.length === 0 ? (
                     <motion.div
+                        key="empty"
                         initial={{ opacity: 0, scale: 0.98 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="flex flex-col items-center justify-center py-24 rounded-xl border border-dashed border-[var(--border-color)]"
+                        className="eq-empty-state"
                     >
-                        <div className="p-4 rounded-xl bg-[var(--bg-surface-secondary)] mb-4">
+                        <div className="eq-empty-state__icon">
                             <Search size={28} className="text-[var(--text-secondary)] opacity-40" />
                         </div>
                         <h3 className="text-base font-semibold text-[var(--text-primary)] mb-1">No equipment found</h3>
-                        <p className="text-sm text-[var(--text-secondary)] text-center max-w-sm mb-6">
-                            Try adjusting your filters or search query.
+                        <p className="text-sm text-[var(--text-secondary)] text-center max-w-sm mb-5">
+                            {activeFilterCount > 0
+                                ? 'Try adjusting your filters or search query.'
+                                : 'Get started by adding your first piece of equipment.'
+                            }
                         </p>
-                        <button
-                            onClick={() => {
-                                setSearchQuery('');
-                                setSelectedCategory('ALL');
-                                setSelectedLocation('ALL');
-                                setActiveStatusFilter('ALL');
-                            }}
-                            className="btn-primary-premium"
-                            style={{ height: '36px', fontSize: '0.75rem', background: 'var(--bg-surface-secondary)', color: 'var(--text-primary)', boxShadow: 'none', border: '1px solid var(--border-color)' }}
-                        >
-                            Clear All Filters
-                        </button>
+                        {activeFilterCount > 0 ? (
+                            <button
+                                onClick={clearAllFilters}
+                                className="btn-primary-premium"
+                                style={{ height: '36px', fontSize: '0.75rem', background: 'var(--bg-elevated)', color: 'var(--text-primary)', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--border-color)' }}
+                            >
+                                Clear All Filters
+                            </button>
+                        ) : (
+                            <button
+                                onClick={() => setIsAddModalOpen(true)}
+                                className="btn-primary-premium"
+                                style={{ height: '36px', fontSize: '0.75rem' }}
+                            >
+                                <Plus size={14} />
+                                Add Equipment
+                            </button>
+                        )}
                     </motion.div>
                 ) : (
                     <EquipmentGrid

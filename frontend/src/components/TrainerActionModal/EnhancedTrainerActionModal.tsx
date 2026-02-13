@@ -695,98 +695,82 @@ const EnhancedTrainerActionModal: React.FC<EnhancedTrainerActionModalProps> = ({
             {/* Content Grid */}
             <div className="trainer-action-modal__content-grid">
               {/* Left Navigation */}
-              <div className="trainer-action-modal__nav-column">
-                <nav className="side-panel-nav">
+                <div className="trainer-action-modal__nav-column">
+                  <nav className="side-panel-nav">
+                    <span className="side-panel-nav__label">General</span>
                     {([
                       { id: "profile" as TabType, label: "Edit Profile", icon: "profile" },
                       { id: "members" as TabType, label: "Assigned Members", icon: "members", badge: assignedMembers.length },
                       { id: "specializations" as TabType, label: "Specializations", icon: "award" },
                       { id: "schedule" as TabType, label: "Schedule", icon: "calendar" },
+                    ] as const).map(tab => (
+                      <button key={tab.id}
+                        className={`side-panel-nav__item ${activeTab === tab.id ? "side-panel-nav__item--active" : ""}`}
+                        onClick={() => setActiveTab(tab.id)}>
+                        <div className="nav-icon-wrap">
+                          {tab.id === "profile" && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>}
+                          {tab.id === "members" && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>}
+                          {tab.id === "specializations" && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="8" r="7" /><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" /></svg>}
+                          {tab.id === "schedule" && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>}
+                        </div>
+                        <span>{tab.label}</span>
+                        {'badge' in tab && tab.badge !== undefined && <span className="nav-badge">{tab.badge}</span>}
+                      </button>
+                    ))}
+
+                    <div className="side-panel-nav__divider" />
+                    <span className="side-panel-nav__label">Operations</span>
+                    {([
                       { id: "salary" as TabType, label: "Salary & Pay", icon: "salary" },
                       { id: "attendance" as TabType, label: "Attendance", icon: "attendance" },
                       { id: "performance" as TabType, label: "Performance", icon: "chart" },
+                    ] as const).map(tab => (
+                      <button key={tab.id}
+                        className={`side-panel-nav__item ${activeTab === tab.id ? "side-panel-nav__item--active" : ""}`}
+                        onClick={() => {
+                          setActiveTab(tab.id)
+                          if (tab.id === "salary" && compensationRules.length === 0 && !compensationLoading) loadCompensation()
+                          if (tab.id === "attendance" && attendanceRecords.length === 0 && !attendanceLoading) loadAttendance(attendanceDays)
+                        }}>
+                        <div className="nav-icon-wrap">
+                          {tab.id === "salary" && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>}
+                          {tab.id === "attendance" && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><path d="M9 14l2 2 4-4" /></svg>}
+                          {tab.id === "performance" && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /></svg>}
+                        </div>
+                        <span>{tab.label}</span>
+                      </button>
+                    ))}
+
+                    <div className="side-panel-nav__divider" />
+                    <span className="side-panel-nav__label">Communication</span>
+                    {([
                       { id: "notes" as TabType, label: "Owner Notes", icon: "notes" },
                       { id: "message" as TabType, label: "Message", icon: "mail" },
-                    ]).map(tab => (
-                    <button
-                      key={tab.id}
-                      className={`side-panel-nav__item ${activeTab === tab.id ? "side-panel-nav__item--active" : ""}`}
-                      onClick={() => {
-                        setActiveTab(tab.id)
-                        if (tab.id === "salary" && compensationRules.length === 0 && !compensationLoading) loadCompensation()
-                        if (tab.id === "attendance" && attendanceRecords.length === 0 && !attendanceLoading) loadAttendance(attendanceDays)
-                      }}
-                    >
-                      {tab.id === "profile" && (
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
-                        </svg>
-                      )}
-                      {tab.id === "members" && (
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
-                          <path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                        </svg>
-                      )}
-                      {tab.id === "specializations" && (
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <circle cx="12" cy="8" r="7" /><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" />
-                        </svg>
-                      )}
-                      {tab.id === "schedule" && (
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                          <line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" />
-                          <line x1="3" y1="10" x2="21" y2="10" />
-                        </svg>
-                      )}
-                      {tab.id === "performance" && (
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" />
-                          <line x1="6" y1="20" x2="6" y2="14" />
-                        </svg>
-                      )}
-                      {tab.id === "salary" && (
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                        </svg>
-                      )}
-                      {tab.id === "attendance" && (
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                          <line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" />
-                          <path d="M9 14l2 2 4-4" />
-                        </svg>
-                      )}
-                      {tab.id === "notes" && (
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                          <polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" />
-                        </svg>
-                      )}
-                      {tab.id === "message" && (
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                          <polyline points="22,6 12,13 2,6" />
-                        </svg>
-                      )}
-                      <span>{tab.label}</span>
-                      {tab.badge !== undefined && <span className="nav-badge">{tab.badge}</span>}
-                    </button>
-                  ))}
+                    ] as const).map(tab => (
+                      <button key={tab.id}
+                        className={`side-panel-nav__item ${activeTab === tab.id ? "side-panel-nav__item--active" : ""}`}
+                        onClick={() => setActiveTab(tab.id)}>
+                        <div className="nav-icon-wrap">
+                          {tab.id === "notes" && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /></svg>}
+                          {tab.id === "message" && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>}
+                        </div>
+                        <span>{tab.label}</span>
+                      </button>
+                    ))}
 
-                  <button
-                    className={`side-panel-nav__item side-panel-nav__item--danger ${activeTab === "delete" ? "side-panel-nav__item--active" : ""}`}
-                    onClick={() => setActiveTab("delete")}
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <polyline points="3 6 5 6 21 6" />
-                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                    </svg>
-                    <span>Delete Trainer</span>
-                  </button>
-                </nav>
-              </div>
+                    <button
+                      className={`side-panel-nav__item side-panel-nav__item--danger ${activeTab === "delete" ? "side-panel-nav__item--active" : ""}`}
+                      onClick={() => setActiveTab("delete")}>
+                      <div className="nav-icon-wrap">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <polyline points="3 6 5 6 21 6" />
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                        </svg>
+                      </div>
+                      <span>Delete Trainer</span>
+                    </button>
+                  </nav>
+                </div>
 
               {/* Right Content Panel */}
               <div className="trainer-action-modal__content-panel">

@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileText, IndianRupee, AlertCircle, Zap, ClipboardCheck, Wrench, Shield, Calendar, ArrowRight, CheckCircle, Clock } from 'lucide-react';
+import { FileText, IndianRupee, AlertCircle, Zap, ClipboardCheck, Wrench, Shield, Calendar, ArrowRight, CheckCircle, Clock, TrendingUp, User } from 'lucide-react';
 import { formatCurrency, formatDate } from '../../../../utils/formatters';
 import type { EquipmentMaintenance, MaintenanceType } from '../../../../types/equipmentMaintenance';
 
@@ -19,96 +19,114 @@ interface MaintenanceOverviewProps {
 export const MaintenanceOverview: React.FC<MaintenanceOverviewProps> = ({ stats, history, setActiveTab }) => {
 
     const getTypeStyles = (type: MaintenanceType) => {
-        const map: Record<MaintenanceType, { color: string; bg: string; icon: React.ReactNode }> = {
-            PREVENTIVE: { color: '#22c55e', bg: 'rgba(34, 197, 94, 0.1)', icon: <Shield size={13} /> },
-            REPAIR: { color: '#ef4444', bg: 'rgba(239, 68, 68, 0.1)', icon: <Wrench size={13} /> },
-            INSPECTION: { color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.1)', icon: <ClipboardCheck size={13} /> }
+        const map: Record<MaintenanceType, { color: string; bg: string; border: string; icon: React.ReactNode; label: string }> = {
+            PREVENTIVE: { color: '#22c55e', bg: 'rgba(34, 197, 94, 0.08)', border: 'rgba(34, 197, 94, 0.18)', icon: <Shield size={14} />, label: 'Preventive' },
+            REPAIR: { color: '#ef4444', bg: 'rgba(239, 68, 68, 0.08)', border: 'rgba(239, 68, 68, 0.18)', icon: <Wrench size={14} />, label: 'Repair' },
+            INSPECTION: { color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.08)', border: 'rgba(59, 130, 246, 0.18)', icon: <ClipboardCheck size={14} />, label: 'Inspection' }
         };
-        return map[type] || { color: 'var(--text-secondary)', bg: 'var(--bg-surface-secondary)', icon: <FileText size={13} /> };
+        return map[type] || { color: 'var(--text-secondary)', bg: 'var(--glass-bg)', border: 'var(--glass-border)', icon: <FileText size={14} />, label: type };
     };
 
-    const healthColor = stats.health > 70 ? '#22c55e' : stats.health > 40 ? '#eab308' : '#ef4444';
+    const getStatusStyle = (status: string) => {
+        const map: Record<string, { color: string; bg: string; label: string }> = {
+            COMPLETED: { color: '#22c55e', bg: 'rgba(34, 197, 94, 0.08)', label: 'Done' },
+            SCHEDULED: { color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.08)', label: 'Scheduled' },
+            OVERDUE: { color: '#ef4444', bg: 'rgba(239, 68, 68, 0.08)', label: 'Overdue' },
+            CANCELLED: { color: '#64748b', bg: 'rgba(100, 116, 139, 0.08)', label: 'Cancelled' },
+        };
+        return map[status] || { color: 'var(--text-secondary)', bg: 'var(--glass-bg)', label: status };
+    };
+
+    const healthColor = stats.health > 70 ? '#22c55e' : stats.health > 40 ? '#f59e0b' : '#ef4444';
+    const healthLabel = stats.health > 80 ? 'Excellent' : stats.health > 60 ? 'Good' : stats.health > 40 ? 'Fair' : 'Critical';
+
+    const kpiCards = [
+        { label: 'Total Records', value: stats.total, icon: FileText, color: '#3b82f6', colorName: 'blue' },
+        { label: 'Total Spent', value: formatCurrency(stats.totalCost), icon: IndianRupee, color: '#22c55e', colorName: 'green' },
+        { label: 'Overdue', value: stats.overdue, icon: AlertCircle, color: '#ef4444', colorName: 'red', alert: stats.overdue > 0 },
+        { label: 'Health Score', value: `${stats.health}%`, icon: Zap, color: healthColor, colorName: stats.health > 70 ? 'green' : stats.health > 40 ? 'amber' : 'red' }
+    ];
 
     return (
-        <div className="space-y-5">
-            {/* KPI Grid */}
+        <div className="maint-overview">
+            {/* KPI Cards */}
             <div className="maintenance-stat-grid">
-                {[
-                    { label: 'Total Logs', value: stats.total, icon: FileText, color: '#3b82f6' },
-                    { label: 'Total Cost', value: formatCurrency(stats.totalCost), icon: IndianRupee, color: '#22c55e' },
-                    { label: 'Overdue', value: stats.overdue, icon: AlertCircle, color: '#ef4444', highlight: stats.overdue > 0 },
-                    { label: 'Health', value: `${stats.health}%`, icon: Zap, color: healthColor }
-                ].map(({ label, value, icon: Icon, color, highlight }) => (
+                {kpiCards.map(({ label, value, icon: Icon, color, colorName, alert }) => (
                     <div
                         key={label}
-                        className={`maintenance-stat-card ${highlight ? 'border-red-500/30' : ''}`}
-                        style={highlight ? { borderColor: 'rgba(239,68,68,0.3)', backgroundColor: 'rgba(239,68,68,0.03)' } : {}}
+                        className={`maintenance-stat-card maintenance-stat-card--${colorName} ${alert ? 'maintenance-stat-card--alert' : ''}`}
                     >
-                        <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `${color}12`, border: `1px solid ${color}20` }}>
-                            <Icon size={16} style={{ color }} />
+                        <div className={`stat-icon-wrap stat-icon-wrap--${colorName}`}>
+                            <Icon size={18} />
                         </div>
                         <div className="maintenance-stat-info">
                             <p className="maintenance-stat-val">{value}</p>
                             <p className="maintenance-stat-label">{label}</p>
                         </div>
-                        {highlight && <span className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-red-500 animate-pulse" />}
+                        {alert && <span className="stat-alert-dot" />}
                     </div>
                 ))}
             </div>
 
-            {/* Two columns */}
-            <div className="grid grid-cols-3 gap-4">
-                {/* Recent Activity */}
-                <div className="col-span-2">
-                    <div className="flex items-center justify-between mb-3">
-                        <h3 className="eq-section-title flex-none" style={{ marginBottom: 0 }}>Recent Activity</h3>
+            {/* Main content — 2/3 + 1/3 layout */}
+            <div className="maint-overview__grid">
+                {/* Left — Recent Activity */}
+                <div className="maint-overview__main">
+                    <div className="maint-section-header">
+                        <h3 className="eq-section-title" style={{ marginBottom: 0 }}>Recent Activity</h3>
                         {history.length > 0 && (
-                            <button
-                                onClick={() => setActiveTab('history')}
-                                className="flex items-center gap-1 text-[10px] font-bold text-[var(--accent-primary)] uppercase tracking-wider hover:gap-2 transition-all"
-                            >
+                            <button onClick={() => setActiveTab('history')} className="maint-link-btn">
                                 View All <ArrowRight size={12} />
                             </button>
                         )}
                     </div>
 
                     {history.length === 0 ? (
-                        <div className="py-10 rounded-xl border border-dashed border-[var(--border-color)] flex flex-col items-center text-[var(--text-secondary)]">
-                            <ClipboardCheck size={24} className="opacity-20 mb-2" />
-                            <p className="text-xs font-semibold">No maintenance records yet</p>
-                            <p className="text-[10px] text-[var(--text-secondary)] mt-0.5">Click "New Log" to add your first record</p>
+                        <div className="empty-state">
+                            <div className="empty-state__icon">
+                                <ClipboardCheck size={22} />
+                            </div>
+                            <p className="empty-state__title">No maintenance records</p>
+                            <p className="empty-state__desc">Click "New Log" to add your first maintenance record for this equipment</p>
                         </div>
                     ) : (
-                        <div className="maintenance-timeline">
-                            {history.slice(0, 5).map(r => {
-                                const styles = getTypeStyles(r.maintenanceType);
+                        <div className="maint-activity-list">
+                            {history.slice(0, 5).map((r, idx) => {
+                                const ts = getTypeStyles(r.maintenanceType);
+                                const ss = getStatusStyle(r.status);
                                 return (
-                                    <div key={r.id} className="timeline-item">
-                                        <div className="p-3 rounded-xl bg-[var(--bg-surface-secondary)] border border-[var(--border-color)] hover:border-[var(--accent-primary)]/40 transition-all">
-                                            <div className="flex items-start gap-3">
-                                                <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5" style={{ backgroundColor: styles.bg }}>
-                                                    {styles.icon}
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="flex justify-between items-start gap-2">
-                                                        <div className="min-w-0">
-                                                            <h4 className="text-[12px] font-bold text-[var(--text-primary)] line-clamp-1">{r.description}</h4>
-                                                            <div className="flex items-center gap-2 mt-1">
-                                                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider" style={{ backgroundColor: styles.bg, color: styles.color, borderColor: `${styles.color}20` }}>
-                                                                    {r.maintenanceType}
-                                                                </span>
-                                                                <span className="text-[10px] text-[var(--text-secondary)]">{r.technicianName}</span>
-                                                            </div>
-                                                        </div>
-                                                        <div className="text-right shrink-0">
-                                                            <p className="text-[10px] text-[var(--text-secondary)] flex items-center gap-1 justify-end">
-                                                                <Clock size={10} /> {formatDate(r.maintenanceDate)}
-                                                            </p>
-                                                            <p className="text-[11px] font-bold text-[var(--text-primary)] mt-0.5">{formatCurrency(r.cost)}</p>
-                                                        </div>
+                                    <div key={r.id} className="maint-activity-card" style={{ '--activity-color': ts.color } as React.CSSProperties}>
+                                        <div className="maint-activity-card__indicator" style={{ backgroundColor: ts.color }} />
+                                        <div className="maint-activity-card__icon" style={{ backgroundColor: ts.bg, borderColor: ts.border, color: ts.color }}>
+                                            {ts.icon}
+                                        </div>
+                                        <div className="maint-activity-card__body">
+                                            <div className="maint-activity-card__top">
+                                                <div className="maint-activity-card__title-area">
+                                                    <h4 className="maint-activity-card__title">{r.description}</h4>
+                                                    <div className="maint-activity-card__badges">
+                                                        <span className="maint-badge" style={{ color: ts.color, backgroundColor: ts.bg, borderColor: ts.border }}>
+                                                            {ts.label}
+                                                        </span>
+                                                        <span className="maint-badge" style={{ color: ss.color, backgroundColor: ss.bg, borderColor: `${ss.color}25` }}>
+                                                            {ss.label}
+                                                        </span>
                                                     </div>
                                                 </div>
+                                                <div className="maint-activity-card__right">
+                                                    <span className="maint-activity-card__cost">{formatCurrency(r.cost)}</span>
+                                                    <span className="maint-activity-card__date">
+                                                        <Clock size={10} /> {formatDate(r.maintenanceDate)}
+                                                    </span>
+                                                </div>
                                             </div>
+                                            {r.technicianName && (
+                                                <div className="maint-activity-card__footer">
+                                                    <span className="maint-activity-card__tech">
+                                                        <User size={10} /> {r.technicianName}
+                                                    </span>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 );
@@ -117,51 +135,74 @@ export const MaintenanceOverview: React.FC<MaintenanceOverviewProps> = ({ stats,
                     )}
                 </div>
 
-                {/* Queue + Insight */}
-                <div className="space-y-4">
-                    <div>
-                        <h3 className="eq-section-title mb-3" style={{ marginBottom: '8px' }}>Queue</h3>
+                {/* Right Sidebar */}
+                <div className="maint-overview__sidebar">
+                    {/* Health Score Card */}
+                    <div className="maint-health-card">
+                        <h3 className="maint-health-card__title">Health Score</h3>
+                        <div className="maint-health-ring">
+                            <svg viewBox="0 0 120 120" className="maint-health-ring__svg">
+                                <circle cx="60" cy="60" r="48" fill="none" stroke="var(--glass-border)" strokeWidth="8" />
+                                <circle
+                                    cx="60" cy="60" r="48" fill="none"
+                                    stroke={healthColor}
+                                    strokeWidth="8" strokeLinecap="round"
+                                    strokeDasharray={`${stats.health * 3.015} 301.5`}
+                                    className="maint-health-ring__fill"
+                                />
+                            </svg>
+                            <div className="maint-health-ring__center">
+                                <span className="maint-health-ring__value" style={{ color: healthColor }}>{stats.health}</span>
+                                <span className="maint-health-ring__unit">/ 100</span>
+                            </div>
+                        </div>
+                        <span className="maint-health-label" style={{ color: healthColor, backgroundColor: `${healthColor}12`, borderColor: `${healthColor}25` }}>
+                            {healthLabel}
+                        </span>
+                        <p className="maint-health-desc">
+                            {stats.health > 80 ? 'Equipment is in excellent condition. Keep up the preventive schedule.' :
+                                stats.health > 50 ? 'Acceptable range. Monitor and schedule preventive checks.' :
+                                    'Critical: Immediate maintenance action required to prevent failure.'}
+                        </p>
+                    </div>
+
+                    {/* Queue */}
+                    <div className="maint-queue-card">
+                        <h3 className="maint-queue-card__title">
+                            Upcoming Tasks
+                            {stats.scheduled > 0 && <span className="maint-queue-card__count">{stats.scheduled}</span>}
+                        </h3>
                         {stats.scheduled === 0 ? (
-                            <div className="p-5 rounded-xl bg-green-500/5 border border-green-500/10 flex flex-col items-center text-center">
-                                <CheckCircle size={20} className="text-green-500 mb-1.5" />
-                                <p className="text-xs font-bold text-green-500">All Clear</p>
-                                <p className="text-[9px] text-green-500/60 uppercase font-bold tracking-wider mt-0.5">No pending tasks</p>
+                            <div className="maint-queue-clear">
+                                <CheckCircle size={20} />
+                                <span className="maint-queue-clear__text">All Clear</span>
+                                <span className="maint-queue-clear__sub">No pending maintenance</span>
                             </div>
                         ) : (
-                            <div className="space-y-2">
+                            <div className="maint-queue-list">
                                 {history.filter(r => r.status === 'SCHEDULED').slice(0, 3).map(r => {
-                                    const typeStyles = getTypeStyles(r.maintenanceType);
+                                    const ts = getTypeStyles(r.maintenanceType);
                                     return (
-                                        <div key={r.id} className="p-3 rounded-xl bg-[var(--bg-surface-secondary)] border border-[var(--border-color)] hover:border-[var(--border-hover)] transition-all">
-                                            <div className="flex justify-between items-center mb-1.5">
-                                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider" style={{ backgroundColor: typeStyles.bg, color: typeStyles.color, borderColor: `${typeStyles.color}20` }}>{r.maintenanceType}</span>
-                                                <span className="text-[10px] text-[var(--text-secondary)] flex items-center gap-1"><Calendar size={10} /> {formatDate(r.maintenanceDate)}</span>
+                                        <div key={r.id} className="maint-queue-item">
+                                            <div className="maint-queue-item__icon" style={{ color: ts.color, backgroundColor: ts.bg }}>
+                                                {ts.icon}
                                             </div>
-                                            <p className="text-[11px] font-semibold text-[var(--text-primary)] line-clamp-2">{r.description}</p>
+                                            <div className="maint-queue-item__info">
+                                                <p className="maint-queue-item__desc">{r.description}</p>
+                                                <span className="maint-queue-item__date">
+                                                    <Calendar size={10} /> {formatDate(r.maintenanceDate)}
+                                                </span>
+                                            </div>
                                         </div>
                                     );
                                 })}
+                                {stats.scheduled > 3 && (
+                                    <button onClick={() => setActiveTab('schedule')} className="maint-link-btn" style={{ justifyContent: 'center', width: '100%', marginTop: '4px' }}>
+                                        +{stats.scheduled - 3} more <ArrowRight size={11} />
+                                    </button>
+                                )}
                             </div>
                         )}
-                    </div>
-
-                    {/* Health indicator */}
-                    <div className="p-4 rounded-xl bg-[var(--bg-surface-secondary)] border border-[var(--border-color)]">
-                        <h3 className="text-[9px] font-bold uppercase tracking-wider text-[var(--text-secondary)] opacity-60 mb-3">Health Score</h3>
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className="flex-1 h-2 rounded-full bg-[var(--bg-primary)] overflow-hidden">
-                                <div
-                                    className="h-full rounded-full transition-all duration-700"
-                                    style={{ width: `${stats.health}%`, backgroundColor: healthColor }}
-                                />
-                            </div>
-                            <span className="text-sm font-bold" style={{ color: healthColor }}>{stats.health}%</span>
-                        </div>
-                        <p className="text-[10px] font-medium text-[var(--text-secondary)] leading-relaxed">
-                            {stats.health > 80 ? 'Equipment in excellent condition. Continue preventive schedule.' :
-                                stats.health > 50 ? 'Within acceptable range. Monitor for potential issues.' :
-                                    'Critical: Immediate maintenance required to prevent failure.'}
-                        </p>
                     </div>
                 </div>
             </div>

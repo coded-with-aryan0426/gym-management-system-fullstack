@@ -13,7 +13,8 @@ import './Trainers.css';
 import {
   Search, Filter, UserPlus, TrendingUp, Users, Activity, Clock,
   Star, ChevronDown, Download, MoreHorizontal, RefreshCw, Zap,
-  Award, Target, Calendar, DollarSign, BarChart3, UserCheck, AlertTriangle, UserX, Percent, X
+  Award, Target, Calendar, DollarSign, BarChart3, UserCheck, AlertTriangle, UserX, Percent, X,
+  Mail, Phone, Briefcase
 } from 'lucide-react';
 import DataTable, { type Column } from '../../components/ui/DataTable';
 
@@ -46,15 +47,22 @@ const computeStaffStats = (list: User[]): StaffStats => {
   return { total: list.length, active, inactive, onLeave, hiredThisMonth, utilizationRate };
 };
 
-/* Mini sparkline SVG */
-const MiniBar: React.FC<{ values: number[]; color: string; height?: number }> = ({ values, color, height = 20 }) => {
+/* Mini sparkline SVG - enhanced with gradient */
+const MiniBar: React.FC<{ values: number[]; color: string; height?: number }> = ({ values, color, height = 24 }) => {
   const max = Math.max(...values, 1);
-  const w = values.length * 5;
+  const w = values.length * 6;
+  const id = `grad-${color.replace('#', '')}`;
   return (
     <svg width={w} height={height} viewBox={`0 0 ${w} ${height}`} style={{ display: 'block' }}>
+      <defs>
+        <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity="1" />
+          <stop offset="100%" stopColor={color} stopOpacity="0.3" />
+        </linearGradient>
+      </defs>
       {values.map((v, i) => {
         const h = (v / max) * height;
-        return <rect key={i} x={i * 5} y={height - h} width={3.5} height={h} rx={1} fill={color} opacity={0.7 + (i / values.length) * 0.3} />;
+        return <rect key={i} x={i * 6} y={height - h} width={4} height={h} rx={2} fill={`url(#${id})`} opacity={0.6 + (i / values.length) * 0.4} />;
       })}
     </svg>
   );
@@ -80,6 +88,31 @@ const RatingStars: React.FC<{ rating: number }> = ({ rating }) => {
   );
 };
 
+/* Dynamic row count based on available viewport height */
+const useAutoPageSize = (headerRef: React.RefObject<HTMLElement | null>, minRows: number = 5, maxRows: number = 50) => {
+  const [pageSize, setPageSize] = useState(10);
+
+  useEffect(() => {
+    const calculate = () => {
+      const headerHeight = headerRef.current?.getBoundingClientRect().bottom ?? 160;
+      const viewportHeight = window.innerHeight;
+      const paginationHeight = 48;
+      const tableHeaderHeight = 36;
+      const bufferPadding = 24;
+      const availableHeight = viewportHeight - headerHeight - paginationHeight - tableHeaderHeight - bufferPadding;
+      const rowHeight = window.innerWidth < 768 ? 80 : 44;
+      const rows = Math.max(minRows, Math.min(maxRows, Math.floor(availableHeight / rowHeight)));
+      setPageSize(rows);
+    };
+
+    calculate();
+    window.addEventListener('resize', calculate);
+    return () => window.removeEventListener('resize', calculate);
+  }, [headerRef, minRows, maxRows]);
+
+  return pageSize;
+};
+
 const Trainers: React.FC = () => {
   const [trainers, setTrainers] = useState<User[]>([]);
   const [performanceData, setPerformanceData] = useState<Record<number, TrainerPerformance>>({});
@@ -91,10 +124,19 @@ const Trainers: React.FC = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [activeStatusFilter, setActiveStatusFilter] = useState<StatusFilter>('all');
 
+  const headerRef = useRef<HTMLElement>(null);
+  const autoPageSize = useAutoPageSize(headerRef);
+
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
   const [sortType, setSortType] = useState<'newest' | 'alphabetical'>('newest');
+
+  // Sync autoPageSize with pageSize
+  useEffect(() => {
+    setPageSize(autoPageSize);
+    setCurrentPage(0);
+  }, [autoPageSize]);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -232,6 +274,21 @@ const Trainers: React.FC = () => {
     return [0.4, 0.6, 0.8, 0.5, 0.9, 0.7, 1].map(m => Math.round(base * m));
   };
 
+  /* 3D Status Badge */
+  const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
+    const s = status.toLowerCase();
+    const isActive = s === 'active' || !s;
+    const isLeave = s === 'on_leave' || s === 'leave';
+    const cls = isActive ? 't-status--active' : isLeave ? 't-status--leave' : 't-status--inactive';
+    const label = isActive ? 'Active' : isLeave ? 'On Leave' : 'Inactive';
+    return (
+      <span className={`t-status ${cls}`}>
+        <span className="t-status__dot" />
+        {label}
+      </span>
+    );
+  };
+
   const columns: Column<User>[] = [
     {
       key: 'trainer',
@@ -242,17 +299,21 @@ const Trainers: React.FC = () => {
         const status = ((member as any).status || 'Active').toLowerCase();
         const isActive = status === 'active';
         const perf = performanceData[member.userId];
-        const rating = perf ? Math.min(5, 3.5 + (perf.clientCount || 0) * 0.1) : 4.0;
+        const joinDate = (member as any).joinDate || (member as any).createdAt;
+        const joinStr = joinDate ? new Date(joinDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '';
 
         return (
           <div className="t-trainer-cell" onClick={(e) => { e.stopPropagation(); handleActionClick(member); }}>
-            <div className="t-trainer-cell__avatar">
+            <div className="t-trainer-cell__avatar-wrap">
               <Avatar name={member.fullName} size="sm" avatarId={savedAvatarId || member.avatarId} userId={member.userId} />
               <span className={`t-trainer-cell__dot ${isActive ? 't-trainer-cell__dot--on' : 't-trainer-cell__dot--off'}`} />
             </div>
             <div className="t-trainer-cell__info">
               <span className="t-trainer-cell__name">{member.fullName}</span>
-              <span className="t-trainer-cell__email">{member.email}</span>
+              <span className="t-trainer-cell__meta">
+                <Mail size={9} />
+                {member.email}
+              </span>
             </div>
           </div>
         );
@@ -261,30 +322,44 @@ const Trainers: React.FC = () => {
     {
       key: 'role',
       header: 'Role',
-      width: '100px',
+      width: '110px',
       render: (member) => {
         const role = member.roles?.[0]?.roleName || 'TRAINER';
         const cls = role.toLowerCase() === 'admin' ? 't-role--admin' :
           role.toLowerCase() === 'manager' ? 't-role--manager' : 't-role--trainer';
-        return <span className={`t-role ${cls}`}>{role}</span>;
+        return (
+          <span className={`t-role ${cls}`}>
+            <Briefcase size={10} />
+            {role}
+          </span>
+        );
       },
     },
     {
       key: 'performance',
       header: 'Performance',
-      width: '160px',
+      width: '170px',
       render: (member) => {
         const perf = performanceData[member.userId];
         const clients = perf?.clientCount || 0;
         const sessions = perf?.completedSessions || 0;
+        const rating = Math.min(5, 3.5 + clients * 0.1);
         return (
           <div className="t-perf">
-            <div className="t-perf__bars">
-              <MiniBar values={getSparkData(member.userId)} color="#6366f1" />
+            <div className="t-perf__chart">
+              <MiniBar values={getSparkData(member.userId)} color="#818cf8" />
             </div>
-            <div className="t-perf__nums">
-              <span className="t-perf__num"><Users size={10} /> {clients}</span>
-              <span className="t-perf__num"><Target size={10} /> {sessions}</span>
+            <div className="t-perf__data">
+              <div className="t-perf__row">
+                <Users size={10} className="t-perf__icon t-perf__icon--clients" />
+                <span className="t-perf__val">{clients}</span>
+                <span className="t-perf__label">clients</span>
+              </div>
+              <div className="t-perf__row">
+                <Target size={10} className="t-perf__icon t-perf__icon--sessions" />
+                <span className="t-perf__val">{sessions}</span>
+                <span className="t-perf__label">sessions</span>
+              </div>
             </div>
           </div>
         );
@@ -293,25 +368,28 @@ const Trainers: React.FC = () => {
     {
       key: 'revenue',
       header: 'Revenue',
-      width: '100px',
+      width: '110px',
       render: (member) => {
         const perf = performanceData[member.userId];
         const rev = perf?.monthlyRevenue || 0;
         return (
-          <span className="t-revenue">
-            <DollarSign size={11} />
-            ₹{rev.toLocaleString()}
-          </span>
+          <div className="t-revenue-cell">
+            <span className="t-revenue-cell__amount">
+              <DollarSign size={12} />
+              ₹{rev.toLocaleString()}
+            </span>
+            <span className="t-revenue-cell__period">this month</span>
+          </div>
         );
       },
     },
     {
       key: 'status',
       header: 'Status',
-      width: '85px',
+      width: '100px',
       render: (member) => {
         const status = (member as any).status || 'Active';
-        return <Badge variant={getStatusVariant(status)}>{status}</Badge>;
+        return <StatusBadge status={status} />;
       },
     },
     {
@@ -327,10 +405,10 @@ const Trainers: React.FC = () => {
     return (
       <div className="pg-page">
         {/* === Header === */}
-        <header className="pg-header">
+        <header className="pg-header" ref={headerRef}>
           <div className="pg-header__row-1">
             <div className="pg-header__title-group">
-              <div className="pg-header__icon">
+              <div className="pg-header__icon t-header-icon">
                 <Users size={18} />
               </div>
               <div>
@@ -342,7 +420,7 @@ const Trainers: React.FC = () => {
             {/* Stat Cards */}
             <div className="pg-stats">
               <button
-                className={`pg-stat-card ${activeStatusFilter === 'all' ? 'pg-stat-card--active' : ''}`}
+                className={`pg-stat-card t-stat-card ${activeStatusFilter === 'all' ? 'pg-stat-card--active t-stat-card--active' : ''}`}
                 onClick={() => setActiveStatusFilter('all')}
               >
                 <div className="pg-stat-card__icon pg-stat-card__icon--total"><Users size={14} /></div>
@@ -352,7 +430,7 @@ const Trainers: React.FC = () => {
                 </div>
               </button>
               <button
-                className={`pg-stat-card ${activeStatusFilter === 'active' ? 'pg-stat-card--active' : ''}`}
+                className={`pg-stat-card t-stat-card ${activeStatusFilter === 'active' ? 'pg-stat-card--active t-stat-card--active' : ''}`}
                 onClick={() => setActiveStatusFilter('active')}
               >
                 <div className="pg-stat-card__icon pg-stat-card__icon--active"><UserCheck size={14} /></div>
@@ -362,7 +440,7 @@ const Trainers: React.FC = () => {
                 </div>
               </button>
               <button
-                className={`pg-stat-card ${activeStatusFilter === 'onLeave' ? 'pg-stat-card--active' : ''}`}
+                className={`pg-stat-card t-stat-card ${activeStatusFilter === 'onLeave' ? 'pg-stat-card--active t-stat-card--active' : ''}`}
                 onClick={() => setActiveStatusFilter('onLeave')}
               >
                 <div className="pg-stat-card__icon pg-stat-card__icon--expiring"><AlertTriangle size={14} /></div>
@@ -372,7 +450,7 @@ const Trainers: React.FC = () => {
                 </div>
               </button>
               <button
-                className={`pg-stat-card ${activeStatusFilter === 'inactive' ? 'pg-stat-card--active' : ''}`}
+                className={`pg-stat-card t-stat-card ${activeStatusFilter === 'inactive' ? 'pg-stat-card--active t-stat-card--active' : ''}`}
                 onClick={() => setActiveStatusFilter('inactive')}
               >
                 <div className="pg-stat-card__icon pg-stat-card__icon--inactive"><UserX size={14} /></div>
@@ -381,7 +459,7 @@ const Trainers: React.FC = () => {
                   <span className="pg-stat-card__label">Inactive</span>
                 </div>
               </button>
-              <div className="pg-stat-card pg-stat-card--no-click">
+              <div className="pg-stat-card pg-stat-card--no-click t-stat-card">
                 <div className="pg-stat-card__icon pg-stat-card__icon--special"><Percent size={14} /></div>
                 <div className="pg-stat-card__data">
                   <span className="pg-stat-card__value pg-stat-card__value--indigo">{stats.utilizationRate}%</span>
@@ -391,7 +469,7 @@ const Trainers: React.FC = () => {
             </div>
 
             <div className="pg-header__actions">
-              <button className="pg-btn pg-btn--primary" onClick={() => setIsCreateModalOpen(true)}>
+              <button className="pg-btn pg-btn--primary t-btn-add" onClick={() => setIsCreateModalOpen(true)}>
                 <UserPlus size={14} />
                 <span>Add Trainer</span>
               </button>
@@ -400,7 +478,7 @@ const Trainers: React.FC = () => {
 
           {/* Row 2: Tabs + Search + Filters */}
           <div className="pg-header__row-2">
-            <div className="pg-tabs">
+            <div className="pg-tabs t-tabs">
               <button
                 className={`pg-tab ${activeStatusFilter === 'all' ? 'pg-tab--active' : ''}`}
                 onClick={() => setActiveStatusFilter('all')}
@@ -436,7 +514,7 @@ const Trainers: React.FC = () => {
             </div>
 
             <div className="pg-header__right">
-              <div className="pg-search">
+              <div className="pg-search t-search">
                 <Search size={14} className="pg-search__icon" />
                 <input
                   type="text"
@@ -508,7 +586,7 @@ const Trainers: React.FC = () => {
 
         {/* === Batch Actions === */}
         {selectedTrainerIds.size > 0 && (
-          <div className="pg-batch">
+          <div className="pg-batch t-batch">
             <span className="pg-batch__count">{selectedTrainerIds.size} selected</span>
             <button className="pg-batch__btn" onClick={() => { showToast(`Messaging ${selectedTrainerIds.size} trainers`, 'success'); setSelectedTrainerIds(new Set()); }}>Message</button>
             <button className="pg-batch__btn" onClick={() => { showToast(`Exporting ${selectedTrainerIds.size} trainers`, 'success'); setSelectedTrainerIds(new Set()); }}>Export</button>
@@ -542,22 +620,33 @@ const Trainers: React.FC = () => {
           mobileCardRender={(member, index) => {
             const role = member.roles?.[0]?.roleName || 'TRAINER';
             const perf = performanceData[member.userId];
+            const status = (member as any).status || 'Active';
+            const rev = perf?.monthlyRevenue || 0;
+            const clients = perf?.clientCount || 0;
+            const sessions = perf?.completedSessions || 0;
+            const savedAvatarId = typeof window !== 'undefined' ? localStorage.getItem(`avatar_${member.userId}`) : null;
             return (
               <div className="t-mobile-card">
                 <div className="t-mobile-card__top">
-                  <Avatar name={member.fullName} size="md" />
+                  <div className="t-mobile-card__avatar-wrap">
+                    <Avatar name={member.fullName} size="md" avatarId={savedAvatarId || member.avatarId} userId={member.userId} />
+                    <span className={`t-trainer-cell__dot ${status.toLowerCase() === 'active' ? 't-trainer-cell__dot--on' : 't-trainer-cell__dot--off'}`} />
+                  </div>
                   <div className="t-mobile-card__info">
                     <span className="t-mobile-card__name">{member.fullName}</span>
                     <span className="t-mobile-card__role">{role}</span>
                   </div>
-                  <Badge variant={getStatusVariant((member as any).status || 'Active')}>{(member as any).status || 'Active'}</Badge>
+                  <StatusBadge status={status} />
                 </div>
                 <div className="t-mobile-card__stats">
-                  <div className="t-mobile-card__stat">
-                    <Users size={12} /> {perf?.clientCount || 0} clients
+                  <div className="t-mobile-card__stat t-mobile-card__stat--clients">
+                    <Users size={12} /> {clients} clients
                   </div>
-                  <div className="t-mobile-card__stat">
-                    <DollarSign size={12} /> ₹{(perf?.monthlyRevenue || 0).toLocaleString()}
+                  <div className="t-mobile-card__stat t-mobile-card__stat--sessions">
+                    <Target size={12} /> {sessions} sessions
+                  </div>
+                  <div className="t-mobile-card__stat t-mobile-card__stat--revenue">
+                    <DollarSign size={12} /> ₹{rev.toLocaleString()}
                   </div>
                 </div>
               </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Plus, TrendingUp, Calendar, LayoutDashboard, History, CalendarDays, BarChart3 } from 'lucide-react';
+import { X, Plus, TrendingUp, Calendar, LayoutDashboard, History, CalendarDays, BarChart3, Activity, AlertTriangle, Wrench, RefreshCw } from 'lucide-react';
 import { equipmentApi } from '../../../services/equipmentApi';
 import { getEquipmentIcon } from '../../../utils/iconMapping';
 import { formatDate } from '../../../utils/formatters';
@@ -127,8 +127,14 @@ const MaintenancePanel: React.FC<MaintenancePanelProps> = ({ equipment, isOpen, 
         { id: 'analysis', label: 'Analytics', icon: BarChart3 },
     ];
 
-    const statusColor = equipment.status === 'ACTIVE' ? '#22c55e' :
-        equipment.status === 'MAINTENANCE' ? '#eab308' : '#ef4444';
+    const statusMap: Record<string, { color: string; label: string; bg: string }> = {
+        ACTIVE: { color: '#22c55e', label: 'Active', bg: 'rgba(34, 197, 94, 0.08)' },
+        MAINTENANCE: { color: '#f59e0b', label: 'In Maintenance', bg: 'rgba(245, 158, 11, 0.08)' },
+        INACTIVE: { color: '#ef4444', label: 'Out of Service', bg: 'rgba(239, 68, 68, 0.08)' },
+        OUT_OF_SERVICE: { color: '#ef4444', label: 'Out of Service', bg: 'rgba(239, 68, 68, 0.08)' },
+    };
+    const eqStatus = statusMap[equipment.status] || statusMap.ACTIVE;
+    const healthColor = stats.health > 70 ? '#22c55e' : stats.health > 40 ? '#f59e0b' : '#ef4444';
 
     return (
         <AnimatePresence>
@@ -142,99 +148,109 @@ const MaintenancePanel: React.FC<MaintenancePanelProps> = ({ equipment, isOpen, 
                         className="eq-modal eq-modal--xl"
                         onClick={e => e.stopPropagation()}
                     >
-                        {/* HEADER */}
-                        <header className="eq-modal__header">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-xl bg-[var(--bg-surface-secondary)] border border-[var(--border-color)] flex items-center justify-center text-[var(--accent-primary)]">
-                                    {getEquipmentIcon(equipment.category, equipment.name, 22)}
+                        {/* ===== HEADER — Equipment Info Banner ===== */}
+                        <header className="maint-panel-header">
+                            <div className="maint-panel-header__left">
+                                <div className="maint-panel-header__icon">
+                                    {getEquipmentIcon(equipment.category, equipment.name, 24)}
                                 </div>
-                                <div>
-                                    <div className="flex items-center gap-2.5">
-                                        <h1 className="eq-modal__title">{equipment.name}</h1>
-                                        <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border" style={{
-                                            color: statusColor,
-                                            borderColor: `${statusColor}40`,
-                                            backgroundColor: `${statusColor}10`
-                                        }}>{equipment.status.replace('_', ' ')}</span>
+                                <div className="maint-panel-header__info">
+                                    <div className="maint-panel-header__title-row">
+                                        <h1 className="maint-panel-header__name">{equipment.name}</h1>
+                                        <span className="maint-status-chip" style={{
+                                            color: eqStatus.color,
+                                            borderColor: `${eqStatus.color}40`,
+                                            backgroundColor: eqStatus.bg
+                                        }}>
+                                            <span className="maint-status-chip__dot" style={{ backgroundColor: eqStatus.color }} />
+                                            {eqStatus.label}
+                                        </span>
                                     </div>
-                                    <div className="flex items-center gap-2 mt-0.5">
-                                        <span className="text-[11px] text-[var(--text-secondary)] font-medium">{equipment.brand}</span>
-                                        {equipment.model && (
-                                            <>
-                                                <span className="text-[var(--border-color)]">/</span>
-                                                <span className="text-[11px] text-[var(--accent-primary)] font-semibold">{equipment.model}</span>
-                                            </>
-                                        )}
-                                        {equipment.location && (
-                                            <>
-                                                <span className="text-[var(--border-color)]">/</span>
-                                                <span className="text-[11px] text-[var(--text-secondary)]">{equipment.location}</span>
-                                            </>
-                                        )}
+                                    <div className="maint-panel-header__meta">
+                                        {equipment.brand && <span className="maint-meta-tag">{equipment.brand}</span>}
+                                        {equipment.model && <><span className="maint-meta-sep">/</span><span className="maint-meta-tag maint-meta-tag--accent">{equipment.model}</span></>}
+                                        {equipment.location && <><span className="maint-meta-sep">/</span><span className="maint-meta-tag maint-meta-tag--dim">{equipment.location}</span></>}
                                     </div>
                                 </div>
                             </div>
-
-                            <div className="flex items-center gap-2">
+                            <div className="maint-panel-header__actions">
+                                {/* Quick stats in header */}
+                                <div className="maint-header-stats">
+                                    <div className="maint-header-stat" style={{ '--stat-color': healthColor } as React.CSSProperties}>
+                                        <Activity size={12} />
+                                        <span className="maint-header-stat__val">{stats.health}%</span>
+                                        <span className="maint-header-stat__label">Health</span>
+                                    </div>
+                                    {stats.overdue > 0 && (
+                                        <div className="maint-header-stat maint-header-stat--alert">
+                                            <AlertTriangle size={12} />
+                                            <span className="maint-header-stat__val">{stats.overdue}</span>
+                                            <span className="maint-header-stat__label">Overdue</span>
+                                        </div>
+                                    )}
+                                </div>
                                 <button
                                     onClick={() => { setShowAddForm(true); setSubmitSuccess(false); }}
-                                    className="eq-btn eq-btn--primary h-8 px-4 text-xs"
+                                    className="maint-btn-new"
                                 >
-                                    <Plus size={14} /> New Log
+                                    <Plus size={14} strokeWidth={2.5} />
+                                    <span>New Log</span>
                                 </button>
-                                <button onClick={onClose} className="eq-modal__close">
+                                <button onClick={onClose} className="maint-btn-close">
                                     <X size={16} />
                                 </button>
                             </div>
                         </header>
 
-                        {/* TAB BAR */}
-                        <div className="maint-tabbar">
-                            <div className="eq-tab-bar">
-                                {navItems.map(item => (
-                                    <button
-                                        key={item.id}
-                                        onClick={() => { setActiveTab(item.id); setShowAddForm(false); }}
-                                        className={`eq-tab-btn ${activeTab === item.id && !showAddForm ? 'eq-tab-btn--active' : ''}`}
-                                    >
-                                        <item.icon size={13} />
-                                        {item.label}
-                                        {item.count !== undefined && item.count > 0 && (
-                                            <span className="eq-tab-count">{item.count}</span>
-                                        )}
-                                    </button>
-                                ))}
+                        {/* ===== TAB BAR ===== */}
+                        <nav className="maint-nav">
+                            <div className="maint-nav__tabs">
+                                {navItems.map(item => {
+                                    const isActive = activeTab === item.id && !showAddForm;
+                                    return (
+                                        <button
+                                            key={item.id}
+                                            onClick={() => { setActiveTab(item.id); setShowAddForm(false); }}
+                                            className={`maint-nav__tab ${isActive ? 'maint-nav__tab--active' : ''}`}
+                                        >
+                                            <item.icon size={14} />
+                                            <span>{item.label}</span>
+                                            {item.count !== undefined && item.count > 0 && (
+                                                <span className="maint-nav__badge">{item.count}</span>
+                                            )}
+                                        </button>
+                                    );
+                                })}
                             </div>
-                            <div className="maint-tabbar-info">
-                                <span className="flex items-center gap-1.5 text-[11px] text-[var(--text-secondary)]">
-                                    <TrendingUp size={12} className="text-[var(--accent-primary)]" />
-                                    Health: <strong className="text-[var(--text-primary)]">{stats.health}%</strong>
-                                </span>
+                            <div className="maint-nav__right">
                                 {equipment.nextMaintenanceDueDate && (
-                                    <span className="maint-next-badge">
+                                    <span className="maint-next-due">
                                         <Calendar size={11} />
-                                        Next: {formatDate(equipment.nextMaintenanceDueDate)}
+                                        Next: <strong>{formatDate(equipment.nextMaintenanceDueDate)}</strong>
                                     </span>
                                 )}
+                                <button onClick={loadHistory} className="maint-btn-refresh" title="Refresh">
+                                    <RefreshCw size={13} />
+                                </button>
                             </div>
-                        </div>
+                        </nav>
 
-                        {/* CONTENT AREA */}
-                        <div className="flex-1 overflow-hidden relative" style={{ minHeight: '420px' }}>
+                        {/* ===== CONTENT AREA ===== */}
+                        <div className="maint-content">
                             {loading ? (
-                                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                    <div className="relative w-8 h-8">
-                                        <div className="absolute inset-0 border-2 border-[var(--accent-primary)]/20 rounded-full" />
-                                        <div className="absolute inset-0 border-2 border-[var(--accent-primary)] border-t-transparent rounded-full animate-spin" />
+                                <div className="maint-loader">
+                                    <div className="maint-spinner">
+                                        <div className="maint-spinner__track" />
+                                        <div className="maint-spinner__fill" />
                                     </div>
-                                    <p className="mt-3 text-[11px] text-[var(--text-secondary)]">Loading maintenance data...</p>
+                                    <p className="maint-loader__text">Loading maintenance data...</p>
                                 </div>
                             ) : (
                                 <AnimatePresence mode="wait">
                                     {showAddForm ? (
                                         <motion.div
                                             key="form"
-                                            className="absolute inset-0 z-30 bg-[var(--bg-surface)]"
+                                            className="maint-content__slide"
                                             initial={{ x: '100%' }}
                                             animate={{ x: 0 }}
                                             exit={{ x: '100%' }}
@@ -252,11 +268,11 @@ const MaintenancePanel: React.FC<MaintenancePanelProps> = ({ equipment, isOpen, 
                                     ) : (
                                         <motion.div
                                             key={activeTab}
-                                            initial={{ opacity: 0, y: 8 }}
+                                            initial={{ opacity: 0, y: 6 }}
                                             animate={{ opacity: 1, y: 0 }}
-                                            exit={{ opacity: 0, y: -8 }}
-                                            transition={{ duration: 0.2 }}
-                                            className="h-full overflow-y-auto custom-scrollbar p-5"
+                                            exit={{ opacity: 0, y: -6 }}
+                                            transition={{ duration: 0.18 }}
+                                            className="maint-content__body custom-scrollbar"
                                         >
                                             {activeTab === 'overview' && (
                                                 <MaintenanceOverview stats={stats} history={history} setActiveTab={setActiveTab} />
