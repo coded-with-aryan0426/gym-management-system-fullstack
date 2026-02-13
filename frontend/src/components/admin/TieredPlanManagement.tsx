@@ -229,17 +229,18 @@ const TieredPlanManagement: React.FC<TieredPlanManagementProps> = ({
 
   return (
     <>
-      {/* Backdrop */}
-      <div
-        style={{
-          position: 'fixed',
-          inset: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.8)',
-          backdropFilter: 'blur(12px)',
-          zIndex: 9998,
-          animation: 'fadeIn 0.2s ease',
-        }}
-      />
+        {/* Backdrop */}
+        <div
+          className="tpm-backdrop"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            backdropFilter: 'blur(12px)',
+            zIndex: 9998,
+            animation: 'fadeIn 0.2s ease',
+          }}
+        />
 
       {/* Modal */}
       <div
@@ -253,25 +254,26 @@ const TieredPlanManagement: React.FC<TieredPlanManagementProps> = ({
           padding: '20px',
         }}
       >
-        <motion.div
-          ref={modalRef}
-          initial={{ opacity: 0, scale: 0.96, y: -10 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.96, y: -10 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-          style={{
-            background: 'linear-gradient(180deg, #141414 0%, #0a0a0a 100%)',
-            borderRadius: 24,
-            width: '100%',
-            maxWidth: 1100,
-            maxHeight: '90vh',
-            overflowY: 'auto',
-            boxShadow: '0 25px 80px -12px rgba(0, 0, 0, 0.95), 0 0 80px rgba(220, 38, 38, 0.1)',
-            border: '1px solid rgba(255,255,255,0.06)',
-          }}
-        >
+          <motion.div
+            ref={modalRef}
+            className="tpm-modal"
+            initial={{ opacity: 0, scale: 0.96, y: -10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: -10 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            style={{
+              background: 'linear-gradient(180deg, #141414 0%, #0a0a0a 100%)',
+              borderRadius: 24,
+              width: '100%',
+              maxWidth: 1100,
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              boxShadow: '0 25px 80px -12px rgba(0, 0, 0, 0.95), 0 0 80px rgba(220, 38, 38, 0.1)',
+              border: '1px solid rgba(255,255,255,0.06)',
+            }}
+          >
           {/* Header - Compact with stats inline */}
-            <div style={{
+            <div className="tpm-header" style={{
               padding: '14px 24px',
               borderBottom: '1px solid rgba(255,255,255,0.06)',
               position: 'sticky',
@@ -300,7 +302,7 @@ const TieredPlanManagement: React.FC<TieredPlanManagementProps> = ({
                     <Crown size={18} style={{ color: '#DC2626' }} />
                   </div>
                   <div>
-                    <h2 style={{ 
+                      <h2 className="tpm-title" style={{ 
                       fontSize: 16, 
                       fontWeight: 700, 
                       color: '#F9FAFB', 
@@ -310,11 +312,11 @@ const TieredPlanManagement: React.FC<TieredPlanManagementProps> = ({
                     }}>
                       Membership Tiers
                     </h2>
-                    <p style={{
-                      fontSize: 11,
-                      color: '#6B7280',
-                      margin: 0,
-                    }}>
+                      <p className="tpm-subtitle" style={{
+                        fontSize: 11,
+                        color: '#6B7280',
+                        margin: 0,
+                      }}>
                       {mode === 'selection' ? 'Select tier to assign' : 'Manage plans'}
                     </p>
                   </div>
@@ -390,9 +392,10 @@ const TieredPlanManagement: React.FC<TieredPlanManagementProps> = ({
                     transform: 'translateY(-50%)',
                     color: '#6B7280',
                   }} />
-                  <input
-                    type="text"
-                    placeholder="Search tiers..."
+                    <input
+                      type="text"
+                      className="tpm-search"
+                      placeholder="Search tiers..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     style={{
@@ -410,13 +413,13 @@ const TieredPlanManagement: React.FC<TieredPlanManagementProps> = ({
                 </div>
 
                 {/* View Toggle - Compact */}
-                <div style={{
-                  display: 'flex',
-                  background: 'rgba(255,255,255,0.03)',
-                  borderRadius: 8,
-                  padding: 3,
-                  border: '1px solid rgba(255,255,255,0.06)',
-                }}>
+                  <div className="tpm-toggle-group" style={{
+                    display: 'flex',
+                    background: 'rgba(255,255,255,0.03)',
+                    borderRadius: 8,
+                    padding: 3,
+                    border: '1px solid rgba(255,255,255,0.06)',
+                  }}>
                   <button
                     onClick={() => setViewMode('grid')}
                     style={{
@@ -479,9 +482,10 @@ const TieredPlanManagement: React.FC<TieredPlanManagementProps> = ({
                   </button>
                 )}
 
-                {/* Close Button */}
-                <button
-                  onClick={onClose}
+                  {/* Close Button */}
+                  <button
+                    className="tpm-close-btn"
+                    onClick={onClose}
                   style={{
                     background: 'rgba(255,255,255,0.03)',
                     border: '1px solid rgba(255,255,255,0.06)',
@@ -713,15 +717,122 @@ const TieredPlanManagement: React.FC<TieredPlanManagementProps> = ({
         )}
       </AnimatePresence>
 
-      <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
+        <style>{`
+          @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+          }
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
+          /* Light mode overrides for TieredPlanManagement */
+          :root.theme-light .tpm-modal,
+          [data-theme="light"] .tpm-modal,
+          body.light-mode .tpm-modal {
+            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%) !important;
+            border-color: #e2e8f0 !important;
+            box-shadow: 0 25px 80px -12px rgba(0,0,0,0.15), 0 0 40px rgba(220,38,38,0.05) !important;
+          }
+          :root.theme-light .tpm-header,
+          [data-theme="light"] .tpm-header,
+          body.light-mode .tpm-header {
+            background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%) !important;
+            border-bottom-color: #e2e8f0 !important;
+          }
+          :root.theme-light .tpm-title,
+          [data-theme="light"] .tpm-title,
+          body.light-mode .tpm-title { color: #1e293b !important; }
+          :root.theme-light .tpm-subtitle,
+          [data-theme="light"] .tpm-subtitle,
+          body.light-mode .tpm-subtitle { color: #64748b !important; }
+          :root.theme-light .tpm-search,
+          [data-theme="light"] .tpm-search,
+          body.light-mode .tpm-search {
+            background: #f1f5f9 !important;
+            border-color: #e2e8f0 !important;
+            color: #1e293b !important;
+          }
+          :root.theme-light .tpm-search::placeholder,
+          [data-theme="light"] .tpm-search::placeholder,
+          body.light-mode .tpm-search::placeholder { color: #94a3b8 !important; }
+          :root.theme-light .tpm-card,
+          [data-theme="light"] .tpm-card,
+          body.light-mode .tpm-card {
+            background: #ffffff !important;
+            border-color: #e2e8f0 !important;
+          }
+          :root.theme-light .tpm-card:hover,
+          [data-theme="light"] .tpm-card:hover,
+          body.light-mode .tpm-card:hover {
+            box-shadow: 0 12px 30px rgba(0,0,0,0.08) !important;
+          }
+          :root.theme-light .tpm-card-name,
+          [data-theme="light"] .tpm-card-name,
+          body.light-mode .tpm-card-name { color: #1e293b !important; }
+          :root.theme-light .tpm-card-desc,
+          [data-theme="light"] .tpm-card-desc,
+          body.light-mode .tpm-card-desc { color: #64748b !important; }
+          :root.theme-light .tpm-card-price,
+          [data-theme="light"] .tpm-card-price,
+          body.light-mode .tpm-card-price { color: #1e293b !important; }
+          :root.theme-light .tpm-stat-box,
+          [data-theme="light"] .tpm-stat-box,
+          body.light-mode .tpm-stat-box { background: #f1f5f9 !important; }
+          :root.theme-light .tpm-stat-val,
+          [data-theme="light"] .tpm-stat-val,
+          body.light-mode .tpm-stat-val { color: #1e293b !important; }
+          :root.theme-light .tpm-variant,
+          [data-theme="light"] .tpm-variant,
+          body.light-mode .tpm-variant {
+            background: #f8fafc !important;
+            border-color: #e2e8f0 !important;
+          }
+          :root.theme-light .tpm-variant-name,
+          [data-theme="light"] .tpm-variant-name,
+          body.light-mode .tpm-variant-name { color: #1e293b !important; }
+          :root.theme-light .tpm-variant-price,
+          [data-theme="light"] .tpm-variant-price,
+          body.light-mode .tpm-variant-price { color: #1e293b !important; }
+          :root.theme-light .tpm-btn-secondary,
+          [data-theme="light"] .tpm-btn-secondary,
+          body.light-mode .tpm-btn-secondary {
+            background: #f1f5f9 !important;
+            border-color: #e2e8f0 !important;
+            color: #475569 !important;
+          }
+          :root.theme-light .tpm-toggle-group,
+          [data-theme="light"] .tpm-toggle-group,
+          body.light-mode .tpm-toggle-group {
+            background: #f1f5f9 !important;
+            border-color: #e2e8f0 !important;
+          }
+          :root.theme-light .tpm-close-btn,
+          [data-theme="light"] .tpm-close-btn,
+          body.light-mode .tpm-close-btn {
+            background: #f1f5f9 !important;
+            border-color: #e2e8f0 !important;
+            color: #64748b !important;
+          }
+          :root.theme-light .tpm-expand-btn,
+          [data-theme="light"] .tpm-expand-btn,
+          body.light-mode .tpm-expand-btn {
+            background: #f8fafc !important;
+            border-top-color: #e2e8f0 !important;
+            color: #475569 !important;
+          }
+          :root.theme-light .tpm-menu,
+          [data-theme="light"] .tpm-menu,
+          body.light-mode .tpm-menu {
+            background: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12) !important;
+          }
+          :root.theme-light .tpm-backdrop,
+          [data-theme="light"] .tpm-backdrop,
+          body.light-mode .tpm-backdrop {
+            background-color: rgba(0,0,0,0.4) !important;
+          }
+        `}</style>
     </>
   );
 };
@@ -780,12 +891,13 @@ const TierCard: React.FC<TierCardProps> = ({
     return `${variant.durationValue} ${variant.durationValue === 1 ? singular : plural}`;
   };
 
-  return (
-    <motion.div
-      layout
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => { setIsHovered(false); setShowMenu(false); }}
-      style={{
+    return (
+      <motion.div
+        layout
+        className="tpm-card"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => { setIsHovered(false); setShowMenu(false); }}
+        style={{
         background: isHovered 
           ? `linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%)`
           : 'rgba(255,255,255,0.02)',
@@ -895,10 +1007,11 @@ const TierCard: React.FC<TierCardProps> = ({
                 </button>
                 <AnimatePresence>
                   {showMenu && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -5 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -5 }}
+                      <motion.div
+                        className="tpm-menu"
+                        initial={{ opacity: 0, y: -5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -5 }}
                       style={{
                         position: 'absolute',
                         top: '100%',
@@ -940,35 +1053,35 @@ const TierCard: React.FC<TierCardProps> = ({
             {getCategoryLabel(plan.category)}
           </span>
         </div>
-        <h3 style={{
-          fontSize: 18,
-          fontWeight: 700,
-          color: '#F9FAFB',
-          margin: '0 0 6px 0',
-          letterSpacing: '-0.3px',
-        }}>
-          {plan.planName}
-        </h3>
-        {plan.description && (
-          <p style={{
-            fontSize: 12,
-            color: '#6B7280',
-            margin: 0,
-            lineHeight: 1.5,
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-          }}>
-            {plan.description}
-          </p>
-        )}
-
-        <div style={{ marginTop: 14 }}>
-          <span style={{
-            fontSize: 28,
-            fontWeight: 800,
+          <h3 className="tpm-card-name" style={{
+            fontSize: 18,
+            fontWeight: 700,
             color: '#F9FAFB',
+            margin: '0 0 6px 0',
+            letterSpacing: '-0.3px',
+          }}>
+            {plan.planName}
+          </h3>
+          {plan.description && (
+            <p className="tpm-card-desc" style={{
+              fontSize: 12,
+              color: '#6B7280',
+              margin: 0,
+              lineHeight: 1.5,
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+            }}>
+              {plan.description}
+            </p>
+          )}
+
+          <div style={{ marginTop: 14 }}>
+            <span className="tpm-card-price" style={{
+              fontSize: 28,
+              fontWeight: 800,
+              color: '#F9FAFB',
             letterSpacing: '-1px',
           }}>
             {formatPrice(getStartingPrice(plan))}
@@ -987,44 +1100,45 @@ const TierCard: React.FC<TierCardProps> = ({
         marginTop: 8,
         borderTop: '1px solid rgba(255,255,255,0.04)',
       }}>
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: 8,
-          flex: 1,
-          padding: '8px 10px',
-          background: 'rgba(59, 130, 246, 0.08)',
-          borderRadius: 8,
-        }}>
-          <Clock size={14} style={{ color: '#3B82F6' }} />
-          <div>
-            <span style={{ fontSize: 14, fontWeight: 700, color: '#F9FAFB' }}>
-              {getActiveVariantCount(plan)}
-            </span>
-            <span style={{ fontSize: 10, color: '#6B7280', marginLeft: 4 }}>Durations</span>
+          <div className="tpm-stat-box" style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 8,
+            flex: 1,
+            padding: '8px 10px',
+            background: 'rgba(59, 130, 246, 0.08)',
+            borderRadius: 8,
+          }}>
+            <Clock size={14} style={{ color: '#3B82F6' }} />
+            <div>
+              <span className="tpm-stat-val" style={{ fontSize: 14, fontWeight: 700, color: '#F9FAFB' }}>
+                {getActiveVariantCount(plan)}
+              </span>
+              <span style={{ fontSize: 10, color: '#6B7280', marginLeft: 4 }}>Durations</span>
+            </div>
           </div>
-        </div>
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: 8,
-          flex: 1,
-          padding: '8px 10px',
-          background: 'rgba(16, 185, 129, 0.08)',
-          borderRadius: 8,
-        }}>
-          <Check size={14} style={{ color: '#10B981' }} />
-          <div>
-            <span style={{ fontSize: 14, fontWeight: 700, color: '#F9FAFB' }}>
-              {plan.features?.filter(f => f.isIncluded).length || 0}
-            </span>
-            <span style={{ fontSize: 10, color: '#6B7280', marginLeft: 4 }}>Features</span>
+          <div className="tpm-stat-box" style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 8,
+            flex: 1,
+            padding: '8px 10px',
+            background: 'rgba(16, 185, 129, 0.08)',
+            borderRadius: 8,
+          }}>
+            <Check size={14} style={{ color: '#10B981' }} />
+            <div>
+              <span className="tpm-stat-val" style={{ fontSize: 14, fontWeight: 700, color: '#F9FAFB' }}>
+                {plan.features?.filter(f => f.isIncluded).length || 0}
+              </span>
+              <span style={{ fontSize: 10, color: '#6B7280', marginLeft: 4 }}>Features</span>
+            </div>
           </div>
-        </div>
       </div>
 
       {/* Expand Button */}
       <button
+        className="tpm-expand-btn"
         onClick={onToggleExpand}
         style={{
           width: '100%',
@@ -1209,11 +1323,12 @@ const TierCardList: React.FC<TierCardProps> = ({
     return `${variant.durationValue} ${variant.durationValue === 1 ? singular : plural}`;
   };
 
-  return (
-    <motion.div
-      layout
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+    return (
+      <motion.div
+        layout
+        className="tpm-card"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
       style={{
         background: 'rgba(255,255,255,0.02)',
         borderTop: `1px solid ${isHovered ? `${color}30` : 'rgba(255,255,255,0.06)'}`,
@@ -1248,7 +1363,7 @@ const TierCardList: React.FC<TierCardProps> = ({
         {/* Info */}
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-            <h3 style={{
+            <h3 className="tpm-card-name" style={{
               fontSize: 16,
               fontWeight: 700,
               color: '#F9FAFB',
@@ -1299,14 +1414,14 @@ const TierCardList: React.FC<TierCardProps> = ({
           </div>
         </div>
 
-        {/* Price */}
-        <div style={{ textAlign: 'right', marginRight: 16 }}>
-          <p style={{
-            fontSize: 24,
-            fontWeight: 800,
-            color: '#F9FAFB',
-            margin: 0,
-          }}>
+          {/* Price */}
+          <div style={{ textAlign: 'right', marginRight: 16 }}>
+            <p className="tpm-card-price" style={{
+              fontSize: 24,
+              fontWeight: 800,
+              color: '#F9FAFB',
+              margin: 0,
+            }}>
             {formatPrice(getStartingPrice(plan))}
           </p>
           <p style={{ fontSize: 11, color: '#6B7280', margin: '2px 0 0' }}>starting</p>

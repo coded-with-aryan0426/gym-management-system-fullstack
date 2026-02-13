@@ -26,4 +26,12 @@ public interface CheckInRepository extends JpaRepository<CheckIn, Long> {
 
     // Find check-ins by user
     List<CheckIn> findByUserUserIdOrderByCheckInTimeDesc(Long userId);
+
+    // NEW METHODS FOR DASHBOARD ANALYTICS
+    
+    // Find check-ins for specific date range
+    @Query("SELECT c FROM CheckIn c JOIN FETCH c.user WHERE c.checkInTime BETWEEN :startDate AND :endDate ORDER BY c.checkInTime DESC")
+    List<CheckIn> findCheckInsForDateRange(
+                    @Param("startDate") LocalDateTime startDate,
+                    @Param("endDate") LocalDateTime endDate);
 }

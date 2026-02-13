@@ -103,4 +103,19 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
         @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t WHERE t.type = 'INCOME' AND t.status = 'Completed' AND t.dateTime >= :startOfDay")
         BigDecimal getTodayRevenue(@Param("startOfDay") LocalDateTime startOfDay);
+
+        // NEW METHODS FOR DASHBOARD ANALYTICS
+        
+        // Get revenue for specific date range
+        @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t WHERE t.type = 'INCOME' AND t.status = 'Completed' AND t.dateTime BETWEEN :startDate AND :endDate")
+        BigDecimal getRevenueForDateRange(
+                        @Param("startDate") LocalDateTime startDate,
+                        @Param("endDate") LocalDateTime endDate);
+
+        // Get revenue by category for date range
+        @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t WHERE t.category = :category AND t.type = 'INCOME' AND t.status = 'Completed' AND t.dateTime BETWEEN :startDate AND :endDate")
+        BigDecimal getRevenueByCategoryAndDateRange(
+                        @Param("category") String category,
+                        @Param("startDate") LocalDateTime startDate,
+                        @Param("endDate") LocalDateTime endDate);
 }

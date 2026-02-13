@@ -117,12 +117,50 @@ const api = {
     return response.data;
   },
 
-  async getAllTrainersPerformance(): Promise<Record<number, TrainerPerformance>> {
-    const response = await apiClient.get<Record<number, TrainerPerformance>>('/users/trainers/performance');
-    return response.data;
-  },
+    async getAllTrainersPerformance(): Promise<Record<number, TrainerPerformance>> {
+      const response = await apiClient.get<Record<number, TrainerPerformance>>('/users/trainers/performance');
+      return response.data;
+    },
 
-  async getUserById(id: number): Promise<User> {
+    // Trainer Details (owner-side)
+    async getTrainerDetails(trainerId: number): Promise<any> {
+      const response = await apiClient.get(`/users/trainers/${trainerId}/details`);
+      return response.data;
+    },
+
+    async updateTrainerDetails(trainerId: number, data: any): Promise<any> {
+      const response = await apiClient.put(`/users/trainers/${trainerId}/details`, data);
+      return response.data;
+    },
+
+    // Compensation / Salary
+    async getTrainerCompensation(trainerId: number): Promise<any[]> {
+      const response = await apiClient.get(`/users/${trainerId}/compensation`);
+      return response.data;
+    },
+
+    async createCompensationRule(trainerId: number, data: any): Promise<any> {
+      const response = await apiClient.post(`/users/${trainerId}/compensation`, data);
+      return response.data;
+    },
+
+    async updateCompensationRule(trainerId: number, ruleId: number, data: any): Promise<any> {
+      const response = await apiClient.put(`/users/${trainerId}/compensation/${ruleId}`, data);
+      return response.data;
+    },
+
+    async deleteCompensationRule(trainerId: number, ruleId: number): Promise<any> {
+      const response = await apiClient.delete(`/users/${trainerId}/compensation/${ruleId}`);
+      return response.data;
+    },
+
+    // Attendance
+    async getTrainerAttendance(trainerId: number, days: number = 30): Promise<any> {
+      const response = await apiClient.get(`/users/${trainerId}/attendance`, { params: { days } });
+      return response.data;
+    },
+
+    async getUserById(id: number): Promise<User> {
     const response = await apiClient.get<User>(`/users/${id}`);
     return response.data;
   },
@@ -260,6 +298,52 @@ const api = {
 
   async getOwnerDashboard(): Promise<any> {
     const response = await apiClient.get('/owner/dashboard');
+    return response.data;
+  },
+
+  // Enhanced Dashboard Analytics APIs
+  async getDailyRevenue(from: string, to: string): Promise<any> {
+    const response = await apiClient.get(`/dashboard/analytics/revenue-daily?from=${from}&to=${to}`);
+    return response.data;
+  },
+
+  async getDailyAttendance(from: string, to: string): Promise<any> {
+    const response = await apiClient.get(`/dashboard/analytics/attendance-daily?from=${from}&to=${to}`);
+    return response.data;
+  },
+
+  async getMembershipBreakdown(): Promise<any> {
+    const response = await apiClient.get('/dashboard/analytics/membership-breakdown');
+    return response.data;
+  },
+
+  async getRevenueBySource(from: string, to: string): Promise<any> {
+    const response = await apiClient.get(`/dashboard/analytics/revenue-by-source?from=${from}&to=${to}`);
+    return response.data;
+  },
+
+  async getOverduePayments(limit: number = 10): Promise<any> {
+    const response = await apiClient.get(`/dashboard/analytics/overdue-payments?limit=${limit}`);
+    return response.data;
+  },
+
+  async getTodaysClasses(): Promise<any> {
+    const response = await apiClient.get('/dashboard/analytics/todays-classes');
+    return response.data;
+  },
+
+  async getOccupancy(): Promise<any> {
+    const response = await apiClient.get('/dashboard/analytics/occupancy');
+    return response.data;
+  },
+
+  async getMonthlyProgress(): Promise<any> {
+    const response = await apiClient.get('/dashboard/analytics/monthly-progress');
+    return response.data;
+  },
+
+  async getDashboardSummary(): Promise<any> {
+    const response = await apiClient.get('/dashboard/analytics/summary');
     return response.data;
   },
 

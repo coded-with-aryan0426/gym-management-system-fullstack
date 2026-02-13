@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useEffect, useState, useMemo, useCallback, useRef } from "react"
-import { FiFilter, FiSearch, FiUserPlus, FiCalendar, FiRefreshCw, FiPackage, FiMessageSquare, FiX, FiUsers, FiTrendingUp, FiAlertTriangle, FiUserCheck, FiUser, FiCreditCard, FiClock, FiActivity } from "react-icons/fi"
+import { FiFilter, FiSearch, FiUserPlus, FiCalendar, FiRefreshCw, FiPackage, FiMessageSquare, FiX, FiUsers, FiAlertTriangle, FiUserCheck, FiUser, FiPercent } from "react-icons/fi"
 import { showToast } from "../../utils/showToast"
 import { useSearchParams } from "react-router-dom"
 import { Button, Badge, getStatusVariant, Avatar, DataTable, type Column } from "../../components"
@@ -14,8 +14,8 @@ import EnhancedMemberActionModal from "../../components/MemberActionModal/Enhanc
 import api from "../../services/api"
 import type { MemberDTO, User } from "../../types"
 import { useMembers } from "../../contexts/MembersContext"
+import "../../styles/page-common.css"
 import "./Members.css"
-import Editable from "../../components/editor/Editable"
 
 interface FilterState {
   status: string[]
@@ -583,103 +583,177 @@ const Members: React.FC = () => {
     },
   ]
 
-  return (
-    <div className="members-page">
-        {/* Unified Header - Single Line */}
-        <Editable id="members-page-header" config={{ allowLayout: true, allowStyle: true, allowVisibility: true }}>
-          <header className="members-header">
-            <h1 className="members-header__title">Members</h1>
+    return (
+      <div className="pg-page">
+          {/* Header */}
+            <header className="pg-header">
+              <div className="pg-header__row-1">
+                <div className="pg-header__title-group">
+                  <div className="pg-header__icon">
+                    <FiUsers size={18} />
+                  </div>
+                  <div>
+                    <h1 className="pg-header__title">Members</h1>
+                    <span className="pg-header__subtitle">{stats.total} total &middot; {stats.newThisMonth} new this month</span>
+                  </div>
+                </div>
 
-            <div className="members-tabs">
-              <button
-                className={`members-tab ${activeStatusFilter === 'all' ? 'members-tab--active' : ''}`}
-                onClick={() => setActiveStatusFilter('all')}
-              >
-                All
-                <span className="members-tab__count">{stats.total}</span>
-              </button>
-              <button
-                className={`members-tab ${activeStatusFilter === 'active' ? 'members-tab--active' : ''}`}
-                onClick={() => setActiveStatusFilter('active')}
-              >
-                Active
-                <span className="members-tab__count members-tab__count--active">{stats.activeCount}</span>
-              </button>
-              <button
-                className={`members-tab ${activeStatusFilter === 'expiring' ? 'members-tab--active' : ''}`}
-                onClick={() => setActiveStatusFilter('expiring')}
-              >
-                Expiring
-                {stats.expiringSoon > 0 && (
-                  <span className="members-tab__count members-tab__count--warning">{stats.expiringSoon}</span>
-                )}
-              </button>
-              <button
-                className={`members-tab ${activeStatusFilter === 'inactive' ? 'members-tab--active' : ''}`}
-                onClick={() => setActiveStatusFilter('inactive')}
-              >
-                Inactive
-                {stats.expiredCount > 0 && (
-                  <span className="members-tab__count members-tab__count--inactive">{stats.expiredCount}</span>
-                )}
-              </button>
-            </div>
-
-            <div className="members-header__right">
-              <div className="members-search">
-                <FiSearch className="members-search__icon" />
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="members-search__input"
-                />
-                {searchQuery && (
-                  <button className="members-search__clear" onClick={() => setSearchQuery('')}>
-                    <FiX size={14} />
+                {/* Stats Cards */}
+                <div className="pg-stats">
+                  <button
+                    className={`pg-stat-card ${activeStatusFilter === 'all' ? 'pg-stat-card--active' : ''}`}
+                    onClick={() => setActiveStatusFilter('all')}
+                  >
+                    <div className="pg-stat-card__icon pg-stat-card__icon--total"><FiUsers size={14} /></div>
+                    <div className="pg-stat-card__data">
+                      <span className="pg-stat-card__value">{stats.total}</span>
+                      <span className="pg-stat-card__label">Total</span>
+                    </div>
                   </button>
-                )}
+                  <button
+                    className={`pg-stat-card ${activeStatusFilter === 'active' ? 'pg-stat-card--active' : ''}`}
+                    onClick={() => setActiveStatusFilter('active')}
+                  >
+                    <div className="pg-stat-card__icon pg-stat-card__icon--active"><FiUserCheck size={14} /></div>
+                    <div className="pg-stat-card__data">
+                      <span className="pg-stat-card__value pg-stat-card__value--green">{stats.activeCount}</span>
+                      <span className="pg-stat-card__label">Active</span>
+                    </div>
+                  </button>
+                  <button
+                    className={`pg-stat-card ${activeStatusFilter === 'expiring' ? 'pg-stat-card--active' : ''}`}
+                    onClick={() => setActiveStatusFilter('expiring')}
+                  >
+                    <div className="pg-stat-card__icon pg-stat-card__icon--expiring"><FiAlertTriangle size={14} /></div>
+                    <div className="pg-stat-card__data">
+                      <span className="pg-stat-card__value pg-stat-card__value--amber">{stats.expiringSoon}</span>
+                      <span className="pg-stat-card__label">Expiring</span>
+                    </div>
+                    {stats.expiringSoon > 0 && <span className="pg-stat-card__pulse" />}
+                  </button>
+                  <button
+                    className={`pg-stat-card ${activeStatusFilter === 'inactive' ? 'pg-stat-card--active' : ''}`}
+                    onClick={() => setActiveStatusFilter('inactive')}
+                  >
+                    <div className="pg-stat-card__icon pg-stat-card__icon--inactive"><FiUser size={14} /></div>
+                    <div className="pg-stat-card__data">
+                      <span className="pg-stat-card__value pg-stat-card__value--red">{stats.expiredCount}</span>
+                      <span className="pg-stat-card__label">Inactive</span>
+                    </div>
+                  </button>
+                  <div className="pg-stat-card pg-stat-card--no-click">
+                    <div className="pg-stat-card__icon pg-stat-card__icon--special"><FiPercent size={14} /></div>
+                    <div className="pg-stat-card__data">
+                      <span className="pg-stat-card__value pg-stat-card__value--indigo">{stats.retentionRate}%</span>
+                      <span className="pg-stat-card__label">Retention</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pg-header__actions">
+                  <button className="pg-btn pg-btn--secondary" onClick={() => setIsMembershipModalOpen(true)}>
+                    <FiPackage size={14} />
+                    <span>Plans</span>
+                  </button>
+                  <button className="pg-btn pg-btn--primary" onClick={() => setIsCreateModalOpen(true)}>
+                    <FiUserPlus size={14} />
+                    <span>Add Member</span>
+                  </button>
+                </div>
               </div>
 
-              <div className="members-filter-container" ref={filterPanelRef}>
+              {/* Row 2: Tabs + Search + Filters */}
+              <div className="pg-header__row-2">
+                <div className="pg-tabs">
                   <button
-                    className={`members-filter-btn ${isFilterPanelOpen ? 'members-filter-btn--open' : ''} ${activeFilterCount > 0 ? 'members-filter-btn--active' : ''}`}
-                    onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
+                    className={`pg-tab ${activeStatusFilter === 'all' ? 'pg-tab--active' : ''}`}
+                    onClick={() => setActiveStatusFilter('all')}
                   >
-                    <FiFilter size={14} />
-                    {activeFilterCount > 0 && <span className="filter-count">{activeFilterCount}</span>}
+                    All
+                    <span className="pg-tab__count">{stats.total}</span>
                   </button>
+                  <button
+                    className={`pg-tab ${activeStatusFilter === 'active' ? 'pg-tab--active' : ''}`}
+                    onClick={() => setActiveStatusFilter('active')}
+                  >
+                    Active
+                    <span className="pg-tab__count pg-tab__count--active">{stats.activeCount}</span>
+                  </button>
+                  <button
+                    className={`pg-tab ${activeStatusFilter === 'expiring' ? 'pg-tab--active' : ''}`}
+                    onClick={() => setActiveStatusFilter('expiring')}
+                  >
+                    Expiring
+                    {stats.expiringSoon > 0 && (
+                      <span className="pg-tab__count pg-tab__count--warning">{stats.expiringSoon}</span>
+                    )}
+                  </button>
+                  <button
+                    className={`pg-tab ${activeStatusFilter === 'inactive' ? 'pg-tab--active' : ''}`}
+                    onClick={() => setActiveStatusFilter('inactive')}
+                  >
+                    Inactive
+                    {stats.expiredCount > 0 && (
+                      <span className="pg-tab__count pg-tab__count--muted">{stats.expiredCount}</span>
+                    )}
+                  </button>
+                </div>
 
-                  {isFilterPanelOpen && (
-                    <div className="filter-dropdown">
-                      <div className="filter-dropdown__header">
-                        <span className="filter-dropdown__title">Filters</span>
-                        {activeFilterCount > 0 && (
-                          <button className="filter-dropdown__clear" onClick={handleResetFilters}>
-                            Clear
-                          </button>
-                        )}
-                      </div>
+                <div className="pg-header__right">
+                  <div className="pg-search">
+                    <FiSearch className="pg-search__icon" />
+                    <input
+                      type="text"
+                      placeholder="Search members..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pg-search__input"
+                    />
+                    {searchQuery && (
+                      <button className="pg-search__clear" onClick={() => setSearchQuery('')}>
+                        <FiX size={14} />
+                      </button>
+                    )}
+                  </div>
 
-                      <div className="filter-dropdown__body">
-                        <div className="filter-dropdown__row">
-                          <label className="filter-dropdown__label">Status</label>
-                          <select
-                            className="filter-dropdown__select"
-                            value={filters.status[0] || ''}
-                            onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value ? [e.target.value] : [] }))}
-                          >
-                            <option value="">All</option>
-                            <option value="Active">Active</option>
-                            <option value="Expired">Expired</option>
-                          </select>
+                  <div className="pg-filter-wrap" ref={filterPanelRef}>
+                    <button
+                      className={`pg-btn pg-btn--icon ${isFilterPanelOpen ? 'pg-btn--active' : ''} ${activeFilterCount > 0 ? 'pg-btn--has-filter' : ''}`}
+                      onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
+                    >
+                      <FiFilter size={14} />
+                      {activeFilterCount > 0 && <span className="pg-btn__badge">{activeFilterCount}</span>}
+                    </button>
+
+                    {isFilterPanelOpen && (
+                      <div className="pg-filter-dropdown">
+                        <div className="pg-filter-dropdown__header">
+                          <span>Filters</span>
+                          {activeFilterCount > 0 && (
+                            <button className="pg-filter-dropdown__clear" onClick={handleResetFilters}>
+                              Clear
+                            </button>
+                          )}
                         </div>
 
-                        <div className="filter-dropdown__row">
-                            <label className="filter-dropdown__label">Plan</label>
+                        <div className="pg-filter-dropdown__body">
+                          <div className="pg-filter-dropdown__row">
+                            <label className="pg-filter-dropdown__label">Status</label>
                             <select
-                              className="filter-dropdown__select"
+                              className="pg-filter-dropdown__select"
+                              value={filters.status[0] || ''}
+                              onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value ? [e.target.value] : [] }))}
+                            >
+                              <option value="">All</option>
+                              <option value="Active">Active</option>
+                              <option value="Expired">Expired</option>
+                            </select>
+                          </div>
+
+                          <div className="pg-filter-dropdown__row">
+                            <label className="pg-filter-dropdown__label">Plan</label>
+                            <select
+                              className="pg-filter-dropdown__select"
                               value={filters.plan[0] || ''}
                               onChange={(e) => setFilters(prev => ({ ...prev, plan: e.target.value ? [e.target.value] : [] }))}
                             >
@@ -690,112 +764,103 @@ const Members: React.FC = () => {
                             </select>
                           </div>
 
-                        <div className="filter-dropdown__row">
-                          <label className="filter-dropdown__label">Duration</label>
-                          <select
-                            className="filter-dropdown__select"
-                            value={filters.planDuration}
-                            onChange={(e) => setFilters(prev => ({ ...prev, planDuration: e.target.value }))}
-                          >
-                            <option value="">All</option>
-                            <option value="1 Month">1 Month</option>
-                            <option value="3 Months">3 Months</option>
-                            <option value="6 Months">6 Months</option>
-                            <option value="12 Months">12 Months</option>
-                          </select>
-                        </div>
+                          <div className="pg-filter-dropdown__row">
+                            <label className="pg-filter-dropdown__label">Duration</label>
+                            <select
+                              className="pg-filter-dropdown__select"
+                              value={filters.planDuration}
+                              onChange={(e) => setFilters(prev => ({ ...prev, planDuration: e.target.value }))}
+                            >
+                              <option value="">All</option>
+                              <option value="1 Month">1 Month</option>
+                              <option value="3 Months">3 Months</option>
+                              <option value="6 Months">6 Months</option>
+                              <option value="12 Months">12 Months</option>
+                            </select>
+                          </div>
 
-                        <div className="filter-dropdown__row">
-                          <label className="filter-dropdown__label">Joined</label>
-                          <select
-                            className="filter-dropdown__select"
-                            value={filters.joinedPeriod}
-                            onChange={(e) => setFilters(prev => ({ ...prev, joinedPeriod: e.target.value }))}
-                          >
-                            <option value="">All Time</option>
-                            <option value="today">Today</option>
-                            <option value="this-week">This Week</option>
-                            <option value="this-month">This Month</option>
-                            <option value="last-3-months">Last 3 Months</option>
-                          </select>
+                          <div className="pg-filter-dropdown__row">
+                            <label className="pg-filter-dropdown__label">Joined</label>
+                            <select
+                              className="pg-filter-dropdown__select"
+                              value={filters.joinedPeriod}
+                              onChange={(e) => setFilters(prev => ({ ...prev, joinedPeriod: e.target.value }))}
+                            >
+                              <option value="">All Time</option>
+                              <option value="today">Today</option>
+                              <option value="this-week">This Week</option>
+                              <option value="this-month">This Month</option>
+                              <option value="last-3-months">Last 3 Months</option>
+                            </select>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
+
+                  <button
+                    className="pg-btn pg-btn--icon"
+                    onClick={() => { loadMembersPaginated(); refreshMembers(); }}
+                    title="Refresh"
+                  >
+                    <FiRefreshCw size={14} />
+                  </button>
                 </div>
+              </div>
+            </header>
 
-              <button className="members-btn members-btn--membership" onClick={() => setIsMembershipModalOpen(true)}>
-                  <FiPackage size={14} />
-                  <span>Plans</span>
+        {/* Active Filters Display */}
+        {activeFilterCount > 0 && (
+          <div className="pg-chips">
+            {filters.status.length > 0 && (
+              <span className="pg-chip">
+                Status: {filters.status[0]}
+                <button onClick={() => setFilters(prev => ({ ...prev, status: [] }))}>
+                  &times;
                 </button>
-
-                <button className="members-btn members-btn--primary" onClick={() => setIsCreateModalOpen(true)}>
-                  <FiUserPlus size={14} />
-                  <span>Add</span>
+              </span>
+            )}
+            {filters.plan.length > 0 && (
+              <span className="pg-chip">
+                Plan: {filters.plan[0]}
+                <button onClick={() => setFilters(prev => ({ ...prev, plan: [] }))}>
+                  &times;
                 </button>
-            </div>
-          </header>
-        </Editable>
-
-      {/* Active Filters Display */}
-      {activeFilterCount > 0 && (
-        <div className="active-filters">
-          {filters.status.length > 0 && (
-            <span className="active-filter">
-              Status: {filters.status[0]}
-              <button onClick={() => setFilters(prev => ({ ...prev, status: [] }))}>
-                <FiX size={12} />
-              </button>
-            </span>
-          )}
-          {filters.plan.length > 0 && (
-            <span className="active-filter">
-              Plan: {filters.plan[0]}
-              <button onClick={() => setFilters(prev => ({ ...prev, plan: [] }))}>
-                <FiX size={12} />
-              </button>
-            </span>
-          )}
-          {filters.planDuration && (
-            <span className="active-filter">
-              Duration: {filters.planDuration}
-              <button onClick={() => setFilters(prev => ({ ...prev, planDuration: "" }))}>
-                <FiX size={12} />
-              </button>
-            </span>
-          )}
-          {filters.joinedPeriod && (
-            <span className="active-filter">
-              Joined: {filters.joinedPeriod.replace(/-/g, ' ')}
-              <button onClick={() => setFilters(prev => ({ ...prev, joinedPeriod: "" }))}>
-                <FiX size={12} />
-              </button>
-            </span>
-          )}
-          <button className="active-filters__clear" onClick={handleResetFilters}>
-            Clear All
-          </button>
-        </div>
-      )}
-
-      {/* Batch Actions Bar */}
-      {selectedMemberIds.size > 0 && (
-        <div className="batch-bar">
-          <div className="batch-bar__left">
-            <span className="batch-bar__count">{selectedMemberIds.size} selected</span>
-            <button className="batch-bar__clear" onClick={() => setSelectedMemberIds(new Set())}>
-              Clear
+              </span>
+            )}
+            {filters.planDuration && (
+              <span className="pg-chip">
+                Duration: {filters.planDuration}
+                <button onClick={() => setFilters(prev => ({ ...prev, planDuration: "" }))}>
+                  &times;
+                </button>
+              </span>
+            )}
+            {filters.joinedPeriod && (
+              <span className="pg-chip">
+                Joined: {filters.joinedPeriod.replace(/-/g, ' ')}
+                <button onClick={() => setFilters(prev => ({ ...prev, joinedPeriod: "" }))}>
+                  &times;
+                </button>
+              </span>
+            )}
+            <button className="pg-chips__clear" onClick={handleResetFilters}>
+              Clear All
             </button>
           </div>
-          <div className="batch-bar__actions">
-            <button className="batch-action batch-action--message" onClick={() => {
+        )}
+
+        {/* Batch Actions Bar */}
+        {selectedMemberIds.size > 0 && (
+          <div className="pg-batch">
+            <span className="pg-batch__count">{selectedMemberIds.size} selected</span>
+            <button className="pg-batch__btn" onClick={() => {
               showToast(`Messaging ${selectedMemberIds.size} members`, 'success')
               setSelectedMemberIds(new Set())
             }}>
-              <FiMessageSquare size={16} />
               Message
             </button>
-            <button className="batch-action batch-action--delete" onClick={() => {
+            <button className="pg-batch__btn pg-batch__btn--danger" onClick={() => {
               if (window.confirm(`Are you sure you want to delete ${selectedMemberIds.size} members?`)) {
                 showToast(`Deleted ${selectedMemberIds.size} members`, 'success')
                 setSelectedMemberIds(new Set())
@@ -803,13 +868,12 @@ const Members: React.FC = () => {
             }}>
               Delete
             </button>
+            <button className="pg-batch__clear" onClick={() => setSelectedMemberIds(new Set())}>&times;</button>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Main Table */}
-      <div className="members-table-wrapper">
-        <Editable id="members-page-table" config={{ allowLayout: true, allowStyle: true, allowVisibility: true }}>
+        {/* Main Table */}
+        <div className="pg-table-wrap members-table-wrapper">
             <DataTable
                 data={paginatedFilteredMembers}
                 keyExtractor={(member) => member.userId}
@@ -879,7 +943,6 @@ const Members: React.FC = () => {
               )
             }}
           />
-        </Editable>
       </div>
 
       {/* Modals */}

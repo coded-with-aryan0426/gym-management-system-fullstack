@@ -713,6 +713,452 @@
   .dash__greeting { font-size: 1.1rem; }
 }
 
+/* ── New Widget Styles for Enhanced Dashboard ── */
+
+/* Overdue Payments Widget */
+.dash__card--overdue {
+  grid-column: span 1;
+  background: linear-gradient(135deg, rgba(244, 63, 94, 0.05), rgba(244, 63, 94, 0.02));
+  border: 1px solid rgba(244, 63, 94, 0.15);
+}
+
+.dash__overdue-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.dash__overdue-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(244, 63, 94, 0.1);
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+}
+
+.dash__overdue-row:hover {
+  background: rgba(244, 63, 94, 0.05);
+  border-color: rgba(244, 63, 94, 0.2);
+}
+
+.dash__overdue-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.dash__overdue-name {
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text);
+}
+
+.dash__overdue-plan {
+  font-size: 0.65rem;
+  color: var(--text-3);
+  margin-top: 2px;
+}
+
+.dash__overdue-amount {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+
+.dash__overdue-days {
+  font-size: 0.65rem;
+  color: var(--amber);
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.dash__overdue-price {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--rose);
+}
+
+/* Today's Classes Widget */
+.dash__card--classes {
+  grid-column: span 1;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(59, 130, 246, 0.02));
+  border: 1px solid rgba(59, 130, 246, 0.15);
+}
+
+.dash__classes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.dash__class-row {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(59, 130, 246, 0.1);
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+}
+
+.dash__class-row:hover {
+  background: rgba(59, 130, 246, 0.05);
+  border-color: rgba(59, 130, 246, 0.2);
+}
+
+.dash__class-row--upcoming {
+  border-left: 3px solid var(--amber);
+}
+
+.dash__class-row--in_progress {
+  border-left: 3px solid var(--emerald);
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.dash__class-row--completed {
+  border-left: 3px solid var(--text-3);
+  opacity: 0.7;
+}
+
+.dash__class-time {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-2);
+  width: 45px;
+  flex-shrink: 0;
+}
+
+.dash__class-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  margin: 0 12px;
+}
+
+.dash__class-name {
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text);
+}
+
+.dash__class-meta {
+  font-size: 0.65rem;
+  color: var(--text-3);
+  margin-top: 2px;
+}
+
+.dash__class-status {
+  flex-shrink: 0;
+}
+
+.dash__live-badge {
+  background: var(--emerald);
+  color: white;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  animation: pulse 2s infinite;
+}
+
+.dash__upcoming-badge {
+  background: var(--amber);
+  color: white;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.dash__completed-badge {
+  background: var(--text-3);
+  color: var(--bg);
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* Occupancy Meter */
+.dash__card--occupancy {
+  grid-column: span 1;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(139, 92, 246, 0.02));
+  border: 1px solid rgba(139, 92, 246, 0.15);
+}
+
+.dash__occupancy-gauge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dash__occupancy-percentage {
+  font-size: 1.5rem;
+  font-weight: 700;
+  padding: 8px 12px;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1;
+}
+
+.dash__occupancy-percentage--low {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--emerald);
+  border: 2px solid var(--emerald);
+}
+
+.dash__occupancy-percentage--medium {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--amber);
+  border: 2px solid var(--amber);
+}
+
+.dash__occupancy-percentage--high {
+  background: rgba(244, 63, 94, 0.1);
+  color: var(--rose);
+  border: 2px solid var(--rose);
+}
+
+.dash__occupancy-details {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.dash__occupancy-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.dash__occupancy-label {
+  font-size: 0.65rem;
+  color: var(--text-3);
+  margin-bottom: 4px;
+}
+
+.dash__occupancy-value {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.dash__occupancy-trend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.dash__occupancy-trend--rising {
+  color: var(--emerald);
+}
+
+.dash__occupancy-trend--falling {
+  color: var(--rose);
+}
+
+.dash__occupancy-trend--stable {
+  color: var(--text-3);
+}
+
+/* Monthly Progress */
+.dash__card--progress {
+  grid-column: span 1;
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.05), rgba(6, 182, 212, 0.02));
+  border: 1px solid rgba(6, 182, 212, 0.15);
+}
+
+.dash__progress-status {
+  display: flex;
+  align-items: center;
+}
+
+.dash__progress-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: var(--radius-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dash__progress-badge--on_track {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--emerald);
+}
+
+.dash__progress-badge--behind {
+  background: rgba(244, 63, 94, 0.1);
+  color: var(--rose);
+}
+
+.dash__progress-badge--ahead {
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--blue);
+}
+
+.dash__progress-bar {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 12px 0;
+}
+
+.dash__progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--cyan), var(--blue));
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.dash__progress-details {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.dash__progress-item {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+}
+
+.dash__progress-label {
+  font-size: 0.65rem;
+  color: var(--text-3);
+  margin-bottom: 4px;
+}
+
+.dash__progress-value {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.dash__progress-projection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.dash__progress-projection-label {
+  font-size: 0.7rem;
+  color: var(--text-3);
+}
+
+.dash__progress-projection-value {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--cyan);
+}
+
+/* Revenue Breakdown */
+.dash__card--breakdown {
+  grid-column: span 1;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(99, 102, 241, 0.02));
+  border: 1px solid rgba(99, 102, 241, 0.15);
+}
+
+.dash__breakdown-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.dash__breakdown-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.dash__breakdown-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgba(99, 102, 241, 0.1);
+  border-radius: var(--radius-sm);
+  min-height: 32px;
+  transition: all 0.2s ease;
+}
+
+.dash__breakdown-bar:hover {
+  background: rgba(99, 102, 241, 0.15);
+}
+
+.dash__breakdown-label {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--text-2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dash__breakdown-value {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--violet);
+}
+
+/* Animations */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* Responsive adjustments for new widgets */
+@media (max-width: 1024px) {
+  .dash__card--overdue,
+  .dash__card--classes,
+  .dash__card--occupancy,
+  .dash__card--progress,
+  .dash__card--breakdown {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 640px) {
+  .dash__occupancy-details,
+  .dash__progress-details {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .dash__occupancy-item,
+  .dash__progress-item {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+
 /* ── Light Theme Support ── */
 [data-theme="light"] .dash,
 .light .dash {

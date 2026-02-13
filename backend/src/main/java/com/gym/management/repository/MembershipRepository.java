@@ -45,4 +45,32 @@ public interface MembershipRepository extends JpaRepository<Membership, Long> {
      * @return count of members using this package
      */
     long countByMembershipPackagePackageId(Long packageId);
+
+    // NEW METHODS FOR DASHBOARD ANALYTICS
+    
+    /**
+     * Count active memberships
+     */
+    @org.springframework.data.jpa.repository.Query("SELECT COUNT(m) FROM Membership m WHERE m.status = 'ACTIVE'")
+    Integer countActiveMemberships();
+
+    /**
+     * Count expiring memberships within date range
+     */
+    @org.springframework.data.jpa.repository.Query("SELECT COUNT(m) FROM Membership m WHERE m.status = 'ACTIVE' AND m.endDate BETWEEN :startDate AND :endDate")
+    Integer countExpiringMemberships(
+            @org.springframework.data.repository.query.Param("startDate") java.time.LocalDate startDate,
+            @org.springframework.data.repository.query.Param("endDate") java.time.LocalDate endDate);
+
+    /**
+     * Count frozen memberships
+     */
+    @org.springframework.data.jpa.repository.Query("SELECT COUNT(m) FROM Membership m WHERE m.status = 'FROZEN'")
+    Integer countFrozenMemberships();
+
+    /**
+     * Count expired memberships
+     */
+    @org.springframework.data.jpa.repository.Query("SELECT COUNT(m) FROM Membership m WHERE m.status = 'EXPIRED'")
+    Integer countExpiredMemberships();
 }

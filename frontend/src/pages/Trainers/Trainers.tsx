@@ -8,22 +8,25 @@ import { useClickOutside } from '../../hooks';
 import EnhancedTrainerActionModal from '../../components/TrainerActionModal/EnhancedTrainerActionModal';
 import api from '../../services/api';
 import type { User, Role, TrainerPerformance } from '../../types';
+import '../../styles/page-common.css';
 import './Trainers.css';
 import {
   Search, Filter, UserPlus, TrendingUp, Users, Activity, Clock,
   Star, ChevronDown, Download, MoreHorizontal, RefreshCw, Zap,
-  Award, Target, Calendar, DollarSign, BarChart3
+  Award, Target, Calendar, DollarSign, BarChart3, UserCheck, AlertTriangle, UserX, Percent, X
 } from 'lucide-react';
 import DataTable, { type Column } from '../../components/ui/DataTable';
 
-type StaffStats = {
-  total: number;
-  active: number;
-  inactive: number;
-  onLeave: number;
-  hiredThisMonth: number;
-  utilizationRate: number;
-};
+  type StatusFilter = 'all' | 'active' | 'inactive' | 'onLeave';
+
+  type StaffStats = {
+    total: number;
+    active: number;
+    inactive: number;
+    onLeave: number;
+    hiredThisMonth: number;
+    utilizationRate: number;
+  };
 
 const computeStaffStats = (list: User[]): StaffStats => {
   const active = list.filter(t => (t as any).status?.toLowerCase() === 'active' || !(t as any).status).length;
@@ -86,6 +89,7 @@ const Trainers: React.FC = () => {
   const [isActionModalOpen, setIsActionModalOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [activeStatusFilter, setActiveStatusFilter] = useState<StatusFilter>('all');
 
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -179,7 +183,7 @@ const Trainers: React.FC = () => {
   const totalPages = useMemo(() => Math.ceil(totalCount / pageSize), [totalCount, pageSize]);
   const activeFilterCount = [filters.role, filters.status].filter(Boolean).length;
 
-  const handleResetFilters = () => setFilters({ role: '', status: '' });
+  const handleResetFilters = () => { setFilters({ role: '', status: '' }); setActiveStatusFilter('all'); };
   const handleFilterChange = (key: string, value: string) => setFilters(prev => ({ ...prev, [key]: value }));
 
   useEffect(() => {
@@ -206,22 +210,19 @@ const Trainers: React.FC = () => {
     setTimeout(() => setRefreshing(false), 600);
   };
 
-  // Compute aggregate performance
-  const totalRevenue = useMemo(() =>
-    Object.values(performanceData).reduce((s, p) => s + (p.monthlyRevenue || 0), 0), [performanceData]);
-  const totalClients = useMemo(() =>
-    Object.values(performanceData).reduce((s, p) => s + (p.clientCount || 0), 0), [performanceData]);
-  const totalSessions = useMemo(() =>
-    Object.values(performanceData).reduce((s, p) => s + (p.completedSessions || 0), 0), [performanceData]);
-  const avgRating = 4.6; // placeholder until API provides this
-
-  const kpis = [
-    { key: 'total', label: 'Total Staff', value: stats.total, icon: <Users size={16} />, color: '#6366f1', change: `+${stats.hiredThisMonth} this mo` },
-    { key: 'active', label: 'Active Now', value: stats.active, icon: <Zap size={16} />, color: '#10b981', change: `${stats.utilizationRate}% rate` },
-    { key: 'revenue', label: 'Monthly Revenue', value: `₹${totalRevenue.toLocaleString()}`, icon: <DollarSign size={16} />, color: '#f59e0b', change: 'All trainers' },
-    { key: 'sessions', label: 'Sessions Done', value: totalSessions, icon: <Target size={16} />, color: '#3b82f6', change: `${totalClients} clients` },
-    { key: 'rating', label: 'Avg Rating', value: avgRating.toFixed(1), icon: <Star size={16} />, color: '#ec4899', change: 'Team avg' },
-  ];
+  // Filter trainers by active status tab
+  const filteredTrainers = useMemo(() => {
+    if (activeStatusFilter === 'all') return trainers;
+    return trainers.filter(t => {
+      const status = ((t as any).status || 'active').toLowerCase();
+      switch (activeStatusFilter) {
+        case 'active': return status === 'active' || !status;
+        case 'inactive': return status === 'inactive';
+        case 'onLeave': return status === 'on_leave' || status === 'leave';
+        default: return true;
+      }
+    });
+  }, [trainers, activeStatusFilter]);
 
   /* helper: generate fake weekly bars from performance data */
   const getSparkData = (uid: number): number[] => {
@@ -323,124 +324,204 @@ const Trainers: React.FC = () => {
     },
   ];
 
-  return (
-    <div className="t-page">
-      {/* === Top Bar === */}
-      <header className="t-header">
-        <div className="t-header__left">
-          <h1 className="t-header__title">Trainers</h1>
-          <span className="t-header__count">{totalCount}</span>
-          {sortType === 'newest'
-            ? <span className="t-sort t-sort--new">Newest</span>
-            : <span className="t-sort t-sort--az">A-Z</span>
-          }
-        </div>
+    return (
+      <div className="pg-page">
+        {/* === Header === */}
+        <header className="pg-header">
+          <div className="pg-header__row-1">
+            <div className="pg-header__title-group">
+              <div className="pg-header__icon">
+                <Users size={18} />
+              </div>
+              <div>
+                <h1 className="pg-header__title">Trainers</h1>
+                <span className="pg-header__subtitle">{stats.total} total &middot; {stats.hiredThisMonth} new this month</span>
+              </div>
+            </div>
 
-        <div className="t-header__right">
-          {/* Quick stat pills */}
-          <div className="t-header__pills">
-            <span className="t-pill t-pill--green"><span className="t-pill__dot" style={{ background: '#10b981' }} />{stats.active} Active</span>
-            <span className="t-pill t-pill--amber"><span className="t-pill__dot" style={{ background: '#f59e0b' }} />{stats.onLeave} Leave</span>
-            <span className="t-pill t-pill--red"><span className="t-pill__dot" style={{ background: '#ef4444' }} />{stats.inactive} Inactive</span>
-          </div>
-
-          {/* Search */}
-          <div className="t-search">
-            <Search size={14} className="t-search__icon" />
-            <input
-              type="text"
-              placeholder="Search trainers..."
-              value={searchQuery}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              className="t-search__input"
-            />
-          </div>
-
-          {/* Filter */}
-          <div className="t-filter-wrap" ref={filterRef}>
-            <button
-              className={`t-btn t-btn--filter ${isFilterOpen ? 't-btn--active' : ''} ${activeFilterCount > 0 ? 't-btn--has-filter' : ''}`}
-              onClick={() => setIsFilterOpen(!isFilterOpen)}
-            >
-              <Filter size={13} />
-              {activeFilterCount > 0 && <span className="t-btn__badge">{activeFilterCount}</span>}
-            </button>
-
-            {isFilterOpen && (
-              <div className="t-filter-panel">
-                <div className="t-filter-panel__head">
-                  <span>Filters</span>
-                  {activeFilterCount > 0 && <button className="t-filter-panel__clear" onClick={handleResetFilters}>Clear</button>}
+            {/* Stat Cards */}
+            <div className="pg-stats">
+              <button
+                className={`pg-stat-card ${activeStatusFilter === 'all' ? 'pg-stat-card--active' : ''}`}
+                onClick={() => setActiveStatusFilter('all')}
+              >
+                <div className="pg-stat-card__icon pg-stat-card__icon--total"><Users size={14} /></div>
+                <div className="pg-stat-card__data">
+                  <span className="pg-stat-card__value">{stats.total}</span>
+                  <span className="pg-stat-card__label">Total</span>
                 </div>
-                <div className="t-filter-panel__body">
-                  <label className="t-filter-label">Role</label>
-                  <select className="t-filter-select" value={filters.role} onChange={(e) => handleFilterChange('role', e.target.value)}>
-                    <option value="">All Roles</option>
-                    <option value="TRAINER">Trainer</option>
-                    <option value="ADMIN">Admin</option>
-                    <option value="MANAGER">Manager</option>
-                  </select>
-                  <label className="t-filter-label">Status</label>
-                  <select className="t-filter-select" value={filters.status} onChange={(e) => handleFilterChange('status', e.target.value)}>
-                    <option value="">All</option>
-                    <option value="Active">Active</option>
-                    <option value="Inactive">Inactive</option>
-                  </select>
+              </button>
+              <button
+                className={`pg-stat-card ${activeStatusFilter === 'active' ? 'pg-stat-card--active' : ''}`}
+                onClick={() => setActiveStatusFilter('active')}
+              >
+                <div className="pg-stat-card__icon pg-stat-card__icon--active"><UserCheck size={14} /></div>
+                <div className="pg-stat-card__data">
+                  <span className="pg-stat-card__value pg-stat-card__value--green">{stats.active}</span>
+                  <span className="pg-stat-card__label">Active</span>
+                </div>
+              </button>
+              <button
+                className={`pg-stat-card ${activeStatusFilter === 'onLeave' ? 'pg-stat-card--active' : ''}`}
+                onClick={() => setActiveStatusFilter('onLeave')}
+              >
+                <div className="pg-stat-card__icon pg-stat-card__icon--expiring"><AlertTriangle size={14} /></div>
+                <div className="pg-stat-card__data">
+                  <span className="pg-stat-card__value pg-stat-card__value--amber">{stats.onLeave}</span>
+                  <span className="pg-stat-card__label">On Leave</span>
+                </div>
+              </button>
+              <button
+                className={`pg-stat-card ${activeStatusFilter === 'inactive' ? 'pg-stat-card--active' : ''}`}
+                onClick={() => setActiveStatusFilter('inactive')}
+              >
+                <div className="pg-stat-card__icon pg-stat-card__icon--inactive"><UserX size={14} /></div>
+                <div className="pg-stat-card__data">
+                  <span className="pg-stat-card__value pg-stat-card__value--red">{stats.inactive}</span>
+                  <span className="pg-stat-card__label">Inactive</span>
+                </div>
+              </button>
+              <div className="pg-stat-card pg-stat-card--no-click">
+                <div className="pg-stat-card__icon pg-stat-card__icon--special"><Percent size={14} /></div>
+                <div className="pg-stat-card__data">
+                  <span className="pg-stat-card__value pg-stat-card__value--indigo">{stats.utilizationRate}%</span>
+                  <span className="pg-stat-card__label">Utilization</span>
                 </div>
               </div>
-            )}
-          </div>
-
-          <button className={`t-btn t-btn--icon ${refreshing ? 't-btn--spin' : ''}`} onClick={handleRefresh} title="Refresh">
-            <RefreshCw size={14} />
-          </button>
-
-          <button className="t-btn t-btn--primary" onClick={() => setIsCreateModalOpen(true)}>
-            <UserPlus size={14} />
-            <span>Add Trainer</span>
-          </button>
-        </div>
-      </header>
-
-      {/* === Active Filter Chips === */}
-      {activeFilterCount > 0 && (
-        <div className="t-chips">
-          {filters.role && <span className="t-chip">Role: {filters.role}<button onClick={() => handleFilterChange('role', '')}>×</button></span>}
-          {filters.status && <span className="t-chip">Status: {filters.status}<button onClick={() => handleFilterChange('status', '')}>×</button></span>}
-          <button className="t-chip-clear" onClick={handleResetFilters}>Clear All</button>
-        </div>
-      )}
-
-      {/* === KPI Cards === */}
-      <div className="t-kpis">
-        {kpis.map(kpi => (
-          <div key={kpi.key} className="t-kpi" style={{ '--kpi-color': kpi.color } as React.CSSProperties}>
-            <div className="t-kpi__icon">{kpi.icon}</div>
-            <div className="t-kpi__body">
-              <span className="t-kpi__value">{kpi.value}</span>
-              <span className="t-kpi__label">{kpi.label}</span>
             </div>
-            <span className="t-kpi__change">{kpi.change}</span>
+
+            <div className="pg-header__actions">
+              <button className="pg-btn pg-btn--primary" onClick={() => setIsCreateModalOpen(true)}>
+                <UserPlus size={14} />
+                <span>Add Trainer</span>
+              </button>
+            </div>
           </div>
-        ))}
-      </div>
 
-      {/* === Batch Actions === */}
-      {selectedTrainerIds.size > 0 && (
-        <div className="t-batch">
-          <span className="t-batch__count">{selectedTrainerIds.size} selected</span>
-          <button className="t-batch__btn" onClick={() => { showToast(`Messaging ${selectedTrainerIds.size} trainers`, 'success'); setSelectedTrainerIds(new Set()); }}>Message</button>
-          <button className="t-batch__btn" onClick={() => { showToast(`Exporting ${selectedTrainerIds.size} trainers`, 'success'); setSelectedTrainerIds(new Set()); }}>Export</button>
-          <button className="t-batch__btn t-batch__btn--danger" onClick={() => { if (window.confirm(`Delete ${selectedTrainerIds.size} trainers?`)) { showToast(`Deleted`, 'success'); setSelectedTrainerIds(new Set()); } }}>Delete</button>
-          <button className="t-batch__clear" onClick={() => setSelectedTrainerIds(new Set())}>×</button>
-        </div>
-      )}
+          {/* Row 2: Tabs + Search + Filters */}
+          <div className="pg-header__row-2">
+            <div className="pg-tabs">
+              <button
+                className={`pg-tab ${activeStatusFilter === 'all' ? 'pg-tab--active' : ''}`}
+                onClick={() => setActiveStatusFilter('all')}
+              >
+                All
+                <span className="pg-tab__count">{stats.total}</span>
+              </button>
+              <button
+                className={`pg-tab ${activeStatusFilter === 'active' ? 'pg-tab--active' : ''}`}
+                onClick={() => setActiveStatusFilter('active')}
+              >
+                Active
+                <span className="pg-tab__count pg-tab__count--active">{stats.active}</span>
+              </button>
+              <button
+                className={`pg-tab ${activeStatusFilter === 'onLeave' ? 'pg-tab--active' : ''}`}
+                onClick={() => setActiveStatusFilter('onLeave')}
+              >
+                On Leave
+                {stats.onLeave > 0 && (
+                  <span className="pg-tab__count pg-tab__count--warning">{stats.onLeave}</span>
+                )}
+              </button>
+              <button
+                className={`pg-tab ${activeStatusFilter === 'inactive' ? 'pg-tab--active' : ''}`}
+                onClick={() => setActiveStatusFilter('inactive')}
+              >
+                Inactive
+                {stats.inactive > 0 && (
+                  <span className="pg-tab__count pg-tab__count--muted">{stats.inactive}</span>
+                )}
+              </button>
+            </div>
 
-      {/* === Table === */}
-      <div className="t-table-wrap">
+            <div className="pg-header__right">
+              <div className="pg-search">
+                <Search size={14} className="pg-search__icon" />
+                <input
+                  type="text"
+                  placeholder="Search trainers..."
+                  value={searchQuery}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  className="pg-search__input"
+                />
+                {searchQuery && (
+                  <button className="pg-search__clear" onClick={() => setSearchQuery('')}>
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+
+              <div className="pg-filter-wrap" ref={filterRef}>
+                <button
+                  className={`pg-btn pg-btn--icon ${isFilterOpen ? 'pg-btn--active' : ''} ${activeFilterCount > 0 ? 'pg-btn--has-filter' : ''}`}
+                  onClick={() => setIsFilterOpen(!isFilterOpen)}
+                >
+                  <Filter size={13} />
+                  {activeFilterCount > 0 && <span className="pg-btn__badge">{activeFilterCount}</span>}
+                </button>
+
+                {isFilterOpen && (
+                  <div className="pg-filter-dropdown">
+                    <div className="pg-filter-dropdown__header">
+                      <span>Filters</span>
+                      {activeFilterCount > 0 && <button className="pg-filter-dropdown__clear" onClick={handleResetFilters}>Clear</button>}
+                    </div>
+                    <div className="pg-filter-dropdown__body">
+                      <div className="pg-filter-dropdown__row">
+                        <label className="pg-filter-dropdown__label">Role</label>
+                        <select className="pg-filter-dropdown__select" value={filters.role} onChange={(e) => handleFilterChange('role', e.target.value)}>
+                          <option value="">All Roles</option>
+                          <option value="TRAINER">Trainer</option>
+                          <option value="ADMIN">Admin</option>
+                          <option value="MANAGER">Manager</option>
+                        </select>
+                      </div>
+                      <div className="pg-filter-dropdown__row">
+                        <label className="pg-filter-dropdown__label">Status</label>
+                        <select className="pg-filter-dropdown__select" value={filters.status} onChange={(e) => handleFilterChange('status', e.target.value)}>
+                          <option value="">All</option>
+                          <option value="Active">Active</option>
+                          <option value="Inactive">Inactive</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <button className={`pg-btn pg-btn--icon ${refreshing ? 'pg-btn--spin' : ''}`} onClick={handleRefresh} title="Refresh">
+                <RefreshCw size={14} />
+              </button>
+            </div>
+          </div>
+        </header>
+
+        {/* === Active Filter Chips === */}
+        {activeFilterCount > 0 && (
+          <div className="pg-chips">
+            {filters.role && <span className="pg-chip">Role: {filters.role}<button onClick={() => handleFilterChange('role', '')}>&times;</button></span>}
+            {filters.status && <span className="pg-chip">Status: {filters.status}<button onClick={() => handleFilterChange('status', '')}>&times;</button></span>}
+            <button className="pg-chips__clear" onClick={handleResetFilters}>Clear All</button>
+          </div>
+        )}
+
+        {/* === Batch Actions === */}
+        {selectedTrainerIds.size > 0 && (
+          <div className="pg-batch">
+            <span className="pg-batch__count">{selectedTrainerIds.size} selected</span>
+            <button className="pg-batch__btn" onClick={() => { showToast(`Messaging ${selectedTrainerIds.size} trainers`, 'success'); setSelectedTrainerIds(new Set()); }}>Message</button>
+            <button className="pg-batch__btn" onClick={() => { showToast(`Exporting ${selectedTrainerIds.size} trainers`, 'success'); setSelectedTrainerIds(new Set()); }}>Export</button>
+            <button className="pg-batch__btn pg-batch__btn--danger" onClick={() => { if (window.confirm(`Delete ${selectedTrainerIds.size} trainers?`)) { showToast(`Deleted`, 'success'); setSelectedTrainerIds(new Set()); } }}>Delete</button>
+            <button className="pg-batch__clear" onClick={() => setSelectedTrainerIds(new Set())}>&times;</button>
+          </div>
+        )}
+
+        {/* === Table === */}
+        <div className="pg-table-wrap t-table-wrap">
         <DataTable
           columns={columns}
-          data={trainers}
+          data={filteredTrainers}
           keyExtractor={(t) => t.userId}
           loading={loading}
           emptyMessage="No trainers found"
