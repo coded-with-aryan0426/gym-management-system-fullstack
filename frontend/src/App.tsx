@@ -5,6 +5,7 @@ import { EditorRoot } from './editor';
 import { AppShell } from './components/Layout';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
+import { ServerHealthProvider } from './pages/utility/ServerOfflinePage';
 
 // Import new design system
 import './styles/global.css';
@@ -58,6 +59,26 @@ const MemberNotifications = lazy(() => import('./pages/member/MemberNotification
 const MemberMessages = lazy(() => import('./pages/member/MemberMessages'));
 const MemberSettings = lazy(() => import('./pages/member/MemberSettings'));
 
+// Super Admin Pages
+const SuperAdminLayout = lazy(() => import('./pages/superadmin/SuperAdminLayout'));
+const SADashboard = lazy(() => import('./pages/superadmin/SADashboard'));
+const SAGyms = lazy(() => import('./pages/superadmin/SAGyms'));
+const SAUsers = lazy(() => import('./pages/superadmin/SAUsers'));
+const SARevenue = lazy(() => import('./pages/superadmin/SARevenue'));
+const SAErrors = lazy(() => import('./pages/superadmin/SAErrors'));
+const SAFeatureFlags = lazy(() => import('./pages/superadmin/SAFeatureFlags'));
+const SASecurity = lazy(() => import('./pages/superadmin/SASecurity'));
+const SADatabase = lazy(() => import('./pages/superadmin/SADatabase'));
+const SAAnalytics = lazy(() => import('./pages/superadmin/SAAnalytics'));
+const SuperAdminPortal = lazy(() => import('./pages/superadmin/SuperAdminPortal'));
+
+// Utility / Premium Pages
+const NotFoundPage = lazy(() => import('./pages/utility/NotFoundPage'));
+const ServerErrorPage = lazy(() => import('./pages/utility/ServerErrorPage'));
+const MaintenancePage = lazy(() => import('./pages/utility/MaintenancePage'));
+const SessionExpiredPage = lazy(() => import('./pages/utility/SessionExpiredPage'));
+const ComingSoonPage = lazy(() => import('./pages/utility/ComingSoonPage'));
+
 // Loading spinner for page transitions
 const PageLoader = () => (
   <div className="page-loader">
@@ -70,98 +91,129 @@ function App() {
     <BrowserRouter>
       <EditorRoot>
         <AppProvider>
-          <ErrorBoundary>
-            <Suspense fallback={<PageLoader />}>
-              <Routes>
-                {/* Public Routes */}
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/unauthorized" element={<UnauthorizedPage />} />
-                <Route path="/change-password" element={<ChangePasswordFirst />} />
+          <ServerHealthProvider>
+            <ErrorBoundary>
+              <Suspense fallback={<PageLoader />}>
+                <Routes>
+                  {/* Public Routes */}
+                  <Route path="/" element={<LandingPage />} />
+                  <Route path="/portal" element={<SuperAdminPortal />} />
+                  <Route path="/unauthorized" element={<UnauthorizedPage />} />
+                  <Route path="/change-password" element={<ChangePasswordFirst />} />
 
-                {/* Static Pages */}
-                <Route path="/about" element={<AboutPage />} />
-                <Route path="/contact" element={<ContactPage />} />
-                <Route path="/privacy" element={<PrivacyPage />} />
-                <Route path="/terms" element={<TermsPage />} />
-                <Route path="/member-app" element={<MemberAppPage />} />
+                  {/* Utility Pages */}
+                  <Route path="/404" element={<NotFoundPage />} />
+                  <Route path="/server-error" element={<ServerErrorPage />} />
+                  <Route path="/maintenance" element={<MaintenancePage />} />
+                  <Route path="/session-expired" element={<SessionExpiredPage />} />
+                  <Route path="/coming-soon" element={<ComingSoonPage />} />
 
-                {/* OAuth Callback Routes */}
-                <Route path="/auth/google/callback" element={<GoogleCallback />} />
+                  {/* Static Pages */}
+                  <Route path="/about" element={<AboutPage />} />
+                  <Route path="/contact" element={<ContactPage />} />
+                  <Route path="/privacy" element={<PrivacyPage />} />
+                  <Route path="/terms" element={<TermsPage />} />
+                  <Route path="/member-app" element={<MemberAppPage />} />
 
-                {/* Trainer Dashboard Routes */}
-                <Route
-                  path="/trainer/*"
-                  element={
-                    <ProtectedRoute allowedRoles={['TRAINER']}>
-                      <TrainerLayout>
+                  {/* OAuth Callback Routes */}
+                  <Route path="/auth/google/callback" element={<GoogleCallback />} />
+
+                  {/* Trainer Dashboard Routes */}
+                  <Route
+                    path="/trainer/*"
+                    element={
+                      <ProtectedRoute allowedRoles={['TRAINER']}>
+                        <TrainerLayout>
+                          <Routes>
+                            <Route index element={<TrainerDashboard />} />
+                            <Route path="profile" element={<TrainerProfile />} />
+                            <Route path="members" element={<MyMembers />} />
+                            <Route path="classes" element={<MyClasses />} />
+                            <Route path="schedule" element={<MySchedule />} />
+                            <Route path="notifications" element={<TrainerNotifications />} />
+                            <Route path="progress-notes" element={<ProgressNotes />} />
+                            <Route path="messages" element={<TrainerMessages />} />
+                            <Route path="reports" element={<TrainerReports />} />
+                            <Route path="settings" element={<TrainerSettings />} />
+                            <Route path="*" element={<Navigate to="/trainer" replace />} />
+                          </Routes>
+                        </TrainerLayout>
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  {/* Member Dashboard Routes */}
+                  <Route
+                    path="/member/*"
+                    element={
+                      <ProtectedRoute allowedRoles={['CUSTOMER', 'MEMBER']}>
+                        <MemberLayout>
+                          <Routes>
+                            <Route index element={<MemberDashboard />} />
+                            <Route path="profile" element={<MemberProfile />} />
+                            <Route path="membership" element={<MyMembership />} />
+                            <Route path="progress" element={<MyProgress />} />
+                            <Route path="classes" element={<AvailableClasses />} />
+                            <Route path="trainer" element={<MyTrainer />} />
+                            <Route path="bookings" element={<MyBookings />} />
+                            <Route path="notifications" element={<MemberNotifications />} />
+                            <Route path="messages" element={<MemberMessages />} />
+                            <Route path="settings" element={<MemberSettings />} />
+                            <Route path="*" element={<Navigate to="/member" replace />} />
+                          </Routes>
+                        </MemberLayout>
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  {/* Super Admin Routes — access via /portal passphrase */}
+                  <Route
+                    path="/superadmin/*"
+                    element={
+                      <SuperAdminLayout>
                         <Routes>
-                          <Route index element={<TrainerDashboard />} />
-                          <Route path="profile" element={<TrainerProfile />} />
-                          <Route path="members" element={<MyMembers />} />
-                          <Route path="classes" element={<MyClasses />} />
-                          <Route path="schedule" element={<MySchedule />} />
-                          <Route path="notifications" element={<TrainerNotifications />} />
-                          <Route path="progress-notes" element={<ProgressNotes />} />
-                          <Route path="messages" element={<TrainerMessages />} />
-                          <Route path="reports" element={<TrainerReports />} />
-                          <Route path="settings" element={<TrainerSettings />} />
-                          <Route path="*" element={<Navigate to="/trainer" replace />} />
+                          <Route index element={<SADashboard />} />
+                          <Route path="gyms" element={<SAGyms />} />
+                          <Route path="users" element={<SAUsers />} />
+                          <Route path="revenue" element={<SARevenue />} />
+                          <Route path="errors" element={<SAErrors />} />
+                          <Route path="features" element={<SAFeatureFlags />} />
+                          <Route path="security" element={<SASecurity />} />
+                          <Route path="database" element={<SADatabase />} />
+                          <Route path="analytics" element={<SAAnalytics />} />
+                          <Route path="*" element={<Navigate to="/superadmin" replace />} />
                         </Routes>
-                      </TrainerLayout>
-                    </ProtectedRoute>
-                  }
-                />
+                      </SuperAdminLayout>
+                    }
+                  />
 
-                {/* Member Dashboard Routes */}
-                <Route
-                  path="/member/*"
-                  element={
-                    <ProtectedRoute allowedRoles={['CUSTOMER', 'MEMBER']}>
-                      <MemberLayout>
-                        <Routes>
-                          <Route index element={<MemberDashboard />} />
-                          <Route path="profile" element={<MemberProfile />} />
-                          <Route path="membership" element={<MyMembership />} />
-                          <Route path="progress" element={<MyProgress />} />
-                          <Route path="classes" element={<AvailableClasses />} />
-                          <Route path="trainer" element={<MyTrainer />} />
-                          <Route path="bookings" element={<MyBookings />} />
-                          <Route path="notifications" element={<MemberNotifications />} />
-                          <Route path="messages" element={<MemberMessages />} />
-                          <Route path="settings" element={<MemberSettings />} />
-                          <Route path="*" element={<Navigate to="/member" replace />} />
-                        </Routes>
-                      </MemberLayout>
-                    </ProtectedRoute>
-                  }
-                />
-
-                {/* Admin/Owner Dashboard Routes */}
-                <Route
-                  path="/*"
-                  element={
-                    <ProtectedRoute allowedRoles={['OWNER', 'ADMIN']}>
-                      <AppShell>
-                        <Routes>
-                          <Route path="/dashboard" element={<Dashboard />} />
-                          <Route path="/trainers" element={<Trainers />} />
-                          <Route path="/members" element={<Members />} />
-                          <Route path="/classes" element={<Classes />} />
-                          <Route path="/equipment" element={<Equipment />} />
-                          <Route path="/financials" element={<Financials />} />
-                          <Route path="/pt-sessions" element={<PTSessions />} />
-                          <Route path="/reports" element={<Reports />} />
-                          <Route path="/notifications" element={<OwnerNotifications />} />
-                          <Route path="/settings" element={<Settings />} />
-                          <Route path="*" element={<Navigate to="/dashboard" replace />} />
-                        </Routes>
-                      </AppShell>
-                    </ProtectedRoute>
-                  }
-                />
-              </Routes>
-            </Suspense>
-          </ErrorBoundary>
+                  {/* Admin/Owner Dashboard Routes */}
+                  <Route
+                    path="/*"
+                    element={
+                      <ProtectedRoute allowedRoles={['OWNER', 'ADMIN']}>
+                        <AppShell>
+                          <Routes>
+                            <Route path="/dashboard" element={<Dashboard />} />
+                            <Route path="/trainers" element={<Trainers />} />
+                            <Route path="/members" element={<Members />} />
+                            <Route path="/classes" element={<Classes />} />
+                            <Route path="/equipment" element={<Equipment />} />
+                            <Route path="/financials" element={<Financials />} />
+                            <Route path="/pt-sessions" element={<PTSessions />} />
+                            <Route path="/reports" element={<Reports />} />
+                            <Route path="/notifications" element={<OwnerNotifications />} />
+                            <Route path="/settings" element={<Settings />} />
+                            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                          </Routes>
+                        </AppShell>
+                      </ProtectedRoute>
+                    }
+                  />
+                </Routes>
+              </Suspense>
+            </ErrorBoundary>
+          </ServerHealthProvider>
         </AppProvider>
       </EditorRoot>
     </BrowserRouter>

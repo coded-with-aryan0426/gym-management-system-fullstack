@@ -230,7 +230,8 @@ public class UserController {
     public ResponseEntity<?> getTrainerDetails(@PathVariable Long trainerId) {
         try {
             User trainer = userService.getUserById(trainerId);
-            if (trainer == null) return ResponseEntity.notFound().build();
+            if (trainer == null)
+                return ResponseEntity.notFound().build();
 
             TrainerDetails details = trainerDetailsRepository.findById(trainerId).orElse(null);
             TrainerProfileDTO dto = mapToOwnerProfileDTO(trainer, details);
@@ -247,11 +248,14 @@ public class UserController {
             @RequestBody TrainerProfileDTO dto) {
         try {
             User trainer = userService.getUserById(trainerId);
-            if (trainer == null) return ResponseEntity.notFound().build();
+            if (trainer == null)
+                return ResponseEntity.notFound().build();
 
             // Update basic user fields
-            if (dto.getName() != null) trainer.setFullName(dto.getName());
-            if (dto.getPhone() != null) trainer.setPhone(dto.getPhone());
+            if (dto.getName() != null)
+                trainer.setFullName(dto.getName());
+            if (dto.getPhone() != null)
+                trainer.setPhone(dto.getPhone());
             userService.updateUser(trainerId, trainer);
 
             // Update or create TrainerDetails
@@ -259,25 +263,44 @@ public class UserController {
                     .orElse(new TrainerDetails());
             details.setUser(trainer);
 
-            if (dto.getEmployeeId() != null) details.setEmployeeId(dto.getEmployeeId());
-            if (dto.getDob() != null) details.setDob(LocalDate.parse(dto.getDob()));
-            if (dto.getGender() != null) details.setGender(dto.getGender());
-            if (dto.getBloodType() != null) details.setBloodType(dto.getBloodType());
-            if (dto.getAddress() != null) details.setAddress(dto.getAddress());
-            if (dto.getAltPhone() != null) details.setAltPhone(dto.getAltPhone());
-            if (dto.getDepartment() != null) details.setDepartment(dto.getDepartment());
-            if (dto.getJoiningDate() != null) details.setJoiningDate(LocalDate.parse(dto.getJoiningDate()));
-            if (dto.getReportingTo() != null) details.setReportingTo(dto.getReportingTo());
-            if (dto.getBio() != null) details.setBio(dto.getBio());
-            if (dto.getInstagram() != null) details.setInstagram(dto.getInstagram());
-            if (dto.getLinkedin() != null) details.setLinkedin(dto.getLinkedin());
-            if (dto.getEmergencyName() != null) details.setEmergencyName(dto.getEmergencyName());
-            if (dto.getEmergencyPhone() != null) details.setEmergencyPhone(dto.getEmergencyPhone());
-            if (dto.getBankName() != null) details.setBankName(dto.getBankName());
-            if (dto.getAccountNo() != null) details.setAccountNo(dto.getAccountNo());
-            if (dto.getIfsc() != null) details.setIfsc(dto.getIfsc());
-            if (dto.getShift() != null) details.setShift(dto.getShift());
-            if (dto.getExperienceYears() != null) details.setExperienceYears(dto.getExperienceYears());
+            if (dto.getEmployeeId() != null)
+                details.setEmployeeId(dto.getEmployeeId());
+            if (dto.getDob() != null)
+                details.setDob(LocalDate.parse(dto.getDob()));
+            if (dto.getGender() != null)
+                details.setGender(dto.getGender());
+            if (dto.getBloodType() != null)
+                details.setBloodType(dto.getBloodType());
+            if (dto.getAddress() != null)
+                details.setAddress(dto.getAddress());
+            if (dto.getAltPhone() != null)
+                details.setAltPhone(dto.getAltPhone());
+            if (dto.getDepartment() != null)
+                details.setDepartment(dto.getDepartment());
+            if (dto.getJoiningDate() != null)
+                details.setJoiningDate(LocalDate.parse(dto.getJoiningDate()));
+            if (dto.getReportingTo() != null)
+                details.setReportingTo(dto.getReportingTo());
+            if (dto.getBio() != null)
+                details.setBio(dto.getBio());
+            if (dto.getInstagram() != null)
+                details.setInstagram(dto.getInstagram());
+            if (dto.getLinkedin() != null)
+                details.setLinkedin(dto.getLinkedin());
+            if (dto.getEmergencyName() != null)
+                details.setEmergencyName(dto.getEmergencyName());
+            if (dto.getEmergencyPhone() != null)
+                details.setEmergencyPhone(dto.getEmergencyPhone());
+            if (dto.getBankName() != null)
+                details.setBankName(dto.getBankName());
+            if (dto.getAccountNo() != null)
+                details.setAccountNo(dto.getAccountNo());
+            if (dto.getIfsc() != null)
+                details.setIfsc(dto.getIfsc());
+            if (dto.getShift() != null)
+                details.setShift(dto.getShift());
+            if (dto.getExperienceYears() != null)
+                details.setExperienceYears(dto.getExperienceYears());
 
             if (dto.getSpecializations() != null) {
                 details.setSpecializations(String.join(",", dto.getSpecializations()));
@@ -352,19 +375,23 @@ public class UserController {
             try {
                 if (details.getCertificationsJson() != null) {
                     builder.certifications(objectMapper.readValue(details.getCertificationsJson(),
-                            new com.fasterxml.jackson.core.type.TypeReference<List<TrainerProfileDTO.CertificationDTO>>() {}));
+                            new com.fasterxml.jackson.core.type.TypeReference<List<TrainerProfileDTO.CertificationDTO>>() {
+                            }));
                 }
                 if (details.getDocumentsJson() != null) {
                     builder.documents(objectMapper.readValue(details.getDocumentsJson(),
-                            new com.fasterxml.jackson.core.type.TypeReference<List<TrainerProfileDTO.DocumentDTO>>() {}));
+                            new com.fasterxml.jackson.core.type.TypeReference<List<TrainerProfileDTO.DocumentDTO>>() {
+                            }));
                 }
                 if (details.getAvailabilityJson() != null) {
                     builder.availability(objectMapper.readValue(details.getAvailabilityJson(),
-                            new com.fasterxml.jackson.core.type.TypeReference<List<TrainerProfileDTO.AvailabilityDTO>>() {}));
+                            new com.fasterxml.jackson.core.type.TypeReference<List<TrainerProfileDTO.AvailabilityDTO>>() {
+                            }));
                 }
                 if (details.getSkillsJson() != null) {
                     builder.skills(objectMapper.readValue(details.getSkillsJson(),
-                            new com.fasterxml.jackson.core.type.TypeReference<List<TrainerProfileDTO.SkillDTO>>() {}));
+                            new com.fasterxml.jackson.core.type.TypeReference<List<TrainerProfileDTO.SkillDTO>>() {
+                            }));
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -431,13 +458,24 @@ public class UserController {
 
             TrainerCompensationRule rule = TrainerCompensationRule.builder()
                     .trainer(trainer)
-                    .perSessionRate(body.get("perSessionRate") != null ? new BigDecimal(body.get("perSessionRate").toString()) : null)
-                    .perHourRate(body.get("perHourRate") != null ? new BigDecimal(body.get("perHourRate").toString()) : null)
-                    .perClassRate(body.get("perClassRate") != null ? new BigDecimal(body.get("perClassRate").toString()) : null)
-                    .perAttendeeRate(body.get("perAttendeeRate") != null ? new BigDecimal(body.get("perAttendeeRate").toString()) : null)
-                    .commissionPercent(body.get("commissionPercent") != null ? new BigDecimal(body.get("commissionPercent").toString()) : null)
-                    .effectiveFrom(body.get("effectiveFrom") != null ? LocalDate.parse(body.get("effectiveFrom").toString()) : LocalDate.now())
-                    .effectiveTo(body.get("effectiveTo") != null ? LocalDate.parse(body.get("effectiveTo").toString()) : null)
+                    .perSessionRate(
+                            body.get("perSessionRate") != null ? new BigDecimal(body.get("perSessionRate").toString())
+                                    : null)
+                    .perHourRate(
+                            body.get("perHourRate") != null ? new BigDecimal(body.get("perHourRate").toString()) : null)
+                    .perClassRate(body.get("perClassRate") != null ? new BigDecimal(body.get("perClassRate").toString())
+                            : null)
+                    .perAttendeeRate(
+                            body.get("perAttendeeRate") != null ? new BigDecimal(body.get("perAttendeeRate").toString())
+                                    : null)
+                    .commissionPercent(body.get("commissionPercent") != null
+                            ? new BigDecimal(body.get("commissionPercent").toString())
+                            : null)
+                    .effectiveFrom(
+                            body.get("effectiveFrom") != null ? LocalDate.parse(body.get("effectiveFrom").toString())
+                                    : LocalDate.now())
+                    .effectiveTo(body.get("effectiveTo") != null ? LocalDate.parse(body.get("effectiveTo").toString())
+                            : null)
                     .isActive(true)
                     .build();
 
@@ -461,14 +499,31 @@ public class UserController {
             }
 
             TrainerCompensationRule rule = opt.get();
-            if (body.containsKey("perSessionRate")) rule.setPerSessionRate(body.get("perSessionRate") != null ? new BigDecimal(body.get("perSessionRate").toString()) : null);
-            if (body.containsKey("perHourRate")) rule.setPerHourRate(body.get("perHourRate") != null ? new BigDecimal(body.get("perHourRate").toString()) : null);
-            if (body.containsKey("perClassRate")) rule.setPerClassRate(body.get("perClassRate") != null ? new BigDecimal(body.get("perClassRate").toString()) : null);
-            if (body.containsKey("perAttendeeRate")) rule.setPerAttendeeRate(body.get("perAttendeeRate") != null ? new BigDecimal(body.get("perAttendeeRate").toString()) : null);
-            if (body.containsKey("commissionPercent")) rule.setCommissionPercent(body.get("commissionPercent") != null ? new BigDecimal(body.get("commissionPercent").toString()) : null);
-            if (body.containsKey("effectiveFrom")) rule.setEffectiveFrom(LocalDate.parse(body.get("effectiveFrom").toString()));
-            if (body.containsKey("effectiveTo")) rule.setEffectiveTo(body.get("effectiveTo") != null ? LocalDate.parse(body.get("effectiveTo").toString()) : null);
-            if (body.containsKey("isActive")) rule.setIsActive((Boolean) body.get("isActive"));
+            if (body.containsKey("perSessionRate"))
+                rule.setPerSessionRate(
+                        body.get("perSessionRate") != null ? new BigDecimal(body.get("perSessionRate").toString())
+                                : null);
+            if (body.containsKey("perHourRate"))
+                rule.setPerHourRate(
+                        body.get("perHourRate") != null ? new BigDecimal(body.get("perHourRate").toString()) : null);
+            if (body.containsKey("perClassRate"))
+                rule.setPerClassRate(
+                        body.get("perClassRate") != null ? new BigDecimal(body.get("perClassRate").toString()) : null);
+            if (body.containsKey("perAttendeeRate"))
+                rule.setPerAttendeeRate(
+                        body.get("perAttendeeRate") != null ? new BigDecimal(body.get("perAttendeeRate").toString())
+                                : null);
+            if (body.containsKey("commissionPercent"))
+                rule.setCommissionPercent(
+                        body.get("commissionPercent") != null ? new BigDecimal(body.get("commissionPercent").toString())
+                                : null);
+            if (body.containsKey("effectiveFrom"))
+                rule.setEffectiveFrom(LocalDate.parse(body.get("effectiveFrom").toString()));
+            if (body.containsKey("effectiveTo"))
+                rule.setEffectiveTo(
+                        body.get("effectiveTo") != null ? LocalDate.parse(body.get("effectiveTo").toString()) : null);
+            if (body.containsKey("isActive"))
+                rule.setIsActive((Boolean) body.get("isActive"));
 
             compensationRuleRepository.save(rule);
             return ResponseEntity.ok(Map.of("message", "Compensation rule updated"));
@@ -522,7 +577,6 @@ public class UserController {
                     .map(c -> ((LocalDateTime) c.get("checkInTime")).toLocalDate())
                     .distinct()
                     .count();
-            long lateDays = 0; // Could be enhanced with shift start time comparison
 
             Map<String, Object> response = new LinkedHashMap<>();
             response.put("records", result);
@@ -530,8 +584,7 @@ public class UserController {
                     "totalDays", totalDays,
                     "presentDays", presentDays,
                     "absentDays", totalDays - presentDays,
-                    "attendancePercent", totalDays > 0 ? Math.round((presentDays * 100.0) / totalDays) : 0
-            ));
+                    "attendancePercent", totalDays > 0 ? Math.round((presentDays * 100.0) / totalDays) : 0));
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {

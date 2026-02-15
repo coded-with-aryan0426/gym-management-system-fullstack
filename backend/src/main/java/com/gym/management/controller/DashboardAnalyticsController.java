@@ -5,7 +5,6 @@ import com.gym.management.service.DashboardAnalyticsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -19,8 +18,9 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/dashboard/analytics")
-@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:5174", "http://localhost:5175"})
-// @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')") // Temporarily disabled for testing
+@CrossOrigin(origins = { "http://localhost:5173", "http://localhost:5174", "http://localhost:5175" })
+// @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')") // Temporarily disabled for
+// testing
 public class DashboardAnalyticsController {
 
     @Autowired
@@ -170,11 +170,11 @@ public class DashboardAnalyticsController {
             testData.put("timestamp", LocalDate.now());
             testData.put("service", "DashboardAnalyticsService");
             testData.put("status", "active");
-            
+
             // Test membership breakdown
             MembershipBreakdownDTO breakdown = analyticsService.getMembershipBreakdown();
             testData.put("membershipBreakdown", breakdown);
-            
+
             return ResponseEntity.ok(testData);
         } catch (Exception e) {
             Map<String, Object> error = new HashMap<>();

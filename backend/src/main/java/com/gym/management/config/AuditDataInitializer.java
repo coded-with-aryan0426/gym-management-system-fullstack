@@ -52,7 +52,7 @@ public class AuditDataInitializer implements CommandLineRunner {
 
     private void seedAuditLogs() {
         System.out.println("Seeding audit logs...");
-        
+
         // Try to find gym 41, or use first available gym
         Optional<Gym> gymOpt = gymRepository.findById(41L);
         if (!gymOpt.isPresent()) {
@@ -64,7 +64,7 @@ public class AuditDataInitializer implements CommandLineRunner {
             gymOpt = Optional.of(gyms.get(0));
         }
         Gym gym = gymOpt.get();
-        
+
         // Try to find a user
         Optional<User> userOpt = userRepository.findByEmail("Aryan23@gmail.com");
         if (!userOpt.isPresent()) {
@@ -74,15 +74,14 @@ public class AuditDataInitializer implements CommandLineRunner {
             }
         }
         User user = userOpt.orElse(null);
-        
+
         Random random = new Random();
-        
+
         List<String> actions = Arrays.asList("LOGIN", "LOGOUT", "CREATE", "UPDATE", "DELETE", "VIEW", "EXPORT");
         List<String> entities = Arrays.asList("MEMBER", "STAFF", "PLAN", "PAYMENT", "SETTINGS", "REPORT");
         List<String> userNames = Arrays.asList("Aryan", "Admin", "Trainer", "Manager");
         List<String> roles = Arrays.asList("OWNER", "STAFF", "TRAINER", "ADMIN");
         List<String> ipAddresses = Arrays.asList("192.168.1.100", "192.168.1.101", "10.0.0.50", "172.16.0.25");
-        List<String> severities = Arrays.asList("info", "low", "medium", "high");
 
         // Create 50 sample audit logs over the past 30 days
         for (int i = 0; i < 50; i++) {
@@ -91,25 +90,25 @@ public class AuditDataInitializer implements CommandLineRunner {
             if (user != null) {
                 log.setUser(user);
             }
-            
+
             String action = actions.get(random.nextInt(actions.size()));
             log.setAction(action);
-            
+
             String entity = entities.get(random.nextInt(entities.size()));
             log.setEntity(entity);
             log.setEntityId(String.valueOf(random.nextInt(100) + 1));
             log.setEntityName("Sample " + entity + " " + (i + 1));
-            
+
             String userName = userNames.get(random.nextInt(userNames.size()));
             log.setUserName(userName);
             log.setUserRole(roles.get(random.nextInt(roles.size())));
-            
+
             log.setIpAddress(ipAddresses.get(random.nextInt(ipAddresses.size())));
             log.setLocation("Local Network");
             log.setDeviceType(random.nextBoolean() ? "desktop" : "mobile");
             log.setBrowser(random.nextBoolean() ? "Chrome" : "Firefox");
             log.setOs(random.nextBoolean() ? "macOS" : "Windows");
-            
+
             // Set description based on action
             switch (action) {
                 case "LOGIN":
@@ -150,16 +149,16 @@ public class AuditDataInitializer implements CommandLineRunner {
                     log.setDetails("Performed action: " + action);
                     log.setSeverity("info");
             }
-            
+
             // Random timestamp within last 30 days
             int daysAgo = random.nextInt(30);
             int hoursAgo = random.nextInt(24);
             int minutesAgo = random.nextInt(60);
             log.setTimestamp(LocalDateTime.now().minusDays(daysAgo).minusHours(hoursAgo).minusMinutes(minutesAgo));
-            
+
             auditLogRepository.save(log);
         }
-        
+
         // Add a few security alerts
         for (int i = 0; i < 5; i++) {
             AuditLog securityLog = new AuditLog();
@@ -173,13 +172,13 @@ public class AuditDataInitializer implements CommandLineRunner {
             securityLog.setTimestamp(LocalDateTime.now().minusDays(random.nextInt(7)));
             auditLogRepository.save(securityLog);
         }
-        
+
         System.out.println("Seeded " + auditLogRepository.count() + " audit logs");
     }
 
     private void seedUserSessions() {
         System.out.println("Seeding user sessions...");
-        
+
         // Try to find gym 41, or use first available gym
         Optional<Gym> gymOpt = gymRepository.findById(41L);
         if (!gymOpt.isPresent()) {
@@ -191,7 +190,7 @@ public class AuditDataInitializer implements CommandLineRunner {
             gymOpt = Optional.of(gyms.get(0));
         }
         Gym gym = gymOpt.get();
-        
+
         // Try to find user
         Optional<User> userOpt = userRepository.findByEmail("Aryan23@gmail.com");
         if (!userOpt.isPresent()) {
@@ -203,7 +202,7 @@ public class AuditDataInitializer implements CommandLineRunner {
             userOpt = Optional.of(users.get(0));
         }
         User user = userOpt.get();
-        
+
         // Current active session
         UserSession activeSession = new UserSession();
         activeSession.setGym(gym);
@@ -221,13 +220,13 @@ public class AuditDataInitializer implements CommandLineRunner {
         activeSession.setLastActiveAt(LocalDateTime.now());
         activeSession.setIsActive(true);
         userSessionRepository.save(activeSession);
-        
+
         // Some past sessions
-        String[] deviceTypes = {"desktop", "mobile", "tablet"};
-        String[] browsers = {"Chrome", "Firefox", "Safari", "Edge"};
-        String[] oses = {"macOS", "Windows 11", "iOS", "Android"};
-        String[] devices = {"MacBook Pro", "iPhone 15", "iPad Air", "Dell XPS", "Samsung Galaxy"};
-        
+        String[] deviceTypes = { "desktop", "mobile", "tablet" };
+        String[] browsers = { "Chrome", "Firefox", "Safari", "Edge" };
+        String[] oses = { "macOS", "Windows 11", "iOS", "Android" };
+        String[] devices = { "MacBook Pro", "iPhone 15", "iPad Air", "Dell XPS", "Samsung Galaxy" };
+
         Random random = new Random();
         for (int i = 0; i < 10; i++) {
             UserSession session = new UserSession();
@@ -242,7 +241,7 @@ public class AuditDataInitializer implements CommandLineRunner {
             session.setBrowser(browsers[random.nextInt(browsers.length)]);
             session.setOs(oses[random.nextInt(oses.length)]);
             session.setLocation("Local Network");
-            
+
             int daysAgo = random.nextInt(14) + 1;
             session.setCreatedAt(LocalDateTime.now().minusDays(daysAgo));
             session.setLastActiveAt(LocalDateTime.now().minusDays(daysAgo).plusHours(random.nextInt(8)));
@@ -250,7 +249,7 @@ public class AuditDataInitializer implements CommandLineRunner {
             session.setIsActive(false);
             userSessionRepository.save(session);
         }
-        
+
         System.out.println("Seeded " + userSessionRepository.count() + " user sessions");
     }
 }

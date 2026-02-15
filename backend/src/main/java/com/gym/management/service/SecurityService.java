@@ -3,7 +3,6 @@ package com.gym.management.service;
 import com.gym.management.model.*;
 import com.gym.management.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,13 +27,11 @@ public class SecurityService {
     @Autowired
     private GymSettingsService gymSettingsService;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
     // ==================== Session Management ====================
 
     @Transactional
-    public UserSession createSession(User user, String token, String device, String browser, String os, String ip, String location) {
+    public UserSession createSession(User user, String token, String device, String browser, String os, String ip,
+            String location) {
         UserSession session = new UserSession();
         session.setUser(user);
         session.setTokenHash(hashToken(token));
@@ -45,19 +42,19 @@ public class SecurityService {
         session.setLocation(location);
         session.setCreatedAt(LocalDateTime.now());
         session.setLastActiveAt(LocalDateTime.now());
-        
+
         // Get session timeout from settings (default 30 minutes)
         int sessionTimeout = getSessionTimeoutMinutes();
         session.setExpiresAt(LocalDateTime.now().plusMinutes(sessionTimeout));
         session.setIsActive(true);
-        
+
         return sessionRepository.save(session);
     }
 
     public List<Map<String, Object>> getActiveSessions(Long userId, String currentToken) {
         List<UserSession> sessions = sessionRepository.findByUserUserIdAndIsActiveOrderByLastActiveAtDesc(userId, true);
         String currentTokenHash = hashToken(currentToken);
-        
+
         List<Map<String, Object>> result = new ArrayList<>();
         for (UserSession session : sessions) {
             Map<String, Object> sessionMap = new HashMap<>();
@@ -103,14 +100,15 @@ public class SecurityService {
             return false;
         }
         UserSession session = sessionOpt.get();
-        return session.getIsActive() && 
-               (session.getExpiresAt() == null || session.getExpiresAt().isAfter(LocalDateTime.now()));
+        return session.getIsActive() &&
+                (session.getExpiresAt() == null || session.getExpiresAt().isAfter(LocalDateTime.now()));
     }
 
     // ==================== Login History ====================
 
     @Transactional
-    public void recordLogin(User user, String device, String browser, String os, String ip, String location, boolean success, String failureReason) {
+    public void recordLogin(User user, String device, String browser, String os, String ip, String location,
+            boolean success, String failureReason) {
         LoginHistory history = new LoginHistory();
         history.setUser(user);
         history.setDevice(device);
@@ -127,7 +125,7 @@ public class SecurityService {
     public List<Map<String, Object>> getLoginHistory(Long userId) {
         List<LoginHistory> history = loginHistoryRepository.findTop20ByUserUserIdOrderByLoginTimeDesc(userId);
         List<Map<String, Object>> result = new ArrayList<>();
-        
+
         for (LoginHistory entry : history) {
             Map<String, Object> historyMap = new HashMap<>();
             historyMap.put("id", entry.getHistoryId().toString());
@@ -154,20 +152,20 @@ public class SecurityService {
     public Map<String, Object> getSecuritySettings() {
         Map<String, String> allSettings = gymSettingsService.getAllSettings();
         Map<String, Object> securitySettings = new HashMap<>();
-        
+
         securitySettings.put("enforce2FA", parseBoolean(allSettings.get("enforce2FA"), false));
         securitySettings.put("sessionTimeout", parseInt(allSettings.get("sessionTimeout"), 30));
         securitySettings.put("passwordExpiry", parseInt(allSettings.get("passwordExpiry"), 90));
         securitySettings.put("maxLoginAttempts", parseInt(allSettings.get("maxLoginAttempts"), 5));
         securitySettings.put("requireStrongPassword", parseBoolean(allSettings.get("requireStrongPassword"), true));
-        
+
         return securitySettings;
     }
 
     @Transactional
     public void updateSecuritySettings(Map<String, Object> settings) {
         Map<String, Object> settingsToSave = new HashMap<>();
-        
+
         if (settings.containsKey("enforce2FA")) {
             settingsToSave.put("enforce2FA", String.valueOf(settings.get("enforce2FA")));
         }
@@ -183,7 +181,7 @@ public class SecurityService {
         if (settings.containsKey("requireStrongPassword")) {
             settingsToSave.put("requireStrongPassword", String.valueOf(settings.get("requireStrongPassword")));
         }
-        
+
         gymSettingsService.updateAllSettings(settingsToSave);
     }
 
@@ -192,7 +190,7 @@ public class SecurityService {
     public Map<String, Object> getPasswordInfo(Long userId) {
         Optional<User> userOpt = userRepository.findById(userId);
         Map<String, Object> info = new HashMap<>();
-        
+
         if (userOpt.isPresent()) {
             User user = userOpt.get();
             LocalDateTime changedAt = user.getPasswordChangedAt();
@@ -204,7 +202,7 @@ public class SecurityService {
                 info.put("daysSinceChange", -1);
                 info.put("lastChanged", null);
             }
-            
+
             // Check if password is expired based on settings
             int expiryDays = parseInt(gymSettingsService.getAllSettings().get("passwordExpiry"), 90);
             if (expiryDays > 0 && changedAt != null) {
@@ -216,7 +214,7 @@ public class SecurityService {
                 info.put("daysUntilExpiry", expiryDays > 0 ? expiryDays : -1);
             }
         }
-        
+
         return info;
     }
 
@@ -224,19 +222,19 @@ public class SecurityService {
         if (password == null || password.length() < 8) {
             return false;
         }
-        
+
         Map<String, String> settings = gymSettingsService.getAllSettings();
         boolean requireStrong = parseBoolean(settings.get("requireStrongPassword"), true);
-        
+
         if (!requireStrong) {
             return true;
         }
-        
+
         boolean hasUppercase = password.matches(".*[A-Z].*");
         boolean hasLowercase = password.matches(".*[a-z].*");
         boolean hasNumber = password.matches(".*[0-9].*");
         boolean hasSpecial = password.matches(".*[!@#$%^&*(),.?\":{}|<>].*");
-        
+
         return hasUppercase && hasLowercase && hasNumber && hasSpecial;
     }
 
@@ -255,7 +253,7 @@ public class SecurityService {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime sessionCutoff = now.minusDays(7); // Keep inactive sessions for 7 days
         LocalDateTime historyCutoff = now.minusDays(90); // Keep history for 90 days
-        
+
         sessionRepository.cleanupExpiredSessions(now, sessionCutoff);
         loginHistoryRepository.cleanupOldHistory(historyCutoff);
     }
@@ -263,14 +261,16 @@ public class SecurityService {
     // ==================== Helper Methods ====================
 
     private String hashToken(String token) {
-        if (token == null) return "";
+        if (token == null)
+            return "";
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hash = digest.digest(token.getBytes(StandardCharsets.UTF_8));
             StringBuilder hexString = new StringBuilder();
             for (byte b : hash) {
                 String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1) hexString.append('0');
+                if (hex.length() == 1)
+                    hexString.append('0');
                 hexString.append(hex);
             }
             return hexString.toString();
@@ -293,20 +293,25 @@ public class SecurityService {
         if (lastActive == null) {
             return "Unknown";
         }
-        
+
         LocalDateTime now = LocalDateTime.now();
         long minutes = ChronoUnit.MINUTES.between(lastActive, now);
-        
-        if (minutes < 1) return "Now";
-        if (minutes < 60) return minutes + " minutes ago";
-        
+
+        if (minutes < 1)
+            return "Now";
+        if (minutes < 60)
+            return minutes + " minutes ago";
+
         long hours = ChronoUnit.HOURS.between(lastActive, now);
-        if (hours < 24) return hours + " hours ago";
-        
+        if (hours < 24)
+            return hours + " hours ago";
+
         long days = ChronoUnit.DAYS.between(lastActive, now);
-        if (days == 1) return "Yesterday";
-        if (days < 7) return days + " days ago";
-        
+        if (days == 1)
+            return "Yesterday";
+        if (days < 7)
+            return days + " days ago";
+
         return lastActive.toLocalDate().toString();
     }
 
@@ -314,16 +319,19 @@ public class SecurityService {
         if (loginTime == null) {
             return "Unknown";
         }
-        
+
         LocalDateTime now = LocalDateTime.now();
         long days = ChronoUnit.DAYS.between(loginTime.toLocalDate(), now.toLocalDate());
-        
+
         String timeStr = String.format("%02d:%02d", loginTime.getHour(), loginTime.getMinute());
-        
-        if (days == 0) return "Today, " + timeStr;
-        if (days == 1) return "Yesterday, " + timeStr;
-        if (days < 7) return days + " days ago";
-        
+
+        if (days == 0)
+            return "Today, " + timeStr;
+        if (days == 1)
+            return "Yesterday, " + timeStr;
+        if (days < 7)
+            return days + " days ago";
+
         return loginTime.toLocalDate().toString() + " " + timeStr;
     }
 

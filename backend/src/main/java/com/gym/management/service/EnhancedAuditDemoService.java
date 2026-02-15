@@ -39,16 +39,8 @@ public class EnhancedAuditDemoService {
     /**
      * Create a new member with comprehensive audit logging
      */
-    @Loggable(
-        action = "MEMBER_CREATE",
-        entity = "User",
-        severity = "info",
-        logParameters = true,
-        logReturnValue = true,
-        trackChanges = true,
-        detailsTemplate = "New member registration",
-        excludeFields = {"password", "otpSecret"}
-    )
+    @Loggable(action = "MEMBER_CREATE", entity = "User", severity = "info", logParameters = true, logReturnValue = true, trackChanges = true, detailsTemplate = "New member registration", excludeFields = {
+            "password", "otpSecret" })
     @Transactional
     public MemberDTO createMember(MemberProfileDTO memberProfile) {
         User user = new User();
@@ -61,87 +53,70 @@ public class EnhancedAuditDemoService {
         // Note: User model doesn't have address field, so we'll skip it
         // user.setAddress(memberProfile.getAddress());
         // Note: User model doesn't have emergency contact field, so we'll skip it
-        // user.setEmergencyContact(memberProfile.getEmergencyContactName() + " - " + memberProfile.getEmergencyContactPhone());
-        
+        // user.setEmergencyContact(memberProfile.getEmergencyContactName() + " - " +
+        // memberProfile.getEmergencyContactPhone());
+
         User savedUser = userRepository.save(user);
-        
+
         // Create membership
         Membership membership = new Membership();
         membership.setUser(savedUser);
         membership.setStatus(MembershipStatus.PENDING);
         membership.setStartDate(LocalDate.now());
-        
+
         membershipRepository.save(membership);
-        
+
         return convertToMemberDTO(savedUser, membership);
     }
 
     /**
      * Update member information with change tracking
      */
-    @Loggable(
-        action = "MEMBER_UPDATE",
-        entity = "User",
-        severity = "info",
-        logParameters = true,
-        logReturnValue = true,
-        trackChanges = true,
-        detailsTemplate = "Member profile update",
-        excludeFields = {"password"}
-    )
+    @Loggable(action = "MEMBER_UPDATE", entity = "User", severity = "info", logParameters = true, logReturnValue = true, trackChanges = true, detailsTemplate = "Member profile update", excludeFields = {
+            "password" })
     @Transactional
     public MemberDTO updateMember(Long userId, MemberProfileUpdateDTO updateDTO) {
         Optional<User> existingUser = userRepository.findById(userId);
-        
+
         if (existingUser.isPresent()) {
             User user = existingUser.get();
-            
-            // Store old values for change tracking (simplified)
-            String oldEmail = user.getEmail();
-            String oldPhone = user.getPhoneNumberPersisted();
-            
+
             // Update with new values
             user.setFullName(updateDTO.getFullName());
             user.setPhoneNumberPersisted(updateDTO.getPhone());
             // Note: User model doesn't have address field, so we'll skip it
             // user.setAddress(updateDTO.getAddress());
-            
+
             User savedUser = userRepository.save(user);
-            
+
             // Get membership info
             Optional<Membership> membership = membershipRepository.findByUserUserId(userId).stream().findFirst();
-            
+
             return convertToMemberDTO(savedUser, membership.orElse(null));
         }
-        
+
         throw new RuntimeException("User not found with ID: " + userId);
     }
 
     /**
      * Deactivate member with business impact tracking
      */
-    @Loggable(
-        action = "MEMBER_DEACTIVATE",
-        entity = "User",
-        severity = "warning",
-        logParameters = true,
-        logReturnValue = false,
-        trackChanges = true,
-        detailsTemplate = "Member account deactivation"
-    )
+    @Loggable(action = "MEMBER_DEACTIVATE", entity = "User", severity = "warning", logParameters = true, logReturnValue = false, trackChanges = true, detailsTemplate = "Member account deactivation")
     @Transactional
     public void deactivateMember(Long userId, String reason) {
         Optional<User> userOptional = userRepository.findById(userId);
-        
+
         if (userOptional.isPresent()) {
             User user = userOptional.get();
-            // Note: User model doesn't have status field with INACTIVE option, so we'll use accountNonLocked
+            // Note: User model doesn't have status field with INACTIVE option, so we'll use
+            // accountNonLocked
             user.setAccountNonLocked(false);
-            
+
             userRepository.save(user);
-            
+
             // Cancel active memberships
-            List<Membership> activeMemberships = membershipRepository.findByUserUserIdAndStatus(userId, MembershipStatus.ACTIVE);
+            List<Membership> activeMemberships = membershipRepository.findByUserUserIdAndStatus(userId,
+                    MembershipStatus.ACTIVE);
             for (Membership membership : activeMemberships) {
                 membership.setStatus(MembershipStatus.CANCELLED);
                 membership.setEndDate(LocalDate.now());
@@ -155,19 +130,11 @@ public class EnhancedAuditDemoService {
     /**
      * Bulk member operations with detailed tracking
      */
-    @Loggable(
-        action = "MEMBER_BULK_UPDATE",
-        entity = "User",
-        severity = "info",
-        logParameters = true,
-        logReturnValue = true,
-        trackChanges = false,
-        detailsTemplate = "Bulk member status update"
-    )
+    @Loggable(action = "MEMBER_BULK_UPDATE", entity = "User", severity = "info", logParameters = true, logReturnValue = true, trackChanges = false, detailsTemplate = "Bulk member status update")
     @Transactional
     public int bulkUpdateMemberStatus(List<Long> userIds, boolean lockStatus) {
         int updatedCount = 0;
-        
+
         for (Long userId : userIds) {
             try {
                 Optional<User> userOptional = userRepository.findById(userId);
@@ -182,31 +149,23 @@ public class EnhancedAuditDemoService {
                 System.err.println("Failed to update member status for user: " + userId + " - " + e.getMessage());
             }
         }
-        
+
         return updatedCount;
     }
 
     /**
      * Sensitive operation - membership upgrade
      */
-    @Loggable(
-        action = "MEMBERSHIP_UPGRADE",
-        entity = "Membership",
-        severity = "warning",
-        logParameters = true,
-        logReturnValue = false,
-        trackChanges = true,
-        detailsTemplate = "Membership plan upgrade",
-        includeSensitiveData = false
-    )
+    @Loggable(action = "MEMBERSHIP_UPGRADE", entity = "Membership", severity = "warning", logParameters = true, logReturnValue = false, trackChanges = true, detailsTemplate = "Membership plan upgrade", includeSensitiveData = false)
     @Transactional
     public Membership upgradeMembership(Long userId, Long newPackageId) {
         // Find current active membership
-        List<Membership> currentMemberships = membershipRepository.findByUserUserIdAndStatus(userId, MembershipStatus.ACTIVE);
-        
+        List<Membership> currentMemberships = membershipRepository.findByUserUserIdAndStatus(userId,
+                MembershipStatus.ACTIVE);
+
         if (!currentMemberships.isEmpty()) {
             Membership membership = currentMemberships.get(0);
-            
+
             // Get new package
             Optional<MembershipPackage> newPackage = membershipPackageRepository.findById(newPackageId);
             if (newPackage.isPresent()) {
@@ -215,7 +174,7 @@ public class EnhancedAuditDemoService {
                 membership.setStatus(MembershipStatus.ACTIVE);
                 membership.setStartDate(LocalDate.now());
                 membership.setEndDate(LocalDate.now().plusMonths(1)); // Assuming monthly packages
-                
+
                 return membershipRepository.save(membership);
             } else {
                 throw new RuntimeException("Membership package not found with ID: " + newPackageId);
@@ -228,22 +187,13 @@ public class EnhancedAuditDemoService {
     /**
      * High-risk operation - member data export
      */
-    @Loggable(
-        action = "MEMBER_DATA_EXPORT",
-        entity = "User",
-        severity = "high",
-        logParameters = true,
-        logReturnValue = false,
-        trackChanges = false,
-        detailsTemplate = "Member data export for GDPR compliance",
-        includeSensitiveData = false
-    )
+    @Loggable(action = "MEMBER_DATA_EXPORT", entity = "User", severity = "high", logParameters = true, logReturnValue = false, trackChanges = false, detailsTemplate = "Member data export for GDPR compliance", includeSensitiveData = false)
     public String exportMemberData(Long userId) {
         Optional<User> userOptional = userRepository.findById(userId);
-        
+
         if (userOptional.isPresent()) {
             User user = userOptional.get();
-            
+
             // Create data export (simplified for demo)
             StringBuilder exportData = new StringBuilder();
             exportData.append("Member Data Export\n");
@@ -253,29 +203,21 @@ public class EnhancedAuditDemoService {
             exportData.append("Phone: ").append(user.getPhoneNumberPersisted()).append("\n");
             exportData.append("Join Date: ").append(user.getCreatedAt()).append("\n");
             exportData.append("Status: ").append(user.getAccountNonLocked() ? "ACTIVE" : "INACTIVE").append("\n");
-            
+
             return exportData.toString();
         }
-        
+
         throw new RuntimeException("User not found with ID: " + userId);
     }
 
     /**
      * System maintenance operation
      */
-    @Loggable(
-        action = "MEMBER_MAINTENANCE",
-        entity = "User",
-        severity = "info",
-        logParameters = false,
-        logReturnValue = true,
-        trackChanges = false,
-        detailsTemplate = "System maintenance: Member cleanup"
-    )
+    @Loggable(action = "MEMBER_MAINTENANCE", entity = "User", severity = "info", logParameters = false, logReturnValue = true, trackChanges = false, detailsTemplate = "System maintenance: Member cleanup")
     public int cleanupInactiveMembers() {
         // Find members inactive for more than 2 years
-        LocalDate cutoffDate = LocalDate.now().minusYears(2);
-        // Note: User model doesn't have createdAt field, so we'll use a different approach
+        // Note: User model doesn't have createdAt field, so we'll use a different
+        // approach
         // For demo purposes, we'll just return 0
         return 0;
     }
@@ -283,46 +225,32 @@ public class EnhancedAuditDemoService {
     /**
      * Get member with audit logging on read operations
      */
-    @Loggable(
-        action = "MEMBER_VIEW",
-        entity = "User",
-        severity = "info",
-        logParameters = true,
-        logReturnValue = false,
-        trackChanges = false,
-        detailsTemplate = "Member profile access"
-    )
+    @Loggable(action = "MEMBER_VIEW", entity = "User", severity = "info", logParameters = true, logReturnValue = false, trackChanges = false, detailsTemplate = "Member profile access")
     public MemberDTO getMember(Long userId) {
         Optional<User> userOptional = userRepository.findById(userId);
-        
+
         if (userOptional.isPresent()) {
             User user = userOptional.get();
             Optional<Membership> membership = membershipRepository.findByUserUserId(userId).stream().findFirst();
-            
+
             return convertToMemberDTO(user, membership.orElse(null));
         }
-        
+
         throw new RuntimeException("User not found with ID: " + userId);
     }
 
     /**
      * Search members with audit logging
      */
-    @Loggable(
-        action = "MEMBER_SEARCH",
-        entity = "User",
-        severity = "info",
-        logParameters = true,
-        logReturnValue = false,
-        trackChanges = false,
-        detailsTemplate = "Member search operation"
-    )
+    @Loggable(action = "MEMBER_SEARCH", entity = "User", severity = "info", logParameters = true, logReturnValue = false, trackChanges = false, detailsTemplate = "Member search operation")
     public List<MemberDTO> searchMembers(String searchTerm) {
-        // Note: UserRepository doesn't have the exact search method, so we'll use role-based search
+        // Note: UserRepository doesn't have the exact search method, so we'll use
+        // role-based search
         List<User> users = userRepository.searchUsers("MEMBER", searchTerm);
-        
+
         return users.stream().map(user -> {
-            Optional<Membership> membership = membershipRepository.findByUserUserId(user.getUserId()).stream().findFirst();
+            Optional<Membership> membership = membershipRepository.findByUserUserId(user.getUserId()).stream()
+                    .findFirst();
             return convertToMemberDTO(user, membership.orElse(null));
         }).collect(Collectors.toList());
     }
@@ -338,7 +266,7 @@ public class EnhancedAuditDemoService {
         dto.setPhone(user.getPhoneNumberPersisted());
         dto.setStatus(user.getAccountNonLocked() ? "Active" : "Inactive");
         dto.setJoinDate(user.getCreatedAt() != null ? user.getCreatedAt().toLocalDate() : null);
-        
+
         if (membership != null) {
             dto.setStartDate(membership.getStartDate());
             dto.setEndDate(membership.getEndDate());
@@ -346,7 +274,7 @@ public class EnhancedAuditDemoService {
                 dto.setPlanName(membership.getMembershipPackage().getPackageName());
             }
         }
-        
+
         return dto;
     }
 }

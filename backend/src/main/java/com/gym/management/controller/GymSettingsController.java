@@ -9,7 +9,6 @@ import com.gym.management.repository.GymRepository;
 import com.gym.management.repository.UserRepository;
 import com.gym.management.security.CustomUserDetails;
 import com.gym.management.service.GymSettingsService;
-import com.gym.management.annotation.Loggable;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -42,7 +41,7 @@ public class GymSettingsController {
 
     @Autowired
     private GymRepository gymRepository;
-    
+
     @Autowired
     private com.gym.management.service.AuditLogService auditLogService;
 
@@ -63,7 +62,7 @@ public class GymSettingsController {
             String ownerName = userRepository.findFullNameByUserId(userId);
             String email = userRepository.findEmailByUserId(userId);
             String phone = userRepository.findPhoneByUserId(userId);
-            
+
             profile.put("ownerName", ownerName != null ? ownerName : "");
             profile.put("email", email != null ? email : "");
             profile.put("phone", phone != null ? phone : "");
@@ -113,7 +112,7 @@ public class GymSettingsController {
         try {
             // Debug: Log received data
             System.out.println("Received owner profile update data: " + data);
-            
+
             Long userId = getCurrentUserId();
             if (userId == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -142,14 +141,15 @@ public class GymSettingsController {
             System.out.println("Looking for gym with userId: " + userId);
             Optional<Gym> gymOpt = gymRepository.findFirstByOwnerUserIdOrderByCreatedAtDesc(userId);
             System.out.println("Gym found: " + gymOpt.isPresent());
-            
+
             if (gymOpt.isPresent()) {
                 Gym gym = gymOpt.get();
                 System.out.println("Found gym: " + gym.getName() + " (ID: " + gym.getGymId() + ")");
-                
+
                 if (data.containsKey("gymName")) {
                     String gymName = (String) data.get("gymName");
-                    System.out.println("Updating gym name: '" + gymName + "' (length: " + (gymName != null ? gymName.length() : "null") + ")");
+                    System.out.println("Updating gym name: '" + gymName + "' (length: "
+                            + (gymName != null ? gymName.length() : "null") + ")");
                     if (gymName != null && !gymName.trim().isEmpty()) {
                         System.out.println("Setting gym name to: '" + gymName.trim() + "'");
                         gym.setName(gymName.trim());
@@ -157,7 +157,7 @@ public class GymSettingsController {
                         System.out.println("Gym name is null or empty, skipping update");
                     }
                 }
-                
+
                 if (data.containsKey("address")) {
                     gym.setAddress((String) data.get("address"));
                 }
@@ -174,50 +174,50 @@ public class GymSettingsController {
                     gym.setEmail((String) data.get("gymEmail"));
                 }
                 gym.setUpdatedBy(userId);
-            gymRepository.save(gym);
-            System.out.println("Gym saved successfully!");
-        } else {
-            System.out.println("No gym found for userId: " + userId + " - creating new gym!");
-            
-            // Auto-create gym when none exists
-            Gym newGym = new Gym();
-            
-            // Get the user entity for the owner relationship
-            Optional<User> ownerUserOpt = userRepository.findById(userId);
-            if (ownerUserOpt.isPresent()) {
-                newGym.setOwner(ownerUserOpt.get());
-            }
-            
-            newGym.setCreatedBy(userId);
-            newGym.setUpdatedBy(userId);
-            
-            if (data.containsKey("gymName")) {
-                String gymName = (String) data.get("gymName");
-                System.out.println("Setting gym name for new gym: '" + gymName + "'");
-                if (gymName != null && !gymName.trim().isEmpty()) {
-                    newGym.setName(gymName.trim());
+                gymRepository.save(gym);
+                System.out.println("Gym saved successfully!");
+            } else {
+                System.out.println("No gym found for userId: " + userId + " - creating new gym!");
+
+                // Auto-create gym when none exists
+                Gym newGym = new Gym();
+
+                // Get the user entity for the owner relationship
+                Optional<User> ownerUserOpt = userRepository.findById(userId);
+                if (ownerUserOpt.isPresent()) {
+                    newGym.setOwner(ownerUserOpt.get());
                 }
+
+                newGym.setCreatedBy(userId);
+                newGym.setUpdatedBy(userId);
+
+                if (data.containsKey("gymName")) {
+                    String gymName = (String) data.get("gymName");
+                    System.out.println("Setting gym name for new gym: '" + gymName + "'");
+                    if (gymName != null && !gymName.trim().isEmpty()) {
+                        newGym.setName(gymName.trim());
+                    }
+                }
+
+                if (data.containsKey("address")) {
+                    newGym.setAddress((String) data.get("address"));
+                }
+                if (data.containsKey("city")) {
+                    newGym.setCity((String) data.get("city"));
+                }
+                if (data.containsKey("state")) {
+                    newGym.setState((String) data.get("state"));
+                }
+                if (data.containsKey("gymPhone")) {
+                    newGym.setPhone((String) data.get("gymPhone"));
+                }
+                if (data.containsKey("gymEmail")) {
+                    newGym.setEmail((String) data.get("gymEmail"));
+                }
+
+                gymRepository.save(newGym);
+                System.out.println("New gym created successfully with ID: " + newGym.getGymId());
             }
-            
-            if (data.containsKey("address")) {
-                newGym.setAddress((String) data.get("address"));
-            }
-            if (data.containsKey("city")) {
-                newGym.setCity((String) data.get("city"));
-            }
-            if (data.containsKey("state")) {
-                newGym.setState((String) data.get("state"));
-            }
-            if (data.containsKey("gymPhone")) {
-                newGym.setPhone((String) data.get("gymPhone"));
-            }
-            if (data.containsKey("gymEmail")) {
-                newGym.setEmail((String) data.get("gymEmail"));
-            }
-            
-            gymRepository.save(newGym);
-            System.out.println("New gym created successfully with ID: " + newGym.getGymId());
-        }
 
             // Save extra fields to key-value store
             if (data.containsKey("taxId")) {
@@ -245,34 +245,34 @@ public class GymSettingsController {
                 }
             }
 
-              // Log the profile update to audit log
-              try {
-                  Long gymId = gymRepository.findFirstByOwnerUserIdOrderByCreatedAtDesc(userId)
-                      .map(Gym::getGymId).orElse(null);
-                  
-                  // Convert changes to proper JSON format
-                  String changesJson;
-                  try {
-                      ObjectMapper mapper = new ObjectMapper();
-                      changesJson = mapper.writeValueAsString(data);
-                  } catch (Exception e) {
-                      changesJson = "{}";
-                  }
-                  
-                  auditLogService.logUpdate(
-                      "PROFILE",                           // entity
-                      user.getUserId().toString(),         // entityId
-                      user.getFullName(),                  // entityName
-                      userId,                              // userId
-                      gymId,                               // gymId
-                      "Owner profile updated",             // details
-                      changesJson,                         // changes (proper JSON)
-                      null                                 // ipAddress
-                  );
-              } catch (Exception auditEx) {
-                  System.err.println("Failed to log owner profile update: " + auditEx.getMessage());
-              }
-            
+            // Log the profile update to audit log
+            try {
+                Long gymId = gymRepository.findFirstByOwnerUserIdOrderByCreatedAtDesc(userId)
+                        .map(Gym::getGymId).orElse(null);
+
+                // Convert changes to proper JSON format
+                String changesJson;
+                try {
+                    ObjectMapper mapper = new ObjectMapper();
+                    changesJson = mapper.writeValueAsString(data);
+                } catch (Exception e) {
+                    changesJson = "{}";
+                }
+
+                auditLogService.logUpdate(
+                        "PROFILE", // entity
+                        user.getUserId().toString(), // entityId
+                        user.getFullName(), // entityName
+                        userId, // userId
+                        gymId, // gymId
+                        "Owner profile updated", // details
+                        changesJson, // changes (proper JSON)
+                        null // ipAddress
+                );
+            } catch (Exception auditEx) {
+                System.err.println("Failed to log owner profile update: " + auditEx.getMessage());
+            }
+
             return ResponseEntity.ok(Map.of("message", "Profile updated successfully"));
         } catch (Exception e) {
             // Log the error and return a proper error response
@@ -294,8 +294,8 @@ public class GymSettingsController {
     public ResponseEntity<?> handleAllExceptions(Exception e) {
         logger.error("Exception in GymSettingsController: ", e);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("error", "Internal server error: " + e.getMessage(), 
-                           "trace", e.getClass().getSimpleName() + ": " + e.getMessage()));
+                .body(Map.of("error", "Internal server error: " + e.getMessage(),
+                        "trace", e.getClass().getSimpleName() + ": " + e.getMessage()));
     }
 
     // ==================== General Settings ====================

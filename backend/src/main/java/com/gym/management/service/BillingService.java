@@ -3,8 +3,6 @@ package com.gym.management.service;
 import com.gym.management.dto.BillingSettingsDTO;
 import com.gym.management.model.BillingSettings;
 import com.gym.management.model.Gym;
-import com.gym.management.model.Invoice;
-import com.gym.management.model.User;
 import com.gym.management.repository.BillingSettingsRepository;
 import com.gym.management.repository.GymRepository;
 import com.gym.management.repository.InvoiceRepository;
@@ -119,50 +117,84 @@ public class BillingService {
     }
 
     private void updateSettingsFromDTO(BillingSettings settings, BillingSettingsDTO dto) {
-        if (dto.getCurrency() != null) settings.setCurrency(dto.getCurrency());
-        if (dto.getCurrencySymbol() != null) settings.setCurrencySymbol(dto.getCurrencySymbol());
-        if (dto.getTaxEnabled() != null) settings.setTaxEnabled(dto.getTaxEnabled());
-        if (dto.getTaxPercentage() != null) settings.setTaxPercentage(dto.getTaxPercentage());
-        if (dto.getTaxName() != null) settings.setTaxName(dto.getTaxName());
-        if (dto.getTaxNumber() != null) settings.setTaxNumber(dto.getTaxNumber());
-        if (dto.getLateFeeEnabled() != null) settings.setLateFeeEnabled(dto.getLateFeeEnabled());
-        if (dto.getLateFeeAmount() != null) settings.setLateFeeAmount(dto.getLateFeeAmount());
-        if (dto.getLateFeeType() != null) settings.setLateFeeType(dto.getLateFeeType());
-        if (dto.getLateFeePercentage() != null) settings.setLateFeePercentage(dto.getLateFeePercentage());
-        if (dto.getGracePeriodDays() != null) settings.setGracePeriodDays(dto.getGracePeriodDays());
-        if (dto.getMaxLateFeeAmount() != null) settings.setMaxLateFeeAmount(dto.getMaxLateFeeAmount());
-        if (dto.getInvoicePrefix() != null) settings.setInvoicePrefix(dto.getInvoicePrefix());
-        if (dto.getAutoInvoiceEnabled() != null) settings.setAutoInvoiceEnabled(dto.getAutoInvoiceEnabled());
-        if (dto.getInvoiceNotes() != null) settings.setInvoiceNotes(dto.getInvoiceNotes());
-        if (dto.getInvoiceFooter() != null) settings.setInvoiceFooter(dto.getInvoiceFooter());
-        if (dto.getAllowPartialPayments() != null) settings.setAllowPartialPayments(dto.getAllowPartialPayments());
-        if (dto.getMinPartialPaymentPercentage() != null) settings.setMinPartialPaymentPercentage(dto.getMinPartialPaymentPercentage());
-        if (dto.getAllowOnlinePayments() != null) settings.setAllowOnlinePayments(dto.getAllowOnlinePayments());
-        if (dto.getAllowCashPayments() != null) settings.setAllowCashPayments(dto.getAllowCashPayments());
-        if (dto.getAllowBankTransfer() != null) settings.setAllowBankTransfer(dto.getAllowBankTransfer());
-        if (dto.getAllowCardPayments() != null) settings.setAllowCardPayments(dto.getAllowCardPayments());
-        if (dto.getAllowUpiPayments() != null) settings.setAllowUpiPayments(dto.getAllowUpiPayments());
-        if (dto.getPaymentReminderEnabled() != null) settings.setPaymentReminderEnabled(dto.getPaymentReminderEnabled());
+        if (dto.getCurrency() != null)
+            settings.setCurrency(dto.getCurrency());
+        if (dto.getCurrencySymbol() != null)
+            settings.setCurrencySymbol(dto.getCurrencySymbol());
+        if (dto.getTaxEnabled() != null)
+            settings.setTaxEnabled(dto.getTaxEnabled());
+        if (dto.getTaxPercentage() != null)
+            settings.setTaxPercentage(dto.getTaxPercentage());
+        if (dto.getTaxName() != null)
+            settings.setTaxName(dto.getTaxName());
+        if (dto.getTaxNumber() != null)
+            settings.setTaxNumber(dto.getTaxNumber());
+        if (dto.getLateFeeEnabled() != null)
+            settings.setLateFeeEnabled(dto.getLateFeeEnabled());
+        if (dto.getLateFeeAmount() != null)
+            settings.setLateFeeAmount(dto.getLateFeeAmount());
+        if (dto.getLateFeeType() != null)
+            settings.setLateFeeType(dto.getLateFeeType());
+        if (dto.getLateFeePercentage() != null)
+            settings.setLateFeePercentage(dto.getLateFeePercentage());
+        if (dto.getGracePeriodDays() != null)
+            settings.setGracePeriodDays(dto.getGracePeriodDays());
+        if (dto.getMaxLateFeeAmount() != null)
+            settings.setMaxLateFeeAmount(dto.getMaxLateFeeAmount());
+        if (dto.getInvoicePrefix() != null)
+            settings.setInvoicePrefix(dto.getInvoicePrefix());
+        if (dto.getAutoInvoiceEnabled() != null)
+            settings.setAutoInvoiceEnabled(dto.getAutoInvoiceEnabled());
+        if (dto.getInvoiceNotes() != null)
+            settings.setInvoiceNotes(dto.getInvoiceNotes());
+        if (dto.getInvoiceFooter() != null)
+            settings.setInvoiceFooter(dto.getInvoiceFooter());
+        if (dto.getAllowPartialPayments() != null)
+            settings.setAllowPartialPayments(dto.getAllowPartialPayments());
+        if (dto.getMinPartialPaymentPercentage() != null)
+            settings.setMinPartialPaymentPercentage(dto.getMinPartialPaymentPercentage());
+        if (dto.getAllowOnlinePayments() != null)
+            settings.setAllowOnlinePayments(dto.getAllowOnlinePayments());
+        if (dto.getAllowCashPayments() != null)
+            settings.setAllowCashPayments(dto.getAllowCashPayments());
+        if (dto.getAllowBankTransfer() != null)
+            settings.setAllowBankTransfer(dto.getAllowBankTransfer());
+        if (dto.getAllowCardPayments() != null)
+            settings.setAllowCardPayments(dto.getAllowCardPayments());
+        if (dto.getAllowUpiPayments() != null)
+            settings.setAllowUpiPayments(dto.getAllowUpiPayments());
+        if (dto.getPaymentReminderEnabled() != null)
+            settings.setPaymentReminderEnabled(dto.getPaymentReminderEnabled());
         if (dto.getPaymentReminderDays() != null) {
             settings.setPaymentReminderDays(dto.getPaymentReminderDays().stream()
                     .map(String::valueOf)
                     .collect(Collectors.joining(",")));
         }
-        if (dto.getOverdueReminderEnabled() != null) settings.setOverdueReminderEnabled(dto.getOverdueReminderEnabled());
+        if (dto.getOverdueReminderEnabled() != null)
+            settings.setOverdueReminderEnabled(dto.getOverdueReminderEnabled());
         if (dto.getOverdueReminderDays() != null) {
             settings.setOverdueReminderDays(dto.getOverdueReminderDays().stream()
                     .map(String::valueOf)
                     .collect(Collectors.joining(",")));
         }
-        if (dto.getRefundPolicyEnabled() != null) settings.setRefundPolicyEnabled(dto.getRefundPolicyEnabled());
-        if (dto.getRefundPeriodDays() != null) settings.setRefundPeriodDays(dto.getRefundPeriodDays());
-        if (dto.getRefundPercentage() != null) settings.setRefundPercentage(dto.getRefundPercentage());
-        if (dto.getRefundDeductionAmount() != null) settings.setRefundDeductionAmount(dto.getRefundDeductionAmount());
-        if (dto.getAutoDiscountEnabled() != null) settings.setAutoDiscountEnabled(dto.getAutoDiscountEnabled());
-        if (dto.getEarlyPaymentDiscountPercentage() != null) settings.setEarlyPaymentDiscountPercentage(dto.getEarlyPaymentDiscountPercentage());
-        if (dto.getEarlyPaymentDays() != null) settings.setEarlyPaymentDays(dto.getEarlyPaymentDays());
-        if (dto.getProrateEnabled() != null) settings.setProrateEnabled(dto.getProrateEnabled());
-        if (dto.getProrateMethod() != null) settings.setProrateMethod(dto.getProrateMethod());
+        if (dto.getRefundPolicyEnabled() != null)
+            settings.setRefundPolicyEnabled(dto.getRefundPolicyEnabled());
+        if (dto.getRefundPeriodDays() != null)
+            settings.setRefundPeriodDays(dto.getRefundPeriodDays());
+        if (dto.getRefundPercentage() != null)
+            settings.setRefundPercentage(dto.getRefundPercentage());
+        if (dto.getRefundDeductionAmount() != null)
+            settings.setRefundDeductionAmount(dto.getRefundDeductionAmount());
+        if (dto.getAutoDiscountEnabled() != null)
+            settings.setAutoDiscountEnabled(dto.getAutoDiscountEnabled());
+        if (dto.getEarlyPaymentDiscountPercentage() != null)
+            settings.setEarlyPaymentDiscountPercentage(dto.getEarlyPaymentDiscountPercentage());
+        if (dto.getEarlyPaymentDays() != null)
+            settings.setEarlyPaymentDays(dto.getEarlyPaymentDays());
+        if (dto.getProrateEnabled() != null)
+            settings.setProrateEnabled(dto.getProrateEnabled());
+        if (dto.getProrateMethod() != null)
+            settings.setProrateMethod(dto.getProrateMethod());
     }
 
     private BillingSettingsDTO convertToDTO(BillingSettings settings) {

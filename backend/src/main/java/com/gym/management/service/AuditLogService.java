@@ -24,7 +24,6 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 /**
@@ -52,8 +51,8 @@ public class AuditLogService {
     /**
      * Log an action performed by a user (simple version)
      */
-    public AuditLog logAction(String action, String target, String userName, 
-                              String userRole, String details, String ipAddress) {
+    public AuditLog logAction(String action, String target, String userName,
+            String userRole, String details, String ipAddress) {
         AuditLog log = new AuditLog();
         log.setAction(action);
         log.setTarget(target);
@@ -63,7 +62,7 @@ public class AuditLogService {
         log.setIpAddress(ipAddress);
         log.setTimestamp(LocalDateTime.now());
         log.setSeverity("info");
-        
+
         return auditLogRepository.save(log);
     }
 
@@ -71,9 +70,9 @@ public class AuditLogService {
      * Log an action with user and gym association
      */
     public AuditLog logAction(String action, String entity, String entityId, String entityName,
-                              Long userId, Long gymId, String details, String severity,
-                              String ipAddress, String deviceType, String browser, String os,
-                              String sessionId, String changes) {
+            Long userId, Long gymId, String details, String severity,
+            String ipAddress, String deviceType, String browser, String os,
+            String sessionId, String changes) {
         AuditLog log = AuditLog.builder()
                 .action(action)
                 .entity(entity)
@@ -161,8 +160,8 @@ public class AuditLogService {
      * Log an action with simplified parameters (for AuthService and similar)
      */
     public AuditLog logAction(String action, String entity, String entityId, String entityName,
-                              Long userId, Long gymId, String details, String changes, String ipAddress) {
-        return logAction(action, entity, entityId, entityName, userId, gymId, 
+            Long userId, Long gymId, String details, String changes, String ipAddress) {
+        return logAction(action, entity, entityId, entityName, userId, gymId,
                 details, "info", ipAddress, null, null, null, null, changes);
     }
 
@@ -171,10 +170,10 @@ public class AuditLogService {
     /**
      * Log user login event
      */
-    public AuditLog logLogin(Long userId, Long gymId, String ipAddress, String deviceType, 
-                             String browser, String os, String sessionId) {
+    public AuditLog logLogin(Long userId, Long gymId, String ipAddress, String deviceType,
+            String browser, String os, String sessionId) {
         return logAction("LOGIN", "User", userId != null ? userId.toString() : null, null,
-                userId, gymId, "User logged in", "info", ipAddress, deviceType, browser, os, 
+                userId, gymId, "User logged in", "info", ipAddress, deviceType, browser, os,
                 sessionId, null);
     }
 
@@ -183,7 +182,7 @@ public class AuditLogService {
      */
     public AuditLog logLogout(Long userId, Long gymId, String ipAddress, String sessionId) {
         return logAction("LOGOUT", "User", userId != null ? userId.toString() : null, null,
-                userId, gymId, "User logged out", "info", ipAddress, null, null, null, 
+                userId, gymId, "User logged out", "info", ipAddress, null, null, null,
                 sessionId, null);
     }
 
@@ -208,27 +207,27 @@ public class AuditLogService {
     /**
      * Log data creation
      */
-    public AuditLog logCreate(String entity, String entityId, String entityName, Long userId, 
-                              Long gymId, String details, String ipAddress) {
-        return logAction("CREATE", entity, entityId, entityName, userId, gymId, 
+    public AuditLog logCreate(String entity, String entityId, String entityName, Long userId,
+            Long gymId, String details, String ipAddress) {
+        return logAction("CREATE", entity, entityId, entityName, userId, gymId,
                 details, "info", ipAddress, null, null, null, null, null);
     }
 
     /**
      * Log data update with changes
      */
-    public AuditLog logUpdate(String entity, String entityId, String entityName, Long userId, 
-                              Long gymId, String details, String changes, String ipAddress) {
-        return logAction("UPDATE", entity, entityId, entityName, userId, gymId, 
+    public AuditLog logUpdate(String entity, String entityId, String entityName, Long userId,
+            Long gymId, String details, String changes, String ipAddress) {
+        return logAction("UPDATE", entity, entityId, entityName, userId, gymId,
                 details, "low", ipAddress, null, null, null, null, changes);
     }
 
     /**
      * Log data deletion
      */
-    public AuditLog logDelete(String entity, String entityId, String entityName, Long userId, 
-                              Long gymId, String details, String ipAddress) {
-        return logAction("DELETE", entity, entityId, entityName, userId, gymId, 
+    public AuditLog logDelete(String entity, String entityId, String entityName, Long userId,
+            Long gymId, String details, String ipAddress) {
+        return logAction("DELETE", entity, entityId, entityName, userId, gymId,
                 details, "medium", ipAddress, null, null, null, null, null);
     }
 
@@ -237,21 +236,21 @@ public class AuditLogService {
     /**
      * Log security event
      */
-    public AuditLog logSecurityEvent(String action, String details, Long userId, Long gymId, 
-                                     String severity, String ipAddress) {
-        return logAction(action, "Security", null, null, userId, gymId, 
+    public AuditLog logSecurityEvent(String action, String details, Long userId, Long gymId,
+            String severity, String ipAddress) {
+        return logAction(action, "Security", null, null, userId, gymId,
                 details, severity, ipAddress, null, null, null, null, null);
     }
 
     /**
      * Log permission change
      */
-    public AuditLog logPermissionChange(Long targetUserId, String oldPermissions, 
-                                        String newPermissions, Long changedByUserId, 
-                                        Long gymId, String ipAddress) {
+    public AuditLog logPermissionChange(Long targetUserId, String oldPermissions,
+            String newPermissions, Long changedByUserId,
+            Long gymId, String ipAddress) {
         String changes = String.format("{\"old\": \"%s\", \"new\": \"%s\"}", oldPermissions, newPermissions);
         return logAction("PERMISSION_CHANGE", "User", targetUserId.toString(), null,
-                changedByUserId, gymId, "User permissions changed", "high", 
+                changedByUserId, gymId, "User permissions changed", "high",
                 ipAddress, null, null, null, null, changes);
     }
 
@@ -260,13 +259,13 @@ public class AuditLogService {
     /**
      * Get paginated audit logs for a gym with filters
      */
-    public Page<AuditLogDTO> getLogs(Long gymId, String search, String severity, 
-                                     LocalDateTime startDate, LocalDateTime endDate,
-                                     int page, int size) {
+    public Page<AuditLogDTO> getLogs(Long gymId, String search, String severity,
+            LocalDateTime startDate, LocalDateTime endDate,
+            int page, int size) {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "timestamp"));
 
         Page<AuditLog> logs;
-        
+
         if (search != null && !search.isEmpty()) {
             logs = auditLogRepository.searchByGym(gymId, search, pageRequest);
         } else if (severity != null && !severity.isEmpty() && !severity.equals("all")) {
@@ -319,14 +318,14 @@ public class AuditLogService {
      */
     public AuditStatsDTO getStats(Long gymId) {
         LocalDateTime startOfToday = LocalDate.now().atStartOfDay();
-        
+
         Long totalLogs = auditLogRepository.countByGymGymId(gymId);
         Long todayLogs = auditLogRepository.countTodayLogsByGym(gymId, startOfToday);
         Long securityAlerts = auditLogRepository.countSecurityAlertsByGym(gymId);
-        
+
         // Get online users count
         Long onlineUsers = userSessionRepository.countByGymGymIdAndStatus(gymId, "online");
-        
+
         // Calculate average session time (last 7 days) - duration stored in seconds
         LocalDateTime weekAgo = LocalDateTime.now().minusDays(7);
         Double avgSessionSeconds = userSessionRepository.calculateAverageSessionDurationByGym(gymId, weekAgo);
@@ -408,12 +407,13 @@ public class AuditLogService {
     /**
      * Create or update user session on login
      */
-    public UserSession createSession(Long userId, Long gymId, String ipAddress, 
-                                     String deviceType, String browser, String os) {
+    public UserSession createSession(Long userId, Long gymId, String ipAddress,
+            String deviceType, String browser, String os) {
         User user = userRepository.findById(userId).orElse(null);
         Gym gym = gymId != null ? gymRepository.findById(gymId).orElse(null) : null;
-        
-        if (user == null) return null;
+
+        if (user == null)
+            return null;
 
         // End any existing active sessions for this user
         List<UserSession> activeSessions = userSessionRepository.findByUserUserIdAndStatus(userId, "online");
@@ -490,7 +490,7 @@ public class AuditLogService {
 
         StringBuilder csv = new StringBuilder();
         csv.append("ID,Timestamp,Action,Entity,User,Role,Severity,IP Address,Details\n");
-        
+
         for (AuditLog log : logs) {
             csv.append(String.format("%d,%s,%s,%s,%s,%s,%s,%s,\"%s\"\n",
                     log.getAuditId(),
@@ -501,10 +501,9 @@ public class AuditLogService {
                     log.getUserRole() != null ? log.getUserRole() : "",
                     log.getSeverity() != null ? log.getSeverity() : "",
                     log.getIpAddress() != null ? log.getIpAddress() : "",
-                    log.getDetails() != null ? log.getDetails().replace("\"", "\"\"") : ""
-            ));
+                    log.getDetails() != null ? log.getDetails().replace("\"", "\"\"") : ""));
         }
-        
+
         return csv.toString();
     }
 
@@ -545,11 +544,10 @@ public class AuditLogService {
      */
     private UserSessionDTO convertSessionToDTO(UserSession session) {
         User user = session.getUser();
-        
+
         String duration = "";
         if (session.getCreatedAt() != null) {
-            LocalDateTime endTime = session.getLogoutAt() != null ? 
-                    session.getLogoutAt() : LocalDateTime.now();
+            LocalDateTime endTime = session.getLogoutAt() != null ? session.getLogoutAt() : LocalDateTime.now();
             long minutes = Duration.between(session.getCreatedAt(), endTime).toMinutes();
             duration = formatDuration(minutes);
         }
@@ -557,10 +555,12 @@ public class AuditLogService {
         return UserSessionDTO.builder()
                 .id(session.getSessionId())
                 .userId(user != null ? user.getUserId() : null)
-                .userName(user != null ? (user.getFullName() != null ? user.getFullName() : user.getUsername()) : "Unknown")
+                .userName(user != null ? (user.getFullName() != null ? user.getFullName() : user.getUsername())
+                        : "Unknown")
                 .userAvatar(user != null ? user.getAvatarId() : null)
-                .userRole(user != null && user.getRoles() != null && !user.getRoles().isEmpty() ? 
-                        user.getRoles().iterator().next().getRoleName() : "UNKNOWN")
+                .userRole(user != null && user.getRoles() != null && !user.getRoles().isEmpty()
+                        ? user.getRoles().iterator().next().getRoleName()
+                        : "UNKNOWN")
                 .status(session.getStatus())
                 .loginTime(session.getCreatedAt())
                 .logoutTime(session.getLogoutAt())
