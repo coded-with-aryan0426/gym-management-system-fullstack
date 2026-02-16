@@ -17,15 +17,27 @@ import CategoryStats from './components/CategoryStats';
 import QuickInsights from './components/QuickInsights';
 import { exportToCSV, exportFinancialPDF } from '../../utils/exportUtils';
 import { financeApi } from '../../services/financeApi';
+import { formatCurrency } from '../../utils/formatters';
 import './Financials.css';
 
-type TabKey = 'overview' | 'transactions' | 'reports';
+type TabKey = 'overview' | 'transactions' | 'reports' | 'analytics' | 'insights';
 
 const Financials: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [activeTab, setActiveTab] = useState<TabKey>('overview');
     const [exportMenuOpen, setExportMenuOpen] = useState(false);
+
+    // Handle URL query param for tab
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search)
+        const tab = params.get('tab')
+        if (tab === 'reports' || tab === 'analytics' || tab === 'insights') {
+            setActiveTab('reports')
+        } else if (tab === 'transactions') {
+            setActiveTab('transactions')
+        }
+    }, [])
 
     const [kpiStats, setKpiStats] = useState<KPIStats>({
         totalRevenue: 0, revenueChange: 0,
@@ -383,14 +395,14 @@ const Financials: React.FC = () => {
                             <section className="breakdown-card">
                                 <div className="section-header-inline">
                                     <h3>Revenue Sources</h3>
-                                    <span className="total-badge">₹{kpiStats.totalRevenue.toLocaleString()}</span>
+                                    <span className="total-badge">{formatCurrency(kpiStats.totalRevenue)}</span>
                                 </div>
                                 <RevenueChart onFilter={setFilterCategory} data={breakdownData.revenue} />
                             </section>
                             <section className="breakdown-card">
                                 <div className="section-header-inline">
                                     <h3>Expense Breakdown</h3>
-                                    <span className="total-badge expense">₹{kpiStats.totalExpenses.toLocaleString()}</span>
+                                    <span className="total-badge expense">{formatCurrency(kpiStats.totalExpenses)}</span>
                                 </div>
                                 <ExpenseChart onFilter={setFilterCategory} data={breakdownData.expenses} />
                             </section>

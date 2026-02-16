@@ -5,21 +5,25 @@ import { EditorRoot } from './editor';
 import { AppShell } from './components/Layout';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
-import { ServerHealthProvider } from './pages/utility/ServerOfflinePage';
+
 
 // Import new design system
 import './styles/global.css';
 
 // Lazy load pages for faster initial load
 const Dashboard = lazy(() => import('./pages/Dashboard/Dashboard'));
-const Trainers = lazy(() => import('./pages/Trainers/Trainers'));
-const Members = lazy(() => import('./pages/Members/Members'));
+const TrainerList = lazy(() => import('./pages/Trainers/TrainerList'));
+const MemberList = lazy(() => import('./pages/Members/MemberList'));
+const MemberDetail = lazy(() => import('./pages/Members/MemberDetail'));
+const TrainerDetail = lazy(() => import('./pages/Trainers/TrainerDetail'));
 const Classes = lazy(() => import('./pages/Classes/Classes'));
 const Financials = lazy(() => import('./pages/Financials/Financials'));
 const Equipment = lazy(() => import('./pages/Equipment/Equipment'));
 const PTSessions = lazy(() => import('./pages/PTSessions/PTSessions'));
 const Reports = lazy(() => import('./pages/Reports/Reports'));
 const Settings = lazy(() => import('./pages/Settings/Settings'));
+const StaffList = lazy(() => import('./pages/Staff/StaffList'));
+const StaffDetail = lazy(() => import('./pages/Staff/StaffDetail'));
 const OwnerNotifications = lazy(() => import('./pages/Dashboard/OwnerNotifications'));
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const UnauthorizedPage = lazy(() => import('./pages/UnauthorizedPage'));
@@ -78,6 +82,7 @@ const ServerErrorPage = lazy(() => import('./pages/utility/ServerErrorPage'));
 const MaintenancePage = lazy(() => import('./pages/utility/MaintenancePage'));
 const SessionExpiredPage = lazy(() => import('./pages/utility/SessionExpiredPage'));
 const ComingSoonPage = lazy(() => import('./pages/utility/ComingSoonPage'));
+const CheckIn = lazy(() => import('./pages/CheckIn/CheckIn'));
 
 // Loading spinner for page transitions
 const PageLoader = () => (
@@ -91,8 +96,7 @@ function App() {
     <BrowserRouter>
       <EditorRoot>
         <AppProvider>
-          <ServerHealthProvider>
-            <ErrorBoundary>
+              <ErrorBoundary>
               <Suspense fallback={<PageLoader />}>
                 <Routes>
                   {/* Public Routes */}
@@ -195,15 +199,21 @@ function App() {
                         <AppShell>
                           <Routes>
                             <Route path="/dashboard" element={<Dashboard />} />
-                            <Route path="/trainers" element={<Trainers />} />
-                            <Route path="/members" element={<Members />} />
+                            <Route path="/trainers" element={<TrainerList />} />
+                            <Route path="/trainers/:id" element={<TrainerDetail />} />
+                            <Route path="/members" element={<MemberList />} />
+                            <Route path="/members/:id" element={<MemberDetail />} />
+                            <Route path="/staff" element={<StaffList />} />
+                            <Route path="/staff/:id" element={<StaffDetail />} />
                             <Route path="/classes" element={<Classes />} />
                             <Route path="/equipment" element={<Equipment />} />
                             <Route path="/financials" element={<Financials />} />
-                            <Route path="/pt-sessions" element={<PTSessions />} />
-                            <Route path="/reports" element={<Reports />} />
+                            {/* Redirect old routes to new consolidated pages */}
+                            <Route path="/pt-sessions" element={<Navigate to="/classes?tab=sessions" replace />} />
+                            <Route path="/reports" element={<Navigate to="/financials?tab=analytics" replace />} />
                             <Route path="/notifications" element={<OwnerNotifications />} />
                             <Route path="/settings" element={<Settings />} />
+                            <Route path="/check-in" element={<CheckIn />} />
                             <Route path="*" element={<Navigate to="/dashboard" replace />} />
                           </Routes>
                         </AppShell>
@@ -213,7 +223,6 @@ function App() {
                 </Routes>
               </Suspense>
             </ErrorBoundary>
-          </ServerHealthProvider>
         </AppProvider>
       </EditorRoot>
     </BrowserRouter>

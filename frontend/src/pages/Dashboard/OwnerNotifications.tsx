@@ -973,7 +973,7 @@ const OwnerNotifications: React.FC = () => {
                     </div>
                 </div>
             </div>
-        </div>
+m        </div>
     );
 };
 

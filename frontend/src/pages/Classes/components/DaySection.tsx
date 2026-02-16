@@ -8,6 +8,7 @@ interface DaySectionProps {
     onClassClick?: (classData: ClassData) => void
     onEdit?: (classData: ClassData) => void
     onCancel?: (classData: ClassData) => void
+    onMarkAttendance?: (classData: ClassData) => void
 }
 
 const DaySection: React.FC<DaySectionProps> = ({
@@ -17,6 +18,7 @@ const DaySection: React.FC<DaySectionProps> = ({
     onClassClick,
     onEdit,
     onCancel,
+    onMarkAttendance,
 }) => {
     const formatDate = (d: Date) => {
         const options: Intl.DateTimeFormatOptions = { weekday: 'short', month: 'short', day: 'numeric' }
@@ -61,6 +63,7 @@ const DaySection: React.FC<DaySectionProps> = ({
                             onClick={() => onClassClick?.(cls)}
                             onEdit={onEdit}
                             onCancel={onCancel}
+                            onMarkAttendance={onMarkAttendance}
                         />
                     ))
                 ) : (

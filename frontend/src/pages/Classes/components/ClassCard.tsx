@@ -20,11 +20,14 @@ interface ClassCardProps {
     onClick?: () => void
     onEdit?: (classData: ClassData) => void
     onCancel?: (classData: ClassData) => void
+    onMarkAttendance?: (classData: ClassData) => void
     isPast?: boolean
 }
 
-const ClassCard: React.FC<ClassCardProps> = ({ classData, onClick, onEdit, onCancel, isPast = false }) => {
+const ClassCard: React.FC<ClassCardProps> = ({ classData, onClick, onEdit, onCancel, onMarkAttendance, isPast = false }) => {
     const { name, trainer, startTime, endTime, capacity, enrolled, status, room } = classData
+    const fillPercent = capacity > 0 ? Math.min((enrolled / capacity) * 100, 100) : 0
+    const capacityColor = fillPercent >= 100 ? 'var(--color-red)' : fillPercent >= 80 ? 'var(--color-amber)' : 'var(--color-emerald)'
 
     const getStatusColor = () => {
         switch (status) {
@@ -93,9 +96,19 @@ const ClassCard: React.FC<ClassCardProps> = ({ classData, onClick, onEdit, onCan
                 {/* Capacity & Status */}
                 <div className="class-card__right">
                     <div className="class-card__capacity">
-                        <span className="capacity-current">{enrolled}</span>
-                        <span className="capacity-divider">/</span>
-                        <span className="capacity-max">{capacity}</span>
+                        <div className="capacity-bar-wrapper">
+                            <div className="capacity-bar-bg">
+                                <div
+                                    className="capacity-bar-fill"
+                                    style={{ width: `${fillPercent}%`, backgroundColor: capacityColor }}
+                                />
+                            </div>
+                            <span className="capacity-text">
+                                <span className="capacity-current">{enrolled}</span>
+                                <span className="capacity-divider">/</span>
+                                <span className="capacity-max">{capacity}</span>
+                            </span>
+                        </div>
                     </div>
                     <div
                         className="class-card__status"
@@ -110,6 +123,18 @@ const ClassCard: React.FC<ClassCardProps> = ({ classData, onClick, onEdit, onCan
 
                 {/* Actions (visible on hover) */}
                 <div className="class-card__actions">
+                    {onMarkAttendance && status !== 'Cancelled' && !isPast && (
+                        <button
+                            className="class-card__action-btn class-card__action-btn--attendance"
+                            title="Mark Attendance"
+                            onClick={(e) => { e.stopPropagation(); onMarkAttendance(classData); }}
+                        >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M9 11l3 3L22 4" />
+                                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+                            </svg>
+                        </button>
+                    )}
                     <button
                         className="class-card__action-btn"
                         title="Edit"

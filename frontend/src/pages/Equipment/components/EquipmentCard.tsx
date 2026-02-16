@@ -2,7 +2,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import type { Equipment } from '../../../types/equipment';
 import { getEquipmentIcon } from '../../../utils/iconMapping';
-import { Wrench, MapPin, Calendar, Clock, Edit3, Trash2, Shield, ShieldAlert, ShieldX, Timer } from 'lucide-react';
+import { formatCurrency } from '../../../utils/formatters';
+import { Wrench, MapPin, Calendar, Clock, Edit3, Trash2, Shield, ShieldAlert, ShieldX, Timer, Heart } from 'lucide-react';
 
 interface EquipmentCardProps {
     equipment: Equipment;
@@ -55,8 +56,38 @@ const EquipmentCard: React.FC<EquipmentCardProps> = ({ equipment, density = 'com
         return rem > 0 ? `${years}y ${rem}mo` : `${years}y`;
     };
 
+    // Compute health score (0-100) from condition, status, warranty, maintenance
+    const getHealthScore = (): number => {
+        let score = 100;
+        // Condition impact
+        const conditionScores: Record<string, number> = { NEW: 0, GOOD: -10, FAIR: -30, POOR: -55 };
+        score += conditionScores[equipment.condition] || -20;
+        // Status impact
+        if (equipment.status === 'MAINTENANCE') score -= 15;
+        if (equipment.status === 'OUT_OF_ORDER') score -= 40;
+        if (equipment.status === 'RETIRED') score -= 60;
+        // Maintenance overdue
+        if (equipment.nextMaintenanceDueDate) {
+            const days = Math.ceil((new Date(equipment.nextMaintenanceDueDate).getTime() - Date.now()) / 86400000);
+            if (days < 0) score -= Math.min(20, Math.abs(days));
+            else if (days <= 7) score -= 5;
+        }
+        // Warranty expired
+        if (equipment.warrantyExpiryDate && new Date(equipment.warrantyExpiryDate) < new Date()) score -= 5;
+        return Math.max(0, Math.min(100, score));
+    };
+
+    const getHealthColor = (score: number) => {
+        if (score >= 80) return '#22c55e';
+        if (score >= 60) return '#3b82f6';
+        if (score >= 40) return '#eab308';
+        return '#ef4444';
+    };
+
     const warranty = getWarrantyStatus();
     const age = getAge();
+    const healthScore = getHealthScore();
+    const healthColor = getHealthColor(healthScore);
 
     const iconSize = { compact: 50, comfortable: 70, spacious: 100 };
     const imageHeight = { compact: 'h-20', comfortable: 'h-28', spacious: 'h-36' };
@@ -88,6 +119,21 @@ const EquipmentCard: React.FC<EquipmentCardProps> = ({ equipment, density = 'com
                             style={{ backgroundColor: config.color, color: config.color }}
                         />
                         <span style={{ color: config.color }}>{config.label}</span>
+                    </div>
+                </div>
+
+                {/* Health Score - bottom left */}
+                <div className="absolute bottom-2 left-2.5 z-20" title={`Health: ${healthScore}%`}>
+                    <div style={{ position: 'relative', width: 32, height: 32 }}>
+                        <svg width="32" height="32" viewBox="0 0 32 32">
+                            <circle cx="16" cy="16" r="13" fill="none" stroke="var(--border-color)" strokeWidth="3" opacity="0.3" />
+                            <circle cx="16" cy="16" r="13" fill="none" stroke={healthColor} strokeWidth="3"
+                                strokeDasharray={`${(healthScore / 100) * 81.68} 81.68`}
+                                strokeLinecap="round" transform="rotate(-90 16 16)" />
+                        </svg>
+                        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Heart size={10} style={{ color: healthColor, fill: healthColor }} />
+                        </div>
                     </div>
                 </div>
 
@@ -174,8 +220,7 @@ const EquipmentCard: React.FC<EquipmentCardProps> = ({ equipment, density = 'com
                     <div className="flex items-center gap-2">
                         {equipment.purchaseCost && equipment.purchaseCost > 0 ? (
                             <span className="cost-tag">
-                                <span className="currency">₹</span>
-                                {equipment.purchaseCost.toLocaleString('en-IN')}
+                                {formatCurrency(equipment.purchaseCost)}
                             </span>
                         ) : (
                             <div className="info-item">

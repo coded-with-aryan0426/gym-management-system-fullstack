@@ -165,6 +165,27 @@ const api = {
     return response.data;
   },
 
+  // Member Detail - Additional data
+  async getMemberAttendance(memberId: number): Promise<any[]> {
+    const response = await apiClient.get<any[]>(`/members/${memberId}/attendance`);
+    return response.data;
+  },
+
+  async getMemberPayments(memberId: number): Promise<any[]> {
+    const response = await apiClient.get<any[]>(`/members/${memberId}/payments`);
+    return response.data;
+  },
+
+  async getMemberSessions(memberId: number): Promise<any[]> {
+    const response = await apiClient.get<any[]>(`/members/${memberId}/sessions`);
+    return response.data;
+  },
+
+  async getMemberNotes(memberId: number): Promise<any[]> {
+    const response = await apiClient.get<any[]>(`/members/${memberId}/notes`);
+    return response.data;
+  },
+
   async createUser(user: CreateUserDto): Promise<User> {
     const response = await apiClient.post<User>('/users', user);
     return response.data;

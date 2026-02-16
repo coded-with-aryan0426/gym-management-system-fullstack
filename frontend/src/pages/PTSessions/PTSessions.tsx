@@ -33,7 +33,7 @@ import ScheduleSessionModal from '../../components/ScheduleSessionModal/Schedule
 import SessionDetailsModal from '../../components/SessionDetailsModal/SessionDetailsModal';
 import './PTSessions.css';
 
-type ViewMode = 'calendar' | 'list';
+type ViewMode = 'calendar' | 'list' | 'packages';
 type FilterStatus = 'all' | 'SCHEDULED' | 'COMPLETED' | 'MISSED' | 'CANCELLED';
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -396,14 +396,21 @@ const PTSessions: React.FC = () => {
                 <Calendar size={16} />
                 <span>Calendar</span>
               </button>
-              <button
-                className={`pt-view-btn ${viewMode === 'list' ? 'pt-view-btn--active' : ''}`}
-                onClick={() => setViewMode('list')}
-              >
-                <List size={16} />
-                <span>List</span>
-              </button>
-            </div>
+                <button
+                  className={`pt-view-btn ${viewMode === 'list' ? 'pt-view-btn--active' : ''}`}
+                  onClick={() => setViewMode('list')}
+                >
+                  <List size={16} />
+                  <span>List</span>
+                </button>
+                <button
+                  className={`pt-view-btn ${viewMode === 'packages' ? 'pt-view-btn--active' : ''}`}
+                  onClick={() => setViewMode('packages')}
+                >
+                  <Dumbbell size={16} />
+                  <span>Packages</span>
+                </button>
+              </div>
 
             <div className="pt-sessions__filter-wrapper">
               <button 
@@ -734,11 +741,104 @@ const PTSessions: React.FC = () => {
                 </div>
               )}
             </div>
-          )}
+            )}
+          </div>
         </div>
-      </div>
 
-      {showScheduleModal && (
+        {/* Packages View */}
+        {viewMode === 'packages' && (
+          <div className="pt-packages">
+            {(() => {
+              const memberGroups = new Map<string, { memberName: string; memberId: string; sessions: typeof filteredSessions }>();
+              filteredSessions.forEach(s => {
+                const key = s.memberId || s.memberName || 'Unknown';
+                if (!memberGroups.has(key)) {
+                  memberGroups.set(key, { memberName: s.memberName || 'Unknown', memberId: s.memberId || '', sessions: [] });
+                }
+                memberGroups.get(key)!.sessions.push(s);
+              });
+              const groups = Array.from(memberGroups.values()).sort((a, b) => b.sessions.length - a.sessions.length);
+              if (groups.length === 0) {
+                return (
+                  <div className="pt-empty">
+                    <Dumbbell size={48} strokeWidth={1} />
+                    <h3>No Session Packages</h3>
+                    <p>Schedule sessions to see member packages here.</p>
+                  </div>
+                );
+              }
+              return groups.map(group => {
+                const completed = group.sessions.filter(s => s.status === 'COMPLETED').length;
+                const scheduled = group.sessions.filter(s => s.status === 'SCHEDULED' || s.status === 'CONFIRMED').length;
+                const cancelled = group.sessions.filter(s => s.status === 'CANCELLED' || s.status === 'NO_SHOW').length;
+                const total = group.sessions.length;
+                const progress = total > 0 ? (completed / total) * 100 : 0;
+                return (
+                  <div key={group.memberId} className="pt-package-card">
+                    <div className="pt-package-card__header">
+                      <div className="pt-package-card__avatar">
+                        {group.memberName.charAt(0)}
+                      </div>
+                      <div className="pt-package-card__info">
+                        <h4 className="pt-package-card__name">{group.memberName}</h4>
+                        <span className="pt-package-card__count">{total} sessions total</span>
+                      </div>
+                      <div className="pt-package-card__progress-ring">
+                        <svg viewBox="0 0 36 36" className="pt-package-card__ring">
+                          <path className="pt-package-card__ring-bg" d="M18 2.0845a 15.9155 15.9155 0 0 1 0 31.831a 15.9155 15.9155 0 0 1 0 -31.831" />
+                          <path className="pt-package-card__ring-fill" strokeDasharray={`${progress}, 100`} d="M18 2.0845a 15.9155 15.9155 0 0 1 0 31.831a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        </svg>
+                        <span className="pt-package-card__progress-text">{Math.round(progress)}%</span>
+                      </div>
+                    </div>
+                    <div className="pt-package-card__stats">
+                      <div className="pt-package-card__stat">
+                        <span className="pt-package-card__stat-value emerald">{completed}</span>
+                        <span className="pt-package-card__stat-label">Completed</span>
+                      </div>
+                      <div className="pt-package-card__stat">
+                        <span className="pt-package-card__stat-value blue">{scheduled}</span>
+                        <span className="pt-package-card__stat-label">Upcoming</span>
+                      </div>
+                      <div className="pt-package-card__stat">
+                        <span className="pt-package-card__stat-value crimson">{cancelled}</span>
+                        <span className="pt-package-card__stat-label">Cancelled</span>
+                      </div>
+                    </div>
+                    <div className="pt-package-card__progress-bar">
+                      <div className="pt-package-card__progress-fill" style={{ width: `${progress}%` }} />
+                    </div>
+                    <div className="pt-package-card__sessions">
+                      {group.sessions.slice(0, 5).map(session => (
+                        <div
+                          key={session.sessionId}
+                          className={`pt-package-card__session-item pt-package-card__session-item--${session.status?.toLowerCase()}`}
+                          onClick={() => { setSelectedSession(session); setShowDetailsModal(true); }}
+                        >
+                          <span className="pt-package-card__session-date">
+                            {new Date(session.sessionDate).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}
+                          </span>
+                          <span className="pt-package-card__session-time">
+                            {new Date(session.sessionDate).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                          <span className="pt-package-card__session-trainer">{session.trainerName}</span>
+                          <Badge variant={session.status === 'COMPLETED' ? 'success' : session.status === 'SCHEDULED' ? 'info' : session.status === 'CANCELLED' ? 'danger' : 'warning'}>
+                            {session.status}
+                          </Badge>
+                        </div>
+                      ))}
+                      {group.sessions.length > 5 && (
+                        <div className="pt-package-card__more">+{group.sessions.length - 5} more sessions</div>
+                      )}
+                    </div>
+                  </div>
+                );
+              });
+            })()}
+          </div>
+        )}
+
+        {showScheduleModal && (
         <ScheduleSessionModal
           trainers={trainers}
           members={members}

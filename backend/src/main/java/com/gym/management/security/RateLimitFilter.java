@@ -53,7 +53,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
         if (path.contains("/auth/login") || path.contains("/auth/oauth/")) {
             key = "login:" + clientIP;
             bucket = loginRateLimitCache.get(key, k -> RateLimitConfig.createLoginBucket());
-        } else if (path.contains("/auth/")) {
+        } else if (path.contains("/auth/") && !path.contains("/health-check")) {
             // Other auth endpoints (signup, password reset) - moderate limit
             key = "auth:" + clientIP;
             bucket = loginRateLimitCache.get(key, k -> RateLimitConfig.createStrictBucket());

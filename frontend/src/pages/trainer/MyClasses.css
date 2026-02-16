@@ -725,13 +725,36 @@
   margin-bottom: 8px;
 }
 
+.my-classes__attendance-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
 .my-classes__attendance-bar {
+  flex: 1;
   height: 4px;
   background: var(--bg-primary, rgba(0, 0, 0, 0.2));
   border-radius: 2px;
   position: relative;
   overflow: hidden;
-  margin-bottom: 6px;
+}
+
+.my-classes__attendance-pct {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-tertiary, rgba(255, 255, 255, 0.5));
+  min-width: 28px;
+  text-align: right;
+}
+
+.my-classes__attendance-pct--high {
+  color: #F59E0B;
+}
+
+.my-classes__attendance-pct--full {
+  color: #10B981;
 }
 
 .my-classes__attendance-fill {

@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import {
-    Search, Filter, MoreVertical, MessageSquare, Calendar, ChevronDown, Grid, List, TrendingUp, Clock, Users, Download, Target, X
+    Search, Filter, MoreVertical, MessageSquare, Calendar, ChevronDown, Grid, List, TrendingUp, Clock, Users, Download, Target, X, ArrowUpDown, AlertTriangle
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { trainerApi } from '../../services/trainerApi';
@@ -14,6 +14,7 @@ const MyMembers: React.FC = () => {
     const [filter, setFilter] = useState('All');
     const [searchQuery, setSearchQuery] = useState('');
     const [quickFilter, setQuickFilter] = useState<string | null>(null);
+    const [sortBy, setSortBy] = useState<'name' | 'lastSession' | 'daysLeft'>('name');
 
     const [members, setMembers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -68,6 +69,15 @@ const MyMembers: React.FC = () => {
         return matchesSearch && matchesFilter;
     });
 
+    const sortedMembers = useMemo(() => {
+        return [...filteredMembers].sort((a, b) => {
+            if (sortBy === 'name') return a.name.localeCompare(b.name);
+            if (sortBy === 'daysLeft') return (a.daysLeft ?? 999) - (b.daysLeft ?? 999);
+            if (sortBy === 'lastSession') return getDaysLeft(a.lastSession) - getDaysLeft(b.lastSession);
+            return 0;
+        });
+    }, [filteredMembers, sortBy]);
+
     const toggleQuickFilter = (filterName: string) => {
         setQuickFilter(prev => prev === filterName ? null : filterName);
     };
@@ -108,7 +118,7 @@ const MyMembers: React.FC = () => {
 
     const handleExport = () => {
         const headers = ['Name', 'Email', 'Phone', 'Status', 'Plan', 'Classes', 'Last Session'];
-        const rows = filteredMembers.map(m =>
+        const rows = sortedMembers.map(m =>
             [m.name, m.email, m.phone, m.status, m.plan, m.stats.classes, m.lastSession]
         );
         const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
@@ -197,6 +207,51 @@ const MyMembers: React.FC = () => {
                 </div>
             </div>
 
+            {/* Stats Summary Bar */}
+            <div className="my-members__stats-bar">
+                <div className="my-members__stat-card">
+                    <Users size={16} />
+                    <div>
+                        <span className="my-members__stat-value">{stats.total}</span>
+                        <span className="my-members__stat-label">Total</span>
+                    </div>
+                </div>
+                <div className="my-members__stat-card my-members__stat-card--success">
+                    <TrendingUp size={16} />
+                    <div>
+                        <span className="my-members__stat-value">{stats.activeCount}</span>
+                        <span className="my-members__stat-label">Active</span>
+                    </div>
+                </div>
+                <div className="my-members__stat-card my-members__stat-card--warning">
+                    <AlertTriangle size={16} />
+                    <div>
+                        <span className="my-members__stat-value">{stats.needsAttention}</span>
+                        <span className="my-members__stat-label">At Risk</span>
+                    </div>
+                </div>
+                <div className="my-members__stat-card my-members__stat-card--danger">
+                    <Clock size={16} />
+                    <div>
+                        <span className="my-members__stat-value">{stats.expiringSoon}</span>
+                        <span className="my-members__stat-label">Expiring</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Sort Bar */}
+            <div className="my-members__sort-bar">
+                <span className="my-members__results-count">{sortedMembers.length} members</span>
+                <div className="my-members__sort-dropdown">
+                    <ArrowUpDown size={12} />
+                    <select value={sortBy} onChange={(e) => setSortBy(e.target.value as any)}>
+                        <option value="name">Sort by Name</option>
+                        <option value="lastSession">Sort by Last Session</option>
+                        <option value="daysLeft">Sort by Days Left</option>
+                    </select>
+                </div>
+            </div>
+
             <div className="my-members__content">
                 {loading ? (
                     <div className="flex justify-center items-center h-64 text-zinc-500">
@@ -207,7 +262,7 @@ const MyMembers: React.FC = () => {
                     <div className="flex justify-center items-center h-64 text-red-400">
                         <Target size={24} className="mr-2" /> {error}
                     </div>
-                ) : filteredMembers.length === 0 ? (
+                ) : sortedMembers.length === 0 ? (
                     <div className="my-members__empty">
                         <Users size={32} />
                         <p>No members found</p>
@@ -216,7 +271,7 @@ const MyMembers: React.FC = () => {
                     <>
                         {viewMode === 'grid' && (
                             <div className="my-members__grid">
-                                {filteredMembers.map(member => (
+                                {sortedMembers.map(member => (
                                     <div key={member.id} className="member-card">
                                         <div className="member-card__header">
                                             <div className="member-card__avatar">
@@ -272,7 +327,7 @@ const MyMembers: React.FC = () => {
                         {
                             viewMode === 'list' && (
                                 <div className="my-members__list">
-                                    {filteredMembers.map(member => (
+                                    {sortedMembers.map(member => (
                                         <div key={member.id} className="member-list-item">
                                             <div className="member-list-item__avatar">
                                                 <img

@@ -446,6 +446,32 @@
 .trainer-schedule__day-column {
   flex: 1;
   border-left: 1px solid var(--border-color, rgba(255, 255, 255, 0.04));
+  position: relative;
+}
+
+/* Current time indicator */
+.trainer-schedule__time-indicator {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.trainer-schedule__time-indicator-dot {
+  position: absolute;
+  left: -4px;
+  top: -4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #DC2626;
+}
+
+.trainer-schedule__time-indicator-line {
+  height: 2px;
+  background: #DC2626;
+  width: 100%;
 }
 
 .trainer-schedule__day-column--today {

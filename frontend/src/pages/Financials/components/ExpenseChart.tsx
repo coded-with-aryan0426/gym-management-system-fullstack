@@ -1,6 +1,7 @@
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import type { ExpenseBreakdown } from '../../../types/finance';
+import { formatCurrency } from '../../../utils/formatters';
 import './ExpenseChart.css';
 
 interface ExpenseChartProps {
@@ -29,7 +30,7 @@ const ExpenseChart: React.FC<ExpenseChartProps> = ({ data = [], onFilter }) => {
         return (
             <div className="expense-tooltip">
                 <span className="tooltip-name">{item.label}</span>
-                <span className="tooltip-value">₹{item.value.toLocaleString('en-IN')}</span>
+                <span className="tooltip-value">{formatCurrency(item.value)}</span>
                 <span className="tooltip-percent">{item.percentage}% of total</span>
             </div>
         );
@@ -72,7 +73,7 @@ const ExpenseChart: React.FC<ExpenseChartProps> = ({ data = [], onFilter }) => {
             <div className="expense-summary">
                 <div className="summary-row">
                     <span className="summary-label">Total Expenses</span>
-                    <span className="summary-value">₹{total.toLocaleString('en-IN')}</span>
+                    <span className="summary-value">{formatCurrency(total)}</span>
                 </div>
                 {topExpense && topExpense.value > 0 && (
                     <div className="summary-insight">

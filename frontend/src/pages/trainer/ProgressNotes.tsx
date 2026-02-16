@@ -50,6 +50,49 @@ const ProgressNotes: React.FC = () => {
     const [formTags, setFormTags] = useState('');
     const [selectedMemberName, setSelectedMemberName] = useState('');
 
+    // Note Templates
+    const noteTemplates = [
+        { label: 'Select a template...', value: '' },
+        {
+            label: 'Strength Session',
+            value: 'strength',
+            data: { category: 'strength', sessionType: 'Strength Training', content: 'Completed strength training session.\n\nExercises performed:\n- \n- \n- \n\nForm observations: \nWeight progression: ', tags: 'strength', mood: 'good' as const }
+        },
+        {
+            label: 'Cardio Session',
+            value: 'cardio',
+            data: { category: 'cardio', sessionType: 'Cardio Training', content: 'Completed cardio session.\n\nActivities:\n- \n\nDuration: \nAvg Heart Rate: \nRecovery: ', tags: 'cardio', mood: 'good' as const }
+        },
+        {
+            label: 'Initial Assessment',
+            value: 'assessment',
+            data: { category: 'general', sessionType: 'Initial Assessment', content: 'Initial fitness assessment completed.\n\nGoals discussed:\n- \n\nCurrent fitness level: \nInjuries/Limitations: \nRecommended program: ', tags: 'assessment,new-member', mood: 'good' as const }
+        },
+        {
+            label: 'Progress Check-in',
+            value: 'checkin',
+            data: { category: 'general', sessionType: 'Progress Review', content: 'Monthly progress check-in.\n\nGoal progress:\n- \n\nMeasurement changes:\n- Weight: \n- Body fat: \n\nAdjustments needed: ', tags: 'progress,review', mood: 'good' as const }
+        },
+        {
+            label: 'Nutrition Review',
+            value: 'nutrition',
+            data: { category: 'nutrition', sessionType: 'Nutrition Consultation', content: 'Nutrition review session.\n\nCurrent diet observations:\n- \n\nRecommendations:\n- \n\nMeal plan adjustments: ', tags: 'nutrition', mood: 'good' as const }
+        }
+    ];
+
+    const applyTemplate = (templateValue: string) => {
+        const template = noteTemplates.find(t => t.value === templateValue);
+        if (!template?.data) return;
+        setFormData(prev => ({
+            ...prev,
+            category: template.data.category as any,
+            sessionType: template.data.sessionType,
+            content: template.data.content,
+            mood: template.data.mood
+        }));
+        setFormTags(template.data.tags);
+    };
+
     useEffect(() => {
         fetchInitialData();
     }, []);
@@ -461,6 +504,19 @@ const ProgressNotes: React.FC = () => {
                                 >
                                     <option value="">Search or select member...</option>
                                     {members.map(m => <option key={m.id} value={m.name}>{m.name}</option>)}
+                                </select>
+                            </div>
+
+                            <div className="progress-notes__form-field">
+                                <label>Quick Template</label>
+                                <select
+                                    className="progress-notes__template-select"
+                                    onChange={(e) => applyTemplate(e.target.value)}
+                                    defaultValue=""
+                                >
+                                    {noteTemplates.map(t => (
+                                        <option key={t.value} value={t.value}>{t.label}</option>
+                                    ))}
                                 </select>
                             </div>
 

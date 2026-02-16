@@ -393,15 +393,20 @@ const MyClasses: React.FC = () => {
                                 </div>
 
                                 <div className="my-classes__card-attendance">
-                                    <div className="my-classes__attendance-bar">
-                                        <div
-                                            className="my-classes__attendance-fill my-classes__attendance-fill--confirmed"
-                                            style={{ width: `${(cls.attendees.confirmed / cls.capacity) * 100}%` }}
-                                        />
-                                        <div
-                                            className="my-classes__attendance-fill my-classes__attendance-fill--pending"
-                                            style={{ width: `${(cls.attendees.pending / cls.capacity) * 100}%`, left: `${(cls.attendees.confirmed / cls.capacity) * 100}%` }}
-                                        />
+                                    <div className="my-classes__attendance-bar-row">
+                                        <div className="my-classes__attendance-bar">
+                                            <div
+                                                className="my-classes__attendance-fill my-classes__attendance-fill--confirmed"
+                                                style={{ width: `${(cls.attendees.confirmed / cls.capacity) * 100}%` }}
+                                            />
+                                            <div
+                                                className="my-classes__attendance-fill my-classes__attendance-fill--pending"
+                                                style={{ width: `${(cls.attendees.pending / cls.capacity) * 100}%`, left: `${(cls.attendees.confirmed / cls.capacity) * 100}%` }}
+                                            />
+                                        </div>
+                                        <span className={`my-classes__attendance-pct ${(cls.attendees.confirmed / cls.capacity) >= 0.9 ? 'my-classes__attendance-pct--full' : (cls.attendees.confirmed / cls.capacity) >= 0.7 ? 'my-classes__attendance-pct--high' : ''}`}>
+                                            {Math.round((cls.attendees.confirmed / cls.capacity) * 100)}%
+                                        </span>
                                     </div>
                                     <div className="my-classes__attendance-stats">
                                         <span className="my-classes__attendance-confirmed">

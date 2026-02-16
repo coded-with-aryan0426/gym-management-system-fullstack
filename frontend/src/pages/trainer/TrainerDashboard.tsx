@@ -8,9 +8,9 @@ import {
 } from 'lucide-react';
 import { format, differenceInMinutes } from 'date-fns';
 import { usePageEntry, useButtonPress } from '../../hooks/useAnimations';
-import ActiveSessionToast from '../../components/shared/ActiveSessionToast';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
+import { formatCurrency } from '../../utils/formatters';
 import './TrainerDashboard.css';
 
 // New Components
@@ -179,7 +179,7 @@ const TrainerDashboard: React.FC = () => {
                 <Editable id="trainer-dashboard-kpi-earnings" config={{ allowLayout: true, allowStyle: true, allowVisibility: true }}>
                   <DashboardStatCard
                       title="Today's Earnings"
-                      value={`₹${data.todayEarnings}`}
+                        value={formatCurrency(data.todayEarnings)}
                       icon={IndianRupee}
                       color="#10b981"
                       delay={0.1}

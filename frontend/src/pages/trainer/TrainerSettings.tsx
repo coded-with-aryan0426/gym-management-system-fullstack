@@ -1,723 +1,915 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect } from "react"
+import { motion, AnimatePresence } from "framer-motion"
 import {
-    ChevronRight, Moon, Sun, Check, Eye, EyeOff,
-    Smartphone, Laptop, Monitor, LogOut, Trash2, Download, Upload
-} from 'lucide-react';
-import { showToast } from '../../utils/showToast';
-import { useTheme } from '../../contexts/ThemeContext';
-import { useAuth } from '../../contexts/AuthContext';
-import { getTrainerSettings, updateTrainerSettings, type TrainerSettingsDTO } from '../../services/trainerSettingsApi';
-import './TrainerSettings.css';
+  User,
+  Shield,
+  Bell,
+  Palette,
+  Calendar,
+  Clock,
+  Save,
+  Moon,
+  Sun,
+  Monitor,
+  Check,
+  Eye,
+  EyeOff,
+  Camera,
+  Loader2,
+  Dumbbell,
+  Target,
+  FileText,
+  CreditCard,
+  Mail,
+  Phone,
+  Award,
+  Info,
+  AlertCircle,
+  Users,
+  Timer,
+  UserCheck,
+  BarChart3,
+  DollarSign,
+  Briefcase,
+} from "lucide-react"
+import { useTheme } from "../../contexts/ThemeContext"
+import { useAuth } from "../../contexts/AuthContext"
+import api from "../../services/api"
+import { toast } from "react-hot-toast"
+import "../Settings/Settings.css"
 
+/* ── Types ── */
+interface TrainerProfile {
+  name: string
+  email: string
+  phone: string
+  specialization: string
+  experience: string
+  bio: string
+  certifications: string
+  profileImage?: string
+}
 
+interface NotificationSettings {
+  emailNotifications: boolean
+  classReminders: boolean
+  memberUpdates: boolean
+  scheduleChanges: boolean
+  progressAlerts: boolean
+  paymentAlerts: boolean
+  newAssignments: boolean
+}
 
+interface AvailabilitySlot {
+  day: string
+  enabled: boolean
+  startTime: string
+  endTime: string
+}
+
+/* ── Sidebar categories ── */
+const settingsCategories = [
+  { id: "profile",        label: "Trainer Profile",     icon: User,       desc: "Personal details & bio",       color: "#3b82f6" },
+  { id: "specialization", label: "Specialization",      icon: Dumbbell,   desc: "Skills & certifications",      color: "#10b981" },
+  { id: "availability",   label: "Availability",        icon: Calendar,   desc: "Working hours & schedule",     color: "#06b6d4" },
+  { id: "clients",        label: "Client Preferences",  icon: Target,     desc: "Training & client settings",   color: "#8b5cf6" },
+  { id: "appearance",     label: "Appearance",           icon: Palette,    desc: "Theme & display",              color: "#a855f7" },
+  { id: "notifications",  label: "Notifications",       icon: Bell,       desc: "Alerts & reminders",           color: "#f97316" },
+  { id: "security",       label: "Security",            icon: Shield,     desc: "Password & account safety",    color: "#ef4444" },
+  { id: "billing",        label: "Earnings & Payouts",  icon: CreditCard, desc: "Payment info & history",       color: "#f59e0b" },
+  { id: "reports",        label: "Reports & Logs",      icon: FileText,   desc: "Session logs & performance",   color: "#14b8a6" },
+]
+
+/* ── Defaults ── */
+const DEFAULT_AVAILABILITY: AvailabilitySlot[] = [
+  { day: "Monday",    enabled: true,  startTime: "06:00", endTime: "20:00" },
+  { day: "Tuesday",   enabled: true,  startTime: "06:00", endTime: "20:00" },
+  { day: "Wednesday", enabled: true,  startTime: "06:00", endTime: "20:00" },
+  { day: "Thursday",  enabled: true,  startTime: "06:00", endTime: "20:00" },
+  { day: "Friday",    enabled: true,  startTime: "06:00", endTime: "20:00" },
+  { day: "Saturday",  enabled: true,  startTime: "08:00", endTime: "16:00" },
+  { day: "Sunday",    enabled: false, startTime: "08:00", endTime: "12:00" },
+]
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
 const TrainerSettings: React.FC = () => {
-    const navigate = useNavigate();
-    const { theme, setTheme } = useTheme();
-    const { logout } = useAuth();
-    const [activeSection, setActiveSection] = useState<string | null>(null);
-    const [showPassword, setShowPassword] = useState(false);
-    const [loading, setLoading] = useState(true);
+  const { themeMode, setThemeMode } = useTheme()
+  const { user } = useAuth()
 
-    // State matching API DTO structure
-    const [profile, setProfile] = useState({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        bio: '',
-    });
+  const [activeSection, setActiveSection] = useState(() =>
+    sessionStorage.getItem("trainer_settings_section") || "profile"
+  )
+  const [saving, setSaving] = useState(false)
 
-    const [notifications, setNotifications] = useState({
-        email: true,
-        push: true,
-        bookings: true,
-        reminders: true,
-        marketing: false,
-        sound: true,
-        vibration: true,
-    });
+  /* ── Profile state ── */
+  const [profile, setProfile] = useState<TrainerProfile>({
+    name: "", email: "", phone: "", specialization: "", experience: "", bio: "", certifications: "",
+  })
 
-    const [privacy, setPrivacy] = useState({
-        profileVisible: true,
-        activityStatus: true,
-        analytics: false,
-        locationServices: true,
-    });
+  /* ── Notification state ── */
+  const [notifications, setNotifications] = useState<NotificationSettings>({
+    emailNotifications: true, classReminders: true, memberUpdates: true,
+    scheduleChanges: true, progressAlerts: true, paymentAlerts: true, newAssignments: true,
+  })
 
-    const [appearance, setAppearance] = useState({
-        theme: 'light',
-        accentColor: '#3B82F6'
-    });
+  /* ── Security state ── */
+  const [currentPassword, setCurrentPassword] = useState("")
+  const [newPassword, setNewPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
+  const [showNewPassword, setShowNewPassword] = useState(false)
 
-    const [regional, setRegional] = useState({
-        language: 'en',
-        timezone: 'ist',
-        dateFormat: 'dd/mm/yyyy',
-        timeFormat: '12h'
-    });
+  /* ── Availability state ── */
+  const [availability, setAvailability] = useState<AvailabilitySlot[]>(DEFAULT_AVAILABILITY)
 
-    // Fetch settings on mount
-    React.useEffect(() => {
-        const fetchSettings = async () => {
-            try {
-                const data = await getTrainerSettings();
+  /* ── Client preferences state ── */
+  const [maxClients, setMaxClients] = useState("20")
+  const [sessionDuration, setSessionDuration] = useState("60")
+  const [autoAcceptBookings, setAutoAcceptBookings] = useState(true)
+  const [allowGroupSessions, setAllowGroupSessions] = useState(true)
+  const [maxGroupSize, setMaxGroupSize] = useState("8")
+  const [restBetweenSessions, setRestBetweenSessions] = useState("15")
 
-                // Map API data to state
-                if (data.profile) setProfile(data.profile);
-                if (data.notifications) setNotifications(data.notifications);
-                if (data.privacy) setPrivacy(data.privacy);
-                if (data.appearance) {
-                    setAppearance(data.appearance);
-                    setTheme(data.appearance.theme === 'dark' ? 'dark' : 'light');
-                }
-                if (data.regional) setRegional(data.regional);
+  /* ── Persist active section ── */
+  useEffect(() => {
+    sessionStorage.setItem("trainer_settings_section", activeSection)
+  }, [activeSection])
 
-            } catch (error) {
-                console.error('Failed to load settings:', error);
-                showToast('Failed to load settings', 'error');
-            } finally {
-                setLoading(false);
-            }
-        };
+  useEffect(() => {
+    fetchProfile()
+    fetchNotificationSettings()
+    fetchAvailability()
+  }, [])
 
-        fetchSettings();
-    }, [setTheme]);
+  /* ── API calls ── */
+  const fetchProfile = async () => {
+    try {
+      const response = await api.get("/api/trainer/profile")
+      if (response.data) {
+        setProfile({
+          name: response.data.name || user?.name || "",
+          email: response.data.email || user?.email || "",
+          phone: response.data.phone || "",
+          specialization: response.data.specialization || "",
+          experience: response.data.experience || "",
+          bio: response.data.bio || "",
+          certifications: response.data.certifications || "",
+          profileImage: response.data.profileImage,
+        })
+      }
+    } catch {
+      setProfile(prev => ({ ...prev, name: user?.name || "", email: user?.email || "" }))
+    }
+  }
 
-    // Generic Save Function
-    const saveSettings = async (section: string, newData: any) => {
-        try {
-            const currentSettings: TrainerSettingsDTO = {
-                profile,
-                notifications: section === 'notifications' ? newData : notifications,
-                privacy: section === 'privacy' ? newData : privacy,
-                appearance: section === 'appearance' ? newData : appearance,
-                regional: section === 'regional' ? newData : regional,
-            };
+  const fetchNotificationSettings = async () => {
+    try {
+      const res = await api.get("/api/trainer/settings/notifications")
+      if (res.data) setNotifications(res.data)
+    } catch { /* defaults */ }
+  }
 
-            // For profile/regional, we pass the current state unless it's being autosaved (which it isn't)
-            if (section === 'profile') currentSettings.profile = profile;
-            if (section === 'regional') currentSettings.regional = regional;
+  const fetchAvailability = async () => {
+    try {
+      const res = await api.get("/api/trainer/settings/availability")
+      if (res.data?.slots) setAvailability(res.data.slots)
+    } catch { /* defaults */ }
+  }
 
-            await updateTrainerSettings(currentSettings);
+  const handleSaveProfile = async () => {
+    setSaving(true)
+    try {
+      await api.put("/api/trainer/profile", profile)
+      toast.success("Profile updated successfully")
+    } catch { toast.error("Failed to update profile") }
+    finally { setSaving(false) }
+  }
 
-            // For explicit saves (buttons)
-            if (section === 'profile' || section === 'regional') {
-                showToast('Settings Saved', 'success', 'Your changes have been applied');
-            }
-        } catch (error) {
-            console.error('Failed to save settings:', error);
-            showToast('Save Failed', 'error', 'Could not update settings');
-        }
-    };
+  const handleSaveNotifications = async () => {
+    setSaving(true)
+    try {
+      await api.put("/api/trainer/settings/notifications", notifications)
+      toast.success("Notification preferences saved")
+    } catch { toast.error("Failed to save notification preferences") }
+    finally { setSaving(false) }
+  }
 
-    // Autosave handlers
-    const updateNotifications = (key: keyof typeof notifications, value: boolean) => {
-        const newSettings = { ...notifications, [key]: value };
-        setNotifications(newSettings);
-        saveSettings('notifications', newSettings);
-    };
+  const handleChangePassword = async () => {
+    if (newPassword !== confirmPassword) { toast.error("Passwords do not match"); return }
+    if (newPassword.length < 8) { toast.error("Password must be at least 8 characters"); return }
+    setSaving(true)
+    try {
+      await api.put("/api/trainer/settings/password", { currentPassword, newPassword })
+      toast.success("Password changed successfully")
+      setCurrentPassword(""); setNewPassword(""); setConfirmPassword("")
+    } catch { toast.error("Failed to change password") }
+    finally { setSaving(false) }
+  }
 
-    const updatePrivacy = (key: keyof typeof privacy, value: boolean) => {
-        const newSettings = { ...privacy, [key]: value };
-        setPrivacy(newSettings);
-        saveSettings('privacy', newSettings);
-    };
+  const handleSaveAvailability = async () => {
+    setSaving(true)
+    try {
+      await api.put("/api/trainer/settings/availability", { slots: availability })
+      toast.success("Availability updated")
+    } catch { toast.error("Failed to update availability") }
+    finally { setSaving(false) }
+  }
 
-    const updateAppearance = (key: keyof typeof appearance, value: any) => {
-        const newSettings = { ...appearance, [key]: value };
-        setAppearance(newSettings);
-        saveSettings('appearance', newSettings);
-    };
+  const handleSaveClientPreferences = async () => {
+    setSaving(true)
+    try {
+      await api.put("/api/trainer/settings/client-preferences", {
+        maxClients: Number(maxClients), sessionDuration: Number(sessionDuration),
+        autoAcceptBookings, allowGroupSessions, maxGroupSize: Number(maxGroupSize),
+        restBetweenSessions: Number(restBetweenSessions),
+      })
+      toast.success("Client preferences saved")
+    } catch { toast.error("Failed to save client preferences") }
+    finally { setSaving(false) }
+  }
 
-    const sections = [
-        { id: 'profile', label: 'Profile', icon: '👤', gradient: 'linear-gradient(135deg, #3B82F6, #1D4ED8)', desc: 'Name, photo, bio' },
-        { id: 'notifications', label: 'Notifications', icon: '🔔', gradient: 'linear-gradient(135deg, #F59E0B, #D97706)', desc: 'Alerts and sounds' },
-        { id: 'appearance', label: 'Appearance', icon: '🎨', gradient: 'linear-gradient(135deg, #8B5CF6, #7C3AED)', desc: 'Theme and display' },
-        { id: 'security', label: 'Security', icon: '🔐', gradient: 'linear-gradient(135deg, #10B981, #059669)', desc: 'Password and 2FA' },
-        { id: 'privacy', label: 'Privacy', icon: '🛡️', gradient: 'linear-gradient(135deg, #EC4899, #DB2777)', desc: 'Data and visibility' },
-        { id: 'language', label: 'Language & Region', icon: '🌍', gradient: 'linear-gradient(135deg, #06B6D4, #0891B2)', desc: 'Time zone, format' },
-        { id: 'sessions', label: 'Active Sessions', icon: '📱', gradient: 'linear-gradient(135deg, #6366F1, #4F46E5)', desc: 'Logged in devices' },
-        { id: 'data', label: 'Data & Storage', icon: '💾', gradient: 'linear-gradient(135deg, #14B8A6, #0D9488)', desc: 'Export and backup' },
-        { id: 'about', label: 'About', icon: 'ℹ️', gradient: 'linear-gradient(135deg, #64748B, #475569)', desc: 'Version and legal' },
-    ];
+  /* ═══════════════════════════════════  SECTIONS  ═══════════════════════════════════ */
 
-    const activeSessions = [
-        { id: 1, device: 'iPhone 15 Pro', location: 'Mumbai, India', lastActive: 'Active now', icon: Smartphone, current: true },
-        { id: 2, device: 'MacBook Pro', location: 'Mumbai, India', lastActive: '2 hours ago', icon: Laptop, current: false },
-        { id: 3, device: 'Chrome on Windows', location: 'Delhi, India', lastActive: '3 days ago', icon: Monitor, current: false },
-    ];
+  const renderSection = () => {
+    switch (activeSection) {
+      case "profile":        return <ProfileSection />
+      case "specialization": return <SpecializationSection />
+      case "availability":   return <AvailabilitySection />
+      case "clients":        return <ClientPreferencesSection />
+      case "appearance":     return <AppearanceSection />
+      case "notifications":  return <NotificationsSection />
+      case "security":       return <SecuritySection />
+      case "billing":        return <BillingSection />
+      case "reports":        return <ReportsSection />
+      default:               return <ProfileSection />
+    }
+  }
 
-    const darkMode = theme === 'dark';
-
-    const handleSave = () => {
-        if (activeSection === 'profile') saveSettings('profile', profile);
-        if (activeSection === 'language') saveSettings('regional', regional);
-    };
-
-    const toggleTheme = (isDark: boolean) => {
-        const newTheme = isDark ? 'dark' : 'light';
-        setTheme(newTheme);
-        updateAppearance('theme', newTheme);
-        showToast(`${newTheme === 'dark' ? 'Dark' : 'Light'} Mode`, 'success', 'Theme updated successfully');
-    };
-
-    const handleLogoutDevice = () => showToast('Device Removed', 'success', 'Session terminated securely');
-
-    const handleLogout = () => {
-        showToast('Signed Out', 'info', 'See you next time!');
-        setTimeout(() => logout(), 800);
-    };
-
-    const renderSectionContent = () => {
-        switch (activeSection) {
-            case 'profile':
-                return (
-                    <div className="ts-detail">
-                        <div className="ts-detail__header">
-                            <button className="ts-detail__back" onClick={() => setActiveSection(null)}>
-                                <ChevronRight size={18} style={{ transform: 'rotate(180deg)' }} />
-                            </button>
-                            <h2>Profile</h2>
-                            <button className="ts-detail__save" onClick={handleSave}>Save</button>
-                        </div>
-                        <div className="ts-detail__content ts-detail__content--single">
-                            <div className="ts-settings-card ts-settings-card--full">
-                                <div className="ts-profile-photo">
-                                    <div className="ts-profile-photo__avatar"><span>JS</span></div>
-                                    <button className="ts-profile-photo__edit">Edit Photo</button>
-                                </div>
-                                <div className="ts-form-row">
-                                    <div className="ts-form-group">
-                                        <label>First Name</label>
-                                        <input type="text" value={profile.firstName} onChange={(e) => setProfile({ ...profile, firstName: e.target.value })} />
-                                    </div>
-                                    <div className="ts-form-group">
-                                        <label>Last Name</label>
-                                        <input type="text" value={profile.lastName} onChange={(e) => setProfile({ ...profile, lastName: e.target.value })} />
-                                    </div>
-                                </div>
-                                <div className="ts-form-row">
-                                    <div className="ts-form-group">
-                                        <label>Email</label>
-                                        <input type="email" value={profile.email} onChange={(e) => setProfile({ ...profile, email: e.target.value })} />
-                                    </div>
-                                    <div className="ts-form-group">
-                                        <label>Phone</label>
-                                        <input type="tel" value={profile.phone} onChange={(e) => setProfile({ ...profile, phone: e.target.value })} />
-                                    </div>
-                                </div>
-                                <div className="ts-form-group">
-                                    <label>Bio</label>
-                                    <textarea rows={2} value={profile.bio} onChange={(e) => setProfile({ ...profile, bio: e.target.value })} />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                );
-
-            case 'notifications':
-                return (
-                    <div className="ts-detail">
-                        <div className="ts-detail__header">
-                            <button className="ts-detail__back" onClick={() => setActiveSection(null)}>
-                                <ChevronRight size={18} style={{ transform: 'rotate(180deg)' }} />
-                            </button>
-                            <h2>Notifications</h2>
-                            <div />
-                        </div>
-                        <div className="ts-detail__content">
-                            <div className="ts-settings-card">
-                                <div className="ts-settings-card__header">
-                                    <span className="ts-settings-card__icon" style={{ background: 'linear-gradient(135deg, #3B82F6, #1D4ED8)' }}>📧</span>
-                                    <span>Push Notifications</span>
-                                </div>
-                                <div className="ts-toggle-row">
-                                    <div className="ts-toggle-row__info">
-                                        <span className="ts-toggle-row__label">Allow Notifications</span>
-                                    </div>
-                                    <label className="ts-switch">
-                                        <input type="checkbox" checked={notifications.push} onChange={(e) => updateNotifications('push', e.target.checked)} />
-                                        <span className="ts-switch__slider" />
-                                    </label>
-                                </div>
-                                <div className="ts-toggle-row">
-                                    <div className="ts-toggle-row__info">
-                                        <span className="ts-toggle-row__label">Email Notifications</span>
-                                    </div>
-                                    <label className="ts-switch">
-                                        <input type="checkbox" checked={notifications.email} onChange={(e) => updateNotifications('email', e.target.checked)} />
-                                        <span className="ts-switch__slider" />
-                                    </label>
-                                </div>
-                            </div>
-                            <div className="ts-settings-card">
-                                <div className="ts-settings-card__header">
-                                    <span className="ts-settings-card__icon" style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)' }}>📅</span>
-                                    <span>Activity Alerts</span>
-                                </div>
-                                <div className="ts-toggle-row">
-                                    <div className="ts-toggle-row__info">
-                                        <span className="ts-toggle-row__label">Booking Alerts</span>
-                                    </div>
-                                    <label className="ts-switch">
-                                        <input type="checkbox" checked={notifications.bookings} onChange={(e) => updateNotifications('bookings', e.target.checked)} />
-                                        <span className="ts-switch__slider" />
-                                    </label>
-                                </div>
-                                <div className="ts-toggle-row">
-                                    <div className="ts-toggle-row__info">
-                                        <span className="ts-toggle-row__label">Session Reminders</span>
-                                    </div>
-                                    <label className="ts-switch">
-                                        <input type="checkbox" checked={notifications.reminders} onChange={(e) => updateNotifications('reminders', e.target.checked)} />
-                                        <span className="ts-switch__slider" />
-                                    </label>
-                                </div>
-                                <div className="ts-toggle-row">
-                                    <div className="ts-toggle-row__info">
-                                        <span className="ts-toggle-row__label">Marketing</span>
-                                    </div>
-                                    <label className="ts-switch">
-                                        <input type="checkbox" checked={notifications.marketing} onChange={(e) => updateNotifications('marketing', e.target.checked)} />
-                                        <span className="ts-switch__slider" />
-                                    </label>
-                                </div>
-                            </div>
-                            <div className="ts-settings-card">
-                                <div className="ts-settings-card__header">
-                                    <span className="ts-settings-card__icon" style={{ background: 'linear-gradient(135deg, #8B5CF6, #7C3AED)' }}>🔊</span>
-                                    <span>Sounds & Haptics</span>
-                                </div>
-                                <div className="ts-toggle-row">
-                                    <div className="ts-toggle-row__info">
-                                        <span className="ts-toggle-row__label">Sound</span>
-                                    </div>
-                                    <label className="ts-switch">
-                                        <input type="checkbox" checked={notifications.sound} onChange={(e) => updateNotifications('sound', e.target.checked)} />
-                                        <span className="ts-switch__slider" />
-                                    </label>
-                                </div>
-                                <div className="ts-toggle-row">
-                                    <div className="ts-toggle-row__info">
-                                        <span className="ts-toggle-row__label">Vibration</span>
-                                    </div>
-                                    <label className="ts-switch">
-                                        <input type="checkbox" checked={notifications.vibration} onChange={(e) => updateNotifications('vibration', e.target.checked)} />
-                                        <span className="ts-switch__slider" />
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                );
-
-            case 'appearance':
-                return (
-                    <div className="ts-detail">
-                        <div className="ts-detail__header">
-                            <button className="ts-detail__back" onClick={() => setActiveSection(null)}>
-                                <ChevronRight size={18} style={{ transform: 'rotate(180deg)' }} />
-                            </button>
-                            <h2>Appearance</h2>
-                            <div />
-                        </div>
-                        <div className="ts-detail__content">
-                            <div className="ts-settings-card">
-                                <div className="ts-settings-card__header">
-                                    <span className="ts-settings-card__icon" style={{ background: 'linear-gradient(135deg, #8B5CF6, #7C3AED)' }}>🎨</span>
-                                    <span>Theme</span>
-                                </div>
-                                <div className="ts-theme-grid">
-                                    <button className={`ts-theme-card ${darkMode ? 'ts-theme-card--active' : ''}`} onClick={() => toggleTheme(true)}>
-                                        <div className="ts-theme-card__preview ts-theme-card__preview--dark"><Moon size={20} /></div>
-                                        <span>Dark</span>
-                                        {darkMode && <Check size={14} className="ts-theme-card__check" />}
-                                    </button>
-                                    <button className={`ts-theme-card ${!darkMode ? 'ts-theme-card--active' : ''}`} onClick={() => toggleTheme(false)}>
-                                        <div className="ts-theme-card__preview ts-theme-card__preview--light"><Sun size={20} /></div>
-                                        <span>Light</span>
-                                        {!darkMode && <Check size={14} className="ts-theme-card__check" />}
-                                    </button>
-                                </div>
-                            </div>
-                            <div className="ts-settings-card">
-                                <div className="ts-settings-card__header">
-                                    <span className="ts-settings-card__icon" style={{ background: 'linear-gradient(135deg, #DC2626, #B91C1C)' }}>❤️</span>
-                                    <span>Accent Color</span>
-                                </div>
-                                <div className="ts-color-grid">
-                                    {['#DC2626', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6', '#EC4899'].map((color) => (
-                                        <button key={color} className="ts-color-btn" style={{ background: color }}>
-                                            {color === '#DC2626' && <Check size={14} />}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                );
-
-            case 'security':
-                return (
-                    <div className="ts-detail">
-                        <div className="ts-detail__header">
-                            <button className="ts-detail__back" onClick={() => setActiveSection(null)}>
-                                <ChevronRight size={18} style={{ transform: 'rotate(180deg)' }} />
-                            </button>
-                            <h2>Security</h2>
-                            <div />
-                        </div>
-                        <div className="ts-detail__content">
-                            <div className="ts-settings-card">
-                                <div className="ts-settings-card__header">
-                                    <span className="ts-settings-card__icon" style={{ background: 'linear-gradient(135deg, #10B981, #059669)' }}>🔑</span>
-                                    <span>Password</span>
-                                </div>
-                                <div className="ts-form-group">
-                                    <label>Current Password</label>
-                                    <div className="ts-input-with-icon">
-                                        <input type={showPassword ? "text" : "password"} placeholder="Enter current password" />
-                                        <button onClick={() => setShowPassword(!showPassword)}>
-                                            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                                        </button>
-                                    </div>
-                                </div>
-                                <div className="ts-form-row">
-                                    <div className="ts-form-group">
-                                        <label>New Password</label>
-                                        <input type="password" placeholder="New password" />
-                                    </div>
-                                    <div className="ts-form-group">
-                                        <label>Confirm Password</label>
-                                        <input type="password" placeholder="Confirm password" />
-                                    </div>
-                                </div>
-                                <button className="ts-btn ts-btn--primary">Update Password</button>
-                            </div>
-                            <div className="ts-settings-card">
-                                <div className="ts-settings-card__header">
-                                    <span className="ts-settings-card__icon" style={{ background: 'linear-gradient(135deg, #6366F1, #4F46E5)' }}>🔐</span>
-                                    <span>Two-Factor Authentication</span>
-                                </div>
-                                <div className="ts-2fa-status">
-                                    <div className="ts-2fa-status__badge ts-2fa-status__badge--enabled">
-                                        <Check size={12} />Enabled
-                                    </div>
-                                    <p>Protected with 2FA via authenticator app.</p>
-                                </div>
-                                <div className="ts-action-row">
-                                    <button className="ts-btn ts-btn--secondary">Manage 2FA</button>
-                                    <button className="ts-btn ts-btn--ghost">Recovery Codes</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                );
-
-            case 'privacy':
-                return (
-                    <div className="ts-detail">
-                        <div className="ts-detail__header">
-                            <button className="ts-detail__back" onClick={() => setActiveSection(null)}>
-                                <ChevronRight size={18} style={{ transform: 'rotate(180deg)' }} />
-                            </button>
-                            <h2>Privacy</h2>
-                            <div />
-                        </div>
-                        <div className="ts-detail__content">
-                            <div className="ts-settings-card">
-                                <div className="ts-settings-card__header">
-                                    <span className="ts-settings-card__icon" style={{ background: 'linear-gradient(135deg, #EC4899, #DB2777)' }}>👁️</span>
-                                    <span>Visibility</span>
-                                </div>
-                                <div className="ts-toggle-row">
-                                    <div className="ts-toggle-row__info">
-                                        <span className="ts-toggle-row__label">Profile Visibility</span>
-                                    </div>
-                                    <label className="ts-switch">
-                                        <input type="checkbox" checked={privacy.profileVisible} onChange={(e) => updatePrivacy('profileVisible', e.target.checked)} />
-                                        <span className="ts-switch__slider" />
-                                    </label>
-                                </div>
-                                <div className="ts-toggle-row">
-                                    <div className="ts-toggle-row__info">
-                                        <span className="ts-toggle-row__label">Activity Status</span>
-                                    </div>
-                                    <label className="ts-switch">
-                                        <input type="checkbox" checked={privacy.activityStatus} onChange={(e) => updatePrivacy('activityStatus', e.target.checked)} />
-                                        <span className="ts-switch__slider" />
-                                    </label>
-                                </div>
-                            </div>
-                            <div className="ts-settings-card">
-                                <div className="ts-settings-card__header">
-                                    <span className="ts-settings-card__icon" style={{ background: 'linear-gradient(135deg, #14B8A6, #0D9488)' }}>📊</span>
-                                    <span>Data & Analytics</span>
-                                </div>
-                                <div className="ts-toggle-row">
-                                    <div className="ts-toggle-row__info">
-                                        <span className="ts-toggle-row__label">Usage Analytics</span>
-                                    </div>
-                                    <label className="ts-switch">
-                                        <input type="checkbox" checked={privacy.analytics} onChange={(e) => updatePrivacy('analytics', e.target.checked)} />
-                                        <span className="ts-switch__slider" />
-                                    </label>
-                                </div>
-                                <div className="ts-toggle-row">
-                                    <div className="ts-toggle-row__info">
-                                        <span className="ts-toggle-row__label">Location Services</span>
-                                    </div>
-                                    <label className="ts-switch">
-                                        <input type="checkbox" checked={privacy.locationServices} onChange={(e) => updatePrivacy('locationServices', e.target.checked)} />
-                                        <span className="ts-switch__slider" />
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                );
-
-            case 'language':
-                return (
-                    <div className="ts-detail">
-                        <div className="ts-detail__header">
-                            <button className="ts-detail__back" onClick={() => setActiveSection(null)}>
-                                <ChevronRight size={18} style={{ transform: 'rotate(180deg)' }} />
-                            </button>
-                            <h2>Language & Region</h2>
-                            <button className="ts-detail__save" onClick={handleSave}>Save</button>
-                        </div>
-                        <div className="ts-detail__content">
-                            <div className="ts-settings-card">
-                                <div className="ts-settings-card__header">
-                                    <span className="ts-settings-card__icon" style={{ background: 'linear-gradient(135deg, #06B6D4, #0891B2)' }}>🌐</span>
-                                    <span>Language</span>
-                                </div>
-                                <div className="ts-select-group">
-                                    <label>App Language</label>
-                                    <select value={regional.language} onChange={(e) => setRegional({ ...regional, language: e.target.value })}>
-                                        <option value="en">🇺🇸 English</option>
-                                        <option value="es">🇪🇸 Spanish</option>
-                                        <option value="fr">🇫🇷 French</option>
-                                        <option value="de">🇩🇪 German</option>
-                                        <option value="hi">🇮🇳 Hindi</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div className="ts-settings-card">
-                                <div className="ts-settings-card__header">
-                                    <span className="ts-settings-card__icon" style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)' }}>🕐</span>
-                                    <span>Regional Settings</span>
-                                </div>
-                                <div className="ts-select-group">
-                                    <label>Time Zone</label>
-                                    <select value={regional.timezone} onChange={(e) => setRegional({ ...regional, timezone: e.target.value })}>
-                                        <option value="ist">IST (UTC+5:30) - India</option>
-                                        <option value="pst">PST (UTC-8) - Pacific</option>
-                                        <option value="est">EST (UTC-5) - Eastern</option>
-                                    </select>
-                                </div>
-                                <div className="ts-form-row">
-                                    <div className="ts-select-group">
-                                        <label>Date Format</label>
-                                        <select value={regional.dateFormat} onChange={(e) => setRegional({ ...regional, dateFormat: e.target.value })}>
-                                            <option value="dd/mm/yyyy">DD/MM/YYYY</option>
-                                            <option value="mm/dd/yyyy">MM/DD/YYYY</option>
-                                        </select>
-                                    </div>
-                                    <div className="ts-select-group">
-                                        <label>Time Format</label>
-                                        <select value={regional.timeFormat} onChange={(e) => setRegional({ ...regional, timeFormat: e.target.value })}>
-                                            <option value="12h">12-hour</option>
-                                            <option value="24h">24-hour</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                );
-
-            case 'sessions':
-                return (
-                    <div className="ts-detail">
-                        <div className="ts-detail__header">
-                            <button className="ts-detail__back" onClick={() => setActiveSection(null)}>
-                                <ChevronRight size={18} style={{ transform: 'rotate(180deg)' }} />
-                            </button>
-                            <h2>Active Sessions</h2>
-                            <div />
-                        </div>
-                        <div className="ts-detail__content ts-detail__content--single">
-                            <div className="ts-settings-card ts-settings-card--full">
-                                <div className="ts-settings-card__header">
-                                    <span className="ts-settings-card__icon" style={{ background: 'linear-gradient(135deg, #6366F1, #4F46E5)' }}>📱</span>
-                                    <span>Logged In Devices</span>
-                                </div>
-                                <div className="ts-devices-list">
-                                    {activeSessions.map((session) => (
-                                        <div key={session.id} className={`ts-device-item ${session.current ? 'ts-device-item--current' : ''}`}>
-                                            <div className="ts-device-item__icon"><session.icon size={18} /></div>
-                                            <div className="ts-device-item__info">
-                                                <span className="ts-device-item__name">
-                                                    {session.device}
-                                                    {session.current && <span className="ts-device-item__badge">This Device</span>}
-                                                </span>
-                                                <span className="ts-device-item__meta">{session.location} • {session.lastActive}</span>
-                                            </div>
-                                            {!session.current && (
-                                                <button className="ts-device-item__logout" onClick={() => handleLogoutDevice()}>
-                                                    <LogOut size={14} />
-                                                </button>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                                <button className="ts-btn ts-btn--danger"><LogOut size={14} />Log Out All Other Devices</button>
-                            </div>
-                        </div>
-                    </div>
-                );
-
-            case 'data':
-                return (
-                    <div className="ts-detail">
-                        <div className="ts-detail__header">
-                            <button className="ts-detail__back" onClick={() => setActiveSection(null)}>
-                                <ChevronRight size={18} style={{ transform: 'rotate(180deg)' }} />
-                            </button>
-                            <h2>Data & Storage</h2>
-                            <div />
-                        </div>
-                        <div className="ts-detail__content">
-                            <div className="ts-settings-card">
-                                <div className="ts-settings-card__header">
-                                    <span className="ts-settings-card__icon" style={{ background: 'linear-gradient(135deg, #14B8A6, #0D9488)' }}>📤</span>
-                                    <span>Export Data</span>
-                                </div>
-                                <p className="ts-settings-card__desc">Download a copy of your data.</p>
-                                <button className="ts-btn ts-btn--secondary"><Download size={14} />Request Export</button>
-                            </div>
-                            <div className="ts-settings-card">
-                                <div className="ts-settings-card__header">
-                                    <span className="ts-settings-card__icon" style={{ background: 'linear-gradient(135deg, #3B82F6, #1D4ED8)' }}>☁️</span>
-                                    <span>Backup</span>
-                                </div>
-                                <div className="ts-backup-status">
-                                    <div className="ts-backup-status__info">
-                                        <span>Last backup: Today, 2:30 PM</span>
-                                        <span className="ts-backup-status__auto">Auto-backup enabled</span>
-                                    </div>
-                                    <button className="ts-btn ts-btn--ghost"><Upload size={14} />Backup</button>
-                                </div>
-                            </div>
-                            <div className="ts-settings-card ts-settings-card--danger">
-                                <div className="ts-settings-card__header">
-                                    <span className="ts-settings-card__icon" style={{ background: 'linear-gradient(135deg, #EF4444, #DC2626)' }}>⚠️</span>
-                                    <span>Danger Zone</span>
-                                </div>
-                                <p className="ts-settings-card__desc">Permanently delete your account.</p>
-                                <button className="ts-btn ts-btn--danger"><Trash2 size={14} />Delete Account</button>
-                            </div>
-                        </div>
-                    </div>
-                );
-
-            case 'about':
-                return (
-                    <div className="ts-detail">
-                        <div className="ts-detail__header">
-                            <button className="ts-detail__back" onClick={() => setActiveSection(null)}>
-                                <ChevronRight size={18} style={{ transform: 'rotate(180deg)' }} />
-                            </button>
-                            <h2>About</h2>
-                            <div />
-                        </div>
-                        <div className="ts-detail__content ts-detail__content--single">
-                            <div className="ts-about-logo">
-                                <div className="ts-about-logo__icon"><span>A</span></div>
-                                <h3>AthlonX Trainer</h3>
-                                <span>Version 2.4.1</span>
-                            </div>
-                            <div className="ts-settings-card ts-settings-card--full">
-                                <div className="ts-link-list">
-                                    <a href="#" className="ts-link-item"><span>📄</span><span>Terms of Service</span><ChevronRight size={14} /></a>
-                                    <a href="#" className="ts-link-item"><span>🔒</span><span>Privacy Policy</span><ChevronRight size={14} /></a>
-                                    <a href="#" className="ts-link-item"><span>📋</span><span>Licenses</span><ChevronRight size={14} /></a>
-                                    <a href="#" className="ts-link-item"><span>💬</span><span>Send Feedback</span><ChevronRight size={14} /></a>
-                                    <a href="#" className="ts-link-item"><span>❓</span><span>Help Center</span><ChevronRight size={14} /></a>
-                                </div>
-                            </div>
-                            <div className="ts-about-footer">
-                                <p>Made with ❤️ by AthlonX Team</p>
-                                <p>© 2024 AthlonX. All rights reserved.</p>
-                            </div>
-                        </div>
-                    </div>
-                );
-
-            default:
-                return null;
-        }
-    };
-
-    return (
-        <div className="trainer-settings">
-            <AnimatePresence mode="wait">
-                {activeSection ? (
-                    <motion.div
-                        key="detail"
-                        initial={{ x: '100%', opacity: 0 }}
-                        animate={{ x: 0, opacity: 1 }}
-                        exit={{ x: '100%', opacity: 0 }}
-                        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                        className="ts-detail-wrapper"
-                    >
-                        {renderSectionContent()}
-                    </motion.div>
-                ) : (
-                    <motion.div
-                        key="list"
-                        initial={{ x: '-100%', opacity: 0 }}
-                        animate={{ x: 0, opacity: 1 }}
-                        exit={{ x: '-100%', opacity: 0 }}
-                        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                        className="ts-list-wrapper"
-                    >
-                        <div className="ts-header">
-                            <h1>Settings</h1>
-                        </div>
-                        <div className="ts-sections">
-                            {sections.map((section, index) => (
-                                <motion.button
-                                    key={section.id}
-                                    className="ts-section-item"
-                                    onClick={() => setActiveSection(section.id)}
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: index * 0.03 }}
-                                    whileTap={{ scale: 0.98 }}
-                                >
-                                    <span className="ts-section-item__icon" style={{ background: section.gradient }}>{section.icon}</span>
-                                    <div className="ts-section-item__text">
-                                        <span className="ts-section-item__label">{section.label}</span>
-                                        <span className="ts-section-item__desc">{section.desc}</span>
-                                    </div>
-                                    <ChevronRight size={16} className="ts-section-item__arrow" />
-                                </motion.button>
-                            ))}
-                        </div>
-                        <div className="ts-footer">
-                            <button className="ts-logout-btn" onClick={handleLogout}><LogOut size={16} /><span>Log Out</span></button>
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+  /* ── Profile ── */
+  const ProfileSection = () => (
+    <div className="settings-section" style={{ "--section-accent": "#3b82f6" } as React.CSSProperties}>
+      <div className="settings-section__header">
+        <div className="settings-section__icon" style={{ background: "linear-gradient(135deg, #3b82f6, #2563eb)" }}>
+          <User size={20} />
         </div>
-    );
-};
+        <div>
+          <h2 className="settings-section__title">Trainer Profile</h2>
+          <p className="settings-section__description">Update your personal details and trainer bio</p>
+        </div>
+        <div className="settings-section__actions">
+          <button className="settings-btn settings-btn--primary" onClick={handleSaveProfile} disabled={saving}>
+            {saving ? <Loader2 size={14} className="spin" /> : <Save size={14} />} Save Changes
+          </button>
+        </div>
+      </div>
 
-export default TrainerSettings;
+      <div className="settings-section__content">
+        {/* Avatar card */}
+        <div className="form-group">
+          <div style={{
+            display: "flex", alignItems: "center", gap: "1.25rem", padding: "1.25rem",
+            background: "var(--bg-secondary)", borderRadius: 12, border: "1px solid var(--border-primary)",
+          }}>
+            <div style={{
+              width: 72, height: 72, borderRadius: "50%", background: "linear-gradient(135deg, #3b82f6, #2563eb)",
+              display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 26,
+              fontWeight: 700, position: "relative", overflow: "hidden", flexShrink: 0,
+            }}>
+              {profile.profileImage
+                ? <img src={profile.profileImage} alt={profile.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                : (profile.name?.charAt(0)?.toUpperCase() || "T")
+              }
+              <button style={{
+                position: "absolute", bottom: 0, right: 0, width: 26, height: 26, borderRadius: "50%",
+                background: "#3b82f6", border: "2px solid var(--bg-primary)", display: "flex",
+                alignItems: "center", justifyContent: "center", cursor: "pointer", color: "#fff",
+              }} title="Change photo">
+                <Camera size={12} />
+              </button>
+            </div>
+            <div>
+              <div style={{ fontWeight: 600, fontSize: "1.1rem", color: "var(--text-primary)", marginBottom: 2 }}>{profile.name || "Trainer"}</div>
+              <div style={{ fontSize: "0.85rem", color: "var(--text-secondary)", display: "flex", alignItems: "center", gap: 6 }}>
+                <Mail size={13} /> {profile.email || "No email set"}
+              </div>
+              {profile.phone && (
+                <div style={{ fontSize: "0.85rem", color: "var(--text-secondary)", display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
+                  <Phone size={13} /> {profile.phone}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Identity fields */}
+        <div className="form-group">
+          <div className="form-group__header">
+            <User size={16} />
+            <h4 className="form-group__title">Personal Information</h4>
+          </div>
+          <div className="form-grid">
+            <div className="field-wrapper">
+              <label className="field-label">
+                Full Name
+                <span className="field-label__required">*</span>
+              </label>
+              <input className="dense-input" type="text" value={profile.name} onChange={e => setProfile({ ...profile, name: e.target.value })} placeholder="Enter your full name" />
+            </div>
+            <div className="field-wrapper">
+              <label className="field-label">
+                Email Address
+                <span className="field-label__required">*</span>
+              </label>
+              <input className="dense-input" type="email" value={profile.email} onChange={e => setProfile({ ...profile, email: e.target.value })} placeholder="trainer@example.com" />
+            </div>
+            <div className="field-wrapper">
+              <label className="field-label">
+                Phone Number
+                <div className="info-icon" data-tooltip="Used for member communication and scheduling">
+                  <Info size={14} />
+                </div>
+              </label>
+              <input className="dense-input" type="tel" value={profile.phone} onChange={e => setProfile({ ...profile, phone: e.target.value })} placeholder="+91 98765 43210" />
+            </div>
+            <div className="field-wrapper">
+              <label className="field-label">
+                Years of Experience
+                <div className="info-icon" data-tooltip="Displayed on your trainer profile visible to members">
+                  <Info size={14} />
+                </div>
+              </label>
+              <input className="dense-input" type="text" value={profile.experience} onChange={e => setProfile({ ...profile, experience: e.target.value })} placeholder="e.g. 5 years" />
+            </div>
+          </div>
+        </div>
+
+        {/* Bio */}
+        <div className="form-group">
+          <div className="form-group__header">
+            <FileText size={16} />
+            <h4 className="form-group__title">About You</h4>
+          </div>
+          <div className="form-grid">
+            <div className="field-wrapper field-wrapper--full">
+              <label className="field-label">
+                Bio / Description
+                <div className="info-icon" data-tooltip="Tell members about your training style, philosophy, and background">
+                  <Info size={14} />
+                </div>
+              </label>
+              <textarea className="dense-input" value={profile.bio} onChange={e => setProfile({ ...profile, bio: e.target.value })} placeholder="Tell members about yourself, your training philosophy, and expertise..." rows={4} style={{ resize: "vertical" }} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
+  /* ── Specialization ── */
+  const SpecializationSection = () => (
+    <div className="settings-section" style={{ "--section-accent": "#10b981" } as React.CSSProperties}>
+      <div className="settings-section__header">
+        <div className="settings-section__icon" style={{ background: "linear-gradient(135deg, #10b981, #059669)" }}>
+          <Dumbbell size={20} />
+        </div>
+        <div>
+          <h2 className="settings-section__title">Specialization & Skills</h2>
+          <p className="settings-section__description">Manage your training expertise and certifications</p>
+        </div>
+        <div className="settings-section__actions">
+          <button className="settings-btn settings-btn--primary" onClick={handleSaveProfile} disabled={saving}>
+            {saving ? <Loader2 size={14} className="spin" /> : <Save size={14} />} Save
+          </button>
+        </div>
+      </div>
+      <div className="settings-section__content">
+        <div className="form-group">
+          <div className="form-group__header">
+            <Award size={16} />
+            <h4 className="form-group__title">Training Expertise</h4>
+          </div>
+          <div className="form-grid">
+            <div className="field-wrapper field-wrapper--full">
+              <label className="field-label">
+                Specializations
+                <span className="field-label__required">*</span>
+                <div className="info-icon" data-tooltip="Separate multiple specializations with commas">
+                  <Info size={14} />
+                </div>
+              </label>
+              <input className="dense-input" type="text" value={profile.specialization} onChange={e => setProfile({ ...profile, specialization: e.target.value })} placeholder="e.g. Strength Training, Yoga, HIIT, CrossFit" />
+              <div className="field-hint"><Check size={12} /> Separate multiple specializations with commas</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="form-group">
+          <div className="form-group__header">
+            <Briefcase size={16} />
+            <h4 className="form-group__title">Qualifications</h4>
+          </div>
+          <div className="form-grid">
+            <div className="field-wrapper field-wrapper--full">
+              <label className="field-label">
+                Certifications
+                <div className="info-icon" data-tooltip="List your professional certifications, each on a new line">
+                  <Info size={14} />
+                </div>
+              </label>
+              <textarea className="dense-input" value={profile.certifications} onChange={e => setProfile({ ...profile, certifications: e.target.value })} placeholder={"e.g.\nNASM-CPT\nACE Certified Personal Trainer\
+CrossFit Level 2"} rows={4} style={{ resize: "vertical" }} />
+            </div>
+            <div className="field-wrapper">
+              <label className="field-label">
+                Years of Experience
+                <div className="info-icon" data-tooltip="Total years in the fitness industry">
+                  <Info size={14} />
+                </div>
+              </label>
+              <input className="dense-input" type="text" value={profile.experience} onChange={e => setProfile({ ...profile, experience: e.target.value })} placeholder="e.g. 5 years" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
+  /* ── Availability ── */
+  const AvailabilitySection = () => (
+    <div className="settings-section" style={{ "--section-accent": "#06b6d4" } as React.CSSProperties}>
+      <div className="settings-section__header">
+        <div className="settings-section__icon" style={{ background: "linear-gradient(135deg, #06b6d4, #0891b2)" }}>
+          <Calendar size={20} />
+        </div>
+        <div>
+          <h2 className="settings-section__title">Availability</h2>
+          <p className="settings-section__description">Set your working hours and available days</p>
+        </div>
+        <div className="settings-section__actions">
+          <button className="settings-btn settings-btn--primary" onClick={handleSaveAvailability} disabled={saving}>
+            {saving ? <Loader2 size={14} className="spin" /> : <Save size={14} />} Save
+          </button>
+        </div>
+      </div>
+      <div className="settings-section__content">
+        <div className="form-group">
+          <div className="form-group__header">
+            <Clock size={16} />
+            <h4 className="form-group__title">Weekly Schedule</h4>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+            {availability.map((slot, i) => (
+              <div
+                key={slot.day}
+                style={{
+                  display: "flex", alignItems: "center", gap: "1rem", padding: "0.85rem 1rem",
+                  borderBottom: i < availability.length - 1 ? "1px solid var(--border-primary)" : "none",
+                  background: slot.enabled ? "transparent" : "var(--bg-secondary)",
+                  borderRadius: i === 0 ? "8px 8px 0 0" : i === availability.length - 1 ? "0 0 8px 8px" : 0,
+                  transition: "background 0.2s ease",
+                }}
+              >
+                <label className="toggle-switch" style={{ flexShrink: 0 }}>
+                  <input type="checkbox" checked={slot.enabled} onChange={e => {
+                    const u = [...availability]; u[i] = { ...u[i], enabled: e.target.checked }; setAvailability(u)
+                  }} />
+                  <span className="toggle-slider" />
+                </label>
+                <span style={{ width: 100, fontWeight: 600, fontSize: "0.9rem", color: slot.enabled ? "var(--text-primary)" : "var(--text-tertiary)" }}>{slot.day}</span>
+                {slot.enabled ? (
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flex: 1 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, flex: 1 }}>
+                      <Clock size={14} style={{ color: "var(--text-tertiary)", flexShrink: 0 }} />
+                      <input className="dense-input" type="time" value={slot.startTime} style={{ flex: 1, maxWidth: 150 }} onChange={e => {
+                        const u = [...availability]; u[i] = { ...u[i], startTime: e.target.value }; setAvailability(u)
+                      }} />
+                    </div>
+                    <span style={{ color: "var(--text-tertiary)", fontSize: "0.85rem", fontWeight: 500 }}>to</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, flex: 1 }}>
+                      <Clock size={14} style={{ color: "var(--text-tertiary)", flexShrink: 0 }} />
+                      <input className="dense-input" type="time" value={slot.endTime} style={{ flex: 1, maxWidth: 150 }} onChange={e => {
+                        const u = [...availability]; u[i] = { ...u[i], endTime: e.target.value }; setAvailability(u)
+                      }} />
+                    </div>
+                  </div>
+                ) : (
+                  <span style={{ color: "var(--text-tertiary)", fontStyle: "italic", fontSize: "0.85rem" }}>Day off</span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
+  /* ── Client Preferences ── */
+  const ClientPreferencesSection = () => (
+    <div className="settings-section" style={{ "--section-accent": "#8b5cf6" } as React.CSSProperties}>
+      <div className="settings-section__header">
+        <div className="settings-section__icon" style={{ background: "linear-gradient(135deg, #8b5cf6, #7c3aed)" }}>
+          <Target size={20} />
+        </div>
+        <div>
+          <h2 className="settings-section__title">Client Preferences</h2>
+          <p className="settings-section__description">Configure training session and client management settings</p>
+        </div>
+        <div className="settings-section__actions">
+          <button className="settings-btn settings-btn--primary" onClick={handleSaveClientPreferences} disabled={saving}>
+            {saving ? <Loader2 size={14} className="spin" /> : <Save size={14} />} Save
+          </button>
+        </div>
+      </div>
+      <div className="settings-section__content">
+        <div className="form-group">
+          <div className="form-group__header">
+            <Users size={16} />
+            <h4 className="form-group__title">Session Configuration</h4>
+          </div>
+          <div className="form-grid">
+            <div className="field-wrapper">
+              <label className="field-label">
+                Max Active Clients
+                <div className="info-icon" data-tooltip="Maximum number of clients you can take on at once">
+                  <Info size={14} />
+                </div>
+              </label>
+              <input className="dense-input" type="number" value={maxClients} onChange={e => setMaxClients(e.target.value)} min="1" max="100" placeholder="20" />
+            </div>
+            <div className="field-wrapper">
+              <label className="field-label">
+                Default Session Duration
+                <div className="info-icon" data-tooltip="Standard length of a training session in minutes">
+                  <Info size={14} />
+                </div>
+              </label>
+              <div style={{ position: "relative" }}>
+                <input className="dense-input" type="number" value={sessionDuration} onChange={e => setSessionDuration(e.target.value)} min="15" max="180" step="15" placeholder="60" />
+                <span style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-tertiary)", fontSize: "0.8rem", pointerEvents: "none" }}>min</span>
+              </div>
+            </div>
+            <div className="field-wrapper">
+              <label className="field-label">
+                Rest Between Sessions
+                <div className="info-icon" data-tooltip="Buffer time between consecutive sessions">
+                  <Info size={14} />
+                </div>
+              </label>
+              <div style={{ position: "relative" }}>
+                <input className="dense-input" type="number" value={restBetweenSessions} onChange={e => setRestBetweenSessions(e.target.value)} min="0" max="60" step="5" placeholder="15" />
+                <span style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-tertiary)", fontSize: "0.8rem", pointerEvents: "none" }}>min</span>
+              </div>
+            </div>
+            <div className="field-wrapper">
+              <label className="field-label">
+                Max Group Size
+                <div className="info-icon" data-tooltip="Maximum members allowed in a single group session">
+                  <Info size={14} />
+                </div>
+              </label>
+              <input className="dense-input" type="number" value={maxGroupSize} onChange={e => setMaxGroupSize(e.target.value)} min="2" max="50" placeholder="8" />
+            </div>
+          </div>
+        </div>
+
+        <div className="form-group">
+          <div className="form-group__header">
+            <UserCheck size={16} />
+            <h4 className="form-group__title">Booking Preferences</h4>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+            <div style={{
+              display: "flex", alignItems: "center", justifyContent: "space-between", padding: "1rem",
+              borderBottom: "1px solid var(--border-primary)",
+            }}>
+              <div>
+                <div style={{ fontWeight: 600, color: "var(--text-primary)", fontSize: "0.9rem" }}>Auto-Accept Bookings</div>
+                <div style={{ fontSize: "0.8rem", color: "var(--text-tertiary)", marginTop: 2 }}>Automatically accept new booking requests from members</div>
+              </div>
+              <label className="toggle-switch"><input type="checkbox" checked={autoAcceptBookings} onChange={e => setAutoAcceptBookings(e.target.checked)} /><span className="toggle-slider" /></label>
+            </div>
+            <div style={{
+              display: "flex", alignItems: "center", justifyContent: "space-between", padding: "1rem",
+            }}>
+              <div>
+                <div style={{ fontWeight: 600, color: "var(--text-primary)", fontSize: "0.9rem" }}>Allow Group Sessions</div>
+                <div style={{ fontSize: "0.8rem", color: "var(--text-tertiary)", marginTop: 2 }}>Enable group training sessions alongside individual sessions</div>
+              </div>
+              <label className="toggle-switch"><input type="checkbox" checked={allowGroupSessions} onChange={e => setAllowGroupSessions(e.target.checked)} /><span className="toggle-slider" /></label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
+  /* ── Appearance ── */
+  const AppearanceSection = () => (
+    <div className="settings-section" style={{ "--section-accent": "#a855f7" } as React.CSSProperties}>
+      <div className="settings-section__header">
+        <div className="settings-section__icon" style={{ background: "linear-gradient(135deg, #a855f7, #9333ea)" }}>
+          <Palette size={20} />
+        </div>
+        <div>
+          <h2 className="settings-section__title">Appearance</h2>
+          <p className="settings-section__description">Customize the look and feel of your dashboard</p>
+        </div>
+      </div>
+      <div className="settings-section__content">
+        <div className="form-group">
+          <div className="form-group__header">
+            <Palette size={16} />
+            <h4 className="form-group__title">Theme Mode</h4>
+          </div>
+          <div className="theme-options">
+            {([
+              { mode: "dark" as const, label: "Dark", icon: <Moon size={24} />, desc: "Easy on the eyes" },
+              { mode: "light" as const, label: "Light", icon: <Sun size={24} />, desc: "Clean and bright" },
+              { mode: "system" as const, label: "System", icon: <Monitor size={24} />, desc: "Match OS setting" },
+            ]).map(t => (
+              <button key={t.mode} className={`theme-option ${themeMode === t.mode ? "theme-option--active" : ""}`} onClick={() => setThemeMode(t.mode)}>
+                <div className="theme-option__preview">
+                  {t.icon}
+                </div>
+                <div className="theme-option__label">{t.label}</div>
+                <div className="theme-option__desc">{t.desc}</div>
+                {themeMode === t.mode && <div className="theme-option__check"><Check size={14} /></div>}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
+  /* ── Notifications ── */
+  const NotificationsSection = () => (
+    <div className="settings-section" style={{ "--section-accent": "#f97316" } as React.CSSProperties}>
+      <div className="settings-section__header">
+        <div className="settings-section__icon" style={{ background: "linear-gradient(135deg, #f97316, #ea580c)" }}>
+          <Bell size={20} />
+        </div>
+        <div>
+          <h2 className="settings-section__title">Notifications</h2>
+          <p className="settings-section__description">Configure how you receive alerts and updates</p>
+        </div>
+        <div className="settings-section__actions">
+          <button className="settings-btn settings-btn--primary" onClick={handleSaveNotifications} disabled={saving}>
+            {saving ? <Loader2 size={14} className="spin" /> : <Save size={14} />} Save
+          </button>
+        </div>
+      </div>
+      <div className="settings-section__content">
+        <div className="form-group">
+          <div className="form-group__header">
+            <Bell size={16} />
+            <h4 className="form-group__title">Alert Preferences</h4>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+            {([
+              { key: "emailNotifications" as const, label: "Email Notifications", desc: "Receive updates and alerts via email", icon: <Mail size={16} /> },
+              { key: "classReminders" as const, label: "Class Reminders", desc: "Get reminded before upcoming classes you teach", icon: <Clock size={16} /> },
+              { key: "memberUpdates" as const, label: "Member Updates", desc: "Notifications about member activity and progress", icon: <Users size={16} /> },
+              { key: "scheduleChanges" as const, label: "Schedule Changes", desc: "Alerts when your schedule is modified by admin", icon: <Calendar size={16} /> },
+              { key: "progressAlerts" as const, label: "Progress Alerts", desc: "Notifications when members hit milestones", icon: <BarChart3 size={16} /> },
+              { key: "paymentAlerts" as const, label: "Payment Alerts", desc: "Notifications about your earnings and payouts", icon: <DollarSign size={16} /> },
+              { key: "newAssignments" as const, label: "New Assignments", desc: "Alerts when new clients are assigned to you", icon: <UserCheck size={16} /> },
+            ]).map((item, idx, arr) => (
+              <div key={item.key} style={{
+                display: "flex", alignItems: "center", justifyContent: "space-between", padding: "1rem",
+                borderBottom: idx < arr.length - 1 ? "1px solid var(--border-primary)" : "none",
+              }}>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem" }}>
+                  <div style={{ color: "var(--text-tertiary)", marginTop: 2 }}>{item.icon}</div>
+                  <div>
+                    <div style={{ fontWeight: 600, color: "var(--text-primary)", fontSize: "0.9rem" }}>{item.label}</div>
+                    <div style={{ fontSize: "0.8rem", color: "var(--text-tertiary)", marginTop: 2 }}>{item.desc}</div>
+                  </div>
+                </div>
+                <label className="toggle-switch">
+                  <input type="checkbox" checked={notifications[item.key]} onChange={e => setNotifications({ ...notifications, [item.key]: e.target.checked })} />
+                  <span className="toggle-slider" />
+                </label>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
+  /* ── Security ── */
+  const SecuritySection = () => (
+    <div className="settings-section" style={{ "--section-accent": "#ef4444" } as React.CSSProperties}>
+      <div className="settings-section__header">
+        <div className="settings-section__icon" style={{ background: "linear-gradient(135deg, #ef4444, #dc2626)" }}>
+          <Shield size={20} />
+        </div>
+        <div>
+          <h2 className="settings-section__title">Security</h2>
+          <p className="settings-section__description">Manage your password and account security</p>
+        </div>
+        <div className="settings-section__actions">
+          <button className="settings-btn settings-btn--primary" onClick={handleChangePassword} disabled={saving || !currentPassword || !newPassword || !confirmPassword}>
+            {saving ? <Loader2 size={14} className="spin" /> : <Shield size={14} />} Update Password
+          </button>
+        </div>
+      </div>
+      <div className="settings-section__content">
+        <div className="form-group">
+          <div className="form-group__header">
+            <Shield size={16} />
+            <h4 className="form-group__title">Change Password</h4>
+          </div>
+          <div className="form-grid">
+            <div className="field-wrapper field-wrapper--full">
+              <label className="field-label">
+                Current Password
+                <span className="field-label__required">*</span>
+              </label>
+              <div style={{ position: "relative" }}>
+                <input className="dense-input" type={showCurrentPassword ? "text" : "password"} value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} placeholder="Enter current password" style={{ paddingRight: 40 }} />
+                <button onClick={() => setShowCurrentPassword(!showCurrentPassword)} type="button" style={{
+                  position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)",
+                  background: "none", border: "none", cursor: "pointer", color: "var(--text-tertiary)",
+                  display: "flex", alignItems: "center", padding: 4,
+                }}>
+                  {showCurrentPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
+            <div className="field-wrapper">
+              <label className="field-label">
+                New Password
+                <span className="field-label__required">*</span>
+              </label>
+              <div style={{ position: "relative" }}>
+                <input className="dense-input" type={showNewPassword ? "text" : "password"} value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Enter new password" style={{ paddingRight: 40 }} />
+                <button onClick={() => setShowNewPassword(!showNewPassword)} type="button" style={{
+                  position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)",
+                  background: "none", border: "none", cursor: "pointer", color: "var(--text-tertiary)",
+                  display: "flex", alignItems: "center", padding: 4,
+                }}>
+                  {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+              {newPassword && newPassword.length < 8 && (
+                <div className="field-error"><AlertCircle size={12} /> Password must be at least 8 characters</div>
+              )}
+              {newPassword && newPassword.length >= 8 && (
+                <div className="field-hint"><Check size={12} /> Password strength: Good</div>
+              )}
+            </div>
+            <div className="field-wrapper">
+              <label className="field-label">
+                Confirm New Password
+                <span className="field-label__required">*</span>
+              </label>
+              <input className="dense-input" type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Confirm new password" />
+              {confirmPassword && confirmPassword !== newPassword && (
+                <div className="field-error"><AlertCircle size={12} /> Passwords do not match</div>
+              )}
+              {confirmPassword && confirmPassword === newPassword && newPassword.length >= 8 && (
+                <div className="field-hint"><Check size={12} /> Passwords match</div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
+  /* ── Billing / Earnings ── */
+  const BillingSection = () => (
+    <div className="settings-section" style={{ "--section-accent": "#f59e0b" } as React.CSSProperties}>
+      <div className="settings-section__header">
+        <div className="settings-section__icon" style={{ background: "linear-gradient(135deg, #f59e0b, #d97706)" }}>
+          <CreditCard size={20} />
+        </div>
+        <div>
+          <h2 className="settings-section__title">Earnings & Payouts</h2>
+          <p className="settings-section__description">View your payment information and earning history</p>
+        </div>
+      </div>
+      <div className="settings-section__content">
+        <div className="form-group">
+          <div className="form-group__header">
+            <DollarSign size={16} />
+            <h4 className="form-group__title">Payout Information</h4>
+          </div>
+          <div style={{
+            padding: "2.5rem 2rem", textAlign: "center",
+            background: "var(--bg-secondary)", borderRadius: 12, border: "1px solid var(--border-primary)",
+          }}>
+            <div style={{
+              width: 56, height: 56, borderRadius: "50%", background: "linear-gradient(135deg, #f59e0b20, #d9770620)",
+              display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1rem",
+            }}>
+              <CreditCard size={28} style={{ color: "#f59e0b" }} />
+            </div>
+            <div style={{ fontWeight: 600, color: "var(--text-primary)", marginBottom: 6, fontSize: "1.05rem" }}>Earnings & Payout Information</div>
+            <div style={{ fontSize: "0.85rem", color: "var(--text-tertiary)", maxWidth: 400, margin: "0 auto", lineHeight: 1.5 }}>
+              Your payout details and earning history are managed by the gym administration. Contact the gym owner for payout inquiries.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
+  /* ── Reports ── */
+  const ReportsSection = () => (
+    <div className="settings-section" style={{ "--section-accent": "#14b8a6" } as React.CSSProperties}>
+      <div className="settings-section__header">
+        <div className="settings-section__icon" style={{ background: "linear-gradient(135deg, #14b8a6, #0d9488)" }}>
+          <FileText size={20} />
+        </div>
+        <div>
+          <h2 className="settings-section__title">Reports & Logs</h2>
+          <p className="settings-section__description">View your session history and performance metrics</p>
+        </div>
+      </div>
+      <div className="settings-section__content">
+        <div className="form-group">
+          <div className="form-group__header">
+            <BarChart3 size={16} />
+            <h4 className="form-group__title">Session & Performance Data</h4>
+          </div>
+          <div style={{
+            padding: "2.5rem 2rem", textAlign: "center",
+            background: "var(--bg-secondary)", borderRadius: 12, border: "1px solid var(--border-primary)",
+          }}>
+            <div style={{
+              width: 56, height: 56, borderRadius: "50%", background: "linear-gradient(135deg, #14b8a620, #0d948820)",
+              display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1rem",
+            }}>
+              <BarChart3 size={28} style={{ color: "#14b8a6" }} />
+            </div>
+            <div style={{ fontWeight: 600, color: "var(--text-primary)", marginBottom: 6, fontSize: "1.05rem" }}>Session Logs & Reports</div>
+            <div style={{ fontSize: "0.85rem", color: "var(--text-tertiary)", maxWidth: 400, margin: "0 auto", lineHeight: 1.5 }}>
+              View your completed sessions, client progress reports, and performance analytics from the Reports section of the dashboard.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
+  /* ═══════════════════════════════════  RENDER  ═══════════════════════════════════ */
+  return (
+    <div className="settings-page">
+      <div className="settings-layout">
+        <aside className="settings-sidebar">
+          {settingsCategories.map((category) => {
+            const Icon = category.icon
+            const isActive = activeSection === category.id
+            return (
+              <motion.button
+                key={category.id}
+                className={`settings-nav-item ${isActive ? "settings-nav-item--active" : ""}`}
+                onClick={() => setActiveSection(category.id)}
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+                transition={{ type: "spring", stiffness: 400, damping: 25 }}
+              >
+                <div
+                  className="settings-nav-item__icon"
+                  style={isActive ? {
+                    background: `linear-gradient(135deg, ${category.color}, ${category.color}dd)`,
+                    color: "#fff",
+                    boxShadow: `0 3px 10px ${category.color}55`,
+                  } : {
+                    color: category.color,
+                    background: `${category.color}15`,
+                  }}
+                >
+                  <Icon size={16} />
+                </div>
+                <div className="settings-nav-item__text">
+                  <div className="settings-nav-item__label">{category.label}</div>
+                  <div className="settings-nav-item__desc">{category.desc}</div>
+                </div>
+              </motion.button>
+            )
+          })}
+        </aside>
+
+        <main className="settings-content">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeSection}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            >
+              {renderSection()}
+            </motion.div>
+          </AnimatePresence>
+        </main>
+      </div>
+    </div>
+  )
+}
+
+export default TrainerSettings

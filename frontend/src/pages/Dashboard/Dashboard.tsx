@@ -21,15 +21,14 @@ import {
   Wallet,
   UserCheck,
   Timer,
-  BarChart3,
-  RefreshCw,
-  CircleDot,
-  AlertTriangle,
-  ChevronRight,
-  Target,
-  Flame,
-  ShieldAlert,
-  Layers
+    RefreshCw,
+    CircleDot,
+    AlertTriangle,
+    Target,
+    Flame,
+    ShieldAlert,
+      Layers,
+      BarChart3
 } from 'lucide-react'
 import {
   AreaChart,
@@ -609,62 +608,66 @@ const Dashboard: React.FC = () => {
           </div>
         </section>
 
-        {/* Live Activity Feed — 4 cols */}
-        <section className="dash__card dash__card--activity">
+        {/* Today's Schedule — 4 cols - REPLACES Live Activity */}
+        <section className="dash__card dash__card--schedule">
           <div className="dash__card-head">
-            <div className="dash__card-icon dash__card-icon--cyan"><Zap size={14} /></div>
+            <div className="dash__card-icon dash__card-icon--cyan"><Calendar size={14} /></div>
             <div>
-              <h3 className="dash__card-title">Live Activity</h3>
-              <p className="dash__card-sub">Real-time updates</p>
+              <h3 className="dash__card-title">Today's Schedule</h3>
+              <p className="dash__card-sub">Upcoming classes & sessions</p>
             </div>
-            <button className="dash__link-btn" onClick={() => navigate('/reports')}>
+            <button className="dash__link-btn" onClick={() => navigate('/classes')}>
               View All <ArrowRight size={11} />
             </button>
           </div>
           <div className="dash__list-scroll">
-            {data?.recentActivity?.slice(0, 5).map((act, i) => (
-              <div key={i} className="dash__activity-row">
-                <div className={`dash__activity-icon dash__activity-icon--${act.type}`}>
-                  {act.type === 'checkin' && <UserCheck size={12} />}
-                  {act.type === 'signup' && <UserPlus size={12} />}
-                  {act.type === 'cancel' && <AlertCircle size={12} />}
-                  {(!act.type || act.type === 'freeze') && <Timer size={12} />}
+            {analyticsData?.todaysClasses?.slice(0, 5).map((cls: any, i: number) => (
+              <div key={i} className="dash__schedule-row">
+                <div className="dash__schedule-time">
+                  {new Date(cls.startTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                 </div>
-                <div className="dash__activity-content">
-                  <span className="dash__activity-name">{act.name}</span>
-                  <span className="dash__activity-desc">
-                    {act.type === 'checkin' && 'Checked in'}
-                    {act.type === 'signup' && 'New signup'}
-                    {act.type === 'cancel' && 'Cancelled'}
-                    {act.type === 'freeze' && 'Membership frozen'}
-                  </span>
+                <div className="dash__schedule-info">
+                  <span className="dash__schedule-name">{cls.name}</span>
+                  <span className="dash__schedule-meta">{cls.trainer}</span>
                 </div>
-                <span className="dash__activity-time">{act.date}</span>
+                <div className={`dash__schedule-status dash__schedule-status--${cls.status?.toLowerCase() || 'upcoming'}`}>
+                  {cls.status === 'IN_PROGRESS' ? 'LIVE' : cls.status === 'COMPLETED' ? 'Done' : 'Upcoming'}
+                </div>
               </div>
             ))}
-            {(!data?.recentActivity || data.recentActivity.length === 0) && (
-              <div className="dash__empty">No recent activity</div>
+            {(!analyticsData?.todaysClasses || analyticsData.todaysClasses.length === 0) && (
+              <div className="dash__empty">No classes scheduled today</div>
             )}
           </div>
         </section>
 
-        {/* Birthdays — 4 cols */}
-        <section className="dash__card dash__card--birthdays">
+        {/* Staff On Duty — 4 cols - REPLACES Birthdays */}
+        <section className="dash__card dash__card--staff">
           <div className="dash__card-head">
-            <div className="dash__card-icon dash__card-icon--amber"><Gift size={14} /></div>
+            <div className="dash__card-icon dash__card-icon--amber"><ShieldAlert size={14} /></div>
             <div>
-              <h3 className="dash__card-title">Birthdays Today</h3>
+              <h3 className="dash__card-title">Staff On Duty</h3>
+              <p className="dash__card-sub">Today's team</p>
             </div>
+            <button className="dash__link-btn" onClick={() => navigate('/staff')}>
+              View All <ArrowRight size={11} />
+            </button>
           </div>
-          <div className="dash__birthday-list">
-            {data?.birthdays?.map((b, i) => (
-              <div key={i} className="dash__birthday-chip">
-                <div className="dash__birthday-avatar">{b.initials}</div>
-                <span>{b.name}</span>
+          <div className="dash__list-scroll">
+            {data?.trainerSchedule?.slice(0, 4).map((trainer: any, i: number) => (
+              <div key={i} className="dash__staff-row">
+                <div className="dash__staff-avatar">{trainer.initials}</div>
+                <div className="dash__staff-info">
+                  <span className="dash__staff-name">{trainer.name}</span>
+                  <span className="dash__staff-role">{trainer.sessionsToday} sessions</span>
+                </div>
+                <div className="dash__staff-status dash__staff-status--on">
+                  <CircleDot size={8} /> On Duty
+                </div>
               </div>
             ))}
-            {(!data?.birthdays || data.birthdays.length === 0) && (
-              <div className="dash__empty">No birthdays today</div>
+            {(!data?.trainerSchedule || data.trainerSchedule.length === 0) && (
+              <div className="dash__empty">No staff on duty</div>
             )}
           </div>
         </section>
@@ -677,26 +680,26 @@ const Dashboard: React.FC = () => {
               <h3 className="dash__card-title">Quick Actions</h3>
             </div>
           </div>
-          <div className="dash__action-grid">
-            <button className="dash__action-btn dash__action-btn--primary" onClick={() => navigate('/members?action=create')}>
-              <UserPlus size={18} /><span>Add Member</span>
-            </button>
-            <button className="dash__action-btn" onClick={() => navigate('/members')}>
-              <CheckCircle2 size={18} /><span>Check-in</span>
-            </button>
-            <button className="dash__action-btn" onClick={() => navigate('/financials')}>
-              <Wallet size={18} /><span>Payments</span>
-            </button>
-            <button className="dash__action-btn" onClick={() => navigate('/reports')}>
-              <BarChart3 size={18} /><span>Reports</span>
-            </button>
-            <button className="dash__action-btn" onClick={() => navigate('/classes')}>
-              <Calendar size={18} /><span>Classes</span>
-            </button>
-            <button className="dash__action-btn" onClick={() => navigate('/equipment')}>
-              <Dumbbell size={18} /><span>Equipment</span>
-            </button>
-          </div>
+            <div className="dash__action-grid">
+              <button className="dash__action-btn dash__action-btn--primary" onClick={() => navigate('/members?action=create')}>
+                <UserPlus size={18} /><span>Add Member</span>
+              </button>
+              <button className="dash__action-btn" onClick={() => navigate('/check-in')}>
+                <CheckCircle2 size={18} /><span>Check-in</span>
+              </button>
+              <button className="dash__action-btn" onClick={() => navigate('/financials')}>
+                <Wallet size={18} /><span>Payments</span>
+              </button>
+              <button className="dash__action-btn" onClick={() => navigate('/classes')}>
+                <Calendar size={18} /><span>Classes</span>
+              </button>
+              <button className="dash__action-btn" onClick={() => navigate('/trainers')}>
+                <Dumbbell size={18} /><span>Trainers</span>
+              </button>
+              <button className="dash__action-btn" onClick={() => navigate('/equipment')}>
+                <Zap size={18} /><span>Equipment</span>
+              </button>
+            </div>
         </section>
 
         {/* Overdue Payments — if present, 4 cols */}
@@ -732,42 +735,7 @@ const Dashboard: React.FC = () => {
           </section>
         )}
 
-        {/* Today's Classes — if present, 4 cols */}
-        {analyticsData?.todaysClasses && analyticsData.todaysClasses.length > 0 && (
-          <section className="dash__card dash__card--classes">
-            <div className="dash__card-head">
-              <div className="dash__card-icon dash__card-icon--blue"><Calendar size={14} /></div>
-              <div>
-                <h3 className="dash__card-title">Today's Classes</h3>
-                <p className="dash__card-sub">Group fitness sessions</p>
-              </div>
-              <span className="dash__count-badge dash__count-badge--blue">{analyticsData.todaysClasses.length}</span>
-            </div>
-            <div className="dash__list-scroll">
-              {analyticsData.todaysClasses.slice(0, 4).map((cls: any, i: number) => (
-                <div key={i} className={`dash__class-row dash__class-row--${(cls.status || '').toLowerCase()}`}>
-                  <div className="dash__class-time">
-                    {new Date(cls.startTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
-                  </div>
-                  <div className="dash__class-info">
-                    <span className="dash__class-name">{cls.name}</span>
-                    <span className="dash__class-meta">{cls.trainer} &middot; {cls.enrolled}/{cls.capacity}</span>
-                  </div>
-                  <div className="dash__class-badge-wrap">
-                    {cls.status === 'IN_PROGRESS' && <span className="dash__badge dash__badge--live">LIVE</span>}
-                    {cls.status === 'UPCOMING' && <span className="dash__badge dash__badge--upcoming">Upcoming</span>}
-                    {cls.status === 'COMPLETED' && <span className="dash__badge dash__badge--done">Done</span>}
-                  </div>
-                </div>
-              ))}
-            </div>
-            {analyticsData.todaysClasses.length > 4 && (
-              <button className="dash__link-btn dash__link-btn--bottom" onClick={() => navigate('/classes')}>
-                View All Classes <ArrowRight size={11} />
-              </button>
-            )}
-          </section>
-        )}
+          {/* Duplicate "Today's Classes" widget removed — already shown in "Today's Schedule" above */}
 
       </div>
     </div>

@@ -29,6 +29,8 @@ const TrainerReports: React.FC = () => {
     const [period, setPeriod] = useState('This Month');
     const [activeTab, setActiveTab] = useState<'overview' | 'sessions' | 'members' | 'earnings'>('overview');
     const [sessionFilter, setSessionFilter] = useState<'all' | 'completed' | 'cancelled' | 'no-show'>('all');
+    const [customStartDate, setCustomStartDate] = useState('');
+    const [customEndDate, setCustomEndDate] = useState('');
 
     // Loading and error states
     const [loading, setLoading] = useState(true);
@@ -249,9 +251,29 @@ const TrainerReports: React.FC = () => {
                                 <option>This Month</option>
                                 <option>Last 3 Months</option>
                                 <option>This Year</option>
+                                <option>Custom</option>
                             </select>
                             <ChevronDown size={14} />
                         </div>
+                        {period === 'Custom' && (
+                            <div className="trainer-reports__custom-range">
+                                <input
+                                    type="date"
+                                    className="trainer-reports__date-input"
+                                    value={customStartDate}
+                                    onChange={(e) => setCustomStartDate(e.target.value)}
+                                    placeholder="Start date"
+                                />
+                                <span className="trainer-reports__date-separator">to</span>
+                                <input
+                                    type="date"
+                                    className="trainer-reports__date-input"
+                                    value={customEndDate}
+                                    onChange={(e) => setCustomEndDate(e.target.value)}
+                                    placeholder="End date"
+                                />
+                            </div>
+                        )}
                         <button
                             className={`trainer-reports__refresh-btn ${refreshing ? 'refreshing' : ''}`}
                             title="Refresh Data"

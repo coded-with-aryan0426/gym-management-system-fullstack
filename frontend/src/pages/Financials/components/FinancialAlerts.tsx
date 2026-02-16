@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatCurrency } from '../../../utils/formatters';
 import './FinancialAlerts.css';
 
 interface Alert {
@@ -22,7 +23,7 @@ const FinancialAlerts: React.FC<FinancialAlertsProps> = ({ pendingCount, pending
             id: '1',
             type: 'critical',
             title: 'Overdue Payments',
-            message: `${pendingCount} invoices totaling ₹${pendingAmount.toLocaleString('en-IN')} are pending`,
+            message: `${pendingCount} invoices totaling ${formatCurrency(pendingAmount)} are pending`,
             actionLabel: 'Collect Now'
         });
     }

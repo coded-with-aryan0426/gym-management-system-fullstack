@@ -1,0 +1,572 @@
+/* ============================================================================
+   Trainer Detail Page
+   ============================================================================ */
+
+.trainer-detail {
+  padding: 20px 24px;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: calc(100vh - 64px);
+}
+
+/* Loading State */
+.trainer-detail__loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  gap: 16px;
+  color: var(--text-tertiary);
+}
+
+.trainer-detail__error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  gap: 16px;
+}
+
+.trainer-detail__error h2 {
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* Header */
+.trainer-detail__header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.trainer-detail__header .back-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.trainer-detail__header .back-btn:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.trainer-detail__title-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+}
+
+.trainer-detail__title-info h1 {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+  color: var(--text-primary);
+}
+
+.trainer-detail__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-tertiary);
+}
+
+.trainer-detail__meta .separator {
+  opacity: 0.4;
+}
+
+.trainer-detail__actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Quick Stats */
+.trainer-detail__quick-stats {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 16px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+}
+
+.trainer-detail__quick-stats .quick-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 16px;
+  border-right: 1px solid var(--border-subtle);
+}
+
+.trainer-detail__quick-stats .quick-stat:last-child {
+  border-right: none;
+}
+
+.trainer-detail__quick-stats .quick-stat__label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.trainer-detail__quick-stats .quick-stat__value {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Tabs */
+.trainer-detail__tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 0;
+  overflow-x: auto;
+}
+
+.trainer-detail__tabs .tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.trainer-detail__tabs .tab:hover {
+  color: var(--text-primary);
+}
+
+.trainer-detail__tabs .tab.active {
+  color: var(--color-crimson);
+  border-bottom-color: var(--color-crimson);
+}
+
+/* Content */
+.trainer-detail__content {
+  min-height: 400px;
+}
+
+/* Overview Tab */
+.trainer-detail__overview {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Detail Cards */
+.detail-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.detail-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.detail-card__header h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.detail-card__header .record-count {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.detail-card__body {
+  padding: 16px;
+}
+
+/* Info Grid */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.info-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-value {
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: var(--bg-tertiary);
+  border-radius: 10px;
+}
+
+.stat-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: rgba(220, 38, 38, 0.1);
+  border-radius: 10px;
+  color: var(--color-crimson);
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+/* Members List */
+.members-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.members-list .member-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+}
+
+.members-list .member-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.members-list .member-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.members-list .member-email {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+/* Schedule List */
+.schedule-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.schedule-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px;
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+}
+
+.schedule-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 60px;
+}
+
+.schedule-date .day {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+}
+
+.schedule-date .date {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.schedule-time {
+  font-size: 13px;
+  color: var(--text-secondary);
+  min-width: 80px;
+}
+
+.schedule-member {
+  flex: 1;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+/* Performance Grid */
+.performance-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.perf-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background: var(--bg-tertiary);
+  border-radius: 10px;
+}
+
+.perf-label {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.perf-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* Compensation List */
+.compensation-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.compensation-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+}
+
+.comp-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.comp-date {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.comp-desc {
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.comp-amount {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.comp-amount .amount {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-emerald);
+}
+
+/* Attendance List */
+.attendance-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.attendance-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px;
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+}
+
+.attendance-date {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  min-width: 100px;
+}
+
+.attendance-time {
+  display: flex;
+  gap: 16px;
+  flex: 1;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* Empty State */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  color: var(--text-tertiary);
+  text-align: center;
+  gap: 8px;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.empty-hint {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+/* Members Table */
+.members-table {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.members-table .member-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px;
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+}
+
+.members-table .member-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.members-table .member-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.members-table .member-email {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.members-table .member-phone {
+  font-size: 13px;
+  color: var(--text-secondary);
+  min-width: 120px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .trainer-detail {
+    padding: 16px;
+  }
+
+  .trainer-detail__header {
+    flex-wrap: wrap;
+  }
+
+  .trainer-detail__title-section {
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .trainer-detail__actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .trainer-detail__quick-stats {
+    flex-wrap: wrap;
+  }
+
+  .quick-stat {
+    border-right: none !important;
+    border-bottom: 1px solid var(--border-subtle);
+    padding-bottom: 12px !important;
+  }
+
+  .quick-stat:last-child {
+    border-bottom: none !important;
+  }
+
+  .stats-grid,
+  .performance-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .schedule-item {
+    flex-wrap: wrap;
+  }
+}

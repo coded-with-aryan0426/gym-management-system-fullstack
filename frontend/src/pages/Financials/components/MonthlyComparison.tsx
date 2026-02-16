@@ -72,7 +72,11 @@ const MonthlyComparison: React.FC<MonthlyComparisonProps> = ({ chartData, period
                             axisLine={false}
                             tickLine={false}
                             tick={{ fill: '#71717a', fontSize: 9 }}
-                            tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`}
+                            tickFormatter={(v) => {
+                                if (v >= 100000) return `₹${(v / 100000).toFixed(0)}L`;
+                                if (v >= 1000) return `₹${(v / 1000).toFixed(0)}k`;
+                                return `₹${v}`;
+                            }}
                             width={45}
                         />
                         <Tooltip content={<CustomTooltip />} />

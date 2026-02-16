@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { formatCurrency } from '../../utils/formatters';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Equipment, EquipmentStats, EquipmentStatus, EquipmentCategory } from '../../types/equipment';
 import { equipmentApi } from '../../services/equipmentApi';
@@ -149,7 +150,7 @@ const EquipmentPage: React.FC = () => {
                     <p className="header-subtitle">
                         Manage and monitor your fitness equipment fleet
                         {totalValue > 0 && (
-                            <> — <strong style={{ color: 'var(--accent-primary)' }}>₹{totalValue.toLocaleString('en-IN')}</strong> total asset value</>
+                            <> — <strong style={{ color: 'var(--accent-primary)' }}>{formatCurrency(totalValue)}</strong> total asset value</>
                         )}
                     </p>
                 </div>

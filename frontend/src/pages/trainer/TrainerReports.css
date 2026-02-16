@@ -80,6 +80,33 @@
   color: var(--text-tertiary, rgba(255, 255, 255, 0.4));
 }
 
+.trainer-reports__custom-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.trainer-reports__date-input {
+  height: 38px;
+  padding: 0 12px;
+  background: var(--sidebar-bg, rgba(12, 12, 14, 0.95));
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: 8px;
+  color: var(--text-primary, #fff);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.trainer-reports__date-input:focus {
+  border-color: var(--accent-color, #6C63FF);
+}
+
+.trainer-reports__date-separator {
+  color: var(--text-tertiary, rgba(255, 255, 255, 0.4));
+  font-size: 12px;
+}
+
 .trainer-reports__refresh-btn {
   width: 38px;
   height: 38px;
@@ -1174,6 +1201,12 @@
 }
 
 :root.theme-light .trainer-reports__period-select select {
+  background: #f9fafb;
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #111;
+}
+
+:root.theme-light .trainer-reports__date-input {
   background: #f9fafb;
   border-color: rgba(0, 0, 0, 0.08);
   color: #111;

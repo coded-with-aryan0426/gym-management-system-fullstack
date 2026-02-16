@@ -222,6 +222,22 @@ const MySchedule: React.FC = () => {
     // Helpers
     // ─────────────────────────────────────────────────────────
 
+    // Current time indicator
+    const [now, setNow] = useState(new Date());
+    useEffect(() => {
+        const timer = setInterval(() => setNow(new Date()), 60000); // update every minute
+        return () => clearInterval(timer);
+    }, []);
+
+    const getCurrentTimePosition = (date: Date): number | null => {
+        if (!isToday(date)) return null;
+        const currentHour = now.getHours();
+        const currentMinute = now.getMinutes();
+        if (currentHour < 6 || currentHour > 19) return null; // outside visible hours
+        // Position as percentage within the hour grid (hours 6-19 = 14 slots)
+        return ((currentHour - 6) + currentMinute / 60) / 14 * 100;
+    };
+
     const hours = Array.from({ length: 14 }, (_, i) => i + 6); // 6 AM to 7 PM
 
     const getEventsForDay = (date: Date) => {
@@ -445,8 +461,15 @@ const MySchedule: React.FC = () => {
 
                             {weekDates.map((date, dayIndex) => {
                                 const isTodayDate = isToday(date);
+                                const timePos = getCurrentTimePosition(date);
                                 return (
                                     <div key={dayIndex} className={`trainer-schedule__day-column ${isTodayDate ? 'trainer-schedule__day-column--today' : ''}`}>
+                                        {timePos !== null && (
+                                            <div className="trainer-schedule__time-indicator" style={{ top: `${timePos}%` }}>
+                                                <div className="trainer-schedule__time-indicator-dot" />
+                                                <div className="trainer-schedule__time-indicator-line" />
+                                            </div>
+                                        )}
                                         {hours.map(hour => {
                                             const event = getEventForSlot(date, hour);
                                             const statusConfig = event ? getStatusConfig(event.status) : null;
@@ -521,6 +544,15 @@ const MySchedule: React.FC = () => {
                             </div>
 
                             <div className="trainer-schedule__day-column trainer-schedule__day-column--wide">
+                                {(() => {
+                                    const timePos = getCurrentTimePosition(currentDate);
+                                    return timePos !== null ? (
+                                        <div className="trainer-schedule__time-indicator" style={{ top: `${timePos}%` }}>
+                                            <div className="trainer-schedule__time-indicator-dot" />
+                                            <div className="trainer-schedule__time-indicator-line" />
+                                        </div>
+                                    ) : null;
+                                })()}
                                 {hours.map(hour => {
                                     /* Use the same logic as week view but wider */
                                     const event = getEventForSlot(currentDate, hour);

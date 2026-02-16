@@ -1,6 +1,7 @@
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from 'recharts';
 import type { Transaction } from '../../../types/finance';
+import { formatCurrency } from '../../../utils/formatters';
 import './CashFlowWaterfall.css';
 
 interface CashFlowWaterfallProps {
@@ -62,7 +63,12 @@ const CashFlowWaterfall: React.FC<CashFlowWaterfallProps> = ({ transactions, tot
         return { name: d.name, base, positive: 0, negative: Math.abs(d.value), type: d.type };
     });
 
-    const fmt = (v: number) => `₹${Math.abs(v / 1000).toFixed(0)}k`;
+    const fmt = (v: number) => {
+        const abs = Math.abs(v);
+        if (abs >= 100000) return `₹${(abs / 100000).toFixed(0)}L`;
+        if (abs >= 1000) return `₹${(abs / 1000).toFixed(0)}k`;
+        return `₹${abs}`;
+    };
 
     const CustomTooltip = ({ active, payload, label }: any) => {
         if (!active || !payload?.length) return null;
@@ -72,9 +78,9 @@ const CashFlowWaterfall: React.FC<CashFlowWaterfallProps> = ({ transactions, tot
             <div className="waterfall-tooltip">
                 <div className="wt-label">{label}</div>
                 <div className={`wt-value ${d.type}`}>
-                    {d.value >= 0 ? '+' : ''}₹{Math.abs(d.value).toLocaleString('en-IN')}
+                    {d.value >= 0 ? '+' : '-'}{formatCurrency(Math.abs(d.value))}
                 </div>
-                <div className="wt-cumulative">Running: ₹{d.cumulative.toLocaleString('en-IN')}</div>
+                <div className="wt-cumulative">Running: {formatCurrency(d.cumulative)}</div>
             </div>
         );
     };
@@ -135,19 +141,19 @@ const CashFlowWaterfall: React.FC<CashFlowWaterfallProps> = ({ transactions, tot
                 <div className="story-flow">
                     <div className="flow-item income">
                         <span className="flow-label">Money In</span>
-                        <span className="flow-value">₹{totalRevenue.toLocaleString('en-IN')}</span>
+                        <span className="flow-value">{formatCurrency(totalRevenue)}</span>
                         {topIncome && <span className="flow-detail">Top: {topIncome[0]}</span>}
                     </div>
                     <div className="flow-arrow">→</div>
                     <div className="flow-item expense">
                         <span className="flow-label">Money Out</span>
-                        <span className="flow-value">₹{totalExpenses.toLocaleString('en-IN')}</span>
+                        <span className="flow-value">{formatCurrency(totalExpenses)}</span>
                         {topExpense && <span className="flow-detail">Top: {topExpense[0]}</span>}
                     </div>
                     <div className="flow-arrow">=</div>
                     <div className={`flow-item ${netProfit >= 0 ? 'profit' : 'loss'}`}>
                         <span className="flow-label">{netProfit >= 0 ? 'Profit' : 'Loss'}</span>
-                        <span className="flow-value">₹{Math.abs(netProfit).toLocaleString('en-IN')}</span>
+                        <span className="flow-value">{formatCurrency(Math.abs(netProfit))}</span>
                         <span className="flow-detail">{totalRevenue > 0 ? Math.round((netProfit / totalRevenue) * 100) : 0}% margin</span>
                     </div>
                 </div>

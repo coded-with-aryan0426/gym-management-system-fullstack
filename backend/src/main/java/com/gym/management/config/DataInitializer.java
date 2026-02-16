@@ -16,6 +16,7 @@ import com.gym.management.repository.RoleRepository;
 import com.gym.management.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -59,6 +60,9 @@ public class DataInitializer implements CommandLineRunner {
 
     @Autowired
     private GymRepository gymRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Override
     public void run(String... args) throws Exception {
@@ -164,7 +168,7 @@ public class DataInitializer implements CommandLineRunner {
                 user.setUsername(username);
                 user.setFullName(fullName);
                 user.setEmail(username + "@gym.com");
-                user.setPassword("password123");
+                user.setPassword(passwordEncoder.encode("password123"));
                 Set<Role> roles = new HashSet<>();
                 roles.add(trainerRole);
                 user.setRoles(roles);
@@ -195,7 +199,7 @@ public class DataInitializer implements CommandLineRunner {
                 user.setUsername(username);
                 user.setFullName(fullName);
                 user.setEmail(username + "@gym.com");
-                user.setPassword("password123");
+                user.setPassword(passwordEncoder.encode("password123"));
                 Set<Role> roles = new HashSet<>();
                 roles.add(customerRole);
                 user.setRoles(roles);
@@ -234,7 +238,7 @@ public class DataInitializer implements CommandLineRunner {
                 user.setUsername(username);
                 user.setFullName(fullName);
                 user.setEmail(username + "@gym.com");
-                user.setPassword("password123");
+                user.setPassword(passwordEncoder.encode("password123"));
                 Set<Role> roles = new HashSet<>();
                 roles.add(staffRole);
                 user.setRoles(roles);
@@ -248,7 +252,7 @@ public class DataInitializer implements CommandLineRunner {
             user.setUsername("admin");
             user.setFullName("Admin User");
             user.setEmail("admin@gym.com");
-            user.setPassword("password123");
+            user.setPassword(passwordEncoder.encode("password123"));
             Set<Role> roles = new HashSet<>();
             roles.add(ownerRole != null ? ownerRole : staffRole);
             user.setRoles(roles);

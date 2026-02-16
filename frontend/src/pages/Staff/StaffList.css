@@ -328,6 +328,11 @@
 /* ============================================
    STAFF CELLS
    ============================================ */
+.staff-phone {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
 .staff-cell {
   display: flex;
   align-items: center;

@@ -50,11 +50,11 @@ const defaultNavItems: NavItem[] = [
   { path: "/dashboard", label: "Dashboard", id: "dashboard", icon: <LayoutDashboard size={18} />, color: "#f87171", end: true },
   { path: "/members", label: "Members", id: "members", icon: <Users size={18} />, color: "#60a5fa" },
   { path: "/trainers", label: "Trainers", id: "trainers", icon: <Dumbbell size={18} />, color: "#22d3ee" },
+  { path: "/staff", label: "Staff", id: "staff", icon: <Shield size={18} />, color: "#14b8a6" },
   { path: "/equipment", label: "Equipment", id: "equipment", icon: <Wrench size={18} />, color: "#fbbf24" },
   { path: "/classes", label: "Classes", id: "classes", icon: <Calendar size={18} />, color: "#34d399" },
-  { path: "/pt-sessions", label: "Sessions", id: "sessions", icon: <User size={18} />, color: "#f472b6" },
   { path: "/financials", label: "Finance", id: "billing", icon: <CreditCard size={18} />, color: "#a78bfa" },
-  { path: "/reports", label: "Reports", id: "reports", icon: <FileText size={18} />, color: "#fb923c" },
+  { path: "/settings", label: "Settings", id: "settings", icon: <Settings size={18} />, color: "#94a3b8" },
 ];
 
 interface CommandRailProps {

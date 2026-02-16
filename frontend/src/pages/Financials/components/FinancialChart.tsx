@@ -1,5 +1,6 @@
 import React from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { formatCurrency } from '../../../utils/formatters';
 import './FinancialChart.css';
 
 interface ChartDataPoint {
@@ -28,18 +29,18 @@ const FinancialChart: React.FC<FinancialChartProps> = ({ data, period, onPeriodC
                 <div className="tooltip-row">
                     <span className="dot emerald"></span>
                     <span>Revenue</span>
-                    <span className="tooltip-value">₹{payload[0]?.value?.toLocaleString('en-IN')}</span>
+                    <span className="tooltip-value">{formatCurrency(payload[0]?.value || 0)}</span>
                 </div>
                 <div className="tooltip-row">
                     <span className="dot crimson"></span>
                     <span>Expenses</span>
-                    <span className="tooltip-value">₹{payload[1]?.value?.toLocaleString('en-IN')}</span>
+                    <span className="tooltip-value">{formatCurrency(payload[1]?.value || 0)}</span>
                 </div>
                 <div className="tooltip-divider"></div>
                 <div className="tooltip-row profit">
                     <span>Net Profit</span>
                     <span className="tooltip-value emerald">
-                        ₹{((payload[0]?.value || 0) - (payload[1]?.value || 0)).toLocaleString('en-IN')}
+                        {formatCurrency((payload[0]?.value || 0) - (payload[1]?.value || 0))}
                     </span>
                 </div>
             </div>
@@ -80,11 +81,11 @@ const FinancialChart: React.FC<FinancialChartProps> = ({ data, period, onPeriodC
                     <div className="chart-summary">
                         <span className="summary-item">
                             <span className="summary-dot emerald"></span>
-                            ₹{totalRevenue.toLocaleString('en-IN')}
+                            {formatCurrency(totalRevenue)}
                         </span>
                         <span className="summary-item">
                             <span className="summary-dot crimson"></span>
-                            ₹{totalExpenses.toLocaleString('en-IN')}
+                            {formatCurrency(totalExpenses)}
                         </span>
                         <span className="summary-profit">
                             {profitPercent >= 0 ? '+' : ''}{profitPercent}% margin
@@ -148,7 +149,11 @@ const FinancialChart: React.FC<FinancialChartProps> = ({ data, period, onPeriodC
                             axisLine={false}
                             tickLine={false}
                             tick={{ fill: '#71717a', fontSize: 11 }}
-                            tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`}
+                            tickFormatter={(v) => {
+                                if (v >= 100000) return `₹${(v / 100000).toFixed(0)}L`;
+                                if (v >= 1000) return `₹${(v / 1000).toFixed(0)}k`;
+                                return `₹${v}`;
+                            }}
                             width={50}
                         />
                         <Tooltip content={<CustomTooltip />} />

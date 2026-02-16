@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import type { Transaction } from '../../../types/finance';
+import { formatCurrency } from '../../../utils/formatters';
 import './RevenueChart.css';
 
 interface RevenueChartProps {
@@ -27,7 +28,7 @@ const RevenueChart: React.FC<RevenueChartProps> = ({ onFilter, data = [] }) => {
         return (
             <div className="revenue-tooltip">
                 <span className="tooltip-name">{data.name}</span>
-                <span className="tooltip-value">₹{data.value.toLocaleString('en-IN')}</span>
+                <span className="tooltip-value">{formatCurrency(data.value)}</span>
                 <span className="tooltip-percent">{data.percent}%</span>
             </div>
         );

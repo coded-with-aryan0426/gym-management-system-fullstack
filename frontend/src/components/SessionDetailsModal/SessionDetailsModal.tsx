@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, Clock, User, Users, FileText, CheckCircle, XCircle, AlertCircle, Repeat, Loader2, Edit2, Save } from 'lucide-react';
+import { Calendar, Clock, User, Users, FileText, CheckCircle, XCircle, AlertCircle, Repeat, Loader2, Edit2, Save, RefreshCw } from 'lucide-react';
 import { ptSessionApi } from '../../services/api';
 import type { PTSessionDTO } from '../../types/ptSession';
 import Modal from '../Modal/Modal';
@@ -27,6 +27,50 @@ const SessionDetailsModal: React.FC<SessionDetailsModalProps> = ({
   const [dietPlan, setDietPlan] = useState(session.dietPlan || '');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isRescheduling, setIsRescheduling] = useState(false);
+  const [rescheduleDate, setRescheduleDate] = useState('');
+  const [rescheduleTime, setRescheduleTime] = useState('');
+  const [availableSlots, setAvailableSlots] = useState<string[]>([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+
+  useEffect(() => {
+    if (isRescheduling && rescheduleDate && session.trainerId) {
+      setLoadingSlots(true);
+      ptSessionApi.getAvailableSlots(session.trainerId, rescheduleDate)
+        .then(slots => {
+          setAvailableSlots(slots.map((s: any) => typeof s === 'string' ? s : s.startTime || s.time || ''));
+        })
+        .catch(() => setAvailableSlots([]))
+        .finally(() => setLoadingSlots(false));
+    }
+  }, [isRescheduling, rescheduleDate, session.trainerId]);
+
+  const handleReschedule = async () => {
+    if (!rescheduleDate || !rescheduleTime) {
+      setError('Please select both date and time');
+      return;
+    }
+    try {
+      setSubmitting(true);
+      setError(null);
+      const newDateTime = `${rescheduleDate}T${rescheduleTime}:00`;
+      const updatedSession: PTSessionDTO = {
+        ...session,
+        sessionDate: newDateTime,
+        status: 'SCHEDULED' as any
+      };
+      await ptSessionApi.updateSession(session.sessionId!, updatedSession);
+      showToast.success('Session rescheduled successfully!');
+      onUpdate();
+      setIsRescheduling(false);
+    } catch (err: any) {
+      const msg = err.response?.data?.message || err.message || 'Failed to reschedule';
+      setError(msg);
+      showToast.error(msg);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const handleUpdateSession = async () => {
     try {
@@ -290,17 +334,87 @@ const SessionDetailsModal: React.FC<SessionDetailsModalProps> = ({
           </div>
         </div>
 
+          {/* Reschedule Section */}
+          {isRescheduling && (
+            <motion.div
+              className="session-details-modal__reschedule"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+            >
+              <h3 className="session-details-modal__section-title">
+                <RefreshCw size={18} />
+                Reschedule Session
+              </h3>
+              <div className="session-details-modal__reschedule-form">
+                <div className="session-details-modal__form-group">
+                  <label>New Date</label>
+                  <input
+                    type="date"
+                    className="session-details-modal__input"
+                    value={rescheduleDate}
+                    onChange={(e) => setRescheduleDate(e.target.value)}
+                    min={new Date().toISOString().split('T')[0]}
+                  />
+                </div>
+                <div className="session-details-modal__form-group">
+                  <label>New Time</label>
+                  {loadingSlots ? (
+                    <div className="session-details-modal__loading-slots">
+                      <Loader2 className="spin" size={16} /> Loading slots...
+                    </div>
+                  ) : availableSlots.length > 0 ? (
+                    <select
+                      className="session-details-modal__input"
+                      value={rescheduleTime}
+                      onChange={(e) => setRescheduleTime(e.target.value)}
+                    >
+                      <option value="">Select a time slot</option>
+                      {availableSlots.map(slot => (
+                        <option key={slot} value={slot}>{slot}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type="time"
+                      className="session-details-modal__input"
+                      value={rescheduleTime}
+                      onChange={(e) => setRescheduleTime(e.target.value)}
+                    />
+                  )}
+                </div>
+              </div>
+              <div className="session-details-modal__reschedule-actions">
+                <Button variant="secondary" onClick={() => { setIsRescheduling(false); setRescheduleDate(''); setRescheduleTime(''); }} disabled={submitting}>
+                  Cancel
+                </Button>
+                <Button variant="primary" onClick={handleReschedule} disabled={submitting || !rescheduleDate || !rescheduleTime}>
+                  {submitting ? <><Loader2 className="spin" size={16} /> Rescheduling...</> : <><RefreshCw size={16} /> Confirm Reschedule</>}
+                </Button>
+              </div>
+            </motion.div>
+          )}
+
         <div className="session-details-modal__actions">
           {!isEditing ? (
             <>
               <Button
-                variant="primary"
-                onClick={() => setIsEditing(true)}
-              >
-                <Edit2 size={16} />
-                Edit Details
-              </Button>
-              <Button variant="secondary" onClick={onClose}>
+                  variant="primary"
+                  onClick={() => setIsEditing(true)}
+                >
+                  <Edit2 size={16} />
+                  Edit Details
+                </Button>
+                {(session.status === 'SCHEDULED' || session.status === 'CONFIRMED') && !isRescheduling && (
+                  <Button
+                    variant="secondary"
+                    onClick={() => setIsRescheduling(true)}
+                  >
+                    <RefreshCw size={16} />
+                    Reschedule
+                  </Button>
+                )}
+                <Button variant="secondary" onClick={onClose}>
                 Close
               </Button>
             </>

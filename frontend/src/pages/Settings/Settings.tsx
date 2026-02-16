@@ -12,6 +12,7 @@ import {
     Bell,
     FileText,
     Palette,
+    Building2,
 } from "lucide-react"
 import "./Settings.css"
 
@@ -24,9 +25,11 @@ import UserRulesSection from "./sections/UserRulesSection"
 import NotificationsSection from "./sections/NotificationsSection"
 import AuditLogSection from "./sections/AuditLogSection"
 import ThemeSection from "./sections/ThemeSection"
+import GymProfileSection from "./sections/GymProfileSection"
 
 const settingsCategories = [
     { id: 'profile', label: 'Owner Profile', icon: User, desc: 'Personal & Gym details', color: '#3b82f6' },
+    { id: 'gymprofile', label: 'Gym Profile', icon: Building2, desc: 'Hours, PT config & holidays', color: '#10b981' },
     { id: 'appearance', label: 'Appearance', icon: Palette, desc: 'Theme & Display', color: '#a855f7' },
     { id: 'security', label: 'Security & Access', icon: Shield, desc: 'Login & Data safety', color: '#ef4444' },
     { id: 'roles', label: 'Roles & Permissions', icon: Users, desc: 'Access control matrix', color: '#f59e0b' },
@@ -51,6 +54,7 @@ const Settings: React.FC = () => {
     const renderSection = () => {
         switch (activeSection) {
             case 'profile': return <OwnerProfileSection />
+            case 'gymprofile': return <GymProfileSection />
             case 'appearance': return <ThemeSection />
             case 'security': return <SecuritySection />
             case 'roles': return <RolesSection />

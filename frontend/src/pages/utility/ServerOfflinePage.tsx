@@ -123,14 +123,10 @@ export const ServerHealthProvider = ({ children }: { children: React.ReactNode }
 
             clearTimeout(timeout);
 
-            if (response && response.ok) {
-                // Server is back
-                if (isOffline) {
-                    setIsOffline(false);
-                    setFailCount(0);
-                } else {
-                    setFailCount(0);
-                }
+            if (response && (response.ok || response.status === 429)) {
+                // Server is reachable (429 = rate-limited but alive)
+                setIsOffline(false);
+                setFailCount(0);
             } else {
                 setFailCount(prev => {
                     const next = prev + 1;
@@ -145,7 +141,7 @@ export const ServerHealthProvider = ({ children }: { children: React.ReactNode }
                 return next;
             });
         }
-    }, [isOffline]);
+    }, []);
 
     useEffect(() => {
         // Initial check

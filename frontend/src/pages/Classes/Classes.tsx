@@ -8,6 +8,10 @@ import { useClasses } from "../../contexts/ClassesContext"
 import "./Classes.css"
 import type { User } from "../../types/user"
 import { format, isToday, isTomorrow, startOfWeek, addDays, isSameDay } from 'date-fns'
+import { Calendar, Clock, Layers } from 'lucide-react'
+
+// Import PTSessions component for the sessions tab
+import PTSessions from "../PTSessions/PTSessions";
 
 const CLASS_TYPES = ["Yoga", "HIIT", "Cardio", "Strength", "Pilates", "CrossFit"]
 
@@ -34,9 +38,24 @@ const Classes: React.FC = () => {
   const [availableTrainers, setAvailableTrainers] = useState<User[]>([])
   const { setStats } = useClasses()
 
+  // Tab state for consolidated pages
+  const [activeTab, setActiveTab] = useState<'classes' | 'sessions' | 'schedule'>('classes')
+
   // Drawer/Modal state
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingClass, setEditingClass] = useState<ClassData | null>(null)
+  const [attendanceClass, setAttendanceClass] = useState<ClassData | null>(null)
+
+  // Handle URL query param for tab
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const tab = params.get('tab')
+    if (tab === 'sessions') {
+      setActiveTab('sessions')
+    } else if (tab === 'schedule') {
+      setActiveTab('schedule')
+    }
+  }, [])
 
   // Fetch Trainers
   useEffect(() => {
@@ -340,6 +359,25 @@ const Classes: React.FC = () => {
     setEditingClass(null)
   }
 
+  const handleMarkAttendance = (classData: ClassData) => {
+    setAttendanceClass(classData)
+  }
+
+  const handleConfirmAttendance = async (presentCount: number) => {
+    if (!attendanceClass) return
+    try {
+      await api.put(`/api/classes/${attendanceClass.id}`, {
+        ...attendanceClass,
+        enrolled: presentCount,
+      })
+      toast.success(`Attendance marked: ${presentCount}/${attendanceClass.capacity} present`)
+      setAttendanceClass(null)
+      fetchClasses()
+    } catch (err) {
+      toast.error('Failed to mark attendance')
+    }
+  }
+
   const handlePrevWeek = () => {
     const newDate = new Date(currentDate)
     newDate.setDate(currentDate.getDate() - 7)
@@ -370,42 +408,100 @@ const Classes: React.FC = () => {
     )
   }
 
+  // Render content based on active tab
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'sessions':
+        // Render PT Sessions component in full page
+        return (
+          <div className="classes-page__sessions">
+            <PTSessions />
+          </div>
+        )
+      case 'schedule':
+        // Show combined schedule (Classes + Sessions) - currently just classes view
+        return (
+          <div className="classes-page__schedule">
+            <WeeklyCalendar
+              currentDate={currentDate}
+              classes={filteredClasses}
+              onClassClick={handleClassClick}
+              onTimeSlotClick={handleTimeSlotClick}
+            />
+          </div>
+        )
+      default:
+        // Default: Show Group Classes
+        return (
+          <>
+            <ScheduleHeader
+              dateRange={getDateRange()}
+              onPrevWeek={handlePrevWeek}
+              onNextWeek={handleNextWeek}
+              onDateSelect={handleDateSelect}
+            >
+              <ScheduleFilters
+                selectedDay={selectedDay}
+                onDayChange={setSelectedDay}
+                classType={filter.type}
+                onClassTypeChange={(type) => setFilter(prev => ({ ...prev, type }))}
+                trainer={filter.trainer}
+                onTrainerChange={(trainer) => setFilter(prev => ({ ...prev, trainer }))}
+                status={filter.status}
+                onStatusChange={(status) => setFilter(prev => ({ ...prev, status }))}
+                classTypes={CLASS_TYPES}
+                trainers={availableTrainers.map(t => t.fullName)}
+                onAddClass={() => {
+                  setEditingClass(null)
+                  setIsModalOpen(true)
+                }}
+              />
+            </ScheduleHeader>
+
+            <StatsDashboard stats={enhancedStats} />
+
+            <div className="classes-page__content">
+              <WeeklyCalendar
+                currentDate={currentDate}
+                classes={filteredClasses}
+                onClassClick={handleClassClick}
+                onTimeSlotClick={handleTimeSlotClick}
+              />
+            </div>
+          </>
+        )
+    }
+  }
+
   return (
     <div className="classes-page">
-      <ScheduleHeader
-        dateRange={getDateRange()}
-        onPrevWeek={handlePrevWeek}
-        onNextWeek={handleNextWeek}
-        onDateSelect={handleDateSelect}
-      >
-        <ScheduleFilters
-          selectedDay={selectedDay}
-          onDayChange={setSelectedDay}
-          classType={filter.type}
-          onClassTypeChange={(type) => setFilter(prev => ({ ...prev, type }))}
-          trainer={filter.trainer}
-          onTrainerChange={(trainer) => setFilter(prev => ({ ...prev, trainer }))}
-          status={filter.status}
-          onStatusChange={(status) => setFilter(prev => ({ ...prev, status }))}
-          classTypes={CLASS_TYPES}
-          trainers={availableTrainers.map(t => t.fullName)}
-          onAddClass={() => {
-            setEditingClass(null)
-            setIsModalOpen(true)
-          }}
-        />
-      </ScheduleHeader>
-
-      <StatsDashboard stats={enhancedStats} />
-
-      <div className="classes-page__content">
-        <WeeklyCalendar
-          currentDate={currentDate}
-          classes={filteredClasses}
-          onClassClick={handleClassClick}
-          onTimeSlotClick={handleTimeSlotClick}
-        />
+      {/* Tab Navigation */}
+      <div className="classes-page__tabs">
+        <button 
+          className={`classes-page__tab ${activeTab === 'classes' ? 'classes-page__tab--active' : ''}`}
+          onClick={() => setActiveTab('classes')}
+        >
+          <Calendar size={16} />
+          <span>Group Classes</span>
+        </button>
+        <button 
+          className={`classes-page__tab ${activeTab === 'sessions' ? 'classes-page__tab--active' : ''}`}
+          onClick={() => setActiveTab('sessions')}
+        >
+          <Clock size={16} />
+          <span>PT Sessions</span>
+        </button>
+        <button 
+          className={`classes-page__tab ${activeTab === 'schedule' ? 'classes-page__tab--active' : ''}`}
+          onClick={() => setActiveTab('schedule')}
+        >
+          <Layers size={16} />
+          <span>Schedule Overview</span>
+        </button>
       </div>
+
+      {/* Tab Content */}
+      {renderContent()}
 
       <AddClassModal
         isOpen={isModalOpen}
@@ -415,6 +511,43 @@ const Classes: React.FC = () => {
         trainers={availableTrainers.map(t => t.fullName)}
         classTypes={CLASS_TYPES}
       />
+
+      {/* Attendance Modal */}
+      {attendanceClass && (
+        <div className="attendance-modal-overlay" onClick={() => setAttendanceClass(null)}>
+          <div className="attendance-modal" onClick={e => e.stopPropagation()}>
+            <h3>Mark Attendance</h3>
+            <p className="attendance-modal__class-name">{attendanceClass.name}</p>
+            <p className="attendance-modal__meta">
+              {attendanceClass.startTime} - {attendanceClass.endTime} &middot; Capacity: {attendanceClass.capacity}
+            </p>
+            <div className="attendance-modal__input-row">
+              <label>Present:</label>
+              <input
+                id="attendance-count"
+                type="number"
+                min={0}
+                max={attendanceClass.capacity}
+                defaultValue={attendanceClass.enrolled}
+                className="attendance-modal__input"
+              />
+              <span className="attendance-modal__of">/ {attendanceClass.capacity}</span>
+            </div>
+            <div className="attendance-modal__actions">
+              <button className="btn-secondary" onClick={() => setAttendanceClass(null)}>Cancel</button>
+              <button
+                className="btn-primary"
+                onClick={() => {
+                  const input = document.getElementById('attendance-count') as HTMLInputElement
+                  handleConfirmAttendance(parseInt(input.value) || 0)
+                }}
+              >
+                Save Attendance
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -168,7 +168,10 @@ public class AuthController {
 
         if (userOpt.isEmpty()) {
             // Log failed login
-            try { auditLogService.logFailedLogin(request.getUsername(), getClientIP(httpRequest), "User not found"); } catch (Exception ignored) {}
+            try {
+                auditLogService.logFailedLogin(request.getUsername(), getClientIP(httpRequest), "User not found");
+            } catch (Exception ignored) {
+            }
             return ResponseEntity.status(401).body(Map.of("error", "User not found"));
         }
 
@@ -176,7 +179,10 @@ public class AuthController {
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             // Log failed login
-            try { auditLogService.logFailedLogin(request.getUsername(), getClientIP(httpRequest), "Invalid password"); } catch (Exception ignored) {}
+            try {
+                auditLogService.logFailedLogin(request.getUsername(), getClientIP(httpRequest), "Invalid password");
+            } catch (Exception ignored) {
+            }
             return ResponseEntity.status(401).body(Map.of("error", "Invalid password"));
         }
 
@@ -211,25 +217,29 @@ public class AuthController {
         // Include gym data for OWNER
         if ("OWNER".equals(userRole)) {
             gymRepository.findFirstByOwnerUserIdOrderByCreatedAtDesc(user.getUserId())
-                .ifPresent(gym -> {
-                    response.setActiveGymId(gym.getGymId());
-                    response.setActiveGymName(gym.getName());
-                });
+                    .ifPresent(gym -> {
+                        response.setActiveGymId(gym.getGymId());
+                        response.setActiveGymName(gym.getName());
+                    });
         }
 
-        String token = tokenProvider.generateTokenFromUser(user, "STAFF", response.getActiveGymId(), userRole, null, null, null, null);
+        String token = tokenProvider.generateTokenFromUser(user, "STAFF", response.getActiveGymId(), userRole, null,
+                null, null, null);
         response.setToken(token);
 
         // Log successful login and create session
         try {
             String ip = getClientIP(httpRequest);
             String userAgent = httpRequest.getHeader("User-Agent");
-            String deviceType = userAgent != null && (userAgent.contains("Mobile") || userAgent.contains("Android")) ? "mobile" : "desktop";
+            String deviceType = userAgent != null && (userAgent.contains("Mobile") || userAgent.contains("Android"))
+                    ? "mobile"
+                    : "desktop";
             String browser = extractBrowser(userAgent);
             String os = extractOS(userAgent);
             auditLogService.logLogin(user.getUserId(), response.getActiveGymId(), ip, deviceType, browser, os, null);
             auditLogService.createSession(user.getUserId(), response.getActiveGymId(), ip, deviceType, browser, os);
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
 
         return ResponseEntity.ok(response);
     }
@@ -279,13 +289,14 @@ public class AuthController {
         // Include gym data for OWNER
         if ("OWNER".equals(userRole)) {
             gymRepository.findFirstByOwnerUserIdOrderByCreatedAtDesc(user.getUserId())
-                .ifPresent(gym -> {
-                    response.setActiveGymId(gym.getGymId());
-                    response.setActiveGymName(gym.getName());
-                });
+                    .ifPresent(gym -> {
+                        response.setActiveGymId(gym.getGymId());
+                        response.setActiveGymName(gym.getName());
+                    });
         }
 
-        String token = tokenProvider.generateTokenFromUser(user, "STAFF", response.getActiveGymId(), userRole, null, null, null, null);
+        String token = tokenProvider.generateTokenFromUser(user, "STAFF", response.getActiveGymId(), userRole, null,
+                null, null, null);
         response.setToken(token);
 
         return ResponseEntity.ok(response);
@@ -324,7 +335,8 @@ public class AuthController {
             String newPassword = request.get("newPassword");
 
             if (email == null || currentPassword == null || newPassword == null) {
-                return ResponseEntity.badRequest().body(Map.of("error", "Email, current password, and new password are required"));
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "Email, current password, and new password are required"));
             }
 
             Optional<User> userOpt = userRepository.findByEmail(email);
@@ -343,7 +355,8 @@ public class AuthController {
 
             return ResponseEntity.ok(Map.of("message", "Password changed successfully"));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("error", "Failed to change password", "details", e.getMessage()));
+            return ResponseEntity.status(500)
+                    .body(Map.of("error", "Failed to change password", "details", e.getMessage()));
         }
     }
 
@@ -650,22 +663,38 @@ public class AuthController {
     }
 
     private String extractBrowser(String userAgent) {
-        if (userAgent == null) return "Unknown";
-        if (userAgent.contains("Chrome") && !userAgent.contains("Edg")) return "Chrome";
-        if (userAgent.contains("Firefox")) return "Firefox";
-        if (userAgent.contains("Safari") && !userAgent.contains("Chrome")) return "Safari";
-        if (userAgent.contains("Edg")) return "Edge";
+        if (userAgent == null)
+            return "Unknown";
+        if (userAgent.contains("Chrome") && !userAgent.contains("Edg"))
+            return "Chrome";
+        if (userAgent.contains("Firefox"))
+            return "Firefox";
+        if (userAgent.contains("Safari") && !userAgent.contains("Chrome"))
+            return "Safari";
+        if (userAgent.contains("Edg"))
+            return "Edge";
         return "Other";
     }
 
     private String extractOS(String userAgent) {
-        if (userAgent == null) return "Unknown";
-        if (userAgent.contains("Windows")) return "Windows";
-        if (userAgent.contains("Mac OS")) return "macOS";
-        if (userAgent.contains("Linux") && !userAgent.contains("Android")) return "Linux";
-        if (userAgent.contains("Android")) return "Android";
-        if (userAgent.contains("iPhone") || userAgent.contains("iPad")) return "iOS";
+        if (userAgent == null)
+            return "Unknown";
+        if (userAgent.contains("Windows"))
+            return "Windows";
+        if (userAgent.contains("Mac OS"))
+            return "macOS";
+        if (userAgent.contains("Linux") && !userAgent.contains("Android"))
+            return "Linux";
+        if (userAgent.contains("Android"))
+            return "Android";
+        if (userAgent.contains("iPhone") || userAgent.contains("iPad"))
+            return "iOS";
         return "Other";
+    }
+
+    @GetMapping("/health-check")
+    public ResponseEntity<?> healthCheck() {
+        return ResponseEntity.ok(Map.of("status", "UP"));
     }
 
     /**
@@ -676,7 +705,7 @@ public class AuthController {
         try {
             Long userId = request.get("userId") != null ? Long.valueOf(request.get("userId").toString()) : null;
             Long gymId = request.get("gymId") != null ? Long.valueOf(request.get("gymId").toString()) : null;
-            
+
             if (userId != null) {
                 String ip = getClientIP(httpRequest);
                 // Log logout event
@@ -684,7 +713,7 @@ public class AuthController {
                 // End user session
                 auditLogService.endSession(userId);
             }
-            
+
             return ResponseEntity.ok(Map.of("message", "Logged out successfully"));
         } catch (Exception e) {
             return ResponseEntity.ok(Map.of("message", "Logged out")); // Still return success even if logging fails

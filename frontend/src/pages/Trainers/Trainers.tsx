@@ -266,12 +266,19 @@ const Trainers: React.FC = () => {
     });
   }, [trainers, activeStatusFilter]);
 
-  /* helper: generate fake weekly bars from performance data */
+  /* helper: derive sparkline bars from real performance metrics */
   const getSparkData = (uid: number): number[] => {
     const perf = performanceData[uid];
-    if (!perf) return [1, 2, 1, 3, 2, 1, 2];
-    const base = perf.completedSessions || 3;
-    return [0.4, 0.6, 0.8, 0.5, 0.9, 0.7, 1].map(m => Math.round(base * m));
+    if (!perf) return [0, 0, 0, 0, 0, 0, 0];
+    // Use real metrics: completed, cancelled, rating, revenue, clients as 7 data points
+    const completed = perf.completedSessions || 0;
+    const cancelled = perf.cancelledSessions || 0;
+    const rating = (perf.avgRating || 0) * 2; // scale 0-10
+    const revenue = Math.min((perf.revenue || 0) / 1000, 10); // normalize
+    const clients = perf.activeClients || 0;
+    const total = completed + cancelled;
+    const successRate = total > 0 ? Math.round((completed / total) * 10) : 0;
+    return [completed, clients, Math.round(rating), Math.round(revenue), successRate, cancelled, completed];
   };
 
   /* 3D Status Badge */
