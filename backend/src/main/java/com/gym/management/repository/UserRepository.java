@@ -32,8 +32,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
         @Query("SELECT COUNT(u) FROM User u JOIN u.roles r WHERE r.roleName = :roleName")
         long countByRoleName(@Param("roleName") String roleName);
 
-        // Find staff by multiple role names (non-trainer staff)
-        @Query("SELECT DISTINCT u FROM User u JOIN u.roles r WHERE r.roleName IN :roleNames")
+        // Find staff by multiple role names (non-trainer staff) - uses subquery to avoid DISTINCT + CLOB issues on Oracle
+        @Query("SELECT u FROM User u WHERE u.userId IN (SELECT u2.userId FROM User u2 JOIN u2.roles r WHERE r.roleName IN :roleNames)")
         List<User> findByRoleNames(@Param("roleNames") java.util.Collection<String> roleNames);
 
         java.util.Optional<User> findByUsername(String username);

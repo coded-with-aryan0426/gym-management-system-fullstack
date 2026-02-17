@@ -107,8 +107,17 @@ const api = {
     size: number = 10,
     search?: string,
     role?: string
-  ): Promise<PageResponse<User>> {
-    return this.getTrainersPaginated(page, size, search, role);
+  ): Promise<PageResponse<any>> {
+    const params: Record<string, any> = { page, size };
+    if (search) params.search = search;
+    if (role) params.role = role;
+    const response = await apiClient.get<PageResponse<any>>('/users/staff/paginated', { params });
+    return response.data;
+  },
+
+  async updateStaffDetails(id: number, data: Record<string, any>): Promise<any> {
+    const response = await apiClient.put(`/users/staff/${id}`, data);
+    return response.data;
   },
 
   async searchUsers(role: string, query: string): Promise<User[]> {

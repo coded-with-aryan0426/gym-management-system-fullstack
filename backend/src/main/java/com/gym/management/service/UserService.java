@@ -456,7 +456,7 @@ public class UserService {
 
     // Staff roles that are NOT trainers (operations/admin staff)
     private static final java.util.Set<String> STAFF_ROLES = java.util.Set.of(
-        "RECEPTIONIST", "FLOOR_MANAGER", "MAINTENANCE", "CLEANING", "OPERATIONS", "SALES", "ADMIN", "MANAGER"
+        "STAFF", "RECEPTIONIST", "FLOOR_MANAGER", "MAINTENANCE", "CLEANING", "OPERATIONS", "SALES", "ADMIN", "MANAGER"
     );
 
     @Transactional(readOnly = true)

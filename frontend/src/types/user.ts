@@ -46,6 +46,21 @@ export interface Staff extends User {
     staffRole?: string;
     gymId?: number;
     gymName?: string;
+    jobTitle?: string;
+    department?: string;
+    shiftTiming?: string;
+    salary?: number;
+    employeeIdCode?: string;
+    gender?: string;
+    dateOfBirth?: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    zipCode?: string;
+    leavingDate?: string;
+    emergencyContactName?: string;
+    emergencyContactPhone?: string;
+    emergencyContactRelation?: string;
 }
 
 export interface Trainer extends User {
