@@ -72,7 +72,8 @@ public class SecurityConfig {
                             "http://localhost:5174", // Trainer
                             "http://localhost:5175", // Member
                             "http://localhost:3000", // Legacy/alternative
-                            "https://trae8sbvnyxu.vercel.app" // Production frontend
+                            "https://trae8sbvnyxu.vercel.app", // Production frontend
+                            "https://trae8sbvnyxu-*.vercel.app" // Production frontend wildcards
                     ));
                     corsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
                     corsConfig.setAllowedHeaders(List.of("*"));
@@ -96,7 +97,8 @@ public class SecurityConfig {
 
                         // ==================== OWNER/ADMIN ONLY ====================
                         // These endpoints manage the entire gym operation
-                        .requestMatchers("/api/dashboard/analytics/**").permitAll() // Temporarily allow public access for testing
+                        .requestMatchers("/api/dashboard/analytics/**").permitAll() // Temporarily allow public access
+                                                                                    // for testing
                         .requestMatchers("/api/dashboard/**").hasAnyRole("OWNER", "ADMIN")
                         .requestMatchers("/api/stats/**").hasAnyRole("OWNER", "ADMIN")
                         .requestMatchers("/api/settings/**").hasAnyRole("OWNER", "ADMIN")
@@ -112,16 +114,20 @@ public class SecurityConfig {
                         // Trainers need access to manage their assigned members and sessions
                         .requestMatchers("/api/trainer/**").hasAnyRole("OWNER", "ADMIN", "TRAINER")
                         .requestMatchers("/api/trainer/equipment/**").hasAnyRole("OWNER", "ADMIN", "TRAINER")
-                        .requestMatchers("/api/pt-sessions/member/**").hasAnyRole("OWNER", "ADMIN", "TRAINER", "MEMBER", "CUSTOMER")
+                        .requestMatchers("/api/pt-sessions/member/**")
+                        .hasAnyRole("OWNER", "ADMIN", "TRAINER", "MEMBER", "CUSTOMER")
                         .requestMatchers("/api/pt-sessions/**").hasAnyRole("OWNER", "ADMIN", "TRAINER")
-                        .requestMatchers("/api/users/members").hasAnyRole("OWNER", "ADMIN", "TRAINER", "MEMBER", "CUSTOMER")
-                        .requestMatchers("/api/users/trainers").hasAnyRole("OWNER", "ADMIN", "TRAINER", "MEMBER", "CUSTOMER")
+                        .requestMatchers("/api/users/members")
+                        .hasAnyRole("OWNER", "ADMIN", "TRAINER", "MEMBER", "CUSTOMER")
+                        .requestMatchers("/api/users/trainers")
+                        .hasAnyRole("OWNER", "ADMIN", "TRAINER", "MEMBER", "CUSTOMER")
                         .requestMatchers("/api/progress-notes/**").hasAnyRole("OWNER", "ADMIN", "TRAINER")
                         .requestMatchers("/api/notifications/**").authenticated() // All users get notifications
 
                         // ==================== MEMBER ENDPOINTS ====================
                         // Members can access their own data, trainers/owners can also access
-                        .requestMatchers("/api/member/progress/photos/file/**").permitAll() // Public access for progress photos
+                        .requestMatchers("/api/member/progress/photos/file/**").permitAll() // Public access for
+                                                                                            // progress photos
                         .requestMatchers("/api/member/**").hasAnyRole("OWNER", "ADMIN", "TRAINER", "MEMBER", "CUSTOMER")
 
                         // ==================== CHAT (All authenticated users) ====================

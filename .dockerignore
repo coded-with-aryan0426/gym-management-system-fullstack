@@ -1,0 +1,17 @@
+.git
+.gitignore
+frontend/
+frontend/node_modules
+backend/target/
+backend/*.log
+backend/uploads/
+*.md
+*.txt
+.env
+.env.local
+.env.production
+.DS_Store
+.idea/
+.vscode/
+.vercel
+.trae
