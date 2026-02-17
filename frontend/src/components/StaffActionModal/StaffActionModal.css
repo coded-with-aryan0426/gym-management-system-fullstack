@@ -635,6 +635,511 @@
 }
 
 /* ============================================================================
+   Content Scroll Area
+   ============================================================================ */
+
+.smod-content-scroll {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  height: 100%;
+  overflow-y: auto;
+}
+
+/* ============================================================================
+   Quick Stats Row
+   ============================================================================ */
+
+.smod-quick-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.smod-qstat {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: 14px;
+  transition: all 0.2s ease;
+}
+
+.smod-qstat:hover {
+  border-color: rgba(99, 102, 241, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.smod-qstat__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.smod-qstat__icon--purple {
+  background: rgba(139, 92, 246, 0.12);
+  color: #8b5cf6;
+}
+
+.smod-qstat__icon--blue {
+  background: rgba(59, 130, 246, 0.12);
+  color: #3b82f6;
+}
+
+.smod-qstat__icon--green {
+  background: rgba(34, 197, 94, 0.12);
+  color: #22c55e;
+}
+
+.smod-qstat__icon--amber {
+  background: rgba(245, 158, 11, 0.12);
+  color: #f59e0b;
+}
+
+.smod-qstat__info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.smod-qstat__value {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.smod-qstat__label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-top: 2px;
+}
+
+/* ============================================================================
+   Two Column Layout
+   ============================================================================ */
+
+.smod-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* ============================================================================
+   Cards
+   ============================================================================ */
+
+.smod-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+}
+
+.smod-card:hover {
+  border-color: rgba(99, 102, 241, 0.25);
+}
+
+.smod-card--emergency {
+  grid-column: 1 / -1;
+}
+
+.smod-card__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.smod-card__header svg {
+  color: var(--smod-accent);
+  flex-shrink: 0;
+}
+
+.smod-card__header--emergency {
+  color: #f59e0b;
+}
+
+.smod-card__header--emergency svg {
+  color: #f59e0b;
+}
+
+.smod-card__body {
+  padding: 12px 16px;
+}
+
+/* ============================================================================
+   Detail Rows (inside cards)
+   ============================================================================ */
+
+.smod-detail-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-subtle, rgba(255,255,255,0.04));
+}
+
+.smod-detail-row:last-child {
+  border-bottom: none;
+}
+
+.smod-detail-row__icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: var(--bg-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+
+.smod-detail-row__content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.smod-detail-row__label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-tertiary);
+  margin-bottom: 1px;
+}
+
+.smod-detail-row__value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.smod-detail-row__value--mono {
+  font-family: 'JetBrains Mono', 'SF Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  color: var(--smod-accent);
+}
+
+/* ============================================================================
+   Address Block
+   ============================================================================ */
+
+.smod-address-block {
+  padding: 8px 0;
+}
+
+.smod-address-block__line {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.smod-address-block__empty {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  font-style: italic;
+  margin: 0;
+  padding: 12px 0;
+}
+
+/* ============================================================================
+   Emergency Contact Grid
+   ============================================================================ */
+
+.smod-emergency-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0 16px;
+}
+
+.smod-empty-inline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 0;
+  color: #f59e0b;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* ============================================================================
+   Department Banner (Job Details tab)
+   ============================================================================ */
+
+.smod-dept-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(139, 92, 246, 0.06));
+  border: 1px solid rgba(99, 102, 241, 0.15);
+  border-radius: 16px;
+}
+
+.smod-dept-banner__icon {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.smod-dept-banner__info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.smod-dept-banner__dept {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.3px;
+}
+
+.smod-dept-banner__title {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.smod-dept-banner__badge {
+  flex-shrink: 0;
+}
+
+/* ============================================================================
+   Role Pills
+   ============================================================================ */
+
+.smod-role-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: rgba(99, 102, 241, 0.12);
+  color: #6366f1;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.smod-role-pill--receptionist { background: rgba(59, 130, 246, 0.12); color: #3b82f6; border-color: rgba(59, 130, 246, 0.2); }
+.smod-role-pill--floor_manager { background: rgba(139, 92, 246, 0.12); color: #8b5cf6; border-color: rgba(139, 92, 246, 0.2); }
+.smod-role-pill--maintenance { background: rgba(245, 158, 11, 0.12); color: #f59e0b; border-color: rgba(245, 158, 11, 0.2); }
+.smod-role-pill--cleaning { background: rgba(20, 184, 166, 0.12); color: #14b8a6; border-color: rgba(20, 184, 166, 0.2); }
+.smod-role-pill--operations { background: rgba(99, 102, 241, 0.12); color: #6366f1; border-color: rgba(99, 102, 241, 0.2); }
+.smod-role-pill--sales { background: rgba(236, 72, 153, 0.12); color: #ec4899; border-color: rgba(236, 72, 153, 0.2); }
+.smod-role-pill--admin { background: rgba(168, 85, 247, 0.12); color: #a855f7; border-color: rgba(168, 85, 247, 0.2); }
+.smod-role-pill--manager { background: rgba(234, 179, 8, 0.12); color: #eab308; border-color: rgba(234, 179, 8, 0.2); }
+
+/* ============================================================================
+   Status Badges (modal-status-badge)
+   ============================================================================ */
+
+.modal-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.modal-status-badge--active { background: rgba(34, 197, 94, 0.12); color: #22c55e; }
+.modal-status-badge--inactive { background: rgba(239, 68, 68, 0.12); color: #ef4444; }
+.modal-status-badge--pending { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
+.modal-status-badge--on-leave { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
+
+.modal-status-badge__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
+  animation: statusPulse 2s ease-in-out infinite;
+}
+
+@keyframes statusPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* ============================================================================
+   Pay Cards (Schedule & Pay tab)
+   ============================================================================ */
+
+.smod-pay-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.smod-pay-card {
+  padding: 24px;
+  border-radius: 16px;
+  border: 1px solid transparent;
+  transition: all 0.25s ease;
+}
+
+.smod-pay-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.smod-pay-card--monthly {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(16, 185, 129, 0.06));
+  border-color: rgba(34, 197, 94, 0.2);
+}
+
+.smod-pay-card--annual {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(99, 102, 241, 0.06));
+  border-color: rgba(139, 92, 246, 0.2);
+}
+
+.smod-pay-card__header {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.smod-pay-card__amount {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  line-height: 1.1;
+}
+
+.smod-pay-card--monthly .smod-pay-card__amount { color: #22c55e; }
+.smod-pay-card--annual .smod-pay-card__amount { color: #8b5cf6; }
+
+.smod-pay-card__sub {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+/* ============================================================================
+   Schedule Display
+   ============================================================================ */
+
+.smod-schedule-display {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.smod-schedule-display__current {
+  padding: 16px;
+  background: rgba(99, 102, 241, 0.06);
+  border: 1px solid rgba(99, 102, 241, 0.12);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.smod-schedule-display__label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-tertiary);
+  margin-bottom: 6px;
+}
+
+.smod-schedule-display__value {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--smod-accent);
+  letter-spacing: -0.3px;
+}
+
+.smod-schedule-display__meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.smod-schedule-display__item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 16px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: 10px;
+}
+
+.smod-schedule-display__item-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-tertiary);
+}
+
+.smod-schedule-display__item-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* ============================================================================
+   Form Section Labels (Edit tab)
+   ============================================================================ */
+
+.smod-form-section-label {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--smod-accent);
+  margin: 20px 0 10px 0;
+  padding-bottom: 8px;
+  border-bottom: 2px solid rgba(99, 102, 241, 0.15);
+}
+
+.smod-form-section-label:first-child {
+  margin-top: 0;
+}
+
+/* ============================================================================
    Light Mode
    ============================================================================ */
 
@@ -756,6 +1261,46 @@ body.light-mode .member-action-modal__close-inline:hover { background-color: #ef
 [data-theme="light"] .profile-section,
 body.light-mode .profile-section { border-top-color: #e2e8f0; }
 
+:root.theme-light .smod-qstat,
+[data-theme="light"] .smod-qstat,
+body.light-mode .smod-qstat { background: #f8fafc; border-color: #e2e8f0; }
+
+:root.theme-light .smod-card,
+[data-theme="light"] .smod-card,
+body.light-mode .smod-card { background: #ffffff; border-color: #e2e8f0; }
+
+:root.theme-light .smod-card__header,
+[data-theme="light"] .smod-card__header,
+body.light-mode .smod-card__header { background: #f8fafc; border-bottom-color: #e2e8f0; }
+
+:root.theme-light .smod-detail-row,
+[data-theme="light"] .smod-detail-row,
+body.light-mode .smod-detail-row { border-bottom-color: #f1f5f9; }
+
+:root.theme-light .smod-detail-row__icon,
+[data-theme="light"] .smod-detail-row__icon,
+body.light-mode .smod-detail-row__icon { background: #f1f5f9; }
+
+:root.theme-light .smod-dept-banner,
+[data-theme="light"] .smod-dept-banner,
+body.light-mode .smod-dept-banner { background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(139, 92, 246, 0.03)); border-color: rgba(99, 102, 241, 0.1); }
+
+:root.theme-light .smod-schedule-display__current,
+[data-theme="light"] .smod-schedule-display__current,
+body.light-mode .smod-schedule-display__current { background: rgba(99, 102, 241, 0.04); border-color: rgba(99, 102, 241, 0.08); }
+
+:root.theme-light .smod-schedule-display__item,
+[data-theme="light"] .smod-schedule-display__item,
+body.light-mode .smod-schedule-display__item { background: #f8fafc; border-color: #e2e8f0; }
+
+:root.theme-light .smod-pay-card--monthly,
+[data-theme="light"] .smod-pay-card--monthly,
+body.light-mode .smod-pay-card--monthly { background: linear-gradient(135deg, rgba(34, 197, 94, 0.06), rgba(16, 185, 129, 0.03)); border-color: rgba(34, 197, 94, 0.15); }
+
+:root.theme-light .smod-pay-card--annual,
+[data-theme="light"] .smod-pay-card--annual,
+body.light-mode .smod-pay-card--annual { background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(99, 102, 241, 0.03)); border-color: rgba(139, 92, 246, 0.15); }
+
 /* ============================================================================
    Responsive Design
    ============================================================================ */
@@ -769,85 +1314,110 @@ body.light-mode .profile-section { border-top-color: #e2e8f0; }
 }
 
 @media (max-width: 768px) {
-  .staff-action-overlay {
-    padding: 16px;
-  }
+    .staff-action-overlay {
+      padding: 16px;
+    }
+  
+    .staff-action-modal {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      max-height: 95vh;
+      border-radius: 16px;
+    }
+  
+    .staff-action-modal__content-grid {
+      grid-template-columns: 1fr;
+    }
+  
+    .staff-action-modal__nav-column {
+      display: flex;
+      overflow-x: auto;
+      padding: 8px 12px;
+      border-right: none;
+      border-bottom: 1px solid var(--border-secondary);
+      -webkit-overflow-scrolling: touch;
+    }
+  
+    .side-panel-nav {
+      flex-direction: row;
+      gap: 4px;
+      min-width: max-content;
+    }
+  
+    .side-panel-nav__divider { display: none; }
+  
+    .side-panel-nav__item {
+      white-space: nowrap;
+      padding: 8px 12px;
+      font-size: 12px;
+    }
+  
+    .side-panel-nav__item span {
+      display: none;
+    }
+  
+    .side-panel-nav__item svg {
+      width: 20px;
+      height: 20px;
+    }
+  
+    .profile-header__stats {
+      display: none;
+    }
+  
+    .staff-action-modal__profile-header {
+      padding: 12px 16px;
+      gap: 12px;
+    }
+  
+    .profile-header__avatar {
+      width: 48px;
+      height: 48px;
+    }
+  
+    .profile-header__name {
+      font-size: 16px;
+    }
+  
+    .form-row-2-col {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+  
+    .staff-action-modal__content-panel {
+      padding: 16px;
+    }
+  
+    .schedule-info {
+      grid-template-columns: 1fr;
+    }
 
-  .staff-action-modal {
-    width: 100%;
-    max-width: 100%;
-    height: auto;
-    max-height: 95vh;
-    border-radius: 16px;
-  }
+    .smod-quick-stats {
+      grid-template-columns: repeat(2, 1fr);
+    }
 
-  .staff-action-modal__content-grid {
-    grid-template-columns: 1fr;
-  }
+    .smod-two-col {
+      grid-template-columns: 1fr;
+    }
 
-  .staff-action-modal__nav-column {
-    display: flex;
-    overflow-x: auto;
-    padding: 8px 12px;
-    border-right: none;
-    border-bottom: 1px solid var(--border-secondary);
-    -webkit-overflow-scrolling: touch;
-  }
+    .smod-emergency-grid {
+      grid-template-columns: 1fr;
+    }
 
-  .side-panel-nav {
-    flex-direction: row;
-    gap: 4px;
-    min-width: max-content;
-  }
+    .smod-pay-cards {
+      grid-template-columns: 1fr;
+    }
 
-  .side-panel-nav__divider { display: none; }
+    .smod-schedule-display__meta {
+      grid-template-columns: 1fr;
+    }
 
-  .side-panel-nav__item {
-    white-space: nowrap;
-    padding: 8px 12px;
-    font-size: 12px;
+    .smod-dept-banner {
+      flex-direction: column;
+      text-align: center;
+    }
   }
-
-  .side-panel-nav__item span {
-    display: none;
-  }
-
-  .side-panel-nav__item svg {
-    width: 20px;
-    height: 20px;
-  }
-
-  .profile-header__stats {
-    display: none;
-  }
-
-  .staff-action-modal__profile-header {
-    padding: 12px 16px;
-    gap: 12px;
-  }
-
-  .profile-header__avatar {
-    width: 48px;
-    height: 48px;
-  }
-
-  .profile-header__name {
-    font-size: 16px;
-  }
-
-  .form-row-2-col {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .staff-action-modal__content-panel {
-    padding: 16px;
-  }
-
-  .schedule-info {
-    grid-template-columns: 1fr;
-  }
-}
 
 @media (max-width: 480px) {
   .profile-header__avatar {
