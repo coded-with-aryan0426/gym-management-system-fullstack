@@ -3,6 +3,8 @@ package com.gym.management.security;
 import com.gym.management.model.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
@@ -13,13 +15,17 @@ import java.util.Set;
 @Component
 public class JwtTokenProvider {
 
-    // Ideally this should be in application.properties
-    // For now, hardcoding a secure key for dev environment (must be exactly 64
-    // chars = 512 bits for HS512)
-    private static final String JWT_SECRET = "9a4f2c8d3b7a1e6f4c5d2b3a4f5e6d7c8b9a0e1f2c3d4e5f6a7b8c9d0e1f2a3b";
+    @Value("${jwt.secret}")
+    private String jwtSecret;
+
     private static final long JWT_EXPIRATION_MS = 86400000; // 24 hours
 
-    private final Key key = Keys.hmacShaKeyFor(JWT_SECRET.getBytes());
+    private Key key;
+
+    @PostConstruct
+    public void init() {
+        this.key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
+    }
 
     public String generateToken(Authentication authentication, String context, Long gymId, String staffRole) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
