@@ -1,0 +1,228 @@
+/* ============================================================================
+   Unified Design System - Premium Gym Experience
+   Combining Trainer Layout Logic with Member Aesthetic Quality
+   ============================================================================ */
+
+:root {
+    /* Base Colors */
+    --bg-primary: #0A0A0F;
+    --bg-secondary: #121218;
+    --bg-tertiary: #1A1A22;
+    --bg-glass: rgba(255, 255, 255, 0.03);
+    --bg-glass-hover: rgba(255, 255, 255, 0.06);
+    --bg-glass-active: rgba(255, 255, 255, 0.08);
+
+    /* Accent Colors (Premium Palette) */
+    --accent-blue: #007AFF;
+    --accent-blue-rgb: 0, 122, 255;
+    --accent-red: #FF3B30;
+    --accent-red-rgb: 255, 59, 48;
+    --accent-green: #34C759;
+    --accent-green-rgb: 52, 199, 89;
+    --accent-purple: #AF52DE;
+    --accent-purple-rgb: 175, 82, 222;
+    --accent-orange: #FF9500;
+    --accent-orange-rgb: 255, 149, 0;
+    --accent-teal: #5AC8FA;
+    --accent-teal-rgb: 90, 200, 250;
+
+    /* Semantic Colors */
+    --status-success: var(--accent-green);
+    --status-warning: var(--accent-orange);
+    --status-error: var(--accent-red);
+    --status-info: var(--accent-blue);
+
+    /* Text Colors */
+    --text-primary: #FFFFFF;
+    --text-secondary: rgba(255, 255, 255, 0.7);
+    --text-tertiary: rgba(255, 255, 255, 0.4);
+    --text-quaternary: rgba(255, 255, 255, 0.25);
+
+    /* Borders & Glass */
+    --border-main: rgba(255, 255, 255, 0.08);
+    --border-focus: rgba(255, 255, 255, 0.15);
+    --glass-blur: blur(20px);
+    --glass-saturate: saturate(180%);
+
+    /* Shadows */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
+    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35);
+    --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.45);
+    --shadow-glow: 0 0 30px rgba(0, 122, 255, 0.15);
+
+    /* Radius */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --radius-2xl: 24px;
+
+    /* Spacing */
+    --s-1: 4px;
+    --s-2: 8px;
+    --s-3: 12px;
+    --s-4: 16px;
+    --s-5: 20px;
+    --s-6: 24px;
+    --s-8: 32px;
+    --s-10: 40px;
+}
+
+:root.theme-light {
+    --bg-primary: #F2F2F7;
+    --bg-secondary: #FFFFFF;
+    --bg-tertiary: #E5E5EA;
+    --bg-glass: rgba(255, 255, 255, 0.7);
+    --bg-glass-hover: rgba(255, 255, 255, 0.8);
+    --bg-glass-active: rgba(255, 255, 255, 0.9);
+
+    --text-primary: #000000;
+    --text-secondary: rgba(0, 0, 0, 0.6);
+    --text-tertiary: rgba(0, 0, 0, 0.4);
+    --text-quaternary: rgba(0, 0, 0, 0.25);
+
+    --border-main: rgba(0, 0, 0, 0.1);
+    --border-focus: rgba(0, 0, 0, 0.2);
+
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.12);
+}
+
+/* Base Page Styling */
+.unified-page {
+    min-height: 100vh;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    padding: var(--s-6) var(--s-8);
+    position: relative;
+    overflow-x: hidden;
+}
+
+.unified-page::before {
+    content: '';
+    position: fixed;
+    top: -10%;
+    right: -10%;
+    width: 60%;
+    height: 60%;
+    background: radial-gradient(circle, rgba(var(--accent-blue-rgb), 0.05) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.unified-page::after {
+    content: '';
+    position: fixed;
+    bottom: -10%;
+    left: -10%;
+    width: 50%;
+    height: 50%;
+    background: radial-gradient(circle, rgba(var(--accent-red-rgb), 0.03) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Grid Layouts (from Trainer logic) */
+.layout-dashboard {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: var(--s-6);
+    position: relative;
+    z-index: 1;
+}
+
+.layout-main-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-6);
+}
+
+.layout-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-6);
+}
+
+@media (max-width: 1200px) {
+    .layout-dashboard {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Glass Components */
+.glass-card {
+    background: var(--bg-glass);
+    backdrop-filter: var(--glass-blur) var(--glass-saturate);
+    -webkit-backdrop-filter: var(--glass-blur) var(--glass-saturate);
+    border: 1px solid var(--border-main);
+    border-radius: var(--radius-xl);
+    padding: var(--s-6);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+    background: var(--bg-glass-hover);
+    border-color: var(--border-focus);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+/* Unified Typography */
+.heading-hero {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: var(--s-1);
+}
+
+.text-subtitle {
+    font-size: 16px;
+    color: var(--text-secondary);
+    margin-bottom: var(--s-6);
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+    margin-bottom: var(--s-4);
+}
+
+/* Standardized Buttons */
+.btn-premium {
+    background: var(--accent-blue);
+    color: white;
+    padding: 10px 20px;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-premium:hover {
+    background: #0066d6;
+    box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+.btn-premium-outline {
+    background: transparent;
+    border: 1px solid var(--border-main);
+    color: var(--text-primary);
+    padding: 10px 20px;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.btn-premium-outline:hover {
+    background: var(--bg-glass-hover);
+    border-color: var(--border-focus);
+}

@@ -1,0 +1,83 @@
+/* ============================================================================
+   Membership Assignment - Selection Mode Styles
+   ============================================================================ */
+
+.membership-select-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Main Select Dropdown - Matches form-input style */
+.membership-select {
+  width: 100%;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: #fff;
+  font-size: 14px;
+  transition: all 0.2s;
+  cursor: pointer;
+  appearance: none;
+  padding-right: 40px;
+}
+
+.membership-select:focus {
+  outline: none;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.membership-select:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.membership-select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.membership-select--loading {
+  color: #666;
+}
+
+.membership-select--error {
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #f87171;
+}
+
+/* Option styles */
+.membership-select option {
+  background: #1a1a1a;
+  color: #fff;
+  padding: 12px;
+}
+
+/* ============================================================================
+   LIGHT MODE OVERRIDES
+   ============================================================================ */
+:root.theme-light .membership-select,
+[data-theme="light"] .membership-select,
+body.light-mode .membership-select {
+  background: #ffffff;
+  border: 1px solid var(--border-primary, #CBD5E1);
+  color: var(--text-primary, #0f172a);
+}
+
+:root.theme-light .membership-select:focus,
+[data-theme="light"] .membership-select:focus,
+body.light-mode .membership-select:focus {
+  background: #ffffff;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+:root.theme-light .membership-select option,
+[data-theme="light"] .membership-select option,
+body.light-mode .membership-select option {
+  background: #ffffff;
+  color: #0f172a;
+}
+

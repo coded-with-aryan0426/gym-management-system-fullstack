@@ -1,0 +1,46 @@
+/* ============================================================================
+   Badge Component Styles
+   ============================================================================ */
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    text-transform: capitalize;
+    white-space: nowrap;
+}
+
+/* Variants */
+.badge--active {
+    background-color: var(--color-emerald-light);
+    color: var(--color-emerald);
+}
+
+.badge--pending {
+    background-color: var(--color-amber-light);
+    color: var(--color-amber);
+}
+
+.badge--expired {
+    background-color: var(--color-crimson-light);
+    color: var(--color-crimson);
+}
+
+.badge--on-leave {
+    background-color: var(--color-ocean-light);
+    color: var(--color-ocean);
+}
+
+.badge--info {
+    background-color: var(--color-ocean-light);
+    color: var(--color-ocean);
+}
+
+.badge--default {
+    background-color: var(--bg-tertiary);
+    color: var(--text-secondary);
+}

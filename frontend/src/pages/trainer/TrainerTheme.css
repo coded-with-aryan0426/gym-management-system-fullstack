@@ -1,0 +1,25 @@
+/* ============================================================================
+   Trainer Theme - Red Primary with Colorful Accents
+   Dark Mode: Red & Black | Light Mode: Red & White
+   ============================================================================ */
+
+:root {
+  /* Primary Red Accent */
+  --trainer-primary: #DC2626;
+  --trainer-primary-hover: #B91C1C;
+  --trainer-primary-light: rgba(220, 38, 38, 0.15);
+  
+  /* Secondary Colors for variety */
+  --trainer-blue: #3B82F6;
+  --trainer-blue-light: rgba(59, 130, 246, 0.15);
+  --trainer-green: #10B981;
+  --trainer-green-light: rgba(16, 185, 129, 0.15);
+  --trainer-purple: #8B5CF6;
+  --trainer-purple-light: rgba(139, 92, 246, 0.15);
+  --trainer-orange: #F59E0B;
+  --trainer-orange-light: rgba(245, 158, 11, 0.15);
+  --trainer-pink: #EC4899;
+  --trainer-pink-light: rgba(236, 72, 153, 0.15);
+  --trainer-cyan: #06B6D4;
+  --trainer-cyan-light: rgba(6, 182, 212, 0.15);
+}

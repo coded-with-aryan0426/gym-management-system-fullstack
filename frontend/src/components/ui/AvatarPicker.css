@@ -1,0 +1,156 @@
+/* ============================================================================
+   Avatar Picker Component - Selection Grid
+   ============================================================================ */
+
+.avatar-picker {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.avatar-picker__label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    letter-spacing: -0.1px;
+}
+
+/* Grid Layout - 5 columns for compact display */
+.avatar-picker__grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+}
+
+/* Individual Avatar Option */
+.avatar-picker__option {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 12px;
+    border: 2px solid var(--border-primary);
+    background: var(--bg-secondary);
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+    padding: 0;
+}
+
+.avatar-picker__option:hover {
+    border-color: var(--border-secondary);
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Selected State */
+.avatar-picker__option--selected {
+    border-color: var(--color-crimson);
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2);
+}
+
+.avatar-picker__option--selected::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--color-crimson);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.avatar-picker__option--selected::before {
+    content: '✓';
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--color-crimson);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+}
+
+/* Avatar Image */
+.avatar-picker__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* No Avatar Option (Initials) */
+.avatar-picker__option--none {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.avatar-picker__initials {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--color-crimson), #b91c1c);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.avatar-picker__option-label {
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+/* Responsive - 4 columns on smaller screens */
+@media (max-width: 500px) {
+    .avatar-picker__grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* Upload Photo Option */
+.avatar-picker__option--upload {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    border-style: dashed;
+}
+
+.avatar-picker__option--upload:hover {
+    border-style: solid;
+    background: rgba(220, 38, 38, 0.05);
+}
+
+.avatar-picker__upload-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--bg-tertiary);
+    border: 1px dashed var(--border-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-tertiary);
+    transition: all 0.2s ease;
+}
+
+.avatar-picker__option--upload:hover .avatar-picker__upload-icon {
+    background: var(--color-crimson);
+    border-color: var(--color-crimson);
+    color: white;
+}

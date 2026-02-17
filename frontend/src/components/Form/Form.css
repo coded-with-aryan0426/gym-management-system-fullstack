@@ -1,0 +1,258 @@
+/* ============================================================================
+   Form Component Styles - Updated for New Design System
+   ============================================================================ */
+
+/* Form Field */
+.form-field {
+  margin-bottom: var(--space-4);
+}
+
+.form-field__label {
+  display: block;
+  margin-bottom: var(--space-2);
+  font-family: var(--font-family);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+}
+
+.form-field__required {
+  color: var(--color-crimson);
+  margin-left: 2px;
+}
+
+.form-field__input {
+  width: 100%;
+  padding: var(--space-3);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--input-radius);
+  font-family: var(--font-family);
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.form-field__input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.form-field__input:hover {
+  border-color: var(--border-hover);
+}
+
+.form-field__input:focus {
+  border-color: var(--color-crimson);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+}
+
+.form-field__input--error {
+  border-color: var(--color-crimson);
+}
+
+.form-field__input--error:focus {
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+}
+
+.form-field__error {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--color-crimson);
+}
+
+/* Toggle */
+.form-toggle {
+  margin-bottom: var(--space-4);
+}
+
+.form-toggle__label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-family: var(--font-family);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.form-toggle__switch {
+  position: relative;
+  width: 48px;
+  height: 26px;
+  flex-shrink: 0;
+}
+
+.form-toggle__switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.form-toggle__slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-primary);
+  transition: all var(--transition-fast);
+  border-radius: 13px;
+}
+
+.form-toggle__slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 2px;
+  bottom: 2px;
+  background: white;
+  transition: all var(--transition-fast);
+  border-radius: 50%;
+  box-shadow: var(--shadow-sm);
+}
+
+.form-toggle__switch input:checked+.form-toggle__slider {
+  background: var(--color-crimson);
+  border-color: var(--color-crimson);
+}
+
+.form-toggle__switch input:checked+.form-toggle__slider:before {
+  transform: translateX(22px);
+}
+
+.form-toggle__switch:hover .form-toggle__slider {
+  border-color: var(--border-hover);
+}
+
+/* Premium Buttons */
+.form-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--button-radius);
+  font-family: var(--font-family);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border: none;
+}
+
+.form-btn--primary {
+  background: var(--color-crimson);
+  color: white;
+}
+
+.form-btn--primary:hover {
+  background: var(--color-crimson-hover);
+  transform: translateY(-1px);
+}
+
+.form-btn--primary:active {
+  transform: translateY(0);
+}
+
+.form-btn--primary:disabled {
+  background: var(--bg-tertiary);
+  color: var(--text-tertiary);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.form-btn--secondary {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-primary);
+  color: var(--text-primary);
+}
+
+.form-btn--secondary:hover {
+  background: var(--bg-elevated);
+  border-color: var(--border-hover);
+}
+
+.form-btn--secondary:active {
+  transform: translateY(0);
+}
+
+.form-btn--danger {
+  background: var(--color-crimson);
+  color: white;
+}
+
+.form-btn--danger:hover {
+  background: var(--color-crimson-hover);
+}
+
+.form-btn--success {
+  background: var(--color-emerald);
+  color: white;
+}
+
+.form-btn--success:hover {
+  filter: brightness(1.1);
+}
+
+/* Button Sizes */
+.form-btn--sm {
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-xs);
+}
+
+.form-btn--lg {
+  padding: var(--space-4) var(--space-8);
+  font-size: var(--text-base);
+}
+
+/* Icon Button */
+.form-btn--icon {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: var(--button-radius);
+}
+
+/* Loading State */
+.form-btn--loading {
+  position: relative;
+  color: transparent !important;
+}
+
+.form-btn--loading::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 2px solid transparent;
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Form Row */
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+}
+
+@media (max-width: 640px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}

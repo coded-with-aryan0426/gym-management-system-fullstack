@@ -1,0 +1,116 @@
+/* ============================================================================
+   PERFORMANCE OPTIMIZATIONS
+   AthlonX Gym Management System
+   ============================================================================ */
+
+/* Smooth scrolling with hardware acceleration */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Hardware accelerated animations */
+.app,
+.app__content,
+.dashboard-new,
+.members-page,
+.staff-page,
+.settings-page,
+.pt-sessions {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-perspective: 1000;
+    perspective: 1000;
+}
+
+/* Optimize will-change for frequently animated elements */
+.stat-card,
+.user-card,
+.chart-card,
+.members-card,
+.activity-item,
+.navbar-premium__link,
+.member-list-item {
+    will-change: transform, box-shadow;
+}
+
+/* Reduce animations on reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Optimize scrollable containers */
+.members-card__list,
+.activity-feed__list,
+.modal__body,
+.user-grid,
+.pt-sessions__list {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    overscroll-behavior: contain;
+}
+
+/* Improve text rendering */
+body {
+    text-rendering: optimizeSpeed;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Optimize images */
+img {
+    content-visibility: auto;
+}
+
+/* Reduce paint areas */
+.card,
+.modal,
+.navbar-premium {
+    contain: layout style paint;
+}
+
+/* GPU accelerated transforms */
+.premium-card:hover,
+.stat-card:hover,
+.user-card:hover,
+.chart-card:hover,
+.activity-item:hover,
+.member-list-item:hover {
+    transform: translateY(-4px) translateZ(0);
+}
+
+/* Optimize grid layouts */
+.user-grid,
+.dashboard-new__stats-grid,
+.dashboard-new__charts {
+    contain: layout;
+}
+
+/* Prevent layout thrashing */
+.skeleton,
+.loading-spinner {
+    contain: strict;
+}
+
+/* Optimize backdrop-filter performance */
+.glass-effect,
+.navbar-premium,
+.modal-overlay,
+.search-modal-overlay {
+    transform: translateZ(0);
+}
+
+/* Content visibility for off-screen content */
+.dashboard-new__charts>*:nth-child(n+3) {
+    content-visibility: auto;
+    contain-intrinsic-size: 200px;
+}

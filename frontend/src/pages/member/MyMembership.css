@@ -1,0 +1,1490 @@
+.mm-container {
+    min-height: 100vh;
+    padding: 24px;
+    background: var(--macos-bg-primary);
+    color: var(--macos-text-primary);
+    width: 100%;
+    max-width: 100%;
+}
+
+.mm-dev-banner {
+    margin-bottom: 16px;
+    padding: 14px 16px;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(234, 179, 8, 0.05));
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    border-radius: 12px;
+}
+
+.mm-dev-banner__content {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.mm-dev-banner__content > svg {
+    color: #f59e0b;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.mm-dev-banner__text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.mm-dev-banner__text strong {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fbbf24;
+}
+
+.theme-light .mm-dev-banner__text strong {
+    color: #d97706;
+}
+
+.mm-dev-banner__text span {
+    font-size: 12px;
+    color: var(--macos-text-secondary);
+    line-height: 1.4;
+}
+
+.mm-status--preview {
+    background: rgba(245, 158, 11, 0.12);
+    color: #fbbf24;
+    border-color: rgba(245, 158, 11, 0.2);
+}
+
+.mm-loading {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: var(--macos-bg-primary);
+    color: var(--macos-text-tertiary);
+}
+
+.mm-loading__spinner {
+    color: var(--macos-accent);
+}
+
+.mm-loading span {
+    font-size: 13px;
+}
+
+.mm-no-membership {
+    min-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 12px;
+    padding: 24px;
+}
+
+.mm-no-membership__icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--macos-accent);
+    margin-bottom: 8px;
+}
+
+.mm-no-membership h2 {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.mm-no-membership p {
+    font-size: 13px;
+    color: var(--macos-text-secondary);
+    margin: 0;
+}
+
+.mm-cta-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+}
+
+.mm-hero {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 12px;
+    border: 1px solid var(--macos-border);
+    background: var(--macos-bg-secondary);
+}
+
+.theme-light .mm-hero {
+    box-shadow: var(--shadow-sm);
+}
+
+.mm-hero__content {
+    position: relative;
+    z-index: 1;
+    padding: 16px;
+}
+
+.mm-hero__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.mm-hero__plan-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.mm-hero__id-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.mm-hero__tier {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--macos-bg-tertiary);
+    font-size: 8px;
+    font-weight: 800;
+    color: var(--tier-color, #3b82f6);
+    width: fit-content;
+}
+
+.mm-hero__title {
+    font-size: 18px;
+    font-weight: 800;
+    margin: 0;
+    color: var(--macos-text-primary);
+}
+
+.mm-hero__id {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    color: var(--macos-text-tertiary);
+    cursor: pointer;
+}
+
+.mm-status {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: var(--macos-success-bg);
+    color: var(--macos-success);
+    border: 1px solid rgba(52, 199, 89, 0.2);
+}
+
+.mm-hero__actions {
+    display: flex;
+    gap: 8px;
+}
+
+.mm-qr-btn,
+.mm-renew-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+}
+
+.mm-qr-btn {
+    background: var(--macos-accent);
+    color: #fff;
+}
+
+.mm-renew-btn {
+    background: var(--macos-bg-tertiary);
+    color: var(--macos-text-primary);
+    border: 1px solid var(--macos-border);
+}
+
+.mm-hero__body {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 16px;
+    align-items: center;
+}
+
+.mm-hero__timer-section {
+    flex: 1;
+}
+
+.mm-countdown-compact {
+    background: var(--macos-bg-primary);
+    border-radius: 10px;
+    padding: 10px 14px;
+    border: 1px solid var(--macos-border);
+    opacity: 0.9;
+}
+
+.mm-countdown-compact__label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--macos-text-tertiary);
+    margin-bottom: 6px;
+}
+
+.mm-countdown-compact__grid {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.mm-countdown-compact__item {
+    display: flex;
+    align-items: baseline;
+    gap: 1px;
+}
+
+.mm-countdown-compact__value {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--macos-text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+.mm-countdown-compact__unit {
+    font-size: 10px;
+    color: var(--macos-text-tertiary);
+    font-weight: 600;
+}
+
+.mm-countdown-compact__sep {
+    color: var(--macos-border);
+    font-weight: 300;
+}
+
+.mm-hero__stats-section {
+    flex: 1;
+}
+
+.mm-hero__stats-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.mm-hero__stat-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: var(--macos-bg-tertiary);
+    border-radius: 6px;
+    font-size: 11px;
+    color: var(--macos-text-secondary);
+}
+
+.mm-hero__stat-pill strong {
+    color: var(--macos-text-primary);
+}
+
+.mm-hero__stat-pill svg {
+    color: var(--macos-accent);
+    opacity: 0.8;
+}
+
+.mm-hero__progress-container {
+    margin-top: 8px;
+}
+
+.mm-hero__progress-bar {
+    height: 4px;
+    background: var(--macos-bg-tertiary);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.mm-hero__progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+}
+
+.mm-hero__progress-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4px;
+    font-size: 9px;
+    color: var(--macos-text-tertiary);
+}
+
+@media (max-width: 1024px) {
+    .mm-hero__body {
+        flex-direction: column;
+        gap: 12px;
+    }
+    .mm-hero__header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    .mm-hero__actions {
+        width: 100%;
+    }
+    .mm-qr-btn, .mm-renew-btn {
+        flex: 1;
+    }
+}
+
+.mm-renew-btn:hover {
+    background: var(--macos-bg-glass-hover);
+}
+
+.mm-quick-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.mm-quick-stat {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    background: var(--macos-bg-secondary);
+    border-radius: 12px;
+    border: 1px solid var(--macos-border);
+}
+
+.theme-light .mm-quick-stat {
+    box-shadow: var(--shadow-sm);
+}
+
+.mm-quick-stat__icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mm-quick-stat__icon--blue { background: rgba(59, 130, 246, 0.12); color: #3b82f6; }
+.mm-quick-stat__icon--green { background: rgba(34, 197, 94, 0.12); color: #22c55e; }
+.mm-quick-stat__icon--purple { background: rgba(139, 92, 246, 0.12); color: #8b5cf6; }
+.mm-quick-stat__icon--amber { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
+
+.mm-quick-stat__value {
+    display: block;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--macos-text-primary);
+    line-height: 1;
+}
+
+.mm-quick-stat__label {
+    display: block;
+    font-size: 10px;
+    color: var(--macos-text-tertiary);
+    margin-top: 2px;
+}
+
+.mm-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    background: var(--macos-bg-secondary);
+    border: 1px solid var(--macos-border);
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.mm-tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    color: var(--macos-text-secondary);
+    font-size: 12px;
+    font-weight: 600;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.mm-tab:hover {
+    color: var(--macos-text-primary);
+    background: var(--macos-bg-glass-hover);
+}
+
+.mm-tab--active {
+    color: var(--macos-text-primary);
+    background: var(--macos-bg-tertiary);
+    box-shadow: var(--shadow-xs);
+}
+
+.mm-content {
+    min-height: 200px;
+}
+
+.mm-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.mm-action-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 12px;
+    background: var(--macos-bg-secondary);
+    border: 1px solid var(--macos-border);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.theme-light .mm-action-card {
+    box-shadow: var(--shadow-sm);
+}
+
+.mm-action-card__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mm-action-card__icon--blue { background: rgba(59, 130, 246, 0.12); color: #3b82f6; }
+.mm-action-card__icon--green { background: rgba(34, 197, 94, 0.12); color: #22c55e; }
+.mm-action-card__icon--purple { background: rgba(139, 92, 246, 0.12); color: #8b5cf6; }
+.mm-action-card__icon--amber { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
+
+.mm-action-card__text {
+    text-align: center;
+}
+
+.mm-action-card__title {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--macos-text-primary);
+}
+
+.mm-action-card__desc {
+    display: block;
+    font-size: 10px;
+    color: var(--macos-text-tertiary);
+    margin-top: 2px;
+}
+
+.mm-section {
+    margin-bottom: 24px;
+}
+
+.mm-section__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.mm-section__header h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    margin: 0;
+    color: var(--macos-text-primary);
+}
+
+.mm-section__header h3 svg {
+    color: var(--macos-accent);
+}
+
+.mm-section__link {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--macos-accent);
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.mm-activity-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+.mm-activity-card {
+    padding: 14px;
+    background: var(--macos-bg-secondary);
+    border: 1px solid var(--macos-border);
+    border-radius: 12px;
+}
+
+.theme-light .mm-activity-card {
+    box-shadow: var(--shadow-sm);
+}
+
+.mm-activity-card__header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--macos-text-tertiary);
+    margin-bottom: 8px;
+}
+
+.mm-activity-card__header svg {
+    color: var(--macos-accent);
+}
+
+.mm-activity-card__value {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--macos-text-primary);
+    line-height: 1;
+}
+
+.mm-activity-card__change {
+    font-size: 10px;
+    color: var(--macos-success);
+    margin-top: 4px;
+}
+
+.mm-activity-card__progress {
+    height: 3px;
+    background: var(--macos-bg-tertiary);
+    border-radius: 2px;
+    margin-top: 8px;
+    overflow: hidden;
+}
+
+.mm-activity-card__progress > div {
+    height: 100%;
+    background: var(--macos-accent);
+    border-radius: 2px;
+}
+
+.mm-perks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.mm-perk-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: var(--macos-bg-secondary);
+    border: 1px solid var(--macos-border);
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.theme-light .mm-perk-item {
+    box-shadow: var(--shadow-sm);
+}
+
+.mm-perk-item__icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mm-perk-item__icon--event { background: rgba(59, 130, 246, 0.12); color: #3b82f6; }
+.mm-perk-item__icon--promo { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
+.mm-perk-item__icon--challenge { background: rgba(34, 197, 94, 0.12); color: #22c55e; }
+
+.mm-perk-item__content {
+    flex: 1;
+}
+
+.mm-perk-item__title {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--macos-text-primary);
+}
+
+.mm-perk-item__date {
+    display: block;
+    font-size: 10px;
+    color: var(--macos-text-tertiary);
+    margin-top: 2px;
+}
+
+.mm-perk-item__arrow {
+    color: var(--macos-border);
+}
+
+.mm-benefits-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.mm-benefit-card {
+    position: relative;
+    padding: 16px;
+    background: var(--macos-bg-secondary);
+    border: 1px solid var(--macos-border);
+    border-radius: 12px;
+    transition: all 0.2s;
+}
+
+.theme-light .mm-benefit-card {
+    box-shadow: var(--shadow-sm);
+}
+
+.mm-benefit-card--locked {
+    opacity: 0.5;
+}
+
+.mm-benefit-card__lock {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: var(--macos-text-tertiary);
+}
+
+.mm-benefit-card__icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(59, 130, 246, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--macos-accent);
+    margin-bottom: 10px;
+}
+
+.mm-benefit-card__title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--macos-text-primary);
+    margin: 0 0 4px 0;
+}
+
+.mm-benefit-card__desc {
+    font-size: 10px;
+    color: var(--macos-text-secondary);
+    margin: 0;
+}
+
+.mm-benefit-card__progress {
+    height: 3px;
+    background: var(--macos-bg-tertiary);
+    border-radius: 2px;
+    margin-top: 10px;
+    overflow: hidden;
+}
+
+.mm-benefit-card__progress > div {
+    height: 100%;
+    background: var(--macos-accent);
+    border-radius: 2px;
+}
+
+.mm-benefit-card__check {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--macos-success-bg);
+    color: var(--macos-success);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mm-benefit-card__upgrade {
+    display: block;
+    font-size: 9px;
+    color: var(--macos-purple);
+    margin-top: 8px;
+}
+
+.mm-rewards-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(59, 130, 246, 0.1));
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    border-radius: 14px;
+}
+
+.mm-rewards-card__points {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.mm-rewards-card__points svg {
+    color: #f59e0b;
+}
+
+.mm-rewards-card__value {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--macos-text-primary);
+}
+
+.mm-rewards-card__label {
+    font-size: 11px;
+    color: var(--macos-text-secondary);
+    margin-top: 4px;
+}
+
+.mm-rewards-card__right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+.mm-rewards-card__progress {
+    text-align: right;
+}
+
+.mm-rewards-card__progress-bar {
+    width: 120px;
+    height: 4px;
+    background: var(--macos-bg-tertiary);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 4px;
+}
+
+.mm-rewards-card__progress-bar > div {
+    height: 100%;
+    background: linear-gradient(90deg, #f59e0b, #eab308);
+    border-radius: 2px;
+}
+
+.mm-rewards-card__progress span {
+    font-size: 10px;
+    color: var(--macos-text-tertiary);
+}
+
+.mm-rewards-card__btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: var(--macos-purple);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.mm-payment-methods {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.mm-payment-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: var(--macos-bg-secondary);
+    border: 1px solid var(--macos-border);
+    border-radius: 12px;
+}
+
+.mm-payment-card--default {
+    border-color: rgba(59, 130, 246, 0.3);
+    background: rgba(59, 130, 246, 0.05);
+}
+
+.mm-payment-card__brand {
+    width: 48px;
+    height: 32px;
+    border-radius: 6px;
+    background: var(--macos-bg-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mm-card-visa {
+    font-size: 10px;
+    font-weight: 800;
+    color: #3b82f6;
+    letter-spacing: 0.05em;
+}
+
+.mm-card-mc {
+    font-size: 10px;
+    font-weight: 800;
+    color: #f59e0b;
+}
+
+.mm-card-amex {
+    font-size: 9px;
+    font-weight: 800;
+    color: #22c55e;
+}
+
+.mm-payment-card__info {
+    flex: 1;
+}
+
+.mm-payment-card__number {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--macos-text-primary);
+    letter-spacing: 0.02em;
+}
+
+.mm-payment-card__expiry {
+    display: block;
+    font-size: 10px;
+    color: var(--macos-text-tertiary);
+    margin-top: 2px;
+}
+
+.mm-payment-card__badge {
+    padding: 4px 10px;
+    background: rgba(59, 130, 246, 0.12);
+    color: var(--macos-accent);
+    font-size: 9px;
+    font-weight: 600;
+    border-radius: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.mm-payment-card__actions {
+    display: flex;
+    gap: 6px;
+}
+
+.mm-payment-card__actions button {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: var(--macos-bg-tertiary);
+    border: none;
+    color: var(--macos-text-tertiary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.mm-payment-card__actions button:hover {
+    background: var(--macos-bg-glass-hover);
+    color: var(--macos-text-primary);
+}
+
+.mm-payment-history {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.mm-history-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: var(--macos-bg-secondary);
+    border: 1px solid var(--macos-border);
+    border-radius: 10px;
+}
+
+.mm-history-item__icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: var(--macos-success-bg);
+    color: var(--macos-success);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mm-history-item__info {
+    flex: 1;
+}
+
+.mm-history-item__type {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--macos-text-primary);
+}
+
+.mm-history-item__meta {
+    display: block;
+    font-size: 10px;
+    color: var(--macos-text-tertiary);
+    margin-top: 2px;
+}
+
+.mm-history-item__right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.mm-history-item__amount {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--macos-text-primary);
+}
+
+.mm-history-item__download {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: var(--macos-bg-tertiary);
+    border: none;
+    color: var(--macos-text-tertiary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mm-history-item__download:hover {
+    background: var(--macos-bg-glass-hover);
+    color: var(--macos-text-primary);
+}
+
+.mm-settings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.mm-setting-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    background: var(--macos-bg-secondary);
+    border: 1px solid var(--macos-border);
+    border-radius: 12px;
+}
+
+.mm-setting-card--danger {
+    border-color: rgba(239, 68, 68, 0.2);
+}
+
+.mm-setting-card__left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.mm-setting-card__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mm-setting-card__icon--blue { background: rgba(59, 130, 246, 0.12); color: #3b82f6; }
+.mm-setting-card__icon--green { background: rgba(34, 197, 94, 0.12); color: #22c55e; }
+.mm-setting-card__icon--purple { background: rgba(139, 92, 246, 0.12); color: #8b5cf6; }
+.mm-setting-card__icon--red { background: rgba(239, 68, 68, 0.12); color: #ef4444; }
+
+.mm-setting-card__info h4 {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--macos-text-primary);
+    margin: 0;
+}
+
+.mm-setting-card__info p {
+    font-size: 11px;
+    color: var(--macos-text-secondary);
+    margin: 2px 0 0;
+}
+
+.mm-setting-card__progress {
+    width: 80px;
+    height: 3px;
+    background: var(--macos-bg-tertiary);
+    border-radius: 2px;
+    margin-top: 6px;
+    overflow: hidden;
+}
+
+.mm-setting-card__progress > div {
+    height: 100%;
+    background: var(--macos-purple);
+    border-radius: 2px;
+}
+
+.mm-toggle {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    cursor: pointer;
+}
+
+.mm-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.mm-toggle__slider {
+    position: absolute;
+    inset: 0;
+    background: var(--macos-bg-tertiary);
+    border-radius: 12px;
+    transition: all 0.3s;
+}
+
+.mm-toggle__slider::before {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    left: 3px;
+    bottom: 3px;
+    background: var(--macos-text-tertiary);
+    border-radius: 50%;
+    transition: all 0.3s;
+}
+
+.mm-toggle input:checked + .mm-toggle__slider {
+    background: var(--macos-accent);
+}
+
+.mm-toggle input:checked + .mm-toggle__slider::before {
+    transform: translateX(20px);
+    background: #fff;
+}
+
+.mm-setting-btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    background: var(--macos-bg-tertiary);
+    color: var(--macos-text-primary);
+    transition: all 0.2s;
+}
+
+.mm-setting-btn:hover {
+    background: var(--macos-bg-glass-hover);
+}
+
+.mm-setting-btn--danger {
+    background: var(--macos-error-bg);
+    color: var(--macos-error);
+}
+
+.mm-setting-btn--danger:hover {
+    background: rgba(239, 68, 68, 0.2);
+}
+
+.mm-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.mm-modal-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--macos-bg-tertiary);
+    border: none;
+    color: var(--macos-text-tertiary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mm-qr-modal {
+    position: relative;
+    background: var(--macos-bg-secondary);
+    border: 1px solid var(--macos-border);
+    border-radius: 20px;
+    padding: 32px 24px;
+    text-align: center;
+    max-width: 300px;
+    width: 100%;
+    box-shadow: var(--shadow-lg);
+}
+
+.mm-qr-code {
+    width: 140px;
+    height: 140px;
+    margin: 0 auto 20px;
+    padding: 16px;
+    background: #fff;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mm-qr-code svg {
+    color: #09090b;
+}
+
+.mm-qr-modal h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0 0 6px;
+    color: var(--macos-text-primary);
+}
+
+.mm-qr-modal p {
+    font-size: 12px;
+    color: var(--macos-text-secondary);
+    margin: 0;
+}
+
+.mm-qr-modal__id {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    padding: 8px 14px;
+    background: var(--macos-bg-tertiary);
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--macos-text-primary);
+    cursor: pointer;
+}
+
+.mm-qr-modal__valid {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 12px;
+    font-size: 11px;
+    color: var(--macos-success);
+}
+
+.mm-freeze-modal {
+    position: relative;
+    background: var(--macos-bg-secondary);
+    border: 1px solid var(--macos-border);
+    border-radius: 20px;
+    max-width: 380px;
+    width: 100%;
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+}
+
+.mm-freeze-modal__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--macos-border);
+}
+
+.mm-freeze-modal__header h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0;
+    color: var(--macos-text-primary);
+}
+
+.mm-freeze-modal__header button {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: transparent;
+    border: none;
+    color: var(--macos-text-tertiary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mm-freeze-modal__body {
+    padding: 20px;
+}
+
+.mm-freeze-info {
+    display: flex;
+    gap: 10px;
+    padding: 12px;
+    background: rgba(59, 130, 246, 0.08);
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.mm-freeze-info svg {
+    color: var(--macos-accent);
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.mm-freeze-info p {
+    font-size: 12px;
+    color: var(--macos-text-secondary);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.mm-freeze-duration label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--macos-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 10px;
+}
+
+.mm-freeze-options {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.mm-freeze-option {
+    flex: 1;
+    padding: 10px;
+    background: var(--macos-bg-tertiary);
+    border: 1px solid var(--macos-border);
+    border-radius: 8px;
+    color: var(--macos-text-secondary);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.mm-freeze-option--active {
+    background: rgba(139, 92, 246, 0.12);
+    border-color: rgba(139, 92, 246, 0.3);
+    color: var(--macos-purple);
+}
+
+.mm-freeze-dates {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px;
+    background: var(--macos-bg-tertiary);
+    border-radius: 10px;
+}
+
+.mm-freeze-date {
+    flex: 1;
+}
+
+.mm-freeze-date span {
+    display: block;
+    font-size: 10px;
+    color: var(--macos-text-tertiary);
+    margin-bottom: 4px;
+}
+
+.mm-freeze-date strong {
+    font-size: 13px;
+    color: var(--macos-text-primary);
+}
+
+.mm-freeze-dates > svg {
+    color: var(--macos-border);
+}
+
+.mm-freeze-modal__footer {
+    display: flex;
+    gap: 10px;
+    padding: 16px 20px;
+    border-top: 1px solid var(--macos-border);
+}
+
+.mm-modal-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+}
+
+.mm-modal-btn--secondary {
+    background: var(--macos-bg-tertiary);
+    color: var(--macos-text-secondary);
+}
+
+.mm-modal-btn--secondary:hover {
+    background: var(--macos-bg-glass-hover);
+}
+
+.mm-modal-btn--primary {
+    background: var(--macos-purple);
+    color: #fff;
+}
+
+.mm-modal-btn--primary:hover {
+    background: #7c3aed;
+}
+
+@media (max-width: 1200px) {
+    .mm-benefits-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 1024px) {
+    .mm-container {
+        padding: 20px;
+    }
+    
+    .mm-hero__stats,
+    .mm-quick-stats,
+    .mm-actions-grid,
+    .mm-activity-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .mm-hero__body {
+        flex-direction: column;
+    }
+
+    .mm-hero__body-left,
+    .mm-hero__body-right {
+        flex: none;
+        width: 100%;
+    }
+    
+    .mm-benefits-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .mm-container {
+        padding: 12px;
+    }
+    
+    .mm-hero__stats,
+    .mm-quick-stats,
+    .mm-actions-grid,
+    .mm-activity-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .mm-benefits-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .mm-countdown__value {
+        font-size: 22px;
+    }
+    
+    .mm-countdown__item {
+        min-width: 42px;
+        padding: 6px 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .mm-hero__stats,
+    .mm-quick-stats,
+    .mm-actions-grid,
+    .mm-activity-grid,
+    .mm-benefits-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .mm-tabs {
+        flex-wrap: wrap;
+    }
+    
+    .mm-tab {
+        flex: 1 1 45%;
+    }
+}

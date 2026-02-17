@@ -1,0 +1,125 @@
+.alerts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.alert-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid;
+    transition: all 0.15s ease;
+}
+
+.alert-item:hover {
+    transform: translateX(2px);
+}
+
+.alert-item--critical {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, transparent 60%);
+    border-color: rgba(239, 68, 68, 0.25);
+}
+
+.alert-item--warning {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, transparent 60%);
+    border-color: rgba(245, 158, 11, 0.25);
+}
+
+.alert-item--info {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, transparent 60%);
+    border-color: rgba(59, 130, 246, 0.25);
+}
+
+.alert-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    flex-shrink: 0;
+}
+
+.alert-icon--critical {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--color-crimson);
+}
+
+.alert-icon--warning {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--color-amber);
+}
+
+.alert-icon--info {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--color-blue);
+}
+
+.alert-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+}
+
+.alert-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.alert-message {
+    font-size: 0.6875rem;
+    color: var(--text-tertiary);
+    line-height: 1.4;
+}
+
+.alert-action {
+    background: none;
+    border: 1px solid;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.625rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+    flex-shrink: 0;
+    align-self: center;
+}
+
+.alert-action--critical {
+    color: var(--color-crimson);
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.alert-action--critical:hover {
+    background: rgba(239, 68, 68, 0.12);
+    border-color: var(--color-crimson);
+}
+
+.alert-action--warning {
+    color: var(--color-amber);
+    border-color: rgba(245, 158, 11, 0.3);
+}
+
+.alert-action--warning:hover {
+    background: rgba(245, 158, 11, 0.12);
+    border-color: var(--color-amber);
+}
+
+.alert-action--info {
+    color: var(--color-blue);
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+.alert-action--info:hover {
+    background: rgba(59, 130, 246, 0.12);
+    border-color: var(--color-blue);
+}

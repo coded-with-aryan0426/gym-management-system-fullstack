@@ -1,0 +1,1502 @@
+/* ============================================================================
+   Trainer Schedule - Professional Calendar Design
+   ============================================================================ */
+
+@import './TrainerTheme.css';
+
+.trainer-schedule {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-primary, #0a0a0a);
+}
+
+/* ============================================
+   HEADER
+   ============================================ */
+.trainer-schedule__header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+  background: var(--bg-secondary, rgba(12, 12, 14, 0.95));
+}
+
+.trainer-schedule__title-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.trainer-schedule__title-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.trainer-schedule__title-section h1 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary, #fff);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.trainer-schedule__week-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(220, 38, 38, 0.1);
+  color: #DC2626;
+}
+
+.trainer-schedule__week-stats {
+  display: flex;
+  gap: 16px;
+  padding: 0 16px;
+  border-left: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+  border-right: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+}
+
+.trainer-schedule__week-stat {
+  text-align: center;
+}
+
+.trainer-schedule__week-stat-value {
+  display: block;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary, #fff);
+  line-height: 1.2;
+}
+
+.trainer-schedule__week-stat-label {
+  display: block;
+  font-size: 10px;
+  color: var(--text-tertiary, rgba(255, 255, 255, 0.5));
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.trainer-schedule__week-stat--highlight .trainer-schedule__week-stat-value {
+  color: #DC2626;
+}
+
+.trainer-schedule__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.trainer-schedule__sync-btn,
+.trainer-schedule__export-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 12px;
+  background: transparent;
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: 8px;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.trainer-schedule__sync-btn:hover,
+.trainer-schedule__export-btn:hover {
+  background: var(--bg-secondary, rgba(255, 255, 255, 0.04));
+  border-color: var(--border-hover, rgba(255, 255, 255, 0.12));
+}
+
+.trainer-schedule__add-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 14px;
+  background: linear-gradient(135deg, #DC2626, #B91C1C);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.25);
+}
+
+.trainer-schedule__add-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
+}
+
+/* ============================================
+   CONTENT
+   ============================================ */
+.trainer-schedule__content {
+  flex: 1;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: hidden;
+}
+
+/* ============================================
+   TOOLBAR
+   ============================================ */
+.trainer-schedule__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.trainer-schedule__view-toggle {
+  display: inline-flex;
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.trainer-schedule__view-toggle button {
+  padding: 7px 14px;
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  color: var(--text-tertiary, rgba(255, 255, 255, 0.5));
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  /* Added gap for icon spacing */
+}
+
+.trainer-schedule__view-toggle button:last-child {
+  border-right: none;
+}
+
+.trainer-schedule__view-toggle button:hover {
+  background: var(--bg-primary, rgba(255, 255, 255, 0.02));
+  color: var(--text-secondary);
+}
+
+.trainer-schedule__view-toggle button.active {
+  background: rgba(220, 38, 38, 0.15);
+  color: #DC2626;
+}
+
+.trainer-schedule__date-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.trainer-schedule__nav-btn {
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: 6px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.trainer-schedule__nav-btn:hover {
+  background: var(--bg-secondary, rgba(255, 255, 255, 0.04));
+  color: var(--text-primary);
+}
+
+.trainer-schedule__date-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary, #fff);
+  min-width: 100px;
+  text-align: center;
+}
+
+.trainer-schedule__today-btn {
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.trainer-schedule__today-btn:hover {
+  background: var(--bg-secondary, rgba(255, 255, 255, 0.04));
+}
+
+.trainer-schedule__filter-group {
+  margin-left: auto;
+}
+
+.trainer-schedule__filter-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.trainer-schedule__filter-btn:hover,
+.trainer-schedule__filter-btn.active {
+  background: var(--bg-secondary, rgba(255, 255, 255, 0.04));
+  border-color: var(--border-hover);
+}
+
+.trainer-schedule__filter-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  background: #DC2626;
+  color: #fff;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+/* ============================================
+   FILTERS PANEL
+   ============================================ */
+.trainer-schedule__filters-panel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--bg-secondary, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+  border-radius: 10px;
+}
+
+.trainer-schedule__filters-label {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin-right: 4px;
+}
+
+.trainer-schedule__filter-chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  background: transparent;
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.trainer-schedule__filter-chip:hover {
+  border-color: var(--chip-color);
+}
+
+.trainer-schedule__filter-chip.active {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--chip-color);
+  color: var(--chip-color);
+}
+
+.trainer-schedule__filter-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.trainer-schedule__clear-filters {
+  padding: 5px 10px;
+  background: transparent;
+  border: none;
+  color: #DC2626;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-left: auto;
+}
+
+.trainer-schedule__clear-filters:hover {
+  text-decoration: underline;
+}
+
+/* ============================================
+   WEEK VIEW
+   ============================================ */
+.trainer-schedule__week-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-secondary, rgba(255, 255, 255, 0.02));
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.trainer-schedule__week-header {
+  display: flex;
+  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+  background: var(--bg-primary, rgba(0, 0, 0, 0.2));
+}
+
+.trainer-schedule__time-gutter {
+  width: 60px;
+  flex-shrink: 0;
+}
+
+.trainer-schedule__week-day-header {
+  flex: 1;
+  padding: 10px 8px;
+  text-align: center;
+  border-left: 1px solid var(--border-color, rgba(255, 255, 255, 0.04));
+}
+
+.trainer-schedule__week-day-header--today {
+  background: rgba(220, 38, 38, 0.08);
+}
+
+.trainer-schedule__week-day-name {
+  display: block;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.trainer-schedule__week-day-date {
+  display: block;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-top: 2px;
+}
+
+.trainer-schedule__week-day-date--today {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: #DC2626;
+  color: #fff;
+  border-radius: 50%;
+}
+
+.trainer-schedule__week-day-count {
+  display: block;
+  font-size: 10px;
+  color: var(--text-tertiary);
+  margin-top: 2px;
+}
+
+.trainer-schedule__week-body {
+  flex: 1;
+  display: flex;
+  overflow-y: auto;
+}
+
+.trainer-schedule__time-column {
+  width: 60px;
+  flex-shrink: 0;
+}
+
+.trainer-schedule__time-slot {
+  height: 60px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 0 8px;
+}
+
+.trainer-schedule__time-label {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  transform: translateY(-6px);
+}
+
+.trainer-schedule__day-column {
+  flex: 1;
+  border-left: 1px solid var(--border-color, rgba(255, 255, 255, 0.04));
+  position: relative;
+}
+
+/* Current time indicator */
+.trainer-schedule__time-indicator {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.trainer-schedule__time-indicator-dot {
+  position: absolute;
+  left: -4px;
+  top: -4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #DC2626;
+}
+
+.trainer-schedule__time-indicator-line {
+  height: 2px;
+  background: #DC2626;
+  width: 100%;
+}
+
+.trainer-schedule__day-column--today {
+  background: rgba(220, 38, 38, 0.03);
+}
+
+.trainer-schedule__hour-slot {
+  height: 60px;
+  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.04));
+  position: relative;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.trainer-schedule__hour-slot:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.trainer-schedule__hour-slot--occupied {
+  cursor: default;
+}
+
+.trainer-schedule__hour-slot--occupied:hover {
+  background: transparent;
+}
+
+.trainer-schedule__empty-slot {
+  position: absolute;
+  inset: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed transparent;
+  border-radius: 6px;
+  color: var(--text-tertiary);
+  opacity: 0;
+  transition: all 0.15s ease;
+}
+
+.trainer-schedule__hour-slot:hover .trainer-schedule__empty-slot {
+  opacity: 1;
+  border-color: var(--border-color, rgba(255, 255, 255, 0.1));
+}
+
+.trainer-schedule__event-block {
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  top: 2px;
+  border-radius: 6px;
+  border-left: 3px solid;
+  padding: 4px 6px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  z-index: 1;
+}
+
+.trainer-schedule__event-block:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 2;
+}
+
+.trainer-schedule__event-time {
+  font-size: 9px;
+  font-weight: 600;
+  opacity: 0.8;
+  margin-bottom: 1px;
+}
+
+.trainer-schedule__event-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.trainer-schedule__event-room,
+.trainer-schedule__event-enrolled {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 9px;
+  color: var(--text-tertiary);
+  margin-top: 2px;
+}
+
+.trainer-schedule__event-recurring {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  color: var(--text-tertiary);
+}
+
+/* ============================================
+   DAY VIEW
+   ============================================ */
+.trainer-schedule__day-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-secondary, rgba(255, 255, 255, 0.02));
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+  border-radius: 12px;
+  overflow: hidden;
+  min-height: 0;
+  /* Important for nested flex scroll */
+}
+
+.trainer-schedule__day-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+  background: var(--bg-primary, rgba(0, 0, 0, 0.2));
+}
+
+.trainer-schedule__day-header h2 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.trainer-schedule__day-summary {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.trainer-schedule__day-body {
+  flex: 1;
+  display: flex;
+  overflow-y: auto;
+}
+
+.trainer-schedule__day-timeline {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.trainer-schedule__day-row {
+  display: flex;
+  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.04));
+  min-height: 70px;
+}
+
+.trainer-schedule__day-time {
+  width: 70px;
+  padding: 10px;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  text-align: right;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border-color, rgba(255, 255, 255, 0.04));
+}
+
+.trainer-schedule__day-events {
+  flex: 1;
+  padding: 6px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.trainer-schedule__day-event {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border-left: 3px solid;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.trainer-schedule__day-event:hover {
+  transform: translateX(2px);
+}
+
+.trainer-schedule__day-event-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.trainer-schedule__day-event-header h4 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.trainer-schedule__day-event-type {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.trainer-schedule__day-event-meta {
+  display: flex;
+  gap: 12px;
+}
+
+.trainer-schedule__day-event-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.trainer-schedule__day-event-notes {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.trainer-schedule__day-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 16px;
+  border: 1px dashed var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: 8px;
+  color: var(--text-tertiary);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.trainer-schedule__day-empty:hover {
+  border-color: #DC2626;
+  color: #DC2626;
+  background: rgba(220, 38, 38, 0.05);
+}
+
+/* ============================================
+   MONTH VIEW (placeholder)
+   ============================================ */
+.trainer-schedule__month-view {
+  flex: 1;
+  background: var(--bg-secondary, rgba(255, 255, 255, 0.02));
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.trainer-schedule__month-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+  background: var(--bg-primary, rgba(0, 0, 0, 0.2));
+}
+
+.trainer-schedule__month-weekday {
+  padding: 10px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+}
+
+.trainer-schedule__month-grid {
+  display: flex;
+  flex-direction: column;
+}
+
+.trainer-schedule__month-week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.trainer-schedule__month-day {
+  min-height: 100px;
+  border-right: 1px solid var(--border-color, rgba(255, 255, 255, 0.04));
+  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.04));
+}
+
+/* ============================================
+   LEGEND
+   ============================================ */
+.trainer-schedule__legend {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  padding: 12px;
+}
+
+.trainer-schedule__legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.trainer-schedule__legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+/* ============================================
+   EVENT DETAIL MODAL
+   ============================================ */
+.trainer-schedule__modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.trainer-schedule__modal {
+  width: 100%;
+  max-width: 420px;
+  background: var(--bg-secondary, #18181b);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+}
+
+.trainer-schedule__modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+}
+
+.trainer-schedule__modal-type {
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.trainer-schedule__modal-close {
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.trainer-schedule__modal-close:hover {
+  background: var(--bg-primary, rgba(255, 255, 255, 0.05));
+  color: var(--text-primary);
+}
+
+.trainer-schedule__modal-body {
+  padding: 20px;
+}
+
+.trainer-schedule__modal-body h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 16px 0;
+}
+
+.trainer-schedule__modal-details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.trainer-schedule__modal-detail {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.trainer-schedule__modal-detail svg {
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+
+.trainer-schedule__modal-notes,
+.trainer-schedule__modal-client {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+}
+
+.trainer-schedule__modal-notes h4,
+.trainer-schedule__modal-client h4 {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  margin: 0 0 6px 0;
+}
+
+.trainer-schedule__modal-notes p,
+.trainer-schedule__modal-client p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.trainer-schedule__modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 16px;
+  border-top: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+  background: var(--bg-primary, rgba(0, 0, 0, 0.2));
+}
+
+.trainer-schedule__modal-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  background: transparent;
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+  color: var(--text-secondary);
+}
+
+.trainer-schedule__modal-btn:hover {
+  background: var(--bg-secondary, rgba(255, 255, 255, 0.05));
+  border-color: var(--border-hover);
+}
+
+.trainer-schedule__modal-btn--primary {
+  background: #DC2626;
+  border-color: #DC2626;
+  color: #fff;
+}
+
+.trainer-schedule__modal-btn--primary:hover {
+  background: #B91C1C;
+}
+
+.trainer-schedule__modal-btn--danger {
+  color: #EF4444;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.trainer-schedule__modal-btn--danger:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: #EF4444;
+}
+
+/* ============================================
+   LIGHT MODE
+   ============================================ */
+:root.theme-light .trainer-schedule {
+  background-color: #ffffff;
+}
+
+:root.theme-light .trainer-schedule__header {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+:root.theme-light .trainer-schedule__title-section h1 {
+  color: #111;
+}
+
+:root.theme-light .trainer-schedule__week-badge {
+  background: rgba(220, 38, 38, 0.08);
+}
+
+:root.theme-light .trainer-schedule__week-stats {
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+:root.theme-light .trainer-schedule__week-stat-value {
+  color: #111;
+}
+
+:root.theme-light .trainer-schedule__sync-btn,
+:root.theme-light .trainer-schedule__export-btn {
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #666;
+}
+
+:root.theme-light .trainer-schedule__view-toggle {
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+:root.theme-light .trainer-schedule__view-toggle button {
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #666;
+}
+
+:root.theme-light .trainer-schedule__nav-btn,
+:root.theme-light .trainer-schedule__today-btn,
+:root.theme-light .trainer-schedule__filter-btn {
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #666;
+}
+
+:root.theme-light .trainer-schedule__date-text {
+  color: #111;
+}
+
+:root.theme-light .trainer-schedule__filters-panel {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+:root.theme-light .trainer-schedule__filter-chip {
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #666;
+}
+
+:root.theme-light .trainer-schedule__week-view,
+:root.theme-light .trainer-schedule__day-view,
+:root.theme-light .trainer-schedule__month-view {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+:root.theme-light .trainer-schedule__week-header,
+:root.theme-light .trainer-schedule__day-header,
+:root.theme-light .trainer-schedule__month-weekdays {
+  background: #f9fafb;
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+:root.theme-light .trainer-schedule__week-day-header {
+  border-color: rgba(0, 0, 0, 0.04);
+}
+
+:root.theme-light .trainer-schedule__week-day-header--today {
+  background: rgba(220, 38, 38, 0.06);
+}
+
+:root.theme-light .trainer-schedule__week-day-date {
+  color: #111;
+}
+
+:root.theme-light .trainer-schedule__day-column {
+  border-color: rgba(0, 0, 0, 0.04);
+}
+
+:root.theme-light .trainer-schedule__day-column--today {
+  background: rgba(220, 38, 38, 0.02);
+}
+
+:root.theme-light .trainer-schedule__hour-slot {
+  border-color: rgba(0, 0, 0, 0.04);
+}
+
+:root.theme-light .trainer-schedule__hour-slot:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+:root.theme-light .trainer-schedule__event-title {
+  color: #111;
+}
+
+:root.theme-light .trainer-schedule__day-row {
+  border-color: rgba(0, 0, 0, 0.04);
+}
+
+:root.theme-light .trainer-schedule__day-time {
+  border-color: rgba(0, 0, 0, 0.04);
+}
+
+:root.theme-light .trainer-schedule__day-event-header h4 {
+  color: #111;
+}
+
+:root.theme-light .trainer-schedule__day-empty {
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+:root.theme-light .trainer-schedule__legend-item {
+  color: #666;
+}
+
+:root.theme-light .trainer-schedule__modal {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+:root.theme-light .trainer-schedule__modal-header {
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+:root.theme-light .trainer-schedule__modal-body h2 {
+  color: #111;
+}
+
+:root.theme-light .trainer-schedule__modal-detail {
+  color: #666;
+}
+
+:root.theme-light .trainer-schedule__modal-notes,
+:root.theme-light .trainer-schedule__modal-client {
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+:root.theme-light .trainer-schedule__modal-actions {
+  background: #f9fafb;
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+:root.theme-light .trainer-schedule__modal-btn {
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #666;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 1024px) {
+  .trainer-schedule__title-row {
+    flex-wrap: wrap;
+  }
+
+  .trainer-schedule__week-stats {
+    order: 3;
+    width: 100%;
+    padding: 12px 0 0;
+    border: none;
+    border-top: 1px solid var(--border-color);
+    margin-top: 8px;
+  }
+
+  .trainer-schedule__header-actions {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .trainer-schedule__header {
+    padding: 12px 14px;
+  }
+
+  .trainer-schedule__content {
+    padding: 12px 14px;
+  }
+
+  .trainer-schedule__title-section h1 {
+    font-size: 18px;
+  }
+
+  .trainer-schedule__title-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .trainer-schedule__title-section {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .trainer-schedule__week-stats {
+    width: 100%;
+    justify-content: space-around;
+  }
+
+  .trainer-schedule__header-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .trainer-schedule__toolbar {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .trainer-schedule__view-toggle {
+    width: 100%;
+  }
+
+  .trainer-schedule__view-toggle button {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .trainer-schedule__date-nav {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .trainer-schedule__filter-group {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .trainer-schedule__filter-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .trainer-schedule__filters-panel {
+    flex-wrap: wrap;
+  }
+
+  .trainer-schedule__week-view {
+    overflow-x: auto;
+  }
+
+  .trainer-schedule__week-header,
+  .trainer-schedule__week-body {
+    min-width: 700px;
+  }
+
+  .trainer-schedule__modal {
+    max-width: 100%;
+    margin: 10px;
+  }
+
+  .trainer-schedule__modal-actions {
+    flex-direction: column;
+  }
+
+  .trainer-schedule__modal-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ============================================
+   AGENDA VIEW (Mobile-First)
+   ============================================ */
+.trainer-schedule__agenda-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-secondary, rgba(255, 255, 255, 0.02));
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.trainer-schedule__agenda-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+  background: var(--bg-primary, rgba(0, 0, 0, 0.2));
+}
+
+.trainer-schedule__agenda-header h2 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.trainer-schedule__agenda-date {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.trainer-schedule__agenda-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.trainer-schedule__agenda-card {
+  display: flex;
+  align-items: stretch;
+  gap: 14px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+  border-left: 4px solid;
+  border-radius: 12px;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.trainer-schedule__agenda-card:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Header row for conflict badge + title */
+.trainer-schedule__agenda-header-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.trainer-schedule__agenda-conflict-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  background: rgba(239, 68, 68, 0.15);
+  border-radius: 4px;
+  color: #EF4444;
+  flex-shrink: 0;
+}
+
+.trainer-schedule__agenda-time {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 50px;
+  padding-right: 14px;
+  border-right: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+}
+
+.trainer-schedule__agenda-time-start {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.trainer-schedule__agenda-time-sep {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  margin: 2px 0;
+}
+
+.trainer-schedule__agenda-time-end {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.trainer-schedule__agenda-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.trainer-schedule__agenda-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.trainer-schedule__agenda-type-badge {
+  display: inline-flex;
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 6px;
+}
+
+.trainer-schedule__agenda-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 6px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.trainer-schedule__agenda-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.trainer-schedule__agenda-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.trainer-schedule__agenda-notes {
+  margin: 8px 0 0 0;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.trainer-schedule__agenda-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  justify-content: center;
+}
+
+.trainer-schedule__agenda-action {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.trainer-schedule__agenda-action--complete {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10B981;
+}
+
+.trainer-schedule__agenda-action--complete:hover {
+  background: rgba(16, 185, 129, 0.2);
+  transform: scale(1.05);
+}
+
+.trainer-schedule__agenda-action--noshow {
+  background: rgba(239, 68, 68, 0.12);
+  color: #EF4444;
+}
+
+.trainer-schedule__agenda-action--noshow:hover {
+  background: rgba(239, 68, 68, 0.2);
+  transform: scale(1.05);
+}
+
+.trainer-schedule__agenda-completed {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  background: rgba(16, 185, 129, 0.12);
+  color: #10B981;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.trainer-schedule__agenda-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--text-tertiary);
+}
+
+.trainer-schedule__agenda-empty h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin: 16px 0 8px;
+}
+
+.trainer-schedule__agenda-empty p {
+  font-size: 13px;
+  margin: 0;
+}
+
+/* Agenda View Mobile Adjustments */
+@media (max-width: 768px) {
+  .trainer-schedule__agenda-card {
+    flex-wrap: wrap;
+    padding: 12px;
+  }
+
+  .trainer-schedule__agenda-time {
+    flex-direction: row;
+    gap: 4px;
+    padding-right: 0;
+    padding-bottom: 10px;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+    width: 100%;
+    justify-content: flex-start;
+    min-width: auto;
+  }
+
+  .trainer-schedule__agenda-time-start {
+    font-size: 13px;
+  }
+
+  .trainer-schedule__agenda-content {
+    width: calc(100% - 100px);
+  }
+
+  .trainer-schedule__agenda-actions {
+    flex-direction: row;
+    position: absolute;
+    top: 12px;
+    right: 12px;
+  }
+
+  .trainer-schedule__agenda-action {
+    width: 36px;
+    height: 36px;
+  }
+}

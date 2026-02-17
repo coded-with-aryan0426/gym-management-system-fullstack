@@ -1,0 +1,1751 @@
+# Complete Gym Member Dashboard Guide
+
+## Overview of Member Dashboard Pages
+
+```
+📱 MEMBER DASHBOARD STRUCTURE
+│
+├── 🏠 Home/Dashboard (Overview)
+├── 👤 My Profile
+├── 💳 My Membership
+├── 📅 Classes & Schedule
+├── 📋 My Bookings
+├── 🏋️ My Trainer
+├── 📊 My Progress
+├── 💰 Payments & Billing
+├── 🔔 Notifications
+└── ⚙️ Settings
+```
+
+---
+
+## 1. 🏠 HOME/DASHBOARD (Main Landing Page)
+
+### Purpose
+First page member sees after login - quick overview of everything important.
+
+### Layout & Components
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Header Bar                                                      │
+│  ┌──────────┐    Fitness Zone Gym          [🔍] [🔔] [👤▼]     │
+│  │   LOGO   │                                                    │
+│  └──────────┘                                                    │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  Welcome Back, Sarah! 👋                                        │
+│  Your last visit: Yesterday at 6:00 PM                          │
+│                                                                  │
+├─────────────────────────────────────────────────────────────────┤
+│  QUICK STATS ROW (4 Cards Side by Side)                        │
+│  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌────────┐│
+│  │ 💳 MEMBERSHIP│ │ 📅 CLASSES   │ │ ✅ ATTENDED  │ │ 🔥 WEEK││
+│  │              │ │              │ │              │ │ STREAK ││
+│  │   ACTIVE     │ │  This Week   │ │  This Month  │ │        ││
+│  │ 25 days left │ │      3       │ │      18      │ │   7    ││
+│  └──────────────┘ └──────────────┘ └──────────────┘ └────────┘│
+│                                                                  │
+├─────────────────────────────────────────────────────────────────┤
+│  UPCOMING CLASSES (Card with List)                 [View All >] │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │ 📅 Tomorrow - Tuesday, March 26                          │  │
+│  │ ─────────────────────────────────────────────────────── │  │
+│  │ ┌────┐                                                   │  │
+│  │ │ 🧘 │ 9:00 AM - Yoga Class                             │  │
+│  │ └────┘ Room A • With Sarah Johnson                      │  │
+│  │        [View Details] [Cancel Booking]                  │  │
+│  │                                                          │  │
+│  │ ┌────┐                                                   │  │
+│  │ │ 🏃 │ 6:00 PM - HIIT Training                          │  │
+│  │ └────┘ Main Studio • With Mike Chen                     │  │
+│  │        [View Details] [Cancel Booking]                  │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+├─────────────────────────────────────────────────────────────────┤
+│  TWO COLUMN LAYOUT                                              │
+│  ┌────────────────────────────┐ ┌──────────────────────────┐  │
+│  │ 🏋️ MY TRAINER              │ │ 📊 PROGRESS SNAPSHOT     │  │
+│  │ ──────────────────────────│ │ ─────────────────────────│  │
+│  │ ┌──────────┐              │ │                          │  │
+│  │ │          │ John Smith   │ │  Weight Progress         │  │
+│  │ │  Photo   │              │ │  Start: 85kg → Now: 78kg │  │
+│  │ │          │ Weight       │ │  Goal: 75kg              │  │
+│  │ └──────────┘ Training     │ │  ██████████░░░░░ 70%     │  │
+│  │                           │ │                          │  │
+│  │ Next Session:             │ │  Workouts This Month: 18 │  │
+│  │ Friday, 10:00 AM          │ │  Calories Burned: 5,200  │  │
+│  │                           │ │                          │  │
+│  │ [Message] [View Profile]  │ │ [View Full Progress]     │  │
+│  └────────────────────────────┘ └──────────────────────────┘  │
+│                                                                  │
+├─────────────────────────────────────────────────────────────────┤
+│  RECENT ACTIVITY (Timeline)                        [View All >] │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │ • Attended Yoga Class - Today 9:00 AM                    │  │
+│  │ • Booked HIIT Training - Yesterday                       │  │
+│  │ • Weight updated to 78kg - 2 days ago                    │  │
+│  │ • Completed Strength Training - 3 days ago               │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Detailed Components
+
+#### A. **Membership Status Card** (Top Priority)
+**Why:** Most important info - is membership active?
+```
+Display Elements:
+├── Status Badge: ACTIVE (green) / EXPIRING (yellow) / EXPIRED (red)
+├── Plan Name: "Premium Monthly"
+├── Days Remaining: "25 days left"
+├── Expiry Date: "Expires: April 20, 2024"
+└── Action Button: [Renew Now] (if < 7 days)
+```
+
+**Alert States:**
+- **Active (>7 days)**: Green background, normal display
+- **Expiring Soon (<7 days)**: Yellow/orange alert, "Renew Now" button
+- **Expired**: Red alert, "Renew Membership" prominent button
+
+#### B. **Quick Stats Cards**
+**Purpose:** At-a-glance metrics
+
+```
+Classes This Week:
+├── Icon: 📅
+├── Number: Large font (3)
+├── Label: "Classes This Week"
+└── Subtext: "2 more scheduled"
+
+Attendance This Month:
+├── Icon: ✅
+├── Number: 18
+├── Label: "Attended"
+├── Progress vs Last Month: "↑ +3 from last month"
+
+Workout Streak:
+├── Icon: 🔥
+├── Number: 7
+├── Label: "Day Streak"
+└── Motivational text: "Keep it up!"
+```
+
+#### C. **Upcoming Classes Section**
+**Shows next 3-5 booked classes**
+
+```
+Each Class Entry:
+├── Date & Day: "Tomorrow - Tuesday, March 26"
+├── Class Icon: 🧘 (based on class type)
+├── Time: "9:00 AM"
+├── Class Name: "Yoga Class"
+├── Location: "Room A"
+├── Trainer: "With Sarah Johnson"
+├── Actions:
+│   ├── [View Details] → Opens class info modal
+│   └── [Cancel Booking] → Confirmation then cancel
+```
+
+**Empty State:**
+```
+┌──────────────────────────────────────┐
+│      📅 No Upcoming Classes          │
+│                                      │
+│   You don't have any classes booked  │
+│                                      │
+│     [Browse Available Classes]       │
+└──────────────────────────────────────┘
+```
+
+#### D. **My Trainer Section**
+```
+Display:
+├── Trainer Photo/Avatar
+├── Trainer Name: "John Smith"
+├── Specialization: "Weight Training & Nutrition"
+├── Rating: ⭐⭐⭐⭐⭐ (if applicable)
+├── Next Session Info:
+│   ├── Date: "Friday, March 29"
+│   ├── Time: "10:00 AM"
+│   └── Duration: "60 minutes"
+└── Action Buttons:
+    ├── [Message Trainer] → Opens chat/message form
+    └── [View Full Profile] → Trainer details page
+```
+
+**If No Trainer Assigned:**
+```
+┌──────────────────────────────────┐
+│   🏋️ No Trainer Assigned        │
+│                                  │
+│   Want personal training?        │
+│   [Request Trainer Assignment]   │
+└──────────────────────────────────┘
+```
+
+#### E. **Progress Snapshot**
+**Mini version of full progress tracking**
+
+```
+Weight Progress:
+├── Visual: Progress bar
+├── Start Weight: "85 kg"
+├── Current Weight: "78 kg" (highlight)
+├── Goal Weight: "75 kg"
+├── Percentage: "70% to goal"
+
+Quick Stats:
+├── Workouts This Month: 18
+├── Calories Burned: 5,200
+├── Avg Duration: 45 mins
+└── [View Full Progress] → Links to Progress page
+```
+
+#### F. **Recent Activity Feed**
+**Timeline of member's recent gym activities**
+
+```
+Activity Types:
+├── Class Attendance: "✅ Attended Yoga Class - Today 9:00 AM"
+├── Bookings: "📅 Booked HIIT Training - Yesterday"
+├── Progress Updates: "📈 Weight updated to 78kg - 2 days ago"
+├── Achievements: "🏆 Completed 10 classes milestone - 5 days ago"
+├── Membership: "💳 Membership renewed - March 1, 2024"
+```
+
+---
+
+## 2. 👤 MY PROFILE
+
+### Purpose
+View and edit personal information, manage account settings.
+
+### Layout
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  My Profile                                    [Edit Profile]    │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  PROFILE HEADER                                                  │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  ┌────────────┐                                           │  │
+│  │  │            │   Sarah Wilson                            │  │
+│  │  │   Avatar   │   Member since: January 2024              │  │
+│  │  │   Photo    │   Member ID: #12345                       │  │
+│  │  │            │   📧 sarah.wilson@email.com               │  │
+│  │  └────────────┘   📱 +1 (555) 123-4567                    │  │
+│  │                                                            │  │
+│  │  [Change Avatar] [Upload Photo]                           │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+├─────────────────────────────────────────────────────────────────┤
+│  PERSONAL INFORMATION (Tabbed Section)                          │
+│  [Basic Info] [Contact] [Emergency] [Preferences]               │
+│                                                                  │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │ BASIC INFORMATION                                         │  │
+│  │ ────────────────────────────────────────────────────────│  │
+│  │                                                          │  │
+│  │ Full Name:          [Sarah Wilson                    ]   │  │
+│  │ Date of Birth:      [📅 January 15, 1995            ]   │  │
+│  │ Age:                29 years                             │  │
+│  │ Gender:             [Female ▼]                           │  │
+│  │ Blood Type:         [O+ ▼]                               │  │
+│  │                                                          │  │
+│  │ ────────────────────────────────────────────────────────│  │
+│  │ CONTACT INFORMATION                                      │  │
+│  │ ────────────────────────────────────────────────────────│  │
+│  │                                                          │  │
+│  │ Email:              [sarah.wilson@email.com          ]   │  │
+│  │ Phone:              [+1 (555) 123-4567               ]   │  │
+│  │ Address:            [123 Main Street                 ]   │  │
+│  │                     [Apt 4B                          ]   │  │
+│  │ City:               [New York                        ]   │  │
+│  │ State:              [NY ▼]                               │  │
+│  │ Zip Code:           [10001                           ]   │  │
+│  │                                                          │  │
+│  │ ────────────────────────────────────────────────────────│  │
+│  │ EMERGENCY CONTACT                                        │  │
+│  │ ────────────────────────────────────────────────────────│  │
+│  │                                                          │  │
+│  │ Name:               [John Wilson                     ]   │  │
+│  │ Relationship:       [Spouse ▼]                           │  │
+│  │ Phone:              [+1 (555) 987-6543               ]   │  │
+│  │ Alt. Phone:         [+1 (555) 111-2222               ]   │  │
+│  │                                                          │  │
+│  │ ────────────────────────────────────────────────────────│  │
+│  │ FITNESS GOALS & PREFERENCES                              │  │
+│  │ ────────────────────────────────────────────────────────│  │
+│  │                                                          │  │
+│  │ Primary Goal:       [☑] Weight Loss                      │  │
+│  │                     [☐] Muscle Gain                      │  │
+│  │                     [☑] General Fitness                  │  │
+│  │                     [☐] Athletic Performance             │  │
+│  │                                                          │  │
+│  │ Fitness Level:      [Intermediate ▼]                     │  │
+│  │                                                          │  │
+│  │ Preferred Class     [☑] Morning (6AM - 12PM)             │  │
+│  │ Times:              [☑] Evening (5PM - 9PM)              │  │
+│  │                     [☐] Afternoon (12PM - 5PM)           │  │
+│  │                                                          │  │
+│  │ Health Conditions:  [Textarea for notes/conditions   ]   │  │
+│  │                     [                                ]   │  │
+│  │                                                          │  │
+│  │ Notes for Trainer:  [Textarea for special requests  ]   │  │
+│  │                     [                                ]   │  │
+│  │                                                          │  │
+│  │            [Cancel]              [Save Changes]          │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+├─────────────────────────────────────────────────────────────────┤
+│  ACCOUNT SECURITY                                               │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │ Password:           ••••••••••      [Change Password]    │  │
+│  │ Last Changed:       March 1, 2024                        │  │
+│  │                                                          │  │
+│  │ Two-Factor Auth:    ✅ Enabled      [Manage]             │  │
+│  │ Login History:      Last login: Today 8:30 AM [View]    │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+├─────────────────────────────────────────────────────────────────┤
+│  QUICK LINKS                                                    │
+│  [Download Member Card] [View QR Code] [Privacy Settings]      │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Key Features
+
+#### A. **Avatar Management**
+```
+Options:
+├── Select from predefined avatars (DiceBear style)
+├── Upload custom photo (max 5MB, JPG/PNG)
+├── Crop/adjust uploaded photo
+└── Preview before saving
+
+Avatar Picker Modal:
+┌──────────────────────────────────────┐
+│  Choose Your Avatar                  │
+│  ─────────────────────────────────  │
+│  [⚪] [⚪] [⚪] [⚪] [⚪] [⚪]         │
+│  [⚪] [⚪] [⚪] [⚪] [⚪] [⚪]         │
+│                                      │
+│  Or Upload Custom Photo:             │
+│  [📁 Choose File]                    │
+│                                      │
+│        [Cancel]  [Save Avatar]       │
+└──────────────────────────────────────┘
+```
+
+#### B. **Editable Fields**
+```
+Required Fields:
+├── Full Name
+├── Email (unique, verified)
+├── Phone
+└── Emergency Contact
+
+Optional Fields:
+├── Date of Birth
+├── Address
+├── Blood Type
+├── Health Conditions
+└── Fitness Goals
+```
+
+#### C. **Change Password Modal**
+```
+┌──────────────────────────────────────┐
+│  Change Password                     │
+│  ─────────────────────────────────  │
+│                                      │
+│  Current Password:                   │
+│  [                              ]    │
+│                                      │
+│  New Password:                       │
+│  [                              ]    │
+│  Strength: ████████░░░░ Strong       │
+│                                      │
+│  Confirm Password:                   │
+│  [                              ]    │
+│                                      │
+│  Requirements:                       │
+│  ✅ At least 8 characters            │
+│  ✅ One uppercase letter             │
+│  ✅ One number                        │
+│  ❌ One special character            │
+│                                      │
+│     [Cancel]  [Update Password]      │
+└──────────────────────────────────────┘
+```
+
+---
+
+## 3. 💳 MY MEMBERSHIP
+
+### Purpose
+View membership details, payment history, renew/upgrade plans.
+
+### Layout
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  My Membership                                                   │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  CURRENT PLAN (Large Card)                                      │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  ┌────────┐                                               │  │
+│  │  │  💎    │   PREMIUM MONTHLY                             │  │
+│  │  │ BADGE  │   Status: ✅ ACTIVE                           │  │
+│  │  └────────┘                                               │  │
+│  │                                                           │  │
+│  │  Started:    January 1, 2024                             │  │
+│  │  Expires:    April 20, 2024                              │  │
+│  │                                                           │  │
+│  │  Time Remaining:                                         │  │
+│  │  ████████████████████████████░░░░░░░░░ 25 days left      │  │
+│  │                                                           │  │
+│  │  Monthly Fee: $99.99                                     │  │
+│  │  Next Billing: April 20, 2024                            │  │
+│  │                                                           │  │
+│  │  ───────────────────────────────────────────────────── │  │
+│  │  Plan Includes:                                          │  │
+│  │  ✅ Unlimited gym access                                 │  │
+│  │  ✅ All group classes                                    │  │
+│  │  ✅ 4 personal training sessions/month                   │  │
+│  │  ✅ Locker access                                        │  │
+│  │  ✅ Guest passes (2/month)                               │  │
+│  │  ✅ Nutrition consultation                               │  │
+│  │                                                           │  │
+│  │  [Change Plan] [Renew Now] [Download Card]              │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+├─────────────────────────────────────────────────────────────────┤
+│  AVAILABLE PLANS (If user wants to upgrade)    [Compare Plans] │
+│                                                                  │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐            │
+│  │ 🥉 BASIC    │  │ 🥈 STANDARD │  │ 💎 PREMIUM  │ ← Current   │
+│  │             │  │             │  │             │            │
+│  │ $49.99/mo   │  │ $79.99/mo   │  │ $99.99/mo   │            │
+│  │             │  │             │  │             │            │
+│  │ • Gym access│  │ • Everything│  │ • Everything│            │
+│  │ • 10 classes│  │   in Basic  │  │   in Standard│            │
+│  │   per month │  │ • Unlimited │  │ • Personal  │            │
+│  │             │  │   classes   │  │   training  │            │
+│  │ [Select]    │  │ • 2 PT      │  │ • Nutrition │            │
+│  │             │  │   sessions  │  │ • Spa access│            │
+│  │             │  │             │  │             │            │
+│  │             │  │ [Upgrade]   │  │ [✓ Current] │            │
+│  └─────────────┘  └─────────────┘  └─────────────┘            │
+│                                                                  │
+├─────────────────────────────────────────────────────────────────┤
+│  USAGE STATISTICS                                               │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  This Month                                              │  │
+│  │  ─────────────────────────────────────────────────────│  │
+│  │                                                          │  │
+│  │  Gym Visits:           18 visits                         │  │
+│  │  Classes Attended:     12 classes                        │  │
+│  │  PT Sessions Used:     2 of 4 remaining                  │  │
+│  │  Guest Passes Used:    0 of 2 remaining                  │  │
+│  │                                                          │  │
+│  │  Average visit:        45 minutes                        │  │
+│  │  Most visited time:    6:00 PM - 8:00 PM                │  │
+│  │  Favorite class:       Yoga (6 times)                    │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+├─────────────────────────────────────────────────────────────────┤
+│  PAYMENT METHOD                                                 │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  💳 Visa ending in 4242                                  │  │
+│  │  Expires: 12/2025                                        │  │
+│  │  Autopay: ✅ Enabled                                     │  │
+│  │                                                          │  │
+│  │  [Update Payment Method] [Disable Autopay]              │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+├─────────────────────────────────────────────────────────────────┤
+│  PAYMENT HISTORY                                [Export PDF]    │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │ Date       │ Description      │ Amount  │ Status │ Receipt││
+│  │────────────┼──────────────────┼─────────┼────────┼────────││
+│  │ Mar 20     │ Monthly Fee      │ $99.99  │ Paid   │ [📄]   ││
+│  │ Feb 20     │ Monthly Fee      │ $99.99  │ Paid   │ [📄]   ││
+│  │ Jan 20     │ Monthly Fee      │ $99.99  │ Paid   │ [📄]   ││
+│  │ Jan 15     │ Signup Fee       │ $50.00  │ Paid   │ [📄]   ││
+│  │            │                  │         │        │        ││
+│  │                                          [Load More]       ││
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+├─────────────────────────────────────────────────────────────────┤
+│  MEMBERSHIP ACTIONS                                             │
+│  [📱 Download Digital Card] [🎟️ Generate Guest Pass]           │
+│  [⏸️ Freeze Membership] [🔄 Change Plan] [❌ Cancel Membership]│
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Key Features
+
+#### A. **Membership Status Indicators**
+```
+Active:
+├── Green badge: ✅ ACTIVE
+├── Normal display
+└── Show days remaining
+
+Expiring Soon (< 7 days):
+├── Yellow badge: ⚠️ EXPIRING SOON
+├── Alert banner: "Your membership expires in 5 days"
+└── Prominent [Renew Now] button
+
+Expired:
+├── Red badge: ❌ EXPIRED
+├── Alert: "Your membership has expired"
+├── Limited access message
+└── [Renew Membership] button
+
+Frozen:
+├── Blue badge: ⏸️ FROZEN
+├── Freeze period: "Until May 1, 2024"
+└── [Unfreeze] button
+```
+
+#### B. **Plan Comparison Modal**
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Compare Membership Plans                              [✕]  │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│         │  BASIC      │  STANDARD   │  PREMIUM              │
+│─────────┼─────────────┼─────────────┼─────────────          │
+│ Price   │  $49.99/mo  │  $79.99/mo  │  $99.99/mo            │
+│─────────┼─────────────┼─────────────┼─────────────          │
+│ Gym     │  ✅ Yes     │  ✅ Yes     │  ✅ Yes               │
+│ Access  │             │             │                       │
+│─────────┼─────────────┼─────────────┼─────────────          │
+│ Classes │  10/month   │  Unlimited  │  Unlimited            │
+│─────────┼─────────────┼─────────────┼─────────────          │
+│ PT      │  ❌ No      │  2/month    │  4/month              │
+│ Sessions│             │             │                       │
+│─────────┼─────────────┼─────────────┼─────────────          │
+│ Locker  │  ❌ No      │  ✅ Yes     │  ✅ Yes               │
+│─────────┼─────────────┼─────────────┼─────────────          │
+│ Guest   │  ❌ No      │  1/month    │  2/month              │
+│ Passes  │             │             │                       │
+│─────────┼─────────────┼─────────────┼─────────────          │
+│ Spa     │  ❌ No      │  ❌ No      │  ✅ Yes               │
+│─────────┼─────────────┼─────────────┼─────────────          │
+│         │ [Select]    │ [Upgrade]   │ [✓ Current]           │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### C. **Freeze Membership**
+```
+┌──────────────────────────────────────┐
+│  Freeze Membership                   │
+│  ─────────────────────────────────  │
+│                                      │
+│  ℹ️ You can freeze your membership   │
+│     for 1-3 months without penalty. │
+│                                      │
+│  Freeze From:                        │
+│  [📅 Select Date            ]        │
+│                                      │
+│  Freeze Duration:                    │
+│  [○ 1 Month]                         │
+│  [○ 2 Months]                        │
+│  [○ 3 Months]                        │
+│                                      │
+│  Reason (optional):                  │
+│  [Textarea                      ]    │
+│                                      │
+│  Your membership will resume on:     │
+│  May 1, 2024                         │
+│                                      │
+│     [Cancel]  [Confirm Freeze]       │
+└──────────────────────────────────────┘
+```
+
+---
+
+## 4. 📅 CLASSES & SCHEDULE
+
+### Purpose
+Browse available classes, view schedule, book classes.
+
+### Layout
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Classes & Schedule                                             │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  FILTERS & SEARCH                                               │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │ 🔍 [Search classes...                                  ] │  │
+│  │                                                          │  │
+│  │ Filter by:                                               │  │
+│  │ [All Types ▼] [All Trainers ▼] [All Days ▼] [All Times ▼]│  │
+│  │                                                          │  │
+│  │ View: [○ Calendar] [● List] [○ Week]    [Clear Filters] │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+├─────────────────────────────────────────────────────────────────┤
+│  CALENDAR VIEW                              [< March 2024 >]    │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  Sun    Mon    Tue    Wed    Thu    Fri    Sat          │  │
+│  │ ──────────────────────────────────────────────────────│  │
+│  │                                                          │  │
+│  │         24     25     26     27     28     29     30     │  │
+│  │                                                          │  │
+│  │        [Yoga] [HIIT] [Yoga] [Spin]        [Yoga]        │  │
+│  │        9:00AM 6:00PM 9:00AM 7:00AM        9:00AM        │  │
+│  │                                                          │  │
+│  │        [Spin]        [Body]        [HIIT]               │  │
+│  │        7:00PM        6:00PM        6:00PM               │  │
+│  │                                                          │  │
+│  │  31     1      2      3      4      5      6            │  │
+│  │                                                          │  │
+│  │  Click any class to view details and book               │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+│      OR                                                         │
+│                                                                  │
+│  LIST VIEW                                     [Show More ▼]    │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │ TODAY - Monday, March 25                                 │  │
+│  │ ───────────────────────────────────────────────────────│  │
+│  │                                                          │  │
+│  │ ┌────────────────────────────────────────────────────┐  │  │
+│  │ │ 🧘 YOGA CLASS              9:00 AM - 10:00 AM      │  │  │
+│  │ │ ──────────────────────────────────────────────────│  │  │
+│  │ │ 📍 Studio A                 👤 Sarah Johnson      │  │  │
+│  │ │ 👥 8/15 spots filled         ⭐ Beginner-Int      │  │  │
+│  │ │                                                    │  │  │
+│  │ │ Description: Gentle flow focusing on flexibility  │  │  │
+│  │ │ and relaxation. Perfect for stress relief.        │  │  │
+│  │ │                                                    │  │  │
+│  │ │ [View Details] [Book Now]                         │  │  │
+│  │ └────────────────────────────────────────────────────┘  │  │
+│  │                                                          │  │
+│  │ ┌────────────────────────────────────────────────────┐  │  │
+│  │ │ 🏃 HIIT TRAINING           6:00 PM - 7:00 PM      │  │  │
+│  │ │ ──────────────────────────────────────────────────│  │  │
+│  │ │ 📍 Main Studio              👤 Mike Chen          │  │  │
+│  │ │ 👥 12/20 spots filled        ⭐ Intermediate       │  │  │
+│  │ │                                                    │  │  │
+│  │ │ Description: High-intensity interval training     │  │  │
+│  │ │ for maximum calorie burn and cardio fitness.     │  │  │
+│  │ │                                                    │  │  │
+│  │ │ [View Details] [Book Now]                         │  │  │
+│  │ └────────────────────────────────────────────────────┘  │  │
+│  │                                                          │  │
+│  │ TOMORROW - Tuesday, March 26                             │  │
+│  │ ───────────────────────────────────────────────────────│  │
+│  │                                                          │  │
+│  │ ┌────────────────────────────────────────────────────┐  │  │
+│  │ │ 🚴 SPIN CLASS              7:00 AM - 8:00 AM      │  │  │
+│  │ │ ──────────────────────────────────────────────────│  │  │
+│  │ │ 📍 Cycle Room               👤 Alex Rivera        │  │  │
+│  │ │ 👥 20/20 FULL 🔴            ⭐ All Levels          │  │  │
+│  │ │                                                    │  │  │
+│  │ │ Description: Energetic cycling with music.        │  │  │
+│  │ │                                                    │  │  │
+│  │ │ [View Details] [Join Waitlist]                    │  │  │
+│  │ └────────────────────────────────────────────────────┘  │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Key Features
+
+#### A. **Class Card Details**
+```
+Each Class Shows:
+├── Class Type Icon: 🧘 Yoga, 🏃 HIIT, 🚴 Spin, 💪 Strength
+├── Class Name: Bold, prominent
+├── Time: Start - End time
+├── Location: Room/Studio
+├── Trainer: Name + photo (small)
+├── Capacity: X/Y spots filled
+├── Level: Beginner, Intermediate, Advanced, All Levels
+├── Duration: Auto-calculated from times
+├── Description: Short 1-2 sentence overview
+└── Action Buttons:
+    ├── [View Details] → Opens detailed modal
+    └── [Book Now] → Booking confirmation
+```
+
+#### B. **Class Status Indicators**
+```
+Available:
+├── Green indicator
+├── Shows spots remaining
+└── [Book Now] button active
+
+Almost Full (< 3 spots):
+├── Yellow indicator
+├── "Only 2 spots left!" message
+└── Urgent [Book Now] styling
+
+Full:
+├── Red indicator: 🔴 FULL
+├── No book button
+└── [Join Waitlist] option
+
+Already Booked:
+├── Green checkmark: ✅ BOOKED
+├── Shows booking details
+└── [Cancel Booking] option
+```
+
+#### C. **Class Details Modal**
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Yoga Class Details                                    [✕]  │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  🧘 YOGA CLASS                                              │
+│  Monday, March 25 • 9:00 AM - 10:00 AM                      │
+│                                                              │
+│  ────────────────────────────────────────────────────────  │
+│                                                              │
+│  📍 Location:        Studio A                               │
+│  ⏱️ Duration:         60 minutes                            │
+│  👥 Capacity:         8/15 spots filled                     │
+│  ⭐ Level:           Beginner to Intermediate               │
+│  🎯 Focus:           Flexibility, Stress Relief             │
+│                                                              │
+│  ────────────────────────────────────────────────────────  │
+│                                                              │
+│  👤 Instructor: Sarah Johnson                               │
+│  ┌──────────┐                                              │
+│  │  Photo   │  Specialization: Yoga, Pilates               │
+│  │          │  Experience: 8 years                          │
+│  └──────────┘  Rating: ⭐⭐⭐⭐⭐ (4.8/5)                     │
+│                                                              │
+│  [View Trainer Profile]                                     │
+│                                                              │
+│  ────────────────────────────────────────────────────────  │
+│                                                              │
+│  📝 Class Description:                                      │
+│  ─────────────────────────────────────────────────────────│
+│  Gentle flow yoga focusing on flexibility and relaxation.  │
+│  Perfect for stress relief and improving posture. Suitable │
+│  for beginners and those looking for a mindful practice.   │
+│                                                              │
+│  What to Bring:                                             │
+│  • Yoga mat (provided if needed)                           │
+│  • Water bottle                                             │
+│  • Towel                                                    │
+│                                                              │
+│  ────────────────────────────────────────────────────────  │
+│                                                              │
+│  📊 Calories Burned (avg): 200-300 kcal                     │
+│  🎵 Music: Ambient, Relaxing                                │
+│  ❄️ Room Temp: Climate-controlled                          │
+│                                                              │
+│  ────────────────────────────────────────────────────────  │
+│                                                              │
+│  This is a recurring class:                                 │
+│  🔁 Every Monday, Wednesday, Friday at 9:00 AM              │
+│                                                              │
+│  [Book Just This Class] [Book Recurring (All 3)]           │
+│                                                              │
+│                         [Cancel]  [Book Now]                │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### D. **Filter Options**
+```
+Class Type:
+├── All Types
+├── Yoga
+├── HIIT
+├── Spin/Cycling
+├── Strength Training
+├── Pilates
+├── Zumba/Dance
+├── Boxing
+└── Stretching/Recovery
+
+Trainer:
+├── All Trainers
+├── (List of trainer names)
+
+Day:
+├── Today
+├── Tomorrow
+├── This Week
+├── Next Week
+├── Monday
+├── Tuesday
+... (all days)
+
+Time:
+├── All Times
+├── Early Morning (5AM-8AM)
+├── Morning (8AM-12PM)
+├── Afternoon (12PM-5PM)
+├── Evening (5PM-9PM)
+└── Night (9PM-11PM)
+
+Level:
+├── All Levels
+├── Beginner
+├── Intermediate
+├── Advanced
+
+Availability:
+├── All Classes
+├── Available Only
+└── My Bookings
+```
+
+---
+
+## 5. 📋 MY BOOKINGS
+
+### Purpose
+View all booked classes, manage bookings, see attendance history.
+
+### Layout
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  My Bookings                                                     │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  TABS                                                           │
+│  [Upcoming] [Past] [Cancelled]                                  │
+│                                                                  │
+├─────────────────────────────────────────────────────────────────┤
+│  UPCOMING BOOKINGS (3)                          [Export to Cal] │
+│                                                                  │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │ TODAY - Monday, March 25                                 │  │
+│  │ ───────────────────────────────────────────────────────│  │
+│  │                                                          │  │
+│  │ ┌────────────────────────────────────────────────────┐  │  │
+│  │ │ 🧘 YOGA CLASS                                      │  │  │
+│  │ │ ──────────────────────────────────────────────────│  │  │
+│  │ │ Time:        9:00 AM - 10:00 AM                   │  │  │
+│  │ │ Location:    Studio A                             │  │  │
+│  │ │ Trainer:     Sarah Johnson                        │  │  │
+│  │ │ Booked:      March 20, 2024                       │  │  │
+│  │ │ Booking ID:  #BK12345                             │  │  │
+│  │ │                                                    │  │  │
+│  │ │ ⏰ Starts in: 2 hours 15 minutes                  │  │  │
+│  │ │                                                    │  │  │
+│  │ │ [Add to Calendar] [Get Directions] [Cancel]      │  │  │
+│  │ └────────────────────────────────────────────────────┘  │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │ TOMORROW - Tuesday, March 26                             │  │
+│  │ ───────────────────────────────────────────────────────│  │
+│  │                                                          │  │
+│  │ ┌────────────────────────────────────────────────────┐  │  │
+│  │ │ 🏃 HIIT TRAINING                                   │  │  │
+│  │ │ ──────────────────────────────────────────────────│  │  │
+│  │ │ Time:        6:00 PM - 7:00 PM                    │  │  │
+│  │ │ Location:    Main Studio                          │  │  │
+│  │ │ Trainer:     Mike Chen                            │  │  │
+│  │ │ Booked:      March 21, 2024                       │  │  │
+│  │ │                                                    │  │  │
+│  │ │ 📧 Reminder sent to your email                    │  │  │
+│  │ │                                                    │  │  │
+│  │ │ [Add to Calendar] [Get Directions] [Cancel]      │  │  │
+│  │ └────────────────────────────────────────────────────┘  │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │ FRIDAY, MARCH 29                                         │  │
+│  │ ───────────────────────────────────────────────────────│  │
+│  │                                                          │  │
+│  │ ┌────────────────────────────────────────────────────┐  │  │
+│  │ │ 💪 STRENGTH TRAINING                               │  │  │
+│  │ │ ──────────────────────────────────────────────────│  │  │
+│  │ │ Time:        10:00 AM - 11:00 AM                  │  │  │
+│  │ │ Location:    Weight Room                          │  │  │
+│  │ │ Trainer:     John Smith (Your PT)                 │  │  │
+│  │ │ Booked:      March 18, 2024                       │  │  │
+│  │ │                                                    │  │  │
+│  │ │ 🎯 Personal Training Session (2/4 used)           │  │  │
+│  │ │                                                    │  │  │
+│  │ │ [Add to Calendar] [Reschedule] [Cancel]          │  │  │
+│  │ └────────────────────────────────────────────────────┘  │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+│  ────────────────────────────────────────────────────────────  │
+│                                                                  │
+│  📊 Booking Summary This Month:                                │
+│  • Total Bookings: 18                                          │
+│  • Attended: 15                                                │
+│  • Cancelled: 2                                                │
+│  • No-shows: 1                                                 │
+│  • Attendance Rate: 83%                                        │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Key Features
+
+#### A. **Cancel Booking Confirmation**
+```
+┌──────────────────────────────────────┐
+│  Cancel Booking?                     │
+│  ─────────────────────────────────  │
+│                                      │
+│  Are you sure you want to cancel:    │
+│                                      │
+│  🧘 Yoga Class                       │
+│  Monday, March 25 at 9:00 AM        │
+│                                      │
+│  ⚠️ Cancellation Policy:             │
+│  • Free cancellation up to 2 hours  │
+│    before class starts               │
+│  • Late cancellations may be        │
+│    charged to your account           │
+│                                      │
+│  Reason (optional):                  │
+│  [Dropdown: Schedule conflict ▼]    │
+│                                      │
+│  [Back to Bookings]  [Confirm Cancel]│
+└──────────────────────────────────────┘
+```
+
+#### B. **Past Bookings Tab**
+```
+Shows:
+├── All attended classes
+├── Attendance confirmation: ✅ Attended / ❌ No-show
+├── Trainer rating prompt (if not rated)
+├── Class feedback option
+└── Statistics and charts
+
+Each Past Class:
+┌────────────────────────────────────────┐
+│ 🧘 Yoga Class                          │
+│ Monday, March 18 • 9:00 AM             │
+│ ✅ Attended                            │
+│                                        │
+│ Rate this class:                       │
+│ ⭐⭐⭐⭐⭐                               │
+│                                        │
+│ [Leave Feedback] [Book Again]         │
+└────────────────────────────────────────┘
+```
+
+#### C. **Attendance Statistics**
+```
+Visual Chart:
+┌────────────────────────────────────────┐
+│  Attendance Trend (Last 3 Months)     │
+│  ─────────────────────────────────── │
+│                                        │
+│  20 ┤     ╭──╮                         │
+│  15 ┤  ╭──╯  ╰──╮                      │
+│  10 ┤──╯        ╰──                    │
+│   5 ┤                                  │
+│   0 └──────
+
+────────────────────────────────│
+│        Jan    Feb    Mar       │
+└────────────────────────────────┘
+
+Monthly Breakdown:
+├── Classes per month
+├── Most attended class type
+├── Favorite trainer
+├── Busiest day/time
+└── Comparison to previous months
+```
+
+---
+
+## 6. 🏋️ MY TRAINER
+
+### Purpose
+View assigned trainer details, upcoming PT sessions, communication.
+
+### Layout
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  My Trainer                                                      │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  TRAINER PROFILE CARD                                           │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  ┌────────────────┐                                       │  │
+│  │  │                │   JOHN SMITH                          │  │
+│  │  │   Trainer      │   Certified Personal Trainer          │  │
+│  │  │   Photo        │   ⭐⭐⭐⭐⭐ 4.9/5.0 (127 reviews)      │  │
+│  │  │   (Large)      │                                       │  │
+│  │  │                │   Member since: January 2020          │  │
+│  │  └────────────────┘   Assigned: January 15, 2024         │  │
+│  │                                                           │  │
+│  │  ──────────────────────────────────────────────────────│  │
+│  │                                                           │  │
+│  │  📋 Specializations:                                     │  │
+│  │  • Weight Training & Muscle Building                     │  │
+│  │  • Sports Performance                                    │  │
+│  │  • Nutrition & Meal Planning                             │  │
+│  │  • Rehabilitation & Injury Prevention                    │  │
+│  │                                                           │  │
+│  │  🎓 Certifications:                                      │  │
+│  │  • NASM Certified Personal Trainer                       │  │
+│  │  • Precision Nutrition Coach                             │  │
+│  │  • Functional Movement Screen (FMS)                      │  │
+│  │                                                           │  │
+│  │  📞 Contact:                                             │  │
+│  │  • Email: john.smith@fitnesszone.com                    │  │
+│  │  • Phone: +1 (555) 234-5678                             │  │
+│  │  • Office Hours: Mon-Fri 8AM-6PM                        │  │
+│  │                                                           │  │
+│  │  [💬 Send Message] [📅 Request Session] [⭐ Leave Review]│  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+├─────────────────────────────────────────────────────────────────┤
+│  UPCOMING PT SESSIONS                            [Schedule More]│
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │ NEXT SESSION                                             │  │
+│  │ ─────────────────────────────────────────────────────── │  │
+│  │                                                          │  │
+│  │ 📅 Friday, March 29, 2024                               │  │
+│  │ ⏰ 10:00 AM - 11:00 AM (60 minutes)                     │  │
+│  │ 📍 Weight Room                                          │  │
+│  │                                                          │  │
+│  │ 🎯 Focus: Upper Body Strength                           │  │
+│  │                                                          │  │
+│  │ 📝 Trainer's Notes:                                     │  │
+│  │ "Let's focus on increasing your bench press. Bring     │  │
+│  │  your workout journal. We'll also work on form."       │  │
+│  │                                                          │  │
+│  │ [Add to Calendar] [Reschedule] [Cancel]                │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │ SCHEDULED SESSIONS THIS MONTH                            │  │
+│  │ ─────────────────────────────────────────────────────── │  │
+│  │                                                          │  │
+│  │ ✅ March 15 - Full Body Assessment - Completed           │  │
+│  │ ✅ March 22 - Lower Body Strength - Completed            │  │
+│  │ 📅 March 29 - Upper Body Strength - Upcoming            │  │
+│  │ 📅 April 5 - Cardio & Core - Scheduled                  │  │
+│  │                                                          │  │
+│  │ Sessions Used: 2 of 4 this month                        │  │
+│  │ Next session resets: April 20, 2024                     │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+├─────────────────────────────────────────────────────────────────┤
+│  YOUR FITNESS PLAN                                [View Full] │  │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │ 🎯 Current Goal: Build Muscle & Lose Fat                │  │
+│  │ 📅 Plan Duration: 12 weeks (Week 8 of 12)               │  │
+│  │                                                          │  │
+│  │ Weekly Training Schedule:                                │  │
+│  │ • Monday: Upper Body (with trainer)                     │  │
+│  │ • Tuesday: Cardio + Yoga Class                          │  │
+│  │ • Wednesday: Rest or Light Activity                     │  │
+│  │ • Thursday: Lower Body (with trainer)                   │  │
+│  │ • Friday: Full Body Circuit                             │  │
+│  │ • Saturday: Active Recovery + Stretching                │  │
+│  │ • Sunday: Rest                                          │  │
+│  │                                                          │  │
+│  │ 📊 Progress: 67% complete ██████████░░░░                 │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+├─────────────────────────────────────────────────────────────────┤
+│  TRAINER'S PROGRESS NOTES                        [View All (12)]│
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │ March 22, 2024                                           │  │
+│  │ ─────────────────────────────────────────────────────── │  │
+│  │ Great progress on squats! Increased weight from 135lbs  │  │
+│  │ to 155lbs with good form. Continue focusing on depth.   │  │
+│  │ Next session: Work on deadlift technique.               │  │
+│  │                                                          │  │
+│  │ Weight: 78kg | Body Fat: 18% | Measurements updated     │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │ March 15, 2024                                           │  │
+│  │ ─────────────────────────────────────────────────────── │  │
+│  │ Completed initial assessment. Current fitness level:    │  │
+│  │ Intermediate. Starting 12-week muscle building program. │  │
+│  │ Focus areas: Upper body strength, core stability.       │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+├─────────────────────────────────────────────────────────────────┤
+│  MESSAGES WITH TRAINER                          [View All (8)] │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │ ┌────────────────────────────────────────────────────┐  │  │
+│  │ │ You: Can we focus on shoulders next session?      │  │  │
+│  │ │ Yesterday 2:30 PM                                  │  │  │
+│  │ └────────────────────────────────────────────────────┘  │  │
+│  │                                                          │  │
+│  │ ┌────────────────────────────────────────────────────┐  │  │
+│  │ │ John: Absolutely! I'll prepare a shoulder-focused │  │  │
+│  │ │ workout. Bring bands if you have them.            │  │  │
+│  │ │ Yesterday 3:15 PM                                  │  │  │
+│  │ └────────────────────────────────────────────────────┘  │  │
+│  │                                                          │  │
+│  │ [Type your message...                        ] [Send]    │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Key Features
+
+#### A. **Request PT Session**
+```
+┌──────────────────────────────────────┐
+│  Request Training Session            │
+│  ─────────────────────────────────  │
+│                                      │
+│  Preferred Date:                     │
+│  [📅 Select Date            ]        │
+│                                      │
+│  Preferred Time:                     │
+│  [○ Morning (8-12)]                  │
+│  [○ Afternoon (12-5)]                │
+│  [○ Evening (5-9)]                   │
+│                                      │
+│  Session Focus:                      │
+│  [Dropdown: Select focus area ▼]    │
+│  • Upper Body                        │
+│  • Lower Body                        │
+│  • Full Body                         │
+│  • Cardio Training                   │
+│  • Technique Review                  │
+│  • Custom                            │
+│                                      │
+│  Special Requests/Notes:             │
+│  [Textarea                      ]    │
+│                                      │
+│  Available Sessions: 2 of 4          │
+│                                      │
+│     [Cancel]  [Send Request]         │
+└──────────────────────────────────────┘
+```
+
+#### B. **Leave Review for Trainer**
+```
+┌──────────────────────────────────────┐
+│  Rate Your Trainer                   │
+│  ─────────────────────────────────  │
+│                                      │
+│  Overall Rating:                     │
+│  ☆☆☆☆☆ (Click to rate)              │
+│                                      │
+│  Knowledge & Expertise:              │
+│  ☆☆☆☆☆                               │
+│                                      │
+│  Communication:                      │
+│  ☆☆☆☆☆                               │
+│                                      │
+│  Motivation & Support:               │
+│  ☆☆☆☆☆                               │
+│                                      │
+│  Results Achieved:                   │
+│  ☆☆☆☆☆                               │
+│                                      │
+│  Your Review:                        │
+│  [Textarea: Share your experience...]│
+│                                      │
+│  [☐] Post anonymously                │
+│                                      │
+│     [Cancel]  [Submit Review]        │
+└──────────────────────────────────────┘
+```
+
+---
+
+## 7. 📊 MY PROGRESS
+
+### Purpose
+Track fitness progress, log workouts, view measurements, see achievements.
+
+### Layout
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  My Progress                                    [Export Data]    │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  PROGRESS OVERVIEW                              [Log Entry]     │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  Current Status                                          │  │
+│  │  ──────────────────────────────────────────────────────│  │
+│  │                                                          │  │
+│  │  Weight: 78 kg      ↓ -7 kg from start                  │  │
+│  │  Body Fat: 18%      ↓ -5% from start                    │  │
+│  │  Muscle Mass: 62kg  ↑ +3 kg from start                  │  │
+│  │                                                          │  │
+│  │  Last Updated: Today                                     │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+├─────────────────────────────────────────────────────────────────┤
+│  VISUAL PROGRESS (Tabs)                                         │
+│  [Weight] [Body Fat] [Measurements] [Strength] [Cardio]         │
+│                                                                  │
+│  WEIGHT PROGRESS                                [3 months ▼]    │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │                                                          │  │
+│  │  85kg ┤                                                  │  │
+│  │       ┤╲                                                 │  │
+│  │  82kg ┤ ╲    Goal: 75kg                                 │  │
+│  │       ┤  ╲  ╱╲                                           │  │
+│  │  79kg ┤   ╲╱  ╲╱╲                                        │  │
+│  │       ┤        ╲                                         │  │
+│  │  76kg ┤         ╲────▶ Current: 78kg                    │  │
+│  │       ┤              ╲                                   │  │
+│  │  73kg ┤               ╰──────                            │  │
+│  │       └────────────────────────────────────────────────│  │
+│  │        Jan    Feb    Mar    Apr    Target               │  │
+│  │                                                          │  │
+│  │  Progress: ██████████████░░░░░░ 70% to goal              │  │
+│  │  Rate: -0.5 kg/week (on track)                          │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+├─────────────────────────────────────────────────────────────────┤
+│  GOALS & MILESTONES                             [Set New Goal]  │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  Active Goals:                                           │  │
+│  │  ─────────────────────────────────────────────────────│  │
+│  │                                                          │  │
+│  │  🎯 Reach 75kg                                          │  │
+│  │     ████████████████░░░░░░ 70% complete                 │  │
+│  │     3 kg to go • Expected: April 30                     │  │
+│  │                                                          │  │
+│  │  🎯 Bench Press 100kg                                   │  │
+│  │     ██████████████░░░░░░░░ 60% complete                 │  │
+│  │     Currently: 90kg • Target: 100kg                     │  │
+│  │                                                          │  │
+│  │  🎯 Complete 50 Classes                                 │  │
+│  │     ████████████████████████░░ 90% complete             │  │
+│  │     45/50 classes • 5 more to go!                       │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  Completed Milestones:                                   │  │
+│  │  ─────────────────────────────────────────────────────│  │
+│  │                                                          │  │
+│  │  ✅ Lost 5kg - February 28                              │  │
+│  │  ✅ 30-day workout streak - March 10                    │  │
+│  │  ✅ First 10km run - March 15                           │  │
+│  │  ✅ 25 classes completed - March 20                     │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+├─────────────────────────────────────────────────────────────────┤
+│  MEASUREMENTS TRACKER                                           │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  Body Measurements (Last Updated: Today)                 │  │
+│  │  ──────────────────────────────────────────────────────│  │
+│  │                                                          │  │
+│  │  Chest:    105 cm  (Start: 110 cm)  ↓ -5 cm             │  │
+│  │  Waist:    85 cm   (Start: 95 cm)   ↓ -10 cm            │  │
+│  │  Hips:     98 cm   (Start: 100 cm)  ↓ -2 cm             │  │
+│  │  Thighs:   58 cm   (Start: 60 cm)   ↓ -2 cm             │  │
+│  │  Arms:     36 cm   (Start: 34 cm)   ↑ +2 cm             │  │
+│  │                                                          │  │
+│  │  [View Measurement History] [Log New Measurements]      │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+├─────────────────────────────────────────────────────────────────┤
+│  STRENGTH PROGRESS                                              │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  Personal Records:                                       │  │
+│  │  ──────────────────────────────────────────────────────│  │
+│  │                                                          │  │
+│  │  Bench Press:    90 kg  (↑ +15 kg from start)           │  │
+│  │  Squat:         120 kg  (↑ +25 kg from start)           │  │
+│  │  Deadlift:      140 kg  (↑ +30 kg from start)           │  │
+│  │  Shoulder Press: 50 kg  (↑ +10 kg from start)           │  │
+│  │                                                          │  │
+│  │  [View All PRs] [Log Workout]                           │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+├─────────────────────────────────────────────────────────────────┤
+│  WORKOUT HISTORY                                [View Calendar] │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  This Week's Activity:                                   │  │
+│  │  ──────────────────────────────────────────────────────│  │
+│  │                                                          │  │
+│  │  Mon: 🏋️ Upper Body Strength (60 min, 350 cal)          │  │
+│  │  Tue: 🧘 Yoga Class (60 min, 200 cal)                   │  │
+│  │  Wed: Rest Day                                          │  │
+│  │  Thu: 🏃 Cardio + Core (45 min, 400 cal)                │  │
+│  │  Fri: 💪 Full Body (Today, 10:00 AM)                    │  │
+│  │  Sat: Planned - Active Recovery                         │  │
+│  │  Sun: Rest Day                                          │  │
+│  │                                                          │  │
+│  │  Week Total: 4 workouts, 235 mins, 950 calories         │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+├─────────────────────────────────────────────────────────────────┤
+│  TRAINER'S NOTES FOR YOU                        [View All (12)] │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  March 22, 2024 - John Smith                            │  │
+│  │  ──────────────────────────────────────────────────────│  │
+│  │  Excellent form on squats today! Weight increased from  │  │
+│  │  135lbs to 155lbs. Continue working on depth and core   │  │
+│  │  engagement. Next: deadlift technique refinement.       │  │
+│  │                                                          │  │
+│  │  Recommended: Add 10 mins stretching post-workout.      │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+├─────────────────────────────────────────────────────────────────┤
+│  PHOTOS & COMPARISONS                           [Add Photos]    │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  Progress Photos:                                        │  │
+│  │  ──────────────────────────────────────────────────────│  │
+│  │                                                          │  │
+│  │  [Photo] [Photo] [Photo] [Photo] [Photo]               │  │
+│  │  Jan 1   Feb 1   Mar 1   Today   Goal                   │  │
+│  │  85kg    82kg    79kg    78kg    75kg                   │  │
+│  │                                                          │  │
+│  │  [View Before/After Comparison]                         │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Key Features
+
+#### A. **Log Progress Entry**
+```
+┌──────────────────────────────────────┐
+│  Log Progress Entry                  │
+│  ─────────────────────────────────  │
+│                                      │
+│  Date: [📅 Today            ]        │
+│                                      │
+│  Weight: [78.5 kg           ]        │
+│  Body Fat %: [18.2 %        ]        │
+│                                      │
+│  Measurements (optional):            │
+│  Chest: [105 cm]  Waist: [85 cm]    │
+│  Arms:  [36 cm]   Thighs: [58 cm]   │
+│                                      │
+│  Photos (optional):                  │
+│  [📷 Add Front View]                 │
+│  [📷 Add Side View]                  │
+│  [📷 Add Back View]                  │
+│                                      │
+│  Notes:                              │
+│  [Textarea: How do you feel?    ]    │
+│                                      │
+│     [Cancel]  [Save Entry]           │
+└──────────────────────────────────────┘
+```
+
+#### B. **Set New Goal**
+```
+┌──────────────────────────────────────┐
+│  Set New Goal                        │
+│  ─────────────────────────────────  │
+│                                      │
+│  Goal Type:                          │
+│  [○ Weight Loss/Gain]                │
+│  [○ Strength Milestone]              │
+│  [○ Cardio Achievement]              │
+│  [○ Class Attendance]                │
+│  [○ Custom Goal]                     │
+│                                      │
+│  Goal Description:                   │
+│  [Bench press 100kg             ]    │
+│                                      │
+│  Current Value:                      │
+│  [90 kg                         ]    │
+│                                      │
+│  Target Value:                       │
+│  [100 kg                        ]    │
+│                                      │
+│  Target Date:                        │
+│  [📅 April 30, 2024         ]        │
+│                                      │
+│  [☐] Make this goal public           │
+│  [☐] Share with trainer              │
+│                                      │
+│     [Cancel]  [Create Goal]          │
+└──────────────────────────────────────┘
+```
+
+---
+
+## 8. 💰 PAYMENTS & BILLING
+
+### Purpose
+View payment history, manage payment methods, handle invoices.
+
+### Layout
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Payments & Billing                                             │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  NEXT PAYMENT DUE                                               │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  ⚠️ Payment Due: April 20, 2024 (20 days)               │  │
+│  │  ──────────────────────────────────────────────────────│  │
+│  │                                                          │  │
+│  │  Membership Fee: $99.99                                 │  │
+│  │  Payment Method: Visa ****4242                          │  │
+│  │  Auto-Pay: ✅ Enabled                                   │  │
+│  │                                                          │  │
+│  │  [Pay Now] [Update Payment Method]                      │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+├─────────────────────────────────────────────────────────────────┤
+│  PAYMENT METHODS                                [Add New Card]  │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  💳 Visa ending in 4242                                  │  │
+│  │  Expires: 12/2025                                        │  │
+│  │  ✅ Default • Auto-pay enabled                           │  │
+│  │  [Edit] [Remove]                                         │  │
+│  │  ──────────────────────────────────────────────────────│  │
+│  │  💳 Mastercard ending in 8888                            │  │
+│  │  Expires: 09/2024 ⚠️ Expires soon!                      │  │
+│  │  [Set as Default] [Edit] [Remove]                       │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+├─────────────────────────────────────────────────────────────────┤
+│  PAYMENT HISTORY                    [Filter ▼] [Export CSV]    │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │                                                          │  │
+│  │  Date       Description       Amount    Status   Actions││
+│  │  ─────────────────────────────────────────────────────│  │
+│  │  Mar 20 '24 Monthly Fee       $99.99   ✅ Paid   [📄][↓]││
+│  │  Feb 20 '24 Monthly Fee       $99.99   ✅ Paid   [📄][↓]││
+│  │  Jan 20 '24 Monthly Fee       $99.99   ✅ Paid   [📄][↓]││
+│  │  Jan 15 '24 PT Session Add-on $50.00   ✅ Paid   [📄][↓]││
+│  │  Jan 01 '24 Signup Fee        $50.00   ✅ Paid   [📄][↓]││
+│  │  Jan 01 '24 First Month       $99.99   ✅ Paid   [📄][↓]││
+│  │                                                          │  │
+│  │  [Load More]                                             │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+│  Total Paid (2024): $449.96                                    │
+│                                                                  │
+├─────────────────────────────────────────────────────────────────┤
+│  INVOICES & RECEIPTS                            [Download All]  │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  March 2024 Statement                          [📥 PDF]  │  │
+│  │  February 2024 Statement                       [📥 PDF]  │  │
+│  │  January 2024 Statement                        [📥 PDF]  │  │
+│  │                                                          │  │
+│  │  [View All Statements]                                   │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+├─────────────────────────────────────────────────────────────────┤
+│  BILLING PREFERENCES                                            │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  Auto-Pay:          [✅ Enabled]                         │  │
+│  │  Email Receipts:    [✅ Enabled]                         │  │
+│  │  Payment Reminders: [✅ 7 days before]                   │  │
+│  │  Billing Email:     sarah.wilson@email.com               │  │
+│  │                                                          │  │
+│  │  [Update Preferences]                                    │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Key Features
+
+#### A. **Add Payment Method**
+```
+┌──────────────────────────────────────┐
+│  Add Payment Method                  │
+│  ─────────────────────────────────  │
+│                                      │
+│  Card Number:                        │
+│  [1234 5678 9012 3456        ]      │
+│                                      │
+│  Cardholder Name:                    │
+│  [Sarah Wilson               ]      │
+│                                      │
+│  Expiry Date:        CVV:            │
+│  [12 / 25 ]         [123]           │
+│                                      │
+│  Billing Address:                    │
+│  [Same as profile address ▼]        │
+│                                      │
+│  [☑] Set as default payment method   │
+│  [☑] Enable auto-pay                 │
+│                                      │
+│  🔒 Your payment info is encrypted  │
+│                                      │
+│     [Cancel]  [Add Card]             │
+└──────────────────────────────────────┘
+```
+
+---
+
+## 9. 🔔 NOTIFICATIONS
+
+### Purpose
+View all notifications, manage notification preferences.
+
+### Layout
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Notifications                    [Mark All Read] [⚙️ Settings]  │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  FILTER: [All] [Unread (3)] [Classes] [Payments] [Gym Updates] │
+│                                                                  │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  🔵 UNREAD                                               │  │
+│  │  ──────────────────────────────────────────────────────│  │
+│  │  📅 Class Reminder                                      │  │
+│  │  Your Yoga Class starts in 2 hours                      │  │
+│  │  Today at 9:00 AM • Studio A                            │  │
+│  │  2 hours ago                           [Mark as Read] [✕]│  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  🔵 UNREAD                                               │  │
+│  │  ──────────────────────────────────────────────────────│  │
+│  │  💳 Payment Reminder                                    │  │
+│  │  Your membership renews in 7 days ($99.99)             │  │
+│  │  Payment due: April 20, 2024                            │  │
+│  │  1 day ago                    [Pay Now] [Mark Read] [✕]│  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  🔵 UNREAD                                               │  │
+│  │  ──────────────────────────────────────────────────────│  │
+│  │  🏋️ New Message from Trainer                            │  │
+│  │  John Smith: "Great progress this week!"               │  │
+│  │  2 days ago                   [Reply] [Mark Read] [✕]  │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  ✅ READ                                                 │  │
+│  │  ──────────────────────────────────────────────────────│  │
+│  │  ✅ Booking Confirmed                                   │  │
+│  │  You're booked for HIIT Training on March 26           │  │
+│  │  3 days ago                            [View] [Delete]  │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  ✅ READ                                                 │  │
+│  │  ──────────────────────────────────────────────────────│  │
+│  │  🎉 Milestone Achieved!                                 │  │
+│  │  You've attended 25 classes! Keep it up!               │  │
+│  │  5 days ago                            [View] [Delete]  │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  ✅ READ                                                 │  │
+│  │  ──────────────────────────────────────────────────────│  │
+│  │  🔔 Schedule Change                                     │  │
+│  │  Yoga Class time changed from 9AM to 10AM on Mar 30    │  │
+│  │  1 week ago                            [View] [Delete]  │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+│  [Load More Notifications]                                      │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Notification Settings
+
+```
+┌──────────────────────────────────────┐
+│  Notification Preferences            │
+│  ─────────────────────────────────  │
+│                                      │
+│  Class Reminders:                    │
+│  [✅] 2 hours before                 │
+│  [✅] 30 minutes before              │
+│  [☐] At start time                   │
+│                                      │
+│  Membership:                         │
+│  [✅] Payment reminders (7 days)     │
+│  [✅] Membership expiring (14 days)  │
+│  [✅] Renewal confirmations          │
+│                                      │
+│  Trainer Messages:                   │
+│  [✅] New messages                   │
+│  [✅] Session reminders              │
+│  [✅] Progress notes added           │
+│                                      │
+│  Gym Updates:                        │
+│  [✅] New classes available          │
+│  [✅] Schedule changes               │
+│  [☐] Promotions & events             │
+│                                      │
+│  Delivery Methods:                   │
+│  [✅] In-app notifications           │
+│  [✅] Email                           │
+│  [☐] SMS (premium)                   │
+│                                      │
+│  Quiet Hours:                        │
+│  [✅] Enable (10 PM - 7 AM)          │
+│                                      │
+│     [Cancel]  [Save Preferences]     │
+└──────────────────────────────────────┘
+```
+
+---
+
+## 10. ⚙️ SETTINGS
+
+### Purpose
+Account settings, preferences, privacy, support.
+
+### Layout
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Settings                                                        │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  ACCOUNT                                                        │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  Email:              sarah.wilson@email.com              │  │
+│  │  Phone:              +1 (555) 123-4567                   │  │
+│  │  Member ID:          #12345                              │  │
+│  │  Member Since:       January 2024                        │  │
+│  │                                                          │  │
+│  │  [Edit Profile] [Change Password] [Change Email]        │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+│  PREFERENCES                                                    │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  Language:           [English (US) ▼]                    │  │
+│  │  Timezone:           [EST (UTC-5) ▼]                     │  │
+│  │  Date Format:        [MM/DD/YYYY ▼]                      │  │
+│  │  Theme:              [○ Light] [● Dark] [○ Auto]         │  │
+│  │  Units:              [○ Metric] [● Imperial]             │  │
+│  │                                                          │  │
+│  │  [Save Preferences]                                      │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+│  PRIVACY & SECURITY                                             │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  Two-Factor Auth:    [✅ Enabled]         [Manage]       │  │
+│  │  Login History:      Last: Today 8:30 AM  [View]        │  │
+│  │  Active Sessions:    2 devices             [View All]    │  │
+│  │                                                          │  │
+│  │  [☑] Make profile visible to other members              │  │
+│  │  [☑] Allow trainer to see my progress                   │  │
+│  │  [☐] Share achievements publicly                         │  │
+│  │                                                          │  │
+│  │  [Privacy Policy] [Terms of Service]                    │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+│  CONNECTED APPS                                                 │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  📱 Apple Health     ✅ Connected    [Disconnect]        │  │
+│  │  📊 Google Fit       ✅ Connected    [Disconnect]        │  │
+│  │  ⌚ Fitbit           ❌ Not connected [Connect]          │  │
+│  │  🏃 Strava           ❌ Not connected [Connect]          │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+│  HELP & SUPPORT                                                 │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  [❓ FAQ & Help Center]                                  │  │
+│  │  [💬 Contact Support]                                    │  │
+│  │  [📞 Call Front Desk: (555) 100-2000]                   │  │
+│  │  [📧 Email: support@fitnesszone.com]                    │  │
+│  │  [🐛 Report a Bug]                                       │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+│  ABOUT                                                          │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  App Version:        2.4.1                               │  │
+│  │  [What's New] [Rate App] [Share Feedback]               │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+│  DANGER ZONE                                                    │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  [⏸️ Freeze Membership]                                  │  │
+│  │  [❌ Cancel Membership]                                  │  │
+│  │  [🗑️ Delete Account]                                     │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+│  [🚪 Logout]                                                    │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## MOBILE RESPONSIVE CONSIDERATIONS
+
+### Key Points for Mobile View
+
+```
+Desktop (> 1024px):
+├── Sidebar always visible
+├── Multi-column layouts
+├── Larger cards and images
+└── More info per screen
+
+Tablet (768px - 1024px):
+├── Collapsible sidebar
+├── 2-column layouts mostly
+├── Slightly smaller cards
+└── Maintained functionality
+
+Mobile (< 768px):
+├── Hamburger menu for navigation
+├── Single column layout
+├── Stacked cards
+├── Bottom navigation bar
+├── Larger touch targets (48px min)
+├── Simplified charts
+└── Mobile-optimized modals
+```
+
+### Mobile Navigation Bottom Bar
+
+```
+┌─────────────────────────────────────┐
+│                                      │
+│         Main Content Area            │
+│                                      │
+└─────────────────────────────────────┘
+┌─────────────────────────────────────┐
+│  [🏠]  [📅]  [💳]  [🏋️]  [👤]      │
+│  Home  Classes Membership Trainer Me│
+└─────────────────────────────────────┘
+```
+Create a comprehensive Member Management UI application with macOS-style 
+design aesthetics for a Mend & Inspection system. The application should 
+handle member registration, profile management, inspection scheduling, 
+and maintenance (mend) tracking.
+---
+
+## SUMMARY: MEMBER DASHBOARD PAGES
+
+| Page | Primary Purpose | Key Features |
+|------|----------------|--------------|
+| **Home** | Overview & quick access | Membership status, upcoming classes, trainer preview, progress snapshot |
+| **Profile** | Personal information | Edit details, change password, avatar management, emergency contact |
+| **Membership** | Plan details & billing | Current plan, usage stats, payment history, plan comparison |
+| **Classes** | Browse & book classes | Calendar/list view, filters, class details, booking management |
+| **My Bookings** | Manage booked classes | Upcoming/past/cancelled tabs, attendance history, cancellation |
+| **My Trainer** | Trainer interaction | Profile, PT sessions, messages, progress notes, scheduling |
+| **Progress** | Fitness tracking | Weight/measurements, goals, milestones, workout history, photos |
+| **Payments** | Financial management | Payment methods, history, invoices, autopay settings |
+| **Notifications** | Alerts & updates | Class reminders, payment alerts, messages, gym updates |
+| **Settings** | Account configuration | Preferences, privacy, connected apps, support, account actions |
+
+This comprehensive dashboard ensures members have complete control over their gym experience while maintaining a clean, intuitive interface!

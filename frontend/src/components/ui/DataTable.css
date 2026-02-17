@@ -1,0 +1,756 @@
+/* ============================================================================
+   DataTable Component - Premium Design V4
+   Clean, consistent, and modern SaaS aesthetics with enhanced features
+   ============================================================================ */
+
+.data-table {
+  width: 100%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.data-table__scroll-container {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.data-table__table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* Header */
+.data-table__head {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+}
+
+.data-table__th {
+  padding: 14px 16px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--border-primary);
+  position: relative;
+}
+
+/* Header with sorting capability */
+.data-table__th--sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.15s ease;
+}
+
+.data-table__th--sortable:hover {
+  color: var(--text-primary);
+}
+
+/* Row Number Column */
+.data-table__th--number,
+.data-table__td--number {
+  width: 48px;
+  min-width: 48px;
+  text-align: center;
+  color: var(--text-tertiary);
+  font-feature-settings: 'tnum' 1;
+}
+
+.row-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 20px;
+  padding: 0 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.data-table__row:hover .row-number {
+  background: rgba(99, 102, 241, 0.1);
+  color: #A5B4FC;
+}
+
+/* Body */
+.data-table__body {
+  background: transparent;
+}
+
+.data-table__row {
+  border-bottom: 1px solid var(--border-subtle);
+  transition: all 0.15s ease;
+}
+
+.data-table__row:last-child {
+  border-bottom: none;
+}
+
+.data-table__row:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.data-table__row--clickable {
+  cursor: pointer;
+}
+
+.data-table__td {
+  padding: 10px 16px;
+  font-size: 13px;
+  color: var(--text-primary);
+  vertical-align: middle;
+  line-height: 1.4;
+}
+
+/* Alternating rows - subtle zebra striping */
+.data-table__row:nth-child(even) {
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.data-table__row:nth-child(even):hover {
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.data-table__row:nth-child(odd):hover {
+  background: rgba(255, 255, 255, 0.025);
+}
+
+/* Loading State */
+.data-table__loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 60px 20px;
+  color: var(--text-tertiary);
+}
+
+.data-table__spinner {
+  width: 24px;
+  height: 24px;
+  border: 2.5px solid rgba(255, 255, 255, 0.1);
+  border-top-color: var(--color-crimson);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Empty State */
+.data-table__empty,
+.data-table__empty-cell {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-tertiary);
+  font-size: 13px;
+}
+
+/* Action Cell */
+.data-table__actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: flex-end;
+}
+
+.data-table__action-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  color: var(--text-tertiary);
+  transition: all 0.15s ease;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.data-table__action-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-primary);
+}
+
+/* ============================================================================
+   Pagination Controls - Premium Compact Design
+   ============================================================================ */
+
+.data-table__pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-top: 1px solid var(--border-subtle);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, transparent 100%);
+  gap: 12px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.pagination__info {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  font-feature-settings: 'tnum' 1;
+}
+
+.pagination__controls {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.pagination__btn {
+  min-width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pagination__btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.pagination__btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.pagination__page--active {
+  background: linear-gradient(135deg, #6366F1, #4F46E5) !important;
+  border-color: #6366F1 !important;
+  color: white !important;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+}
+
+.pagination__page--active:hover {
+  background: linear-gradient(135deg, #4F46E5, #4338CA) !important;
+  border-color: #4F46E5 !important;
+  color: white !important;
+}
+
+.pagination__ellipsis {
+  padding: 0 8px;
+  color: var(--text-tertiary);
+  font-size: 12px;
+}
+
+.pagination__size {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.pagination__size label {
+  white-space: nowrap;
+}
+
+.pagination__size select {
+  padding: 4px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-primary);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pagination__size select:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.pagination__size select:focus {
+  outline: none;
+  border-color: #6366F1;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+}
+
+/* ============================================================================
+   Sort Indicator
+   ============================================================================ */
+
+.data-table__sort-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: var(--color-emerald);
+  padding: 3px 8px;
+  background: rgba(16, 185, 129, 0.1);
+  border-radius: 4px;
+  margin-left: 8px;
+}
+
+.data-table__sort-indicator--newest {
+  color: var(--color-ocean);
+  background: rgba(59, 130, 246, 0.1);
+}
+
+/* ============================================================================
+   Mobile Card Layout
+   ============================================================================ */
+
+.data-table__cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.data-table__card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 16px;
+  transition: all 0.15s ease;
+}
+
+.data-table__card--clickable {
+  cursor: pointer;
+}
+
+.data-table__card--clickable:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
+}
+
+.data-table__card--clickable:active {
+  transform: translateY(0);
+}
+
+.mobile-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mobile-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.mobile-card__user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.mobile-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.mobile-card__name {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mobile-card__email {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mobile-card__status {
+  flex-shrink: 0;
+}
+
+.mobile-card__details {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.mobile-card__detail {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mobile-card__detail-label {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mobile-card__detail-value {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.mobile-card__actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 12px;
+}
+
+/* ============================================================================
+   Responsive
+   ============================================================================ */
+
+@media (max-width: 1024px) {
+
+  .data-table__th,
+  .data-table__td {
+    padding: 12px 14px;
+  }
+}
+
+@media (max-width: 768px) {
+
+  .data-table__th,
+  .data-table__td {
+    padding: 10px 12px;
+  }
+
+  .data-table--mobile .data-table__table {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .data-table__pagination {
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .pagination__controls {
+    order: 1;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .pagination__info {
+    order: 2;
+    text-align: center;
+  }
+
+  .pagination__size {
+    order: 3;
+    justify-content: center;
+  }
+
+  .pagination__btn {
+    min-width: 36px;
+    height: 36px;
+  }
+
+  .mobile-card__details {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .data-table__cards {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .data-table__card {
+    padding: 12px;
+  }
+}
+
+
+/* ============================================================================
+   Titan Mode Styles (High Density)
+   ============================================================================ */
+
+.data-table--compact .data-table__th {
+  padding: 6px 10px;
+  font-size: 10px;
+}
+
+.data-table--compact .data-table__td {
+  padding: 4px 10px;
+  height: auto;
+  font-size: 12px;
+}
+
+.data-table--sticky .data-table__head {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  /* Ensure header background is opaque when sticky */
+  background: var(--bg-secondary);
+  box-shadow: 0 1px 0 var(--border-subtle);
+}
+
+.data-table--sticky .data-table__th {
+  border-bottom: none;
+}
+
+/* Checkbox Column */
+.data-table__th--checkbox,
+.data-table__td--checkbox {
+  width: 40px;
+  min-width: 40px;
+  text-align: center;
+  padding-left: 16px;
+  padding-right: 8px;
+}
+
+.data-table__checkbox {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-radius: 5px;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.data-table__checkbox:checked {
+  background: linear-gradient(135deg, #6366F1, #4F46E5);
+  border-color: transparent;
+  box-shadow: 0 2px 6px rgba(99, 102, 241, 0.3);
+}
+
+.data-table__checkbox:checked::after {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 2px;
+  width: 5px;
+  height: 9px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.data-table__checkbox:hover {
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.data-table__checkbox:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+/* Hide checkbox until hover (when enabled) */
+.data-table--hide-checkbox .data-table__td--checkbox .data-table__checkbox {
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.15s ease;
+}
+
+.data-table--hide-checkbox .data-table__row:hover .data-table__td--checkbox .data-table__checkbox,
+.data-table--hide-checkbox .data-table__row--selected .data-table__td--checkbox .data-table__checkbox,
+.data-table--has-selection .data-table__td--checkbox .data-table__checkbox {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Always show header checkbox when any row is selected */
+.data-table--has-selection .data-table__th--checkbox .data-table__checkbox {
+  opacity: 1;
+}
+
+/* Selected Row State */
+.data-table__row--selected {
+  background: rgba(99, 102, 241, 0.06) !important;
+}
+
+.data-table__row--selected:hover {
+  background: rgba(99, 102, 241, 0.1) !important;
+}
+
+.data-table__row--selected .row-number {
+  background: rgba(99, 102, 241, 0.15);
+  color: #A5B4FC;
+}
+
+/* Batch Action Bar Animation */
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ============================================================================
+   Batch Action Bar
+   ============================================================================ */
+.members-batch-actions,
+.staff-batch-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.batch-actions__info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.batch-actions__count {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.batch-actions__clear {
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.batch-actions__clear:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
+}
+
+.batch-actions__buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.batch-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.batch-btn__icon {
+  font-size: 14px;
+}
+
+.batch-btn--message {
+  background: rgba(59, 130, 246, 0.1);
+  color: #60A5FA;
+  border-color: rgba(59, 130, 246, 0.2);
+}
+
+.batch-btn--message:hover {
+  background: rgba(59, 130, 246, 0.2);
+}
+
+.batch-btn--export {
+  background: rgba(16, 185, 129, 0.1);
+  color: #34D399;
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+.batch-btn--export:hover {
+  background: rgba(16, 185, 129, 0.2);
+}
+
+.batch-btn--danger {
+  background: rgba(239, 68, 68, 0.1);
+  color: #F87171;
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+.batch-btn--danger:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+@media (max-width: 640px) {
+
+  .members-batch-actions,
+  .staff-batch-actions {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .batch-actions__buttons {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+}
+
+/* ============================================================================
+   Light Theme
+   ============================================================================ */
+:root.theme-light .data-table {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+}

@@ -1,0 +1,738 @@
+/**
+ * Editor CSS - All styles for the visual editor
+ */
+
+/* ===== Inspector Overlay ===== */
+.inspector-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 99999;
+}
+
+/* Highlight box */
+.inspector-highlight {
+  position: absolute;
+  pointer-events: none;
+  box-sizing: border-box;
+  transition: all 0.05s ease-out;
+}
+
+/* Hover state - Green border like DevTools */
+.inspector-highlight--hover {
+  border: 2px solid #eee311;
+  background: rgba(238, 227, 17, 0.05);
+}
+
+/* Selected state - Blue border */
+.inspector-highlight--selected {
+  border: 2px solid #3B82F6;
+  background: rgba(59, 130, 246, 0.05);
+}
+
+/* Move mode - Enable pointer events for drag */
+.inspector-highlight--move {
+  pointer-events: auto !important;
+  cursor: grab;
+}
+
+.inspector-highlight--move:active {
+  cursor: grabbing;
+}
+
+/* Tag label */
+.inspector-label {
+  position: absolute;
+  top: -22px;
+  left: -2px;
+  padding: 2px 6px;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  border-radius: 3px;
+  pointer-events: none;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.inspector-label--hover {
+  background: #10B981;
+  color: white;
+}
+
+.inspector-label--selected {
+  background: #3B82F6;
+  color: white;
+}
+
+/* Position label below if at top of viewport */
+.inspector-highlight[style*="top: 0"] .inspector-label,
+.inspector-highlight[style*="top: 1"] .inspector-label,
+.inspector-highlight[style*="top: 2"] .inspector-label {
+  top: auto;
+  bottom: -22px;
+}
+
+/* ===== Resize Handles ===== */
+.resize-handle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #3B82F6;
+  border: 1px solid white;
+  border-radius: 2px;
+  pointer-events: auto;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.resize-handle--nw {
+  top: -4px;
+  left: -4px;
+  cursor: nw-resize;
+}
+
+.resize-handle--ne {
+  top: -4px;
+  right: -4px;
+  cursor: ne-resize;
+}
+
+.resize-handle--sw {
+  bottom: -4px;
+  left: -4px;
+  cursor: sw-resize;
+}
+
+.resize-handle--se {
+  bottom: -4px;
+  right: -4px;
+  cursor: se-resize;
+}
+
+.resize-handle--n {
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: n-resize;
+}
+
+.resize-handle--s {
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: s-resize;
+}
+
+.resize-handle--e {
+  top: 50%;
+  right: -4px;
+  transform: translateY(-50%);
+  cursor: e-resize;
+}
+
+.resize-handle--w {
+  top: 50%;
+  left: -4px;
+  transform: translateY(-50%);
+  cursor: w-resize;
+}
+
+.resize-handle:hover {
+  background: #2563EB;
+  transform-origin: center;
+}
+
+/* ===== Editor Toolbar ===== */
+.editor-toolbar {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(30, 30, 30, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  z-index: 100000;
+}
+
+.editor-toolbar button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.editor-toolbar button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.editor-toolbar button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.editor-toolbar button svg {
+  width: 18px;
+  height: 18px;
+}
+
+.editor-toolbar__divider {
+  width: 1px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Mode toggle group */
+.editor-toolbar__mode-group {
+  display: flex;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  padding: 2px;
+  gap: 2px;
+}
+
+.editor-toolbar__mode-group button {
+  background: transparent !important;
+  opacity: 0.5;
+}
+
+.editor-toolbar__mode-group button.active {
+  background: rgba(59, 130, 246, 0.3) !important;
+  opacity: 1;
+  color: #3B82F6;
+}
+
+.editor-toolbar__mode-group button:hover:not(.active) {
+  opacity: 0.8;
+}
+
+/* ===== Selection Panel ===== */
+.selection-panel {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 280px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  background: rgba(20, 20, 25, 0.98);
+  backdrop-filter: blur(20px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+  z-index: 100000;
+  color: white;
+  font-size: 13px;
+}
+
+.selection-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.selection-panel__title {
+  font-weight: 600;
+  color: #3B82F6;
+}
+
+.selection-panel__close {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.selection-panel__close:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.selection-panel__section {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.selection-panel__section-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 8px;
+}
+
+.selection-panel__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.selection-panel__label {
+  width: 60px;
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.selection-panel__input {
+  flex: 1;
+  padding: 6px 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: white;
+  font-size: 12px;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+.selection-panel__input:focus {
+  outline: none;
+  border-color: #3B82F6;
+  background: rgba(59, 130, 246, 0.1);
+}
+
+/* ===== Edit Mode Indicator ===== */
+/* No cursor override - let normal UI interaction work */
+
+/* Ensure all interactive elements remain clickable */
+body.edit-mode-active button,
+body.edit-mode-active a,
+body.edit-mode-active input,
+body.edit-mode-active [role="button"] {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+/* ===== Toggle Button ===== */
+.edit-mode-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+  border: none;
+  border-radius: 50%;
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+  transition: all 0.2s ease;
+  z-index: 99998;
+}
+
+.edit-mode-toggle:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 28px rgba(59, 130, 246, 0.5);
+}
+
+.edit-mode-toggle.active {
+  background: linear-gradient(135deg, #10B981, #059669);
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+}
+
+.edit-mode-toggle svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* ===== Phase 3: Enhanced Selection Panel ===== */
+
+/* Floating panel variant */
+.selection-panel--floating {
+  background: rgba(20, 20, 25, 0.98);
+  backdrop-filter: blur(20px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+  color: white;
+  font-size: 13px;
+}
+
+/* Quick action buttons */
+.sp-quick-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.sp-quick-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #EF4444;
+}
+
+/* Input rows */
+.sp-row {
+  display: flex;
+  gap: 8px;
+}
+
+.sp-input-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+
+.sp-input-group label {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+  width: 20px;
+}
+
+.sp-input-group input {
+  flex: 1;
+  width: 100%;
+  padding: 6px 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: white;
+  font-size: 12px;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+.sp-input-group input:focus {
+  outline: none;
+  border-color: #3B82F6;
+  background: rgba(59, 130, 246, 0.1);
+}
+
+/* Spacing grid (for padding/margin) */
+.sp-spacing-grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  grid-template-rows: auto auto auto;
+  gap: 4px;
+  align-items: center;
+}
+
+.sp-spacing-input {
+  width: 54px;
+  padding: 4px 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  color: white;
+  font-size: 11px;
+  font-family: 'SF Mono', monospace;
+  text-align: center;
+}
+
+.sp-spacing-input:focus {
+  outline: none;
+  border-color: #3B82F6;
+}
+
+.sp-spacing-top {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.sp-spacing-left {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.sp-spacing-center {
+  grid-column: 2;
+  grid-row: 2;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.3);
+  text-align: center;
+}
+
+.sp-spacing-right {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+.sp-spacing-bottom {
+  grid-column: 2;
+  grid-row: 3;
+}
+
+/* Color picker */
+.sp-color-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sp-color-preview {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  flex-shrink: 0;
+  background-image:
+    linear-gradient(45deg, #333 25%, transparent 25%),
+    linear-gradient(-45deg, #333 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #333 75%),
+    linear-gradient(-45deg, transparent 75%, #333 75%);
+  background-size: 8px 8px;
+  background-position: 0 0, 0 4px, 4px -4px, -4px 0px;
+}
+
+.sp-color-preview:hover {
+  border-color: #3B82F6;
+}
+
+.sp-color-input {
+  flex: 1;
+  padding: 6px 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: white;
+  font-size: 12px;
+  font-family: 'SF Mono', monospace;
+}
+
+.sp-color-input:focus {
+  outline: none;
+  border-color: #3B82F6;
+}
+
+.sp-color-picker {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 4px;
+  margin-top: 8px;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+}
+
+.sp-color-swatch {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 4px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.1s;
+}
+
+.sp-color-swatch:hover {
+  transform: scale(1.15);
+  border-color: white;
+  z-index: 1;
+}
+
+/* Opacity slider */
+.sp-slider {
+  width: 100%;
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: linear-gradient(to right, transparent, #3B82F6);
+  border-radius: 3px;
+  outline: none;
+}
+
+.sp-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid #3B82F6;
+  cursor: pointer;
+}
+
+/* ===== New Compact Selection Panel ===== */
+.sp-panel {
+  width: 240px;
+  background: rgba(20, 20, 25, 0.98);
+  backdrop-filter: blur(20px);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  z-index: 100002;
+  color: white;
+  font-size: 12px;
+  overflow: hidden;
+}
+
+.sp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.sp-tag {
+  background: rgba(59, 130, 246, 0.2);
+  color: #60A5FA;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.sp-header-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.sp-btn-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.sp-btn-icon:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.sp-section {
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.sp-section:last-child {
+  border-bottom: none;
+}
+
+.sp-section>label {
+  display: block;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 4px;
+}
+
+.sp-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sp-row input[type="number"],
+.sp-row input[type="text"] {
+  flex: 1;
+  width: 100%;
+  padding: 4px 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  color: white;
+  font-size: 11px;
+  font-family: 'SF Mono', monospace;
+}
+
+.sp-row input:focus {
+  outline: none;
+  border-color: #3B82F6;
+}
+
+.sp-row span {
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 10px;
+}
+
+.sp-spacing {
+  display: flex;
+  gap: 4px;
+}
+
+.sp-spacing input {
+  width: 44px;
+  padding: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  color: white;
+  font-size: 10px;
+  font-family: 'SF Mono', monospace;
+  text-align: center;
+}
+
+.sp-spacing input:focus {
+  outline: none;
+  border-color: #3B82F6;
+}
+
+.sp-color-box {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.sp-color-box:hover {
+  border-color: #3B82F6;
+}
+
+.sp-colors {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.sp-colors button {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 3px;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.sp-colors button:hover {
+  transform: scale(1.1);
+  border-color: white;
+}

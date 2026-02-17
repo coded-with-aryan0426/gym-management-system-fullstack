@@ -1,0 +1,375 @@
+/* ============================================================================
+   Floating Action Button (FAB) - Compact Side-Docked Design
+   ============================================================================ */
+
+.fab-container {
+    position: fixed;
+    right: 0;
+    z-index: 1000;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 0;
+    transition: bottom 0.05s linear;
+    /* Shared container background */
+    background: rgba(28, 28, 32, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-right: none;
+    border-radius: 6px 0 0 6px;
+    overflow: hidden;
+}
+
+.fab-container--dragging {
+    transition: none;
+    user-select: none;
+}
+
+/* Drag handle - minimal grip */
+.fab-drag-handle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    background: transparent;
+    border: none;
+    border-right: 1px solid rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.2);
+    cursor: ns-resize;
+    transition: all 0.15s ease;
+}
+
+.fab-drag-handle:hover {
+    background: rgba(255, 255, 255, 0.03);
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.fab-container--dragging .fab-drag-handle {
+    background: rgba(220, 38, 38, 0.1);
+    color: rgba(220, 38, 38, 0.5);
+}
+
+/* Trigger button - compact */
+.fab-trigger {
+    width: 28px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+}
+
+.fab-trigger:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+}
+
+.fab-trigger.fab-trigger--open {
+    background: rgba(220, 38, 38, 0.8);
+    color: #fff;
+}
+
+.fab-trigger__icon {
+    transition: transform 0.2s ease;
+}
+
+.fab-trigger--open .fab-trigger__icon {
+    transform: rotate(45deg);
+}
+
+/* Expanded panel */
+.fab-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px;
+    background: rgba(24, 24, 27, 0.95);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-right: none;
+    border-radius: 12px 0 0 12px;
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    transform: translateX(100%);
+    pointer-events: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-right: -1px;
+}
+
+.fab-panel--open {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+}
+
+.fab-panel__item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+}
+
+.fab-panel__item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
+
+.fab-menu-item__button:hover {
+    background: rgba(40, 40, 45, 0.95);
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: scale(1.05);
+}
+
+.fab-menu-item__button:active {
+    transform: scale(0.95);
+}
+
+.fab-menu-item__button--primary {
+    background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+    border-color: transparent;
+}
+
+.fab-menu-item__button--primary:hover {
+    background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+}
+
+.fab-menu-item__label {
+    padding: 6px 12px;
+    background: rgba(24, 24, 27, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #fff;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Backdrop when open */
+.fab-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 999;
+}
+
+.fab-backdrop--visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Quick Note Modal */
+.fab-quick-note-modal {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 1100;
+    padding: 16px;
+}
+
+.fab-quick-note-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.fab-quick-note-modal__content {
+    position: relative;
+    width: 100%;
+    max-width: 480px;
+    background: #18181b;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px 20px 24px 24px;
+    padding: 20px;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.fab-quick-note-modal__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.fab-quick-note-modal__header h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+    margin: 0;
+}
+
+.fab-quick-note-modal__close {
+    width: 32px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.05);
+    border: none;
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+}
+
+.fab-quick-note-modal__close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+.fab-quick-note-modal__client {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    margin-bottom: 16px;
+}
+
+.fab-quick-note-modal__client-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.fab-quick-note-modal__client-info h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    margin: 0 0 2px 0;
+}
+
+.fab-quick-note-modal__client-info span {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.fab-quick-note-modal__textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    color: #fff;
+    font-size: 14px;
+    font-family: inherit;
+    resize: none;
+    transition: border-color 0.15s ease;
+}
+
+.fab-quick-note-modal__textarea::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.fab-quick-note-modal__textarea:focus {
+    outline: none;
+    border-color: rgba(220, 38, 38, 0.5);
+}
+
+.fab-quick-note-modal__actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.fab-quick-note-modal__btn {
+    flex: 1;
+    height: 48px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.fab-quick-note-modal__btn--cancel {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.fab-quick-note-modal__btn--cancel:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.fab-quick-note-modal__btn--save {
+    background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+    border: none;
+    color: #fff;
+}
+
+.fab-quick-note-modal__btn--save:hover {
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+}
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+    .fab-container {
+        bottom: 80px;
+        /* Above HUD */
+        right: 16px;
+    }
+
+    .fab-button {
+        width: 60px;
+        height: 60px;
+    }
+
+    .fab-menu-item__button {
+        width: 52px;
+        height: 52px;
+    }
+
+    .fab-quick-note-modal {
+        padding: 0;
+    }
+
+    .fab-quick-note-modal__content {
+        border-radius: 20px 20px 0 0;
+        max-height: 80vh;
+        padding-bottom: env(safe-area-inset-bottom, 20px);
+    }
+}
+
+/* Desktop - hide backdrop on hover interaction */
+@media (min-width: 769px) {
+    .fab-backdrop {
+        display: none;
+    }
+}

@@ -1,0 +1,353 @@
+/* Class Attendance Modal Styles */
+.attendance-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 1rem;
+    animation: fadeIn 0.2sease-out;
+}
+
+.attendance-modal {
+    background-color: #09090b;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    max-height: 85vh;
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.attendance-modal__header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.attendance-modal__title h2 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #f4f4f5;
+}
+
+.attendance-modal__subtitle {
+    margin: 0.25rem 0 0;
+    font-size: 0.85rem;
+    color: #a1a1aa;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.attendance-modal__close {
+    background: none;
+    border: none;
+    color: #71717a;
+    padding: 0.25rem;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-left: 1rem;
+    transition: all 0.2s;
+}
+
+.attendance-modal__close:hover {
+    color: #e4e4e7;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Content Area */
+.attendance-modal__content {
+    padding: 1.5rem;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.attendance-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.attendee-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem;
+    background-color: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    transition: background-color 0.2s;
+}
+
+.attendee-item:hover {
+    background-color: rgba(255, 255, 255, 0.04);
+}
+
+.attendee-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.attendee-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: white;
+    text-transform: uppercase;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.attendee-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.attendee-name {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #e4e4e7;
+}
+
+.attendee-status-label {
+    font-size: 0.7rem;
+    color: #a1a1aa;
+    text-transform: capitalize;
+}
+
+/* Status Buttons */
+.attendee-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.status-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: transparent;
+    color: #71717a;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.status-btn:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #a1a1aa;
+}
+
+/* Active States */
+.status-btn.confirmed.active {
+    background-color: rgba(34, 197, 94, 0.15);
+    color: #4ade80;
+    border-color: rgba(34, 197, 94, 0.3);
+}
+
+.status-btn.absent.active {
+    background-color: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.status-btn.pending.active {
+    background-color: rgba(234, 179, 8, 0.15);
+    color: #facc15;
+    border-color: rgba(234, 179, 8, 0.3);
+}
+
+/* Tooltips */
+.status-btn::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 4px 8px;
+    background-color: #18181b;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #e4e4e7;
+    font-size: 0.7rem;
+    border-radius: 4px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    margin-bottom: 6px;
+    transition: opacity 0.2s;
+}
+
+.status-btn:hover::after {
+    opacity: 1;
+}
+
+/* Summary Bar */
+.attendance-summary {
+    margin-bottom: 1.5rem;
+    display: flex;
+    gap: 1rem;
+    padding: 0.75rem;
+    background-color: rgba(24, 24, 27, 0.5);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.summary-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+}
+
+.summary-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.summary-value.confirmed {
+    color: #4ade80;
+}
+
+.summary-value.pending {
+    color: #facc15;
+}
+
+.summary-value.absent {
+    color: #f87171;
+}
+
+.summary-label {
+    font-size: 0.7rem;
+    color: #a1a1aa;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+}
+
+/* Footer */
+.attendance-modal__footer {
+    padding: 1.25rem 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    background-color: rgba(9, 9, 11, 0.95);
+}
+
+.btn-secondary {
+    background-color: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #e4e4e7;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    border: none;
+    color: white;
+    padding: 0.5rem 1.25rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+}
+
+.btn-primary:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+.btn-primary:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Loading State */
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    color: #a1a1aa;
+    gap: 1rem;
+}
+
+.spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: #71717a;
+}

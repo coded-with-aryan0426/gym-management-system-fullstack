@@ -1,0 +1,388 @@
+/* ============================================================================
+   SESSION DETAILS MODAL STYLES
+   AthlonX Gym Management System
+   ============================================================================ */
+
+.session-details-modal__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-5);
+  height: 100%;
+}
+
+/* Error Message */
+.session-details-modal__error {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-4);
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius-premium-md);
+  color: var(--color-error-500);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+.session-details-modal__error button {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  color: var(--color-error-500);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-1);
+  border-radius: var(--radius-sm);
+  transition: var(--transition-fast);
+}
+
+.session-details-modal__error button:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+/* Header */
+.session-details-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--spacing-3);
+  padding-bottom: var(--spacing-4);
+  margin-bottom: var(--spacing-2);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.session-details-modal__status {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.session-details-modal__recurring {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3);
+  background: var(--gradient-info-light);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-primary-400);
+}
+
+/* Sections */
+.session-details-modal__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.session-details-modal__section-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.session-details-modal__section-title svg {
+  color: var(--color-primary-400);
+}
+
+.session-details-modal__section-title .required {
+  color: var(--color-error-500);
+  margin-left: var(--spacing-1);
+}
+
+/* Info Grid */
+.session-details-modal__info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-4);
+}
+
+.session-details-modal__info-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  padding: var(--spacing-3);
+  background: var(--glass-bg-light);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-premium-md);
+  transition: var(--transition-smooth);
+}
+
+.session-details-modal__info-item:hover {
+  border-color: var(--glass-border-hover);
+  background: rgba(99, 102, 241, 0.05);
+}
+
+.session-details-modal__info-label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+.session-details-modal__info-label svg {
+  opacity: 0.7;
+}
+
+.session-details-modal__info-value {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Textarea */
+.session-details-modal__textarea {
+  width: 100%;
+  padding: var(--spacing-4);
+  background: var(--glass-bg-dark);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-premium-md);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family-premium);
+  line-height: 1.6;
+  min-height: 100px;
+  resize: vertical;
+  transition: var(--transition-smooth);
+}
+
+.session-details-modal__textarea::placeholder {
+  color: var(--text-tertiary);
+}
+
+.session-details-modal__textarea:hover {
+  border-color: var(--glass-border-hover);
+}
+
+.session-details-modal__textarea:focus {
+  outline: none;
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+}
+
+/* Text Display */
+.session-details-modal__text {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin: 0;
+  padding: var(--spacing-4);
+  background: var(--glass-bg-light);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-premium-md);
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+/* Actions */
+.session-details-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-3);
+  padding-top: var(--spacing-5);
+  border-top: 1px solid var(--glass-border);
+  margin-top: auto;
+  /* Push to bottom */
+}
+
+.session-details-modal__actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+/* Spinner Animation */
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .session-details-modal__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .session-details-modal__actions {
+    flex-direction: column;
+  }
+
+  .session-details-modal__actions button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Status Select Dropdown */
+.session-details-modal__status-select {
+  padding: var(--spacing-2) var(--spacing-4);
+  background: var(--glass-bg-dark);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-full);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  font-family: var(--font-family-premium);
+  cursor: pointer;
+  outline: none;
+  transition: var(--transition-smooth);
+  min-width: 140px;
+}
+
+.session-details-modal__status-select:hover {
+  border-color: var(--color-primary-400);
+  background: var(--glass-bg);
+}
+
+.session-details-modal__status-select:focus {
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+.session-details-modal__status-select option {
+  background: var(--color-bg-tertiary);
+  color: var(--text-primary);
+  padding: 8px;
+}
+
+/* Plans Grid */
+.session-details-modal__plans-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--spacing-4);
+}
+
+/* Layout Grid for Desktop */
+.session-details-modal__layout-grid {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  /* Fixed width sidebar for info, rest for details */
+  gap: var(--spacing-6);
+}
+
+.session-details-modal__left-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-5);
+  border-right: 1px solid var(--glass-border);
+  padding-right: var(--spacing-6);
+}
+
+.session-details-modal__right-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-5);
+}
+
+/* Force vertical stack in left column */
+.session-details-modal__left-col .session-details-modal__info-grid {
+  grid-template-columns: 1fr;
+  gap: var(--spacing-3);
+}
+
+/* Reschedule Section */
+.session-details-modal__reschedule {
+  padding: var(--spacing-4);
+  background: rgba(99, 102, 241, 0.06);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: var(--radius-premium-md);
+  overflow: hidden;
+}
+
+.session-details-modal__reschedule-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-4);
+  margin-top: var(--spacing-3);
+}
+
+.session-details-modal__form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.session-details-modal__form-group label {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+.session-details-modal__input {
+  padding: var(--spacing-3);
+  background: var(--glass-bg-dark);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-premium-md);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family-premium);
+  transition: var(--transition-smooth);
+}
+
+.session-details-modal__input:focus {
+  outline: none;
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.session-details-modal__loading-slots {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-3);
+  color: var(--text-tertiary);
+  font-size: var(--font-size-sm);
+}
+
+.session-details-modal__reschedule-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-3);
+  margin-top: var(--spacing-4);
+}
+
+/* Tablet/Mobile Adjustments */
+@media (max-width: 900px) {
+  .session-details-modal__layout-grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-5);
+  }
+
+  .session-details-modal__left-col {
+    border-right: none;
+    border-bottom: 1px solid var(--glass-border);
+    padding-right: 0;
+    padding-bottom: var(--spacing-5);
+  }
+
+  .session-details-modal__left-col .session-details-modal__info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    /* Return to grid */
+  }
+}

@@ -1,0 +1,119 @@
+/* ============================================================================
+   AppShell - Main Application Layout (Fully Responsive)
+   Breakpoints: Desktop (>1024px), Tablet (768-1024px), Mobile (<768px)
+   ============================================================================ */
+
+:root {
+  --sidebar-width: 180px;
+  --sidebar-collapsed: 56px;
+  --utility-bar-height: 48px;
+  --mobile-nav-height: 64px;
+}
+
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background-color: var(--bg-primary);
+}
+
+.app-shell__main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  margin-left: var(--sidebar-width);
+  transition: margin-left 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: margin-left;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.app-shell--collapsed .app-shell__main {
+  margin-left: var(--sidebar-collapsed);
+}
+
+.app-shell__content {
+  flex: 1;
+  padding: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background-color: var(--bg-primary);
+  -webkit-overflow-scrolling: touch;
+  position: relative; /* Fixes Framer Motion scroll warning */
+}
+
+.app-shell__content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.app-shell__content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.app-shell__content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+}
+
+.app-shell__content::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+:root.theme-light .app-shell__content::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+:root.theme-light .app-shell__content::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.12);
+}
+
+/* ============================================
+   TABLET BREAKPOINT (768px - 1024px)
+   Sidebar always collapsed
+   ============================================ */
+@media (max-width: 1024px) {
+  .app-shell__main {
+    margin-left: var(--sidebar-collapsed);
+  }
+
+  .app-shell--collapsed .app-shell__main {
+    margin-left: var(--sidebar-collapsed);
+  }
+}
+
+/* ============================================
+   MOBILE BREAKPOINT (<768px)
+   Bottom navigation, no sidebar
+   ============================================ */
+@media (max-width: 768px) {
+  .app-shell {
+    flex-direction: column;
+  }
+
+  .app-shell__main {
+    margin-left: 0;
+    padding-bottom: var(--mobile-nav-height);
+    height: calc(100vh - var(--mobile-nav-height));
+    height: calc(100dvh - var(--mobile-nav-height));
+  }
+
+  .app-shell--collapsed .app-shell__main {
+    margin-left: 0;
+  }
+
+  .app-shell__content {
+    padding-bottom: 16px;
+  }
+}
+
+/* ============================================
+   SMALL MOBILE (<480px)
+   Extra compact spacing
+   ============================================ */
+@media (max-width: 480px) {
+  .app-shell__content {
+    padding-bottom: 12px;
+  }
+}

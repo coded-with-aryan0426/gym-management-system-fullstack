@@ -1,0 +1,335 @@
+/* ============================================================================
+   Create User Modal - Pure Black Theme (Unified with ActionModal)
+   ============================================================================ */
+
+.create-user-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  /* Lighter overlay */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  /* High z-index */
+  padding: 16px;
+}
+
+/* Modal */
+.create-user-modal {
+  width: 100%;
+  max-width: 800px;
+  /* Wider match */
+  background: var(--bg-secondary);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px;
+  box-shadow: var(--shadow-xl);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  color: var(--text-primary);
+}
+
+.create-user-modal--selection {
+  max-width: 600px;
+  /* Slightly wider for selection too */
+}
+
+/* Header */
+.create-user-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 32px;
+  /* More padding */
+  padding-bottom: 0;
+}
+
+.create-user-modal__header h2 {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.create-user-modal__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.create-user-modal__close:hover {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+
+/* Body */
+.create-user-modal__body {
+  padding: 32px;
+}
+
+.create-user-modal__selection {
+  padding: 32px;
+  /* More padding */
+}
+
+.selection-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+/* Selection Cards (Matching CreateActionModal) */
+.selection-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 24px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  height: 240px;
+}
+
+.selection-card:hover {
+  background: var(--bg-elevated);
+  border-color: var(--border-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.selection-card__icon {
+  margin-bottom: 16px;
+  color: var(--text-tertiary);
+  transition: all 0.2s;
+}
+
+.selection-card:hover .selection-card__icon {
+  color: var(--color-ocean);
+  transform: scale(1.1);
+}
+
+.selection-card__label {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.selection-card__desc {
+  font-size: 13px;
+  color: var(--text-tertiary);
+}
+
+/* Form Styles */
+.form-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.form-input {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-primary);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.form-input:focus {
+  outline: none;
+  background: var(--bg-primary);
+  border-color: var(--color-ocean);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.form-input::placeholder {
+  color: var(--text-muted);
+}
+
+/* Input validation */
+.input-with-validation {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.validation-icon {
+  position: absolute;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.validation-icon--valid {
+  color: #10b981;
+}
+
+.validation-icon--invalid {
+  color: #ef4444;
+}
+
+/* Footer */
+.create-user-modal__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px 24px;
+  /* background: #050505; Optional: Slightly distinct footer */
+}
+
+.button-group {
+  display: flex;
+  gap: 12px;
+  margin-left: auto;
+}
+
+/* Button overrides for dark mode */
+.create-user-modal__footer button {
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.create-user-modal__footer button.btn-secondary {
+  background: transparent;
+  border: 1px solid var(--border-primary);
+  color: var(--text-secondary);
+}
+
+.create-user-modal__footer button.btn-secondary:hover {
+  background: var(--bg-elevated);
+  border-color: var(--border-primary);
+  color: var(--text-primary);
+}
+
+/* ============================================================================
+   LIGHT MODE OVERRIDES
+   ============================================================================ */
+:root.theme-light .create-user-modal,
+[data-theme="light"] .create-user-modal,
+body.light-mode .create-user-modal {
+  background: var(--bg-secondary, #ffffff);
+  border: 1px solid var(--border-primary, #CBD5E1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+:root.theme-light .create-user-overlay,
+[data-theme="light"] .create-user-overlay,
+body.light-mode .create-user-overlay {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+/* Form Labels */
+:root.theme-light .create-user-modal .form-group label,
+[data-theme="light"] .create-user-modal .form-group label,
+body.light-mode .create-user-modal .form-group label {
+  color: #334155;
+}
+
+/* Form Inputs - Visible borders */
+:root.theme-light .create-user-modal .form-input,
+[data-theme="light"] .create-user-modal .form-input,
+body.light-mode .create-user-modal .form-input {
+  background: #ffffff;
+  border: 1px solid var(--border-primary, #CBD5E1);
+  color: var(--text-primary, #0f172a);
+}
+
+:root.theme-light .create-user-modal .form-input:focus,
+[data-theme="light"] .create-user-modal .form-input:focus,
+body.light-mode .create-user-modal .form-input:focus {
+  background: #ffffff;
+  border-color: var(--color-crimson, #DC2626);
+  border-width: 2px;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+:root.theme-light .create-user-modal .form-input::placeholder,
+[data-theme="light"] .create-user-modal .form-input::placeholder,
+body.light-mode .create-user-modal .form-input::placeholder {
+  color: #64748b;
+}
+
+/* Selection Cards */
+:root.theme-light .selection-card,
+[data-theme="light"] .selection-card,
+body.light-mode .selection-card {
+  background: var(--bg-tertiary, #f1f5f9);
+  border: 1px solid var(--border-primary, #CBD5E1);
+}
+
+:root.theme-light .selection-card:hover,
+[data-theme="light"] .selection-card:hover,
+body.light-mode .selection-card:hover {
+  background: #ffffff;
+  border-color: var(--color-ocean, #3b82f6);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* Close Button */
+:root.theme-light .create-user-modal__close,
+[data-theme="light"] .create-user-modal__close,
+body.light-mode .create-user-modal__close {
+  border: 1px solid var(--border-primary, #CBD5E1);
+  color: #475569;
+}
+
+:root.theme-light .create-user-modal__close:hover,
+[data-theme="light"] .create-user-modal__close:hover,
+body.light-mode .create-user-modal__close:hover {
+  background: var(--bg-tertiary, #f1f5f9);
+  color: #0f172a;
+}
+
+/* Footer buttons */
+:root.theme-light .create-user-modal__footer button.btn-secondary,
+[data-theme="light"] .create-user-modal__footer button.btn-secondary,
+body.light-mode .create-user-modal__footer button.btn-secondary {
+  background: var(--bg-tertiary, #f1f5f9);
+  border: 1px solid var(--border-primary, #CBD5E1);
+  color: #475569;
+}
+
+:root.theme-light .create-user-modal__footer button.btn-secondary:hover,
+[data-theme="light"] .create-user-modal__footer button.btn-secondary:hover,
+body.light-mode .create-user-modal__footer button.btn-secondary:hover {
+  background: #ffffff;
+  color: #0f172a;
+}

@@ -1,0 +1,1212 @@
+/* ============================================================================
+   Create Action Modal - Premium Dark Theme v2.0
+   Matches the MembershipPlanManagement premium aesthetic
+   ============================================================================ */
+
+/* Overlay */
+.cam-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+}
+
+/* Modal Container - Premium */
+.cam-modal {
+  width: 100%;
+  max-width: 620px;
+  max-height: 90vh;
+  background: linear-gradient(180deg, #141414 0%, #0a0a0a 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  box-shadow: 
+    0 0 0 1px rgba(255, 255, 255, 0.03),
+    0 32px 64px rgba(0, 0, 0, 0.6),
+    0 0 120px rgba(220, 38, 38, 0.08);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.cam-modal--premium {
+  border-color: rgba(220, 38, 38, 0.15);
+}
+
+/* Premium Header */
+.cam-header--premium {
+  position: relative;
+  padding: 24px 24px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.cam-header__bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(220, 38, 38, 0.12) 0%, rgba(220, 38, 38, 0.02) 50%, transparent 100%);
+  pointer-events: none;
+}
+
+.cam-header__content {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.cam-header__icon-wrap {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(220, 38, 38, 0.35);
+}
+
+.cam-header__text {
+  flex: 1;
+}
+
+.cam-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 4px;
+  letter-spacing: -0.02em;
+}
+
+.cam-subtitle {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0;
+}
+
+.cam-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cam-close:hover {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+}
+
+/* Progress Steps - Compact with animated track */
+.cam-progress {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  background: rgba(0, 0, 0, 0.25);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  gap: 0;
+}
+
+.cam-progress__step {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 16px;
+  transition: all 0.25s;
+  z-index: 1;
+}
+
+.cam-progress__step span {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.35);
+  white-space: nowrap;
+}
+
+.cam-progress__circle {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cam-progress__step--active .cam-progress__circle {
+  background: rgba(220, 38, 38, 0.2);
+  border-color: #DC2626;
+  color: #DC2626;
+  box-shadow: 0 0 8px rgba(220, 38, 38, 0.3);
+}
+
+.cam-progress__step--active span {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.cam-progress__step--complete .cam-progress__circle {
+  background: #10B981;
+  border-color: #10B981;
+  color: #fff;
+}
+
+/* Progress line with animated fill */
+.cam-progress__line {
+  position: relative;
+  width: 50px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 0 2px;
+  border-radius: 1px;
+  overflow: hidden;
+}
+
+.cam-progress__line::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #DC2626, #10B981);
+  border-radius: 1px;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cam-progress__line--filled::after {
+  width: 100%;
+}
+
+/* Body */
+.cam-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.cam-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Premium Sections */
+.cam-section--premium {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+}
+
+.cam-section__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.cam-section__icon {
+  width: 28px;
+  height: 28px;
+  background: rgba(220, 38, 38, 0.15);
+  border: 1px solid rgba(220, 38, 38, 0.25);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #DC2626;
+}
+
+.cam-section__icon--accent {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.25);
+  color: #3B82F6;
+}
+
+.cam-section__icon--emerald {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.25);
+  color: #10B981;
+}
+
+.cam-section__badge {
+  margin-left: auto;
+  padding: 4px 10px;
+  background: rgba(220, 38, 38, 0.15);
+  border: 1px solid rgba(220, 38, 38, 0.25);
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #DC2626;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.cam-section__badge--emerald {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.25);
+  color: #10B981;
+}
+
+/* Grid */
+.cam-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+/* Field */
+.cam-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cam-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.45);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+/* Input Wrapper - Premium Style */
+.cam-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.cam-input-icon {
+  position: absolute;
+  left: 14px;
+  color: rgba(255, 255, 255, 0.25);
+  pointer-events: none;
+  transition: color 0.2s;
+}
+
+.cam-input-check {
+  position: absolute;
+  right: 14px;
+  color: #10B981;
+  pointer-events: none;
+}
+
+.cam-input {
+  width: 100%;
+  height: 46px;
+  padding: 0 40px 0 42px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cam-input::placeholder {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.cam-input:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.cam-input:focus {
+  outline: none;
+  border-color: #DC2626;
+  background: rgba(220, 38, 38, 0.08);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+}
+
+.cam-input:focus + .cam-input-icon,
+.cam-input-wrap:focus-within .cam-input-icon {
+  color: #DC2626;
+}
+
+/* Date input specific */
+.cam-input[type="date"] {
+  color-scheme: dark;
+  padding-right: 14px;
+}
+
+.cam-input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) opacity(0.5);
+  cursor: pointer;
+}
+
+/* Plans Grid - Premium Cards */
+.cam-plans-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.cam-plans-loading,
+.cam-plans-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 40px 20px;
+  color: rgba(255, 255, 255, 0.4);
+  text-align: center;
+}
+
+.cam-plans-empty svg {
+  opacity: 0.4;
+  margin-bottom: 4px;
+}
+
+.cam-plans-empty span {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.cam-plans-empty p {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.3);
+  margin: 0;
+}
+
+/* Premium Plan Card */
+.cam-plan-card--premium {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  text-align: left;
+}
+
+.cam-plan-card--premium:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.cam-plan-card--premium.cam-plan-card--selected {
+  border-color: var(--plan-color, #DC2626);
+  background: rgba(0, 0, 0, 0.6);
+  box-shadow: 
+    0 0 0 1px var(--plan-color, #DC2626),
+    0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.cam-plan-card__color-bar {
+  height: 4px;
+  background: var(--plan-color, #DC2626);
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.cam-plan-card--selected .cam-plan-card__color-bar {
+  opacity: 1;
+}
+
+.cam-plan-card__content {
+  padding: 14px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cam-plan-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cam-plan-card__name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.01em;
+}
+
+.cam-plan-card--premium .cam-plan-card__check {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: transparent;
+  transition: all 0.2s;
+}
+
+.cam-plan-card--selected .cam-plan-card__check {
+  background: var(--plan-color, #DC2626);
+  border-color: var(--plan-color, #DC2626);
+  color: #fff;
+}
+
+.cam-plan-card__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.cam-plan-card__count {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.cam-plan-card__price {
+  font-size: 12px;
+  font-weight: 600;
+  color: #10B981;
+}
+
+/* Duration Grid - Premium */
+.cam-duration-grid--premium {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.cam-duration-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 18px 12px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.cam-duration-card:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.cam-duration-card--selected {
+  border-color: var(--plan-color, #DC2626);
+  background: rgba(0, 0, 0, 0.6);
+  box-shadow: 0 0 0 1px var(--plan-color, #DC2626);
+}
+
+.cam-duration-card__duration {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.cam-duration-card__price {
+  font-size: 16px;
+  font-weight: 700;
+  color: #10B981;
+}
+
+.cam-duration-card__pt {
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(220, 38, 38, 0.9);
+  background: rgba(220, 38, 38, 0.12);
+  padding: 3px 8px;
+  border-radius: 10px;
+  margin-top: 4px;
+}
+
+.cam-duration-card__check {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--plan-color, #DC2626);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+/* Premium Summary */
+.cam-summary--premium {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0.02) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.cam-summary__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 18px;
+  background: rgba(16, 185, 129, 0.08);
+  border-bottom: 1px solid rgba(16, 185, 129, 0.15);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #10B981;
+}
+
+.cam-summary__body {
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cam-summary__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.cam-summary__row span:first-child {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.cam-summary__row span:last-child {
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 500;
+}
+
+.cam-summary__divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 6px 0;
+}
+
+.cam-summary__row--total {
+  padding-top: 8px;
+}
+
+.cam-summary__row--total span:first-child {
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.cam-summary__row--total span:last-child {
+  font-size: 18px;
+  font-weight: 700;
+  color: #10B981;
+}
+
+/* Premium Footer - Compact */
+.cam-footer--premium {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 12px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.cam-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 18px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cam-btn--cancel {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.cam-btn--cancel:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.cam-btn--premium {
+  background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%);
+  border: none;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(220, 38, 38, 0.35);
+}
+
+.cam-btn--premium:hover:not(:disabled) {
+  background: linear-gradient(135deg, #EF4444 0%, #B91C1C 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(220, 38, 38, 0.45);
+}
+
+.cam-btn--premium:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.cam-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Spinner */
+.cam-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(220, 38, 38, 0.2);
+  border-top-color: #DC2626;
+  border-radius: 50%;
+  animation: cam-spin 0.8s linear infinite;
+}
+
+.cam-spinner--sm {
+  width: 16px;
+  height: 16px;
+  border-width: 2px;
+  border-color: rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+}
+
+@keyframes cam-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ============================================================================
+   Responsive
+   ============================================================================ */
+@media (max-width: 640px) {
+  .cam-modal {
+    max-height: 95vh;
+    border-radius: 16px;
+  }
+
+  .cam-header--premium {
+    padding: 20px 16px 16px;
+  }
+
+  .cam-header__icon-wrap {
+    width: 42px;
+    height: 42px;
+  }
+
+  .cam-progress {
+    padding: 12px 16px;
+  }
+
+  .cam-progress__step span {
+    display: none;
+  }
+
+  .cam-body {
+    padding: 16px;
+  }
+
+  .cam-section--premium {
+    padding: 16px;
+  }
+
+  .cam-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .cam-plans-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cam-duration-grid--premium {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .cam-footer--premium {
+    flex-direction: column;
+    padding: 16px;
+  }
+
+  .cam-btn {
+    width: 100%;
+  }
+}
+
+/* ============================================================================
+   Legacy Classes (kept for backwards compatibility)
+   ============================================================================ */
+.cam-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.cam-header__left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cam-back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cam-back:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.cam-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cam-section__header svg {
+  color: #DC2626;
+}
+
+.cam-dropdown-trigger {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.cam-dropdown-trigger:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.cam-dropdown-trigger:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.cam-dropdown-trigger--open {
+  border-color: rgba(220, 38, 38, 0.35);
+  background: rgba(220, 38, 38, 0.06);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+}
+
+.cam-dropdown-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.cam-dropdown-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cam-dropdown-value--muted {
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 500;
+}
+
+.cam-dropdown-icon {
+  color: rgba(255, 255, 255, 0.5);
+  transition: transform 0.2s;
+}
+
+.cam-dropdown-trigger--open .cam-dropdown-icon {
+  transform: rotate(180deg);
+  color: #DC2626;
+}
+
+.cam-dropdown-body {
+  overflow: hidden;
+}
+
+.cam-plans {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cam-plan-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: left;
+}
+
+.cam-plan-card:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.cam-plan-card--selected {
+  background: rgba(220, 38, 38, 0.08);
+  border-color: rgba(220, 38, 38, 0.3);
+  box-shadow: 0 0 20px rgba(220, 38, 38, 0.1);
+}
+
+.cam-plan-card--selected:hover {
+  background: rgba(220, 38, 38, 0.1);
+  border-color: rgba(220, 38, 38, 0.4);
+}
+
+.cam-plan-card__check {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.cam-plan-card--selected .cam-plan-card__check {
+  background: #DC2626;
+  border-color: #DC2626;
+  color: #fff;
+}
+
+.cam-plan-card__info {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.cam-duration-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.cam-duration-grid--plans {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.cam-duration-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cam-duration-btn--card {
+  height: auto;
+  padding: 12px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  text-align: left;
+}
+
+.cam-duration-btn__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.cam-duration-btn__price {
+  font-size: 14px;
+  font-weight: 700;
+  color: #10B981;
+}
+
+.cam-duration-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.cam-duration-btn--selected {
+  background: rgba(220, 38, 38, 0.1);
+  border-color: rgba(220, 38, 38, 0.4);
+  color: #DC2626;
+}
+
+.cam-duration-btn--selected:hover {
+  background: rgba(220, 38, 38, 0.15);
+}
+
+.cam-duration-btn--selected svg {
+  color: #DC2626;
+}
+
+.cam-duration-btn--selected .cam-duration-btn__label {
+  color: #fff;
+}
+
+.cam-duration-empty {
+  padding: 16px;
+  border-radius: 10px;
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 12px;
+}
+
+.cam-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+}
+
+.cam-summary__row--total {
+  padding-top: 10px;
+  margin-top: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.cam-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.cam-btn--submit {
+  background: linear-gradient(135deg, #DC2626, #991B1B);
+  border: none;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
+
+.cam-btn--submit:hover {
+  background: linear-gradient(135deg, #EF4444, #B91C1C);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+}
+
+.cam-btn--submit:active {
+  transform: translateY(0);
+}
+
+/* ============================================================================
+   Light Mode (kept for reference but premium theme stays dark)
+   ============================================================================ */
+:root.theme-light .cam-modal,
+[data-theme="light"] .cam-modal {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+:root.theme-light .cam-modal--premium,
+[data-theme="light"] .cam-modal--premium {
+  border-color: rgba(220, 38, 38, 0.2);
+}
+
+:root.theme-light .cam-header--premium .cam-header__bg,
+[data-theme="light"] .cam-header--premium .cam-header__bg {
+  background: linear-gradient(135deg, rgba(220, 38, 38, 0.08) 0%, rgba(220, 38, 38, 0.02) 50%, transparent 100%);
+}
+
+:root.theme-light .cam-title,
+[data-theme="light"] .cam-title {
+  color: #0f172a;
+}
+
+:root.theme-light .cam-subtitle,
+[data-theme="light"] .cam-subtitle {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+:root.theme-light .cam-close,
+[data-theme="light"] .cam-close {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.08);
+  color: rgba(0, 0, 0, 0.5);
+}
+
+:root.theme-light .cam-progress,
+[data-theme="light"] .cam-progress {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+:root.theme-light .cam-progress__step span,
+[data-theme="light"] .cam-progress__step span {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+:root.theme-light .cam-progress__circle,
+[data-theme="light"] .cam-progress__circle {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.12);
+  color: rgba(0, 0, 0, 0.4);
+}
+
+:root.theme-light .cam-section--premium,
+[data-theme="light"] .cam-section--premium {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+:root.theme-light .cam-section__header,
+[data-theme="light"] .cam-section__header {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+:root.theme-light .cam-label,
+[data-theme="light"] .cam-label {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+:root.theme-light .cam-input,
+[data-theme="light"] .cam-input {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #0f172a;
+}
+
+:root.theme-light .cam-input::placeholder,
+[data-theme="light"] .cam-input::placeholder {
+  color: rgba(0, 0, 0, 0.35);
+}
+
+:root.theme-light .cam-input-icon,
+[data-theme="light"] .cam-input-icon {
+  color: rgba(0, 0, 0, 0.3);
+}
+
+:root.theme-light .cam-plan-card--premium,
+[data-theme="light"] .cam-plan-card--premium {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+:root.theme-light .cam-plan-card__name,
+[data-theme="light"] .cam-plan-card__name {
+  color: #0f172a;
+}
+
+:root.theme-light .cam-plan-card__count,
+[data-theme="light"] .cam-plan-card__count {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+:root.theme-light .cam-duration-card,
+[data-theme="light"] .cam-duration-card {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+:root.theme-light .cam-duration-card__duration,
+[data-theme="light"] .cam-duration-card__duration {
+  color: #0f172a;
+}
+
+:root.theme-light .cam-summary--premium,
+[data-theme="light"] .cam-summary--premium {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.06) 0%, rgba(16, 185, 129, 0.02) 100%);
+}
+
+:root.theme-light .cam-summary__row span:first-child,
+[data-theme="light"] .cam-summary__row span:first-child {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+:root.theme-light .cam-summary__row span:last-child,
+[data-theme="light"] .cam-summary__row span:last-child {
+  color: rgba(0, 0, 0, 0.85);
+}
+
+:root.theme-light .cam-footer--premium,
+[data-theme="light"] .cam-footer--premium {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+:root.theme-light .cam-btn--cancel,
+[data-theme="light"] .cam-btn--cancel {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.12);
+  color: rgba(0, 0, 0, 0.6);
+}

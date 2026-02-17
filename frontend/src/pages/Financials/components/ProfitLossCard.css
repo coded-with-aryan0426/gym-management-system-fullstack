@@ -1,0 +1,209 @@
+.pl-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.pl-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-primary);
+}
+
+.pl-title {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.pl-badge {
+    font-size: 0.625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.pl-badge.positive {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--color-emerald);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.pl-badge.negative {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--color-crimson);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.pl-body {
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.pl-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.pl-section-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-tertiary);
+}
+
+.pl-section-total {
+    font-size: 0.875rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.pl-section-total.income { color: var(--color-emerald); }
+.pl-section-total.expense { color: var(--color-crimson); }
+
+.pl-items {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.pl-item {
+    display: grid;
+    grid-template-columns: 80px 1fr 70px 36px;
+    align-items: center;
+    gap: 8px;
+}
+
+.pl-item-name {
+    font-size: 0.6875rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pl-item-bar-container {
+    height: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.pl-item-bar {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.6s ease;
+}
+
+.pl-item-bar.income { background: var(--color-emerald); }
+.pl-item-bar.expense { background: var(--color-crimson); }
+
+.pl-item-value {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.pl-item-pct {
+    font-size: 0.625rem;
+    color: var(--text-tertiary);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.pl-divider {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+}
+
+.pl-divider::before,
+.pl-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border-secondary);
+}
+
+.pl-divider-label {
+    font-size: 0.5625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-tertiary);
+}
+
+.pl-net {
+    padding: 10px 12px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.pl-net.positive {
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.pl-net.negative {
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.pl-net-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.pl-net-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.pl-net-value {
+    font-size: 1.125rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.pl-net.positive .pl-net-value { color: var(--color-emerald); }
+.pl-net.negative .pl-net-value { color: var(--color-crimson); }
+
+.pl-net-bar-container {
+    height: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.pl-net-bar {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.6s ease;
+}
+
+.pl-net-bar.positive { background: var(--color-emerald); }
+.pl-net-bar.negative { background: var(--color-crimson); }
+
+.pl-net-margin {
+    font-size: 0.625rem;
+    color: var(--text-tertiary);
+}
