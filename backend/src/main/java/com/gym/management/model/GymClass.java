@@ -22,7 +22,7 @@ public class GymClass {
     @Column(name = "class_type", nullable = false)
     private String classType;
 
-    @Column(name = "description", columnDefinition = "CLOB")
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -81,38 +81,133 @@ public class GymClass {
         return maxCapacity - (currentBookings != null ? currentBookings : 0);
     }
 
-    public Long getClassId() { return classId; }
-    public void setClassId(Long classId) { this.classId = classId; }
-    public String getClassName() { return className; }
-    public void setClassName(String className) { this.className = className; }
-    public String getClassType() { return classType; }
-    public void setClassType(String classType) { this.classType = classType; }
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
-    public User getTrainer() { return trainer; }
-    public void setTrainer(User trainer) { this.trainer = trainer; }
-    public LocalDateTime getStartTime() { return startTime; }
-    public void setStartTime(LocalDateTime startTime) { this.startTime = startTime; }
-    public Integer getDurationMinutes() { return durationMinutes; }
-    public void setDurationMinutes(Integer durationMinutes) { this.durationMinutes = durationMinutes; }
-    public Integer getMaxCapacity() { return maxCapacity; }
-    public void setMaxCapacity(Integer maxCapacity) { this.maxCapacity = maxCapacity; }
-    public Integer getCurrentBookings() { return currentBookings; }
-    public void setCurrentBookings(Integer currentBookings) { this.currentBookings = currentBookings; }
-    public String getDifficulty() { return difficulty; }
-    public void setDifficulty(String difficulty) { this.difficulty = difficulty; }
-    public String getLocation() { return location; }
-    public void setLocation(String location) { this.location = location; }
-    public ClassStatus getStatus() { return status; }
-    public void setStatus(ClassStatus status) { this.status = status; }
-    public Boolean getRecurring() { return recurring; }
-    public void setRecurring(Boolean recurring) { this.recurring = recurring; }
-    public String getRecurrencePattern() { return recurrencePattern; }
-    public void setRecurrencePattern(String recurrencePattern) { this.recurrencePattern = recurrencePattern; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public Long getClassId() {
+        return classId;
+    }
+
+    public void setClassId(Long classId) {
+        this.classId = classId;
+    }
+
+    public String getClassName() {
+        return className;
+    }
+
+    public void setClassName(String className) {
+        this.className = className;
+    }
+
+    public String getClassType() {
+        return classType;
+    }
+
+    public void setClassType(String classType) {
+        this.classType = classType;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public User getTrainer() {
+        return trainer;
+    }
+
+    public void setTrainer(User trainer) {
+        this.trainer = trainer;
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public Integer getDurationMinutes() {
+        return durationMinutes;
+    }
+
+    public void setDurationMinutes(Integer durationMinutes) {
+        this.durationMinutes = durationMinutes;
+    }
+
+    public Integer getMaxCapacity() {
+        return maxCapacity;
+    }
+
+    public void setMaxCapacity(Integer maxCapacity) {
+        this.maxCapacity = maxCapacity;
+    }
+
+    public Integer getCurrentBookings() {
+        return currentBookings;
+    }
+
+    public void setCurrentBookings(Integer currentBookings) {
+        this.currentBookings = currentBookings;
+    }
+
+    public String getDifficulty() {
+        return difficulty;
+    }
+
+    public void setDifficulty(String difficulty) {
+        this.difficulty = difficulty;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public ClassStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ClassStatus status) {
+        this.status = status;
+    }
+
+    public Boolean getRecurring() {
+        return recurring;
+    }
+
+    public void setRecurring(Boolean recurring) {
+        this.recurring = recurring;
+    }
+
+    public String getRecurrencePattern() {
+        return recurrencePattern;
+    }
+
+    public void setRecurrencePattern(String recurrencePattern) {
+        this.recurrencePattern = recurrencePattern;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 
     public enum ClassStatus {
         SCHEDULED, CANCELLED, COMPLETED, FULL

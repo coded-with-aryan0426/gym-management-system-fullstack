@@ -31,14 +31,20 @@ public class GymClassService {
     @Autowired
     private UserRepository userRepository;
 
-    private static final String[] CLASS_TYPES = {"Yoga", "HIIT", "Strength", "Spin", "Pilates", "Boxing", "CrossFit", "Group"};
-    private static final String[] DIFFICULTIES = {"Beginner", "Intermediate", "Advanced"};
-    private static final String[] LOCATIONS = {"Studio A", "Studio B", "Main Floor", "Spin Room", "Boxing Ring"};
+    private static final String[] CLASS_TYPES = { "Yoga", "HIIT", "Strength", "Spin", "Pilates", "Boxing", "CrossFit",
+            "Group" };
+    private static final String[] DIFFICULTIES = { "Beginner", "Intermediate", "Advanced" };
+    private static final String[] LOCATIONS = { "Studio A", "Studio B", "Main Floor", "Spin Room", "Boxing Ring" };
 
     @PostConstruct
     public void initializeDummyClasses() {
-        if (gymClassRepository.count() == 0) {
-            generateDummyClasses();
+        try {
+            if (gymClassRepository.count() == 0) {
+                generateDummyClasses();
+            }
+        } catch (Exception e) {
+            System.err.println("Warning: Failed to initialize dummy classes. Database might not be ready. Error: "
+                    + e.getMessage());
         }
     }
 
@@ -58,11 +64,12 @@ public class GymClassService {
             LocalDate classDate = today.plusDays(dayOffset);
             int classesPerDay = dayOffset == 0 ? 7 : 5;
 
-            String[] times = {"08:00", "09:30", "11:00", "14:00", "16:30", "18:00", "19:30"};
+            String[] times = { "08:00", "09:30", "11:00", "14:00", "16:30", "18:00", "19:30" };
 
             for (int i = 0; i < classesPerDay; i++) {
                 String[] timeParts = times[i % times.length].split(":");
-                LocalDateTime startTime = LocalDateTime.of(classDate, LocalTime.of(Integer.parseInt(timeParts[0]), Integer.parseInt(timeParts[1])));
+                LocalDateTime startTime = LocalDateTime.of(classDate,
+                        LocalTime.of(Integer.parseInt(timeParts[0]), Integer.parseInt(timeParts[1])));
 
                 if (startTime.isBefore(LocalDateTime.now())) {
                     continue;
@@ -77,7 +84,7 @@ public class GymClassService {
                 gymClass.setDescription("Join us for an energizing " + classType + " session!");
                 gymClass.setTrainer(trainer);
                 gymClass.setStartTime(startTime);
-                gymClass.setDurationMinutes(new int[]{45, 60, 75, 90}[random.nextInt(4)]);
+                gymClass.setDurationMinutes(new int[] { 45, 60, 75, 90 }[random.nextInt(4)]);
                 gymClass.setMaxCapacity(random.nextInt(15) + 10);
                 gymClass.setCurrentBookings(random.nextInt(gymClass.getMaxCapacity() / 2));
                 gymClass.setDifficulty(DIFFICULTIES[random.nextInt(DIFFICULTIES.length)]);
@@ -92,13 +99,15 @@ public class GymClassService {
     @Transactional(readOnly = true)
     public List<GymClassDTO> getAvailableClasses(Long memberId) {
         LocalDateTime now = LocalDateTime.now();
-        List<GymClass> classes = gymClassRepository.findByStartTimeAfterAndStatusOrderByStartTimeAsc(now, GymClass.ClassStatus.SCHEDULED);
+        List<GymClass> classes = gymClassRepository.findByStartTimeAfterAndStatusOrderByStartTimeAsc(now,
+                GymClass.ClassStatus.SCHEDULED);
 
         Set<Long> bookedClassIds = new HashSet<>();
         Map<Long, Long> bookingIdMap = new HashMap<>();
 
         if (memberId != null) {
-            List<ClassBooking> memberBookings = classBookingRepository.findByMemberUserIdAndStatusOrderByBookedAtDesc(memberId, ClassBooking.BookingStatus.CONFIRMED);
+            List<ClassBooking> memberBookings = classBookingRepository
+                    .findByMemberUserIdAndStatusOrderByBookedAtDesc(memberId, ClassBooking.BookingStatus.CONFIRMED);
             for (ClassBooking booking : memberBookings) {
                 bookedClassIds.add(booking.getGymClass().getClassId());
                 bookingIdMap.put(booking.getGymClass().getClassId(), booking.getBookingId());
@@ -122,7 +131,8 @@ public class GymClassService {
         Map<Long, Long> bookingIdMap = new HashMap<>();
 
         if (memberId != null) {
-            List<ClassBooking> memberBookings = classBookingRepository.findByMemberUserIdAndStatusOrderByBookedAtDesc(memberId, ClassBooking.BookingStatus.CONFIRMED);
+            List<ClassBooking> memberBookings = classBookingRepository
+                    .findByMemberUserIdAndStatusOrderByBookedAtDesc(memberId, ClassBooking.BookingStatus.CONFIRMED);
             for (ClassBooking booking : memberBookings) {
                 bookedClassIds.add(booking.getGymClass().getClassId());
                 bookingIdMap.put(booking.getGymClass().getClassId(), booking.getBookingId());
