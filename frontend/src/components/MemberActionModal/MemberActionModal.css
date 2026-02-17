@@ -7,9 +7,11 @@
   --modal-max-width: 1680px;
   --modal-height: min(90vh, 960px);
   --modal-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-  --tab-active-bg: rgba(220, 38, 38, 0.1);
+  --tab-active-bg: rgba(99, 102, 241, 0.1);
   --tab-hover-bg: rgba(28, 22, 22, 0.03);
   --sidebar-offset: 220px;
+  --modal-accent: #6366F1;
+  --modal-accent-hover: #4F46E5;
 }
 
 /* Overlay - Account for sidebar offset */
@@ -72,8 +74,8 @@
 }
 
 .member-action-modal__close-inline:hover {
-  background-color: var(--color-crimson);
-  border-color: var(--color-crimson);
+  background-color: #ef4444;
+  border-color: #ef4444;
   color: var(--text-on-accent, white);
   transform: rotate(90deg);
 }
@@ -94,7 +96,7 @@
   height: 44px;
   border-radius: 12px;
   overflow: hidden;
-  border: 2px solid var(--color-crimson);
+  border: 2px solid var(--modal-accent);
   background-color: var(--bg-tertiary);
   flex-shrink: 0;
 }
@@ -145,7 +147,7 @@
 
 /* Badges */
 .plan-badge,
-.status-badge {
+.modal-status-badge {
   /* Removed fixed sizing to allow auto-flex */
   width: auto;
   min-width: 60px;
@@ -168,12 +170,137 @@
   /* Prevent breaking */
 }
 
+/* Unified plan badge (shared with MemberList) */
+.member-action-modal .member-plan-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  text-transform: none;
+  height: auto;
+}
+
+.member-action-modal .member-plan-badge .plan-icon { font-size: 12px; line-height: 1; }
+
+.member-action-modal .member-plan--none {
+  background: rgba(107, 114, 128, 0.1);
+  color: #9CA3AF;
+  border: 1px solid rgba(107, 114, 128, 0.15);
+}
+.member-action-modal .member-plan--basic {
+  background: rgba(20, 184, 166, 0.12);
+  color: #5EEAD4;
+  border: 1px solid rgba(20, 184, 166, 0.25);
+}
+.member-action-modal .member-plan--standard {
+  background: rgba(59, 130, 246, 0.12);
+  color: #93C5FD;
+  border: 1px solid rgba(59, 130, 246, 0.25);
+}
+.member-action-modal .member-plan--gold {
+  background: rgba(234, 179, 8, 0.12);
+  color: #FDE047;
+  border: 1px solid rgba(234, 179, 8, 0.25);
+}
+.member-action-modal .member-plan--corporate {
+  background: rgba(99, 102, 241, 0.12);
+  color: #A5B4FC;
+  border: 1px solid rgba(99, 102, 241, 0.25);
+}
+.member-action-modal .member-plan--student {
+  background: rgba(236, 72, 153, 0.12);
+  color: #F9A8D4;
+  border: 1px solid rgba(236, 72, 153, 0.25);
+}
+.member-action-modal .member-plan--premium {
+  background: rgba(168, 85, 247, 0.12);
+  color: #C4B5FD;
+  border: 1px solid rgba(168, 85, 247, 0.25);
+}
+.member-action-modal .member-plan--platinum {
+  background: linear-gradient(135deg, rgba(234, 179, 8, 0.15), rgba(168, 85, 247, 0.1));
+  color: #FDE68A;
+  border: 1px solid rgba(234, 179, 8, 0.3);
+}
+.member-action-modal .member-plan--default {
+  background: rgba(148, 163, 184, 0.1);
+  color: #CBD5E1;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+/* Modal status badge (avoids conflict with MemberList status-badge) */
+.modal-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+  text-transform: capitalize;
+  letter-spacing: 0.03em;
+}
+.modal-status-badge__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.modal-status-badge--active {
+  background: rgba(34, 197, 94, 0.12);
+  color: #4ADE80;
+  border: 1px solid rgba(34, 197, 94, 0.25);
+}
+.modal-status-badge--active .modal-status-badge__dot {
+  background: #4ADE80;
+  box-shadow: 0 0 6px rgba(74, 222, 128, 0.6);
+}
+.modal-status-badge--expired,
+.modal-status-badge--inactive {
+  background: rgba(239, 68, 68, 0.12);
+  color: #FCA5A5;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+.modal-status-badge--expired .modal-status-badge__dot,
+.modal-status-badge--inactive .modal-status-badge__dot {
+  background: #FCA5A5;
+}
+
 
 
 .plan-badge {
-  background: rgba(220, 38, 38, 0.12);
-  color: var(--color-crimson);
-  border: 1px solid rgba(220, 38, 38, 0.2);
+  background: rgba(99, 102, 241, 0.12);
+  color: var(--modal-accent);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.plan-badge--basic {
+  background: rgba(20, 184, 166, 0.12);
+  color: #14b8a6;
+  border-color: rgba(20, 184, 166, 0.2);
+}
+
+.plan-badge--standard {
+  background: rgba(59, 130, 246, 0.12);
+  color: #3b82f6;
+  border-color: rgba(59, 130, 246, 0.2);
+}
+
+.plan-badge--premium {
+  background: rgba(168, 85, 247, 0.12);
+  color: #a855f7;
+  border-color: rgba(168, 85, 247, 0.2);
+}
+
+.plan-badge--no-plan {
+  background: rgba(107, 114, 128, 0.12);
+  color: #6b7280;
+  border-color: rgba(107, 114, 128, 0.2);
 }
 
 .status-badge {
@@ -229,19 +356,19 @@
 
 .stat-item:hover {
   transform: translateY(-1px);
-  border-color: var(--color-crimson);
+  border-color: var(--modal-accent);
 }
 
 .stat-value {
   font-size: 18px;
   font-weight: 800;
-  color: var(--color-crimson);
+  color: var(--modal-accent);
   line-height: 1;
 }
 
 .stat-label {
   font-size: 8px;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   text-transform: uppercase;
   font-weight: 600;
   margin-top: 2px;
@@ -294,10 +421,10 @@
 }
 
 .side-panel-nav__item--active {
-  background-color: var(--tab-active-bg);
-  border-color: rgba(220, 38, 38, 0.2);
-  color: var(--color-crimson);
-}
+    background-color: var(--tab-active-bg);
+    border-color: rgba(99, 102, 241, 0.25);
+    color: var(--modal-accent);
+  }
 
 .side-panel-nav__item--danger {
   color: #ef4444;
@@ -323,9 +450,9 @@
 }
 
 .side-panel-nav__item--active .nav-badge {
-  background-color: var(--color-crimson);
-  color: var(--text-on-accent, white);
-}
+    background-color: var(--modal-accent);
+    color: var(--text-on-accent, white);
+  }
 
 /* Right Content Panel */
 .member-action-modal__content-panel {
@@ -384,7 +511,7 @@
 .form-group label {
   font-size: 11px;
   font-weight: 700;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.4px;
 }
@@ -407,8 +534,8 @@
 .form-select:focus,
 .form-textarea:focus {
   outline: none;
-  border-color: var(--color-crimson);
-  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+  border-color: var(--modal-accent);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
   background-color: var(--bg-primary);
 }
 
@@ -466,7 +593,7 @@
 .message-compose__label {
   font-size: 13px;
   font-weight: 500;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   min-width: 60px;
   flex-shrink: 0;
 }
@@ -483,8 +610,8 @@
   align-items: center;
   gap: 6px;
   padding: 4px 10px;
-  background: rgba(220, 38, 38, 0.08);
-  border: 1px solid rgba(220, 38, 38, 0.15);
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.15);
   border-radius: 16px;
   font-size: 12px;
   font-weight: 500;
@@ -493,7 +620,7 @@
 
 .recipient-email {
   font-size: 11px;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   font-weight: 400;
 }
 
@@ -563,8 +690,8 @@ body.light-mode .message-compose__row {
 :root.theme-light .recipient-tag,
 [data-theme="light"] .recipient-tag,
 body.light-mode .recipient-tag {
-  background: rgba(220, 38, 38, 0.06);
-  border-color: rgba(220, 38, 38, 0.12);
+  background: rgba(99, 102, 241, 0.06);
+  border-color: rgba(99, 102, 241, 0.12);
 }
 
 
@@ -593,15 +720,15 @@ body.light-mode .recipient-tag {
 }
 
 .btn--primary {
-  background-color: var(--color-crimson);
+  background: linear-gradient(135deg, #6366F1, #4F46E5);
   color: var(--text-on-accent, white);
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
 }
 
 .btn--primary:hover:not(:disabled) {
-  background-color: var(--color-crimson-hover);
+  background: linear-gradient(135deg, #4F46E5, #4338CA);
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(220, 38, 38, 0.3);
+  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.35);
 }
 
 .btn--primary:disabled {
@@ -653,7 +780,7 @@ body.light-mode .recipient-tag {
 }
 
 .trainers-count {
-  background: var(--color-crimson);
+  background: var(--modal-accent);
   color: white;
   padding: 2px 8px;
   border-radius: 12px;
@@ -682,8 +809,8 @@ body.light-mode .recipient-tag {
 
 .add-trainer-btn:hover,
 .add-trainer-btn--active {
-  background: var(--color-crimson);
-  border-color: var(--color-crimson);
+  background: var(--modal-accent);
+  border-color: var(--modal-accent);
   color: var(--text-on-accent, white);
 }
 
@@ -746,7 +873,7 @@ body.light-mode .recipient-tag {
 
 .trainer-popover__input:focus {
   outline: none;
-  border-color: var(--color-crimson);
+  border-color: var(--modal-accent);
 }
 
 .trainer-popover__results {
@@ -773,7 +900,7 @@ body.light-mode .recipient-tag {
   height: 36px;
   border-radius: 10px;
   background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
-  color: var(--color-crimson);
+  color: var(--modal-accent);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -796,7 +923,7 @@ body.light-mode .recipient-tag {
 
 .trainer-popover__email {
   font-size: 11px;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -807,7 +934,7 @@ body.light-mode .recipient-tag {
 .trainer-popover__empty {
   padding: 20px;
   text-align: center;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   font-size: 13px;
 }
 
@@ -831,7 +958,7 @@ body.light-mode .recipient-tag {
 }
 
 .trainer-item:hover {
-  border-color: rgba(220, 38, 38, 0.3);
+  border-color: rgba(99, 102, 241, 0.3);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
@@ -846,7 +973,7 @@ body.light-mode .recipient-tag {
   height: 36px;
   border-radius: 10px;
   background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
-  color: var(--color-crimson);
+  color: var(--modal-accent);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -863,7 +990,7 @@ body.light-mode .recipient-tag {
 
 .trainer-item__role {
   font-size: 11px;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
 }
 
 .trainer-item__remove {
@@ -886,7 +1013,7 @@ body.light-mode .recipient-tag {
 .empty-state {
   text-align: center;
   padding: 32px 20px;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
 }
 
 .empty-state svg {
@@ -919,7 +1046,7 @@ body.light-mode .recipient-tag {
 
 .current-plan-label {
   font-size: 11px;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   text-transform: uppercase;
   font-weight: 600;
 }
@@ -927,7 +1054,7 @@ body.light-mode .recipient-tag {
 .current-plan-name {
   font-size: 14px;
   font-weight: 700;
-  color: var(--color-crimson);
+  color: var(--modal-accent);
 }
 
 /* Renew Section */
@@ -940,7 +1067,7 @@ body.light-mode .recipient-tag {
 
 .renew-total-label {
   font-size: 10px;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   text-transform: uppercase;
   font-weight: 600;
   display: block;
@@ -1128,7 +1255,7 @@ body.light-mode .recipient-tag {
 .checkbox-label input[type="checkbox"] {
   width: 16px;
   height: 16px;
-  accent-color: var(--color-crimson);
+  accent-color: var(--modal-accent);
 }
 
 .price-hint {
@@ -1289,7 +1416,7 @@ body.light-mode .recipient-tag {
    ============================================================================ */
 .profile-header__avatar-component {
   flex-shrink: 0;
-  border: 2px solid var(--color-crimson);
+  border: 2px solid var(--modal-accent);
 }
 
 .profile-header__avatar-component.avatar--lg {
@@ -1340,7 +1467,7 @@ body.light-mode .stat-label {
 :root.theme-light .stat-value,
 [data-theme="light"] .stat-value,
 body.light-mode .stat-value {
-  color: #dc2626;
+  color: #4F46E5;
 }
 
 /* Navigation - Light Mode */
@@ -1367,8 +1494,8 @@ body.light-mode .side-panel-nav__item:hover {
 :root.theme-light .side-panel-nav__item--active,
 [data-theme="light"] .side-panel-nav__item--active,
 body.light-mode .side-panel-nav__item--active {
-  background-color: rgba(220, 38, 38, 0.08);
-  color: #dc2626;
+  background-color: rgba(99, 102, 241, 0.08);
+  color: #4F46E5;
 }
 
 /* Content Panel - Light Mode */
@@ -1406,7 +1533,7 @@ body.light-mode .form-input:focus,
 [data-theme="light"] .form-select:focus,
 body.light-mode .form-select:focus {
   background-color: #ffffff;
-  border-color: #dc2626;
+  border-color: #4F46E5;
 }
 
 :root.theme-light .form-group label,
@@ -1487,8 +1614,8 @@ body.light-mode .member-action-modal__close-inline {
 :root.theme-light .member-action-modal__close-inline:hover,
 [data-theme="light"] .member-action-modal__close-inline:hover,
 body.light-mode .member-action-modal__close-inline:hover {
-  background-color: #dc2626;
-  border-color: #dc2626;
+  background-color: #ef4444;
+  border-color: #ef4444;
   color: white;
 }
 
@@ -1553,4 +1680,700 @@ body.light-mode .empty-state p {
 [data-theme="light"] .empty-state span,
 body.light-mode .empty-state span {
   color: #94a3b8;
+}
+
+/* ============================================================================
+   Payment History Tab - Transaction List
+   ============================================================================ */
+
+.transactions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.transaction-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--bg-tertiary);
+  transition: background 0.15s ease;
+}
+
+.transaction-item:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.transaction-item__left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.transaction-item__icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.transaction-item__icon--income {
+  background: rgba(34, 197, 94, 0.12);
+  color: #22c55e;
+}
+
+.transaction-item__icon--expense {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+}
+
+.transaction-item__info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.transaction-item__desc {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.transaction-item__date {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.transaction-item__right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.transaction-item__amount {
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.transaction-item__amount--positive {
+  color: #22c55e;
+}
+
+.transaction-item__amount--negative {
+  color: #ef4444;
+}
+
+.transaction-item__status {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.transaction-item__status--completed {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+}
+
+.transaction-item__status--pending {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+
+.transaction-item__status--failed {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+/* ============================================================================
+   Attendance Tab - Summary & Check-in List
+   ============================================================================ */
+
+.attendance-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.attendance-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 8px;
+  background: var(--bg-tertiary);
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+}
+
+.attendance-stat__value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.attendance-stat__label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.checkins-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.checkin-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--bg-tertiary);
+  transition: background 0.15s ease;
+}
+
+.checkin-item:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.checkin-item__date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 42px;
+  flex-shrink: 0;
+}
+
+.checkin-item__day {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  letter-spacing: 0.5px;
+}
+
+.checkin-item__full-date {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.checkin-item__times {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+}
+
+.checkin-item__in,
+.checkin-item__out {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.checkin-item__in {
+  color: #22c55e;
+  font-weight: 500;
+}
+
+.checkin-item__duration {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: rgba(99, 102, 241, 0.1);
+  padding: 2px 8px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.checkin-item__status {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+  text-transform: capitalize;
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+  flex-shrink: 0;
+}
+
+.checkin-item__status--checked-out {
+  background: rgba(100, 116, 139, 0.1);
+  color: #94a3b8;
+}
+
+/* ============================================================================
+   Profile Sections - Emergency Contact, Health, Notes
+   ============================================================================ */
+
+.profile-section {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.profile-section__title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 12px 0;
+}
+
+.profile-section__title svg {
+  color: var(--text-secondary);
+}
+
+/* Notes Section */
+.notes-add-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.notes-add-row .form-input {
+  flex: 1;
+}
+
+.notes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.notes-empty {
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+  padding: 12px;
+}
+
+.note-item {
+  padding: 8px 10px;
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+}
+
+.note-item__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.note-item__author {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--modal-accent);
+}
+
+.note-item__date {
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
+.note-item__content {
+  font-size: 12px;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Nav badge for tab counts */
+.nav-badge {
+  font-size: 10px;
+  font-weight: 600;
+  background: rgba(99, 102, 241, 0.12);
+  color: var(--modal-accent);
+  padding: 1px 6px;
+  border-radius: 10px;
+  margin-left: auto;
+}
+
+/* ============================================================================
+   Light Mode Overrides for New Sections
+   ============================================================================ */
+
+:root.theme-light .transaction-item,
+[data-theme="light"] .transaction-item,
+body.light-mode .transaction-item {
+  background: #f8fafc;
+}
+
+:root.theme-light .transaction-item:hover,
+[data-theme="light"] .transaction-item:hover,
+body.light-mode .transaction-item:hover {
+  background: #f1f5f9;
+}
+
+:root.theme-light .attendance-stat,
+[data-theme="light"] .attendance-stat,
+body.light-mode .attendance-stat {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+:root.theme-light .checkin-item,
+[data-theme="light"] .checkin-item,
+body.light-mode .checkin-item {
+  background: #f8fafc;
+}
+
+:root.theme-light .checkin-item:hover,
+[data-theme="light"] .checkin-item:hover,
+body.light-mode .checkin-item:hover {
+  background: #f1f5f9;
+}
+
+:root.theme-light .note-item,
+[data-theme="light"] .note-item,
+body.light-mode .note-item {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+:root.theme-light .profile-section,
+[data-theme="light"] .profile-section,
+body.light-mode .profile-section {
+  border-top-color: #e2e8f0;
+}
+
+/* ============================================================================
+   Tiered Plan Renewal UI
+   ============================================================================ */
+
+/* Plan Selection Cards Grid */
+.renew-plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.renew-plan-card {
+  position: relative;
+  padding: 16px;
+  border-radius: 14px;
+  background: var(--bg-tertiary);
+  border: 2px solid var(--border-subtle);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.renew-plan-card:hover {
+  border-color: rgba(108, 99, 255, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.renew-plan-card--selected {
+  border-color: #6C63FF;
+  background: rgba(108, 99, 255, 0.06);
+  box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.12), 0 8px 24px rgba(108, 99, 255, 0.1);
+}
+
+.renew-plan-card--selected::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #6C63FF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 12px;
+}
+
+.renew-plan-card--recommended {
+  border-color: rgba(108, 99, 255, 0.3);
+}
+
+.renew-plan-card__badge {
+  position: absolute;
+  top: -9px;
+  right: 14px;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #fff;
+  padding: 3px 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.renew-plan-card__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.renew-plan-card__icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.renew-plan-card__name {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.renew-plan-card__desc {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  margin: 0 0 10px 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.renew-plan-card__price {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.renew-plan-card__price-from {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  font-weight: 500;
+}
+
+.renew-plan-card__price-value {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+}
+
+/* Plan features list */
+.renew-plan-card__features {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.renew-plan-card__features li {
+  font-size: 10.5px;
+  color: var(--text-secondary);
+  line-height: 1.3;
+}
+
+.renew-plan-card__features li.included {
+  color: var(--text-primary);
+}
+
+.renew-plan-card__features li.excluded {
+  color: var(--text-muted);
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+.renew-plan-card__features li.more {
+  color: var(--text-secondary);
+  font-style: italic;
+  font-size: 10px;
+}
+
+/* Variant Duration Picker */
+.renew-variant-section {
+  margin-bottom: 20px;
+}
+
+.renew-variant-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.renew-variant-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.renew-variant-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 12px 18px;
+  border: 2px solid var(--border-subtle);
+  border-radius: 12px;
+  background: var(--bg-tertiary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 100px;
+  position: relative;
+}
+
+.renew-variant-pill:hover {
+  border-color: rgba(108, 99, 255, 0.4);
+  background: rgba(108, 99, 255, 0.04);
+  transform: translateY(-1px);
+}
+
+.renew-variant-pill--selected {
+  border-color: #6C63FF;
+  background: rgba(108, 99, 255, 0.08);
+  box-shadow: 0 0 0 2px rgba(108, 99, 255, 0.15), 0 4px 12px rgba(108, 99, 255, 0.08);
+}
+
+.renew-variant-pill__duration {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: capitalize;
+}
+
+.renew-variant-pill--selected .renew-variant-pill__duration {
+  color: var(--text-primary);
+}
+
+.renew-variant-pill__price {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.3px;
+}
+
+.renew-variant-pill__discount {
+  font-size: 9px;
+  font-weight: 700;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.12);
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+.renew-variant-pill__popular-tag {
+  position: absolute;
+  top: -8px;
+  right: -4px;
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: #fff;
+  background: linear-gradient(135deg, #6C63FF, #a855f7);
+  padding: 2px 6px;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(108, 99, 255, 0.3);
+}
+
+/* Renewal Summary */
+.renew-summary {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.renew-summary__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.renew-summary__row span:last-child {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.renew-summary__row--total {
+  padding-top: 8px;
+  margin-top: 4px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.renew-summary__total {
+  font-size: 18px !important;
+  font-weight: 800 !important;
+  color: #6C63FF !important;
+}
+
+.renew-summary__strikethrough {
+  text-decoration: line-through;
+  color: var(--text-muted) !important;
+  font-weight: 400 !important;
+}
+
+.renew-summary__row--discount span:first-child {
+  color: var(--text-muted);
+}
+
+/* Light mode overrides for renewal */
+:root.theme-light .renew-plan-card,
+[data-theme="light"] .renew-plan-card,
+body.light-mode .renew-plan-card {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+:root.theme-light .renew-plan-card--selected,
+[data-theme="light"] .renew-plan-card--selected,
+body.light-mode .renew-plan-card--selected {
+  background: rgba(108, 99, 255, 0.04);
+}
+
+:root.theme-light .renew-variant-pill,
+[data-theme="light"] .renew-variant-pill,
+body.light-mode .renew-variant-pill {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+:root.theme-light .renew-summary,
+[data-theme="light"] .renew-summary,
+body.light-mode .renew-summary {
+  background: #f8fafc;
+  border-color: #e2e8f0;
 }

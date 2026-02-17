@@ -1,0 +1,5 @@
+- [x] Package card displays side-by-side layout on desktop
+- [x] Package card displays stacked layout on mobile
+- [x] Card height is reduced compared to the original version
+- [x] Session list is correctly positioned to the right of the summary
+- [x] All interactive elements (clicks on sessions) still work

@@ -80,10 +80,12 @@ export interface MemberDTO {
     fullName: string;
     email: string;
     phone?: string;
+    phoneNumber?: string;
     status: string;
     createdAt?: string;
     joinDate?: string;
     startDate?: string;
+    endDate?: string;
     planName?: string;
     planDuration?: string;
     membershipStatus?: string;
@@ -92,6 +94,58 @@ export interface MemberDTO {
     trainerName?: string;
     avatarId?: string;
     roles?: Role[];
+    // Phase 1 additions
+    paymentStatus?: 'paid' | 'unpaid' | 'overdue' | 'partial';
+    lastPaymentDate?: string;
+    amountDue?: number;
+    lastCheckInDate?: string;
+    lastCheckInTime?: string;
+    // Phase 2 additions
+    gender?: 'male' | 'female' | 'other';
+    bloodGroup?: string;
+    emergencyContactName?: string;
+    emergencyContactPhone?: string;
+    emergencyContactRelation?: string;
+    healthNotes?: string;
+    fitnessGoals?: string;
+    address?: string;
+    dateOfBirth?: string;
+    height?: number;
+    weight?: number;
+}
+
+// Transaction type for payment history
+export interface MemberTransaction {
+    transactionId: number;
+    userId: number;
+    amount: number;
+    type: string;
+    category?: string;
+    description?: string;
+    status: string;
+    referenceNumber?: string;
+    dateTime: string;
+    createdAt?: string;
+    createdBy?: string;
+}
+
+// Check-in type for attendance history
+export interface MemberCheckIn {
+    checkInId: number;
+    userId?: number;
+    checkInTime: string;
+    checkOutTime?: string;
+    status: string;
+}
+
+// Member note type
+export interface MemberNote {
+    noteId?: number;
+    userId: number;
+    content: string;
+    author?: string;
+    createdAt: string;
+    pinned?: boolean;
 }
 
 // DTOs for API operations

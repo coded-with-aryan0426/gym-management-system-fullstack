@@ -24,9 +24,13 @@ public class ProgressNoteController {
     }
 
     // Get notes for a specific member
-    @GetMapping("/members/{memberId}/progress-notes")
-    public ResponseEntity<List<ProgressNoteDTO>> getMemberNotes(@PathVariable Long memberId) {
-        return ResponseEntity.ok(progressNoteService.getNotesForMember(memberId));
+    @GetMapping({"/members/{memberId}/progress-notes", "/members/{memberId}/notes"})
+    public ResponseEntity<?> getMemberNotes(@PathVariable Long memberId) {
+        try {
+            return ResponseEntity.ok(progressNoteService.getNotesForMember(memberId));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error fetching notes: " + e.getMessage());
+        }
     }
 
     // Create a note for a specific member

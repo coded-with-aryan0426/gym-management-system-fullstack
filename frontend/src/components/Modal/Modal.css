@@ -27,21 +27,21 @@
   display: flex;
   flex-direction: column;
 
-  /* Base Appearance */
-  background: var(--bg-secondary);
-  border: 1px solid var(--glass-border);
-  border-radius: 20px;
-  box-shadow: var(--elevation-3, 0 25px 50px -12px rgba(0, 0, 0, 0.5));
+  /* Base Appearance — Simple plain color */
+  background: var(--bg-primary, #ffffff);
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 24px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   color: var(--text-primary);
 
   /* Animation */
-  animation: modalAppear 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: modalAppear 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes modalAppear {
   from {
     opacity: 0;
-    transform: scale(0.95) translateY(10px);
+    transform: scale(0.98) translateY(12px);
   }
 
   to {
@@ -50,16 +50,9 @@
   }
 }
 
-/* Gradient border glow effect */
+/* Removed Gradient border glow effect as requested */
 .modal::before {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  border-radius: inherit;
-  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-  z-index: -1;
-  filter: blur(15px);
-  opacity: 0.15;
+  display: none;
 }
 
 /* Header */
@@ -67,12 +60,24 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 24px;
-  /* Reduced vertical padding */
-  border-bottom: 1px solid var(--glass-border);
-  background: var(--bg-tertiary);
-  border-radius: 20px 20px 0 0;
+  padding: 16px 28px;
+  border-bottom: 1px solid var(--border, #f3f4f6);
+  background: var(--bg-tertiary, #f9fafb);
+  border-radius: 24px 24px 0 0;
   flex-shrink: 0;
+}
+
+[data-theme="dark"] .modal,
+.theme-dark .modal {
+  background: var(--bg-secondary, #111827);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .modal__header,
+.theme-dark .modal__header {
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom-color: rgba(255, 255, 255, 0.05);
 }
 
 .modal__title {

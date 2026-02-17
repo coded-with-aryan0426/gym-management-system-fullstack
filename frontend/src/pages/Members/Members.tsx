@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useEffect, useState, useMemo, useCallback, useRef } from "react"
-import { FiFilter, FiSearch, FiUserPlus, FiCalendar, FiRefreshCw, FiPackage, FiMessageSquare, FiX, FiUsers, FiAlertTriangle, FiUserCheck, FiUser, FiPercent } from "react-icons/fi"
+import { FiFilter, FiSearch, FiUserPlus, FiCalendar, FiRefreshCw, FiPackage, FiMessageSquare, FiX, FiUsers, FiAlertTriangle, FiUserCheck, FiUser, FiPercent, FiDownload, FiPhone } from "react-icons/fi"
 import { showToast } from "../../utils/showToast"
 import { useSearchParams } from "react-router-dom"
 import { Button, Badge, getStatusVariant, Avatar, DataTable, type Column } from "../../components"
@@ -48,6 +48,11 @@ const Members: React.FC = () => {
   const [activeStatusFilter, setActiveStatusFilter] = useState<StatusFilter>('all')
   const [hoveredRowId, setHoveredRowId] = useState<string | number | null>(null)
   const [planNames, setPlanNames] = useState<string[]>([])
+  const [refreshTrigger, setRefreshTrigger] = useState(0)
+
+  const triggerRefresh = useCallback(() => {
+    setRefreshTrigger(prev => prev + 1)
+  }, [])
 
   // Fetch dynamic plan names for filter dropdown
   useEffect(() => {
@@ -160,7 +165,7 @@ const Members: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }, [currentPage, pageSize, debouncedSearch, filters.status, filters.plan, hasClientSideFilters])
+  }, [currentPage, pageSize, debouncedSearch, filters.status, filters.plan, hasClientSideFilters, refreshTrigger])
 
   useEffect(() => {
     loadMembersPaginated()
@@ -457,131 +462,278 @@ const Members: React.FC = () => {
     return 'member-plan--basic'
   }
 
-  const columns: Column<MemberDTO>[] = [
-    {
-      key: "fullName",
-      header: "Member",
-      width: "auto",
-      render: (member) => (
-        <div
-          className="member-cell"
-          onClick={(e) => { e.stopPropagation(); handleActionClick(member) }}
-          style={{ cursor: 'pointer' }}
-        >
-          <div className="member-avatar-wrapper">
-            <span className={`status-dot ${getStatusDotClass(member)}`} />
-            <Avatar
-              name={member.fullName}
-              size="sm"
-              avatarId={localStorage.getItem(`avatar_${member.userId}`) || (member as any).avatarId}
-              userId={member.userId}
-            />
+    // Helper: derive payment status from member data
+    const getPaymentStatus = (member: MemberDTO) => {
+      if (member.paymentStatus) return member.paymentStatus
+      const { isExpired, daysLeft } = getExpiryInfo(member)
+      if (!member.planName) return 'unpaid'
+      if (isExpired) return 'overdue'
+      if (daysLeft !== null && daysLeft <= 7 && daysLeft > 0) return 'partial'
+      if ((member.status || '').toLowerCase() === 'active') return 'paid'
+      return 'unpaid'
+    }
+
+    const getPaymentBadgeClass = (status: string) => {
+      switch (status) {
+        case 'paid': return 'payment-badge--paid'
+        case 'overdue': return 'payment-badge--overdue'
+        case 'partial': return 'payment-badge--partial'
+        default: return 'payment-badge--unpaid'
+      }
+    }
+
+    // Helper: format relative check-in time
+    const formatCheckIn = (member: MemberDTO) => {
+      const dateStr = member.lastCheckInDate || (member as any).lastVisit
+      if (!dateStr) return { text: 'Never', className: 'checkin--never' }
+      const date = new Date(dateStr)
+      const now = new Date()
+      const diffMs = now.getTime() - date.getTime()
+      const diffHours = diffMs / (1000 * 60 * 60)
+      const diffDays = Math.floor(diffHours / 24)
+      if (diffHours < 24) {
+        const timeStr = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+        return { text: `Today ${timeStr}`, className: 'checkin--recent' }
+      }
+      if (diffDays <= 7) return { text: `${diffDays}d ago`, className: 'checkin--week' }
+      return { text: `${diffDays}d ago`, className: 'checkin--old' }
+    }
+
+    // Helper: format join date
+    const formatJoinDate = (member: MemberDTO) => {
+      const dateStr = member.joinDate || member.createdAt || member.startDate
+      if (!dateStr) return { date: '—', tenure: '' }
+      const d = new Date(dateStr)
+      const dateFormatted = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+      const now = new Date()
+      const months = Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24 * 30))
+      const tenure = months < 1 ? 'New' : months < 12 ? `${months}mo` : `${Math.floor(months / 12)}y ${months % 12}mo`
+      return { date: dateFormatted, tenure }
+    }
+
+    // Export CSV
+    const handleExportCSV = () => {
+      const dataToExport = isUsingTabFilter ? filteredMembers : allMembers
+      if (dataToExport.length === 0) {
+        showToast('No members to export', 'error')
+        return
+      }
+      const headers = ['Name', 'Email', 'Phone', 'Plan', 'Status', 'Payment', 'Join Date', 'Validity']
+      const rows = dataToExport.map(m => {
+        const { daysLeft, isExpired } = getExpiryInfo(m)
+        const joinInfo = formatJoinDate(m)
+        return [
+          m.fullName || '',
+          m.email || '',
+          m.phone || m.phoneNumber || '',
+          m.planName || 'No Plan',
+          m.status || '',
+          getPaymentStatus(m),
+          joinInfo.date,
+          isExpired ? `${Math.abs(daysLeft || 0)}d overdue` : daysLeft ? `${daysLeft}d left` : 'N/A'
+        ]
+      })
+      const csv = [headers, ...rows].map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n')
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `members_${new Date().toISOString().split('T')[0]}.csv`
+      link.click()
+      URL.revokeObjectURL(url)
+      showToast(`Exported ${dataToExport.length} members`, 'success')
+    }
+
+    const columns: Column<MemberDTO>[] = [
+      {
+        key: "fullName",
+        header: "Member",
+        width: "auto",
+        render: (member) => (
+          <div
+            className="member-cell"
+            onClick={(e) => { e.stopPropagation(); handleActionClick(member) }}
+            style={{ cursor: 'pointer' }}
+          >
+            <div className="member-avatar-wrapper">
+              <span className={`status-dot ${getStatusDotClass(member)}`} />
+              <Avatar
+                name={member.fullName}
+                size="sm"
+                avatarId={localStorage.getItem(`avatar_${member.userId}`) || (member as any).avatarId}
+                userId={member.userId}
+              />
+            </div>
+                  <div className="member-cell__info">
+                    <span className="member-name">{member.fullName}</span>
+                    <div className="member-cell__sub">
+                      <span className="member-email">{member.email}</span>
+                      {member.planName && (
+                        <span className={`member-inline-plan ${getPlanClass(member.planName)}`}>
+                          {member.planName}
+                        </span>
+                      )}
+                    </div>
+                  </div>
           </div>
-          <div className="member-cell__info">
-            <span className="member-name">{member.fullName}</span>
-            <span className="member-email">{member.email}</span>
-          </div>
-        </div>
-      ),
-    },
-    {
-      key: "planName",
-      header: "Membership",
-      width: "150px",
-      render: (member) => {
+        ),
+      },
+      {
+        key: "planName",
+        header: "Membership",
+        width: "150px",
+        render: (member) => {
+            return (
+              <div className="member-plan-cell">
+                <span className={`member-plan-badge ${getPlanClass(member.planName)}`}>
+                  <span className="plan-icon">{getPlanIcon(member.planName)}</span>
+                  {member.planName || 'No Plan'}
+                </span>
+              </div>
+            )
+          },
+      },
+      {
+        key: "phone",
+        header: "Phone",
+        width: "130px",
+        render: (member) => {
+          const phone = member.phone || member.phoneNumber || (member as any).phoneNumber
+          if (!phone) return <span className="member-phone member-phone--none">—</span>
           return (
-            <div className="member-plan-cell">
-              <span className={`member-plan-badge ${getPlanClass(member.planName)}`}>
-                <span className="plan-icon">{getPlanIcon(member.planName)}</span>
-                {member.planName || 'No Plan'}
+            <a href={`tel:${phone}`} className="member-phone" onClick={(e) => e.stopPropagation()}>
+              <FiPhone size={12} />
+              <span>{phone}</span>
+            </a>
+          )
+        },
+      },
+      {
+        key: "paymentStatus",
+        header: "Payment",
+        width: "100px",
+        render: (member) => {
+          const status = getPaymentStatus(member)
+          return (
+            <div className="member-payment-cell">
+              <span className={`payment-badge ${getPaymentBadgeClass(status)}`}>
+                {status.charAt(0).toUpperCase() + status.slice(1)}
               </span>
             </div>
           )
         },
-    },
-    {
-      key: "expiryDate",
-      header: "Validity",
-      width: "130px",
-      render: (member) => {
-        const { date, daysLeft, isExpired } = getExpiryInfo(member)
-        if (!date) return <span className="member-date member-date--none">No plan</span>
-
-        const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-
-        return (
-          <div className="member-expiry-cell">
-            <span className={`member-days-left ${isExpired ? 'member-days-left--expired' : daysLeft !== null && daysLeft <= 7 ? 'member-days-left--warning' : ''}`}>
-              {isExpired ? `${Math.abs(daysLeft || 0)}d overdue` : `${daysLeft}d left`}
-            </span>
-            <span className="member-expiry-date">{dateStr}</span>
-          </div>
-        )
       },
-    },
-    {
-      key: "status",
-      header: "Status",
-      width: "120px",
-      render: (member) => {
-        const { isExpired, daysLeft } = getExpiryInfo(member)
-        let statusText = member.status || 'Unknown'
-        let statusClass = 'status-badge'
+      {
+        key: "expiryDate",
+        header: "Validity",
+        width: "110px",
+        render: (member) => {
+          const { date, daysLeft, isExpired } = getExpiryInfo(member)
+          if (!date) return <span className="member-date member-date--none">No plan</span>
 
-        if (isExpired) {
-          statusText = 'Lapsed'
-          statusClass += ' status-badge--danger'
-        } else if (daysLeft !== null && daysLeft <= 7 && daysLeft > 0) {
-          statusText = 'Expiring'
-          statusClass += ' status-badge--warning'
-        } else if ((member.status || '').toLowerCase() === 'active') {
-          statusText = 'Active'
-          statusClass += ' status-badge--success'
-        } else {
-          statusText = 'Inactive'
-          statusClass += ' status-badge--muted'
-        }
+          const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 
-        return (
-          <div className="member-status-cell">
-            <span className={statusClass}>
-              <span className="status-badge__dot" />
-              {statusText}
-            </span>
-          </div>
-        )
-      },
-    },
-    {
-      key: "actions",
-      header: "",
-      width: "100px",
-      render: (member) => {
-        const isHovered = hoveredRowId === member.userId
-        return (
-          <div className="member-actions">
-            <div className={`quick-actions ${isHovered ? 'quick-actions--visible' : ''}`}>
-              <button
-                className="quick-action-btn quick-action-btn--renew"
-                onClick={(e) => { e.stopPropagation(); handleActionClick(member); }}
-                title="Renew Plan"
-              >
-                <FiCalendar size={14} />
-              </button>
-              <button
-                className="quick-action-btn quick-action-btn--message"
-                onClick={(e) => { e.stopPropagation(); handleSendMessage(member); }}
-                title="Send Message"
-              >
-                <FiMessageSquare size={14} />
-              </button>
+          return (
+            <div className="member-expiry-cell">
+              <span className={`member-days-left ${isExpired ? 'member-days-left--expired' : daysLeft !== null && daysLeft <= 7 ? 'member-days-left--warning' : ''}`}>
+                {isExpired ? `${Math.abs(daysLeft || 0)}d overdue` : `${daysLeft}d left`}
+              </span>
+              <span className="member-expiry-date">{dateStr}</span>
             </div>
-            <ActionMenuButton onClick={(e) => { e.stopPropagation(); handleActionClick(member); }} />
-          </div>
-        )
+          )
+        },
       },
-    },
-  ]
+      {
+        key: "status",
+        header: "Status",
+        width: "110px",
+        render: (member) => {
+          const { isExpired, daysLeft } = getExpiryInfo(member)
+          let statusText = member.status || 'Unknown'
+          let statusClass = 'status-badge'
+
+          if (isExpired) {
+            statusText = 'Lapsed'
+            statusClass += ' status-badge--danger'
+          } else if (daysLeft !== null && daysLeft <= 7 && daysLeft > 0) {
+            statusText = 'Expiring'
+            statusClass += ' status-badge--warning'
+          } else if ((member.status || '').toLowerCase() === 'active') {
+            statusText = 'Active'
+            statusClass += ' status-badge--success'
+          } else {
+            statusText = 'Inactive'
+            statusClass += ' status-badge--muted'
+          }
+
+          return (
+            <div className="member-status-cell">
+              <span className={statusClass}>
+                <span className="status-badge__dot" />
+                {statusText}
+              </span>
+            </div>
+          )
+        },
+      },
+      {
+        key: "lastCheckIn",
+        header: "Last Check-in",
+        width: "110px",
+        render: (member) => {
+          const { text, className } = formatCheckIn(member)
+          return (
+            <div className="member-checkin-cell">
+              <span className={`checkin-text ${className}`}>{text}</span>
+            </div>
+          )
+        },
+      },
+      {
+        key: "joinDate",
+        header: "Joined",
+        width: "110px",
+        render: (member) => {
+          const { date, tenure } = formatJoinDate(member)
+          return (
+            <div className="member-join-cell">
+              <span className="join-date">{date}</span>
+              {tenure && <span className="join-tenure">{tenure}</span>}
+            </div>
+          )
+        },
+      },
+      {
+        key: "actions",
+        header: "",
+        width: "100px",
+        render: (member) => {
+          const isHovered = hoveredRowId === member.userId
+          return (
+            <div className="member-actions">
+              <div className={`quick-actions ${isHovered ? 'quick-actions--visible' : ''}`}>
+                  <button
+                    className="quick-action-btn quick-action-btn--renew"
+                    onClick={(e) => { e.stopPropagation(); handleActionClick(member); }}
+                    title="Manage Plan"
+                  >
+                    <FiPackage size={14} />
+                  </button>
+
+                <button
+                  className="quick-action-btn quick-action-btn--message"
+                  onClick={(e) => { e.stopPropagation(); handleSendMessage(member); }}
+                  title="Send Message"
+                >
+                  <FiMessageSquare size={14} />
+                </button>
+              </div>
+              <ActionMenuButton onClick={(e) => { e.stopPropagation(); handleActionClick(member); }} />
+            </div>
+          )
+        },
+      },
+    ]
 
     return (
       <div className="pg-page">
@@ -650,16 +802,19 @@ const Members: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="pg-header__actions">
-                  <button className="pg-btn pg-btn--secondary" onClick={() => setIsMembershipModalOpen(true)}>
-                    <FiPackage size={14} />
-                    <span>Plans</span>
-                  </button>
-                  <button className="pg-btn pg-btn--primary" onClick={() => setIsCreateModalOpen(true)}>
-                    <FiUserPlus size={14} />
-                    <span>Add Member</span>
-                  </button>
-                </div>
+                  <div className="pg-header__actions">
+                    <button className="pg-btn pg-btn--icon" onClick={handleExportCSV} title="Export CSV">
+                      <FiDownload size={14} />
+                    </button>
+                    <button className="pg-btn pg-btn--secondary" onClick={() => setIsMembershipModalOpen(true)}>
+                      <FiPackage size={14} />
+                      <span>Plans</span>
+                    </button>
+                    <button className="pg-btn pg-btn--primary" onClick={() => setIsCreateModalOpen(true)}>
+                      <FiUserPlus size={14} />
+                      <span>Add Member</span>
+                    </button>
+                  </div>
               </div>
 
               {/* Row 2: Tabs + Search + Filters */}
@@ -905,58 +1060,71 @@ const Members: React.FC = () => {
               selectedIds={selectedMemberIds}
               onSelectionChange={setSelectedMemberIds}
             mobileCardRender={(member, index) => {
-              const { daysLeft, isExpired } = getExpiryInfo(member)
-              return (
-                <div className="member-card">
-                  <div className="member-card__header">
-                    <div className="member-card__user">
-                      <div className="member-avatar-wrapper">
-                        <span className={`status-dot ${getStatusDotClass(member)}`} />
-                        <Avatar name={member.fullName} size="md" />
-                      </div>
-                      <div className="member-card__info">
-                        <span className="member-card__name">{member.fullName}</span>
-                        <span className="member-card__plan">
-                          {getPlanIcon(member.planName)} {member.planName || 'No Plan'}
-                          {daysLeft !== null && (
-                            <span className={`member-card__expiry ${isExpired ? 'member-card__expiry--expired' : daysLeft <= 7 ? 'member-card__expiry--warning' : ''}`}>
-                              {isExpired ? `${Math.abs(daysLeft)}d overdue` : `${daysLeft}d left`}
-                            </span>
+                const { daysLeft, isExpired } = getExpiryInfo(member)
+                const paymentStat = getPaymentStatus(member)
+                const memberPhone = member.phone || member.phoneNumber || (member as any).phoneNumber
+                return (
+                  <div className="member-card">
+                    <div className="member-card__header">
+                      <div className="member-card__user">
+                        <div className="member-avatar-wrapper">
+                          <span className={`status-dot ${getStatusDotClass(member)}`} />
+                          <Avatar name={member.fullName} size="md" />
+                        </div>
+                        <div className="member-card__info">
+                          <span className="member-card__name">{member.fullName}</span>
+                          <span className="member-card__plan">
+                            {getPlanIcon(member.planName)} {member.planName || 'No Plan'}
+                            {daysLeft !== null && (
+                              <span className={`member-card__expiry ${isExpired ? 'member-card__expiry--expired' : daysLeft <= 7 ? 'member-card__expiry--warning' : ''}`}>
+                                {isExpired ? `${Math.abs(daysLeft)}d overdue` : `${daysLeft}d left`}
+                              </span>
+                            )}
+                          </span>
+                          {memberPhone && (
+                            <a href={`tel:${memberPhone}`} className="member-card__phone" onClick={(e) => e.stopPropagation()}>
+                              <FiPhone size={12} /> {memberPhone}
+                            </a>
                           )}
+                        </div>
+                      </div>
+                      <div className="member-card__badges">
+                        <span className={`payment-badge ${getPaymentBadgeClass(paymentStat)}`}>
+                          {paymentStat.charAt(0).toUpperCase() + paymentStat.slice(1)}
                         </span>
+                        <Badge variant={getStatusVariant(member.status)}>{member.status}</Badge>
                       </div>
                     </div>
-                    <Badge variant={getStatusVariant(member.status)}>{member.status}</Badge>
+                    <div className="member-card__actions">
+                      <button className="member-card__action" onClick={(e) => { e.stopPropagation(); handleActionClick(member); }}>
+                        <FiCalendar size={16} />
+                        Renew
+                      </button>
+                      <button className="member-card__action" onClick={(e) => { e.stopPropagation(); handleSendMessage(member); }}>
+                        <FiMessageSquare size={16} />
+                        Message
+                      </button>
+                      <ActionMenuButton onClick={(e) => { e.stopPropagation(); handleActionClick(member); }} />
+                    </div>
                   </div>
-                  <div className="member-card__actions">
-                    <button className="member-card__action" onClick={(e) => { e.stopPropagation(); handleActionClick(member); }}>
-                      <FiCalendar size={16} />
-                      Renew
-                    </button>
-                    <button className="member-card__action" onClick={(e) => { e.stopPropagation(); handleSendMessage(member); }}>
-                      <FiMessageSquare size={16} />
-                      Message
-                    </button>
-                    <ActionMenuButton onClick={(e) => { e.stopPropagation(); handleActionClick(member); }} />
-                  </div>
-                </div>
-              )
-            }}
+                )
+              }}
           />
       </div>
 
       {/* Modals */}
       {isActionModalOpen && selectedMember && (
-        <EnhancedMemberActionModal
-          isOpen={isActionModalOpen}
-          onClose={handleCloseActionModal}
-          member={selectedMember as unknown as User}
-          onEditProfile={() => { loadMembersPaginated(); refreshMembers(); }}
-          onRenewPlan={(member, packageId, amount, customDuration, skipTransaction) =>
-            handleRenewPlan(member as unknown as MemberDTO, packageId, amount, customDuration, skipTransaction)
-          }
-          onSendMessage={() => handleSendMessage(selectedMember)}
-        />
+          <EnhancedMemberActionModal
+            isOpen={isActionModalOpen}
+            onClose={handleCloseActionModal}
+            member={selectedMember as unknown as User}
+            onEditProfile={() => { triggerRefresh(); refreshMembers(); }}
+            onRenewPlan={(member, packageId, amount, customDuration, skipTransaction) => {
+              handleRenewPlan(member as unknown as MemberDTO, packageId, amount, customDuration, skipTransaction);
+              triggerRefresh();
+            }}
+            onSendMessage={() => handleSendMessage(selectedMember)}
+          />
       )}
 
       <CreateActionModal
@@ -968,7 +1136,7 @@ const Members: React.FC = () => {
             newParams.delete('action')
             return newParams
           })
-          loadMembersPaginated()
+          triggerRefresh()
           refreshMembers()
         }}
         initialView="memberForm"
@@ -978,6 +1146,7 @@ const Members: React.FC = () => {
           isOpen={isMembershipModalOpen}
           onClose={() => setIsMembershipModalOpen(false)}
           onSuccess={() => {
+            triggerRefresh()
             refreshMembers()
             api.getMemberPlanNames().then(setPlanNames).catch(() => {})
           }}

@@ -69,7 +69,7 @@
 
 .pg-header__subtitle {
   font-size: 11px;
-  color: var(--text-tertiary, #64748B);
+  color: var(--text-secondary, #94A3B8);
   white-space: nowrap;
 }
 
@@ -205,7 +205,7 @@
 .pg-stat-card__label {
   font-size: 10px;
   font-weight: 600;
-  color: var(--text-tertiary, #64748B);
+  color: var(--text-secondary, #94A3B8);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   line-height: 1;
@@ -276,7 +276,7 @@
   background: transparent;
   border: none;
   border-radius: 6px;
-  color: #94A3B8;
+  color: #CBD5E1;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -313,8 +313,8 @@
 }
 
 .pg-tab:not(.pg-tab--active) .pg-tab__count {
-  background: rgba(255, 255, 255, 0.08);
-  color: #94A3B8;
+  background: rgba(255, 255, 255, 0.1);
+  color: #CBD5E1;
 }
 
 .pg-tab__count--active  { background: rgba(16, 185, 129, 0.2); color: #6EE7B7; }
@@ -343,7 +343,7 @@
 .pg-search__icon {
   position: absolute;
   left: 10px;
-  color: var(--text-tertiary, #64748B);
+  color: var(--text-secondary, #94A3B8);
   font-size: 14px;
   pointer-events: none;
 }
@@ -368,7 +368,7 @@
   background: rgba(30, 41, 59, 0.7);
 }
 
-.pg-search__input::placeholder { color: var(--text-tertiary, #64748B); }
+.pg-search__input::placeholder { color: var(--text-secondary, #94A3B8); }
 
 .pg-search__clear {
   position: absolute;
@@ -858,7 +858,7 @@
 .pg-kpi__label {
   font-size: 10px;
   font-weight: 600;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }

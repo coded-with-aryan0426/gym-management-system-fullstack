@@ -195,7 +195,9 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({ isOpen, onClose, 
 
             if (isMember && selectedVariant) {
                 payload.startDate = formData.startDate
-                // Use variantId as packageId for backend compatibility
+                payload.planId = selectedPlanId
+                payload.variantId = selectedVariantId
+                // Maintain packageId for backward compatibility
                 payload.packageId = selectedVariantId
             }
 

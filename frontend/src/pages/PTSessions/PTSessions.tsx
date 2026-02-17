@@ -775,38 +775,40 @@ const PTSessions: React.FC = () => {
                 const progress = total > 0 ? (completed / total) * 100 : 0;
                 return (
                   <div key={group.memberId} className="pt-package-card">
-                    <div className="pt-package-card__header">
-                      <div className="pt-package-card__avatar">
-                        {group.memberName.charAt(0)}
+                    <div className="pt-package-card__summary">
+                      <div className="pt-package-card__header">
+                        <div className="pt-package-card__avatar">
+                          {group.memberName.charAt(0)}
+                        </div>
+                        <div className="pt-package-card__info">
+                          <h4 className="pt-package-card__name">{group.memberName}</h4>
+                          <span className="pt-package-card__count">{total} sessions total</span>
+                        </div>
+                        <div className="pt-package-card__progress-ring">
+                          <svg viewBox="0 0 36 36" className="pt-package-card__ring">
+                            <path className="pt-package-card__ring-bg" d="M18 2.0845a 15.9155 15.9155 0 0 1 0 31.831a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            <path className="pt-package-card__ring-fill" strokeDasharray={`${progress}, 100`} d="M18 2.0845a 15.9155 15.9155 0 0 1 0 31.831a 15.9155 15.9155 0 0 1 0 -31.831" />
+                          </svg>
+                          <span className="pt-package-card__progress-text">{Math.round(progress)}%</span>
+                        </div>
                       </div>
-                      <div className="pt-package-card__info">
-                        <h4 className="pt-package-card__name">{group.memberName}</h4>
-                        <span className="pt-package-card__count">{total} sessions total</span>
+                      <div className="pt-package-card__stats">
+                        <div className="pt-package-card__stat">
+                          <span className="pt-package-card__stat-value emerald">{completed}</span>
+                          <span className="pt-package-card__stat-label">Completed</span>
+                        </div>
+                        <div className="pt-package-card__stat">
+                          <span className="pt-package-card__stat-value blue">{scheduled}</span>
+                          <span className="pt-package-card__stat-label">Upcoming</span>
+                        </div>
+                        <div className="pt-package-card__stat">
+                          <span className="pt-package-card__stat-value crimson">{cancelled}</span>
+                          <span className="pt-package-card__stat-label">Cancelled</span>
+                        </div>
                       </div>
-                      <div className="pt-package-card__progress-ring">
-                        <svg viewBox="0 0 36 36" className="pt-package-card__ring">
-                          <path className="pt-package-card__ring-bg" d="M18 2.0845a 15.9155 15.9155 0 0 1 0 31.831a 15.9155 15.9155 0 0 1 0 -31.831" />
-                          <path className="pt-package-card__ring-fill" strokeDasharray={`${progress}, 100`} d="M18 2.0845a 15.9155 15.9155 0 0 1 0 31.831a 15.9155 15.9155 0 0 1 0 -31.831" />
-                        </svg>
-                        <span className="pt-package-card__progress-text">{Math.round(progress)}%</span>
+                      <div className="pt-package-card__progress-bar">
+                        <div className="pt-package-card__progress-fill" style={{ width: `${progress}%` }} />
                       </div>
-                    </div>
-                    <div className="pt-package-card__stats">
-                      <div className="pt-package-card__stat">
-                        <span className="pt-package-card__stat-value emerald">{completed}</span>
-                        <span className="pt-package-card__stat-label">Completed</span>
-                      </div>
-                      <div className="pt-package-card__stat">
-                        <span className="pt-package-card__stat-value blue">{scheduled}</span>
-                        <span className="pt-package-card__stat-label">Upcoming</span>
-                      </div>
-                      <div className="pt-package-card__stat">
-                        <span className="pt-package-card__stat-value crimson">{cancelled}</span>
-                        <span className="pt-package-card__stat-label">Cancelled</span>
-                      </div>
-                    </div>
-                    <div className="pt-package-card__progress-bar">
-                      <div className="pt-package-card__progress-fill" style={{ width: `${progress}%` }} />
                     </div>
                     <div className="pt-package-card__sessions">
                       {group.sessions.slice(0, 5).map(session => (

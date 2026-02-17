@@ -170,6 +170,7 @@ public class ProgressNoteService {
         // Populate MemberInfo
         if (note.getMember() != null) {
             ProgressNoteDTO.MemberInfo info = new ProgressNoteDTO.MemberInfo();
+            info.setId(note.getMember().getUserId());
             info.setName(note.getMember().getFullName());
             info.setAvatar(note.getMember().getAvatarId());
             // Goal and StartDate might need to come from Membership or other source

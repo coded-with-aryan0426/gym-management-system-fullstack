@@ -345,6 +345,15 @@ public class User {
     private Long packageId;
 
     @Transient
+    private Long planId;
+
+    @Transient
+    private Long variantId;
+
+    @Transient
+    private Long gymId;
+
+    @Transient
     private java.time.LocalDate startDate;
 
     @Transient
@@ -362,6 +371,30 @@ public class User {
 
     public void setPackageId(Long packageId) {
         this.packageId = packageId;
+    }
+
+    public Long getPlanId() {
+        return planId;
+    }
+
+    public void setPlanId(Long planId) {
+        this.planId = planId;
+    }
+
+    public Long getVariantId() {
+        return variantId;
+    }
+
+    public void setVariantId(Long variantId) {
+        this.variantId = variantId;
+    }
+
+    public Long getGymId() {
+        return gymId;
+    }
+
+    public void setGymId(Long gymId) {
+        this.gymId = gymId;
     }
 
     public java.time.LocalDate getStartDate() {

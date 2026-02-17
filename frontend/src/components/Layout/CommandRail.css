@@ -138,7 +138,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1px;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   white-space: nowrap;
 }
 
@@ -165,11 +165,22 @@
   border-color: var(--sidebar-border);
 }
 
+/* Hovering non-active links slightly tints with section color */
+.command-rail__link:not(.command-rail__link--active):hover {
+  background: color-mix(in srgb, currentColor 5%, var(--hover-bg));
+}
+
 .command-rail__link--active {
   background: var(--active-bg);
   color: var(--text-primary);
   font-weight: 600;
-  border-color: var(--sidebar-border);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Active link inherits section color from inline style - enhance with tinted bg */
+.command-rail__link--active {
+  background: color-mix(in srgb, currentColor 8%, transparent);
+  border-color: color-mix(in srgb, currentColor 15%, transparent);
 }
 
 /* Active indicator bar - left edge glow */
@@ -856,7 +867,7 @@
 
 /* ─── Badge ─── */
 .command-rail__badge {
-  background: linear-gradient(135deg, #ef4444, #dc2626);
+  background: linear-gradient(135deg, #6366F1, #4F46E5);
   color: white;
   font-size: 9px;
   font-weight: 700;
@@ -864,7 +875,7 @@
   border-radius: 20px;
   margin-left: auto;
   line-height: 1.4;
-  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
+  box-shadow: 0 2px 6px rgba(99, 102, 241, 0.3);
 }
 
 /* ─── Mobile ─── */

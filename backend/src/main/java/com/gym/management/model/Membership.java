@@ -37,6 +37,14 @@ public class Membership {
     @JoinColumn(name = "package_id")
     private MembershipPackage membershipPackage;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tiered_plan_id")
+    private TieredMembershipPlan tieredPlan;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "plan_variant_id")
+    private PlanVariant planVariant;
+
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private MembershipStatus status = MembershipStatus.PENDING;
@@ -127,6 +135,22 @@ public class Membership {
 
     public MembershipPackage getMembershipPackage() {
         return membershipPackage;
+    }
+
+    public TieredMembershipPlan getTieredPlan() {
+        return tieredPlan;
+    }
+
+    public void setTieredPlan(TieredMembershipPlan tieredPlan) {
+        this.tieredPlan = tieredPlan;
+    }
+
+    public PlanVariant getPlanVariant() {
+        return planVariant;
+    }
+
+    public void setPlanVariant(PlanVariant planVariant) {
+        this.planVariant = planVariant;
     }
 
     // Check if membership is currently active

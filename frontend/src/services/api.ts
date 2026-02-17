@@ -182,7 +182,7 @@ const api = {
   },
 
   async getMemberNotes(memberId: number): Promise<any[]> {
-    const response = await apiClient.get<any[]>(`/members/${memberId}/notes`);
+    const response = await apiClient.get<any[]>(`/members/${memberId}/progress-notes`);
     return response.data;
   },
 
@@ -432,8 +432,23 @@ const api = {
     return response.data;
   },
 
-  async renewMembership(userId: number, packageId: number, customDurationMonths?: number): Promise<any> {
-    const response = await apiClient.post('/memberships/renew', { userId, packageId, customDurationMonths });
+  async renewMembership(userId: number, packageId: number, customDurationMonths?: number, gymId?: number): Promise<any> {
+    const response = await apiClient.post('/memberships/renew', { userId, packageId, customDurationMonths, gymId });
+    return response.data;
+  },
+
+  async renewMembershipWithPlan(userId: number, planId: number, variantId: number, gymId?: number, isUpgrade?: boolean): Promise<any> {
+    const response = await apiClient.post('/memberships/renew', { userId, planId, variantId, gymId, isUpgrade });
+    return response.data;
+  },
+
+  async getActiveTieredPlans(): Promise<any[]> {
+    const response = await apiClient.get('/admin/tiered-plans/active');
+    return response.data;
+  },
+
+  async getAllTieredPlans(): Promise<any[]> {
+    const response = await apiClient.get('/admin/tiered-plans');
     return response.data;
   },
 

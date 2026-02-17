@@ -272,236 +272,252 @@ const TieredPlanManagement: React.FC<TieredPlanManagementProps> = ({
               border: '1px solid rgba(255,255,255,0.06)',
             }}
           >
-          {/* Header - Compact with stats inline */}
-            <div className="tpm-header" style={{
-              padding: '14px 24px',
-              borderBottom: '1px solid rgba(255,255,255,0.06)',
-              position: 'sticky',
-              top: 0,
-              background: 'linear-gradient(180deg, #141414 0%, #121212 100%)',
-              zIndex: 10,
-            }}>
-              {/* Single Row: Title + Stats + Search + Actions */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 16,
+            {/* Header - Compact with stats inline */}
+              <div className="tpm-header" style={{
+                padding: '14px 24px',
+                borderBottom: '1px solid rgba(255,255,255,0.06)',
+                position: 'sticky',
+                top: 0,
+                background: 'linear-gradient(180deg, #141414 0%, #121212 100%)',
+                zIndex: 10,
               }}>
-                {/* Title */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
-                  <div style={{
-                    width: 36,
-                    height: 36,
-                    background: 'linear-gradient(135deg, rgba(220, 38, 38, 0.25) 0%, rgba(220, 38, 38, 0.08) 100%)',
-                    borderRadius: 10,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    border: '1px solid rgba(220, 38, 38, 0.2)',
-                  }}>
-                    <Crown size={18} style={{ color: '#DC2626' }} />
-                  </div>
-                  <div>
-                      <h2 className="tpm-title" style={{ 
-                      fontSize: 16, 
-                      fontWeight: 700, 
-                      color: '#F9FAFB', 
-                      margin: 0,
-                      letterSpacing: '-0.3px',
-                      lineHeight: 1.2,
-                    }}>
-                      Membership Tiers
-                    </h2>
-                      <p className="tpm-subtitle" style={{
-                        fontSize: 11,
-                        color: '#6B7280',
-                        margin: 0,
-                      }}>
-                      {mode === 'selection' ? 'Select tier to assign' : 'Manage plans'}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Compact Stats Pills */}
+                {/* Single Row: Title + Stats + Search + Actions */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 6,
-                  flexShrink: 0,
+                  gap: 16,
+                  flexWrap: 'wrap',
+                  justifyContent: 'space-between'
                 }}>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 5,
-                    padding: '5px 8px',
-                    background: 'rgba(59, 130, 246, 0.08)',
-                    borderRadius: 6,
-                    border: '1px solid rgba(59, 130, 246, 0.12)',
-                  }}>
-                    <Package size={11} style={{ color: '#3B82F6' }} />
-                    <span style={{ fontSize: 11, fontWeight: 700, color: '#F9FAFB' }}>{plans.length}</span>
-                  </div>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 5,
-                    padding: '5px 8px',
-                    background: 'rgba(16, 185, 129, 0.08)',
-                    borderRadius: 6,
-                    border: '1px solid rgba(16, 185, 129, 0.12)',
-                  }}>
-                    <Zap size={11} style={{ color: '#10B981' }} />
-                    <span style={{ fontSize: 11, fontWeight: 700, color: '#10B981' }}>{plans.filter(p => p.status === 'ACTIVE').length}</span>
-                  </div>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 5,
-                    padding: '5px 8px',
-                    background: 'rgba(239, 68, 68, 0.08)',
-                    borderRadius: 6,
-                    border: '1px solid rgba(239, 68, 68, 0.12)',
-                  }}>
-                    <X size={11} style={{ color: '#EF4444' }} />
-                    <span style={{ fontSize: 11, fontWeight: 700, color: '#EF4444' }}>{plans.filter(p => p.status !== 'ACTIVE').length}</span>
-                  </div>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 5,
-                    padding: '5px 8px',
-                    background: 'rgba(245, 158, 11, 0.08)',
-                    borderRadius: 6,
-                    border: '1px solid rgba(245, 158, 11, 0.12)',
-                  }}>
-                    <Star size={11} style={{ color: '#F59E0B' }} />
-                    <span style={{ fontSize: 11, fontWeight: 700, color: '#F59E0B' }}>{plans.filter(p => p.isRecommended).length}</span>
-                  </div>
-                </div>
+                  {/* Title & Stats Group */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+                      <div style={{
+                        width: 36,
+                        height: 36,
+                        background: 'linear-gradient(135deg, rgba(220, 38, 38, 0.25) 0%, rgba(220, 38, 38, 0.08) 100%)',
+                        borderRadius: 10,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        border: '1px solid rgba(220, 38, 38, 0.2)',
+                      }}>
+                        <Crown size={18} style={{ color: '#DC2626' }} />
+                      </div>
+                      <div>
+                          <h2 className="tpm-title" style={{ 
+                          fontSize: 16, 
+                          fontWeight: 700, 
+                          color: '#F9FAFB', 
+                          margin: 0,
+                          letterSpacing: '-0.3px',
+                          lineHeight: 1.2,
+                        }}>
+                          Membership Tiers
+                        </h2>
+                          <p className="tpm-subtitle" style={{
+                            fontSize: 11,
+                            color: '#6B7280',
+                            margin: 0,
+                          }}>
+                          {mode === 'selection' ? 'Select tier to assign' : 'Manage plans'}
+                        </p>
+                      </div>
+                    </div>
 
-                {/* Search Input - Compact */}
-                <div style={{
-                  flex: 1,
-                  position: 'relative',
-                  maxWidth: 280,
-                }}>
-                  <Search size={14} style={{
-                    position: 'absolute',
-                    left: 10,
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    color: '#6B7280',
-                  }} />
-                    <input
-                      type="text"
-                      className="tpm-search"
-                      placeholder="Search tiers..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '8px 10px 8px 32px',
-                      background: 'rgba(255,255,255,0.03)',
-                      border: '1px solid rgba(255,255,255,0.08)',
-                      borderRadius: 8,
-                      color: '#F9FAFB',
-                      fontSize: 12,
-                      outline: 'none',
-                      transition: 'all 0.2s ease',
-                    }}
-                  />
-                </div>
-
-                {/* View Toggle - Compact */}
-                  <div className="tpm-toggle-group" style={{
-                    display: 'flex',
-                    background: 'rgba(255,255,255,0.03)',
-                    borderRadius: 8,
-                    padding: 3,
-                    border: '1px solid rgba(255,255,255,0.06)',
-                  }}>
-                  <button
-                    onClick={() => setViewMode('grid')}
-                    style={{
-                      padding: '6px 10px',
-                      background: viewMode === 'grid' ? 'rgba(220, 38, 38, 0.15)' : 'transparent',
-                      border: 'none',
-                      borderRadius: 6,
-                      color: viewMode === 'grid' ? '#DC2626' : '#6B7280',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      transition: 'all 0.2s ease',
-                    }}
-                    title="Grid view"
-                  >
-                    <LayoutGrid size={14} />
-                  </button>
-                  <button
-                    onClick={() => setViewMode('list')}
-                    style={{
-                      padding: '6px 10px',
-                      background: viewMode === 'list' ? 'rgba(220, 38, 38, 0.15)' : 'transparent',
-                      border: 'none',
-                      borderRadius: 6,
-                      color: viewMode === 'list' ? '#DC2626' : '#6B7280',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      transition: 'all 0.2s ease',
-                    }}
-                    title="List view"
-                  >
-                    <List size={14} />
-                  </button>
-                </div>
-
-                {/* Create Button - Compact */}
-                {mode === 'management' && (
-                  <button
-                    onClick={() => setShowWizard(true)}
-                    style={{
+                    {/* Compact Stats Pills */}
+                    <div style={{
                       display: 'flex',
                       alignItems: 'center',
                       gap: 6,
-                      padding: '8px 14px',
-                      background: 'linear-gradient(135deg, #DC2626 0%, #B91C1C 100%)',
-                      border: 'none',
-                      borderRadius: 8,
-                      color: '#fff',
-                      fontSize: 12,
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      boxShadow: '0 4px 12px rgba(220, 38, 38, 0.3)',
-                      transition: 'all 0.2s ease',
                       flexShrink: 0,
-                    }}
-                  >
-                    <Plus size={14} />
-                    Create Tier
-                  </button>
-                )}
+                    }}>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 5,
+                        padding: '5px 8px',
+                        background: 'rgba(59, 130, 246, 0.08)',
+                        borderRadius: 6,
+                        border: '1px solid rgba(59, 130, 246, 0.12)',
+                      }}>
+                        <Package size={11} style={{ color: '#3B82F6' }} />
+                        <span style={{ fontSize: 11, fontWeight: 700, color: '#F9FAFB' }}>{plans.length}</span>
+                      </div>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 5,
+                        padding: '5px 8px',
+                        background: 'rgba(16, 185, 129, 0.08)',
+                        borderRadius: 6,
+                        border: '1px solid rgba(16, 185, 129, 0.12)',
+                      }}>
+                        <Zap size={11} style={{ color: '#10B981' }} />
+                        <span style={{ fontSize: 11, fontWeight: 700, color: '#10B981' }}>{plans.filter(p => p.status === 'ACTIVE').length}</span>
+                      </div>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 5,
+                        padding: '5px 8px',
+                        background: 'rgba(239, 68, 68, 0.08)',
+                        borderRadius: 6,
+                        border: '1px solid rgba(239, 68, 68, 0.12)',
+                      }}>
+                        <X size={11} style={{ color: '#EF4444' }} />
+                        <span style={{ fontSize: 11, fontWeight: 700, color: '#EF4444' }}>{plans.filter(p => p.status !== 'ACTIVE').length}</span>
+                      </div>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 5,
+                        padding: '5px 8px',
+                        background: 'rgba(245, 158, 11, 0.08)',
+                        borderRadius: 6,
+                        border: '1px solid rgba(245, 158, 11, 0.12)',
+                      }}>
+                        <Star size={11} style={{ color: '#F59E0B' }} />
+                        <span style={{ fontSize: 11, fontWeight: 700, color: '#F59E0B' }}>{plans.filter(p => p.isRecommended).length}</span>
+                      </div>
+                    </div>
+                  </div>
 
-                  {/* Close Button */}
-                  <button
-                    className="tpm-close-btn"
-                    onClick={onClose}
-                  style={{
-                    background: 'rgba(255,255,255,0.03)',
-                    border: '1px solid rgba(255,255,255,0.06)',
-                    color: '#6B7280',
-                    cursor: 'pointer',
-                    padding: 7,
-                    display: 'flex',
-                    borderRadius: 6,
-                    transition: 'all 0.2s ease',
-                    flexShrink: 0,
-                  }}
-                >
-                  <X size={14} />
-                </button>
+                  {/* Search and Actions Group */}
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: 12, 
+                    flex: 1, 
+                    justifyContent: 'flex-end',
+                    minWidth: 'fit-content'
+                  }}>
+                    {/* Search Input - Compact */}
+                    <div style={{
+                      flex: 1,
+                      position: 'relative',
+                      maxWidth: 240,
+                      minWidth: 150
+                    }}>
+                      <Search size={14} style={{
+                        position: 'absolute',
+                        left: 10,
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        color: '#6B7280',
+                      }} />
+                        <input
+                          type="text"
+                          className="tpm-search"
+                          placeholder="Search tiers..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '8px 10px 8px 32px',
+                          background: 'rgba(255,255,255,0.03)',
+                          border: '1px solid rgba(255,255,255,0.08)',
+                          borderRadius: 8,
+                          color: '#F9FAFB',
+                          fontSize: 12,
+                          outline: 'none',
+                          transition: 'all 0.2s ease',
+                        }}
+                      />
+                    </div>
+
+                    {/* View Toggle - Compact */}
+                      <div className="tpm-toggle-group" style={{
+                        display: 'flex',
+                        background: 'rgba(255,255,255,0.03)',
+                        borderRadius: 8,
+                        padding: 3,
+                        border: '1px solid rgba(255,255,255,0.06)',
+                        flexShrink: 0
+                      }}>
+                      <button
+                        onClick={() => setViewMode('grid')}
+                        style={{
+                          padding: '6px 10px',
+                          background: viewMode === 'grid' ? 'rgba(220, 38, 38, 0.15)' : 'transparent',
+                          border: 'none',
+                          borderRadius: 6,
+                          color: viewMode === 'grid' ? '#DC2626' : '#6B7280',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          transition: 'all 0.2s ease',
+                        }}
+                        title="Grid view"
+                      >
+                        <LayoutGrid size={14} />
+                      </button>
+                      <button
+                        onClick={() => setViewMode('list')}
+                        style={{
+                          padding: '6px 10px',
+                          background: viewMode === 'list' ? 'rgba(220, 38, 38, 0.15)' : 'transparent',
+                          border: 'none',
+                          borderRadius: 6,
+                          color: viewMode === 'list' ? '#DC2626' : '#6B7280',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          transition: 'all 0.2s ease',
+                        }}
+                        title="List view"
+                      >
+                        <List size={14} />
+                      </button>
+                    </div>
+
+                    {/* Create Button - Compact */}
+                    {mode === 'management' && (
+                      <button
+                        onClick={() => setShowWizard(true)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 6,
+                          padding: '8px 14px',
+                          background: 'linear-gradient(135deg, #DC2626 0%, #B91C1C 100%)',
+                          border: 'none',
+                          borderRadius: 8,
+                          color: '#fff',
+                          fontSize: 12,
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          boxShadow: '0 4px 12px rgba(220, 38, 38, 0.3)',
+                          transition: 'all 0.2s ease',
+                          flexShrink: 0,
+                        }}
+                      >
+                        <Plus size={14} />
+                        Create Tier
+                      </button>
+                    )}
+
+                      {/* Close Button */}
+                      <button
+                        className="tpm-close-btn"
+                        onClick={onClose}
+                      style={{
+                        background: 'rgba(255,255,255,0.03)',
+                        border: '1px solid rgba(255,255,255,0.06)',
+                        color: '#6B7280',
+                        cursor: 'pointer',
+                        padding: 7,
+                        display: 'flex',
+                        borderRadius: 6,
+                        transition: 'all 0.2s ease',
+                        flexShrink: 0,
+                      }}
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
 
           {/* Content */}
           <div style={{ padding: '20px 28px' }}>
@@ -931,37 +947,12 @@ const TierCard: React.FC<TierCardProps> = ({
         background: `linear-gradient(90deg, ${color} 0%, ${color}90 50%, ${color}60 100%)`,
       }} />
 
-      {/* Recommended Badge */}
-      {plan.isRecommended && (
-        <div style={{
-          position: 'absolute',
-          top: 14,
-          right: 14,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 4,
-          padding: '5px 10px',
-          background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
-          borderRadius: 16,
-          fontSize: 9,
-          fontWeight: 700,
-          color: '#fff',
-          textTransform: 'uppercase',
-          letterSpacing: '0.5px',
-          boxShadow: '0 4px 12px rgba(245, 158, 11, 0.4)',
-          zIndex: 5,
-        }}>
-          <Star size={9} fill="#fff" />
-          Best Value
-        </div>
-      )}
-
       {/* Header */}
       <div style={{ padding: '18px 18px 0', position: 'relative' }}>
         <div style={{
           display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
+          alignItems: 'center',
+          gap: 12,
           marginBottom: 14,
         }}>
           <div style={{
@@ -973,10 +964,36 @@ const TierCard: React.FC<TierCardProps> = ({
             alignItems: 'center',
             justifyContent: 'center',
             border: `1px solid ${color}20`,
+            flexShrink: 0,
           }}>
             <Crown size={22} style={{ color }} />
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, overflow: 'hidden' }}>
+            {/* Recommended Badge */}
+            {plan.isRecommended && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 4,
+                padding: '5px 10px',
+                background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
+                borderRadius: 16,
+                fontSize: 9,
+                fontWeight: 700,
+                color: '#fff',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px',
+                boxShadow: '0 4px 12px rgba(245, 158, 11, 0.4)',
+                flexShrink: 0,
+              }}>
+                <Star size={9} fill="#fff" />
+                Best Value
+              </div>
+            )}
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
             <span style={{
               padding: '4px 10px',
               background: statusColor.bg,

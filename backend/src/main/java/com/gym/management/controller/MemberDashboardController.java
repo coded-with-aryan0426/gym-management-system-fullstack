@@ -75,8 +75,18 @@ public class MemberDashboardController {
                 }
 
                 if (membership.getMembershipPackage() != null) {
-                    membershipInfo.put("packageName", membership.getMembershipPackage().getPackageName());
-                }
+                      membershipInfo.put("packageName", membership.getMembershipPackage().getPackageName());
+                  }
+
+                  // Include tiered plan info (new system takes priority)
+                  if (membership.getTieredPlan() != null) {
+                      membershipInfo.put("planName", membership.getTieredPlan().getPlanName());
+                      membershipInfo.put("packageName", membership.getTieredPlan().getPlanName()); // Override legacy
+                      if (membership.getPlanVariant() != null) {
+                          membershipInfo.put("planDuration", membership.getPlanVariant().getFormattedDuration());
+                          membershipInfo.put("planPrice", membership.getPlanVariant().getPrice());
+                      }
+                  }
 
                 dashboard.put("membership", membershipInfo);
             } else {
@@ -157,6 +167,16 @@ public class MemberDashboardController {
         if (m.getMembershipPackage() != null) {
             result.put("packageName", m.getMembershipPackage().getPackageName());
             result.put("packagePrice", m.getMembershipPackage().getPrice());
+        }
+
+        // Tiered plan takes priority
+        if (m.getTieredPlan() != null) {
+            result.put("planName", m.getTieredPlan().getPlanName());
+            result.put("packageName", m.getTieredPlan().getPlanName()); // Override legacy
+            if (m.getPlanVariant() != null) {
+                result.put("planDuration", m.getPlanVariant().getFormattedDuration());
+                result.put("packagePrice", m.getPlanVariant().getPrice());
+            }
         }
 
         return ResponseEntity.ok(result);

@@ -188,28 +188,45 @@ const MemberList: React.FC = () => {
   }, [filters])
 
   const getExpiryInfo = (member: MemberDTO) => {
-    const startDate = member.startDate ? new Date(member.startDate) : null
-    if (!startDate || !member.planDuration) return { date: null, daysLeft: null, isExpired: false }
+    // Use endDate directly from the backend - this is the source of truth
+    const endDate = member.endDate ? new Date(member.endDate) : null
+    if (!endDate) {
+      // Fallback: try calculating from startDate + planDuration (legacy)
+      const startDate = member.startDate ? new Date(member.startDate) : null
+      if (!startDate || !member.planDuration) return { date: null, daysLeft: null, isExpired: false }
 
-    const durationStr = member.planDuration.toLowerCase()
-    let expiryDate = new Date(startDate)
+      const durationStr = member.planDuration.toLowerCase()
+      let expiryDate = new Date(startDate)
 
-    if (durationStr.includes('year')) {
-      const years = parseInt(durationStr) || 1
-      expiryDate.setMonth(expiryDate.getMonth() + years * 12)
-    } else if (durationStr.includes('month')) {
-      const months = parseInt(durationStr) || 1
-      expiryDate.setMonth(expiryDate.getMonth() + months)
-    } else if (durationStr.includes('day')) {
-      const days = parseInt(durationStr) || 30
-      expiryDate.setDate(expiryDate.getDate() + days)
+      if (durationStr.includes('year')) {
+        const years = parseInt(durationStr) || 1
+        expiryDate.setMonth(expiryDate.getMonth() + years * 12)
+      } else if (durationStr.includes('month')) {
+        const months = parseInt(durationStr) || 1
+        expiryDate.setMonth(expiryDate.getMonth() + months)
+      } else if (durationStr.includes('week')) {
+        const weeks = parseInt(durationStr) || 1
+        expiryDate.setDate(expiryDate.getDate() + weeks * 7)
+      } else if (durationStr.includes('day')) {
+        const days = parseInt(durationStr) || 30
+        expiryDate.setDate(expiryDate.getDate() + days)
+      }
+
+      const now = new Date()
+      const daysLeft = Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+      const isExpired = daysLeft < 0
+
+      return { date: expiryDate, daysLeft, isExpired }
     }
 
     const now = new Date()
-    const daysLeft = Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+    now.setHours(0, 0, 0, 0)
+    const target = new Date(endDate)
+    target.setHours(0, 0, 0, 0)
+    const daysLeft = Math.ceil((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
     const isExpired = daysLeft < 0
 
-    return { date: expiryDate, daysLeft, isExpired }
+    return { date: endDate, daysLeft, isExpired }
   }
 
   // Determine if we're using a tab filter that requires all members (unified list)
@@ -263,32 +280,16 @@ const MemberList: React.FC = () => {
     if (filters.expiryStatus) {
       const now = new Date()
       result = result.filter(m => {
-        if (!m.startDate || !m.planDuration) return false
-
-        const startDate = new Date(m.startDate)
-        const durationStr = m.planDuration.toLowerCase()
-        let expiryDate = new Date(startDate)
-
-        if (durationStr.includes('year')) {
-          const years = parseInt(durationStr) || 1
-          expiryDate.setMonth(expiryDate.getMonth() + years * 12)
-        } else if (durationStr.includes('month')) {
-          const months = parseInt(durationStr) || 1
-          expiryDate.setMonth(expiryDate.getMonth() + months)
-        } else if (durationStr.includes('day')) {
-          const days = parseInt(durationStr) || 30
-          expiryDate.setDate(expiryDate.getDate() + days)
-        }
-
-        const daysUntilExpiry = Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+        const { daysLeft, isExpired } = getExpiryInfo(m)
+        if (daysLeft === null) return false
 
         switch (filters.expiryStatus) {
           case 'expiring-soon':
-            return daysUntilExpiry > 0 && daysUntilExpiry <= 7
+            return !isExpired && daysLeft > 0 && daysLeft <= 7
           case 'expiring-month':
-            return daysUntilExpiry > 0 && daysUntilExpiry <= 30
+            return !isExpired && daysLeft > 0 && daysLeft <= 30
           case 'already-expired':
-            return daysUntilExpiry < 0
+            return isExpired
           default:
             return true
         }
@@ -442,19 +443,28 @@ const MemberList: React.FC = () => {
 
   const getPlanIcon = (planName: string | undefined) => {
     const plan = (planName || '').toLowerCase()
+    if (plan.includes('platinum') || plan.includes('elite')) return '👑'
     if (plan.includes('premium') || plan.includes('vip')) return '💎'
-    if (plan.includes('standard') || plan.includes('gold')) return '⭐'
-    if (plan.includes('basic') || plan.includes('starter')) return '📦'
-    if (plan.includes('student')) return '🎓'
+    if (plan.includes('gold')) return '⭐'
+    if (plan.includes('standard')) return '🏅'
     if (plan.includes('corporate')) return '🏢'
-    return '📋'
+    if (plan.includes('student')) return '🎓'
+    if (plan.includes('basic') || plan.includes('starter')) return '📦'
+    if (!planName || plan === 'no plan') return ''
+    return '🏋️'
   }
 
   const getPlanClass = (planName: string | undefined) => {
     const plan = (planName || '').toLowerCase()
+    if (!planName || plan === 'no plan') return 'member-plan--none'
+    if (plan.includes('platinum') || plan.includes('elite')) return 'member-plan--platinum'
     if (plan.includes('premium') || plan.includes('vip')) return 'member-plan--premium'
-    if (plan.includes('standard') || plan.includes('gold')) return 'member-plan--standard'
-    return 'member-plan--basic'
+    if (plan.includes('gold')) return 'member-plan--gold'
+    if (plan.includes('corporate')) return 'member-plan--corporate'
+    if (plan.includes('student')) return 'member-plan--student'
+    if (plan.includes('standard')) return 'member-plan--standard'
+    if (plan.includes('basic') || plan.includes('starter')) return 'member-plan--basic'
+    return 'member-plan--default'
   }
 
   const columns: Column<MemberDTO>[] = [

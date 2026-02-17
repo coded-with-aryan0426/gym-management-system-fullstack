@@ -26,6 +26,8 @@ public class ProgressNoteDTO {
     private List<Attachment> attachments;
     private List<String> tags;
     private String followUp;
+    
+    @com.fasterxml.jackson.annotation.JsonProperty("private")
     private boolean isPrivate;
 
     @Data
@@ -33,6 +35,7 @@ public class ProgressNoteDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class MemberInfo {
+        private Long id;
         private String name;
         private String avatar;
         private String goal;

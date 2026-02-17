@@ -78,8 +78,16 @@ public class UserService {
     public List<String> getDistinctMemberPlanNames() {
         List<com.gym.management.model.Membership> allMemberships = membershipRepository.findAll();
         return allMemberships.stream()
-                .filter(m -> m.getMembershipPackage() != null)
-                .map(m -> m.getMembershipPackage().getPackageName())
+                .map(m -> {
+                    // Priority: tiered plan > legacy package
+                    if (m.getTieredPlan() != null) {
+                        return m.getTieredPlan().getPlanName();
+                    } else if (m.getMembershipPackage() != null) {
+                        return m.getMembershipPackage().getPackageName();
+                    }
+                    return null;
+                })
+                .filter(name -> name != null)
                 .distinct()
                 .sorted(String.CASE_INSENSITIVE_ORDER)
                 .collect(Collectors.toList());
@@ -183,12 +191,10 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public List<com.gym.management.dto.MemberDTO> getAllMembers() {
-        // Query all possible member role names (legacy support for different naming
-        // conventions)
+        // Query all possible member role names (legacy support for different naming conventions)
         java.util.Set<Long> seenIds = new java.util.HashSet<>();
         List<User> allMembers = new java.util.ArrayList<>();
 
-        // Try all possible role naming conventions
         String[] memberRoles = { "CUSTOMER", "MEMBER", "ROLE_CUSTOMER", "ROLE_MEMBER" };
         for (String roleName : memberRoles) {
             List<User> users = userRepository.findByRoleName(roleName);
@@ -198,55 +204,85 @@ public class UserService {
             }
         }
 
-        return allMembers.stream().map(user -> {
-            com.gym.management.dto.MemberDTO dto = new com.gym.management.dto.MemberDTO();
-            dto.setUserId(user.getUserId());
-            dto.setFullName(user.getFullName());
-            dto.setEmail(user.getEmail());
-            dto.setPhone(user.getPhone());
+        return allMembers.stream().map(user -> populateMemberDTO(user))
+                .collect(java.util.stream.Collectors.toList());
+    }
 
-            // Fetch membership
-            List<com.gym.management.model.Membership> memberships = membershipRepository
-                    .findByUserUserId(user.getUserId());
-            if (!memberships.isEmpty()) {
-                // Determine active membership (simplistic logic: take the last one or active
-                // one)
-                com.gym.management.model.Membership activeMembership = memberships.stream()
-                        .filter(m -> m.getStatus() == com.gym.management.model.MembershipStatus.ACTIVE)
-                        .findFirst()
-                        .orElse(memberships.get(0)); // Fallback to first
+    /**
+     * Shared helper: populate a MemberDTO from a User by reading their membership.
+     * Supports both tiered plans and legacy packages.
+     */
+    private MemberDTO populateMemberDTO(User user) {
+        MemberDTO dto = new MemberDTO();
+        dto.setUserId(user.getUserId());
+        dto.setFullName(user.getFullName());
+        dto.setEmail(user.getEmail());
+        dto.setPhone(user.getPhone());
+        dto.setCreatedAt(user.getCreatedAt());
 
-                if (activeMembership.getStatus() != null) {
-                    dto.setStatus(activeMembership.getStatus().name());
+        List<Membership> memberships = membershipRepository.findByUserUserId(user.getUserId());
+        if (!memberships.isEmpty()) {
+            Membership activeMembership = memberships.stream()
+                    .filter(m -> m.getStatus() == MembershipStatus.ACTIVE)
+                    .findFirst()
+                    .orElse(memberships.get(0));
+
+            dto.setStatus(activeMembership.getStatus() != null ? activeMembership.getStatus().name() : "UNKNOWN");
+            dto.setStartDate(activeMembership.getStartDate());
+            dto.setEndDate(activeMembership.getEndDate());
+
+            // Priority: tieredPlan > planVariant > legacy membershipPackage
+            if (activeMembership.getTieredPlan() != null) {
+                dto.setPlanName(activeMembership.getTieredPlan().getPlanName());
+                if (activeMembership.getPlanVariant() != null) {
+                    dto.setPlanDuration(activeMembership.getPlanVariant().getFormattedDuration());
                 } else {
-                    dto.setStatus("UNKNOWN");
+                    // Calculate from dates if variant missing
+                    dto.setPlanDuration(calculateDurationLabel(activeMembership.getStartDate(), activeMembership.getEndDate()));
                 }
-
-                if (activeMembership.getMembershipPackage() != null) {
-                    dto.setPlanName(activeMembership.getMembershipPackage().getPackageName());
-                    Integer months = activeMembership.getMembershipPackage().getDurationMonths();
-                    if (months != null) {
-                        dto.setPlanDuration(months + (months == 1 ? " Month" : " Months"));
-                    } else {
-                        // Fallback logic if null (though migration should fix only on restart)
-                        dto.setPlanDuration(activeMembership.getMembershipPackage().getDurationDays() + " Days");
-                    }
+            } else if (activeMembership.getMembershipPackage() != null) {
+                dto.setPlanName(activeMembership.getMembershipPackage().getPackageName());
+                Integer months = activeMembership.getMembershipPackage().getDurationMonths();
+                if (months != null) {
+                    dto.setPlanDuration(months + (months == 1 ? " Month" : " Months"));
                 } else {
-                    dto.setPlanName("Unknown Plan");
-                    dto.setPlanDuration("-");
-                }
-
-                dto.setStartDate(activeMembership.getStartDate());
-                dto.setEndDate(activeMembership.getEndDate());
-                if (user.getCreatedAt() != null) {
-                    dto.setJoinDate(user.getCreatedAt().toLocalDate());
+                    Integer days = activeMembership.getMembershipPackage().getDurationDays();
+                    dto.setPlanDuration(days != null ? days + " Days" : "-");
                 }
             } else {
-                dto.setStatus("Inactive");
-                dto.setPlanName("No Plan");
+                // No plan reference but has membership record - derive from dates
+                dto.setPlanName("Custom Plan");
+                dto.setPlanDuration(calculateDurationLabel(activeMembership.getStartDate(), activeMembership.getEndDate()));
             }
-            return dto;
-        }).collect(java.util.stream.Collectors.toList());
+
+            if (user.getCreatedAt() != null) {
+                dto.setJoinDate(user.getCreatedAt().toLocalDate());
+            }
+        } else {
+            dto.setStatus("Inactive");
+            dto.setPlanName("No Plan");
+        }
+        return dto;
+    }
+
+    /**
+     * Calculate a human-readable duration label from start/end dates.
+     */
+    private String calculateDurationLabel(LocalDate start, LocalDate end) {
+        if (start == null || end == null) return "-";
+        long days = java.time.temporal.ChronoUnit.DAYS.between(start, end);
+        if (days >= 365) {
+            long years = days / 365;
+            return years + (years == 1 ? " Year" : " Years");
+        } else if (days >= 28) {
+            long months = days / 30;
+            return months + (months == 1 ? " Month" : " Months");
+        } else if (days >= 7) {
+            long weeks = days / 7;
+            return weeks + (weeks == 1 ? " Week" : " Weeks");
+        } else {
+            return days + (days == 1 ? " Day" : " Days");
+        }
     }
 
     /**
@@ -278,47 +314,11 @@ public class UserService {
                     .collect(Collectors.toList());
         }
 
-        // Convert to MemberDTO and apply additional filters
+        // Convert to MemberDTO using shared helper (supports tiered plans + legacy packages)
         LocalDate today = LocalDate.now();
-        List<MemberDTO> allMembers = allCustomers.stream().map(user -> {
-            MemberDTO dto = new MemberDTO();
-            dto.setUserId(user.getUserId());
-            dto.setFullName(user.getFullName());
-            dto.setEmail(user.getEmail());
-            dto.setPhone(user.getPhone());
-            dto.setCreatedAt(user.getCreatedAt());
-
-            // Fetch membership
-            List<Membership> memberships = membershipRepository.findByUserUserId(user.getUserId());
-            if (!memberships.isEmpty()) {
-                Membership activeMembership = memberships.stream()
-                        .filter(m -> m.getStatus() == MembershipStatus.ACTIVE)
-                        .findFirst()
-                        .orElse(memberships.get(0));
-
-                dto.setStatus(activeMembership.getStatus() != null ? activeMembership.getStatus().name() : "UNKNOWN");
-
-                if (activeMembership.getMembershipPackage() != null) {
-                    dto.setPlanName(activeMembership.getMembershipPackage().getPackageName());
-                    Integer months = activeMembership.getMembershipPackage().getDurationMonths();
-                    dto.setPlanDuration(months != null ? months + (months == 1 ? " Month" : " Months")
-                            : activeMembership.getMembershipPackage().getDurationDays() + " Days");
-                } else {
-                    dto.setPlanName("Unknown Plan");
-                    dto.setPlanDuration("-");
-                }
-
-                dto.setStartDate(activeMembership.getStartDate());
-                dto.setEndDate(activeMembership.getEndDate());
-                if (user.getCreatedAt() != null) {
-                    dto.setJoinDate(user.getCreatedAt().toLocalDate());
-                }
-            } else {
-                dto.setStatus("Inactive");
-                dto.setPlanName("No Plan");
-            }
-            return dto;
-        }).collect(Collectors.toList());
+        List<MemberDTO> allMembers = allCustomers.stream()
+                .map(user -> populateMemberDTO(user))
+                .collect(Collectors.toList());
 
         // Apply status filter
         if (status != null && !status.trim().isEmpty()) {
@@ -480,6 +480,12 @@ public class UserService {
     private com.gym.management.repository.MembershipPackageRepository membershipPackageRepository;
 
     @Autowired
+    private com.gym.management.repository.TieredMembershipPlanRepository tieredPlanRepository;
+
+    @Autowired
+    private com.gym.management.repository.PlanVariantRepository planVariantRepository;
+
+    @Autowired
     private com.gym.management.repository.GymRepository gymRepository;
 
     @Transactional
@@ -555,21 +561,33 @@ public class UserService {
             null
         );
 
-        // Create Membership if this is a CUSTOMER with packageId
-        if (isCustomer && user.getPackageId() != null) {
+        // Create Membership if this is a CUSTOMER with packageId (or variantId/planId)
+        if (isCustomer && (user.getPackageId() != null || user.getVariantId() != null)) {
             try {
-                com.gym.management.model.MembershipPackage pkg = membershipPackageRepository
-                        .findById(user.getPackageId())
-                        .orElseThrow(() -> new RuntimeException("Package not found: " + user.getPackageId()));
+                // Get gym context
+                com.gym.management.model.Gym gym = null;
+                if (user.getGymId() != null) {
+                    gym = gymRepository.findById(user.getGymId()).orElse(null);
+                }
+                
+                if (gym == null) {
+                    // Fallback to default gym (id=1 or any first gym)
+                    gym = gymRepository.findById(1L).orElse(null);
+                    if (gym == null) {
+                        List<com.gym.management.model.Gym> allGyms = gymRepository.findAll();
+                        if (!allGyms.isEmpty()) {
+                            gym = allGyms.get(0);
+                        }
+                    }
+                }
 
-                // Get default gym (id=1)
-                com.gym.management.model.Gym defaultGym = gymRepository.findById(1L)
-                        .orElseThrow(() -> new RuntimeException("Default gym not found"));
+                if (gym == null) {
+                    throw new RuntimeException("No gym found in the system. Cannot create membership.");
+                }
 
                 com.gym.management.model.Membership membership = new com.gym.management.model.Membership();
                 membership.setUser(savedUser);
-                membership.setGym(defaultGym); // Set required gym
-                membership.setMembershipPackage(pkg);
+                membership.setGym(gym);
 
                 // Set start date (default to today if not provided)
                 java.time.LocalDate startDate = user.getStartDate() != null
@@ -577,25 +595,50 @@ public class UserService {
                         : java.time.LocalDate.now();
                 membership.setStartDate(startDate);
 
-                // Calculate end date based on package duration (days preferred)
-                Integer durationDays = pkg.getDurationDays();
-                if (durationDays != null && durationDays > 0) {
-                    membership.setEndDate(startDate.plusDays(durationDays));
-                } else {
-                    int months = user.getDuration() != null ? user.getDuration() : 1;
-                    if (months <= 0) {
-                        months = pkg.getDurationMonths() != null ? pkg.getDurationMonths() : 1;
+                if (user.getPlanId() != null && user.getVariantId() != null) {
+                    // Tiered Plan
+                    com.gym.management.model.TieredMembershipPlan plan = tieredPlanRepository.findById(user.getPlanId())
+                            .orElseThrow(() -> new RuntimeException("Plan not found: " + user.getPlanId()));
+                    com.gym.management.model.PlanVariant variant = planVariantRepository.findById(user.getVariantId())
+                            .orElseThrow(() -> new RuntimeException("Variant not found: " + user.getVariantId()));
+                    
+                    membership.setTieredPlan(plan);
+                    membership.setPlanVariant(variant);
+                    membership.setEndDate(startDate.plusDays(variant.getDurationDays()));
+                } else if (user.getPackageId() != null) {
+                    // Try to find if packageId is actually a Tiered Plan Variant (for backward compatibility)
+                    Optional<com.gym.management.model.PlanVariant> variantOpt = planVariantRepository.findById(user.getPackageId());
+                    
+                    if (variantOpt.isPresent()) {
+                        com.gym.management.model.PlanVariant variant = variantOpt.get();
+                        membership.setTieredPlan(variant.getPlan());
+                        membership.setPlanVariant(variant);
+                        membership.setEndDate(startDate.plusDays(variant.getDurationDays()));
+                    } else {
+                        // Fallback to legacy MembershipPackage
+                        com.gym.management.model.MembershipPackage pkg = membershipPackageRepository
+                                .findById(user.getPackageId())
+                                .orElseThrow(() -> new RuntimeException("Package/Variant not found: " + user.getPackageId()));
+                        
+                        membership.setMembershipPackage(pkg);
+                        
+                        Integer durationDays = pkg.getDurationDays();
+                        if (durationDays != null && durationDays > 0) {
+                            membership.setEndDate(startDate.plusDays(durationDays));
+                        } else {
+                            int months = user.getDuration() != null ? user.getDuration() : 1;
+                            if (months <= 0) {
+                                months = pkg.getDurationMonths() != null ? pkg.getDurationMonths() : 1;
+                            }
+                            membership.setEndDate(startDate.plusMonths(months));
+                        }
                     }
-                    membership.setEndDate(startDate.plusMonths(months));
                 }
 
-                // Set status to ACTIVE
                 membership.setStatus(com.gym.management.model.MembershipStatus.ACTIVE);
-
                 membershipRepository.save(membership);
             } catch (Exception e) {
-                // Log but don't fail user creation
-                System.err.println("Failed to create membership: " + e.getMessage());
+                System.err.println("Failed to create membership during user creation: " + e.getMessage());
             }
         }
 

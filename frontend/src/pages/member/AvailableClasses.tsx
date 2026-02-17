@@ -1,10 +1,12 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Search, Calendar, List, Clock, MapPin,
     Users, ChevronLeft, ChevronRight, Heart, Zap,
     Dumbbell, Bike, Sparkles, Target, User, CalendarDays,
-    Loader2, AlertCircle, CheckCircle2, CalendarCheck, Flame
+    Loader2, AlertCircle, CheckCircle2, CalendarCheck, Flame,
+    X, Star, Download, Bell, ChevronDown, Info, Timer,
+    UserCircle, Award, TrendingUp, Grid3X3
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { gymClassApi } from '../../services/api';
@@ -13,27 +15,380 @@ import { useAuth } from '../../contexts/AuthContext';
 import '../../styles/macos-member.css';
 import './AvailableClasses.css';
 
-const classTypeConfig: Record<string, { icon: React.ReactNode; color: string; bg: string }> = {
-    'Yoga': { icon: <Heart size={16} />, color: '#34C759', bg: 'rgba(52, 199, 89, 0.12)' },
-    'HIIT': { icon: <Zap size={16} />, color: '#FF3B30', bg: 'rgba(255, 59, 48, 0.12)' },
-    'Strength': { icon: <Dumbbell size={16} />, color: '#007AFF', bg: 'rgba(0, 122, 255, 0.12)' },
-    'Spin': { icon: <Bike size={16} />, color: '#AF52DE', bg: 'rgba(175, 82, 222, 0.12)' },
-    'Pilates': { icon: <Sparkles size={16} />, color: '#5AC8FA', bg: 'rgba(90, 200, 250, 0.12)' },
-    'Boxing': { icon: <Target size={16} />, color: '#FF9500', bg: 'rgba(255, 149, 0, 0.12)' },
-    'PT Session': { icon: <User size={16} />, color: '#5856D6', bg: 'rgba(88, 86, 214, 0.12)' },
-    'Group': { icon: <Users size={16} />, color: '#FF2D55', bg: 'rgba(255, 45, 85, 0.12)' },
-    'CrossFit': { icon: <Flame size={16} />, color: '#FF6B35', bg: 'rgba(255, 107, 53, 0.12)' }
+/* ────────────── constants ────────────── */
+
+const CLASS_TYPE_CONFIG: Record<string, { icon: React.ReactNode; color: string; bg: string; gradient: string }> = {
+    'Yoga':       { icon: <Heart size={16} />,    color: '#34C759', bg: 'rgba(52,199,89,0.12)',   gradient: 'linear-gradient(135deg, #34C759 0%, #30D158 100%)' },
+    'HIIT':       { icon: <Zap size={16} />,      color: '#FF3B30', bg: 'rgba(255,59,48,0.12)',   gradient: 'linear-gradient(135deg, #FF3B30 0%, #FF6961 100%)' },
+    'Strength':   { icon: <Dumbbell size={16} />,  color: '#007AFF', bg: 'rgba(0,122,255,0.12)',   gradient: 'linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%)' },
+    'Spin':       { icon: <Bike size={16} />,      color: '#AF52DE', bg: 'rgba(175,82,222,0.12)',  gradient: 'linear-gradient(135deg, #AF52DE 0%, #BF5AF2 100%)' },
+    'Pilates':    { icon: <Sparkles size={16} />,  color: '#5AC8FA', bg: 'rgba(90,200,250,0.12)',  gradient: 'linear-gradient(135deg, #5AC8FA 0%, #64D2FF 100%)' },
+    'Boxing':     { icon: <Target size={16} />,    color: '#FF9500', bg: 'rgba(255,149,0,0.12)',   gradient: 'linear-gradient(135deg, #FF9500 0%, #FFCC00 100%)' },
+    'PT Session': { icon: <User size={16} />,      color: '#5856D6', bg: 'rgba(88,86,214,0.12)',   gradient: 'linear-gradient(135deg, #5856D6 0%, #AF52DE 100%)' },
+    'Group':      { icon: <Users size={16} />,     color: '#FF2D55', bg: 'rgba(255,45,85,0.12)',   gradient: 'linear-gradient(135deg, #FF2D55 0%, #FF6482 100%)' },
+    'CrossFit':   { icon: <Flame size={16} />,     color: '#FF6B35', bg: 'rgba(255,107,53,0.12)',  gradient: 'linear-gradient(135deg, #FF6B35 0%, #FF9500 100%)' },
 };
 
-const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.04 } }
+const DEFAULT_CONFIG = { icon: <Sparkles size={16} />, color: '#8E8E93', bg: 'rgba(142,142,147,0.12)', gradient: 'linear-gradient(135deg, #8E8E93 0%, #AEAEB2 100%)' };
+
+const DIFFICULTY_MAP: Record<string, { label: string; cls: string }> = {
+    'Beginner':     { label: 'Beginner',     cls: 'badge--success' },
+    'Intermediate': { label: 'Intermediate', cls: 'badge--warning' },
+    'Advanced':     { label: 'Advanced',     cls: 'badge--danger' },
 };
 
-const itemVariants = {
-    hidden: { opacity: 0, y: 16 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.3 } }
+const TIME_FILTERS = [
+    { key: 'all', label: 'All Day' },
+    { key: 'morning', label: 'Morning', range: [0, 12] },
+    { key: 'afternoon', label: 'Afternoon', range: [12, 17] },
+    { key: 'evening', label: 'Evening', range: [17, 24] },
+] as const;
+
+type ViewMode = 'list' | 'weekly' | 'monthly';
+type TimeFilter = typeof TIME_FILTERS[number]['key'];
+
+/* ────────────── helpers ────────────── */
+
+const formatTime = (d: string) => new Date(d).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+const formatDate = (d: string) => new Date(d).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+
+const isToday = (date: Date) => date.toDateString() === new Date().toDateString();
+
+const getRelativeTime = (dateStr: string) => {
+    const now = new Date();
+    const target = new Date(dateStr);
+    const diffMs = target.getTime() - now.getTime();
+    const diffMin = Math.floor(diffMs / 60000);
+    if (diffMin < 0) return 'Started';
+    if (diffMin < 60) return `In ${diffMin}m`;
+    const diffHrs = Math.floor(diffMin / 60);
+    if (diffHrs < 24) return `In ${diffHrs}h`;
+    const diffDays = Math.floor(diffHrs / 24);
+    return `In ${diffDays}d`;
 };
+
+const isStartingSoon = (dateStr: string) => {
+    const diffMs = new Date(dateStr).getTime() - Date.now();
+    return diffMs > 0 && diffMs < 30 * 60 * 1000;
+};
+
+const getConfig = (type: string) => CLASS_TYPE_CONFIG[type] || DEFAULT_CONFIG;
+
+const generateICS = (c: GymClassDTO) => {
+    const start = new Date(c.startTime);
+    const end = new Date(start.getTime() + c.durationMinutes * 60000);
+    const fmt = (d: Date) => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+    return `BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nDTSTART:${fmt(start)}\nDTEND:${fmt(end)}\nSUMMARY:${c.classType} - ${c.className}\nLOCATION:${c.location || ''}\nDESCRIPTION:Trainer: ${c.trainerName || 'TBA'}\\nDifficulty: ${c.difficulty || 'All levels'}\nEND:VEVENT\nEND:VCALENDAR`;
+};
+
+const downloadICS = (c: GymClassDTO) => {
+    const blob = new Blob([generateICS(c)], { type: 'text/calendar;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${c.classType.replace(/\s/g, '_')}_${formatDate(c.startTime).replace(/\s/g, '_')}.ics`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success('Calendar event downloaded');
+};
+
+const FAVORITES_KEY = 'gym_class_favorites';
+const loadFavorites = (): Set<number> => {
+    try { return new Set(JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]')); } catch { return new Set(); }
+};
+const saveFavorites = (favs: Set<number>) => {
+    localStorage.setItem(FAVORITES_KEY, JSON.stringify([...favs]));
+};
+
+/* ────────────── animation variants ────────────── */
+
+const containerVariants = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.04 } } };
+const itemVariants = { hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.3 } } };
+
+/* ══════════════════════════════════════════════════
+   SUB-COMPONENTS
+   ══════════════════════════════════════════════════ */
+
+/* ── Capacity Bar ── */
+const CapacityBar: React.FC<{ current: number; max: number; spotsLeft: number }> = ({ current, max, spotsLeft }) => {
+    const pct = max > 0 ? Math.min((current / max) * 100, 100) : 0;
+    const isFull = spotsLeft <= 0;
+    const isLow = spotsLeft > 0 && spotsLeft <= 3;
+    return (
+        <div className="capacity-bar">
+            <div className="capacity-bar__track">
+                <div
+                    className={`capacity-bar__fill ${isFull ? 'capacity-bar__fill--full' : isLow ? 'capacity-bar__fill--low' : ''}`}
+                    style={{ width: `${pct}%` }}
+                />
+            </div>
+            <span className={`capacity-bar__label ${isFull ? 'capacity-bar__label--full' : isLow ? 'capacity-bar__label--low' : ''}`}>
+                {isFull ? 'Full' : `${spotsLeft}/${max} spots`}
+            </span>
+        </div>
+    );
+};
+
+/* ── Trainer Preview Popup ── */
+const TrainerPreview: React.FC<{ name: string; onClose: () => void }> = ({ name, onClose }) => (
+    <motion.div
+        className="trainer-preview"
+        initial={{ opacity: 0, y: 8, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 8, scale: 0.95 }}
+        transition={{ duration: 0.15 }}
+    >
+        <div className="trainer-preview__header">
+            <div className="trainer-preview__avatar">
+                <UserCircle size={32} />
+            </div>
+            <div>
+                <h4 className="trainer-preview__name">{name}</h4>
+                <span className="trainer-preview__role">Certified Trainer</span>
+            </div>
+            <button className="trainer-preview__close" onClick={onClose}><X size={14} /></button>
+        </div>
+        <div className="trainer-preview__stats">
+            <div className="trainer-preview__stat">
+                <Award size={12} />
+                <span>Certified</span>
+            </div>
+            <div className="trainer-preview__stat">
+                <Star size={12} />
+                <span>4.8 rating</span>
+            </div>
+            <div className="trainer-preview__stat">
+                <TrendingUp size={12} />
+                <span>200+ sessions</span>
+            </div>
+        </div>
+    </motion.div>
+);
+
+/* ── Class Detail Modal ── */
+const ClassDetailModal: React.FC<{
+    classItem: GymClassDTO;
+    onClose: () => void;
+    onBook: (id: number) => void;
+    onWaitlist: (id: number) => void;
+    isBooking: boolean;
+    isFavorite: boolean;
+    onToggleFav: () => void;
+}> = ({ classItem, onClose, onBook, onWaitlist, isBooking, isFavorite, onToggleFav }) => {
+    const config = getConfig(classItem.classType);
+    const isFull = classItem.spotsLeft <= 0;
+    const diff = DIFFICULTY_MAP[classItem.difficulty || ''];
+
+    return (
+        <motion.div className="ac-modal-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose}>
+            <motion.div
+                className="ac-modal"
+                initial={{ opacity: 0, y: 40, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 40, scale: 0.95 }}
+                transition={{ duration: 0.25 }}
+                onClick={e => e.stopPropagation()}
+            >
+                {/* Hero gradient header */}
+                <div className="ac-modal__hero" style={{ background: config.gradient }}>
+                    <button className="ac-modal__close" onClick={onClose}><X size={18} /></button>
+                    <button className={`ac-modal__fav ${isFavorite ? 'ac-modal__fav--active' : ''}`} onClick={onToggleFav}>
+                        <Heart size={18} fill={isFavorite ? 'currentColor' : 'none'} />
+                    </button>
+                    <div className="ac-modal__hero-icon">{config.icon}</div>
+                    <h2 className="ac-modal__hero-title">{classItem.className || classItem.classType}</h2>
+                    <span className="ac-modal__hero-type">{classItem.classType}</span>
+                    {isStartingSoon(classItem.startTime) && (
+                        <span className="ac-modal__soon-badge"><Timer size={12} /> Starting Soon</span>
+                    )}
+                </div>
+
+                <div className="ac-modal__body">
+                    {/* Key details grid */}
+                    <div className="ac-modal__details-grid">
+                        <div className="ac-modal__detail">
+                            <Calendar size={14} />
+                            <div>
+                                <span className="ac-modal__detail-label">Date</span>
+                                <span className="ac-modal__detail-value">{formatDate(classItem.startTime)}</span>
+                            </div>
+                        </div>
+                        <div className="ac-modal__detail">
+                            <Clock size={14} />
+                            <div>
+                                <span className="ac-modal__detail-label">Time</span>
+                                <span className="ac-modal__detail-value">{formatTime(classItem.startTime)} ({classItem.durationMinutes}m)</span>
+                            </div>
+                        </div>
+                        {classItem.location && (
+                            <div className="ac-modal__detail">
+                                <MapPin size={14} />
+                                <div>
+                                    <span className="ac-modal__detail-label">Location</span>
+                                    <span className="ac-modal__detail-value">{classItem.location}</span>
+                                </div>
+                            </div>
+                        )}
+                        <div className="ac-modal__detail">
+                            <Users size={14} />
+                            <div>
+                                <span className="ac-modal__detail-label">Capacity</span>
+                                <span className="ac-modal__detail-value">{classItem.currentBookings}/{classItem.maxCapacity} booked</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Trainer section */}
+                    {classItem.trainerName && (
+                        <div className="ac-modal__trainer">
+                            <div className="ac-modal__trainer-avatar"><UserCircle size={36} /></div>
+                            <div className="ac-modal__trainer-info">
+                                <span className="ac-modal__trainer-name">{classItem.trainerName}</span>
+                                <span className="ac-modal__trainer-role">Instructor</span>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Difficulty */}
+                    {diff && (
+                        <div className="ac-modal__row">
+                            <span className="ac-modal__row-label">Difficulty</span>
+                            <span className={`ac-modal__badge ${diff.cls}`}>{diff.label}</span>
+                        </div>
+                    )}
+
+                    {/* Description */}
+                    {classItem.description && (
+                        <div className="ac-modal__desc">
+                            <h4>About this class</h4>
+                            <p>{classItem.description}</p>
+                        </div>
+                    )}
+
+                    {/* Capacity bar */}
+                    <div className="ac-modal__capacity">
+                        <CapacityBar current={classItem.currentBookings} max={classItem.maxCapacity} spotsLeft={classItem.spotsLeft} />
+                    </div>
+
+                    {/* Cancellation policy */}
+                    <div className="ac-modal__policy">
+                        <Info size={13} />
+                        <span>Free cancellation up to 2 hours before class start time</span>
+                    </div>
+                </div>
+
+                {/* Footer actions */}
+                <div className="ac-modal__footer">
+                    <button className="ac-modal__ics-btn" onClick={() => downloadICS(classItem)}>
+                        <Download size={14} /> Export .ics
+                    </button>
+                    {classItem.isBooked ? (
+                        <button className="ac-modal__book-btn ac-modal__book-btn--booked" disabled>
+                            <CheckCircle2 size={16} /> Already Booked
+                        </button>
+                    ) : isFull ? (
+                        <button className="ac-modal__book-btn ac-modal__book-btn--waitlist" onClick={() => onWaitlist(classItem.classId)}>
+                            <Bell size={16} /> Join Waitlist
+                        </button>
+                    ) : (
+                        <button className="ac-modal__book-btn" onClick={() => onBook(classItem.classId)} disabled={isBooking}>
+                            {isBooking ? <><Loader2 size={16} className="spin" /> Booking...</> : 'Book This Class'}
+                        </button>
+                    )}
+                </div>
+            </motion.div>
+        </motion.div>
+    );
+};
+
+/* ── Monthly Calendar View ── */
+const MonthlyCalendar: React.FC<{
+    classes: GymClassDTO[];
+    month: Date;
+    onChangeMonth: (dir: number) => void;
+    onSelectClass: (c: GymClassDTO) => void;
+    favorites: Set<number>;
+}> = ({ classes, month, onChangeMonth, onSelectClass, favorites }) => {
+    const year = month.getFullYear();
+    const m = month.getMonth();
+    const firstDay = new Date(year, m, 1).getDay();
+    const daysInMonth = new Date(year, m + 1, 0).getDate();
+
+    const classMap = useMemo(() => {
+        const map: Record<string, GymClassDTO[]> = {};
+        classes.forEach(c => {
+            const d = new Date(c.startTime);
+            if (d.getMonth() === m && d.getFullYear() === year) {
+                const key = d.getDate().toString();
+                if (!map[key]) map[key] = [];
+                map[key].push(c);
+            }
+        });
+        return map;
+    }, [classes, m, year]);
+
+    const cells: (number | null)[] = [];
+    for (let i = 0; i < firstDay; i++) cells.push(null);
+    for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+
+    const todayDate = new Date();
+    const isTodayCell = (day: number) =>
+        todayDate.getFullYear() === year && todayDate.getMonth() === m && todayDate.getDate() === day;
+
+    return (
+        <div className="monthly-cal">
+            <div className="monthly-cal__nav">
+                <button className="monthly-cal__nav-btn" onClick={() => onChangeMonth(-1)}><ChevronLeft size={18} /></button>
+                <span className="monthly-cal__nav-label">
+                    {month.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                </span>
+                <button className="monthly-cal__nav-btn" onClick={() => onChangeMonth(1)}><ChevronRight size={18} /></button>
+            </div>
+            <div className="monthly-cal__weekdays">
+                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
+                    <div key={d} className="monthly-cal__weekday">{d}</div>
+                ))}
+            </div>
+            <div className="monthly-cal__grid">
+                {cells.map((day, i) => {
+                    if (day === null) return <div key={`e-${i}`} className="monthly-cal__cell monthly-cal__cell--empty" />;
+                    const dayClasses = classMap[day.toString()] || [];
+                    return (
+                        <div
+                            key={day}
+                            className={`monthly-cal__cell ${isTodayCell(day) ? 'monthly-cal__cell--today' : ''} ${dayClasses.length > 0 ? 'monthly-cal__cell--has-classes' : ''}`}
+                        >
+                            <span className="monthly-cal__day-num">{day}</span>
+                            {dayClasses.length > 0 && (
+                                <div className="monthly-cal__dots">
+                                    {dayClasses.slice(0, 4).map(c => {
+                                        const cfg = getConfig(c.classType);
+                                        return (
+                                            <button
+                                                key={c.classId}
+                                                className={`monthly-cal__dot ${c.isBooked ? 'monthly-cal__dot--booked' : ''}`}
+                                                style={{ background: cfg.color }}
+                                                onClick={() => onSelectClass(c)}
+                                                title={`${c.classType} ${formatTime(c.startTime)}`}
+                                            />
+                                        );
+                                    })}
+                                    {dayClasses.length > 4 && (
+                                        <span className="monthly-cal__more">+{dayClasses.length - 4}</span>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+};
+
+/* ══════════════════════════════════════════════════
+   MAIN COMPONENT
+   ══════════════════════════════════════════════════ */
 
 const AvailableClasses: React.FC = () => {
     const [classes, setClasses] = useState<GymClassDTO[]>([]);
@@ -41,33 +396,37 @@ const AvailableClasses: React.FC = () => {
     const [bookedCount, setBookedCount] = useState(0);
     const [loading, setLoading] = useState(true);
     const [booking, setBooking] = useState<number | null>(null);
-    const [view, setView] = useState<'list' | 'calendar'>('list');
+    const [view, setView] = useState<ViewMode>('list');
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedType, setSelectedType] = useState('All');
+    const [selectedDifficulty, setSelectedDifficulty] = useState('All');
+    const [selectedTimeFilter, setSelectedTimeFilter] = useState<TimeFilter>('all');
     const [selectedWeek, setSelectedWeek] = useState(0);
+    const [calMonth, setCalMonth] = useState(new Date());
     const [error, setError] = useState<string | null>(null);
     const [showBookingSuccess, setShowBookingSuccess] = useState<number | null>(null);
+    const [detailClass, setDetailClass] = useState<GymClassDTO | null>(null);
+    const [favorites, setFavorites] = useState<Set<number>>(loadFavorites);
+    const [showFavOnly, setShowFavOnly] = useState(false);
+    const [trainerPreview, setTrainerPreview] = useState<{ name: string; x: number; y: number } | null>(null);
+    const [waitlist, setWaitlist] = useState<Set<number>>(new Set());
 
     const { user, isLoading: authLoading } = useAuth();
     const memberId = Number(user?.userId || user?.id);
 
     useEffect(() => {
-        if (!authLoading) {
-            fetchClasses();
-        }
+        if (!authLoading) fetchClasses();
     }, [memberId, authLoading]);
 
     const fetchClasses = async () => {
         try {
             setLoading(true);
             setError(null);
-
             const [availableClasses, todayClasses, bookingsCount] = await Promise.all([
                 gymClassApi.getAvailableClasses(memberId),
                 gymClassApi.getTodaysClasses(memberId),
                 memberId ? gymClassApi.getMemberBookingsCount(memberId) : Promise.resolve(0)
             ]);
-
             setClasses(availableClasses);
             setTodaysClasses(todayClasses);
             setBookedCount(bookingsCount);
@@ -82,129 +441,119 @@ const AvailableClasses: React.FC = () => {
     };
 
     const handleBook = async (classId: number) => {
-        if (!memberId) {
-            toast.error('Please log in to book a class');
-            return;
-        }
-
+        if (!memberId) { toast.error('Please log in to book a class'); return; }
         setBooking(classId);
         try {
-            const booking = await gymClassApi.bookClass(classId, memberId);
-            
-            setClasses(prev => prev.map(c => 
-                c.classId === classId 
-                    ? { ...c, isBooked: true, bookingId: booking.bookingId, spotsLeft: c.spotsLeft - 1 }
-                    : c
-            ));
-            setTodaysClasses(prev => prev.map(c => 
-                c.classId === classId 
-                    ? { ...c, isBooked: true, bookingId: booking.bookingId, spotsLeft: c.spotsLeft - 1 }
-                    : c
-            ));
+            const bk = await gymClassApi.bookClass(classId, memberId);
+            const update = (list: GymClassDTO[]) =>
+                list.map(c => c.classId === classId ? { ...c, isBooked: true, bookingId: bk.bookingId, spotsLeft: c.spotsLeft - 1, currentBookings: c.currentBookings + 1 } : c);
+            setClasses(update);
+            setTodaysClasses(update);
             setBookedCount(prev => prev + 1);
-
-            const bookedClass = classes.find(c => c.classId === classId);
             setShowBookingSuccess(classId);
+            const bookedClass = classes.find(c => c.classId === classId);
             toast.success(
                 <div className="toast-booking-success">
                     <CheckCircle2 size={18} />
-                    <div>
-                        <strong>Booking Confirmed!</strong>
-                        <p>{bookedClass?.classType} with {bookedClass?.trainerName}</p>
-                    </div>
+                    <div><strong>Booking Confirmed!</strong><p>{bookedClass?.classType} with {bookedClass?.trainerName}</p></div>
                 </div>,
                 { duration: 4000, icon: null }
             );
-            
             setTimeout(() => setShowBookingSuccess(null), 3000);
+            if (detailClass?.classId === classId) {
+                setDetailClass(prev => prev ? { ...prev, isBooked: true, bookingId: bk.bookingId, spotsLeft: prev.spotsLeft - 1, currentBookings: prev.currentBookings + 1 } : null);
+            }
         } catch (err: any) {
-            console.error('Booking failed:', err);
-            const message = err.response?.data?.message || 'Failed to book class. Please try again.';
-            toast.error(message);
+            toast.error(err.response?.data?.message || 'Failed to book class. Please try again.');
         } finally {
             setBooking(null);
         }
     };
 
+    const handleWaitlist = useCallback((classId: number) => {
+        setWaitlist(prev => { const n = new Set(prev); n.add(classId); return n; });
+        toast.success('You\'ve been added to the waitlist! We\'ll notify you when a spot opens.', { duration: 4000 });
+    }, []);
+
+    const toggleFavorite = useCallback((classId: number) => {
+        setFavorites(prev => {
+            const next = new Set(prev);
+            if (next.has(classId)) next.delete(classId); else next.add(classId);
+            saveFavorites(next);
+            return next;
+        });
+    }, []);
+
+    const handleTrainerClick = useCallback((name: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        const rect = (e.target as HTMLElement).getBoundingClientRect();
+        setTrainerPreview({ name, x: rect.left, y: rect.bottom + 8 });
+    }, []);
+
+    /* ── derived data ── */
+
     const types = useMemo(() => {
-        const uniqueTypes = new Set(classes.map(c => c.classType));
-        return ['All', ...Array.from(uniqueTypes)];
+        const unique = new Set(classes.map(c => c.classType));
+        return ['All', ...Array.from(unique)];
     }, [classes]);
 
-    const filteredClasses = useMemo(() => {
-        return classes.filter(classItem => {
-            const trainerName = classItem.trainerName || '';
-            const matchesSearch = 
-                trainerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                classItem.classType.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                classItem.className.toLowerCase().includes(searchTerm.toLowerCase());
-            const matchesType = selectedType === 'All' || classItem.classType === selectedType;
-            return matchesSearch && matchesType;
-        });
-    }, [classes, searchTerm, selectedType]);
+    const difficulties = useMemo(() => {
+        const unique = new Set(classes.map(c => c.difficulty).filter(Boolean));
+        return ['All', ...Array.from(unique)] as string[];
+    }, [classes]);
 
-    const filteredTodaysClasses = useMemo(() => {
-        return todaysClasses.filter(classItem => {
-            const trainerName = classItem.trainerName || '';
-            const matchesSearch = 
-                trainerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                classItem.classType.toLowerCase().includes(searchTerm.toLowerCase());
-            const matchesType = selectedType === 'All' || classItem.classType === selectedType;
-            return matchesSearch && matchesType;
-        });
-    }, [todaysClasses, searchTerm, selectedType]);
+    const filterFn = useCallback((c: GymClassDTO) => {
+        const trainerName = c.trainerName || '';
+        const matchSearch =
+            trainerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            c.classType.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            c.className.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchType = selectedType === 'All' || c.classType === selectedType;
+        const matchDiff = selectedDifficulty === 'All' || c.difficulty === selectedDifficulty;
+        const matchFav = !showFavOnly || favorites.has(c.classId);
 
-    const getWeekDays = (weekOffset: number) => {
+        let matchTime = true;
+        if (selectedTimeFilter !== 'all') {
+            const hour = new Date(c.startTime).getHours();
+            const tf = TIME_FILTERS.find(t => t.key === selectedTimeFilter);
+            if (tf && 'range' in tf) matchTime = hour >= tf.range[0] && hour < tf.range[1];
+        }
+        return matchSearch && matchType && matchDiff && matchTime && matchFav;
+    }, [searchTerm, selectedType, selectedDifficulty, selectedTimeFilter, showFavOnly, favorites]);
+
+    const filteredClasses = useMemo(() => classes.filter(filterFn), [classes, filterFn]);
+
+    const filteredTodaysClasses = useMemo(() => todaysClasses.filter(filterFn), [todaysClasses, filterFn]);
+
+    const getWeekDays = (offset: number) => {
         const today = new Date();
-        const startOfWeek = new Date(today);
-        startOfWeek.setDate(today.getDate() - today.getDay() + (weekOffset * 7));
+        const start = new Date(today);
+        start.setDate(today.getDate() - today.getDay() + offset * 7);
         return Array.from({ length: 7 }, (_, i) => {
-            const d = new Date(startOfWeek);
+            const d = new Date(start);
             d.setDate(d.getDate() + i);
             return d;
         });
     };
-
     const weekDays = getWeekDays(selectedWeek);
 
     const getClassesForDay = (date: Date) =>
-        filteredClasses.filter(classItem => {
-            const classDate = new Date(classItem.startTime);
-            return classDate.toDateString() === date.toDateString();
-        });
+        filteredClasses.filter(c => new Date(c.startTime).toDateString() === date.toDateString());
 
-    const formatTime = (dateStr: string) => {
-        const date = new Date(dateStr);
-        return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-    };
+    const activeFilterCount = [
+        selectedType !== 'All',
+        selectedDifficulty !== 'All',
+        selectedTimeFilter !== 'all',
+        showFavOnly,
+        searchTerm.length > 0,
+    ].filter(Boolean).length;
 
-    const formatDate = (dateStr: string) => {
-        const date = new Date(dateStr);
-        return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-    };
-
-    const isToday = (date: Date) => {
-        const today = new Date();
-        return date.toDateString() === today.toDateString();
-    };
-
-    const getDifficultyColor = (diff?: string) => {
-        switch (diff) {
-            case 'Beginner': return 'badge--success';
-            case 'Intermediate': return 'badge--warning';
-            case 'Advanced': return 'badge--danger';
-            default: return 'badge--info';
-        }
-    };
-
+    /* ── loading state ── */
     if (loading) {
         return (
             <div className="classes-page">
                 <div className="classes-loading">
-                    <motion.div
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                    >
+                    <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}>
                         <Loader2 size={24} className="classes-loading__icon" />
                     </motion.div>
                     <p>Loading available classes...</p>
@@ -213,19 +562,17 @@ const AvailableClasses: React.FC = () => {
         );
     }
 
+    /* ── render ── */
     return (
-        <motion.div
-            className="classes-page"
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-        >
+        <motion.div className="classes-page" variants={containerVariants} initial="hidden" animate="visible">
+            {/* Click-away for trainer preview */}
+            {trainerPreview && <div className="ac-click-away" onClick={() => setTrainerPreview(null)} />}
+
+            {/* Header */}
             <motion.header className="classes-header" variants={itemVariants}>
                 <div className="classes-header__content">
                     <h1 className="classes-header__title">Class Schedule</h1>
-                    <p className="classes-header__subtitle">
-                        Browse and book available sessions
-                    </p>
+                    <p className="classes-header__subtitle">Browse and book available sessions</p>
                 </div>
                 <div className="classes-header__stats">
                     <div className="classes-stat">
@@ -245,6 +592,7 @@ const AvailableClasses: React.FC = () => {
                 </div>
             </motion.header>
 
+            {/* Today's classes */}
             {filteredTodaysClasses.length > 0 && (
                 <motion.section className="todays-classes" variants={itemVariants}>
                     <div className="todays-classes__header">
@@ -256,29 +604,31 @@ const AvailableClasses: React.FC = () => {
                     </div>
                     <div className="todays-classes__list">
                         {filteredTodaysClasses.slice(0, 5).map(classItem => {
-                            const config = classTypeConfig[classItem.classType] || classTypeConfig['PT Session'];
+                            const config = getConfig(classItem.classType);
                             const isBooked = classItem.isBooked;
                             const isBookingThis = booking === classItem.classId;
                             const justBooked = showBookingSuccess === classItem.classId;
+                            const isFull = classItem.spotsLeft <= 0;
+                            const soon = isStartingSoon(classItem.startTime);
 
                             return (
                                 <motion.div
                                     key={classItem.classId}
-                                    className={`todays-class-item ${isBooked ? 'todays-class-item--booked' : ''} ${justBooked ? 'todays-class-item--just-booked' : ''}`}
+                                    className={`todays-class-item ${isBooked ? 'todays-class-item--booked' : ''} ${justBooked ? 'todays-class-item--just-booked' : ''} ${soon ? 'todays-class-item--soon' : ''}`}
                                     whileHover={{ scale: 1.01 }}
                                     layout
+                                    onClick={() => setDetailClass(classItem)}
+                                    style={{ cursor: 'pointer' }}
                                 >
-                                    <div 
-                                        className="todays-class-item__icon"
-                                        style={{ background: config.bg, color: config.color }}
-                                    >
+                                    <div className="todays-class-item__icon" style={{ background: config.bg, color: config.color }}>
                                         {config.icon}
                                     </div>
                                     <div className="todays-class-item__info">
                                         <div className="todays-class-item__main">
                                             <span className="todays-class-item__type">{classItem.classType}</span>
+                                            {soon && <span className="starting-soon-badge"><Timer size={10} /> Soon</span>}
                                             {classItem.difficulty && (
-                                                <span className={`todays-class-item__difficulty ${getDifficultyColor(classItem.difficulty)}`}>
+                                                <span className={`todays-class-item__difficulty ${DIFFICULTY_MAP[classItem.difficulty]?.cls || 'badge--info'}`}>
                                                     {classItem.difficulty}
                                                 </span>
                                             )}
@@ -289,38 +639,27 @@ const AvailableClasses: React.FC = () => {
                                             {classItem.location && <span><MapPin size={11} /> {classItem.location}</span>}
                                         </div>
                                     </div>
-                                    <div className="todays-class-item__action">
-                                        {classItem.spotsLeft !== undefined && (
-                                            <span className="todays-class-item__spots">
-                                                {classItem.spotsLeft} spots
-                                            </span>
-                                        )}
+                                    <div className="todays-class-item__action" onClick={e => e.stopPropagation()}>
+                                        <CapacityBar current={classItem.currentBookings} max={classItem.maxCapacity} spotsLeft={classItem.spotsLeft} />
                                         <button
-                                            className={`todays-class-item__btn ${isBooked ? 'todays-class-item__btn--booked' : ''}`}
-                                            onClick={() => !isBooked && handleBook(classItem.classId)}
+                                            className={`todays-class-item__btn ${isBooked ? 'todays-class-item__btn--booked' : isFull ? 'todays-class-item__btn--waitlist' : ''}`}
+                                            onClick={() => {
+                                                if (isBooked) return;
+                                                if (isFull) handleWaitlist(classItem.classId);
+                                                else handleBook(classItem.classId);
+                                            }}
                                             disabled={isBookingThis || isBooked}
                                         >
-                                            {isBookingThis ? (
-                                                <Loader2 size={14} className="spin" />
-                                            ) : isBooked ? (
-                                                <>
-                                                    <CheckCircle2 size={14} />
-                                                    Booked
-                                                </>
-                                            ) : (
-                                                'Book Now'
-                                            )}
+                                            {isBookingThis ? <Loader2 size={14} className="spin" />
+                                                : isBooked ? <><CheckCircle2 size={14} /> Booked</>
+                                                : isFull ? <><Bell size={14} /> Waitlist</>
+                                                : 'Book Now'}
                                         </button>
                                     </div>
                                     {justBooked && (
-                                        <motion.div 
-                                            className="booking-success-overlay"
-                                            initial={{ opacity: 0, scale: 0.8 }}
-                                            animate={{ opacity: 1, scale: 1 }}
-                                            exit={{ opacity: 0 }}
-                                        >
-                                            <CheckCircle2 size={24} />
-                                            <span>Booked!</span>
+                                        <motion.div className="booking-success-overlay"
+                                            initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}>
+                                            <CheckCircle2 size={24} /><span>Booked!</span>
                                         </motion.div>
                                     )}
                                 </motion.div>
@@ -330,94 +669,135 @@ const AvailableClasses: React.FC = () => {
                 </motion.section>
             )}
 
+            {/* Toolbar: search, filters, view toggle */}
             <motion.div className="classes-toolbar" variants={itemVariants}>
                 <div className="classes-search">
                     <Search size={16} className="classes-search__icon" />
-                    <input
-                        type="text"
-                        placeholder="Search classes or trainers..."
-                        value={searchTerm}
-                        onChange={e => setSearchTerm(e.target.value)}
-                        className="classes-search__input"
-                    />
+                    <input type="text" placeholder="Search classes or trainers..." value={searchTerm}
+                        onChange={e => setSearchTerm(e.target.value)} className="classes-search__input" />
+                    {searchTerm && (
+                        <button className="classes-search__clear" onClick={() => setSearchTerm('')}><X size={14} /></button>
+                    )}
                 </div>
 
+                {/* Type filter chips */}
                 <div className="classes-filters">
-                    {types.map(type => (
-                        <button
-                            key={type}
-                            className={`classes-filter ${selectedType === type ? 'classes-filter--active' : ''}`}
-                            onClick={() => setSelectedType(type as string)}
-                        >
-                            {type}
-                        </button>
-                    ))}
+                    {types.map(type => {
+                        const cfg = type !== 'All' ? getConfig(type) : null;
+                        return (
+                            <button
+                                key={type}
+                                className={`classes-filter ${selectedType === type ? 'classes-filter--active' : ''}`}
+                                onClick={() => setSelectedType(type)}
+                                style={selectedType === type && cfg ? { borderColor: cfg.color, color: cfg.color, background: cfg.bg } : undefined}
+                            >
+                                {cfg && <span className="classes-filter__icon" style={{ color: cfg.color }}>{cfg.icon}</span>}
+                                {type}
+                            </button>
+                        );
+                    })}
                 </div>
 
+                {/* Secondary filters row */}
+                <div className="classes-filters-secondary">
+                    {/* Difficulty */}
+                    <div className="classes-filter-group">
+                        <label className="classes-filter-group__label">Difficulty</label>
+                        <div className="classes-filter-group__options">
+                            {difficulties.map(d => (
+                                <button key={d}
+                                    className={`classes-filter-pill ${selectedDifficulty === d ? 'classes-filter-pill--active' : ''}`}
+                                    onClick={() => setSelectedDifficulty(d)}
+                                >{d}</button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Time of day */}
+                    <div className="classes-filter-group">
+                        <label className="classes-filter-group__label">Time</label>
+                        <div className="classes-filter-group__options">
+                            {TIME_FILTERS.map(tf => (
+                                <button key={tf.key}
+                                    className={`classes-filter-pill ${selectedTimeFilter === tf.key ? 'classes-filter-pill--active' : ''}`}
+                                    onClick={() => setSelectedTimeFilter(tf.key)}
+                                >{tf.label}</button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Favorites filter */}
+                    <button
+                        className={`classes-fav-filter ${showFavOnly ? 'classes-fav-filter--active' : ''}`}
+                        onClick={() => setShowFavOnly(!showFavOnly)}
+                    >
+                        <Heart size={14} fill={showFavOnly ? 'currentColor' : 'none'} />
+                        Favorites
+                        {favorites.size > 0 && <span className="classes-fav-filter__count">{favorites.size}</span>}
+                    </button>
+
+                    {/* Clear all filters */}
+                    {activeFilterCount > 0 && (
+                        <button className="classes-clear-filters" onClick={() => {
+                            setSelectedType('All');
+                            setSelectedDifficulty('All');
+                            setSelectedTimeFilter('all');
+                            setShowFavOnly(false);
+                            setSearchTerm('');
+                        }}>
+                            <X size={12} /> Clear all ({activeFilterCount})
+                        </button>
+                    )}
+                </div>
+
+                {/* View toggle */}
                 <div className="classes-view-toggle">
-                    <button
-                        className={`classes-view-btn ${view === 'list' ? 'classes-view-btn--active' : ''}`}
-                        onClick={() => setView('list')}
-                        title="List view"
-                    >
-                        <List size={16} />
-                    </button>
-                    <button
-                        className={`classes-view-btn ${view === 'calendar' ? 'classes-view-btn--active' : ''}`}
-                        onClick={() => setView('calendar')}
-                        title="Calendar view"
-                    >
-                        <CalendarDays size={16} />
-                    </button>
+                    <button className={`classes-view-btn ${view === 'list' ? 'classes-view-btn--active' : ''}`}
+                        onClick={() => setView('list')} title="List view"><List size={16} /></button>
+                    <button className={`classes-view-btn ${view === 'weekly' ? 'classes-view-btn--active' : ''}`}
+                        onClick={() => setView('weekly')} title="Weekly view"><CalendarDays size={16} /></button>
+                    <button className={`classes-view-btn ${view === 'monthly' ? 'classes-view-btn--active' : ''}`}
+                        onClick={() => setView('monthly')} title="Monthly view"><Grid3X3 size={16} /></button>
                 </div>
             </motion.div>
 
             {error && (
                 <motion.div className="classes-error" variants={itemVariants}>
-                    <AlertCircle size={16} />
-                    <span>{error}</span>
+                    <AlertCircle size={16} /><span>{error}</span>
                     <button onClick={fetchClasses}>Try Again</button>
                 </motion.div>
             )}
 
+            {/* Content area */}
             <AnimatePresence mode="wait">
-                {view === 'list' ? (
-                    <motion.div
-                        key="list"
-                        className="classes-content"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                    >
+                {view === 'list' && (
+                    <motion.div key="list" className="classes-content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                         {filteredClasses.length === 0 ? (
                             <motion.div className="classes-empty" variants={itemVariants}>
-                                <div className="classes-empty__icon">
-                                    <Calendar size={32} />
-                                </div>
-                                <h3 className="classes-empty__title">No Classes Available</h3>
+                                <div className="classes-empty__icon"><Calendar size={32} /></div>
+                                <h3 className="classes-empty__title">No Classes Found</h3>
                                 <p className="classes-empty__text">
-                                    {searchTerm || selectedType !== 'All'
+                                    {activeFilterCount > 0
                                         ? 'Try adjusting your filters to see more classes'
-                                        : 'Check back later for new sessions or contact your trainer'}
+                                        : 'Check back later for new sessions'}
                                 </p>
-                                {(searchTerm || selectedType !== 'All') && (
-                                    <button
-                                        className="classes-empty__btn"
-                                        onClick={() => {
-                                            setSearchTerm('');
-                                            setSelectedType('All');
-                                        }}
-                                    >
-                                        Clear Filters
-                                    </button>
+                                {activeFilterCount > 0 && (
+                                    <button className="classes-empty__btn" onClick={() => {
+                                        setSearchTerm(''); setSelectedType('All'); setSelectedDifficulty('All');
+                                        setSelectedTimeFilter('all'); setShowFavOnly(false);
+                                    }}>Clear Filters</button>
                                 )}
                             </motion.div>
                         ) : (
                             <div className="classes-grid">
-                                {filteredClasses.map((classItem) => {
-                                    const config = classTypeConfig[classItem.classType] || classTypeConfig['PT Session'];
+                                {filteredClasses.map(classItem => {
+                                    const config = getConfig(classItem.classType);
                                     const isBooked = classItem.isBooked;
                                     const justBooked = showBookingSuccess === classItem.classId;
+                                    const isFav = favorites.has(classItem.classId);
+                                    const isFull = classItem.spotsLeft <= 0;
+                                    const onWL = waitlist.has(classItem.classId);
+                                    const soon = isStartingSoon(classItem.startTime);
 
                                     return (
                                         <motion.div
@@ -426,44 +806,48 @@ const AvailableClasses: React.FC = () => {
                                             variants={itemVariants}
                                             whileHover={{ y: -2, transition: { duration: 0.2 } }}
                                             layout
+                                            onClick={() => setDetailClass(classItem)}
+                                            style={{ cursor: 'pointer' }}
                                         >
+                                            {/* Gradient top strip */}
+                                            <div className="class-card__gradient-strip" style={{ background: config.gradient }} />
+
                                             {justBooked && (
-                                                <motion.div 
-                                                    className="class-card__success-badge"
-                                                    initial={{ opacity: 0, y: -10 }}
-                                                    animate={{ opacity: 1, y: 0 }}
-                                                >
-                                                    <CheckCircle2 size={14} />
-                                                    Booking Confirmed!
+                                                <motion.div className="class-card__success-badge"
+                                                    initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
+                                                    <CheckCircle2 size={14} /> Booking Confirmed!
                                                 </motion.div>
                                             )}
+
                                             <div className="class-card__header">
-                                                <div
-                                                    className="class-card__icon"
-                                                    style={{ background: config.bg, color: config.color }}
-                                                >
+                                                <div className="class-card__icon" style={{ background: config.bg, color: config.color }}>
                                                     {config.icon}
                                                 </div>
-                                                <div className="flex gap-2">
+                                                <div className="class-card__header-right">
+                                                    {soon && <span className="starting-soon-badge"><Timer size={10} /> Soon</span>}
                                                     {classItem.difficulty && (
-                                                        <span className={`class-card__badge ${getDifficultyColor(classItem.difficulty)}`}>
+                                                        <span className={`class-card__badge ${DIFFICULTY_MAP[classItem.difficulty]?.cls || 'badge--info'}`}>
                                                             {classItem.difficulty}
                                                         </span>
                                                     )}
                                                     {isBooked && (
-                                                        <span className="class-card__badge badge--success">
-                                                            <CheckCircle2 size={10} /> Booked
-                                                        </span>
+                                                        <span className="class-card__badge badge--success"><CheckCircle2 size={10} /> Booked</span>
                                                     )}
+                                                    <button
+                                                        className={`class-card__fav ${isFav ? 'class-card__fav--active' : ''}`}
+                                                        onClick={e => { e.stopPropagation(); toggleFavorite(classItem.classId); }}
+                                                    >
+                                                        <Heart size={14} fill={isFav ? 'currentColor' : 'none'} />
+                                                    </button>
                                                 </div>
                                             </div>
 
-                                            <h3 className="class-card__title">{classItem.classType}</h3>
+                                            <h3 className="class-card__title">{classItem.className || classItem.classType}</h3>
 
                                             {classItem.trainerName && (
-                                                <p className="class-card__trainer">
-                                                    <User size={12} />
-                                                    {classItem.trainerName}
+                                                <p className="class-card__trainer"
+                                                    onClick={e => handleTrainerClick(classItem.trainerName!, e)}>
+                                                    <User size={12} /> {classItem.trainerName}
                                                 </p>
                                             )}
 
@@ -471,6 +855,7 @@ const AvailableClasses: React.FC = () => {
                                                 <div className="class-card__detail">
                                                     <Calendar size={12} />
                                                     <span>{formatDate(classItem.startTime)}</span>
+                                                    <span className="class-card__relative-time">{getRelativeTime(classItem.startTime)}</span>
                                                 </div>
                                                 <div className="class-card__detail">
                                                     <Clock size={12} />
@@ -478,38 +863,41 @@ const AvailableClasses: React.FC = () => {
                                                 </div>
                                                 {classItem.location && (
                                                     <div className="class-card__detail">
-                                                        <MapPin size={12} />
-                                                        <span>{classItem.location}</span>
+                                                        <MapPin size={12} /><span>{classItem.location}</span>
                                                     </div>
                                                 )}
                                             </div>
 
-                                            <div className="class-card__footer">
-                                                {classItem.spotsLeft !== undefined && (
-                                                    <span className={`class-card__spots ${classItem.spotsLeft <= 3 ? 'class-card__spots--low' : ''}`}>
-                                                        <Users size={12} />
-                                                        {classItem.spotsLeft} spots left
-                                                    </span>
-                                                )}
-                                                <button
-                                                    className={`class-card__btn ${isBooked ? 'class-card__btn--booked' : ''}`}
-                                                    onClick={() => !isBooked && handleBook(classItem.classId)}
-                                                    disabled={booking === classItem.classId || isBooked}
-                                                >
-                                                    {booking === classItem.classId ? (
-                                                        <>
-                                                            <Loader2 size={12} className="spin" />
-                                                            Booking...
-                                                        </>
-                                                    ) : isBooked ? (
-                                                        <>
-                                                            <CheckCircle2 size={12} />
-                                                            Booked
-                                                        </>
-                                                    ) : (
-                                                        'Book Now'
-                                                    )}
+                                            {/* Capacity bar */}
+                                            <div className="class-card__capacity">
+                                                <CapacityBar current={classItem.currentBookings} max={classItem.maxCapacity} spotsLeft={classItem.spotsLeft} />
+                                            </div>
+
+                                            <div className="class-card__footer" onClick={e => e.stopPropagation()}>
+                                                <button className="class-card__ics" onClick={() => downloadICS(classItem)} title="Download calendar event">
+                                                    <Download size={12} />
                                                 </button>
+                                                {isBooked ? (
+                                                    <button className="class-card__btn class-card__btn--booked" disabled>
+                                                        <CheckCircle2 size={12} /> Booked
+                                                    </button>
+                                                ) : isFull ? (
+                                                    <button
+                                                        className={`class-card__btn class-card__btn--waitlist ${onWL ? 'class-card__btn--on-wl' : ''}`}
+                                                        onClick={() => !onWL && handleWaitlist(classItem.classId)}
+                                                        disabled={onWL}
+                                                    >
+                                                        <Bell size={12} /> {onWL ? 'On Waitlist' : 'Join Waitlist'}
+                                                    </button>
+                                                ) : (
+                                                    <button className="class-card__btn"
+                                                        onClick={() => handleBook(classItem.classId)}
+                                                        disabled={booking === classItem.classId}>
+                                                        {booking === classItem.classId
+                                                            ? <><Loader2 size={12} className="spin" /> Booking...</>
+                                                            : 'Book Now'}
+                                                    </button>
+                                                )}
                                             </div>
                                         </motion.div>
                                     );
@@ -517,49 +905,25 @@ const AvailableClasses: React.FC = () => {
                             </div>
                         )}
                     </motion.div>
-                ) : (
-                    <motion.div
-                        key="calendar"
-                        className="classes-calendar"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                    >
+                )}
+
+                {view === 'weekly' && (
+                    <motion.div key="calendar" className="classes-calendar" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                         <div className="classes-calendar__nav">
-                            <button
-                                className="classes-calendar__nav-btn"
-                                onClick={() => setSelectedWeek(w => w - 1)}
-                            >
-                                <ChevronLeft size={18} />
-                            </button>
+                            <button className="classes-calendar__nav-btn" onClick={() => setSelectedWeek(w => w - 1)}><ChevronLeft size={18} /></button>
                             <span className="classes-calendar__nav-label">
                                 {weekDays[0].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {weekDays[6].toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                             </span>
-                            <button
-                                className="classes-calendar__nav-btn"
-                                onClick={() => setSelectedWeek(w => w + 1)}
-                            >
-                                <ChevronRight size={18} />
-                            </button>
+                            <button className="classes-calendar__nav-btn" onClick={() => setSelectedWeek(w => w + 1)}><ChevronRight size={18} /></button>
                             {selectedWeek !== 0 && (
-                                <button
-                                    className="classes-calendar__today-btn"
-                                    onClick={() => setSelectedWeek(0)}
-                                >
-                                    Today
-                                </button>
+                                <button className="classes-calendar__today-btn" onClick={() => setSelectedWeek(0)}>Today</button>
                             )}
                         </div>
 
                         <div className="classes-calendar__header">
                             {weekDays.map((day, i) => (
-                                <div
-                                    key={i}
-                                    className={`classes-calendar__day-header ${isToday(day) ? 'classes-calendar__day-header--today' : ''}`}
-                                >
-                                    <span className="classes-calendar__weekday">
-                                        {day.toLocaleDateString('en-US', { weekday: 'short' })}
-                                    </span>
+                                <div key={i} className={`classes-calendar__day-header ${isToday(day) ? 'classes-calendar__day-header--today' : ''}`}>
+                                    <span className="classes-calendar__weekday">{day.toLocaleDateString('en-US', { weekday: 'short' })}</span>
                                     <span className="classes-calendar__date">{day.getDate()}</span>
                                 </div>
                             ))}
@@ -569,52 +933,76 @@ const AvailableClasses: React.FC = () => {
                             {weekDays.map((day, i) => {
                                 const dayClasses = getClassesForDay(day);
                                 return (
-                                    <div
-                                        key={i}
-                                        className={`classes-calendar__column ${isToday(day) ? 'classes-calendar__column--today' : ''}`}
-                                    >
+                                    <div key={i} className={`classes-calendar__column ${isToday(day) ? 'classes-calendar__column--today' : ''}`}>
                                         {dayClasses.length > 0 ? (
                                             dayClasses.map(classItem => {
-                                                const config = classTypeConfig[classItem.classType] || classTypeConfig['PT Session'];
+                                                const config = getConfig(classItem.classType);
                                                 const isBooked = classItem.isBooked;
-
                                                 return (
                                                     <div
                                                         key={classItem.classId}
                                                         className={`classes-calendar__item ${isBooked ? 'classes-calendar__item--booked' : ''}`}
                                                         style={{ borderLeftColor: config.color }}
-                                                        onClick={() => !isBooked && handleBook(classItem.classId)}
+                                                        onClick={() => setDetailClass(classItem)}
                                                     >
-                                                        <div className="classes-calendar__item-icon" style={{ color: config.color }}>
-                                                            {config.icon}
-                                                        </div>
+                                                        <div className="classes-calendar__item-icon" style={{ color: config.color }}>{config.icon}</div>
                                                         <div className="classes-calendar__item-info">
-                                                            <span className="classes-calendar__item-time">
-                                                                {formatTime(classItem.startTime)}
-                                                            </span>
+                                                            <span className="classes-calendar__item-time">{formatTime(classItem.startTime)}</span>
                                                             <span className="classes-calendar__item-type">{classItem.classType}</span>
-                                                            {classItem.trainerName && (
-                                                                <span className="classes-calendar__item-trainer">
-                                                                    {classItem.trainerName}
-                                                                </span>
-                                                            )}
+                                                            {classItem.trainerName && <span className="classes-calendar__item-trainer">{classItem.trainerName}</span>}
                                                         </div>
-                                                        {isBooked && (
-                                                            <CheckCircle2 size={10} className="classes-calendar__item-check" />
-                                                        )}
+                                                        {isBooked && <CheckCircle2 size={10} className="classes-calendar__item-check" />}
                                                     </div>
                                                 );
                                             })
                                         ) : (
-                                            <div className="classes-calendar__empty">
-                                                <span>No classes</span>
-                                            </div>
+                                            <div className="classes-calendar__empty"><span>No classes</span></div>
                                         )}
                                     </div>
                                 );
                             })}
                         </div>
                     </motion.div>
+                )}
+
+                {view === 'monthly' && (
+                    <motion.div key="monthly" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                        <MonthlyCalendar
+                            classes={filteredClasses}
+                            month={calMonth}
+                            onChangeMonth={dir => setCalMonth(prev => {
+                                const n = new Date(prev);
+                                n.setMonth(n.getMonth() + dir);
+                                return n;
+                            })}
+                            onSelectClass={c => setDetailClass(c)}
+                            favorites={favorites}
+                        />
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Trainer preview popup */}
+            <AnimatePresence>
+                {trainerPreview && (
+                    <div style={{ position: 'fixed', left: trainerPreview.x, top: trainerPreview.y, zIndex: 1000 }}>
+                        <TrainerPreview name={trainerPreview.name} onClose={() => setTrainerPreview(null)} />
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Class detail modal */}
+            <AnimatePresence>
+                {detailClass && (
+                    <ClassDetailModal
+                        classItem={detailClass}
+                        onClose={() => setDetailClass(null)}
+                        onBook={handleBook}
+                        onWaitlist={handleWaitlist}
+                        isBooking={booking === detailClass.classId}
+                        isFavorite={favorites.has(detailClass.classId)}
+                        onToggleFav={() => toggleFavorite(detailClass.classId)}
+                    />
                 )}
             </AnimatePresence>
         </motion.div>
