@@ -71,7 +71,8 @@ public class SecurityConfig {
                             "http://localhost:5173", // Owner
                             "http://localhost:5174", // Trainer
                             "http://localhost:5175", // Member
-                            "http://localhost:3000" // Legacy/alternative
+                            "http://localhost:3000", // Legacy/alternative
+                            "https://trae8sbvnyxu.vercel.app" // Production frontend
                     ));
                     corsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
                     corsConfig.setAllowedHeaders(List.of("*"));
