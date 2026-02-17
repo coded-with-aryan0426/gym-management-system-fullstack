@@ -116,6 +116,33 @@ public class UserController {
         }
     }
 
+    @GetMapping("/staff/paginated")
+    public ResponseEntity<?> getStaffPaginated(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String role,
+            @RequestParam(required = false) String status) {
+        try {
+            return ResponseEntity.ok(userService.getStaffPaginated(page, size, search, role, status));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500)
+                    .body(java.util.Map.of("error", e.getMessage(), "type", e.getClass().getName()));
+        }
+    }
+
+    @PutMapping("/staff/{id}")
+    public ResponseEntity<?> updateStaff(@PathVariable Long id, @RequestBody java.util.Map<String, Object> updates) {
+        try {
+            return ResponseEntity.ok(userService.updateStaffDetails(id, updates));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500)
+                    .body(java.util.Map.of("error", e.getMessage(), "type", e.getClass().getName()));
+        }
+    }
+
     @GetMapping("/search")
     public List<User> searchUsers(
             @RequestParam String role,

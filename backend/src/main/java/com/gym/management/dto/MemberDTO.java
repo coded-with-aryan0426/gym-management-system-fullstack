@@ -23,6 +23,16 @@ public class MemberDTO {
     private LocalDate joinDate;
     private LocalDateTime createdAt; // For "today first" sorting
 
+    // Personal info fields
+    private String gender;
+    private LocalDate dateOfBirth;
+    private String bloodType;
+    private String address;
+    private String city;
+    private String state;
+    private String zipCode;
+    private String avatarId;
+
     // Emergency contact fields
     private String emergencyContactName;
     private String emergencyContactPhone;
@@ -31,6 +41,11 @@ public class MemberDTO {
     // Health info fields
     private String healthNotes;
     private String fitnessGoals;
+
+    // Membership plan details
+    private String membershipPlanName;
+    private String membershipPlanCategory;
+    private Double membershipPlanPrice;
 
     // Status color helper for frontend (optional, but keeping it clean in backend)
     public String getStatusColor() {

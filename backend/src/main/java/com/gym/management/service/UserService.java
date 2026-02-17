@@ -227,6 +227,16 @@ public class UserService {
         dto.setHealthNotes(user.getHealthNotes());
         dto.setFitnessGoals(user.getFitnessGoals());
 
+        // Personal info
+        dto.setGender(user.getGender());
+        dto.setDateOfBirth(user.getDateOfBirth());
+        dto.setBloodType(user.getBloodType());
+        dto.setAddress(user.getAddress());
+        dto.setCity(user.getCity());
+        dto.setState(user.getState());
+        dto.setZipCode(user.getZipCode());
+        dto.setAvatarId(user.getAvatarId());
+
         List<Membership> memberships = membershipRepository.findByUserUserId(user.getUserId());
         if (!memberships.isEmpty()) {
             Membership activeMembership = memberships.stream()
@@ -241,8 +251,11 @@ public class UserService {
             // Priority: tieredPlan > planVariant > legacy membershipPackage
             if (activeMembership.getTieredPlan() != null) {
                 dto.setPlanName(activeMembership.getTieredPlan().getPlanName());
+                dto.setMembershipPlanName(activeMembership.getTieredPlan().getPlanName());
+                dto.setMembershipPlanCategory(activeMembership.getTieredPlan().getCategory() != null ? activeMembership.getTieredPlan().getCategory().name() : null);
                 if (activeMembership.getPlanVariant() != null) {
                     dto.setPlanDuration(activeMembership.getPlanVariant().getFormattedDuration());
+                    dto.setMembershipPlanPrice(activeMembership.getPlanVariant().getPrice());
                 } else {
                     // Calculate from dates if variant missing
                     dto.setPlanDuration(calculateDurationLabel(activeMembership.getStartDate(), activeMembership.getEndDate()));
@@ -439,6 +452,124 @@ public class UserService {
         List<User> pageContent = start < allTrainers.size() ? allTrainers.subList(start, end) : Collections.emptyList();
 
         return new PageResponse<>(pageContent, page, size, totalCount, "newest");
+    }
+
+    // Staff roles that are NOT trainers (operations/admin staff)
+    private static final java.util.Set<String> STAFF_ROLES = java.util.Set.of(
+        "RECEPTIONIST", "FLOOR_MANAGER", "MAINTENANCE", "CLEANING", "OPERATIONS", "SALES", "ADMIN", "MANAGER"
+    );
+
+    @Transactional(readOnly = true)
+    public PageResponse<com.gym.management.dto.StaffDTO> getStaffPaginated(int page, int size, String search, String role, String status) {
+        java.util.Set<String> rolesToQuery = new java.util.HashSet<>();
+        if (role != null && !role.trim().isEmpty()) {
+            rolesToQuery.add(role.toUpperCase());
+            rolesToQuery.add("ROLE_" + role.toUpperCase());
+        } else {
+            for (String r : STAFF_ROLES) {
+                rolesToQuery.add(r);
+                rolesToQuery.add("ROLE_" + r);
+            }
+        }
+
+        List<User> allStaff = userRepository.findByRoleNames(rolesToQuery);
+
+        if (search != null && !search.trim().isEmpty()) {
+            String searchLower = search.toLowerCase();
+            allStaff = allStaff.stream()
+                .filter(u -> (u.getFullName() != null && u.getFullName().toLowerCase().contains(searchLower)) ||
+                        (u.getEmail() != null && u.getEmail().toLowerCase().contains(searchLower)) ||
+                        (u.getJobTitle() != null && u.getJobTitle().toLowerCase().contains(searchLower)))
+                .collect(Collectors.toList());
+        }
+
+        if (status != null && !status.trim().isEmpty()) {
+            allStaff = allStaff.stream()
+                .filter(u -> u.getStatus() != null && u.getStatus().equalsIgnoreCase(status))
+                .collect(Collectors.toList());
+        }
+
+        allStaff.sort((a, b) -> {
+            String nameA = a.getFullName() != null ? a.getFullName() : "";
+            String nameB = b.getFullName() != null ? b.getFullName() : "";
+            return nameA.compareToIgnoreCase(nameB);
+        });
+
+        long totalCount = allStaff.size();
+        int start = page * size;
+        int end = Math.min(start + size, allStaff.size());
+        List<User> pageContent = start < allStaff.size() ? allStaff.subList(start, end) : Collections.emptyList();
+
+        List<com.gym.management.dto.StaffDTO> dtos = pageContent.stream()
+            .map(this::populateStaffDTO)
+            .collect(Collectors.toList());
+
+        return new PageResponse<>(dtos, page, size, totalCount, "alphabetical");
+    }
+
+    private com.gym.management.dto.StaffDTO populateStaffDTO(User user) {
+        com.gym.management.dto.StaffDTO dto = new com.gym.management.dto.StaffDTO();
+        dto.setUserId(user.getUserId());
+        dto.setFullName(user.getFullName());
+        dto.setEmail(user.getEmail());
+        dto.setPhone(user.getPhone());
+        dto.setGender(user.getGender());
+        dto.setDateOfBirth(user.getDateOfBirth());
+        dto.setAddress(user.getAddress());
+        dto.setCity(user.getCity());
+        dto.setState(user.getState());
+        dto.setZipCode(user.getZipCode());
+        dto.setAvatarId(user.getAvatarId());
+        dto.setJobTitle(user.getJobTitle());
+        dto.setDepartment(user.getDepartment());
+        dto.setShiftTiming(user.getShiftTiming());
+        dto.setSalary(user.getSalary());
+        dto.setEmployeeIdCode(user.getEmployeeIdCode());
+        dto.setStatus(user.getStatus() != null ? user.getStatus() : "Active");
+        dto.setCreatedAt(user.getCreatedAt());
+        dto.setLeavingDate(user.getLeavingDate());
+        dto.setEmergencyContactName(user.getEmergencyContactName());
+        dto.setEmergencyContactPhone(user.getEmergencyContactPhone());
+        dto.setEmergencyContactRelation(user.getEmergencyContactRelation());
+        if (user.getRoles() != null && !user.getRoles().isEmpty()) {
+            String roleName = user.getRoles().stream()
+                .map(r -> r.getRoleName())
+                .filter(r -> !r.equals("USER") && !r.equals("MEMBER") && !r.equals("TRAINER"))
+                .findFirst()
+                .orElse(user.getRoles().iterator().next().getRoleName());
+            dto.setStaffRole(roleName.replace("ROLE_", ""));
+        }
+        return dto;
+    }
+
+    @Transactional
+    public com.gym.management.dto.StaffDTO updateStaffDetails(Long userId, java.util.Map<String, Object> updates) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("Staff not found: " + userId));
+        if (updates.containsKey("fullName")) user.setFullName((String) updates.get("fullName"));
+        if (updates.containsKey("email")) user.setEmail((String) updates.get("email"));
+        if (updates.containsKey("phone")) user.setPhone((String) updates.get("phone"));
+        if (updates.containsKey("gender")) user.setGender((String) updates.get("gender"));
+        if (updates.containsKey("address")) user.setAddress((String) updates.get("address"));
+        if (updates.containsKey("city")) user.setCity((String) updates.get("city"));
+        if (updates.containsKey("state")) user.setState((String) updates.get("state"));
+        if (updates.containsKey("zipCode")) user.setZipCode((String) updates.get("zipCode"));
+        if (updates.containsKey("jobTitle")) user.setJobTitle((String) updates.get("jobTitle"));
+        if (updates.containsKey("department")) user.setDepartment((String) updates.get("department"));
+        if (updates.containsKey("shiftTiming")) user.setShiftTiming((String) updates.get("shiftTiming"));
+        if (updates.containsKey("employeeIdCode")) user.setEmployeeIdCode((String) updates.get("employeeIdCode"));
+        if (updates.containsKey("status")) user.setStatus((String) updates.get("status"));
+        if (updates.containsKey("salary") && updates.get("salary") != null) {
+            user.setSalary(new java.math.BigDecimal(updates.get("salary").toString()));
+        }
+        if (updates.containsKey("emergencyContactName")) user.setEmergencyContactName((String) updates.get("emergencyContactName"));
+        if (updates.containsKey("emergencyContactPhone")) user.setEmergencyContactPhone((String) updates.get("emergencyContactPhone"));
+        if (updates.containsKey("emergencyContactRelation")) user.setEmergencyContactRelation((String) updates.get("emergencyContactRelation"));
+        if (updates.containsKey("dateOfBirth") && updates.get("dateOfBirth") != null) {
+            user.setDateOfBirth(java.time.LocalDate.parse(updates.get("dateOfBirth").toString()));
+        }
+        userRepository.save(user);
+        return populateStaffDTO(user);
     }
 
     @Autowired
@@ -714,12 +845,41 @@ public class UserService {
                 changes.add(String.format("Status: '%s' → '%s'", existingUser.getStatus(), user.getStatus()));
                 existingUser.setStatus(user.getStatus());
             }
-            // Update avatarId if provided
-            if (user.getAvatarId() != null && !user.getAvatarId().equals(existingUser.getAvatarId())) {
-                changes.add("Avatar updated");
-                existingUser.setAvatarId(user.getAvatarId());
-            }
-            // Update emergency contact fields
+              // Update avatarId if provided
+              if (user.getAvatarId() != null && !user.getAvatarId().equals(existingUser.getAvatarId())) {
+                  changes.add("Avatar updated");
+                  existingUser.setAvatarId(user.getAvatarId());
+              }
+              // Update personal info fields
+              if (user.getGender() != null && !user.getGender().equals(existingUser.getGender())) {
+                  changes.add(String.format("Gender: '%s' → '%s'", existingUser.getGender(), user.getGender()));
+                  existingUser.setGender(user.getGender());
+              }
+              if (user.getDateOfBirth() != null) {
+                  changes.add("Date of birth updated");
+                  existingUser.setDateOfBirth(user.getDateOfBirth());
+              }
+              if (user.getBloodType() != null && !user.getBloodType().equals(existingUser.getBloodType())) {
+                  changes.add("Blood type updated");
+                  existingUser.setBloodType(user.getBloodType());
+              }
+              if (user.getAddress() != null && !user.getAddress().equals(existingUser.getAddress())) {
+                  changes.add("Address updated");
+                  existingUser.setAddress(user.getAddress());
+              }
+              if (user.getCity() != null && !user.getCity().equals(existingUser.getCity())) {
+                  changes.add("City updated");
+                  existingUser.setCity(user.getCity());
+              }
+              if (user.getState() != null && !user.getState().equals(existingUser.getState())) {
+                  changes.add("State updated");
+                  existingUser.setState(user.getState());
+              }
+              if (user.getZipCode() != null && !user.getZipCode().equals(existingUser.getZipCode())) {
+                  changes.add("Zip code updated");
+                  existingUser.setZipCode(user.getZipCode());
+              }
+              // Update emergency contact fields
             if (user.getEmergencyContactName() != null) {
                 existingUser.setEmergencyContactName(user.getEmergencyContactName());
                 changes.add("Emergency contact name updated");

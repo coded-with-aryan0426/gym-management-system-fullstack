@@ -3,7 +3,7 @@
    ============================================================================ */
 
 :root {
-  --modal-nav-width: 200px;
+  --modal-nav-width: 220px;
   --modal-max-width: 1680px;
   --modal-height: min(90vh, 960px);
   --modal-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
@@ -1533,6 +1533,24 @@ body.light-mode .member-action-modal__nav-column {
   border-right-color: #e2e8f0;
 }
 
+:root.theme-light .side-panel-nav__label,
+[data-theme="light"] .side-panel-nav__label,
+body.light-mode .side-panel-nav__label {
+  color: #94a3b8;
+}
+
+:root.theme-light .side-panel-nav__divider,
+[data-theme="light"] .side-panel-nav__divider,
+body.light-mode .side-panel-nav__divider {
+  background: #e2e8f0;
+}
+
+:root.theme-light .nav-icon-wrap,
+[data-theme="light"] .nav-icon-wrap,
+body.light-mode .nav-icon-wrap {
+  background: rgba(99, 102, 241, 0.05);
+}
+
 :root.theme-light .side-panel-nav__item,
 [data-theme="light"] .side-panel-nav__item,
 body.light-mode .side-panel-nav__item {
@@ -1551,6 +1569,12 @@ body.light-mode .side-panel-nav__item:hover {
 body.light-mode .side-panel-nav__item--active {
   background-color: rgba(99, 102, 241, 0.08);
   color: #4F46E5;
+}
+
+:root.theme-light .side-panel-nav__item--active .nav-icon-wrap,
+[data-theme="light"] .side-panel-nav__item--active .nav-icon-wrap,
+body.light-mode .side-panel-nav__item--active .nav-icon-wrap {
+  background: rgba(99, 102, 241, 0.1);
 }
 
 /* Content Panel - Light Mode */
@@ -2059,15 +2083,14 @@ body.light-mode .empty-state span {
   line-height: 1.4;
 }
 
-/* Nav badge for tab counts */
-.nav-badge {
+/* Nav badge for tab counts (in profile sections) */
+.profile-section .nav-badge {
   font-size: 10px;
   font-weight: 600;
   background: rgba(99, 102, 241, 0.12);
   color: var(--modal-accent);
   padding: 1px 6px;
   border-radius: 10px;
-  margin-left: auto;
 }
 
 /* ============================================================================

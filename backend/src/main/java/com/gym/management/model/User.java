@@ -286,6 +286,33 @@ public class User {
     @Column(name = "zip_code")
     private String zipCode;
 
+    // Staff-specific fields
+    @Column(name = "job_title")
+    private String jobTitle;
+
+    @Column(name = "department")
+    private String department;
+
+    @Column(name = "shift_timing")
+    private String shiftTiming;
+
+    @Column(name = "salary")
+    private BigDecimal salary;
+
+    @Column(name = "employee_id_code")
+    private String employeeIdCode;
+
+    public String getJobTitle() { return jobTitle; }
+    public void setJobTitle(String jobTitle) { this.jobTitle = jobTitle; }
+    public String getDepartment() { return department; }
+    public void setDepartment(String department) { this.department = department; }
+    public String getShiftTiming() { return shiftTiming; }
+    public void setShiftTiming(String shiftTiming) { this.shiftTiming = shiftTiming; }
+    public BigDecimal getSalary() { return salary; }
+    public void setSalary(BigDecimal salary) { this.salary = salary; }
+    public String getEmployeeIdCode() { return employeeIdCode; }
+    public void setEmployeeIdCode(String employeeIdCode) { this.employeeIdCode = employeeIdCode; }
+
     @Column(name = "emergency_contact_name")
     private String emergencyContactName;
 
