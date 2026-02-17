@@ -9,6 +9,7 @@ import EnhancedStaffActionModal from '../../components/StaffActionModal/Enhanced
 import CreateActionModal from '../../components/CreateActionModal/CreateActionModal';
 import api from '../../services/api';
 import type { Staff as StaffType } from '../../types/user';
+import '../../styles/page-common.css';
 import './StaffList.css';
 
 type StatusFilter = 'all' | 'active' | 'inactive';

@@ -530,22 +530,140 @@
 }
 
 @media (max-width: 480px) {
-  .staff-page__title {
-    font-size: 16px;
+    .staff-page__title {
+      font-size: 16px;
+    }
+    
+    .sort-badge {
+      font-size: 10px;
+      padding: 3px 8px;
+    }
+    
+    .btn-filters {
+      padding: 0 10px;
+      font-size: 11px;
+    }
+    
+    .filter-chip {
+      font-size: 10px;
+      padding: 3px 8px;
+    }
   }
-  
-  .sort-badge {
-    font-size: 10px;
-    padding: 3px 8px;
-  }
-  
-  .btn-filters {
-    padding: 0 10px;
-    font-size: 11px;
-  }
-  
-  .filter-chip {
-    font-size: 10px;
-    padding: 3px 8px;
-  }
+
+/* ============================================
+   ROLE PILL (new table columns)
+   ============================================ */
+.staff-role-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--role-color, #6b7280);
+  background: color-mix(in srgb, var(--role-color, #6b7280) 12%, transparent);
+  white-space: nowrap;
+}
+
+.staff-dept {
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.staff-shift {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.staff-shift svg {
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+
+.staff-table-wrapper {
+  /* wrapper for DataTable inside staff page */
+}
+
+/* ============================================
+   MOBILE CARD (DataTable mobileCardRender)
+   ============================================ */
+.mobile-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+}
+
+.mobile-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.mobile-card__user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.mobile-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.mobile-card__name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mobile-card__email {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mobile-card__details {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.mobile-card__detail {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mobile-card__detail-label {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  font-weight: 600;
+}
+
+.mobile-card__detail-value {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.mobile-card__actions {
+  display: flex;
+  justify-content: flex-end;
 }
