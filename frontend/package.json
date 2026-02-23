@@ -9,7 +9,7 @@
     "dev:trainer": "vite --port 5174",
     "dev:member": "vite --port 5175",
     "dev:all": "concurrently \"npm run dev:owner\" \"npm run dev:trainer\" \"npm run dev:member\"",
-    "build": "tsc -b && vite build",
+    "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",

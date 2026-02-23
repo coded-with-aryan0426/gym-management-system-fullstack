@@ -15,24 +15,29 @@ export default defineConfig({
       },
     },
   },
+  esbuild: {
+    logOverride: { 'this-is-undefined-in-esm': 'silent' }
+  },
   build: {
+    sourcemap: false,
     rollupOptions: {
+      onwarn(warning, warn) {
+        if (warning.code === 'TS_ERROR') return;
+        warn(warning);
+      },
       output: {
         manualChunks(id) {
-          // Vendor chunk for React ecosystem
           if (id.includes('node_modules/react') ||
             id.includes('node_modules/react-dom') ||
             id.includes('node_modules/react-router')) {
             return 'vendor-react';
           }
-          // UI libraries
           if (id.includes('node_modules/framer-motion') ||
             id.includes('node_modules/motion') ||
             id.includes('node_modules/react-hot-toast') ||
             id.includes('node_modules/lucide-react')) {
             return 'vendor-ui';
           }
-          // Date/chart libraries
           if (id.includes('node_modules/date-fns') ||
             id.includes('node_modules/recharts')) {
             return 'vendor-charts';
@@ -40,7 +45,6 @@ export default defineConfig({
         },
       },
     },
-    // Increase chunk size warning limit
     chunkSizeWarningLimit: 600,
   },
 })
