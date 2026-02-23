@@ -140,7 +140,7 @@ const SARevenue: React.FC = () => {
                                 </defs>
                                 <XAxis dataKey="m" axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.35)', fontSize: 10 }} />
                                 <YAxis axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.35)', fontSize: 10 }} tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}k`} />
-                                <Tooltip contentStyle={{ backgroundColor: '#1c1c1f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, fontSize: 11 }} formatter={(v: number) => [`$${v.toLocaleString()}`, 'Revenue']} />
+                                <Tooltip contentStyle={{ backgroundColor: '#1c1c1f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, fontSize: 11 }} formatter={(v: number | undefined) => [`$${(v ?? 0).toLocaleString()}`, 'Revenue']} />
                                 <Area type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={2} fill="url(#revG)" strokeDasharray={((_: unknown, i: number) => i >= REVENUE_TREND.length ? '5 5' : '0') as any} dot={false} />
                             </AreaChart>
                         </ResponsiveContainer>
@@ -193,7 +193,7 @@ const SARevenue: React.FC = () => {
                         <BarChart data={REVENUE_BY_CITY} margin={{ top: 4, right: 4, left: -10, bottom: 0 }}>
                             <XAxis dataKey="city" axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.35)', fontSize: 10 }} />
                             <YAxis axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.35)', fontSize: 10 }} tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}k`} />
-                            <Tooltip contentStyle={{ backgroundColor: '#1c1c1f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, fontSize: 11 }} formatter={(v: number) => [`$${v.toLocaleString()}`, 'Revenue']} />
+                            <Tooltip contentStyle={{ backgroundColor: '#1c1c1f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, fontSize: 11 }} formatter={(v: number | undefined) => [`$${(v ?? 0).toLocaleString()}`, 'Revenue']} />
                             <Bar dataKey="revenue" radius={[4, 4, 0, 0]} barSize={32}>
                                 {REVENUE_BY_CITY.map((_, i) => <Cell key={i} fill={i === 0 ? '#10b981' : i === 1 ? '#3b82f6' : '#8b5cf6'} fillOpacity={0.6} />)}
                             </Bar>

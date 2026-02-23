@@ -21,14 +21,14 @@ import {
   Wallet,
   UserCheck,
   Timer,
-    RefreshCw,
-    CircleDot,
-    AlertTriangle,
-    Target,
-    Flame,
-    ShieldAlert,
-      Layers,
-      BarChart3
+  RefreshCw,
+  CircleDot,
+  AlertTriangle,
+  Target,
+  Flame,
+  ShieldAlert,
+  Layers,
+  BarChart3
 } from 'lucide-react'
 import {
   AreaChart,
@@ -464,7 +464,7 @@ const Dashboard: React.FC = () => {
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.04)" />
                 <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.35)', fontSize: 10 }} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.35)', fontSize: 10 }} />
-                <Tooltip contentStyle={{ backgroundColor: '#1c1c1f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, fontSize: 12, boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }} formatter={(val: number) => [formatPrice(val), 'Revenue']} cursor={{ stroke: 'rgba(16,185,129,0.2)', strokeWidth: 1 }} />
+                <Tooltip contentStyle={{ backgroundColor: '#1c1c1f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, fontSize: 12, boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }} formatter={(val: number | undefined) => [formatPrice(val ?? 0), 'Revenue']} cursor={{ stroke: 'rgba(16,185,129,0.2)', strokeWidth: 1 }} />
                 <Area type="monotone" dataKey="value" stroke="#10b981" strokeWidth={2.5} fill="url(#revGrad)" dot={false} activeDot={{ r: 5, fill: '#10b981', stroke: '#fff', strokeWidth: 2 }} />
               </AreaChart>
             </ResponsiveContainer>
@@ -487,13 +487,13 @@ const Dashboard: React.FC = () => {
             <div className="dash__mem-chart">
               <div className="dash__mem-donut-wrap">
                 <ResponsiveContainer width="100%" height={220}>
-                    <PieChart>
-                      <Pie
-                        data={membershipDistribution}
-                        cx="50%" cy="50%"
-                        innerRadius={62} outerRadius={90}
-                        paddingAngle={3} dataKey="value" strokeWidth={0}
-                      >
+                  <PieChart>
+                    <Pie
+                      data={membershipDistribution}
+                      cx="50%" cy="50%"
+                      innerRadius={62} outerRadius={90}
+                      paddingAngle={3} dataKey="value" strokeWidth={0}
+                    >
                       {membershipDistribution.map((entry, i) => (
                         <Cell key={i} fill={entry.color} />
                       ))}
@@ -680,26 +680,26 @@ const Dashboard: React.FC = () => {
               <h3 className="dash__card-title">Quick Actions</h3>
             </div>
           </div>
-            <div className="dash__action-grid">
-              <button className="dash__action-btn dash__action-btn--primary" onClick={() => navigate('/members?action=create')}>
-                <UserPlus size={18} /><span>Add Member</span>
-              </button>
-              <button className="dash__action-btn" onClick={() => navigate('/check-in')}>
-                <CheckCircle2 size={18} /><span>Check-in</span>
-              </button>
-              <button className="dash__action-btn" onClick={() => navigate('/financials')}>
-                <Wallet size={18} /><span>Payments</span>
-              </button>
-              <button className="dash__action-btn" onClick={() => navigate('/classes')}>
-                <Calendar size={18} /><span>Classes</span>
-              </button>
-              <button className="dash__action-btn" onClick={() => navigate('/trainers')}>
-                <Dumbbell size={18} /><span>Trainers</span>
-              </button>
-              <button className="dash__action-btn" onClick={() => navigate('/equipment')}>
-                <Zap size={18} /><span>Equipment</span>
-              </button>
-            </div>
+          <div className="dash__action-grid">
+            <button className="dash__action-btn dash__action-btn--primary" onClick={() => navigate('/members?action=create')}>
+              <UserPlus size={18} /><span>Add Member</span>
+            </button>
+            <button className="dash__action-btn" onClick={() => navigate('/check-in')}>
+              <CheckCircle2 size={18} /><span>Check-in</span>
+            </button>
+            <button className="dash__action-btn" onClick={() => navigate('/financials')}>
+              <Wallet size={18} /><span>Payments</span>
+            </button>
+            <button className="dash__action-btn" onClick={() => navigate('/classes')}>
+              <Calendar size={18} /><span>Classes</span>
+            </button>
+            <button className="dash__action-btn" onClick={() => navigate('/trainers')}>
+              <Dumbbell size={18} /><span>Trainers</span>
+            </button>
+            <button className="dash__action-btn" onClick={() => navigate('/equipment')}>
+              <Zap size={18} /><span>Equipment</span>
+            </button>
+          </div>
         </section>
 
         {/* Overdue Payments — if present, 4 cols */}
@@ -735,7 +735,7 @@ const Dashboard: React.FC = () => {
           </section>
         )}
 
-          {/* Duplicate "Today's Classes" widget removed — already shown in "Today's Schedule" above */}
+        {/* Duplicate "Today's Classes" widget removed — already shown in "Today's Schedule" above */}
 
       </div>
     </div>

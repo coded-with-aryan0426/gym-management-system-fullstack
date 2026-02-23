@@ -169,7 +169,7 @@ const SADatabase: React.FC = () => {
                                 </defs>
                                 <XAxis dataKey="d" axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.35)', fontSize: 10 }} />
                                 <YAxis axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.35)', fontSize: 10 }} tickFormatter={(v: number) => `${v} GB`} domain={[1.5, 3]} />
-                                <Tooltip contentStyle={{ backgroundColor: '#1c1c1f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, fontSize: 11 }} formatter={(v: number) => [`${v} GB`, 'Size']} />
+                                <Tooltip contentStyle={{ backgroundColor: '#1c1c1f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, fontSize: 11 }} formatter={(v: number | undefined) => [`${v ?? 0} GB`, 'Size']} />
                                 <Area type="monotone" dataKey="size" stroke="#3b82f6" strokeWidth={2} fill="url(#storeG)" dot={{ r: 3, fill: '#3b82f6' }} />
                             </AreaChart>
                         </ResponsiveContainer>

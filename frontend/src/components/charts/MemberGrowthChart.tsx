@@ -37,7 +37,7 @@ const MemberGrowthChart: React.FC<MemberGrowthChartProps> = ({ data }) => {
             borderRadius: 'var(--radius-base)',
             color: 'var(--text-primary)',
           }}
-          formatter={(value: number) => [value, 'Members']}
+          formatter={(value: number | undefined) => [value ?? 0, 'Members']}
         />
         <Area
           type="monotone"

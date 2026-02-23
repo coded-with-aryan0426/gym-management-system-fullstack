@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Badge, Button } from '../ui';
-import { 
-  Calendar, 
-  Clock, 
-  IndianRupee, 
-  Users, 
-  CheckCircle, 
+import {
+  Calendar,
+  Clock,
+  IndianRupee,
+  Users,
+  CheckCircle,
   AlertCircle,
   TrendingUp,
   QrCode,
@@ -34,8 +34,6 @@ const MemberMembershipView: React.FC<MemberMembershipViewProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [daysRemaining, setDaysRemaining] = useState<number>(0);
   const [progressPercentage, setProgressPercentage] = useState<number>(0);
-  
-  const { toast } = useToast();
 
   useEffect(() => {
     fetchMemberMembership();
@@ -45,123 +43,81 @@ const MemberMembershipView: React.FC<MemberMembershipViewProps> = ({
     try {
       setLoading(true);
       setError(null);
-      
-      // Fetch current membership
+
       const membershipResponse = await membershipApi.getMemberMembership(memberId);
       const membershipData = membershipResponse.data;
-      
+
       if (membershipData) {
         setMembership(membershipData);
-        
-        // Fetch plan details
+
         if (membershipData.membershipPackageId) {
           const planResponse = await membershipApi.getMembershipPlan(membershipData.membershipPackageId);
           setPlanDetails(planResponse.data);
         }
-        
-        // Calculate days remaining and progress
+
         calculateMembershipProgress(membershipData);
       }
-      
-    } catch (err: any) {
-      const errorMessage = err.response?.data?.message || 'Failed to fetch membership details';
+
+    } catch (err: unknown) {
+      const errorMessage = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Failed to fetch membership details';
       setError(errorMessage);
-      toast({
-        title: 'Error',
-        description: errorMessage,
-        variant: 'destructive'
-      });
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
-  const calculateMembershipProgress = (membership: MembershipDTO) => {
-    if (!membership.endDate) return;
-    
+  const calculateMembershipProgress = (m: MembershipDTO) => {
+    if (!m.endDate) return;
+
     const today = new Date();
-    const endDate = new Date(membership.endDate);
-    const startDate = new Date(membership.startDate);
-    
+    const endDate = new Date(m.endDate);
+    const startDate = new Date(m.startDate);
+
     const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
     const elapsedDays = Math.ceil((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
     const remainingDays = Math.max(0, totalDays - elapsedDays);
-    
+
     setDaysRemaining(remainingDays);
     setProgressPercentage(Math.min(100, Math.max(0, (elapsedDays / totalDays) * 100)));
   };
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR'
-    }).format(price);
-  };
+  const formatPrice = (price: number) =>
+    new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(price);
 
   const formatDuration = (days: number) => {
-    if (days >= 365) {
-      const years = Math.floor(days / 365);
-      return `${years} year${years > 1 ? 's' : ''}`;
-    } else if (days >= 30) {
-      const months = Math.floor(days / 30);
-      return `${months} month${months > 1 ? 's' : ''}`;
-    } else {
-      return `${days} day${days > 1 ? 's' : ''}`;
-    }
+    if (days >= 365) { const y = Math.floor(days / 365); return `${y} year${y > 1 ? 's' : ''}`; }
+    if (days >= 30) { const m = Math.floor(days / 30); return `${m} month${m > 1 ? 's' : ''}`; }
+    return `${days} day${days > 1 ? 's' : ''}`;
   };
 
   const generateQRCode = async () => {
     try {
-      const response = await membershipApi.generateCheckInQR(memberId);
-      // Handle QR code generation and display
-      toast({
-        title: 'QR Code Generated',
-        description: 'Show this QR code at the gym entrance for quick check-in'
-      });
-    } catch (err) {
-      toast({
-        title: 'Error',
-        description: 'Failed to generate QR code',
-        variant: 'destructive'
-      });
+      await membershipApi.generateCheckInQR(memberId);
+      toast.success('Show this QR code at the gym entrance for quick check-in');
+    } catch {
+      toast.error('Failed to generate QR code');
     }
   };
 
   const downloadMembershipCard = () => {
-    // Generate and download membership card PDF
-    toast({
-      title: 'Membership Card',
-      description: 'Your membership card is being prepared for download'
-    });
+    toast('Your membership card is being prepared for download');
   };
 
-  const getStatusColor = (status: string) => {
+  const statusBadgeColor = (status: string) => {
     switch (status) {
-      case 'ACTIVE': return 'bg-green-100 text-green-800';
-      case 'EXPIRED': return 'bg-red-100 text-red-800';
-      case 'PENDING': return 'bg-yellow-100 text-yellow-800';
-      case 'CANCELLED': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-blue-100 text-blue-800';
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'ACTIVE': return <CheckCircle className="h-4 w-4" />;
-      case 'EXPIRED': return <AlertCircle className="h-4 w-4" />;
-      case 'PENDING': return <Clock className="h-4 w-4" />;
-      default: return <Calendar className="h-4 w-4" />;
+      case 'ACTIVE': return 'success';
+      case 'EXPIRED': return 'danger';
+      default: return 'default';
     }
   };
 
   if (loading) {
     return (
       <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          </div>
-        </CardContent>
+        <div className="p-6 flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+        </div>
       </Card>
     );
   }
@@ -169,21 +125,15 @@ const MemberMembershipView: React.FC<MemberMembershipViewProps> = ({
   if (error) {
     return (
       <Card>
-        <CardContent className="p-6">
-          <Alert variant="destructive">
+        <div className="p-6">
+          <div className="flex items-center gap-2 text-red-500 mb-4">
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="mt-4"
-            onClick={fetchMemberMembership}
-          >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Retry
+            <span>{error}</span>
+          </div>
+          <Button variant="secondary" onClick={fetchMemberMembership}>
+            <RefreshCw className="h-4 w-4 mr-2" /> Retry
           </Button>
-        </CardContent>
+        </div>
       </Card>
     );
   }
@@ -191,149 +141,122 @@ const MemberMembershipView: React.FC<MemberMembershipViewProps> = ({
   if (!membership) {
     return (
       <Card>
-        <CardContent className="p-6">
-          <div className="text-center text-gray-500">
-            <Users className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-            <p className="font-medium">No Active Membership</p>
-            <p className="text-sm mt-1">
-              You don't currently have an active membership. Contact the gym to get started!
-            </p>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="mt-4"
-              onClick={onRenewMembership}
-            >
-              Browse Membership Plans
-            </Button>
-          </div>
-        </CardContent>
+        <div className="p-6 text-center text-gray-500">
+          <Users className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+          <p className="font-medium">No Active Membership</p>
+          <p className="text-sm mt-1">You don't currently have an active membership. Contact the gym to get started!</p>
+          <Button variant="secondary" onClick={onRenewMembership} style={{ marginTop: '1rem' }}>
+            Browse Membership Plans
+          </Button>
+        </div>
       </Card>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       {/* Membership Status Card */}
       <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-xl">Current Membership</CardTitle>
-            <Badge className={getStatusColor(membership.status)}>
-              {getStatusIcon(membership.status)}
-              <span className="ml-1">{membership.status}</span>
+        <div className="p-6">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <h2 className="text-xl font-semibold">Current Membership</h2>
+            <Badge variant={statusBadgeColor(membership.status) as 'success' | 'danger' | 'default'}>
+              {membership.status}
             </Badge>
           </div>
-        </CardHeader>
-        <CardContent>
+
           {planDetails && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h3 className="text-lg font-semibold">{planDetails.packageName}</h3>
-                <Badge variant="outline">{formatPrice(planDetails.price)}</Badge>
+                <span className="text-sm font-medium">{formatPrice(planDetails.price)}</span>
               </div>
-              
-              <Separator />
-              
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="flex items-center space-x-2">
-                  <Calendar className="h-4 w-4 text-blue-600" />
+
+              <hr style={{ border: '1px solid rgba(255,255,255,0.08)' }} />
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Calendar className="h-4 w-4 text-blue-500" />
                   <div>
-                    <p className="text-sm text-gray-600">Start Date</p>
-                    <p className="font-medium">
-                      {new Date(membership.startDate).toLocaleDateString()}
-                    </p>
+                    <p className="text-xs text-gray-500">Start Date</p>
+                    <p className="font-medium text-sm">{new Date(membership.startDate).toLocaleDateString()}</p>
                   </div>
                 </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Clock className="h-4 w-4 text-red-600" />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Clock className="h-4 w-4 text-red-500" />
                   <div>
-                    <p className="text-sm text-gray-600">End Date</p>
-                    <p className="font-medium">
-                      {new Date(membership.endDate).toLocaleDateString()}
-                    </p>
+                    <p className="text-xs text-gray-500">End Date</p>
+                    <p className="font-medium text-sm">{new Date(membership.endDate).toLocaleDateString()}</p>
                   </div>
                 </div>
-                
-                <div className="flex items-center space-x-2">
-                  <TrendingUp className="h-4 w-4 text-green-600" />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <TrendingUp className="h-4 w-4 text-green-500" />
                   <div>
-                    <p className="text-sm text-gray-600">Duration</p>
-                    <p className="font-medium">{formatDuration(planDetails.durationDays)}</p>
+                    <p className="text-xs text-gray-500">Duration</p>
+                    <p className="font-medium text-sm">{formatDuration(planDetails.durationDays)}</p>
                   </div>
                 </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Users className="h-4 w-4 text-purple-600" />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Users className="h-4 w-4 text-purple-500" />
                   <div>
-                    <p className="text-sm text-gray-600">PT Sessions</p>
-                    <p className="font-medium">{planDetails.includedPTSessions}</p>
+                    <p className="text-xs text-gray-500">PT Sessions</p>
+                    <p className="font-medium text-sm">{planDetails.includedPTSessions}</p>
                   </div>
                 </div>
               </div>
             </div>
           )}
-        </CardContent>
+        </div>
       </Card>
 
       {/* Progress Card */}
       <Card>
-        <CardHeader>
-          <CardTitle>Membership Progress</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">Days Remaining</span>
-              <span className="text-lg font-semibold">
-                {daysRemaining} {daysRemaining === 1 ? 'day' : 'days'}
-              </span>
+        <div className="p-6">
+          <h2 className="text-lg font-semibold mb-4">Membership Progress</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span className="text-sm text-gray-500">Days Remaining</span>
+              <span className="text-lg font-semibold">{daysRemaining} {daysRemaining === 1 ? 'day' : 'days'}</span>
             </div>
-            
-            <Progress value={progressPercentage} className="h-2" />
-            
-            <div className="flex justify-between text-sm text-gray-600">
-              <span>{Math.round(progressPercentage)}% Complete</span>
-              <span>{100 - Math.round(progressPercentage)}% Remaining</span>
+
+            {/* Progress bar */}
+            <div style={{ background: 'rgba(255,255,255,0.08)', borderRadius: '99px', height: '8px', overflow: 'hidden' }}>
+              <div style={{ width: `${progressPercentage}%`, height: '100%', background: '#10b981', borderRadius: '99px', transition: 'width 0.4s' }} />
             </div>
-            
+
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span className="text-xs text-gray-500">{Math.round(progressPercentage)}% Complete</span>
+              <span className="text-xs text-gray-500">{100 - Math.round(progressPercentage)}% Remaining</span>
+            </div>
+
             {daysRemaining <= 7 && membership.status === 'ACTIVE' && (
-              <Alert className="mt-4">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  Your membership expires in {daysRemaining} {daysRemaining === 1 ? 'day' : 'days'}. 
-                  Consider renewing to avoid interruption.
-                </AlertDescription>
-              </Alert>
+              <div style={{ marginTop: '0.5rem', padding: '0.75rem', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '8px', display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
+                <AlertCircle className="h-4 w-4 text-red-500" style={{ marginTop: '1px', flexShrink: 0 }} />
+                <span className="text-sm text-gray-300">
+                  Your membership expires in {daysRemaining} {daysRemaining === 1 ? 'day' : 'days'}. Consider renewing to avoid interruption.
+                </span>
+              </div>
             )}
           </div>
-        </CardContent>
+        </div>
       </Card>
 
       {/* Action Buttons */}
-      <div className="flex flex-wrap gap-4">
-        <Button onClick={generateQRCode} variant="outline">
-          <QrCode className="h-4 w-4 mr-2" />
-          Generate Check-in QR
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
+        <Button variant="secondary" onClick={generateQRCode}>
+          <QrCode className="h-4 w-4 mr-2" /> Generate Check-in QR
         </Button>
-        
-        <Button onClick={downloadMembershipCard} variant="outline">
-          <Download className="h-4 w-4 mr-2" />
-          Download Membership Card
+        <Button variant="secondary" onClick={downloadMembershipCard}>
+          <Download className="h-4 w-4 mr-2" /> Download Membership Card
         </Button>
-        
         {daysRemaining <= 30 && (
           <Button onClick={onRenewMembership}>
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Renew Membership
+            <RefreshCw className="h-4 w-4 mr-2" /> Renew Membership
           </Button>
         )}
-        
         {onUpgradeMembership && (
-          <Button onClick={onUpgradeMembership} variant="secondary">
-            <TrendingUp className="h-4 w-4 mr-2" />
-            Upgrade Plan
+          <Button variant="secondary" onClick={onUpgradeMembership}>
+            <TrendingUp className="h-4 w-4 mr-2" /> Upgrade Plan
           </Button>
         )}
       </div>

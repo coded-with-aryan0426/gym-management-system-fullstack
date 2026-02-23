@@ -5,11 +5,11 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { MemberProfileDTO, MemberProfileUpdateDTO } from '../types/member.types';
+import { MemberProfileDTO, MemberProfileUpdateDTO } from '../types/member';
 import UnifiedProfileApiService from '../services/unifiedProfileApiService';
 import ProfileCacheManager from '../services/profileCacheManager';
 import { useAuth } from '../contexts/AuthContext';
-import { useToast } from '../contexts/ToastContext';
+import { toast } from 'react-hot-toast';
 
 interface UseUnifiedProfileOptions {
   autoRefresh?: boolean;
@@ -49,8 +49,7 @@ export function useUnifiedProfile(
   const [cacheStats, setCacheStats] = useState({ size: 0, keys: [] as string[] });
 
   const { user: currentUser } = useAuth();
-  const { showToast } = useToast();
-  const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const refreshIntervalRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cacheManager = ProfileCacheManager;
   const apiService = UnifiedProfileApiService;
 
@@ -98,37 +97,37 @@ export function useUnifiedProfile(
 
       // API update
       const updatedProfile = await apiService.updateProfile(userId, updateData);
-      
+
       // Update local state
       setProfile(updatedProfile);
       setCacheStats(apiService.getCacheStats());
-      
+
       // Success callback
       onUpdateSuccess?.(updatedProfile);
-      
+
       // Show success toast
-      showToast.success('Profile updated successfully');
-      
+      toast.success('Profile updated successfully');
+
     } catch (err) {
       const error = err as Error;
       setError(error);
-      
+
       // Revert optimistic update
       if (optimisticUpdates) {
         await fetchProfile(); // Refetch to ensure consistency
       }
-      
+
       // Error callback
       onUpdateError?.(error);
-      
+
       // Show error toast
-      showToast.error(error.message || 'Failed to update profile');
-      
+      toast.error(error.message || 'Failed to update profile');
+
       console.error('Failed to update profile:', error);
     } finally {
       setIsUpdating(false);
     }
-  }, [userId, profile, optimisticUpdates, apiService, fetchProfile, onUpdateSuccess, onUpdateError, showToast]);
+  }, [userId, profile, optimisticUpdates, apiService, fetchProfile, onUpdateSuccess, onUpdateError]);
 
   /**
    * Refresh profile data
@@ -142,7 +141,7 @@ export function useUnifiedProfile(
    */
   const invalidateProfile = useCallback(() => {
     if (!userId) return;
-    
+
     apiService.invalidateProfile(userId);
     setProfile(null);
     setCacheStats(apiService.getCacheStats());
@@ -157,17 +156,17 @@ export function useUnifiedProfile(
     const unsubscribe = apiService.subscribeToProfileUpdates(userId, (updatedProfile) => {
       setProfile(updatedProfile);
       setCacheStats(apiService.getCacheStats());
-      
+
       // Show notification if updated by someone else
-      if (updatedProfile && currentUser && updatedProfile.userId !== currentUser.id) {
-        showToast.info('Profile was updated by another user');
+      if (updatedProfile && currentUser && String(updatedProfile.userId) !== String(currentUser.id)) {
+        toast('Profile was updated by another user');
       }
     });
 
     return () => {
       unsubscribe();
     };
-  }, [userId, apiService, currentUser, showToast]);
+  }, [userId, apiService, currentUser]);
 
   /**
    * Auto-refresh profile data
@@ -242,11 +241,11 @@ export function useUnifiedProfiles(
     try {
       const profileData = await apiService.getProfiles(userIds);
       const profileMap = new Map<string, MemberProfileDTO>();
-      
+
       profileData.forEach(profile => {
         profileMap.set(profile.userId.toString(), profile);
       });
-      
+
       setProfiles(profileMap);
     } catch (err) {
       const error = err as Error;

@@ -52,7 +52,7 @@ const EarningsChart: React.FC<EarningsChartProps> = ({ data }) => {
                         <Tooltip
                             cursor={{ fill: 'rgba(255,255,255,0.05)' }}
                             contentStyle={{ backgroundColor: '#1a1a1a', borderColor: 'rgba(255,255,255,0.1)', color: '#fff' }}
-                            formatter={(value: number) => [`₹${value.toLocaleString()}`, 'Earnings']}
+                            formatter={(value: number | undefined) => [`₹${(value ?? 0).toLocaleString()}`, 'Earnings']}
                         />
                         <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                             {data.map((entry, index) => (

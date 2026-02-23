@@ -32,7 +32,7 @@ const RevenueChart: React.FC<RevenueChartProps> = ({ data }) => {
             borderRadius: 'var(--radius-base)',
             color: 'var(--text-primary)',
           }}
-          formatter={(value: number) => [`$${value}`, 'Revenue']}
+          formatter={(value: number | undefined) => [`$${value ?? 0}`, 'Revenue']}
         />
         <Line
           type="monotone"
