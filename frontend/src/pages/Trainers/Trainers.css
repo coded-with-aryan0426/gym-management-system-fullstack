@@ -406,6 +406,29 @@
   font-feature-settings: 'tnum' 1;
 }
 
+/* === Stat Card Pulse - Trainer accent (indigo) === */
+.t-stat-card .pg-stat-card__pulse {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f59e0b;
+  animation: t-pulse-ring 2s ease-in-out infinite;
+}
+
+@keyframes t-pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.5); opacity: 1; }
+  70% { box-shadow: 0 0 0 8px rgba(245, 158, 11, 0); opacity: 0.7; }
+  100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); opacity: 1; }
+}
+
+/* === Table top accent line (indigo) === */
+.t-table-wrap::before {
+  background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.5), rgba(168, 85, 247, 0.4), rgba(99, 102, 241, 0.5), transparent);
+}
+
 /* === Batch Actions - Enhanced === */
 .t-batch {
   background: linear-gradient(180deg, rgba(99, 102, 241, 0.08) 0%, rgba(99, 102, 241, 0.03) 100%) !important;

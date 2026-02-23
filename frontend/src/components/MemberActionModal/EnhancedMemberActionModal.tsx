@@ -10,6 +10,7 @@ import api from "../../services/api"
 import { useAuth } from "../../contexts/AuthContext"
 import { relationshipFilterService, enhancedApi } from "../../services"
 import { useRealTimeData, useOptimisticUpdates, useMicroInteractions } from "../../hooks"
+import { saveAvatar } from "../../hooks/useAvatarStore"
 import { showToast } from "../../utils/toast"
 import Avatar from "../ui/Avatar"
 import AvatarPicker from "../ui/AvatarPicker"
@@ -258,7 +259,7 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
           joinDate: (((member as any).joinDate || member.createdAt || "") as string).split('T')[0],
           notes: "",
           avatarId: member.userId ? (localStorage.getItem(`avatar_${member.userId}`) || (member as any).avatarId || null) : null,
-        })
+        });
 
         // Initialize emergency contact form
         setEmergencyForm({
@@ -472,12 +473,8 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
       // Remove frontend-only fields
       delete updatedMember.phoneNumber;
 
-      // Persist avatar to localStorage
-      if (editForm.avatarId) {
-        localStorage.setItem(`avatar_${localMember.userId}`, editForm.avatarId)
-      } else {
-        localStorage.removeItem(`avatar_${localMember.userId}`)
-      }
+        // Persist avatar — dispatches storage event so ALL tabs/windows update instantly
+        saveAvatar(localMember.userId, editForm.avatarId)
 
       console.log('Sending update payload:', updatedMember)
       const savedUser = await api.updateUser(localMember.userId, updatedMember)
@@ -569,6 +566,41 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
         clearLoading('send-message')
       }
     }
+
+  // Maps icon name strings (from DB) → emoji
+  const resolveIconName = (iconName: string | undefined): string => {
+    if (!iconName) return ''
+    const n = iconName.toLowerCase().trim()
+    const map: Record<string, string> = {
+      dumbbell: '🏋️', barbell: '🏋️', weight: '🏋️',
+      star: '⭐', stars: '⭐', sparkle: '✨', sparkles: '✨',
+      crown: '👑', king: '👑', trophy: '🏆',
+      gem: '💎', diamond: '💎', jewel: '💎',
+      'graduation-cap': '🎓', graduation: '🎓', student: '🎓', mortarboard: '🎓',
+      building: '🏢', office: '🏢', corporate: '🏢', company: '🏢',
+      fire: '🔥', flame: '🔥',
+      lightning: '⚡', bolt: '⚡', zap: '⚡',
+      heart: '❤️', love: '❤️',
+      shield: '🛡️', lock: '🔒',
+      rocket: '🚀',
+      leaf: '🌿', nature: '🌿',
+      sun: '☀️', moon: '🌙',
+      medal: '🏅', award: '🏅', badge: '🏅',
+      running: '🏃', runner: '🏃',
+      swimming: '🏊', swim: '🏊',
+      yoga: '🧘', zen: '🧘',
+      boxing: '🥊', fight: '🥊',
+      bike: '🚴', cycling: '🚴',
+      infinity: '∞', unlimited: '∞',
+    }
+    // exact match first
+    if (map[n]) return map[n]
+    // partial match
+    for (const [key, emoji] of Object.entries(map)) {
+      if (n.includes(key)) return emoji
+    }
+    return iconName // fallback: show raw text shouldn't happen now
+  }
 
   // Plan badge helpers (consistent with MemberList)
   const getPlanIcon = (planName: string | undefined) => {
@@ -703,914 +735,816 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
 
   if (!member || !localMember) return null
 
-  const modalContent =
-    <>
-      <Editable id="member-action-modal">
-        <AnimatePresence>
-          {isOpen && (
+  // ── helpers used inside JSX ──
+  const memberInitials = localMember.fullName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
+  const joinDateDisplay = (() => {
+    const d = (localMember as any).joinDate || localMember.createdAt
+    if (!d) return '—'
+    try { return new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) }
+    catch { return '—' }
+  })()
+  const memberIdDisplay = `#${String(localMember.userId).padStart(5, '0')}`
+  const statusRaw = ((localMember as any).membershipStatus || (localMember as any).status || 'Inactive') as string
+  const statusLower = statusRaw.toLowerCase()
+
+  // current-plan helpers (shared between header and membership tab)
+  const planName = getPlanForMember()
+  const hasPlan = planName && planName !== 'No Plan' && planName !== 'None'
+
+  const startDateStr = (localMember as any)?.startDate || (localMember as any)?.membershipStartDate || (localMember as any)?.planStartDate
+  const endDateStr   = (localMember as any)?.endDate   || (localMember as any)?.membershipEndDate   || (localMember as any)?.planEndDate
+  let progressPercent = 0, daysLeft: number | null = null, totalDays: number | null = null, isExpired = false
+  if (startDateStr && endDateStr) {
+    const start = new Date(startDateStr).getTime(), end = new Date(endDateStr).getTime(), now = Date.now()
+    totalDays = Math.ceil((end - start) / 86400000)
+    daysLeft  = Math.ceil((end - now) / 86400000)
+    isExpired = daysLeft < 0
+    progressPercent = totalDays > 0 ? Math.min(100, Math.max(0, Math.round(((now - start) / (end - start)) * 100))) : 0
+  } else if (daysRemaining !== null) {
+    daysLeft = daysRemaining; isExpired = daysLeft <= 0
+  }
+  const progressColor = isExpired ? '#ef4444' : daysLeft !== null && daysLeft <= 7 ? '#f59e0b' : '#22c55e'
+  const fmtDate = (s: string) => { try { return new Date(s).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) } catch { return s } }
+
+  // Derive duration label from actual dates (never stale unlike planDuration string)
+  const durationFromDays = (days: number): { chip: string; full: string } => {
+    if (days >= 365 && days % 365 === 0) { const n = days / 365; return { chip: `${n}y`, full: `${n} Year${n !== 1 ? 's' : ''}` } }
+    if (days >= 28) { const n = Math.round(days / 30); return { chip: `${n}mo`, full: `${n} Month${n !== 1 ? 's' : ''}` } }
+    if (days >= 7 && days % 7 === 0) { const n = days / 7; return { chip: `${n}w`, full: `${n} Week${n !== 1 ? 's' : ''}` } }
+    return { chip: `${days}d`, full: `${days} Day${days !== 1 ? 's' : ''}` }
+  }
+  const durationLabels = totalDays != null && totalDays > 0 ? durationFromDays(totalDays) : null
+  const durationChip = durationLabels?.chip ?? ''
+  const durationFull = durationLabels?.full ?? ''
+
+  const modalContent = (
+    <Editable id="member-action-modal">
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            className="mam-overlay"
+            onClick={onClose}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+          >
             <motion.div
-              className="member-action-overlay"
-              onClick={onClose}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
+              className="mam"
+              onClick={(e) => e.stopPropagation()}
+              initial={{ opacity: 0, scale: 0.97, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.97, y: 20 }}
+              transition={{ type: 'spring', stiffness: 320, damping: 32 }}
             >
-              {/* Modal Content Wrapper */}
-              <motion.div
-                className="member-action-modal member-action-modal--redesigned"
-                onClick={(e) => e.stopPropagation()}
-                initial={{ opacity: 0, y: 24 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 24 }}
-                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              >
-                {/* Profile Header - Premium Enterprise Design */}
-                  <div className="member-action-modal__profile-header">
-                    <div className="profile-header__avatar">
-                      {editForm.avatarId ? (
-                        <img src={getAvatarUrl(editForm.avatarId) || ''} alt={localMember.fullName} />
-                      ) : (
-                        <div className="avatar-initials" style={{
-                          width: '100%', height: '100%',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          background: 'linear-gradient(135deg, var(--color-crimson), #b91c1c)',
-                          color: 'white', fontWeight: 700, fontSize: '18px',
-                        }}>
-                          {localMember.fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
-                        </div>
-                      )}
-                    </div>
 
-                    <div className="profile-header__info">
-                      <h2 className="profile-header__name">{localMember.fullName}</h2>
-                      <p className="profile-header__email">{localMember.email}</p>
-                    </div>
-
-                      <div className="profile-header__meta">
-                          <span className={`member-plan-badge ${getPlanBadgeClass(getPlanForMember())}`}>
-                            <span className="plan-icon">{getPlanIcon(getPlanForMember())}</span>
-                            {getPlanForMember()}
-                          </span>
-                          <div className={`modal-status-badge modal-status-badge--${(localMember.status || localMember.membershipStatus || 'Inactive').toLowerCase()}`}>
-                            <span className="modal-status-badge__dot"></span>
-                            {localMember.status || localMember.membershipStatus || 'Inactive'}
-                          </div>
-                        </div>
-
-                    <div className="profile-header__stats">
-                      <div className="stat-item">
-                        <span className="stat-value">{assignedTrainers.length}</span>
-                        <span className="stat-label">Trainers</span>
-                      </div>
-                      <div className="stat-item">
-                        <span className="stat-value">{daysRemaining !== null ? daysRemaining : '—'}</span>
-                        <span className="stat-label">Days Left</span>
-                      </div>
-                    </div>
-
-                    <button className="member-action-modal__close-inline" onClick={onClose}>
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <line x1="18" y1="6" x2="6" y2="18" />
-                        <line x1="6" y1="6" x2="18" y2="18" />
-                      </svg>
-                    </button>
+                {/* ══════════════════════════════════════════════
+                    HEADER — full-width member identity strip
+                ══════════════════════════════════════════════ */}
+                <div className="mam-header">
+                    {/* Avatar — uses Avatar component to handle custom upload + dicebear + initials */}
+                    <div className="mam-header__avatar-wrap">
+                        <Avatar
+                            name={localMember.fullName}
+                            avatarId={editForm.avatarId || localStorage.getItem(`avatar_${localMember.userId}`) || (localMember as any).avatarId || undefined}
+                          userId={localMember.userId}
+                          size="lg"
+                          className="mam-header__avatar-img"
+                        />
+                    <span className={`mam-header__status-dot mam-header__status-dot--${statusLower}`} />
                   </div>
 
-                {/* Two-Column Content Layout with Dynamic Panels */}
-                <div className="member-action-modal__content-grid">
-                    {/* Left Column: Tab Navigation */}
-                    <div className="member-action-modal__nav-column">
-                      <nav className="side-panel-nav">
-                        <span className="side-panel-nav__label">General</span>
-                          {([
-                            { id: "profile" as TabType, label: "Edit Profile", icon: "profile" },
-                            { id: "renew" as TabType, label: "Membership Plan", icon: "renew" },
-                            { id: "trainers" as TabType, label: "Assigned Trainers", icon: "trainers", badge: assignedTrainers.length },
-                          ] as const).map(tab => (
+                {/* Identity block */}
+                <div className="mam-header__identity">
+                  <div className="mam-header__name-row">
+                    <h2 className="mam-header__name">{localMember.fullName}</h2>
+                    <span className={`mam-header__status-pill mam-header__status-pill--${statusLower}`}>{statusRaw}</span>
+                  </div>
+                  <div className="mam-header__meta-row">
+                    <span className="mam-header__meta-item">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                      {localMember.email}
+                    </span>
+                    {(localMember as any).phoneNumber && (
+                      <span className="mam-header__meta-item">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.9 16.19 19.79 19.79 0 0 1 1.83 7.52 2 2 0 0 1 3.81 5.36h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 12a16 16 0 0 0 5.91 5.91l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                        {(localMember as any).phoneNumber}
+                      </span>
+                    )}
+                    <span className="mam-header__meta-item">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                      Joined {joinDateDisplay}
+                    </span>
+                    <span className="mam-header__id-chip">{memberIdDisplay}</span>
+                  </div>
+                </div>
 
-                          <button key={tab.id}
-                            className={`side-panel-nav__item ${activeTab === tab.id ? "side-panel-nav__item--active" : ""}`}
-                            onClick={() => setActiveTab(tab.id)}>
-                            <div className="nav-icon-wrap">
-                              {tab.id === "profile" && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>}
-                              {tab.id === "renew" && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" /></svg>}
-                              {tab.id === "trainers" && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>}
-                            </div>
-                            <span>{tab.label}</span>
-                            {'badge' in tab && tab.badge !== undefined && <span className="nav-badge">{tab.badge}</span>}
-                          </button>
-                        ))}
+                {/* Plan + Days strip */}
+                <div className="mam-header__plan-strip">
+                  {hasPlan ? (
+                    <>
+                      <span className={`member-plan-badge ${getPlanBadgeClass(planName)}`}>
+                        <span className="plan-icon">{getPlanIcon(planName)}</span>
+                        {planName}
+                        {durationChip && <span className="mam-header__dur-chip">{durationChip}</span>}
+                      </span>
+                      {daysLeft !== null && (
+                        <div className={`mam-header__days ${isExpired ? 'mam-header__days--expired' : daysLeft <= 7 ? 'mam-header__days--warn' : 'mam-header__days--ok'}`}>
+                          <span className="mam-header__days-num">{Math.abs(daysLeft)}</span>
+                          <span className="mam-header__days-label">{isExpired ? 'overdue' : 'days left'}</span>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <span className="mam-header__no-plan">No active plan</span>
+                  )}
+                </div>
 
-                        <div className="side-panel-nav__divider" />
-                        <span className="side-panel-nav__label">History</span>
-                        {([
-                          { id: "payments" as TabType, label: "Payment History", icon: "payments" },
-                          { id: "attendance" as TabType, label: "Attendance", icon: "attendance", badge: checkIns.length > 0 ? checkIns.length : undefined },
-                        ] as const).map(tab => (
-                          <button key={tab.id}
-                            className={`side-panel-nav__item ${activeTab === tab.id ? "side-panel-nav__item--active" : ""}`}
-                            onClick={() => setActiveTab(tab.id)}>
-                            <div className="nav-icon-wrap">
-                              {tab.id === "payments" && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2" /><line x1="1" y1="10" x2="23" y2="10" /></svg>}
-                              {tab.id === "attendance" && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><path d="M9 14l2 2 4-4" /></svg>}
-                            </div>
-                            <span>{tab.label}</span>
-                            {'badge' in tab && tab.badge !== undefined && <span className="nav-badge">{tab.badge}</span>}
-                          </button>
-                        ))}
+                {/* Quick stats */}
+                <div className="mam-header__stats">
+                  <div className="mam-header__stat">
+                    <span className="mam-header__stat-val">{transactions.length || '—'}</span>
+                    <span className="mam-header__stat-lbl">Payments</span>
+                  </div>
+                  <div className="mam-header__stat">
+                    <span className="mam-header__stat-val">{checkIns.length || '—'}</span>
+                    <span className="mam-header__stat-lbl">Visits</span>
+                  </div>
+                  <div className="mam-header__stat">
+                    <span className="mam-header__stat-val">{assignedTrainers.length}</span>
+                    <span className="mam-header__stat-lbl">Trainers</span>
+                  </div>
+                </div>
 
-                        <div className="side-panel-nav__divider" />
-                        <span className="side-panel-nav__label">Communication</span>
-                        <button
-                          className={`side-panel-nav__item ${activeTab === "message" ? "side-panel-nav__item--active" : ""}`}
-                          onClick={() => setActiveTab("message")}>
-                          <div className="nav-icon-wrap">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                              <polyline points="22,6 12,13 2,6" />
-                            </svg>
-                          </div>
-                          <span>Message Member</span>
-                        </button>
+                {/* Close */}
+                <button className="mam-header__close" onClick={onClose} title="Close">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
+                </button>
+              </div>
 
-                        <button
-                          className={`side-panel-nav__item side-panel-nav__item--danger ${activeTab === "delete" ? "side-panel-nav__item--active" : ""}`}
-                          onClick={() => setActiveTab("delete")}>
-                          <div className="nav-icon-wrap">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <polyline points="3 6 5 6 21 6" />
-                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                            </svg>
-                          </div>
-                          <span>Delete Member</span>
-                        </button>
-                      </nav>
-                    </div>
+              {/* ══════════════════════════════════════════════
+                  BODY — sidebar nav + content panel
+              ══════════════════════════════════════════════ */}
+              <div className="mam-body">
 
-                  {/* Right Column: Dynamic Content Panel */}
-                  <div className="member-action-modal__content-panel">
-                    <AnimatePresence mode="wait">
-                      {/* Profile Edit Panel */}
-                      {activeTab === "profile" && (
-                        <motion.div
-                          key="profile"
-                          className="content-panel"
-                          initial={{ opacity: 0, x: 20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: -20 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          <div className="content-panel__header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                            <h4 className="content-panel__title" style={{ margin: 0 }}>Edit Profile</h4>
-                            <button
-                              type="button"
-                              className="btn btn--secondary btn--sm"
-                              onClick={() => setShowAvatarPicker(true)}
+                {/* ── Sidebar Nav ── */}
+                <nav className="mam-nav">
+                  <div className="mam-nav__group">
+                    <span className="mam-nav__group-label">Member</span>
+                    {([
+                      { id: 'profile'  as TabType, label: 'Edit Profile',       color: '#6366f1',
+                        icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> },
+                      { id: 'renew'    as TabType, label: 'Membership',         color: '#10b981',
+                        icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg> },
+                      { id: 'trainers' as TabType, label: 'Trainers',           color: '#f59e0b', badge: assignedTrainers.length,
+                        icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
+                    ] as any[]).map((tab: any) => (
+                      <button key={tab.id}
+                        className={`mam-nav__item ${activeTab === tab.id ? 'mam-nav__item--active' : ''}`}
+                        style={{ '--nav-color': tab.color } as any}
+                        onClick={() => setActiveTab(tab.id)}
+                      >
+                        <span className="mam-nav__icon">{tab.icon}</span>
+                        <span className="mam-nav__label">{tab.label}</span>
+                        {tab.badge !== undefined && <span className="mam-nav__badge">{tab.badge}</span>}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="mam-nav__group">
+                    <span className="mam-nav__group-label">History</span>
+                    {([
+                      { id: 'payments'   as TabType, label: 'Payments',    color: '#3b82f6', badge: transactions.length || undefined,
+                        icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> },
+                      { id: 'attendance' as TabType, label: 'Attendance',  color: '#06b6d4', badge: checkIns.length || undefined,
+                        icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><path d="M9 14l2 2 4-4"/></svg> },
+                    ] as any[]).map((tab: any) => (
+                      <button key={tab.id}
+                        className={`mam-nav__item ${activeTab === tab.id ? 'mam-nav__item--active' : ''}`}
+                        style={{ '--nav-color': tab.color } as any}
+                        onClick={() => setActiveTab(tab.id)}
+                      >
+                        <span className="mam-nav__icon">{tab.icon}</span>
+                        <span className="mam-nav__label">{tab.label}</span>
+                        {tab.badge !== undefined && <span className="mam-nav__badge">{tab.badge}</span>}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="mam-nav__group">
+                    <span className="mam-nav__group-label">Actions</span>
+                    <button
+                      className={`mam-nav__item ${activeTab === 'message' ? 'mam-nav__item--active' : ''}`}
+                      style={{ '--nav-color': '#8b5cf6' } as any}
+                      onClick={() => setActiveTab('message')}
+                    >
+                      <span className="mam-nav__icon">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                      </span>
+                      <span className="mam-nav__label">Message</span>
+                    </button>
+                    <button
+                      className={`mam-nav__item mam-nav__item--danger ${activeTab === 'delete' ? 'mam-nav__item--active' : ''}`}
+                      style={{ '--nav-color': '#ef4444' } as any}
+                      onClick={() => setActiveTab('delete')}
+                    >
+                      <span className="mam-nav__icon">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                      </span>
+                      <span className="mam-nav__label">Delete</span>
+                    </button>
+                  </div>
+                </nav>
+
+                {/* ── Content Panel ── */}
+                <div className="mam-panel">
+                  <AnimatePresence mode="wait">
+
+                    {/* ─── PROFILE TAB ─── */}
+                    {activeTab === 'profile' && (
+                      <motion.div key="profile" className="mam-tab"
+                        initial={{ opacity: 0, x: 14 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -14 }}
+                        transition={{ duration: 0.18 }}
+                      >
+                        {/* Avatar Picker Popup */}
+                        <AnimatePresence>
+                          {showAvatarPicker && (
+                            <motion.div className="mam-overlay" style={{ zIndex: 1100 }}
+                              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                              onClick={() => setShowAvatarPicker(false)}
                             >
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                                <circle cx="12" cy="7" r="4" />
-                              </svg>
-                              Choose Avatar
+                              <motion.div className="avatar-picker-modal"
+                                initial={{ scale: 0.92, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.92, opacity: 0 }}
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <div className="avatar-picker-modal__header">
+                                  <h5>Choose Avatar</h5>
+                                  <button className="avatar-picker-modal__close" onClick={() => setShowAvatarPicker(false)}>×</button>
+                                </div>
+                                <AvatarPicker selectedId={editForm.avatarId} userId={localMember?.userId} variant="member"
+                                  onSelect={(id) => { setEditForm(prev => ({ ...prev, avatarId: id })); setShowAvatarPicker(false); showToast.success('Avatar selected!') }} />
+                              </motion.div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+
+                        {/* ── Section: Basic Info ── */}
+                        <div className="mam-section">
+                          <div className="mam-section__head">
+                            <div className="mam-section__title-row">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                              <span>Basic Info</span>
+                            </div>
+                            <button type="button" className="mam-btn mam-btn--ghost mam-btn--sm" onClick={() => setShowAvatarPicker(true)}>
+                              Change Avatar
                             </button>
                           </div>
-
-                          {/* Avatar Picker Popup Modal */}
-                          <AnimatePresence>
-                            {showAvatarPicker && (
-                              <motion.div
-                                className="member-action-overlay" /* reusing existing overlay class but z-index might need handling or just use nested div */
-                                style={{ zIndex: 1100, backgroundColor: 'rgba(0,0,0,0.5)' }}
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                onClick={() => setShowAvatarPicker(false)}
-                              >
-                                <motion.div
-                                  className="avatar-picker-modal"
-                                  initial={{ scale: 0.9, opacity: 0 }}
-                                  animate={{ scale: 1, opacity: 1 }}
-                                  exit={{ scale: 0.9, opacity: 0 }}
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <div className="avatar-picker-modal__header">
-                                    <h5>Choose Member Avatar</h5>
-                                    <button
-                                      className="avatar-picker-modal__close"
-                                      onClick={() => setShowAvatarPicker(false)}
-                                    >
-                                      ×
-                                    </button>
-                                  </div>
-                                  <AvatarPicker
-                                    selectedId={editForm.avatarId}
-                                    userId={localMember?.userId}
-                                    variant="member"
-                                    onSelect={(id) => {
-                                      setEditForm(prev => ({ ...prev, avatarId: id }))
-                                      setShowAvatarPicker(false)
-                                      showToast.success("Avatar selected!")
-                                    }}
-                                  />
-                                </motion.div>
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                          <div className="content-panel__body">
-                            <div className="form-row-2-col">
-                              <div className="form-group" style={{ marginBottom: 0 }}>
-                                <label>Full Name</label>
-                                <div className="input-with-validation">
-                                  <input
-                                    type="text"
-                                    value={editForm.fullName}
+                          <div className="mam-section__body">
+                            <div className="mam-form-grid">
+                              <div className="mam-field">
+                                <label className="mam-label">Full Name</label>
+                                <div className="mam-input-wrap">
+                                  <input type="text" value={editForm.fullName}
                                     onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })}
                                     onKeyDown={(e) => e.key === 'Enter' && isEditFormValid() && handleSaveProfile()}
-                                    className={`form-input ${editForm.fullName.length > 0 ? (isValidFullName(editForm.fullName) ? 'input--valid' : 'input--invalid') : ''}`}
+                                    className={`mam-input ${editForm.fullName.length > 0 ? (isValidFullName(editForm.fullName) ? 'mam-input--valid' : 'mam-input--invalid') : ''}`}
+                                    placeholder="Member full name"
                                   />
                                   <ValidationIcon show={editForm.fullName.length > 0} isValid={isValidFullName(editForm.fullName)} />
                                 </div>
                               </div>
-                              <div className="form-group" style={{ marginBottom: 0 }}>
-                                <label>Email</label>
-                                <div className="input-with-validation">
-                                  <input
-                                    type="email"
-                                    value={editForm.email}
+                              <div className="mam-field">
+                                <label className="mam-label">Email Address</label>
+                                <div className="mam-input-wrap">
+                                  <input type="email" value={editForm.email}
                                     onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
                                     onKeyDown={(e) => e.key === 'Enter' && isEditFormValid() && handleSaveProfile()}
-                                    className={`form-input ${editForm.email.length > 0 ? (isValidEmail(editForm.email) ? 'input--valid' : 'input--invalid') : ''}`}
+                                    className={`mam-input ${editForm.email.length > 0 ? (isValidEmail(editForm.email) ? 'mam-input--valid' : 'mam-input--invalid') : ''}`}
+                                    placeholder="email@example.com"
                                   />
                                   <ValidationIcon show={editForm.email.length > 0} isValid={isValidEmail(editForm.email)} />
                                 </div>
                               </div>
-                            </div>
-
-                            <div className="form-row-2-col">
-                              <div className="form-group" style={{ marginBottom: 0 }}>
-                                <label>Phone</label>
-                                <div className="input-with-validation">
-                                  <input
-                                    type="text"
-                                    value={editForm.phone}
+                              <div className="mam-field">
+                                <label className="mam-label">Phone</label>
+                                <div className="mam-input-wrap">
+                                  <input type="text" value={editForm.phone}
                                     onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
                                     onKeyDown={(e) => e.key === 'Enter' && isEditFormValid() && handleSaveProfile()}
-                                    className={`form-input ${editForm.phone.length > 0 ? (isValidPhone(editForm.phone) ? 'input--valid' : 'input--invalid') : ''}`}
+                                    className={`mam-input ${editForm.phone.length > 0 ? (isValidPhone(editForm.phone) ? 'mam-input--valid' : 'mam-input--invalid') : ''}`}
+                                    placeholder="+91 98765 43210"
                                   />
                                   <ValidationIcon show={editForm.phone.length > 0} isValid={isValidPhone(editForm.phone)} />
                                 </div>
                               </div>
-                              <div className="form-group" style={{ marginBottom: 0 }}>
-                                <label>Join Date</label>
-                                <input
-                                  type="date"
-                                  value={editForm.joinDate}
+                              <div className="mam-field">
+                                <label className="mam-label">Join Date</label>
+                                <input type="date" value={editForm.joinDate}
                                   onChange={(e) => setEditForm({ ...editForm, joinDate: e.target.value })}
-                                  className="form-input"
+                                  className="mam-input"
                                 />
                               </div>
                             </div>
-                            </div>
-                            <div className="form-actions">
-                              <button
-                                className="btn btn--primary"
-                                onClick={handleSaveProfile}
-                                disabled={!isEditFormValid()}
-                              >
-                                Save Changes
+                            <div className="mam-section__foot">
+                              <button className="mam-btn mam-btn--primary" onClick={handleSaveProfile} disabled={!isEditFormValid()}>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                                Save Profile
                               </button>
                             </div>
+                          </div>
+                        </div>
 
-                              {/* Emergency Contact Section */}
-                              <div className="profile-section">
-                                <h5 className="profile-section__title">
-                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
-                                  </svg>
-                                  Emergency Contact
-                                </h5>
-                                <div className="form-row-2-col">
-                                  <div className="form-group" style={{ marginBottom: 0 }}>
-                                    <label>Contact Name</label>
-                                    <input
-                                      type="text"
-                                      value={emergencyForm.emergencyContactName}
-                                      onChange={(e) => setEmergencyForm(prev => ({ ...prev, emergencyContactName: e.target.value }))}
-                                      className="form-input"
-                                      placeholder="Emergency contact name"
-                                    />
-                                  </div>
-                                  <div className="form-group" style={{ marginBottom: 0 }}>
-                                    <label>Contact Phone</label>
-                                    <div className="input-with-validation">
-                                      <input
-                                        type="tel"
-                                        inputMode="numeric"
-                                        value={emergencyForm.emergencyContactPhone}
-                                        onChange={(e) => handleEmergencyPhoneChange(e.target.value)}
-                                        onKeyDown={(e) => {
-                                          // Block letters and special chars except allowed keys
-                                          const allowed = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Home', 'End', '+', '-', ' ']
-                                          if (!allowed.includes(e.key) && !/^[0-9]$/.test(e.key)) {
-                                            e.preventDefault()
-                                          }
-                                        }}
-                                        className={`form-input ${emergencyForm.emergencyContactPhone.length > 0 ? (isValidEmergencyPhone(emergencyForm.emergencyContactPhone) ? 'input--valid' : 'input--invalid') : ''}`}
-                                        placeholder="+91 98765 43210"
-                                        maxLength={15}
-                                      />
-                                      <ValidationIcon show={emergencyForm.emergencyContactPhone.length > 0} isValid={isValidEmergencyPhone(emergencyForm.emergencyContactPhone)} />
-                                    </div>
-                                  </div>
-                                </div>
-                                <div className="form-group" style={{ marginBottom: 0, marginTop: 8 }}>
-                                  <label>Relationship</label>
-                                  <select
-                                    value={emergencyForm.emergencyContactRelation}
-                                    onChange={(e) => setEmergencyForm(prev => ({ ...prev, emergencyContactRelation: e.target.value }))}
-                                    className="form-select"
-                                  >
-                                    <option value="">Select relationship</option>
-                                    <option value="Spouse">Spouse</option>
-                                    <option value="Parent">Parent</option>
-                                    <option value="Sibling">Sibling</option>
-                                    <option value="Friend">Friend</option>
-                                    <option value="Other">Other</option>
-                                  </select>
-                                </div>
-                                <div className="form-actions" style={{ marginTop: 8 }}>
-                                  <button
-                                    className="btn btn--secondary btn--sm"
-                                    onClick={handleSaveEmergency}
-                                    disabled={emergencyForm.emergencyContactPhone.length > 0 && !isValidEmergencyPhone(emergencyForm.emergencyContactPhone)}
-                                  >
-                                    Save Emergency Contact
-                                  </button>
+                        {/* ── Section: Emergency Contact ── */}
+                        <div className="mam-section">
+                          <div className="mam-section__head">
+                            <div className="mam-section__title-row">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.9 16.19 19.79 19.79 0 0 1 1.83 7.52 2 2 0 0 1 3.81 5.36h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 12a16 16 0 0 0 5.91 5.91l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                              <span>Emergency Contact</span>
+                            </div>
+                          </div>
+                          <div className="mam-section__body">
+                            <div className="mam-form-grid">
+                              <div className="mam-field">
+                                <label className="mam-label">Contact Name</label>
+                                <input type="text" value={emergencyForm.emergencyContactName}
+                                  onChange={(e) => setEmergencyForm(prev => ({ ...prev, emergencyContactName: e.target.value }))}
+                                  className="mam-input" placeholder="Full name" />
+                              </div>
+                              <div className="mam-field">
+                                <label className="mam-label">Phone Number</label>
+                                <div className="mam-input-wrap">
+                                  <input type="tel" inputMode="numeric" value={emergencyForm.emergencyContactPhone}
+                                    onChange={(e) => handleEmergencyPhoneChange(e.target.value)}
+                                    onKeyDown={(e) => { const allowed = ['Backspace','Delete','ArrowLeft','ArrowRight','Tab','Home','End','+','-',' ']; if (!allowed.includes(e.key) && !/^[0-9]$/.test(e.key)) e.preventDefault() }}
+                                    className={`mam-input ${emergencyForm.emergencyContactPhone.length > 0 ? (isValidEmergencyPhone(emergencyForm.emergencyContactPhone) ? 'mam-input--valid' : 'mam-input--invalid') : ''}`}
+                                    placeholder="+91 98765 43210" maxLength={15} />
+                                  <ValidationIcon show={emergencyForm.emergencyContactPhone.length > 0} isValid={isValidEmergencyPhone(emergencyForm.emergencyContactPhone)} />
                                 </div>
                               </div>
-
-                            {/* Health Information Section */}
-                            <div className="profile-section">
-                              <h5 className="profile-section__title">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                  <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-                                </svg>
-                                Health Information
-                              </h5>
-                              <div className="form-group" style={{ marginBottom: 8 }}>
-                                <label>Health Notes / Medical Conditions</label>
-                                <textarea
-                                  value={healthForm.healthNotes}
-                                  onChange={(e) => setHealthForm(prev => ({ ...prev, healthNotes: e.target.value }))}
-                                  className="form-input"
-                                  rows={2}
-                                  placeholder="Allergies, conditions, medications..."
-                                  style={{ resize: 'vertical', minHeight: 50 }}
-                                />
-                              </div>
-                              <div className="form-group" style={{ marginBottom: 0 }}>
-                                <label>Fitness Goals</label>
-                                <textarea
-                                  value={healthForm.fitnessGoals}
-                                  onChange={(e) => setHealthForm(prev => ({ ...prev, fitnessGoals: e.target.value }))}
-                                  className="form-input"
-                                  rows={2}
-                                  placeholder="Weight loss, muscle gain, endurance..."
-                                  style={{ resize: 'vertical', minHeight: 50 }}
-                                />
-                              </div>
-                              <div className="form-actions" style={{ marginTop: 8 }}>
-                                <button className="btn btn--secondary btn--sm" onClick={handleSaveHealth}>
-                                  Save Health Info
-                                </button>
+                              <div className="mam-field mam-field--full">
+                                <label className="mam-label">Relationship</label>
+                                <select value={emergencyForm.emergencyContactRelation}
+                                  onChange={(e) => setEmergencyForm(prev => ({ ...prev, emergencyContactRelation: e.target.value }))}
+                                  className="mam-input mam-select">
+                                  <option value="">Select relationship</option>
+                                  <option value="Spouse">Spouse</option>
+                                  <option value="Parent">Parent</option>
+                                  <option value="Sibling">Sibling</option>
+                                  <option value="Friend">Friend</option>
+                                  <option value="Other">Other</option>
+                                </select>
                               </div>
                             </div>
+                            <div className="mam-section__foot">
+                              <button className="mam-btn mam-btn--secondary mam-btn--sm" onClick={handleSaveEmergency}
+                                disabled={emergencyForm.emergencyContactPhone.length > 0 && !isValidEmergencyPhone(emergencyForm.emergencyContactPhone)}>
+                                Save Emergency Contact
+                              </button>
+                            </div>
+                          </div>
+                        </div>
 
-                            {/* Notes Section */}
-                            <div className="profile-section">
-                              <h5 className="profile-section__title">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                                  <polyline points="14 2 14 8 20 8" />
-                                  <line x1="16" y1="13" x2="8" y2="13" />
-                                  <line x1="16" y1="17" x2="8" y2="17" />
-                                </svg>
-                                Staff Notes
-                                <span className="nav-badge" style={{ marginLeft: 6 }}>{memberNotes.length}</span>
-                              </h5>
-                              <div className="notes-add-row">
-                                <input
-                                  type="text"
-                                  value={newNote}
-                                  onChange={(e) => setNewNote(e.target.value)}
-                                  onKeyDown={(e) => e.key === 'Enter' && handleAddNote()}
-                                  className="form-input"
-                                  placeholder="Add a note..."
-                                />
-                                <button className="btn btn--primary btn--sm" onClick={handleAddNote} disabled={!newNote.trim()}>
-                                  Add
-                                </button>
-                              </div>
-                              <div className="notes-list">
-                                {memberNotes.length === 0 && !notesLoading && (
-                                  <p className="notes-empty">No notes yet</p>
+                        {/* ── Section: Health Info ── */}
+                        <div className="mam-section">
+                          <div className="mam-section__head">
+                            <div className="mam-section__title-row">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                              <span>Health & Goals</span>
+                            </div>
+                          </div>
+                          <div className="mam-section__body">
+                            <div className="mam-field mam-field--full">
+                              <label className="mam-label">Health Notes / Medical Conditions</label>
+                              <textarea value={healthForm.healthNotes}
+                                onChange={(e) => setHealthForm(prev => ({ ...prev, healthNotes: e.target.value }))}
+                                className="mam-input mam-textarea" rows={2} placeholder="Allergies, conditions, medications..." />
+                            </div>
+                            <div className="mam-field mam-field--full" style={{ marginTop: 10 }}>
+                              <label className="mam-label">Fitness Goals</label>
+                              <textarea value={healthForm.fitnessGoals}
+                                onChange={(e) => setHealthForm(prev => ({ ...prev, fitnessGoals: e.target.value }))}
+                                className="mam-input mam-textarea" rows={2} placeholder="Weight loss, muscle gain, endurance..." />
+                            </div>
+                            <div className="mam-section__foot">
+                              <button className="mam-btn mam-btn--secondary mam-btn--sm" onClick={handleSaveHealth}>Save Health Info</button>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* ── Section: Staff Notes ── */}
+                        <div className="mam-section">
+                          <div className="mam-section__head">
+                            <div className="mam-section__title-row">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                              <span>Staff Notes</span>
+                              {memberNotes.length > 0 && <span className="mam-nav__badge">{memberNotes.length}</span>}
+                            </div>
+                          </div>
+                          <div className="mam-section__body">
+                            <div className="mam-notes-add">
+                              <input type="text" value={newNote} onChange={(e) => setNewNote(e.target.value)}
+                                onKeyDown={(e) => e.key === 'Enter' && handleAddNote()}
+                                className="mam-input" placeholder="Add a note and press Enter..." />
+                              <button className="mam-btn mam-btn--primary mam-btn--sm" onClick={handleAddNote} disabled={!newNote.trim()}>Add</button>
+                            </div>
+                            <div className="mam-notes-list">
+                              {notesLoading && <p className="mam-empty-hint">Loading notes...</p>}
+                              {!notesLoading && memberNotes.length === 0 && <p className="mam-empty-hint">No notes yet</p>}
+                              {memberNotes.map((note: any, i: number) => (
+                                <div key={i} className="mam-note">
+                                  <div className="mam-note__head">
+                                    <span className="mam-note__author">{note.author || 'Admin'}</span>
+                                    <span className="mam-note__date">{note.createdAt ? new Date(note.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : ''}</span>
+                                  </div>
+                                  <p className="mam-note__body">{note.content}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {/* ─── MEMBERSHIP TAB ─── */}
+                    {activeTab === 'renew' && (
+                      <motion.div key="renew" className="mam-tab"
+                        initial={{ opacity: 0, x: 14 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -14 }}
+                        transition={{ duration: 0.18 }}
+                      >
+                          {/* Current plan status card */}
+                          <div className={`mam-current-plan ${isExpired ? 'mam-current-plan--expired' : !hasPlan ? 'mam-current-plan--none' : ''}`}>
+                            <div className="mam-current-plan__left">
+                              {/* Left: plan name + dates */}
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <span className="mam-current-plan__label">Current Plan</span>
+                                <div className="mam-current-plan__name-row">
+                                  {hasPlan ? (
+                                    <span className={`member-plan-badge ${getPlanBadgeClass(planName)}`}>
+                                      <span className="plan-icon">{getPlanIcon(planName)}</span>
+                                      {planName}
+                                    </span>
+                                  ) : (
+                                    <span className="mam-current-plan__none">No active plan</span>
+                                  )}
+                                  {durationFull && (
+                                    <span className="mam-current-plan__dur">{durationFull}</span>
+                                  )}
+                                </div>
+                                {(startDateStr || endDateStr) && (
+                                  <div className="mam-current-plan__dates">
+                                    {startDateStr && <span>{fmtDate(startDateStr)}</span>}
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                                    {endDateStr && <span className={isExpired ? 'mam-current-plan__date--expired' : ''}>{fmtDate(endDateStr)}</span>}
+                                    {totalDays && <span className="mam-current-plan__total">({totalDays}d total)</span>}
+                                  </div>
                                 )}
-                                {memberNotes.map((note, i) => (
-                                  <div key={i} className="note-item">
-                                    <div className="note-item__header">
-                                      <span className="note-item__author">{note.author || 'Admin'}</span>
-                                      <span className="note-item__date">
-                                        {note.createdAt ? new Date(note.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : ''}
-                                      </span>
-                                    </div>
-                                    <p className="note-item__content">{note.content}</p>
-                                  </div>
-                                ))}
                               </div>
-                            </div>
-                          </motion.div>
-                        )}
-
-                        {/* Payment History Panel */}
-                        {activeTab === "payments" && (
-                          <motion.div
-                            key="payments"
-                            className="content-panel"
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -20 }}
-                            transition={{ duration: 0.2 }}
-                          >
-                            <h4 className="content-panel__title">Payment History</h4>
-                            <div className="content-panel__body">
-                              {transactionsLoading ? (
-                                <div className="empty-state"><p>Loading payments...</p></div>
-                              ) : transactions.length === 0 ? (
-                                <div className="empty-state">
-                                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
-                                    <line x1="1" y1="10" x2="23" y2="10" />
-                                  </svg>
-                                  <p>No payment records found</p>
-                                  <span>Payments will appear here when recorded</span>
-                                </div>
-                              ) : (
-                                <div className="transactions-list">
-                                  {transactions.map((tx, i) => (
-                                    <div key={tx.transactionId || i} className="transaction-item">
-                                      <div className="transaction-item__left">
-                                        <span className={`transaction-item__icon ${tx.type === 'INCOME' ? 'transaction-item__icon--income' : 'transaction-item__icon--expense'}`}>
-                                          {tx.type === 'INCOME' ? '+' : '-'}
-                                        </span>
-                                        <div className="transaction-item__info">
-                                          <span className="transaction-item__desc">{tx.description || tx.category || 'Payment'}</span>
-                                          <span className="transaction-item__date">
-                                            {tx.dateTime ? new Date(tx.dateTime).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
-                                          </span>
-                                        </div>
-                                      </div>
-                                      <div className="transaction-item__right">
-                                        <span className={`transaction-item__amount ${tx.type === 'INCOME' ? 'transaction-item__amount--positive' : 'transaction-item__amount--negative'}`}>
-                                          {tx.type === 'INCOME' ? '+' : '-'}₹{Math.abs(Number(tx.amount) || 0).toLocaleString()}
-                                        </span>
-                                        <span className={`transaction-item__status transaction-item__status--${(tx.status || '').toLowerCase()}`}>
-                                          {tx.status || 'Completed'}
-                                        </span>
-                                      </div>
-                                    </div>
-                                  ))}
+                              {/* Right: days block */}
+                              {hasPlan && daysLeft !== null && (
+                                <div className={`mam-current-plan__days-block ${isExpired ? 'mam-current-plan__days-block--expired' : daysLeft <= 7 ? 'mam-current-plan__days-block--warn' : ''}`}>
+                                  <span className="mam-current-plan__days-num">{Math.abs(daysLeft)}</span>
+                                  <span className="mam-current-plan__days-label">{isExpired ? 'overdue' : 'days left'}</span>
                                 </div>
                               )}
                             </div>
-                          </motion.div>
-                        )}
-
-                        {/* Attendance / Check-in History Panel */}
-                        {activeTab === "attendance" && (
-                          <motion.div
-                            key="attendance"
-                            className="content-panel"
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -20 }}
-                            transition={{ duration: 0.2 }}
-                          >
-                            <h4 className="content-panel__title">Attendance History</h4>
-                            <div className="content-panel__body">
-                              {/* Attendance summary */}
-                              <div className="attendance-summary">
-                                <div className="attendance-stat">
-                                  <span className="attendance-stat__value">{checkIns.length}</span>
-                                  <span className="attendance-stat__label">Total Visits</span>
+                            {hasPlan && progressPercent > 0 && (
+                              <div className="mam-current-plan__progress">
+                                <div className="mam-current-plan__progress-track">
+                                  <div className="mam-current-plan__progress-fill" style={{ width: `${progressPercent}%`, background: progressColor }} />
                                 </div>
-                                <div className="attendance-stat">
-                                  <span className="attendance-stat__value">
-                                    {checkIns.filter(c => {
-                                      const d = new Date(c.checkInTime)
-                                      const now = new Date()
-                                      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
-                                    }).length}
-                                  </span>
-                                  <span className="attendance-stat__label">This Month</span>
-                                </div>
-                                <div className="attendance-stat">
-                                  <span className="attendance-stat__value">
-                                    {checkIns.length > 0 ? (() => {
-                                      const durations = checkIns
-                                        .filter(c => c.checkOutTime)
-                                        .map(c => (new Date(c.checkOutTime).getTime() - new Date(c.checkInTime).getTime()) / (1000 * 60))
-                                      return durations.length > 0 ? `${Math.round(durations.reduce((a, b) => a + b, 0) / durations.length)}m` : '—'
-                                    })() : '—'}
-                                  </span>
-                                  <span className="attendance-stat__label">Avg Duration</span>
-                                </div>
+                                <span className="mam-current-plan__progress-label">{progressPercent}% used</span>
                               </div>
+                            )}
+                          </div>
 
-                              {checkInsLoading ? (
-                                <div className="empty-state"><p>Loading attendance...</p></div>
-                              ) : checkIns.length === 0 ? (
-                                <div className="empty-state">
-                                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                                    <line x1="16" y1="2" x2="16" y2="6" />
-                                    <line x1="8" y1="2" x2="8" y2="6" />
-                                    <line x1="3" y1="10" x2="21" y2="10" />
-                                  </svg>
-                                  <p>No check-in records found</p>
-                                  <span>Check-ins will appear here</span>
-                                </div>
-                              ) : (
-                                <div className="checkins-list">
-                                  {checkIns.slice(0, 50).map((ci, i) => {
-                                    const inTime = new Date(ci.checkInTime)
-                                    const outTime = ci.checkOutTime ? new Date(ci.checkOutTime) : null
-                                    const duration = outTime ? Math.round((outTime.getTime() - inTime.getTime()) / (1000 * 60)) : null
-                                    return (
-                                      <div key={ci.checkInId || i} className="checkin-item">
-                                        <div className="checkin-item__date">
-                                          <span className="checkin-item__day">{inTime.toLocaleDateString('en-US', { weekday: 'short' })}</span>
-                                          <span className="checkin-item__full-date">{inTime.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                        {/* Plan selection */}
+                        <div className="mam-section" style={{ marginTop: 16 }}>
+                          <div className="mam-section__head">
+                            <div className="mam-section__title-row">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
+                              <span>Select Plan</span>
+                            </div>
+                          </div>
+                          <div className="mam-section__body">
+                            {tieredPlansLoading ? (
+                              <div className="mam-plans-skeleton">
+                                {[1,2,3].map(i => <div key={i} className="mam-plan-skeleton-card" />)}
+                              </div>
+                            ) : tieredPlans.length === 0 ? (
+                              <div className="mam-empty">
+                                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                                <p>No plans available</p>
+                                <span>Create membership plans in Settings</span>
+                              </div>
+                            ) : (
+                              <div className="mam-plans-grid">
+                                {tieredPlans.map((plan: any) => {
+                                  const isSel = selectedPlanId === plan.planId
+                                  const isCurrent = plan.planName === getPlanForMember()
+                                  const activeVars = (plan.variants || []).filter((v: any) => v.isActive !== false)
+                                  const lowestPrice = activeVars.length > 0 ? Math.min(...activeVars.map((v: any) => v.price)) : 0
+                                  const catColors: Record<string, string> = { STANDARD: '#3B82F6', PREMIUM: '#8B5CF6', VIP: '#F59E0B', CORPORATE: '#10B981', STUDENT: '#6366F1', CUSTOM: '#EC4899' }
+                                  const catColor = plan.category ? (catColors[plan.category] || '#6366F1') : undefined
+                                  const accentColor = plan.planColor || '#6366f1'
+                                  return (
+                                    <div key={plan.planId}
+                                      className={`mam-plan-card ${isSel ? 'mam-plan-card--selected' : ''} ${isCurrent ? 'mam-plan-card--current' : ''} ${plan.isRecommended ? 'mam-plan-card--recommended' : ''}`}
+                                      style={{ '--plan-color': accentColor } as any}
+                                      onClick={() => { setSelectedPlanId(plan.planId); const pop = activeVars.find((v: any) => v.isPopular); setSelectedVariantId((pop || activeVars[0])?.variantId || null) }}
+                                    >
+                                      {isCurrent && <span className="mam-plan-card__current-badge">Current</span>}
+                                      {plan.isRecommended && !isCurrent && <span className="mam-plan-card__rec-badge">Recommended</span>}
+                                        <div className="mam-plan-card__icon-name">
+                                          <span className="mam-plan-card__icon">
+                                            {plan.iconName ? resolveIconName(plan.iconName) : getPlanIcon(plan.planName)}
+                                          </span>
+                                          <h5 className="mam-plan-card__name">{plan.planName}</h5>
                                         </div>
-                                        <div className="checkin-item__times">
-                                          <span className="checkin-item__in">In: {inTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}</span>
-                                          {outTime && (
-                                            <span className="checkin-item__out">Out: {outTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}</span>
-                                          )}
-                                        </div>
-                                        {duration !== null && (
-                                          <span className="checkin-item__duration">{duration}m</span>
-                                        )}
-                                        <span className={`checkin-item__status checkin-item__status--${(ci.status || '').replace(/\s+/g, '-').toLowerCase()}`}>
-                                          {ci.status || 'check-in'}
+                                      {plan.category && (
+                                        <span className="mam-plan-card__cat" style={{ color: catColor, borderColor: catColor }}>
+                                          {plan.category.charAt(0) + plan.category.slice(1).toLowerCase()}
                                         </span>
+                                      )}
+                                      {plan.description && <p className="mam-plan-card__desc">{plan.description}</p>}
+                                      <div className="mam-plan-card__price">
+                                        <span className="mam-plan-card__price-from">from</span>
+                                        <span className="mam-plan-card__price-val">₹{lowestPrice.toLocaleString()}</span>
                                       </div>
+                                      {activeVars.length > 0 && (
+                                        <div className="mam-plan-card__dur-chips">
+                                          {activeVars.slice(0, 4).map((v: any) => (
+                                            <span key={v.variantId} className="mam-plan-card__dur-chip">
+                                              {v.durationValue}{v.durationUnit?.[0]?.toLowerCase() || 'm'}
+                                            </span>
+                                          ))}
+                                          {activeVars.length > 4 && <span className="mam-plan-card__dur-chip mam-plan-card__dur-chip--more">+{activeVars.length - 4}</span>}
+                                        </div>
+                                      )}
+                                      {plan.features && plan.features.filter((f: any) => f.isIncluded).length > 0 && (
+                                        <ul className="mam-plan-card__features">
+                                          {plan.features.filter((f: any) => f.isIncluded).slice(0, 3).map((f: any, fi: number) => (
+                                            <li key={f.featureId || fi}>✓ {f.name}</li>
+                                          ))}
+                                        </ul>
+                                      )}
+                                      {plan.memberCount != null && (
+                                        <div className="mam-plan-card__members">
+                                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                          {plan.memberCount} member{plan.memberCount !== 1 ? 's' : ''}
+                                        </div>
+                                      )}
+                                    </div>
+                                  )
+                                })}
+                              </div>
+                            )}
+
+                            {/* Duration segmented picker */}
+                            {selectedPlan && (
+                              <div className="mam-duration-section">
+                                <label className="mam-label" style={{ marginBottom: 10, display: 'block' }}>Select Duration for <strong>{selectedPlan.planName}</strong></label>
+                                <div className="mam-duration-grid">
+                                  {(selectedPlan.variants || []).filter((v: any) => v.isActive !== false).map((variant: any) => {
+                                    const isVarSel = selectedVariantId === variant.variantId
+                                    const durLabel = variant.durationValue + ' ' + (variant.durationUnit || 'MONTHS').toLowerCase().replace(/s$/, '') + (variant.durationValue > 1 ? 's' : '')
+                                    return (
+                                      <button key={variant.variantId}
+                                        className={`mam-duration-card ${isVarSel ? 'mam-duration-card--selected' : ''} ${variant.isPopular ? 'mam-duration-card--popular' : ''}`}
+                                        style={{ '--plan-color': selectedPlan.planColor || '#6366f1' } as any}
+                                        onClick={() => setSelectedVariantId(variant.variantId)}
+                                      >
+                                        {variant.isPopular && <span className="mam-duration-card__popular">Popular</span>}
+                                        <span className="mam-duration-card__dur">{durLabel}</span>
+                                        <span className="mam-duration-card__price">₹{Number(variant.price).toLocaleString()}</span>
+                                        {variant.discountPercent > 0 && (
+                                          <span className="mam-duration-card__discount">{variant.discountPercent}% off</span>
+                                        )}
+                                      </button>
                                     )
                                   })}
                                 </div>
-                              )}
-                            </div>
-                          </motion.div>
-                        )}
+                              </div>
+                            )}
 
-                        {/* Renew Plan Panel */}
-                      {activeTab === "renew" && (
-                        <motion.div
-                          key="renew"
-                          className="content-panel"
-                          initial={{ opacity: 0, x: 20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -20 }}
-                            transition={{ duration: 0.2 }}
-                          >
-                              <h4 className="content-panel__title">Membership Management</h4>
-                              <div className="content-panel__body">
-
-                              {/* Current plan info */}
-                                <div className="current-plan-info">
-                                  <span className="current-plan-label">Current Plan</span>
-                                  <span className={`member-plan-badge ${getPlanBadgeClass(getPlanForMember())}`}>
-                                    <span className="plan-icon">{getPlanIcon(getPlanForMember())}</span>
-                                    {getPlanForMember()}
-                                  </span>
-                                </div>
-
-                              {tieredPlansLoading ? (
-                                <div className="empty-state"><p>Loading plans...</p></div>
-                              ) : tieredPlans.length === 0 ? (
-                                <div className="empty-state">
-                                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
-                                    <line x1="1" y1="10" x2="23" y2="10" />
-                                  </svg>
-                                  <p>No membership plans available</p>
-                                  <span>Create plans in Settings to enable renewals</span>
-                                </div>
-                              ) : (
-                                <>
-                                  {/* Plan Selection Cards */}
-                                  <div className="renew-plans-grid">
-                                    {tieredPlans.map((plan: any) => {
-                                      const isSelected = selectedPlanId === plan.planId
-                                      const activeVariants = (plan.variants || []).filter((v: any) => v.isActive !== false)
-                                      const lowestPrice = activeVariants.length > 0
-                                        ? Math.min(...activeVariants.map((v: any) => v.price))
-                                        : 0
-                                      return (
-                                        <div
-                                          key={plan.planId}
-                                          className={`renew-plan-card ${isSelected ? 'renew-plan-card--selected' : ''} ${plan.isRecommended ? 'renew-plan-card--recommended' : ''}`}
-                                          onClick={() => {
-                                            setSelectedPlanId(plan.planId)
-                                            // Auto-select popular or first variant
-                                            const popular = activeVariants.find((v: any) => v.isPopular)
-                                            setSelectedVariantId((popular || activeVariants[0])?.variantId || null)
-                                          }}
-                                          style={{ borderColor: isSelected ? (plan.planColor || '#6C63FF') : undefined }}
-                                        >
-                                          {plan.isRecommended && (
-                                            <span className="renew-plan-card__badge" style={{ background: plan.planColor || '#6C63FF' }}>Recommended</span>
-                                          )}
-                                          <div className="renew-plan-card__header" style={{ color: plan.planColor || '#6C63FF' }}>
-                                              <span className="renew-plan-card__icon">
-                                                {getPlanIcon(plan.planName)}
-                                              </span>
-                                              <h5 className="renew-plan-card__name">{plan.planName}</h5>
-                                            </div>
-                                          {plan.description && (
-                                            <p className="renew-plan-card__desc">{plan.description}</p>
-                                          )}
-                                          <div className="renew-plan-card__price">
-                                            <span className="renew-plan-card__price-from">from</span>
-                                            <span className="renew-plan-card__price-value">₹{lowestPrice.toLocaleString()}</span>
-                                          </div>
-                                          {/* Plan features */}
-                                          {plan.features && plan.features.length > 0 && (
-                                            <ul className="renew-plan-card__features">
-                                              {plan.features.slice(0, 4).map((f: any, i: number) => (
-                                                <li key={f.featureId || i} className={f.isIncluded ? 'included' : 'excluded'}>
-                                                  {f.isIncluded ? '✓' : '✗'} {f.name}
-                                                </li>
-                                              ))}
-                                              {plan.features.length > 4 && (
-                                                <li className="more">+{plan.features.length - 4} more</li>
-                                              )}
-                                            </ul>
-                                          )}
-                                        </div>
-                                      )
-                                    })}
-                                  </div>
-
-                                  {/* Variant (Duration) Picker */}
-                                  {selectedPlan && (
-                                    <div className="renew-variant-section">
-                                      <label className="renew-variant-label">Select Duration</label>
-                                      <div className="renew-variant-pills">
-                                        {(selectedPlan.variants || [])
-                                          .filter((v: any) => v.isActive !== false)
-                                          .map((variant: any) => {
-                                            const isVarSelected = selectedVariantId === variant.variantId
-                                            const durationLabel = variant.durationValue + ' ' + (variant.durationUnit || 'MONTHS').toLowerCase().replace(/s$/, '') + (variant.durationValue > 1 ? 's' : '')
-                                            return (
-                                              <button
-                                                key={variant.variantId}
-                                                className={`renew-variant-pill ${isVarSelected ? 'renew-variant-pill--selected' : ''} ${variant.isPopular ? 'renew-variant-pill--popular' : ''}`}
-                                                onClick={() => setSelectedVariantId(variant.variantId)}
-                                              >
-                                                <span className="renew-variant-pill__duration">{durationLabel}</span>
-                                                <span className="renew-variant-pill__price">₹{Number(variant.price).toLocaleString()}</span>
-                                                {variant.discountPercent > 0 && (
-                                                  <span className="renew-variant-pill__discount">{variant.discountPercent}% off</span>
-                                                )}
-                                                {variant.isPopular && <span className="renew-variant-pill__popular-tag">Popular</span>}
-                                              </button>
-                                            )
-                                          })}
-                                      </div>
-                                    </div>
-                                  )}
-
-                                  {/* Selected variant summary */}
-                                  {selectedVariant && (
-                                    <div className="renew-summary">
-                                      <div className="renew-summary__row">
-                                        <span>Plan</span>
-                                        <span>{selectedPlan?.planName}</span>
-                                      </div>
-                                      <div className="renew-summary__row">
-                                        <span>Duration</span>
-                                        <span>{selectedVariant.durationValue} {(selectedVariant.durationUnit || 'MONTHS').toLowerCase()}</span>
-                                      </div>
-                                      {selectedVariant.originalPrice && selectedVariant.originalPrice > selectedVariant.price && (
-                                        <div className="renew-summary__row renew-summary__row--discount">
-                                          <span>Original Price</span>
-                                          <span className="renew-summary__strikethrough">₹{Number(selectedVariant.originalPrice).toLocaleString()}</span>
-                                        </div>
-                                      )}
-                                      {selectedVariant.includedPTSessions > 0 && (
-                                        <div className="renew-summary__row">
-                                          <span>Included PT Sessions</span>
-                                          <span>{selectedVariant.includedPTSessions}</span>
-                                        </div>
-                                      )}
-                                      <div className="renew-summary__row renew-summary__row--total">
-                                        <span>Total Amount</span>
-                                        <span className="renew-summary__total">₹{Number(selectedVariant.price).toLocaleString()}</span>
-                                      </div>
-                                    </div>
-                                  )}
-                                </>
-                              )}
-                            </div>
-                              <div className="form-actions">
-                                {selectedPlan?.planName === getPlanForMember() ? (
-                                  <button
-                                    className="btn btn--primary btn-renew-wide"
-                                    onClick={() => handleRenewAndPay(false)}
-                                    disabled={!selectedPlanId || !selectedVariantId || isRenewing}
-                                  >
-                                    {isRenewing ? 'Processing...' : 'Extend Current Plan'}
-                                  </button>
-                                ) : (
-                                  <button
-                                    className="btn btn--primary btn-renew-wide"
-                                    onClick={() => handleRenewAndPay(true)}
-                                    disabled={!selectedPlanId || !selectedVariantId || isRenewing}
-                                    style={{ background: 'linear-gradient(135deg, #6366f1, #a855f7)' }}
-                                  >
-                                    {isRenewing ? 'Processing...' : getPlanForMember() === 'No Plan' ? 'Activate Plan' : 'Upgrade / Change Plan'}
-                                  </button>
+                            {/* Summary */}
+                            {selectedVariant && (
+                              <div className="mam-renew-summary">
+                                <div className="mam-renew-summary__row"><span>Plan</span><span>{selectedPlan?.planName}</span></div>
+                                <div className="mam-renew-summary__row"><span>Duration</span><span>{selectedVariant.durationValue} {(selectedVariant.durationUnit || 'MONTHS').toLowerCase()}</span></div>
+                                {selectedVariant.originalPrice && selectedVariant.originalPrice > selectedVariant.price && (
+                                  <div className="mam-renew-summary__row mam-renew-summary__row--strike"><span>Original</span><s>₹{Number(selectedVariant.originalPrice).toLocaleString()}</s></div>
                                 )}
+                                {selectedVariant.includedPTSessions > 0 && (
+                                  <div className="mam-renew-summary__row"><span>PT Sessions</span><span>{selectedVariant.includedPTSessions}</span></div>
+                                )}
+                                <div className="mam-renew-summary__row mam-renew-summary__row--total"><span>Total</span><span>₹{Number(selectedVariant.price).toLocaleString()}</span></div>
                               </div>
+                            )}
 
-                        </motion.div>
-                      )}
+                            {/* CTA */}
+                            <div className="mam-section__foot" style={{ marginTop: 16 }}>
+                              {selectedPlan?.planName === getPlanForMember() ? (
+                                <button className="mam-btn mam-btn--primary mam-btn--wide" onClick={() => handleRenewAndPay(false)} disabled={!selectedPlanId || !selectedVariantId || isRenewing}>
+                                  {isRenewing ? 'Processing...' : 'Extend Current Plan'}
+                                </button>
+                              ) : (
+                                <button className="mam-btn mam-btn--upgrade mam-btn--wide" onClick={() => handleRenewAndPay(true)} disabled={!selectedPlanId || !selectedVariantId || isRenewing}>
+                                  {isRenewing ? 'Processing...' : getPlanForMember() === 'No Plan' ? 'Activate Plan' : 'Upgrade / Change Plan'}
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
 
-                      {/* Message Panel */}
-                      {activeTab === "message" && (
-                        <motion.div
-                          key="message"
-                          className="content-panel"
-                          initial={{ opacity: 0, x: 20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: -20 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          <h4 className="content-panel__title">Send Message</h4>
-                          <div className="message-compose">
-                            {/* Recipient Row - macOS Mail style */}
-                            <div className="message-compose__row">
-                              <span className="message-compose__label">To:</span>
-                              <div className="message-compose__recipient">
-                                <span className="recipient-tag">
-                                  {localMember.fullName}
-                                  <span className="recipient-email">&lt;{localMember.email}&gt;</span>
+                    {/* ─── PAYMENTS TAB ─── */}
+                    {activeTab === 'payments' && (
+                      <motion.div key="payments" className="mam-tab"
+                        initial={{ opacity: 0, x: 14 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -14 }}
+                        transition={{ duration: 0.18 }}
+                      >
+                        <div className="mam-section">
+                          <div className="mam-section__head">
+                            <div className="mam-section__title-row">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                              <span>Payment History</span>
+                            </div>
+                          </div>
+                          <div className="mam-section__body">
+                            {/* Stat chips */}
+                            {transactions.length > 0 && (
+                              <div className="mam-stat-row">
+                                <div className="mam-stat-chip">
+                                  <span className="mam-stat-chip__val">{transactions.length}</span>
+                                  <span className="mam-stat-chip__lbl">Total Txns</span>
+                                </div>
+                                <div className="mam-stat-chip">
+                                  <span className="mam-stat-chip__val">
+                                    ₹{transactions.filter((t: any) => t.type === 'INCOME').reduce((s: number, t: any) => s + (Number(t.amount) || 0), 0).toLocaleString()}
+                                  </span>
+                                  <span className="mam-stat-chip__lbl">Total Paid</span>
+                                </div>
+                                <div className="mam-stat-chip">
+                                  <span className="mam-stat-chip__val">
+                                    {transactions.filter((t: any) => { const d = new Date(t.dateTime); const n = new Date(); return d.getMonth() === n.getMonth() && d.getFullYear() === n.getFullYear() }).length}
+                                  </span>
+                                  <span className="mam-stat-chip__lbl">This Month</span>
+                                </div>
+                              </div>
+                            )}
+                            {transactionsLoading ? (
+                              <div className="mam-empty"><p>Loading payments...</p></div>
+                            ) : transactions.length === 0 ? (
+                              <div className="mam-empty">
+                                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                                <p>No payment records found</p><span>Payments will appear here when recorded</span>
+                              </div>
+                            ) : (
+                              <div className="mam-txn-list">
+                                {transactions.map((tx: any, i: number) => (
+                                  <div key={tx.transactionId || i} className="mam-txn">
+                                    <div className={`mam-txn__icon ${tx.type === 'INCOME' ? 'mam-txn__icon--in' : 'mam-txn__icon--out'}`}>
+                                      {tx.type === 'INCOME'
+                                        ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+                                        : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>}
+                                    </div>
+                                    <div className="mam-txn__info">
+                                      <span className="mam-txn__desc">{tx.description || tx.category || 'Payment'}</span>
+                                      <span className="mam-txn__date">{tx.dateTime ? new Date(tx.dateTime).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}</span>
+                                    </div>
+                                    <div className="mam-txn__right">
+                                      <span className={`mam-txn__amount ${tx.type === 'INCOME' ? 'mam-txn__amount--pos' : 'mam-txn__amount--neg'}`}>
+                                        {tx.type === 'INCOME' ? '+' : '-'}₹{Math.abs(Number(tx.amount) || 0).toLocaleString()}
+                                      </span>
+                                      <span className={`mam-txn__status mam-txn__status--${(tx.status || '').toLowerCase()}`}>{tx.status || 'Completed'}</span>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {/* ─── ATTENDANCE TAB ─── */}
+                    {activeTab === 'attendance' && (
+                      <motion.div key="attendance" className="mam-tab"
+                        initial={{ opacity: 0, x: 14 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -14 }}
+                        transition={{ duration: 0.18 }}
+                      >
+                        <div className="mam-section">
+                          <div className="mam-section__head">
+                            <div className="mam-section__title-row">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><path d="M9 14l2 2 4-4"/></svg>
+                              <span>Attendance History</span>
+                            </div>
+                          </div>
+                          <div className="mam-section__body">
+                            {/* Stat chips */}
+                            <div className="mam-stat-row">
+                              <div className="mam-stat-chip">
+                                <span className="mam-stat-chip__val">{checkIns.length}</span>
+                                <span className="mam-stat-chip__lbl">Total Visits</span>
+                              </div>
+                              <div className="mam-stat-chip">
+                                <span className="mam-stat-chip__val">
+                                  {checkIns.filter((c: any) => { const d = new Date(c.checkInTime), n = new Date(); return d.getMonth() === n.getMonth() && d.getFullYear() === n.getFullYear() }).length}
                                 </span>
+                                <span className="mam-stat-chip__lbl">This Month</span>
+                              </div>
+                              <div className="mam-stat-chip">
+                                <span className="mam-stat-chip__val">
+                                  {(() => { const durs = checkIns.filter((c: any) => c.checkOutTime).map((c: any) => (new Date(c.checkOutTime).getTime() - new Date(c.checkInTime).getTime()) / 60000); return durs.length > 0 ? `${Math.round(durs.reduce((a: number, b: number) => a + b, 0) / durs.length)}m` : '—' })()}
+                                </span>
+                                <span className="mam-stat-chip__lbl">Avg Duration</span>
                               </div>
                             </div>
 
-                            {/* Subject Row */}
-                            <div className="message-compose__row">
-                              <span className="message-compose__label">Subject:</span>
-                              <input
-                                type="text"
-                                value={messageForm.subject}
-                                onChange={(e) => setMessageForm({ ...messageForm, subject: e.target.value })}
-                                onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                                className="message-compose__input"
-                                placeholder="Enter subject..."
-                              />
-                            </div>
-
-                            {/* Message Body */}
-                            <div className="message-compose__body">
-                              <textarea
-                                value={messageForm.body}
-                                onChange={(e) => setMessageForm({ ...messageForm, body: e.target.value })}
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-                                    e.preventDefault()
-                                    handleSendMessage()
-                                  }
-                                }}
-                                className="message-compose__textarea"
-                                placeholder="Write your message here..."
-                              />
-                              <span className="message-compose__hint">⌘ + Enter to send</span>
-                            </div>
+                            {checkInsLoading ? (
+                              <div className="mam-empty"><p>Loading attendance...</p></div>
+                            ) : checkIns.length === 0 ? (
+                              <div className="mam-empty">
+                                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                <p>No check-in records found</p><span>Check-ins will appear here</span>
+                              </div>
+                            ) : (
+                              <div className="mam-checkin-list">
+                                {checkIns.slice(0, 50).map((ci: any, i: number) => {
+                                  const inTime = new Date(ci.checkInTime)
+                                  const outTime = ci.checkOutTime ? new Date(ci.checkOutTime) : null
+                                  const dur = outTime ? Math.round((outTime.getTime() - inTime.getTime()) / 60000) : null
+                                  return (
+                                    <div key={ci.checkInId || i} className="mam-checkin">
+                                      <div className="mam-checkin__date-col">
+                                        <span className="mam-checkin__weekday">{inTime.toLocaleDateString('en-US', { weekday: 'short' })}</span>
+                                        <span className="mam-checkin__day">{inTime.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                                      </div>
+                                      <div className="mam-checkin__times">
+                                        <span className="mam-checkin__in">↑ {inTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}</span>
+                                        {outTime && <span className="mam-checkin__out">↓ {outTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}</span>}
+                                      </div>
+                                      {dur !== null && <span className="mam-checkin__dur">{dur}m</span>}
+                                      <span className={`mam-checkin__status mam-checkin__status--${(ci.status || 'present').replace(/\s+/g,'-').toLowerCase()}`}>{ci.status || 'Present'}</span>
+                                    </div>
+                                  )
+                                })}
+                              </div>
+                            )}
                           </div>
-                          <div className="form-actions">
-                            <button className="btn btn--primary" onClick={handleSendMessage}>
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <line x1="22" y1="2" x2="11" y2="13" />
-                                <polygon points="22 2 15 22 11 13 2 9 22 2" />
-                              </svg>
-                              Send
-                            </button>
-                          </div>
-                        </motion.div>
-                      )}
+                        </div>
+                      </motion.div>
+                    )}
 
-                      {/* Assigned Trainers Panel */}
-                      {activeTab === "trainers" && (
-                        <motion.div
-                          key="trainers"
-                          className="content-panel"
-                          initial={{ opacity: 0, x: 20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: -20 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          {/* Header Row: Title + Add Button */}
-                          <div className="trainers-header">
-                            <h4 className="trainers-header__title">
-                              Assigned Trainers
-                              <span className="trainers-count">{assignedTrainers.length}</span>
-                            </h4>
-                            <div className="trainers-header__action">
-                              <button
-                                className={`add-trainer-btn ${showTrainerSearch ? 'add-trainer-btn--active' : ''}`}
-                                onClick={() => setShowTrainerSearch(!showTrainerSearch)}
-                              >
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                  <line x1="12" y1="5" x2="12" y2="19" />
-                                  <line x1="5" y1="12" x2="19" y2="12" />
-                                </svg>
+                    {/* ─── TRAINERS TAB ─── */}
+                    {activeTab === 'trainers' && (
+                      <motion.div key="trainers" className="mam-tab"
+                        initial={{ opacity: 0, x: 14 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -14 }}
+                        transition={{ duration: 0.18 }}
+                      >
+                        <div className="mam-section">
+                          <div className="mam-section__head">
+                            <div className="mam-section__title-row">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                              <span>Assigned Trainers</span>
+                              {assignedTrainers.length > 0 && <span className="mam-nav__badge">{assignedTrainers.length}</span>}
+                            </div>
+                            <div style={{ position: 'relative' }}>
+                              <button className={`mam-btn mam-btn--secondary mam-btn--sm ${showTrainerSearch ? 'mam-btn--active' : ''}`}
+                                onClick={() => setShowTrainerSearch(!showTrainerSearch)}>
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                                 Add Trainer
                               </button>
-
-                              {/* Floating Popover Panel */}
                               <AnimatePresence>
                                 {showTrainerSearch && (
-                                  <motion.div
-                                    className="trainer-popover"
-                                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                                    transition={{ duration: 0.15 }}
+                                  <motion.div className="mam-trainer-popover"
+                                    initial={{ opacity: 0, y: -8, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    exit={{ opacity: 0, y: -8, scale: 0.96 }} transition={{ duration: 0.15 }}
                                     onClick={(e) => e.stopPropagation()}
                                   >
-                                    <div className="trainer-popover__header">
+                                    <div className="mam-trainer-popover__head">
                                       <span>Search Trainers</span>
-                                      <button
-                                        className="trainer-popover__close"
-                                        onClick={() => setShowTrainerSearch(false)}
-                                      >
-                                        ×
-                                      </button>
+                                      <button className="mam-trainer-popover__close" onClick={() => setShowTrainerSearch(false)}>×</button>
                                     </div>
-                                    <input
-                                      type="text"
-                                      className="trainer-popover__input"
-                                      placeholder="Type trainer name..."
-                                      value={searchQuery}
+                                    <input type="text" className="mam-input" placeholder="Type name..." value={searchQuery}
                                       onChange={(e) => setSearchQuery(e.target.value)}
-                                      onKeyDown={(e) => e.key === 'Escape' && setShowTrainerSearch(false)}
-                                      autoFocus
-                                    />
-                                    <div className="trainer-popover__results">
-                                      {isSearching && (
-                                        <div className="trainer-popover__loading">Searching...</div>
-                                      )}
-
+                                      onKeyDown={(e) => e.key === 'Escape' && setShowTrainerSearch(false)} autoFocus
+                                      style={{ margin: '8px 12px', width: 'calc(100% - 24px)' }} />
+                                    <div className="mam-trainer-popover__list">
+                                      {isSearching && <div className="mam-trainer-popover__hint">Searching...</div>}
                                       {!isSearching && (() => {
-                                        // MEMOIZED FILTERING: Filter out trainers that are already assigned
-                                        // Using useMemo here would be ideal if this block was its own component, 
-                                        // but for now we rely on the fact that this is fast enough for <1000 items.
-                                        // The LAG issue is likely mostly due to re-renders.
-
-                                        const unassignedTrainers = availableTrainers.filter(
-                                          trainer => !assignedTrainers.some(assigned => assigned.userId === trainer.userId)
-                                        );
-
-                                        if (unassignedTrainers.length === 0) {
-                                          if (availableTrainers.length > 0) {
-                                            return <div className="trainer-popover__empty">All matching trainers are already assigned.</div>;
-                                          } else if (searchQuery.length > 0) {
-                                            return <div className="trainer-popover__empty">No trainers found</div>;
-                                          }
-                                          return null;
-                                        }
-
-                                        return unassignedTrainers.map((trainer) => (
-                                          <div
-                                            key={trainer.userId}
-                                            className="trainer-popover__item"
-                                            onClick={() => {
-                                              handleAddTrainer(trainer)
-                                              // Close immediately - optimistically handled
-                                            }}
-                                          >
-                                            <div className="trainer-popover__avatar">
-                                              {trainer.fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
-                                            </div>
-                                            <div className="trainer-popover__info">
-                                              <span className="trainer-popover__name">{trainer.fullName}</span>
-                                              <span className="trainer-popover__email">{trainer.email}</span>
+                                        const unassigned = availableTrainers.filter(t => !assignedTrainers.some(a => a.userId === t.userId))
+                                        if (unassigned.length === 0) return <div className="mam-trainer-popover__hint">{availableTrainers.length > 0 ? 'All matching trainers are assigned.' : searchQuery ? 'No trainers found' : 'Start typing to search'}</div>
+                                        return unassigned.map(trainer => (
+                                          <div key={trainer.userId} className="mam-trainer-popover__item" onClick={() => handleAddTrainer(trainer)}>
+                                            <div className="mam-trainer-popover__avatar">{trainer.fullName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0,2)}</div>
+                                            <div>
+                                              <div className="mam-trainer-popover__name">{trainer.fullName}</div>
+                                              <div className="mam-trainer-popover__email">{trainer.email}</div>
                                             </div>
                                           </div>
-                                        ));
+                                        ))
                                       })()}
                                     </div>
                                   </motion.div>
@@ -1618,243 +1552,118 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
                               </AnimatePresence>
                             </div>
                           </div>
-
-                          {/* Scrollable Trainers List */}
-                          <div className="content-panel__body">
-                            <div className="trainers-list">
-                              {assignedTrainers.length === 0 ? (
-                                <div className="empty-state">
-                                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                                    <circle cx="9" cy="7" r="4" />
-                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                                  </svg>
-                                  <p>No trainers assigned yet</p>
-                                  <span>Click "Add Trainer" to assign one</span>
-                                </div>
-                              ) : (
-                                assignedTrainers.map((trainer) => (
-                                  <div key={trainer.userId} className="trainer-item">
-                                    <div className="trainer-item__info">
-                                      <div className="trainer-item__avatar">
-                                        {trainer.fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
-                                      </div>
-                                      <div>
-                                        <span className="trainer-item__name">{trainer.fullName}</span>
-                                        <span className="trainer-item__role">Personal Trainer</span>
-                                      </div>
-                                    </div>
-                                    <button
-                                      className="trainer-item__remove"
-                                      onClick={() => handleRemoveTrainer(trainer.userId)}
-                                    >
-                                      Remove
-                                    </button>
-                                  </div>
-                                ))
-                              )}
-                            </div>
-                          </div>
-                        </motion.div>
-                      )}
-
-                      {/* Delete Profile Panel */}
-                      {activeTab === "delete" && (
-                        <motion.div
-                          key="delete"
-                          className="content-panel content-panel--danger"
-                          initial={{ opacity: 0, x: 20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: -20 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          <h4 className="content-panel__title content-panel__title--danger">Delete Profile</h4>
-                          <div className="content-panel__body">
-                            <div className="delete-warning">
-                              <div className="delete-warning__icon">
-                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                  <circle cx="12" cy="12" r="10" />
-                                  <line x1="12" y1="8" x2="12" y2="12" />
-                                  <line x1="12" y1="16" x2="12.01" y2="16" />
-                                </svg>
+                          <div className="mam-section__body">
+                            {assignedTrainers.length === 0 ? (
+                              <div className="mam-empty">
+                                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                <p>No trainers assigned</p><span>Click "Add Trainer" to assign one</span>
                               </div>
-                              <h5>Are you sure?</h5>
-                              <p>You are about to permanently delete <strong>{localMember.fullName}</strong>.</p>
-                              <p className="delete-warning__note">This action cannot be undone.</p>
+                            ) : (
+                              <div className="mam-trainer-list">
+                                {assignedTrainers.map(trainer => (
+                                  <div key={trainer.userId} className="mam-trainer">
+                                    <div className="mam-trainer__avatar">{trainer.fullName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0,2)}</div>
+                                    <div className="mam-trainer__info">
+                                      <span className="mam-trainer__name">{trainer.fullName}</span>
+                                      <span className="mam-trainer__role">Personal Trainer</span>
+                                    </div>
+                                    <button className="mam-btn mam-btn--ghost mam-btn--sm mam-btn--danger" onClick={() => handleRemoveTrainer(trainer.userId)}>Remove</button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {/* ─── MESSAGE TAB ─── */}
+                    {activeTab === 'message' && (
+                      <motion.div key="message" className="mam-tab"
+                        initial={{ opacity: 0, x: 14 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -14 }}
+                        transition={{ duration: 0.18 }}
+                      >
+                        <div className="mam-section">
+                          <div className="mam-section__head">
+                            <div className="mam-section__title-row">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                              <span>Send Message</span>
                             </div>
-                            <div className="delete-actions">
-                              <button className="btn btn--secondary" onClick={() => setActiveTab("profile")}>
-                                Cancel
-                              </button>
-                              <button
-                                className="btn btn--danger"
-                                onClick={handleDeleteMember}
-                                disabled={isDeleting}
-                              >
-                                {isDeleting ? 'Deleting...' : 'Delete Member'}
+                          </div>
+                          <div className="mam-section__body">
+                            <div className="mam-compose">
+                              <div className="mam-compose__row">
+                                <span className="mam-compose__lbl">To</span>
+                                <span className="mam-compose__recipient">
+                                  <span className="mam-compose__tag">{localMember.fullName} <span className="mam-compose__email">&lt;{localMember.email}&gt;</span></span>
+                                </span>
+                              </div>
+                              <div className="mam-compose__row">
+                                <span className="mam-compose__lbl">Subject</span>
+                                <input type="text" value={messageForm.subject}
+                                  onChange={(e) => setMessageForm({ ...messageForm, subject: e.target.value })}
+                                  onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                                  className="mam-compose__input" placeholder="Message subject..." />
+                              </div>
+                              <div className="mam-compose__body-wrap">
+                                <textarea value={messageForm.body}
+                                  onChange={(e) => setMessageForm({ ...messageForm, body: e.target.value })}
+                                  onKeyDown={(e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); handleSendMessage() } }}
+                                  className="mam-compose__textarea" placeholder="Write your message..." />
+                                <span className="mam-compose__hint">⌘ + Enter to send</span>
+                              </div>
+                            </div>
+                            <div className="mam-section__foot">
+                              <button className="mam-btn mam-btn--primary" onClick={handleSendMessage} disabled={!messageForm.body.trim()}>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                                Send Message
                               </button>
                             </div>
                           </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Sub-modals remain the same but with loading states */}
-              {/* Edit Profile Sub-Modal */}
-              <AnimatePresence>
-                {activeSubModal === "edit" && (
-                  <motion.div
-                    className="sub-modal-overlay"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    onClick={() => setActiveSubModal(null)}
-                  >
-                    <motion.div
-                      className="sub-modal"
-                      onClick={(e) => e.stopPropagation()}
-                      initial={{ opacity: 0, scale: 0.95, x: 20 }}
-                      animate={{ opacity: 1, scale: 1, x: 0 }}
-                      exit={{ opacity: 0, scale: 0.95, x: 20 }}
-                    >
-                      <div className="sub-modal__header">
-                        <h3>Edit Profile: {member.fullName}</h3>
-                        <button className="sub-modal__close" onClick={() => setActiveSubModal(null)}>
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <line x1="18" y1="6" x2="6" y2="18" />
-                            <line x1="6" y1="6" x2="18" y2="18" />
-                          </svg>
-                        </button>
-                      </div>
-                      <div className="sub-modal__body">
-                        <div className="form-group">
-                          <label>Full Name</label>
-                          <input
-                            type="text"
-                            value={editForm.fullName}
-                            onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })}
-                            className="form-input"
-                            disabled={isLoading('save-profile')}
-                          />
                         </div>
-                        <div className="form-group">
-                          <label>Email</label>
-                          <input
-                            type="email"
-                            value={editForm.email}
-                            onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                            className="form-input"
-                            disabled={isLoading('save-profile')}
-                          />
+                      </motion.div>
+                    )}
+
+                    {/* ─── DELETE TAB ─── */}
+                    {activeTab === 'delete' && (
+                      <motion.div key="delete" className="mam-tab"
+                        initial={{ opacity: 0, x: 14 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -14 }}
+                        transition={{ duration: 0.18 }}
+                      >
+                        <div className="mam-danger-zone">
+                          <div className="mam-danger-zone__icon">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                            </svg>
+                          </div>
+                          <h4 className="mam-danger-zone__title">Delete Member Profile</h4>
+                          <p className="mam-danger-zone__body">
+                            You are about to permanently delete <strong>{localMember.fullName}</strong>'s profile, including all payment history, attendance records, and personal data.
+                          </p>
+                          <p className="mam-danger-zone__warning">This action is irreversible and cannot be undone.</p>
+                          <div className="mam-danger-zone__actions">
+                            <button className="mam-btn mam-btn--secondary" onClick={() => setActiveTab('profile')}>
+                              Cancel, keep member
+                            </button>
+                            <button className="mam-btn mam-btn--danger" onClick={handleDeleteMember} disabled={isDeleting}>
+                              {isDeleting
+                                ? <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mam-spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Deleting...</>
+                                : <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Permanently Delete</>}
+                            </button>
+                          </div>
                         </div>
-                        <div className="form-group">
-                          <label>Phone</label>
-                          <input
-                            type="tel"
-                            value={editForm.phone}
-                            onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-                            className="form-input"
-                            disabled={isLoading('save-profile')}
-                          />
-                        </div>
-                      </div>
-                      <div className="sub-modal__footer">
-                        <button
-                          className="btn btn--secondary"
-                          onClick={() => setActiveSubModal(null)}
-                          disabled={isLoading('save-profile')}
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          className="btn btn--primary"
-                          onClick={handleSaveProfile}
-                          disabled={isLoading('save-profile')}
-                        >
-                          {isLoading('save-profile') ? 'Saving...' : 'Save Changes'}
-                        </button>
-                      </div>
-                    </motion.div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                      </motion.div>
+                    )}
 
-              {/* Other sub-modals (renew, message) remain the same */}
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-          {/* Legacy Renew Sub-Modal removed - using tiered plan tab instead */}
-
-        {/* Message Member Sub-Modal */}
-        <AnimatePresence>
-          {
-            activeSubModal === "message" && (
-              <motion.div
-                className="sub-modal-overlay"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={() => setActiveSubModal(null)}
-              >
-                <motion.div
-                  className="sub-modal"
-                  onClick={(e) => e.stopPropagation()}
-                  initial={{ opacity: 0, scale: 0.95, x: 20 }}
-                  animate={{ opacity: 1, scale: 1, x: 0 }}
-                  exit={{ opacity: 0, scale: 0.95, x: 20 }}
-                >
-                  <div className="sub-modal__header">
-                    <h3>Message Member: {member.fullName}</h3>
-                    <button className="sub-modal__close" onClick={() => setActiveSubModal(null)}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <line x1="18" y1="6" x2="6" y2="18" />
-                        <line x1="6" y1="6" x2="18" y2="18" />
-                      </svg>
-                    </button>
-                  </div>
-                  <div className="sub-modal__body">
-                    <div className="form-group">
-                      <label>Subject</label>
-                      <input
-                        type="text"
-                        value={messageForm.subject}
-                        onChange={(e) => setMessageForm({ ...messageForm, subject: e.target.value })}
-                        className="form-input"
-                        placeholder="Enter subject..."
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>Message Body</label>
-                      <textarea
-                        value={messageForm.body}
-                        onChange={(e) => setMessageForm({ ...messageForm, body: e.target.value })}
-                        className="form-textarea"
-                        rows={6}
-                        placeholder="Write your message..."
-                      />
-                    </div>
-                  </div>
-                  <div className="sub-modal__footer">
-                    <button className="btn btn--primary" onClick={handleSendMessage}>
-                      Send Message
-                    </button>
-                    <button className="btn btn--secondary" onClick={() => setActiveSubModal(null)}>
-                      Cancel
-                    </button>
-                  </div>
-                </motion.div>
-              </motion.div>
-            )
-          }
-        </AnimatePresence >
-      </Editable>
-    </>
-
+                  </AnimatePresence>
+                </div>{/* /mam-panel */}
+              </div>{/* /mam-body */}
+            </motion.div>{/* /mam */}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </Editable>
+  )
 
   if (typeof document === 'undefined') return null
 

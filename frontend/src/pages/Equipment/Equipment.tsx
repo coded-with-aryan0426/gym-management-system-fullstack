@@ -277,45 +277,27 @@ const EquipmentPage: React.FC = () => {
                             </button>
                         ))}
                     </div>
-
-                    <div className="status-filters">
-                        {statusFilters.map((sf) => (
-                            <button
-                                key={sf.key}
-                                onClick={() => setActiveStatusFilter(sf.key)}
-                                className={`status-chip ${activeStatusFilter === sf.key ? 'active' : ''}`}
-                            >
-                                {sf.key !== 'ALL' && <span className="chip-dot" style={{ backgroundColor: sf.color }} />}
-                                {sf.label}
-                                <span className="chip-count">{sf.count}</span>
-                            </button>
-                        ))}
-                    </div>
+                    {!loading && (
+                        <span className="results-count">
+                            Showing <strong>{filteredList.length}</strong> of <strong>{equipmentList.length}</strong> equipment
+                            {activeFilterCount > 0 && (
+                                <>
+                                    <span className="active-filters-count">
+                                        <Filter size={8} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 2 }} />
+                                        {activeFilterCount}
+                                    </span>
+                                    <button
+                                        onClick={clearAllFilters}
+                                        className="ml-2 text-[11px] font-semibold text-[var(--accent-primary)] hover:underline cursor-pointer bg-transparent border-none"
+                                    >
+                                        Clear filters
+                                    </button>
+                                </>
+                            )}
+                        </span>
+                    )}
                 </div>
             </div>
-
-            {/* Results Count */}
-            {!loading && (
-                <div className="results-bar">
-                    <span className="results-count">
-                        Showing <strong>{filteredList.length}</strong> of <strong>{equipmentList.length}</strong> equipment
-                        {activeFilterCount > 0 && (
-                            <>
-                                <span className="active-filters-count">
-                                    <Filter size={8} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 2 }} />
-                                    {activeFilterCount}
-                                </span>
-                                <button
-                                    onClick={clearAllFilters}
-                                    className="ml-2 text-[11px] font-semibold text-[var(--accent-primary)] hover:underline cursor-pointer bg-transparent border-none"
-                                >
-                                    Clear filters
-                                </button>
-                            </>
-                        )}
-                    </span>
-                </div>
-            )}
 
             {/* Grid Content */}
             <AnimatePresence mode="wait">

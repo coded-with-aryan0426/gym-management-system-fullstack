@@ -1,14 +1,15 @@
 import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
-import { FiUsers, FiUserCheck, FiUser, FiUserPlus, FiSearch, FiFilter, FiRefreshCw, FiShield, FiClock } from 'react-icons/fi';
+import { useSearchParams } from 'react-router-dom';
+import { FiUsers, FiUserCheck, FiUserPlus, FiSearch, FiFilter, FiRefreshCw, FiShield, FiClock, FiX } from 'react-icons/fi';
 import { showToast } from '../../utils/showToast';
-import { Badge, getStatusVariant, Avatar, DataTable, type Column, Button } from '../../components/ui';
+import { Badge, getStatusVariant, Avatar, DataTable, type Column } from '../../components/ui';
 import { ActionMenuButton } from '../../components/shared';
 import { useClickOutside } from '../../hooks';
 import EnhancedStaffActionModal from '../../components/StaffActionModal/EnhancedStaffActionModal';
 import CreateActionModal from '../../components/CreateActionModal/CreateActionModal';
 import api from '../../services/api';
 import type { Staff as StaffType } from '../../types/user';
+import '../../styles/page-common.css';
 import './Staff.css';
 
 type StatusFilter = 'all' | 'active' | 'inactive';
@@ -37,34 +38,72 @@ const ROLE_COLORS: Record<string, string> = {
   STAFF: '#6b7280',
 };
 
+/* Dynamic row count based on available viewport height */
+const useAutoPageSize = (headerRef: React.RefObject<HTMLElement | null>, minRows: number = 5, maxRows: number = 50) => {
+  const [pageSize, setPageSize] = useState(10);
+
+  useEffect(() => {
+    const calculate = () => {
+      const headerHeight = headerRef.current?.getBoundingClientRect().bottom ?? 160;
+      const viewportHeight = window.innerHeight;
+      const paginationHeight = 48;
+      const tableHeaderHeight = 36;
+      const bufferPadding = 24;
+      const availableHeight = viewportHeight - headerHeight - paginationHeight - tableHeaderHeight - bufferPadding;
+      const rowHeight = window.innerWidth < 768 ? 80 : 44;
+      const rows = Math.max(minRows, Math.min(maxRows, Math.floor(availableHeight / rowHeight)));
+      setPageSize(rows);
+    };
+
+    calculate();
+    window.addEventListener('resize', calculate);
+    return () => window.removeEventListener('resize', calculate);
+  }, [headerRef, minRows, maxRows]);
+
+  return pageSize;
+};
+
 const Staff: React.FC = () => {
-  const navigate = useNavigate();
   const [staff, setStaff] = useState<StaffType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState<StaffType | null>(null);
   const [isActionModalOpen, setIsActionModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [activeStatusFilter, setActiveStatusFilter] = useState<StatusFilter>('all');
 
+  const headerRef = useRef<HTMLElement>(null);
+  const autoPageSize = useAutoPageSize(headerRef);
+
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
+  // Sync autoPageSize → pageSize
+  useEffect(() => {
+    setPageSize(autoPageSize);
+    setCurrentPage(0);
+  }, [autoPageSize]);
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
 
   const filterRef = useRef<HTMLDivElement>(null);
   useClickOutside(filterRef as React.RefObject<HTMLElement>, () => setIsFilterOpen(false), isFilterOpen);
 
   const [searchParams] = useSearchParams();
-  const [filters, setFilters] = useState({ role: "", status: "" });
+  const [filters, setFilters] = useState({ role: '', status: '' });
+
+  // Global stats across all pages (like Trainers page)
+  const [globalTotalCount, setGlobalTotalCount] = useState<number | null>(null);
 
   const stats = useMemo(() => {
     const activeCount = staff.filter(s => (s as any).status === 'Active' || !(s as any).status).length;
     const inactiveCount = staff.filter(s => (s as any).status === 'Inactive').length;
-    return { total: totalCount, activeCount, inactiveCount };
-  }, [staff, totalCount]);
+    const total = globalTotalCount ?? totalCount;
+    return { total, activeCount, inactiveCount };
+  }, [staff, totalCount, globalTotalCount]);
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(searchQuery), 300);
@@ -90,13 +129,24 @@ const Staff: React.FC = () => {
     }
   }, [currentPage, pageSize, debouncedSearch, filters.role]);
 
+  // Load total count for stat cards (unfiltered)
+  const loadGlobalCount = useCallback(async () => {
+    try {
+      const response = await api.getStaffPaginated(0, 1);
+      setGlobalTotalCount(response.totalCount);
+    } catch {
+      setGlobalTotalCount(null);
+    }
+  }, []);
+
   useEffect(() => { loadStaffPaginated(); }, [loadStaffPaginated]);
+  useEffect(() => { loadGlobalCount(); }, [loadGlobalCount]);
   useEffect(() => { setCurrentPage(0); }, [debouncedSearch, filters, activeStatusFilter]);
 
   const totalPages = useMemo(() => Math.ceil(totalCount / pageSize), [totalCount, pageSize]);
   const activeFilterCount = [filters.role, filters.status].filter(Boolean).length;
 
-  const handleResetFilters = () => { setFilters({ role: "", status: "" }); setActiveStatusFilter('all'); };
+  const handleResetFilters = () => { setFilters({ role: '', status: '' }); setActiveStatusFilter('all'); };
   const handleFilterChange = (key: string, value: string) => setFilters(prev => ({ ...prev, [key]: value }));
 
   useEffect(() => {
@@ -130,6 +180,12 @@ const Staff: React.FC = () => {
     }
   };
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await Promise.all([loadStaffPaginated(), loadGlobalCount()]);
+    setTimeout(() => setRefreshing(false), 600);
+  };
+
   const getStatus = (s: StaffType) => (s as any).status || 'Active';
 
   const filteredStaff = useMemo(() => {
@@ -151,7 +207,7 @@ const Staff: React.FC = () => {
       key: 'member', header: 'Staff Member', width: 'auto',
       render: (s) => (
         <div className="staff-cell" onClick={(e) => { e.stopPropagation(); handleActionClick(s); }} style={{ cursor: 'pointer' }}>
-          <Avatar name={s.fullName} size="md" />
+          <Avatar name={s.fullName} size="sm" userId={s.userId} />
           <div className="staff-cell__info">
             <span className="staff-name">{s.fullName}</span>
             <span className="staff-email">{(s as any).jobTitle || s.email}</span>
@@ -210,105 +266,118 @@ const Staff: React.FC = () => {
 
   return (
     <div className="pg-page">
-      <header className="pg-header">
-        <div className="pg-header__row-1">
-          <div className="pg-header__title-group">
-            <div className="pg-header__icon"><FiShield size={18} /></div>
-            <div>
-              <h1 className="pg-header__title">Staff Directory</h1>
-              <span className="pg-header__subtitle">{stats.total} gym operations personnel</span>
-            </div>
-          </div>
-
-          <div className="pg-stats">
-            <button className={`pg-stat-card ${activeStatusFilter === 'all' ? 'pg-stat-card--active' : ''}`} onClick={() => setActiveStatusFilter('all')}>
-              <div className="pg-stat-card__icon pg-stat-card__icon--total"><FiUsers size={14} /></div>
-              <div className="pg-stat-card__data">
-                <span className="pg-stat-card__value">{stats.total}</span>
-                <span className="pg-stat-card__label">Total</span>
-              </div>
-            </button>
-            <button className={`pg-stat-card ${activeStatusFilter === 'active' ? 'pg-stat-card--active' : ''}`} onClick={() => setActiveStatusFilter('active')}>
-              <div className="pg-stat-card__icon pg-stat-card__icon--active"><FiUserCheck size={14} /></div>
-              <div className="pg-stat-card__data">
-                <span className="pg-stat-card__value pg-stat-card__value--green">{stats.activeCount}</span>
-                <span className="pg-stat-card__label">Active</span>
-              </div>
-            </button>
-            <button className={`pg-stat-card ${activeStatusFilter === 'inactive' ? 'pg-stat-card--active' : ''}`} onClick={() => setActiveStatusFilter('inactive')}>
-              <div className="pg-stat-card__icon pg-stat-card__icon--inactive"><FiUser size={14} /></div>
-              <div className="pg-stat-card__data">
-                <span className="pg-stat-card__value pg-stat-card__value--red">{stats.inactiveCount}</span>
-                <span className="pg-stat-card__label">Inactive</span>
-              </div>
-            </button>
-          </div>
-
-          <div className="pg-header__actions">
-            <button className="pg-btn pg-btn--primary" onClick={() => setIsCreateModalOpen(true)}>
-              <FiUserPlus size={14} /><span>Add Staff</span>
-            </button>
+      {/* === Header === */}
+      <header className="pg-header pg-header--single-line" ref={headerRef}>
+        {/* Title */}
+        <div className="pg-header__title-group">
+          <div className="pg-header__icon"><FiShield size={18} /></div>
+          <div>
+            <h1 className="pg-header__title">Staff Directory</h1>
+            <span className="pg-header__subtitle">{stats.total} operations personnel</span>
           </div>
         </div>
 
-        <div className="pg-header__row-2">
-          <div className="pg-tabs">
-            <button className={`pg-tab ${activeStatusFilter === 'all' ? 'pg-tab--active' : ''}`} onClick={() => setActiveStatusFilter('all')}>
-              All<span className="pg-tab__count">{stats.total}</span>
-            </button>
-            <button className={`pg-tab ${activeStatusFilter === 'active' ? 'pg-tab--active' : ''}`} onClick={() => setActiveStatusFilter('active')}>
-              Active<span className="pg-tab__count pg-tab__count--active">{stats.activeCount}</span>
-            </button>
-            <button className={`pg-tab ${activeStatusFilter === 'inactive' ? 'pg-tab--active' : ''}`} onClick={() => setActiveStatusFilter('inactive')}>
-              Inactive<span className="pg-tab__count pg-tab__count--muted">{stats.inactiveCount}</span>
-            </button>
-          </div>
-
-          <div className="pg-header__right">
-            <div className="pg-search">
-              <FiSearch className="pg-search__icon" />
-              <input type="text" placeholder="Search by name, job title..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pg-search__input" />
-              {searchQuery && <button className="pg-search__clear" onClick={() => setSearchQuery('')}>&times;</button>}
+        {/* Stat Cards — double as filter buttons */}
+        <div className="pg-stats">
+          <button
+            className={`pg-stat-card ${activeStatusFilter === 'all' ? 'pg-stat-card--active' : ''}`}
+            onClick={() => setActiveStatusFilter('all')}
+          >
+            <div className="pg-stat-card__icon pg-stat-card__icon--total"><FiUsers size={14} /></div>
+            <div className="pg-stat-card__data">
+              <span className="pg-stat-card__value">{stats.total}</span>
+              <span className="pg-stat-card__label">Total</span>
             </div>
+          </button>
+          <button
+            className={`pg-stat-card ${activeStatusFilter === 'active' ? 'pg-stat-card--active' : ''}`}
+            onClick={() => setActiveStatusFilter('active')}
+          >
+            <div className="pg-stat-card__icon pg-stat-card__icon--active"><FiUserCheck size={14} /></div>
+            <div className="pg-stat-card__data">
+              <span className="pg-stat-card__value pg-stat-card__value--green">{stats.activeCount}</span>
+              <span className="pg-stat-card__label">Active</span>
+            </div>
+          </button>
+          <button
+            className={`pg-stat-card ${activeStatusFilter === 'inactive' ? 'pg-stat-card--active' : ''}`}
+            onClick={() => setActiveStatusFilter('inactive')}
+          >
+            <div className="pg-stat-card__icon pg-stat-card__icon--inactive"><FiUserPlus size={14} /></div>
+            <div className="pg-stat-card__data">
+              <span className="pg-stat-card__value pg-stat-card__value--red">{stats.inactiveCount}</span>
+              <span className="pg-stat-card__label">Inactive</span>
+            </div>
+          </button>
+        </div>
 
-            <div className="pg-filter-wrap" ref={filterRef}>
-              <button className={`pg-btn pg-btn--icon ${isFilterOpen ? 'pg-btn--active' : ''} ${activeFilterCount > 0 ? 'pg-btn--has-filter' : ''}`} onClick={() => setIsFilterOpen(!isFilterOpen)}>
-                <FiFilter size={14} />
-                {activeFilterCount > 0 && <span className="pg-btn__badge">{activeFilterCount}</span>}
-              </button>
+        {/* Search */}
+        <div className="pg-search">
+          <FiSearch className="pg-search__icon" />
+          <input
+            type="text"
+            placeholder="Search staff..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pg-search__input"
+          />
+          {searchQuery && (
+            <button className="pg-search__clear" onClick={() => setSearchQuery('')}>
+              <FiX size={14} />
+            </button>
+          )}
+        </div>
 
-              {isFilterOpen && (
-                <div className="pg-filter-dropdown">
-                  <div className="pg-filter-dropdown__header">
-                    <span>Filters</span>
-                    {activeFilterCount > 0 && <button className="pg-filter-dropdown__clear" onClick={handleResetFilters}>Clear</button>}
-                  </div>
-                  <div className="pg-filter-dropdown__body">
-                    <div className="pg-filter-dropdown__row">
-                      <label className="pg-filter-dropdown__label">Department</label>
-                      <select className="pg-filter-dropdown__select" value={filters.role} onChange={(e) => handleFilterChange("role", e.target.value)}>
-                        <option value="">All Departments</option>
-                        <option value="RECEPTIONIST">Reception</option>
-                        <option value="FLOOR_MANAGER">Floor Management</option>
-                        <option value="MAINTENANCE">Maintenance</option>
-                        <option value="CLEANING">Housekeeping</option>
-                        <option value="OPERATIONS">Operations</option>
-                        <option value="SALES">Sales</option>
-                        <option value="ADMIN">Administration</option>
-                      </select>
-                    </div>
+        {/* Filter + Refresh + Add */}
+        <div className="pg-header__actions">
+          <div className="pg-filter-wrap" ref={filterRef}>
+            <button
+              className={`pg-btn pg-btn--icon ${isFilterOpen ? 'pg-btn--active' : ''} ${activeFilterCount > 0 ? 'pg-btn--has-filter' : ''}`}
+              onClick={() => setIsFilterOpen(!isFilterOpen)}
+            >
+              <FiFilter size={14} />
+              {activeFilterCount > 0 && <span className="pg-btn__badge">{activeFilterCount}</span>}
+            </button>
+            {isFilterOpen && (
+              <div className="pg-filter-dropdown">
+                <div className="pg-filter-dropdown__header">
+                  <span>Filters</span>
+                  {activeFilterCount > 0 && <button className="pg-filter-dropdown__clear" onClick={handleResetFilters}>Clear</button>}
+                </div>
+                <div className="pg-filter-dropdown__body">
+                  <div className="pg-filter-dropdown__row">
+                    <label className="pg-filter-dropdown__label">Dept</label>
+                    <select className="pg-filter-dropdown__select" value={filters.role} onChange={(e) => handleFilterChange('role', e.target.value)}>
+                      <option value="">All Departments</option>
+                      <option value="RECEPTIONIST">Reception</option>
+                      <option value="FLOOR_MANAGER">Floor Management</option>
+                      <option value="MAINTENANCE">Maintenance</option>
+                      <option value="CLEANING">Housekeeping</option>
+                      <option value="OPERATIONS">Operations</option>
+                      <option value="SALES">Sales</option>
+                      <option value="ADMIN">Administration</option>
+                    </select>
                   </div>
                 </div>
-              )}
-            </div>
-
-            <button className="pg-btn pg-btn--icon" onClick={() => loadStaffPaginated()} title="Refresh">
-              <FiRefreshCw size={14} />
-            </button>
+              </div>
+            )}
           </div>
+
+          <button
+            className={`pg-btn pg-btn--icon ${refreshing ? 'pg-btn--spin' : ''}`}
+            onClick={handleRefresh}
+            title="Refresh"
+          >
+            <FiRefreshCw size={14} />
+          </button>
+
+          <button className="pg-btn pg-btn--primary" onClick={() => setIsCreateModalOpen(true)}>
+            <FiUserPlus size={14} /><span>Add Staff</span>
+          </button>
         </div>
       </header>
 
+      {/* === Active Filter Chips === */}
       {activeFilterCount > 0 && (
         <div className="pg-chips">
           {filters.role && (
@@ -321,14 +390,17 @@ const Staff: React.FC = () => {
         </div>
       )}
 
-      <div className="pg-table-wrap staff-table-wrapper">
+      {/* === Table === */}
+      <div className="pg-table-wrap staff-table-wrap">
         <DataTable
           columns={columns}
           data={filteredStaff}
           keyExtractor={(s) => s.userId}
           loading={loading}
-          emptyMessage={searchQuery || activeFilterCount > 0 ? "No staff match your filters" : "No staff found. Add your first staff member!"}
+          emptyMessage={searchQuery || activeFilterCount > 0 ? 'No staff match your filters' : 'No staff found. Add your first staff member!'}
           onRowClick={(s: StaffType) => handleActionClick(s)}
+          compact
+          stickyHeader
           pagination={{
             currentPage, totalPages, totalCount, pageSize,
             onPageChange: setCurrentPage,
@@ -338,33 +410,39 @@ const Staff: React.FC = () => {
             const role = (s as any).staffRole || 'STAFF';
             const status = getStatus(s);
             return (
-              <div className="mobile-card">
-                <div className="mobile-card__header">
-                  <div className="mobile-card__user">
-                    <Avatar name={s.fullName} size="md" />
-                    <div className="mobile-card__info">
-                      <span className="mobile-card__name">{s.fullName}</span>
-                      <span className="mobile-card__email">{(s as any).jobTitle || s.email}</span>
-                    </div>
+              <div className="staff-mobile-card">
+                <div className="staff-mobile-card__top">
+                  <Avatar name={s.fullName} size="md" userId={s.userId} />
+                  <div className="staff-mobile-card__info">
+                    <span className="staff-mobile-card__name">{s.fullName}</span>
+                    <span
+                      className="staff-mobile-card__role"
+                      style={{ color: ROLE_COLORS[role] || '#6b7280' }}
+                    >
+                      {ROLE_LABELS[role] || role}
+                    </span>
                   </div>
                   <Badge variant={getStatusVariant(status)}>{status}</Badge>
                 </div>
-                <div className="mobile-card__details">
-                  <div className="mobile-card__detail">
-                    <span className="mobile-card__detail-label">Role</span>
-                    <span className="mobile-card__detail-value">{ROLE_LABELS[role] || role}</span>
-                  </div>
-                  <div className="mobile-card__detail">
-                    <span className="mobile-card__detail-label">Department</span>
-                    <span className="mobile-card__detail-value">{(s as any).department || '—'}</span>
-                  </div>
-                  <div className="mobile-card__detail">
-                    <span className="mobile-card__detail-label">Shift</span>
-                    <span className="mobile-card__detail-value">{(s as any).shiftTiming || '—'}</span>
-                  </div>
-                </div>
-                <div className="mobile-card__actions">
-                  <ActionMenuButton onClick={(e) => { e.stopPropagation(); handleActionClick(s); }} />
+                <div className="staff-mobile-card__details">
+                  {(s as any).department && (
+                    <div className="staff-mobile-card__detail">
+                      <span className="staff-mobile-card__detail-label">Dept</span>
+                      <span className="staff-mobile-card__detail-value">{(s as any).department}</span>
+                    </div>
+                  )}
+                  {(s as any).shiftTiming && (
+                    <div className="staff-mobile-card__detail">
+                      <FiClock size={11} style={{ opacity: 0.5, flexShrink: 0 }} />
+                      <span className="staff-mobile-card__detail-value">{(s as any).shiftTiming}</span>
+                    </div>
+                  )}
+                  {(s as any).employeeIdCode && (
+                    <div className="staff-mobile-card__detail">
+                      <span className="staff-mobile-card__detail-label">ID</span>
+                      <span className="staff-mobile-card__detail-value staff-mobile-card__detail-value--mono">{(s as any).employeeIdCode}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             );
@@ -382,7 +460,7 @@ const Staff: React.FC = () => {
 
       <CreateActionModal
         isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
+        onClose={() => { setIsCreateModalOpen(false); loadStaffPaginated(); }}
         initialView="staffForm"
       />
     </div>

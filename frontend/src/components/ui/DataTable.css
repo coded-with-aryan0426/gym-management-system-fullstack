@@ -30,9 +30,9 @@
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
 }
 
-.data-table__th {
-  padding: 14px 16px;
-  text-align: left;
+  .data-table__th {
+    padding: 5px 16px;
+  text-align: center;
   font-size: 11px;
   font-weight: 700;
   color: var(--text-secondary);
@@ -107,12 +107,14 @@
 }
 
 .data-table__td {
-  padding: 10px 16px;
-  font-size: 13px;
-  color: var(--text-primary);
-  vertical-align: middle;
-  line-height: 1.4;
-}
+      padding: 10px 16px;
+      font-size: 13px;
+      color: var(--text-primary);
+      vertical-align: middle;
+      line-height: 1.4;
+      text-align: center;
+      display: table-cell;
+    }
 
 /* Alternating rows - subtle zebra striping */
 .data-table__row:nth-child(even) {
@@ -451,7 +453,9 @@
 
 @media (max-width: 768px) {
 
-  .data-table__th,
+  .data-table__th {
+    padding: 5px 12px;
+  }
   .data-table__td {
     padding: 10px 12px;
   }
@@ -583,7 +587,16 @@
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
 }
 
-/* Hide checkbox until hover (when enabled) */
+/* selectMode: checkbox column is always fully visible when data-table--selectable */
+.data-table--selectable .data-table__th--checkbox .data-table__checkbox,
+.data-table--selectable .data-table__td--checkbox .data-table__checkbox {
+  opacity: 1;
+  transform: scale(1);
+  transition: all 0.15s ease;
+}
+
+/* Legacy hide-until-hover (kept for backwards compat) */
+.data-table--hide-checkbox .data-table__th--checkbox .data-table__checkbox,
 .data-table--hide-checkbox .data-table__td--checkbox .data-table__checkbox {
   opacity: 0;
   transform: scale(0.8);
@@ -597,9 +610,9 @@
   transform: scale(1);
 }
 
-/* Always show header checkbox when any row is selected */
-.data-table--has-selection .data-table__th--checkbox .data-table__checkbox {
+.data-table--has-selection.data-table--hide-checkbox .data-table__th--checkbox .data-table__checkbox {
   opacity: 1;
+  transform: scale(1);
 }
 
 /* Selected Row State */
@@ -747,10 +760,124 @@
 }
 
 /* ============================================================================
+   Select-Toggle Column (far-right "Select" button in table header)
+   ============================================================================ */
+.data-table__th--select-toggle {
+  text-align: right;
+  padding-right: 12px;
+  white-space: nowrap;
+  border-left: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.data-table__td--select-toggle {
+  border-left: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.dt-select-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  background: rgba(99, 102, 241, 0.08);
+  color: #818cf8;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.12s;
+  white-space: nowrap;
+}
+
+.dt-select-toggle-btn:hover {
+  background: rgba(99, 102, 241, 0.18);
+  border-color: rgba(99, 102, 241, 0.6);
+  transform: translateY(-1px);
+}
+
+.dt-select-toggle-btn--active {
+  background: rgba(99, 102, 241, 0.2);
+  border-color: #818cf8;
+  color: #a5b4fc;
+}
+
+.dt-select-toggle-btn--active:hover {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #fca5a5;
+}
+
+/* Actions cell in checkbox mode */
+.pl-actions.pl-actions--checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.data-table__td:has(.pl-user-cell) {
+  text-align: left;
+}
+
+.data-table__td:has(.pl-actions--checkbox) {
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* Custom styled checkbox */
+.pl-row-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  border-radius: 6px;
+  border: 2px solid rgba(129, 140, 248, 0.4);
+  background: rgba(99, 102, 241, 0.06);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s, transform 0.1s;
+  position: relative;
+  display: block;
+}
+
+.pl-row-checkbox:hover {
+  border-color: rgba(129, 140, 248, 0.8);
+  background: rgba(99, 102, 241, 0.12);
+  transform: scale(1.08);
+}
+
+.pl-row-checkbox:checked {
+  background: #6366f1;
+  border-color: #818cf8;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+.pl-row-checkbox:checked::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 6px;
+  width: 5px;
+  height: 9px;
+  border: 2px solid #fff;
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg);
+}
+
+/* ============================================================================
    Light Theme
    ============================================================================ */
 :root.theme-light .data-table {
   background: #fff;
   border-color: rgba(0, 0, 0, 0.08);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+}
+
+:root.theme-light .dt-select-toggle-btn {
+  border-color: rgba(99, 102, 241, 0.3);
+  background: rgba(99, 102, 241, 0.06);
+  color: #6366f1;
 }

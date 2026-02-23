@@ -103,8 +103,8 @@
 .trainer-action-modal__profile-header {
   display: flex;
   align-items: center;
-  gap: 20px;
-  padding: 22px 32px;
+  gap: 12px;
+  padding: 12px 16px;
   background: linear-gradient(135deg,
     rgba(220, 38, 38, 0.06) 0%,
     rgba(220, 38, 38, 0.02) 25%,
@@ -149,9 +149,9 @@
 
 /* Avatar - Premium Ring */
 .profile-header__avatar {
-  width: 60px;
-  height: 60px;
-  border-radius: 18px;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
   overflow: hidden;
   flex-shrink: 0;
   position: relative;
@@ -207,7 +207,7 @@
 
 .profile-header__name {
   font-family: 'Outfit', sans-serif;
-  font-size: 21px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
@@ -324,11 +324,11 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 10px 18px;
+  padding: 8px 12px;
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
   border-radius: var(--card-radius);
-  min-width: 76px;
+  min-width: 64px;
   transition: all 0.3s var(--transition-smooth);
   backdrop-filter: blur(8px);
   position: relative;
@@ -359,7 +359,7 @@
 }
 
 .stat-value {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 800;
   color: var(--color-crimson);
   line-height: 1;
@@ -1858,6 +1858,38 @@
   .performance-stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  /* Profile header: wrap to 2 rows at tablet */
+  .trainer-action-modal__profile-header {
+    flex-wrap: wrap;
+    padding: 18px 24px;
+    gap: 14px;
+  }
+
+  /* Row 1: avatar + name/email take full width */
+  .profile-header__info {
+    flex: 1;
+    min-width: 160px;
+  }
+
+  /* Row 2: meta badges + stats wrap below, left-aligned */
+  .profile-header__meta {
+    order: 3;
+    flex: 0 0 100%;
+    justify-content: flex-start;
+  }
+
+  .profile-header__stats {
+    order: 4;
+    flex: 0 0 100%;
+    justify-content: flex-start;
+  }
+
+  .trainer-action-modal__close-inline {
+    order: 2;
+    margin-left: auto;
+    flex-shrink: 0;
+  }
 }
 
 @media (max-width: 768px) {
@@ -2781,5 +2813,54 @@ body.light-mode .message-compose__row {
 @media (max-width: 768px) {
   .attendance-summary {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ── 600px: schedule rows stack + availability chip grid collapses ── */
+@media (max-width: 600px) {
+  .trainer-action-modal__profile-header {
+    padding: 12px 14px;
+    gap: 10px;
+  }
+
+  /* Schedule editor row: stack day + times vertically */
+  .schedule-day-row {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  /* Availability summary grid: 4 days per row → 2 */
+  .availability-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+
+  /* Attendance summary: 4 → 2 columns */
+  .attendance-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Performance stats: always 2-col on small mobile */
+  .performance-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Content panel: reduce padding */
+  .trainer-action-modal__content-panel {
+    padding: 16px 12px;
+  }
+
+  /* Delete zone: reduce padding */
+  .delete-zone {
+    padding: 24px 16px;
+  }
+
+  .delete-zone__actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .delete-zone__actions .btn--large {
+    width: 100%;
+    justify-content: center;
   }
 }

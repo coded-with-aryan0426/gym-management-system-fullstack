@@ -13,11 +13,14 @@ interface AvatarProps {
 // Helper to generate DiceBear URL from avatarId
 export const getAvatarUrl = (avatarId: string | null | undefined): string | null => {
     if (!avatarId) return null;
-    if (avatarId === 'custom') return null; // Custom images handled separately
-    return `https://api.dicebear.com/7.x/avataaars/svg?seed=${avatarId}`;
+    // Custom photo stored as data URL directly in avatarId
+    if (avatarId.startsWith('data:')) return avatarId;
+    // Legacy: custom stored in localStorage
+    if (avatarId === 'custom') return null;
+    return `https://api.dicebear.com/7.x/lorelei/svg?seed=${avatarId}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf`;
 };
 
-// Get custom image from localStorage
+// Get custom image from localStorage (legacy fallback only)
 export const getCustomAvatarImage = (userId: number | undefined): string | null => {
     if (!userId) return null;
     return localStorage.getItem(`avatar_image_${userId}`);
@@ -56,14 +59,19 @@ const Avatar: React.FC<AvatarProps> = ({
     };
 
     // Determine image source
-    // Priority: src > custom upload > avatarId (DiceBear) > initials
+    // Priority: src > data: avatarId (custom photo in DB) > legacy localStorage > avatarId (DiceBear) > initials
     let imageSrc: string | undefined = src;
 
+    if (!imageSrc && avatarId?.startsWith('data:')) {
+        imageSrc = avatarId;
+    }
+
     if (!imageSrc && avatarId === 'custom' && userId) {
+        // Legacy: migrate from localStorage
         imageSrc = getCustomAvatarImage(userId) || undefined;
     }
 
-    if (!imageSrc && avatarId && avatarId !== 'custom') {
+    if (!imageSrc && avatarId && avatarId !== 'custom' && !avatarId.startsWith('data:')) {
         imageSrc = getAvatarUrl(avatarId) || undefined;
     }
 

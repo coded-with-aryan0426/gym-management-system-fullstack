@@ -3,7 +3,7 @@ import './DataTable.css';
 
 export interface Column<T> {
     key: string;
-    header: string;
+    header: string | React.ReactNode;
     width?: string;
     hideOnMobile?: boolean;
     mobileOrder?: number;
@@ -31,15 +31,9 @@ interface DataTableProps<T> {
     className?: string;
     pagination?: PaginationProps;
     mobileCardRender?: (item: T, index: number) => React.ReactNode;
-    // Titan mode props
     compact?: boolean;
-    selectable?: boolean;
-    selectedIds?: Set<string | number>;
-    onSelectionChange?: (selectedIds: Set<string | number>) => void;
     stickyHeader?: boolean;
-    // New premium features
     showRowNumbers?: boolean;
-    hideCheckboxUntilHover?: boolean;
 }
 
 function DataTable<T>({
@@ -53,57 +47,10 @@ function DataTable<T>({
     pagination,
     mobileCardRender,
     compact = false,
-    selectable = false,
-    selectedIds: externalSelectedIds,
-    onSelectionChange,
     stickyHeader = false,
     showRowNumbers = false,
-    hideCheckboxUntilHover = false,
 }: DataTableProps<T>) {
     const [isMobile, setIsMobile] = useState(false);
-    const [internalSelectedIds, setInternalSelectedIds] = useState<Set<string | number>>(new Set());
-    const [hoveredRowId, setHoveredRowId] = useState<string | number | null>(null);
-    const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
-
-    // Use external or internal selection state
-    const selectedIds = externalSelectedIds ?? internalSelectedIds;
-
-    const handleSelectAll = () => {
-        if (selectedIds.size === data.length) {
-            const newSelection = new Set<string | number>();
-            setInternalSelectedIds(newSelection);
-            onSelectionChange?.(newSelection);
-        } else {
-            const newSelection = new Set(data.map(item => keyExtractor(item)));
-            setInternalSelectedIds(newSelection);
-            onSelectionChange?.(newSelection);
-        }
-    };
-
-    const handleSelectRow = (id: string | number, index: number, e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent) => {
-        e.stopPropagation();
-        const newSelection = new Set(selectedIds);
-        
-        // Support shift+click for range selection
-        if ('shiftKey' in e && e.shiftKey && lastSelectedIndex !== null) {
-            const start = Math.min(lastSelectedIndex, index);
-            const end = Math.max(lastSelectedIndex, index);
-            for (let i = start; i <= end; i++) {
-                const itemId = keyExtractor(data[i]);
-                newSelection.add(itemId);
-            }
-        } else {
-            if (newSelection.has(id)) {
-                newSelection.delete(id);
-            } else {
-                newSelection.add(id);
-            }
-            setLastSelectedIndex(index);
-        }
-        
-        setInternalSelectedIds(newSelection);
-        onSelectionChange?.(newSelection);
-    };
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -118,8 +65,6 @@ function DataTable<T>({
         isMobile ? 'data-table--mobile' : '',
         compact ? 'data-table--compact' : '',
         stickyHeader ? 'data-table--sticky' : '',
-        hideCheckboxUntilHover ? 'data-table--hide-checkbox' : '',
-        selectedIds.size > 0 ? 'data-table--has-selection' : '',
     ].filter(Boolean).join(' ');
 
     if (loading) {
@@ -145,7 +90,6 @@ function DataTable<T>({
         ? columns.filter(col => !col.hideOnMobile)
         : columns;
 
-    // Generate page numbers to display
     const getPageNumbers = () => {
         if (!pagination) return [];
         const { currentPage, totalPages } = pagination;
@@ -157,11 +101,9 @@ function DataTable<T>({
         } else {
             pages.push(0);
             if (currentPage > 2) pages.push('...');
-
             const start = Math.max(1, currentPage - 1);
             const end = Math.min(totalPages - 2, currentPage + 1);
             for (let i = start; i <= end; i++) pages.push(i);
-
             if (currentPage < totalPages - 3) pages.push('...');
             pages.push(totalPages - 1);
         }
@@ -197,16 +139,6 @@ function DataTable<T>({
                                 {showRowNumbers && (
                                     <th className="data-table__th data-table__th--number" style={{ width: 48 }}>#</th>
                                 )}
-                                {selectable && (
-                                    <th className="data-table__th data-table__th--checkbox" style={{ width: 40 }}>
-                                        <input
-                                            type="checkbox"
-                                            checked={data.length > 0 && selectedIds.size === data.length}
-                                            onChange={handleSelectAll}
-                                            className="data-table__checkbox"
-                                        />
-                                    </th>
-                                )}
                                 {visibleColumns.map((col) => (
                                     <th
                                         key={col.key}
@@ -218,51 +150,37 @@ function DataTable<T>({
                                 ))}
                             </tr>
                         </thead>
-                    <tbody className="data-table__body">
-                        {data.length === 0 ? (
-                            <tr>
-                                <td colSpan={visibleColumns.length + (selectable ? 1 : 0) + (showRowNumbers ? 1 : 0)} className="data-table__empty-cell">
-                                    {emptyMessage}
-                                </td>
-                            </tr>
-                        ) : (
-                            data.map((item, index) => {
-                                const id = keyExtractor(item);
-                                const isSelected = selectedIds.has(id);
-                                const isHovered = hoveredRowId === id;
-                                const rowNumber = pagination 
-                                    ? pagination.currentPage * pagination.pageSize + index + 1 
-                                    : index + 1;
-                                return (
-                                    <tr
-                                        key={id}
-                                        className={`data-table__row ${onRowClick ? 'data-table__row--clickable' : ''} ${isSelected ? 'data-table__row--selected' : ''} ${isHovered ? 'data-table__row--hovered' : ''}`}
-                                        onClick={() => onRowClick?.(item)}
-                                        onMouseEnter={() => setHoveredRowId(id)}
-                                        onMouseLeave={() => setHoveredRowId(null)}
-                                    >
-                                        {showRowNumbers && (
-                                            <td className="data-table__td data-table__td--number">
-                                                <span className="row-number">{rowNumber}</span>
-                                            </td>
-                                        )}
-                                        {selectable && (
-                                            <td className="data-table__td data-table__td--checkbox" onClick={e => e.stopPropagation()}>
-                                                <input
-                                                    type="checkbox"
-                                                    checked={isSelected}
-                                                    onChange={(e) => handleSelectRow(id, index, e)}
-                                                    className="data-table__checkbox"
-                                                />
-                                            </td>
-                                        )}
-                                        {visibleColumns.map((col) => (
-                                            <td key={col.key} className="data-table__td">
-                                                {col.render
-                                                    ? col.render(item, index)
-                                                    : (item as Record<string, unknown>)[col.key] as React.ReactNode
-                                                }
-                                            </td>
+                        <tbody className="data-table__body">
+                            {data.length === 0 ? (
+                                <tr>
+                                    <td colSpan={visibleColumns.length + (showRowNumbers ? 1 : 0)} className="data-table__empty-cell">
+                                        {emptyMessage}
+                                    </td>
+                                </tr>
+                            ) : (
+                                data.map((item, index) => {
+                                    const id = keyExtractor(item);
+                                    const rowNumber = pagination
+                                        ? pagination.currentPage * pagination.pageSize + index + 1
+                                        : index + 1;
+                                    return (
+                                        <tr
+                                            key={id}
+                                            className={`data-table__row ${onRowClick ? 'data-table__row--clickable' : ''}`}
+                                            onClick={() => onRowClick?.(item)}
+                                        >
+                                            {showRowNumbers && (
+                                                <td className="data-table__td data-table__td--number">
+                                                    <span className="row-number">{rowNumber}</span>
+                                                </td>
+                                            )}
+                                            {visibleColumns.map((col) => (
+                                                <td key={col.key} className="data-table__td">
+                                                    {col.render
+                                                        ? col.render(item, index)
+                                                        : (item as Record<string, unknown>)[col.key] as React.ReactNode
+                                                    }
+                                                </td>
                                             ))}
                                         </tr>
                                     );
@@ -273,7 +191,6 @@ function DataTable<T>({
                 </div>
             )}
 
-            {/* Pagination Controls */}
             {pagination && pagination.totalPages > 0 && (
                 <div className="data-table__pagination">
                     <div className="pagination__info">

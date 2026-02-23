@@ -1184,7 +1184,7 @@ const EnhancedTrainerActionModal: React.FC<EnhancedTrainerActionModalProps> = ({
                       <div className="content-panel__body">
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                           {availability.map((slot, index) => (
-                            <div key={slot.day} style={{
+                            <div key={slot.day} className="schedule-day-row" style={{
                               display: 'grid', gridTemplateColumns: '120px 1fr 1fr auto', gap: 12, alignItems: 'center',
                               padding: '14px 16px', background: slot.isAvailable ? 'var(--bg-secondary)' : 'var(--bg-tertiary)',
                               border: '1px solid var(--border-primary)', borderRadius: 12,

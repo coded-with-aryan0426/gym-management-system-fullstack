@@ -59,11 +59,12 @@ export const AVATAR_OPTIONS = TRAINER_AVATAR_OPTIONS; // Backward compatibility
 // Generate DiceBear URL for an avatar seed
 export const getAvatarUrl = (avatarId: string | null | undefined): string | null => {
     if (!avatarId) return null;
-    if (avatarId === 'custom') return null; // Custom images handled separately
-    return `https://api.dicebear.com/7.x/avataaars/svg?seed=${avatarId}`;
+    if (avatarId === 'custom') return null;
+    if (avatarId.startsWith('data:')) return avatarId;
+    return `https://api.dicebear.com/7.x/lorelei/svg?seed=${avatarId}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf`;
 };
 
-// Get custom image from localStorage
+// Get custom image from localStorage (legacy fallback)
 export const getCustomAvatarImage = (userId: number | undefined): string | null => {
     if (!userId) return null;
     return localStorage.getItem(`avatar_image_${userId}`);
@@ -78,10 +79,10 @@ const AvatarPicker: React.FC<AvatarPickerProps & { variant?: 'staff' | 'member' 
 }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [previewImage, setPreviewImage] = useState<string | null>(() => {
-        // Load existing custom image if any
-        if (userId && selectedId === 'custom') {
-            return getCustomAvatarImage(userId);
-        }
+        // Load existing custom image from avatarId if it's a data URL
+        if (selectedId?.startsWith('data:')) return selectedId;
+        // Legacy: load from localStorage
+        if (userId && selectedId === 'custom') return getCustomAvatarImage(userId);
         return null;
     });
 
@@ -109,13 +110,14 @@ const AvatarPicker: React.FC<AvatarPickerProps & { variant?: 'staff' | 'member' 
             const base64 = e.target?.result as string;
             setPreviewImage(base64);
 
-            // Save to localStorage
+            // Store data URL directly as avatarId (syncs via DB, works across all tabs/browsers)
+            // Also keep legacy localStorage copy for backward compat
             if (userId) {
                 localStorage.setItem(`avatar_image_${userId}`, base64);
             }
 
-            // Notify parent with custom selection
-            onSelect('custom', base64);
+            // Pass the data URL as the avatarId directly — no more 'custom' sentinel
+            onSelect(base64, base64);
         };
         reader.readAsDataURL(file);
     };
@@ -148,7 +150,7 @@ const AvatarPicker: React.FC<AvatarPickerProps & { variant?: 'staff' | 'member' 
                 {/* Upload Custom Photo Option */}
                 <button
                     type="button"
-                    className={`avatar-picker__option avatar-picker__option--upload ${selectedId === 'custom' ? 'avatar-picker__option--selected' : ''}`}
+                    className={`avatar-picker__option avatar-picker__option--upload ${(selectedId === 'custom' || selectedId?.startsWith('data:')) ? 'avatar-picker__option--selected' : ''}`}
                     onClick={handleUploadClick}
                     title="Upload custom photo"
                 >

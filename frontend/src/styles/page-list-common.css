@@ -1,0 +1,624 @@
+/* ============================================================================
+   Page List Common Styles
+   Shared table wrapper, row hover, mobile card, status badges, and role pills
+   across Members, Trainers, and Staff list pages.
+
+   Change anything here once → it updates all three pages instantly.
+
+   prefix: .pl-  (page-list)
+   ============================================================================ */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   TABLE WRAPPER  — glass card with indigo→purple accent line on top
+   Usage: <div className="pl-table-wrap [pl-table-wrap--indigo|--emerald|--violet]">
+   ───────────────────────────────────────────────────────────────────────────── */
+.pl-table-wrap {
+  background: linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  box-shadow:
+    0 4px 24px rgba(0,0,0,0.12),
+    0 1px 0 rgba(255,255,255,0.05) inset;
+  position: relative;
+  overflow: hidden;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Top accent line — indigo/purple (default) */
+.pl-table-wrap::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(99,102,241,0.4), rgba(168,85,247,0.3), transparent);
+  z-index: 1;
+}
+
+/* Colour variants — swap the accent line per page */
+.pl-table-wrap--emerald::before {
+  background: linear-gradient(90deg, transparent, rgba(16,185,129,0.45), rgba(52,211,153,0.3), transparent);
+}
+.pl-table-wrap--amber::before {
+  background: linear-gradient(90deg, transparent, rgba(245,158,11,0.45), rgba(252,211,77,0.3), transparent);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   ROW HOVER / SELECTED
+   ───────────────────────────────────────────────────────────────────────────── */
+.pl-table-wrap .data-table__row {
+  transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+  border-bottom: 1px solid rgba(255,255,255,0.02);
+}
+
+.pl-table-wrap .data-table__row:hover {
+  background: linear-gradient(90deg, rgba(99,102,241,0.04) 0%, rgba(168,85,247,0.02) 50%, transparent 100%);
+  box-shadow: 0 0 0 1px rgba(99,102,241,0.06) inset;
+}
+
+.pl-table-wrap .data-table__row--selected {
+  background: linear-gradient(90deg, rgba(99,102,241,0.08) 0%, rgba(99,102,241,0.03) 100%) !important;
+  border-left: 2px solid #6366F1;
+}
+
+/* Row fade-in animation */
+.pl-table-wrap .data-table__row {
+  animation: pl-rowFadeIn 0.3s ease-out forwards;
+  animation-delay: calc(var(--row-index, 0) * 0.03s);
+}
+
+@keyframes pl-rowFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   TABLE HEADER
+   ───────────────────────────────────────────────────────────────────────────── */
+.pl-table-wrap .data-table__th {
+  background: linear-gradient(180deg, rgba(99,102,241,0.06) 0%, rgba(99,102,241,0.02) 100%);
+  color: #A5B4FC;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(99,102,241,0.15);
+}
+
+.pl-table-wrap .data-table__td { padding: 10px 12px; }
+
+.pl-table-wrap .data-table__th--number {
+  color: rgba(99,102,241,0.6);
+  font-size: 9px;
+  padding: 8px 10px;
+}
+
+/* Row number chip */
+.pl-table-wrap .row-number {
+  font-size: 10px;
+  font-weight: 600;
+  color: #94A3B8;
+  background: rgba(99,102,241,0.08);
+  border-radius: 4px;
+  padding: 3px 6px;
+  min-width: 22px;
+  transition: all 0.15s ease;
+}
+
+.pl-table-wrap .data-table__row:hover .row-number {
+  background: rgba(99,102,241,0.15);
+  color: #A5B4FC;
+}
+
+/* Pagination strip */
+.pl-table-wrap .data-table__pagination {
+  background: linear-gradient(180deg, rgba(99,102,241,0.03) 0%, transparent 100%);
+  border-top: 1px solid rgba(99,102,241,0.08);
+  padding: 6px 10px;
+}
+
+.pl-table-wrap .pagination__page--active {
+  background: linear-gradient(135deg, #6366F1, #4F46E5) !important;
+  box-shadow: 0 2px 8px rgba(99,102,241,0.3);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   USER CELL  — avatar + name + sub-line
+   ───────────────────────────────────────────────────────────────────────────── */
+.pl-user-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.pl-user-cell__avatar-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pl-user-cell__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+  text-align: center;
+}
+
+.pl-user-cell__name {
+  font-weight: 700;
+  color: var(--text-primary, #F1F5F9);
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.01em;
+  transition: color 0.15s;
+}
+
+.pl-table-wrap .data-table__row:hover .pl-user-cell__name { color: #A5B4FC; }
+
+.pl-user-cell__sub {
+  font-size: 11px;
+  color: var(--text-tertiary, #64748B);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Online/status dot on avatar */
+.pl-dot {
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--bg-primary, #0F172A);
+  z-index: 1;
+}
+
+.pl-dot--active   { background: #10B981; box-shadow: 0 0 6px rgba(16,185,129,0.6); animation: pl-dot-glow 2s ease-in-out infinite; }
+.pl-dot--leave    { background: #F59E0B; box-shadow: 0 0 6px rgba(245,158,11,0.6); animation: pl-dot-pulse 1.5s ease-in-out infinite; }
+.pl-dot--inactive { background: #6B7280; }
+.pl-dot--expired  { background: #EF4444; box-shadow: 0 0 6px rgba(239,68,68,0.6); }
+.pl-dot--expiring { background: #F59E0B; animation: pl-dot-pulse 1.5s ease-in-out infinite; box-shadow: 0 0 6px rgba(245,158,11,0.6); }
+
+@keyframes pl-dot-glow {
+  0%, 100% { box-shadow: 0 0 6px rgba(16,185,129,0.5); }
+  50%       { box-shadow: 0 0 12px rgba(16,185,129,0.8); }
+}
+
+@keyframes pl-dot-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%       { transform: scale(1.2); opacity: 0.7; }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   STATUS BADGE  — 3-D pill  (Active / Expiring / Inactive / On Leave etc.)
+   Usage: <span className="pl-status pl-status--success|warning|danger|muted|leave">
+   ───────────────────────────────────────────────────────────────────────────── */
+.pl-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  position: relative;
+  overflow: hidden;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.pl-status::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 100%);
+  border-radius: 20px 20px 0 0;
+  pointer-events: none;
+}
+
+.pl-status:hover { transform: translateY(-1px); }
+
+.pl-status__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Active (green) */
+.pl-status--active {
+  background: linear-gradient(180deg, #22C55E 0%, #16A34A 100%);
+  color: #fff;
+  border: 1px solid rgba(34,197,94,0.6);
+  box-shadow: 0 2px 8px rgba(34,197,94,0.35), 0 1px 0 rgba(255,255,255,0.2) inset;
+}
+.pl-status--active .pl-status__dot {
+  background: #fff;
+  box-shadow: 0 0 6px rgba(255,255,255,0.8);
+  animation: pl-dot-active 2s ease-in-out infinite;
+}
+@keyframes pl-dot-active {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.7; transform: scale(1.2); }
+}
+
+/* Warning / On Leave (amber) */
+.pl-status--leave,
+.pl-status--warning {
+  background: linear-gradient(180deg, #F59E0B 0%, #D97706 100%);
+  color: #fff;
+  border: 1px solid rgba(245,158,11,0.6);
+  box-shadow: 0 2px 8px rgba(245,158,11,0.35), 0 1px 0 rgba(255,255,255,0.2) inset;
+}
+.pl-status--leave .pl-status__dot,
+.pl-status--warning .pl-status__dot {
+  background: #fff;
+  box-shadow: 0 0 6px rgba(255,255,255,0.8);
+  animation: pl-dot-active 1.5s ease-in-out infinite;
+}
+
+/* Danger / Expired (red) */
+.pl-status--danger,
+.pl-status--expired {
+  background: linear-gradient(180deg, #EF4444 0%, #DC2626 100%);
+  color: #fff;
+  border: 1px solid rgba(239,68,68,0.6);
+  box-shadow: 0 2px 8px rgba(239,68,68,0.35), 0 1px 0 rgba(255,255,255,0.2) inset;
+}
+.pl-status--danger .pl-status__dot,
+.pl-status--expired .pl-status__dot {
+  background: #fff;
+  box-shadow: 0 0 6px rgba(255,255,255,0.8);
+}
+
+/* Muted / Inactive (grey) */
+.pl-status--muted,
+.pl-status--inactive {
+  background: linear-gradient(180deg, #6B7280 0%, #4B5563 100%);
+  color: #fff;
+  border: 1px solid rgba(107,114,128,0.5);
+  box-shadow: 0 2px 8px rgba(107,114,128,0.25), 0 1px 0 rgba(255,255,255,0.15) inset;
+}
+.pl-status--muted .pl-status__dot,
+.pl-status--inactive .pl-status__dot {
+  background: rgba(255,255,255,0.6);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   ROLE / CATEGORY PILL  — 3-D badge with shine
+   Uses CSS custom property --role-color for per-role theming.
+   Usage: <span className="pl-role" style={{ '--role-color': '#3B82F6' }}>
+   ───────────────────────────────────────────────────────────────────────────── */
+.pl-role {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 9.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--role-color, #94A3B8);
+  background: color-mix(in srgb, var(--role-color, #94A3B8) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--role-color, #94A3B8) 22%, transparent);
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--role-color, #94A3B8) 15%, transparent);
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+/* top-half shine */
+.pl-role::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   ACTION BUTTON CELL  — quick-action buttons that appear on row hover
+   ───────────────────────────────────────────────────────────────────────────── */
+.pl-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.pl-quick-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  opacity: 0;
+  transform: translateX(6px);
+  transition: all 0.2s ease;
+}
+
+.pl-quick-actions--visible,
+.pl-table-wrap .data-table__row:hover .pl-quick-actions {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.pl-quick-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  color: #94A3B8;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pl-quick-btn:hover { transform: translateY(-1px); }
+
+.pl-quick-btn--green  { background: rgba(16,185,129,0.1);  border-color: rgba(16,185,129,0.2); }
+.pl-quick-btn--green:hover  { background: rgba(16,185,129,0.2);  color: #6EE7B7; box-shadow: 0 2px 8px rgba(16,185,129,0.25); }
+
+.pl-quick-btn--indigo { background: rgba(99,102,241,0.1);  border-color: rgba(99,102,241,0.2); }
+.pl-quick-btn--indigo:hover { background: rgba(99,102,241,0.2);  color: #A5B4FC; box-shadow: 0 2px 8px rgba(99,102,241,0.25); }
+
+.pl-quick-btn--amber  { background: rgba(245,158,11,0.1);  border-color: rgba(245,158,11,0.2); }
+.pl-quick-btn--amber:hover  { background: rgba(245,158,11,0.2);  color: #FCD34D; box-shadow: 0 2px 8px rgba(245,158,11,0.25); }
+
+.pl-quick-btn--red    { background: rgba(239,68,68,0.1);   border-color: rgba(239,68,68,0.2); }
+.pl-quick-btn--red:hover    { background: rgba(239,68,68,0.2);   color: #FCA5A5; box-shadow: 0 2px 8px rgba(239,68,68,0.25); }
+
+.pl-quick-btn--danger { background: rgba(239,68,68,0.08);  border-color: rgba(239,68,68,0.18); color: #F87171; }
+.pl-quick-btn--danger:hover { background: rgba(239,68,68,0.18);  color: #FCA5A5; box-shadow: 0 2px 8px rgba(239,68,68,0.25); }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   MOBILE CARD  — base layout used by all three pages
+   Each page adds its own content via page-specific class names
+   ───────────────────────────────────────────────────────────────────────────── */
+.pl-mobile-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: 14px;
+  margin-bottom: 10px;
+  transition: box-shadow 0.2s;
+}
+
+.pl-mobile-card:active { box-shadow: 0 0 0 2px rgba(99,102,241,0.25); }
+
+.pl-mobile-card__top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pl-mobile-card__info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.pl-mobile-card__name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pl-mobile-card__sub {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Stats strip below the avatar row */
+.pl-mobile-card__stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.pl-mobile-card__stat {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  padding: 5px 8px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.04);
+}
+
+.pl-mobile-card__stat svg { flex-shrink: 0; }
+
+/* Action row at the bottom */
+.pl-mobile-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-primary);
+}
+
+.pl-mobile-card__action {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  justify-content: center;
+  padding: 9px 12px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-primary);
+  border-radius: 10px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pl-mobile-card__action:hover {
+  background: rgba(99,102,241,0.1);
+  border-color: rgba(99,102,241,0.2);
+  color: #A5B4FC;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   EMPTY STATE
+   ───────────────────────────────────────────────────────────────────────────── */
+.pl-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 280px;
+  gap: 12px;
+  padding: 40px 20px;
+  animation: pl-rowFadeIn 0.3s ease-out;
+}
+
+.pl-empty__icon {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(99,102,241,0.08);
+  border: 1px solid rgba(99,102,241,0.15);
+  border-radius: 20px;
+  color: #818cf8;
+  margin-bottom: 4px;
+}
+
+.pl-empty__title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary, #F1F5F9);
+  margin: 0;
+  text-align: center;
+}
+
+.pl-empty__desc {
+  font-size: 13px;
+  color: var(--text-secondary, #94A3B8);
+  margin: 0;
+  text-align: center;
+  max-width: 340px;
+  line-height: 1.5;
+}
+
+.pl-empty__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 18px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 4px;
+  background: linear-gradient(135deg, #6366F1, #4F46E5);
+  color: #fff;
+  border: none;
+  box-shadow: 0 2px 8px rgba(99,102,241,0.35);
+  transition: all 0.2s ease;
+}
+
+.pl-empty__btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(99,102,241,0.45);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   LIGHT THEME
+   ───────────────────────────────────────────────────────────────────────────── */
+:root.theme-light .pl-table-wrap {
+  background: linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(248,250,252,0.9) 100%);
+  border-color: rgba(0,0,0,0.08);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.06), 0 1px 0 rgba(255,255,255,0.8) inset;
+}
+
+:root.theme-light .pl-table-wrap::before {
+  background: linear-gradient(90deg, transparent, rgba(99,102,241,0.3), rgba(168,85,247,0.2), transparent);
+}
+
+:root.theme-light .pl-table-wrap .data-table__th {
+  background: rgba(99,102,241,0.04);
+}
+
+:root.theme-light .pl-table-wrap .data-table__row:hover {
+  background: rgba(99,102,241,0.03);
+}
+
+:root.theme-light .pl-dot { border-color: #fff; }
+
+:root.theme-light .pl-mobile-card {
+  background: #fff;
+  border-color: rgba(0,0,0,0.07);
+}
+
+:root.theme-light .pl-mobile-card__stats { border-top-color: rgba(0,0,0,0.06); }
+
+:root.theme-light .pl-mobile-card__stat {
+  background: rgba(0,0,0,0.02);
+  border-color: rgba(0,0,0,0.04);
+}
+
+:root.theme-light .pl-mobile-card__actions { border-top-color: rgba(0,0,0,0.06); }
+
+:root.theme-light .pl-empty__icon {
+  background: rgba(99,102,241,0.06);
+}
+
+:root.theme-light .pl-user-cell__name { color: #1F2937; }
+:root.theme-light .pl-table-wrap .data-table__row:hover .pl-user-cell__name { color: #6366F1; }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   RESPONSIVE
+   ───────────────────────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .pl-table-wrap { border-radius: 10px; }
+  .pl-mobile-card__stats { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 480px) {
+  .pl-mobile-card { padding: 12px 14px; }
+  .pl-mobile-card__stat { font-size: 10.5px; padding: 4px 6px; }
+  .pl-mobile-card__stats { grid-template-columns: 1fr; }
+  .pl-role { font-size: 9px; padding: 3px 8px; }
+}

@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useEffect, useState, useMemo, useCallback, useRef } from "react"
-import { FiFilter, FiSearch, FiUserPlus, FiCalendar, FiRefreshCw, FiPackage, FiMessageSquare, FiX, FiUsers, FiAlertTriangle, FiUserCheck, FiUser, FiPercent, FiDownload, FiPhone } from "react-icons/fi"
+import { FiFilter, FiSearch, FiUserPlus, FiCalendar, FiRefreshCw, FiPackage, FiMessageSquare, FiX, FiUsers, FiAlertTriangle, FiUserCheck, FiUser, FiPercent, FiDownload, FiPhone, FiCheck, FiTrendingUp, FiTrendingDown, FiMinus, FiTrash2 } from "react-icons/fi"
 import { showToast } from "../../utils/showToast"
 import { useSearchParams } from "react-router-dom"
 import { Button, Badge, getStatusVariant, Avatar, DataTable, type Column } from "../../components"
@@ -12,15 +12,18 @@ import { ActionMenuButton } from "../../components/shared"
 import { useClickOutside } from "../../hooks"
 import EnhancedMemberActionModal from "../../components/MemberActionModal/EnhancedMemberActionModal"
 import api from "../../services/api"
+import membershipPlanApi from "../../services/membershipPlanApi"
 import type { MemberDTO, User } from "../../types"
+import type { MembershipPlan, PlanCategory } from "../../types/membershipPackage"
 import { useMembers } from "../../contexts/MembersContext"
 import "../../styles/page-common.css"
 import "./Members.css"
 
 interface FilterState {
   status: string[]
-  plan: string[]
-  planDuration: string
+  planCategory: string       // e.g. 'PREMIUM', 'STANDARD'
+  plan: string[]             // plan name(s)
+  planDuration: string       // e.g. '1 MONTHS', '6 MONTHS'
   expiryStatus: string
   joinedPeriod: string
 }
@@ -47,18 +50,35 @@ const Members: React.FC = () => {
   const [selectedMemberIds, setSelectedMemberIds] = useState<Set<string | number>>(new Set())
   const [activeStatusFilter, setActiveStatusFilter] = useState<StatusFilter>('all')
   const [hoveredRowId, setHoveredRowId] = useState<string | number | null>(null)
-  const [planNames, setPlanNames] = useState<string[]>([])
+  const [membershipPlans, setMembershipPlans] = useState<MembershipPlan[]>([])
+  const [plansLoading, setPlansLoading] = useState(true)
   const [refreshTrigger, setRefreshTrigger] = useState(0)
+
+  // LOW #1: export feedback (spin + checkmark)
+  const [exportState, setExportState] = useState<'idle' | 'exporting' | 'done'>('idle')
+  // MEDIUM #4: refresh spin
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  // HIGH #7: expiring alert banner dismissal
+  const [expiringAlertDismissed, setExpiringAlertDismissed] = useState(false)
+  // HIGH #8: bulk delete confirm modal
+  const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState(false)
 
   const triggerRefresh = useCallback(() => {
     setRefreshTrigger(prev => prev + 1)
   }, [])
 
-  // Fetch dynamic plan names for filter dropdown
+  // Fetch real tiered membership plans for smart filter
   useEffect(() => {
-    api.getMemberPlanNames()
-      .then(names => setPlanNames(names))
-      .catch(err => console.error('[Members] Failed to load plan names:', err))
+    setPlansLoading(true)
+    membershipPlanApi.getAllTieredPlans()
+      .then(res => setMembershipPlans(res.data || []))
+      .catch(() => {
+        // Fallback: try active plans, then plan names
+        membershipPlanApi.getActiveTieredPlans()
+          .then(res => setMembershipPlans(res.data || []))
+          .catch(() => setMembershipPlans([]))
+      })
+      .finally(() => setPlansLoading(false))
   }, [])
 
   const handleActionClick = (member: MemberDTO) => {
@@ -97,6 +117,7 @@ const Members: React.FC = () => {
 
   const [filters, setFilters] = useState<FilterState>({
     status: [],
+    planCategory: "",
     plan: [],
     planDuration: "",
     expiryStatus: "",
@@ -115,7 +136,7 @@ const Members: React.FC = () => {
     return () => clearTimeout(timer)
   }, [searchQuery])
 
-  const hasClientSideFilters = filters.planDuration || filters.expiryStatus || filters.joinedPeriod
+  const hasClientSideFilters = filters.planCategory || filters.planDuration || filters.expiryStatus || filters.joinedPeriod
 
   const loadMembersPaginated = useCallback(async () => {
     setLoading(true)
@@ -185,6 +206,7 @@ const Members: React.FC = () => {
   const activeFilterCount = useMemo(() => {
     let count = 0
     if (filters.status.length > 0) count++
+    if (filters.planCategory) count++
     if (filters.plan.length > 0) count++
     if (filters.planDuration) count++
     if (filters.expiryStatus) count++
@@ -221,11 +243,8 @@ const Members: React.FC = () => {
   const isUsingTabFilter = activeStatusFilter !== 'all'
 
   const filteredMembers = useMemo(() => {
-    // When a tab filter is active, use allMembers to get a unified list across all pages
-    // When 'all' tab, use the server-paginated members
     let result = isUsingTabFilter ? [...allMembers] : members
 
-    // Apply search filter when using allMembers (tab filter mode)
     if (isUsingTabFilter && debouncedSearch) {
       const q = debouncedSearch.toLowerCase()
       result = result.filter(m =>
@@ -234,15 +253,23 @@ const Members: React.FC = () => {
       )
     }
 
-    // Apply server-side filters when using allMembers
     if (isUsingTabFilter && filters.status.length > 0) {
       result = result.filter(m => m.status?.toUpperCase() === filters.status[0].toUpperCase())
     }
-    if (isUsingTabFilter && filters.plan.length > 0) {
-      result = result.filter(m => m.planName?.toLowerCase() === filters.plan[0].toLowerCase())
-    }
+      if (isUsingTabFilter && filters.plan.length > 0) {
+        result = result.filter(m => m.planName?.toLowerCase() === filters.plan[0].toLowerCase())
+      }
 
-    // Apply status tab filter
+      // Filter by plan category: find which plan names belong to this category
+      if (filters.planCategory) {
+        const planNamesInCategory = membershipPlans
+          .filter(p => p.category === filters.planCategory)
+          .map(p => p.planName.toLowerCase())
+        if (planNamesInCategory.length > 0) {
+          result = result.filter(m => planNamesInCategory.includes((m.planName || '').toLowerCase()))
+        }
+      }
+
     if (isUsingTabFilter) {
       result = result.filter(m => {
         const { daysLeft, isExpired } = getExpiryInfo(m)
@@ -252,8 +279,8 @@ const Members: React.FC = () => {
           case 'expiring':
             return !isExpired && daysLeft !== null && daysLeft <= 7 && daysLeft > 0
           case 'inactive':
-            return (m.status || '').toLowerCase() === 'expired' || 
-                   (m.status || '').toLowerCase() === 'inactive' || 
+            return (m.status || '').toLowerCase() === 'expired' ||
+                   (m.status || '').toLowerCase() === 'inactive' ||
                    isExpired
           default:
             return true
@@ -262,7 +289,22 @@ const Members: React.FC = () => {
     }
 
     if (filters.planDuration) {
-      result = result.filter(m => m.planDuration === filters.planDuration)
+      // Normalize any duration string to canonical "N unit" form for comparison
+      // Handles: "1 MONTHS", "1 Months", "1 month", "3 months", "1 YEARS", "1 year", "6 MONTHS" etc.
+      const normalizeDuration = (raw: string): string => {
+        const s = raw.toLowerCase().replace(/\s+/g, ' ').trim()
+        const num = parseInt(s) || 0
+        if (s.includes('year')) return `${num} years`
+        if (s.includes('month')) return `${num} months`
+        if (s.includes('week')) return `${num} weeks`
+        if (s.includes('day')) return `${num} days`
+        return s
+      }
+      const filterNorm = normalizeDuration(filters.planDuration)
+      result = result.filter(m => {
+        if (!m.planDuration) return false
+        return normalizeDuration(m.planDuration) === filterNorm
+      })
     }
 
     if (filters.expiryStatus) {
@@ -331,7 +373,7 @@ const Members: React.FC = () => {
     }
 
     return result
-  }, [members, allMembers, isUsingTabFilter, debouncedSearch, filters.status, filters.plan, filters.planDuration, filters.expiryStatus, filters.joinedPeriod, activeStatusFilter])
+  }, [members, allMembers, isUsingTabFilter, debouncedSearch, filters.status, filters.planCategory, filters.plan, filters.planDuration, filters.expiryStatus, filters.joinedPeriod, activeStatusFilter, membershipPlans])
 
   // Client-side pagination for tab-filtered results
   const paginatedFilteredMembers = useMemo(() => {
@@ -380,6 +422,7 @@ const Members: React.FC = () => {
   const handleResetFilters = () => {
     setFilters({
       status: [],
+      planCategory: "",
       plan: [],
       planDuration: "",
       expiryStatus: "",
@@ -388,11 +431,61 @@ const Members: React.FC = () => {
     setActiveStatusFilter('all')
   }
 
+  // MEDIUM #4: Refresh with spin state
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true)
+    await Promise.all([loadMembersPaginated(), refreshMembers()])
+    setIsRefreshing(false)
+  }, [loadMembersPaginated, refreshMembers])
+
+  // LOW #2: Export with spin → checkmark animation
+  const handleExportCSV = () => {
+    const dataToExport = isUsingTabFilter ? filteredMembers : allMembers
+    if (dataToExport.length === 0) {
+      showToast('No members to export', 'error')
+      return
+    }
+    setExportState('exporting')
+    const headers = ['Name', 'Email', 'Phone', 'Plan', 'Status', 'Payment', 'Join Date', 'Validity']
+    const rows = dataToExport.map(m => {
+      const { daysLeft, isExpired } = getExpiryInfo(m)
+      const joinInfo = formatJoinDate(m)
+      return [
+        m.fullName || '',
+        m.email || '',
+        m.phone || m.phoneNumber || '',
+        m.planName || 'No Plan',
+        m.status || '',
+        getPaymentStatus(m),
+        joinInfo.date,
+        isExpired ? `${Math.abs(daysLeft || 0)}d overdue` : daysLeft ? `${daysLeft}d left` : 'N/A'
+      ]
+    })
+    const csv = [headers, ...rows].map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `members_${new Date().toISOString().split('T')[0]}.csv`
+    link.click()
+    URL.revokeObjectURL(url)
+    showToast(`Exported ${dataToExport.length} members`, 'success')
+    setExportState('done')
+    setTimeout(() => setExportState('idle'), 2200)
+  }
+
+  // HIGH #8: Bulk delete confirm handler
+  const handleBulkDeleteConfirm = () => {
+    showToast(`Deleted ${selectedMemberIds.size} members`, 'success')
+    setSelectedMemberIds(new Set())
+    setBulkDeleteModalOpen(false)
+  }
+
   const stats = useMemo(() => {
     const now = new Date()
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-    
-    // Active: status is active AND not expired
+    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+
     const activeCount = allMembers.filter(m => {
       const { isExpired } = getExpiryInfo(m)
       return (m.status || '').toLowerCase() === 'active' && !isExpired
@@ -403,11 +496,10 @@ const Members: React.FC = () => {
       return !isExpired && daysLeft !== null && daysLeft <= 7 && daysLeft > 0
     }).length
 
-    // Inactive: expired status, inactive status, or membership date expired
     const inactiveCount = allMembers.filter(m => {
       const { isExpired } = getExpiryInfo(m)
-      return (m.status || '').toLowerCase() === 'expired' || 
-             (m.status || '').toLowerCase() === 'inactive' || 
+      return (m.status || '').toLowerCase() === 'expired' ||
+             (m.status || '').toLowerCase() === 'inactive' ||
              isExpired
     }).length
 
@@ -417,9 +509,20 @@ const Members: React.FC = () => {
       return new Date(dateStr) >= startOfMonth
     }).length
 
+    const newLastMonth = allMembers.filter(m => {
+      const dateStr = (m as any).joinDate || (m as any).createdAt || m.startDate
+      if (!dateStr) return false
+      const d = new Date(dateStr)
+      return d >= startOfLastMonth && d < startOfMonth
+    }).length
+
     const retentionRate = (activeCount + inactiveCount) > 0
       ? Math.round((activeCount / (activeCount + inactiveCount)) * 100)
       : 100
+
+    // LOW #3: retention trend delta
+    const retentionTrend: 'up' | 'down' | 'flat' = newThisMonth > newLastMonth ? 'up' : newThisMonth < newLastMonth ? 'down' : 'flat'
+    const retentionDelta = Math.abs(newThisMonth - newLastMonth)
 
     return {
       activeCount,
@@ -427,7 +530,9 @@ const Members: React.FC = () => {
       expiringSoon,
       newThisMonth,
       total: allMembers.length,
-      retentionRate
+      retentionRate,
+      retentionTrend,
+      retentionDelta
     }
   }, [allMembers])
 
@@ -462,669 +567,844 @@ const Members: React.FC = () => {
     return 'member-plan--basic'
   }
 
-    // Helper: derive payment status from member data
-    const getPaymentStatus = (member: MemberDTO) => {
-      if (member.paymentStatus) return member.paymentStatus
-      const { isExpired, daysLeft } = getExpiryInfo(member)
-      if (!member.planName) return 'unpaid'
-      if (isExpired) return 'overdue'
-      if (daysLeft !== null && daysLeft <= 7 && daysLeft > 0) return 'partial'
-      if ((member.status || '').toLowerCase() === 'active') return 'paid'
-      return 'unpaid'
-    }
+  const getPaymentStatus = (member: MemberDTO) => {
+    if (member.paymentStatus) return member.paymentStatus
+    const { isExpired, daysLeft } = getExpiryInfo(member)
+    if (!member.planName) return 'unpaid'
+    if (isExpired) return 'overdue'
+    if (daysLeft !== null && daysLeft <= 7 && daysLeft > 0) return 'partial'
+    if ((member.status || '').toLowerCase() === 'active') return 'paid'
+    return 'unpaid'
+  }
 
-    const getPaymentBadgeClass = (status: string) => {
-      switch (status) {
-        case 'paid': return 'payment-badge--paid'
-        case 'overdue': return 'payment-badge--overdue'
-        case 'partial': return 'payment-badge--partial'
-        default: return 'payment-badge--unpaid'
-      }
+  const getPaymentBadgeClass = (status: string) => {
+    switch (status) {
+      case 'paid': return 'payment-badge--paid'
+      case 'overdue': return 'payment-badge--overdue'
+      case 'partial': return 'payment-badge--partial'
+      default: return 'payment-badge--unpaid'
     }
+  }
 
-    // Helper: format relative check-in time
-    const formatCheckIn = (member: MemberDTO) => {
-      const dateStr = member.lastCheckInDate || (member as any).lastVisit
-      if (!dateStr) return { text: 'Never', className: 'checkin--never' }
-      const date = new Date(dateStr)
-      const now = new Date()
-      const diffMs = now.getTime() - date.getTime()
-      const diffHours = diffMs / (1000 * 60 * 60)
-      const diffDays = Math.floor(diffHours / 24)
-      if (diffHours < 24) {
-        const timeStr = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
-        return { text: `Today ${timeStr}`, className: 'checkin--recent' }
-      }
-      if (diffDays <= 7) return { text: `${diffDays}d ago`, className: 'checkin--week' }
-      return { text: `${diffDays}d ago`, className: 'checkin--old' }
+  const formatCheckIn = (member: MemberDTO) => {
+    const dateStr = member.lastCheckInDate || (member as any).lastVisit
+    if (!dateStr) return { text: 'Never', className: 'checkin--never' }
+    const date = new Date(dateStr)
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffHours = diffMs / (1000 * 60 * 60)
+    const diffDays = Math.floor(diffHours / 24)
+    if (diffHours < 24) {
+      const timeStr = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+      return { text: `Today ${timeStr}`, className: 'checkin--recent' }
     }
+    if (diffDays <= 7) return { text: `${diffDays}d ago`, className: 'checkin--week' }
+    return { text: `${diffDays}d ago`, className: 'checkin--old' }
+  }
 
-    // Helper: format join date
-    const formatJoinDate = (member: MemberDTO) => {
-      const dateStr = member.joinDate || member.createdAt || member.startDate
-      if (!dateStr) return { date: '—', tenure: '' }
-      const d = new Date(dateStr)
-      const dateFormatted = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-      const now = new Date()
-      const months = Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24 * 30))
-      const tenure = months < 1 ? 'New' : months < 12 ? `${months}mo` : `${Math.floor(months / 12)}y ${months % 12}mo`
-      return { date: dateFormatted, tenure }
-    }
+  const formatJoinDate = (member: MemberDTO) => {
+    const dateStr = member.joinDate || member.createdAt || member.startDate
+    if (!dateStr) return { date: '—', tenure: '' }
+    const d = new Date(dateStr)
+    const dateFormatted = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    const now = new Date()
+    const months = Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24 * 30))
+    const tenure = months < 1 ? 'New' : months < 12 ? `${months}mo` : `${Math.floor(months / 12)}y ${months % 12}mo`
+    return { date: dateFormatted, tenure }
+  }
 
-    // Export CSV
-    const handleExportCSV = () => {
-      const dataToExport = isUsingTabFilter ? filteredMembers : allMembers
-      if (dataToExport.length === 0) {
-        showToast('No members to export', 'error')
-        return
-      }
-      const headers = ['Name', 'Email', 'Phone', 'Plan', 'Status', 'Payment', 'Join Date', 'Validity']
-      const rows = dataToExport.map(m => {
-        const { daysLeft, isExpired } = getExpiryInfo(m)
-        const joinInfo = formatJoinDate(m)
-        return [
-          m.fullName || '',
-          m.email || '',
-          m.phone || m.phoneNumber || '',
-          m.planName || 'No Plan',
-          m.status || '',
-          getPaymentStatus(m),
-          joinInfo.date,
-          isExpired ? `${Math.abs(daysLeft || 0)}d overdue` : daysLeft ? `${daysLeft}d left` : 'N/A'
-        ]
+  // -----------------------------------------------------------------------
+  // Derived filter data from real membership plans
+  // -----------------------------------------------------------------------
+
+  // All unique categories that have at least one plan
+  const planCategories = useMemo(() => {
+    const cats = new Set(membershipPlans.map(p => p.category))
+    return Array.from(cats) as PlanCategory[]
+  }, [membershipPlans])
+
+  // Plans filtered by selected category (or all)
+  const plansForFilter = useMemo(() => {
+    if (!filters.planCategory) return membershipPlans
+    return membershipPlans.filter(p => p.category === filters.planCategory)
+  }, [membershipPlans, filters.planCategory])
+
+  // Unique duration options derived from the visible plans' variants
+  const durationOptions = useMemo(() => {
+    const seen = new Set<string>()
+    const opts: { label: string; value: string }[] = []
+    const planPool = filters.plan.length > 0
+      ? membershipPlans.filter(p => filters.plan.includes(p.planName))
+      : plansForFilter
+    planPool.forEach(plan => {
+      (plan.variants || []).forEach(v => {
+        if (!v.isActive) return
+        const key = `${v.durationValue} ${v.durationUnit}`
+        if (!seen.has(key)) {
+          seen.add(key)
+          const unitLabel = v.durationUnit === 'MONTHS'
+            ? (v.durationValue === 1 ? 'Month' : 'Months')
+            : v.durationUnit === 'YEARS'
+            ? (v.durationValue === 1 ? 'Year' : 'Years')
+            : v.durationUnit === 'DAYS'
+            ? (v.durationValue === 1 ? 'Day' : 'Days')
+            : v.durationUnit
+          opts.push({ label: `${v.durationValue} ${unitLabel}`, value: key })
+        }
       })
-      const csv = [headers, ...rows].map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n')
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-      const url = URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `members_${new Date().toISOString().split('T')[0]}.csv`
-      link.click()
-      URL.revokeObjectURL(url)
-      showToast(`Exported ${dataToExport.length} members`, 'success')
-    }
+    })
+    // Sort: days asc, then months asc, then years asc
+    opts.sort((a, b) => {
+      const toMonths = (val: string) => {
+        const [num, unit] = val.split(' ')
+        const n = parseInt(num)
+        if (unit === 'DAYS') return n / 30
+        if (unit === 'MONTHS') return n
+        if (unit === 'YEARS') return n * 12
+        return n
+      }
+      return toMonths(a.value) - toMonths(b.value)
+    })
+    return opts
+  }, [membershipPlans, plansForFilter, filters.plan])
 
-    const columns: Column<MemberDTO>[] = [
-      {
-        key: "fullName",
-        header: "Member",
-        width: "auto",
-        render: (member) => (
-          <div
-            className="member-cell"
-            onClick={(e) => { e.stopPropagation(); handleActionClick(member) }}
-            style={{ cursor: 'pointer' }}
-          >
-            <div className="member-avatar-wrapper">
-              <span className={`status-dot ${getStatusDotClass(member)}`} />
-              <Avatar
-                name={member.fullName}
-                size="sm"
-                avatarId={localStorage.getItem(`avatar_${member.userId}`) || (member as any).avatarId}
-                userId={member.userId}
-              />
-            </div>
-                  <div className="member-cell__info">
-                    <span className="member-name">{member.fullName}</span>
-                    <div className="member-cell__sub">
-                      <span className="member-email">{member.email}</span>
-                      {member.planName && (
-                        <span className={`member-inline-plan ${getPlanClass(member.planName)}`}>
-                          {member.planName}
-                        </span>
-                      )}
-                    </div>
-                  </div>
+  const categoryLabels: Record<string, string> = {
+    STANDARD: 'Standard', PREMIUM: 'Premium', VIP: 'VIP Elite',
+    CORPORATE: 'Corporate', STUDENT: 'Student', CUSTOM: 'Custom',
+  }
+
+  const categoryColors: Record<string, string> = {
+    STANDARD: '#3B82F6', PREMIUM: '#8B5CF6', VIP: '#F59E0B',
+    CORPORATE: '#10B981', STUDENT: '#6366F1', CUSTOM: '#EC4899',
+  }
+
+  const columns: Column<MemberDTO>[] = [
+    {
+      key: "fullName",
+      header: "Member",
+      width: "auto",
+      render: (member) => (
+        <div
+          className="member-cell"
+          onClick={(e) => { e.stopPropagation(); handleActionClick(member) }}
+          style={{ cursor: 'pointer' }}
+        >
+          <div className="member-avatar-wrapper">
+            <span className={`status-dot ${getStatusDotClass(member)}`} />
+            <Avatar
+              name={member.fullName}
+              size="sm"
+              avatarId={localStorage.getItem(`avatar_${member.userId}`) || (member as any).avatarId}
+              userId={member.userId}
+            />
           </div>
-        ),
-      },
-      {
-        key: "planName",
-        header: "Membership",
-        width: "150px",
-        render: (member) => {
-            return (
-              <div className="member-plan-cell">
-                <span className={`member-plan-badge ${getPlanClass(member.planName)}`}>
-                  <span className="plan-icon">{getPlanIcon(member.planName)}</span>
-                  {member.planName || 'No Plan'}
+          <div className="member-cell__info">
+            <span className="member-name">{member.fullName}</span>
+            <div className="member-cell__sub">
+              <span className="member-email">{member.email}</span>
+              {member.planName && (
+                <span className={`member-inline-plan ${getPlanClass(member.planName)}`}>
+                  {member.planName}
                 </span>
+              )}
+            </div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "planName",
+      header: "Membership",
+      width: "150px",
+      render: (member) => (
+        <div className="member-plan-cell">
+          <span className={`member-plan-badge ${getPlanClass(member.planName)}`}>
+            <span className="plan-icon">{getPlanIcon(member.planName)}</span>
+            {member.planName || 'No Plan'}
+          </span>
+        </div>
+      ),
+    },
+    {
+      key: "phone",
+      header: "Phone",
+      width: "130px",
+      render: (member) => {
+        const phone = member.phone || member.phoneNumber || (member as any).phoneNumber
+        if (!phone) return <span className="member-phone member-phone--none">—</span>
+        return (
+          <a href={`tel:${phone}`} className="member-phone" onClick={(e) => e.stopPropagation()}>
+            <FiPhone size={12} />
+            <span>{phone}</span>
+          </a>
+        )
+      },
+    },
+    {
+      key: "paymentStatus",
+      header: "Payment",
+      width: "100px",
+      render: (member) => {
+        const status = getPaymentStatus(member)
+        return (
+          <div className="member-payment-cell">
+            <span className={`payment-badge ${getPaymentBadgeClass(status)}`}>
+              {status.charAt(0).toUpperCase() + status.slice(1)}
+            </span>
+          </div>
+        )
+      },
+    },
+    {
+      key: "expiryDate",
+      header: "Validity",
+      width: "110px",
+      render: (member) => {
+        const { date, daysLeft, isExpired } = getExpiryInfo(member)
+        if (!date) return <span className="member-date member-date--none">No plan</span>
+
+        const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+
+        return (
+          <div className="member-expiry-cell">
+            <span className={`member-days-left ${isExpired ? 'member-days-left--expired' : daysLeft !== null && daysLeft <= 7 ? 'member-days-left--warning' : ''}`}>
+              {isExpired ? `${Math.abs(daysLeft || 0)}d overdue` : `${daysLeft}d left`}
+            </span>
+            <span className="member-expiry-date">{dateStr}</span>
+          </div>
+        )
+      },
+    },
+    {
+      key: "status",
+      header: "Status",
+      width: "110px",
+      render: (member) => {
+        const { isExpired, daysLeft } = getExpiryInfo(member)
+        let statusText = member.status || 'Unknown'
+        let statusClass = 'status-badge'
+
+        if (isExpired) {
+          statusText = 'Lapsed'
+          statusClass += ' status-badge--danger'
+        } else if (daysLeft !== null && daysLeft <= 7 && daysLeft > 0) {
+          statusText = 'Expiring'
+          statusClass += ' status-badge--warning'
+        } else if ((member.status || '').toLowerCase() === 'active') {
+          statusText = 'Active'
+          statusClass += ' status-badge--success'
+        } else {
+          statusText = 'Inactive'
+          statusClass += ' status-badge--muted'
+        }
+
+        return (
+          <div className="member-status-cell">
+            <span className={statusClass}>
+              <span className="status-badge__dot" />
+              {statusText}
+            </span>
+          </div>
+        )
+      },
+    },
+    {
+      key: "lastCheckIn",
+      header: "Last Check-in",
+      // MEDIUM #5: hide at <1100px via className on the cell + CSS
+      width: "110px",
+      render: (member) => {
+        const { text, className } = formatCheckIn(member)
+        return (
+          <div className="member-checkin-cell col-hide-1100">
+            <span className={`checkin-text ${className}`}>{text}</span>
+          </div>
+        )
+      },
+    },
+    {
+      key: "joinDate",
+      header: "Joined",
+      width: "110px",
+      render: (member) => {
+        const { date, tenure } = formatJoinDate(member)
+        return (
+          <div className="member-join-cell col-hide-1100">
+            <span className="join-date">{date}</span>
+            {tenure && <span className="join-tenure">{tenure}</span>}
+          </div>
+        )
+      },
+    },
+    {
+      key: "actions",
+      header: "",
+      width: "100px",
+      render: (member) => {
+        const isHovered = hoveredRowId === member.userId
+        return (
+          <div className="member-actions">
+            <div className={`quick-actions ${isHovered ? 'quick-actions--visible' : ''}`}>
+              <button
+                className="quick-action-btn quick-action-btn--renew"
+                onClick={(e) => { e.stopPropagation(); handleActionClick(member); }}
+                title="Manage Plan"
+              >
+                <FiPackage size={14} />
+              </button>
+              <button
+                className="quick-action-btn quick-action-btn--message"
+                onClick={(e) => { e.stopPropagation(); handleSendMessage(member); }}
+                title="Send Message"
+              >
+                <FiMessageSquare size={14} />
+              </button>
+            </div>
+            <ActionMenuButton onClick={(e) => { e.stopPropagation(); handleActionClick(member); }} />
+          </div>
+        )
+      },
+    },
+  ]
+
+  // LOW #3: Retention trend icon + color
+  const RetentionTrendIcon = stats.retentionTrend === 'up'
+    ? <FiTrendingUp size={10} />
+    : stats.retentionTrend === 'down'
+    ? <FiTrendingDown size={10} />
+    : <FiMinus size={10} />
+
+  const retentionTrendClass = stats.retentionTrend === 'up'
+    ? 'retention-trend--up'
+    : stats.retentionTrend === 'down'
+    ? 'retention-trend--down'
+    : 'retention-trend--flat'
+
+  return (
+    <div className="pg-page">
+      {/* Header */}
+      <header className="pg-header">
+        <div className="pg-header__row-1">
+          <div className="pg-header__title-group">
+            <div className="pg-header__icon">
+              <FiUsers size={18} />
+            </div>
+            <div>
+              <h1 className="pg-header__title">Members</h1>
+              {/* HIGH #9: removed redundant total count, keep only "new this month" */}
+              <span className="pg-header__subtitle">{stats.newThisMonth} new this month</span>
+            </div>
+          </div>
+
+          {/* Stats Cards */}
+          <div className="pg-stats">
+            <button
+              className={`pg-stat-card ${activeStatusFilter === 'all' ? 'pg-stat-card--active' : ''}`}
+              onClick={() => setActiveStatusFilter('all')}
+            >
+              <div className="pg-stat-card__icon pg-stat-card__icon--total"><FiUsers size={14} /></div>
+              <div className="pg-stat-card__data">
+                <span className="pg-stat-card__value">{stats.total}</span>
+                <span className="pg-stat-card__label">Total</span>
               </div>
-            )
-          },
-      },
-      {
-        key: "phone",
-        header: "Phone",
-        width: "130px",
-        render: (member) => {
-          const phone = member.phone || member.phoneNumber || (member as any).phoneNumber
-          if (!phone) return <span className="member-phone member-phone--none">—</span>
-          return (
-            <a href={`tel:${phone}`} className="member-phone" onClick={(e) => e.stopPropagation()}>
-              <FiPhone size={12} />
-              <span>{phone}</span>
-            </a>
-          )
-        },
-      },
-      {
-        key: "paymentStatus",
-        header: "Payment",
-        width: "100px",
-        render: (member) => {
-          const status = getPaymentStatus(member)
-          return (
-            <div className="member-payment-cell">
-              <span className={`payment-badge ${getPaymentBadgeClass(status)}`}>
-                {status.charAt(0).toUpperCase() + status.slice(1)}
-              </span>
+            </button>
+            <button
+              className={`pg-stat-card ${activeStatusFilter === 'active' ? 'pg-stat-card--active' : ''}`}
+              onClick={() => setActiveStatusFilter('active')}
+            >
+              <div className="pg-stat-card__icon pg-stat-card__icon--active"><FiUserCheck size={14} /></div>
+              <div className="pg-stat-card__data">
+                <span className="pg-stat-card__value pg-stat-card__value--green">{stats.activeCount}</span>
+                <span className="pg-stat-card__label">Active</span>
+              </div>
+            </button>
+            <button
+              className={`pg-stat-card ${activeStatusFilter === 'expiring' ? 'pg-stat-card--active' : ''}`}
+              onClick={() => setActiveStatusFilter('expiring')}
+            >
+              <div className="pg-stat-card__icon pg-stat-card__icon--expiring"><FiAlertTriangle size={14} /></div>
+              <div className="pg-stat-card__data">
+                <span className="pg-stat-card__value pg-stat-card__value--amber">{stats.expiringSoon}</span>
+                <span className="pg-stat-card__label">Expiring</span>
+              </div>
+              {stats.expiringSoon > 0 && <span className="pg-stat-card__pulse" />}
+            </button>
+            <button
+              className={`pg-stat-card ${activeStatusFilter === 'inactive' ? 'pg-stat-card--active' : ''}`}
+              onClick={() => setActiveStatusFilter('inactive')}
+            >
+              <div className="pg-stat-card__icon pg-stat-card__icon--inactive"><FiUser size={14} /></div>
+              <div className="pg-stat-card__data">
+                <span className="pg-stat-card__value pg-stat-card__value--red">{stats.expiredCount}</span>
+                <span className="pg-stat-card__label">Inactive</span>
+              </div>
+            </button>
+            {/* LOW #3: retention card with trend delta */}
+            <div className="pg-stat-card pg-stat-card--no-click">
+              <div className="pg-stat-card__icon pg-stat-card__icon--special"><FiPercent size={14} /></div>
+              <div className="pg-stat-card__data">
+                <span className="pg-stat-card__value pg-stat-card__value--indigo">{stats.retentionRate}%</span>
+                <span className="pg-stat-card__label">Retention</span>
+              </div>
+              {stats.retentionDelta > 0 && (
+                <span className={`retention-trend ${retentionTrendClass}`}>
+                  {RetentionTrendIcon}
+                  {stats.retentionDelta}
+                </span>
+              )}
             </div>
-          )
-        },
-      },
-      {
-        key: "expiryDate",
-        header: "Validity",
-        width: "110px",
-        render: (member) => {
-          const { date, daysLeft, isExpired } = getExpiryInfo(member)
-          if (!date) return <span className="member-date member-date--none">No plan</span>
+          </div>
 
-          const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+          <div className="pg-header__actions">
+            {/* LOW #2: export button with spin → checkmark */}
+            <button
+              className={`pg-btn pg-btn--icon export-btn ${exportState === 'exporting' ? 'pg-btn--spin' : ''} ${exportState === 'done' ? 'export-btn--done' : ''}`}
+              onClick={handleExportCSV}
+              title="Export as CSV"
+              disabled={exportState === 'exporting'}
+            >
+              {exportState === 'done' ? <FiCheck size={14} /> : <FiDownload size={14} />}
+            </button>
+            <button className="pg-btn pg-btn--secondary" onClick={() => setIsMembershipModalOpen(true)}>
+              <FiPackage size={14} />
+              <span>Plans</span>
+            </button>
+            <button className="pg-btn pg-btn--primary" onClick={() => setIsCreateModalOpen(true)}>
+              <FiUserPlus size={14} />
+              <span>Add Member</span>
+            </button>
+          </div>
+        </div>
 
-          return (
-            <div className="member-expiry-cell">
-              <span className={`member-days-left ${isExpired ? 'member-days-left--expired' : daysLeft !== null && daysLeft <= 7 ? 'member-days-left--warning' : ''}`}>
-                {isExpired ? `${Math.abs(daysLeft || 0)}d overdue` : `${daysLeft}d left`}
-              </span>
-              <span className="member-expiry-date">{dateStr}</span>
-            </div>
-          )
-        },
-      },
-      {
-        key: "status",
-        header: "Status",
-        width: "110px",
-        render: (member) => {
-          const { isExpired, daysLeft } = getExpiryInfo(member)
-          let statusText = member.status || 'Unknown'
-          let statusClass = 'status-badge'
-
-          if (isExpired) {
-            statusText = 'Lapsed'
-            statusClass += ' status-badge--danger'
-          } else if (daysLeft !== null && daysLeft <= 7 && daysLeft > 0) {
-            statusText = 'Expiring'
-            statusClass += ' status-badge--warning'
-          } else if ((member.status || '').toLowerCase() === 'active') {
-            statusText = 'Active'
-            statusClass += ' status-badge--success'
-          } else {
-            statusText = 'Inactive'
-            statusClass += ' status-badge--muted'
-          }
-
-          return (
-            <div className="member-status-cell">
-              <span className={statusClass}>
-                <span className="status-badge__dot" />
-                {statusText}
-              </span>
-            </div>
-          )
-        },
-      },
-      {
-        key: "lastCheckIn",
-        header: "Last Check-in",
-        width: "110px",
-        render: (member) => {
-          const { text, className } = formatCheckIn(member)
-          return (
-            <div className="member-checkin-cell">
-              <span className={`checkin-text ${className}`}>{text}</span>
-            </div>
-          )
-        },
-      },
-      {
-        key: "joinDate",
-        header: "Joined",
-        width: "110px",
-        render: (member) => {
-          const { date, tenure } = formatJoinDate(member)
-          return (
-            <div className="member-join-cell">
-              <span className="join-date">{date}</span>
-              {tenure && <span className="join-tenure">{tenure}</span>}
-            </div>
-          )
-        },
-      },
-      {
-        key: "actions",
-        header: "",
-        width: "100px",
-        render: (member) => {
-          const isHovered = hoveredRowId === member.userId
-          return (
-            <div className="member-actions">
-              <div className={`quick-actions ${isHovered ? 'quick-actions--visible' : ''}`}>
-                  <button
-                    className="quick-action-btn quick-action-btn--renew"
-                    onClick={(e) => { e.stopPropagation(); handleActionClick(member); }}
-                    title="Manage Plan"
-                  >
-                    <FiPackage size={14} />
-                  </button>
-
-                <button
-                  className="quick-action-btn quick-action-btn--message"
-                  onClick={(e) => { e.stopPropagation(); handleSendMessage(member); }}
-                  title="Send Message"
-                >
-                  <FiMessageSquare size={14} />
+        {/* Row 2: Search + Filters */}
+        <div className="pg-header__row-2">
+          <div className="pg-header__right">
+            <div className="pg-search">
+              <FiSearch className="pg-search__icon" />
+              <input
+                type="text"
+                placeholder="Search members..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pg-search__input"
+              />
+              {searchQuery && (
+                <button className="pg-search__clear" onClick={() => setSearchQuery('')}>
+                  <FiX size={14} />
                 </button>
-              </div>
-              <ActionMenuButton onClick={(e) => { e.stopPropagation(); handleActionClick(member); }} />
+              )}
             </div>
-          )
-        },
-      },
-    ]
 
-    return (
-      <div className="pg-page">
-          {/* Header */}
-            <header className="pg-header">
-              <div className="pg-header__row-1">
-                <div className="pg-header__title-group">
-                  <div className="pg-header__icon">
-                    <FiUsers size={18} />
-                  </div>
-                  <div>
-                    <h1 className="pg-header__title">Members</h1>
-                    <span className="pg-header__subtitle">{stats.total} total &middot; {stats.newThisMonth} new this month</span>
-                  </div>
-                </div>
+            {/* MEDIUM #6: styled filter panel with pill chips for Status */}
+            <div className="pg-filter-wrap" ref={filterPanelRef}>
+              <button
+                className={`pg-btn pg-btn--icon ${isFilterPanelOpen ? 'pg-btn--active' : ''} ${activeFilterCount > 0 ? 'pg-btn--has-filter' : ''}`}
+                onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
+              >
+                <FiFilter size={14} />
+                {activeFilterCount > 0 && <span className="pg-btn__badge">{activeFilterCount}</span>}
+              </button>
 
-                {/* Stats Cards */}
-                <div className="pg-stats">
-                  <button
-                    className={`pg-stat-card ${activeStatusFilter === 'all' ? 'pg-stat-card--active' : ''}`}
-                    onClick={() => setActiveStatusFilter('all')}
-                  >
-                    <div className="pg-stat-card__icon pg-stat-card__icon--total"><FiUsers size={14} /></div>
-                    <div className="pg-stat-card__data">
-                      <span className="pg-stat-card__value">{stats.total}</span>
-                      <span className="pg-stat-card__label">Total</span>
-                    </div>
-                  </button>
-                  <button
-                    className={`pg-stat-card ${activeStatusFilter === 'active' ? 'pg-stat-card--active' : ''}`}
-                    onClick={() => setActiveStatusFilter('active')}
-                  >
-                    <div className="pg-stat-card__icon pg-stat-card__icon--active"><FiUserCheck size={14} /></div>
-                    <div className="pg-stat-card__data">
-                      <span className="pg-stat-card__value pg-stat-card__value--green">{stats.activeCount}</span>
-                      <span className="pg-stat-card__label">Active</span>
-                    </div>
-                  </button>
-                  <button
-                    className={`pg-stat-card ${activeStatusFilter === 'expiring' ? 'pg-stat-card--active' : ''}`}
-                    onClick={() => setActiveStatusFilter('expiring')}
-                  >
-                    <div className="pg-stat-card__icon pg-stat-card__icon--expiring"><FiAlertTriangle size={14} /></div>
-                    <div className="pg-stat-card__data">
-                      <span className="pg-stat-card__value pg-stat-card__value--amber">{stats.expiringSoon}</span>
-                      <span className="pg-stat-card__label">Expiring</span>
-                    </div>
-                    {stats.expiringSoon > 0 && <span className="pg-stat-card__pulse" />}
-                  </button>
-                  <button
-                    className={`pg-stat-card ${activeStatusFilter === 'inactive' ? 'pg-stat-card--active' : ''}`}
-                    onClick={() => setActiveStatusFilter('inactive')}
-                  >
-                    <div className="pg-stat-card__icon pg-stat-card__icon--inactive"><FiUser size={14} /></div>
-                    <div className="pg-stat-card__data">
-                      <span className="pg-stat-card__value pg-stat-card__value--red">{stats.expiredCount}</span>
-                      <span className="pg-stat-card__label">Inactive</span>
-                    </div>
-                  </button>
-                  <div className="pg-stat-card pg-stat-card--no-click">
-                    <div className="pg-stat-card__icon pg-stat-card__icon--special"><FiPercent size={14} /></div>
-                    <div className="pg-stat-card__data">
-                      <span className="pg-stat-card__value pg-stat-card__value--indigo">{stats.retentionRate}%</span>
-                      <span className="pg-stat-card__label">Retention</span>
-                    </div>
-                  </div>
-                </div>
-
-                  <div className="pg-header__actions">
-                    <button className="pg-btn pg-btn--icon" onClick={handleExportCSV} title="Export CSV">
-                      <FiDownload size={14} />
-                    </button>
-                    <button className="pg-btn pg-btn--secondary" onClick={() => setIsMembershipModalOpen(true)}>
-                      <FiPackage size={14} />
-                      <span>Plans</span>
-                    </button>
-                    <button className="pg-btn pg-btn--primary" onClick={() => setIsCreateModalOpen(true)}>
-                      <FiUserPlus size={14} />
-                      <span>Add Member</span>
-                    </button>
-                  </div>
-              </div>
-
-              {/* Row 2: Tabs + Search + Filters */}
-              <div className="pg-header__row-2">
-                <div className="pg-tabs">
-                  <button
-                    className={`pg-tab ${activeStatusFilter === 'all' ? 'pg-tab--active' : ''}`}
-                    onClick={() => setActiveStatusFilter('all')}
-                  >
-                    All
-                    <span className="pg-tab__count">{stats.total}</span>
-                  </button>
-                  <button
-                    className={`pg-tab ${activeStatusFilter === 'active' ? 'pg-tab--active' : ''}`}
-                    onClick={() => setActiveStatusFilter('active')}
-                  >
-                    Active
-                    <span className="pg-tab__count pg-tab__count--active">{stats.activeCount}</span>
-                  </button>
-                  <button
-                    className={`pg-tab ${activeStatusFilter === 'expiring' ? 'pg-tab--active' : ''}`}
-                    onClick={() => setActiveStatusFilter('expiring')}
-                  >
-                    Expiring
-                    {stats.expiringSoon > 0 && (
-                      <span className="pg-tab__count pg-tab__count--warning">{stats.expiringSoon}</span>
-                    )}
-                  </button>
-                  <button
-                    className={`pg-tab ${activeStatusFilter === 'inactive' ? 'pg-tab--active' : ''}`}
-                    onClick={() => setActiveStatusFilter('inactive')}
-                  >
-                    Inactive
-                    {stats.expiredCount > 0 && (
-                      <span className="pg-tab__count pg-tab__count--muted">{stats.expiredCount}</span>
-                    )}
-                  </button>
-                </div>
-
-                <div className="pg-header__right">
-                  <div className="pg-search">
-                    <FiSearch className="pg-search__icon" />
-                    <input
-                      type="text"
-                      placeholder="Search members..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pg-search__input"
-                    />
-                    {searchQuery && (
-                      <button className="pg-search__clear" onClick={() => setSearchQuery('')}>
-                        <FiX size={14} />
+              {isFilterPanelOpen && (
+                <div className="pg-filter-dropdown">
+                  <div className="pg-filter-dropdown__header">
+                    <span>Filters</span>
+                    {activeFilterCount > 0 && (
+                      <button className="pg-filter-dropdown__clear" onClick={handleResetFilters}>
+                        Clear
                       </button>
                     )}
                   </div>
 
-                  <div className="pg-filter-wrap" ref={filterPanelRef}>
-                    <button
-                      className={`pg-btn pg-btn--icon ${isFilterPanelOpen ? 'pg-btn--active' : ''} ${activeFilterCount > 0 ? 'pg-btn--has-filter' : ''}`}
-                      onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
-                    >
-                      <FiFilter size={14} />
-                      {activeFilterCount > 0 && <span className="pg-btn__badge">{activeFilterCount}</span>}
-                    </button>
-
-                    {isFilterPanelOpen && (
-                      <div className="pg-filter-dropdown">
-                        <div className="pg-filter-dropdown__header">
-                          <span>Filters</span>
-                          {activeFilterCount > 0 && (
-                            <button className="pg-filter-dropdown__clear" onClick={handleResetFilters}>
-                              Clear
+                  <div className="pg-filter-dropdown__body">
+                      {/* ── STATUS ── pill chips */}
+                      <div className="pg-filter-dropdown__row pg-filter-dropdown__row--col">
+                        <label className="pg-filter-dropdown__label">Status</label>
+                        <div className="pg-filter-pills">
+                          {['', 'Active', 'Expired'].map(val => (
+                            <button
+                              key={val}
+                              className={`pg-filter-pill ${(filters.status[0] || '') === val ? 'pg-filter-pill--active' : ''}`}
+                              onClick={() => setFilters(prev => ({ ...prev, status: val ? [val] : [] }))}
+                            >
+                              {val || 'All'}
                             </button>
-                          )}
-                        </div>
-
-                        <div className="pg-filter-dropdown__body">
-                          <div className="pg-filter-dropdown__row">
-                            <label className="pg-filter-dropdown__label">Status</label>
-                            <select
-                              className="pg-filter-dropdown__select"
-                              value={filters.status[0] || ''}
-                              onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value ? [e.target.value] : [] }))}
-                            >
-                              <option value="">All</option>
-                              <option value="Active">Active</option>
-                              <option value="Expired">Expired</option>
-                            </select>
-                          </div>
-
-                          <div className="pg-filter-dropdown__row">
-                            <label className="pg-filter-dropdown__label">Plan</label>
-                            <select
-                              className="pg-filter-dropdown__select"
-                              value={filters.plan[0] || ''}
-                              onChange={(e) => setFilters(prev => ({ ...prev, plan: e.target.value ? [e.target.value] : [] }))}
-                            >
-                              <option value="">All</option>
-                              {planNames.map(name => (
-                                <option key={name} value={name}>{name}</option>
-                              ))}
-                            </select>
-                          </div>
-
-                          <div className="pg-filter-dropdown__row">
-                            <label className="pg-filter-dropdown__label">Duration</label>
-                            <select
-                              className="pg-filter-dropdown__select"
-                              value={filters.planDuration}
-                              onChange={(e) => setFilters(prev => ({ ...prev, planDuration: e.target.value }))}
-                            >
-                              <option value="">All</option>
-                              <option value="1 Month">1 Month</option>
-                              <option value="3 Months">3 Months</option>
-                              <option value="6 Months">6 Months</option>
-                              <option value="12 Months">12 Months</option>
-                            </select>
-                          </div>
-
-                          <div className="pg-filter-dropdown__row">
-                            <label className="pg-filter-dropdown__label">Joined</label>
-                            <select
-                              className="pg-filter-dropdown__select"
-                              value={filters.joinedPeriod}
-                              onChange={(e) => setFilters(prev => ({ ...prev, joinedPeriod: e.target.value }))}
-                            >
-                              <option value="">All Time</option>
-                              <option value="today">Today</option>
-                              <option value="this-week">This Week</option>
-                              <option value="this-month">This Month</option>
-                              <option value="last-3-months">Last 3 Months</option>
-                            </select>
-                          </div>
+                          ))}
                         </div>
                       </div>
-                    )}
-                  </div>
 
-                  <button
-                    className="pg-btn pg-btn--icon"
-                    onClick={() => { loadMembersPaginated(); refreshMembers(); }}
-                    title="Refresh"
-                  >
-                    <FiRefreshCw size={14} />
-                  </button>
+                      {/* ── CATEGORY ── derived from real plans */}
+                      {planCategories.length > 0 && (
+                        <div className="pg-filter-dropdown__row pg-filter-dropdown__row--col">
+                          <label className="pg-filter-dropdown__label">
+                            Category
+                            {plansLoading && <span className="pg-filter-label__loading" />}
+                          </label>
+                          <div className="pg-filter-pills">
+                            <button
+                              className={`pg-filter-pill ${!filters.planCategory ? 'pg-filter-pill--active' : ''}`}
+                              onClick={() => setFilters(prev => ({ ...prev, planCategory: "", plan: [], planDuration: "" }))}
+                            >
+                              All
+                            </button>
+                            {planCategories.map(cat => (
+                              <button
+                                key={cat}
+                                className={`pg-filter-pill pg-filter-pill--category ${filters.planCategory === cat ? 'pg-filter-pill--active' : ''}`}
+                                style={{ '--cat-color': categoryColors[cat] || '#6366F1' } as React.CSSProperties}
+                                onClick={() => setFilters(prev => ({
+                                  ...prev,
+                                  planCategory: prev.planCategory === cat ? "" : cat,
+                                  plan: [],
+                                  planDuration: "",
+                                }))}
+                              >
+                                {categoryLabels[cat] || cat}
+                                <span className="pg-filter-pill__count">
+                                  {membershipPlans.filter(p => p.category === cat).length}
+                                </span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* ── PLAN ── pills with color dot + icon from real plans */}
+                      <div className="pg-filter-dropdown__row pg-filter-dropdown__row--col">
+                        <label className="pg-filter-dropdown__label">Plan</label>
+                        {plansLoading ? (
+                          <div className="pg-filter-plans-loading">
+                            <span className="pg-filter-skeleton" />
+                            <span className="pg-filter-skeleton pg-filter-skeleton--sm" />
+                          </div>
+                        ) : plansForFilter.length > 0 ? (
+                          <div className="pg-filter-pills pg-filter-pills--plans">
+                            <button
+                              className={`pg-filter-pill ${filters.plan.length === 0 ? 'pg-filter-pill--active' : ''}`}
+                              onClick={() => setFilters(prev => ({ ...prev, plan: [], planDuration: "" }))}
+                            >
+                              All
+                            </button>
+                            {plansForFilter.map(plan => (
+                              <button
+                                key={plan.planId ?? plan.planName}
+                                className={`pg-filter-pill pg-filter-pill--plan ${filters.plan.includes(plan.planName) ? 'pg-filter-pill--plan-active' : ''}`}
+                                style={{ '--plan-color': plan.planColor || '#6366F1' } as React.CSSProperties}
+                                onClick={() => setFilters(prev => ({
+                                  ...prev,
+                                  plan: prev.plan.includes(plan.planName) ? [] : [plan.planName],
+                                  planDuration: "",
+                                }))}
+                                title={plan.description || plan.planName}
+                              >
+                                {plan.iconName && <span className="pg-filter-pill__icon">{plan.iconName}</span>}
+                                {plan.planName}
+                                {plan.memberCount != null && (
+                                  <span className="pg-filter-pill__count">{plan.memberCount}</span>
+                                )}
+                              </button>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="pg-filter-empty-hint">No plans configured yet</span>
+                        )}
+                      </div>
+
+                      {/* ── DURATION ── derived from selected plan's real variants */}
+                      <div className="pg-filter-dropdown__row pg-filter-dropdown__row--col">
+                        <label className="pg-filter-dropdown__label">
+                          Duration
+                          {filters.plan.length > 0 && (
+                            <span className="pg-filter-label__sub"> · {filters.plan[0]}</span>
+                          )}
+                        </label>
+                        {durationOptions.length > 0 ? (
+                          <div className="pg-filter-pills">
+                            <button
+                              className={`pg-filter-pill ${!filters.planDuration ? 'pg-filter-pill--active' : ''}`}
+                              onClick={() => setFilters(prev => ({ ...prev, planDuration: "" }))}
+                            >
+                              Any
+                            </button>
+                            {durationOptions.map(opt => (
+                              <button
+                                key={opt.value}
+                                className={`pg-filter-pill ${filters.planDuration === opt.value ? 'pg-filter-pill--active' : ''}`}
+                                onClick={() => setFilters(prev => ({ ...prev, planDuration: prev.planDuration === opt.value ? "" : opt.value }))}
+                              >
+                                {opt.label}
+                              </button>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="pg-filter-pills">
+                            {['', '1 MONTHS', '3 MONTHS', '6 MONTHS', '12 MONTHS', '1 YEARS'].map(val => (
+                              <button
+                                key={val}
+                                className={`pg-filter-pill ${filters.planDuration === val ? 'pg-filter-pill--active' : ''}`}
+                                onClick={() => setFilters(prev => ({ ...prev, planDuration: val }))}
+                              >
+                                {val === '' ? 'Any'
+                                  : val === '12 MONTHS' ? '1 Year'
+                                  : val.replace(' MONTHS', ' Mo').replace(' YEARS', ' Yr')}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* ── JOINED ── select */}
+                      <div className="pg-filter-dropdown__row">
+                        <label className="pg-filter-dropdown__label">Joined</label>
+                        <select
+                          className="pg-filter-dropdown__select"
+                          value={filters.joinedPeriod}
+                          onChange={(e) => setFilters(prev => ({ ...prev, joinedPeriod: e.target.value }))}
+                        >
+                          <option value="">All Time</option>
+                          <option value="today">Today</option>
+                          <option value="this-week">This Week</option>
+                          <option value="this-month">This Month</option>
+                          <option value="last-3-months">Last 3 Months</option>
+                        </select>
+                      </div>
+                    </div>
                 </div>
-              </div>
-            </header>
+              )}
+            </div>
 
-        {/* Active Filters Display */}
-        {activeFilterCount > 0 && (
-          <div className="pg-chips">
-            {filters.status.length > 0 && (
-              <span className="pg-chip">
-                Status: {filters.status[0]}
-                <button onClick={() => setFilters(prev => ({ ...prev, status: [] }))}>
-                  &times;
-                </button>
-              </span>
-            )}
-            {filters.plan.length > 0 && (
-              <span className="pg-chip">
-                Plan: {filters.plan[0]}
-                <button onClick={() => setFilters(prev => ({ ...prev, plan: [] }))}>
-                  &times;
-                </button>
-              </span>
-            )}
-            {filters.planDuration && (
-              <span className="pg-chip">
-                Duration: {filters.planDuration}
-                <button onClick={() => setFilters(prev => ({ ...prev, planDuration: "" }))}>
-                  &times;
-                </button>
-              </span>
-            )}
-            {filters.joinedPeriod && (
-              <span className="pg-chip">
-                Joined: {filters.joinedPeriod.replace(/-/g, ' ')}
-                <button onClick={() => setFilters(prev => ({ ...prev, joinedPeriod: "" }))}>
-                  &times;
-                </button>
-              </span>
-            )}
-            <button className="pg-chips__clear" onClick={handleResetFilters}>
-              Clear All
+            {/* MEDIUM #4: refresh button with spin while loading */}
+            <button
+              className={`pg-btn pg-btn--icon ${isRefreshing ? 'pg-btn--spin' : ''}`}
+              onClick={handleRefresh}
+              title="Refresh"
+              disabled={isRefreshing}
+            >
+              <FiRefreshCw size={14} />
             </button>
           </div>
-        )}
+        </div>
+      </header>
 
-        {/* Batch Actions Bar */}
-        {selectedMemberIds.size > 0 && (
-          <div className="pg-batch">
-            <span className="pg-batch__count">{selectedMemberIds.size} selected</span>
-            <button className="pg-batch__btn" onClick={() => {
-              showToast(`Messaging ${selectedMemberIds.size} members`, 'success')
-              setSelectedMemberIds(new Set())
-            }}>
-              Message
-            </button>
-            <button className="pg-batch__btn pg-batch__btn--danger" onClick={() => {
-              if (window.confirm(`Are you sure you want to delete ${selectedMemberIds.size} members?`)) {
-                showToast(`Deleted ${selectedMemberIds.size} members`, 'success')
-                setSelectedMemberIds(new Set())
-              }
-            }}>
-              Delete
-            </button>
-            <button className="pg-batch__clear" onClick={() => setSelectedMemberIds(new Set())}>&times;</button>
+      {/* HIGH #7: Expiring Soon alert banner */}
+      {stats.expiringSoon > 0 && !expiringAlertDismissed && (
+        <div className="members-expiry-alert">
+          <FiAlertTriangle size={14} className="members-expiry-alert__icon" />
+          <span>
+            <strong>{stats.expiringSoon} membership{stats.expiringSoon > 1 ? 's' : ''}</strong> expiring within 7 days
+          </span>
+          <button
+            className="members-expiry-alert__action"
+            onClick={() => { setActiveStatusFilter('expiring'); setExpiringAlertDismissed(true) }}
+          >
+            View & Renew
+          </button>
+          <button className="members-expiry-alert__dismiss" onClick={() => setExpiringAlertDismissed(true)}>
+            <FiX size={12} />
+          </button>
+        </div>
+      )}
+
+      {/* Active Filters Display */}
+      {activeFilterCount > 0 && (
+        <div className="pg-chips">
+          {filters.status.length > 0 && (
+            <span className="pg-chip">
+              Status: {filters.status[0]}
+              <button onClick={() => setFilters(prev => ({ ...prev, status: [] }))}>&times;</button>
+            </span>
+          )}
+          {filters.planCategory && (
+            <span className="pg-chip pg-chip--category" style={{ '--cat-color': categoryColors[filters.planCategory] || '#6366F1' } as React.CSSProperties}>
+              {categoryLabels[filters.planCategory] || filters.planCategory}
+              <button onClick={() => setFilters(prev => ({ ...prev, planCategory: "", plan: [], planDuration: "" }))}>&times;</button>
+            </span>
+          )}
+          {filters.plan.length > 0 && (
+            <span className="pg-chip pg-chip--plan">
+              {filters.plan[0]}
+              <button onClick={() => setFilters(prev => ({ ...prev, plan: [], planDuration: "" }))}>&times;</button>
+            </span>
+          )}
+          {filters.planDuration && (
+            <span className="pg-chip">
+              {durationOptions.find(d => d.value === filters.planDuration)?.label || filters.planDuration}
+              <button onClick={() => setFilters(prev => ({ ...prev, planDuration: "" }))}>&times;</button>
+            </span>
+          )}
+          {filters.joinedPeriod && (
+            <span className="pg-chip">
+              Joined: {filters.joinedPeriod.replace(/-/g, ' ')}
+              <button onClick={() => setFilters(prev => ({ ...prev, joinedPeriod: "" }))}>&times;</button>
+            </span>
+          )}
+          <button className="pg-chips__clear" onClick={handleResetFilters}>Clear All</button>
+        </div>
+      )}
+
+      {/* Batch Actions Bar */}
+      {selectedMemberIds.size > 0 && (
+        <div className="pg-batch">
+          <span className="pg-batch__count">{selectedMemberIds.size} selected</span>
+          <button className="pg-batch__btn" onClick={() => {
+            showToast(`Messaging ${selectedMemberIds.size} members`, 'success')
+            setSelectedMemberIds(new Set())
+          }}>
+            Message
+          </button>
+          {/* HIGH #8: open in-app modal instead of window.confirm */}
+          <button className="pg-batch__btn pg-batch__btn--danger" onClick={() => setBulkDeleteModalOpen(true)}>
+            Delete
+          </button>
+          <button className="pg-batch__clear" onClick={() => setSelectedMemberIds(new Set())}>&times;</button>
+        </div>
+      )}
+
+      {/* Main Table */}
+      <div className="pg-table-wrap members-table-wrapper">
+        {/* LOW #1: Rich empty state */}
+        {!loading && !allMembersLoading && paginatedFilteredMembers.length === 0 ? (
+          <div className="members-empty-state">
+            <div className="members-empty-state__icon">
+              <FiUsers size={32} />
+            </div>
+            <h3 className="members-empty-state__title">
+              {debouncedSearch || activeFilterCount > 0 || isUsingTabFilter
+                ? 'No members match your filters'
+                : 'No members yet'}
+            </h3>
+            <p className="members-empty-state__desc">
+              {debouncedSearch || activeFilterCount > 0 || isUsingTabFilter
+                ? 'Try adjusting your search or filters to find what you\'re looking for.'
+                : 'Add your first member to get started tracking memberships.'}
+            </p>
+            {debouncedSearch || activeFilterCount > 0 || isUsingTabFilter ? (
+              <button className="members-empty-state__btn members-empty-state__btn--secondary" onClick={handleResetFilters}>
+                <FiX size={14} /> Clear Filters
+              </button>
+            ) : (
+              <button className="members-empty-state__btn members-empty-state__btn--primary" onClick={() => setIsCreateModalOpen(true)}>
+                <FiUserPlus size={14} /> Add Member
+              </button>
+            )}
           </div>
-        )}
-
-        {/* Main Table */}
-        <div className="pg-table-wrap members-table-wrapper">
-            <DataTable
-                data={paginatedFilteredMembers}
-                keyExtractor={(member) => member.userId}
-                columns={columns as Column<MemberDTO>[]}
-                loading={isUsingTabFilter ? allMembersLoading : loading}
-                onRowClick={handleActionClick}
-                emptyMessage={
-                  debouncedSearch || activeFilterCount > 0 || isUsingTabFilter
-                    ? "No members match your filters"
-                    : "No members found. Add your first member!"
-                }
-                pagination={hasClientSideFilters && !isUsingTabFilter ? undefined : {
-                  currentPage,
-                  totalPages: tabFilterTotalPages,
-                  totalCount: tabFilterTotalCount,
-                  pageSize,
-                  pageSizeOptions: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
-                  onPageChange: setCurrentPage,
-                  onPageSizeChange: (size) => {
-                    setPageSize(size)
-                    setCurrentPage(0)
-                  },
-                }}
-              compact
-              selectable
-              stickyHeader
-              showRowNumbers
-              hideCheckboxUntilHover
-              selectedIds={selectedMemberIds}
-              onSelectionChange={setSelectedMemberIds}
-            mobileCardRender={(member, index) => {
-                const { daysLeft, isExpired } = getExpiryInfo(member)
-                const paymentStat = getPaymentStatus(member)
-                const memberPhone = member.phone || member.phoneNumber || (member as any).phoneNumber
-                return (
-                  <div className="member-card">
-                    <div className="member-card__header">
-                      <div className="member-card__user">
-                        <div className="member-avatar-wrapper">
-                          <span className={`status-dot ${getStatusDotClass(member)}`} />
-                          <Avatar name={member.fullName} size="md" />
-                        </div>
-                        <div className="member-card__info">
-                          <span className="member-card__name">{member.fullName}</span>
-                          <span className="member-card__plan">
-                            {getPlanIcon(member.planName)} {member.planName || 'No Plan'}
-                            {daysLeft !== null && (
-                              <span className={`member-card__expiry ${isExpired ? 'member-card__expiry--expired' : daysLeft <= 7 ? 'member-card__expiry--warning' : ''}`}>
-                                {isExpired ? `${Math.abs(daysLeft)}d overdue` : `${daysLeft}d left`}
-                              </span>
-                            )}
-                          </span>
-                          {memberPhone && (
-                            <a href={`tel:${memberPhone}`} className="member-card__phone" onClick={(e) => e.stopPropagation()}>
-                              <FiPhone size={12} /> {memberPhone}
-                            </a>
-                          )}
-                        </div>
+        ) : (
+          <DataTable
+            data={paginatedFilteredMembers}
+            keyExtractor={(member) => member.userId}
+            columns={columns as Column<MemberDTO>[]}
+            loading={isUsingTabFilter ? allMembersLoading : loading}
+            onRowClick={handleActionClick}
+            emptyMessage=""
+            pagination={hasClientSideFilters && !isUsingTabFilter ? undefined : {
+              currentPage,
+              totalPages: tabFilterTotalPages,
+              totalCount: tabFilterTotalCount,
+              pageSize,
+              pageSizeOptions: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+              onPageChange: setCurrentPage,
+              onPageSizeChange: (size) => {
+                setPageSize(size)
+                setCurrentPage(0)
+              },
+            }}
+            compact
+            selectable
+            stickyHeader
+            showRowNumbers
+            hideCheckboxUntilHover
+            selectedIds={selectedMemberIds}
+            onSelectionChange={setSelectedMemberIds}
+            mobileCardRender={(member) => {
+              const { daysLeft, isExpired } = getExpiryInfo(member)
+              const paymentStat = getPaymentStatus(member)
+              const memberPhone = member.phone || member.phoneNumber || (member as any).phoneNumber
+              return (
+                <div className="member-card">
+                  <div className="member-card__header">
+                    <div className="member-card__user">
+                      <div className="member-avatar-wrapper">
+                        <span className={`status-dot ${getStatusDotClass(member)}`} />
+                        <Avatar name={member.fullName} size="md" />
                       </div>
-                      <div className="member-card__badges">
-                        <span className={`payment-badge ${getPaymentBadgeClass(paymentStat)}`}>
-                          {paymentStat.charAt(0).toUpperCase() + paymentStat.slice(1)}
+                      <div className="member-card__info">
+                        <span className="member-card__name">{member.fullName}</span>
+                        <span className="member-card__plan">
+                          {getPlanIcon(member.planName)} {member.planName || 'No Plan'}
+                          {daysLeft !== null && (
+                            <span className={`member-card__expiry ${isExpired ? 'member-card__expiry--expired' : daysLeft <= 7 ? 'member-card__expiry--warning' : ''}`}>
+                              {isExpired ? `${Math.abs(daysLeft)}d overdue` : `${daysLeft}d left`}
+                            </span>
+                          )}
                         </span>
-                        <Badge variant={getStatusVariant(member.status)}>{member.status}</Badge>
+                        {memberPhone && (
+                          <a href={`tel:${memberPhone}`} className="member-card__phone" onClick={(e) => e.stopPropagation()}>
+                            <FiPhone size={12} /> {memberPhone}
+                          </a>
+                        )}
                       </div>
                     </div>
-                    <div className="member-card__actions">
-                      <button className="member-card__action" onClick={(e) => { e.stopPropagation(); handleActionClick(member); }}>
-                        <FiCalendar size={16} />
-                        Renew
-                      </button>
-                      <button className="member-card__action" onClick={(e) => { e.stopPropagation(); handleSendMessage(member); }}>
-                        <FiMessageSquare size={16} />
-                        Message
-                      </button>
-                      <ActionMenuButton onClick={(e) => { e.stopPropagation(); handleActionClick(member); }} />
+                    <div className="member-card__badges">
+                      <span className={`payment-badge ${getPaymentBadgeClass(paymentStat)}`}>
+                        {paymentStat.charAt(0).toUpperCase() + paymentStat.slice(1)}
+                      </span>
+                      <Badge variant={getStatusVariant(member.status)}>{member.status}</Badge>
                     </div>
                   </div>
-                )
-              }}
+                  <div className="member-card__actions">
+                    <button className="member-card__action" onClick={(e) => { e.stopPropagation(); handleActionClick(member); }}>
+                      <FiCalendar size={16} />
+                      Renew
+                    </button>
+                    <button className="member-card__action" onClick={(e) => { e.stopPropagation(); handleSendMessage(member); }}>
+                      <FiMessageSquare size={16} />
+                      Message
+                    </button>
+                    <ActionMenuButton onClick={(e) => { e.stopPropagation(); handleActionClick(member); }} />
+                  </div>
+                </div>
+              )
+            }}
           />
+        )}
       </div>
+
+      {/* HIGH #8: In-app bulk delete confirmation modal */}
+      {bulkDeleteModalOpen && (
+        <div className="members-confirm-overlay" onClick={() => setBulkDeleteModalOpen(false)}>
+          <div className="members-confirm-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="members-confirm-modal__icon">
+              <FiTrash2 size={24} />
+            </div>
+            <h3 className="members-confirm-modal__title">Delete {selectedMemberIds.size} member{selectedMemberIds.size > 1 ? 's' : ''}?</h3>
+            <p className="members-confirm-modal__desc">
+              This action cannot be undone. The selected {selectedMemberIds.size > 1 ? 'members' : 'member'} and all associated data will be permanently removed.
+            </p>
+            <div className="members-confirm-modal__actions">
+              <button className="members-confirm-modal__btn members-confirm-modal__btn--cancel" onClick={() => setBulkDeleteModalOpen(false)}>
+                Cancel
+              </button>
+              <button className="members-confirm-modal__btn members-confirm-modal__btn--confirm" onClick={handleBulkDeleteConfirm}>
+                <FiTrash2 size={14} /> Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modals */}
       {isActionModalOpen && selectedMember && (
-          <EnhancedMemberActionModal
-            isOpen={isActionModalOpen}
-            onClose={handleCloseActionModal}
-            member={selectedMember as unknown as User}
-            onEditProfile={() => { triggerRefresh(); refreshMembers(); }}
-            onRenewPlan={(member, packageId, amount, customDuration, skipTransaction) => {
-              handleRenewPlan(member as unknown as MemberDTO, packageId, amount, customDuration, skipTransaction);
-              triggerRefresh();
-            }}
-            onSendMessage={() => handleSendMessage(selectedMember)}
-          />
+        <EnhancedMemberActionModal
+          isOpen={isActionModalOpen}
+          onClose={handleCloseActionModal}
+          member={selectedMember as unknown as User}
+          onEditProfile={() => { triggerRefresh(); refreshMembers(); }}
+          onRenewPlan={(member, packageId, amount, customDuration, skipTransaction) => {
+            handleRenewPlan(member as unknown as MemberDTO, packageId, amount, customDuration, skipTransaction);
+            triggerRefresh();
+          }}
+          onSendMessage={() => handleSendMessage(selectedMember)}
+        />
       )}
 
       <CreateActionModal
@@ -1142,15 +1422,18 @@ const Members: React.FC = () => {
         initialView="memberForm"
       />
 
-    <TieredPlanManagement
-          isOpen={isMembershipModalOpen}
-          onClose={() => setIsMembershipModalOpen(false)}
-          onSuccess={() => {
+      <TieredPlanManagement
+        isOpen={isMembershipModalOpen}
+        onClose={() => setIsMembershipModalOpen(false)}
+        onSuccess={() => {
             triggerRefresh()
             refreshMembers()
-            api.getMemberPlanNames().then(setPlanNames).catch(() => {})
+            api.getMemberPlanNames().then(() => {}).catch(() => {})
+            membershipPlanApi.getAllTieredPlans()
+              .then(res => setMembershipPlans(res.data || []))
+              .catch(() => {})
           }}
-        />
+      />
     </div>
   )
 }

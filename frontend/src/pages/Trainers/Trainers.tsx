@@ -409,22 +409,23 @@ const Trainers: React.FC = () => {
     },
   ];
 
-    return (
-      <div className="pg-page">
-        {/* === Header === */}
-        <header className="pg-header" ref={headerRef}>
-          <div className="pg-header__row-1">
+      return (
+        <div className="pg-page">
+          {/* === Header: single-line responsive (same pattern as Members) === */}
+          <header className="pg-header pg-header--single-line" ref={headerRef}>
+
+            {/* Title group */}
             <div className="pg-header__title-group">
               <div className="pg-header__icon t-header-icon">
                 <Users size={18} />
               </div>
-              <div>
+              <div className="pg-header__title-stack">
                 <h1 className="pg-header__title">Trainers</h1>
-                <span className="pg-header__subtitle">{stats.total} total &middot; {stats.hiredThisMonth} new this month</span>
+                <span className="pg-header__month-badge">+{stats.hiredThisMonth} this month</span>
               </div>
             </div>
 
-            {/* Stat Cards */}
+            {/* Stat Cards — clickable filters */}
             <div className="pg-stats">
               <button
                 className={`pg-stat-card t-stat-card ${activeStatusFilter === 'all' ? 'pg-stat-card--active t-stat-card--active' : ''}`}
@@ -455,6 +456,7 @@ const Trainers: React.FC = () => {
                   <span className="pg-stat-card__value pg-stat-card__value--amber">{stats.onLeave}</span>
                   <span className="pg-stat-card__label">On Leave</span>
                 </div>
+                {stats.onLeave > 0 && <span className="pg-stat-card__pulse" />}
               </button>
               <button
                 className={`pg-stat-card t-stat-card ${activeStatusFilter === 'inactive' ? 'pg-stat-card--active t-stat-card--active' : ''}`}
@@ -475,112 +477,76 @@ const Trainers: React.FC = () => {
               </div>
             </div>
 
+            {/* Search */}
+            <div className="pg-search t-search">
+              <Search size={14} className="pg-search__icon" />
+              <input
+                type="text"
+                placeholder="Search trainers..."
+                value={searchQuery}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                className="pg-search__input"
+              />
+              {searchQuery && (
+                <button className="pg-search__clear" onClick={() => setSearchQuery('')}>
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+
+            {/* Filter */}
+            <div className="pg-filter-wrap" ref={filterRef}>
+              <button
+                className={`pg-btn pg-btn--icon ${isFilterOpen ? 'pg-btn--active' : ''} ${activeFilterCount > 0 ? 'pg-btn--has-filter' : ''}`}
+                onClick={() => setIsFilterOpen(!isFilterOpen)}
+              >
+                <Filter size={13} />
+                {activeFilterCount > 0 && <span className="pg-btn__badge">{activeFilterCount}</span>}
+              </button>
+
+              {isFilterOpen && (
+                <div className="pg-filter-dropdown">
+                  <div className="pg-filter-dropdown__header">
+                    <span>Filters</span>
+                    {activeFilterCount > 0 && <button className="pg-filter-dropdown__clear" onClick={handleResetFilters}>Clear</button>}
+                  </div>
+                  <div className="pg-filter-dropdown__body">
+                    <div className="pg-filter-dropdown__row">
+                      <label className="pg-filter-dropdown__label">Role</label>
+                      <select className="pg-filter-dropdown__select" value={filters.role} onChange={(e) => handleFilterChange('role', e.target.value)}>
+                        <option value="">All Roles</option>
+                        <option value="TRAINER">Trainer</option>
+                        <option value="ADMIN">Admin</option>
+                        <option value="MANAGER">Manager</option>
+                      </select>
+                    </div>
+                    <div className="pg-filter-dropdown__row">
+                      <label className="pg-filter-dropdown__label">Status</label>
+                      <select className="pg-filter-dropdown__select" value={filters.status} onChange={(e) => handleFilterChange('status', e.target.value)}>
+                        <option value="">All</option>
+                        <option value="Active">Active</option>
+                        <option value="Inactive">Inactive</option>
+                        <option value="On Leave">On Leave</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Refresh */}
+            <button className={`pg-btn pg-btn--icon ${refreshing ? 'pg-btn--spin' : ''}`} onClick={handleRefresh} title="Refresh">
+              <RefreshCw size={14} />
+            </button>
+
+            {/* Primary action */}
             <div className="pg-header__actions">
               <button className="pg-btn pg-btn--primary t-btn-add" onClick={() => setIsCreateModalOpen(true)}>
                 <UserPlus size={14} />
                 <span>Add Trainer</span>
               </button>
             </div>
-          </div>
-
-          {/* Row 2: Tabs + Search + Filters */}
-          <div className="pg-header__row-2">
-            <div className="pg-tabs t-tabs">
-              <button
-                className={`pg-tab ${activeStatusFilter === 'all' ? 'pg-tab--active' : ''}`}
-                onClick={() => setActiveStatusFilter('all')}
-              >
-                All
-                <span className="pg-tab__count">{stats.total}</span>
-              </button>
-              <button
-                className={`pg-tab ${activeStatusFilter === 'active' ? 'pg-tab--active' : ''}`}
-                onClick={() => setActiveStatusFilter('active')}
-              >
-                Active
-                <span className="pg-tab__count pg-tab__count--active">{stats.active}</span>
-              </button>
-              <button
-                className={`pg-tab ${activeStatusFilter === 'onLeave' ? 'pg-tab--active' : ''}`}
-                onClick={() => setActiveStatusFilter('onLeave')}
-              >
-                On Leave
-                {stats.onLeave > 0 && (
-                  <span className="pg-tab__count pg-tab__count--warning">{stats.onLeave}</span>
-                )}
-              </button>
-              <button
-                className={`pg-tab ${activeStatusFilter === 'inactive' ? 'pg-tab--active' : ''}`}
-                onClick={() => setActiveStatusFilter('inactive')}
-              >
-                Inactive
-                {stats.inactive > 0 && (
-                  <span className="pg-tab__count pg-tab__count--muted">{stats.inactive}</span>
-                )}
-              </button>
-            </div>
-
-            <div className="pg-header__right">
-              <div className="pg-search t-search">
-                <Search size={14} className="pg-search__icon" />
-                <input
-                  type="text"
-                  placeholder="Search trainers..."
-                  value={searchQuery}
-                  onChange={(e) => handleSearchChange(e.target.value)}
-                  className="pg-search__input"
-                />
-                {searchQuery && (
-                  <button className="pg-search__clear" onClick={() => setSearchQuery('')}>
-                    <X size={14} />
-                  </button>
-                )}
-              </div>
-
-              <div className="pg-filter-wrap" ref={filterRef}>
-                <button
-                  className={`pg-btn pg-btn--icon ${isFilterOpen ? 'pg-btn--active' : ''} ${activeFilterCount > 0 ? 'pg-btn--has-filter' : ''}`}
-                  onClick={() => setIsFilterOpen(!isFilterOpen)}
-                >
-                  <Filter size={13} />
-                  {activeFilterCount > 0 && <span className="pg-btn__badge">{activeFilterCount}</span>}
-                </button>
-
-                {isFilterOpen && (
-                  <div className="pg-filter-dropdown">
-                    <div className="pg-filter-dropdown__header">
-                      <span>Filters</span>
-                      {activeFilterCount > 0 && <button className="pg-filter-dropdown__clear" onClick={handleResetFilters}>Clear</button>}
-                    </div>
-                    <div className="pg-filter-dropdown__body">
-                      <div className="pg-filter-dropdown__row">
-                        <label className="pg-filter-dropdown__label">Role</label>
-                        <select className="pg-filter-dropdown__select" value={filters.role} onChange={(e) => handleFilterChange('role', e.target.value)}>
-                          <option value="">All Roles</option>
-                          <option value="TRAINER">Trainer</option>
-                          <option value="ADMIN">Admin</option>
-                          <option value="MANAGER">Manager</option>
-                        </select>
-                      </div>
-                      <div className="pg-filter-dropdown__row">
-                        <label className="pg-filter-dropdown__label">Status</label>
-                        <select className="pg-filter-dropdown__select" value={filters.status} onChange={(e) => handleFilterChange('status', e.target.value)}>
-                          <option value="">All</option>
-                          <option value="Active">Active</option>
-                          <option value="Inactive">Inactive</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <button className={`pg-btn pg-btn--icon ${refreshing ? 'pg-btn--spin' : ''}`} onClick={handleRefresh} title="Refresh">
-                <RefreshCw size={14} />
-              </button>
-            </div>
-          </div>
-        </header>
+          </header>
 
         {/* === Active Filter Chips === */}
         {activeFilterCount > 0 && (
@@ -677,7 +643,7 @@ const Trainers: React.FC = () => {
           setSearchParams(prev => { const p = new URLSearchParams(prev); p.delete('action'); return p; });
           loadTrainersPaginated();
         }}
-        initialView="staffForm"
+        initialView="trainerForm"
       />
     </div>
   );

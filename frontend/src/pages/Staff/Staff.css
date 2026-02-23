@@ -1,36 +1,31 @@
-/* Staff page - custom element styles */
+/* ============================================================================
+   Staff Page - Styles (mirrors Trainers page quality)
+   ============================================================================ */
 
-.staff-role-pill {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 10px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  color: var(--role-color, #6b7280);
-  background: color-mix(in srgb, var(--role-color, #6b7280) 12%, transparent);
-  white-space: nowrap;
+/* === Table Wrapper - Glass Card === */
+.staff-table-wrap {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.12),
+    0 1px 0 rgba(255, 255, 255, 0.05) inset;
+  position: relative;
+  overflow: hidden;
 }
 
-.staff-dept {
-  font-size: 13px;
-  color: var(--text-secondary);
+.staff-table-wrap::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.4), rgba(168, 85, 247, 0.3), transparent);
+  z-index: 1;
 }
 
-.staff-shift {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 12px;
-  color: var(--text-tertiary);
-  font-variant-numeric: tabular-nums;
-}
-
-.staff-shift svg {
-  opacity: 0.5;
-}
-
+/* === Staff Cell === */
 .staff-cell {
   display: flex;
   align-items: center;
@@ -61,26 +56,220 @@
   text-overflow: ellipsis;
 }
 
+/* === Role Pill === */
+.staff-role-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--role-color, #6b7280);
+  background: color-mix(in srgb, var(--role-color, #6b7280) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--role-color, #6b7280) 20%, transparent);
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.staff-role-pill::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+/* === Department === */
+.staff-dept {
+  font-size: 13px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* === Shift === */
+.staff-shift {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.staff-shift svg {
+  opacity: 0.5;
+  flex-shrink: 0;
+}
+
+/* === Phone === */
 .staff-phone {
   font-size: 12.5px;
   color: var(--text-secondary);
   font-variant-numeric: tabular-nums;
 }
 
+/* === Emp ID === */
 .staff-id {
   font-size: 12px;
   font-weight: 500;
   color: var(--text-tertiary);
-  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-family: 'SF Mono', 'JetBrains Mono', 'Fira Code', monospace;
 }
 
+/* === Row index === */
 .staff-index {
   font-size: 12px;
   color: var(--text-tertiary);
   font-variant-numeric: tabular-nums;
 }
 
+/* === Actions === */
 .staff-actions {
   display: flex;
   justify-content: center;
+}
+
+/* === Row hover === */
+.staff-table-wrap .data-table__row {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.staff-table-wrap .data-table__row:hover {
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0.04) 0%, rgba(168, 85, 247, 0.02) 50%, transparent 100%);
+  box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.06) inset;
+}
+
+/* === Mobile Card === */
+.staff-mobile-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.staff-mobile-card__top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.staff-mobile-card__info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.staff-mobile-card__name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.staff-mobile-card__role {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.staff-mobile-card__details {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.staff-mobile-card__detail {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 6px;
+  padding: 4px 8px;
+}
+
+.staff-mobile-card__detail-label {
+  color: var(--text-tertiary);
+  font-weight: 700;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.staff-mobile-card__detail-value {
+  color: var(--text-secondary);
+}
+
+.staff-mobile-card__detail-value--mono {
+  font-family: 'SF Mono', 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #818cf8;
+}
+
+/* === Light Theme === */
+:root.theme-light .staff-table-wrap {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.9) 100%);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), 0 1px 0 rgba(255, 255, 255, 0.8) inset;
+}
+
+:root.theme-light .staff-table-wrap::before {
+  background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.3), rgba(168, 85, 247, 0.2), transparent);
+}
+
+:root.theme-light .staff-table-wrap .data-table__row:hover {
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0.04) 0%, rgba(168, 85, 247, 0.02) 50%, transparent 100%);
+}
+
+:root.theme-light .staff-mobile-card__detail {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.04);
+}
+
+:root.theme-light .staff-mobile-card__details {
+  border-top-color: rgba(0, 0, 0, 0.06);
+}
+
+/* === Responsive === */
+@media (max-width: 768px) {
+  .staff-table-wrap {
+    border-radius: 10px;
+  }
+
+  .staff-role-pill {
+    font-size: 9px;
+    padding: 3px 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .staff-mobile-card__details {
+    gap: 6px;
+  }
+
+  .staff-mobile-card__detail {
+    font-size: 10.5px;
+    padding: 3px 6px;
+  }
 }

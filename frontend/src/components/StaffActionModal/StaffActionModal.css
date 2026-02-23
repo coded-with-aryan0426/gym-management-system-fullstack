@@ -117,8 +117,10 @@
 }
 
 .profile-header__meta {
+  flex: 1;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   flex-wrap: wrap;
 }
@@ -1420,18 +1422,84 @@ body.light-mode .smod-pay-card--annual { background: linear-gradient(135deg, rgb
   }
 
 @media (max-width: 480px) {
+  .staff-action-overlay {
+    padding: 8px;
+  }
+
+  .staff-action-modal {
+    border-radius: 14px;
+    max-height: 98vh;
+  }
+
   .profile-header__avatar {
     width: 40px;
     height: 40px;
-    border-radius: 12px;
+    border-radius: 10px;
   }
 
   .profile-header__name { font-size: 14px; }
+
+  .profile-header__meta { gap: 4px; }
 
   .role-badge, .status-badge {
     font-size: 9px;
     padding: 2px 8px;
   }
+
+  .staff-action-modal__content-panel {
+    padding: 12px;
+  }
+
+  .smod-quick-stats {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .smod-qstat {
+    padding: 10px 12px;
+  }
+
+  .smod-qstat__icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+  }
+
+  .smod-qstat__value {
+    font-size: 12px;
+  }
+
+  .smod-two-col {
+    grid-template-columns: 1fr;
+  }
+
+  .smod-pay-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .smod-pay-card__amount {
+    font-size: 22px;
+  }
+
+  .smod-dept-banner {
+    padding: 14px 16px;
+  }
+
+  .smod-dept-banner__icon {
+    font-size: 24px;
+  }
+
+  .smod-dept-banner__dept {
+    font-size: 15px;
+  }
+
+  .delete-warning {
+    padding: 24px 16px;
+    margin: 16px auto;
+  }
+
+  .delete-warning h5 { font-size: 14px; }
+  .delete-warning p { font-size: 12px; }
 
   .btn {
     padding: 8px 16px;
@@ -1441,5 +1509,10 @@ body.light-mode .smod-pay-card--annual { background: linear-gradient(135deg, rgb
   .form-input, .form-select {
     padding: 8px 12px;
     font-size: 13px;
+  }
+
+  .form-row-2-col {
+    grid-template-columns: 1fr;
+    gap: 10px;
   }
 }
