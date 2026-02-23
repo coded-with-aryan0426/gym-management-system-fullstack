@@ -1,0 +1,8 @@
+[phases.build]
+cmds = ["cd backend && mvn clean package -DskipTests"]
+
+[phases.setup]
+nixPkgs = ["...", "maven"]
+
+[start]
+cmd = "cd backend && java -jar target/management-0.0.1-SNAPSHOT.war"
