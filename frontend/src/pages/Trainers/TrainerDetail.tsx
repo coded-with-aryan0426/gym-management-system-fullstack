@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  FiArrowLeft, FiUser, FiCalendar, FiCreditCard, FiTrendingUp, 
+import {
+  FiArrowLeft, FiUser, FiCalendar, FiCreditCard, FiTrendingUp,
   FiClock, FiDollarSign, FiStar, FiMail, FiPhone, FiAward,
   FiEdit2, FiMessageSquare, FiUsers, FiActivity
 } from 'react-icons/fi';
@@ -37,7 +37,7 @@ const TrainerDetail: React.FC = () => {
     try {
       const user = await api.getUserById(parseInt(id));
       setTrainer(user);
-      
+
       // Load additional data in parallel
       const [perfData, compData, attendData, membersData, sessionsData] = await Promise.all([
         api.getTrainerDetails(parseInt(id)).catch(() => null),
@@ -46,7 +46,7 @@ const TrainerDetail: React.FC = () => {
         api.getTrainerCustomers(parseInt(id)).catch(() => []),
         api.getMemberSessions(parseInt(id)).catch(() => [])
       ]);
-      
+
       setPerformance(perfData);
       setCompensation(compData);
       setAttendance(attendData);
@@ -63,13 +63,13 @@ const TrainerDetail: React.FC = () => {
   // Calculate trainer stats
   const trainerStats = useMemo(() => {
     if (!trainer) return null;
-    
+
     return {
       clientCount: assignedMembers.length,
       completedSessions: sessions.filter(s => s.status === 'COMPLETED').length,
       totalRevenue: performance?.totalRevenue || 0,
       rating: performance?.rating || 0,
-      attendanceRate: attendance.length > 0 
+      attendanceRate: attendance.length > 0
         ? Math.round((attendance.filter(a => a.status === 'PRESENT').length / attendance.length) * 100)
         : 0
     };
@@ -131,16 +131,16 @@ const TrainerDetail: React.FC = () => {
                   <div className="info-item">
                     <span className="info-label">Joined</span>
                     <span className="info-value">
-                      {trainer.createdAt 
+                      {trainer.createdAt
                         ? new Date(trainer.createdAt).toLocaleDateString('en-US', {
                           day: 'numeric', month: 'short', year: 'numeric'
-                        }) 
+                        })
                         : '—'}
                     </span>
                   </div>
                   <div className="info-item">
                     <span className="info-label">Specialization</span>
-                    <span className="info-value">{trainerStats?.clientCount > 0 ? 'Personal Training' : 'General Fitness'}</span>
+                    <span className="info-value">{(trainerStats?.clientCount ?? 0) > 0 ? 'Personal Training' : 'General Fitness'}</span>
                   </div>
                 </div>
               </div>
@@ -156,28 +156,28 @@ const TrainerDetail: React.FC = () => {
                   <div className="stat-item">
                     <div className="stat-icon"><FiUsers size={20} /></div>
                     <div className="stat-info">
-                      <span className="stat-value">{trainerStats?.clientCount || 0}</span>
+                      <span className="stat-value">{trainerStats?.clientCount ?? 0}</span>
                       <span className="stat-label">Active Clients</span>
                     </div>
                   </div>
                   <div className="stat-item">
                     <div className="stat-icon"><FiCalendar size={20} /></div>
                     <div className="stat-info">
-                      <span className="stat-value">{trainerStats?.completedSessions || 0}</span>
+                      <span className="stat-value">{trainerStats?.completedSessions ?? 0}</span>
                       <span className="stat-label">Sessions Completed</span>
                     </div>
                   </div>
                   <div className="stat-item">
                     <div className="stat-icon"><FiDollarSign size={20} /></div>
                     <div className="stat-info">
-                      <span className="stat-value">₹{(trainerStats?.totalRevenue || 0).toLocaleString()}</span>
+                      <span className="stat-value">₹{(trainerStats?.totalRevenue ?? 0).toLocaleString()}</span>
                       <span className="stat-label">Revenue Generated</span>
                     </div>
                   </div>
                   <div className="stat-item">
                     <div className="stat-icon"><FiStar size={20} /></div>
                     <div className="stat-info">
-                      <span className="stat-value">{trainerStats?.rating || 0}</span>
+                      <span className="stat-value">{trainerStats?.rating ?? 0}</span>
                       <span className="stat-label">Average Rating</span>
                     </div>
                   </div>
@@ -243,7 +243,7 @@ const TrainerDetail: React.FC = () => {
                         <div className="schedule-member">
                           {session.memberName || 'Member'}
                         </div>
-                        <Badge 
+                        <Badge
                           variant={session.status === 'COMPLETED' ? 'success' : session.status === 'SCHEDULED' ? 'info' : 'default'}
                         >
                           {session.status || 'Scheduled'}
@@ -304,7 +304,7 @@ const TrainerDetail: React.FC = () => {
                   <div className="perf-card">
                     <span className="perf-label">Session Completion Rate</span>
                     <span className="perf-value">
-                      {sessions.length > 0 
+                      {sessions.length > 0
                         ? Math.round((sessions.filter(s => s.status === 'COMPLETED').length / sessions.length) * 100)
                         : 0}%
                     </span>
@@ -437,7 +437,7 @@ const TrainerDetail: React.FC = () => {
         <button className="back-btn" onClick={() => navigate('/trainers')}>
           <FiArrowLeft size={20} />
         </button>
-        
+
         <div className="trainer-detail__title-section">
           <Avatar name={trainer.fullName} size="xl" />
           <div className="trainer-detail__title-info">
@@ -457,10 +457,10 @@ const TrainerDetail: React.FC = () => {
         </div>
 
         <div className="trainer-detail__actions">
-          <Button variant="secondary" onClick={() => {}}>
+          <Button variant="secondary" onClick={() => { }}>
             <FiMessageSquare size={14} /> Message
           </Button>
-          <Button variant="primary" onClick={() => {}}>
+          <Button variant="primary" onClick={() => { }}>
             <FiEdit2 size={14} /> Edit
           </Button>
         </div>
@@ -488,43 +488,43 @@ const TrainerDetail: React.FC = () => {
 
       {/* Tabs */}
       <div className="trainer-detail__tabs">
-        <button 
+        <button
           className={`tab ${activeTab === 'overview' ? 'active' : ''}`}
           onClick={() => setActiveTab('overview')}
         >
           <FiUser size={14} /> Overview
         </button>
-        <button 
+        <button
           className={`tab ${activeTab === 'schedule' ? 'active' : ''}`}
           onClick={() => setActiveTab('schedule')}
         >
           <FiCalendar size={14} /> Schedule
         </button>
-        <button 
+        <button
           className={`tab ${activeTab === 'members' ? 'active' : ''}`}
           onClick={() => setActiveTab('members')}
         >
           <FiUsers size={14} /> Members
         </button>
-        <button 
+        <button
           className={`tab ${activeTab === 'performance' ? 'active' : ''}`}
           onClick={() => setActiveTab('performance')}
         >
           <FiTrendingUp size={14} /> Performance
         </button>
-        <button 
+        <button
           className={`tab ${activeTab === 'compensation' ? 'active' : ''}`}
           onClick={() => setActiveTab('compensation')}
         >
           <FiDollarSign size={14} /> Compensation
         </button>
-        <button 
+        <button
           className={`tab ${activeTab === 'attendance' ? 'active' : ''}`}
           onClick={() => setActiveTab('attendance')}
         >
           <FiActivity size={14} /> Attendance
         </button>
-        <button 
+        <button
           className={`tab ${activeTab === 'reviews' ? 'active' : ''}`}
           onClick={() => setActiveTab('reviews')}
         >

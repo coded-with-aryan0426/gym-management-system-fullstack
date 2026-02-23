@@ -1,23 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useAuth } from '../../contexts/AuthContext';
-import { memberProgressApi } from '../../services/api';
+import { useAuth } from '../../../contexts/AuthContext';
+import { memberProgressApi } from '../../../services/api';
+import type { NoteDTO } from '../../../services/api';
 
-interface Note {
-    id: number;
-    title: string;
-    content: string;
-    category: string;
-    importance: 'low' | 'medium' | 'high';
-    createdAt: string;
-    updatedAt: string;
-    isRead: boolean;
-}
+interface Note extends NoteDTO { }
 
 const TrainerNotesTab: React.FC = () => {
     const { user } = useAuth();
     const memberId = Number(user?.userId || user?.id);
-    
+
     const [notes, setNotes] = useState<Note[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -26,7 +18,7 @@ const TrainerNotesTab: React.FC = () => {
     useEffect(() => {
         const fetchNotes = async () => {
             if (!memberId) return;
-            
+
             try {
                 setLoading(true);
                 const notesData = await memberProgressApi.getNotes(memberId);
@@ -65,23 +57,23 @@ const TrainerNotesTab: React.FC = () => {
         switch (importance) {
             case 'high': return (
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M12 2v20"/>
-                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                    <path d="M12 2v20" />
+                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
                 </svg>
             );
             case 'medium': return (
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                    <path d="M21 12a9 9 0 1 1-6.219-8.56" />
                 </svg>
             );
             case 'low': return (
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="12" cy="12" r="10"/>
+                    <circle cx="12" cy="12" r="10" />
                 </svg>
             );
             default: return (
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="12" cy="12" r="10"/>
+                    <circle cx="12" cy="12" r="10" />
                 </svg>
             );
         }
@@ -129,8 +121,8 @@ const TrainerNotesTab: React.FC = () => {
                 </div>
                 <div className="filter-group">
                     <label>
-                        <input 
-                            type="checkbox" 
+                        <input
+                            type="checkbox"
                             checked={showUnreadOnly}
                             onChange={e => setShowUnreadOnly(e.target.checked)}
                         />
@@ -141,12 +133,12 @@ const TrainerNotesTab: React.FC = () => {
 
             {loading ? (
                 <div className="notes-loading">
-                    <motion.div 
-                        animate={{ rotate: 360 }} 
+                    <motion.div
+                        animate={{ rotate: 360 }}
                         transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                     >
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                            <path d="M21 12a9 9 0 1 1-6.219-8.56" />
                         </svg>
                     </motion.div>
                     <span>Loading notes...</span>
@@ -156,7 +148,7 @@ const TrainerNotesTab: React.FC = () => {
                     {filteredNotes.length === 0 ? (
                         <div className="empty-notes">
                             <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
                             </svg>
                             <h3>No notes yet</h3>
                             <p>Your trainer will send messages and feedback here</p>
@@ -183,14 +175,14 @@ const TrainerNotesTab: React.FC = () => {
                                     <div className="note-actions">
                                         <button className="note-action-btn">
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                                             </svg>
                                         </button>
                                         <button className="note-action-btn">
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                <polyline points="3 6 5 6 21 6"/>
-                                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                                <polyline points="3 6 5 6 21 6" />
+                                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                                             </svg>
                                         </button>
                                     </div>
@@ -206,8 +198,8 @@ const TrainerNotesTab: React.FC = () => {
                                     </div>
                                     <button className="btn-secondary btn-sm">
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                            <path d="M12 2v20"/>
-                                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                                            <path d="M12 2v20" />
+                                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
                                         </svg>
                                         Mark as Read
                                     </button>

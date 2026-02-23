@@ -19,24 +19,24 @@ class ProgressCache {
     set<T>(key: string, data: T, options?: CacheOptions): void {
         const ttl = options?.ttl || this.defaultTTL;
         const now = Date.now();
-        
+
         this.cache.set(key, {
             data,
             timestamp: now,
             expiresAt: now + ttl
         });
-        
+
         this.notifyListeners(key);
     }
 
     get<T>(key: string, options?: CacheOptions): T | null {
         const entry = this.cache.get(key);
-        
+
         if (!entry) return null;
-        
+
         const now = Date.now();
         const isExpired = now > entry.expiresAt;
-        
+
         if (isExpired) {
             if (options?.staleWhileRevalidate) {
                 return entry.data;
@@ -44,20 +44,20 @@ class ProgressCache {
             this.cache.delete(key);
             return null;
         }
-        
+
         return entry.data;
     }
 
     has(key: string): boolean {
         const entry = this.cache.get(key);
         if (!entry) return false;
-        
+
         const now = Date.now();
         if (now > entry.expiresAt) {
             this.cache.delete(key);
             return false;
         }
-        
+
         return true;
     }
 
@@ -68,13 +68,13 @@ class ProgressCache {
 
     invalidatePattern(pattern: RegExp): void {
         const keysToDelete: string[] = [];
-        
+
         this.cache.forEach((_, key) => {
             if (pattern.test(key)) {
                 keysToDelete.push(key);
             }
         });
-        
+
         keysToDelete.forEach(key => {
             this.cache.delete(key);
             this.notifyListeners(key);
@@ -91,9 +91,9 @@ class ProgressCache {
         if (!this.listeners.has(key)) {
             this.listeners.set(key, new Set());
         }
-        
+
         this.listeners.get(key)!.add(listener);
-        
+
         return () => {
             const listeners = this.listeners.get(key);
             if (listeners) {
@@ -133,7 +133,7 @@ export function useCachedProgressData<T>(
         dependencies?: any[];
     }
 ) {
-    const [data, setData] = useState<T | null>(() => 
+    const [data, setData] = useState<T | null>(() =>
         progressCache.get<T>(key, { staleWhileRevalidate: options?.staleWhileRevalidate })
     );
     const [loading, setLoading] = useState(!progressCache.has(key));
@@ -150,12 +150,12 @@ export function useCachedProgressData<T>(
             setLoading(true);
         }
         setError(null);
-        
+
         try {
             const result = await fetchRef.current();
-            progressCache.set(key, result, { 
+            progressCache.set(key, result, {
                 ttl: options?.ttl,
-                staleWhileRevalidate: options?.staleWhileRevalidate 
+                staleWhileRevalidate: options?.staleWhileRevalidate
             });
             setData(result);
             setIsStale(false);
@@ -171,10 +171,10 @@ export function useCachedProgressData<T>(
 
     useEffect(() => {
         const cachedData = progressCache.get<T>(key, { staleWhileRevalidate: true });
-        
+
         if (cachedData) {
             setData(cachedData);
-            
+
             // Check if cache is stale and revalidate in background
             if (!progressCache.has(key)) {
                 setIsStale(true);
@@ -193,7 +193,7 @@ export function useCachedProgressData<T>(
                 setData(newData);
             }
         });
-        
+
         return unsubscribe;
     }, [key]);
 
@@ -202,12 +202,12 @@ export function useCachedProgressData<T>(
         return fetchData();
     }, [key, fetchData]);
 
-    return { 
-        data, 
-        loading, 
-        error, 
+    return {
+        data,
+        loading,
+        error,
         isStale,
-        refetch 
+        refetch
     };
 }
 
@@ -220,7 +220,7 @@ export function useAutoRefresh<T>(
     const [data, setData] = useState<T | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
-    const intervalRef = useRef<NodeJS.Timeout | null>(null);
+    const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     const fetchData = useCallback(async () => {
         try {
@@ -238,10 +238,10 @@ export function useAutoRefresh<T>(
 
     useEffect(() => {
         fetchData();
-        
+
         // Set up auto-refresh
         intervalRef.current = setInterval(fetchData, interval);
-        
+
         return () => {
             if (intervalRef.current) {
                 clearInterval(intervalRef.current);

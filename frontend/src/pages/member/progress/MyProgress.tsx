@@ -1,8 +1,19 @@
 import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '../../contexts/AuthContext';
-import { memberProgressApi } from '../../services/api';
-import '../../styles/macos-member.css';
+import {
+    FiBarChart2 as BarChart3,
+    FiActivity as Activity,
+    FiTarget as Target,
+    FiDisc as Dumbbell,
+    FiCamera as Camera,
+    FiHeart as Heart,
+    FiPlus as Plus,
+    FiImage as Images,
+    FiClock as History
+} from 'react-icons/fi';
+import { useAuth } from '../../../contexts/AuthContext';
+import { memberProgressApi } from '../../../services/api';
+import '../../../styles/macos-member.css';
 import './MyProgress.css';
 
 // Import section components
@@ -122,7 +133,7 @@ const MyProgress: React.FC = () => {
             if (newProgress.waist || newProgress.chest || newProgress.arms || newProgress.hips) {
                 await memberProgressApi.createMeasurement(memberId, entryData);
             }
-            
+
             // Reset form and close modal
             setNewProgress({ weight: '', bodyFat: '', muscleMass: '', chest: '', waist: '', arms: '', legs: '', hips: '', shoulders: '', notes: '' });
             setActiveModal(null);
@@ -205,7 +216,7 @@ const MyProgress: React.FC = () => {
         try {
             setSaving(true);
             await memberProgressApi.uploadPhoto(memberId, photoFile, photoDescription, photoDate);
-            
+
             // Reset form
             setPhotoFile(null);
             setPhotoDescription('');
@@ -312,7 +323,7 @@ const MyProgress: React.FC = () => {
                         setNewProgress={setNewProgress}
                     />
                 )}
-                
+
                 {activeModal === 'logWorkout' && (
                     <LogWorkoutModal
                         isOpen={true}
@@ -323,7 +334,7 @@ const MyProgress: React.FC = () => {
                         setNewWorkout={setNewWorkout}
                     />
                 )}
-                
+
                 {activeModal === 'createGoal' && (
                     <CreateGoalModal
                         isOpen={true}
@@ -334,7 +345,7 @@ const MyProgress: React.FC = () => {
                         setNewGoal={setNewGoal}
                     />
                 )}
-                
+
                 {activeModal === 'photoUpload' && (
                     <PhotoUploadModal
                         isOpen={true}
@@ -349,7 +360,7 @@ const MyProgress: React.FC = () => {
                         setPhotoDate={setPhotoDate}
                     />
                 )}
-                
+
                 {activeModal === 'photoGallery' && (
                     <PhotoGalleryModal
                         isOpen={true}
@@ -357,7 +368,7 @@ const MyProgress: React.FC = () => {
                         onUpload={() => setActiveModal('photoUpload')}
                     />
                 )}
-                
+
                 {activeModal === 'history' && (
                     <HistoryModal
                         isOpen={true}

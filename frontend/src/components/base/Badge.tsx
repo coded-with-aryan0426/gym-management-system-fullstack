@@ -1,7 +1,7 @@
 import React from 'react';
 import './Badge.css';
 
-export type BadgeVariant = 'primary' | 'secondary' | 'success' | 'error' | 'warning' | 'neutral';
+export type BadgeVariant = 'primary' | 'secondary' | 'success' | 'error' | 'warning' | 'neutral' | 'info' | 'danger';
 export type BadgeSize = 'sm' | 'md' | 'lg';
 
 interface BadgeProps {
@@ -17,9 +17,11 @@ const Badge: React.FC<BadgeProps> = ({
   children,
   className = '',
 }) => {
+  const finalVariant = variant === 'danger' ? 'error' : variant;
+
   const classes = [
     'badge',
-    `badge--${variant}`,
+    `badge--${finalVariant}`,
     `badge--${size}`,
     className,
   ]

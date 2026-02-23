@@ -141,7 +141,7 @@ const SARevenue: React.FC = () => {
                                 <XAxis dataKey="m" axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.35)', fontSize: 10 }} />
                                 <YAxis axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.35)', fontSize: 10 }} tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}k`} />
                                 <Tooltip contentStyle={{ backgroundColor: '#1c1c1f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, fontSize: 11 }} formatter={(v: number) => [`$${v.toLocaleString()}`, 'Revenue']} />
-                                <Area type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={2} fill="url(#revG)" strokeDasharray={(_: unknown, i: number) => i >= REVENUE_TREND.length ? '5 5' : '0'} dot={false} />
+                                <Area type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={2} fill="url(#revG)" strokeDasharray={((_: unknown, i: number) => i >= REVENUE_TREND.length ? '5 5' : '0') as any} dot={false} />
                             </AreaChart>
                         </ResponsiveContainer>
                     </div>

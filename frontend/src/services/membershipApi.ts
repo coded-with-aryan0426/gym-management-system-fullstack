@@ -1,5 +1,5 @@
 import { apiClient } from './api';
-import { MembershipDTO } from '../types/membership';
+import type { MembershipDTO } from '../types/membership';
 import type { MembershipPackageDTO } from '../types/membershipPackage';
 
 class MembershipApiService {

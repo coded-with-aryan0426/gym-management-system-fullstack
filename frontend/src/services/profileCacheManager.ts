@@ -1,8 +1,9 @@
+import { useState, useEffect } from 'react';
 /**
  * UNIFIED PROFILE CACHE MANAGER
- * Handles cache invalidation and synchronization across all components
- * Ensures data consistency between Member and Admin views
- */
+  * Handles cache invalidation and synchronization across all components
+    * Ensures data consistency between Member and Admin views
+      */
 
 class ProfileCacheManager {
   private static instance: ProfileCacheManager;
@@ -58,15 +59,15 @@ class ProfileCacheManager {
   getProfile(userId: string): any | null {
     const cacheKey = `profile_${userId}`;
     const cached = this.cache.get(cacheKey);
-    
+
     if (!cached) return null;
-    
+
     // Check if cache is expired
     if (Date.now() - cached.timestamp > this.CACHE_TTL) {
       this.cache.delete(cacheKey);
       return null;
     }
-    
+
     return cached.data;
   }
 
@@ -80,7 +81,7 @@ class ProfileCacheManager {
       timestamp: Date.now(),
       version
     });
-    
+
     // Notify subscribers
     this.notifySubscribers(userId, data);
   }
@@ -91,10 +92,10 @@ class ProfileCacheManager {
   invalidateProfile(userId: string): void {
     const cacheKey = `profile_${userId}`;
     this.cache.delete(cacheKey);
-    
+
     // Broadcast to other tabs
     this.broadcastUpdate(userId);
-    
+
     // Notify subscribers with null to indicate invalidation
     this.notifySubscribers(userId, null);
   }
@@ -104,7 +105,7 @@ class ProfileCacheManager {
    */
   invalidateAllProfiles(): void {
     this.cache.clear();
-    
+
     // Broadcast to other tabs
     if (this.broadcastChannel) {
       this.broadcastChannel.postMessage({
@@ -121,9 +122,9 @@ class ProfileCacheManager {
     if (!this.subscribers.has(userId)) {
       this.subscribers.set(userId, new Set());
     }
-    
+
     this.subscribers.get(userId)!.add(callback);
-    
+
     // Return unsubscribe function
     return () => {
       const callbacks = this.subscribers.get(userId);
@@ -177,9 +178,9 @@ class ProfileCacheManager {
   isCacheValid(userId: string): boolean {
     const cacheKey = `profile_${userId}`;
     const cached = this.cache.get(cacheKey);
-    
+
     if (!cached) return false;
-    
+
     return Date.now() - cached.timestamp <= this.CACHE_TTL;
   }
 
@@ -203,6 +204,16 @@ class ProfileCacheManager {
         this.cache.delete(key);
       }
     }
+  }
+
+  /**
+   * Invalidate local cache without broadcasting (used by sync listeners)
+   */
+  private invalidateLocalCache(userId: string): void {
+    const cacheKey = `profile_${userId}`;
+    this.cache.delete(cacheKey);
+    // Notify subscribers with null to indicate invalidation
+    this.notifySubscribers(userId, null);
   }
 }
 

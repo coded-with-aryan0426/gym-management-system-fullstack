@@ -182,4 +182,8 @@ export interface TrainerPerformance {
     monthlyRevenue: number;
     completedSessions: number;
     totalHours: number;
+    cancelledSessions?: number;
+    avgRating?: number;
+    revenue?: number;
+    activeClients?: number;
 }

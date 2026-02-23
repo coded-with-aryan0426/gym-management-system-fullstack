@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { 
-  Calendar, 
-  List, 
-  Plus, 
-  Repeat, 
-  Clock, 
-  Users, 
-  CheckCircle, 
-  XCircle, 
+import {
+  Calendar,
+  List,
+  Plus,
+  Repeat,
+  Clock,
+  Users,
+  CheckCircle,
+  XCircle,
   AlertCircle,
   ChevronLeft,
   ChevronRight,
@@ -166,7 +166,7 @@ const PTSessions: React.FC = () => {
       completed: sessions.filter(s => s.status === 'COMPLETED').length,
       missed: sessions.filter(s => s.status === 'MISSED').length,
       cancelled: sessions.filter(s => s.status === 'CANCELLED').length,
-      completionRate: sessions.length > 0 
+      completionRate: sessions.length > 0
         ? Math.round((sessions.filter(s => s.status === 'COMPLETED').length / sessions.length) * 100)
         : 0
     };
@@ -198,31 +198,31 @@ const PTSessions: React.FC = () => {
   const calendarDays = useMemo(() => {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
-    
+
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
-    
+
     const days: { date: Date; isCurrentMonth: boolean; sessions: PTSessionDTO[] }[] = [];
-    
+
     const startPadding = firstDay.getDay();
     for (let i = startPadding - 1; i >= 0; i--) {
       const date = new Date(year, month, -i);
       days.push({ date, isCurrentMonth: false, sessions: [] });
     }
-    
+
     for (let day = 1; day <= lastDay.getDate(); day++) {
       const date = new Date(year, month, day);
       const dateStr = date.toISOString().split('T')[0];
       const daySessions = sessions.filter(s => s.sessionDate.startsWith(dateStr));
       days.push({ date, isCurrentMonth: true, sessions: daySessions });
     }
-    
+
     const remainingDays = 42 - days.length;
     for (let i = 1; i <= remainingDays; i++) {
       const date = new Date(year, month + 1, i);
       days.push({ date, isCurrentMonth: false, sessions: [] });
     }
-    
+
     return days;
   }, [currentDate, sessions]);
 
@@ -396,24 +396,24 @@ const PTSessions: React.FC = () => {
                 <Calendar size={16} />
                 <span>Calendar</span>
               </button>
-                <button
-                  className={`pt-view-btn ${viewMode === 'list' ? 'pt-view-btn--active' : ''}`}
-                  onClick={() => setViewMode('list')}
-                >
-                  <List size={16} />
-                  <span>List</span>
-                </button>
-                <button
-                  className={`pt-view-btn ${viewMode === 'packages' ? 'pt-view-btn--active' : ''}`}
-                  onClick={() => setViewMode('packages')}
-                >
-                  <Dumbbell size={16} />
-                  <span>Packages</span>
-                </button>
-              </div>
+              <button
+                className={`pt-view-btn ${viewMode === 'list' ? 'pt-view-btn--active' : ''}`}
+                onClick={() => setViewMode('list')}
+              >
+                <List size={16} />
+                <span>List</span>
+              </button>
+              <button
+                className={`pt-view-btn ${viewMode === 'packages' ? 'pt-view-btn--active' : ''}`}
+                onClick={() => setViewMode('packages')}
+              >
+                <Dumbbell size={16} />
+                <span>Packages</span>
+              </button>
+            </div>
 
             <div className="pt-sessions__filter-wrapper">
-              <button 
+              <button
                 className={`pt-filter-btn ${isFilterOpen ? 'pt-filter-btn--active' : ''} ${hasActiveFilters ? 'pt-filter-btn--has-filters' : ''}`}
                 onClick={() => setIsFilterOpen(!isFilterOpen)}
               >
@@ -430,11 +430,11 @@ const PTSessions: React.FC = () => {
                       <button className="pt-filter-clear" onClick={clearFilters}>Clear all</button>
                     )}
                   </div>
-                  
+
                   <div className="pt-filter-group">
                     <label>Status</label>
-                    <select 
-                      value={filterStatus} 
+                    <select
+                      value={filterStatus}
                       onChange={(e) => setFilterStatus(e.target.value as FilterStatus)}
                     >
                       <option value="all">All Status</option>
@@ -447,8 +447,8 @@ const PTSessions: React.FC = () => {
 
                   <div className="pt-filter-group">
                     <label>Trainer</label>
-                    <select 
-                      value={selectedTrainerId || ''} 
+                    <select
+                      value={selectedTrainerId || ''}
                       onChange={(e) => setSelectedTrainerId(e.target.value ? Number(e.target.value) : null)}
                     >
                       <option value="">All Trainers</option>
@@ -462,8 +462,8 @@ const PTSessions: React.FC = () => {
 
                   <div className="pt-filter-group">
                     <label>Member</label>
-                    <select 
-                      value={selectedMemberId || ''} 
+                    <select
+                      value={selectedMemberId || ''}
                       onChange={(e) => setSelectedMemberId(e.target.value ? Number(e.target.value) : null)}
                     >
                       <option value="">All Members</option>
@@ -554,8 +554,8 @@ const PTSessions: React.FC = () => {
                       {day.sessions.length > 0 && (
                         <div className="pt-calendar__day-events">
                           {day.sessions.slice(0, 3).map((session) => (
-                            <div 
-                              key={session.sessionId} 
+                            <div
+                              key={session.sessionId}
                               className={`pt-calendar__event-chip pt-calendar__event-chip--${session.status.toLowerCase()}`}
                               onClick={(e) => { e.stopPropagation(); handleSessionClick(session); }}
                               title={`${session.trainerName} with ${session.memberName}`}
@@ -600,8 +600,8 @@ const PTSessions: React.FC = () => {
                   ) : (
                     <div className="pt-calendar__detail-list">
                       {filteredSessions.map(session => (
-                        <div 
-                          key={session.sessionId} 
+                        <div
+                          key={session.sessionId}
                           className={`pt-session-card ${getStatusBgClass(session.status)}`}
                           onClick={() => handleSessionClick(session)}
                         >
@@ -669,8 +669,8 @@ const PTSessions: React.FC = () => {
               ) : (
                 <div className="pt-sessions__list-grid">
                   {filteredSessions.map(session => (
-                    <div 
-                      key={session.sessionId} 
+                    <div
+                      key={session.sessionId}
                       className={`pt-list-card ${getStatusBgClass(session.status)}`}
                       onClick={() => handleSessionClick(session)}
                     >
@@ -741,106 +741,106 @@ const PTSessions: React.FC = () => {
                 </div>
               )}
             </div>
-            )}
-          </div>
+          )}
         </div>
+      </div>
 
-        {/* Packages View */}
-        {viewMode === 'packages' && (
-          <div className="pt-packages">
-            {(() => {
-              const memberGroups = new Map<string, { memberName: string; memberId: string; sessions: typeof filteredSessions }>();
-              filteredSessions.forEach(s => {
-                const key = s.memberId || s.memberName || 'Unknown';
-                if (!memberGroups.has(key)) {
-                  memberGroups.set(key, { memberName: s.memberName || 'Unknown', memberId: s.memberId || '', sessions: [] });
-                }
-                memberGroups.get(key)!.sessions.push(s);
-              });
-              const groups = Array.from(memberGroups.values()).sort((a, b) => b.sessions.length - a.sessions.length);
-              if (groups.length === 0) {
-                return (
-                  <div className="pt-empty">
-                    <Dumbbell size={48} strokeWidth={1} />
-                    <h3>No Session Packages</h3>
-                    <p>Schedule sessions to see member packages here.</p>
-                  </div>
-                );
+      {/* Packages View */}
+      {viewMode === 'packages' && (
+        <div className="pt-packages">
+          {(() => {
+            const memberGroups = new Map<string, { memberName: string; memberId: string; sessions: typeof filteredSessions }>();
+            filteredSessions.forEach(s => {
+              const key = s.memberId ? String(s.memberId) : (s.memberName || 'Unknown');
+              if (!memberGroups.has(key)) {
+                memberGroups.set(key, { memberName: s.memberName || 'Unknown', memberId: s.memberId ? String(s.memberId) : '', sessions: [] });
               }
-              return groups.map(group => {
-                const completed = group.sessions.filter(s => s.status === 'COMPLETED').length;
-                const scheduled = group.sessions.filter(s => s.status === 'SCHEDULED' || s.status === 'CONFIRMED').length;
-                const cancelled = group.sessions.filter(s => s.status === 'CANCELLED' || s.status === 'NO_SHOW').length;
-                const total = group.sessions.length;
-                const progress = total > 0 ? (completed / total) * 100 : 0;
-                return (
-                  <div key={group.memberId} className="pt-package-card">
-                    <div className="pt-package-card__summary">
-                      <div className="pt-package-card__header">
-                        <div className="pt-package-card__avatar">
-                          {group.memberName.charAt(0)}
-                        </div>
-                        <div className="pt-package-card__info">
-                          <h4 className="pt-package-card__name">{group.memberName}</h4>
-                          <span className="pt-package-card__count">{total} sessions total</span>
-                        </div>
-                        <div className="pt-package-card__progress-ring">
-                          <svg viewBox="0 0 36 36" className="pt-package-card__ring">
-                            <path className="pt-package-card__ring-bg" d="M18 2.0845a 15.9155 15.9155 0 0 1 0 31.831a 15.9155 15.9155 0 0 1 0 -31.831" />
-                            <path className="pt-package-card__ring-fill" strokeDasharray={`${progress}, 100`} d="M18 2.0845a 15.9155 15.9155 0 0 1 0 31.831a 15.9155 15.9155 0 0 1 0 -31.831" />
-                          </svg>
-                          <span className="pt-package-card__progress-text">{Math.round(progress)}%</span>
-                        </div>
+              memberGroups.get(key)!.sessions.push(s);
+            });
+            const groups = Array.from(memberGroups.values()).sort((a, b) => b.sessions.length - a.sessions.length);
+            if (groups.length === 0) {
+              return (
+                <div className="pt-empty">
+                  <Dumbbell size={48} strokeWidth={1} />
+                  <h3>No Session Packages</h3>
+                  <p>Schedule sessions to see member packages here.</p>
+                </div>
+              );
+            }
+            return groups.map(group => {
+              const completed = group.sessions.filter(s => s.status === 'COMPLETED').length;
+              const scheduled = group.sessions.filter(s => s.status === 'SCHEDULED' || s.status === 'CONFIRMED').length;
+              const cancelled = group.sessions.filter(s => s.status === 'CANCELLED' || s.status === 'NO_SHOW').length;
+              const total = group.sessions.length;
+              const progress = total > 0 ? (completed / total) * 100 : 0;
+              return (
+                <div key={group.memberId} className="pt-package-card">
+                  <div className="pt-package-card__summary">
+                    <div className="pt-package-card__header">
+                      <div className="pt-package-card__avatar">
+                        {group.memberName.charAt(0)}
                       </div>
-                      <div className="pt-package-card__stats">
-                        <div className="pt-package-card__stat">
-                          <span className="pt-package-card__stat-value emerald">{completed}</span>
-                          <span className="pt-package-card__stat-label">Completed</span>
-                        </div>
-                        <div className="pt-package-card__stat">
-                          <span className="pt-package-card__stat-value blue">{scheduled}</span>
-                          <span className="pt-package-card__stat-label">Upcoming</span>
-                        </div>
-                        <div className="pt-package-card__stat">
-                          <span className="pt-package-card__stat-value crimson">{cancelled}</span>
-                          <span className="pt-package-card__stat-label">Cancelled</span>
-                        </div>
+                      <div className="pt-package-card__info">
+                        <h4 className="pt-package-card__name">{group.memberName}</h4>
+                        <span className="pt-package-card__count">{total} sessions total</span>
                       </div>
-                      <div className="pt-package-card__progress-bar">
-                        <div className="pt-package-card__progress-fill" style={{ width: `${progress}%` }} />
+                      <div className="pt-package-card__progress-ring">
+                        <svg viewBox="0 0 36 36" className="pt-package-card__ring">
+                          <path className="pt-package-card__ring-bg" d="M18 2.0845a 15.9155 15.9155 0 0 1 0 31.831a 15.9155 15.9155 0 0 1 0 -31.831" />
+                          <path className="pt-package-card__ring-fill" strokeDasharray={`${progress}, 100`} d="M18 2.0845a 15.9155 15.9155 0 0 1 0 31.831a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        </svg>
+                        <span className="pt-package-card__progress-text">{Math.round(progress)}%</span>
                       </div>
                     </div>
-                    <div className="pt-package-card__sessions">
-                      {group.sessions.slice(0, 5).map(session => (
-                        <div
-                          key={session.sessionId}
-                          className={`pt-package-card__session-item pt-package-card__session-item--${session.status?.toLowerCase()}`}
-                          onClick={() => { setSelectedSession(session); setShowDetailsModal(true); }}
-                        >
-                          <span className="pt-package-card__session-date">
-                            {new Date(session.sessionDate).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}
-                          </span>
-                          <span className="pt-package-card__session-time">
-                            {new Date(session.sessionDate).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
-                          </span>
-                          <span className="pt-package-card__session-trainer">{session.trainerName}</span>
-                          <Badge variant={session.status === 'COMPLETED' ? 'success' : session.status === 'SCHEDULED' ? 'info' : session.status === 'CANCELLED' ? 'danger' : 'warning'}>
-                            {session.status}
-                          </Badge>
-                        </div>
-                      ))}
-                      {group.sessions.length > 5 && (
-                        <div className="pt-package-card__more">+{group.sessions.length - 5} more sessions</div>
-                      )}
+                    <div className="pt-package-card__stats">
+                      <div className="pt-package-card__stat">
+                        <span className="pt-package-card__stat-value emerald">{completed}</span>
+                        <span className="pt-package-card__stat-label">Completed</span>
+                      </div>
+                      <div className="pt-package-card__stat">
+                        <span className="pt-package-card__stat-value blue">{scheduled}</span>
+                        <span className="pt-package-card__stat-label">Upcoming</span>
+                      </div>
+                      <div className="pt-package-card__stat">
+                        <span className="pt-package-card__stat-value crimson">{cancelled}</span>
+                        <span className="pt-package-card__stat-label">Cancelled</span>
+                      </div>
+                    </div>
+                    <div className="pt-package-card__progress-bar">
+                      <div className="pt-package-card__progress-fill" style={{ width: `${progress}%` }} />
                     </div>
                   </div>
-                );
-              });
-            })()}
-          </div>
-        )}
+                  <div className="pt-package-card__sessions">
+                    {group.sessions.slice(0, 5).map(session => (
+                      <div
+                        key={session.sessionId}
+                        className={`pt-package-card__session-item pt-package-card__session-item--${session.status?.toLowerCase()}`}
+                        onClick={() => { setSelectedSession(session); setShowDetailsModal(true); }}
+                      >
+                        <span className="pt-package-card__session-date">
+                          {new Date(session.sessionDate).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}
+                        </span>
+                        <span className="pt-package-card__session-time">
+                          {new Date(session.sessionDate).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                        <span className="pt-package-card__session-trainer">{session.trainerName}</span>
+                        <Badge variant={session.status === 'COMPLETED' ? 'success' : session.status === 'SCHEDULED' ? 'info' : session.status === 'CANCELLED' ? 'danger' : 'warning'}>
+                          {session.status}
+                        </Badge>
+                      </div>
+                    ))}
+                    {group.sessions.length > 5 && (
+                      <div className="pt-package-card__more">+{group.sessions.length - 5} more sessions</div>
+                    )}
+                  </div>
+                </div>
+              );
+            });
+          })()}
+        </div>
+      )}
 
-        {showScheduleModal && (
+      {showScheduleModal && (
         <ScheduleSessionModal
           trainers={trainers}
           members={members}

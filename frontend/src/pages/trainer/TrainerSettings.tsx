@@ -69,26 +69,26 @@ interface AvailabilitySlot {
 
 /* ── Sidebar categories ── */
 const settingsCategories = [
-  { id: "profile",        label: "Trainer Profile",     icon: User,       desc: "Personal details & bio",       color: "#3b82f6" },
-  { id: "specialization", label: "Specialization",      icon: Dumbbell,   desc: "Skills & certifications",      color: "#10b981" },
-  { id: "availability",   label: "Availability",        icon: Calendar,   desc: "Working hours & schedule",     color: "#06b6d4" },
-  { id: "clients",        label: "Client Preferences",  icon: Target,     desc: "Training & client settings",   color: "#8b5cf6" },
-  { id: "appearance",     label: "Appearance",           icon: Palette,    desc: "Theme & display",              color: "#a855f7" },
-  { id: "notifications",  label: "Notifications",       icon: Bell,       desc: "Alerts & reminders",           color: "#f97316" },
-  { id: "security",       label: "Security",            icon: Shield,     desc: "Password & account safety",    color: "#ef4444" },
-  { id: "billing",        label: "Earnings & Payouts",  icon: CreditCard, desc: "Payment info & history",       color: "#f59e0b" },
-  { id: "reports",        label: "Reports & Logs",      icon: FileText,   desc: "Session logs & performance",   color: "#14b8a6" },
+  { id: "profile", label: "Trainer Profile", icon: User, desc: "Personal details & bio", color: "#3b82f6" },
+  { id: "specialization", label: "Specialization", icon: Dumbbell, desc: "Skills & certifications", color: "#10b981" },
+  { id: "availability", label: "Availability", icon: Calendar, desc: "Working hours & schedule", color: "#06b6d4" },
+  { id: "clients", label: "Client Preferences", icon: Target, desc: "Training & client settings", color: "#8b5cf6" },
+  { id: "appearance", label: "Appearance", icon: Palette, desc: "Theme & display", color: "#a855f7" },
+  { id: "notifications", label: "Notifications", icon: Bell, desc: "Alerts & reminders", color: "#f97316" },
+  { id: "security", label: "Security", icon: Shield, desc: "Password & account safety", color: "#ef4444" },
+  { id: "billing", label: "Earnings & Payouts", icon: CreditCard, desc: "Payment info & history", color: "#f59e0b" },
+  { id: "reports", label: "Reports & Logs", icon: FileText, desc: "Session logs & performance", color: "#14b8a6" },
 ]
 
 /* ── Defaults ── */
 const DEFAULT_AVAILABILITY: AvailabilitySlot[] = [
-  { day: "Monday",    enabled: true,  startTime: "06:00", endTime: "20:00" },
-  { day: "Tuesday",   enabled: true,  startTime: "06:00", endTime: "20:00" },
-  { day: "Wednesday", enabled: true,  startTime: "06:00", endTime: "20:00" },
-  { day: "Thursday",  enabled: true,  startTime: "06:00", endTime: "20:00" },
-  { day: "Friday",    enabled: true,  startTime: "06:00", endTime: "20:00" },
-  { day: "Saturday",  enabled: true,  startTime: "08:00", endTime: "16:00" },
-  { day: "Sunday",    enabled: false, startTime: "08:00", endTime: "12:00" },
+  { day: "Monday", enabled: true, startTime: "06:00", endTime: "20:00" },
+  { day: "Tuesday", enabled: true, startTime: "06:00", endTime: "20:00" },
+  { day: "Wednesday", enabled: true, startTime: "06:00", endTime: "20:00" },
+  { day: "Thursday", enabled: true, startTime: "06:00", endTime: "20:00" },
+  { day: "Friday", enabled: true, startTime: "06:00", endTime: "20:00" },
+  { day: "Saturday", enabled: true, startTime: "08:00", endTime: "16:00" },
+  { day: "Sunday", enabled: false, startTime: "08:00", endTime: "12:00" },
 ]
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
@@ -147,7 +147,7 @@ const TrainerSettings: React.FC = () => {
       const response = await api.get("/api/trainer/profile")
       if (response.data) {
         setProfile({
-          name: response.data.name || user?.name || "",
+          name: response.data.name || user?.fullName || "",
           email: response.data.email || user?.email || "",
           phone: response.data.phone || "",
           specialization: response.data.specialization || "",
@@ -158,7 +158,7 @@ const TrainerSettings: React.FC = () => {
         })
       }
     } catch {
-      setProfile(prev => ({ ...prev, name: user?.name || "", email: user?.email || "" }))
+      setProfile(prev => ({ ...prev, name: user?.fullName || "", email: user?.email || "" }))
     }
   }
 
@@ -232,16 +232,16 @@ const TrainerSettings: React.FC = () => {
 
   const renderSection = () => {
     switch (activeSection) {
-      case "profile":        return <ProfileSection />
+      case "profile": return <ProfileSection />
       case "specialization": return <SpecializationSection />
-      case "availability":   return <AvailabilitySection />
-      case "clients":        return <ClientPreferencesSection />
-      case "appearance":     return <AppearanceSection />
-      case "notifications":  return <NotificationsSection />
-      case "security":       return <SecuritySection />
-      case "billing":        return <BillingSection />
-      case "reports":        return <ReportsSection />
-      default:               return <ProfileSection />
+      case "availability": return <AvailabilitySection />
+      case "clients": return <ClientPreferencesSection />
+      case "appearance": return <AppearanceSection />
+      case "notifications": return <NotificationsSection />
+      case "security": return <SecuritySection />
+      case "billing": return <BillingSection />
+      case "reports": return <ReportsSection />
+      default: return <ProfileSection />
     }
   }
 

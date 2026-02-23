@@ -15,7 +15,7 @@ interface MemberSettings {
   trialPeriodDays: number
   welcomeEmailEnabled: boolean
   orientationRequired: boolean
-  
+
   // Check-in & Access
   checkInMethod: string
   allowMultipleCheckInsPerDay: boolean
@@ -28,7 +28,7 @@ interface MemberSettings {
   peakHourRestrictions: boolean
   peakHourStart: string
   peakHourEnd: string
-  
+
   // Booking & Classes
   maxActiveBookings: number
   bookingWindowDays: number
@@ -40,7 +40,7 @@ interface MemberSettings {
   waitlistEnabled: boolean
   waitlistAutoEnroll: boolean
   maxWaitlistPerClass: number
-  
+
   // Account & Behavior
   maxFamilyMembers: number
   familyDiscountPercent: number
@@ -51,7 +51,7 @@ interface MemberSettings {
   pointsPerVisit: number
   pointsPerReferral: number
   pointsRedemptionRate: number
-  
+
   // Communication Preferences
   allowSmsNotifications: boolean
   allowEmailNotifications: boolean
@@ -60,7 +60,7 @@ interface MemberSettings {
   birthdayGreetingsEnabled: boolean
   inactivityAlertDays: number
   inactivityFollowUpEnabled: boolean
-  
+
   // Suspension & Compliance
   autoSuspendOnPaymentFailure: boolean
   paymentGracePeriodDays: number
@@ -85,7 +85,7 @@ const defaultSettings: MemberSettings = {
   trialPeriodDays: 7,
   welcomeEmailEnabled: true,
   orientationRequired: false,
-  
+
   // Check-in & Access
   checkInMethod: 'qr_code',
   allowMultipleCheckInsPerDay: true,
@@ -98,7 +98,7 @@ const defaultSettings: MemberSettings = {
   peakHourRestrictions: false,
   peakHourStart: '17:00',
   peakHourEnd: '20:00',
-  
+
   // Booking & Classes
   maxActiveBookings: 5,
   bookingWindowDays: 14,
@@ -110,7 +110,7 @@ const defaultSettings: MemberSettings = {
   waitlistEnabled: true,
   waitlistAutoEnroll: true,
   maxWaitlistPerClass: 10,
-  
+
   // Account & Behavior
   maxFamilyMembers: 4,
   familyDiscountPercent: 15,
@@ -121,7 +121,7 @@ const defaultSettings: MemberSettings = {
   pointsPerVisit: 10,
   pointsPerReferral: 100,
   pointsRedemptionRate: 1,
-  
+
   // Communication Preferences
   allowSmsNotifications: true,
   allowEmailNotifications: true,
@@ -130,7 +130,7 @@ const defaultSettings: MemberSettings = {
   birthdayGreetingsEnabled: true,
   inactivityAlertDays: 14,
   inactivityFollowUpEnabled: true,
-  
+
   // Suspension & Compliance
   autoSuspendOnPaymentFailure: true,
   paymentGracePeriodDays: 7,
@@ -160,7 +160,7 @@ const MemberRulesSection = () => {
     try {
       const response = await api.get('/settings/gym')
       const data = response.data as Record<string, string>
-      
+
       const loadedSettings: MemberSettings = {
         // Registration & Onboarding
         requirePhoneVerification: data.memberRequirePhoneVerification === 'true',
@@ -174,7 +174,7 @@ const MemberRulesSection = () => {
         trialPeriodDays: parseInt(data.memberTrialPeriodDays) || 7,
         welcomeEmailEnabled: data.memberWelcomeEmailEnabled !== 'false',
         orientationRequired: data.memberOrientationRequired === 'true',
-        
+
         // Check-in & Access
         checkInMethod: data.memberCheckInMethod || 'qr_code',
         allowMultipleCheckInsPerDay: data.memberAllowMultipleCheckInsPerDay !== 'false',
@@ -187,7 +187,7 @@ const MemberRulesSection = () => {
         peakHourRestrictions: data.memberPeakHourRestrictions === 'true',
         peakHourStart: data.memberPeakHourStart || '17:00',
         peakHourEnd: data.memberPeakHourEnd || '20:00',
-        
+
         // Booking & Classes
         maxActiveBookings: parseInt(data.memberMaxActiveBookings) || 5,
         bookingWindowDays: parseInt(data.memberBookingWindowDays) || 14,
@@ -199,7 +199,7 @@ const MemberRulesSection = () => {
         waitlistEnabled: data.memberWaitlistEnabled !== 'false',
         waitlistAutoEnroll: data.memberWaitlistAutoEnroll !== 'false',
         maxWaitlistPerClass: parseInt(data.memberMaxWaitlistPerClass) || 10,
-        
+
         // Account & Behavior
         maxFamilyMembers: parseInt(data.memberMaxFamilyMembers) || 4,
         familyDiscountPercent: parseInt(data.memberFamilyDiscountPercent) || 15,
@@ -210,7 +210,7 @@ const MemberRulesSection = () => {
         pointsPerVisit: parseInt(data.memberPointsPerVisit) || 10,
         pointsPerReferral: parseInt(data.memberPointsPerReferral) || 100,
         pointsRedemptionRate: parseFloat(data.memberPointsRedemptionRate) || 1,
-        
+
         // Communication Preferences
         allowSmsNotifications: data.memberAllowSmsNotifications !== 'false',
         allowEmailNotifications: data.memberAllowEmailNotifications !== 'false',
@@ -219,7 +219,7 @@ const MemberRulesSection = () => {
         birthdayGreetingsEnabled: data.memberBirthdayGreetingsEnabled !== 'false',
         inactivityAlertDays: parseInt(data.memberInactivityAlertDays) || 14,
         inactivityFollowUpEnabled: data.memberInactivityFollowUpEnabled !== 'false',
-        
+
         // Suspension & Compliance
         autoSuspendOnPaymentFailure: data.memberAutoSuspendOnPaymentFailure !== 'false',
         paymentGracePeriodDays: parseInt(data.memberPaymentGracePeriodDays) || 7,
@@ -230,7 +230,7 @@ const MemberRulesSection = () => {
         covidDeclarationRequired: data.memberCovidDeclarationRequired === 'true',
         memberCodeOfConductRequired: data.memberCodeOfConductRequired !== 'false'
       }
-      
+
       setSettings(loadedSettings)
       setOriginalSettings(loadedSettings)
     } catch (error) {
@@ -250,7 +250,7 @@ const MemberRulesSection = () => {
 
   const getChanges = () => {
     const changes: { field: string; oldValue: string; newValue: string }[] = []
-    
+
     const fieldLabels: Record<string, string> = {
       requirePhoneVerification: 'Require Phone Verification',
       requireEmailVerification: 'Require Email Verification',
@@ -309,11 +309,11 @@ const MemberRulesSection = () => {
       covidDeclarationRequired: 'COVID Declaration Required',
       memberCodeOfConductRequired: 'Code of Conduct Required'
     }
-    
+
     Object.keys(settings).forEach(key => {
       const field = key as keyof MemberSettings
       if (settings[field] !== originalSettings[field]) {
-        const formatValue = (val: unknown) => {
+        const formatValue = (val: unknown): string => {
           if (typeof val === 'boolean') return val ? 'Enabled' : 'Disabled'
           if (field === 'checkInMethod') {
             const methods: Record<string, string> = {
@@ -323,7 +323,7 @@ const MemberRulesSection = () => {
               'pin': 'PIN Code',
               'face': 'Face Recognition'
             }
-            return methods[val as string] || val
+            return methods[val as string] || String(val)
           }
           if (field === 'referralBonusType') {
             return val === 'credit' ? 'Account Credit' : val === 'discount' ? 'Discount' : 'Cash'
@@ -337,7 +337,7 @@ const MemberRulesSection = () => {
         })
       }
     })
-    
+
     return changes
   }
 
@@ -408,7 +408,7 @@ const MemberRulesSection = () => {
         memberCovidDeclarationRequired: String(settings.covidDeclarationRequired),
         memberCodeOfConductRequired: String(settings.memberCodeOfConductRequired)
       }
-      
+
       await api.put('/settings/gym', payload)
       setOriginalSettings(settings)
       setShowConfirmDialog(false)
@@ -1306,15 +1306,15 @@ const MemberRulesSection = () => {
               </div>
             </div>
             <div className="confirm-dialog-footer">
-              <button 
-                className="btn-cancel" 
+              <button
+                className="btn-cancel"
                 onClick={() => setShowConfirmDialog(false)}
                 disabled={saving}
               >
                 Cancel
               </button>
-              <button 
-                className="btn-confirm" 
+              <button
+                className="btn-confirm"
                 onClick={confirmSave}
                 disabled={saving}
               >

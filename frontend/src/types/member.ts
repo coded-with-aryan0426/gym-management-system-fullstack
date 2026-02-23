@@ -1,4 +1,4 @@
-import { User, Role } from './user';
+import type { User, Role } from './user';
 
 export interface MemberProfileDTO {
     userId: number;

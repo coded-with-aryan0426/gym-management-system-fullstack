@@ -6,7 +6,7 @@ interface AvatarProps {
     name: string;
     avatarId?: string | null; // Persistent avatar selection
     userId?: number; // For loading custom images from localStorage
-    size?: 'sm' | 'md' | 'lg';
+    size?: 'sm' | 'md' | 'lg' | 'xl';
     className?: string;
 }
 

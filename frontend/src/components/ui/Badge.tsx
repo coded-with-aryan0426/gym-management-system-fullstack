@@ -1,21 +1,23 @@
 import React from 'react';
 import './Badge.css';
 
-type BadgeVariant = 'active' | 'pending' | 'expired' | 'on-leave' | 'info' | 'default';
+type BadgeVariant = 'active' | 'pending' | 'expired' | 'on-leave' | 'info' | 'default' | 'success' | 'warning' | 'danger';
 
 interface BadgeProps {
     variant?: BadgeVariant;
     children: React.ReactNode;
     className?: string;
+    size?: 'sm' | 'md' | 'lg';
 }
 
 const Badge: React.FC<BadgeProps> = ({
     variant = 'default',
     children,
-    className = ''
+    className = '',
+    size = 'md'
 }) => {
     return (
-        <span className={`badge badge--${variant} ${className}`}>
+        <span className={`badge badge--${variant} badge--${size} ${className}`}>
             {children}
         </span>
     );

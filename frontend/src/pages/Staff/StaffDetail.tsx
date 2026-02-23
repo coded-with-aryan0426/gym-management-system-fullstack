@@ -109,7 +109,7 @@ const StaffDetail: React.FC = () => {
                   </div>
                   <div className="info-item">
                     <span className="info-label">Role</span>
-                    <span className="info-value">{staff.role || '—'}</span>
+                    <span className="info-value">{staff.roles?.[0]?.roleName || '—'}</span>
                   </div>
                   <div className="info-item">
                     <span className="info-label">Joined</span>
@@ -266,7 +266,7 @@ const StaffDetail: React.FC = () => {
             <div className="staff-detail__meta">
               <span className="staff-id">#{staff.userId.toString().padStart(4, '0')}</span>
               <span className="separator">•</span>
-              <span className="staff-role">{staff.role || 'Staff'}</span>
+              <span className="staff-role">{staff.roles?.[0]?.roleName || 'Staff'}</span>
               <span className="separator">•</span>
               <span className="staff-email">{staff.email}</span>
               {staff.phone && (
@@ -280,10 +280,10 @@ const StaffDetail: React.FC = () => {
         </div>
 
         <div className="staff-detail__actions">
-          <Button variant="secondary" onClick={() => {}}>
+          <Button variant="secondary" onClick={() => { }}>
             <FiMessageSquare size={14} /> Message
           </Button>
-          <Button variant="primary" onClick={() => {}}>
+          <Button variant="primary" onClick={() => { }}>
             <FiEdit2 size={14} /> Edit
           </Button>
         </div>

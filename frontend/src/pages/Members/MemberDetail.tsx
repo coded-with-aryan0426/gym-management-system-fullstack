@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  FiArrowLeft, FiUser, FiCalendar, FiCreditCard, FiTrendingUp, 
+import {
+  FiArrowLeft, FiUser, FiCalendar, FiCreditCard, FiTrendingUp,
   FiClock, FiFileText, FiActivity, FiPhone, FiMail, FiHome,
   FiEdit2, FiMessageSquare, FiPrinter, FiRefreshCw, FiMapPin
 } from 'react-icons/fi';
@@ -42,7 +42,7 @@ const MemberDetail: React.FC = () => {
     try {
       const user = await api.getUserById(parseInt(id));
       setMember(user as unknown as MemberDTO);
-      
+
       // Load additional data in parallel
       const [attendanceData, paymentsData, sessionsData, notesData, summaryData, metricsData, measurementData, goalsData, pbData, workoutData] = await Promise.all([
         api.getMemberAttendance(parseInt(id)).catch(() => []),
@@ -56,7 +56,7 @@ const MemberDetail: React.FC = () => {
         api.getPersonalBests(parseInt(id)).catch(() => []),
         api.getWorkoutLogs(parseInt(id), '1month').catch(() => [])
       ]);
-      
+
       setAttendance(attendanceData);
       setPayments(paymentsData);
       setSessions(sessionsData);
@@ -78,16 +78,16 @@ const MemberDetail: React.FC = () => {
   // Calculate membership stats
   const membershipStats = useMemo(() => {
     if (!member) return null;
-    
+
     const startDate = member.startDate ? new Date(member.startDate) : null;
     let expiryDate = null;
     let daysLeft = 0;
     let isExpired = false;
-    
+
     if (startDate && member.planDuration) {
       expiryDate = new Date(startDate);
       const durationStr = member.planDuration.toLowerCase();
-      
+
       if (durationStr.includes('year')) {
         const years = parseInt(durationStr) || 1;
         expiryDate.setMonth(expiryDate.getMonth() + years * 12);
@@ -98,7 +98,7 @@ const MemberDetail: React.FC = () => {
         const days = parseInt(durationStr) || 30;
         expiryDate.setDate(expiryDate.getDate() + days);
       }
-      
+
       const now = new Date();
       daysLeft = Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
       isExpired = daysLeft < 0;
@@ -117,11 +117,11 @@ const MemberDetail: React.FC = () => {
   // Get status badge
   const getStatusBadge = () => {
     if (!membershipStats) return null;
-    
+
     if (membershipStats.isExpired) {
       return <Badge variant="danger">Expired</Badge>;
     }
-    if (membershipStats.daysLeft <= 7) {
+    if ((membershipStats?.daysLeft ?? 999) <= 7) {
       return <Badge variant="warning">Expiring Soon</Badge>;
     }
     return <Badge variant="success">Active</Badge>;
@@ -183,10 +183,10 @@ const MemberDetail: React.FC = () => {
                   <div className="info-item">
                     <span className="info-label">Join Date</span>
                     <span className="info-value">
-                      {member.joinDate || member.createdAt 
+                      {member.joinDate || member.createdAt
                         ? new Date(member.joinDate || member.createdAt || '').toLocaleDateString('en-US', {
                           day: 'numeric', month: 'short', year: 'numeric'
-                        }) 
+                        })
                         : '—'}
                     </span>
                   </div>
@@ -216,29 +216,29 @@ const MemberDetail: React.FC = () => {
                   <div className="info-item">
                     <span className="info-label">Start Date</span>
                     <span className="info-value">
-                      {membershipStats?.startDate 
+                      {membershipStats?.startDate
                         ? membershipStats.startDate.toLocaleDateString('en-US', {
                           day: 'numeric', month: 'short', year: 'numeric'
-                        }) 
+                        })
                         : '—'}
                     </span>
                   </div>
                   <div className="info-item">
                     <span className="info-label">Expiry Date</span>
                     <span className="info-value">
-                      {membershipStats?.expiryDate 
+                      {membershipStats?.expiryDate
                         ? membershipStats.expiryDate.toLocaleDateString('en-US', {
                           day: 'numeric', month: 'short', year: 'numeric'
-                        }) 
+                        })
                         : '—'}
                     </span>
                   </div>
                   <div className="info-item">
                     <span className="info-label">Days Remaining</span>
-                    <span className={`info-value days-remaining ${membershipStats?.isExpired ? 'expired' : membershipStats?.daysLeft <= 7 ? 'warning' : 'active'}`}>
-                      {membershipStats?.isExpired 
+                    <span className={`info-value days-remaining ${membershipStats?.isExpired ? 'expired' : (membershipStats?.daysLeft ?? 999) <= 7 ? 'warning' : 'active'}`}>
+                      {membershipStats?.isExpired
                         ? `Expired ${membershipStats.daysLeft} days ago`
-                        : membershipStats 
+                        : membershipStats
                           ? `${membershipStats.daysLeft} days`
                           : '—'}
                     </span>
@@ -360,194 +360,194 @@ const MemberDetail: React.FC = () => {
         );
 
       case 'progress':
-          return (
-            <div className="member-detail__progress">
-              {/* Summary Stats */}
-              {progressSummary && (
-                <div className="detail-card">
-                  <div className="detail-card__header">
-                    <h3><FiTrendingUp size={16} /> Progress Summary</h3>
-                  </div>
-                  <div className="detail-card__body">
-                    <div className="progress-stats-grid">
-                      <div className="progress-stat-card">
-                        <span className="progress-stat-label">Current Weight</span>
-                        <span className="progress-stat-value">{progressSummary.currentWeight ? `${progressSummary.currentWeight} kg` : '—'}</span>
-                        {progressSummary.weightChange != null && (
-                          <span className={`progress-stat-change ${progressSummary.weightChange < 0 ? 'positive' : progressSummary.weightChange > 0 ? 'negative' : ''}`}>
-                            {progressSummary.weightChange > 0 ? '+' : ''}{progressSummary.weightChange} kg
-                          </span>
-                        )}
-                      </div>
-                      <div className="progress-stat-card">
-                        <span className="progress-stat-label">Body Fat</span>
-                        <span className="progress-stat-value">{progressSummary.currentBodyFat ? `${progressSummary.currentBodyFat}%` : '—'}</span>
-                        {progressSummary.bodyFatChange != null && (
-                          <span className={`progress-stat-change ${progressSummary.bodyFatChange < 0 ? 'positive' : ''}`}>
-                            {progressSummary.bodyFatChange > 0 ? '+' : ''}{progressSummary.bodyFatChange}%
-                          </span>
-                        )}
-                      </div>
-                      <div className="progress-stat-card">
-                        <span className="progress-stat-label">BMI</span>
-                        <span className="progress-stat-value">{progressSummary.currentBmi || '—'}</span>
-                        {progressSummary.bmiCategory && (
-                          <span className="progress-stat-sub">{progressSummary.bmiCategory}</span>
-                        )}
-                      </div>
-                      <div className="progress-stat-card">
-                        <span className="progress-stat-label">Workouts (Month)</span>
-                        <span className="progress-stat-value">{progressSummary.workoutsThisMonth ?? 0}</span>
-                        <span className="progress-stat-sub">{progressSummary.currentStreak ?? 0} day streak</span>
-                      </div>
-                      <div className="progress-stat-card">
-                        <span className="progress-stat-label">Consistency</span>
-                        <span className="progress-stat-value">{progressSummary.consistencyRate ? `${Math.round(progressSummary.consistencyRate)}%` : '—'}</span>
-                      </div>
-                      <div className="progress-stat-card">
-                        <span className="progress-stat-label">Personal Bests</span>
-                        <span className="progress-stat-value">{progressSummary.totalPersonalBests ?? 0}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Goals */}
+        return (
+          <div className="member-detail__progress">
+            {/* Summary Stats */}
+            {progressSummary && (
               <div className="detail-card">
                 <div className="detail-card__header">
-                  <h3><FiTrendingUp size={16} /> Goals</h3>
-                  <span className="record-count">{goals.length} goals</span>
+                  <h3><FiTrendingUp size={16} /> Progress Summary</h3>
                 </div>
                 <div className="detail-card__body">
-                  {goals.length === 0 ? (
-                    <div className="empty-state">
-                      <FiTrendingUp size={32} />
-                      <p>No goals set yet</p>
+                  <div className="progress-stats-grid">
+                    <div className="progress-stat-card">
+                      <span className="progress-stat-label">Current Weight</span>
+                      <span className="progress-stat-value">{progressSummary.currentWeight ? `${progressSummary.currentWeight} kg` : '—'}</span>
+                      {progressSummary.weightChange != null && (
+                        <span className={`progress-stat-change ${progressSummary.weightChange < 0 ? 'positive' : progressSummary.weightChange > 0 ? 'negative' : ''}`}>
+                          {progressSummary.weightChange > 0 ? '+' : ''}{progressSummary.weightChange} kg
+                        </span>
+                      )}
                     </div>
-                  ) : (
-                    <div className="goals-list">
-                      {goals.map((goal: any, index: number) => (
-                        <div key={index} className="goal-item">
-                          <div className="goal-info">
-                            <span className="goal-title">{goal.goalType || goal.title || 'Goal'}</span>
-                            <span className="goal-desc">{goal.description || `Target: ${goal.targetValue ?? '—'}`}</span>
-                          </div>
-                          <div className="goal-progress">
-                            <div className="goal-bar">
-                              <div className="goal-bar-fill" style={{ width: `${Math.min(100, goal.progressPercent || 0)}%` }} />
-                            </div>
-                            <span className="goal-pct">{Math.round(goal.progressPercent || 0)}%</span>
-                          </div>
-                          <Badge 
-                            variant={goal.status === 'COMPLETED' ? 'success' : goal.status === 'IN_PROGRESS' ? 'info' : 'default'} 
-                            size="sm"
-                          >
-                            {goal.status || 'Active'}
-                          </Badge>
-                        </div>
-                      ))}
+                    <div className="progress-stat-card">
+                      <span className="progress-stat-label">Body Fat</span>
+                      <span className="progress-stat-value">{progressSummary.currentBodyFat ? `${progressSummary.currentBodyFat}%` : '—'}</span>
+                      {progressSummary.bodyFatChange != null && (
+                        <span className={`progress-stat-change ${progressSummary.bodyFatChange < 0 ? 'positive' : ''}`}>
+                          {progressSummary.bodyFatChange > 0 ? '+' : ''}{progressSummary.bodyFatChange}%
+                        </span>
+                      )}
                     </div>
-                  )}
+                    <div className="progress-stat-card">
+                      <span className="progress-stat-label">BMI</span>
+                      <span className="progress-stat-value">{progressSummary.currentBmi || '—'}</span>
+                      {progressSummary.bmiCategory && (
+                        <span className="progress-stat-sub">{progressSummary.bmiCategory}</span>
+                      )}
+                    </div>
+                    <div className="progress-stat-card">
+                      <span className="progress-stat-label">Workouts (Month)</span>
+                      <span className="progress-stat-value">{progressSummary.workoutsThisMonth ?? 0}</span>
+                      <span className="progress-stat-sub">{progressSummary.currentStreak ?? 0} day streak</span>
+                    </div>
+                    <div className="progress-stat-card">
+                      <span className="progress-stat-label">Consistency</span>
+                      <span className="progress-stat-value">{progressSummary.consistencyRate ? `${Math.round(progressSummary.consistencyRate)}%` : '—'}</span>
+                    </div>
+                    <div className="progress-stat-card">
+                      <span className="progress-stat-label">Personal Bests</span>
+                      <span className="progress-stat-value">{progressSummary.totalPersonalBests ?? 0}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
+            )}
 
-              {/* Personal Bests */}
-              {personalBests.length > 0 && (
-                <div className="detail-card">
-                  <div className="detail-card__header">
-                    <h3><FiTrendingUp size={16} /> Personal Bests</h3>
+            {/* Goals */}
+            <div className="detail-card">
+              <div className="detail-card__header">
+                <h3><FiTrendingUp size={16} /> Goals</h3>
+                <span className="record-count">{goals.length} goals</span>
+              </div>
+              <div className="detail-card__body">
+                {goals.length === 0 ? (
+                  <div className="empty-state">
+                    <FiTrendingUp size={32} />
+                    <p>No goals set yet</p>
                   </div>
-                  <div className="detail-card__body">
-                    <div className="pb-grid">
-                      {personalBests.map((pb: any, index: number) => (
-                        <div key={index} className="pb-item">
-                          <span className="pb-exercise">{pb.exerciseName || pb.exercise}</span>
-                          <span className="pb-value">{pb.value} {pb.unit || 'kg'}</span>
-                          {pb.achievedDate && (
-                            <span className="pb-date">{new Date(pb.achievedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-                          )}
+                ) : (
+                  <div className="goals-list">
+                    {goals.map((goal: any, index: number) => (
+                      <div key={index} className="goal-item">
+                        <div className="goal-info">
+                          <span className="goal-title">{goal.goalType || goal.title || 'Goal'}</span>
+                          <span className="goal-desc">{goal.description || `Target: ${goal.targetValue ?? '—'}`}</span>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Recent Workouts */}
-              {workoutLogs.length > 0 && (
-                <div className="detail-card">
-                  <div className="detail-card__header">
-                    <h3><FiActivity size={16} /> Recent Workouts</h3>
-                    <span className="record-count">{workoutLogs.length} logs</span>
-                  </div>
-                  <div className="detail-card__body">
-                    <div className="workouts-list">
-                      {workoutLogs.slice(0, 10).map((log: any, index: number) => (
-                        <div key={index} className="workout-item">
-                          <div className="workout-date">
-                            {new Date(log.workoutDate || log.createdAt).toLocaleDateString('en-US', {
-                              weekday: 'short', month: 'short', day: 'numeric'
-                            })}
+                        <div className="goal-progress">
+                          <div className="goal-bar">
+                            <div className="goal-bar-fill" style={{ width: `${Math.min(100, goal.progressPercent || 0)}%` }} />
                           </div>
-                          <div className="workout-info">
-                            <span className="workout-type">{log.workoutType || log.type || 'Workout'}</span>
-                            {log.duration && <span className="workout-duration">{log.duration} min</span>}
-                          </div>
-                          {log.caloriesBurned && (
-                            <span className="workout-calories">{log.caloriesBurned} kcal</span>
-                          )}
+                          <span className="goal-pct">{Math.round(goal.progressPercent || 0)}%</span>
                         </div>
-                      ))}
-                    </div>
+                        <Badge
+                          variant={goal.status === 'COMPLETED' ? 'success' : goal.status === 'IN_PROGRESS' ? 'info' : 'default'}
+                          size="sm"
+                        >
+                          {goal.status || 'Active'}
+                        </Badge>
+                      </div>
+                    ))}
                   </div>
-                </div>
-              )}
-
-              {/* Body Measurements */}
-              {measurements.length > 0 && (
-                <div className="detail-card">
-                  <div className="detail-card__header">
-                    <h3><FiUser size={16} /> Body Measurements</h3>
-                    <span className="record-count">{measurements.length} records</span>
-                  </div>
-                  <div className="detail-card__body">
-                    <div className="measurements-list">
-                      {measurements.slice(0, 8).map((m: any, index: number) => (
-                        <div key={index} className="measurement-item">
-                          <div className="measurement-date">
-                            {new Date(m.recordDate || m.createdAt).toLocaleDateString('en-US', {
-                              month: 'short', day: 'numeric', year: 'numeric'
-                            })}
-                          </div>
-                          <div className="measurement-values">
-                            {m.weight && <span>Weight: {m.weight}kg</span>}
-                            {m.bodyFatPercentage && <span>BF: {m.bodyFatPercentage}%</span>}
-                            {m.chest && <span>Chest: {m.chest}cm</span>}
-                            {m.waist && <span>Waist: {m.waist}cm</span>}
-                            {m.hips && <span>Hips: {m.hips}cm</span>}
-                            {m.biceps && <span>Biceps: {m.biceps}cm</span>}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {!progressSummary && goals.length === 0 && personalBests.length === 0 && workoutLogs.length === 0 && measurements.length === 0 && (
-                <div className="detail-card">
-                  <div className="detail-card__body">
-                    <div className="empty-state">
-                      <FiTrendingUp size={32} />
-                      <p>No progress data yet</p>
-                      <span className="empty-hint">Track weight, measurements, goals, and workouts over time</span>
-                    </div>
-                  </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
-          );
+
+            {/* Personal Bests */}
+            {personalBests.length > 0 && (
+              <div className="detail-card">
+                <div className="detail-card__header">
+                  <h3><FiTrendingUp size={16} /> Personal Bests</h3>
+                </div>
+                <div className="detail-card__body">
+                  <div className="pb-grid">
+                    {personalBests.map((pb: any, index: number) => (
+                      <div key={index} className="pb-item">
+                        <span className="pb-exercise">{pb.exerciseName || pb.exercise}</span>
+                        <span className="pb-value">{pb.value} {pb.unit || 'kg'}</span>
+                        {pb.achievedDate && (
+                          <span className="pb-date">{new Date(pb.achievedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Recent Workouts */}
+            {workoutLogs.length > 0 && (
+              <div className="detail-card">
+                <div className="detail-card__header">
+                  <h3><FiActivity size={16} /> Recent Workouts</h3>
+                  <span className="record-count">{workoutLogs.length} logs</span>
+                </div>
+                <div className="detail-card__body">
+                  <div className="workouts-list">
+                    {workoutLogs.slice(0, 10).map((log: any, index: number) => (
+                      <div key={index} className="workout-item">
+                        <div className="workout-date">
+                          {new Date(log.workoutDate || log.createdAt).toLocaleDateString('en-US', {
+                            weekday: 'short', month: 'short', day: 'numeric'
+                          })}
+                        </div>
+                        <div className="workout-info">
+                          <span className="workout-type">{log.workoutType || log.type || 'Workout'}</span>
+                          {log.duration && <span className="workout-duration">{log.duration} min</span>}
+                        </div>
+                        {log.caloriesBurned && (
+                          <span className="workout-calories">{log.caloriesBurned} kcal</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Body Measurements */}
+            {measurements.length > 0 && (
+              <div className="detail-card">
+                <div className="detail-card__header">
+                  <h3><FiUser size={16} /> Body Measurements</h3>
+                  <span className="record-count">{measurements.length} records</span>
+                </div>
+                <div className="detail-card__body">
+                  <div className="measurements-list">
+                    {measurements.slice(0, 8).map((m: any, index: number) => (
+                      <div key={index} className="measurement-item">
+                        <div className="measurement-date">
+                          {new Date(m.recordDate || m.createdAt).toLocaleDateString('en-US', {
+                            month: 'short', day: 'numeric', year: 'numeric'
+                          })}
+                        </div>
+                        <div className="measurement-values">
+                          {m.weight && <span>Weight: {m.weight}kg</span>}
+                          {m.bodyFatPercentage && <span>BF: {m.bodyFatPercentage}%</span>}
+                          {m.chest && <span>Chest: {m.chest}cm</span>}
+                          {m.waist && <span>Waist: {m.waist}cm</span>}
+                          {m.hips && <span>Hips: {m.hips}cm</span>}
+                          {m.biceps && <span>Biceps: {m.biceps}cm</span>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {!progressSummary && goals.length === 0 && personalBests.length === 0 && workoutLogs.length === 0 && measurements.length === 0 && (
+              <div className="detail-card">
+                <div className="detail-card__body">
+                  <div className="empty-state">
+                    <FiTrendingUp size={32} />
+                    <p>No progress data yet</p>
+                    <span className="empty-hint">Track weight, measurements, goals, and workouts over time</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        );
 
       case 'sessions':
         return (
@@ -580,8 +580,8 @@ const MemberDetail: React.FC = () => {
                           </span>
                           <span className="session-trainer">{session.trainerName}</span>
                         </div>
-                        <Badge 
-                          variant={session.status === 'COMPLETED' ? 'success' : session.status === 'SCHEDULED' ? 'info' : 'default'} 
+                        <Badge
+                          variant={session.status === 'COMPLETED' ? 'success' : session.status === 'SCHEDULED' ? 'info' : 'default'}
                           size="sm"
                         >
                           {session.status || 'Scheduled'}
@@ -630,80 +630,80 @@ const MemberDetail: React.FC = () => {
         );
 
       case 'activity':
-          const activityItems: { date: string; type: string; icon: React.ReactNode; description: string; meta?: string }[] = [];
-          
-          // Build timeline from check-ins
-          attendance.slice(0, 15).forEach((record: any) => {
-            activityItems.push({
-              date: record.checkInTime || record.createdAt,
-              type: 'checkin',
-              icon: <FiClock size={14} />,
-              description: 'Checked in at the gym',
-              meta: record.duration ? `${Math.round(record.duration)} min session` : undefined
-            });
-          });
-          
-          // Build timeline from payments
-          payments.slice(0, 10).forEach((payment: any) => {
-            activityItems.push({
-              date: payment.date || payment.createdAt,
-              type: 'payment',
-              icon: <FiCreditCard size={14} />,
-              description: payment.description || 'Payment made',
-              meta: `₹${payment.amount?.toLocaleString() || 0}`
-            });
-          });
-          
-          // Build timeline from sessions
-          sessions.slice(0, 10).forEach((session: any) => {
-            activityItems.push({
-              date: session.sessionDate || session.createdAt,
-              type: 'session',
-              icon: <FiCalendar size={14} />,
-              description: `PT Session${session.trainerName ? ` with ${session.trainerName}` : ''}`,
-              meta: session.status
-            });
-          });
+        const activityItems: { date: string; type: string; icon: React.ReactNode; description: string; meta?: string }[] = [];
 
-          // Sort by date descending
-          activityItems.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        // Build timeline from check-ins
+        attendance.slice(0, 15).forEach((record: any) => {
+          activityItems.push({
+            date: record.checkInTime || record.createdAt,
+            type: 'checkin',
+            icon: <FiClock size={14} />,
+            description: 'Checked in at the gym',
+            meta: record.duration ? `${Math.round(record.duration)} min session` : undefined
+          });
+        });
 
-          return (
-            <div className="member-detail__activity">
-              <div className="detail-card">
-                <div className="detail-card__header">
-                  <h3><FiActivity size={16} /> Activity Log</h3>
-                  <span className="record-count">{activityItems.length} events</span>
-                </div>
-                <div className="detail-card__body">
-                  {activityItems.length === 0 ? (
-                    <div className="empty-state">
-                      <FiActivity size={32} />
-                      <p>No activity recorded yet</p>
-                    </div>
-                  ) : (
-                    <div className="activity-timeline">
-                      {activityItems.slice(0, 30).map((item, index) => (
-                        <div key={index} className={`activity-item activity-item--${item.type}`}>
-                          <div className="activity-icon">{item.icon}</div>
-                          <div className="activity-line" />
-                          <div className="activity-content">
-                            <span className="activity-desc">{item.description}</span>
-                            {item.meta && <span className="activity-meta">{item.meta}</span>}
-                            <span className="activity-date">
-                              {new Date(item.date).toLocaleDateString('en-US', {
-                                weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-                              })}
-                            </span>
-                          </div>
+        // Build timeline from payments
+        payments.slice(0, 10).forEach((payment: any) => {
+          activityItems.push({
+            date: payment.date || payment.createdAt,
+            type: 'payment',
+            icon: <FiCreditCard size={14} />,
+            description: payment.description || 'Payment made',
+            meta: `₹${payment.amount?.toLocaleString() || 0}`
+          });
+        });
+
+        // Build timeline from sessions
+        sessions.slice(0, 10).forEach((session: any) => {
+          activityItems.push({
+            date: session.sessionDate || session.createdAt,
+            type: 'session',
+            icon: <FiCalendar size={14} />,
+            description: `PT Session${session.trainerName ? ` with ${session.trainerName}` : ''}`,
+            meta: session.status
+          });
+        });
+
+        // Sort by date descending
+        activityItems.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+        return (
+          <div className="member-detail__activity">
+            <div className="detail-card">
+              <div className="detail-card__header">
+                <h3><FiActivity size={16} /> Activity Log</h3>
+                <span className="record-count">{activityItems.length} events</span>
+              </div>
+              <div className="detail-card__body">
+                {activityItems.length === 0 ? (
+                  <div className="empty-state">
+                    <FiActivity size={32} />
+                    <p>No activity recorded yet</p>
+                  </div>
+                ) : (
+                  <div className="activity-timeline">
+                    {activityItems.slice(0, 30).map((item, index) => (
+                      <div key={index} className={`activity-item activity-item--${item.type}`}>
+                        <div className="activity-icon">{item.icon}</div>
+                        <div className="activity-line" />
+                        <div className="activity-content">
+                          <span className="activity-desc">{item.description}</span>
+                          {item.meta && <span className="activity-meta">{item.meta}</span>}
+                          <span className="activity-date">
+                            {new Date(item.date).toLocaleDateString('en-US', {
+                              weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                            })}
+                          </span>
                         </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
-          );
+          </div>
+        );
 
       default:
         return null;
@@ -717,7 +717,7 @@ const MemberDetail: React.FC = () => {
         <button className="back-btn" onClick={() => navigate('/members')}>
           <FiArrowLeft size={20} />
         </button>
-        
+
         <div className="member-detail__title-section">
           <Avatar name={member.fullName} size="xl" />
           <div className="member-detail__title-info">
@@ -737,13 +737,13 @@ const MemberDetail: React.FC = () => {
         </div>
 
         <div className="member-detail__actions">
-          <Button variant="secondary" onClick={() => {}}>
+          <Button variant="secondary" onClick={() => { }}>
             <FiMessageSquare size={14} /> Message
           </Button>
-          <Button variant="secondary" onClick={() => {}}>
+          <Button variant="secondary" onClick={() => { }}>
             <FiPrinter size={14} /> Print Card
           </Button>
-          <Button variant="primary" onClick={() => {}}>
+          <Button variant="primary" onClick={() => { }}>
             <FiEdit2 size={14} /> Edit
           </Button>
         </div>
@@ -761,10 +761,10 @@ const MemberDetail: React.FC = () => {
         </div>
         <div className="quick-stat">
           <span className="quick-stat__label">Days Remaining</span>
-          <span className={`quick-stat__value ${membershipStats?.isExpired ? 'expired' : membershipStats?.daysLeft <= 7 ? 'warning' : ''}`}>
-            {membershipStats?.isExpired 
+          <span className={`quick-stat__value ${membershipStats?.isExpired ? 'expired' : (membershipStats?.daysLeft ?? 999) <= 7 ? 'warning' : ''}`}>
+            {membershipStats?.isExpired
               ? `Expired ${membershipStats.daysLeft}d ago`
-              : membershipStats 
+              : membershipStats
                 ? `${membershipStats.daysLeft} days`
                 : '—'}
           </span>
@@ -777,43 +777,43 @@ const MemberDetail: React.FC = () => {
 
       {/* Tabs */}
       <div className="member-detail__tabs">
-        <button 
+        <button
           className={`tab ${activeTab === 'overview' ? 'active' : ''}`}
           onClick={() => setActiveTab('overview')}
         >
           <FiUser size={14} /> Overview
         </button>
-        <button 
+        <button
           className={`tab ${activeTab === 'attendance' ? 'active' : ''}`}
           onClick={() => setActiveTab('attendance')}
         >
           <FiClock size={14} /> Attendance
         </button>
-        <button 
+        <button
           className={`tab ${activeTab === 'payments' ? 'active' : ''}`}
           onClick={() => setActiveTab('payments')}
         >
           <FiCreditCard size={14} /> Payments
         </button>
-        <button 
+        <button
           className={`tab ${activeTab === 'progress' ? 'active' : ''}`}
           onClick={() => setActiveTab('progress')}
         >
           <FiTrendingUp size={14} /> Progress
         </button>
-        <button 
+        <button
           className={`tab ${activeTab === 'sessions' ? 'active' : ''}`}
           onClick={() => setActiveTab('sessions')}
         >
           <FiCalendar size={14} /> Sessions
         </button>
-        <button 
+        <button
           className={`tab ${activeTab === 'notes' ? 'active' : ''}`}
           onClick={() => setActiveTab('notes')}
         >
           <FiFileText size={14} /> Notes
         </button>
-        <button 
+        <button
           className={`tab ${activeTab === 'activity' ? 'active' : ''}`}
           onClick={() => setActiveTab('activity')}
         >

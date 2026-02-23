@@ -1,38 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useAuth } from '../../contexts/AuthContext';
-import { memberProgressApi } from '../../services/api';
+import { useAuth } from '../../../contexts/AuthContext';
+import { memberProgressApi } from '../../../services/api';
+import type { MemberGoalDTO } from '../../../services/api';
 
-interface Goal {
-    id: number;
-    title: string;
-    goalType: string;
-    startValue: number;
-    currentValue: number;
-    targetValue: number;
-    unit: string;
-    startDate: string;
-    targetDate: string | null;
-    weeklyTarget: number | null;
-    isActive: boolean;
+interface Goal extends MemberGoalDTO {
     progress: number;
 }
 
 const GoalsTab: React.FC = () => {
     const { user } = useAuth();
     const memberId = Number(user?.userId || user?.id);
-    
+
     const [goals, setGoals] = useState<Goal[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchGoals = async () => {
             if (!memberId) return;
-            
+
             try {
                 setLoading(true);
                 const goalsData = await memberProgressApi.getGoals(memberId);
-                setGoals(goalsData);
+                const goalsWithProgress = goalsData.map((g: MemberGoalDTO) => ({
+                    ...g,
+                    progress: g.targetValue && (g.currentValue !== undefined)
+                        ? Math.min(100, Math.round((g.currentValue / g.targetValue) * 100))
+                        : 0
+                }));
+                setGoals(goalsWithProgress);
             } catch (error) {
                 console.error('Error fetching goals:', error);
             } finally {
@@ -46,12 +42,12 @@ const GoalsTab: React.FC = () => {
     if (loading) {
         return (
             <div className="goals-loading">
-                <motion.div 
-                    animate={{ rotate: 360 }} 
+                <motion.div
+                    animate={{ rotate: 360 }}
                     transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                 >
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                        <path d="M21 12a9 9 0 1 1-6.219-8.56" />
                     </svg>
                 </motion.div>
                 <span>Loading goals...</span>
@@ -63,42 +59,42 @@ const GoalsTab: React.FC = () => {
         switch (type.toLowerCase()) {
             case 'weight': return (
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="12" cy="5" r="3"/>
-                    <path d="M6.5 8a6.5 6.5 0 1 0 11 0Z"/>
+                    <circle cx="12" cy="5" r="3" />
+                    <path d="M6.5 8a6.5 6.5 0 1 0 11 0Z" />
                 </svg>
             );
             case 'muscle': return (
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M6 12h12"/>
-                    <path d="M6 16h12"/>
-                    <path d="M6 20h12"/>
-                    <path d="M6 8h12"/>
-                    <path d="M6 4h12"/>
+                    <path d="M6 12h12" />
+                    <path d="M6 16h12" />
+                    <path d="M6 20h12" />
+                    <path d="M6 8h12" />
+                    <path d="M6 4h12" />
                 </svg>
             );
             case 'bodyfat': return (
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M22 12h-4l-3-9L9 21l-3-9H2"/>
+                    <path d="M22 12h-4l-3-9L9 21l-3-9H2" />
                 </svg>
             );
             case 'strength': return (
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M6 4h4l2 4h6"/>
-                    <path d="M11 16a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
-                    <path d="M20 16a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
-                    <path d="M4 16h16"/>
+                    <path d="M6 4h4l2 4h6" />
+                    <path d="M11 16a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+                    <path d="M20 16a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+                    <path d="M4 16h16" />
                 </svg>
             );
             case 'endurance': return (
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M12 2v20"/>
-                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                    <path d="M12 2v20" />
+                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
                 </svg>
             );
             default: return (
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="12" cy="12" r="10"/>
-                    <polyline points="12 6 12 12 16 14"/>
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
                 </svg>
             );
         }
@@ -137,15 +133,15 @@ const GoalsTab: React.FC = () => {
                 {goals.length === 0 ? (
                     <div className="empty-goals">
                         <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <circle cx="12" cy="12" r="10"/>
-                            <polyline points="12 6 12 12 16 14"/>
+                            <circle cx="12" cy="12" r="10" />
+                            <polyline points="12 6 12 12 16 14" />
                         </svg>
                         <h3>No goals yet</h3>
                         <p>Set your first goal to start tracking progress</p>
                         <button className="btn-primary">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <line x1="12" y1="5" x2="12" y2="19"/>
-                                <line x1="5" y1="12" x2="19" y2="12"/>
+                                <line x1="12" y1="5" x2="12" y2="19" />
+                                <line x1="5" y1="12" x2="19" y2="12" />
                             </svg>
                             Create Goal
                         </button>
@@ -166,20 +162,20 @@ const GoalsTab: React.FC = () => {
                                     <h3>{goal.title}</h3>
                                     <div className="goal-meta">
                                         <span className="goal-type">{goal.goalType}</span>
-                                        <span className="goal-date">Started {new Date(goal.startDate).toLocaleDateString()}</span>
+                                        <span className="goal-date">Started {goal.startDate ? new Date(goal.startDate).toLocaleDateString() : 'N/A'}</span>
                                     </div>
                                 </div>
                                 <div className="goal-actions">
                                     <button className="goal-action-btn">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                                         </svg>
                                     </button>
                                     <button className="goal-action-btn">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                            <polyline points="3 6 5 6 21 6"/>
-                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                            <polyline points="3 6 5 6 21 6" />
+                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                                         </svg>
                                     </button>
                                 </div>
@@ -199,51 +195,46 @@ const GoalsTab: React.FC = () => {
                                     </div>
                                 </div>
                                 <div className="progress-bar">
-                                    <div 
+                                    <div
                                         className="progress-fill"
-                                        style={{ 
+                                        style={{
                                             width: `${Math.min(goal.progress, 100)}%`,
                                             backgroundColor: getProgressColor(goal.progress)
                                         }}
                                     />
                                 </div>
+                                <div className="progress-text">
+                                    <span>{goal.currentValue ?? 0} / {goal.targetValue} {goal.unit}</span>
+                                    <span>{Math.round(goal.progress)}%</span>
+                                </div>
                             </div>
 
-                            <div className="goal-details">
-                                <div className="goal-detail-item">
-                                    <span className="detail-label">Progress</span>
-                                    <span className="detail-value">
-                                        {Math.round(goal.currentValue - goal.startValue)} {goal.unit} 
-                                        {goal.currentValue > goal.startValue ? 'gained' : goal.currentValue < goal.startValue ? 'lost' : 'no change'}
-                                    </span>
+                            {goal.weeklyTarget && (
+                                <div className="goal-weekly">
+                                    <span>Weekly Target: {goal.weeklyTarget} {goal.unit}</span>
                                 </div>
-                                {goal.weeklyTarget && (
-                                    <div className="goal-detail-item">
-                                        <span className="detail-label">Weekly Target</span>
-                                        <span className="detail-value">{goal.weeklyTarget} {goal.unit}/week</span>
-                                    </div>
-                                )}
+                            )}
+
+                            <div className="goal-dates">
+                                <span>Started: {goal.startDate ? new Date(goal.startDate).toLocaleDateString() : 'N/A'}</span>
                                 {goal.targetDate && (
-                                    <div className="goal-detail-item">
-                                        <span className="detail-label">Target Date</span>
-                                        <span className="detail-value">{new Date(goal.targetDate).toLocaleDateString()}</span>
-                                    </div>
+                                    <span>Target: {new Date(goal.targetDate).toLocaleDateString()}</span>
                                 )}
                             </div>
 
                             <div className="goal-footer">
                                 <button className="btn-secondary btn-sm">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M12 2v20"/>
-                                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                                        <path d="M12 2v20" />
+                                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
                                     </svg>
                                     Update Progress
                                 </button>
                                 <button className="btn-primary btn-sm">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M20 6h-8l-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2Z"/>
-                                        <polyline points="16 16 12 12 16 8"/>
-                                        <line x1="12" y1="12" x2="22" y2="12"/>
+                                        <path d="M20 6h-8l-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2Z" />
+                                        <polyline points="16 16 12 12 16 8" />
+                                        <line x1="12" y1="12" x2="22" y2="12" />
                                     </svg>
                                     View Details
                                 </button>

@@ -1,4 +1,4 @@
-export type SessionStatus = 'SCHEDULED' | 'COMPLETED' | 'MISSED' | 'CANCELLED';
+export type SessionStatus = 'SCHEDULED' | 'COMPLETED' | 'MISSED' | 'CANCELLED' | 'CONFIRMED' | 'NO_SHOW';
 export type RecurringFrequency = 'WEEKLY' | 'BIWEEKLY';
 
 export interface PTSessionDTO {
