@@ -66,14 +66,11 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration corsConfig = new CorsConfiguration();
-                    // Allow all frontend ports for multi-role testing
-                    corsConfig.setAllowedOrigins(List.of(
-                            "http://localhost:5173", // Owner
-                            "http://localhost:5174", // Trainer
-                            "http://localhost:5175", // Member
-                            "http://localhost:3000", // Legacy/alternative
+                    corsConfig.setAllowedOriginPatterns(List.of(
+                            "http://localhost:*", // All local ports
                             "https://trae8sbvnyxu.vercel.app", // Production frontend
-                            "https://trae8sbvnyxu-*.vercel.app" // Production frontend wildcards
+                            "https://trae8sbvnyxu-*.vercel.app", // Vercel preview deployments
+                            "https://*.vercel.app" // All Vercel preview URLs
                     ));
                     corsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
                     corsConfig.setAllowedHeaders(List.of("*"));
