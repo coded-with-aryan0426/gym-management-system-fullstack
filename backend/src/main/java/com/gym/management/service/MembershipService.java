@@ -1,16 +1,31 @@
 package com.gym.management.service;
 
-import com.gym.management.model.*;
-import com.gym.management.repository.*;
+import com.gym.management.model.Gym;
+import com.gym.management.model.Membership;
+import com.gym.management.model.MembershipPackage;
+import com.gym.management.model.MembershipStatus;
+import com.gym.management.model.PlanVariant;
+import com.gym.management.model.TieredMembershipPlan;
+import com.gym.management.model.User;
+import com.gym.management.repository.GymRepository;
+import com.gym.management.repository.MembershipPackageRepository;
+import com.gym.management.repository.MembershipRepository;
+import com.gym.management.repository.PlanVariantRepository;
+import com.gym.management.repository.TieredMembershipPlanRepository;
+import com.gym.management.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
 public class MembershipService {
+
+    private static final long EXPIRING_SOON_HOURS = 7L * 24L;
 
     @Autowired
     private MembershipRepository membershipRepository;
@@ -26,18 +41,13 @@ public class MembershipService {
 
     @Autowired
     private UserRepository userRepository;
-    
+
     @Autowired
     private GymRepository gymRepository;
-    
+
     @Autowired
     private AuditLogService auditLogService;
 
-    /**
-     * Renew membership using the new tiered plan system.
-     * If planId + variantId are provided, use tiered plan.
-     * Falls back to legacy packageId for backward compatibility.
-     */
     @Transactional
     public Membership renewMembership(Long userId, Long packageId, Integer customMonths) {
         return renewMembership(userId, packageId, null, null, customMonths, null);
@@ -58,7 +68,6 @@ public class MembershipService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Determine plan details
         String planName;
         double price;
         int durationDays;
@@ -67,13 +76,11 @@ public class MembershipService {
         MembershipPackage legacyPackage = null;
 
         if (planId != null && variantId != null) {
-            // New tiered plan renewal
             tieredPlan = tieredPlanRepository.findById(planId)
                     .orElseThrow(() -> new RuntimeException("Selected plan not found (ID: " + planId + ")"));
             planVariant = planVariantRepository.findById(variantId)
                     .orElseThrow(() -> new RuntimeException("Selected duration option not found (ID: " + variantId + ")"));
 
-            // Safety check: Ensure variant belongs to the selected plan
             if (planVariant.getPlan() == null || !planVariant.getPlan().getPlanId().equals(planId)) {
                 throw new RuntimeException("The selected duration option does not belong to the selected plan. Please refresh and try again.");
             }
@@ -82,7 +89,6 @@ public class MembershipService {
             price = planVariant.getPrice();
             durationDays = planVariant.getDurationDays();
         } else if (packageId != null) {
-            // Legacy package renewal
             legacyPackage = packageRepository.findById(packageId)
                     .orElseThrow(() -> new RuntimeException("Package not found"));
             planName = legacyPackage.getPackageName();
@@ -92,95 +98,122 @@ public class MembershipService {
             throw new RuntimeException("Either planId+variantId or packageId must be provided");
         }
 
-        // Find existing membership
         List<Membership> memberships = membershipRepository.findByUserUserId(userId);
-        Membership membership = memberships.stream()
-                .filter(m -> m.getStatus() == MembershipStatus.ACTIVE || m.getStatus() == MembershipStatus.EXPIRED)
-                .findFirst()
-                .orElse(null);
+        Membership membership = findMembershipToRenew(memberships);
 
         if (membership == null) {
-            // Create new membership
             membership = new Membership();
             membership.setUser(user);
-            
-            // Try to get gym from various sources
-            if (gymId != null) {
-                membership.setGym(gymRepository.findById(gymId)
-                        .orElseThrow(() -> new RuntimeException("Gym not found")));
-            } else {
-                Membership anyMembership = memberships.stream().findFirst().orElse(null);
-                if (anyMembership != null && anyMembership.getGym() != null) {
-                    membership.setGym(anyMembership.getGym());
-                } else {
-                    // Fallback to first available gym if no gymId provided and no previous memberships
-                    List<com.gym.management.model.Gym> allGyms = gymRepository.findAll();
-                    if (!allGyms.isEmpty()) {
-                        membership.setGym(allGyms.get(0));
-                    } else {
-                        throw new RuntimeException("No gym context found. Please ensure at least one gym exists in the system.");
-                    }
-                }
-            }
+            membership.setGym(resolveGymForMembership(gymId, memberships));
         }
 
-        // Calculate dates
-        LocalDate newStartDate = LocalDate.now();
-        // Only extend if it's a standard renewal (not an upgrade/change)
-        if ((isUpgrade == null || !isUpgrade) && membership.getEndDate() != null && !membership.getEndDate().isBefore(LocalDate.now())) {
-            newStartDate = membership.getEndDate();
-        } else if (isUpgrade != null && isUpgrade) {
-            // For upgrades/changes, start immediately today
-            newStartDate = LocalDate.now();
-            membership.setStatus(MembershipStatus.ACTIVE); // Force active on upgrade
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime effectiveCurrentEnd = membership.getEffectiveEndDateTime();
+
+        LocalDateTime newStartDateTime = now;
+        if ((isUpgrade == null || !isUpgrade) && effectiveCurrentEnd != null && effectiveCurrentEnd.isAfter(now)) {
+            newStartDateTime = effectiveCurrentEnd;
         }
 
-        // Calculate end date from variant duration or custom months
-        LocalDate newEndDate;
+        LocalDateTime newEndDateTime;
         if (customMonths != null && customMonths > 0) {
-            newEndDate = newStartDate.plusMonths(customMonths);
+            newEndDateTime = newStartDateTime.plusMonths(customMonths);
         } else {
-            newEndDate = newStartDate.plusDays(durationDays);
+            newEndDateTime = newStartDateTime.plusDays(durationDays);
         }
 
-        membership.setStartDate(newStartDate);
-        membership.setEndDate(newEndDate);
-        membership.setStatus(MembershipStatus.ACTIVE);
+        membership.setStartDateTime(newStartDateTime);
+        membership.setEndDateTime(newEndDateTime);
+        membership.setStartDate(newStartDateTime.toLocalDate());
+        membership.setEndDate(newEndDateTime.toLocalDate());
+        membership.setStatus(calculateStatusFromEndDateTime(newEndDateTime));
 
-        // Set plan references - clear the other type to avoid stale data
         if (tieredPlan != null) {
             membership.setTieredPlan(tieredPlan);
             membership.setPlanVariant(planVariant);
-            membership.setMembershipPackage(null); // Clear legacy reference
+            membership.setMembershipPackage(null);
         }
+
         if (legacyPackage != null) {
             membership.setMembershipPackage(legacyPackage);
-            membership.setTieredPlan(null); // Clear tiered reference
+            membership.setTieredPlan(null);
             membership.setPlanVariant(null);
         }
 
         Membership saved = membershipRepository.save(membership);
-        
-        // Log the renewal
+
         try {
             String changes = String.format(
-                "{\"planName\": \"%s\", \"price\": %.2f, \"durationDays\": %d, \"startDate\": \"%s\", \"endDate\": \"%s\"}",
-                planName, price, durationDays, newStartDate, newEndDate);
+                    "{\"planName\":\"%s\",\"price\":%.2f,\"durationDays\":%d,\"startDateTime\":\"%s\",\"endDateTime\":\"%s\"}",
+                    planName,
+                    price,
+                    durationDays,
+                    newStartDateTime,
+                    newEndDateTime
+            );
             String action = (isUpgrade != null && isUpgrade) ? "Membership upgraded/changed" : "Membership renewed";
             auditLogService.logUpdate(
-                "MEMBERSHIP",
-                saved.getId().toString(),
-                user.getFullName() + " - " + planName,
-                user.getUserId(),
-                membership.getGym() != null ? membership.getGym().getGymId() : null,
-                action,
-                changes,
-                null
+                    "MEMBERSHIP",
+                    saved.getId().toString(),
+                    user.getFullName() + " - " + planName,
+                    user.getUserId(),
+                    membership.getGym() != null ? membership.getGym().getGymId() : null,
+                    action,
+                    changes,
+                    null
             );
         } catch (Exception e) {
             System.err.println("Failed to log membership renewal: " + e.getMessage());
         }
-        
+
         return saved;
+    }
+
+    public MembershipStatus calculateStatusFromEndDateTime(LocalDateTime endDateTime) {
+        if (endDateTime == null) {
+            return MembershipStatus.ACTIVE;
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        if (!now.isBefore(endDateTime)) {
+            return MembershipStatus.EXPIRED;
+        }
+
+        long hoursRemaining = Duration.between(now, endDateTime).toHours();
+        if (hoursRemaining <= EXPIRING_SOON_HOURS) {
+            return MembershipStatus.EXPIRING_SOON;
+        }
+
+        return MembershipStatus.ACTIVE;
+    }
+
+    private Membership findMembershipToRenew(List<Membership> memberships) {
+        if (memberships == null || memberships.isEmpty()) {
+            return null;
+        }
+
+        return memberships.stream()
+                .filter(m -> m.getStatus() != MembershipStatus.CANCELLED)
+                .max(Comparator.comparing(Membership::getEffectiveEndDateTime, Comparator.nullsLast(LocalDateTime::compareTo)))
+                .orElse(memberships.get(0));
+    }
+
+    private Gym resolveGymForMembership(Long gymId, List<Membership> memberships) {
+        if (gymId != null) {
+            return gymRepository.findById(gymId)
+                    .orElseThrow(() -> new RuntimeException("Gym not found"));
+        }
+
+        Membership anyMembership = memberships.stream().findFirst().orElse(null);
+        if (anyMembership != null && anyMembership.getGym() != null) {
+            return anyMembership.getGym();
+        }
+
+        List<Gym> allGyms = gymRepository.findAll();
+        if (!allGyms.isEmpty()) {
+            return allGyms.get(0);
+        }
+
+        throw new RuntimeException("No gym context found. Please ensure at least one gym exists in the system.");
     }
 }

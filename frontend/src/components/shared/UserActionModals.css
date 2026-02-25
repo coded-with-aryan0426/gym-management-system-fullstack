@@ -7,8 +7,7 @@
   position: fixed;
   inset: 0;
   z-index: 1000;
-  background: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(3px);
+  background: rgba(0, 0, 0, 0.42);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -61,7 +60,7 @@
 
 .uam__header-icon--message {
   background: rgba(99, 102, 241, 0.18);
-  color: #818cf8;
+  color: #94a3b8;
 }
 
 .uam__header-icon--delete {
@@ -124,9 +123,9 @@
   border-radius: 20px;
   font-size: 11px;
   font-weight: 500;
-  background: rgba(99, 102, 241, 0.12);
-  color: #a5b4fc;
-  border: 1px solid rgba(99, 102, 241, 0.2);
+  background: rgba(100, 116, 139, 0.12);
+  color: #cbd5e1;
+  border: 1px solid rgba(100, 116, 139, 0.24);
 }
 
 .uam__recipient-chip--danger {
@@ -186,8 +185,8 @@
 
 .uam__input:focus,
 .uam__textarea:focus {
-  border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  border-color: #64748b;
+  box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.18);
 }
 
 .uam__input:disabled,
@@ -284,13 +283,13 @@
 }
 
 .uam__btn--send {
-  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  background: linear-gradient(135deg, #64748b, #475569);
   color: #fff;
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35);
+  box-shadow: 0 2px 8px rgba(100, 116, 139, 0.35);
 }
 
 .uam__btn--send:not(:disabled):hover {
-  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.45);
+  box-shadow: 0 4px 14px rgba(100, 116, 139, 0.45);
 }
 
 .uam__btn--delete {

@@ -201,24 +201,42 @@ public class UserController {
 
     // Assign customer to trainer
     @PostMapping("/{trainerId}/customers/{customerId}")
-    public ResponseEntity<User> assignCustomerToTrainer(
+    public ResponseEntity<?> assignCustomerToTrainer(
             @PathVariable Long trainerId,
             @PathVariable Long customerId) {
-        User trainer = userService.assignCustomerToTrainer(trainerId, customerId);
-        return trainer != null
-                ? ResponseEntity.ok(trainer)
-                : ResponseEntity.notFound().build();
+        try {
+            long customerCount = userService.assignCustomerToTrainer(trainerId, customerId);
+            if (customerCount == -1L)
+                return ResponseEntity.notFound().build();
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "trainerId", trainerId,
+                    "customerId", customerId,
+                    "customerCount", customerCount));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+        }
     }
 
     // Remove customer from trainer
     @DeleteMapping("/{trainerId}/customers/{customerId}")
-    public ResponseEntity<User> removeCustomerFromTrainer(
+    public ResponseEntity<?> removeCustomerFromTrainer(
             @PathVariable Long trainerId,
             @PathVariable Long customerId) {
-        User trainer = userService.removeCustomerFromTrainer(trainerId, customerId);
-        return trainer != null
-                ? ResponseEntity.ok(trainer)
-                : ResponseEntity.notFound().build();
+        try {
+            long customerCount = userService.removeCustomerFromTrainer(trainerId, customerId);
+            if (customerCount == -1L)
+                return ResponseEntity.notFound().build();
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "trainerId", trainerId,
+                    "customerId", customerId,
+                    "customerCount", customerCount));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+        }
     }
 
     // Get performance metrics for all trainers

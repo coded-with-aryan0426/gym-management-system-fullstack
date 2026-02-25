@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 /**
  * Entity representing a member's membership at a specific gym.
@@ -54,6 +55,12 @@ public class Membership {
 
     @Column(name = "end_date")
     private LocalDate endDate;
+
+    @Column(name = "start_date_time")
+    private LocalDateTime startDateTime;
+
+    @Column(name = "end_date_time")
+    private LocalDateTime endDateTime;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -153,12 +160,35 @@ public class Membership {
         this.planVariant = planVariant;
     }
 
+    public LocalDateTime getEffectiveStartDateTime() {
+        if (startDateTime != null) {
+            return startDateTime;
+        }
+        if (startDate != null) {
+            return startDate.atStartOfDay();
+        }
+        return null;
+    }
+
+    public LocalDateTime getEffectiveEndDateTime() {
+        if (endDateTime != null) {
+            return endDateTime;
+        }
+        if (endDate != null) {
+            return LocalDateTime.of(endDate, LocalTime.MAX);
+        }
+        return null;
+    }
+
     // Check if membership is currently active
     public boolean isActive() {
-        if (status != MembershipStatus.ACTIVE)
+        if (status != MembershipStatus.ACTIVE && status != MembershipStatus.EXPIRING_SOON) {
             return false;
-        if (endDate == null)
+        }
+        LocalDateTime effectiveEndDateTime = getEffectiveEndDateTime();
+        if (effectiveEndDateTime == null) {
             return true;
-        return !LocalDate.now().isAfter(endDate);
+        }
+        return LocalDateTime.now().isBefore(effectiveEndDateTime);
     }
 }

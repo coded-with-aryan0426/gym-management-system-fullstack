@@ -6,6 +6,7 @@ import ReactDOM from "react-dom"
 import { motion, AnimatePresence } from "framer-motion"
 import api from "../../services/api"
 import type { User } from "../../types/user"
+import { showToast } from "../../utils/showToast"
 import "./StaffActionModal.css"
 
 interface Customer {
@@ -74,11 +75,15 @@ const StaffActionModal: React.FC<StaffActionModalProps> = ({
     setLoading(true)
     try {
       const customers = await api.getTrainerCustomers(staff.userId)
-      setAssignedCustomers(customers.map((c: User) => ({
-        id: c.userId,
-        name: c.fullName,
-        role: "Customer"
-      })))
+      setAssignedCustomers(
+        customers
+          .filter((c: User) => c.userId != null)          // ← guard: skip nulls
+          .map((c: User) => ({
+            id: c.userId,
+            name: c.fullName || 'Unknown',
+            role: "Customer"
+          }))
+      )
     } catch (err) {
       console.error('[Beta] Failed to load assigned customers:', err)
       setAssignedCustomers([])
@@ -90,11 +95,15 @@ const StaffActionModal: React.FC<StaffActionModalProps> = ({
   const loadAvailableCustomers = async () => {
     try {
       const allCustomers = await api.getUsers("CUSTOMER")
-      setAvailableCustomers(allCustomers.map((c: User) => ({
-        id: c.userId,
-        name: c.fullName,
-        role: "Customer"
-      })))
+      setAvailableCustomers(
+        allCustomers
+          .filter((c: User) => c.userId != null)          // ← guard: skip nulls
+          .map((c: User) => ({
+            id: c.userId,
+            name: c.fullName || 'Unknown',
+            role: "Customer"
+          }))
+      )
     } catch (err) {
       console.error('[Beta] Failed to load available customers:', err)
       setAvailableCustomers([])
@@ -156,9 +165,11 @@ const StaffActionModal: React.FC<StaffActionModalProps> = ({
     if (!staff) return
     try {
       await api.removeCustomerFromTrainer(staff.userId, customerId)
-      setAssignedCustomers(assignedCustomers.filter((c) => c.id !== customerId))
+      await loadAssignedCustomers()                               // reload from DB
+      showToast('Member removed from trainer', 'success')
     } catch (err) {
       console.error('[Beta] Failed to remove customer:', err)
+      showToast('Failed to remove member', 'error')
     }
   }
 
@@ -166,12 +177,15 @@ const StaffActionModal: React.FC<StaffActionModalProps> = ({
     if (!staff) return
     try {
       await api.assignCustomerToTrainer(staff.userId, customer.id)
-      setAssignedCustomers([...assignedCustomers, customer])
+      await loadAssignedCustomers()                               // reload from DB
       setShowCustomerSearch(false)
+      showToast(`${customer.name} assigned to trainer`, 'success')
     } catch (err) {
       console.error('[Beta] Failed to assign customer:', err)
+      showToast('Failed to assign member to trainer', 'error')
     }
   }
+
 
   const getRoleForStaff = () => staff?.roles?.[0]?.roleName || "TRAINER"
   const getStatusForStaff = () => "Active"
@@ -304,8 +318,8 @@ const StaffActionModal: React.FC<StaffActionModalProps> = ({
                       </option>
                       {availableCustomers
                         .filter((c) => !assignedCustomers.find((ac) => ac.id === c.id))
-                        .map((customer) => (
-                          <option key={customer.id} value={customer.id}>
+                        .map((customer, idx) => (
+                          <option key={customer.id ?? `fallback-${idx}`} value={customer.id}>
                             {customer.name} ({customer.role})
                           </option>
                         ))}

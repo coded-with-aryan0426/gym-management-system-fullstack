@@ -348,10 +348,10 @@ const TrainerRulesSection: React.FC = () => {
     }
 
     return (
-        <div className="settings-section" style={{ "--section-accent": "#8b5cf6" } as React.CSSProperties}>
+        <div className="settings-section settings-section--purple">
             <div className="settings-section__header">
                 <div className="settings-section__title-group">
-                    <div className="settings-section__icon" style={{ background: 'linear-gradient(135deg, #6366f1, #4f46e5)' }}>
+                    <div className="settings-section__icon settings-section__icon--purple">
                         <Dumbbell size={20} />
                     </div>
                     <div>
@@ -474,7 +474,7 @@ const TrainerRulesSection: React.FC = () => {
                                     onChange={(e) => updateRule('cancellationNoticePeriod', parseInt(e.target.value) || 0)}
                                     min={0}
                                     max={72}
-                                    style={{ maxWidth: '200px' }}
+                                   
                                 />
                             </div>
 
@@ -581,7 +581,7 @@ const TrainerRulesSection: React.FC = () => {
                                     min={1}
                                     max={3}
                                     step={0.1}
-                                    style={{ maxWidth: '150px' }}
+                                   
                                 />
                                 <span className="field-helper">e.g., 1.5x for overtime hours</span>
                             </div>
@@ -619,7 +619,7 @@ const TrainerRulesSection: React.FC = () => {
                                         onChange={(e) => updateRule('commissionPercentage', parseInt(e.target.value) || 0)}
                                         min={0}
                                         max={50}
-                                        style={{ maxWidth: '150px' }}
+                                       
                                     />
                                 </div>
                             )}
@@ -725,7 +725,7 @@ const TrainerRulesSection: React.FC = () => {
                                     className="dense-input"
                                     value={rules.performanceReviewFrequency}
                                     onChange={(e) => updateRule('performanceReviewFrequency', e.target.value)}
-                                    style={{ maxWidth: '200px' }}
+                                   
                                 >
                                     <option value="weekly">Weekly</option>
                                     <option value="biweekly">Bi-weekly</option>
@@ -800,7 +800,7 @@ const TrainerRulesSection: React.FC = () => {
                                         min={1}
                                         max={5}
                                         step={0.1}
-                                        style={{ maxWidth: '150px' }}
+                                       
                                     />
                                     <span className="field-helper">Out of 5 stars</span>
                                 </div>
@@ -893,7 +893,7 @@ const TrainerRulesSection: React.FC = () => {
                                         </span>
                                     ))}
                                     {rules.requiredCertifications.length === 0 && (
-                                        <span style={{ color: 'var(--settings-text-tertiary)', fontSize: '13px' }}>
+                                        <span>
                                             No certifications required
                                         </span>
                                     )}
@@ -907,7 +907,7 @@ const TrainerRulesSection: React.FC = () => {
                                         onChange={(e) => setNewCertification(e.target.value)}
                                         placeholder="Enter certification name (e.g., CPR, First Aid)"
                                         onKeyDown={(e) => e.key === 'Enter' && addCertification()}
-                                        style={{ maxWidth: '300px' }}
+                                       
                                     />
                                     <button 
                                         className="cert-add-btn"
@@ -969,7 +969,7 @@ const TrainerRulesSection: React.FC = () => {
                                     onChange={(e) => updateRule('newClientTrialSessions', parseInt(e.target.value) || 0)}
                                     min={0}
                                     max={10}
-                                    style={{ maxWidth: '150px' }}
+                                   
                                 />
                                 <span className="field-helper">Free sessions before commitment</span>
                             </div>
@@ -1007,7 +1007,7 @@ const TrainerRulesSection: React.FC = () => {
                                         onChange={(e) => updateRule('transferNoticePeriod', parseInt(e.target.value) || 0)}
                                         min={0}
                                         max={30}
-                                        style={{ maxWidth: '150px' }}
+                                       
                                     />
                                 </div>
                             )}

@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import ReactDOM from "react-dom"
 import { motion, AnimatePresence } from "framer-motion"
 import type { User } from "../../types/user"
@@ -68,6 +68,8 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
   // Legacy sub-modal state (will be replaced by tab system)
   const [activeSubModal, setActiveSubModal] = useState<"edit" | "renew" | "message" | null>(null)
   const [showTrainerSearch, setShowTrainerSearch] = useState(false)
+  const addTrainerBtnRef = useRef<HTMLButtonElement>(null)
+  const [trainerPopoverPos, setTrainerPopoverPos] = useState<{ top: number; left: number } | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
   const [availableTrainers, setAvailableTrainers] = useState<User[]>([])
   const [isSearching, setIsSearching] = useState(false)
@@ -892,7 +894,7 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
                   <div className="mam-nav__group">
                     <span className="mam-nav__group-label">Member</span>
                     {([
-                      { id: 'profile'  as TabType, label: 'Edit Profile',       color: '#6366f1',
+                      { id: 'profile'  as TabType, label: 'Edit Profile',       color: '#64748b',
                         icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> },
                       { id: 'renew'    as TabType, label: 'Membership',         color: '#10b981',
                         icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg> },
@@ -914,7 +916,7 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
                   <div className="mam-nav__group">
                     <span className="mam-nav__group-label">History</span>
                     {([
-                      { id: 'payments'   as TabType, label: 'Payments',    color: '#3b82f6', badge: transactions.length || undefined,
+                      { id: 'payments'   as TabType, label: 'Payments',    color: '#64748b', badge: transactions.length || undefined,
                         icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> },
                       { id: 'attendance' as TabType, label: 'Attendance',  color: '#06b6d4', badge: checkIns.length || undefined,
                         icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><path d="M9 14l2 2 4-4"/></svg> },
@@ -1243,9 +1245,9 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
                                   const isCurrent = plan.planName === getPlanForMember()
                                   const activeVars = (plan.variants || []).filter((v: any) => v.isActive !== false)
                                   const lowestPrice = activeVars.length > 0 ? Math.min(...activeVars.map((v: any) => v.price)) : 0
-                                  const catColors: Record<string, string> = { STANDARD: '#3B82F6', PREMIUM: '#8B5CF6', VIP: '#F59E0B', CORPORATE: '#10B981', STUDENT: '#6366F1', CUSTOM: '#EC4899' }
-                                  const catColor = plan.category ? (catColors[plan.category] || '#6366F1') : undefined
-                                  const accentColor = plan.planColor || '#6366f1'
+                                  const catColors: Record<string, string> = { STANDARD: '#64748B', PREMIUM: '#8B5CF6', VIP: '#F59E0B', CORPORATE: '#10B981', STUDENT: '#64748B', CUSTOM: '#EC4899' }
+                                  const catColor = plan.category ? (catColors[plan.category] || '#64748B') : undefined
+                                  const accentColor = plan.planColor || '#64748b'
                                   return (
                                     <div key={plan.planId}
                                       className={`mam-plan-card ${isSel ? 'mam-plan-card--selected' : ''} ${isCurrent ? 'mam-plan-card--current' : ''} ${plan.isRecommended ? 'mam-plan-card--recommended' : ''}`}
@@ -1310,7 +1312,7 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
                                     return (
                                       <button key={variant.variantId}
                                         className={`mam-duration-card ${isVarSel ? 'mam-duration-card--selected' : ''} ${variant.isPopular ? 'mam-duration-card--popular' : ''}`}
-                                        style={{ '--plan-color': selectedPlan.planColor || '#6366f1' } as any}
+                                        style={{ '--plan-color': selectedPlan.planColor || '#64748b' } as any}
                                         onClick={() => setSelectedVariantId(variant.variantId)}
                                       >
                                         {variant.isPopular && <span className="mam-duration-card__popular">Popular</span>}
@@ -1510,47 +1512,54 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
                               <span>Assigned Trainers</span>
                               {assignedTrainers.length > 0 && <span className="mam-nav__badge">{assignedTrainers.length}</span>}
                             </div>
-                            <div style={{ position: 'relative' }}>
-                              <button className={`mam-btn mam-btn--secondary mam-btn--sm ${showTrainerSearch ? 'mam-btn--active' : ''}`}
-                                onClick={() => setShowTrainerSearch(!showTrainerSearch)}>
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                                Add Trainer
-                              </button>
-                              <AnimatePresence>
-                                {showTrainerSearch && (
-                                  <motion.div className="mam-trainer-popover"
-                                    initial={{ opacity: 0, y: -8, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }}
-                                    exit={{ opacity: 0, y: -8, scale: 0.96 }} transition={{ duration: 0.15 }}
-                                    onClick={(e) => e.stopPropagation()}
-                                  >
-                                    <div className="mam-trainer-popover__head">
-                                      <span>Search Trainers</span>
-                                      <button className="mam-trainer-popover__close" onClick={() => setShowTrainerSearch(false)}>×</button>
-                                    </div>
-                                    <input type="text" className="mam-input" placeholder="Type name..." value={searchQuery}
-                                      onChange={(e) => setSearchQuery(e.target.value)}
-                                      onKeyDown={(e) => e.key === 'Escape' && setShowTrainerSearch(false)} autoFocus
-                                      style={{ margin: '8px 12px', width: 'calc(100% - 24px)' }} />
-                                    <div className="mam-trainer-popover__list">
-                                      {isSearching && <div className="mam-trainer-popover__hint">Searching...</div>}
-                                      {!isSearching && (() => {
-                                        const unassigned = availableTrainers.filter(t => !assignedTrainers.some(a => a.userId === t.userId))
-                                        if (unassigned.length === 0) return <div className="mam-trainer-popover__hint">{availableTrainers.length > 0 ? 'All matching trainers are assigned.' : searchQuery ? 'No trainers found' : 'Start typing to search'}</div>
-                                        return unassigned.map(trainer => (
-                                          <div key={trainer.userId} className="mam-trainer-popover__item" onClick={() => handleAddTrainer(trainer)}>
-                                            <div className="mam-trainer-popover__avatar">{trainer.fullName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0,2)}</div>
-                                            <div>
-                                              <div className="mam-trainer-popover__name">{trainer.fullName}</div>
-                                              <div className="mam-trainer-popover__email">{trainer.email}</div>
+                              <div style={{ position: 'relative' }}>
+                                  <button ref={addTrainerBtnRef} className={`mam-btn mam-btn--secondary mam-btn--sm ${showTrainerSearch ? 'mam-btn--active' : ''}`}
+                                    onClick={() => {
+                                      if (!showTrainerSearch && addTrainerBtnRef.current) {
+                                        const rect = addTrainerBtnRef.current.getBoundingClientRect()
+                                        setTrainerPopoverPos({ top: rect.bottom + 8, left: rect.right - 280 })
+                                      }
+                                      setShowTrainerSearch(!showTrainerSearch)
+                                    }}>
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                    Add Trainer
+                                  </button>
+                                  <AnimatePresence>
+                                    {showTrainerSearch && trainerPopoverPos && (
+                                      <motion.div className="mam-trainer-popover"
+                                        style={{ position: 'fixed', top: trainerPopoverPos.top, left: trainerPopoverPos.left, zIndex: 99999 }}
+                                        initial={{ opacity: 0, y: -8, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }}
+                                        exit={{ opacity: 0, y: -8, scale: 0.96 }} transition={{ duration: 0.15 }}
+                                        onClick={(e) => e.stopPropagation()}
+                                      >
+                                        <div className="mam-trainer-popover__head">
+                                          <span>Search Trainers</span>
+                                          <button className="mam-trainer-popover__close" onClick={() => setShowTrainerSearch(false)}>×</button>
+                                        </div>
+                                      <input type="text" className="mam-input" placeholder="Type name..." value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        onKeyDown={(e) => e.key === 'Escape' && setShowTrainerSearch(false)} autoFocus
+                                        style={{ margin: '8px 12px', width: 'calc(100% - 24px)' }} />
+                                      <div className="mam-trainer-popover__list">
+                                        {isSearching && <div className="mam-trainer-popover__hint">Searching...</div>}
+                                        {!isSearching && (() => {
+                                          const unassigned = availableTrainers.filter(t => !assignedTrainers.some(a => a.userId === t.userId))
+                                          if (unassigned.length === 0) return <div className="mam-trainer-popover__hint">{availableTrainers.length > 0 ? 'All matching trainers are assigned.' : searchQuery ? 'No trainers found' : 'Start typing to search'}</div>
+                                          return unassigned.map(trainer => (
+                                            <div key={trainer.userId} className="mam-trainer-popover__item" onClick={() => handleAddTrainer(trainer)}>
+                                              <div className="mam-trainer-popover__avatar">{trainer.fullName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0,2)}</div>
+                                              <div>
+                                                <div className="mam-trainer-popover__name">{trainer.fullName}</div>
+                                                <div className="mam-trainer-popover__email">{trainer.email}</div>
+                                              </div>
                                             </div>
-                                          </div>
-                                        ))
-                                      })()}
-                                    </div>
-                                  </motion.div>
-                                )}
-                              </AnimatePresence>
-                            </div>
+                                          ))
+                                        })()}
+                                      </div>
+                                      </motion.div>
+                                    )}
+                                  </AnimatePresence>
+                              </div>
                           </div>
                           <div className="mam-section__body">
                             {assignedTrainers.length === 0 ? (

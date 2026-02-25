@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useEffect, useState, useMemo, useCallback, useRef } from "react"
-import { FiFilter, FiSearch, FiUserPlus, FiCalendar, FiRefreshCw, FiPackage, FiMessageSquare, FiX, FiUsers, FiAlertTriangle, FiUserCheck, FiUser, FiPercent, FiDownload, FiPhone, FiCheck, FiTrendingUp, FiTrendingDown, FiMinus, FiTrash2 } from "react-icons/fi"
+import { FiFilter, FiSearch, FiUserPlus, FiCalendar, FiRefreshCw, FiPackage, FiMessageSquare, FiX, FiUsers, FiAlertTriangle, FiUserCheck, FiUser, FiUserX, FiPercent, FiDownload, FiPhone, FiCheck, FiTrendingUp, FiTrendingDown, FiMinus, FiTrash2 } from "react-icons/fi"
 import { showToast } from "../../utils/showToast"
 import { useSearchParams } from "react-router-dom"
 import { Button, Badge, getStatusVariant, Avatar, DataTable, type Column } from "../../components"
@@ -218,22 +218,38 @@ const Members: React.FC = () => {
     const startDate = member.startDate ? new Date(member.startDate) : null
     if (!startDate || !member.planDuration) return { date: null, daysLeft: null, isExpired: false }
 
-    const durationStr = member.planDuration.toLowerCase()
+    const durationStr = member.planDuration.toLowerCase().trim()
+
+    // Parse numeric value — handles both "1 day" and "one day" style strings
+    const wordToNum: Record<string, number> = {
+      one: 1, two: 2, three: 3, four: 4, five: 5,
+      six: 6, seven: 7, eight: 8, nine: 9, ten: 10,
+    }
+    const parseDurationNum = (str: string): number => {
+      const n = parseInt(str)
+      if (!isNaN(n)) return n
+      for (const [word, val] of Object.entries(wordToNum)) {
+        if (str.includes(word)) return val
+      }
+      return 1 // safe fallback
+    }
+
     let expiryDate = new Date(startDate)
 
     if (durationStr.includes('year')) {
-      const years = parseInt(durationStr) || 1
-      expiryDate.setMonth(expiryDate.getMonth() + years * 12)
+      expiryDate.setFullYear(expiryDate.getFullYear() + parseDurationNum(durationStr))
     } else if (durationStr.includes('month')) {
-      const months = parseInt(durationStr) || 1
-      expiryDate.setMonth(expiryDate.getMonth() + months)
+      expiryDate.setMonth(expiryDate.getMonth() + parseDurationNum(durationStr))
+    } else if (durationStr.includes('week')) {
+      expiryDate.setDate(expiryDate.getDate() + parseDurationNum(durationStr) * 7)
     } else if (durationStr.includes('day')) {
-      const days = parseInt(durationStr) || 30
-      expiryDate.setDate(expiryDate.getDate() + days)
+      expiryDate.setDate(expiryDate.getDate() + parseDurationNum(durationStr))
     }
 
     const now = new Date()
-    const daysLeft = Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+    // Use floor so that daysLeft=0 means "expires today" (still within the day), daysLeft<0 = expired
+    const msLeft = expiryDate.getTime() - now.getTime()
+    const daysLeft = Math.floor(msLeft / (1000 * 60 * 60 * 24))
     const isExpired = daysLeft < 0
 
     return { date: expiryDate, daysLeft, isExpired }
@@ -256,19 +272,19 @@ const Members: React.FC = () => {
     if (isUsingTabFilter && filters.status.length > 0) {
       result = result.filter(m => m.status?.toUpperCase() === filters.status[0].toUpperCase())
     }
-      if (isUsingTabFilter && filters.plan.length > 0) {
-        result = result.filter(m => m.planName?.toLowerCase() === filters.plan[0].toLowerCase())
-      }
+    if (isUsingTabFilter && filters.plan.length > 0) {
+      result = result.filter(m => m.planName?.toLowerCase() === filters.plan[0].toLowerCase())
+    }
 
-      // Filter by plan category: find which plan names belong to this category
-      if (filters.planCategory) {
-        const planNamesInCategory = membershipPlans
-          .filter(p => p.category === filters.planCategory)
-          .map(p => p.planName.toLowerCase())
-        if (planNamesInCategory.length > 0) {
-          result = result.filter(m => planNamesInCategory.includes((m.planName || '').toLowerCase()))
-        }
+    // Filter by plan category: find which plan names belong to this category
+    if (filters.planCategory) {
+      const planNamesInCategory = membershipPlans
+        .filter(p => p.category === filters.planCategory)
+        .map(p => p.planName.toLowerCase())
+      if (planNamesInCategory.length > 0) {
+        result = result.filter(m => planNamesInCategory.includes((m.planName || '').toLowerCase()))
       }
+    }
 
     if (isUsingTabFilter) {
       result = result.filter(m => {
@@ -280,8 +296,8 @@ const Members: React.FC = () => {
             return !isExpired && daysLeft !== null && daysLeft <= 7 && daysLeft > 0
           case 'inactive':
             return (m.status || '').toLowerCase() === 'expired' ||
-                   (m.status || '').toLowerCase() === 'inactive' ||
-                   isExpired
+              (m.status || '').toLowerCase() === 'inactive' ||
+              isExpired
           default:
             return true
         }
@@ -499,8 +515,8 @@ const Members: React.FC = () => {
     const inactiveCount = allMembers.filter(m => {
       const { isExpired } = getExpiryInfo(m)
       return (m.status || '').toLowerCase() === 'expired' ||
-             (m.status || '').toLowerCase() === 'inactive' ||
-             isExpired
+        (m.status || '').toLowerCase() === 'inactive' ||
+        isExpired
     }).length
 
     const newThisMonth = allMembers.filter(m => {
@@ -541,7 +557,7 @@ const Members: React.FC = () => {
     if (isExpired || (member.status || '').toLowerCase() === 'expired') {
       return 'status-dot--expired'
     }
-    if (daysLeft !== null && daysLeft <= 7 && daysLeft > 0) {
+    if (daysLeft === 0 || (daysLeft !== null && daysLeft <= 7 && daysLeft > 0)) {
       return 'status-dot--expiring'
     }
     if ((member.status || '').toLowerCase() === 'active') {
@@ -645,10 +661,10 @@ const Members: React.FC = () => {
           const unitLabel = v.durationUnit === 'MONTHS'
             ? (v.durationValue === 1 ? 'Month' : 'Months')
             : v.durationUnit === 'YEARS'
-            ? (v.durationValue === 1 ? 'Year' : 'Years')
-            : v.durationUnit === 'DAYS'
-            ? (v.durationValue === 1 ? 'Day' : 'Days')
-            : v.durationUnit
+              ? (v.durationValue === 1 ? 'Year' : 'Years')
+              : v.durationUnit === 'DAYS'
+                ? (v.durationValue === 1 ? 'Day' : 'Days')
+                : v.durationUnit
           opts.push({ label: `${v.durationValue} ${unitLabel}`, value: key })
         }
       })
@@ -765,11 +781,24 @@ const Members: React.FC = () => {
 
         const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 
+        let validityLabel: string
+        let validityClass = 'member-days-left'
+        if (isExpired) {
+          validityLabel = `${Math.abs(daysLeft!)}d overdue`
+          validityClass += ' member-days-left--expired'
+        } else if (daysLeft === 0) {
+          validityLabel = 'Expires today'
+          validityClass += ' member-days-left--warning'
+        } else if (daysLeft !== null && daysLeft <= 7) {
+          validityLabel = `${daysLeft}d left`
+          validityClass += ' member-days-left--warning'
+        } else {
+          validityLabel = `${daysLeft}d left`
+        }
+
         return (
           <div className="member-expiry-cell">
-            <span className={`member-days-left ${isExpired ? 'member-days-left--expired' : daysLeft !== null && daysLeft <= 7 ? 'member-days-left--warning' : ''}`}>
-              {isExpired ? `${Math.abs(daysLeft || 0)}d overdue` : `${daysLeft}d left`}
-            </span>
+            <span className={validityClass}>{validityLabel}</span>
             <span className="member-expiry-date">{dateStr}</span>
           </div>
         )
@@ -785,8 +814,11 @@ const Members: React.FC = () => {
         let statusClass = 'status-badge'
 
         if (isExpired) {
-          statusText = 'Lapsed'
+          statusText = 'Expired'
           statusClass += ' status-badge--danger'
+        } else if (daysLeft === 0) {
+          statusText = 'Expires Today'
+          statusClass += ' status-badge--warning'
         } else if (daysLeft !== null && daysLeft <= 7 && daysLeft > 0) {
           statusText = 'Expiring'
           statusClass += ' status-badge--warning'
@@ -871,14 +903,14 @@ const Members: React.FC = () => {
   const RetentionTrendIcon = stats.retentionTrend === 'up'
     ? <FiTrendingUp size={10} />
     : stats.retentionTrend === 'down'
-    ? <FiTrendingDown size={10} />
-    : <FiMinus size={10} />
+      ? <FiTrendingDown size={10} />
+      : <FiMinus size={10} />
 
   const retentionTrendClass = stats.retentionTrend === 'up'
     ? 'retention-trend--up'
     : stats.retentionTrend === 'down'
-    ? 'retention-trend--down'
-    : 'retention-trend--flat'
+      ? 'retention-trend--down'
+      : 'retention-trend--flat'
 
   return (
     <div className="pg-page">
@@ -933,10 +965,10 @@ const Members: React.FC = () => {
               className={`pg-stat-card ${activeStatusFilter === 'inactive' ? 'pg-stat-card--active' : ''}`}
               onClick={() => setActiveStatusFilter('inactive')}
             >
-              <div className="pg-stat-card__icon pg-stat-card__icon--inactive"><FiUser size={14} /></div>
+              <div className="pg-stat-card__icon pg-stat-card__icon--expired"><FiUserX size={14} /></div>
               <div className="pg-stat-card__data">
                 <span className="pg-stat-card__value pg-stat-card__value--red">{stats.expiredCount}</span>
-                <span className="pg-stat-card__label">Inactive</span>
+                <span className="pg-stat-card__label">Expired</span>
               </div>
             </button>
             {/* LOW #3: retention card with trend delta */}
@@ -1017,158 +1049,158 @@ const Members: React.FC = () => {
                   </div>
 
                   <div className="pg-filter-dropdown__body">
-                      {/* ── STATUS ── pill chips */}
+                    {/* ── STATUS ── pill chips */}
+                    <div className="pg-filter-dropdown__row pg-filter-dropdown__row--col">
+                      <label className="pg-filter-dropdown__label">Status</label>
+                      <div className="pg-filter-pills">
+                        {['', 'Active', 'Expired'].map(val => (
+                          <button
+                            key={val}
+                            className={`pg-filter-pill ${(filters.status[0] || '') === val ? 'pg-filter-pill--active' : ''}`}
+                            onClick={() => setFilters(prev => ({ ...prev, status: val ? [val] : [] }))}
+                          >
+                            {val || 'All'}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* ── CATEGORY ── derived from real plans */}
+                    {planCategories.length > 0 && (
                       <div className="pg-filter-dropdown__row pg-filter-dropdown__row--col">
-                        <label className="pg-filter-dropdown__label">Status</label>
+                        <label className="pg-filter-dropdown__label">
+                          Category
+                          {plansLoading && <span className="pg-filter-label__loading" />}
+                        </label>
                         <div className="pg-filter-pills">
-                          {['', 'Active', 'Expired'].map(val => (
+                          <button
+                            className={`pg-filter-pill ${!filters.planCategory ? 'pg-filter-pill--active' : ''}`}
+                            onClick={() => setFilters(prev => ({ ...prev, planCategory: "", plan: [], planDuration: "" }))}
+                          >
+                            All
+                          </button>
+                          {planCategories.map(cat => (
                             <button
-                              key={val}
-                              className={`pg-filter-pill ${(filters.status[0] || '') === val ? 'pg-filter-pill--active' : ''}`}
-                              onClick={() => setFilters(prev => ({ ...prev, status: val ? [val] : [] }))}
+                              key={cat}
+                              className={`pg-filter-pill pg-filter-pill--category ${filters.planCategory === cat ? 'pg-filter-pill--active' : ''}`}
+                              style={{ '--cat-color': categoryColors[cat] || '#6366F1' } as React.CSSProperties}
+                              onClick={() => setFilters(prev => ({
+                                ...prev,
+                                planCategory: prev.planCategory === cat ? "" : cat,
+                                plan: [],
+                                planDuration: "",
+                              }))}
                             >
-                              {val || 'All'}
+                              {categoryLabels[cat] || cat}
+                              <span className="pg-filter-pill__count">
+                                {membershipPlans.filter(p => p.category === cat).length}
+                              </span>
                             </button>
                           ))}
                         </div>
                       </div>
+                    )}
 
-                      {/* ── CATEGORY ── derived from real plans */}
-                      {planCategories.length > 0 && (
-                        <div className="pg-filter-dropdown__row pg-filter-dropdown__row--col">
-                          <label className="pg-filter-dropdown__label">
-                            Category
-                            {plansLoading && <span className="pg-filter-label__loading" />}
-                          </label>
-                          <div className="pg-filter-pills">
+                    {/* ── PLAN ── pills with color dot + icon from real plans */}
+                    <div className="pg-filter-dropdown__row pg-filter-dropdown__row--col">
+                      <label className="pg-filter-dropdown__label">Plan</label>
+                      {plansLoading ? (
+                        <div className="pg-filter-plans-loading">
+                          <span className="pg-filter-skeleton" />
+                          <span className="pg-filter-skeleton pg-filter-skeleton--sm" />
+                        </div>
+                      ) : plansForFilter.length > 0 ? (
+                        <div className="pg-filter-pills pg-filter-pills--plans">
+                          <button
+                            className={`pg-filter-pill ${filters.plan.length === 0 ? 'pg-filter-pill--active' : ''}`}
+                            onClick={() => setFilters(prev => ({ ...prev, plan: [], planDuration: "" }))}
+                          >
+                            All
+                          </button>
+                          {plansForFilter.map(plan => (
                             <button
-                              className={`pg-filter-pill ${!filters.planCategory ? 'pg-filter-pill--active' : ''}`}
-                              onClick={() => setFilters(prev => ({ ...prev, planCategory: "", plan: [], planDuration: "" }))}
+                              key={plan.planId ?? plan.planName}
+                              className={`pg-filter-pill pg-filter-pill--plan ${filters.plan.includes(plan.planName) ? 'pg-filter-pill--plan-active' : ''}`}
+                              style={{ '--plan-color': plan.planColor || '#6366F1' } as React.CSSProperties}
+                              onClick={() => setFilters(prev => ({
+                                ...prev,
+                                plan: prev.plan.includes(plan.planName) ? [] : [plan.planName],
+                                planDuration: "",
+                              }))}
+                              title={plan.description || plan.planName}
                             >
-                              All
+                              {plan.iconName && <span className="pg-filter-pill__icon">{plan.iconName}</span>}
+                              {plan.planName}
+                              {plan.memberCount != null && (
+                                <span className="pg-filter-pill__count">{plan.memberCount}</span>
+                              )}
                             </button>
-                            {planCategories.map(cat => (
-                              <button
-                                key={cat}
-                                className={`pg-filter-pill pg-filter-pill--category ${filters.planCategory === cat ? 'pg-filter-pill--active' : ''}`}
-                                style={{ '--cat-color': categoryColors[cat] || '#6366F1' } as React.CSSProperties}
-                                onClick={() => setFilters(prev => ({
-                                  ...prev,
-                                  planCategory: prev.planCategory === cat ? "" : cat,
-                                  plan: [],
-                                  planDuration: "",
-                                }))}
-                              >
-                                {categoryLabels[cat] || cat}
-                                <span className="pg-filter-pill__count">
-                                  {membershipPlans.filter(p => p.category === cat).length}
-                                </span>
-                              </button>
-                            ))}
-                          </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="pg-filter-empty-hint">No plans configured yet</span>
+                      )}
+                    </div>
+
+                    {/* ── DURATION ── derived from selected plan's real variants */}
+                    <div className="pg-filter-dropdown__row pg-filter-dropdown__row--col">
+                      <label className="pg-filter-dropdown__label">
+                        Duration
+                        {filters.plan.length > 0 && (
+                          <span className="pg-filter-label__sub"> · {filters.plan[0]}</span>
+                        )}
+                      </label>
+                      {durationOptions.length > 0 ? (
+                        <div className="pg-filter-pills">
+                          <button
+                            className={`pg-filter-pill ${!filters.planDuration ? 'pg-filter-pill--active' : ''}`}
+                            onClick={() => setFilters(prev => ({ ...prev, planDuration: "" }))}
+                          >
+                            Any
+                          </button>
+                          {durationOptions.map(opt => (
+                            <button
+                              key={opt.value}
+                              className={`pg-filter-pill ${filters.planDuration === opt.value ? 'pg-filter-pill--active' : ''}`}
+                              onClick={() => setFilters(prev => ({ ...prev, planDuration: prev.planDuration === opt.value ? "" : opt.value }))}
+                            >
+                              {opt.label}
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="pg-filter-pills">
+                          {['', '1 MONTHS', '3 MONTHS', '6 MONTHS', '12 MONTHS', '1 YEARS'].map(val => (
+                            <button
+                              key={val}
+                              className={`pg-filter-pill ${filters.planDuration === val ? 'pg-filter-pill--active' : ''}`}
+                              onClick={() => setFilters(prev => ({ ...prev, planDuration: val }))}
+                            >
+                              {val === '' ? 'Any'
+                                : val === '12 MONTHS' ? '1 Year'
+                                  : val.replace(' MONTHS', ' Mo').replace(' YEARS', ' Yr')}
+                            </button>
+                          ))}
                         </div>
                       )}
-
-                      {/* ── PLAN ── pills with color dot + icon from real plans */}
-                      <div className="pg-filter-dropdown__row pg-filter-dropdown__row--col">
-                        <label className="pg-filter-dropdown__label">Plan</label>
-                        {plansLoading ? (
-                          <div className="pg-filter-plans-loading">
-                            <span className="pg-filter-skeleton" />
-                            <span className="pg-filter-skeleton pg-filter-skeleton--sm" />
-                          </div>
-                        ) : plansForFilter.length > 0 ? (
-                          <div className="pg-filter-pills pg-filter-pills--plans">
-                            <button
-                              className={`pg-filter-pill ${filters.plan.length === 0 ? 'pg-filter-pill--active' : ''}`}
-                              onClick={() => setFilters(prev => ({ ...prev, plan: [], planDuration: "" }))}
-                            >
-                              All
-                            </button>
-                            {plansForFilter.map(plan => (
-                              <button
-                                key={plan.planId ?? plan.planName}
-                                className={`pg-filter-pill pg-filter-pill--plan ${filters.plan.includes(plan.planName) ? 'pg-filter-pill--plan-active' : ''}`}
-                                style={{ '--plan-color': plan.planColor || '#6366F1' } as React.CSSProperties}
-                                onClick={() => setFilters(prev => ({
-                                  ...prev,
-                                  plan: prev.plan.includes(plan.planName) ? [] : [plan.planName],
-                                  planDuration: "",
-                                }))}
-                                title={plan.description || plan.planName}
-                              >
-                                {plan.iconName && <span className="pg-filter-pill__icon">{plan.iconName}</span>}
-                                {plan.planName}
-                                {plan.memberCount != null && (
-                                  <span className="pg-filter-pill__count">{plan.memberCount}</span>
-                                )}
-                              </button>
-                            ))}
-                          </div>
-                        ) : (
-                          <span className="pg-filter-empty-hint">No plans configured yet</span>
-                        )}
-                      </div>
-
-                      {/* ── DURATION ── derived from selected plan's real variants */}
-                      <div className="pg-filter-dropdown__row pg-filter-dropdown__row--col">
-                        <label className="pg-filter-dropdown__label">
-                          Duration
-                          {filters.plan.length > 0 && (
-                            <span className="pg-filter-label__sub"> · {filters.plan[0]}</span>
-                          )}
-                        </label>
-                        {durationOptions.length > 0 ? (
-                          <div className="pg-filter-pills">
-                            <button
-                              className={`pg-filter-pill ${!filters.planDuration ? 'pg-filter-pill--active' : ''}`}
-                              onClick={() => setFilters(prev => ({ ...prev, planDuration: "" }))}
-                            >
-                              Any
-                            </button>
-                            {durationOptions.map(opt => (
-                              <button
-                                key={opt.value}
-                                className={`pg-filter-pill ${filters.planDuration === opt.value ? 'pg-filter-pill--active' : ''}`}
-                                onClick={() => setFilters(prev => ({ ...prev, planDuration: prev.planDuration === opt.value ? "" : opt.value }))}
-                              >
-                                {opt.label}
-                              </button>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="pg-filter-pills">
-                            {['', '1 MONTHS', '3 MONTHS', '6 MONTHS', '12 MONTHS', '1 YEARS'].map(val => (
-                              <button
-                                key={val}
-                                className={`pg-filter-pill ${filters.planDuration === val ? 'pg-filter-pill--active' : ''}`}
-                                onClick={() => setFilters(prev => ({ ...prev, planDuration: val }))}
-                              >
-                                {val === '' ? 'Any'
-                                  : val === '12 MONTHS' ? '1 Year'
-                                  : val.replace(' MONTHS', ' Mo').replace(' YEARS', ' Yr')}
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* ── JOINED ── select */}
-                      <div className="pg-filter-dropdown__row">
-                        <label className="pg-filter-dropdown__label">Joined</label>
-                        <select
-                          className="pg-filter-dropdown__select"
-                          value={filters.joinedPeriod}
-                          onChange={(e) => setFilters(prev => ({ ...prev, joinedPeriod: e.target.value }))}
-                        >
-                          <option value="">All Time</option>
-                          <option value="today">Today</option>
-                          <option value="this-week">This Week</option>
-                          <option value="this-month">This Month</option>
-                          <option value="last-3-months">Last 3 Months</option>
-                        </select>
-                      </div>
                     </div>
+
+                    {/* ── JOINED ── select */}
+                    <div className="pg-filter-dropdown__row">
+                      <label className="pg-filter-dropdown__label">Joined</label>
+                      <select
+                        className="pg-filter-dropdown__select"
+                        value={filters.joinedPeriod}
+                        onChange={(e) => setFilters(prev => ({ ...prev, joinedPeriod: e.target.value }))}
+                      >
+                        <option value="">All Time</option>
+                        <option value="today">Today</option>
+                        <option value="this-week">This Week</option>
+                        <option value="this-month">This Month</option>
+                        <option value="last-3-months">Last 3 Months</option>
+                      </select>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
@@ -1319,6 +1351,26 @@ const Members: React.FC = () => {
               const { daysLeft, isExpired } = getExpiryInfo(member)
               const paymentStat = getPaymentStatus(member)
               const memberPhone = member.phone || member.phoneNumber || (member as any).phoneNumber
+
+              // Compute display status same way as the table column
+              let mobileStatusText: string
+              let mobileStatusVariant: 'success' | 'warning' | 'danger' | 'default'
+              if (isExpired) {
+                mobileStatusText = 'Expired'
+                mobileStatusVariant = 'danger'
+              } else if (daysLeft === 0) {
+                mobileStatusText = 'Expires Today'
+                mobileStatusVariant = 'warning'
+              } else if (daysLeft !== null && daysLeft <= 7 && daysLeft > 0) {
+                mobileStatusText = 'Expiring'
+                mobileStatusVariant = 'warning'
+              } else if ((member.status || '').toLowerCase() === 'active') {
+                mobileStatusText = 'Active'
+                mobileStatusVariant = 'success'
+              } else {
+                mobileStatusText = 'Inactive'
+                mobileStatusVariant = 'default'
+              }
               return (
                 <div className="member-card">
                   <div className="member-card__header">
@@ -1333,7 +1385,11 @@ const Members: React.FC = () => {
                           {getPlanIcon(member.planName)} {member.planName || 'No Plan'}
                           {daysLeft !== null && (
                             <span className={`member-card__expiry ${isExpired ? 'member-card__expiry--expired' : daysLeft <= 7 ? 'member-card__expiry--warning' : ''}`}>
-                              {isExpired ? `${Math.abs(daysLeft)}d overdue` : `${daysLeft}d left`}
+                              {isExpired
+                                ? `${Math.abs(daysLeft)}d overdue`
+                                : daysLeft === 0
+                                  ? 'Expires today'
+                                  : `${daysLeft}d left`}
                             </span>
                           )}
                         </span>
@@ -1348,7 +1404,7 @@ const Members: React.FC = () => {
                       <span className={`payment-badge ${getPaymentBadgeClass(paymentStat)}`}>
                         {paymentStat.charAt(0).toUpperCase() + paymentStat.slice(1)}
                       </span>
-                      <Badge variant={getStatusVariant(member.status)}>{member.status}</Badge>
+                      <Badge variant={mobileStatusVariant}>{mobileStatusText}</Badge>
                     </div>
                   </div>
                   <div className="member-card__actions">
@@ -1426,13 +1482,13 @@ const Members: React.FC = () => {
         isOpen={isMembershipModalOpen}
         onClose={() => setIsMembershipModalOpen(false)}
         onSuccess={() => {
-            triggerRefresh()
-            refreshMembers()
-            api.getMemberPlanNames().then(() => {}).catch(() => {})
-            membershipPlanApi.getAllTieredPlans()
-              .then(res => setMembershipPlans(res.data || []))
-              .catch(() => {})
-          }}
+          triggerRefresh()
+          refreshMembers()
+          api.getMemberPlanNames().then(() => { }).catch(() => { })
+          membershipPlanApi.getAllTieredPlans()
+            .then(res => setMembershipPlans(res.data || []))
+            .catch(() => { })
+        }}
       />
     </div>
   )

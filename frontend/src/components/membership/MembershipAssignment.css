@@ -26,8 +26,8 @@
 .membership-select:focus {
   outline: none;
   background-color: rgba(255, 255, 255, 0.05);
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  border-color: #64748B;
+  box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.15);
 }
 
 .membership-select:hover:not(:disabled) {
@@ -70,8 +70,8 @@ body.light-mode .membership-select {
 [data-theme="light"] .membership-select:focus,
 body.light-mode .membership-select:focus {
   background: #ffffff;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: #64748B;
+  box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.12);
 }
 
 :root.theme-light .membership-select option,

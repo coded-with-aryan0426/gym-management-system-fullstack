@@ -148,7 +148,7 @@ const LogProgressModal: React.FC<LogProgressModalProps> = ({
                     {/* Tip Banner */}
                     <div style={{
                         backgroundColor: '#eff6ff',
-                        border: '1px solid #bfdbfe',
+                        border: '1px solid #e2e8f0',
                         borderRadius: '8px',
                         padding: '12px 16px',
                         marginBottom: '24px',
@@ -156,12 +156,12 @@ const LogProgressModal: React.FC<LogProgressModalProps> = ({
                         gap: '12px',
                         alignItems: 'flex-start',
                     }}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" style={{ flexShrink: 0, marginTop: '2px' }}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" style={{ flexShrink: 0, marginTop: '2px' }}>
                             <circle cx="12" cy="12" r="10"/>
                             <line x1="12" y1="8" x2="12" y2="12"/>
                             <line x1="12" y1="16" x2="12.01" y2="16"/>
                         </svg>
-                        <span style={{ fontSize: '14px', color: '#1e40af', lineHeight: '1.5' }}>
+                        <span style={{ fontSize: '14px', color: '#334155', lineHeight: '1.5' }}>
                             Tip: Log at the same time each day for accurate tracking.
                         </span>
                     </div>
@@ -277,7 +277,7 @@ const LogProgressModal: React.FC<LogProgressModalProps> = ({
                             fontSize: '14px',
                             fontWeight: 500,
                             cursor: saving ? 'not-allowed' : 'pointer',
-                            backgroundColor: '#3b82f6',
+                            backgroundColor: '#64748b',
                             border: 'none',
                             color: 'white',
                             display: 'flex',

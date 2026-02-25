@@ -80,31 +80,37 @@ export const MembersProvider: React.FC<{ children: ReactNode }> = ({ children })
         const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
         members.forEach(m => {
-            if (m.startDate && m.planDuration) {
+            const mAny = m as any;
+            let expiryMs: number | null = null;
+
+            if (mAny.endDateTime) {
+                expiryMs = new Date(mAny.endDateTime).getTime() - now.getTime();
+            } else if (m.endDate) {
+                expiryMs = new Date(m.endDate).getTime() - now.getTime();
+            } else if (m.startDate && m.planDuration) {
                 const startDate = new Date(m.startDate);
                 const durationStr = m.planDuration.toLowerCase();
                 let expiryDate = new Date(startDate);
-
                 if (durationStr.includes('year')) {
-                    const years = parseInt(durationStr) || 1;
-                    expiryDate.setMonth(expiryDate.getMonth() + years * 12);
+                    expiryDate.setMonth(expiryDate.getMonth() + (parseInt(durationStr) || 1) * 12);
                 } else if (durationStr.includes('month')) {
-                    const months = parseInt(durationStr) || 1;
-                    expiryDate.setMonth(expiryDate.getMonth() + months);
+                    expiryDate.setMonth(expiryDate.getMonth() + (parseInt(durationStr) || 1));
                 } else if (durationStr.includes('day')) {
-                    const days = parseInt(durationStr) || 30;
-                    expiryDate.setDate(expiryDate.getDate() + days);
+                    expiryDate.setDate(expiryDate.getDate() + (parseInt(durationStr) || 30));
                 }
+                expiryMs = expiryDate.getTime() - now.getTime();
+            }
 
-                const daysUntilExpiry = Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-                
+            if (expiryMs !== null) {
+                const daysUntilExpiry = expiryMs / (1000 * 60 * 60 * 24);
                 if (daysUntilExpiry > 0 && daysUntilExpiry <= 7) {
                     expiringSoon++;
                 }
+            }
 
-                if (startDate >= monthStart) {
-                    newThisMonth++;
-                }
+            const dateStr = m.startDate || m.joinDate || (m as any).createdAt;
+            if (dateStr && new Date(dateStr) >= monthStart) {
+                newThisMonth++;
             }
         });
 

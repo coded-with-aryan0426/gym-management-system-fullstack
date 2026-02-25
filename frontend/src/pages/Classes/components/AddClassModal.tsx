@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { X, Clock, MapPin, Users, Calendar, ChevronDown, Check } from 'lucide-react';
 import type { ClassData } from './index';
 import './AddClassModal.css';
@@ -54,42 +53,18 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
         onSave(formData);
     };
 
-    const backdropVariants = {
-        hidden: { opacity: 0 },
-        visible: { opacity: 1, transition: { duration: 0.2 } },
-    };
-
-    const modalVariants = {
-        hidden: { opacity: 0, scale: 0.95, y: 10 },
-        visible: {
-            opacity: 1,
-            scale: 1,
-            y: 0,
-            transition: { type: 'spring' as const, damping: 25, stiffness: 300 }
-        },
-        exit: { opacity: 0, scale: 0.95, y: 10, transition: { duration: 0.15 } }
-    };
-
     return (
-        <AnimatePresence>
+        <>
             {isOpen && (
                 <div className="add-class-modal-overlay">
                     {/* Backdrop */}
-                    <motion.div
-                        variants={backdropVariants}
-                        initial="hidden"
-                        animate="visible"
-                        exit="hidden"
+                    <div
                         onClick={onClose}
                         className="add-class-modal-backdrop"
                     />
 
                     {/* Modal Content */}
-                    <motion.div
-                        variants={modalVariants}
-                        initial="hidden"
-                        animate="visible"
-                        exit="exit"
+                    <div
                         className="add-class-modal-content"
                     >
                         {/* Header */}
@@ -240,9 +215,9 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
 
                             </form>
                         </div>
-                    </motion.div>
+                    </div>
                 </div>
             )}
-        </AnimatePresence>
+        </>
     );
 };

@@ -422,10 +422,10 @@ const BillingRulesSection: React.FC = () => {
     ]
 
     return (
-        <div className="settings-section" style={{ "--section-accent": "#10b981" } as React.CSSProperties}>
+        <div className="settings-section settings-section--green">
             <div className="settings-section__header">
                 <div className="settings-section__title-group">
-                    <div className="settings-section__icon" style={{ background: 'linear-gradient(135deg, #10b981, #059669)' }}>
+                    <div className="settings-section__icon settings-section__icon--green">
                         <CreditCard size={20} />
                     </div>
                     <div>
@@ -524,7 +524,7 @@ const BillingRulesSection: React.FC = () => {
                             </div>
 
                             {settings.taxEnabled && (
-                                <div className="form-grid form-grid--3col" style={{ marginLeft: '40px', marginTop: '16px' }}>
+                                <div className="form-grid form-grid--3col form-grid--indented">
                                     <div className="field-wrapper">
                                         <label className="field-label">Tax Name</label>
                                         <input
@@ -590,7 +590,7 @@ const BillingRulesSection: React.FC = () => {
 
                             {settings.lateFeeEnabled && (
                                 <>
-                                    <div className="form-grid form-grid--2col" style={{ marginLeft: '40px', marginTop: '16px' }}>
+                                    <div className="form-grid form-grid--2col form-grid--indented">
                                         <div className="field-wrapper">
                                             <label className="field-label">Late Fee Type</label>
                                             <select
@@ -628,7 +628,7 @@ const BillingRulesSection: React.FC = () => {
                                             </div>
                                         )}
                                     </div>
-                                    <div className="form-grid form-grid--2col" style={{ marginLeft: '40px', marginTop: '8px' }}>
+                                    <div className="form-grid form-grid--2col form-grid--indented form-grid--mt-sm">
                                         <div className="field-wrapper">
                                             <label className="field-label">Grace Period (Days)</label>
                                             <input
@@ -709,7 +709,7 @@ const BillingRulesSection: React.FC = () => {
                                 />
                             </div>
 
-                            <div className="field-wrapper" style={{ marginTop: '16px' }}>
+                            <div className="field-wrapper field-wrapper--mt">
                                 <label className="field-label">Default Invoice Notes</label>
                                 <textarea
                                     className="dense-input dense-input--textarea"
@@ -720,7 +720,7 @@ const BillingRulesSection: React.FC = () => {
                                 />
                             </div>
 
-                            <div className="field-wrapper" style={{ marginTop: '16px' }}>
+                            <div className="field-wrapper field-wrapper--mt">
                                 <label className="field-label">Invoice Footer</label>
                                 <textarea
                                     className="dense-input dense-input--textarea"
@@ -849,7 +849,7 @@ const BillingRulesSection: React.FC = () => {
                             </div>
 
                             {settings.allowPartialPayments && (
-                                <div className="field-wrapper" style={{ marginLeft: '40px', marginTop: '16px', maxWidth: '300px' }}>
+                                <div className="field-wrapper field-wrapper--indented">
                                     <label className="field-label">Minimum Partial Payment (%)</label>
                                     <input
                                         type="number"
@@ -892,8 +892,8 @@ const BillingRulesSection: React.FC = () => {
                             </div>
 
                             {settings.paymentReminderEnabled && (
-                                <div className="reminder-days-config" style={{ marginLeft: '40px', marginTop: '16px' }}>
-                                    <label className="field-label">Reminder Days (Before Due Date)</label>
+                            <div className="reminder-days-config reminder-days-config--indented">
+                                <label className="field-label">Reminder Days (Before Due Date)</label>
                                     <div className="reminder-tags">
                                         {settings.paymentReminderDays.map(day => (
                                             <span key={day} className="reminder-tag">
@@ -913,7 +913,6 @@ const BillingRulesSection: React.FC = () => {
                                             placeholder="Days"
                                             min={1}
                                             max={30}
-                                            style={{ width: '80px' }}
                                         />
                                         <button 
                                             className="add-reminder-btn"
@@ -949,7 +948,7 @@ const BillingRulesSection: React.FC = () => {
                             </div>
 
                             {settings.overdueReminderEnabled && (
-                                <div className="reminder-days-config" style={{ marginLeft: '40px', marginTop: '16px' }}>
+                                <div className="reminder-days-config reminder-days-config--indented">
                                     <label className="field-label">Reminder Days (After Due Date)</label>
                                     <div className="reminder-tags">
                                         {settings.overdueReminderDays.map(day => (
@@ -970,7 +969,6 @@ const BillingRulesSection: React.FC = () => {
                                             placeholder="Days"
                                             min={1}
                                             max={30}
-                                            style={{ width: '80px' }}
                                         />
                                         <button 
                                             className="add-reminder-btn"
@@ -1011,7 +1009,7 @@ const BillingRulesSection: React.FC = () => {
                             </div>
 
                             {settings.refundPolicyEnabled && (
-                                <div className="form-grid form-grid--3col" style={{ marginLeft: '40px', marginTop: '16px' }}>
+                                <div className="form-grid form-grid--3col form-grid--indented">
                                     <div className="field-wrapper">
                                         <label className="field-label">Refund Window (Days)</label>
                                         <input
@@ -1079,7 +1077,7 @@ const BillingRulesSection: React.FC = () => {
                             </div>
 
                             {settings.autoDiscountEnabled && (
-                                <div className="form-grid form-grid--2col" style={{ marginLeft: '40px', marginTop: '16px' }}>
+                                <div className="form-grid form-grid--2col form-grid--indented">
                                     <div className="field-wrapper">
                                         <label className="field-label">Discount Percentage (%)</label>
                                         <input
@@ -1131,7 +1129,7 @@ const BillingRulesSection: React.FC = () => {
                             </div>
 
                             {settings.prorateEnabled && (
-                                <div className="field-wrapper" style={{ marginLeft: '40px', marginTop: '16px', maxWidth: '300px' }}>
+                                <div className="field-wrapper field-wrapper--indented">
                                     <label className="field-label">Proration Method</label>
                                     <select
                                         className="dense-input"

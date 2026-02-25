@@ -23,7 +23,7 @@ const EquipmentCard: React.FC<EquipmentCardProps> = ({ equipment, density = 'com
 
     const conditionConfig: Record<string, { color: string; label: string }> = {
         NEW: { color: '#22c55e', label: 'New' },
-        GOOD: { color: '#3b82f6', label: 'Good' },
+        GOOD: { color: '#64748b', label: 'Good' },
         FAIR: { color: '#eab308', label: 'Fair' },
         POOR: { color: '#ef4444', label: 'Poor' }
     };
@@ -79,7 +79,7 @@ const EquipmentCard: React.FC<EquipmentCardProps> = ({ equipment, density = 'com
 
     const getHealthColor = (score: number) => {
         if (score >= 80) return '#22c55e';
-        if (score >= 60) return '#3b82f6';
+        if (score >= 60) return '#64748b';
         if (score >= 40) return '#eab308';
         return '#ef4444';
     };

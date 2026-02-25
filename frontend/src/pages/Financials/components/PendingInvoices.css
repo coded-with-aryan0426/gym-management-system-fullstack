@@ -70,7 +70,10 @@
 }
 
 .pi-item:last-child { border-bottom: none; }
-.pi-item:hover { background: rgba(255, 255, 255, 0.02); }
+.pi-item--normal   { background: transparent; }
+.pi-item--warning  { background: rgba(249,115,22,0.04); border-left: 2px solid rgba(249,115,22,0.35); }
+.pi-item--critical { background: rgba(239,68,68,0.05);  border-left: 2px solid rgba(239,68,68,0.4); }
+.pi-item:hover { background: rgba(255, 255, 255, 0.03) !important; }
 
 .pi-item-left {
     display: flex;

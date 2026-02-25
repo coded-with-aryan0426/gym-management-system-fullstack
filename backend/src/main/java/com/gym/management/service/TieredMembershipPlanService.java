@@ -27,8 +27,8 @@ public class TieredMembershipPlanService {
 
     // Premium color palette
     private static final String[] PLAN_COLORS = {
-        "#DC2626", "#EA580C", "#D97706", "#16A34A", 
-        "#0891B2", "#2563EB", "#7C3AED", "#DB2777"
+            "#DC2626", "#EA580C", "#D97706", "#16A34A",
+            "#0891B2", "#2563EB", "#7C3AED", "#DB2777"
     };
 
     /**
@@ -109,8 +109,8 @@ public class TieredMembershipPlanService {
                 .orElseThrow(() -> new IllegalArgumentException("Plan not found with ID: " + planId));
 
         // Check name uniqueness (excluding current plan)
-        if (!existingPlan.getPlanName().equals(dto.getPlanName()) && 
-            planRepository.existsByPlanNameAndPlanIdNot(dto.getPlanName(), planId)) {
+        if (!existingPlan.getPlanName().equals(dto.getPlanName()) &&
+                planRepository.existsByPlanNameAndPlanIdNot(dto.getPlanName(), planId)) {
             throw new IllegalArgumentException("A plan with this name already exists");
         }
 
@@ -120,7 +120,7 @@ public class TieredMembershipPlanService {
         existingPlan.setCategory(dto.getCategory());
         existingPlan.setIconName(dto.getIconName());
         existingPlan.setIsRecommended(dto.getIsRecommended());
-        
+
         if (dto.getStatus() != null) {
             existingPlan.setStatus(dto.getStatus());
         }
@@ -137,13 +137,13 @@ public class TieredMembershipPlanService {
             for (TieredMembershipPlanDTO.PlanVariantDTO variantDTO : dto.getVariants()) {
                 PlanVariant variant = new PlanVariant();
                 variant.setDurationValue(variantDTO.getDurationValue());
-                variant.setDurationUnit(variantDTO.getDurationUnit() != null ? 
-                        variantDTO.getDurationUnit() : PlanVariant.DurationUnit.MONTHS);
+                variant.setDurationUnit(variantDTO.getDurationUnit() != null ? variantDTO.getDurationUnit()
+                        : PlanVariant.DurationUnit.MONTHS);
                 variant.setPrice(variantDTO.getPrice());
                 variant.setOriginalPrice(variantDTO.getOriginalPrice());
                 variant.setDiscountPercent(variantDTO.getDiscountPercent());
-                variant.setIncludedPTSessions(variantDTO.getIncludedPTSessions() != null ? 
-                        variantDTO.getIncludedPTSessions() : 0);
+                variant.setIncludedPTSessions(
+                        variantDTO.getIncludedPTSessions() != null ? variantDTO.getIncludedPTSessions() : 0);
                 variant.setIsPopular(variantDTO.getIsPopular() != null ? variantDTO.getIsPopular() : false);
                 variant.setIsActive(variantDTO.getIsActive() != null ? variantDTO.getIsActive() : true);
                 variant.setSortOrder(variantDTO.getSortOrder() != null ? variantDTO.getSortOrder() : 0);
@@ -159,8 +159,8 @@ public class TieredMembershipPlanService {
                 PlanFeature feature = new PlanFeature();
                 feature.setName(featureDTO.getName());
                 feature.setDescription(featureDTO.getDescription());
-                feature.setCategory(featureDTO.getCategory() != null ? 
-                        featureDTO.getCategory() : PlanFeature.FeatureCategory.ACCESS);
+                feature.setCategory(featureDTO.getCategory() != null ? featureDTO.getCategory()
+                        : PlanFeature.FeatureCategory.ACCESS);
                 feature.setIsIncluded(featureDTO.getIsIncluded() != null ? featureDTO.getIsIncluded() : true);
                 feature.setSortOrder(featureDTO.getSortOrder() != null ? featureDTO.getSortOrder() : 0);
                 existingPlan.addFeature(feature);
@@ -178,10 +178,10 @@ public class TieredMembershipPlanService {
         TieredMembershipPlan plan = planRepository.findById(planId)
                 .orElseThrow(() -> new IllegalArgumentException("Plan not found with ID: " + planId));
 
-        // TODO: Add check for active members using this plan
+        // Check for active members using this plan (Future implementation)
         // long memberCount = membershipRepository.countByTieredPlanId(planId);
         // if (memberCount > 0) {
-        //     throw new IllegalStateException("Cannot delete plan with active members");
+        // throw new IllegalStateException("Cannot delete plan with active members");
         // }
 
         planRepository.delete(plan);
@@ -277,19 +277,19 @@ public class TieredMembershipPlanService {
     @Transactional(readOnly = true)
     public Map<String, Object> getPlanStatistics() {
         Map<String, Object> stats = new HashMap<>();
-        
+
         stats.put("totalPlans", planRepository.count());
         stats.put("activePlans", planRepository.countByStatus(PlanStatus.ACTIVE));
         stats.put("draftPlans", planRepository.countByStatus(PlanStatus.DRAFT));
         stats.put("archivedPlans", planRepository.countByStatus(PlanStatus.ARCHIVED));
-        
+
         // Plans by category
         Map<String, Long> byCategory = new HashMap<>();
         for (PlanCategory category : PlanCategory.values()) {
             byCategory.put(category.name(), planRepository.countByCategory(category));
         }
         stats.put("plansByCategory", byCategory);
-        
+
         return stats;
     }
 

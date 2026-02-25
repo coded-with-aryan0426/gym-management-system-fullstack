@@ -83,6 +83,8 @@ const MaintenancePage = lazy(() => import('./pages/utility/MaintenancePage'));
 const SessionExpiredPage = lazy(() => import('./pages/utility/SessionExpiredPage'));
 const ComingSoonPage = lazy(() => import('./pages/utility/ComingSoonPage'));
 const CheckIn = lazy(() => import('./pages/CheckIn/CheckIn'));
+const AttendancePage = lazy(() => import('./pages/Attendance/Attendance'));
+const TodoPage = lazy(() => import('./pages/Todo/Todo'));
 
 // Loading spinner for page transitions
 const PageLoader = () => (
@@ -213,8 +215,10 @@ function App() {
                             <Route path="/reports" element={<Navigate to="/financials?tab=analytics" replace />} />
                             <Route path="/notifications" element={<OwnerNotifications />} />
                             <Route path="/settings" element={<Settings />} />
-                            <Route path="/check-in" element={<CheckIn />} />
-                            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                              <Route path="/check-in" element={<CheckIn />} />
+                              <Route path="/attendance" element={<AttendancePage />} />
+                              <Route path="/tasks" element={<TodoPage />} />
+                              <Route path="*" element={<Navigate to="/dashboard" replace />} />
                           </Routes>
                         </AppShell>
                       </ProtectedRoute>

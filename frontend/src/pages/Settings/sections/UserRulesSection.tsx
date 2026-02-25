@@ -501,7 +501,7 @@ const UserRulesSection: React.FC = () => {
                 />
               </div>
               {settings.staff_carryForward && (
-                <div className="form-grid form-grid--2col" style={{ marginLeft: '40px', marginTop: '12px' }}>
+                <div className="form-grid form-grid--2col">
                   <div className="field-wrapper">
                     <label className="field-label">Max Carry Forward (days)</label>
                     <input type="number" className="dense-input" value={settings.staff_maxCarryForward || 5} onChange={e => updateSetting('staff_maxCarryForward', parseInt(e.target.value))} />
@@ -712,7 +712,7 @@ const UserRulesSection: React.FC = () => {
                 />
               </div>
               {settings.trainer_commissionEnabled && (
-                <div className="form-grid form-grid--2col" style={{ marginLeft: '40px', marginTop: '12px' }}>
+                <div className="form-grid form-grid--2col">
                   <div className="field-wrapper">
                     <label className="field-label">Commission (%)</label>
                     <input type="number" className="dense-input" value={settings.trainer_commissionPercent || 10} onChange={e => updateSetting('trainer_commissionPercent', parseInt(e.target.value))} />
@@ -781,7 +781,7 @@ const UserRulesSection: React.FC = () => {
                   onClick={() => updateSetting('trainer_certificationRequired', !settings.trainer_certificationRequired)}
                 />
               </div>
-              <div className="form-grid form-grid--2col" style={{ marginTop: '12px' }}>
+              <div className="form-grid form-grid--2col">
                 <div className="field-wrapper">
                   <label className="field-label">Expiry Warning (days before)</label>
                   <input type="number" className="dense-input" value={settings.trainer_certExpiryWarning || 30} onChange={e => updateSetting('trainer_certExpiryWarning', parseInt(e.target.value))} />
@@ -831,7 +831,7 @@ const UserRulesSection: React.FC = () => {
                 />
               </div>
               {settings.trainer_trialSessionsAllowed && (
-                <div className="form-grid form-grid--2col" style={{ marginLeft: '40px', marginTop: '12px' }}>
+                <div className="form-grid form-grid--2col">
                   <div className="field-wrapper">
                     <label className="field-label">Trial Session Limit</label>
                     <input type="number" className="dense-input" value={settings.trainer_trialSessionLimit || 1} onChange={e => updateSetting('trainer_trialSessionLimit', parseInt(e.target.value))} />
@@ -909,7 +909,7 @@ const UserRulesSection: React.FC = () => {
                   onClick={() => updateSetting('member_requireHealthDeclaration', !settings.member_requireHealthDeclaration)}
                 />
               </div>
-              <div className="form-grid form-grid--2col" style={{ marginTop: '12px' }}>
+              <div className="form-grid form-grid--2col">
                 <div className="field-wrapper">
                   <label className="field-label">Minimum Age</label>
                   <input type="number" className="dense-input" value={settings.member_minAge || 16} onChange={e => updateSetting('member_minAge', parseInt(e.target.value))} />
@@ -999,7 +999,7 @@ const UserRulesSection: React.FC = () => {
                 />
               </div>
               {settings.member_allowGuestAccess && (
-                <div className="form-grid form-grid--2col" style={{ marginLeft: '40px', marginTop: '12px' }}>
+                <div className="form-grid form-grid--2col">
                   <div className="field-wrapper">
                     <label className="field-label">Guest Fee (₹)</label>
                     <input type="number" className="dense-input" value={settings.member_guestFee || 10} onChange={e => updateSetting('member_guestFee', parseInt(e.target.value))} />
@@ -1045,7 +1045,7 @@ const UserRulesSection: React.FC = () => {
                 />
               </div>
               {settings.member_noShowPenalty && (
-                <div className="form-grid form-grid--2col" style={{ marginLeft: '40px', marginTop: '12px' }}>
+                <div className="form-grid form-grid--2col">
                   <div className="field-wrapper">
                     <label className="field-label">Suspension After (no-shows)</label>
                     <input type="number" className="dense-input" value={settings.member_noShowSuspensionThreshold || 3} onChange={e => updateSetting('member_noShowSuspensionThreshold', parseInt(e.target.value))} />
@@ -1090,7 +1090,7 @@ const UserRulesSection: React.FC = () => {
                 />
               </div>
               {settings.member_familyMembershipEnabled && (
-                <div className="form-grid form-grid--2col" style={{ marginLeft: '40px', marginTop: '12px' }}>
+                <div className="form-grid form-grid--2col">
                   <div className="field-wrapper">
                     <label className="field-label">Family Discount (%)</label>
                     <input type="number" className="dense-input" value={settings.member_familyDiscount || 15} onChange={e => updateSetting('member_familyDiscount', parseInt(e.target.value))} />
@@ -1111,7 +1111,7 @@ const UserRulesSection: React.FC = () => {
                 />
               </div>
               {settings.member_referralEnabled && (
-                <div className="form-grid form-grid--2col" style={{ marginLeft: '40px', marginTop: '12px' }}>
+                <div className="form-grid form-grid--2col">
                   <div className="field-wrapper">
                     <label className="field-label">Reward Type</label>
                     <select className="dense-input" value={settings.member_referralReward || 'credit'} onChange={e => updateSetting('member_referralReward', e.target.value)}>
@@ -1141,7 +1141,7 @@ const UserRulesSection: React.FC = () => {
                 />
               </div>
               {settings.member_loyaltyPointsEnabled && (
-                <div className="form-grid form-grid--2col" style={{ marginLeft: '40px', marginTop: '12px' }}>
+                <div className="form-grid form-grid--2col">
                   <div className="field-wrapper">
                     <label className="field-label">Points Per ₹ Spent</label>
                     <input type="number" className="dense-input" value={settings.member_pointsPerRupee || 1} onChange={e => updateSetting('member_pointsPerRupee', parseInt(e.target.value))} />
@@ -1235,7 +1235,7 @@ const UserRulesSection: React.FC = () => {
                   onClick={() => updateSetting('member_autoSuspendOnPaymentFailure', !settings.member_autoSuspendOnPaymentFailure)}
                 />
               </div>
-              <div className="form-grid form-grid--2col" style={{ marginTop: '12px' }}>
+              <div className="form-grid form-grid--2col">
                 <div className="field-wrapper">
                   <label className="field-label">Payment Grace Period (days)</label>
                   <input type="number" className="dense-input" value={settings.member_paymentGracePeriod || 7} onChange={e => updateSetting('member_paymentGracePeriod', parseInt(e.target.value))} />
@@ -1255,7 +1255,7 @@ const UserRulesSection: React.FC = () => {
                 />
               </div>
               {settings.member_waiverRequired && (
-                <div className="form-grid form-grid--2col" style={{ marginLeft: '40px', marginTop: '12px' }}>
+                <div className="form-grid form-grid--2col">
                   <div className="field-wrapper">
                     <label className="field-label">Waiver Expiry (months)</label>
                     <input type="number" className="dense-input" value={settings.member_waiverExpiryMonths || 12} onChange={e => updateSetting('member_waiverExpiryMonths', parseInt(e.target.value))} />
@@ -1290,10 +1290,10 @@ const UserRulesSection: React.FC = () => {
   }
 
   return (
-    <div className="settings-section" style={{ "--section-accent": "#8b5cf6" } as React.CSSProperties}>
+    <div className="settings-section">
       <div className="settings-section__header">
         <div className="settings-section__title-group">
-            <div className="settings-section__icon" style={{ background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)' }}><Users size={20} /></div>
+            <div className="settings-section__icon settings-section__icon--purple"><Users size={20} /></div>
           <div>
             <h2 className="settings-section__title">User Rules</h2>
             <p className="settings-section__description">Configure rules for staff, trainers, and members</p>

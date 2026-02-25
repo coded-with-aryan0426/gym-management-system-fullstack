@@ -12,12 +12,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Filter,
-  TrendingUp,
   User,
   Dumbbell,
   X,
-  Zap,
-  Target,
   Eye
 } from 'lucide-react';
 import { ptSessionApi } from '../../services/api';
@@ -36,10 +33,20 @@ import './PTSessions.css';
 type ViewMode = 'calendar' | 'list' | 'packages';
 type FilterStatus = 'all' | 'SCHEDULED' | 'COMPLETED' | 'MISSED' | 'CANCELLED';
 
+export interface PTStats {
+  today: number; thisWeek: number; scheduled: number;
+  completed: number; missed: number; completionRate: number;
+  trainers: number; members: number;
+}
+
+interface PTSessionsProps {
+  onStatsChange?: (stats: PTStats) => void;
+}
+
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
-const PTSessions: React.FC = () => {
+const PTSessions: React.FC<PTSessionsProps> = ({ onStatsChange }) => {
   const [sessions, setSessions] = useState<PTSessionDTO[]>([]);
   const [trainers, setTrainers] = useState<UserType[]>([]);
   const [members, setMembers] = useState<UserType[]>([]);
@@ -171,6 +178,22 @@ const PTSessions: React.FC = () => {
         : 0
     };
   }, [sessions]);
+
+  useEffect(() => {
+    if (onStatsChange) {
+      onStatsChange({
+        today: stats.today,
+        thisWeek: stats.thisWeek,
+        scheduled: stats.scheduled,
+        completed: stats.completed,
+        missed: stats.missed,
+        completionRate: stats.completionRate,
+        trainers: trainers.length,
+        members: members.length,
+      });
+    }
+  }, [stats, trainers.length, members.length, onStatsChange]);
+
 
   const filteredSessions = useMemo(() => {
     let result = sessions;
@@ -330,61 +353,6 @@ const PTSessions: React.FC = () => {
 
   return (
     <div className="pt-sessions">
-      {/* Stats Strip */}
-      <div className="pt-stats-strip">
-        <div className="pt-stats-strip__item pt-stats-strip__item--today">
-          <Zap size={16} />
-          <span className="pt-stats-strip__value">{stats.today}</span>
-          <span className="pt-stats-strip__label">Today</span>
-        </div>
-        <div className="pt-stats-strip__divider" />
-        <div className="pt-stats-strip__item pt-stats-strip__item--week">
-          <Calendar size={16} />
-          <span className="pt-stats-strip__value">{stats.thisWeek}</span>
-          <span className="pt-stats-strip__label">This Week</span>
-        </div>
-        <div className="pt-stats-strip__divider" />
-        <div className="pt-stats-strip__item pt-stats-strip__item--scheduled">
-          <Clock size={16} />
-          <span className="pt-stats-strip__value">{stats.scheduled}</span>
-          <span className="pt-stats-strip__label">Upcoming</span>
-        </div>
-        <div className="pt-stats-strip__divider" />
-        <div className="pt-stats-strip__item pt-stats-strip__item--completed">
-          <CheckCircle size={16} />
-          <span className="pt-stats-strip__value">{stats.completed}</span>
-          <span className="pt-stats-strip__label">Done</span>
-        </div>
-        <div className="pt-stats-strip__divider" />
-        <div className="pt-stats-strip__item pt-stats-strip__item--rate">
-          <TrendingUp size={16} />
-          <span className="pt-stats-strip__value">{stats.completionRate}%</span>
-          <span className="pt-stats-strip__label">Rate</span>
-          <div className="pt-stats-strip__bar">
-            <div className="pt-stats-strip__bar-fill" style={{ width: `${stats.completionRate}%` }} />
-          </div>
-        </div>
-        <div className="pt-stats-strip__divider" />
-        <div className="pt-stats-strip__item pt-stats-strip__item--missed">
-          <AlertCircle size={16} />
-          <span className="pt-stats-strip__value">{stats.missed}</span>
-          <span className="pt-stats-strip__label">Missed</span>
-        </div>
-        <div className="pt-stats-strip__divider" />
-        <div className="pt-stats-strip__item pt-stats-strip__item--people">
-          <Users size={16} />
-          <span className="pt-stats-strip__value">{trainers.length}</span>
-          <span className="pt-stats-strip__label">Trainers</span>
-        </div>
-        <div className="pt-stats-strip__divider" />
-        <div className="pt-stats-strip__item pt-stats-strip__item--people">
-          <Target size={16} />
-          <span className="pt-stats-strip__value">{members.length}</span>
-          <span className="pt-stats-strip__label">Members</span>
-        </div>
-      </div>
-
-      {/* Main Content */}
       <div className="pt-sessions__main">
         <div className="pt-sessions__toolbar">
           <div className="pt-sessions__toolbar-left">

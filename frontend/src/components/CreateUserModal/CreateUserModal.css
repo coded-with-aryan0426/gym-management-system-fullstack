@@ -5,10 +5,8 @@
 .create-user-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  /* Lighter overlay */
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.45);
+  /* Normal dim overlay */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -23,8 +21,6 @@
   max-width: 800px;
   /* Wider match */
   background: var(--bg-secondary);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
   border: 1px solid var(--border-subtle);
   border-radius: 20px;
   box-shadow: var(--shadow-xl);
@@ -174,7 +170,7 @@
   outline: none;
   background: var(--bg-primary);
   border-color: var(--color-ocean);
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 2px rgba(100, 116, 139, 0.12);
 }
 
 .form-input::placeholder {
@@ -299,7 +295,7 @@ body.light-mode .selection-card {
 [data-theme="light"] .selection-card:hover,
 body.light-mode .selection-card:hover {
   background: #ffffff;
-  border-color: var(--color-ocean, #3b82f6);
+  border-color: var(--color-ocean, #64748b);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 

@@ -1,3 +1,4 @@
+
 package com.gym.management.service;
 
 import com.gym.management.dto.MemberDTO;
@@ -34,6 +35,9 @@ public class UserService {
 
     @Autowired
     private AuditLogService auditLogService;
+
+    @Autowired
+    private MembershipService membershipService;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -94,13 +98,16 @@ public class UserService {
     }
 
     /**
-     * Randomly assign membership packages to all members who have no package or have null package.
-     * This is a migration/normalization endpoint to align legacy members with the new membership system.
+     * Randomly assign membership packages to all members who have no package or
+     * have null package.
+     * This is a migration/normalization endpoint to align legacy members with the
+     * new membership system.
      * Returns a summary of changes made.
      */
     @Transactional
     public Map<String, Object> randomlyAssignMembershipPackages() {
-        List<com.gym.management.model.MembershipPackage> activePackages = membershipPackageRepository.findActivePackages();
+        List<com.gym.management.model.MembershipPackage> activePackages = membershipPackageRepository
+                .findActivePackages();
         if (activePackages.isEmpty()) {
             throw new RuntimeException("No active membership packages available for assignment");
         }
@@ -123,10 +130,11 @@ public class UserService {
         List<Map<String, Object>> log = new ArrayList<>();
 
         for (User user : allCustomers) {
-            List<com.gym.management.model.Membership> memberships = membershipRepository.findByUserUserId(user.getUserId());
+            List<com.gym.management.model.Membership> memberships = membershipRepository
+                    .findByUserUserId(user.getUserId());
 
             com.gym.management.model.Membership membership;
-            
+
             if (memberships.isEmpty()) {
                 // Create a new membership record for legacy members without one
                 try {
@@ -148,7 +156,8 @@ public class UserService {
             }
 
             // Assign a random package
-            com.gym.management.model.MembershipPackage randomPackage = activePackages.get(random.nextInt(activePackages.size()));
+            com.gym.management.model.MembershipPackage randomPackage = activePackages
+                    .get(random.nextInt(activePackages.size()));
             String oldPlanName = membership.getMembershipPackage() != null
                     ? membership.getMembershipPackage().getPackageName()
                     : "null";
@@ -184,14 +193,16 @@ public class UserService {
         result.put("totalMembers", allCustomers.size());
         result.put("assigned", assignedCount);
         result.put("skipped", skippedCount);
-        result.put("availablePackages", activePackages.stream().map(p -> p.getPackageName()).collect(Collectors.toList()));
+        result.put("availablePackages",
+                activePackages.stream().map(p -> p.getPackageName()).collect(Collectors.toList()));
         result.put("log", log);
         return result;
     }
 
     @Transactional(readOnly = true)
     public List<com.gym.management.dto.MemberDTO> getAllMembers() {
-        // Query all possible member role names (legacy support for different naming conventions)
+        // Query all possible member role names (legacy support for different naming
+        // conventions)
         java.util.Set<Long> seenIds = new java.util.HashSet<>();
         List<User> allMembers = new java.util.ArrayList<>();
 
@@ -244,21 +255,30 @@ public class UserService {
                     .findFirst()
                     .orElse(memberships.get(0));
 
-            dto.setStatus(activeMembership.getStatus() != null ? activeMembership.getStatus().name() : "UNKNOWN");
+            // Recompute live status from effective end timestamp (avoids stale stored
+            // value)
+            MembershipStatus liveStatus = membershipService.calculateStatusFromEndDateTime(
+                    activeMembership.getEffectiveEndDateTime());
+            dto.setStatus(liveStatus.name());
             dto.setStartDate(activeMembership.getStartDate());
             dto.setEndDate(activeMembership.getEndDate());
+            dto.setStartDateTime(activeMembership.getEffectiveStartDateTime());
+            dto.setEndDateTime(activeMembership.getEffectiveEndDateTime());
 
             // Priority: tieredPlan > planVariant > legacy membershipPackage
             if (activeMembership.getTieredPlan() != null) {
                 dto.setPlanName(activeMembership.getTieredPlan().getPlanName());
                 dto.setMembershipPlanName(activeMembership.getTieredPlan().getPlanName());
-                dto.setMembershipPlanCategory(activeMembership.getTieredPlan().getCategory() != null ? activeMembership.getTieredPlan().getCategory().name() : null);
+                dto.setMembershipPlanCategory(activeMembership.getTieredPlan().getCategory() != null
+                        ? activeMembership.getTieredPlan().getCategory().name()
+                        : null);
                 if (activeMembership.getPlanVariant() != null) {
                     dto.setPlanDuration(activeMembership.getPlanVariant().getFormattedDuration());
                     dto.setMembershipPlanPrice(activeMembership.getPlanVariant().getPrice());
                 } else {
                     // Calculate from dates if variant missing
-                    dto.setPlanDuration(calculateDurationLabel(activeMembership.getStartDate(), activeMembership.getEndDate()));
+                    dto.setPlanDuration(
+                            calculateDurationLabel(activeMembership.getStartDate(), activeMembership.getEndDate()));
                 }
             } else if (activeMembership.getMembershipPackage() != null) {
                 dto.setPlanName(activeMembership.getMembershipPackage().getPackageName());
@@ -272,7 +292,8 @@ public class UserService {
             } else {
                 // No plan reference but has membership record - derive from dates
                 dto.setPlanName("Custom Plan");
-                dto.setPlanDuration(calculateDurationLabel(activeMembership.getStartDate(), activeMembership.getEndDate()));
+                dto.setPlanDuration(
+                        calculateDurationLabel(activeMembership.getStartDate(), activeMembership.getEndDate()));
             }
 
             if (user.getCreatedAt() != null) {
@@ -289,7 +310,8 @@ public class UserService {
      * Calculate a human-readable duration label from start/end dates.
      */
     private String calculateDurationLabel(LocalDate start, LocalDate end) {
-        if (start == null || end == null) return "-";
+        if (start == null || end == null)
+            return "-";
         long days = java.time.temporal.ChronoUnit.DAYS.between(start, end);
         if (days >= 365) {
             long years = days / 365;
@@ -334,7 +356,8 @@ public class UserService {
                     .collect(Collectors.toList());
         }
 
-        // Convert to MemberDTO using shared helper (supports tiered plans + legacy packages)
+        // Convert to MemberDTO using shared helper (supports tiered plans + legacy
+        // packages)
         LocalDate today = LocalDate.now();
         List<MemberDTO> allMembers = allCustomers.stream()
                 .map(user -> populateMemberDTO(user))
@@ -456,11 +479,12 @@ public class UserService {
 
     // Staff roles that are NOT trainers (operations/admin staff)
     private static final java.util.Set<String> STAFF_ROLES = java.util.Set.of(
-        "STAFF", "RECEPTIONIST", "FLOOR_MANAGER", "MAINTENANCE", "CLEANING", "OPERATIONS", "SALES", "ADMIN", "MANAGER"
-    );
+            "STAFF", "RECEPTIONIST", "FLOOR_MANAGER", "MAINTENANCE", "CLEANING", "OPERATIONS", "SALES", "ADMIN",
+            "MANAGER");
 
     @Transactional(readOnly = true)
-    public PageResponse<com.gym.management.dto.StaffDTO> getStaffPaginated(int page, int size, String search, String role, String status) {
+    public PageResponse<com.gym.management.dto.StaffDTO> getStaffPaginated(int page, int size, String search,
+            String role, String status) {
         java.util.Set<String> rolesToQuery = new java.util.HashSet<>();
         if (role != null && !role.trim().isEmpty()) {
             rolesToQuery.add(role.toUpperCase());
@@ -477,16 +501,16 @@ public class UserService {
         if (search != null && !search.trim().isEmpty()) {
             String searchLower = search.toLowerCase();
             allStaff = allStaff.stream()
-                .filter(u -> (u.getFullName() != null && u.getFullName().toLowerCase().contains(searchLower)) ||
-                        (u.getEmail() != null && u.getEmail().toLowerCase().contains(searchLower)) ||
-                        (u.getJobTitle() != null && u.getJobTitle().toLowerCase().contains(searchLower)))
-                .collect(Collectors.toList());
+                    .filter(u -> (u.getFullName() != null && u.getFullName().toLowerCase().contains(searchLower)) ||
+                            (u.getEmail() != null && u.getEmail().toLowerCase().contains(searchLower)) ||
+                            (u.getJobTitle() != null && u.getJobTitle().toLowerCase().contains(searchLower)))
+                    .collect(Collectors.toList());
         }
 
         if (status != null && !status.trim().isEmpty()) {
             allStaff = allStaff.stream()
-                .filter(u -> u.getStatus() != null && u.getStatus().equalsIgnoreCase(status))
-                .collect(Collectors.toList());
+                    .filter(u -> u.getStatus() != null && u.getStatus().equalsIgnoreCase(status))
+                    .collect(Collectors.toList());
         }
 
         allStaff.sort((a, b) -> {
@@ -501,8 +525,8 @@ public class UserService {
         List<User> pageContent = start < allStaff.size() ? allStaff.subList(start, end) : Collections.emptyList();
 
         List<com.gym.management.dto.StaffDTO> dtos = pageContent.stream()
-            .map(this::populateStaffDTO)
-            .collect(Collectors.toList());
+                .map(this::populateStaffDTO)
+                .collect(Collectors.toList());
 
         return new PageResponse<>(dtos, page, size, totalCount, "alphabetical");
     }
@@ -533,10 +557,10 @@ public class UserService {
         dto.setEmergencyContactRelation(user.getEmergencyContactRelation());
         if (user.getRoles() != null && !user.getRoles().isEmpty()) {
             String roleName = user.getRoles().stream()
-                .map(r -> r.getRoleName())
-                .filter(r -> !r.equals("USER") && !r.equals("MEMBER") && !r.equals("TRAINER"))
-                .findFirst()
-                .orElse(user.getRoles().iterator().next().getRoleName());
+                    .map(r -> r.getRoleName())
+                    .filter(r -> !r.equals("USER") && !r.equals("MEMBER") && !r.equals("TRAINER"))
+                    .findFirst()
+                    .orElse(user.getRoles().iterator().next().getRoleName());
             dto.setStaffRole(roleName.replace("ROLE_", ""));
         }
         return dto;
@@ -545,26 +569,42 @@ public class UserService {
     @Transactional
     public com.gym.management.dto.StaffDTO updateStaffDetails(Long userId, java.util.Map<String, Object> updates) {
         User user = userRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("Staff not found: " + userId));
-        if (updates.containsKey("fullName")) user.setFullName((String) updates.get("fullName"));
-        if (updates.containsKey("email")) user.setEmail((String) updates.get("email"));
-        if (updates.containsKey("phone")) user.setPhone((String) updates.get("phone"));
-        if (updates.containsKey("gender")) user.setGender((String) updates.get("gender"));
-        if (updates.containsKey("address")) user.setAddress((String) updates.get("address"));
-        if (updates.containsKey("city")) user.setCity((String) updates.get("city"));
-        if (updates.containsKey("state")) user.setState((String) updates.get("state"));
-        if (updates.containsKey("zipCode")) user.setZipCode((String) updates.get("zipCode"));
-        if (updates.containsKey("jobTitle")) user.setJobTitle((String) updates.get("jobTitle"));
-        if (updates.containsKey("department")) user.setDepartment((String) updates.get("department"));
-        if (updates.containsKey("shiftTiming")) user.setShiftTiming((String) updates.get("shiftTiming"));
-        if (updates.containsKey("employeeIdCode")) user.setEmployeeIdCode((String) updates.get("employeeIdCode"));
-        if (updates.containsKey("status")) user.setStatus((String) updates.get("status"));
+                .orElseThrow(() -> new RuntimeException("Staff not found: " + userId));
+        if (updates.containsKey("fullName"))
+            user.setFullName((String) updates.get("fullName"));
+        if (updates.containsKey("email"))
+            user.setEmail((String) updates.get("email"));
+        if (updates.containsKey("phone"))
+            user.setPhone((String) updates.get("phone"));
+        if (updates.containsKey("gender"))
+            user.setGender((String) updates.get("gender"));
+        if (updates.containsKey("address"))
+            user.setAddress((String) updates.get("address"));
+        if (updates.containsKey("city"))
+            user.setCity((String) updates.get("city"));
+        if (updates.containsKey("state"))
+            user.setState((String) updates.get("state"));
+        if (updates.containsKey("zipCode"))
+            user.setZipCode((String) updates.get("zipCode"));
+        if (updates.containsKey("jobTitle"))
+            user.setJobTitle((String) updates.get("jobTitle"));
+        if (updates.containsKey("department"))
+            user.setDepartment((String) updates.get("department"));
+        if (updates.containsKey("shiftTiming"))
+            user.setShiftTiming((String) updates.get("shiftTiming"));
+        if (updates.containsKey("employeeIdCode"))
+            user.setEmployeeIdCode((String) updates.get("employeeIdCode"));
+        if (updates.containsKey("status"))
+            user.setStatus((String) updates.get("status"));
         if (updates.containsKey("salary") && updates.get("salary") != null) {
             user.setSalary(new java.math.BigDecimal(updates.get("salary").toString()));
         }
-        if (updates.containsKey("emergencyContactName")) user.setEmergencyContactName((String) updates.get("emergencyContactName"));
-        if (updates.containsKey("emergencyContactPhone")) user.setEmergencyContactPhone((String) updates.get("emergencyContactPhone"));
-        if (updates.containsKey("emergencyContactRelation")) user.setEmergencyContactRelation((String) updates.get("emergencyContactRelation"));
+        if (updates.containsKey("emergencyContactName"))
+            user.setEmergencyContactName((String) updates.get("emergencyContactName"));
+        if (updates.containsKey("emergencyContactPhone"))
+            user.setEmergencyContactPhone((String) updates.get("emergencyContactPhone"));
+        if (updates.containsKey("emergencyContactRelation"))
+            user.setEmergencyContactRelation((String) updates.get("emergencyContactRelation"));
         if (updates.containsKey("dateOfBirth") && updates.get("dateOfBirth") != null) {
             user.setDateOfBirth(java.time.LocalDate.parse(updates.get("dateOfBirth").toString()));
         }
@@ -583,13 +623,12 @@ public class UserService {
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
             // Log failed password change attempt
             auditLogService.logSecurityEvent(
-                "PASSWORD_CHANGE_FAILED",
-                "Failed password change attempt - incorrect current password",
-                userId,
-                1L,
-                "medium",
-                null
-            );
+                    "PASSWORD_CHANGE_FAILED",
+                    "Failed password change attempt - incorrect current password",
+                    userId,
+                    1L,
+                    "medium",
+                    null);
             throw new RuntimeException("Incorrect current password");
         }
 
@@ -597,16 +636,15 @@ public class UserService {
         user.setIsFirstLogin(false);
         user.setPasswordChangedAt(LocalDateTime.now());
         userRepository.save(user);
-        
+
         // Log successful password change
         auditLogService.logSecurityEvent(
-            "PASSWORD_CHANGED",
-            "User changed their password",
-            userId,
-            1L,
-            "info",
-            null
-        );
+                "PASSWORD_CHANGED",
+                "User changed their password",
+                userId,
+                1L,
+                "info",
+                null);
     }
 
     public User getUserById(Long id) {
@@ -628,6 +666,15 @@ public class UserService {
 
     @Transactional
     public User createUser(User user) {
+        // ── Duplicate email guard ────────────────────────────────────
+        if (user.getEmail() != null && !user.getEmail().isBlank()) {
+            if (userRepository.existsByEmailIgnoreCase(user.getEmail().trim())) {
+                throw new RuntimeException("An account with the email '" + user.getEmail().trim() + "' already exists");
+            }
+            // Normalize email to lowercase before saving
+            user.setEmail(user.getEmail().trim().toLowerCase());
+        }
+
         // Map phoneNumber to phone if provided
         if (user.getPhoneNumber() != null && !user.getPhoneNumber().isEmpty()) {
             user.setPhone(user.getPhoneNumber());
@@ -687,17 +734,17 @@ public class UserService {
         }
 
         // Log user creation in audit log
-        String roleName = savedUser.getRoles() != null && !savedUser.getRoles().isEmpty() 
-            ? savedUser.getRoles().iterator().next().getRoleName() : "USER";
+        String roleName = savedUser.getRoles() != null && !savedUser.getRoles().isEmpty()
+                ? savedUser.getRoles().iterator().next().getRoleName()
+                : "USER";
         auditLogService.logCreate(
-            "User",
-            savedUser.getUserId().toString(),
-            savedUser.getFullName(),
-            savedUser.getUserId(),
-            1L, // Default gym ID
-            String.format("New %s created: %s (%s)", roleName, savedUser.getFullName(), savedUser.getEmail()),
-            null
-        );
+                "User",
+                savedUser.getUserId().toString(),
+                savedUser.getFullName(),
+                savedUser.getUserId(),
+                1L, // Default gym ID
+                String.format("New %s created: %s (%s)", roleName, savedUser.getFullName(), savedUser.getEmail()),
+                null);
 
         // Create Membership if this is a CUSTOMER with packageId (or variantId/planId)
         if (isCustomer && (user.getPackageId() != null || user.getVariantId() != null)) {
@@ -707,7 +754,7 @@ public class UserService {
                 if (user.getGymId() != null) {
                     gym = gymRepository.findById(user.getGymId()).orElse(null);
                 }
-                
+
                 if (gym == null) {
                     // Fallback to default gym (id=1 or any first gym)
                     gym = gymRepository.findById(1L).orElse(null);
@@ -727,11 +774,19 @@ public class UserService {
                 membership.setUser(savedUser);
                 membership.setGym(gym);
 
-                // Set start date (default to today if not provided)
-                java.time.LocalDate startDate = user.getStartDate() != null
-                        ? user.getStartDate()
-                        : java.time.LocalDate.now();
+                // Determine start datetime from payload (frontend may send a datetime-local
+                // value)
+                java.time.LocalDateTime startDateTime;
+                if (user.getStartDateTime() != null) {
+                    startDateTime = user.getStartDateTime();
+                } else if (user.getStartDate() != null) {
+                    startDateTime = user.getStartDate().atStartOfDay();
+                } else {
+                    startDateTime = java.time.LocalDateTime.now();
+                }
+                java.time.LocalDate startDate = startDateTime.toLocalDate();
                 membership.setStartDate(startDate);
+                membership.setStartDateTime(startDateTime);
 
                 if (user.getPlanId() != null && user.getVariantId() != null) {
                     // Tiered Plan
@@ -739,41 +794,51 @@ public class UserService {
                             .orElseThrow(() -> new RuntimeException("Plan not found: " + user.getPlanId()));
                     com.gym.management.model.PlanVariant variant = planVariantRepository.findById(user.getVariantId())
                             .orElseThrow(() -> new RuntimeException("Variant not found: " + user.getVariantId()));
-                    
+
                     membership.setTieredPlan(plan);
                     membership.setPlanVariant(variant);
-                    membership.setEndDate(startDate.plusDays(variant.getDurationDays()));
+                    java.time.LocalDateTime endDateTime = startDateTime.plusDays(variant.getDurationDays());
+                    membership.setEndDateTime(endDateTime);
+                    membership.setEndDate(endDateTime.toLocalDate());
                 } else if (user.getPackageId() != null) {
-                    // Try to find if packageId is actually a Tiered Plan Variant (for backward compatibility)
-                    Optional<com.gym.management.model.PlanVariant> variantOpt = planVariantRepository.findById(user.getPackageId());
-                    
+                    // Try to find if packageId is actually a Tiered Plan Variant (for backward
+                    // compatibility)
+                    Optional<com.gym.management.model.PlanVariant> variantOpt = planVariantRepository
+                            .findById(user.getPackageId());
+
                     if (variantOpt.isPresent()) {
                         com.gym.management.model.PlanVariant variant = variantOpt.get();
                         membership.setTieredPlan(variant.getPlan());
                         membership.setPlanVariant(variant);
-                        membership.setEndDate(startDate.plusDays(variant.getDurationDays()));
+                        java.time.LocalDateTime endDateTime = startDateTime.plusDays(variant.getDurationDays());
+                        membership.setEndDateTime(endDateTime);
+                        membership.setEndDate(endDateTime.toLocalDate());
                     } else {
                         // Fallback to legacy MembershipPackage
                         com.gym.management.model.MembershipPackage pkg = membershipPackageRepository
                                 .findById(user.getPackageId())
-                                .orElseThrow(() -> new RuntimeException("Package/Variant not found: " + user.getPackageId()));
-                        
+                                .orElseThrow(() -> new RuntimeException(
+                                        "Package/Variant not found: " + user.getPackageId()));
+
                         membership.setMembershipPackage(pkg);
-                        
+
+                        java.time.LocalDateTime endDateTime;
                         Integer durationDays = pkg.getDurationDays();
                         if (durationDays != null && durationDays > 0) {
-                            membership.setEndDate(startDate.plusDays(durationDays));
+                            endDateTime = startDateTime.plusDays(durationDays);
                         } else {
                             int months = user.getDuration() != null ? user.getDuration() : 1;
                             if (months <= 0) {
                                 months = pkg.getDurationMonths() != null ? pkg.getDurationMonths() : 1;
                             }
-                            membership.setEndDate(startDate.plusMonths(months));
+                            endDateTime = startDateTime.plusMonths(months);
                         }
+                        membership.setEndDateTime(endDateTime);
+                        membership.setEndDate(endDateTime.toLocalDate());
                     }
                 }
 
-                membership.setStatus(com.gym.management.model.MembershipStatus.ACTIVE);
+                membership.setStatus(membershipService.calculateStatusFromEndDateTime(membership.getEndDateTime()));
                 membershipRepository.save(membership);
             } catch (Exception e) {
                 System.err.println("Failed to create membership during user creation: " + e.getMessage());
@@ -799,7 +864,7 @@ public class UserService {
         if (existingUser != null) {
             // Track changes for audit log
             List<String> changes = new ArrayList<>();
-            
+
             // Update fields
             if (user.getUsername() != null && !user.getUsername().equals(existingUser.getUsername())) {
                 changes.add(String.format("Username: '%s' → '%s'", existingUser.getUsername(), user.getUsername()));
@@ -845,41 +910,41 @@ public class UserService {
                 changes.add(String.format("Status: '%s' → '%s'", existingUser.getStatus(), user.getStatus()));
                 existingUser.setStatus(user.getStatus());
             }
-              // Update avatarId if provided
-              if (user.getAvatarId() != null && !user.getAvatarId().equals(existingUser.getAvatarId())) {
-                  changes.add("Avatar updated");
-                  existingUser.setAvatarId(user.getAvatarId());
-              }
-              // Update personal info fields
-              if (user.getGender() != null && !user.getGender().equals(existingUser.getGender())) {
-                  changes.add(String.format("Gender: '%s' → '%s'", existingUser.getGender(), user.getGender()));
-                  existingUser.setGender(user.getGender());
-              }
-              if (user.getDateOfBirth() != null) {
-                  changes.add("Date of birth updated");
-                  existingUser.setDateOfBirth(user.getDateOfBirth());
-              }
-              if (user.getBloodType() != null && !user.getBloodType().equals(existingUser.getBloodType())) {
-                  changes.add("Blood type updated");
-                  existingUser.setBloodType(user.getBloodType());
-              }
-              if (user.getAddress() != null && !user.getAddress().equals(existingUser.getAddress())) {
-                  changes.add("Address updated");
-                  existingUser.setAddress(user.getAddress());
-              }
-              if (user.getCity() != null && !user.getCity().equals(existingUser.getCity())) {
-                  changes.add("City updated");
-                  existingUser.setCity(user.getCity());
-              }
-              if (user.getState() != null && !user.getState().equals(existingUser.getState())) {
-                  changes.add("State updated");
-                  existingUser.setState(user.getState());
-              }
-              if (user.getZipCode() != null && !user.getZipCode().equals(existingUser.getZipCode())) {
-                  changes.add("Zip code updated");
-                  existingUser.setZipCode(user.getZipCode());
-              }
-              // Update emergency contact fields
+            // Update avatarId if provided
+            if (user.getAvatarId() != null && !user.getAvatarId().equals(existingUser.getAvatarId())) {
+                changes.add("Avatar updated");
+                existingUser.setAvatarId(user.getAvatarId());
+            }
+            // Update personal info fields
+            if (user.getGender() != null && !user.getGender().equals(existingUser.getGender())) {
+                changes.add(String.format("Gender: '%s' → '%s'", existingUser.getGender(), user.getGender()));
+                existingUser.setGender(user.getGender());
+            }
+            if (user.getDateOfBirth() != null) {
+                changes.add("Date of birth updated");
+                existingUser.setDateOfBirth(user.getDateOfBirth());
+            }
+            if (user.getBloodType() != null && !user.getBloodType().equals(existingUser.getBloodType())) {
+                changes.add("Blood type updated");
+                existingUser.setBloodType(user.getBloodType());
+            }
+            if (user.getAddress() != null && !user.getAddress().equals(existingUser.getAddress())) {
+                changes.add("Address updated");
+                existingUser.setAddress(user.getAddress());
+            }
+            if (user.getCity() != null && !user.getCity().equals(existingUser.getCity())) {
+                changes.add("City updated");
+                existingUser.setCity(user.getCity());
+            }
+            if (user.getState() != null && !user.getState().equals(existingUser.getState())) {
+                changes.add("State updated");
+                existingUser.setState(user.getState());
+            }
+            if (user.getZipCode() != null && !user.getZipCode().equals(existingUser.getZipCode())) {
+                changes.add("Zip code updated");
+                existingUser.setZipCode(user.getZipCode());
+            }
+            // Update emergency contact fields
             if (user.getEmergencyContactName() != null) {
                 existingUser.setEmergencyContactName(user.getEmergencyContactName());
                 changes.add("Emergency contact name updated");
@@ -901,24 +966,23 @@ public class UserService {
                 existingUser.setFitnessGoals(user.getFitnessGoals());
                 changes.add("Fitness goals updated");
             }
-            
+
             User updatedUser = userRepository.save(existingUser);
-            
+
             // Log the update in audit log
             if (!changes.isEmpty()) {
                 String changesStr = String.join("; ", changes);
                 auditLogService.logUpdate(
-                    "User",
-                    id.toString(),
-                    existingUser.getFullName(),
-                    id,
-                    1L, // Default gym ID
-                    "User profile updated",
-                    changesStr,
-                    null
-                );
+                        "User",
+                        id.toString(),
+                        existingUser.getFullName(),
+                        id,
+                        1L, // Default gym ID
+                        "User profile updated",
+                        changesStr,
+                        null);
             }
-            
+
             return updatedUser;
         }
         return null;
@@ -938,8 +1002,9 @@ public class UserService {
         // Capture user info for audit log before deletion
         String userName = user.getFullName();
         String userEmail = user.getEmail();
-        String userRole = user.getRoles() != null && !user.getRoles().isEmpty() 
-            ? user.getRoles().iterator().next().getRoleName() : "USER";
+        String userRole = user.getRoles() != null && !user.getRoles().isEmpty()
+                ? user.getRoles().iterator().next().getRoleName()
+                : "USER";
 
         // 1. Clear ManyToMany relationships (Trainer <-> Customer)
         // We need to remove this user from others' lists to avoid FK constraint issues
@@ -962,80 +1027,95 @@ public class UserService {
         // Save to update join tables
         userRepository.save(user);
 
-        // 2. Delete Memberships
-        List<Membership> memberships = membershipRepository.findByUserUserId(id);
-        membershipRepository.deleteAll(memberships);
+        // 2. Keep historical memberships/sessions/ratings and soft-delete only.
+        // Deleting child rows here causes FK violations because many historical tables
+        // (class bookings, ratings, notes, notifications, etc.) still reference this
+        // user.
 
-        // 3. Delete PT Sessions (as member or trainer)
-        List<com.gym.management.model.PTSession> sessionsAsMember = ptSessionRepository.findByMemberId(id);
-        ptSessionRepository.deleteAll(sessionsAsMember);
-
-        List<com.gym.management.model.PTSession> sessionsAsTrainer = ptSessionRepository.findByTrainerId(id);
-        ptSessionRepository.deleteAll(sessionsAsTrainer);
-
-        // 4. Finally Delete User
-        userRepository.deleteById(id);
+        // 3. Soft-delete user to avoid FK constraint failures from historical records
+        // while hiding the profile from regular queries via @SQLRestriction.
+        user.setIsDeleted(true);
+        user.setStatus("Deleted");
+        userRepository.save(user);
 
         // Log the deletion in audit log
         auditLogService.logDelete(
-            "User",
-            id.toString(),
-            userName,
-            null, // We don't know who deleted, could be passed as param
-            1L, // Default gym ID
-            String.format("%s deleted: %s (%s)", userRole, userName, userEmail),
-            null
-        );
+                "User",
+                id.toString(),
+                userName,
+                null, // We don't know who deleted, could be passed as param
+                1L, // Default gym ID
+                String.format("%s deleted: %s (%s)", userRole, userName, userEmail),
+                null);
     }
 
+    /**
+     * Assign a customer to a trainer.
+     *
+     * Uses a native Oracle MERGE (upsert) directly on the join table to avoid:
+     * - @Version OptimisticLockException when saving the customer entity
+     * - HashSet equals/hashCode bugs caused by Lombok @Data including @Version
+     * field
+     * - Recursive EAGER loading chains on both sides of the ManyToMany
+     *
+     * Idempotent: safe to call even if the relationship already exists.
+     */
     @Transactional
-    public User assignCustomerToTrainer(Long trainerId, Long customerId) {
+    public long assignCustomerToTrainer(Long trainerId, Long customerId) {
         Objects.requireNonNull(trainerId, "Trainer ID must not be null");
         Objects.requireNonNull(customerId, "Customer ID must not be null");
-        User trainer = userRepository.findById(trainerId).orElse(null);
-        User customer = userRepository.findById(customerId).orElse(null);
 
-        if (trainer != null && customer != null) {
-            // Add to both sides of the relationship
-            trainer.getCustomers().add(customer);
-            customer.getTrainers().add(trainer);
-            userRepository.save(trainer);
-            userRepository.save(customer);
-
-            // Flush to ensure database write completes and clear cache
-            entityManager.flush();
-            entityManager.clear();
-
-            // Re-fetch fresh trainer data to return
-            return userRepository.findById(trainerId).orElse(null);
+        if (!userRepository.existsById(trainerId) || !userRepository.existsById(customerId)) {
+            return -1L; // signal not found
         }
-        return null;
+
+        // Oracle MERGE = upsert: only inserts if the row doesn't exist
+        entityManager.createNativeQuery(
+                "MERGE INTO trainer_customer_map t " +
+                        "USING dual ON (t.trainer_user_id = :tid AND t.customer_user_id = :cid) " +
+                        "WHEN NOT MATCHED THEN " +
+                        "  INSERT (trainer_user_id, customer_user_id) VALUES (:tid, :cid)")
+                .setParameter("tid", trainerId)
+                .setParameter("cid", customerId)
+                .executeUpdate();
+
+        // Return updated customer count for this trainer
+        Number count = (Number) entityManager.createNativeQuery(
+                "SELECT COUNT(*) FROM trainer_customer_map WHERE trainer_user_id = :tid")
+                .setParameter("tid", trainerId)
+                .getSingleResult();
+
+        return count.longValue();
     }
 
+    /**
+     * Remove a customer from a trainer.
+     *
+     * Uses native SQL DELETE directly on the join table for the same reasons
+     * as assignCustomerToTrainer. Idempotent: safe even if row doesn't exist.
+     */
     @Transactional
-    public User removeCustomerFromTrainer(Long trainerId, Long customerId) {
+    public long removeCustomerFromTrainer(Long trainerId, Long customerId) {
         Objects.requireNonNull(trainerId, "Trainer ID must not be null");
         Objects.requireNonNull(customerId, "Customer ID must not be null");
-        User trainer = userRepository.findById(trainerId).orElse(null);
-        User customer = userRepository.findById(customerId).orElse(null);
 
-        if (trainer != null && customer != null) {
-            // Remove from both sides using ID-based comparison to avoid proxy equality
-            // issues
-            trainer.getCustomers().removeIf(c -> c.getUserId().equals(customerId));
-            customer.getTrainers().removeIf(t -> t.getUserId().equals(trainerId));
-
-            userRepository.save(trainer);
-            userRepository.save(customer);
-
-            // Flush to ensure database write completes and clear cache
-            entityManager.flush();
-            entityManager.clear();
-
-            // Re-fetch fresh trainer data to return
-            return userRepository.findById(trainerId).orElse(null);
+        if (!userRepository.existsById(trainerId)) {
+            return -1L; // signal not found
         }
-        return null;
+
+        entityManager.createNativeQuery(
+                "DELETE FROM trainer_customer_map " +
+                        "WHERE trainer_user_id = :tid AND customer_user_id = :cid")
+                .setParameter("tid", trainerId)
+                .setParameter("cid", customerId)
+                .executeUpdate();
+
+        Number count = (Number) entityManager.createNativeQuery(
+                "SELECT COUNT(*) FROM trainer_customer_map WHERE trainer_user_id = :tid")
+                .setParameter("tid", trainerId)
+                .getSingleResult();
+
+        return count.longValue();
     }
 
     /**

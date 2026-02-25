@@ -665,7 +665,7 @@ const EnhancedTrainerActionModal: React.FC<EnhancedTrainerActionModalProps> = ({
                   {editForm.status}
                 </span>
                 {selectedSpecs.length > 0 && (
-                  <span className="role-badge" style={{ background: 'rgba(59,130,246,0.1)', color: '#3b82f6', border: '1px solid rgba(59,130,246,0.2)' }}>
+                  <span className="role-badge" style={{ background: 'rgba(100,116,139,0.12)', color: '#64748b', border: '1px solid rgba(59,130,246,0.2)' }}>
                     {selectedSpecs[0]}{selectedSpecs.length > 1 ? ` +${selectedSpecs.length - 1}` : ''}
                   </span>
                 )}
@@ -1544,8 +1544,8 @@ const EnhancedTrainerActionModal: React.FC<EnhancedTrainerActionModalProps> = ({
                                   </span>
                                   <span style={{
                                     fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 6,
-                                    background: record.status === 'checked-out' ? 'rgba(34,197,94,0.1)' : 'rgba(59,130,246,0.1)',
-                                    color: record.status === 'checked-out' ? '#22c55e' : '#3b82f6',
+                                    background: record.status === 'checked-out' ? 'rgba(34,197,94,0.1)' : 'rgba(100,116,139,0.12)',
+                                    color: record.status === 'checked-out' ? '#22c55e' : '#64748b',
                                   }}>
                                     {duration ? `${duration}h` : 'Active'}
                                   </span>

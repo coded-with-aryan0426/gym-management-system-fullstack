@@ -10,7 +10,6 @@ import com.gym.management.model.MembershipStatus;
 import com.gym.management.model.Gym;
 import com.gym.management.model.TieredMembershipPlan;
 import com.gym.management.model.PlanVariant;
-import com.gym.management.model.PlanFeature;
 import com.gym.management.repository.MembershipRepository;
 import com.gym.management.repository.GymRepository;
 import com.gym.management.repository.MembershipPackageRepository;
@@ -26,7 +25,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -106,7 +104,7 @@ public class DataInitializer implements CommandLineRunner {
 
     private void initializeRoles() {
         String[] roleNames = { "OWNER", "TRAINER", "STAFF", "CUSTOMER", "ADMIN", "MANAGER",
-            "RECEPTIONIST", "FLOOR_MANAGER", "MAINTENANCE", "CLEANING", "OPERATIONS", "SALES" };
+                "RECEPTIONIST", "FLOOR_MANAGER", "MAINTENANCE", "CLEANING", "OPERATIONS", "SALES" };
         for (String roleName : roleNames) {
             if (roleRepository.findByRoleName(roleName) == null) {
                 Role role = new Role();
@@ -219,8 +217,8 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private PlanVariant createVariant(TieredMembershipPlan plan, int durationValue, PlanVariant.DurationUnit unit,
-                                       double price, Double originalPrice, int ptSessions,
-                                       boolean isPopular, boolean isActive, int sortOrder) {
+            double price, Double originalPrice, int ptSessions,
+            boolean isPopular, boolean isActive, int sortOrder) {
         PlanVariant v = new PlanVariant();
         v.setPlan(plan);
         v.setDurationValue(durationValue);
@@ -307,7 +305,8 @@ public class DataInitializer implements CommandLineRunner {
                     java.util.List<PlanVariant> planVariants = allVariants.stream()
                             .filter(v -> v.getPlan().getPlanId().equals(plan.getPlanId()))
                             .collect(java.util.stream.Collectors.toList());
-                    if (planVariants.isEmpty()) planVariants = allVariants;
+                    if (planVariants.isEmpty())
+                        planVariants = allVariants;
                     PlanVariant variant = planVariants.get(random.nextInt(planVariants.size()));
 
                     Membership m = new Membership();
@@ -327,12 +326,14 @@ public class DataInitializer implements CommandLineRunner {
                     } else if (roll > 0.1) {
                         // Expiring soon (within 7 days)
                         m.setStatus(MembershipStatus.ACTIVE);
-                        m.setStartDate(java.time.LocalDate.now().minusDays(variant.getDurationDays() - random.nextInt(7)));
+                        m.setStartDate(
+                                java.time.LocalDate.now().minusDays(variant.getDurationDays() - random.nextInt(7)));
                         m.setEndDate(java.time.LocalDate.now().plusDays(1 + random.nextInt(6)));
                     } else {
                         // Expired
                         m.setStatus(MembershipStatus.EXPIRED);
-                        m.setStartDate(java.time.LocalDate.now().minusDays(variant.getDurationDays() + 10 + random.nextInt(90)));
+                        m.setStartDate(java.time.LocalDate.now()
+                                .minusDays(variant.getDurationDays() + 10 + random.nextInt(90)));
                         m.setEndDate(java.time.LocalDate.now().minusDays(1 + random.nextInt(30)));
                     }
                     membershipRepository.save(m);

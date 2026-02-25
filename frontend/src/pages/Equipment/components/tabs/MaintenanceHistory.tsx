@@ -29,7 +29,7 @@ export const MaintenanceHistory: React.FC<MaintenanceHistoryProps> = ({ history 
         const map: Record<string, { color: string; bg: string; border: string; icon: React.ReactNode; label: string }> = {
             PREVENTIVE: { color: '#22c55e', bg: 'rgba(34, 197, 94, 0.08)', border: 'rgba(34, 197, 94, 0.18)', icon: <Shield size={14} />, label: 'Preventive' },
             REPAIR: { color: '#ef4444', bg: 'rgba(239, 68, 68, 0.08)', border: 'rgba(239, 68, 68, 0.18)', icon: <Wrench size={14} />, label: 'Repair' },
-            INSPECTION: { color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.08)', border: 'rgba(59, 130, 246, 0.18)', icon: <ClipboardCheck size={14} />, label: 'Inspection' }
+            INSPECTION: { color: '#64748b', bg: 'rgba(100, 116, 139, 0.08)', border: 'rgba(100, 116, 139, 0.18)', icon: <ClipboardCheck size={14} />, label: 'Inspection' }
         };
         return map[type] || { color: 'var(--text-secondary)', bg: 'var(--glass-bg)', border: 'var(--glass-border)', icon: null, label: type };
     };
@@ -37,7 +37,7 @@ export const MaintenanceHistory: React.FC<MaintenanceHistoryProps> = ({ history 
     const getStatusConfig = (status: MaintenanceStatus) => {
         const map: Record<string, { color: string; bg: string; icon: React.ReactNode; label: string }> = {
             COMPLETED: { color: '#22c55e', bg: 'rgba(34, 197, 94, 0.08)', icon: <CheckCircle size={10} />, label: 'Completed' },
-            SCHEDULED: { color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.08)', icon: <Calendar size={10} />, label: 'Scheduled' },
+            SCHEDULED: { color: '#64748b', bg: 'rgba(100, 116, 139, 0.08)', icon: <Calendar size={10} />, label: 'Scheduled' },
             OVERDUE: { color: '#ef4444', bg: 'rgba(239, 68, 68, 0.08)', icon: <AlertCircle size={10} />, label: 'Overdue' },
             CANCELLED: { color: '#64748b', bg: 'rgba(100, 116, 139, 0.08)', icon: <X size={10} />, label: 'Cancelled' }
         };

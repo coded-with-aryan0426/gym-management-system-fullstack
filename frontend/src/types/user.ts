@@ -101,6 +101,8 @@ export interface MemberDTO {
     joinDate?: string;
     startDate?: string;
     endDate?: string;
+    startDateTime?: string;  // ISO-8601 e.g. "2025-06-01T09:00:00"
+    endDateTime?: string;
     planName?: string;
     planDuration?: string;
     membershipStatus?: string;

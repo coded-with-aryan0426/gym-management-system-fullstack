@@ -14,7 +14,7 @@ export const MaintenanceAnalysis: React.FC<MaintenanceAnalysisProps> = ({ stats,
     const typeConfig: Record<string, { color: string; bg: string; border: string; icon: React.ReactNode; label: string }> = {
         PREVENTIVE: { color: '#22c55e', bg: 'rgba(34, 197, 94, 0.08)', border: 'rgba(34, 197, 94, 0.18)', icon: <Shield size={16} />, label: 'Preventive' },
         REPAIR: { color: '#ef4444', bg: 'rgba(239, 68, 68, 0.08)', border: 'rgba(239, 68, 68, 0.18)', icon: <Wrench size={16} />, label: 'Repair' },
-        INSPECTION: { color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.08)', border: 'rgba(59, 130, 246, 0.18)', icon: <ClipboardCheck size={16} />, label: 'Inspection' }
+        INSPECTION: { color: '#64748b', bg: 'rgba(100, 116, 139, 0.08)', border: 'rgba(100, 116, 139, 0.18)', icon: <ClipboardCheck size={16} />, label: 'Inspection' }
     };
 
     const healthColor = stats.health > 70 ? '#22c55e' : stats.health > 40 ? '#f59e0b' : '#ef4444';
@@ -37,7 +37,7 @@ export const MaintenanceAnalysis: React.FC<MaintenanceAnalysisProps> = ({ stats,
 
     const kpis = [
         { label: 'Total Spent', value: formatCurrency(totalCost), icon: IndianRupee, color: '#22c55e' },
-        { label: 'Avg / Service', value: formatCurrency(avgCost), icon: IndianRupee, color: '#3b82f6' },
+        { label: 'Avg / Service', value: formatCurrency(avgCost), icon: IndianRupee, color: '#64748b' },
         { label: 'Health Score', value: `${stats.health}%`, icon: Activity, color: healthColor },
     ];
 

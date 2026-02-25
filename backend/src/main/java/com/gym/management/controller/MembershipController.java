@@ -29,17 +29,21 @@ public class MembershipController {
                     request.getGymId(),
                     request.getIsUpgrade());
 
-            return ResponseEntity.ok(Map.of(
-                "membershipId", membership.getId(),
-                "status", membership.getStatus().name(),
-                "startDate", membership.getStartDate().toString(),
-                "endDate", membership.getEndDate().toString(),
-                "planName", membership.getTieredPlan() != null 
-                    ? membership.getTieredPlan().getPlanName() 
-                    : (membership.getMembershipPackage() != null 
-                        ? membership.getMembershipPackage().getPackageName() 
-                        : "Unknown")
-            ));
+            java.util.Map<String, Object> response = new java.util.LinkedHashMap<>();
+            response.put("membershipId", membership.getId());
+            response.put("status", membership.getStatus().name());
+            response.put("startDate", membership.getStartDate() != null ? membership.getStartDate().toString() : null);
+            response.put("endDate", membership.getEndDate() != null ? membership.getEndDate().toString() : null);
+            response.put("startDateTime",
+                    membership.getStartDateTime() != null ? membership.getStartDateTime().toString() : null);
+            response.put("endDateTime",
+                    membership.getEndDateTime() != null ? membership.getEndDateTime().toString() : null);
+            response.put("planName", membership.getTieredPlan() != null
+                    ? membership.getTieredPlan().getPlanName()
+                    : (membership.getMembershipPackage() != null
+                            ? membership.getMembershipPackage().getPackageName()
+                            : "Unknown"));
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.badRequest().body(Map.of("error", "Error renewing membership: " + e.getMessage()));

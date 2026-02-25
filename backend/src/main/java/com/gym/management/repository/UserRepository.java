@@ -32,7 +32,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
         @Query("SELECT COUNT(u) FROM User u JOIN u.roles r WHERE r.roleName = :roleName")
         long countByRoleName(@Param("roleName") String roleName);
 
-        // Find staff by multiple role names (non-trainer staff) - uses subquery to avoid DISTINCT + CLOB issues on Oracle
+        // Find staff by multiple role names (non-trainer staff) - uses subquery to
+        // avoid DISTINCT + CLOB issues on Oracle
         @Query("SELECT u FROM User u WHERE u.userId IN (SELECT u2.userId FROM User u2 JOIN u2.roles r WHERE r.roleName IN :roleNames)")
         List<User> findByRoleNames(@Param("roleNames") java.util.Collection<String> roleNames);
 
@@ -40,7 +41,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
         boolean existsByUsername(String username);
 
-        boolean existsByEmail(String email);
+        @Query("SELECT COUNT(u) > 0 FROM User u WHERE LOWER(u.email) = LOWER(:email)")
+        boolean existsByEmailIgnoreCase(@Param("email") String email);
 
         java.util.Optional<User> findByEmail(String email);
 

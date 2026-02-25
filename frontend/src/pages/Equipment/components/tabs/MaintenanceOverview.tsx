@@ -22,7 +22,7 @@ export const MaintenanceOverview: React.FC<MaintenanceOverviewProps> = ({ stats,
         const map: Record<MaintenanceType, { color: string; bg: string; border: string; icon: React.ReactNode; label: string }> = {
             PREVENTIVE: { color: '#22c55e', bg: 'rgba(34, 197, 94, 0.08)', border: 'rgba(34, 197, 94, 0.18)', icon: <Shield size={14} />, label: 'Preventive' },
             REPAIR: { color: '#ef4444', bg: 'rgba(239, 68, 68, 0.08)', border: 'rgba(239, 68, 68, 0.18)', icon: <Wrench size={14} />, label: 'Repair' },
-            INSPECTION: { color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.08)', border: 'rgba(59, 130, 246, 0.18)', icon: <ClipboardCheck size={14} />, label: 'Inspection' }
+            INSPECTION: { color: '#64748b', bg: 'rgba(100, 116, 139, 0.08)', border: 'rgba(100, 116, 139, 0.18)', icon: <ClipboardCheck size={14} />, label: 'Inspection' }
         };
         return map[type] || { color: 'var(--text-secondary)', bg: 'var(--glass-bg)', border: 'var(--glass-border)', icon: <FileText size={14} />, label: type };
     };
@@ -30,7 +30,7 @@ export const MaintenanceOverview: React.FC<MaintenanceOverviewProps> = ({ stats,
     const getStatusStyle = (status: string) => {
         const map: Record<string, { color: string; bg: string; label: string }> = {
             COMPLETED: { color: '#22c55e', bg: 'rgba(34, 197, 94, 0.08)', label: 'Done' },
-            SCHEDULED: { color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.08)', label: 'Scheduled' },
+            SCHEDULED: { color: '#64748b', bg: 'rgba(100, 116, 139, 0.08)', label: 'Scheduled' },
             OVERDUE: { color: '#ef4444', bg: 'rgba(239, 68, 68, 0.08)', label: 'Overdue' },
             CANCELLED: { color: '#64748b', bg: 'rgba(100, 116, 139, 0.08)', label: 'Cancelled' },
         };
@@ -41,7 +41,7 @@ export const MaintenanceOverview: React.FC<MaintenanceOverviewProps> = ({ stats,
     const healthLabel = stats.health > 80 ? 'Excellent' : stats.health > 60 ? 'Good' : stats.health > 40 ? 'Fair' : 'Critical';
 
     const kpiCards = [
-        { label: 'Total Records', value: stats.total, icon: FileText, color: '#3b82f6', colorName: 'blue' },
+        { label: 'Total Records', value: stats.total, icon: FileText, color: '#64748b', colorName: 'blue' },
         { label: 'Total Spent', value: formatCurrency(stats.totalCost), icon: IndianRupee, color: '#22c55e', colorName: 'green' },
         { label: 'Overdue', value: stats.overdue, icon: AlertCircle, color: '#ef4444', colorName: 'red', alert: stats.overdue > 0 },
         { label: 'Health Score', value: `${stats.health}%`, icon: Zap, color: healthColor, colorName: stats.health > 70 ? 'green' : stats.health > 40 ? 'amber' : 'red' }

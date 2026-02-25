@@ -207,7 +207,7 @@ ${JSON.stringify(
                             onClick={handleCopy}
                             style={{
                                 padding: '6px 16px',
-                                background: copied ? '#10B981' : '#3B82F6',
+                                background: copied ? '#10B981' : '#64748B',
                                 border: 'none',
                                 borderRadius: '6px',
                                 color: 'white',

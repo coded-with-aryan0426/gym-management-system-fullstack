@@ -402,10 +402,10 @@ const MembershipPoliciesSection: React.FC = () => {
     ]
 
     return (
-        <div className="settings-section" style={{ "--section-accent": "#06b6d4" } as React.CSSProperties}>
+        <div className="settings-section settings-section--teal">
             <div className="settings-section__header">
                 <div className="settings-section__title-group">
-                    <div className="settings-section__icon" style={{ background: 'linear-gradient(135deg, #06b6d4, #0891b2)' }}>
+                    <div className="settings-section__icon settings-section__icon--teal">
                         <Users size={20} />
                     </div>
                     <div>
@@ -517,7 +517,7 @@ const MembershipPoliciesSection: React.FC = () => {
                             </div>
 
                             {policies.allowUpgrade && (
-                                <div className="policy-toggle-row" style={{ marginLeft: '40px' }}>
+                                <div className="policy-toggle-row policy-toggle-row--indented">
                                     <div className="policy-toggle-row__info">
                                         <div className="policy-toggle-row__icon">
                                             <Percent size={16} />
@@ -551,7 +551,7 @@ const MembershipPoliciesSection: React.FC = () => {
                             </div>
 
                             {policies.allowDowngrade && (
-                                <div className="policy-toggle-row" style={{ marginLeft: '40px' }}>
+                                <div className="policy-toggle-row policy-toggle-row--indented">
                                     <div className="policy-toggle-row__info">
                                         <div className="policy-toggle-row__icon">
                                             <Percent size={16} />
@@ -569,7 +569,7 @@ const MembershipPoliciesSection: React.FC = () => {
                             )}
 
                             {(policies.allowUpgrade || policies.allowDowngrade) && (
-                                <div className="form-grid form-grid--2col" style={{ marginTop: '16px', marginLeft: '40px' }}>
+                                <div className="form-grid form-grid--2col">
                                     <div className="field-wrapper">
                                         <label className="field-label">Notice Period (Days)</label>
                                         <input
@@ -635,7 +635,7 @@ const MembershipPoliciesSection: React.FC = () => {
                                 </div>
                             </div>
 
-                            <div className="form-grid form-grid--2col" style={{ marginTop: '16px' }}>
+                            <div className="form-grid form-grid--2col">
                                 <div className="field-wrapper">
                                     <label className="field-label">Minimum Freeze Duration (Days)</label>
                                     <input
@@ -686,7 +686,7 @@ const MembershipPoliciesSection: React.FC = () => {
                             </div>
 
                             {policies.freezeFeeEnabled && (
-                                <div className="field-wrapper" style={{ marginLeft: '40px', marginTop: '16px', maxWidth: '200px' }}>
+                                <div className="field-wrapper" className="field-wrapper--indented-narrow">
                                     <label className="field-label">Freeze Fee Per Day (₹)</label>
                                     <input
                                         type="number"
@@ -728,7 +728,7 @@ const MembershipPoliciesSection: React.FC = () => {
 
                             {policies.allowTransfer && (
                                 <>
-                                    <div className="field-wrapper" style={{ marginLeft: '40px', marginTop: '16px', maxWidth: '200px' }}>
+                                    <div className="field-wrapper" className="field-wrapper--indented-narrow">
                                         <label className="field-label">Transfer Fee (₹)</label>
                                         <input
                                             type="number"
@@ -740,7 +740,7 @@ const MembershipPoliciesSection: React.FC = () => {
                                         <span className="field-hint">Fee charged for transfer</span>
                                     </div>
 
-                                    <div className="policy-toggle-row" style={{ marginLeft: '40px' }}>
+                                    <div className="policy-toggle-row policy-toggle-row--indented">
                                         <div className="policy-toggle-row__info">
                                             <div className="policy-toggle-row__icon">
                                                 <CalendarClock size={16} />
@@ -756,7 +756,7 @@ const MembershipPoliciesSection: React.FC = () => {
                                         />
                                     </div>
 
-                                    <div className="policy-toggle-row" style={{ marginLeft: '40px' }}>
+                                    <div className="policy-toggle-row policy-toggle-row--indented">
                                         <div className="policy-toggle-row__info">
                                             <div className="policy-toggle-row__icon">
                                                 <BadgeCheck size={16} />
@@ -812,7 +812,7 @@ const MembershipPoliciesSection: React.FC = () => {
                                 </div>
                             </div>
 
-                            <div className="form-grid form-grid--2col" style={{ marginTop: '8px' }}>
+                            <div className="form-grid form-grid--2col">
                                 {policies.cancellationFeeType === 'FIXED' ? (
                                     <div className="field-wrapper">
                                         <label className="field-label">Cancellation Fee (₹)</label>
@@ -864,7 +864,7 @@ const MembershipPoliciesSection: React.FC = () => {
                             </div>
 
                             {policies.allowEarlyCancellation && (
-                                <div className="field-wrapper" style={{ marginLeft: '40px', marginTop: '16px', maxWidth: '200px' }}>
+                                <div className="field-wrapper" className="field-wrapper--indented-narrow">
                                     <label className="field-label">Early Cancellation Penalty (₹)</label>
                                     <input
                                         type="number"
@@ -906,7 +906,7 @@ const MembershipPoliciesSection: React.FC = () => {
                             </div>
 
                             {policies.autoRenewalEnabled && (
-                                <div className="reminder-days-config" style={{ marginLeft: '40px', marginTop: '16px' }}>
+                                <div className="reminder-days-config">
                                     <label className="field-label">Renewal Reminder Days (Before Expiry)</label>
                                     <div className="reminder-tags">
                                         {policies.renewalReminderDays.map(day => (
@@ -927,7 +927,7 @@ const MembershipPoliciesSection: React.FC = () => {
                                             placeholder="Days"
                                             min={1}
                                             max={60}
-                                            style={{ width: '80px' }}
+                                           
                                         />
                                         <button 
                                             className="add-reminder-btn"
@@ -967,7 +967,7 @@ const MembershipPoliciesSection: React.FC = () => {
                                         placeholder="Days"
                                         min={1}
                                         max={60}
-                                        style={{ width: '80px' }}
+                                       
                                     />
                                     <button 
                                         className="add-reminder-btn"
@@ -978,7 +978,7 @@ const MembershipPoliciesSection: React.FC = () => {
                                 </div>
                             </div>
 
-                            <div className="field-wrapper" style={{ marginTop: '16px', maxWidth: '200px' }}>
+                            <div className="field-wrapper">
                                 <label className="field-label">Grace Period After Expiry (Days)</label>
                                 <input
                                     type="number"

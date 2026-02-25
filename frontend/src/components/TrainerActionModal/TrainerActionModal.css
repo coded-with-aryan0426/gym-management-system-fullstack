@@ -27,9 +27,7 @@
 .trainer-action-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.78);
-  backdrop-filter: blur(16px) saturate(200%);
-  -webkit-backdrop-filter: blur(16px) saturate(200%);
+  background-color: rgba(0, 0, 0, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -245,7 +243,6 @@
   background: rgba(220, 38, 38, 0.08);
   color: var(--color-crimson);
   border: 1px solid rgba(220, 38, 38, 0.12);
-  backdrop-filter: blur(8px);
   transition: all 0.2s ease;
 }
 
@@ -268,7 +265,6 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.6px;
-  backdrop-filter: blur(8px);
   transition: all 0.2s ease;
 }
 
@@ -330,7 +326,6 @@
   border-radius: var(--card-radius);
   min-width: 64px;
   transition: all 0.3s var(--transition-smooth);
-  backdrop-filter: blur(8px);
   position: relative;
   overflow: hidden;
 }
@@ -992,7 +987,6 @@
   color: var(--text-primary);
   border: 1px solid var(--glass-border);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-  backdrop-filter: blur(8px);
 }
 
 .btn--secondary:hover:not(:disabled) {
@@ -1128,7 +1122,6 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  backdrop-filter: blur(24px);
 }
 
 .trainer-popover__header {
@@ -1704,7 +1697,7 @@
 
 .perf-stat-card--primary::before { background: linear-gradient(90deg, var(--color-crimson), #ef4444); }
 .perf-stat-card--success::before { background: linear-gradient(90deg, #22c55e, #34d399); }
-.perf-stat-card--info::before { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+.perf-stat-card--info::before { background: linear-gradient(90deg, #64748b, #94a3b8); }
 .perf-stat-card--warning::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
 
 .perf-stat-card__icon {
@@ -1733,8 +1726,8 @@
 }
 
 .perf-stat-card--info .perf-stat-card__icon {
-  background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
+  background: rgba(100, 116, 139, 0.12);
+  color: #64748b;
 }
 
 .perf-stat-card--warning .perf-stat-card__icon {
@@ -2066,8 +2059,7 @@
 .avatar-picker-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2310,7 +2302,7 @@ body.light-mode .message-compose__row {
 .sub-modal-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: rgba(0, 0, 0, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2586,8 +2578,8 @@ body.light-mode .message-compose__row {
 }
 
 .session-history__status--scheduled {
-  background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
+  background: rgba(100, 116, 139, 0.12);
+  color: #64748b;
 }
 
 @media (max-width: 900px) {
@@ -2699,7 +2691,7 @@ body.light-mode .message-compose__row {
 .attendance-stat__value--present { color: #22c55e; }
 .attendance-stat__value--absent { color: #ef4444; }
 .attendance-stat__value--total { color: var(--color-crimson); }
-.attendance-stat__value--rate { color: #3b82f6; }
+.attendance-stat__value--rate { color: #64748b; }
 
 .attendance-stat__label {
   font-size: 10px;

@@ -765,10 +765,10 @@ const NotificationsSection: React.FC = () => {
   }
 
   return (
-    <div className="settings-section" style={{ "--section-accent": "#f97316" } as React.CSSProperties}>
+    <div className="settings-section settings-section--orange">
       <div className="settings-section__header">
         <div className="settings-section__title-group">
-            <div className="settings-section__icon" style={{ background: 'linear-gradient(135deg, #f97316, #ea580c)' }}>
+            <div className="settings-section__icon settings-section__icon--orange">
               <Bell size={20} />
           </div>
           <div>

@@ -257,24 +257,21 @@ public class AuditLogService {
     // ==================== RETRIEVAL METHODS ====================
 
     /**
-     * Get paginated audit logs for a gym with filters
+     * Get paginated audit logs for a gym with combined filters
      */
-    public Page<AuditLogDTO> getLogs(Long gymId, String search, String severity,
+    public Page<AuditLogDTO> getLogs(Long gymId, String search, String action, String severity,
             LocalDateTime startDate, LocalDateTime endDate,
             int page, int size) {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "timestamp"));
 
-        Page<AuditLog> logs;
+        // Normalize empty strings to null so JPQL :param IS NULL checks work
+        String normalizedSearch   = (search   != null && !search.isEmpty())                    ? search   : null;
+        String normalizedAction   = (action   != null && !action.isEmpty()   && !action.equals("all"))   ? action   : null;
+        String normalizedSeverity = (severity != null && !severity.isEmpty() && !severity.equals("all")) ? severity : null;
 
-        if (search != null && !search.isEmpty()) {
-            logs = auditLogRepository.searchByGym(gymId, search, pageRequest);
-        } else if (severity != null && !severity.isEmpty() && !severity.equals("all")) {
-            logs = auditLogRepository.findByGymGymIdAndSeverityOrderByTimestampDesc(gymId, severity, pageRequest);
-        } else if (startDate != null && endDate != null) {
-            logs = auditLogRepository.findByGymAndTimestampBetween(gymId, startDate, endDate, pageRequest);
-        } else {
-            logs = auditLogRepository.findByGymGymIdOrderByTimestampDesc(gymId, pageRequest);
-        }
+        Page<AuditLog> logs = auditLogRepository.findWithFilters(
+                gymId, normalizedSearch, normalizedAction, normalizedSeverity,
+                startDate, endDate, pageRequest);
 
         return logs.map(this::convertToDTO);
     }

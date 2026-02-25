@@ -91,6 +91,25 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
     Page<AuditLog> searchByGym(@Param("gymId") Long gymId, @Param("query") String query, Pageable pageable);
 
     /**
+     * Combined filter query - supports any combination of search, action, severity, and date range
+     */
+    @Query("SELECT a FROM AuditLog a WHERE a.gym.gymId = :gymId " +
+           "AND (:search IS NULL OR LOWER(a.action) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(a.userName) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(a.details) LIKE LOWER(CONCAT('%', :search, '%'))) " +
+           "AND (:action IS NULL OR a.action = :action) " +
+           "AND (:severity IS NULL OR a.severity = :severity) " +
+           "AND (:startDate IS NULL OR a.timestamp >= :startDate) " +
+           "AND (:endDate IS NULL OR a.timestamp <= :endDate) " +
+           "ORDER BY a.timestamp DESC")
+    Page<AuditLog> findWithFilters(
+            @Param("gymId") Long gymId,
+            @Param("search") String search,
+            @Param("action") String action,
+            @Param("severity") String severity,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            Pageable pageable);
+
+    /**
      * Count audit logs by action type
      * @param action The action type
      * @return Count of logs with that action

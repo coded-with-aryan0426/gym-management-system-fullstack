@@ -218,10 +218,10 @@ const RolesSection: React.FC = () => {
         )
 
     return (
-        <div className="settings-section" style={{ "--section-accent": "#f59e0b" } as React.CSSProperties}>
+        <div className="settings-section settings-section--amber">
             <div className="settings-section__header">
                 <div className="settings-section__title-group">
-                    <div className="settings-section__icon" style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}>
+                    <div className="settings-section__icon settings-section__icon--amber">
                         <Shield size={20} />
                     </div>
                     <div>

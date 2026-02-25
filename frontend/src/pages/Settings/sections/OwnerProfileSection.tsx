@@ -346,10 +346,10 @@ const OwnerProfileSection: React.FC = () => {
   }
 
   return (
-    <div className="settings-section" style={{ "--section-accent": "#3b82f6" } as React.CSSProperties}>
+    <div className="settings-section settings-section--blue">
       <div className="settings-section__header">
         <div className="settings-section__title-group">
-            <div className="settings-section__icon" style={{ background: 'linear-gradient(135deg, #3b82f6, #2563eb)' }}>
+            <div className="settings-section__icon settings-section__icon--blue">
               <User size={20} />
             </div>
           <div>
@@ -483,11 +483,11 @@ const OwnerProfileSection: React.FC = () => {
           </div>
         </div>
 
-        <div className="form-group">
-          <h4 className="form-group__title">
-            <Mail size={14} className="form-group__title-icon" />
-            Communication
-          </h4>
+          <div className="form-group">
+            <div className="form-group__header">
+              <Mail size={16} />
+              <h4 className="form-group__title">Communication</h4>
+            </div>
           <div className="form-grid">
             <div className="field-wrapper">
               <label className="field-label">
@@ -543,11 +543,11 @@ const OwnerProfileSection: React.FC = () => {
           </div>
         </div>
 
-        <div className="form-group">
-          <h4 className="form-group__title">
-            <MapPin size={14} className="form-group__title-icon" />
-            Business Address
-          </h4>
+          <div className="form-group">
+            <div className="form-group__header">
+              <MapPin size={16} />
+              <h4 className="form-group__title">Business Address</h4>
+            </div>
           <div className="form-grid">
             <div className="field-wrapper field-wrapper--full">
               <label className="field-label">

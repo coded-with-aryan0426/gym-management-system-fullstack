@@ -13,7 +13,7 @@ export const MaintenanceSchedule: React.FC<MaintenanceScheduleProps> = ({ calend
     const localizer = momentLocalizer(moment);
 
     const getStatusColor = (status: MaintenanceStatus) => {
-        const c: Record<string, string> = { COMPLETED: '#22c55e', SCHEDULED: '#3b82f6', OVERDUE: '#ef4444', CANCELLED: 'var(--text-secondary)' };
+        const c: Record<string, string> = { COMPLETED: '#22c55e', SCHEDULED: '#64748b', OVERDUE: '#ef4444', CANCELLED: 'var(--text-secondary)' };
         return c[status] || 'var(--text-secondary)';
     };
 

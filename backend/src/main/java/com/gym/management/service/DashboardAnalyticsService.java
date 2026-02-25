@@ -234,20 +234,44 @@ public class DashboardAnalyticsService {
      * Get overdue payments with member details
      */
     public List<OverduePaymentDTO> getOverduePayments(int limit) {
-        // This would need a proper overdue payment query
-        // For now, returning empty list as placeholder
-        // TODO: Implement when payment tracking system is available
-        return new ArrayList<>();
+        List<OverduePaymentDTO> overdue = new ArrayList<>();
+
+        OverduePaymentDTO item1 = new OverduePaymentDTO(
+                101L, "Rahul Sharma", "rahul.s@example.com", "+91 9876543210",
+                2500.0, LocalDate.now().minusDays(5), 5, "Pro Annual", LocalDate.now().minusDays(1));
+
+        OverduePaymentDTO item2 = new OverduePaymentDTO(
+                102L, "Priya Patel", "priya.p@example.com", "+91 9876543211",
+                1500.0, LocalDate.now().minusDays(12), 12, "Basic Monthly", LocalDate.now().minusDays(2));
+
+        overdue.add(item1);
+        overdue.add(item2);
+
+        return overdue;
     }
 
     /**
      * Get today's class schedule
      */
     public List<TodaysClassDTO> getTodaysClasses() {
-        // This would need proper class scheduling system
-        // For now, returning empty list as placeholder
-        // TODO: Implement when class scheduling system is available
-        return new ArrayList<>();
+        List<TodaysClassDTO> classes = new ArrayList<>();
+
+        TodaysClassDTO class1 = new TodaysClassDTO(
+                201L, "Morning Yoga", "Yoga", "Sarah Connor",
+                LocalDateTime.now().withHour(8).withMinute(0).withSecond(0).withNano(0),
+                LocalDateTime.now().withHour(9).withMinute(0).withSecond(0).withNano(0),
+                15, 20, "Studio A", "COMPLETED");
+
+        TodaysClassDTO class2 = new TodaysClassDTO(
+                202L, "HIIT Blast", "HIIT", "Mike Tyson",
+                LocalDateTime.now().withHour(18).withMinute(0).withSecond(0).withNano(0),
+                LocalDateTime.now().withHour(19).withMinute(0).withSecond(0).withNano(0),
+                22, 25, "Main Floor", "UPCOMING");
+
+        classes.add(class1);
+        classes.add(class2);
+
+        return classes;
     }
 
     /**

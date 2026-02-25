@@ -26,27 +26,27 @@ interface CreateActionModalProps {
 type ViewType = "memberForm" | "staffForm" | "trainerForm"
 
 const PLAN_COLORS = [
-    '#DC2626', '#10B981', '#3B82F6', '#8B5CF6',
+    '#DC2626', '#10B981', '#64748B', '#8B5CF6',
     '#F59E0B', '#EC4899', '#06B6D4', '#84CC16',
 ]
 
 const TRAINER_TYPES = [
-    { value: "Gym Trainer",      label: "🏋️ Gym Trainer",      desc: "General fitness & gym floor" },
-    { value: "Personal Trainer", label: "🎯 Personal Trainer",  desc: "1-on-1 personalised PT sessions" },
-    { value: "Member Manager",   label: "👥 Member Manager",    desc: "Manages member relations & renewals" },
-    { value: "Other",            label: "✏️ Other",             desc: "Custom — specify below" },
+    { value: "Gym Trainer", label: "🏋️ Gym Trainer", desc: "General fitness & gym floor" },
+    { value: "Personal Trainer", label: "🎯 Personal Trainer", desc: "1-on-1 personalised PT sessions" },
+    { value: "Member Manager", label: "👥 Member Manager", desc: "Manages member relations & renewals" },
+    { value: "Other", label: "✏️ Other", desc: "Custom — specify below" },
 ]
 
 const STAFF_ROLES = [
-    { value: "RECEPTIONIST",  label: "🗂️ Receptionist",   desc: "Front desk & visitor management" },
-    { value: "FLOOR_MANAGER", label: "🏢 Floor Manager",   desc: "Oversees gym floor operations" },
-    { value: "MAINTENANCE",   label: "🔧 Maintenance",     desc: "Equipment & facility upkeep" },
-    { value: "CLEANING",      label: "🧹 Housekeeping",    desc: "Cleanliness & hygiene" },
-    { value: "OPERATIONS",    label: "⚙️ Operations",      desc: "Day-to-day operations" },
-    { value: "SALES",         label: "💼 Sales",           desc: "Membership sales & renewals" },
-    { value: "ADMIN",         label: "🛡️ Admin",           desc: "Administrative tasks" },
-    { value: "TRAINER",       label: "🏋️ Trainer",        desc: "Fitness trainer on staff payroll" },
-    { value: "OTHER",         label: "✏️ Other",           desc: "Custom role — specify below" },
+    { value: "RECEPTIONIST", label: "🗂️ Receptionist", desc: "Front desk & visitor management" },
+    { value: "FLOOR_MANAGER", label: "🏢 Floor Manager", desc: "Oversees gym floor operations" },
+    { value: "MAINTENANCE", label: "🔧 Maintenance", desc: "Equipment & facility upkeep" },
+    { value: "CLEANING", label: "🧹 Housekeeping", desc: "Cleanliness & hygiene" },
+    { value: "OPERATIONS", label: "⚙️ Operations", desc: "Day-to-day operations" },
+    { value: "SALES", label: "💼 Sales", desc: "Membership sales & renewals" },
+    { value: "ADMIN", label: "🛡️ Admin", desc: "Administrative tasks" },
+    { value: "TRAINER", label: "🏋️ Trainer", desc: "Fitness trainer on staff payroll" },
+    { value: "OTHER", label: "✏️ Other", desc: "Custom role — specify below" },
 ]
 
 const DEPARTMENTS = [
@@ -58,7 +58,7 @@ const emptyForm = () => ({
     fullName: "",
     email: "",
     phoneNumber: "",
-    startDate: new Date().toISOString().split("T")[0],
+    startDate: new Date().toISOString().slice(0, 16),  // YYYY-MM-DDTHH:MM for datetime-local
     // trainer
     trainerType: "",
     customTrainerType: "",
@@ -156,6 +156,14 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({
         if (formData.phoneNumber.length !== 10) return toast.error("Phone number must be exactly 10 digits")
         if (!formData.email) return toast.error("Email is required")
 
+        // RFC 5322-inspired email format check
+        const emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/
+        if (!emailRegex.test(formData.email.trim())) return toast.error("Please enter a valid email address")
+
+        // Duplicate email check before hitting the server
+        const emailAlreadyExists = await api.checkEmailExists(formData.email.trim())
+        if (emailAlreadyExists) return toast.error("An account with this email already exists")
+
         if (view === "memberForm" && !selectedVariantId)
             return toast.error("Please select a membership plan and duration")
 
@@ -206,15 +214,16 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({
                 password: "12345678",
                 roles: [{ roleId: 0, roleName: role }],
                 joinDate: formData.startDate,
-                ...(jobTitleValue  && { jobTitle: jobTitleValue }),
+                ...(jobTitleValue && { jobTitle: jobTitleValue }),
                 ...(departmentValue && { department: departmentValue }),
             }
 
             if (view === "memberForm" && selectedVariant) {
-                payload.startDate  = formData.startDate
-                payload.planId     = selectedPlanId
-                payload.variantId  = selectedVariantId
-                payload.packageId  = selectedVariantId
+                payload.startDate = formData.startDate.split('T')[0]   // backward compat date
+                payload.startDateTime = formData.startDate               // precise timestamp
+                payload.planId = selectedPlanId
+                payload.variantId = selectedVariantId
+                payload.packageId = selectedVariantId
             }
 
             await api.createUser(payload as any)
@@ -240,21 +249,21 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({
     }
 
     const getTitle = () => {
-        if (view === "memberForm")  return "Add New Member"
-        if (view === "staffForm")   return "Add New Staff"
+        if (view === "memberForm") return "Add New Member"
+        if (view === "staffForm") return "Add New Staff"
         return "Add New Trainer"
     }
 
     const getSubtitle = () => {
-        if (view === "memberForm")  return "Register a new gym member with their membership plan"
-        if (view === "staffForm")   return "Add a new staff member to your gym team"
+        if (view === "memberForm") return "Register a new gym member with their membership plan"
+        if (view === "staffForm") return "Add a new staff member to your gym team"
         return "Add a new trainer to your team"
     }
 
-    const formatPrice    = (price: number) => `₹${price.toLocaleString("en-IN")}`
+    const formatPrice = (price: number) => `₹${price.toLocaleString("en-IN")}`
     const formatDuration = (days: number) => {
         if (days >= 365) { const y = Math.floor(days / 365); return `${y} Year${y > 1 ? "s" : ""}` }
-        if (days >= 30)  { const m = Math.floor(days / 30);  return `${m} Month${m > 1 ? "s" : ""}` }
+        if (days >= 30) { const m = Math.floor(days / 30); return `${m} Month${m > 1 ? "s" : ""}` }
         return `${days} Day${days > 1 ? "s" : ""}`
     }
 
@@ -279,8 +288,8 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({
                                     {view === "staffForm"
                                         ? <Briefcase size={20} />
                                         : view === "trainerForm"
-                                        ? <Dumbbell size={20} />
-                                        : <UserPlus size={20} />}
+                                            ? <Dumbbell size={20} />
+                                            : <UserPlus size={20} />}
                                 </div>
                                 <div className="cam-header__text">
                                     <h2 className="cam-title">{getTitle()}</h2>
@@ -295,8 +304,8 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({
                             <div className="cam-progress">
                                 {[
                                     { label: "Personal Info", step: 1 },
-                                    { label: "Select Plan",   step: 2 },
-                                    { label: "Duration",      step: 3 },
+                                    { label: "Select Plan", step: 2 },
+                                    { label: "Duration", step: 3 },
                                 ].map((s, i, arr) => (
                                     <React.Fragment key={s.step}>
                                         <div className={`cam-progress__step ${currentStep >= s.step ? "cam-progress__step--active" : ""} ${currentStep > s.step ? "cam-progress__step--complete" : ""}`}>
@@ -354,10 +363,10 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({
                                                     </div>
                                                 </div>
                                                 <div className="cam-field">
-                                                    <label className="cam-label">Start Date</label>
+                                                    <label className="cam-label">Start Date & Time</label>
                                                     <div className="cam-input-wrap">
                                                         <Calendar size={14} className="cam-input-icon" />
-                                                        <input type="date" name="startDate" value={formData.startDate} onChange={handleChange} className="cam-input" />
+                                                        <input type="datetime-local" name="startDate" value={formData.startDate} onChange={handleChange} className="cam-input" />
                                                     </div>
                                                 </div>
                                             </div>
@@ -682,7 +691,7 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({
                                     <><div className="cam-spinner cam-spinner--sm" />Creating…</>
                                 ) : (
                                     <><UserPlus size={16} />
-                                    Create {view === "memberForm" ? "Member" : view === "staffForm" ? "Staff" : "Trainer"}</>
+                                        Create {view === "memberForm" ? "Member" : view === "staffForm" ? "Staff" : "Trainer"}</>
                                 )}
                             </button>
                         </div>

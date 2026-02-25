@@ -40,13 +40,14 @@ public class AuditLogController {
     public ResponseEntity<Map<String, Object>> getLogs(
             @RequestParam Long gymId,
             @RequestParam(required = false) String search,
+            @RequestParam(required = false) String action,
             @RequestParam(required = false) String severity,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "15") int size) {
+            @RequestParam(defaultValue = "20") int size) {
         
-        Page<AuditLogDTO> logs = auditLogService.getLogs(gymId, search, severity, startDate, endDate, page, size);
+        Page<AuditLogDTO> logs = auditLogService.getLogs(gymId, search, action, severity, startDate, endDate, page, size);
         
         Map<String, Object> response = new HashMap<>();
         response.put("logs", logs.getContent());

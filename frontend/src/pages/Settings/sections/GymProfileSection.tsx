@@ -144,10 +144,10 @@ const GymProfileSection: React.FC = () => {
   }
 
   return (
-    <div className="settings-section" style={{ "--section-accent": "#10b981" } as React.CSSProperties}>
+    <div className="settings-section settings-section--green">
       <div className="settings-section__header">
         <div className="settings-section__title-group">
-          <div className="settings-section__icon" style={{ background: "linear-gradient(135deg, #10b981, #059669)" }}>
+          <div className="settings-section__icon settings-section__icon--green">
             <Building2 size={20} />
           </div>
           <div>
@@ -157,79 +157,68 @@ const GymProfileSection: React.FC = () => {
         </div>
       </div>
 
-      <div className="settings-section__content">
-        {/* Gym Hours */}
-        <div className="form-group">
-          <div className="form-group__header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <Clock size={16} />
-              <h4 className="form-group__title" style={{ margin: 0 }}>Operating Hours</h4>
-            </div>
-            <button className="settings-save-btn" onClick={saveHours} disabled={savingHours} style={{ padding: "6px 14px", fontSize: 13 }}>
-              <Save size={14} />
-              {savingHours ? "Saving..." : "Save Hours"}
-            </button>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 12 }}>
-            {gymHours.map((h, i) => (
-              <div
-                key={h.dayOfWeek}
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "120px 1fr 1fr auto",
-                  gap: 10,
-                  alignItems: "center",
-                  padding: "8px 12px",
-                  borderRadius: 8,
-                  background: h.isClosed ? "var(--bg-tertiary, #f3f4f6)" : "var(--bg-secondary, #f9fafb)",
-                  opacity: h.isClosed ? 0.6 : 1,
-                }}
-              >
-                <span style={{ fontWeight: 500, fontSize: 13, textTransform: "capitalize" }}>
-                  {h.dayOfWeek.charAt(0) + h.dayOfWeek.slice(1).toLowerCase()}
-                </span>
-                <input
-                  type="time"
-                  className="dense-input"
-                  value={h.openTime}
-                  onChange={(e) => handleHoursChange(i, "openTime", e.target.value)}
-                  disabled={h.isClosed}
-                  style={{ padding: "6px 10px", fontSize: 13 }}
-                />
-                <input
-                  type="time"
-                  className="dense-input"
-                  value={h.closeTime}
-                  onChange={(e) => handleHoursChange(i, "closeTime", e.target.value)}
-                  disabled={h.isClosed}
-                  style={{ padding: "6px 10px", fontSize: 13 }}
-                />
-                <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, cursor: "pointer", whiteSpace: "nowrap" }}>
-                  <input
-                    type="checkbox"
-                    checked={!!h.isClosed}
-                    onChange={(e) => handleHoursChange(i, "isClosed", e.target.checked)}
-                  />
-                  Closed
-                </label>
+        <div className="settings-section__content">
+          {/* Gym Hours */}
+          <div className="form-group">
+            <div className="form-group__header form-group__header--spaced">
+              <div className="form-group__header-left">
+                <Clock size={16} />
+                <h4 className="form-group__title">Operating Hours</h4>
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* PT Configuration */}
-        <div className="form-group">
-          <div className="form-group__header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <Dumbbell size={16} />
-              <h4 className="form-group__title" style={{ margin: 0 }}>PT Session Configuration</h4>
+              <button className="settings-save-btn" onClick={saveHours} disabled={savingHours}>
+                <Save size={14} />
+                {savingHours ? "Saving..." : "Save Hours"}
+              </button>
             </div>
-            <button className="settings-save-btn" onClick={savePTConfig} disabled={savingPT} style={{ padding: "6px 14px", fontSize: 13 }}>
-              <Save size={14} />
-              {savingPT ? "Saving..." : "Save Config"}
-            </button>
+            <div className="gym-hours-list">
+              {gymHours.map((h, i) => (
+                <div
+                  key={h.dayOfWeek}
+                  className={`gym-hours-row${h.isClosed ? " gym-hours-row--closed" : ""}`}
+                >
+                  <span className="gym-hours-row__day">
+                    {h.dayOfWeek.charAt(0) + h.dayOfWeek.slice(1).toLowerCase()}
+                  </span>
+                  <input
+                    type="time"
+                    className="dense-input"
+                    value={h.openTime}
+                    onChange={(e) => handleHoursChange(i, "openTime", e.target.value)}
+                    disabled={h.isClosed}
+                  />
+                  <input
+                    type="time"
+                    className="dense-input"
+                    value={h.closeTime}
+                    onChange={(e) => handleHoursChange(i, "closeTime", e.target.value)}
+                    disabled={h.isClosed}
+                  />
+                  <label className="gym-hours-row__closed-label">
+                    <input
+                      type="checkbox"
+                      checked={!!h.isClosed}
+                      onChange={(e) => handleHoursChange(i, "isClosed", e.target.checked)}
+                    />
+                    Closed
+                  </label>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="form-grid" style={{ marginTop: 12 }}>
+
+          {/* PT Configuration */}
+          <div className="form-group">
+            <div className="form-group__header form-group__header--spaced">
+              <div className="form-group__header-left">
+                <Dumbbell size={16} />
+                <h4 className="form-group__title">PT Session Configuration</h4>
+              </div>
+              <button className="settings-save-btn" onClick={savePTConfig} disabled={savingPT}>
+                <Save size={14} />
+                {savingPT ? "Saving..." : "Save Config"}
+              </button>
+            </div>
+            <div className="form-grid">
             <div className="field-wrapper">
               <label className="field-label">
                 Default Duration (minutes)
@@ -283,97 +272,74 @@ const GymProfileSection: React.FC = () => {
           </div>
         </div>
 
-        {/* Blackout Days */}
-        <div className="form-group">
-          <div className="form-group__header">
-            <Calendar size={16} />
-            <h4 className="form-group__title">Blackout Days / Holidays</h4>
-          </div>
-          <p style={{ fontSize: 12, color: "var(--text-tertiary)", margin: "4px 0 12px" }}>
-            Days when the gym is closed for holidays or maintenance. No bookings allowed.
-          </p>
-
-          <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
-            <input
-              type="date"
-              className="dense-input"
-              value={newBlackoutDate}
-              onChange={(e) => setNewBlackoutDate(e.target.value)}
-              min={new Date().toISOString().split("T")[0]}
-              style={{ flex: "0 0 180px" }}
-            />
-            <input
-              type="text"
-              className="dense-input"
-              placeholder="Reason (optional)"
-              value={newBlackoutReason}
-              onChange={(e) => setNewBlackoutReason(e.target.value)}
-              style={{ flex: 1, minWidth: 150 }}
-            />
-            <button
-              className="settings-save-btn"
-              onClick={addBlackoutDay}
-              disabled={!newBlackoutDate}
-              style={{ padding: "6px 14px", fontSize: 13 }}
-            >
-              <Plus size={14} />
-              Add
-            </button>
-          </div>
-
-          {blackoutDays.length === 0 ? (
-            <div style={{ textAlign: "center", padding: 20, color: "var(--text-tertiary)", fontSize: 13 }}>
-              No blackout days configured
+          {/* Blackout Days */}
+          <div className="form-group">
+            <div className="form-group__header">
+              <Calendar size={16} />
+              <h4 className="form-group__title">Blackout Days / Holidays</h4>
             </div>
-          ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              {blackoutDays
-                .sort((a, b) => a.date.localeCompare(b.date))
-                .map((b) => (
-                  <div
-                    key={b.date}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      padding: "8px 12px",
-                      borderRadius: 8,
-                      background: "var(--bg-secondary, #f9fafb)",
-                      fontSize: 13,
-                    }}
-                  >
-                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <span style={{ fontWeight: 500 }}>
-                        {new Date(b.date + "T00:00:00").toLocaleDateString(undefined, {
-                          weekday: "short",
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })}
-                      </span>
-                      {b.reason && (
-                        <span style={{ color: "var(--text-tertiary)" }}> &mdash; {b.reason}</span>
-                      )}
+            <p className="form-group__desc">
+              Days when the gym is closed for holidays or maintenance. No bookings allowed.
+            </p>
+
+            <div className="blackout-add-row">
+              <input
+                type="date"
+                className="dense-input"
+                value={newBlackoutDate}
+                onChange={(e) => setNewBlackoutDate(e.target.value)}
+                min={new Date().toISOString().split("T")[0]}
+              />
+              <input
+                type="text"
+                className="dense-input"
+                placeholder="Reason (optional)"
+                value={newBlackoutReason}
+                onChange={(e) => setNewBlackoutReason(e.target.value)}
+              />
+              <button
+                className="settings-save-btn"
+                onClick={addBlackoutDay}
+                disabled={!newBlackoutDate}
+              >
+                <Plus size={14} />
+                Add
+              </button>
+            </div>
+
+            {blackoutDays.length === 0 ? (
+              <p className="blackout-empty">No blackout days configured</p>
+            ) : (
+              <div className="blackout-list">
+                {blackoutDays
+                  .sort((a, b) => a.date.localeCompare(b.date))
+                  .map((b) => (
+                    <div key={b.date} className="blackout-row">
+                      <div className="blackout-row__info">
+                        <span className="blackout-row__date">
+                          {new Date(b.date + "T00:00:00").toLocaleDateString(undefined, {
+                            weekday: "short",
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </span>
+                        {b.reason && (
+                          <span className="blackout-row__reason">&mdash; {b.reason}</span>
+                        )}
+                      </div>
+                      <button
+                        className="blackout-row__remove"
+                        onClick={() => removeBlackoutDay(b.date)}
+                        title="Remove"
+                      >
+                        <Trash2 size={14} />
+                      </button>
                     </div>
-                    <button
-                      onClick={() => removeBlackoutDay(b.date)}
-                      style={{
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                        color: "var(--text-tertiary)",
-                        padding: 4,
-                        borderRadius: 4,
-                      }}
-                      title="Remove"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                ))}
-            </div>
-          )}
-        </div>
+                  ))}
+              </div>
+            )}
+          </div>
 
         <div className="policy-note">
           <div className="policy-note__icon">

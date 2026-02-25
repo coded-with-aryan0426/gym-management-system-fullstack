@@ -25,12 +25,12 @@ export const MaintenanceForm: React.FC<MaintenanceFormProps> = ({ newLog, setNew
     const typeCards: { type: MaintenanceType; color: string; bg: string; border: string; icon: React.ReactNode; label: string; desc: string }[] = [
         { type: 'PREVENTIVE', color: '#22c55e', bg: 'rgba(34, 197, 94, 0.06)', border: 'rgba(34, 197, 94, 0.2)', icon: <Shield size={20} />, label: 'Preventive', desc: 'Routine maintenance to prevent issues' },
         { type: 'REPAIR', color: '#ef4444', bg: 'rgba(239, 68, 68, 0.06)', border: 'rgba(239, 68, 68, 0.2)', icon: <Wrench size={20} />, label: 'Repair', desc: 'Fix existing issues or broken parts' },
-        { type: 'INSPECTION', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.06)', border: 'rgba(59, 130, 246, 0.2)', icon: <ClipboardCheck size={20} />, label: 'Inspection', desc: 'Evaluate equipment condition' }
+          { type: 'INSPECTION', color: '#64748b', bg: 'rgba(100, 116, 139, 0.06)', border: 'rgba(100, 116, 139, 0.2)', icon: <ClipboardCheck size={20} />, label: 'Inspection', desc: 'Evaluate equipment condition' }
     ];
 
     const statusOptions: { status: MaintenanceStatus; color: string; label: string; icon: React.ReactNode }[] = [
         { status: 'COMPLETED', color: '#22c55e', label: 'Completed', icon: <CheckCircle size={12} /> },
-        { status: 'SCHEDULED', color: '#3b82f6', label: 'Scheduled', icon: <Calendar size={12} /> },
+          { status: 'SCHEDULED', color: '#64748b', label: 'Scheduled', icon: <Calendar size={12} /> },
         { status: 'OVERDUE', color: '#ef4444', label: 'Overdue', icon: <AlertCircle size={12} /> },
     ];
 

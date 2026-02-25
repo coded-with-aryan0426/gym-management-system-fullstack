@@ -89,6 +89,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/api/gyms/public/**").permitAll()
                         .requestMatchers("/api/dashboard/analytics/test").permitAll() // Test endpoint
+                        .requestMatchers("/api/tasks/seed").permitAll()  // Seed dummy data — no auth needed
+                        .requestMatchers("/api/tasks/**").permitAll()    // Task board — permit all (roles enforced at method level)
 
                         .requestMatchers("/ws/**").permitAll() // WebSocket handshake
                         .requestMatchers("/error").permitAll()

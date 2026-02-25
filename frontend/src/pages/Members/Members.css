@@ -694,12 +694,7 @@
   color: #A5B4FC !important;
 }
 
-/* Light theme */
-:root.theme-light .pg-filter-pill { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.08); color: #6B7280; }
-:root.theme-light .pg-filter-pill:hover { background: rgba(0,0,0,0.05); }
-:root.theme-light .pg-filter-pill--active { background: rgba(99,102,241,0.08); border-color: rgba(99,102,241,0.3); color: #6366F1; }
-:root.theme-light .pg-filter-skeleton { background: linear-gradient(90deg, rgba(0,0,0,0.04) 25%, rgba(0,0,0,0.08) 50%, rgba(0,0,0,0.04) 75%); background-size: 200% 100%; }
-:root.theme-light .pg-filter-empty-hint { color: #9CA3AF; }
+/* (light-mode filter pills now handled in the block below) */
 
 /* ============================================================
    HIGH #7: Expiring Soon alert banner
@@ -865,20 +860,9 @@
   box-shadow: 0 4px 14px rgba(239, 68, 68, 0.45);
 }
 
-/* Light theme adjustments */
-:root.theme-light .members-confirm-modal { background: #fff; border-color: rgba(0,0,0,0.08); }
-:root.theme-light .members-empty-state__icon { background: rgba(99,102,241,0.06); }
-:root.theme-light .pg-filter-pill { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.08); color: #6B7280; }
-:root.theme-light .pg-filter-pill:hover { background: rgba(0,0,0,0.05); }
-:root.theme-light .pg-filter-pill--active { background: rgba(99,102,241,0.08); border-color: rgba(99,102,241,0.3); color: #6366F1; }
-:root.theme-light .members-expiry-alert { background: rgba(245,158,11,0.06); border-color: rgba(245,158,11,0.2); }
+/* (light-mode adjustments now handled in the block below) */
 
-/* === Light Theme === */
-:root.theme-light .members-table-wrapper .data-table__th { background: rgba(99, 102, 241, 0.04); }
-:root.theme-light .members-table-wrapper .data-table__row:hover { background: rgba(99, 102, 241, 0.04); }
-:root.theme-light .member-name { color: #1F2937; }
-:root.theme-light .data-table__row:hover .member-name { color: #6366F1; }
-:root.theme-light .status-dot { border-color: #fff; }
+/* (light-mode table/name/dot now handled in the block below) */
 
 /* === Row Animation === */
 .members-table-wrapper .data-table__row {
@@ -973,15 +957,155 @@
 }
 
 /* === Light Theme Additions === */
-:root.theme-light .member-phone { color: #6B7280; }
-:root.theme-light .member-phone:hover { color: #6366F1; }
-:root.theme-light .checkin--recent { color: #059669; }
-:root.theme-light .checkin--week { color: #D97706; }
-:root.theme-light .checkin--old { color: #DC2626; }
-:root.theme-light .checkin--never { color: #9CA3AF; }
-:root.theme-light .join-date { color: #374151; }
-:root.theme-light .join-tenure { color: #9CA3AF; }
-:root.theme-light .payment-badge--paid { background: rgba(16, 185, 129, 0.1); color: #059669; border-color: rgba(16, 185, 129, 0.2); }
-:root.theme-light .payment-badge--overdue { background: rgba(239, 68, 68, 0.1); color: #DC2626; border-color: rgba(239, 68, 68, 0.2); }
-:root.theme-light .payment-badge--partial { background: rgba(245, 158, 11, 0.1); color: #D97706; border-color: rgba(245, 158, 11, 0.2); }
-:root.theme-light .payment-badge--unpaid { background: rgba(107, 114, 128, 0.1); color: #6B7280; border-color: rgba(107, 114, 128, 0.2); }
+:root.theme-light,
+[data-theme="light"],
+body.light-mode {
+  /* Table header */
+  & .members-table-wrapper .data-table__th {
+    background: linear-gradient(180deg, rgba(99, 102, 241, 0.05) 0%, rgba(99, 102, 241, 0.02) 100%);
+    color: #6366F1;
+    border-bottom-color: rgba(99, 102, 241, 0.12);
+  }
+  & .members-table-wrapper .data-table__th--number { color: rgba(99, 102, 241, 0.5); }
+
+  /* Row */
+  & .members-table-wrapper .data-table__row { border-bottom-color: rgba(0,0,0,0.04); }
+  & .members-table-wrapper .data-table__row:hover { background: rgba(99, 102, 241, 0.03); }
+  & .members-table-wrapper .data-table__row--selected { background: rgba(99, 102, 241, 0.05) !important; }
+
+  /* Row number */
+  & .members-table-wrapper .row-number {
+    color: #6366F1;
+    background: rgba(99, 102, 241, 0.08);
+  }
+  & .members-table-wrapper .data-table__row:hover .row-number {
+    background: rgba(99, 102, 241, 0.14);
+    color: #4F46E5;
+  }
+
+  /* Member name / email */
+  & .member-name { color: #1F2937; }
+  & .data-table__row:hover .member-name { color: #6366F1; }
+  & .member-email { color: #6B7280; }
+  & .member-date { color: #6B7280; }
+
+  /* Status dot */
+  & .status-dot { border-color: #fff; }
+
+  /* Plan badges — lighter, readable tints */
+  & .member-plan--basic {
+    background: linear-gradient(135deg, rgba(20, 184, 166, 0.12) 0%, rgba(20, 184, 166, 0.06) 100%);
+    color: #0d9488;
+    border-color: rgba(20, 184, 166, 0.25);
+    box-shadow: 0 1px 4px rgba(20, 184, 166, 0.15);
+  }
+  & .member-plan--standard {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, rgba(59, 130, 246, 0.06) 100%);
+    color: #2563eb;
+    border-color: rgba(59, 130, 246, 0.25);
+    box-shadow: 0 1px 4px rgba(59, 130, 246, 0.15);
+  }
+  & .member-plan--premium {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.12) 0%, rgba(139, 92, 246, 0.06) 100%);
+    color: #7c3aed;
+    border-color: rgba(168, 85, 247, 0.25);
+    box-shadow: 0 1px 4px rgba(139, 92, 246, 0.15);
+  }
+  & .member-plan--default {
+    background: rgba(99, 102, 241, 0.06);
+    color: #6366F1;
+    border-color: rgba(99, 102, 241, 0.2);
+  }
+
+  /* Expiry */
+  & .member-days-left { color: #059669; }
+  & .member-days-left--warning { color: #d97706; }
+  & .member-days-left--expired { color: #dc2626; }
+  & .member-expiry-date { color: #9CA3AF; }
+
+  /* Quick actions */
+  & .quick-action-btn {
+    background: rgba(0,0,0,0.04);
+    border-color: rgba(0,0,0,0.08);
+    color: #6B7280;
+  }
+  & .quick-action-btn--renew { background: rgba(16,185,129,0.07); border-color: rgba(16,185,129,0.15); }
+  & .quick-action-btn--renew:hover { background: rgba(16,185,129,0.14); color: #059669; box-shadow: 0 2px 8px rgba(16,185,129,0.15); }
+  & .quick-action-btn--message { background: rgba(99,102,241,0.07); border-color: rgba(99,102,241,0.15); }
+  & .quick-action-btn--message:hover { background: rgba(99,102,241,0.14); color: #6366F1; box-shadow: 0 2px 8px rgba(99,102,241,0.15); }
+
+  /* Payment badges */
+  & .payment-badge--paid    { background: rgba(16,185,129,0.08);  color: #059669; border-color: rgba(16,185,129,0.2);  }
+  & .payment-badge--overdue { background: rgba(239,68,68,0.08);   color: #dc2626; border-color: rgba(239,68,68,0.2);   }
+  & .payment-badge--partial { background: rgba(245,158,11,0.08);  color: #d97706; border-color: rgba(245,158,11,0.2);  }
+  & .payment-badge--unpaid  { background: rgba(107,114,128,0.08); color: #6B7280; border-color: rgba(107,114,128,0.2); }
+
+  /* Check-in */
+  & .checkin--recent { color: #059669; }
+  & .checkin--week   { color: #d97706; }
+  & .checkin--old    { color: #dc2626; }
+  & .checkin--never  { color: #9CA3AF; }
+
+  /* Join date */
+  & .join-date    { color: #374151; }
+  & .join-tenure  { color: #9CA3AF; }
+
+  /* Phone */
+  & .member-phone { color: #6B7280; }
+  & .member-phone:hover { color: #6366F1; }
+  & .member-phone--none { color: #D1D5DB; }
+
+  /* Filter pills */
+  & .pg-filter-pill { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.08); color: #6B7280; }
+  & .pg-filter-pill:hover { background: rgba(0,0,0,0.06); border-color: rgba(0,0,0,0.14); color: #374151; }
+  & .pg-filter-pill--active { background: rgba(99,102,241,0.08); border-color: rgba(99,102,241,0.3); color: #6366F1; box-shadow: none; }
+  & .pg-filter-pill__count { background: rgba(0,0,0,0.08); }
+  & .pg-filter-skeleton { background: linear-gradient(90deg, rgba(0,0,0,0.04) 25%, rgba(0,0,0,0.08) 50%, rgba(0,0,0,0.04) 75%); background-size: 200% 100%; }
+  & .pg-filter-empty-hint { color: #9CA3AF; }
+  & .pg-filter-label__loading { border-color: rgba(0,0,0,0.1); border-top-color: #6366F1; }
+  & .pg-filter-label__sub { color: #9CA3AF; }
+
+  /* Retention trend */
+  & .retention-trend--up   { color: #059669; background: rgba(5,150,105,0.1);  }
+  & .retention-trend--down { color: #dc2626; background: rgba(220,38,38,0.1);  }
+  & .retention-trend--flat { color: #6B7280; background: rgba(107,114,128,0.08); }
+
+  /* Expiry alert */
+  & .members-expiry-alert {
+    background: linear-gradient(90deg, rgba(245,158,11,0.08) 0%, rgba(245,158,11,0.04) 100%);
+    border-color: rgba(245,158,11,0.2);
+    color: #92400e;
+  }
+  & .members-expiry-alert__icon { color: #d97706; }
+  & .members-expiry-alert__action {
+    background: rgba(245,158,11,0.1);
+    border-color: rgba(245,158,11,0.25);
+    color: #92400e;
+  }
+  & .members-expiry-alert__action:hover { background: rgba(245,158,11,0.18); border-color: rgba(245,158,11,0.4); }
+  & .members-expiry-alert__dismiss { color: rgba(146,64,14,0.5); }
+  & .members-expiry-alert__dismiss:hover { background: rgba(245,158,11,0.12); color: #92400e; }
+
+  /* Confirm modal */
+  & .members-confirm-modal { background: #fff; border-color: rgba(0,0,0,0.08); box-shadow: 0 24px 64px rgba(0,0,0,0.12); }
+  & .members-confirm-modal__btn--cancel {
+    background: rgba(0,0,0,0.04);
+    border-color: rgba(0,0,0,0.1);
+  }
+  & .members-confirm-modal__btn--cancel:hover { background: rgba(0,0,0,0.07); }
+
+  /* Empty state */
+  & .members-empty-state__icon { background: rgba(99,102,241,0.06); border-color: rgba(99,102,241,0.12); }
+  & .members-empty-state__btn--secondary {
+    background: rgba(0,0,0,0.04);
+    border-color: rgba(0,0,0,0.1);
+    color: #6B7280;
+  }
+  & .members-empty-state__btn--secondary:hover { background: rgba(99,102,241,0.08); border-color: rgba(99,102,241,0.2); color: #6366F1; }
+
+  /* Pagination */
+  & .members-table-wrapper .data-table__pagination {
+    background: linear-gradient(180deg, rgba(99, 102, 241, 0.02) 0%, transparent 100%);
+    border-top-color: rgba(99, 102, 241, 0.06);
+  }
+}

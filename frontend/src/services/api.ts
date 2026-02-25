@@ -387,6 +387,27 @@ const api = {
     return response.data;
   },
 
+  // Finance endpoints (real transaction-based data)
+  async getFinanceOverview(period: string = 'month'): Promise<any> {
+    const response = await apiClient.get('/finance/overview', { params: { period } });
+    return response.data;
+  },
+
+  async getFinanceDailyTrend(period: string = 'month'): Promise<any[]> {
+    const response = await apiClient.get<any[]>('/finance/daily-trend', { params: { period } });
+    return response.data;
+  },
+
+  async getFinanceCategoryStats(type: string = 'INCOME', period: string = 'month'): Promise<any[]> {
+    const response = await apiClient.get<any[]>('/finance/category-stats', { params: { type, period } });
+    return response.data;
+  },
+
+  async getFinanceBreakdown(period: string = 'month'): Promise<any> {
+    const response = await apiClient.get('/finance/breakdown', { params: { period } });
+    return response.data;
+  },
+
   async getFloorStatus(): Promise<unknown[]> {
     const response = await apiClient.get('/dashboard/floor-status');
     return response.data;

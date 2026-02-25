@@ -26,11 +26,12 @@ public class FinanceService {
     private LocalDateTime[] getDateRange(String period) {
         LocalDateTime endDate = LocalDateTime.now();
         LocalDateTime startDate = switch (period) {
-            case "day" -> LocalDate.now().atStartOfDay();
-            case "week" -> LocalDate.now().minusWeeks(1).atStartOfDay();
-            case "month" -> LocalDate.now().minusMonths(1).atStartOfDay();
-            case "year" -> LocalDate.now().minusYears(1).atStartOfDay();
-            default -> LocalDate.now().minusMonths(1).atStartOfDay();
+            case "day"     -> LocalDate.now().atStartOfDay();
+            case "week"    -> LocalDate.now().minusWeeks(1).atStartOfDay();
+            case "month"   -> LocalDate.now().minusMonths(1).atStartOfDay();
+            case "6month"  -> LocalDate.now().minusMonths(6).atStartOfDay();
+            case "year"    -> LocalDate.now().minusYears(1).atStartOfDay();
+            default        -> LocalDate.now().minusMonths(1).atStartOfDay();
         };
         return new LocalDateTime[] { startDate, endDate };
     }
@@ -87,9 +88,11 @@ public class FinanceService {
         LocalDateTime[] range = getDateRange(period);
         LocalDateTime[] prevRange = getPreviousDateRange(period);
 
+        // Revenue: only Completed income (cash actually received)
         BigDecimal totalRevenue = transactionRepository.sumAmountByTypeAndStatusAndDateRange("INCOME", "Completed",
                 range[0], range[1]);
-        BigDecimal totalExpenses = transactionRepository.sumAmountByTypeAndStatusAndDateRange("EXPENSE", "Completed",
+        // Expenses: ALL statuses (an expense is a liability whether paid or pending)
+        BigDecimal totalExpenses = transactionRepository.sumAmountByTypeAndDateRange("EXPENSE",
                 range[0], range[1]);
         BigDecimal pendingDues = transactionRepository.sumAmountByStatusAndDateRange("Pending", range[0], range[1]);
         Long pendingCount = transactionRepository.countPendingTransactions(range[0], range[1]);
@@ -97,7 +100,7 @@ public class FinanceService {
         // Previous period for comparison
         BigDecimal prevRevenue = transactionRepository.sumAmountByTypeAndStatusAndDateRange("INCOME", "Completed",
                 prevRange[0], prevRange[1]);
-        BigDecimal prevExpenses = transactionRepository.sumAmountByTypeAndStatusAndDateRange("EXPENSE", "Completed",
+        BigDecimal prevExpenses = transactionRepository.sumAmountByTypeAndDateRange("EXPENSE",
                 prevRange[0], prevRange[1]);
 
         BigDecimal netProfit = totalRevenue.subtract(totalExpenses);
@@ -144,8 +147,8 @@ public class FinanceService {
         Map<String, Map<String, BigDecimal>> grouped = new java.util.TreeMap<>();
 
         for (Transaction t : transactions) {
-            if (!"Completed".equals(t.getStatus()))
-                continue;
+            if ("INCOME".equals(t.getType()) && !"Completed".equals(t.getStatus()))
+                continue; // Only count completed income as received revenue
 
             String key = t.getDateTime().toLocalDate().toString();
 
@@ -197,7 +200,15 @@ public class FinanceService {
         for (Object[] r : results) {
             String date = r[0].toString();
             String type = (String) r[1];
-            BigDecimal amount = (BigDecimal) r[2];
+            // Safely convert whatever numeric type the DB returns to BigDecimal
+            BigDecimal amount;
+            if (r[2] instanceof BigDecimal) {
+                amount = (BigDecimal) r[2];
+            } else if (r[2] instanceof Number) {
+                amount = BigDecimal.valueOf(((Number) r[2]).doubleValue());
+            } else {
+                amount = BigDecimal.ZERO;
+            }
             grouped.putIfAbsent(date, new HashMap<>());
             Map<String, BigDecimal> dayData = grouped.get(date);
             dayData.putIfAbsent("revenue", BigDecimal.ZERO);

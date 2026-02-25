@@ -433,7 +433,7 @@ const MemberRulesSection = () => {
   }
 
   return (
-    <div className="settings-section" style={{ "--section-accent": "#8b5cf6" } as React.CSSProperties}>
+    <div className="settings-section settings-section--purple">
       <div className="settings-section-header">
         <div className="settings-section-title">
           <FiUsers className="section-icon" />

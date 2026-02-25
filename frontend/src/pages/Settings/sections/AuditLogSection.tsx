@@ -1,34 +1,18 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect, useCallback, useMemo } from "react"
+import { useState, useEffect, useCallback, useMemo, useRef } from "react"
 import {
   History, Search, Download, Filter, ChevronLeft, ChevronRight, ChevronDown, ChevronUp,
   Loader2, Calendar, User, Activity, Shield, LogIn, LogOut, Clock,
-  Monitor, RefreshCw, Eye, AlertTriangle, CheckCircle2, XCircle,
+  Monitor, RefreshCw, AlertTriangle, CheckCircle2, XCircle,
   Settings, CreditCard, Users, UserPlus, UserMinus, Edit3, Trash2, Plus,
-  Key, Lock, Mail, Bell, Database, ArrowRight, FileText, BarChart3, Wifi, TrendingUp
+  Key, Lock, Mail, Bell, Database, ArrowRight, FileText, BarChart3, TrendingUp,
+  Laptop, MapPin, Globe, Terminal, Zap
 } from "lucide-react"
 import api from "../../../services/api"
 
 // ── Types ──────────────────────────────────────────────────────────────────
-
-type ActionType =
-  | 'LOGIN' | 'LOGOUT' | 'LOGIN_FAILED'
-  | 'CREATE' | 'UPDATE' | 'DELETE' | 'VIEW' | 'EXPORT'
-  | 'PASSWORD_CHANGE' | 'PASSWORD_RESET'
-  | 'PERMISSION_CHANGE' | 'ROLE_CHANGE'
-  | 'PAYMENT_RECEIVED' | 'REFUND_ISSUED'
-  | 'MEMBER_CHECKIN' | 'MEMBER_CHECKOUT' | 'MEMBERSHIP_ACTIVATED' | 'MEMBERSHIP_EXPIRED'
-  | 'SETTINGS_CHANGE'
-  | 'EMAIL_SENT' | 'NOTIFICATION_SENT'
-  | 'ERROR' | 'WARNING' | 'SECURITY_ALERT'
-
-type EntityType =
-  | 'USER' | 'MEMBER' | 'TRAINER' | 'STAFF' | 'ADMIN'
-  | 'MEMBERSHIP' | 'PAYMENT' | 'INVOICE' | 'CLASS' | 'BOOKING'
-  | 'SETTINGS' | 'SYSTEM' | 'SECURITY' | 'NOTIFICATION'
-  | 'REPORT' | 'EQUIPMENT' | 'SCHEDULE' | 'PROFILE'
 
 type SeverityLevel = 'info' | 'low' | 'medium' | 'high' | 'critical'
 
@@ -38,14 +22,18 @@ interface AuditLogEntry {
   userId: string
   userName: string
   userRole: string
-  action: ActionType
-  entity: EntityType
+  action: string
+  entity: string
   entityId?: string
   entityName?: string
   details: string
   changes?: any
   ipAddress: string
   severity: SeverityLevel
+  deviceType?: string
+  browser?: string
+  os?: string
+  location?: string
 }
 
 interface AuditFilters {
@@ -60,204 +48,332 @@ interface AuditStats {
   totalLogs: number
   todayLogs: number
   onlineUsers: number
-  avgSessionTime: string
   securityAlerts: number
-  topActions: { action: string; count: number }[]
   actionCounts: Record<string, number>
   severityCounts: Record<string, number>
   dailyActivity: Record<string, number>
 }
 
-// ── Helpers ────────────────────────────────────────────────────────────────
+// ── Action metadata ────────────────────────────────────────────────────────
 
-const ACTION_META: Record<string, { icon: React.ReactNode; label: string; color: string }> = {
-  'LOGIN':               { icon: <LogIn size={14} />,         label: 'Logged In',           color: 'var(--settings-accent-success)' },
-  'LOGOUT':              { icon: <LogOut size={14} />,        label: 'Logged Out',          color: 'var(--settings-text-tertiary)' },
-  'LOGIN_FAILED':        { icon: <XCircle size={14} />,       label: 'Login Failed',        color: 'var(--settings-accent-danger)' },
-  'CREATE':              { icon: <Plus size={14} />,          label: 'Created',             color: 'var(--settings-accent-success)' },
-  'UPDATE':              { icon: <Edit3 size={14} />,         label: 'Updated',             color: 'var(--settings-accent-blue)' },
-  'DELETE':              { icon: <Trash2 size={14} />,        label: 'Deleted',             color: 'var(--settings-accent-danger)' },
-  'VIEW':                { icon: <Eye size={14} />,           label: 'Viewed',              color: 'var(--settings-text-tertiary)' },
-  'EXPORT':              { icon: <Download size={14} />,      label: 'Exported',            color: 'var(--settings-accent-blue)' },
-  'PASSWORD_CHANGE':     { icon: <Key size={14} />,           label: 'Password Changed',    color: 'var(--settings-accent-amber)' },
-  'PASSWORD_RESET':      { icon: <Lock size={14} />,          label: 'Password Reset',      color: 'var(--settings-accent-amber)' },
-  'PERMISSION_CHANGE':   { icon: <Shield size={14} />,        label: 'Permission Changed',  color: 'var(--settings-accent-purple)' },
-  'ROLE_CHANGE':         { icon: <Shield size={14} />,        label: 'Role Changed',        color: 'var(--settings-accent-purple)' },
-  'PAYMENT_RECEIVED':    { icon: <CreditCard size={14} />,    label: 'Payment Received',    color: 'var(--settings-accent-success)' },
-  'REFUND_ISSUED':       { icon: <CreditCard size={14} />,    label: 'Refund Issued',       color: 'var(--settings-accent-amber)' },
-  'MEMBER_CHECKIN':      { icon: <UserPlus size={14} />,      label: 'Checked In',          color: 'var(--settings-accent-success)' },
-  'MEMBER_CHECKOUT':     { icon: <UserMinus size={14} />,     label: 'Checked Out',         color: 'var(--settings-text-tertiary)' },
-  'MEMBERSHIP_ACTIVATED':{ icon: <CheckCircle2 size={14} />,  label: 'Membership Active',   color: 'var(--settings-accent-success)' },
-  'MEMBERSHIP_EXPIRED':  { icon: <AlertTriangle size={14} />, label: 'Membership Expired',  color: 'var(--settings-accent-amber)' },
-  'SETTINGS_CHANGE':     { icon: <Settings size={14} />,      label: 'Settings Changed',    color: 'var(--settings-accent-blue)' },
-  'EMAIL_SENT':          { icon: <Mail size={14} />,          label: 'Email Sent',          color: 'var(--settings-accent-teal)' },
-  'NOTIFICATION_SENT':   { icon: <Bell size={14} />,          label: 'Notification Sent',   color: 'var(--settings-accent-teal)' },
-  'SECURITY_ALERT':      { icon: <AlertTriangle size={14} />, label: 'Security Alert',      color: 'var(--settings-accent-danger)' },
-  'ERROR':               { icon: <XCircle size={14} />,       label: 'Error',               color: 'var(--settings-accent-danger)' },
-  'WARNING':             { icon: <AlertTriangle size={14} />, label: 'Warning',             color: 'var(--settings-accent-amber)' },
+const ACTION_META: Record<string, { icon: React.ReactNode; label: string; color: string; verb: string }> = {
+  LOGIN:                { icon: <LogIn size={13} />,        label: 'Logged In',          color: '#10b981', verb: 'logged into' },
+  LOGOUT:               { icon: <LogOut size={13} />,       label: 'Logged Out',         color: '#6b7280', verb: 'logged out of' },
+  LOGIN_FAILED:         { icon: <XCircle size={13} />,      label: 'Login Failed',       color: '#ef4444', verb: 'failed to log into' },
+  CREATE:               { icon: <Plus size={13} />,         label: 'Created',            color: '#10b981', verb: 'created' },
+  UPDATE:               { icon: <Edit3 size={13} />,        label: 'Updated',            color: '#3b82f6', verb: 'updated' },
+  DELETE:               { icon: <Trash2 size={13} />,       label: 'Deleted',            color: '#ef4444', verb: 'deleted' },
+  VIEW:                 { icon: <History size={13} />,      label: 'Viewed',             color: '#6b7280', verb: 'viewed' },
+  EXPORT:               { icon: <Download size={13} />,     label: 'Exported',           color: '#3b82f6', verb: 'exported' },
+  PASSWORD_CHANGE:      { icon: <Key size={13} />,          label: 'Password Changed',   color: '#f59e0b', verb: 'changed password on' },
+  PASSWORD_RESET:       { icon: <Lock size={13} />,         label: 'Password Reset',     color: '#f59e0b', verb: 'reset password on' },
+  PERMISSION_CHANGE:    { icon: <Shield size={13} />,       label: 'Permission Changed', color: '#8b5cf6', verb: 'changed permissions on' },
+  ROLE_CHANGE:          { icon: <Shield size={13} />,       label: 'Role Changed',       color: '#8b5cf6', verb: 'changed role on' },
+  PAYMENT_RECEIVED:     { icon: <CreditCard size={13} />,   label: 'Payment Received',   color: '#10b981', verb: 'received payment on' },
+  REFUND_ISSUED:        { icon: <CreditCard size={13} />,   label: 'Refund Issued',      color: '#f59e0b', verb: 'issued refund on' },
+  MEMBER_CHECKIN:       { icon: <UserPlus size={13} />,     label: 'Member Check-In',    color: '#10b981', verb: 'checked in' },
+  MEMBER_CHECKOUT:      { icon: <UserMinus size={13} />,    label: 'Member Check-Out',   color: '#6b7280', verb: 'checked out' },
+  MEMBERSHIP_ACTIVATED: { icon: <CheckCircle2 size={13} />, label: 'Membership Active',  color: '#10b981', verb: 'activated membership for' },
+  MEMBERSHIP_EXPIRED:   { icon: <AlertTriangle size={13} />,label: 'Membership Expired', color: '#f97316', verb: 'expired membership on' },
+  SETTINGS_CHANGE:      { icon: <Settings size={13} />,     label: 'Settings Changed',   color: '#3b82f6', verb: 'changed settings on' },
+  EMAIL_SENT:           { icon: <Mail size={13} />,         label: 'Email Sent',         color: '#14b8a6', verb: 'sent email regarding' },
+  NOTIFICATION_SENT:    { icon: <Bell size={13} />,         label: 'Notification Sent',  color: '#14b8a6', verb: 'sent notification to' },
+  SECURITY_ALERT:       { icon: <AlertTriangle size={13} />,label: 'Security Alert',     color: '#ef4444', verb: 'triggered security alert on' },
+  ERROR:                { icon: <XCircle size={13} />,      label: 'Error',              color: '#ef4444', verb: 'encountered error on' },
+  WARNING:              { icon: <AlertTriangle size={13} />,label: 'Warning',            color: '#f59e0b', verb: 'triggered warning on' },
 }
 
-const ACTION_COLORS: Record<string, string> = {
-  'LOGIN': '#10b981', 'LOGOUT': '#6b7280', 'LOGIN_FAILED': '#ef4444',
-  'CREATE': '#10b981', 'UPDATE': '#3b82f6', 'DELETE': '#ef4444',
-  'VIEW': '#6b7280', 'EXPORT': '#3b82f6',
-  'PASSWORD_CHANGE': '#f59e0b', 'PASSWORD_RESET': '#f59e0b',
-  'PERMISSION_CHANGE': '#8b5cf6', 'ROLE_CHANGE': '#8b5cf6',
-  'SETTINGS_CHANGE': '#3b82f6', 'SECURITY_ALERT': '#ef4444',
-}
-
-const SEVERITY_COLORS: Record<string, string> = {
-  'info': '#3b82f6', 'low': '#10b981', 'medium': '#f59e0b', 'high': '#f97316', 'critical': '#ef4444',
+const SEVERITY_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
+  info:     { label: 'Info',     color: '#3b82f6', bg: 'rgba(59,130,246,0.12)' },
+  low:      { label: 'Low',      color: '#10b981', bg: 'rgba(16,185,129,0.12)' },
+  medium:   { label: 'Medium',   color: '#f59e0b', bg: 'rgba(245,158,11,0.12)' },
+  high:     { label: 'High',     color: '#f97316', bg: 'rgba(249,115,22,0.12)' },
+  critical: { label: 'Critical', color: '#ef4444', bg: 'rgba(239,68,68,0.12)' },
 }
 
 const ENTITY_LABELS: Record<string, string> = {
-  'USER': 'User', 'MEMBER': 'Member', 'TRAINER': 'Trainer', 'STAFF': 'Staff', 'ADMIN': 'Admin',
-  'MEMBERSHIP': 'Membership', 'PAYMENT': 'Payment', 'INVOICE': 'Invoice', 'CLASS': 'Class',
-  'BOOKING': 'Booking', 'SETTINGS': 'Settings', 'SYSTEM': 'System', 'SECURITY': 'Security',
-  'NOTIFICATION': 'Notification', 'REPORT': 'Report', 'EQUIPMENT': 'Equipment', 'SCHEDULE': 'Schedule',
-  'PROFILE': 'Profile',
+  USER: 'User', MEMBER: 'Member', TRAINER: 'Trainer', STAFF: 'Staff', ADMIN: 'Admin',
+  MEMBERSHIP: 'Membership', PAYMENT: 'Payment', INVOICE: 'Invoice', CLASS: 'Class',
+  BOOKING: 'Booking', SETTINGS: 'Settings', SYSTEM: 'System', SECURITY: 'Security',
+  NOTIFICATION: 'Notification', REPORT: 'Report', EQUIPMENT: 'Equipment',
+  SCHEDULE: 'Schedule', PROFILE: 'Profile',
 }
 
-const SEVERITY_CONFIG: Record<string, { label: string; dotClass: string }> = {
-  'info':     { label: 'Info',     dotClass: 'al-severity-dot--info' },
-  'low':      { label: 'Low',      dotClass: 'al-severity-dot--low' },
-  'medium':   { label: 'Medium',   dotClass: 'al-severity-dot--medium' },
-  'high':     { label: 'High',     dotClass: 'al-severity-dot--high' },
-  'critical': { label: 'Critical', dotClass: 'al-severity-dot--critical' },
+// ── Helpers ────────────────────────────────────────────────────────────────
+
+function getActionMeta(action: string) {
+  // Strip _COMPLETED / _STARTED / _FAILED suffixes that the AOP aspect appends
+  const normalized = action.replace(/_(COMPLETED|STARTED|FAILED)$/, '')
+  return ACTION_META[normalized] || {
+    icon: <Activity size={13} />,
+    label: normalized.replace(/_/g, ' '),
+    color: '#6b7280',
+    verb: 'performed',
+  }
 }
 
-function formatRelativeTime(timestamp: string): string {
-  const date = new Date(timestamp)
-  const now = new Date()
-  const diff = now.getTime() - date.getTime()
-  if (diff < 60000) return 'Just now'
-  if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`
-  if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`
-  if (diff < 172800000) return 'Yesterday'
-  return date.toLocaleDateString('en-US', {
-    month: 'short', day: 'numeric',
-    ...(date.getFullYear() !== now.getFullYear() ? { year: 'numeric' } : {}),
-  })
+/** Build a human-readable one-liner:  "John Smith updated Member #42 (Jane Doe)" */
+function buildHeadline(log: AuditLogEntry): { user: string; verb: string; target: string } {
+  const meta = getActionMeta(log.action)
+  const entity = ENTITY_LABELS[log.entity] || log.entity
+  const name = log.entityName ? ` "${log.entityName}"` : ''
+  const id   = log.entityId   ? ` #${log.entityId}` : ''
+  const target = entity + id + name
+  return {
+    user: log.userName || 'System',
+    verb: meta.verb,
+    target,
+  }
 }
 
-function formatFullTimestamp(timestamp: string): string {
-  return new Date(timestamp).toLocaleString('en-US', {
+function formatRelativeTime(ts: string): string {
+  const diff = Date.now() - new Date(ts).getTime()
+  if (diff < 60_000)     return 'just now'
+  if (diff < 3_600_000)  return `${Math.floor(diff / 60_000)}m ago`
+  if (diff < 86_400_000) return `${Math.floor(diff / 3_600_000)}h ago`
+  if (diff < 172_800_000) return 'yesterday'
+  const d = new Date(ts)
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: d.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined })
+}
+
+function formatFullTs(ts: string): string {
+  return new Date(ts).toLocaleString('en-US', {
     weekday: 'short', month: 'short', day: 'numeric', year: 'numeric',
     hour: '2-digit', minute: '2-digit', second: '2-digit',
   })
 }
 
-function getActionMeta(action: string) {
-  return ACTION_META[action] || { icon: <Activity size={14} />, label: action.replace(/_/g, ' '), color: 'var(--settings-text-tertiary)' }
+function formatFieldName(raw: string): string {
+  // "membershipType" → "Membership Type",  "maxSessions" → "Max Sessions"
+  return raw
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, c => c.toUpperCase())
 }
 
-// ── Bar Chart Component (pure CSS) ─────────────────────────────────────────
-
-const BarChart: React.FC<{
-  data: { label: string; value: number; color: string }[]
-  maxBars?: number
-}> = ({ data, maxBars = 8 }) => {
-  const sorted = [...data].sort((a, b) => b.value - a.value).slice(0, maxBars)
-  const max = Math.max(...sorted.map(d => d.value), 1)
-
-  return (
-    <div className="al-chart-bars">
-      {sorted.map((item, i) => (
-        <div key={i} className="al-chart-bar-row">
-          <span className="al-chart-bar-label" title={item.label}>{item.label}</span>
-          <div className="al-chart-bar-track">
-            <div
-              className="al-chart-bar-fill"
-              style={{ width: `${(item.value / max) * 100}%`, background: item.color }}
-            />
-          </div>
-          <span className="al-chart-bar-value">{item.value}</span>
-        </div>
-      ))}
-      {sorted.length === 0 && (
-        <div className="al-chart-empty">No data available</div>
-      )}
-    </div>
-  )
-}
-
-// ── Activity Sparkline (last 14 days) ──────────────────────────────────────
-
-const ActivitySparkline: React.FC<{ dailyActivity: Record<string, number> }> = ({ dailyActivity }) => {
-  // Build last 14 days
-  const days: { date: string; label: string; count: number }[] = []
-  for (let i = 13; i >= 0; i--) {
-    const d = new Date()
-    d.setDate(d.getDate() - i)
-    const key = d.toISOString().slice(0, 10)
-    const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-    days.push({ date: key, label, count: dailyActivity[key] || 0 })
+function formatValue(v: any): string {
+  if (v === null || v === undefined || v === '') return '—'
+  if (typeof v === 'boolean') return v ? 'Yes' : 'No'
+  if (typeof v === 'number') return String(v)
+  const s = String(v).trim()
+  if (!s) return '—'
+  // Try to prettify ISO dates
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
+    try {
+      return new Date(s).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+    } catch { /* */ }
   }
-  const max = Math.max(...days.map(d => d.count), 1)
-
-  return (
-    <div className="al-sparkline">
-      <div className="al-sparkline-bars">
-        {days.map((day, i) => (
-          <div key={i} className="al-sparkline-col" title={`${day.label}: ${day.count} events`}>
-            <div className="al-sparkline-bar-wrapper">
-              <div
-                className="al-sparkline-bar"
-                style={{ height: `${Math.max((day.count / max) * 100, 3)}%` }}
-              />
-            </div>
-            <span className="al-sparkline-label">{day.label.split(' ')[1]}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
+  return s
 }
 
-// ── Changes Display ────────────────────────────────────────────────────────
+// ── Changes table ──────────────────────────────────────────────────────────
 
-const ChangesDisplay: React.FC<{ changes: any }> = ({ changes }) => {
-  let entries: { field: string; oldValue: any; newValue: any }[] = []
+type ChangeRow = { field: string; oldValue: any; newValue: any }
 
-  if (Array.isArray(changes)) {
-    entries = changes.map(c => ({ field: c.field || 'unknown', oldValue: c.oldValue, newValue: c.newValue }))
-  } else if (typeof changes === 'object' && changes !== null) {
-    if (changes.raw) {
-      return (
-        <div className="al-changes-raw">
-          <code>{String(changes.raw)}</code>
-        </div>
-      )
+const SKIP_FIELDS = new Set(['id','createdAt','updatedAt','gymId','entityType','timestamp','changed','type','sensitive'])
+const isSensitiveField = (f: string) => /password|secret|token|pin|cvv|ssn|key/i.test(f)
+
+/**
+ * Parse the plain-text format that UserService.updateUser() writes:
+ *   "Name: 'Old Name' → 'New Name'; Email: 'a@b.com' → 'c@d.com'; Phone: '123' → '456'"
+ *   "Avatar updated"          ← no arrow, no quotes
+ *   "Password changed"        ← masked by isSensitiveField
+ * Also handles → (HTML entity) stored in DB.
+ */
+function parsePlainTextChanges(raw: string): ChangeRow[] | null {
+  // Normalise HTML entity arrow
+  const text = raw.replace(/→/g, '→')
+
+  // Split on "; " boundary (the separator UserService uses)
+  const parts = text.split(/;\s*/).map(s => s.trim()).filter(Boolean)
+  if (parts.length === 0) return null
+
+  const rows: ChangeRow[] = []
+  for (const part of parts) {
+    // Pattern 1:  "Field Name: 'old' → 'new'"  or  "Field: old → new"
+    const arrowMatch = part.match(/^(.+?):\s*(.+?)\s*[→\-\>]+\s*(.+)$/)
+    if (arrowMatch) {
+      const field = arrowMatch[1].trim()
+      const oldVal = arrowMatch[2].replace(/^['"]|['"]$/g, '').trim()
+      const newVal = arrowMatch[3].replace(/^['"]|['"]$/g, '').trim()
+      rows.push({ field, oldValue: oldVal === 'null' ? null : oldVal, newValue: newVal === 'null' ? null : newVal })
+      continue
     }
-    entries = Object.entries(changes).map(([field, val]: [string, any]) => {
-      if (typeof val === 'object' && val !== null && ('oldValue' in val || 'newValue' in val)) {
-        return { field, oldValue: val.oldValue, newValue: val.newValue }
-      }
-      return { field, oldValue: '-', newValue: String(val) }
-    })
+    // Pattern 2:  "Field Name updated" / "Field Name changed"  — no before/after values
+    const simpleMatch = part.match(/^(.+?)\s+(updated|changed|cleared|removed|set)$/i)
+    if (simpleMatch) {
+      rows.push({ field: simpleMatch[1].trim(), oldValue: undefined, newValue: simpleMatch[2] })
+      continue
+    }
+    // Pattern 3:  "Field: value"  — create-style single value
+    const colonMatch = part.match(/^(.+?):\s*(.+)$/)
+    if (colonMatch) {
+      rows.push({ field: colonMatch[1].trim(), oldValue: undefined, newValue: colonMatch[2].trim() })
+      continue
+    }
+    // Fallback — treat entire segment as a description with no structured data
+    rows.push({ field: part, oldValue: undefined, newValue: undefined })
+  }
+  return rows.length > 0 ? rows : null
+}
+
+/**
+ * Normalise whatever `changes` arrives as into ChangeRow[].
+ * Handles 5 formats actually produced by the backend:
+ *
+ *  A) Plain string  — "Name: 'x' → 'y'; Email: 'a' → 'b'"  (UserService)
+ *  B) { result: "..." }  — AOP aspect wrapper around plain string or JSON
+ *  C) { raw: "..." }     — raw fallback from old code
+ *  D) { field: { field, oldValue, newValue, changed } }  — EntityChangeTracker JSON
+ *  E) [{ field, oldValue, newValue }]  — array format
+ */
+function normaliseChanges(changes: any): ChangeRow[] {
+  if (!changes) return []
+
+  // ── A: plain string ───────────────────────────────────────────────────────
+  if (typeof changes === 'string') {
+    const trimmed = changes.trim()
+    if (!trimmed || trimmed === 'null') return []
+    const rows = parsePlainTextChanges(trimmed)
+    return rows ?? [{ field: 'Details', oldValue: undefined, newValue: trimmed }]
   }
 
-  if (entries.length === 0) return null
+  // ── E: array ──────────────────────────────────────────────────────────────
+  if (Array.isArray(changes)) {
+    return changes.map((c: any) => ({
+      field:    c.field    ?? c.key   ?? 'field',
+      oldValue: c.oldValue ?? c.before ?? c.from,
+      newValue: c.newValue ?? c.after  ?? c.to,
+    }))
+  }
+
+  // ── Object formats ────────────────────────────────────────────────────────
+  if (typeof changes === 'object' && changes !== null) {
+    const keys = Object.keys(changes)
+
+    // B: { result: "..." }
+    if (keys.length === 1 && 'result' in changes) {
+      const inner = String(changes.result).trim()
+      if (!inner || inner === 'null') return []
+      // Could be a JSON string inside result
+      try {
+        const parsed = JSON.parse(inner)
+        return normaliseChanges(parsed)
+      } catch {
+        return parsePlainTextChanges(inner) ?? [{ field: 'Details', oldValue: undefined, newValue: inner }]
+      }
+    }
+
+    // C: { raw: "..." }
+    if ('raw' in changes) {
+      return normaliseChanges(String(changes.raw))
+    }
+
+    // D: EntityChangeTracker — each value has { field, oldValue, newValue, changed }
+    //    or plain { old, new } from logPermissionChange
+    const rows: ChangeRow[] = []
+    for (const [key, val] of Object.entries(changes) as [string, any][]) {
+      if (SKIP_FIELDS.has(key)) continue
+      if (typeof val === 'object' && val !== null) {
+        if ('oldValue' in val || 'newValue' in val || 'before' in val || 'after' in val) {
+          rows.push({ field: val.field ?? key, oldValue: val.oldValue ?? val.before, newValue: val.newValue ?? val.after })
+        } else if ('old' in val || 'new' in val) {
+          rows.push({ field: key, oldValue: val.old, newValue: val.new })
+        } else {
+          // Nested object — stringify it as a value
+          rows.push({ field: key, oldValue: undefined, newValue: JSON.stringify(val) })
+        }
+      } else {
+        rows.push({ field: key, oldValue: undefined, newValue: val })
+      }
+    }
+    return rows
+  }
+
+  return []
+}
+
+const ChangesDisplay: React.FC<{ changes: any; action: string }> = ({ changes, action }) => {
+  const rows = normaliseChanges(changes)
+  if (rows.length === 0) return null
+
+  const baseAction = action.replace(/_(COMPLETED|STARTED|FAILED)$/, '')
+  // A "create" has no meaningful before values
+  const isCreate = baseAction === 'CREATE' ||
+    rows.every(r => r.oldValue === undefined || r.oldValue === null || r.oldValue === '')
 
   return (
     <div className="al-changes-table">
-      <div className="al-changes-header">
+      <div className="al-changes-head">
         <span>Field</span>
-        <span>Before</span>
-        <span></span>
-        <span>After</span>
+        {!isCreate && <span>Before</span>}
+        {!isCreate && <span></span>}
+        <span>{isCreate ? 'Value' : 'After'}</span>
       </div>
-      {entries.map((entry, i) => {
-        const isSensitive = entry.field.toLowerCase().includes('password') || entry.field.toLowerCase().includes('secret')
+      {rows.map((row, i) => {
+        const sensitive = isSensitiveField(String(row.field))
+        const oldVal = sensitive ? '••••••' : formatValue(row.oldValue)
+        const newVal = sensitive ? '••••••' : formatValue(row.newValue)
+        const changed = !isCreate && oldVal !== newVal && oldVal !== '—' && oldVal !== newVal
         return (
-          <div key={i} className="al-changes-row">
-            <span className="al-changes-field">{entry.field}</span>
-            <span className="al-changes-old">{isSensitive ? '********' : (entry.oldValue ?? '-')}</span>
-            <span className="al-changes-arrow"><ArrowRight size={12} /></span>
-            <span className="al-changes-new">{isSensitive ? '********' : (entry.newValue ?? '-')}</span>
+          <div key={i} className={`al-changes-row${changed ? ' al-changes-row--changed' : ''}`}>
+            <span className="al-ch-field">{formatFieldName(String(row.field))}</span>
+            {!isCreate && (
+              <>
+                <span className={`al-ch-old${changed ? ' al-ch-old--strike' : ''}`}>{oldVal}</span>
+                <span className="al-ch-arrow"><ArrowRight size={11} /></span>
+              </>
+            )}
+            <span className={`al-ch-new${changed ? ' al-ch-new--highlight' : ''}`}>{newVal}</span>
           </div>
         )
       })}
+    </div>
+  )
+}
+
+// ── Sparkline (14-day activity) ────────────────────────────────────────────
+
+const Sparkline: React.FC<{ data: Record<string, number> }> = ({ data }) => {
+  const days = Array.from({ length: 14 }, (_, i) => {
+    const d = new Date()
+    d.setDate(d.getDate() - (13 - i))
+    const key = d.toISOString().slice(0, 10)
+    return { key, day: d.getDate(), count: data[key] || 0 }
+  })
+  const max = Math.max(...days.map(d => d.count), 1)
+  return (
+    <div className="al-sparkline">
+      {days.map((day, i) => (
+        <div key={i} className="al-spark-col" title={`${day.key}: ${day.count} events`}>
+          <div className="al-spark-track">
+            <div className="al-spark-bar" style={{ height: `${Math.max((day.count / max) * 100, 2)}%` }} />
+          </div>
+          {(i === 0 || i === 6 || i === 13) && (
+            <span className="al-spark-label">{day.day}</span>
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// ── Inline bar chart ───────────────────────────────────────────────────────
+
+const MiniBarChart: React.FC<{ items: { label: string; value: number; color: string }[] }> = ({ items }) => {
+  const sorted = [...items].sort((a, b) => b.value - a.value).slice(0, 7)
+  const max = Math.max(...sorted.map(d => d.value), 1)
+  return (
+    <div className="al-minibars">
+      {sorted.map((item, i) => (
+        <div key={i} className="al-minibar-row">
+          <span className="al-minibar-label" title={item.label}>{item.label}</span>
+          <div className="al-minibar-track">
+            <div className="al-minibar-fill" style={{ width: `${(item.value / max) * 100}%`, background: item.color }} />
+          </div>
+          <span className="al-minibar-val">{item.value}</span>
+        </div>
+      ))}
     </div>
   )
 }
@@ -268,61 +384,89 @@ const AuditLogSection: React.FC = () => {
   const [logs, setLogs] = useState<AuditLogEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
-  const [expandedLog, setExpandedLog] = useState<string | null>(null)
+  const [expandedId, setExpandedId] = useState<string | null>(null)
   const [showFilters, setShowFilters] = useState(false)
-  const [showAnalytics, setShowAnalytics] = useState(true)
+  const [showAnalytics, setShowAnalytics] = useState(false)
   const [page, setPage] = useState(1)
-  const [totalFromApi, setTotalFromApi] = useState(0)
-  const itemsPerPage = 20
-
+  const [totalElements, setTotalElements] = useState(0)
+  const [totalPages, setTotalPages] = useState(1)
   const [apiStats, setApiStats] = useState<AuditStats | null>(null)
+  const PER_PAGE = 25
 
   const [filters, setFilters] = useState<AuditFilters>({
     search: '', action: '', severity: '', dateFrom: '', dateTo: '',
   })
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const gymId = localStorage.getItem('activeGymId') || '41'
 
-  // ── Data Fetching ──────────────────────────────────────────────────────
+  // ── Filter handlers ──────────────────────────────────────────────────
+
+  const handleSearch = (v: string) => {
+    setFilters(f => ({ ...f, search: v }))
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => { setDebouncedSearch(v); setPage(1) }, 400)
+  }
+
+  const handleFilter = (k: keyof Omit<AuditFilters, 'search'>, v: string) => {
+    setFilters(f => ({ ...f, [k]: v }))
+    setPage(1)
+  }
+
+  const clearFilters = () => {
+    setFilters({ search: '', action: '', severity: '', dateFrom: '', dateTo: '' })
+    setDebouncedSearch('')
+    setPage(1)
+  }
+
+  const hasFilters = !!(debouncedSearch || filters.action || filters.severity || filters.dateFrom || filters.dateTo)
+
+  // ── Fetch ────────────────────────────────────────────────────────────
 
   const fetchLogs = useCallback(async () => {
     try {
-      const response = await api.get(`/audit-logs?gymId=${gymId}&page=${page - 1}&size=${itemsPerPage}&includeChanges=true`)
-      if (response.data?.logs?.length > 0) {
-        const mapped: AuditLogEntry[] = response.data.logs.map((log: any) => ({
-          id: log.id?.toString() || `log-${Math.random()}`,
-          timestamp: log.timestamp,
-          userId: log.userId?.toString() || '',
-          userName: log.userName || 'System',
-          userRole: log.userRole || '',
-          action: log.action || 'UPDATE',
-          entity: log.entity || 'SYSTEM',
-          entityId: log.entityId,
-          entityName: log.entityName,
-          details: log.details || '',
-          changes: log.changes ? (() => { try { return JSON.parse(log.changes) } catch { return { raw: log.changes } } })() : undefined,
-          ipAddress: log.ipAddress || '',
-          severity: log.severity || 'info',
-        }))
-        setLogs(mapped)
-        setTotalFromApi(response.data.totalElements || response.data.total || mapped.length)
-      } else {
-        setLogs([])
-        setTotalFromApi(0)
-      }
+      const p = new URLSearchParams({ gymId, page: String(page - 1), size: String(PER_PAGE), includeChanges: 'true' })
+      if (debouncedSearch)  p.set('search',    debouncedSearch)
+      if (filters.action)   p.set('action',    filters.action)
+      if (filters.severity) p.set('severity',  filters.severity)
+      if (filters.dateFrom) p.set('startDate', `${filters.dateFrom}T00:00:00`)
+      if (filters.dateTo)   p.set('endDate',   `${filters.dateTo}T23:59:59`)
+
+      const res = await api.get(`/audit-logs?${p}`)
+      const rawLogs: any[] = res.data?.logs ?? []
+      const mapped: AuditLogEntry[] = rawLogs.map((l: any) => ({
+        id:         l.id?.toString() || `${Math.random()}`,
+        timestamp:  l.timestamp,
+        userId:     l.userId?.toString() || '',
+        userName:   l.userName || 'System',
+        userRole:   l.userRole || '',
+        action:     l.action || 'UPDATE',
+        entity:     l.entity || 'SYSTEM',
+        entityId:   l.entityId?.toString(),
+        entityName: l.entityName,
+        details:    l.details || '',
+        changes:    l.changes ? (() => { try { return JSON.parse(l.changes) } catch { return { raw: l.changes } } })() : undefined,
+        ipAddress:  l.ipAddress || '',
+        severity:   l.severity || 'info',
+        deviceType: l.deviceType,
+        browser:    l.browser,
+        os:         l.os,
+        location:   l.location,
+      }))
+      setLogs(mapped)
+      setTotalElements(res.data?.totalElements ?? res.data?.total ?? mapped.length)
+      setTotalPages(res.data?.totalPages ?? Math.ceil((res.data?.totalElements ?? mapped.length) / PER_PAGE))
     } catch {
-      setLogs([])
-      setTotalFromApi(0)
+      setLogs([]); setTotalElements(0); setTotalPages(1)
     }
-  }, [page, itemsPerPage, gymId])
+  }, [page, gymId, debouncedSearch, filters.action, filters.severity, filters.dateFrom, filters.dateTo])
 
   const fetchStats = useCallback(async () => {
     try {
-      const response = await api.get(`/audit-logs/stats?gymId=${gymId}`)
-      setApiStats(response.data)
-    } catch {
-      // stats are optional, don't fail
-    }
+      const res = await api.get(`/audit-logs/stats?gymId=${gymId}`)
+      setApiStats(res.data)
+    } catch { /* optional */ }
   }, [gymId])
 
   useEffect(() => {
@@ -336,414 +480,400 @@ const AuditLogSection: React.FC = () => {
     setRefreshing(false)
   }
 
-  // ── Filtering ──────────────────────────────────────────────────────────
+  // ── Export ───────────────────────────────────────────────────────────
 
-  const filteredLogs = useMemo(() => {
-    return logs.filter(log => {
-      if (filters.search) {
-        const s = filters.search.toLowerCase()
-        if (!log.details.toLowerCase().includes(s) && !log.userName.toLowerCase().includes(s) && !log.action.toLowerCase().includes(s) && !log.entity.toLowerCase().includes(s)) return false
-      }
-      if (filters.action && log.action !== filters.action) return false
-      if (filters.severity && log.severity !== filters.severity) return false
-      if (filters.dateFrom && new Date(log.timestamp) < new Date(filters.dateFrom)) return false
-      if (filters.dateTo && new Date(log.timestamp) > new Date(filters.dateTo + 'T23:59:59')) return false
-      return true
-    })
-  }, [logs, filters])
+  const exportCSV = async () => {
+    try {
+      const p = new URLSearchParams({ gymId })
+      if (filters.dateFrom) p.set('startDate', `${filters.dateFrom}T00:00:00`)
+      if (filters.dateTo)   p.set('endDate',   `${filters.dateTo}T23:59:59`)
+      const res = await api.get(`/audit-logs/export/csv?${p}`, { responseType: 'text' })
+      dl(new Blob([res.data], { type: 'text/csv' }), `audit-${today()}.csv`)
+    } catch {
+      // fallback
+      const header = 'Timestamp,User,Role,Action,Entity,EntityID,Severity,IP,Details'
+      const body = logs.map(l =>
+        [l.timestamp, l.userName, l.userRole, l.action, l.entity, l.entityId ?? '', l.severity, l.ipAddress, `"${l.details.replace(/"/g, '""')}"`].join(',')
+      ).join('\n')
+      dl(new Blob([header + '\n' + body], { type: 'text/csv' }), `audit-${today()}.csv`)
+    }
+  }
 
-  // ── Computed Stats ─────────────────────────────────────────────────────
+  const exportJSON = () => {
+    const data = logs.map(l => ({
+      timestamp: l.timestamp, user: l.userName, role: l.userRole,
+      action: l.action, entity: l.entity, entityId: l.entityId,
+      severity: l.severity, ip: l.ipAddress, browser: l.browser,
+      os: l.os, device: l.deviceType, details: l.details,
+    }))
+    dl(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }), `audit-${today()}.json`)
+  }
+
+  function dl(blob: Blob, name: string) {
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a'); a.href = url; a.download = name; a.click(); URL.revokeObjectURL(url)
+  }
+  function today() { return new Date().toISOString().slice(0, 10) }
+
+  // ── Stats ────────────────────────────────────────────────────────────
 
   const stats = useMemo(() => {
-    const today = new Date().toDateString()
-    const todayCount = apiStats?.todayLogs ?? logs.filter(l => new Date(l.timestamp).toDateString() === today).length
-    const uniqueUsers = new Set(logs.map(l => l.userName)).size
-    const securityCount = apiStats?.securityAlerts ?? logs.filter(l =>
-      l.action.includes('LOGIN') || l.action.includes('PASSWORD') || l.action.includes('PERMISSION') || l.entity === 'SECURITY'
-    ).length
-    const onlineUsers = apiStats?.onlineUsers ?? 0
+    const todayStr = new Date().toDateString()
     return {
-      total: apiStats?.totalLogs ?? totalFromApi ?? logs.length,
-      todayCount,
-      uniqueUsers,
-      securityCount,
-      onlineUsers,
+      total:    apiStats?.totalLogs    ?? totalElements,
+      today:    apiStats?.todayLogs    ?? logs.filter(l => new Date(l.timestamp).toDateString() === todayStr).length,
+      online:   apiStats?.onlineUsers  ?? 0,
+      security: apiStats?.securityAlerts ?? logs.filter(l =>
+        ['LOGIN_FAILED','SECURITY_ALERT','PERMISSION_CHANGE','ROLE_CHANGE'].some(a => l.action.startsWith(a))
+      ).length,
+      activeUsers: new Set(logs.map(l => l.userId)).size,
     }
-  }, [logs, totalFromApi, apiStats])
-
-  // ── Analytics Data ─────────────────────────────────────────────────────
+  }, [logs, totalElements, apiStats])
 
   const actionChartData = useMemo(() => {
-    const counts = apiStats?.actionCounts || {}
-    // If no API data, compute from current logs
-    const finalCounts = Object.keys(counts).length > 0
-      ? counts
+    const counts = apiStats?.actionCounts && Object.keys(apiStats.actionCounts).length > 0
+      ? apiStats.actionCounts
       : logs.reduce((acc, l) => { acc[l.action] = (acc[l.action] || 0) + 1; return acc }, {} as Record<string, number>)
-
-    return Object.entries(finalCounts).map(([action, count]) => ({
-      label: ACTION_META[action]?.label || action.replace(/_/g, ' '),
+    return Object.entries(counts).map(([action, count]) => ({
+      label: getActionMeta(action).label,
       value: count as number,
-      color: ACTION_COLORS[action] || '#6b7280',
+      color: getActionMeta(action).color,
     }))
   }, [apiStats, logs])
 
   const severityChartData = useMemo(() => {
-    const counts = apiStats?.severityCounts || {}
-    const finalCounts = Object.keys(counts).length > 0
-      ? counts
+    const counts = apiStats?.severityCounts && Object.keys(apiStats.severityCounts).length > 0
+      ? apiStats.severityCounts
       : logs.reduce((acc, l) => { acc[l.severity] = (acc[l.severity] || 0) + 1; return acc }, {} as Record<string, number>)
-
-    return Object.entries(finalCounts).map(([severity, count]) => ({
-      label: severity.charAt(0).toUpperCase() + severity.slice(1),
+    return Object.entries(counts).map(([sev, count]) => ({
+      label: SEVERITY_CONFIG[sev]?.label ?? sev,
       value: count as number,
-      color: SEVERITY_COLORS[severity] || '#6b7280',
+      color: SEVERITY_CONFIG[sev]?.color ?? '#6b7280',
     }))
   }, [apiStats, logs])
 
   const dailyActivity = useMemo(() => {
-    if (apiStats?.dailyActivity && Object.keys(apiStats.dailyActivity).length > 0) {
-      return apiStats.dailyActivity
-    }
-    // Fallback: compute from current page logs
-    const activity: Record<string, number> = {}
-    logs.forEach(l => {
-      const day = new Date(l.timestamp).toISOString().slice(0, 10)
-      activity[day] = (activity[day] || 0) + 1
-    })
-    return activity
+    if (apiStats?.dailyActivity && Object.keys(apiStats.dailyActivity).length > 0) return apiStats.dailyActivity
+    const m: Record<string, number> = {}
+    logs.forEach(l => { const k = new Date(l.timestamp).toISOString().slice(0, 10); m[k] = (m[k] || 0) + 1 })
+    return m
   }, [apiStats, logs])
 
-  // ── Export ─────────────────────────────────────────────────────────────
-
-  const exportLogs = (format: 'csv' | 'json') => {
-    if (filteredLogs.length === 0) return
-    const rows = filteredLogs.map(l => ({
-      timestamp: l.timestamp, user: l.userName, role: l.userRole,
-      action: l.action, entity: l.entity, details: l.details, severity: l.severity,
-    }))
-    let content: string, mime: string, ext: string
-    if (format === 'csv') {
-      const headers = Object.keys(rows[0]).join(',')
-      const body = rows.map(r => Object.values(r).map(v => `"${v}"`).join(',')).join('\n')
-      content = headers + '\n' + body; mime = 'text/csv'; ext = 'csv'
-    } else {
-      content = JSON.stringify(rows, null, 2); mime = 'application/json'; ext = 'json'
-    }
-    const blob = new Blob([content], { type: mime })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url; a.download = `audit-log-${new Date().toISOString().slice(0, 10)}.${ext}`
-    a.click(); URL.revokeObjectURL(url)
-  }
-
-  // ── Pagination ─────────────────────────────────────────────────────────
-
-  const totalPages = Math.max(1, Math.ceil((totalFromApi || filteredLogs.length) / itemsPerPage))
-  const hasActiveFilters = filters.search || filters.action || filters.severity || filters.dateFrom || filters.dateTo
-  const clearFilters = () => setFilters({ search: '', action: '', severity: '', dateFrom: '', dateTo: '' })
-
-  // ── Render ─────────────────────────────────────────────────────────────
+  // ── Render ───────────────────────────────────────────────────────────
 
   if (loading) {
     return (
       <div className="settings-section">
         <div className="settings-loading">
-          <Loader2 className="spin" size={24} />
-          <span>Loading audit logs...</span>
+          <Loader2 className="spin" size={22} />
+          <span>Loading audit logs…</span>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="settings-section" style={{ "--section-accent": "#14b8a6" } as React.CSSProperties}>
-      {/* Header */}
+    <div className="settings-section settings-section--teal">
+
+      {/* ── Header ── */}
       <div className="settings-section__header">
         <div className="settings-section__title-group">
-            <div className="settings-section__icon" style={{ background: 'linear-gradient(135deg, #14b8a6, #0d9488)' }}>
-              <History size={20} />
+          <div className="settings-section__icon settings-section__icon--teal">
+            <History size={18} />
           </div>
           <div>
             <h2 className="settings-section__title">System Audit Log</h2>
             <p className="settings-section__description">
-              Track every action, login, change, and security event across your system
+              Every action, change, login and security event — who did it, when, and exactly what changed
             </p>
           </div>
         </div>
         <div className="al-header-actions">
           <button className="al-icon-btn" onClick={handleRefresh} disabled={refreshing} title="Refresh">
-            <RefreshCw size={15} className={refreshing ? 'spin' : ''} />
+            <RefreshCw size={14} className={refreshing ? 'spin' : ''} />
           </button>
           <button
-            className={`al-icon-btn ${showAnalytics ? 'al-icon-btn--active' : ''}`}
-            onClick={() => setShowAnalytics(!showAnalytics)}
-            title="Analytics"
+            className={`al-icon-btn${showAnalytics ? ' al-icon-btn--active' : ''}`}
+            onClick={() => setShowAnalytics(v => !v)}
+            title="Toggle analytics"
           >
-            <BarChart3 size={15} />
+            <BarChart3 size={14} />
           </button>
-          <button className={`al-icon-btn ${showFilters ? 'al-icon-btn--active' : ''}`} onClick={() => setShowFilters(!showFilters)} title="Filters">
-            <Filter size={15} />
-            {hasActiveFilters && <span className="al-filter-badge" />}
+          <button
+            className={`al-icon-btn${showFilters ? ' al-icon-btn--active' : ''}`}
+            onClick={() => setShowFilters(v => !v)}
+            title="Filters"
+          >
+            <Filter size={14} />
+            {hasFilters && <span className="al-filter-dot" />}
           </button>
-          <div className="al-export-dropdown">
+          <div className="al-export-wrap">
             <button className="al-icon-btn" title="Export">
-              <Download size={15} />
+              <Download size={14} />
             </button>
             <div className="al-export-menu">
-              <button onClick={() => exportLogs('csv')}>
-                <FileText size={14} /> Export CSV
-              </button>
-              <button onClick={() => exportLogs('json')}>
-                <Database size={14} /> Export JSON
-              </button>
+              <button onClick={exportCSV}><FileText size={13} />Export CSV (all)</button>
+              <button onClick={exportJSON}><Database size={13} />Export JSON (page)</button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Summary Stats - 5 cards */}
-      <div className="al-stats-row">
+      {/* ── Stats strip ── */}
+      <div className="al-stats">
         <div className="al-stat">
-          <div className="al-stat-icon"><Activity size={15} /></div>
-          <div className="al-stat-info">
-            <span className="al-stat-number">{stats.total}</span>
-            <span className="al-stat-label">Total Events</span>
-          </div>
+          <Activity size={14} className="al-stat-icon" />
+          <span className="al-stat-num">{stats.total.toLocaleString()}</span>
+          <span className="al-stat-lbl">Total Events</span>
         </div>
+        <div className="al-stat-div" />
         <div className="al-stat">
-          <div className="al-stat-icon al-stat-icon--blue"><Calendar size={15} /></div>
-          <div className="al-stat-info">
-            <span className="al-stat-number">{stats.todayCount}</span>
-            <span className="al-stat-label">Today</span>
-          </div>
+          <Calendar size={14} className="al-stat-icon al-stat-icon--blue" />
+          <span className="al-stat-num">{stats.today}</span>
+          <span className="al-stat-lbl">Today</span>
         </div>
+        <div className="al-stat-div" />
         <div className="al-stat">
-          <div className="al-stat-icon al-stat-icon--teal">
-            <Wifi size={15} />
-          </div>
-          <div className="al-stat-info">
-            <span className="al-stat-number">{stats.onlineUsers}</span>
-            <span className="al-stat-label">Online Now</span>
-          </div>
+          <Users size={14} className="al-stat-icon al-stat-icon--purple" />
+          <span className="al-stat-num">{stats.activeUsers}</span>
+          <span className="al-stat-lbl">Active Users</span>
         </div>
+        <div className="al-stat-div" />
         <div className="al-stat">
-          <div className="al-stat-icon al-stat-icon--purple"><Users size={15} /></div>
-          <div className="al-stat-info">
-            <span className="al-stat-number">{stats.uniqueUsers}</span>
-            <span className="al-stat-label">Active Users</span>
-          </div>
+          <Globe size={14} className="al-stat-icon al-stat-icon--teal" />
+          <span className="al-stat-num">{stats.online}</span>
+          <span className="al-stat-lbl">Online Now</span>
         </div>
+        <div className="al-stat-div" />
         <div className="al-stat">
-          <div className="al-stat-icon al-stat-icon--amber"><Shield size={15} /></div>
-          <div className="al-stat-info">
-            <span className="al-stat-number">{stats.securityCount}</span>
-            <span className="al-stat-label">Security Events</span>
-          </div>
+          <Shield size={14} className={`al-stat-icon${stats.security > 0 ? ' al-stat-icon--danger' : ' al-stat-icon--amber'}`} />
+          <span className={`al-stat-num${stats.security > 0 ? ' al-stat-num--danger' : ''}`}>{stats.security}</span>
+          <span className="al-stat-lbl">Security Events</span>
         </div>
       </div>
 
-      {/* Analytics Section */}
+      {/* ── Analytics panel ── */}
       {showAnalytics && (
         <div className="al-analytics">
-          <div className="al-analytics-header">
-            <TrendingUp size={16} />
-            <h3>Activity Analytics</h3>
-            <span className="al-analytics-subtitle">Overview of system activity patterns</span>
+          <div className="al-analytics-title">
+            <TrendingUp size={13} />
+            Activity Analytics
+            <span className="al-analytics-sub">based on current filters / visible data</span>
           </div>
-
-          {/* Daily Activity Chart */}
-          <div className="al-analytics-card al-analytics-card--full">
-            <div className="al-analytics-card-header">
-              <Calendar size={14} />
-              <h4>Daily Activity</h4>
-              <span className="al-analytics-card-sub">Last 14 days</span>
+          <div className="al-analytics-body">
+            <div className="al-analytics-col al-analytics-col--wide">
+              <div className="al-analytics-card-title"><Calendar size={12} />Daily Activity — last 14 days</div>
+              <Sparkline data={dailyActivity} />
             </div>
-            <ActivitySparkline dailyActivity={dailyActivity} />
-          </div>
-
-          <div className="al-analytics-grid">
-            {/* Action Breakdown */}
-            <div className="al-analytics-card">
-              <div className="al-analytics-card-header">
-                <Activity size={14} />
-                <h4>Actions Breakdown</h4>
-              </div>
-              <BarChart data={actionChartData} maxBars={8} />
+            <div className="al-analytics-col">
+              <div className="al-analytics-card-title"><Zap size={12} />Actions</div>
+              <MiniBarChart items={actionChartData} />
             </div>
-
-            {/* Severity Distribution */}
-            <div className="al-analytics-card">
-              <div className="al-analytics-card-header">
-                <Shield size={14} />
-                <h4>Severity Distribution</h4>
-              </div>
-              <BarChart data={severityChartData} maxBars={5} />
+            <div className="al-analytics-col">
+              <div className="al-analytics-card-title"><Shield size={12} />Severity</div>
+              <MiniBarChart items={severityChartData} />
             </div>
           </div>
         </div>
       )}
 
-      {/* Filters Panel */}
+      {/* ── Filters panel ── */}
       {showFilters && (
         <div className="al-filters">
-          <div className="al-filters-row">
-            <div className="al-filter-field al-filter-field--search">
-              <Search size={14} className="al-filter-search-icon" />
-              <input
-                type="text"
-                placeholder="Search by user, action, details..."
-                value={filters.search}
-                onChange={e => setFilters(f => ({ ...f, search: e.target.value }))}
-              />
-            </div>
-            <div className="al-filter-field">
-              <select value={filters.action} onChange={e => setFilters(f => ({ ...f, action: e.target.value }))}>
-                <option value="">All Actions</option>
-                {Object.entries(ACTION_META).map(([key, meta]) => (
-                  <option key={key} value={key}>{meta.label}</option>
-                ))}
-              </select>
-            </div>
-            <div className="al-filter-field">
-              <select value={filters.severity} onChange={e => setFilters(f => ({ ...f, severity: e.target.value }))}>
-                <option value="">All Severity</option>
-                <option value="info">Info</option>
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-                <option value="critical">Critical</option>
-              </select>
-            </div>
-            <div className="al-filter-field">
-              <input type="date" value={filters.dateFrom} onChange={e => setFilters(f => ({ ...f, dateFrom: e.target.value }))} />
-            </div>
-            <div className="al-filter-field">
-              <input type="date" value={filters.dateTo} onChange={e => setFilters(f => ({ ...f, dateTo: e.target.value }))} />
-            </div>
-            {hasActiveFilters && (
-              <button className="al-clear-filters" onClick={clearFilters}>Clear</button>
-            )}
+          <div className="al-filter-search">
+            <Search size={13} className="al-filter-search-icon" />
+            <input
+              type="text"
+              placeholder="Search user, action, details, IP…"
+              value={filters.search}
+              onChange={e => handleSearch(e.target.value)}
+            />
           </div>
+          <select value={filters.action} onChange={e => handleFilter('action', e.target.value)}>
+            <option value="">All actions</option>
+            {Object.entries(ACTION_META).map(([k, v]) => (
+              <option key={k} value={k}>{v.label}</option>
+            ))}
+          </select>
+          <select value={filters.severity} onChange={e => handleFilter('severity', e.target.value)}>
+            <option value="">All severity</option>
+            {Object.entries(SEVERITY_CONFIG).map(([k, v]) => (
+              <option key={k} value={k}>{v.label}</option>
+            ))}
+          </select>
+          <div className="al-filter-date-range">
+            <input type="date" value={filters.dateFrom} onChange={e => handleFilter('dateFrom', e.target.value)} title="From date" />
+            <span>–</span>
+            <input type="date" value={filters.dateTo} onChange={e => handleFilter('dateTo', e.target.value)} title="To date" />
+          </div>
+          {hasFilters && (
+            <button className="al-clear-btn" onClick={clearFilters}>Clear filters</button>
+          )}
         </div>
       )}
 
-      {/* Log Timeline */}
+      {/* ── Log list ── */}
       <div className="settings-section__content">
-        <div className="al-timeline">
-          {filteredLogs.length === 0 ? (
-            <div className="al-empty">
-              <div className="al-empty-icon"><History size={40} /></div>
-              <h3>No audit logs found</h3>
-              <p>
-                {hasActiveFilters
-                  ? 'No logs match your current filters. Try adjusting or clearing them.'
-                  : 'Audit logs will appear here as users interact with your system.'}
-              </p>
-              {hasActiveFilters && (
-                <button className="al-empty-action" onClick={clearFilters}>Clear Filters</button>
-              )}
-            </div>
-          ) : (
-            filteredLogs.map(log => {
-              const meta = getActionMeta(log.action)
-              const isExpanded = expandedLog === log.id
-              const severityCfg = SEVERITY_CONFIG[log.severity] || SEVERITY_CONFIG.info
+        {logs.length === 0 ? (
+          <div className="al-empty">
+            <History size={36} className="al-empty-icon" />
+            <p className="al-empty-title">No audit logs found</p>
+            <p className="al-empty-desc">
+              {hasFilters ? 'No logs match your filters — try adjusting or clearing them.' : 'Audit events will appear here as users interact with the system.'}
+            </p>
+            {hasFilters && <button className="al-clear-btn" onClick={clearFilters}>Clear filters</button>}
+          </div>
+        ) : (
+          <div className="al-log-list">
+            {logs.map(log => {
+              const meta     = getActionMeta(log.action)
+              const severity = SEVERITY_CONFIG[log.severity] ?? SEVERITY_CONFIG.info
+              const headline = buildHeadline(log)
+              const expanded = expandedId === log.id
+              const hasChanges = !!log.changes
 
               return (
                 <div
                   key={log.id}
-                  className={`al-entry ${isExpanded ? 'al-entry--expanded' : ''}`}
-                  onClick={() => setExpandedLog(isExpanded ? null : log.id)}
+                  className={`al-row${expanded ? ' al-row--open' : ''}`}
+                  onClick={() => setExpandedId(expanded ? null : log.id)}
                 >
-                  <div className="al-entry-row">
-                    <div className="al-entry-indicator" style={{ background: meta.color }} />
-                    <div className="al-entry-icon" style={{ color: meta.color }}>{meta.icon}</div>
-                    <div className="al-entry-body">
-                      <div className="al-entry-headline">
-                        <span className="al-entry-user">{log.userName}</span>
-                        <span className="al-entry-action" style={{ color: meta.color }}>{meta.label}</span>
-                        <span className="al-entry-entity">{ENTITY_LABELS[log.entity] || log.entity}</span>
-                        {log.entityId && <span className="al-entry-entity-id">#{log.entityId}</span>}
-                      </div>
-                      {log.details && <p className="al-entry-details">{log.details}</p>}
-                    </div>
-                    <div className="al-entry-right">
-                      <div className={`al-severity-dot ${severityCfg.dotClass}`} title={severityCfg.label} />
-                      <span className="al-entry-time" title={formatFullTimestamp(log.timestamp)}>
-                        {formatRelativeTime(log.timestamp)}
-                      </span>
-                      {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                    </div>
+                  {/* colour bar */}
+                  <div className="al-row-bar" style={{ background: meta.color }} />
+
+                  {/* action icon */}
+                  <div className="al-row-icon" style={{ color: meta.color }}>
+                    {meta.icon}
                   </div>
 
-                  {isExpanded && (
-                    <div className="al-entry-expanded" onClick={e => e.stopPropagation()}>
+                  {/* main content */}
+                  <div className="al-row-body">
+                    {/* headline sentence */}
+                    <div className="al-row-headline">
+                      <span className="al-hl-user">{headline.user}</span>
+                      <span className="al-hl-verb" style={{ color: meta.color }}>{headline.verb}</span>
+                      <span className="al-hl-target">{headline.target}</span>
+                      {hasChanges && <span className="al-changed-badge"><Edit3 size={10} /> changed</span>}
+                    </div>
+                    {/* details line — shown only when not expanded */}
+                    {!expanded && log.details && (
+                      <p className="al-row-detail">{log.details}</p>
+                    )}
+                  </div>
+
+                  {/* right meta */}
+                  <div className="al-row-meta">
+                    {/* severity pill */}
+                    <span
+                      className="al-sev-pill"
+                      style={{ color: severity.color, background: severity.bg }}
+                    >
+                      {severity.label}
+                    </span>
+                    {/* IP — always show if present */}
+                    {log.ipAddress && (
+                      <span className="al-row-ip" title="IP Address">
+                        <Terminal size={10} />{log.ipAddress}
+                      </span>
+                    )}
+                    <span className="al-row-time" title={formatFullTs(log.timestamp)}>
+                      <Clock size={10} />{formatRelativeTime(log.timestamp)}
+                    </span>
+                    {expanded ? <ChevronUp size={13} className="al-row-chevron" /> : <ChevronDown size={13} className="al-row-chevron" />}
+                  </div>
+
+                  {/* expanded detail */}
+                  {expanded && (
+                    <div className="al-detail" onClick={e => e.stopPropagation()}>
+                      {/* full details text */}
+                      {log.details && (
+                        <p className="al-detail-desc">{log.details}</p>
+                      )}
+
+                      {/* metadata grid */}
                       <div className="al-detail-grid">
-                        <div className="al-detail-item">
-                          <Clock size={13} />
-                          <span className="al-detail-label">Time</span>
-                          <span className="al-detail-value">{formatFullTimestamp(log.timestamp)}</span>
+                        <div className="al-detail-cell">
+                          <Clock size={12} /><span className="al-dc-label">Time</span>
+                          <span className="al-dc-value">{formatFullTs(log.timestamp)}</span>
                         </div>
-                        <div className="al-detail-item">
-                          <User size={13} />
-                          <span className="al-detail-label">User</span>
-                          <span className="al-detail-value">{log.userName} {log.userRole ? `(${log.userRole})` : ''}</span>
+                        <div className="al-detail-cell">
+                          <User size={12} /><span className="al-dc-label">Performed by</span>
+                          <span className="al-dc-value">
+                            {log.userName}
+                            {log.userRole && <span className="al-dc-role">{log.userRole}</span>}
+                          </span>
                         </div>
-                        <div className="al-detail-item">
-                          <Activity size={13} />
-                          <span className="al-detail-label">Action</span>
-                          <span className="al-detail-value">{meta.label}</span>
+                        <div className="al-detail-cell">
+                          <Activity size={12} /><span className="al-dc-label">Action</span>
+                          <span className="al-dc-value" style={{ color: meta.color }}>{meta.label}</span>
                         </div>
-                        <div className="al-detail-item">
-                          <Database size={13} />
-                          <span className="al-detail-label">Entity</span>
-                          <span className="al-detail-value">{ENTITY_LABELS[log.entity] || log.entity}{log.entityId ? ` #${log.entityId}` : ''}</span>
+                        <div className="al-detail-cell">
+                          <Database size={12} /><span className="al-dc-label">Entity</span>
+                          <span className="al-dc-value">
+                            {ENTITY_LABELS[log.entity] || log.entity}
+                            {log.entityId && <span className="al-dc-id">#{log.entityId}</span>}
+                            {log.entityName && <span className="al-dc-ename">"{log.entityName}"</span>}
+                          </span>
                         </div>
                         {log.ipAddress && (
-                          <div className="al-detail-item">
-                            <Monitor size={13} />
-                            <span className="al-detail-label">IP Address</span>
-                            <span className="al-detail-value">{log.ipAddress}</span>
+                          <div className="al-detail-cell">
+                            <Globe size={12} /><span className="al-dc-label">IP Address</span>
+                            <span className="al-dc-value al-dc-mono">{log.ipAddress}</span>
                           </div>
                         )}
-                        <div className="al-detail-item">
-                          <Shield size={13} />
-                          <span className="al-detail-label">Severity</span>
-                          <span className="al-detail-value">{severityCfg.label}</span>
+                        {(log.browser || log.os || log.deviceType) && (
+                          <div className="al-detail-cell">
+                            <Laptop size={12} /><span className="al-dc-label">Device</span>
+                            <span className="al-dc-value">
+                              {[log.browser, log.os].filter(Boolean).join(', ')}
+                              {log.deviceType && <span className="al-dc-device">{log.deviceType}</span>}
+                            </span>
+                          </div>
+                        )}
+                        {log.location && (
+                          <div className="al-detail-cell">
+                            <MapPin size={12} /><span className="al-dc-label">Location</span>
+                            <span className="al-dc-value">{log.location}</span>
+                          </div>
+                        )}
+                        <div className="al-detail-cell">
+                          <Shield size={12} /><span className="al-dc-label">Severity</span>
+                          <span className="al-dc-value" style={{ color: severity.color }}>{severity.label}</span>
                         </div>
                       </div>
 
-                      {log.changes && (
+                      {/* What changed */}
+                      {hasChanges && (
                         <div className="al-changes-section">
-                          <h4 className="al-changes-heading">
-                            <Edit3 size={14} />
-                            What Changed
-                          </h4>
-                          <ChangesDisplay changes={log.changes} />
+                          <div className="al-changes-title">
+                            <Edit3 size={12} />
+                            What changed
+                          </div>
+                          <ChangesDisplay changes={log.changes} action={log.action} />
                         </div>
                       )}
                     </div>
                   )}
                 </div>
               )
-            })
-          )}
-        </div>
+            })}
+          </div>
+        )}
 
-        {/* Pagination */}
-        {filteredLogs.length > 0 && (
+        {/* pagination */}
+        {logs.length > 0 && (
           <div className="al-pagination">
-            <span className="al-pagination-info">
-              Showing {filteredLogs.length} of {stats.total} events
-              {hasActiveFilters ? ' (filtered)' : ''}
+            <span className="al-page-info">
+              {((page - 1) * PER_PAGE) + 1}–{Math.min(page * PER_PAGE, totalElements)} of {totalElements.toLocaleString()} events
+              {hasFilters && ' (filtered)'}
             </span>
-            <div className="al-pagination-controls">
+            <div className="al-page-controls">
               <button className="al-page-btn" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>
-                <ChevronLeft size={14} />
+                <ChevronLeft size={13} />
               </button>
-              <span className="al-page-indicator">Page {page} of {totalPages}</span>
+              <span className="al-page-label">Page {page} of {totalPages}</span>
               <button className="al-page-btn" disabled={page >= totalPages} onClick={() => setPage(p => p + 1)}>
-                <ChevronRight size={14} />
+                <ChevronRight size={13} />
               </button>
             </div>
           </div>

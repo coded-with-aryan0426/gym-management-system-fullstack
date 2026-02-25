@@ -59,7 +59,7 @@ const EquipmentModal: React.FC<EquipmentModalProps> = ({ isOpen, onClose, onSubm
         { value: 'CARDIO', label: 'Cardio', desc: 'Treadmills & bikes', icon: <Heart size={20} />, color: '#f97316' },
         { value: 'FUNCTIONAL', label: 'Functional', desc: 'Cross-training gear', icon: <Zap size={20} />, color: '#eab308' },
         { value: 'YOGA', label: 'Yoga', desc: 'Mats & blocks', icon: <Flower2 size={20} />, color: '#22c55e' },
-        { value: 'RECOVERY', label: 'Recovery', desc: 'Foam rollers & bands', icon: <Sparkles size={20} />, color: '#3b82f6' },
+          { value: 'RECOVERY', label: 'Recovery', desc: 'Foam rollers & bands', icon: <Sparkles size={20} />, color: '#64748b' },
         { value: 'OTHER', label: 'Other', desc: 'Miscellaneous items', icon: <Package size={20} />, color: '#8b5cf6' }
     ];
 
@@ -72,7 +72,7 @@ const EquipmentModal: React.FC<EquipmentModalProps> = ({ isOpen, onClose, onSubm
 
     const conditions: { value: EquipmentCondition; label: string; color: string }[] = [
         { value: 'NEW', label: 'New', color: '#22c55e' },
-        { value: 'GOOD', label: 'Good', color: '#3b82f6' },
+          { value: 'GOOD', label: 'Good', color: '#64748b' },
         { value: 'FAIR', label: 'Fair', color: '#eab308' },
         { value: 'POOR', label: 'Poor', color: '#ef4444' }
     ];

@@ -72,6 +72,9 @@ public class TrainerDashboardController {
     @Autowired
     private MembershipRepository membershipRepository;
 
+    @Autowired
+    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+
     @GetMapping("/members")
     @org.springframework.transaction.annotation.Transactional
     public ResponseEntity<List<TrainerMemberDTO>> getAssignedMembers() {
@@ -317,7 +320,7 @@ public class TrainerDashboardController {
         return ResponseEntity.ok(dto);
     }
 
-    @PostMapping("/profile")
+    @PutMapping("/profile")
     public ResponseEntity<?> updateProfile(@RequestBody com.gym.management.dto.trainer.TrainerProfileDTO dto) {
         Long trainerId = getAuthenticatedTrainerId();
         User trainer = userRepository.findById(trainerId)
@@ -335,8 +338,9 @@ public class TrainerDashboardController {
                 .orElse(new com.gym.management.model.TrainerDetails());
         details.setUser(trainer); // Ensure ID link for new
 
-        if (dto.getEmployeeId() != null)
-            details.setEmployeeId(dto.getEmployeeId());
+        // employeeId is system-generated and immutable — never allow updates from
+        // client
+
         if (dto.getDob() != null)
             details.setDob(LocalDate.parse(dto.getDob())); // Assumes YYYY-MM-DD
         if (dto.getGender() != null)
@@ -389,6 +393,35 @@ public class TrainerDashboardController {
 
         trainerDetailsRepository.save(details);
         return ResponseEntity.ok(apiResponse(true, mapToProfileDTO(trainer, details), "Profile updated successfully"));
+    }
+
+    @PostMapping("/profile/password")
+    public ResponseEntity<?> changePassword(@RequestBody Map<String, String> payload) {
+        Long trainerId = getAuthenticatedTrainerId();
+        User trainer = userRepository.findById(trainerId)
+                .orElseThrow(() -> new RuntimeException("Trainer not found"));
+
+        String currentPassword = payload.get("currentPassword");
+        String newPassword = payload.get("newPassword");
+
+        if (currentPassword == null || newPassword == null) {
+            return ResponseEntity.badRequest().body(apiResponse(false, null, "Current and new password are required"));
+        }
+
+        // We use BCryptPasswordEncoder directly or via an interface if we had one
+        // injected,
+        // but since we might not have it here, we'll autowire PasswordEncoder at the
+        // top and use it.
+        // If it's not injected, we'll let it throw a 500 so we know to add it.
+        if (!passwordEncoder.matches(currentPassword, trainer.getPassword())) {
+            return ResponseEntity.badRequest().body(apiResponse(false, null, "Incorrect current password"));
+        }
+
+        trainer.setPassword(passwordEncoder.encode(newPassword));
+        trainer.setPasswordChangedAt(LocalDateTime.now());
+        userRepository.save(trainer);
+
+        return ResponseEntity.ok(apiResponse(true, null, "Password changed successfully"));
     }
 
     @PostMapping("/documents/upload")
@@ -482,7 +515,17 @@ public class TrainerDashboardController {
 
         // Re-adding the original logic for employeeId, dob, gender, etc.
         if (details != null) {
-            builder.employeeId(details.getEmployeeId())
+            // Use the REAL system-generated employeeIdCode from the User entity (same field
+            // shown in owner's staff list)
+            // TrainerDetails.employeeId is a stale field — we ignore it
+            String empId = trainer.getEmployeeIdCode();
+            if (empId == null || empId.isBlank()) {
+                // Fallback: generate and persist to User entity
+                empId = String.format("TRAINER-%04d", trainer.getUserId());
+                trainer.setEmployeeIdCode(empId);
+                userRepository.save(trainer);
+            }
+            builder.employeeId(empId)
                     .dob(details.getDob() != null ? details.getDob().toString() : null)
                     .gender(details.getGender())
                     .bloodType(details.getBloodType())
@@ -524,20 +567,20 @@ public class TrainerDashboardController {
                 builder.documents(Collections.emptyList());
             }
 
-        } else
-
-        {
-            // Default empty/mock values for new profile
-            builder.languages(Arrays.asList("English", "Hindi"))
+        } else {
+            // No TrainerDetails yet — still read the real ID from User entity
+            String empId = trainer.getEmployeeIdCode();
+            if (empId == null || empId.isBlank()) {
+                empId = String.format("TRAINER-%04d", trainer.getUserId());
+                trainer.setEmployeeIdCode(empId);
+                userRepository.save(trainer);
+            }
+            builder.employeeId(empId)
+                    .languages(Arrays.asList("English", "Hindi"))
                     .specializations(Arrays.asList("Strength Training", "HIIT"))
                     .certifications(Collections.emptyList())
                     .documents(Collections.emptyList());
         }
-
-        builder.stats(com.gym.management.dto.trainer.TrainerProfileDTO.ProfileStatsDTO.builder()
-                .activeMembers(trainer.getCustomers() != null ? trainer.getCustomers().size() : 0)
-                .totalMembers(trainer.getCustomers() != null ? trainer.getCustomers().size() : 0).sessionsMonth(86)
-                .attendance(94.0).rating(4.9).reviews(127).experience("8 Yrs").earnings(48500.0).build());
 
         return builder.build();
     }

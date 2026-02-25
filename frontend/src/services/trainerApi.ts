@@ -342,13 +342,20 @@ export const trainerApi = {
 
     async updateProfile(data: Partial<TrainerProfile>): Promise<TrainerProfile> {
         try {
-            const response = await apiClient.post('/trainer/profile', data);
+            const response = await apiClient.put('/trainer/profile', data);   // PUT — correct REST
             return normalizeResponse<TrainerProfile>(response.data);
         } catch (error) {
             console.warn('API Error (updateProfile), using mock data:', error);
-            // Simulate update
             return { ...MOCK_PROFILE, ...data };
         }
+    },
+
+    async changePassword(currentPassword: string, newPassword: string): Promise<void> {
+        const response = await apiClient.post('/trainer/profile/password', {
+            currentPassword,
+            newPassword,
+        });
+        normalizeResponse<void>(response.data);
     },
 
     async uploadDocument(file: File, type: string = 'document'): Promise<Document> {

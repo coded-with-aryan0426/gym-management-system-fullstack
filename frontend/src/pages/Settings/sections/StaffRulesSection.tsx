@@ -1389,10 +1389,10 @@ const StaffRulesSection: React.FC = () => {
     )
 
     return (
-        <div className="settings-section" style={{ "--section-accent": "#8b5cf6" } as React.CSSProperties}>
+        <div className="settings-section settings-section--purple">
             <div className="settings-section__header">
                 <div className="settings-section__title-group">
-                    <div className="settings-section__icon" style={{ background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)' }}>
+                    <div className="settings-section__icon settings-section__icon--purple">
                         <Users size={20} />
                     </div>
                     <div>

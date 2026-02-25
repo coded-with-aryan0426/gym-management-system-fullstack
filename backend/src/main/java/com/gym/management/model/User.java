@@ -398,6 +398,9 @@ public class User {
     private java.time.LocalDate startDate;
 
     @Transient
+    private java.time.LocalDateTime startDateTime;
+
+    @Transient
     private Integer duration;
 
     @Transient
@@ -444,6 +447,14 @@ public class User {
 
     public void setStartDate(java.time.LocalDate startDate) {
         this.startDate = startDate;
+    }
+
+    public java.time.LocalDateTime getStartDateTime() {
+        return startDateTime;
+    }
+
+    public void setStartDateTime(java.time.LocalDateTime startDateTime) {
+        this.startDateTime = startDateTime;
     }
 
     public Integer getDuration() {

@@ -258,10 +258,10 @@ const SecuritySection: React.FC = () => {
   }
 
   return (
-    <div className="settings-section" style={{ "--section-accent": "#ef4444" } as React.CSSProperties}>
+    <div className="settings-section settings-section--red">
       <div className="settings-section__header">
         <div className="settings-section__title-group">
-            <div className="settings-section__icon" style={{ background: 'linear-gradient(135deg, #ef4444, #dc2626)' }}>
+            <div className="settings-section__icon settings-section__icon--red">
               <Shield size={20} />
           </div>
           <div>
@@ -337,7 +337,7 @@ const SecuritySection: React.FC = () => {
             />
           </div>
 
-          <div className="form-grid" style={{ marginTop: '16px' }}>
+          <div className="form-grid form-grid--indented">
             <div className="field-wrapper">
               <label className="field-label">
                 Session Timeout (minutes)
@@ -417,9 +417,8 @@ const SecuritySection: React.FC = () => {
               </div>
             </div>
             <button
-              className="settings-section__cancel-btn"
+              className="settings-section__cancel-btn settings-section__cancel-btn--auto"
               onClick={() => setShowPasswordModal(true)}
-              style={{ width: 'auto' }}
             >
               Change Password
             </button>
@@ -427,8 +426,8 @@ const SecuritySection: React.FC = () => {
         </div>
 
         <div className="form-group">
-          <div className="form-group__header" style={{ justifyContent: 'space-between', width: '100%' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div className="form-group__header form-group__header--between">
+            <div className="form-group__header-left">
               <Monitor size={16} />
               <h4 className="form-group__title">Active Sessions</h4>
             </div>
@@ -506,9 +505,9 @@ const SecuritySection: React.FC = () => {
 
           <div className="policy-toggle-row">
             <div className="policy-toggle-row__info">
-              <div className="policy-toggle-row__icon" style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444' }}>
-                <LogOut size={16} />
-              </div>
+              <div className="policy-toggle-row__icon policy-toggle-row__icon--danger">
+                  <LogOut size={16} />
+                </div>
               <div className="policy-toggle-row__text">
                 <span className="policy-toggle-row__label">Sign Out of Account</span>
                 <p className="policy-toggle-row__hint">
@@ -519,28 +518,6 @@ const SecuritySection: React.FC = () => {
             <button
               className="logout-btn"
               onClick={handleLogoutAccount}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '10px 20px',
-                background: 'rgba(239, 68, 68, 0.1)',
-                color: '#ef4444',
-                border: '1px solid rgba(239, 68, 68, 0.3)',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontWeight: 500,
-                fontSize: '14px',
-                transition: 'all 0.2s ease'
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.background = '#ef4444'
-                e.currentTarget.style.color = 'white'
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'
-                e.currentTarget.style.color = '#ef4444'
-              }}
             >
               <LogOut size={16} />
               Logout
