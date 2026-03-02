@@ -18,23 +18,23 @@ import './AvailableClasses.css';
 /* ────────────── constants ────────────── */
 
 const CLASS_TYPE_CONFIG: Record<string, { icon: React.ReactNode; color: string; bg: string; gradient: string }> = {
-    'Yoga':       { icon: <Heart size={16} />,    color: '#34C759', bg: 'rgba(52,199,89,0.12)',   gradient: 'linear-gradient(135deg, #34C759 0%, #30D158 100%)' },
-    'HIIT':       { icon: <Zap size={16} />,      color: '#FF3B30', bg: 'rgba(255,59,48,0.12)',   gradient: 'linear-gradient(135deg, #FF3B30 0%, #FF6961 100%)' },
-    'Strength':   { icon: <Dumbbell size={16} />,  color: '#007AFF', bg: 'rgba(0,122,255,0.12)',   gradient: 'linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%)' },
-    'Spin':       { icon: <Bike size={16} />,      color: '#AF52DE', bg: 'rgba(175,82,222,0.12)',  gradient: 'linear-gradient(135deg, #AF52DE 0%, #BF5AF2 100%)' },
-    'Pilates':    { icon: <Sparkles size={16} />,  color: '#5AC8FA', bg: 'rgba(90,200,250,0.12)',  gradient: 'linear-gradient(135deg, #5AC8FA 0%, #64D2FF 100%)' },
-    'Boxing':     { icon: <Target size={16} />,    color: '#FF9500', bg: 'rgba(255,149,0,0.12)',   gradient: 'linear-gradient(135deg, #FF9500 0%, #FFCC00 100%)' },
-    'PT Session': { icon: <User size={16} />,      color: '#5856D6', bg: 'rgba(88,86,214,0.12)',   gradient: 'linear-gradient(135deg, #5856D6 0%, #AF52DE 100%)' },
-    'Group':      { icon: <Users size={16} />,     color: '#FF2D55', bg: 'rgba(255,45,85,0.12)',   gradient: 'linear-gradient(135deg, #FF2D55 0%, #FF6482 100%)' },
-    'CrossFit':   { icon: <Flame size={16} />,     color: '#FF6B35', bg: 'rgba(255,107,53,0.12)',  gradient: 'linear-gradient(135deg, #FF6B35 0%, #FF9500 100%)' },
+    'Yoga': { icon: <Heart size={16} />, color: '#34C759', bg: 'rgba(52,199,89,0.12)', gradient: 'linear-gradient(135deg, #34C759 0%, #30D158 100%)' },
+    'HIIT': { icon: <Zap size={16} />, color: '#FF3B30', bg: 'rgba(255,59,48,0.12)', gradient: 'linear-gradient(135deg, #FF3B30 0%, #FF6961 100%)' },
+    'Strength': { icon: <Dumbbell size={16} />, color: '#007AFF', bg: 'rgba(0,122,255,0.12)', gradient: 'linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%)' },
+    'Spin': { icon: <Bike size={16} />, color: '#AF52DE', bg: 'rgba(175,82,222,0.12)', gradient: 'linear-gradient(135deg, #AF52DE 0%, #BF5AF2 100%)' },
+    'Pilates': { icon: <Sparkles size={16} />, color: '#5AC8FA', bg: 'rgba(90,200,250,0.12)', gradient: 'linear-gradient(135deg, #5AC8FA 0%, #64D2FF 100%)' },
+    'Boxing': { icon: <Target size={16} />, color: '#FF9500', bg: 'rgba(255,149,0,0.12)', gradient: 'linear-gradient(135deg, #FF9500 0%, #FFCC00 100%)' },
+    'PT Session': { icon: <User size={16} />, color: '#5856D6', bg: 'rgba(88,86,214,0.12)', gradient: 'linear-gradient(135deg, #5856D6 0%, #AF52DE 100%)' },
+    'Group': { icon: <Users size={16} />, color: '#FF2D55', bg: 'rgba(255,45,85,0.12)', gradient: 'linear-gradient(135deg, #FF2D55 0%, #FF6482 100%)' },
+    'CrossFit': { icon: <Flame size={16} />, color: '#FF6B35', bg: 'rgba(255,107,53,0.12)', gradient: 'linear-gradient(135deg, #FF6B35 0%, #FF9500 100%)' },
 };
 
 const DEFAULT_CONFIG = { icon: <Sparkles size={16} />, color: '#8E8E93', bg: 'rgba(142,142,147,0.12)', gradient: 'linear-gradient(135deg, #8E8E93 0%, #AEAEB2 100%)' };
 
 const DIFFICULTY_MAP: Record<string, { label: string; cls: string }> = {
-    'Beginner':     { label: 'Beginner',     cls: 'badge--success' },
+    'Beginner': { label: 'Beginner', cls: 'badge--success' },
     'Intermediate': { label: 'Intermediate', cls: 'badge--warning' },
-    'Advanced':     { label: 'Advanced',     cls: 'badge--danger' },
+    'Advanced': { label: 'Advanced', cls: 'badge--danger' },
 };
 
 const TIME_FILTERS = [
@@ -92,12 +92,12 @@ const downloadICS = (c: GymClassDTO) => {
     toast.success('Calendar event downloaded');
 };
 
-const FAVORITES_KEY = 'gym_class_favorites';
-const loadFavorites = (): Set<number> => {
-    try { return new Set(JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]')); } catch { return new Set(); }
+const FAVORITES_KEY = (uid: number | string) => `gym_class_favorites_${uid}`;
+const loadFavorites = (uid: number): Set<number> => {
+    try { return new Set(JSON.parse(localStorage.getItem(FAVORITES_KEY(uid)) || '[]')); } catch { return new Set(); }
 };
-const saveFavorites = (favs: Set<number>) => {
-    localStorage.setItem(FAVORITES_KEY, JSON.stringify([...favs]));
+const saveFavorites = (uid: number, favs: Set<number>) => {
+    localStorage.setItem(FAVORITES_KEY(uid), JSON.stringify([...favs]));
 };
 
 /* ────────────── animation variants ────────────── */
@@ -406,30 +406,37 @@ const AvailableClasses: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [showBookingSuccess, setShowBookingSuccess] = useState<number | null>(null);
     const [detailClass, setDetailClass] = useState<GymClassDTO | null>(null);
-    const [favorites, setFavorites] = useState<Set<number>>(loadFavorites);
+    const { user, isLoading: authLoading } = useAuth();
+    const memberId = Number(user?.userId || (user as any)?.id);
+
+    // User-scoped favorites — load once memberId resolves
+    const [favorites, setFavorites] = useState<Set<number>>(() => memberId ? loadFavorites(memberId) : new Set());
     const [showFavOnly, setShowFavOnly] = useState(false);
     const [trainerPreview, setTrainerPreview] = useState<{ name: string; x: number; y: number } | null>(null);
     const [waitlist, setWaitlist] = useState<Set<number>>(new Set());
 
-    const { user, isLoading: authLoading } = useAuth();
-    const memberId = Number(user?.userId || user?.id);
+    // Ref for booking success timer cleanup
+    const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    useEffect(() => { return () => { if (successTimerRef.current) clearTimeout(successTimerRef.current); }; }, []);
 
     useEffect(() => {
         if (!authLoading) fetchClasses();
     }, [memberId, authLoading]);
 
-    const fetchClasses = async () => {
+    const fetchClasses = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
-            const [availableClasses, todayClasses, bookingsCount] = await Promise.all([
+            const [availableClasses, todayClasses] = await Promise.all([
                 gymClassApi.getAvailableClasses(memberId),
                 gymClassApi.getTodaysClasses(memberId),
-                memberId ? gymClassApi.getMemberBookingsCount(memberId) : Promise.resolve(0)
             ]);
             setClasses(availableClasses);
             setTodaysClasses(todayClasses);
-            setBookedCount(bookingsCount);
+            // Derive booked count from class list — no extra API call needed
+            setBookedCount(availableClasses.filter(c => c.isBooked).length);
+            // Init waitlist state from server data
+            setWaitlist(new Set(availableClasses.filter(c => c.isWaitlisted).map(c => c.classId)));
         } catch (err) {
             console.error('Failed to fetch classes:', err);
             setError('Failed to load classes. Please try again.');
@@ -438,7 +445,7 @@ const AvailableClasses: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [memberId]);
 
     const handleBook = async (classId: number) => {
         if (!memberId) { toast.error('Please log in to book a class'); return; }
@@ -459,7 +466,8 @@ const AvailableClasses: React.FC = () => {
                 </div>,
                 { duration: 4000, icon: null }
             );
-            setTimeout(() => setShowBookingSuccess(null), 3000);
+            if (successTimerRef.current) clearTimeout(successTimerRef.current);
+            successTimerRef.current = setTimeout(() => setShowBookingSuccess(null), 3000);
             if (detailClass?.classId === classId) {
                 setDetailClass(prev => prev ? { ...prev, isBooked: true, bookingId: bk.bookingId, spotsLeft: prev.spotsLeft - 1, currentBookings: prev.currentBookings + 1 } : null);
             }
@@ -470,30 +478,51 @@ const AvailableClasses: React.FC = () => {
         }
     };
 
-    const handleWaitlist = useCallback((classId: number) => {
-        setWaitlist(prev => { const n = new Set(prev); n.add(classId); return n; });
-        toast.success('You\'ve been added to the waitlist! We\'ll notify you when a spot opens.', { duration: 4000 });
-    }, []);
+    const handleWaitlist = useCallback(async (classItem: GymClassDTO) => {
+        if (!memberId) { toast.error('Please log in'); return; }
+        setBooking(classItem.classId);
+        try {
+            const bk = await gymClassApi.bookClass(classItem.classId, memberId);
+            if (bk.status === 'WAITLISTED') {
+                setWaitlist(prev => new Set([...prev, classItem.classId]));
+                const update = (list: GymClassDTO[]) => list.map(c => c.classId === classItem.classId ? { ...c, isWaitlisted: true } : c);
+                setClasses(update);
+                setTodaysClasses(update);
+                toast.success("Added to waitlist! You'll be notified when a spot opens.", { duration: 4000 });
+            } else {
+                // Spot opened — confirmed booking
+                toast.success('Class booked!');
+                fetchClasses();
+            }
+        } catch (err: any) {
+            toast.error(err.response?.data?.message || 'Failed to join waitlist');
+        } finally {
+            setBooking(null);
+        }
+    }, [memberId, fetchClasses]);
 
     const toggleFavorite = useCallback((classId: number) => {
         setFavorites(prev => {
             const next = new Set(prev);
             if (next.has(classId)) next.delete(classId); else next.add(classId);
-            saveFavorites(next);
+            saveFavorites(memberId, next);
             return next;
         });
-    }, []);
+    }, [memberId]);
 
     const handleTrainerClick = useCallback((name: string, e: React.MouseEvent) => {
         e.stopPropagation();
         const rect = (e.target as HTMLElement).getBoundingClientRect();
-        setTrainerPreview({ name, x: rect.left, y: rect.bottom + 8 });
+        const POPUP_W = 220, POPUP_H = 150;
+        const x = Math.min(rect.left, window.innerWidth - POPUP_W - 16);
+        const y = Math.min(rect.bottom + 8, window.innerHeight - POPUP_H - 16);
+        setTrainerPreview({ name, x, y });
     }, []);
 
     /* ── derived data ── */
 
     const types = useMemo(() => {
-        const unique = new Set(classes.map(c => c.classType));
+        const unique = new Set(classes.map(c => c.classType).filter(Boolean));
         return ['All', ...Array.from(unique)];
     }, [classes]);
 
@@ -525,17 +554,16 @@ const AvailableClasses: React.FC = () => {
 
     const filteredTodaysClasses = useMemo(() => todaysClasses.filter(filterFn), [todaysClasses, filterFn]);
 
-    const getWeekDays = (offset: number) => {
+    const weekDays = useMemo(() => {
         const today = new Date();
         const start = new Date(today);
-        start.setDate(today.getDate() - today.getDay() + offset * 7);
+        start.setDate(today.getDate() - today.getDay() + selectedWeek * 7);
         return Array.from({ length: 7 }, (_, i) => {
             const d = new Date(start);
             d.setDate(d.getDate() + i);
             return d;
         });
-    };
-    const weekDays = getWeekDays(selectedWeek);
+    }, [selectedWeek]);
 
     const getClassesForDay = (date: Date) =>
         filteredClasses.filter(c => new Date(c.startTime).toDateString() === date.toDateString());
@@ -609,6 +637,7 @@ const AvailableClasses: React.FC = () => {
                             const isBookingThis = booking === classItem.classId;
                             const justBooked = showBookingSuccess === classItem.classId;
                             const isFull = classItem.spotsLeft <= 0;
+                            const onWL = waitlist.has(classItem.classId) || classItem.isWaitlisted;
                             const soon = isStartingSoon(classItem.startTime);
 
                             return (
@@ -645,15 +674,16 @@ const AvailableClasses: React.FC = () => {
                                             className={`todays-class-item__btn ${isBooked ? 'todays-class-item__btn--booked' : isFull ? 'todays-class-item__btn--waitlist' : ''}`}
                                             onClick={() => {
                                                 if (isBooked) return;
-                                                if (isFull) handleWaitlist(classItem.classId);
+                                                if (isFull) handleWaitlist(classItem);
                                                 else handleBook(classItem.classId);
                                             }}
-                                            disabled={isBookingThis || isBooked}
+                                            disabled={isBookingThis || isBooked || onWL}
                                         >
                                             {isBookingThis ? <Loader2 size={14} className="spin" />
                                                 : isBooked ? <><CheckCircle2 size={14} /> Booked</>
-                                                : isFull ? <><Bell size={14} /> Waitlist</>
-                                                : 'Book Now'}
+                                                    : onWL ? <><Bell size={14} /> On Waitlist</>
+                                                        : isFull ? <><Bell size={14} /> Waitlist</>
+                                                            : 'Book Now'}
                                         </button>
                                     </div>
                                     {justBooked && (
@@ -667,6 +697,13 @@ const AvailableClasses: React.FC = () => {
                         })}
                     </div>
                 </motion.section>
+            )}
+            {/* Today's empty state */}
+            {filteredTodaysClasses.length === 0 && !loading && (
+                <div className="todays-empty">
+                    <Calendar size={18} />
+                    <span>No classes today — <button onClick={() => setView('list')}>browse all classes</button></span>
+                </div>
             )}
 
             {/* Toolbar: search, filters, view toggle */}
@@ -682,11 +719,11 @@ const AvailableClasses: React.FC = () => {
 
                 {/* Type filter chips */}
                 <div className="classes-filters">
-                    {types.map(type => {
+                    {types.map((type, i) => {
                         const cfg = type !== 'All' ? getConfig(type) : null;
                         return (
                             <button
-                                key={type}
+                                key={type || `type-${i}`}
                                 className={`classes-filter ${selectedType === type ? 'classes-filter--active' : ''}`}
                                 onClick={() => setSelectedType(type)}
                                 style={selectedType === type && cfg ? { borderColor: cfg.color, color: cfg.color, background: cfg.bg } : undefined}
@@ -704,8 +741,8 @@ const AvailableClasses: React.FC = () => {
                     <div className="classes-filter-group">
                         <label className="classes-filter-group__label">Difficulty</label>
                         <div className="classes-filter-group__options">
-                            {difficulties.map(d => (
-                                <button key={d}
+                            {difficulties.map((d, i) => (
+                                <button key={d || `diff-${i}`}
                                     className={`classes-filter-pill ${selectedDifficulty === d ? 'classes-filter-pill--active' : ''}`}
                                     onClick={() => setSelectedDifficulty(d)}
                                 >{d}</button>
@@ -878,16 +915,34 @@ const AvailableClasses: React.FC = () => {
                                                     <Download size={12} />
                                                 </button>
                                                 {isBooked ? (
-                                                    <button className="class-card__btn class-card__btn--booked" disabled>
-                                                        <CheckCircle2 size={12} /> Booked
-                                                    </button>
+                                                    <div className="class-card__booked-actions">
+                                                        <button className="class-card__btn class-card__btn--booked" disabled>
+                                                            <CheckCircle2 size={12} /> Booked
+                                                        </button>
+                                                        <button
+                                                            className="class-card__btn class-card__btn--cancel"
+                                                            onClick={async (e) => {
+                                                                e.stopPropagation();
+                                                                try {
+                                                                    await gymClassApi.cancelBooking(classItem.bookingId!, memberId);
+                                                                    const update = (list: GymClassDTO[]) => list.map(c => c.classId === classItem.classId ? { ...c, isBooked: false, spotsLeft: c.spotsLeft + 1, currentBookings: c.currentBookings - 1 } : c);
+                                                                    setClasses(update); setTodaysClasses(update);
+                                                                    setBookedCount(prev => prev - 1);
+                                                                    toast.success('Booking cancelled');
+                                                                } catch { toast.error('Failed to cancel booking'); }
+                                                            }}
+                                                        >
+                                                            <X size={12} /> Cancel
+                                                        </button>
+                                                    </div>
                                                 ) : isFull ? (
                                                     <button
                                                         className={`class-card__btn class-card__btn--waitlist ${onWL ? 'class-card__btn--on-wl' : ''}`}
-                                                        onClick={() => !onWL && handleWaitlist(classItem.classId)}
-                                                        disabled={onWL}
+                                                        onClick={() => !onWL && handleWaitlist(classItem)}
+                                                        disabled={onWL || booking === classItem.classId}
                                                     >
-                                                        <Bell size={12} /> {onWL ? 'On Waitlist' : 'Join Waitlist'}
+                                                        {booking === classItem.classId ? <Loader2 size={12} className="spin" /> : <Bell size={12} />}
+                                                        {onWL ? 'On Waitlist' : 'Join Waitlist'}
                                                     </button>
                                                 ) : (
                                                     <button className="class-card__btn"
@@ -998,7 +1053,7 @@ const AvailableClasses: React.FC = () => {
                         classItem={detailClass}
                         onClose={() => setDetailClass(null)}
                         onBook={handleBook}
-                        onWaitlist={handleWaitlist}
+                        onWaitlist={(id) => handleWaitlist(classes.find(c => c.classId === id) || detailClass)}
                         isBooking={booking === detailClass.classId}
                         isFavorite={favorites.has(detailClass.classId)}
                         onToggleFav={() => toggleFavorite(detailClass.classId)}

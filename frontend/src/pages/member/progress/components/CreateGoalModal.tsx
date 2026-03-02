@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { X, Check, Target, TrendingUp, Calendar, Ruler, Scale, Activity } from 'lucide-react';
 
 interface CreateGoalModalProps {
     isOpen: boolean;
@@ -16,6 +17,7 @@ interface CreateGoalModalProps {
         weeklyTarget: string;
     };
     setNewGoal: (goal: any) => void;
+    stats?: any;
 }
 
 const CreateGoalModal: React.FC<CreateGoalModalProps> = ({
@@ -24,7 +26,8 @@ const CreateGoalModal: React.FC<CreateGoalModalProps> = ({
     onSave,
     saving,
     newGoal,
-    setNewGoal
+    setNewGoal,
+    stats = {}
 }) => {
     if (!isOpen) return null;
 
@@ -37,108 +40,116 @@ const CreateGoalModal: React.FC<CreateGoalModalProps> = ({
             onClick={onClose}
         >
             <motion.div
-                className="modal-content"
-                initial={{ scale: 0.95, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.95, opacity: 0 }}
+                className="modal-content modal-premium-form goal-modal"
+                initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.95, opacity: 0, y: 20 }}
                 onClick={e => e.stopPropagation()}
             >
-                <div className="modal-header">
-                    <h2>Create New Goal</h2>
-                    <button className="modal-close" onClick={onClose}>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <line x1="18" y1="6" x2="6" y2="18"/>
-                            <line x1="6" y1="6" x2="18" y2="18"/>
-                        </svg>
+                <div className="modal-header-premium goal-header">
+                    <div className="header-badge target">
+                        <Target size={18} />
+                    </div>
+                    <div className="header-info">
+                        <h2>Define Your Goal</h2>
+                        <p>Set a target and track your ascent</p>
+                    </div>
+                    <button className="close-btn-circle" onClick={onClose}>
+                        <X size={18} />
                     </button>
                 </div>
-                <div className="modal-body">
-                    <div className="form-group">
+
+                <div className="modal-body-compact">
+                    <div className="compact-input-group active-focus">
                         <label>Goal Title</label>
                         <input
                             type="text"
-                            placeholder="e.g., Reach 75kg, Build 5kg Muscle"
+                            placeholder="e.g., Summer Body Transformation"
                             value={newGoal.title}
                             onChange={e => setNewGoal({ ...newGoal, title: e.target.value })}
+                            className="premium-text-input"
                         />
                     </div>
-                    <div className="form-group">
-                        <label>Goal Type</label>
-                        <select
-                            value={newGoal.type}
-                            onChange={e => setNewGoal({ ...newGoal, type: e.target.value })}
-                        >
-                            <option value="weight">Weight Loss/Gain</option>
-                            <option value="muscle">Muscle Mass</option>
-                            <option value="bodyFat">Body Fat Percentage</option>
-                            <option value="strength">Strength (Lift Weight)</option>
-                            <option value="endurance">Endurance</option>
-                        </select>
-                    </div>
-                    <div className="form-row">
-                        <div className="form-group">
-                            <label>Current Value</label>
-                            <input
-                                type="number"
-                                step="0.1"
-                                placeholder="e.g., 80.5"
-                                value={newGoal.currentValue}
-                                onChange={e => setNewGoal({ ...newGoal, currentValue: e.target.value })}
-                            />
+
+                    <div className="goal-type-grid">
+                        <div className={`goal-type-option ${newGoal.type === 'weight' ? 'active' : ''}`} onClick={() => setNewGoal({...newGoal, type: 'weight', unit: 'kg'})}>
+                            <Scale size={16} />
+                            <span>Weight</span>
                         </div>
-                        <div className="form-group">
-                            <label>Target Value</label>
-                            <input
-                                type="number"
-                                step="0.1"
-                                placeholder="e.g., 75.0"
-                                value={newGoal.targetValue}
-                                onChange={e => setNewGoal({ ...newGoal, targetValue: e.target.value })}
-                            />
+                        <div className={`goal-type-option ${newGoal.type === 'bodyFat' ? 'active' : ''}`} onClick={() => setNewGoal({...newGoal, type: 'bodyFat', unit: '%'})}>
+                            <TrendingUp size={16} />
+                            <span>Body Fat</span>
                         </div>
-                        <div className="form-group">
-                            <label>Unit</label>
-                            <select
-                                value={newGoal.unit}
-                                onChange={e => setNewGoal({ ...newGoal, unit: e.target.value })}
-                            >
-                                <option value="kg">kg</option>
-                                <option value="lbs">lbs</option>
-                                <option value="%">%</option>
-                            </select>
+                        <div className={`goal-type-option ${newGoal.type === 'muscle' ? 'active' : ''}`} onClick={() => setNewGoal({...newGoal, type: 'muscle', unit: 'kg'})}>
+                            <Activity size={16} />
+                            <span>Muscle</span>
                         </div>
                     </div>
-                    <div className="form-row">
-                        <div className="form-group">
-                            <label>Weekly Target (optional)</label>
-                            <input
-                                type="number"
-                                step="0.1"
-                                placeholder="e.g., 0.5"
-                                value={newGoal.weeklyTarget}
-                                onChange={e => setNewGoal({ ...newGoal, weeklyTarget: e.target.value })}
-                            />
-                            <span className="form-hint">How much change per week</span>
+
+                    <div className="metrics-pod-grid goal-pods">
+                        <div className="metric-pod current-pod">
+                            <div className="pod-content">
+                                <label>Current</label>
+                                <div className="input-with-unit">
+                                    <input
+                                        type="number"
+                                        step="0.1"
+                                        placeholder={`${stats?.currentWeight || "0.0"}`}
+                                        value={newGoal.currentValue}
+                                        onChange={e => setNewGoal({ ...newGoal, currentValue: e.target.value })}
+                                    />
+                                    <span>{newGoal.unit}</span>
+                                </div>
+                            </div>
                         </div>
-                        <div className="form-group">
-                            <label>Target Date (optional)</label>
+                        <div className="metric-pod target-pod">
+                            <div className="pod-content">
+                                <label>Target</label>
+                                <div className="input-with-unit">
+                                    <input
+                                        type="number"
+                                        step="0.1"
+                                        placeholder="0.0"
+                                        value={newGoal.targetValue}
+                                        onChange={e => setNewGoal({ ...newGoal, targetValue: e.target.value })}
+                                    />
+                                    <span>{newGoal.unit}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="form-row-compact">
+                        <div className="compact-input-group flex-1">
+                            <label><Calendar size={12} /> Target Date</label>
                             <input
                                 type="date"
                                 value={newGoal.targetDate}
                                 onChange={e => setNewGoal({ ...newGoal, targetDate: e.target.value })}
                             />
                         </div>
+                        <div className="compact-input-group flex-1">
+                            <label><TrendingUp size={12} /> Weekly Pace</label>
+                            <input
+                                type="number"
+                                step="0.1"
+                                placeholder="0.5"
+                                value={newGoal.weeklyTarget}
+                                onChange={e => setNewGoal({ ...newGoal, weeklyTarget: e.target.value })}
+                            />
+                        </div>
                     </div>
                 </div>
-                <div className="modal-footer">
-                    <button className="btn-secondary" onClick={onClose}>Cancel</button>
-                    <button className="btn-primary" onClick={onSave}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M20 6h-8l-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2Z"/>
-                            <polyline points="16 16 12 12 16 8"/>
-                            <line x1="12" y1="12" x2="22" y2="12"/>
-                        </svg>
-                        Create Goal
+
+                <div className="modal-footer-premium">
+                    <button className="btn-ghost-premium" onClick={onClose} disabled={saving}>Cancel</button>
+                    <button className={`btn-active-premium goal-btn ${saving ? 'loading' : ''}`} onClick={onSave} disabled={saving}>
+                        {saving ? <div className="loader-dots"><span></span><span></span><span></span></div> : (
+                            <>
+                                <span>Activate Goal</span>
+                                <Check size={16} />
+                            </>
+                        )}
                     </button>
                 </div>
             </motion.div>

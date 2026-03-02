@@ -363,9 +363,9 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
                     <button className="dropdown-portal__action">Mark all read</button>
                   </div>
                   <div className="dropdown-portal__list">
-                    {notifications.map(notification => (
-                      <div
-                        key={notification.id}
+                      {notifications.map((notification, ni) => (
+                        <div
+                          key={`notif-${ni}-${notification.id ?? ''}`}
                         className={`dropdown-portal__notification ${!notification.isRead ? 'dropdown-portal__notification--unread' : ''}`}
                       >
                         <div className={`dropdown-portal__notification-icon dropdown-portal__notification-icon--${notification.type}`}>
@@ -503,9 +503,9 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
 
                   {searchResults.length > 0 && (
                     <div className="search-modal__results">
-                      {searchResults.map(result => (
-                        <motion.div
-                          key={result.id}
+                        {searchResults.map((result, ri) => (
+                          <motion.div
+                            key={`result-${ri}-${result.id ?? ''}`}
                           className="search-result-item"
                           whileHover={{ backgroundColor: 'rgba(99, 102, 241, 0.1)' }}
                           onClick={() => {

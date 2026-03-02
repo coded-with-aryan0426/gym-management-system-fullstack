@@ -1,17 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { 
+    LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
+    AreaChart, Area
+} from 'recharts';
+import { 
+    Scale, Activity, Target, Dumbbell, Camera, MessageSquare, 
+    Flame, Calendar, Clock, Plus, 
+    Info, CheckCircle2, AlertCircle, TrendingUp, Sparkles, Zap
+} from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { memberProgressApi } from '../../services/api';
+import './MyProgress.css';
+import PRHistoryModal from './components/PRHistoryModal';
+import './PRHistoryStyles.css';
 
 interface ProgressSummary {
     currentWeight: number | null;
     startWeight: number | null;
     goalWeight: number | null;
-    bodyFat: number | null;
+    currentBmi: number | null;
+    bmiCategory: string | null;
+    // API returns these as currentBodyFat / currentMuscleMass
+    currentBodyFat: number | null;
     startBodyFat: number | null;
-    muscleMass: number | null;
+    currentMuscleMass: number | null;
     startMuscleMass: number | null;
-    streak: number;
+    // API returns currentStreak
+    currentStreak: number;
     longestStreak: number;
     totalCaloriesBurned: number;
     totalWorkouts: number;
@@ -20,385 +36,511 @@ interface ProgressSummary {
     workoutsThisWeek: number;
     consistencyRate: number;
     firstEntryDate?: string;
+    topPersonalBests?: any[];
 }
 
-const OverviewTab: React.FC = () => {
+const OverviewTab: React.FC<{ timeRange?: string }> = ({ timeRange = '30D' }) => {
     const { user } = useAuth();
     const memberId = Number(user?.userId || user?.id);
     
     const [summary, setSummary] = useState<ProgressSummary | null>(null);
+    const [metrics, setMetrics] = useState<any[]>([]);
+    const [goals, setGoals] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isPRModalOpen, setIsPRModalOpen] = useState(false);
 
     useEffect(() => {
-        const fetchSummary = async () => {
+        const fetchData = async () => {
             if (!memberId) return;
             
             try {
                 setLoading(true);
-                const summaryData = await memberProgressApi.getSummary(memberId);
-                setSummary(summaryData);
+                const [summaryData, metricsData, goalsData] = await Promise.all([
+                    memberProgressApi.getSummary(memberId),
+                    memberProgressApi.getMetrics(memberId, timeRange),
+                    memberProgressApi.getGoals(memberId)
+                ]);
+                
+                setSummary(summaryData as unknown as ProgressSummary);
+                
+                // Process and sort metrics
+                const processedMetrics = (metricsData || [])
+                    .filter((m: any) => m.weight !== null || m.bodyFat !== null)
+                    .sort((a: any, b: any) => new Date(a.recordDate).getTime() - new Date(b.recordDate).getTime());
+                
+                setMetrics(processedMetrics);
+                setGoals((goalsData || []).filter((g: any) => g.isActive));
             } catch (error) {
-                console.error('Error fetching summary:', error);
+                console.error('Error fetching dashboard data:', error);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchSummary();
-    }, [memberId]);
+        fetchData();
+    }, [memberId, timeRange]);
 
     if (loading) {
         return (
             <div className="overview-loading">
-                <motion.div 
-                    animate={{ rotate: 360 }} 
-                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-                    </svg>
+                <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}>
+                    <Activity size={24} />
                 </motion.div>
-                <span>Loading overview...</span>
+                <span>Loading your dashboard...</span>
             </div>
         );
     }
 
-    if (!summary) {
-        return (
-            <div className="overview-empty">
-                <div className="empty-state">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-                    </svg>
-                    <h3>No progress data yet</h3>
-                    <p>Start logging your progress to see your overview here</p>
-                </div>
-            </div>
-        );
-    }
+    if (!summary) return null;
 
-    const weightChange = summary.currentWeight && summary.startWeight 
-        ? summary.currentWeight - summary.startWeight 
-        : 0;
-    const muscleChange = summary.muscleMass && summary.startMuscleMass 
-        ? summary.muscleMass - summary.startMuscleMass 
-        : 0;
-    const bodyFatChange = summary.bodyFat && summary.startBodyFat 
-        ? summary.bodyFat - summary.startBodyFat 
-        : 0;
-
+    const weightChange = summary.currentWeight && summary.startWeight ? summary.currentWeight - summary.startWeight : 0;
+    const totalLost = weightChange < 0 ? Math.abs(weightChange).toFixed(1) : "0";
+    const percentChange = summary.startWeight ? ((weightChange / summary.startWeight) * 100).toFixed(1) : "0";
+    
+    // Improved BMI Logic
     const heightInMeters = user?.height ? user.height / 100 : null;
-    const bmiValue = summary.currentWeight && heightInMeters 
-        ? (summary.currentWeight / (heightInMeters * heightInMeters)).toFixed(1) 
+    const calculatedBmi = summary.currentWeight && heightInMeters ? (summary.currentWeight / (heightInMeters * heightInMeters)) : null;
+    const bmiValue = summary.currentBmi || calculatedBmi;
+    
+    const getBmiCategory = (bmi: number) => {
+        if (bmi < 18.5) return 'Underweight';
+        if (bmi < 25) return 'Normal';
+        if (bmi < 30) return 'Overweight';
+        return 'Obese';
+    };
+    
+    const bmiCategory = summary.bmiCategory || (bmiValue ? getBmiCategory(bmiValue) : 'Not set');
+
+    const bmiTrendData = metrics
+        .filter(m => m.bmi || (m.weight && heightInMeters))
+        .map(m => ({
+            date: new Date(m.recordDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+            bmi: m.bmi || (m.weight / (heightInMeters! * heightInMeters!))
+        }));
+
+    // Insight Logic
+    const topGoal = goals[0];
+    const goalProgress = topGoal 
+        ? (topGoal.targetValue !== topGoal.startValue 
+            ? Math.min(100, Math.max(0, ((topGoal.currentValue - topGoal.startValue) / (topGoal.targetValue - topGoal.startValue)) * 100))
+            : 0)
         : null;
+    
+    const remainingToGoal = topGoal ? (100 - (goalProgress || 0)).toFixed(1) : null;
 
     return (
-        <motion.div className="overview-tab" variants={{
-            hidden: { opacity: 0, y: 20 },
-            visible: { opacity: 1, y: 0 }
+        <motion.div className="overview-tab-v2" initial="hidden" animate="visible" variants={{
+            hidden: { opacity: 0 },
+            visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
         }}>
-            {/* Summary Banner */}
-            {(weightChange !== 0 || muscleChange !== 0 || summary.streak > 0) && (
-                <motion.div className="summary-banner" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
-                    <div className="summary-banner__content">
-                        <div className="summary-banner__main">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-                                <path d="M18.63 13A17.89 17.89 0 0 1 18 8"/>
-                                <path d="M6.38 13a17.89 17.89 0 0 0 .62-5 17.9 17.9 0 0 0-3.62 1.18"/>
-                                <path d="M3.93 7.17a10 10 0 0 0 2.1-1.13"/>
-                                <path d="M12 3v4"/>
-                                <path d="M3 12h4"/>
-                                <path d="M21 12h-4"/>
-                                <path d="M12 18v4"/>
-                                <path d="M20.83 8.83a10 10 0 0 0-1.13-2.1"/>
-                            </svg>
-                            <span>
-                                {weightChange !== 0 || muscleChange !== 0 ? (
-                                    <><strong>Great progress!</strong> You've {weightChange < 0 ? `lost ${Math.abs(weightChange).toFixed(1)}kg` : ''}{weightChange < 0 && muscleChange > 0 ? ' and ' : ''}{muscleChange > 0 ? `gained ${muscleChange.toFixed(1)}kg muscle` : ''}{summary.firstEntryDate ? ` since ${new Date(summary.firstEntryDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : ''}</>
-                                ) : (
-                                    <><strong>Keep going!</strong> {summary.streak > 0 ? `You're on a ${summary.streak} day streak!` : 'Start logging your progress today.'}</>
-                                )}
-                            </span>
+            
+            {/* Top Stat Summary Grid */}
+            <div className="dashboard-grid stats-summary-grid">
+                <div className="summary-card">
+                    <div className="summary-card__top">
+                        <div className="summary-card__icon weight"><Scale size={18} /></div>
+                        <div className="summary-card__info">
+                            <span className="label">Starting Weight</span>
+                            <span className="value">{summary.startWeight?.toFixed(1) || '--'} <small>kg</small></span>
+                            <span className="date">{summary.firstEntryDate ? new Date(summary.firstEntryDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '--'}</span>
                         </div>
-                        <div className="summary-banner__stats">
-                            <div className="mini-stat">
-                                <span className="mini-stat__value">{summary.streak}</span>
-                                <span className="mini-stat__label">Day Streak</span>
-                            </div>
-                            <div className="mini-stat">
-                                <span className="mini-stat__value">{summary.workoutsThisWeek}/7</span>
-                                <span className="mini-stat__label">This Week</span>
-                            </div>
-                            <div className="mini-stat">
-                                <span className="mini-stat__value">{Math.round(summary.consistencyRate || 0)}%</span>
-                                <span className="mini-stat__label">Consistency</span>
-                            </div>
-                        </div>
-                    </div>
-                </motion.div>
-            )}
-
-            {/* Top Stats Row */}
-            <motion.div className="stats-row" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-                <div className="stat-card stat-card--weight clickable">
-                    <div className="stat-card__icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <circle cx="12" cy="5" r="3"/>
-                            <path d="M6.5 8a6.5 6.5 0 1 0 11 0Z"/>
-                        </svg>
-                    </div>
-                    <div className="stat-card__body">
-                        <div className="stat-card__value">{summary.currentWeight ?? '--'}<span>kg</span></div>
-                        <div className="stat-card__label">Current Weight</div>
-                        <div className="stat-card__detail">
-                            {summary.goalWeight ? `Goal: ${summary.goalWeight}kg (${Math.abs((summary.currentWeight ?? 0) - summary.goalWeight).toFixed(1)}kg to go)` : 'Set a goal to track progress'}
-                        </div>
-                    </div>
-                    <div className="stat-card__right">
-                        {weightChange !== 0 && (
-                            <div className={`stat-card__trend ${weightChange <= 0 ? 'positive' : 'negative'}`}>
-                                {weightChange <= 0 ? (
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-                                    </svg>
-                                ) : (
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M6 9l6 6 6-6"/>
-                                    </svg>
-                                )}
-                                {weightChange > 0 ? '+' : ''}{weightChange.toFixed(1)}kg
-                            </div>
-                        )}
                     </div>
                 </div>
-
-                <div className="stat-card stat-card--bodyfat clickable">
-                    <div className="stat-card__icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M22 12h-4l-3-9L9 21l-3-9H2"/>
-                        </svg>
-                    </div>
-                    <div className="stat-card__body">
-                        <div className="stat-card__value">{summary.bodyFat ?? '--'}<span>%</span></div>
-                        <div className="stat-card__label">Body Fat</div>
-                        <div className="stat-card__detail">
-                            {summary.startBodyFat ? `Started at ${summary.startBodyFat}% (${Math.abs(bodyFatChange).toFixed(1)}% lost)` : 'Log your first measurement'}
+                <div className="summary-card highlight">
+                    <div className="summary-card__top">
+                        <div className="summary-card__icon current"><Activity size={18} /></div>
+                        <div className="summary-card__info">
+                            <span className="label">Current Weight</span>
+                            <span className="value">{summary.currentWeight?.toFixed(1) || '--'} <small>kg</small></span>
+                            <span className="date">Today</span>
                         </div>
                     </div>
-                    <div className="stat-card__right">
-                        {bodyFatChange !== 0 && (
-                            <div className={`stat-card__trend ${bodyFatChange <= 0 ? 'positive' : 'negative'}`}>
-                                {bodyFatChange <= 0 ? (
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-                                    </svg>
-                                ) : (
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M6 9l6 6 6-6"/>
-                                    </svg>
-                                )}
-                                {bodyFatChange}%
-                            </div>
-                        )}
-                        {summary.bodyFat && (
-                            <div className="stat-card__category">
-                                {summary.bodyFat < 15 ? 'Athletic' : summary.bodyFat < 20 ? 'Fit' : summary.bodyFat < 25 ? 'Average' : 'Above Average'}
-                            </div>
-                        )}
-                    </div>
                 </div>
-
-                <div className="stat-card stat-card--muscle clickable">
-                    <div className="stat-card__icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M6 12h12"/>
-                            <path d="M6 16h12"/>
-                            <path d="M6 20h12"/>
-                            <path d="M6 8h12"/>
-                            <path d="M6 4h12"/>
-                        </svg>
-                    </div>
-                    <div className="stat-card__body">
-                        <div className="stat-card__value">{summary.muscleMass ?? '--'}<span>kg</span></div>
-                        <div className="stat-card__label">Muscle Mass</div>
-                        <div className="stat-card__detail">
-                            {summary.muscleMass && summary.currentWeight ? `${((summary.muscleMass / summary.currentWeight) * 100).toFixed(0)}% of total body weight` : 'Log your first measurement'}
+                <div className="summary-card">
+                    <div className="summary-card__top">
+                        <div className="summary-card__icon goal"><Target size={18} /></div>
+                        <div className="summary-card__info">
+                            <span className="label">Goal Weight</span>
+                            <span className="value">{summary.goalWeight?.toFixed(1) || '--'} <small>kg</small></span>
+                            <span className="detail">{(summary.currentWeight && summary.goalWeight) ? `${Math.abs(summary.currentWeight - summary.goalWeight).toFixed(1)}kg remaining` : 'Set a goal'}</span>
                         </div>
                     </div>
-                    <div className="stat-card__right">
-                        {muscleChange !== 0 && (
-                            <div className={`stat-card__trend ${muscleChange >= 0 ? 'positive' : 'negative'}`}>
-                                {muscleChange >= 0 ? (
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M6 9l6 6 6-6"/>
-                                    </svg>
-                                ) : (
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-                                    </svg>
-                                )}
-                                +{muscleChange.toFixed(1)}kg
-                            </div>
-                        )}
+                </div>
+                <div className="summary-card">
+                    <div className="summary-card__top">
+                        <div className="summary-card__icon loss"><Flame size={18} /></div>
+                        <div className="summary-card__info">
+                            <span className="label">Total Lost</span>
+                            <span className="value text-emerald-500">{weightChange < 0 ? '-' : ''}{totalLost} <small>kg</small></span>
+                            <span className="detail">{percentChange}% change</span>
+                        </div>
                     </div>
                 </div>
-
-                <div className="stat-card stat-card--bmi">
-                    <div className="stat-card__icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-                            <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
-                            <line x1="12" y1="22.08" x2="12" y2="12"/>
-                        </svg>
-                    </div>
-                    <div className="stat-card__body">
-                        <div className="stat-card__value">{bmiValue ?? '--'}</div>
-                        <div className="stat-card__label">BMI</div>
-                        <div className="stat-card__detail">Category: {bmiValue ? (parseFloat(bmiValue) < 18.5 ? 'Underweight' : parseFloat(bmiValue) < 25 ? 'Normal' : parseFloat(bmiValue) < 30 ? 'Overweight' : 'Obese') : 'N/A'}</div>
-                    </div>
-                    <div className="stat-card__right">
-                        {bmiValue && (
-                            <div className={`bmi-indicator ${parseFloat(bmiValue) < 18.5 ? 'underweight' : parseFloat(bmiValue) < 25 ? 'healthy' : parseFloat(bmiValue) < 30 ? 'overweight' : 'obese'}`}>
-                                {parseFloat(bmiValue) < 18.5 ? 'Underweight' : parseFloat(bmiValue) < 25 ? 'Healthy' : parseFloat(bmiValue) < 30 ? 'Overweight' : 'Obese'}
-                            </div>
-                        )}
+                <div className="summary-card">
+                    <div className="summary-card__top">
+                        <div className="summary-card__icon pace"><Clock size={18} /></div>
+                        <div className="summary-card__info">
+                            <span className="label">Avg Weekly Loss</span>
+                            <span className="value">0.4 <small>kg</small></span>
+                            <span className="detail">per week</span>
+                        </div>
                     </div>
                 </div>
-            </motion.div>
-
-            {/* Three Column Grid */}
-            <motion.div className="three-col-grid" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-                {/* Personal Bests */}
-                <div className="panel-card">
-                    <div className="panel-card__header">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <circle cx="12" cy="8" r="7"/>
-                            <polyline points="14 22 14 16 8 16 8 22"/>
-                        </svg>
-                        <h3>Personal Records</h3>
-                        <button className="panel-add-btn" onClick={() => {/* Open log PR modal */}}>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <line x1="12" y1="5" x2="12" y2="19"/>
-                                <line x1="5" y1="12" x2="19" y2="12"/>
-                            </svg>
-                        </button>
+                <div className="summary-card">
+                    <div className="summary-card__top">
+                        <div className="summary-card__icon date"><Calendar size={18} /></div>
+                        <div className="summary-card__info">
+                            <span className="label">Est. Goal Date</span>
+                            <span className="value">Jun 4</span>
+                            <span className="detail">at current pace</span>
+                        </div>
                     </div>
-                    <div className="pb-list">
-                        {/* This would be populated with actual PRs from context/state */}
-                        <div className="pb-item">
-                            <div className="pb-item__left">
-                                <span className="pb-category-badge" data-category="push">P</span>
-                                <div className="pb-item__info">
-                                    <span className="pb-exercise">Bench Press</span>
-                                    <span className="pb-date">Jan 15, 2024</span>
+                </div>
+            </div>
+
+            {/* Main Content Area */}
+            <div className="dashboard-main-layout">
+                {/* Left Column - 2/3 width */}
+                <div className="dashboard-column-main">
+                    
+                    {/* Weight & Body Comp Graph Section */}
+                    <div className="dashboard-section chart-section">
+                        <div className="section-header">
+                            <h3>Weight & Body Composition</h3>
+                            <div className="header-actions">
+                                <div className="chart-legend">
+                                    <span className="legend-item"><span className="dot weight"></span> Weight</span>
+                                    <span className="legend-item"><span className="dot fat"></span> Body Fat</span>
                                 </div>
                             </div>
-                            <div className="pb-item__right">
-                                <span className="pb-weight">185 lbs</span>
-                                <span className="pb-improvement">
-                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M5 17l5-5 5 5"/>
-                                    </svg>
-                                    +5
-                                </span>
+                        </div>
+                        <div className="main-chart-container">
+                            {metrics.length > 0 ? (
+                                <ResponsiveContainer width="100%" height={300}>
+                                    <AreaChart data={metrics.map(m => ({
+                                        ...m,
+                                        date: new Date(m.recordDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                                    }))}>
+                                        <defs>
+                                            <linearGradient id="colorWeightMain" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1}/>
+                                                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                                            </linearGradient>
+                                        </defs>
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                                        <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{fill: 'rgba(255,255,255,0.4)', fontSize: 11}} dy={10} />
+                                        <YAxis yAxisId="left" orientation="left" stroke="rgba(255,255,255,0.1)" tick={{fill: 'rgba(255,255,255,0.4)', fontSize: 10}} domain={['dataMin - 2', 'dataMax + 2']} />
+                                        <YAxis yAxisId="right" orientation="right" stroke="rgba(255,255,255,0.1)" tick={{fill: 'rgba(255,255,255,0.4)', fontSize: 10}} domain={[0, 'dataMax + 5']} />
+                                        <Tooltip 
+                                            contentStyle={{backgroundColor: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px'}}
+                                            itemStyle={{fontSize: '12px'}}
+                                        />
+                                        <Area yAxisId="left" type="monotone" dataKey="weight" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorWeightMain)" animationDuration={1000} />
+                                        <Line yAxisId="right" type="monotone" dataKey="bodyFat" stroke="#a855f7" strokeWidth={2} dot={{r: 4, fill: '#a855f7'}} animationDuration={1000} />
+                                    </AreaChart>
+                                </ResponsiveContainer>
+                            ) : (
+                                <div className="empty-chart-placeholder">
+                                    <Activity size={48} opacity={0.2} />
+                                    <p>No historical data to display</p>
+                                    <span style={{fontSize: '12px', opacity: 0.5}}>Start logging your metrics to see trends</span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="dashboard-row-grid">
+                        {/* Active Goals */}
+                        <div className="dashboard-section goals-section">
+                            <div className="section-header">
+                                <h3>Active Goals</h3>
+                                <span className="count-badge">{goals.length} goals</span>
+                            </div>
+                            <div className="goals-list">
+                                {goals.length > 0 ? goals.map((goal, idx) => {
+                                    const progress = goal.targetValue !== goal.startValue 
+                                        ? Math.min(100, Math.max(0, ((goal.currentValue - goal.startValue) / (goal.targetValue - goal.startValue)) * 100))
+                                        : 0;
+                                    
+                                    return (
+                                        <div className="goal-item-mini" key={idx}>
+                                            <div className="goal-info">
+                                                <span className="goal-title">{goal.title}</span>
+                                                <span className="goal-type">{goal.goalType} Goal</span>
+                                            </div>
+                                            <div className="goal-progress-container">
+                                                <div className="goal-meta">
+                                                    <span className="percent">{Math.round(progress)}%</span>
+                                                    <span className="remaining">{Math.abs(goal.targetValue - goal.currentValue).toFixed(1)} {goal.unit} remaining</span>
+                                                </div>
+                                                <div className="progress-bar-bg">
+                                                    <div className="progress-bar-fill" style={{width: `${progress}%`}}></div>
+                                                </div>
+                                                <div className="goal-status-text warning">
+                                                    <AlertCircle size={10} /> Behind schedule - increase effort
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                }) : (
+                                    <div className="empty-section-state">
+                                        <Plus size={20} />
+                                        <p>Set a new goal</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* BMI Trend */}
+                        <div className="dashboard-section bmi-section">
+                            <div className="section-header">
+                                <h3>BMI Trend</h3>
+                                <div className="bmi-badge" style={{
+                                    backgroundColor: bmiCategory === 'Healthy' || bmiCategory === 'Normal' ? 'rgba(16, 185, 129, 0.1)' : 
+                                                   bmiCategory === 'Underweight' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(245, 158, 11, 0.1)',
+                                    color: bmiCategory === 'Healthy' || bmiCategory === 'Normal' ? '#10b981' : 
+                                           bmiCategory === 'Underweight' ? '#3b82f6' : '#f59e0b'
+                                }}>
+                                    {bmiCategory}
+                                </div>
+                            </div>
+                            <div className="bmi-content-v2">
+                                <div className="bmi-main-display">
+                                    <div className="bmi-value-large">
+                                        <span className="number">{bmiValue?.toFixed(1) || '--'}</span>
+                                        <span className="label">Current BMI</span>
+                                    </div>
+                                    {!user?.height && (
+                                        <div className="bmi-warning">
+                                            <AlertCircle size={12} />
+                                            <span>Set height in profile for accuracy</span>
+                                        </div>
+                                    )}
+                                </div>
+                                
+                                <div className="bmi-trend-mini-chart">
+                                    {bmiTrendData.length > 1 ? (
+                                        <ResponsiveContainer width="100%" height={80}>
+                                            <LineChart data={bmiTrendData}>
+                                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                                                <Tooltip 
+                                                    contentStyle={{backgroundColor: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', fontSize: '10px'}}
+                                                />
+                                                <Line 
+                                                    type="monotone" 
+                                                    dataKey="bmi" 
+                                                    stroke="#10b981" 
+                                                    strokeWidth={2} 
+                                                    dot={false}
+                                                    animationDuration={1500}
+                                                />
+                                            </LineChart>
+                                        </ResponsiveContainer>
+                                    ) : (
+                                        <div className="bmi-no-trend">
+                                            <TrendingUp size={24} opacity={0.2} />
+                                            <span>Insufficient data for trend</span>
+                                        </div>
+                                    )}
+                                </div>
+                                
+                                <div className="bmi-scale-mini">
+                                    <div className="scale-markers">
+                                        <div className="marker" style={{left: '0%'}}>15</div>
+                                        <div className="marker" style={{left: '25%'}}>20</div>
+                                        <div className="marker" style={{left: '50%'}}>25</div>
+                                        <div className="marker" style={{left: '75%'}}>30</div>
+                                        <div className="marker" style={{left: '100%'}}>35</div>
+                                    </div>
+                                    <div className="scale-bar">
+                                        <div className="bar-segment blue" style={{width: '23.3%'}}></div>
+                                        <div className="bar-segment green" style={{width: '32.5%'}}></div>
+                                        <div className="bar-segment orange" style={{width: '25%'}}></div>
+                                        <div className="bar-segment red" style={{width: '19.2%'}}></div>
+                                        {bmiValue && (
+                                            <motion.div 
+                                                className="bmi-pointer" 
+                                                initial={{ left: '0%' }}
+                                                animate={{ left: `${Math.min(100, Math.max(0, ((bmiValue - 15) / 20) * 100))}%` }}
+                                                transition={{ duration: 1, type: 'spring' }}
+                                            />
+                                        )}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <button className="panel-btn">
-                        View All PRs (0)
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <polyline points="9 18 15 12 9 6"/>
-                        </svg>
-                    </button>
+
+                    {/* Personal Records - Dense Grid */}
+                    <div className="dashboard-section pr-section">
+                        <div className="section-header">
+                            <h3>Personal Records</h3>
+                            <button className="text-btn" onClick={() => setIsPRModalOpen(true)}>View All PRs</button>
+                        </div>
+                        <div className="pr-dense-grid">
+                            {summary.topPersonalBests && summary.topPersonalBests.length > 0 ? (
+                                summary.topPersonalBests.slice(0, 4).map((pb: any, idx: number) => (
+                                    <div className="pr-card-mini" key={idx}>
+                                        <div className={`pr-icon ${pb.category?.toLowerCase() || 'push'}`}>
+                                            {pb.exercise.charAt(0).toUpperCase()}
+                                        </div>
+                                        <div className="pr-details">
+                                            <span className="exercise">{pb.exercise}</span>
+                                            <span className="stat">{pb.reps ? `${pb.reps} reps · ` : ''}{pb.weightValue} {pb.unit || 'kg'}</span>
+                                            <span className="date">{new Date(pb.recordDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="empty-pr-state">
+                                    <p>No PRs recorded yet</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    <PRHistoryModal 
+                        isOpen={isPRModalOpen}
+                        onClose={() => setIsPRModalOpen(false)}
+                        memberId={memberId}
+                    />
                 </div>
 
-                {/* Weekly Summary */}
-                <div className="panel-card">
-                    <div className="panel-card__header">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                            <line x1="16" y1="2" x2="16" y2="6"/>
-                            <line x1="8" y1="2" x2="8" y2="6"/>
-                            <line x1="3" y1="10" x2="21" y2="10"/>
-                        </svg>
-                        <h3>This Week</h3>
-                    </div>
-                    <div className="weekly-summary">
-                        <div className="weekly-summary__ring">
-                            <svg viewBox="0 0 100 100">
-                                <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="8"/>
-                                <circle
-                                    cx="50" cy="50" r="45" fill="none"
-                                    stroke="#007AFF" strokeWidth="8"
-                                    strokeLinecap="round"
-                                    strokeDasharray={`${(summary.consistencyRate || 0) * 2.83} 283`}
-                                    transform="rotate(-90 50 50)"
-                                />
-                            </svg>
-                            <div className="weekly-summary__ring-value">
-                                <span className="ring-percent">{Math.round(summary.consistencyRate || 0)}%</span>
-                                <span className="ring-label">Complete</span>
-                            </div>
+                {/* Right Column - 1/3 width */}
+                <div className="dashboard-column-side">
+                    
+                    {/* Visual Progress */}
+                    <div className="dashboard-section photos-section">
+                        <div className="section-header">
+                            <h3>Visual Progress</h3>
+                            <button className="text-btn">Gallery</button>
                         </div>
-                        <div className="weekly-summary__stats">
-                            <div className="weekly-stat">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <circle cx="12" cy="12" r="10"/>
-                                    <polyline points="12 6 12 12 16 14"/>
-                                </svg>
-                                <span>{summary.avgWorkoutDuration} min</span>
-                                <span className="weekly-stat__label">Avg Session</span>
+                        <div className="photo-preview-card">
+                            <div className="photo-placeholder">
+                                <Camera size={24} opacity={0.3} />
+                                <div className="photo-badge">Today</div>
                             </div>
-                            <div className="weekly-stat">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <path d="M17 7h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-9a2 2 0 0 1-2-2v-3"/>
-                                    <path d="M10 22V12a3 3 0 0 0-3-3H4a3 3 0 0 0-3 3v7a3 3 0 0 0 3 3h7a3 3 0 0 0 3-3Z"/>
-                                    <path d="M7 22h10"/>
-                                    <path d="M12 22v-5"/>
-                                </svg>
-                                <span>{summary.totalCaloriesBurned}</span>
-                                <span className="weekly-stat__label">Calories</span>
-                            </div>
-                            <div className="weekly-stat">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <path d="M6 4h4l2 4h6"/>
-                                    <path d="M11 16a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
-                                    <path d="M20 16a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
-                                    <path d="M4 16h16"/>
-                                </svg>
-                                <span>{summary.totalWorkouts}</span>
-                                <span className="weekly-stat__label">Total Workouts</span>
-                            </div>
+                            <button className="add-photo-btn-inline">
+                                <Plus size={16} /> Add Photo
+                            </button>
                         </div>
                     </div>
-                </div>
 
-                {/* Trainer Feedback */}
-                <div className="panel-card">
-                    <div className="panel-card__header">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                        </svg>
-                        <h3>Trainer Notes</h3>
-                        <span className="notes-count">0</span>
-                    </div>
-                    <div className="trainer-feedback">
-                        <div className="empty-feedback">
-                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
-                            </svg>
-                            <p>No notes from your trainer yet</p>
+                    {/* Weekly Insight Section (Improved UI) */}
+                    <div className="dashboard-section insight-section-v2">
+                        <div className="section-header">
+                            <h3>Weekly Insight</h3>
+                            <Sparkles size={16} color="#FFD700" />
+                        </div>
+                        
+                        <div className="insight-card-premium">
+                            {topGoal ? (
+                                <div className="goal-insight-pills">
+                                    <p className="insight-message">
+                                        You're <span className="highlight">{remainingToGoal}%</span> away from your <span className="goal-name">{topGoal.title}</span> goal!
+                                    </p>
+                                    <div className="insight-progress-mini">
+                                        <div className="bar-bg">
+                                            <div className="bar-fill" style={{ width: `${goalProgress}%` }}></div>
+                                        </div>
+                                        <span className="percent-label">{Math.round(goalProgress || 0)}% complete</span>
+                                    </div>
+                                </div>
+                            ) : (
+                                <p className="insight-message">Set a fitness goal to see progress insights!</p>
+                            )}
+
+                            <div className="insight-stats-grid">
+                                <div className="insight-stat-box streak">
+                                    <div className="icon-wrapper">
+                                        <Zap size={18} fill="#FF9500" color="#FF9500" />
+                                        <motion.div 
+                                            className="glow-pulse"
+                                            animate={{ scale: [1, 1.5, 1], opacity: [0.3, 0.6, 0.3] }}
+                                            transition={{ duration: 2, repeat: Infinity }}
+                                        />
+                                    </div>
+                                    <div className="stat-info">
+                                        <span className="value">{summary.currentStreak || 0} Day</span>
+                                        <span className="label">Streak</span>
+                                    </div>
+                                </div>
+                                <div className="insight-stat-box consistency">
+                                    <div className="ring-container-mini">
+                                        <svg viewBox="0 0 36 36" className="circular-chart-mini">
+                                            <path className="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                            <path className="circle" strokeDasharray={`${summary.consistencyRate || 0}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                        </svg>
+                                        <span className="ring-value">{Math.round(summary.consistencyRate || 0)}%</span>
+                                    </div>
+                                    <div className="stat-info">
+                                        <span className="value">{summary.workoutsThisWeek || 0}/7</span>
+                                        <span className="label">This Week</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="weekly-activity-dots">
+                                <span className="dots-label">Activity Status</span>
+                                <div className="dots-container">
+                                    {[...Array(7)].map((_, i) => (
+                                        <div 
+                                            key={i} 
+                                            className={`activity-dot ${i < (summary.workoutsThisWeek || 0) ? 'active' : ''}`}
+                                            title={`Day ${i+1}`}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <button className="panel-btn panel-btn--primary">
-                        Read All Notes
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <polyline points="9 18 15 12 9 6"/>
-                        </svg>
-                    </button>
+
+                    {/* Trainer Notes */}
+                    <div className="dashboard-section notes-section">
+                        <div className="section-header">
+                            <h3>Trainer Notes</h3>
+                            <button className="icon-btn"><MessageSquare size={16} /></button>
+                        </div>
+                        <div className="notes-preview">
+                            <div className="empty-notes">
+                                <p>No new notes to read</p>
+                            </div>
+                            <button className="panel-btn-dense">Read All Notes</button>
+                        </div>
+                    </div>
+
+                    {/* Achievement Timeline */}
+                    <div className="dashboard-section timeline-section">
+                        <div className="section-header">
+                            <h3>Achievements</h3>
+                        </div>
+                        <div className="achievement-timeline-mini">
+                            <div className="timeline-item-mini reached">
+                                <div className="dot"><CheckCircle2 size={12} /></div>
+                                <div className="content">
+                                    <span className="title">Member Since</span>
+                                    <span className="date">{summary.firstEntryDate ? new Date(summary.firstEntryDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '--'}</span>
+                                </div>
+                            </div>
+                            <div className="timeline-item-mini reached">
+                                <div className="dot"><CheckCircle2 size={12} /></div>
+                                <div className="content">
+                                    <span className="title">Total Workouts</span>
+                                    <span className="date">{summary.totalWorkouts || 0} reached</span>
+                                </div>
+                            </div>
+                            <div className="timeline-item-mini current">
+                                <div className="dot"></div>
+                                <div className="content">
+                                    <span className="title">Next Milestone</span>
+                                    <span className="target">{goals.length > 0 ? goals[0].title : 'Set a goal'}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
-            </motion.div>
+            </div>
         </motion.div>
     );
 };

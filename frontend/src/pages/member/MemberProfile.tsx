@@ -4,10 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import {
     User, Lock, Activity, Save, Camera, Mail, Phone, Calendar,
     Shield, Heart, MapPin, Droplet, Target, Award, Sparkles,
-    ChevronRight, Edit3, X, Zap, TrendingUp, Clock, Fingerprint,
-    Smartphone, AlertCircle, CheckCircle2, CreditCard, History,
+    ChevronRight, Edit3, X, Zap, TrendingUp, Clock,
+    AlertCircle, CheckCircle2, CreditCard, History,
     Trophy, Star, Download, QrCode, ArrowUpRight, Check, Ruler,
-    Scale, Percent, Users, MessageSquare, Info
+    Scale, Percent, Users, MessageSquare, Info, Loader2, Eye, EyeOff,
+    Smartphone, Fingerprint
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { memberProfileApi, type MemberProfileData, type MemberProfileUpdate } from '../../api/memberProfileApi';
@@ -65,6 +66,14 @@ const MemberProfile: React.FC = () => {
     const [hasChanges, setHasChanges] = useState(false);
     const [originalFormData, setOriginalFormData] = useState<any | null>(null);
 
+    // Change password modal state
+    const [showPasswordModal, setShowPasswordModal] = useState(false);
+    const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    const [passwordSaving, setPasswordSaving] = useState(false);
+    const [showCurrentPw, setShowCurrentPw] = useState(false);
+    const [showNewPw, setShowNewPw] = useState(false);
+    const [showConfirmPw, setShowConfirmPw] = useState(false);
+
     const [formData, setFormData] = useState({
         fullName: '',
         phone: '',
@@ -99,6 +108,31 @@ const MemberProfile: React.FC = () => {
         });
     }, [originalFormData, checkForChanges]);
 
+    const parseFitnessGoals = (goalsData: any): string[] => {
+        if (!goalsData) return [];
+        if (Array.isArray(goalsData)) return goalsData;
+        if (typeof goalsData === 'string') {
+            // Clean up common stringified formats
+            let cleaned = goalsData.trim();
+            
+            try {
+                const parsed = JSON.parse(cleaned);
+                if (Array.isArray(parsed)) return parsed;
+            } catch {
+                // If JSON parse fails, check if it's a string representation of an array
+                if (cleaned.startsWith('[') && cleaned.endsWith(']')) {
+                    cleaned = cleaned.substring(1, cleaned.length - 1);
+                }
+                
+                // Split by comma and clean up quotes and whitespace
+                return cleaned.split(',')
+                    .map(g => g.trim().replace(/^["']|["']$/g, ''))
+                    .filter(Boolean);
+            }
+        }
+        return [];
+    };
+
     useEffect(() => {
         const fetchProfile = async () => {
             if (authLoading) return;
@@ -110,6 +144,7 @@ const MemberProfile: React.FC = () => {
             try {
                 const data = await memberProfileApi.getProfile(Number(user.id));
                 setProfile(data);
+                const parsedGoals = parseFitnessGoals(data.fitnessGoals);
                 const initialFormData = {
                     fullName: data.fullName || '',
                     phone: data.phone || '',
@@ -123,7 +158,7 @@ const MemberProfile: React.FC = () => {
                     emergencyContactName: data.emergencyContactName || '',
                     emergencyContactPhone: data.emergencyContactPhone || '',
                     healthNotes: data.healthNotes || '',
-                    fitnessGoals: data.fitnessGoals || [],
+                    fitnessGoals: parsedGoals,
                     height: data.height,
                     weight: data.weight,
                     bodyFat: data.bodyFat,
@@ -160,6 +195,12 @@ const MemberProfile: React.FC = () => {
         if (e) e.preventDefault();
         if (!user?.id) return;
 
+        const validationError = validateForm();
+        if (validationError) {
+            toast.error(validationError);
+            return;
+        }
+
         setSaving(true);
         try {
             const updateData: MemberProfileUpdate = {
@@ -183,7 +224,15 @@ const MemberProfile: React.FC = () => {
 
             const updated = await memberProfileApi.updateProfile(Number(user.id), updateData);
             setProfile(updated);
-            setOriginalFormData({ ...formData });
+            
+            const parsedUpdatedGoals = parseFitnessGoals(updated.fitnessGoals);
+            const finalFormData = {
+                ...formData,
+                fitnessGoals: parsedUpdatedGoals
+            };
+            
+            setFormData(finalFormData);
+            setOriginalFormData(finalFormData);
             setHasChanges(false);
             toast.success('Profile updated successfully!');
             setEditMode(false);
@@ -214,6 +263,58 @@ const MemberProfile: React.FC = () => {
         });
     };
 
+    const validateForm = (): string | null => {
+        if (formData.phone && !/^\+?[\d\s\-()]{7,15}$/.test(formData.phone)) {
+            return 'Please enter a valid phone number';
+        }
+        if (formData.dateOfBirth && new Date(formData.dateOfBirth) > new Date()) {
+            return 'Date of birth cannot be in the future';
+        }
+        if (formData.bodyFat !== null && (formData.bodyFat < 0 || formData.bodyFat > 100)) {
+            return 'Body fat must be between 0 and 100%';
+        }
+        if (formData.height !== null && formData.height <= 0) {
+            return 'Height must be a positive value';
+        }
+        if (formData.weight !== null && formData.weight <= 0) {
+            return 'Weight must be a positive value';
+        }
+        return null;
+    };
+
+    const handleChangePassword = async () => {
+        if (!passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
+            toast.error('All password fields are required');
+            return;
+        }
+        if (passwordForm.newPassword.length < 6) {
+            toast.error('New password must be at least 6 characters');
+            return;
+        }
+        if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+            toast.error('New passwords do not match');
+            return;
+        }
+        if (!profile?.email) return;
+
+        setPasswordSaving(true);
+        try {
+            await api.post('/auth/change-password', {
+                email: profile.email,
+                currentPassword: passwordForm.currentPassword,
+                newPassword: passwordForm.newPassword,
+            });
+            toast.success('Password changed successfully');
+            setShowPasswordModal(false);
+            setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+        } catch (err: any) {
+            const msg = err?.response?.data?.error || 'Failed to change password';
+            toast.error(msg);
+        } finally {
+            setPasswordSaving(false);
+        }
+    };
+
     const tabs: { id: TabType; label: string; icon: React.ReactNode }[] = [
         { id: 'overview', label: 'Overview', icon: <Activity size={16} /> },
         { id: 'personal', label: 'Personal', icon: <User size={16} /> },
@@ -224,18 +325,18 @@ const MemberProfile: React.FC = () => {
     ];
 
     const fitnessGoalOptions = [
-        { name: 'Weight Loss', icon: <TrendingUp size={18} />, color: '#FF9500' },
-        { name: 'Muscle Gain', icon: <Zap size={18} />, color: '#FF3B30' },
-        { name: 'General Fitness', icon: <Activity size={18} />, color: '#007AFF' },
-        { name: 'Athletic Performance', icon: <Award size={18} />, color: '#AF52DE' },
-        { name: 'Flexibility', icon: <Sparkles size={18} />, color: '#5AC8FA' },
-        { name: 'Stress Relief', icon: <Heart size={18} />, color: '#34C759' }
+        { name: 'Weight Loss', icon: <TrendingUp size={18} />, color: '#FF9500', rgb: '255, 149, 0' },
+        { name: 'Lean Muscle', icon: <Zap size={18} />, color: '#FF3B30', rgb: '255, 59, 48' },
+        { name: 'Improve Endurance', icon: <Activity size={18} />, color: '#007AFF', rgb: '0, 122, 255' },
+        { name: 'Athletic Performance', icon: <Award size={18} />, color: '#AF52DE', rgb: '175, 82, 222' },
+        { name: 'Flexibility', icon: <Sparkles size={18} />, color: '#5AC8FA', rgb: '90, 200, 250' },
+        { name: 'General Fitness', icon: <Heart size={18} />, color: '#34C759', rgb: '52, 199, 89' }
     ];
 
     const formatDate = (dateStr: string | null) => {
         if (!dateStr) return 'Not set';
         try {
-            return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+            return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         } catch {
             return dateStr;
         }
@@ -259,7 +360,7 @@ const MemberProfile: React.FC = () => {
                     animate={{ rotate: 360 }}
                     transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                 >
-                    <Activity size={32} />
+                    <Loader2 size={32} />
                 </motion.div>
                 <p>{authLoading ? 'Verifying session...' : 'Loading profile...'}</p>
             </div>
@@ -303,6 +404,17 @@ const MemberProfile: React.FC = () => {
         ? formData.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
         : 'M';
 
+    // Computed BMI
+    const bmi = (formData.height && formData.weight && formData.height > 0)
+        ? (formData.weight / Math.pow(formData.height / 100, 2)).toFixed(1)
+        : null;
+    const bmiCategory = bmi
+        ? Number(bmi) < 18.5 ? 'Underweight'
+            : Number(bmi) < 25 ? 'Normal'
+            : Number(bmi) < 30 ? 'Overweight'
+            : 'Obese'
+        : null;
+
     const stats = profile.stats;
     const membership = profile.membership;
     const achievements = profile.achievements || [];
@@ -341,16 +453,16 @@ const MemberProfile: React.FC = () => {
                     disabled={saving}
                 >
                     {saving ? (
-                        <>
-                            <motion.div
-                                animate={{ rotate: 360 }}
-                                transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                            >
-                                <Activity size={14} />
-                            </motion.div>
-                            Saving...
-                        </>
-                    ) : (
+                            <>
+                                <motion.div
+                                    animate={{ rotate: 360 }}
+                                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                                >
+                                    <Loader2 size={14} />
+                                </motion.div>
+                                Saving...
+                            </>
+                        ) : (
                         <>
                             <Save size={14} />
                             Save Changes
@@ -383,7 +495,7 @@ const MemberProfile: React.FC = () => {
                             transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
                         />
                         <div className="profile-avatar__image">{memberInitials}</div>
-                        <button className="profile-avatar__edit" title="Upload Photo">
+                        <button className="profile-avatar__edit" title="Upload Photo" onClick={() => toast('Photo upload coming soon', { icon: '📸' })}>
                             <Camera size={14} />
                         </button>
                         <div className="profile-avatar__status" />
@@ -478,7 +590,7 @@ const MemberProfile: React.FC = () => {
                                                             placeholder="Enter your name"
                                                         />
                                                     ) : (
-                                                        <span className="summary-value">{formData.fullName || 'Not set'}</span>
+                                                        <span className="summary-value"><User size={14} color="#007AFF" /> {formData.fullName || 'Not set'}</span>
                                                     )}
                                                 </div>
                                                 <div className="summary-item">
@@ -491,7 +603,7 @@ const MemberProfile: React.FC = () => {
                                                             className="summary-input"
                                                         />
                                                     ) : (
-                                                        <span className="summary-value">{formData.dateOfBirth || 'Not set'}</span>
+                                                        <span className="summary-value"><Calendar size={14} color="#007AFF" /> {formatDate(formData.dateOfBirth)}</span>
                                                     )}
                                                 </div>
                                                 <div className="summary-item">
@@ -508,7 +620,7 @@ const MemberProfile: React.FC = () => {
                                                             <option value="Other">Other</option>
                                                         </select>
                                                     ) : (
-                                                        <span className="summary-value">{formData.gender || 'Not set'}</span>
+                                                        <span className="summary-value"><User size={14} color="#007AFF" /> {formData.gender || 'Not set'}</span>
                                                     )}
                                                 </div>
                                                 <div className="summary-item">
@@ -530,7 +642,7 @@ const MemberProfile: React.FC = () => {
                                                             <option value="AB-">AB-</option>
                                                         </select>
                                                     ) : (
-                                                        <span className="summary-value"><Droplet size={12} color="#FF3B30" /> {formData.bloodType || 'Not set'}</span>
+                                                        <span className="summary-value"><Droplet size={14} color="#FF3B30" /> {formData.bloodType || 'Not set'}</span>
                                                     )}
                                                 </div>
                                             </div>
@@ -579,20 +691,20 @@ const MemberProfile: React.FC = () => {
                                             <div className="progress-mini-grid">
                                                 <div className="progress-item">
                                                     <div className="progress-item__header">
-                                                        <span>Workout Streak</span>
-                                                        <span>{stats?.currentStreak || 0} days</span>
+                                                        <span><Zap size={12} color="#FF9500" /> Workout Streak</span>
+                                                        <span style={{ fontWeight: '700' }}>{stats?.currentStreak || 0} days</span>
                                                     </div>
                                                     <div className="progress-bar-bg">
-                                                        <div className="progress-bar-fill" style={{ width: `${Math.min((stats?.currentStreak || 0) * 10, 100)}%`, background: 'linear-gradient(90deg, #007AFF, #5AC8FA)' }} />
+                                                        <div className="progress-bar-fill" style={{ width: `${Math.min((stats?.currentStreak || 0) * 10, 100)}%`, background: 'linear-gradient(90deg, #FF9500, #FFCC00)' }} />
                                                     </div>
                                                 </div>
                                                 <div className="progress-item">
                                                     <div className="progress-item__header">
-                                                        <span>Total Workouts</span>
-                                                        <span>{stats?.totalWorkouts || 0}</span>
+                                                        <span><Activity size={12} color="#007AFF" /> Total Workouts</span>
+                                                        <span style={{ fontWeight: '700' }}>{stats?.totalWorkouts || 0}</span>
                                                     </div>
                                                     <div className="progress-bar-bg">
-                                                        <div className="progress-bar-fill" style={{ width: `${Math.min((stats?.totalWorkouts || 0) / 2, 100)}%`, background: 'linear-gradient(90deg, #AF52DE, #FF9500)' }} />
+                                                        <div className="progress-bar-fill" style={{ width: `${Math.min((stats?.totalWorkouts || 0) / 2, 100)}%`, background: 'linear-gradient(90deg, #007AFF, #5AC8FA)' }} />
                                                     </div>
                                                 </div>
                                             </div>
@@ -608,7 +720,10 @@ const MemberProfile: React.FC = () => {
                                                             type="button"
                                                             className={`goal-chip ${formData.fitnessGoals.includes(goal.name) ? 'goal-chip--active' : ''}`}
                                                             onClick={() => handleGoalToggle(goal.name)}
-                                                            style={{ '--goal-color': goal.color } as React.CSSProperties}
+                                                            style={{ 
+                                                                '--goal-color': goal.color,
+                                                                '--goal-color-rgb': goal.rgb
+                                                            } as React.CSSProperties}
                                                         >
                                                             {goal.icon}
                                                             {goal.name}
@@ -622,8 +737,15 @@ const MemberProfile: React.FC = () => {
                                                         formData.fitnessGoals.map(goal => {
                                                             const goalOption = fitnessGoalOptions.find(g => g.name === goal);
                                                             return (
-                                                                <span key={goal} className="goal-tag" style={{ borderColor: goalOption?.color }}>
-                                                                    {goalOption?.icon}
+                                                                <span 
+                                                                    key={goal} 
+                                                                    className="goal-tag" 
+                                                                    style={{ 
+                                                                        '--goal-color': goalOption?.color || '#8E8E93',
+                                                                        '--goal-color-rgb': goalOption?.rgb || '142, 142, 147'
+                                                                    } as React.CSSProperties}
+                                                                >
+                                                                    {goalOption?.icon || <Target size={12} />}
                                                                     {goal}
                                                                 </span>
                                                             );
@@ -644,7 +766,7 @@ const MemberProfile: React.FC = () => {
                                         {renderSectionHeader('Personal Information', <User size={14} />, editMode)}
                                         <div className="profile-form-grid-compact">
                                             <div className="profile-field-compact">
-                                                <label className="profile-field-compact__label"><User size={12} />Full Name</label>
+                                                <label className="profile-field-compact__label"><User size={12} color="#007AFF" />Full Name</label>
                                                 <div className="profile-field-compact__input-wrapper">
                                                     <input
                                                         type="text"
@@ -657,7 +779,7 @@ const MemberProfile: React.FC = () => {
                                                 </div>
                                             </div>
                                             <div className="profile-field-compact">
-                                                <label className="profile-field-compact__label"><Calendar size={12} />Date of Birth</label>
+                                                <label className="profile-field-compact__label"><Calendar size={12} color="#007AFF" />Date of Birth</label>
                                                 <div className="profile-field-compact__input-wrapper">
                                                     <input
                                                         type="date"
@@ -669,7 +791,7 @@ const MemberProfile: React.FC = () => {
                                                 </div>
                                             </div>
                                             <div className="profile-field-compact">
-                                                <label className="profile-field-compact__label"><User size={12} />Gender</label>
+                                                <label className="profile-field-compact__label"><User size={12} color="#007AFF" />Gender</label>
                                                 <div className="profile-field-compact__input-wrapper">
                                                     <select
                                                         value={formData.gender}
@@ -685,7 +807,7 @@ const MemberProfile: React.FC = () => {
                                                 </div>
                                             </div>
                                             <div className="profile-field-compact">
-                                                <label className="profile-field-compact__label"><Droplet size={12} />Blood Type</label>
+                                                <label className="profile-field-compact__label"><Droplet size={12} color="#FF3B30" />Blood Type</label>
                                                 <div className="profile-field-compact__input-wrapper">
                                                     <select
                                                         value={formData.bloodType}
@@ -712,7 +834,7 @@ const MemberProfile: React.FC = () => {
                                         {renderSectionHeader('Body Measurements', <Activity size={14} />, editMode)}
                                         <div className="profile-form-grid-compact">
                                             <div className="profile-field-compact">
-                                                <label className="profile-field-compact__label"><Ruler size={12} />Height (cm)</label>
+                                                <label className="profile-field-compact__label"><Ruler size={12} color="#007AFF" />Height (cm)</label>
                                                 <div className="profile-field-compact__input-wrapper">
                                                     <input
                                                         type="number"
@@ -725,7 +847,7 @@ const MemberProfile: React.FC = () => {
                                                 </div>
                                             </div>
                                             <div className="profile-field-compact">
-                                                <label className="profile-field-compact__label"><Scale size={12} />Weight (kg)</label>
+                                                <label className="profile-field-compact__label"><Scale size={12} color="#007AFF" />Weight (kg)</label>
                                                 <div className="profile-field-compact__input-wrapper">
                                                     <input
                                                         type="number"
@@ -737,24 +859,40 @@ const MemberProfile: React.FC = () => {
                                                     />
                                                 </div>
                                             </div>
-                                            <div className="profile-field-compact">
-                                                <label className="profile-field-compact__label"><Percent size={12} />Body Fat (%)</label>
-                                                <div className="profile-field-compact__input-wrapper">
-                                                    <input
-                                                        type="number"
-                                                        value={formData.bodyFat || ''}
-                                                        onChange={(e) => updateFormData({ bodyFat: e.target.value ? Number(e.target.value) : null })}
-                                                        className={`profile-field-compact__input ${!editMode ? 'profile-field-compact__input--readonly' : ''}`}
-                                                        placeholder="e.g., 15"
-                                                        readOnly={!editMode}
-                                                    />
-                                                </div>
-                                            </div>
-                                        </div>
+                                              <div className="profile-field-compact">
+                                                  <label className="profile-field-compact__label"><Percent size={12} color="#007AFF" />Body Fat (%)</label>
+                                                  <div className="profile-field-compact__input-wrapper">
+                                                      <input
+                                                          type="number"
+                                                          value={formData.bodyFat || ''}
+                                                          onChange={(e) => updateFormData({ bodyFat: e.target.value ? Number(e.target.value) : null })}
+                                                          className={`profile-field-compact__input ${!editMode ? 'profile-field-compact__input--readonly' : ''}`}
+                                                          placeholder="e.g., 15"
+                                                          readOnly={!editMode}
+                                                      />
+                                                  </div>
+                                              </div>
+                                              {bmi && (
+                                                  <div className="profile-field-compact">
+                                                      <label className="profile-field-compact__label"><Activity size={12} color="#007AFF" />BMI (computed)</label>
+                                                      <div className="profile-field-compact__input-wrapper">
+                                                          <div className="profile-field-compact__input profile-field-compact__input--readonly" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                              <span style={{ fontWeight: '700', fontSize: '16px' }}>{bmi}</span>
+                                                              <span className="bmi-category-badge" style={{ 
+                                                                  backgroundColor: Number(bmi) < 18.5 ? 'rgba(90, 200, 250, 0.15)' : Number(bmi) < 25 ? 'rgba(52, 199, 89, 0.15)' : Number(bmi) < 30 ? 'rgba(255, 149, 0, 0.15)' : 'rgba(255, 59, 48, 0.15)',
+                                                                  color: Number(bmi) < 18.5 ? '#5AC8FA' : Number(bmi) < 25 ? '#34C759' : Number(bmi) < 30 ? '#FF9500' : '#FF3B30'
+                                                              }}>
+                                                                  {bmiCategory}
+                                                              </span>
+                                                          </div>
+                                                      </div>
+                                                  </div>
+                                              )}
+                                          </div>
 
-                                        {renderSaveBar()}
-                                    </div>
-                                )}
+                                          {renderSaveBar()}
+                                      </div>
+                                  )}
 
                                 {activeTab === 'contact' && (
                                     <div className="tab-content-section">
@@ -919,9 +1057,11 @@ const MemberProfile: React.FC = () => {
                                                     className={`goal-option-card ${formData.fitnessGoals.includes(goal.name) ? 'goal-option-card--active' : ''}`}
                                                     onClick={() => editMode && handleGoalToggle(goal.name)}
                                                     disabled={!editMode}
-                                                    style={{ '--goal-accent': goal.color } as React.CSSProperties}
-                                                >
-                                                    <div className="goal-option-card__icon" style={{ color: goal.color }}>
+                                                    style={{ 
+                                                        '--goal-accent': goal.color,
+                                                        '--goal-accent-rgb': goal.rgb
+                                                    } as React.CSSProperties}
+                                                >                                                    <div className="goal-option-card__icon" style={{ color: goal.color }}>
                                                         {goal.icon}
                                                     </div>
                                                     <span className="goal-option-card__name">{goal.name}</span>
@@ -951,9 +1091,13 @@ const MemberProfile: React.FC = () => {
                                                         <div className="security-item__subtitle">Change your account password</div>
                                                     </div>
                                                 </div>
-                                                <button className="profile-btn-compact profile-btn-compact--secondary" type="button">
-                                                    Change Password
-                                                </button>
+                                                  <button
+                                                      className="profile-btn-compact profile-btn-compact--secondary"
+                                                      type="button"
+                                                      onClick={() => setShowPasswordModal(true)}
+                                                  >
+                                                      Change Password
+                                                  </button>
                                             </div>
                                             <div className="security-item">
                                                 <div className="security-item__content">
@@ -967,30 +1111,26 @@ const MemberProfile: React.FC = () => {
                                                     {profile.twoFactorEnabled ? 'Enabled' : 'Disabled'}
                                                 </PulsingBadge>
                                             </div>
-                                            <div className="security-item">
-                                                <div className="security-item__content">
-                                                    <Smartphone size={20} />
-                                                    <div>
-                                                        <div className="security-item__title">Active Sessions</div>
-                                                        <div className="security-item__subtitle">Manage your logged-in devices</div>
-                                                    </div>
-                                                </div>
-                                                <button className="profile-btn-compact profile-btn-compact--secondary" type="button">
-                                                    View Sessions
-                                                </button>
-                                            </div>
-                                            <div className="security-item">
-                                                <div className="security-item__content">
-                                                    <Fingerprint size={20} />
-                                                    <div>
-                                                        <div className="security-item__title">Biometric Login</div>
-                                                        <div className="security-item__subtitle">Use fingerprint or face ID to sign in</div>
-                                                    </div>
-                                                </div>
-                                                <button className="profile-btn-compact profile-btn-compact--secondary" type="button">
-                                                    Setup
-                                                </button>
-                                            </div>
+                                              <div className="security-item">
+                                                  <div className="security-item__content">
+                                                      <Smartphone size={20} />
+                                                      <div>
+                                                          <div className="security-item__title">Active Sessions</div>
+                                                          <div className="security-item__subtitle">Manage your logged-in devices</div>
+                                                      </div>
+                                                  </div>
+                                                  <PulsingBadge color="#8E8E93">Coming Soon</PulsingBadge>
+                                              </div>
+                                              <div className="security-item">
+                                                  <div className="security-item__content">
+                                                      <Fingerprint size={20} />
+                                                      <div>
+                                                          <div className="security-item__title">Biometric Login</div>
+                                                          <div className="security-item__subtitle">Use fingerprint or face ID to sign in</div>
+                                                      </div>
+                                                  </div>
+                                                  <PulsingBadge color="#8E8E93">Coming Soon</PulsingBadge>
+                                              </div>
                                         </div>
                                     </div>
                                 )}
@@ -1007,16 +1147,16 @@ const MemberProfile: React.FC = () => {
                             <ChevronRight size={14} className="widget-icon-link" />
                         </div>
                         {trainerLoading ? (
-                            <div className="membership-card" style={{ padding: '12px', textAlign: 'center' }}>
-                                <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}>
-                                    <Activity size={16} />
-                                </motion.div>
-                            </div>
+                          <div className="membership-card" style={{ padding: '12px', textAlign: 'center' }}>
+                                  <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}>
+                                      <Loader2 size={16} />
+                                  </motion.div>
+                              </div>
                         ) : assignedTrainer ? (
                             <div className="membership-card" style={{ padding: '12px' }}>
                                 <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                                     <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'linear-gradient(135deg, #007AFF, #5856D6)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold' }}>
-                                        {assignedTrainer.name[0]}
+                                        {assignedTrainer.name?.[0] ?? '?'}
                                     </div>
                                     <div style={{ flex: 1 }}>
                                         <div style={{ fontSize: '14px', fontWeight: '600' }}>{assignedTrainer.name}</div>
@@ -1104,15 +1244,153 @@ const MemberProfile: React.FC = () => {
                                 <span className="stat-label">Weight</span>
                                 <span className="stat-value">{formData.weight ? `${formData.weight} kg` : 'Not set'}</span>
                             </div>
-                            <div className="body-stat-item">
-                                <span className="stat-label">Body Fat</span>
-                                <span className="stat-value">{formData.bodyFat ? `${formData.bodyFat}%` : 'Not set'}</span>
-                            </div>
-                        </div>
-                        <button className="widget-action-btn" onClick={() => { setActiveTab('personal'); setEditMode(true); }}>Update Stats</button>
-                    </div>
+                              <div className="body-stat-item">
+                                  <span className="stat-label">Body Fat</span>
+                                  <span className="stat-value">{formData.bodyFat ? `${formData.bodyFat}%` : 'Not set'}</span>
+                              </div>
+                              {bmi && (
+                                  <div className="body-stat-item">
+                                      <span className="stat-label">BMI</span>
+                                      <span className="stat-value" style={{ color: Number(bmi) < 18.5 ? '#5AC8FA' : Number(bmi) < 25 ? '#34C759' : Number(bmi) < 30 ? '#FF9500' : '#FF3B30' }}>
+                                          {bmi} <span style={{ fontSize: '10px', opacity: 0.7 }}>({bmiCategory})</span>
+                                      </span>
+                                  </div>
+                              )}
+                          </div>
+                          <button className="widget-action-btn" onClick={() => { setActiveTab('personal'); setEditMode(true); }}>Update Stats</button>
+                      </div>
                 </div>
             </div>
+
+            {/* Change Password Modal */}
+            <AnimatePresence>
+                {showPasswordModal && (
+                    <motion.div
+                        className="modal-overlay"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={(e) => { if (e.target === e.currentTarget) setShowPasswordModal(false); }}
+                        style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.92, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.92, opacity: 0 }}
+                            style={{ background: 'var(--macos-surface)', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '420px', boxShadow: '0 24px 48px rgba(0,0,0,0.3)' }}
+                        >
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                                <h3 style={{ fontSize: '17px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <Lock size={18} /> Change Password
+                                </h3>
+                                <button onClick={() => setShowPasswordModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--macos-text-secondary)' }}>
+                                    <X size={18} />
+                                </button>
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                                {/* Current Password */}
+                                <div className="profile-field-compact profile-field-compact--full">
+                                    <label className="profile-field-compact__label"><Lock size={12} />Current Password</label>
+                                    <div className="profile-field-compact__input-wrapper" style={{ position: 'relative' }}>
+                                        <input
+                                            type={showCurrentPw ? 'text' : 'password'}
+                                            value={passwordForm.currentPassword}
+                                            onChange={(e) => setPasswordForm(p => ({ ...p, currentPassword: e.target.value }))}
+                                            className="profile-field-compact__input"
+                                            placeholder="Enter current password"
+                                            autoComplete="current-password"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowCurrentPw(v => !v)}
+                                            style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--macos-text-secondary)', padding: 0 }}
+                                        >
+                                            {showCurrentPw ? <EyeOff size={14} /> : <Eye size={14} />}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* New Password */}
+                                <div className="profile-field-compact profile-field-compact--full">
+                                    <label className="profile-field-compact__label"><Lock size={12} />New Password</label>
+                                    <div className="profile-field-compact__input-wrapper" style={{ position: 'relative' }}>
+                                        <input
+                                            type={showNewPw ? 'text' : 'password'}
+                                            value={passwordForm.newPassword}
+                                            onChange={(e) => setPasswordForm(p => ({ ...p, newPassword: e.target.value }))}
+                                            className="profile-field-compact__input"
+                                            placeholder="Min. 6 characters"
+                                            autoComplete="new-password"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowNewPw(v => !v)}
+                                            style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--macos-text-secondary)', padding: 0 }}
+                                        >
+                                            {showNewPw ? <EyeOff size={14} /> : <Eye size={14} />}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Confirm Password */}
+                                <div className="profile-field-compact profile-field-compact--full">
+                                    <label className="profile-field-compact__label"><Lock size={12} />Confirm New Password</label>
+                                    <div className="profile-field-compact__input-wrapper" style={{ position: 'relative' }}>
+                                        <input
+                                            type={showConfirmPw ? 'text' : 'password'}
+                                            value={passwordForm.confirmPassword}
+                                            onChange={(e) => setPasswordForm(p => ({ ...p, confirmPassword: e.target.value }))}
+                                            className="profile-field-compact__input"
+                                            placeholder="Repeat new password"
+                                            autoComplete="new-password"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowConfirmPw(v => !v)}
+                                            style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--macos-text-secondary)', padding: 0 }}
+                                        >
+                                            {showConfirmPw ? <EyeOff size={14} /> : <Eye size={14} />}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Strength hint */}
+                                {passwordForm.newPassword.length > 0 && (
+                                    <div style={{ fontSize: '12px', color: passwordForm.newPassword.length < 6 ? '#FF3B30' : passwordForm.newPassword.length < 10 ? '#FF9500' : '#34C759' }}>
+                                        Strength: {passwordForm.newPassword.length < 6 ? 'Too short' : passwordForm.newPassword.length < 10 ? 'Fair' : 'Strong'}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '10px', marginTop: '24px' }}>
+                                <button
+                                    className="profile-btn-compact profile-btn-compact--secondary"
+                                    style={{ flex: 1 }}
+                                    onClick={() => { setShowPasswordModal(false); setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' }); }}
+                                    disabled={passwordSaving}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    className="profile-btn-compact profile-btn-compact--primary"
+                                    style={{ flex: 1 }}
+                                    onClick={handleChangePassword}
+                                    disabled={passwordSaving}
+                                >
+                                    {passwordSaving ? (
+                                        <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }} style={{ display: 'inline-flex' }}>
+                                            <Loader2 size={14} />
+                                        </motion.div>
+                                    ) : (
+                                        <><CheckCircle2 size={14} /> Update Password</>
+                                    )}
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </motion.div>
     );
 };

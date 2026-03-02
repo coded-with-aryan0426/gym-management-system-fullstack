@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'react-hot-toast';
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
     ResponsiveContainer, Area, AreaChart, BarChart, Bar, ReferenceLine,
@@ -10,12 +11,21 @@ import {
     Camera, Calendar, Zap, Heart, TrendingUp, TrendingDown,
     Clock, ChevronRight, X, Check, Edit3, Ruler, Scale as ScaleIcon,
     AlertCircle, Info, ChevronDown, ChevronUp, History, BarChart3,
-    Award, Sparkles, ArrowRight, Timer, Percent, Images
+    Award, Sparkles, ArrowRight, Timer, Percent, Images, Trash2
 } from 'lucide-react';
 import { memberProgressApi } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import '../../styles/macos-member.css';
 import './MyProgress.css';
+
+// Import Modal Components
+import LogProgressModal from './progress/components/LogProgressModal';
+import LogWorkoutModal from './progress/components/LogWorkoutModal';
+import CreateGoalModal from './progress/components/CreateGoalModal';
+import PhotoUploadModal from './progress/components/PhotoUploadModal';
+import PhotoGalleryModal from './progress/components/PhotoGalleryModal';
+import HistoryModal from './progress/components/HistoryModal';
+import PRHistoryModal from './progress/components/PRHistoryModal';
 
 interface ProgressNote {
     id: number;
@@ -34,6 +44,7 @@ interface ProgressEntry {
     weight?: number;
     bodyFat?: number;
     muscleMass?: number;
+    bmi?: number;
     chest?: number;
     waist?: number;
     arms?: number;
@@ -65,6 +76,7 @@ interface Goal {
     startDate: string;
     targetDate?: string;
     weeklyTarget?: number;
+    isActive?: boolean;
 }
 
 interface WorkoutLog {
@@ -96,6 +108,15 @@ const itemVariants = {
     visible: { opacity: 1, y: 0 }
 };
 
+const WeightIcon: React.FC<{ size?: number }> = ({ size = 14 }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z" />
+        <path d="M7 10h4" />
+        <path d="M15 10h2" />
+        <path d="M7 15h10" />
+    </svg>
+);
+
 const MyProgress: React.FC = () => {
     const [notes, setNotes] = useState<ProgressNote[]>([]);
     const [loading, setLoading] = useState(true);
@@ -104,6 +125,8 @@ const MyProgress: React.FC = () => {
     const [activeModal, setActiveModal] = useState<ModalType>(null);
     const [expandedGoal, setExpandedGoal] = useState<number | null>(null);
     const [saving, setSaving] = useState(false);
+    const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
+    const isFirstRender = React.useRef(true);
 
     const [progressEntries, setProgressEntries] = useState<ProgressEntry[]>([]);
     const [personalBests, setPersonalBests] = useState<PersonalBest[]>([]);
@@ -153,6 +176,10 @@ const MyProgress: React.FC = () => {
     const memberId = Number(user?.userId || user?.id);
 
     const [isLightTheme, setIsLightTheme] = useState(false);
+    const [isPRModalOpen, setIsPRModalOpen] = useState(false);
+    const [insightDismissed, setInsightDismissed] = useState(() =>
+        sessionStorage.getItem('insightDismissed') === 'true'
+    );
 
     useEffect(() => {
         const checkTheme = () => {
@@ -174,7 +201,7 @@ const MyProgress: React.FC = () => {
     };
 
     const fetchProgressData = useCallback(async () => {
-        if (authLoading || !memberId) {
+        if (authLoading || !memberId || isNaN(memberId)) {
             if (!authLoading) setLoading(false);
             return;
         }
@@ -182,25 +209,21 @@ const MyProgress: React.FC = () => {
         try {
             setLoading(true);
 
-            // Ensure memberId is valid before making API calls
-            if (!memberId || isNaN(memberId)) {
-                console.error('Invalid memberId:', memberId);
-                setLoading(false);
-                return;
-            }
-
-            const [summaryData, metricsData, goalsData, pbData, workoutsData, measurementsData, photosData] = await Promise.all([
+            const [summaryData, metricsData, goalsData, pbData, workoutsData, measurementsData, photosData, notesData] = await Promise.all([
                 memberProgressApi.getSummary(memberId).catch(() => null),
                 memberProgressApi.getMetrics(memberId, timeRange === 'ALL' ? undefined : timeRange).catch(() => []),
                 memberProgressApi.getGoals(memberId).catch(() => []),
                 memberProgressApi.getPersonalBests(memberId).catch(() => []),
-                memberProgressApi.getWorkouts(memberId, '30D').catch(() => []),
+                memberProgressApi.getWorkouts(memberId, timeRange === 'ALL' ? undefined : timeRange).catch(() => []),
                 memberProgressApi.getMeasurements(memberId, timeRange === 'ALL' ? undefined : timeRange).catch(() => []),
-                memberProgressApi.getPhotos(memberId).catch(() => [])
+                memberProgressApi.getPhotos(memberId).catch(() => []),
+                (memberProgressApi as any).getTrainerNotes ? (memberProgressApi as any).getTrainerNotes(memberId).catch(() => []) : Promise.resolve([])
+
             ]);
 
             setSummary(summaryData);
             setPhotos(photosData);
+            setNotes(notesData || []);
 
             const measurementsByDate = new Map<string, any>();
             (measurementsData || []).forEach((m: any) => {
@@ -216,6 +239,7 @@ const MyProgress: React.FC = () => {
                     weight: m.weight,
                     bodyFat: m.bodyFat,
                     muscleMass: m.muscleMass,
+                    bmi: m.bmi ?? undefined,
                     chest: measurement?.chest ?? m.chest,
                     waist: measurement?.waist ?? m.waist,
                     arms: measurement?.arms ?? m.arms,
@@ -259,7 +283,8 @@ const MyProgress: React.FC = () => {
                 unit: g.unit || 'kg',
                 startDate: g.startDate,
                 targetDate: g.targetDate,
-                weeklyTarget: g.weeklyTarget
+                weeklyTarget: g.weeklyTarget,
+                isActive: g.isActive !== false
             }));
             setGoals(mappedGoals);
 
@@ -285,18 +310,98 @@ const MyProgress: React.FC = () => {
             }));
             setWorkoutLogs(mappedWorkouts);
 
-            setNotes([]);
-
         } catch (error) {
             console.error('Error fetching progress data:', error);
         } finally {
             setLoading(false);
         }
-    }, [memberId, timeRange]);
+    }, [memberId]);
 
     useEffect(() => {
         fetchProgressData();
     }, [fetchProgressData]);
+
+    // Selective refetch for time-sensitive data
+    useEffect(() => {
+        if (isFirstRender.current) {
+            isFirstRender.current = false;
+            return;
+        }
+        if (!memberId || loading) return;
+
+        const refetchTimeData = async () => {
+            try {
+                // Only fetch time-sensitive data
+                const [metricsData, measurementsData, workoutsData] = await Promise.all([
+                    memberProgressApi.getMetrics(memberId, timeRange === 'ALL' ? undefined : timeRange).catch(() => []),
+                    memberProgressApi.getMeasurements(memberId, timeRange === 'ALL' ? undefined : timeRange).catch(() => []),
+                    memberProgressApi.getWorkouts(memberId, timeRange === 'ALL' ? undefined : timeRange).catch(() => [])
+                ]);
+
+                const measurementsByDate = new Map<string, any>();
+                (measurementsData || []).forEach((m: any) => {
+                    measurementsByDate.set(m.recordDate, m);
+                });
+
+                const entries: ProgressEntry[] = (metricsData || []).map((m: any) => {
+                    const metricDate = m.recordDate?.split('T')[0];
+                    const measurement = measurementsByDate.get(metricDate) || measurementsByDate.get(m.recordDate);
+                    return {
+                        id: m.id,
+                        date: metricDate || m.recordDate,
+                        weight: m.weight,
+                        bodyFat: m.bodyFat,
+                        muscleMass: m.muscleMass,
+                        bmi: m.bmi ?? undefined,
+                        chest: measurement?.chest ?? m.chest,
+                        waist: measurement?.waist ?? m.waist,
+                        arms: measurement?.arms ?? m.arms,
+                        legs: measurement?.legs ?? m.legs,
+                        hips: measurement?.hips ?? m.hips,
+                        shoulders: measurement?.shoulders ?? m.shoulders,
+                        notes: m.notes
+                    };
+                });
+
+                (measurementsData || []).forEach((m: any) => {
+                    const mDate = m.recordDate?.split('T')[0];
+                    if (!entries.find(e => e.date === mDate || e.date === m.recordDate)) {
+                        entries.push({
+                            id: m.id + 10000,
+                            date: mDate || m.recordDate,
+                            weight: undefined,
+                            bodyFat: undefined,
+                            muscleMass: undefined,
+                            chest: m.chest,
+                            waist: m.waist,
+                            arms: m.arms,
+                            legs: m.legs,
+                            hips: m.hips,
+                            shoulders: m.shoulders,
+                            notes: m.notes
+                        });
+                    }
+                });
+
+                entries.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+                setProgressEntries(entries);
+
+                const mappedWorkouts: WorkoutLog[] = (workoutsData || []).map((w: any) => ({
+                    id: w.id,
+                    date: w.workoutDate,
+                    duration: w.durationMinutes || 0,
+                    caloriesBurned: w.caloriesBurned || 0,
+                    type: w.workoutType || 'General',
+                    exercises: w.exercisesCount || 0
+                }));
+                setWorkoutLogs(mappedWorkouts);
+            } catch (error) {
+                console.error('Error refetching time-sensitive data:', error);
+            }
+        };
+
+        refetchTimeData();
+    }, [timeRange, memberId]);
 
     const getLatestEntry = () => progressEntries[progressEntries.length - 1] || null;
     const getFirstEntry = () => progressEntries[0] || null;
@@ -369,7 +474,13 @@ const MyProgress: React.FC = () => {
         totalWorkouts: summary?.totalWorkouts || 0,
         thisMonthWorkouts: summary?.workoutsThisMonth || 0,
         avgWorkoutDuration: summary?.avgWorkoutDuration || (workoutLogs.filter(w => w.duration > 0).length > 0 ? Math.round(workoutLogs.filter(w => w.duration > 0).reduce((sum, w) => sum + w.duration, 0) / workoutLogs.filter(w => w.duration > 0).length) : 0),
-        workoutsThisWeek: summary?.workoutsThisWeek || workoutLogs.filter(w => w.duration > 0).length
+        workoutsThisWeek: summary?.workoutsThisWeek || workoutLogs.filter(w => w.duration > 0).length,
+        currentChest: latestMeasurement?.chest || null,
+        currentWaist: latestMeasurement?.waist || null,
+        currentArms: latestMeasurement?.arms || null,
+        currentLegs: latestMeasurement?.legs || null,
+        currentHips: latestMeasurement?.hips || null,
+        currentShoulders: latestMeasurement?.shoulders || null
     };
 
     const weightChange = calculateChange(stats.currentWeight, stats.startWeight);
@@ -377,18 +488,39 @@ const MyProgress: React.FC = () => {
     const bodyFatChange = calculateChange(stats.bodyFat, stats.startBodyFat);
     const weeklyWeightChange = calculateChange(stats.currentWeight, stats.previousWeight);
 
-    const heightInMeters = user?.height ? user.height / 100 : (summary?.height ? summary.height / 100 : null);
-    const bmiValue = stats.currentWeight && heightInMeters ? (stats.currentWeight / (heightInMeters * heightInMeters)).toFixed(1) : null;
-    const bmiCategory = bmiValue ? (parseFloat(bmiValue) < 18.5 ? 'Underweight' : parseFloat(bmiValue) < 25 ? 'Normal' : parseFloat(bmiValue) < 30 ? 'Overweight' : 'Obese') : 'N/A';
+    // Dynamic Insight Logic
+    const activeGoals = goals.filter(g => g.isActive !== false);
+    const primaryGoal = activeGoals[0] || null;
 
-    // Calculate BMI for each entry for the chart
-    const entriesWithBmi = progressEntries.map(entry => {
-        const entryBmi = entry.weight && heightInMeters ? (entry.weight / (heightInMeters * heightInMeters)).toFixed(1) : null;
-        return {
-            ...entry,
-            bmi: entryBmi ? parseFloat(entryBmi) : null
-        };
-    });
+    const weeklyProgress = workoutLogs.filter(w => {
+        const workoutDate = new Date(w.date);
+        const now = new Date();
+        const diffDays = Math.ceil(Math.abs(now.getTime() - workoutDate.getTime()) / (1000 * 60 * 60 * 24));
+        return diffDays <= 7;
+    }).length;
+
+    const nextMilestone = primaryGoal ? {
+        title: primaryGoal.title,
+        remaining: Math.abs(primaryGoal.targetValue - primaryGoal.currentValue).toFixed(1),
+        unit: primaryGoal.unit,
+        percent: Math.min(100, Math.max(0, (Math.abs(primaryGoal.currentValue - primaryGoal.startValue) / Math.abs(primaryGoal.targetValue - primaryGoal.startValue)) * 100)).toFixed(0)
+    } : null;
+
+    // Use server-computed BMI (already calculated from user height in DB) as primary source
+    const bmiValue = summary?.currentBmi != null
+        ? Number(summary.currentBmi).toFixed(1)
+        : (() => {
+            const heightInMeters = user?.height ? user.height / 100 : null;
+            return stats.currentWeight && heightInMeters
+                ? (stats.currentWeight / (heightInMeters * heightInMeters)).toFixed(1)
+                : (latest?.bmi != null ? Number(latest.bmi).toFixed(1) : null);
+        })();
+    const bmiCategory = summary?.bmiCategory ||
+        (bmiValue ? (
+            parseFloat(bmiValue) < 18.5 ? 'Underweight' :
+                parseFloat(bmiValue) < 25 ? 'Normal' :
+                    parseFloat(bmiValue) < 30 ? 'Overweight' : 'Obese'
+        ) : 'N/A');
 
     const heatmapData = Array.from({ length: 35 }, (_, i) => {
         const date = new Date(Date.now() - (34 - i) * 24 * 60 * 60 * 1000);
@@ -431,30 +563,39 @@ const MyProgress: React.FC = () => {
 
     const consistencyRate = Math.round((workoutLogs.filter(w => w.duration > 0).length / 7) * 100);
 
-    const WeightIcon = ({ size = 14 }: { size?: number }) => (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="5" r="3" />
-            <path d="M6.5 8a6.5 6.5 0 1 0 11 0Z" />
-        </svg>
-    );
-
     const tabs: { id: TabType; label: string; icon: React.ReactNode }[] = [
         { id: 'weight', label: 'Weight', icon: <WeightIcon size={14} /> },
         { id: 'bodyFat', label: 'Body Composition', icon: <Activity size={14} /> },
+        { id: 'bmi', label: 'BMI Trend', icon: <BarChart3 size={14} /> },
         { id: 'measurements', label: 'Measurements', icon: <Ruler size={14} /> },
         { id: 'strength', label: 'Strength', icon: <Dumbbell size={14} /> },
         { id: 'consistency', label: 'Activity', icon: <Calendar size={14} /> }
     ];
 
-    const chartData = progressEntries.map((entry, index) => {
+    const chartData = Array.from(
+        progressEntries
+            .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+            .reduce((map, entry) => {
+                const dateStr = entry.date?.split('T')[0] ?? '';
+                if (!map.has(dateStr)) map.set(dateStr, entry);
+                return map;
+            }, new Map<string, typeof progressEntries[0]>())
+            .values()
+    ).map((entry) => {
         const dateStr = entry.date?.split('T')[0];
         const workoutsOnDate = workoutLogs.filter(w => w.date?.startsWith(dateStr || ''));
         const totalVolume = workoutsOnDate.reduce((sum, w) => sum + (w.caloriesBurned || 0), 0);
-        
-        // Calculate BMI for this entry using height
-        const currentHeight = user?.height || summary?.height;
-        const hInMeters = currentHeight ? currentHeight / 100 : null;
-        const entryBmi = entry.weight && hInMeters ? (entry.weight / (hInMeters * hInMeters)).toFixed(1) : null;
+
+        // Use stored BMI from progress_metrics (computed server-side from user's height)
+        // Fall back to client-side calculation only if stored value is missing
+        let entryBmi: number | null = entry.bmi != null ? Number(entry.bmi) : null;
+        if (entryBmi === null && entry.weight) {
+            const h = user?.height || summary?.height;
+            if (h) {
+                const hM = h / 100;
+                entryBmi = parseFloat((entry.weight / (hM * hM)).toFixed(2));
+            }
+        }
 
         return {
             date: new Date(entry.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
@@ -462,7 +603,7 @@ const MyProgress: React.FC = () => {
             weight: entry.weight,
             bodyFat: entry.bodyFat,
             muscle: entry.muscleMass,
-            bmi: entryBmi ? parseFloat(entryBmi) : null,
+            bmi: entryBmi,
             chest: entry.chest,
             waist: entry.waist,
             arms: entry.arms,
@@ -490,7 +631,8 @@ const MyProgress: React.FC = () => {
 
         const getUnit = () => {
             if (dataKey === 'bodyFat') return '%';
-            if (dataKey === 'volume') return ' lbs';
+            if (dataKey === 'bmi') return '';
+            if (dataKey === 'volume') return ' kcal';
             return ' kg';
         };
 
@@ -502,7 +644,8 @@ const MyProgress: React.FC = () => {
                         {dataKey === 'weight' ? 'Weight' :
                             dataKey === 'bodyFat' ? 'Body Fat' :
                                 dataKey === 'muscle' ? 'Muscle Mass' :
-                                    dataKey === 'leanMass' ? 'Lean Mass' : 'Volume'}
+                                    dataKey === 'bmi' ? 'BMI' :
+                                        dataKey === 'leanMass' ? 'Lean Mass' : 'Calories'}
                     </span>
                     <span className="tooltip-number">{value}{getUnit()}</span>
                 </div>
@@ -520,40 +663,36 @@ const MyProgress: React.FC = () => {
 
     const handlePhotoUpload = async () => {
         if (!photoFile || !memberId) {
-            alert('Please select a photo');
+            toast.error('Please select a photo');
             return;
         }
 
         try {
             setSaving(true);
             await memberProgressApi.uploadPhoto(memberId, photoFile, photoDescription, photoDate);
-            
-            // Refresh data
-            const photosData = await memberProgressApi.getPhotos(memberId);
-            setPhotos(photosData);
-            
+            await fetchProgressData();
+
             // Reset form
             setPhotoFile(null);
             setPhotoDescription('');
             setPhotoDate(new Date().toISOString().split('T')[0]);
             setActiveModal(null);
+            toast.success('Photo uploaded successfully');
         } catch (error) {
             console.error('Error uploading photo:', error);
-            alert('Failed to upload photo');
+            toast.error('Failed to upload photo');
         } finally {
             setSaving(false);
         }
     };
-
     const handleDeletePhoto = async (photoId: number) => {
-        if (!window.confirm('Are you sure you want to delete this photo?')) return;
-
         try {
             await memberProgressApi.deletePhoto(memberId, photoId);
             setPhotos(prev => prev.filter(p => p.id !== photoId));
+            toast.success('Photo deleted successfully');
         } catch (error) {
             console.error('Error deleting photo:', error);
-            alert('Failed to delete photo');
+            toast.error('Failed to delete photo');
         }
     };
 
@@ -575,25 +714,24 @@ const MyProgress: React.FC = () => {
     };
 
     const handleDeleteEntry = async (metricId: number) => {
-        if (!window.confirm('Are you sure you want to delete this entry?')) return;
-
         try {
             await memberProgressApi.deleteMetric(memberId, metricId);
             await fetchProgressData();
+            toast.success('Entry deleted successfully');
         } catch (error) {
             console.error('Error deleting metric:', error);
-            alert('Failed to delete metric');
+            toast.error('Failed to delete metric');
         }
     };
 
     const handleLogProgress = async () => {
         if (!memberId) {
-            alert('User session not found. Please log in again.');
+            toast.error('User session not found. Please log in again.');
             return;
         }
 
         if (!newProgress.weight && !newProgress.bodyFat && !newProgress.muscleMass && !newProgress.waist && !newProgress.chest) {
-            alert('Please enter at least some data to log');
+            toast.error('Please enter at least some data to log');
             return;
         }
 
@@ -642,11 +780,12 @@ const MyProgress: React.FC = () => {
             setNewProgress({ weight: '', bodyFat: '', muscleMass: '', chest: '', waist: '', arms: '', legs: '', hips: '', shoulders: '', notes: '' });
             setEditingEntry(null);
             setActiveModal(null);
+            toast.success(editingEntry ? 'Progress updated' : 'Progress logged successfully');
         } catch (error: any) {
             console.error('Error saving progress:', error);
             setProgressEntries(previousEntries); // Rollback
             const errorMsg = error.response?.data?.error || error.message || 'Unknown error';
-            alert(`Failed to save progress: ${errorMsg}`);
+            toast.error(`Failed to save progress: ${errorMsg}`);
         } finally {
             setSaving(false);
         }
@@ -654,7 +793,7 @@ const MyProgress: React.FC = () => {
 
     const handleLogWorkout = async () => {
         if (!newWorkout.exercise || !newWorkout.weight) {
-            alert('Please enter exercise and weight');
+            toast.error('Please enter exercise and weight');
             return;
         }
 
@@ -674,9 +813,10 @@ const MyProgress: React.FC = () => {
             await fetchProgressData();
             setNewWorkout({ exercise: '', weight: '', reps: '', unit: 'lbs', category: 'push', notes: '' });
             setActiveModal(null);
+            toast.success('Workout PR logged successfully');
         } catch (error) {
             console.error('Error saving PR:', error);
-            alert('Failed to save PR. Please try again.');
+            toast.error('Failed to save PR. Please try again.');
         } finally {
             setSaving(false);
         }
@@ -684,7 +824,7 @@ const MyProgress: React.FC = () => {
 
     const handleCreateGoal = async () => {
         if (!newGoal.title || !newGoal.targetValue) {
-            alert('Please enter goal title and target value');
+            toast.error('Please enter goal title and target value');
             return;
         }
 
@@ -707,22 +847,49 @@ const MyProgress: React.FC = () => {
             await fetchProgressData();
             setNewGoal({ title: '', type: 'weight', currentValue: '', targetValue: '', unit: 'kg', targetDate: '', weeklyTarget: '' });
             setActiveModal(null);
+            toast.success('New goal created successfully');
         } catch (error) {
             console.error('Error creating goal:', error);
-            alert('Failed to create goal. Please try again.');
+            toast.error('Failed to create goal. Please try again.');
         } finally {
             setSaving(false);
         }
     };
 
     const measurementComparison = [
-        { label: 'Chest', current: latest?.chest || null, start: first?.chest || null, unit: 'cm', ideal: '104-110', good: true },
-        { label: 'Waist', current: latest?.waist || null, start: first?.waist || null, unit: 'cm', ideal: '< 94', good: true },
-        { label: 'Arms', current: latest?.arms || null, start: first?.arms || null, unit: 'cm', ideal: '36-40', good: true },
-        { label: 'Legs', current: latest?.legs || null, start: first?.legs || null, unit: 'cm', ideal: '58-65', good: true },
-        { label: 'Hips', current: latest?.hips || null, start: first?.hips || null, unit: 'cm', ideal: '< 102', good: true },
-        { label: 'Shoulders', current: latest?.shoulders || null, start: first?.shoulders || null, unit: 'cm', ideal: '> 115', good: true }
+        { label: 'Chest', current: latest?.chest || null, start: first?.chest || null, unit: 'cm', good: true },
+        { label: 'Waist', current: latest?.waist || null, start: first?.waist || null, unit: 'cm', good: true },
+        { label: 'Arms', current: latest?.arms || null, start: first?.arms || null, unit: 'cm', good: true },
+        { label: 'Legs', current: latest?.legs || null, start: first?.legs || null, unit: 'cm', good: true },
+        { label: 'Hips', current: latest?.hips || null, start: first?.hips || null, unit: 'cm', good: true },
+        { label: 'Shoulders', current: latest?.shoulders || null, start: first?.shoulders || null, unit: 'cm', good: true }
     ].filter(m => m.current !== null || m.start !== null);
+
+    const isTabEmpty = (tab: TabType) => {
+        switch (tab) {
+            case 'weight': return !stats.currentWeight;
+            case 'bodyFat': return !stats.bodyFat;
+            case 'bmi': return !bmiValue;
+            case 'measurements': return measurementComparison.length === 0;
+            case 'strength': return personalBests.length === 0;
+            case 'consistency': return workoutLogs.length === 0;
+            default: return false;
+        }
+    };
+
+    const renderEmptyState = (tab: TabType) => (
+        <div className="chart-tab-empty">
+            <div className="empty-icon-container">
+                <Info size={48} strokeWidth={1} />
+            </div>
+            <h3>No {tab} data found</h3>
+            <p>Log your first entries to see your progress trends and charts.</p>
+            <button className="btn-primary" onClick={() => setActiveModal(tab === 'strength' ? 'logWorkout' : 'logProgress')}>
+                <Plus size={16} />
+                Log Your First {tab === 'strength' ? 'PR' : 'Entry'}
+            </button>
+        </div>
+    );
 
     if (loading) {
         return (
@@ -769,37 +936,61 @@ const MyProgress: React.FC = () => {
                 </button>
             </motion.div>
 
-            {/* Summary Banner */}
-            {(weightChange.value !== 0 || muscleChange.value !== 0 || stats.streak > 0) && (
-                <motion.div className="summary-banner" variants={itemVariants}>
-                    <div className="summary-banner__content">
-                        <div className="summary-banner__main">
-                            <Sparkles size={20} />
-                            <span>
-                                {weightChange.value !== 0 || muscleChange.value !== 0 ? (
-                                    <><strong>Great progress!</strong> You've {weightChange.value < 0 ? `lost ${Math.abs(weightChange.value)}kg` : ''}{weightChange.value < 0 && muscleChange.value > 0 ? ' and ' : ''}{muscleChange.value > 0 ? `gained ${muscleChange.value}kg muscle` : ''}{summary?.firstEntryDate ? ` since ${new Date(summary.firstEntryDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : ''}</>
+            {/* Weekly Insight Bar — only show when there's something meaningful */}
+            <AnimatePresence>
+            {!insightDismissed && (stats.streak > 2 || Number(nextMilestone?.percent) >= 50 || consistencyRate >= 60) && (
+                <motion.div
+                    className="insight-banner"
+                    variants={itemVariants}
+                    initial={{ opacity: 0, y: -8, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -8, scale: 0.97, transition: { duration: 0.2 } }}
+                >
+                    <div className="insight-banner__left">
+                        <div className="insight-icon-pulse">
+                            <Sparkles size={16} />
+                        </div>
+                        <div className="insight-text-group">
+                            <span className="insight-title">Weekly Insight</span>
+                            <span className="insight-desc">
+                                {nextMilestone ? (
+                                    <>You're <strong>{nextMilestone.remaining}{nextMilestone.unit}</strong> away from <strong>{nextMilestone.title}</strong> ({nextMilestone.percent}%)</>
                                 ) : (
-                                    <><strong>Keep going!</strong> {stats.streak > 0 ? `You're on a ${stats.streak} day streak!` : 'Start logging your progress today.'}</>
+                                    <>Crushed <strong>{weeklyProgress} workouts</strong> this week. Keep it up!</>
                                 )}
                             </span>
                         </div>
-                        <div className="summary-banner__stats">
-                            <div className="mini-stat">
-                                <span className="mini-stat__value">{stats.streak}</span>
-                                <span className="mini-stat__label">Day Streak</span>
-                            </div>
-                            <div className="mini-stat">
-                                <span className="mini-stat__value">{stats.workoutsThisWeek}/7</span>
-                                <span className="mini-stat__label">This Week</span>
-                            </div>
-                            <div className="mini-stat">
-                                <span className="mini-stat__value">{Math.round(summary?.consistencyRate || consistencyRate)}%</span>
-                                <span className="mini-stat__label">Consistency</span>
-                            </div>
+                    </div>
+                    <div className="insight-banner__right">
+                        <div className="insight-mini-stat">
+                            <Flame size={13} className="insight-stat-icon streak-icon" />
+                            <span className="insight-stat-val">{stats.streak}</span>
+                            <span className="insight-stat-lbl">streak</span>
                         </div>
+                        <div className="insight-mini-stat">
+                            <Activity size={13} className="insight-stat-icon workout-icon" />
+                            <span className="insight-stat-val">{stats.workoutsThisWeek}/7</span>
+                            <span className="insight-stat-lbl">week</span>
+                        </div>
+                        <div className="insight-mini-stat">
+                            <Trophy size={13} className="insight-stat-icon trophy-icon" />
+                            <span className="insight-stat-val">{Math.round(summary?.consistencyRate || consistencyRate)}%</span>
+                            <span className="insight-stat-lbl">consistency</span>
+                        </div>
+                        <button
+                            className="insight-close-btn"
+                            onClick={() => {
+                                sessionStorage.setItem('insightDismissed', 'true');
+                                setInsightDismissed(true);
+                            }}
+                            aria-label="Dismiss insight"
+                        >
+                            <X size={13} />
+                        </button>
                     </div>
                 </motion.div>
             )}
+            </AnimatePresence>
 
             {/* Top Stats Row */}
             <motion.div className="stats-row" variants={itemVariants}>
@@ -959,7 +1150,13 @@ const MyProgress: React.FC = () => {
                             </div>
                             <div className="chart-stat">
                                 <span className="chart-stat-label">Est. Goal Date</span>
-                                <span className="chart-stat-value">{getProjectedDate(goals[0] || { targetValue: 75, currentValue: 78, weeklyTarget: 0.5 } as Goal).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                                <span className="chart-stat-value">
+                                    {goals.length > 0 ? (
+                                        getProjectedDate(goals[0]).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                                    ) : (
+                                        'No Goal'
+                                    )}
+                                </span>
                                 <span className="chart-stat-date">at current pace</span>
                             </div>
                         </>
@@ -1002,6 +1199,45 @@ const MyProgress: React.FC = () => {
                             </div>
                         </>
                     )}
+                    {activeTab === 'bmi' && (() => {
+                        const firstBmi = chartData.find(d => d.bmi != null)?.bmi ?? null;
+                        const lastBmi = [...chartData].reverse().find(d => d.bmi != null)?.bmi ?? null;
+                        const bmiChange = firstBmi != null && lastBmi != null ? (lastBmi - firstBmi).toFixed(1) : null;
+                        const currentBmiNum = bmiValue ? parseFloat(bmiValue) : null;
+                        return (
+                            <>
+                                <div className="chart-stat">
+                                    <span className="chart-stat-label">Starting BMI</span>
+                                    <span className="chart-stat-value">{firstBmi?.toFixed(1) ?? '--'}</span>
+                                    <span className="chart-stat-date">Day 1</span>
+                                </div>
+                                <div className="chart-stat highlight-stat">
+                                    <span className="chart-stat-label">Current BMI</span>
+                                    <span className="chart-stat-value highlight">{bmiValue ?? '--'}</span>
+                                    <span className="chart-stat-date">{bmiCategory}</span>
+                                </div>
+                                <div className="chart-stat">
+                                    <span className="chart-stat-label">BMI Change</span>
+                                    <span className={`chart-stat-value ${bmiChange && parseFloat(bmiChange) < 0 ? 'positive' : 'negative'}`}>
+                                        {bmiChange ? (parseFloat(bmiChange) > 0 ? '+' : '') + bmiChange : '--'}
+                                    </span>
+                                    <span className="chart-stat-date">total reduction</span>
+                                </div>
+                                <div className="chart-stat">
+                                    <span className="chart-stat-label">Healthy Target</span>
+                                    <span className="chart-stat-value">18.5 – 24.9</span>
+                                    <span className="chart-stat-date">normal range</span>
+                                </div>
+                                <div className="chart-stat">
+                                    <span className="chart-stat-label">Points to Healthy</span>
+                                    <span className="chart-stat-value">
+                                        {currentBmiNum != null && currentBmiNum > 25 ? (currentBmiNum - 25).toFixed(1) : currentBmiNum != null && currentBmiNum < 18.5 ? (18.5 - currentBmiNum).toFixed(1) : '✓'}
+                                    </span>
+                                    <span className="chart-stat-date">{currentBmiNum != null && currentBmiNum > 18.5 && currentBmiNum < 25 ? 'in healthy range!' : 'to normal'}</span>
+                                </div>
+                            </>
+                        );
+                    })()}
                     {activeTab === 'measurements' && (
                         <>
                             <div className="chart-stat">
@@ -1171,13 +1407,15 @@ const MyProgress: React.FC = () => {
                             transition={{ duration: 0.2 }}
                             className="chart-inner"
                         >
-                            {activeTab === 'consistency' ? (
+                            {isTabEmpty(activeTab) ? (
+                                renderEmptyState(activeTab)
+                            ) : activeTab === 'consistency' ? (
                                 <div className="activity-container">
                                     <div className="weekly-bars">
                                         <h4>This Week's Activity</h4>
                                         <div className="week-bar-grid">
-                                            {weeklyActivity.map((day, i) => (
-                                                <div key={day.day} className="week-bar-item">
+                                              {weeklyActivity.map((day, i) => (
+                                                  <div key={`week-${i}-${day.day}`} className="week-bar-item">
                                                     <div className="week-bar-wrapper">
                                                         <motion.div
                                                             className={`week-bar ${day.active ? 'active' : 'rest'}`}
@@ -1198,7 +1436,7 @@ const MyProgress: React.FC = () => {
                                         <div className="heatmap-grid">
                                             {heatmapData.map((d, i) => (
                                                 <motion.div
-                                                    key={d.day}
+                                                    key={`${d.day}-${d.date ?? i}`}
                                                     className={`heatmap-cell intensity-${d.intensity}`}
                                                     initial={{ scale: 0 }}
                                                     animate={{ scale: 1 }}
@@ -1225,8 +1463,8 @@ const MyProgress: React.FC = () => {
                                             const change = (m.current ?? 0) - (m.start ?? 0);
                                             const isGood = m.label === 'Waist' || m.label === 'Hips' ? change < 0 : change > 0;
                                             return (
-                                                <motion.div
-                                                    key={m.label}
+                                                  <motion.div
+                                                      key={`meas-${i}-${m.label}`}
                                                     className="measurement-row"
                                                     initial={{ opacity: 0, x: -20 }}
                                                     animate={{ opacity: 1, x: 0 }}
@@ -1255,32 +1493,38 @@ const MyProgress: React.FC = () => {
                                                             {change > 0 ? '+' : ''}{change.toFixed(1)}
                                                         </span>
                                                     </div>
-                                                    <div className="measurement-row__ideal">
-                                                        <span>Ideal: {m.ideal}</span>
-                                                    </div>
-                                                </motion.div>
-                                            );
+                                                </motion.div>);
                                         })}
                                     </div>
                                 </div>
-                                    ) : activeTab === 'bmi' ? (
+                            ) : activeTab === 'bmi' ? (
+                                <div className="bmi-chart-expanded">
+                                    <ResponsiveContainer width="100%" height={280}>
                                         <AreaChart data={chartData}>
                                             <defs>
-                                                <linearGradient id="bmiGradient" x1="0" y1="0" x2="0" y2="1">
-                                                    <stop offset="0%" stopColor="#007AFF" stopOpacity={0.3} />
+                                                <linearGradient id="bmiGradientMain" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="0%" stopColor="#007AFF" stopOpacity={0.2} />
                                                     <stop offset="100%" stopColor="#007AFF" stopOpacity={0} />
                                                 </linearGradient>
                                             </defs>
                                             <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} vertical={false} />
                                             <XAxis dataKey="date" stroke={chartColors.axis} tick={{ fontSize: 11, fill: isLightTheme ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.4)' }} axisLine={false} tickLine={false} />
-                                            <YAxis stroke={chartColors.axis} tick={{ fontSize: 11, fill: isLightTheme ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.4)' }} axisLine={false} tickLine={false} domain={[15, 40]} />
+                                            <YAxis stroke={chartColors.axis} tick={{ fontSize: 11, fill: isLightTheme ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.4)' }} axisLine={false} tickLine={false} domain={['dataMin - 1', 'dataMax + 1']} />
                                             <Tooltip content={<CustomTooltip />} />
-                                            <ReferenceLine y={18.5} stroke="#FF9F0A" strokeDasharray="3 3" label={{ value: 'Underweight', position: 'insideBottomLeft', fill: '#FF9F0A', fontSize: 10 }} />
-                                            <ReferenceLine y={25} stroke="#30D158" strokeDasharray="3 3" label={{ value: 'Healthy', position: 'insideTopLeft', fill: '#30D158', fontSize: 10 }} />
-                                            <ReferenceLine y={30} stroke="#FF3B30" strokeDasharray="3 3" label={{ value: 'Overweight', position: 'insideTopLeft', fill: '#FF3B30', fontSize: 10 }} />
-                                            <Area type="monotone" dataKey="bmi" stroke="#007AFF" strokeWidth={2.5} fill="url(#bmiGradient)" dot={{ fill: '#007AFF', strokeWidth: 0, r: 4 }} />
+                                            <ReferenceLine y={18.5} stroke="#FF9F0A" strokeDasharray="3 3" />
+                                            <ReferenceLine y={25} stroke="#30D158" strokeDasharray="3 3" />
+                                            <ReferenceLine y={30} stroke="#FF3B30" strokeDasharray="3 3" />
+                                            <Area type="monotone" dataKey="bmi" stroke="#007AFF" strokeWidth={2.5} fill="url(#bmiGradientMain)" dot={{ fill: '#007AFF', strokeWidth: 0, r: 4 }} connectNulls />
                                         </AreaChart>
-                                    ) : activeTab === 'bodyFat' ? (
+                                    </ResponsiveContainer>
+                                    <div className="bmi-scale-labels" style={{ marginTop: '1rem', paddingBottom: '1rem' }}>
+                                        <div className="bmi-label underweight"><span>&lt; 18.5</span> Underweight</div>
+                                        <div className="bmi-label healthy"><span>18.5 - 24.9</span> Healthy</div>
+                                        <div className="bmi-label overweight"><span>25.0 - 29.9</span> Overweight</div>
+                                        <div className="bmi-label obese"><span>&gt; 30.0</span> Obese</div>
+                                    </div>
+                                </div>
+                            ) : activeTab === 'bodyFat' ? (
 
                                 <div className="body-composition-chart">
                                     <div className="composition-main">
@@ -1309,8 +1553,8 @@ const MyProgress: React.FC = () => {
                                     <div className="composition-pie">
                                         <h5>Current Composition</h5>
                                         <div className="pie-legend">
-                                            {bodyCompositionData.map((item) => (
-                                                <div key={item.name} className="pie-legend-item">
+                                            {bodyCompositionData.map((item, bci) => (
+                                                  <div key={`bc-${bci}-${item.name}`} className="pie-legend-item">
                                                     <span className="pie-dot" style={{ background: item.color }}></span>
                                                     <span>{item.name}: {item.value.toFixed(1)}kg</span>
                                                 </div>
@@ -1359,7 +1603,7 @@ const MyProgress: React.FC = () => {
                     <div className="section-title">
                         <Target size={18} />
                         <h3>Active Goals</h3>
-                        <span className="goal-count">{goals.length} goals</span>
+                        <span className="goal-count">{goals.filter(g => g.isActive !== false).length} goals</span>
                     </div>
                     <button className="section-action" onClick={() => setActiveModal('createGoal')}>
                         <Plus size={14} />
@@ -1367,7 +1611,7 @@ const MyProgress: React.FC = () => {
                     </button>
                 </div>
                 <div className="goals-grid">
-                    {goals.map(goal => {
+                    {goals.filter(g => g.isActive !== false).map((goal, gi) => {
                         const totalChange = Math.abs(goal.targetValue - goal.startValue);
                         const currentChange = Math.abs(goal.currentValue - goal.startValue);
                         const progress = Math.min(100, Math.max(0, (currentChange / totalChange) * 100));
@@ -1377,8 +1621,8 @@ const MyProgress: React.FC = () => {
                         const isExpanded = expandedGoal === goal.id;
 
                         return (
-                            <motion.div
-                                key={goal.id}
+                              <motion.div
+                                    key={`goal-${gi}-${goal.id ?? ''}`}
                                 className={`goal-card ${isExpanded ? 'expanded' : ''}`}
                                 onClick={() => setExpandedGoal(isExpanded ? null : goal.id)}
                                 layout
@@ -1464,42 +1708,6 @@ const MyProgress: React.FC = () => {
                 </div>
             </motion.section>
 
-            {/* BMI Trend Section */}
-            <motion.section className="bmi-trend-section" variants={itemVariants}>
-                <div className="section-header">
-                    <div className="section-title">
-                        <BarChart3 size={18} />
-                        <h3>BMI Trend</h3>
-                        <span className="bmi-status">{bmiValue ? `Current: ${bmiValue} (${bmiCategory})` : 'No data'}</span>
-                    </div>
-                </div>
-                <div className="bmi-chart-expanded">
-                    <ResponsiveContainer width="100%" height={200}>
-                        <AreaChart data={chartData}>
-                            <defs>
-                                <linearGradient id="bmiGradientMain" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stopColor="#007AFF" stopOpacity={0.2} />
-                                    <stop offset="100%" stopColor="#007AFF" stopOpacity={0} />
-                                </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} vertical={false} />
-                            <XAxis dataKey="date" stroke={chartColors.axis} tick={{ fontSize: 10, fill: chartColors.axis }} axisLine={false} tickLine={false} />
-                            <YAxis stroke={chartColors.axis} tick={{ fontSize: 10, fill: chartColors.axis }} axisLine={false} tickLine={false} domain={['dataMin - 1', 'dataMax + 1']} />
-                            <Tooltip content={<CustomTooltip />} />
-                            <ReferenceLine y={18.5} stroke="#FF9F0A" strokeDasharray="3 3" />
-                            <ReferenceLine y={25} stroke="#30D158" strokeDasharray="3 3" />
-                            <ReferenceLine y={30} stroke="#FF3B30" strokeDasharray="3 3" />
-                            <Area type="monotone" dataKey="bmi" stroke="#007AFF" strokeWidth={2} fill="url(#bmiGradientMain)" dot={{ fill: '#007AFF', r: 3 }} />
-                        </AreaChart>
-                    </ResponsiveContainer>
-                    <div className="bmi-scale-labels">
-                        <div className="bmi-label underweight"><span>&lt; 18.5</span> Underweight</div>
-                        <div className="bmi-label healthy"><span>18.5 - 24.9</span> Healthy</div>
-                        <div className="bmi-label overweight"><span>25.0 - 29.9</span> Overweight</div>
-                        <div className="bmi-label obese"><span>&gt; 30.0</span> Obese</div>
-                    </div>
-                </div>
-            </motion.section>
 
             {/* Photo Gallery Preview */}
             <motion.section className="photo-gallery-preview" variants={itemVariants}>
@@ -1516,11 +1724,14 @@ const MyProgress: React.FC = () => {
                 </div>
                 <div className="photo-grid-preview">
                     {photos.length > 0 ? (
-                        photos.slice(0, 4).map(photo => (
-                            <div key={photo.id} className="photo-preview-item" onClick={() => setActiveModal('photoGallery')}>
-                                <img src={photo.photoUrl} alt={photo.description || 'Progress'} />
+                        [...photos]
+                            .sort((a, b) => new Date(b.recordDate).getTime() - new Date(a.recordDate).getTime())
+                            .slice(0, 4)
+                            .map((photo, pi) => (
+                            <div key={`photo-${pi}-${photo.id ?? pi}`} className="photo-preview-item" onClick={() => setActiveModal('photoGallery')}>
+                                <img src={photo.photoUrl.startsWith('http') ? photo.photoUrl : `http://localhost:8081${photo.photoUrl}`} alt={photo.description || 'Progress'} />
                                 <div className="photo-date-overlay">
-                                    {new Date(photo.recordDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                    <span className="photo-date-text">{new Date(photo.recordDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                                 </div>
                             </div>
                         ))
@@ -1551,8 +1762,8 @@ const MyProgress: React.FC = () => {
                         </button>
                     </div>
                     <div className="pb-list">
-                        {personalBests.slice(0, 4).map((pb) => (
-                            <div key={pb.id} className="pb-item">
+                        {personalBests.slice(0, 4).map((pb, i) => (
+                              <div key={`pb-${i}-${pb.id ?? ''}`} className="pb-item">
                                 <div className="pb-item__left">
                                     <span className="pb-category-badge" data-category={pb.category}>
                                         {pb.category.charAt(0).toUpperCase()}
@@ -1577,7 +1788,7 @@ const MyProgress: React.FC = () => {
                             </div>
                         ))}
                     </div>
-                    <button className="panel-btn">
+                    <button className="panel-btn" onClick={() => setIsPRModalOpen(true)}>
                         View All PRs ({personalBests.length})
                         <ChevronRight size={14} />
                     </button>
@@ -1634,8 +1845,8 @@ const MyProgress: React.FC = () => {
                         <span className="notes-count">{notes.length}</span>
                     </div>
                     <div className="trainer-feedback">
-                        {notes.slice(0, 1).map(note => (
-                            <div key={note.id} className="feedback-item">
+                        {notes.slice(0, 1).map((note, ni) => (
+                            <div key={`note-${ni}-${note.id ?? ''}`} className="feedback-item">
                                 <div className="trainer-profile">
                                     <div className="trainer-avatar">
                                         {note.trainer.fullName.split(' ').map(n => n[0]).join('')}
@@ -1697,715 +1908,75 @@ const MyProgress: React.FC = () => {
             </motion.section>
 
             {/* Modals */}
+            {/* Modals */}
             <AnimatePresence>
-                {activeModal === 'logProgress' && (
-                    <motion.div
-                        className="modal-overlay"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={() => setActiveModal(null)}
-                    >
-                        <motion.div
-                            className="modal-content modal-large"
-                            initial={{ scale: 0.95, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.95, opacity: 0 }}
-                            onClick={e => e.stopPropagation()}
-                        >
-                            <div className="modal-header">
-                                <h2>{editingEntry ? 'Edit Progress Entry' : "Log Today's Progress"}</h2>
-                                <button className="modal-close" onClick={() => { setActiveModal(null); setEditingEntry(null); }}>
-                                    <X size={20} />
-                                </button>
-                            </div>
-                            <div className="modal-body">
-                                {editingEntry && (
-                                    <div className="editing-banner">
-                                        <Info size={14} />
-                                        <span>Editing entry from {new Date(editingEntry.date).toLocaleDateString()}</span>
-                                    </div>
-                                )}
-                                <div className="modal-tip">
-                                    <Info size={14} />
-                                    <span>Tip: Log your progress at the same time each day for accurate tracking. Morning measurements are most consistent.</span>
-                                </div>
+                <LogProgressModal
+                    isOpen={activeModal === 'logProgress'}
+                    onClose={() => { setActiveModal(null); setEditingEntry(null); }}
+                    onSave={handleLogProgress}
+                    saving={saving}
+                    editingEntry={editingEntry}
+                    newProgress={newProgress}
+                    setNewProgress={setNewProgress}
+                    stats={stats}
+                />
 
-                                <div className="form-section">
-                                    <h4>Body Metrics</h4>
-                                    <div className="form-grid">
-                                        <div className="form-group">
-                                            <label>Weight (kg)</label>
-                                            <input
-                                                type="number"
-                                                step="0.1"
-                                                placeholder={`Last: ${stats.currentWeight}kg`}
-                                                value={newProgress.weight}
-                                                onChange={e => setNewProgress({ ...newProgress, weight: e.target.value })}
-                                            />
-                                            <span className="form-hint">Step on scale first thing in morning</span>
-                                        </div>
-                                        <div className="form-group">
-                                            <label>Body Fat (%)</label>
-                                            <input
-                                                type="number"
-                                                step="0.1"
-                                                placeholder={`Last: ${stats.bodyFat}%`}
-                                                value={newProgress.bodyFat}
-                                                onChange={e => setNewProgress({ ...newProgress, bodyFat: e.target.value })}
-                                            />
-                                            <span className="form-hint">Use smart scale or calipers</span>
-                                        </div>
-                                        <div className="form-group">
-                                            <label>Muscle Mass (kg)</label>
-                                            <input
-                                                type="number"
-                                                step="0.1"
-                                                placeholder={`Last: ${stats.muscleMass}kg`}
-                                                value={newProgress.muscleMass}
-                                                onChange={e => setNewProgress({ ...newProgress, muscleMass: e.target.value })}
-                                            />
-                                            <span className="form-hint">From smart scale reading</span>
-                                        </div>
-                                    </div>
-                                </div>
+                <LogWorkoutModal
+                    isOpen={activeModal === 'logWorkout'}
+                    onClose={() => setActiveModal(null)}
+                    onSave={handleLogWorkout}
+                    saving={saving}
+                    newWorkout={newWorkout}
+                    setNewWorkout={setNewWorkout}
+                />
 
-                                <div className="form-section">
-                                    <h4>Body Measurements (cm)</h4>
-                                    <p className="form-section-desc">Measure at the widest/largest point for each area</p>
-                                    <div className="form-grid six-col">
-                                        <div className="form-group">
-                                            <label>Chest</label>
-                                            <input
-                                                type="number"
-                                                step="0.1"
-                                                placeholder={`${latest?.chest || ''}`}
-                                                value={newProgress.chest}
-                                                onChange={e => setNewProgress({ ...newProgress, chest: e.target.value })}
-                                            />
-                                        </div>
-                                        <div className="form-group">
-                                            <label>Waist</label>
-                                            <input
-                                                type="number"
-                                                step="0.1"
-                                                placeholder={`${latest?.waist || ''}`}
-                                                value={newProgress.waist}
-                                                onChange={e => setNewProgress({ ...newProgress, waist: e.target.value })}
-                                            />
-                                        </div>
-                                        <div className="form-group">
-                                            <label>Hips</label>
-                                            <input
-                                                type="number"
-                                                step="0.1"
-                                                placeholder={`${latest?.hips || ''}`}
-                                                value={newProgress.hips}
-                                                onChange={e => setNewProgress({ ...newProgress, hips: e.target.value })}
-                                            />
-                                        </div>
-                                        <div className="form-group">
-                                            <label>Arms</label>
-                                            <input
-                                                type="number"
-                                                step="0.1"
-                                                placeholder={`${latest?.arms || ''}`}
-                                                value={newProgress.arms}
-                                                onChange={e => setNewProgress({ ...newProgress, arms: e.target.value })}
-                                            />
-                                        </div>
-                                        <div className="form-group">
-                                            <label>Legs</label>
-                                            <input
-                                                type="number"
-                                                step="0.1"
-                                                placeholder={`${latest?.legs || ''}`}
-                                                value={newProgress.legs}
-                                                onChange={e => setNewProgress({ ...newProgress, legs: e.target.value })}
-                                            />
-                                        </div>
-                                        <div className="form-group">
-                                            <label>Shoulders</label>
-                                            <input
-                                                type="number"
-                                                step="0.1"
-                                                placeholder={`${latest?.shoulders || ''}`}
-                                                value={newProgress.shoulders}
-                                                onChange={e => setNewProgress({ ...newProgress, shoulders: e.target.value })}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
+                <CreateGoalModal
+                    isOpen={activeModal === 'createGoal'}
+                    onClose={() => setActiveModal(null)}
+                    onSave={handleCreateGoal}
+                    saving={saving}
+                    newGoal={newGoal}
+                    setNewGoal={setNewGoal}
+                    stats={stats}
+                />
 
-                                <div className="form-section">
-                                    <h4>Notes (Optional)</h4>
-                                    <textarea
-                                        placeholder="How are you feeling? Any observations about your progress?"
-                                        value={newProgress.notes}
-                                        onChange={e => setNewProgress({ ...newProgress, notes: e.target.value })}
-                                        rows={3}
-                                    />
-                                </div>
-                            </div>
-                            <div className="modal-footer">
-                                <button className="btn-secondary" onClick={() => setActiveModal(null)} disabled={saving}>Cancel</button>
-                                <button className={`btn-primary ${saving ? 'loading' : ''}`} onClick={handleLogProgress} disabled={saving}>
-                                    {saving ? (
-                                        <div className="spinner-small"></div>
-                                    ) : (
-                                        <>
-                                            <Check size={16} />
-                                            <span>Save Progress</span>
-                                        </>
-                                    )}
-                                </button>
-                            </div>
-                        </motion.div>
-                    </motion.div>
-                )}
+                <PhotoUploadModal
+                    isOpen={activeModal === 'photoUpload'}
+                    onClose={() => setActiveModal(null)}
+                    onSave={handlePhotoUpload}
+                    saving={saving}
+                    photoFile={photoFile}
+                    setPhotoFile={setPhotoFile}
+                    photoDescription={photoDescription}
+                    setPhotoDescription={setPhotoDescription}
+                    photoDate={photoDate}
+                    setPhotoDate={setPhotoDate}
+                />
 
-                {activeModal === 'logWorkout' && (
-                    <motion.div
-                        className="modal-overlay"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={() => setActiveModal(null)}
-                    >
-                        <motion.div
-                            className="modal-content"
-                            initial={{ scale: 0.95, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.95, opacity: 0 }}
-                            onClick={e => e.stopPropagation()}
-                        >
-                            <div className="modal-header">
-                                <h2>Log Personal Record</h2>
-                                <button className="modal-close" onClick={() => setActiveModal(null)}>
-                                    <X size={20} />
-                                </button>
-                            </div>
-                            <div className="modal-body">
-                                <div className="form-group">
-                                    <label>Exercise Name</label>
-                                    <input
-                                        type="text"
-                                        placeholder="e.g., Bench Press, Squat, Deadlift"
-                                        value={newWorkout.exercise}
-                                        onChange={e => setNewWorkout({ ...newWorkout, exercise: e.target.value })}
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label>Category</label>
-                                    <select
-                                        value={newWorkout.category}
-                                        onChange={e => setNewWorkout({ ...newWorkout, category: e.target.value as PersonalBest['category'] })}
-                                    >
-                                        <option value="push">Push (Chest, Shoulders, Triceps)</option>
-                                        <option value="pull">Pull (Back, Biceps)</option>
-                                        <option value="legs">Legs (Quads, Hamstrings, Glutes)</option>
-                                        <option value="core">Core (Abs, Obliques)</option>
-                                        <option value="cardio">Cardio / Endurance</option>
-                                    </select>
-                                </div>
-                                <div className="form-row">
-                                    <div className="form-group flex-2">
-                                        <label>Weight</label>
-                                        <input
-                                            type="number"
-                                            placeholder="e.g., 185"
-                                            value={newWorkout.weight}
-                                            onChange={e => setNewWorkout({ ...newWorkout, weight: e.target.value })}
-                                        />
-                                    </div>
-                                    <div className="form-group flex-1">
-                                        <label>Unit</label>
-                                        <select
-                                            value={newWorkout.unit}
-                                            onChange={e => setNewWorkout({ ...newWorkout, unit: e.target.value })}
-                                        >
-                                            <option value="lbs">lbs</option>
-                                            <option value="kg">kg</option>
-                                        </select>
-                                    </div>
-                                    <div className="form-group flex-1">
-                                        <label>Reps</label>
-                                        <input
-                                            type="number"
-                                            placeholder="e.g., 5"
-                                            value={newWorkout.reps}
-                                            onChange={e => setNewWorkout({ ...newWorkout, reps: e.target.value })}
-                                        />
-                                    </div>
-                                </div>
-                                <div className="form-group">
-                                    <label>Notes (optional)</label>
-                                    <textarea
-                                        placeholder="How did it feel? Any form notes?"
-                                        value={newWorkout.notes}
-                                        onChange={e => setNewWorkout({ ...newWorkout, notes: e.target.value })}
-                                    />
-                                </div>
-                            </div>
-                            <div className="modal-footer">
-                                <button className="btn-secondary" onClick={() => setActiveModal(null)}>Cancel</button>
-                                <button className="btn-primary" onClick={handleLogWorkout}>
-                                    <Check size={16} />
-                                    Log PR
-                                </button>
-                            </div>
-                        </motion.div>
-                    </motion.div>
-                )}
+                <PhotoGalleryModal
+                    isOpen={activeModal === 'photoGallery'}
+                    onClose={() => setActiveModal(null)}
+                    onUpload={() => setActiveModal('photoUpload')}
+                    photos={photos}
+                    handleDeletePhoto={handleDeletePhoto}
+                />
 
-                {activeModal === 'createGoal' && (
-                    <motion.div
-                        className="modal-overlay"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={() => setActiveModal(null)}
-                    >
-                        <motion.div
-                            className="modal-content"
-                            initial={{ scale: 0.95, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.95, opacity: 0 }}
-                            onClick={e => e.stopPropagation()}
-                        >
-                            <div className="modal-header">
-                                <h2>Create New Goal</h2>
-                                <button className="modal-close" onClick={() => setActiveModal(null)}>
-                                    <X size={20} />
-                                </button>
-                            </div>
-                            <div className="modal-body">
-                                <div className="form-group">
-                                    <label>Goal Title</label>
-                                    <input
-                                        type="text"
-                                        placeholder="e.g., Reach 75kg, Build 5kg Muscle"
-                                        value={newGoal.title}
-                                        onChange={e => setNewGoal({ ...newGoal, title: e.target.value })}
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label>Goal Type</label>
-                                    <select
-                                        value={newGoal.type}
-                                        onChange={e => setNewGoal({ ...newGoal, type: e.target.value as Goal['type'] })}
-                                    >
-                                        <option value="weight">Weight Loss/Gain</option>
-                                        <option value="muscle">Muscle Mass</option>
-                                        <option value="bodyFat">Body Fat Percentage</option>
-                                        <option value="strength">Strength (Lift Weight)</option>
-                                        <option value="endurance">Endurance</option>
-                                    </select>
-                                </div>
-                                <div className="form-row">
-                                    <div className="form-group">
-                                        <label>Current Value</label>
-                                        <input
-                                            type="number"
-                                            step="0.1"
-                                            placeholder={`e.g., ${stats.currentWeight}`}
-                                            value={newGoal.currentValue}
-                                            onChange={e => setNewGoal({ ...newGoal, currentValue: e.target.value })}
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Target Value</label>
-                                        <input
-                                            type="number"
-                                            step="0.1"
-                                            placeholder="e.g., 75"
-                                            value={newGoal.targetValue}
-                                            onChange={e => setNewGoal({ ...newGoal, targetValue: e.target.value })}
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Unit</label>
-                                        <select
-                                            value={newGoal.unit}
-                                            onChange={e => setNewGoal({ ...newGoal, unit: e.target.value })}
-                                        >
-                                            <option value="kg">kg</option>
-                                            <option value="lbs">lbs</option>
-                                            <option value="%">%</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div className="form-row">
-                                    <div className="form-group">
-                                        <label>Weekly Target (optional)</label>
-                                        <input
-                                            type="number"
-                                            step="0.1"
-                                            placeholder="e.g., 0.5"
-                                            value={newGoal.weeklyTarget}
-                                            onChange={e => setNewGoal({ ...newGoal, weeklyTarget: e.target.value })}
-                                        />
-                                        <span className="form-hint">How much change per week</span>
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Target Date (optional)</label>
-                                        <input
-                                            type="date"
-                                            value={newGoal.targetDate}
-                                            onChange={e => setNewGoal({ ...newGoal, targetDate: e.target.value })}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="modal-footer">
-                                <button className="btn-secondary" onClick={() => setActiveModal(null)}>Cancel</button>
-                                <button className="btn-primary" onClick={handleCreateGoal}>
-                                    <Check size={16} />
-                                    Create Goal
-                                </button>
-                            </div>
-                        </motion.div>
-                    </motion.div>
-                )}
+                <HistoryModal
+                    isOpen={activeModal === 'history'}
+                    onClose={() => setActiveModal(null)}
+                    onAddEntry={() => setActiveModal('logProgress')}
+                    progressEntries={progressEntries}
+                    handleEditEntry={handleEditEntry}
+                    handleDeleteEntry={handleDeleteEntry}
+                    deleteTarget={deleteTarget}
+                    setDeleteTarget={setDeleteTarget}
+                />
 
-                {activeModal === 'photoGallery' && (
-                    <motion.div
-                        className="modal-overlay"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={() => setActiveModal(null)}
-                    >
-                        <motion.div
-                            className="modal-content modal-xl"
-                            initial={{ scale: 0.95, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.95, opacity: 0 }}
-                            onClick={e => e.stopPropagation()}
-                        >
-                            <div className="modal-header">
-                                <div>
-                                    <h2>Visual Progress Gallery</h2>
-                                    <span className="modal-subtitle">Track your transformation over time</span>
-                                </div>
-                                <div className="header-actions">
-                                    <button className="btn-primary btn-sm" onClick={() => setActiveModal('photoUpload')}>
-                                        <Plus size={14} />
-                                        Add Photo
-                                    </button>
-                                    <button className="modal-close" onClick={() => setActiveModal(null)}>
-                                        <X size={20} />
-                                    </button>
-                                </div>
-                            </div>
-                            <div className="modal-body">
-                                {photos.length > 0 ? (
-                                    <div className="photo-gallery-grid">
-                                        {photos.map(photo => (
-                                            <div key={photo.id} className="gallery-card">
-                                                <div className="gallery-image-container">
-                                                    <img src={photo.photoUrl} alt={photo.description || 'Progress'} />
-                                                    <button className="delete-photo-btn" onClick={() => handleDeletePhoto(photo.id)}>
-                                                        <X size={14} />
-                                                    </button>
-                                                </div>
-                                                <div className="gallery-info">
-                                                    <span className="gallery-date">
-                                                        {new Date(photo.recordDate).toLocaleDateString('en-US', { 
-                                                            weekday: 'long', 
-                                                            year: 'numeric', 
-                                                            month: 'long', 
-                                                            day: 'numeric' 
-                                                        })}
-                                                    </span>
-                                                    {photo.description && <p className="gallery-desc">{photo.description}</p>}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className="empty-gallery">
-                                        <Camera size={64} />
-                                        <h3>No photos yet</h3>
-                                        <p>Start your visual journey by uploading your first progress photo.</p>
-                                        <button className="btn-primary" onClick={() => setActiveModal('photoUpload')}>
-                                            Upload Photo
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
-                        </motion.div>
-                    </motion.div>
-                )}
-
-                {activeModal === 'photoUpload' && (
-                    <motion.div
-                        className="modal-overlay"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={() => setActiveModal(null)}
-                    >
-                        <motion.div
-                            className="modal-content"
-                            initial={{ scale: 0.95, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.95, opacity: 0 }}
-                            onClick={e => e.stopPropagation()}
-                        >
-                            <div className="modal-header">
-                                <h2>Add Progress Photo</h2>
-                                <button className="modal-close" onClick={() => setActiveModal(null)}>
-                                    <X size={20} />
-                                </button>
-                            </div>
-                            <div className="modal-body">
-                                <div 
-                                    className={`photo-upload-zone ${photoFile ? 'has-file' : ''}`}
-                                    onClick={() => document.getElementById('photo-input')?.click()}
-                                >
-                                    {photoFile ? (
-                                        <div className="photo-preview-container">
-                                            <img src={URL.createObjectURL(photoFile)} alt="Preview" />
-                                            <div className="change-photo-overlay">
-                                                <Camera size={24} />
-                                                <span>Change Photo</span>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <Camera size={48} />
-                                            <p>Click to select or drag progress photo</p>
-                                            <span>JPG, PNG up to 10MB</span>
-                                        </>
-                                    )}
-                                    <input 
-                                        id="photo-input"
-                                        type="file" 
-                                        accept="image/*" 
-                                        onChange={e => setPhotoFile(e.target.files?.[0] || null)}
-                                        hidden
-                                    />
-                                </div>
-
-                                <div className="form-group mt-4">
-                                    <label>Record Date</label>
-                                    <input 
-                                        type="date" 
-                                        value={photoDate}
-                                        onChange={e => setPhotoDate(e.target.value)}
-                                    />
-                                </div>
-
-                                <div className="form-group">
-                                    <label>Description (Optional)</label>
-                                    <textarea
-                                        placeholder="Front view, side view, etc."
-                                        value={photoDescription}
-                                        onChange={e => setPhotoDescription(e.target.value)}
-                                        rows={2}
-                                    />
-                                </div>
-
-                                <div className="photo-tips">
-                                    <h4>Tips for Progress Photos</h4>
-                                    <ul>
-                                        <li>Use consistent lighting and background</li>
-                                        <li>Take photos at the same time of day</li>
-                                        <li>Include front, side, and back views</li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <div className="modal-footer">
-                                <button className="btn-secondary" onClick={() => setActiveModal(null)} disabled={saving}>Cancel</button>
-                                <button className={`btn-primary ${saving ? 'loading' : ''}`} onClick={handlePhotoUpload} disabled={saving || !photoFile}>
-                                    {saving ? <div className="spinner-small"></div> : (
-                                        <>
-                                            <Check size={16} />
-                                            <span>Upload Photo</span>
-                                        </>
-                                    )}
-                                </button>
-                            </div>
-                        </motion.div>
-                    </motion.div>
-                )}
-
-                {activeModal === 'history' && (
-                    <motion.div
-                        className="modal-overlay"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={() => setActiveModal(null)}
-                    >
-                        <motion.div
-                            className="modal-content history-modal-premium"
-                            initial={{ scale: 0.95, opacity: 0, y: 20 }}
-                            animate={{ scale: 1, opacity: 1, y: 0 }}
-                            exit={{ scale: 0.95, opacity: 0, y: 20 }}
-                            onClick={e => e.stopPropagation()}
-                        >
-                            <div className="history-modal-header">
-                                <div className="header-title-section">
-                                    <div className="header-icon-badge">
-                                        <History size={20} />
-                                    </div>
-                                    <div>
-                                        <h2>Progress Journey</h2>
-                                        <span className="header-subtitle">{progressEntries.length} entries recorded</span>
-                                    </div>
-                                </div>
-                                <button className="modal-close-premium" onClick={() => setActiveModal(null)}>
-                                    <X size={18} />
-                                </button>
-                            </div>
-                            
-                            <div className="history-modal-body">
-                                {progressEntries.length > 0 ? (
-                                    <div className="history-cards-container">
-                                        {[...progressEntries].reverse().map((entry, i) => {
-                                            const prev = progressEntries[progressEntries.length - i - 2];
-                                            const weightChange = prev && entry.weight && prev.weight ? entry.weight - prev.weight : 0;
-                                            const fatChange = prev && entry.bodyFat && prev.bodyFat ? entry.bodyFat - prev.bodyFat : 0;
-                                            
-                                            return (
-                                                <motion.div 
-                                                    key={entry.id} 
-                                                    className="history-entry-card"
-                                                    initial={{ opacity: 0, x: -20 }}
-                                                    animate={{ opacity: 1, x: 0 }}
-                                                    transition={{ delay: i * 0.05 }}
-                                                >
-                                                    <div className="entry-date-badge">
-                                                        <Calendar size={14} />
-                                                        <span>{new Date(entry.date).toLocaleDateString('en-US', { 
-                                                            weekday: 'short',
-                                                            month: 'short', 
-                                                            day: 'numeric',
-                                                            year: 'numeric'
-                                                        })}</span>
-                                                        {i === 0 && <span className="latest-badge">Latest</span>}
-                                                    </div>
-                                                    
-                                                    <div className="entry-metrics-grid">
-                                                        <div className="metric-pill weight">
-                                                            <ScaleIcon size={14} />
-                                                            <span className="metric-value">{entry.weight ? `${entry.weight}kg` : '—'}</span>
-                                                            {weightChange !== 0 && (
-                                                                <span className={`metric-change ${weightChange < 0 ? 'positive' : 'negative'}`}>
-                                                                    {weightChange < 0 ? <TrendingDown size={12} /> : <TrendingUp size={12} />}
-                                                                    {Math.abs(weightChange).toFixed(1)}
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                        
-                                                        <div className="metric-pill bodyfat">
-                                                            <Percent size={14} />
-                                                            <span className="metric-value">{entry.bodyFat ? `${entry.bodyFat}%` : '—'}</span>
-                                                            {fatChange !== 0 && (
-                                                                <span className={`metric-change ${fatChange < 0 ? 'positive' : 'negative'}`}>
-                                                                    {fatChange < 0 ? <TrendingDown size={12} /> : <TrendingUp size={12} />}
-                                                                    {Math.abs(fatChange).toFixed(1)}
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                        
-                                                        <div className="metric-pill muscle">
-                                                            <Dumbbell size={14} />
-                                                            <span className="metric-value">{entry.muscleMass ? `${entry.muscleMass}kg` : '—'}</span>
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    <div className="entry-measurements">
-                                                        {entry.chest && (
-                                                            <div className="measurement-tag">
-                                                                <span className="tag-label">Chest</span>
-                                                                <span className="tag-value">{entry.chest}cm</span>
-                                                            </div>
-                                                        )}
-                                                        {entry.waist && (
-                                                            <div className="measurement-tag">
-                                                                <span className="tag-label">Waist</span>
-                                                                <span className="tag-value">{entry.waist}cm</span>
-                                                            </div>
-                                                        )}
-                                                        {entry.arms && (
-                                                            <div className="measurement-tag">
-                                                                <span className="tag-label">Arms</span>
-                                                                <span className="tag-value">{entry.arms}cm</span>
-                                                            </div>
-                                                        )}
-                                                        {entry.hips && (
-                                                            <div className="measurement-tag">
-                                                                <span className="tag-label">Hips</span>
-                                                                <span className="tag-value">{entry.hips}cm</span>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    
-                                                    {entry.notes && (
-                                                        <div className="entry-notes">
-                                                            <Info size={12} />
-                                                            <span>{entry.notes}</span>
-                                                        </div>
-                                                    )}
-                                                    
-                                                    <div className="entry-actions">
-                                                        <button 
-                                                            className="action-btn edit-btn" 
-                                                            onClick={() => handleEditEntry(entry)}
-                                                            title="Edit entry"
-                                                        >
-                                                            <Edit3 size={14} />
-                                                            <span>Edit</span>
-                                                        </button>
-                                                        <button 
-                                                            className="action-btn delete-btn" 
-                                                            onClick={() => handleDeleteEntry(entry.id)}
-                                                            title="Delete entry"
-                                                        >
-                                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                                <path d="M3 6h18"/>
-                                                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-                                                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-                                                                <line x1="10" y1="11" x2="10" y2="17"/>
-                                                                <line x1="14" y1="11" x2="14" y2="17"/>
-                                                            </svg>
-                                                            <span>Delete</span>
-                                                        </button>
-                                                    </div>
-                                                </motion.div>
-                                            );
-                                        })}
-                                    </div>
-                                ) : (
-                                    <div className="history-empty-state">
-                                        <div className="empty-icon">
-                                            <History size={48} />
-                                        </div>
-                                        <h3>No Progress Recorded Yet</h3>
-                                        <p>Start logging your progress to see your journey here</p>
-                                        <button className="btn-primary" onClick={() => setActiveModal('logProgress')}>
-                                            <Plus size={16} />
-                                            Log First Entry
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
-                            
-                            <div className="history-modal-footer">
-                                <button className="btn-secondary" onClick={() => setActiveModal(null)}>
-                                    Close
-                                </button>
-                                <button className="btn-primary" onClick={() => setActiveModal('logProgress')}>
-                                    <Plus size={16} />
-                                    Add New Entry
-                                </button>
-                            </div>
-                        </motion.div>
-                    </motion.div>
-                )}
+                <PRHistoryModal
+                    isOpen={isPRModalOpen}
+                    onClose={() => setIsPRModalOpen(false)}
+                    memberId={memberId}
+                />
             </AnimatePresence>
         </motion.div>
     );

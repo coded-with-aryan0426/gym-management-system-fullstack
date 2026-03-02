@@ -1,105 +1,178 @@
 # Member Layout & Navigation — Improvement Plan
 
-## Current State Analysis
+## Current State (Accurate — March 2026)
 
-**File:** `MemberLayout.tsx` (39 lines)  
-**Current nav items (8):** Dashboard, My Profile, My Membership, My Progress, Available Classes, My Trainer, My Bookings, Messages.
+**File:** `MemberLayout.tsx` — **40 lines** (confirmed by reading actual source)
 
-**Problems:**
-- **Notifications page exists but is NOT in the navigation** — member can't navigate to it
-- **Settings page exists but is NOT in the navigation** — member can't navigate to it
-- Both Notifications and Settings icons are imported in the file but NOT used in `navItems`!
-- No notification badge count on nav items
-- No grouping/sections in navigation (all 8 items in flat list)
-- No bottom tab bar for mobile
-- No breadcrumbs
-- No search/command palette (Cmd+K pattern)
+```tsx
+// Actual current navItems array (10 items):
+{ path: '/member',             icon: <Home />,         label: 'Dashboard',         color: '#EF4444', end: true }
+{ path: '/member/profile',     icon: <User />,         label: 'My Profile',         color: '#3B82F6' }
+{ path: '/member/membership',  icon: <CreditCard />,   label: 'My Membership',      color: '#8B5CF6' }
+{ path: '/member/progress',    icon: <Activity />,     label: 'My Progress',        color: '#10B981' }
+{ path: '/member/classes',     icon: <BookOpen />,     label: 'Available Classes',  color: '#F59E0B' }
+{ path: '/member/trainer',     icon: <UserCheck />,    label: 'My Trainer',         color: '#06B6D4' }
+{ path: '/member/bookings',    icon: <Calendar />,     label: 'My Bookings',        color: '#EC4899' }
+{ path: '/member/messages',    icon: <MessageSquare />,label: 'Messages',           color: '#6366F1' }
+{ path: '/member/notifications',icon: <Bell />,        label: 'Notifications',      color: '#F97316' }
+{ path: '/member/settings',    icon: <Settings />,     label: 'Settings',           color: '#64748B' }
+```
+
+**What is confirmed working:**
+- All 10 pages are reachable via navigation
+- Uses shared `DashboardLayout` component (consistent with Owner/Trainer roles)
+- `useEffect` sets `data-layout="member"` on `<html>` for CSS scoping and cleanly removes it on unmount
+- Imports `unified-design-system.css` for consistent tokens
+- Renders `<Outlet />` or `children` correctly
+
+**Confirmed missing from current code:**
+- `navItems` array is defined inline inside the component body — recreated on every render
+- No unread badge counts on Messages or Notifications nav items — both show as plain nav items with no count
+- `ChatContext` is NOT imported in MemberLayout — no path to show unread message count
+- No collapsed/icon-only sidebar mode
+- No mobile bottom tab bar
+- No section grouping/headers in sidebar
 
 ---
 
-## Missing Navigation Items
+## What Needs to Be Fixed
 
-| Page | Route | Status |
-|------|-------|--------|
-| Notifications | `/member/notifications` | **EXISTS but NOT in nav** |
-| Settings | `/member/settings` | **EXISTS but NOT in nav** |
+### P0 — Unread Badges (High Impact, Low Effort)
+
+**Gap:** The Messages nav item renders `<MessageSquare size={20} />` with no badge. The Notifications nav item renders `<Bell size={20} />` with no badge. Both are critical engagement drivers — users won't know to check them.
+
+**Fix for Messages:**
+```tsx
+// In MemberLayout.tsx — import ChatContext
+import { useChatContext } from '../../contexts/ChatContext';
+// Inside component:
+const { unreadCount } = useChatContext();
+// In navItems for messages, pass badge: unreadCount > 0 ? unreadCount : undefined
+```
+
+**Fix for Notifications:**
+```tsx
+// Import notificationApi
+import { notificationApi } from '../../api/notificationApi';
+// Add state:
+const [notifUnread, setNotifUnread] = useState(0);
+useEffect(() => {
+    if (!user?.userId) return;
+    notificationApi.getStats(user.userId)
+        .then(stats => setNotifUnread(stats.unread))
+        .catch(() => {});
+    const interval = setInterval(() => {
+        notificationApi.getStats(user.userId!)
+            .then(stats => setNotifUnread(stats.unread))
+            .catch(() => {});
+    }, 60_000); // poll every 60s
+    return () => clearInterval(interval);
+}, [user?.userId]);
+```
+
+**Backend:** `GET /api/notifications/stats?userId={id}` already exists and returns `{ unread, total, starred, archived }`. No backend work needed.
+
+**Check:** Verify `DashboardLayout` / `CommandRail` supports a `badge` prop on `NavItem`. If not, extend the `NavItem` type:
+```ts
+interface NavItem {
+    path: string;
+    icon: React.ReactNode;
+    label: string;
+    color: string;
+    end?: boolean;
+    badge?: number;  // add this
+}
+```
+Then in `CommandRail.tsx`, render badge pill next to the nav item label.
 
 ---
 
-## Proposed Navigation Structure
+### P1 — Performance Fix
 
-### Desktop (Sidebar)
+**Gap:** `navItems` is an array literal defined inside the component function body — it is recreated on every render (every keystroke, every state change in parent).
+
+**Fix:**
+```tsx
+// Move navItems OUTSIDE the component (it never depends on state):
+const NAV_ITEMS: NavItem[] = [
+    { path: '/member', icon: <Home size={20} />, label: 'Dashboard', color: '#EF4444', end: true },
+    // ...
+];
+
+const MemberLayout: React.FC<MemberLayoutProps> = ({ children }) => {
+    // navItems no longer defined here
+    return (
+        <DashboardLayout navItems={NAV_ITEMS}>
 ```
-─── Dashboard          (Home icon, red)
-─── My Profile         (User icon, blue)
+This is a 5-line change and a guaranteed improvement.
 
-── MEMBERSHIP ──
-─── My Membership      (CreditCard icon, purple)
-─── My Bookings        (Calendar icon, pink)
+---
 
-── FITNESS ──
-─── My Progress        (Activity icon, green)
-─── Available Classes  (BookOpen icon, yellow)
-─── My Trainer         (UserCheck icon, cyan)
+### P1 — Section Grouping in Sidebar
 
-── COMMUNICATION ──
-─── Messages           (MessageSquare icon, indigo)  [badge: unread count]
-─── Notifications      (Bell icon, orange)            [badge: unread count]
-
-── SYSTEM ──
-─── Settings           (Settings icon, gray)
+**Fix:** Extend `NavItem` to support `groupLabel` separator:
+```ts
+interface NavItem {
+    // ...existing fields...
+    groupLabel?: string; // renders as section header above this item
+}
 ```
 
-### Mobile (Bottom Tab Bar — 5 items max)
+**Proposed nav structure:**
 ```
-Dashboard | Classes | Progress | Messages | More (→ expands to full nav)
+── MAIN ─────────────────
+   Dashboard
+
+── MEMBERSHIP ───────────
+   My Membership
+   My Bookings
+
+── FITNESS ──────────────
+   My Progress
+   Available Classes
+   My Trainer
+
+── ACCOUNT ──────────────
+   My Profile
+   Messages       [badge]
+   Notifications  [badge]
+   Settings
 ```
 
 ---
 
-## UI/UX Improvements
+### P2 — Mobile Bottom Tab Bar
 
-### Navigation Enhancements
-- **Add Notifications and Settings** to navItems array (they are imported but unused!)
-- **Section headers:** Group nav items under "Membership", "Fitness", "Communication", "System" labels
-- **Badge counts:** Show unread count badges on Messages and Notifications icons
-- **Active indicator:** Animated left border + icon color change (like macOS sidebar)
-- **Collapsed mode:** Allow sidebar to collapse to icon-only view on smaller screens
+**5 tab items (most used):**
+| Tab | Icon | Route |
+|-----|------|-------|
+| Home | `Home` | `/member` |
+| Classes | `BookOpen` | `/member/classes` |
+| Progress | `Activity` | `/member/progress` |
+| Messages | `MessageSquare` | `/member/messages` |
+| More | `MoreHorizontal` | opens drawer with remaining items |
 
-### New Pages to Add
-
-| Page | Purpose | Priority |
-|------|---------|----------|
-| **Gym Info** | Gym address, hours, contact, announcements, gym rules | P1 |
-| **Help & Support** | FAQ, contact support, report issue, feedback | P1 |
-| **QR Check-in** | QR code for gym entry / self check-in | P2 |
-| **Achievements** | Dedicated page for all badges, milestones, streaks | P2 |
-| **Workout Plans** | Saved workout routines / trainer-assigned plans | P1 |
-| **Diet/Nutrition** | Meal plans from trainer, nutrition tips | P3 |
-
-### Pages to Consider Removing or Merging
-
-| Current Page | Action | Reason |
-|--------------|--------|--------|
-| My Profile | Keep but slim down | Remove settings-like functionality, keep display + edit |
-| My Trainer | Keep | Useful for trainer discovery and management |
-| My Bookings | Keep | Essential for booking management |
-| Available Classes | Keep | Core feature |
+**Implementation:** Add `MemberBottomNav.tsx` rendered inside `MemberLayout` only when `window.innerWidth < 768`. "More" drawer contains: My Membership, My Bookings, My Trainer, Notifications, Settings, My Profile.
 
 ---
 
-## Performance Improvements
-- Prefetch adjacent routes on hover
-- Cache notification/message counts in context
-- Memoize `navItems` array (currently recreated on every render)
+### P2 — Future Pages
+
+| Page | Route | Backend Exists? | Priority |
+|------|-------|----------------|----------|
+| Workout Plans | `/member/workouts` | Partially (PTSession endpoints) | P1 |
+| Gym Info | `/member/gym-info` | `GET /api/gym/info` exists | P1 |
+| Help & Support | `/member/help` | No | P2 |
+| Achievements | `/member/achievements` | Embedded in Progress | P2 |
+| QR Check-in | `/member/checkin` | `POST /api/checkin` exists | P2 |
 
 ---
 
 ## Implementation Priority
 
-| Phase | Items |
-|-------|-------|
-| **Phase 1** | **Add Notifications and Settings to nav** (critical — pages exist but are unreachable!) |
-| **Phase 2** | Section headers, badge counts, mobile bottom tab |
-| **Phase 3** | Gym Info page, Help & Support, sidebar collapse |
-| **Phase 4** | QR Check-in, Achievements, Workout Plans pages |
+| Phase | Work | Files Changed |
+|-------|------|---------------|
+| **Phase 1** | Move `navItems` outside component; add `badge` prop to `NavItem`; wire Messages unread count from `ChatContext`; wire Notifications unread count via polling | `MemberLayout.tsx`, `CommandRail.tsx` (NavItem type) |
+| **Phase 2** | Section group headers in sidebar (`groupLabel` on NavItem) | `MemberLayout.tsx`, `CommandRail.tsx` |
+| **Phase 3** | Mobile bottom tab bar `MemberBottomNav.tsx` | New file + `MemberLayout.tsx` |
+| **Phase 4** | Add Gym Info page, Workout Plans page | New route + page files |

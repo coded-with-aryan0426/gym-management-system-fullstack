@@ -1,105 +1,119 @@
-# Member Dashboard — Improvement Plan
+# Member Dashboard Improvements Plan
 
-## Current State Analysis
-
-**File:** `MemberDashboard.tsx` (261 lines)  
-**Current features:** Greeting, membership status card, booked classes count, unread notifications count, assigned trainer info, quick navigation links.
-
-**Problems:**
-- Very basic — only 261 lines for a dashboard (owner dashboard is 6x larger)
-- No charts or visual analytics
-- No real-time data (no workout streaks, attendance trends)
-- No motivational/gamification elements
-- No quick actions for the most common member tasks
-- No skeleton loaders or empty-state illustrations
+**File:** `frontend/src/pages/member/MemberDashboard.tsx`  
+**Backend:** `MemberDashboardController.java` (`GET /api/member/dashboard`)  
+**Lines:** ~261 (frontend) | ~220 (backend)  
+**Last Reviewed:** 2026-03-02 (against actual source)
 
 ---
 
-## Missing Functionality (Real-World Gym App)
+## Current State (Verified)
 
-| Priority | Feature | Description |
-|----------|---------|-------------|
-| **P0** | Attendance streak tracker | "You've been to the gym 12 days in a row!" visual streak counter |
-| **P0** | Today's schedule | Show today's booked classes and PT sessions in a timeline |
-| **P0** | Quick actions bar | Book class, log workout, message trainer, check-in (QR) |
-| **P0** | Membership expiry alert | Prominent banner if membership expires within 7 days |
-| **P1** | Weekly activity chart | Bar chart or heatmap of gym visits this week |
-| **P1** | Progress snapshot | Mini weight/body-fat trend chart (last 30 days) |
-| **P1** | Calorie/workout summary | "This week: 4 workouts, 1,200 cal burned" stat cards |
-| **P1** | Achievements/badges carousel | Recent achievements with animation |
-| **P1** | Upcoming renewals | Card showing next billing date and amount |
-| **P2** | Personalized workout tip | AI-generated or template fitness tip of the day |
-| **P2** | Trainer message preview | Show last message from trainer without navigating |
-| **P2** | Class recommendations | "Based on your goals, try Yoga this week" |
-| **P2** | Gym announcements feed | Owner broadcast messages (maintenance, events, offers) |
-| **P3** | Leaderboard widget | Optional ranking among gym members (opt-in) |
-| **P3** | Weather-based suggestion | "It's raining — perfect day for indoor HIIT!" |
+The dashboard fetches `/api/member/dashboard?memberId=X` and renders:
+- Greeting + date/time header
+- 3 header stat cards: Days Left, Bookings Count, Activity (hardcoded `streakDays: 7`)
+- "NEXT SESSION" banner (fully hardcoded dummy data)
+- My Schedule list (fully hardcoded 3 classes)
+- Sidebar: Quick Actions, My Trainer, Membership Status, Progress Snapshot
+
+**All schedule/progress data is hardcoded.** Only membership, trainer, and booking count come from the API.
 
 ---
 
-## UI/UX Improvements
+## Confirmed Gaps & Improvements
 
-### Layout Changes
-- **Grid layout:** Convert from vertical stack to a responsive bento grid (2-col on desktop, 1-col mobile)
-- **Hero section:** Large greeting card with animated gradient background showing time-sensitive greeting + avatar + streak badge
-- **Stat cards row:** 4 mini stat cards (Workouts This Week, Calories Burned, Current Streak, Days Until Renewal) with micro-animations
-- **Today's timeline:** Vertical timeline of today's booked sessions with time indicators
+### P0 — Data Hardcoding (Critical)
 
-### Visual Enhancements
-- Add skeleton placeholders during loading (matches owner dashboard pattern)
-- Empty state illustrations when no bookings or data
-- Animated counter for streak and stats
-- Color-coded membership status badge (green=active, amber=expiring, red=expired)
-- Glassmorphism cards with subtle hover effects
-- Progress ring for "weekly goal completion" (e.g., 4/5 gym visits)
+| # | Gap | Location | Fix |
+|---|-----|----------|-----|
+| D1 | `streakDays: 7` is hardcoded | line 85 | Backend: add `currentStreak` to `/api/member/dashboard` response (query from `workout_log` or `progress_metrics` table) |
+| D2 | `upcomingClasses` list is 3 fake entries | lines 87-91 | Backend: add `upcomingClasses` array to dashboard response from `class_booking` + `gym_class` JOIN; frontend replace dummy |
+| D3 | Progress Snapshot widget: `weight: 78kg`, `goal: 75kg`, `workouts: 18`, `accuracy: 92%` — all hardcoded | lines 236-252 | Backend: add `progressSnapshot: { currentWeight, goalWeight, totalWorkouts }` from `progress_metrics` table to dashboard response |
+| D4 | `membership.endDate` shows `'Jan 26, 2026'` fallback string, but real API returns ISO date | line 86 | Frontend: parse `membership.endDate` correctly and format it |
 
-### Interactions
-- Pull-to-refresh pattern on mobile
-- Click-through on every card leads to the relevant detail page
-- Celebration animation on streak milestones (7, 30, 100 days)
-- Quick check-in button (QR code modal or NFC trigger)
+### P1 — Backend Dashboard Endpoint Missing Fields
 
----
+The current `/api/member/dashboard` response returns:
+```
+memberId, memberName, email, membership{}, assignedTrainer{}, bookedClassesCount, unreadNotificationsCount
+```
+**Missing from response that frontend needs:**
+- `currentStreak` — query `workout_log` for consecutive days with entries
+- `upcomingClasses[]` — top 3 upcoming class bookings with class title, time, location, trainer
+- `progressSnapshot: { currentWeight, goalWeight, totalWorkouts }` — from `progress_metrics` latest entry
+- `assignedTrainer.specialization` — trainer's specialization field (exists in User entity?)
+- `assignedTrainer.nextSession` — next PT session date from `pt_session` table
 
-## Things to Remove
-- **Nothing to remove** — the dashboard is too sparse. Only add.
+### P2 — Frontend UX Gaps
 
-## Things Wasting Resources
-- No issues currently (the page is too simple to waste resources)
+| # | Gap | Fix |
+|---|-----|-----|
+| F1 | Loading state shows plain text "Loading..." | Replace with skeleton cards matching the actual layout |
+| F2 | No empty state when `upcomingClasses` is empty (currently just falls through) | Add an empty state CTA: "No upcoming sessions — Book a class!" with button |
+| F3 | "Check In" button on next session banner does nothing (navigates to /member/classes but doesn't pre-select the class) | Pass classId as query param: `navigate('/member/classes?classId=X')` |
+| F4 | Progress Snapshot sidebar widget shows hardcoded goal progress bar | Connect to real API data; hide widget if no data |
+| F5 | Notification bell icon in quick actions has no badge for unread count | Use `dashboard.unreadNotificationsCount` to render a badge on the Notifications quick action |
+| F6 | Streak count uses dummy `stats.streakDays = 7` | Connect to real `currentStreak` from API |
 
-## Duplicate Content
-- Greeting + name shown in both dashboard header AND sidebar — keep only one
+### P3 — Database / Backend
 
----
+| # | Gap | Fix |
+|---|-----|-----|
+| DB1 | No streak calculation exists | Add `streakCalculationService` or SQL: count consecutive days where member has a workout_log or class checkin |
+| DB2 | `upcomingClasses` query is missing from dashboard endpoint | Add `classBookingRepository.findTop3UpcomingByMemberId(memberId, now)` with a JOIN on `gym_class` |
+| DB3 | `progressSnapshot` needs latest `progress_metrics` row | Add `progressMetricRepository.findTopByMemberIdOrderByRecordDateDesc(memberId)` |
+| DB4 | No index on `class_booking(member_id, status, class_start_time)` | Add composite index for the upcoming classes query |
 
-## Performance Improvements
-- Implement `React.lazy` for chart components (only load if visible)
-- Use `useMemo` for derived data (already partially done)
-- Add `staleTime` to react-query/SWR to avoid re-fetching on every navigation back
-- Virtualize announcement feed if it grows
+### P4 — Nice to Have
 
----
-
-## New Components Needed
-
-| Component | Purpose |
-|-----------|---------|
-| `AttendanceStreak` | Circular streak counter with fire animation |
-| `TodayTimeline` | Vertical timeline of today's sessions |
-| `WeeklyActivityChart` | Simple bar chart (recharts) |
-| `ProgressSnapshot` | Mini line chart for weight trend |
-| `QuickActionsBar` | 4 icon buttons for most common tasks |
-| `MembershipAlert` | Warning banner for expiring memberships |
-| `AchievementsCarousel` | Horizontal scroll of badge cards |
-| `GymAnnouncements` | Feed of owner broadcasts |
+| # | Improvement |
+|---|------------|
+| N1 | Add a "Today's Focus" card showing today's class/PT session if any |
+| N2 | Show membership expiry warning banner when `daysRemaining < 7` |
+| N3 | Add pull-to-refresh / manual refresh button |
+| N4 | Animate stat card numbers counting up on load |
 
 ---
 
-## Implementation Priority
+## Implementation Order
 
-| Phase | Items |
-|-------|-------|
-| **Phase 1** | Stat cards row, today's timeline, quick actions bar, membership alert |
-| **Phase 2** | Weekly activity chart, progress snapshot, attendance streak |
-| **Phase 3** | Achievements carousel, trainer message preview, announcements |
-| **Phase 4** | Personalized tips, leaderboard, recommendations |
+1. **DB1+DB2+DB3** — Update `getDashboard()` in `MemberDashboardController` to include `upcomingClasses`, `currentStreak`, `progressSnapshot`
+2. **D1+D2+D3** — Remove all hardcoded data from `MemberDashboard.tsx`, connect to API
+3. **F1** — Replace loading text with skeletons
+4. **F2+F3+F5** — Empty state, check-in nav, notification badge
+5. **N2** — Membership expiry warning
+
+---
+
+## API Response Shape (Target)
+
+```json
+{
+  "memberId": 42,
+  "memberName": "John Doe",
+  "membership": {
+    "status": "ACTIVE",
+    "packageName": "Premium Monthly",
+    "daysRemaining": 25,
+    "endDate": "2026-01-26",
+    "isExpired": false
+  },
+  "assignedTrainer": {
+    "id": 5,
+    "fullName": "Sarah Johnson",
+    "specialization": "Strength & Conditioning",
+    "nextSession": "2026-03-05T10:00:00"
+  },
+  "bookedClassesCount": 3,
+  "unreadNotificationsCount": 2,
+  "currentStreak": 7,
+  "upcomingClasses": [
+    { "classId": 10, "title": "Morning Yoga", "type": "Yoga", "startTime": "2026-03-03T09:00:00", "location": "Studio A", "trainerName": "Sarah J.", "bookingId": 55 }
+  ],
+  "progressSnapshot": {
+    "currentWeight": 78.5,
+    "goalWeight": 75.0,
+    "totalWorkouts": 18
+  }
+}
+```

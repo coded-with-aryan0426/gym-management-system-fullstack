@@ -12,6 +12,7 @@ import {
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 import { apiClient } from '../../services/api';
+import { getOrCreateAppId } from '../../utils/appId';
 import '../../styles/unified-design-system.css';
 import './MyMembership.css';
 
@@ -21,6 +22,7 @@ interface MembershipData {
     status?: string;
     packageName?: string;
     packagePrice?: number;
+    planDuration?: string;
     startDate?: string;
     endDate?: string;
     daysRemaining?: number;
@@ -76,6 +78,10 @@ const MyMembership: React.FC = () => {
     const [freezeDays, setFreezeDays] = useState(7);
     const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
     const [isUsingDummyData, setIsUsingDummyData] = useState(false);
+    const [usageStats, setUsageStats] = useState<any>({
+        gymVisits: 0, classesAttended: 0, ptSessionsUsed: 0, ptSessionsTotal: 4, calories: 0, minutesActive: 0, streak: 0, points: 0
+    });
+    const [paymentHistory, setPaymentHistory] = useState<any[]>([]);
 
     const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([
         { id: '1', type: 'visa', last4: '4242', expiry: '12/26', isDefault: true },
@@ -92,25 +98,44 @@ const MyMembership: React.FC = () => {
                 return;
             }
             try {
-                const response = await apiClient.get('/member/membership', {
-                    params: { memberId: userId }
-                });
-                const data = response.data;
+                const [memRes, statsRes, histRes] = await Promise.all([
+                    apiClient.get('/member/membership', { params: { memberId: userId } }),
+                    apiClient.get('/member/membership/usage-stats', { params: { memberId: userId } }),
+                    apiClient.get('/member/payments/history', { params: { memberId: userId } })
+                ]);
+
+                const data = memRes.data;
                 if (data.hasMembership) {
                     setMembership({
                         ...data,
                         autoRenew: data.autoRenew ?? true,
                         freezeAvailable: true,
-                        freezeDaysUsed: 3,
-                        freezeDaysTotal: 14
+                        freezeDaysUsed: data.freezeDaysUsed || 0,
+                        freezeDaysTotal: data.freezeDaysTotal || 14
                     });
                     setIsUsingDummyData(false);
                 } else {
                     setMembership(DUMMY_MEMBERSHIP);
                     setIsUsingDummyData(true);
                 }
+
+                if (statsRes.data && !statsRes.data.error) {
+                    setUsageStats((prev: any) => ({ ...prev, ...statsRes.data }));
+                }
+
+                if (histRes.data && Array.isArray(histRes.data)) {
+                    const mappedHistory = histRes.data.map((t: any) => ({
+                        id: t.refId || `INV-${t.id || Math.random().toString(36).substr(2, 9)}`,
+                        date: new Date(t.dateTime || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                        amount: t.amount || 0,
+                        status: t.status || 'Paid',
+                        method: 'Card ••••',
+                        type: t.type || 'Membership Plan'
+                    }));
+                    setPaymentHistory(mappedHistory);
+                }
             } catch (error) {
-                console.error('Error fetching membership:', error);
+                console.error('Error fetching membership info:', error);
                 setMembership(DUMMY_MEMBERSHIP);
                 setIsUsingDummyData(true);
             } finally {
@@ -170,22 +195,7 @@ const MyMembership: React.FC = () => {
         { icon: <Activity size={18} />, title: 'Health Analytics', desc: 'Advanced body metrics', active: membershipTier.tier !== 'standard', premium: true }
     ];
 
-    const usageStats = {
-        gymVisits: 18,
-        classesAttended: 12,
-        ptSessionsUsed: 2,
-        ptSessionsTotal: 4,
-        calories: 24500,
-        minutesActive: 1680,
-        streak: 7,
-        points: 850
-    };
 
-    const paymentHistory = [
-        { id: 'INV-2025-001', date: 'Dec 20, 2025', amount: 99.99, status: 'Paid', method: 'Visa ••4242', type: 'Monthly Subscription' },
-        { id: 'INV-2025-002', date: 'Nov 20, 2025', amount: 99.99, status: 'Paid', method: 'Visa ••4242', type: 'Monthly Subscription' },
-        { id: 'INV-2025-003', date: 'Oct 20, 2025', amount: 99.99, status: 'Paid', method: 'Visa ••4242', type: 'Monthly Subscription' },
-    ];
 
     const upcomingPerks = [
         { date: 'Jan 28', title: 'Free Smoothie Day', icon: <Coffee size={14} />, type: 'event' },
@@ -193,9 +203,49 @@ const MyMembership: React.FC = () => {
         { date: 'Feb 1', title: 'New Year Challenge', icon: <Target size={14} />, type: 'challenge' }
     ];
 
-    const handleFreezeMembership = () => {
-        toast.success(`Membership frozen for ${freezeDays} days`);
-        setShowFreezeModal(false);
+    const handleFreezeMembership = async () => {
+        if (!membership?.membershipId) return;
+        try {
+            const response = await apiClient.post(`/member/membership/${membership.membershipId}/freeze?days=${freezeDays}`);
+            toast.success(response.data?.message || `Membership frozen for ${freezeDays} days`);
+            setShowFreezeModal(false);
+            setMembership(prev => {
+                if (!prev) return prev;
+                const newEndDate = prev.endDate
+                    ? new Date(new Date(prev.endDate).getTime() + (freezeDays + 1) * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+                    : prev.endDate;
+                return {
+                    ...prev,
+                    isFrozen: true,
+                    freezeDaysUsed: (prev.freezeDaysUsed || 0) + freezeDays,
+                    endDate: newEndDate,
+                    daysRemaining: prev.daysRemaining ? prev.daysRemaining + freezeDays : prev.daysRemaining
+                };
+            });
+        } catch (error: any) {
+            toast.error(error.response?.data?.error || 'Failed to freeze membership');
+        }
+    };
+
+    const handleAutoRenewToggle = async (enabled: boolean) => {
+        if (!membership?.membershipId) return;
+        try {
+            const response = await apiClient.put(`/member/membership/${membership.membershipId}/auto-renew?enabled=${enabled}`);
+            toast.success(response.data?.message || `Auto-renewal ${enabled ? 'enabled' : 'disabled'}`);
+            setMembership(prev => prev ? { ...prev, autoRenew: enabled } : null);
+        } catch (error: any) {
+            toast.error(error.response?.data?.error || 'Please add a payment method before enabling auto-renewal.');
+        }
+    };
+
+    const handleCancelMembership = async () => {
+        if (!membership?.membershipId) return;
+        try {
+            const response = await apiClient.post(`/member/membership/${membership.membershipId}/cancel-request`);
+            toast.success(response.data?.message || 'Cancellation request sent');
+        } catch (error: any) {
+            toast.error(error.response?.data?.error || 'Failed to send cancellation request');
+        }
     };
 
     const handleCopyMemberId = () => {
@@ -219,9 +269,9 @@ const MyMembership: React.FC = () => {
     if (loading) {
         return (
             <div className="mm-loading">
-                <motion.div 
+                <motion.div
                     className="mm-loading__spinner"
-                    animate={{ rotate: 360 }} 
+                    animate={{ rotate: 360 }}
                     transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                 >
                     <CreditCard size={28} />
@@ -231,7 +281,16 @@ const MyMembership: React.FC = () => {
         );
     }
 
-    const progressPercentage = membership?.daysRemaining ? Math.min((membership.daysRemaining / 30) * 100, 100) : 0;
+    const totalDays = (() => {
+        if (membership?.startDate && membership?.endDate) {
+            const start = new Date(membership.startDate).getTime();
+            const end = new Date(membership.endDate).getTime();
+            return Math.max(1, Math.ceil((end - start) / (1000 * 60 * 60 * 24)));
+        }
+        return 90;
+    })();
+    const daysUsed = totalDays - (membership?.daysRemaining ?? totalDays);
+    const progressPercentage = Math.min(Math.max((daysUsed / totalDays) * 100, 0), 100);
     const freezeProgress = membership?.freezeDaysTotal ? ((membership.freezeDaysUsed || 0) / membership.freezeDaysTotal) * 100 : 0;
 
     return (
@@ -242,7 +301,7 @@ const MyMembership: React.FC = () => {
             animate="visible"
         >
             {isUsingDummyData && (
-                <motion.div 
+                <motion.div
                     className="mm-dev-banner"
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -260,7 +319,7 @@ const MyMembership: React.FC = () => {
             <motion.div className="mm-hero" variants={itemVariants}>
                 <div className="mm-hero__glow" />
                 <div className="mm-hero__pattern" />
-                
+
                 <div className="mm-hero__content">
                     <div className="mm-hero__header">
                         <div className="mm-hero__plan-info">
@@ -271,7 +330,7 @@ const MyMembership: React.FC = () => {
                             <h1 className="mm-hero__title">{membership?.packageName || 'Membership'}</h1>
                             <div className="mm-hero__id-group">
                                 <div className="mm-hero__id" onClick={handleCopyMemberId}>
-                                    <span>ID: MEM-{user?.id || '0000'}</span>
+                                    <span>ID: {user?.userId ? getOrCreateAppId(user.userId, 'MEMBER', (user as any).createdAt) : 'MBR-----'}</span>
                                     <Copy size={10} />
                                 </div>
                                 <div className={`mm-status ${membership?.isExpired ? 'mm-status--expired' : ''} ${isUsingDummyData ? 'mm-status--preview' : ''}`}>
@@ -281,7 +340,7 @@ const MyMembership: React.FC = () => {
                         </div>
 
                         <div className="mm-hero__actions">
-                            <motion.button 
+                            <motion.button
                                 className="mm-qr-btn"
                                 onClick={() => setShowQRCode(true)}
                                 whileHover={{ scale: 1.02 }}
@@ -290,7 +349,7 @@ const MyMembership: React.FC = () => {
                                 <QrCode size={14} />
                                 QR
                             </motion.button>
-                            <motion.button 
+                            <motion.button
                                 className="mm-renew-btn"
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
@@ -344,7 +403,7 @@ const MyMembership: React.FC = () => {
                                 </div>
                                 <div className="mm-hero__stat-pill">
                                     <CreditCard size={12} />
-                                    <span>Plan: <strong>${membership?.packagePrice?.toFixed(2) || '0.00'}/mo</strong></span>
+                                    <span>Plan: <strong>₹{membership?.packagePrice?.toLocaleString('en-IN') || '0'}{membership?.planDuration ? ` / ${membership.planDuration}` : ''}</strong></span>
                                 </div>
                             </div>
                         </div>
@@ -438,7 +497,7 @@ const MyMembership: React.FC = () => {
                     {activeTab === 'overview' && (
                         <>
                             <div className="mm-actions-grid">
-                                <motion.button 
+                                <motion.button
                                     className="mm-action-card"
                                     onClick={() => setShowQRCode(true)}
                                     whileHover={{ y: -3, boxShadow: '0 8px 24px rgba(59, 130, 246, 0.15)' }}
@@ -451,7 +510,7 @@ const MyMembership: React.FC = () => {
                                         <span className="mm-action-card__desc">Scan at entrance</span>
                                     </div>
                                 </motion.button>
-                                <motion.button 
+                                <motion.button
                                     className="mm-action-card"
                                     whileHover={{ y: -3, boxShadow: '0 8px 24px rgba(34, 197, 94, 0.15)' }}
                                     onClick={() => toast.success('Guest pass sent!')}
@@ -464,7 +523,7 @@ const MyMembership: React.FC = () => {
                                         <span className="mm-action-card__desc">2 remaining</span>
                                     </div>
                                 </motion.button>
-                                <motion.button 
+                                <motion.button
                                     className="mm-action-card"
                                     onClick={() => setShowFreezeModal(true)}
                                     whileHover={{ y: -3, boxShadow: '0 8px 24px rgba(139, 92, 246, 0.15)' }}
@@ -477,7 +536,7 @@ const MyMembership: React.FC = () => {
                                         <span className="mm-action-card__desc">11 days left</span>
                                     </div>
                                 </motion.button>
-                                <motion.button 
+                                <motion.button
                                     className="mm-action-card"
                                     whileHover={{ y: -3, boxShadow: '0 8px 24px rgba(245, 158, 11, 0.15)' }}
                                     onClick={() => toast.success('Renewal reminder set')}
@@ -541,8 +600,8 @@ const MyMembership: React.FC = () => {
                                 </div>
                                 <div className="mm-perks-list">
                                     {upcomingPerks.map((perk, i) => (
-                                        <motion.div 
-                                            key={i} 
+                                        <motion.div
+                                            key={i}
                                             className="mm-perk-item"
                                             initial={{ opacity: 0, x: -12 }}
                                             animate={{ opacity: 1, x: 0 }}
@@ -620,7 +679,7 @@ const MyMembership: React.FC = () => {
                                             </div>
                                             <span>150 more to next reward</span>
                                         </div>
-                                        <motion.button 
+                                        <motion.button
                                             className="mm-rewards-card__btn"
                                             whileHover={{ scale: 1.02 }}
                                             whileTap={{ scale: 0.98 }}
@@ -645,8 +704,8 @@ const MyMembership: React.FC = () => {
                                 </div>
                                 <div className="mm-payment-methods">
                                     {paymentMethods.map((pm) => (
-                                        <motion.div 
-                                            key={pm.id} 
+                                        <motion.div
+                                            key={pm.id}
                                             className={`mm-payment-card ${pm.isDefault ? 'mm-payment-card--default' : ''}`}
                                             whileHover={{ scale: 1.01 }}
                                         >
@@ -686,7 +745,7 @@ const MyMembership: React.FC = () => {
                                 </div>
                                 <div className="mm-payment-history">
                                     {paymentHistory.map((payment, i) => (
-                                        <motion.div 
+                                        <motion.div
                                             key={payment.id}
                                             className="mm-history-item"
                                             initial={{ opacity: 0, y: 8 }}
@@ -726,13 +785,10 @@ const MyMembership: React.FC = () => {
                                     </div>
                                 </div>
                                 <label className="mm-toggle">
-                                    <input 
-                                        type="checkbox" 
-                                        checked={membership?.autoRenew} 
-                                        onChange={() => {
-                                            setMembership(prev => prev ? {...prev, autoRenew: !prev.autoRenew} : null);
-                                            toast.success('Auto-renewal updated');
-                                        }}
+                                    <input
+                                        type="checkbox"
+                                        checked={membership?.autoRenew}
+                                        onChange={(e) => handleAutoRenewToggle(e.target.checked)}
                                     />
                                     <span className="mm-toggle__slider" />
                                 </label>
@@ -751,7 +807,7 @@ const MyMembership: React.FC = () => {
                                         </div>
                                     </div>
                                 </div>
-                                <motion.button 
+                                <motion.button
                                     className="mm-setting-btn"
                                     onClick={() => setShowFreezeModal(true)}
                                     disabled={!membership?.freezeAvailable}
@@ -788,9 +844,9 @@ const MyMembership: React.FC = () => {
                                         <p>End your membership at the current billing period</p>
                                     </div>
                                 </div>
-                                <motion.button 
+                                <motion.button
                                     className="mm-setting-btn mm-setting-btn--danger"
-                                    onClick={() => toast.error('Please contact support to cancel')}
+                                    onClick={handleCancelMembership}
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
                                 >
@@ -804,14 +860,14 @@ const MyMembership: React.FC = () => {
 
             <AnimatePresence>
                 {showQRCode && (
-                    <motion.div 
+                    <motion.div
                         className="mm-modal-overlay"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={() => setShowQRCode(false)}
                     >
-                        <motion.div 
+                        <motion.div
                             className="mm-qr-modal"
                             initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
@@ -841,14 +897,14 @@ const MyMembership: React.FC = () => {
                 )}
 
                 {showFreezeModal && (
-                    <motion.div 
+                    <motion.div
                         className="mm-modal-overlay"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={() => setShowFreezeModal(false)}
                     >
-                        <motion.div 
+                        <motion.div
                             className="mm-freeze-modal"
                             initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}

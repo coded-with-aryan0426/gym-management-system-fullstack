@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { BarChart3, Activity, Target, Dumbbell, Camera, Heart } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { memberProgressApi } from '../../services/api';
 import '../../styles/macos-member.css';
@@ -291,7 +292,7 @@ const MyProgress: React.FC = () => {
                     transition={{ duration: 0.2 }}
                     className="tab-content"
                 >
-                    {activeTab === 'overview' && <OverviewTab />}
+                    {activeTab === 'overview' && <OverviewTab timeRange={timeRange} />}
                     {activeTab === 'metrics' && <MetricsTab timeRange={timeRange} />}
                     {activeTab === 'goals' && <GoalsTab />}
                     {activeTab === 'workouts' && <WorkoutsTab />}

@@ -126,50 +126,50 @@ const api = {
     return response.data;
   },
 
-    async getAllTrainersPerformance(): Promise<Record<number, TrainerPerformance>> {
-      const response = await apiClient.get<Record<number, TrainerPerformance>>('/users/trainers/performance');
-      return response.data;
-    },
+  async getAllTrainersPerformance(): Promise<Record<number, TrainerPerformance>> {
+    const response = await apiClient.get<Record<number, TrainerPerformance>>('/users/trainers/performance');
+    return response.data;
+  },
 
-    // Trainer Details (owner-side)
-    async getTrainerDetails(trainerId: number): Promise<any> {
-      const response = await apiClient.get(`/users/trainers/${trainerId}/details`);
-      return response.data;
-    },
+  // Trainer Details (owner-side)
+  async getTrainerDetails(trainerId: number): Promise<any> {
+    const response = await apiClient.get(`/users/trainers/${trainerId}/details`);
+    return response.data;
+  },
 
-    async updateTrainerDetails(trainerId: number, data: any): Promise<any> {
-      const response = await apiClient.put(`/users/trainers/${trainerId}/details`, data);
-      return response.data;
-    },
+  async updateTrainerDetails(trainerId: number, data: any): Promise<any> {
+    const response = await apiClient.put(`/users/trainers/${trainerId}/details`, data);
+    return response.data;
+  },
 
-    // Compensation / Salary
-    async getTrainerCompensation(trainerId: number): Promise<any[]> {
-      const response = await apiClient.get(`/users/${trainerId}/compensation`);
-      return response.data;
-    },
+  // Compensation / Salary
+  async getTrainerCompensation(trainerId: number): Promise<any[]> {
+    const response = await apiClient.get(`/users/${trainerId}/compensation`);
+    return response.data;
+  },
 
-    async createCompensationRule(trainerId: number, data: any): Promise<any> {
-      const response = await apiClient.post(`/users/${trainerId}/compensation`, data);
-      return response.data;
-    },
+  async createCompensationRule(trainerId: number, data: any): Promise<any> {
+    const response = await apiClient.post(`/users/${trainerId}/compensation`, data);
+    return response.data;
+  },
 
-    async updateCompensationRule(trainerId: number, ruleId: number, data: any): Promise<any> {
-      const response = await apiClient.put(`/users/${trainerId}/compensation/${ruleId}`, data);
-      return response.data;
-    },
+  async updateCompensationRule(trainerId: number, ruleId: number, data: any): Promise<any> {
+    const response = await apiClient.put(`/users/${trainerId}/compensation/${ruleId}`, data);
+    return response.data;
+  },
 
-    async deleteCompensationRule(trainerId: number, ruleId: number): Promise<any> {
-      const response = await apiClient.delete(`/users/${trainerId}/compensation/${ruleId}`);
-      return response.data;
-    },
+  async deleteCompensationRule(trainerId: number, ruleId: number): Promise<any> {
+    const response = await apiClient.delete(`/users/${trainerId}/compensation/${ruleId}`);
+    return response.data;
+  },
 
-    // Attendance
-    async getTrainerAttendance(trainerId: number, days: number = 30): Promise<any> {
-      const response = await apiClient.get(`/users/${trainerId}/attendance`, { params: { days } });
-      return response.data;
-    },
+  // Attendance
+  async getTrainerAttendance(trainerId: number, days: number = 30): Promise<any> {
+    const response = await apiClient.get(`/users/${trainerId}/attendance`, { params: { days } });
+    return response.data;
+  },
 
-    async getUserById(id: number): Promise<User> {
+  async getUserById(id: number): Promise<User> {
     const response = await apiClient.get<User>(`/users/${id}`);
     return response.data;
   },
@@ -951,6 +951,13 @@ const memberProgressApi = {
     return response.data;
   },
 
+  async getPersonalBests(memberId: number): Promise<PersonalBestDTO[]> {
+    const response = await apiClient.get<PersonalBestDTO[]>('/member/progress/personal-bests', {
+      params: { memberId }
+    });
+    return response.data;
+  },
+
   async createGoal(memberId: number, dto: MemberGoalDTO): Promise<MemberGoalDTO> {
     const response = await apiClient.post<MemberGoalDTO>('/member/progress/goals', dto, {
       params: { memberId }
@@ -969,13 +976,6 @@ const memberProgressApi = {
     await apiClient.delete(`/member/progress/goals/${goalId}`, {
       params: { memberId }
     });
-  },
-
-  async getPersonalBests(memberId: number): Promise<PersonalBestDTO[]> {
-    const response = await apiClient.get<PersonalBestDTO[]>('/member/progress/personal-bests', {
-      params: { memberId }
-    });
-    return response.data;
   },
 
   async createOrUpdatePersonalBest(memberId: number, dto: PersonalBestDTO): Promise<PersonalBestDTO> {
@@ -1067,6 +1067,7 @@ export interface GymClassDTO {
   recurrencePattern?: string;
   isBooked?: boolean;
   bookingId?: number;
+  isWaitlisted?: boolean;
 }
 
 export interface ClassBookingDTO {

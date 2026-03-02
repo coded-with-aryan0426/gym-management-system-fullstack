@@ -1,0 +1,11 @@
+{
+  "general": {
+    "sessionRetention": {
+      "enabled": true,
+      "maxAge": ""
+    }
+  },
+  "ui": {
+    "inlineThinkingMode": "full"
+  }
+}

@@ -29,8 +29,8 @@ const ActivityTimeline: React.FC = () => {
         <div className="activity-timeline">
             <h3 className="activity-timeline__title">Recent Activity</h3>
             <div className="activity-timeline__list">
-                {activities.map((item) => (
-                    <div key={item.id} className="activity-item">
+                {activities.map((item, ai) => (
+                    <div key={`activity-${ai}-${item.id ?? ''}`} className="activity-item">
                         <div className="activity-item__icon">
                             {getIcon(item.type)}
                         </div>

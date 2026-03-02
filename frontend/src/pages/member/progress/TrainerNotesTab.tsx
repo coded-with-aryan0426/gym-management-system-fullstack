@@ -162,9 +162,9 @@ const TrainerNotesTab: React.FC = () => {
                             <p>Your trainer will send messages and feedback here</p>
                         </div>
                     ) : (
-                        filteredNotes.map((note) => (
+                        filteredNotes.map((note, ni) => (
                             <motion.div
-                                key={note.id}
+                                key={`note-${ni}-${note.id ?? ''}`}
                                 className={`note-card ${note.isRead ? 'read' : 'unread'}`}
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}

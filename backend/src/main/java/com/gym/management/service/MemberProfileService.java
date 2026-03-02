@@ -298,9 +298,24 @@ public class MemberProfileService {
     }
 
     private List<String> parseFitnessGoals(String fitnessGoals) {
-        if (fitnessGoals == null || fitnessGoals.isEmpty()) {
+        if (fitnessGoals == null || fitnessGoals.trim().isEmpty() || fitnessGoals.equals("[]")) {
             return Collections.emptyList();
         }
-        return Arrays.asList(fitnessGoals.split(","));
+        
+        String cleaned = fitnessGoals.trim();
+        // Handle stringified JSON format if present
+        if (cleaned.startsWith("[") && cleaned.endsWith("]")) {
+            cleaned = cleaned.substring(1, cleaned.length() - 1);
+        }
+        
+        if (cleaned.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return Arrays.stream(cleaned.split(","))
+                .map(String::trim)
+                .map(s -> s.replaceAll("^[\"']|[\"']$", "")) // Remove surrounding quotes
+                .filter(s -> !s.isEmpty())
+                .collect(java.util.stream.Collectors.toList());
     }
 }

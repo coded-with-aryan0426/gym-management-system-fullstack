@@ -31,9 +31,10 @@ public class GymClassService {
     @Autowired
     private UserRepository userRepository;
 
-    private static final String[] CLASS_TYPES = {"Yoga", "HIIT", "Strength", "Spin", "Pilates", "Boxing", "CrossFit", "Group"};
-    private static final String[] DIFFICULTIES = {"Beginner", "Intermediate", "Advanced"};
-    private static final String[] LOCATIONS = {"Studio A", "Studio B", "Main Floor", "Spin Room", "Boxing Ring"};
+    private static final String[] CLASS_TYPES = { "Yoga", "HIIT", "Strength", "Spin", "Pilates", "Boxing", "CrossFit",
+            "Group" };
+    private static final String[] DIFFICULTIES = { "Beginner", "Intermediate", "Advanced" };
+    private static final String[] LOCATIONS = { "Studio A", "Studio B", "Main Floor", "Spin Room", "Boxing Ring" };
 
     @PostConstruct
     public void initializeDummyClasses() {
@@ -58,11 +59,12 @@ public class GymClassService {
             LocalDate classDate = today.plusDays(dayOffset);
             int classesPerDay = dayOffset == 0 ? 7 : 5;
 
-            String[] times = {"08:00", "09:30", "11:00", "14:00", "16:30", "18:00", "19:30"};
+            String[] times = { "08:00", "09:30", "11:00", "14:00", "16:30", "18:00", "19:30" };
 
             for (int i = 0; i < classesPerDay; i++) {
                 String[] timeParts = times[i % times.length].split(":");
-                LocalDateTime startTime = LocalDateTime.of(classDate, LocalTime.of(Integer.parseInt(timeParts[0]), Integer.parseInt(timeParts[1])));
+                LocalDateTime startTime = LocalDateTime.of(classDate,
+                        LocalTime.of(Integer.parseInt(timeParts[0]), Integer.parseInt(timeParts[1])));
 
                 if (startTime.isBefore(LocalDateTime.now())) {
                     continue;
@@ -77,7 +79,7 @@ public class GymClassService {
                 gymClass.setDescription("Join us for an energizing " + classType + " session!");
                 gymClass.setTrainer(trainer);
                 gymClass.setStartTime(startTime);
-                gymClass.setDurationMinutes(new int[]{45, 60, 75, 90}[random.nextInt(4)]);
+                gymClass.setDurationMinutes(new int[] { 45, 60, 75, 90 }[random.nextInt(4)]);
                 gymClass.setMaxCapacity(random.nextInt(15) + 10);
                 gymClass.setCurrentBookings(random.nextInt(gymClass.getMaxCapacity() / 2));
                 gymClass.setDifficulty(DIFFICULTIES[random.nextInt(DIFFICULTIES.length)]);
@@ -92,21 +94,30 @@ public class GymClassService {
     @Transactional(readOnly = true)
     public List<GymClassDTO> getAvailableClasses(Long memberId) {
         LocalDateTime now = LocalDateTime.now();
-        List<GymClass> classes = gymClassRepository.findByStartTimeAfterAndStatusOrderByStartTimeAsc(now, GymClass.ClassStatus.SCHEDULED);
+        List<GymClass> classes = gymClassRepository.findByStartTimeAfterAndStatusOrderByStartTimeAsc(now,
+                GymClass.ClassStatus.SCHEDULED);
 
         Set<Long> bookedClassIds = new HashSet<>();
         Map<Long, Long> bookingIdMap = new HashMap<>();
+        Set<Long> waitlistedClassIds = new HashSet<>();
 
         if (memberId != null) {
-            List<ClassBooking> memberBookings = classBookingRepository.findByMemberUserIdAndStatusOrderByBookedAtDesc(memberId, ClassBooking.BookingStatus.CONFIRMED);
+            List<ClassBooking> memberBookings = classBookingRepository
+                    .findByMemberUserIdAndStatusOrderByBookedAtDesc(memberId, ClassBooking.BookingStatus.CONFIRMED);
             for (ClassBooking booking : memberBookings) {
                 bookedClassIds.add(booking.getGymClass().getClassId());
                 bookingIdMap.put(booking.getGymClass().getClassId(), booking.getBookingId());
             }
+            List<ClassBooking> waitlistBookings = classBookingRepository
+                    .findByMemberUserIdAndStatusOrderByBookedAtDesc(memberId, ClassBooking.BookingStatus.WAITLISTED);
+            for (ClassBooking booking : waitlistBookings) {
+                waitlistedClassIds.add(booking.getGymClass().getClassId());
+            }
         }
 
         return classes.stream()
-                .map(gc -> toDTO(gc, bookedClassIds.contains(gc.getClassId()), bookingIdMap.get(gc.getClassId())))
+                .map(gc -> toDTO(gc, bookedClassIds.contains(gc.getClassId()), bookingIdMap.get(gc.getClassId()),
+                        waitlistedClassIds.contains(gc.getClassId())))
                 .collect(Collectors.toList());
     }
 
@@ -120,18 +131,26 @@ public class GymClassService {
 
         Set<Long> bookedClassIds = new HashSet<>();
         Map<Long, Long> bookingIdMap = new HashMap<>();
+        Set<Long> waitlistedClassIds = new HashSet<>();
 
         if (memberId != null) {
-            List<ClassBooking> memberBookings = classBookingRepository.findByMemberUserIdAndStatusOrderByBookedAtDesc(memberId, ClassBooking.BookingStatus.CONFIRMED);
+            List<ClassBooking> memberBookings = classBookingRepository
+                    .findByMemberUserIdAndStatusOrderByBookedAtDesc(memberId, ClassBooking.BookingStatus.CONFIRMED);
             for (ClassBooking booking : memberBookings) {
                 bookedClassIds.add(booking.getGymClass().getClassId());
                 bookingIdMap.put(booking.getGymClass().getClassId(), booking.getBookingId());
+            }
+            List<ClassBooking> waitlistBookings = classBookingRepository
+                    .findByMemberUserIdAndStatusOrderByBookedAtDesc(memberId, ClassBooking.BookingStatus.WAITLISTED);
+            for (ClassBooking booking : waitlistBookings) {
+                waitlistedClassIds.add(booking.getGymClass().getClassId());
             }
         }
 
         return classes.stream()
                 .filter(gc -> gc.getStartTime().isAfter(LocalDateTime.now()))
-                .map(gc -> toDTO(gc, bookedClassIds.contains(gc.getClassId()), bookingIdMap.get(gc.getClassId())))
+                .map(gc -> toDTO(gc, bookedClassIds.contains(gc.getClassId()), bookingIdMap.get(gc.getClassId()),
+                        waitlistedClassIds.contains(gc.getClassId())))
                 .collect(Collectors.toList());
     }
 
@@ -161,12 +180,25 @@ public class GymClassService {
             throw new IllegalArgumentException("You have already booked this class");
         }
 
-        if (gymClass.getSpotsLeft() <= 0) {
-            throw new IllegalArgumentException("This class is full");
+        // Check if already on waitlist
+        boolean alreadyWaitlisted = classBookingRepository.existsByGymClassClassIdAndMemberUserIdAndStatus(
+                classId, memberId, ClassBooking.BookingStatus.WAITLISTED);
+        if (alreadyWaitlisted) {
+            throw new IllegalArgumentException("You are already on the waitlist for this class");
         }
 
         if (gymClass.getStartTime().isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("This class has already started");
+        }
+
+        // If class is full → create a WAITLISTED booking instead of throwing
+        if (gymClass.getSpotsLeft() <= 0) {
+            ClassBooking waitlistBooking = new ClassBooking();
+            waitlistBooking.setGymClass(gymClass);
+            waitlistBooking.setMember(member);
+            waitlistBooking.setStatus(ClassBooking.BookingStatus.WAITLISTED);
+            ClassBooking saved = classBookingRepository.save(waitlistBooking);
+            return toBookingDTO(saved);
         }
 
         ClassBooking booking = new ClassBooking();
@@ -235,6 +267,10 @@ public class GymClassService {
     }
 
     private GymClassDTO toDTO(GymClass gc, boolean isBooked, Long bookingId) {
+        return toDTO(gc, isBooked, bookingId, false);
+    }
+
+    private GymClassDTO toDTO(GymClass gc, boolean isBooked, Long bookingId, boolean isWaitlisted) {
         GymClassDTO dto = new GymClassDTO();
         dto.setClassId(gc.getClassId());
         dto.setClassName(gc.getClassName());
@@ -252,6 +288,7 @@ public class GymClassService {
         dto.setRecurrencePattern(gc.getRecurrencePattern());
         dto.setIsBooked(isBooked);
         dto.setBookingId(bookingId);
+        dto.setIsWaitlisted(isWaitlisted);
 
         if (gc.getTrainer() != null) {
             dto.setTrainerId(gc.getTrainer().getUserId());

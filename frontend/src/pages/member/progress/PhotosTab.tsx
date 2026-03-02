@@ -114,8 +114,8 @@ const PhotosTab: React.FC = () => {
                                 <label>Date Filter</label>
                                 <select value={selectedDate} onChange={e => setSelectedDate(e.target.value)}>
                                     <option value="">All Photos</option>
-                                    {photos.map((photo) => (
-                                        <option key={photo.recordDate} value={photo.recordDate}>
+                                    {photos.map((photo, opi) => (
+                                        <option key={`opt-${opi}-${photo.recordDate}`} value={photo.recordDate}>
                                             {getPhotoDate(photo.recordDate)}
                                         </option>
                                     ))}
@@ -123,9 +123,9 @@ const PhotosTab: React.FC = () => {
                             </div>
 
                             <div className="photo-gallery">
-                                {filteredPhotos.map((photo) => (
+                                {filteredPhotos.map((photo, fpi) => (
                                     <motion.div
-                                        key={photo.id}
+                                        key={`fphoto-${fpi}-${photo.id ?? ''}`}
                                         className="photo-card"
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}

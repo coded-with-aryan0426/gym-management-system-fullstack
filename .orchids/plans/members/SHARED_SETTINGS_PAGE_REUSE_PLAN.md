@@ -1,31 +1,128 @@
 # Shared Settings Page — Reuse Plan
 
-## Overview
+## Current State (Confirmed from Actual Code — March 2026)
 
-The Owner Settings page (`frontend/src/pages/Settings/Settings.tsx`) has the best UI architecture for settings pages in the application. Both the **Member Settings** and **Trainer Settings** pages currently have their own custom, inferior implementations. This plan outlines how to extract the Owner Settings UI shell into a shared component and reuse it across all three roles.
+### Architecture Comparison
+
+| Feature | Owner Settings | Member Settings | Trainer Settings |
+|---------|---------------|-----------------|------------------|
+| **File size** | **131 lines** (thin wrapper) | **759 lines** (monolith) | **914 lines** (monolith) |
+| **Sidebar structure** | Gradient icons, label + desc, `motion.button` via `Settings.css` | ✅ Same CSS classes — `settings-nav-item`, `settings-nav-item__icon`, etc. | Unknown (separate CSS) |
+| **Section components** | ✅ Separate files in `pages/Settings/sections/` (13 files) | ❌ All inline in `renderSection()` switch | ❌ All inline |
+| **AnimatePresence transitions** | ✅ Spring transitions | ✅ `duration: 0.25` transitions | Unknown |
+| **State persistence** | ✅ `sessionStorage('settings_active_section')` | ✅ `sessionStorage('member_settings_section')` | Unknown |
+| **Shared CSS** | `Settings.css` (5643 lines) | ✅ Imports `../Settings/Settings.css` at line 13 | Unknown |
+| **API wired** | ✅ Most sections save | ❌ `handleSave()` is no-op (confirmed) | Unknown |
+| **`import api`** | ✅ Used | ✅ Imported but **never called** | Unknown |
+
+### Confirmed Key Finding
+
+`MemberSettings.tsx` already:
+- Imports `../Settings/Settings.css` — shares all 5643 lines of premium styles
+- Uses identical CSS class names: `settings-page`, `settings-layout`, `settings-sidebar`, `settings-content`, `settings-nav`, `settings-nav-item`, `settings-nav-item--active`, `settings-nav-item__icon`, `settings-section`, `settings-section__header`, `settings-section__content`, `form-group`, `form-grid`, `field-wrapper`, `dense-input`, `policy-toggle`, `policy-toggle--active`
+- Has `AnimatePresence` + `motion.div` with `mode="wait"`
+- Has sessionStorage persistence
+
+**The UI shell is effectively already shared.** The only structural difference is monolith vs. extracted section files.
 
 ---
 
-## Current Architecture Comparison
+## What Still Needs To Be Done
 
-| Feature | Owner Settings ✅ | Member Settings ❌ | Trainer Settings ❌ |
-|---------|------------------|-------------------|---------------------|
-| **Sidebar style** | Gradient icons, label + description | Basic list items | Custom sidebar |
-| **Section components** | Separate files in `sections/` | One 420-line switch statement | One 490-line switch statement |
-| **Transitions** | AnimatePresence smooth transitions | Basic rendering | AnimatePresence (inconsistent) |
-| **State persistence** | SessionStorage for active section | None | None |
-| **CSS** | `Settings.css` (121KB — premium) | `MemberSettings.css` (12KB) | `TrainerSettings.css` (22KB) |
-| **File size** | 128 lines (shell only) | 654 lines (monolith) | 724 lines (monolith) |
+### Issue 1 (P0): Member Settings `handleSave` is a no-op
+All 8 Save buttons call a `handleSave()` that only shows `toast.success` — no API call ever made. The `api` import on line 12 is unused. This is the highest priority fix. See `MEMBER_SETTINGS_IMPROVEMENTS.md` for full fix plan.
+
+**This must be fixed before any architectural refactoring.**
+
+### Issue 2 (P1): Appearance section duplicates ThemeSection
+Owner Settings uses `<ThemeSection />` from `pages/Settings/sections/ThemeSection.tsx`.
+
+Member Settings has its own inline appearance UI (lines 558–580):
+```tsx
+case 'appearance':
+    return (
+        <div className="settings-section" ...>
+            <div className="theme-selector">
+                {[
+                    { key: 'dark', icon: Moon, label: 'Dark', desc: 'Easy on the eyes' },
+                    { key: 'light', icon: Sun, label: 'Light', desc: 'Classic bright look' },
+                    { key: 'system', icon: Monitor, label: 'System', desc: 'Match device theme' },
+                ].map(t => (
+                    <button className={`theme-option ${themeMode === t.key ? 'theme-option--active' : ''}`}
+                        onClick={() => setThemeMode(t.key as any)}>
+```
+This is a near-exact copy of what `ThemeSection.tsx` does. When Owner's ThemeSection is updated, Member's appearance section won't get the update.
+
+**Fix:** Replace the `case 'appearance'` block entirely with:
+```tsx
+case 'appearance':
+    return <ThemeSection />;
+// import ThemeSection from '../Settings/sections/ThemeSection';
+```
+
+### Issue 3 (P1): Security section not reused
+Owner Settings has `pages/Settings/sections/SecuritySection.tsx` (password change + 2FA).
+Member Settings has its own inline password-change UI in `case 'security'` (lines 633–697).
+
+**Options:**
+- **Option A (Recommended):** Keep `MemberSecuritySection` separate (it has member-specific logic like `POST /api/member/settings/{userId}/change-password` vs owner's endpoint).
+- **Option B:** Extract a shared `PasswordChangeSection` component used by both, with a `changePasswordEndpoint` prop.
+
+### Issue 4 (P1): Trainer Settings (914 lines) is also a monolith
+Same pattern — all sections inline. After member settings is fixed, trainer settings should get the same treatment.
+
+### Issue 5 (P2): No shared `SettingsShell` component
+Both Owner and Member Settings implement the sidebar + `AnimatePresence` + sessionStorage pattern themselves. A `SettingsShell` component could eliminate this duplication entirely.
 
 ---
 
-## Architecture Plan
+## Recommended Refactoring Plan
 
-### Step 1: Extract Shared `SettingsShell` Component
+### Phase 1 (P0) — Fix Saves First
+**Do NOT refactor until saves work.** Extracting sections into files while saves are broken makes debugging harder.
 
-Create: `frontend/src/components/shared/SettingsShell.tsx`
+1. Wire `handleSave` to correct API endpoints (see `MEMBER_SETTINGS_IMPROVEMENTS.md`)
+2. Add `useEffect` to load data on mount
+3. Fix `preferredTrainer` to use dropdown from API
+4. Fix Membership section to show real data
+
+### Phase 2 (P1) — Remove Appearance Duplication
+1. Replace `case 'appearance'` in MemberSettings with `<ThemeSection />`
+2. Same for Trainer Settings if it also has a duplicate appearance section
+
+### Phase 3 (P1) — Extract Member Settings Sections
+
+```
+pages/member/settings/sections/
+├── MemberProfileSection.tsx       (profile form + photo avatar)
+├── FitnessSection.tsx             (goals, body stats, workout type chips)
+├── MemberMembershipSection.tsx    (plan display from API)
+├── BookingPrefsSection.tsx        (time/trainer/toggles)
+├── HealthSection.tsx              (blood group, allergies, emergency contact)
+├── AppearanceSection.tsx          → re-exports ThemeSection
+├── MemberNotifSection.tsx         (7 notification toggles)
+└── MemberSecuritySection.tsx      (password change)
+```
+
+`MemberSettings.tsx` becomes:
+```tsx
+// ~60 lines — thin wrapper
+const SECTIONS = [...]; // same array, just import section components
+const renderSection = () => {
+    switch (activeSection) {
+        case 'profile': return <MemberProfileSection />;
+        case 'fitness': return <FitnessSection />;
+        // ...
+    }
+};
+```
+
+### Phase 4 (P2) — Extract `SettingsShell`
+
+The sidebar rendering, `AnimatePresence` transitions, and sessionStorage persistence are repeated in Owner and Member Settings. Extract to a shared component:
 
 ```tsx
+// components/shared/SettingsShell.tsx
 interface SettingsCategory {
     id: string;
     label: string;
@@ -37,174 +134,102 @@ interface SettingsCategory {
 interface SettingsShellProps {
     categories: SettingsCategory[];
     renderSection: (activeSection: string) => React.ReactNode;
-    storageKey: string; // e.g., 'member_settings', 'trainer_settings'
+    storageKey: string;
 }
-
-const SettingsShell: React.FC<SettingsShellProps> = ({
-    categories, renderSection, storageKey
-}) => {
-    // SessionStorage persistence
-    // Sidebar rendering
-    // AnimatePresence transitions
-    // Uses Settings.css (shared)
-};
 ```
 
-### Step 2: Refactor Owner Settings to Use Shell
+Both `Settings.tsx` (owner, 131 lines) and `MemberSettings.tsx` (member, 759 lines) become ~30-line thin wrappers that define their section arrays and delegate everything to `SettingsShell`.
 
-```tsx
-// Settings.tsx (Owner) — becomes thin wrapper
-import SettingsShell from '../../components/shared/SettingsShell';
+### Phase 5 (P2) — Trainer Settings Refactoring
 
-const ownerCategories = [
-    { id: 'profile', label: 'Owner Profile', icon: User, desc: '...', color: '#3b82f6' },
-    // ... existing categories
-];
-
-const Settings = () => (
-    <SettingsShell
-        categories={ownerCategories}
-        storageKey="owner_settings"
-        renderSection={(section) => {
-            switch (section) {
-                case 'profile': return <OwnerProfileSection />;
-                // ... existing sections
-            }
-        }}
-    />
-);
+Apply same treatment to `TrainerSettings.tsx` (914 lines):
 ```
-
-### Step 3: Refactor Member Settings to Use Shell
-
-```tsx
-// MemberSettings.tsx — becomes thin wrapper
-import SettingsShell from '../../components/shared/SettingsShell';
-
-const memberCategories = [
-    { id: 'profile', label: 'My Profile', icon: User, desc: 'Personal details', color: '#3b82f6' },
-    { id: 'appearance', label: 'Appearance', icon: Palette, desc: 'Theme & Display', color: '#a855f7' },
-    { id: 'notifications', label: 'Notifications', icon: Bell, desc: 'Alerts & Reminders', color: '#f97316' },
-    { id: 'privacy', label: 'Privacy', icon: Eye, desc: 'Visibility & Sharing', color: '#10b981' },
-    { id: 'security', label: 'Security', icon: Shield, desc: 'Password & 2FA', color: '#ef4444' },
-    { id: 'account', label: 'Account', icon: Settings, desc: 'Data & Deletion', color: '#6b7280' },
-];
-
-const MemberSettings = () => (
-    <SettingsShell
-        categories={memberCategories}
-        storageKey="member_settings"
-        renderSection={(section) => {
-            switch (section) {
-                case 'profile': return <MemberProfileSection />;
-                case 'appearance': return <ThemeSection />;  // REUSE from owner!
-                // ... new member-specific sections
-            }
-        }}
-    />
-);
-```
-
-### Step 4: Refactor Trainer Settings to Use Shell
-
-```tsx
-// TrainerSettings.tsx — becomes thin wrapper
-import SettingsShell from '../../components/shared/SettingsShell';
-
-const trainerCategories = [
-    { id: 'profile', label: 'My Profile', icon: User, desc: 'Personal details', color: '#3b82f6' },
-    { id: 'appearance', label: 'Appearance', icon: Palette, desc: 'Theme & Display', color: '#a855f7' },
-    { id: 'availability', label: 'Availability', icon: Calendar, desc: 'Working hours', color: '#10b981' },
-    { id: 'sessions', label: 'Session Defaults', icon: Clock, desc: 'Duration & Buffer', color: '#f59e0b' },
-    { id: 'notifications', label: 'Notifications', icon: Bell, desc: 'Alerts & Reminders', color: '#f97316' },
-    { id: 'privacy', label: 'Privacy', icon: Eye, desc: 'Visibility & Sharing', color: '#06b6d4' },
-    { id: 'security', label: 'Security', icon: Shield, desc: 'Password & 2FA', color: '#ef4444' },
-    { id: 'integrations', label: 'Integrations', icon: Link, desc: 'Calendar sync', color: '#8b5cf6' },
-    { id: 'account', label: 'Account', icon: Settings, desc: 'Data & Deletion', color: '#6b7280' },
-];
+pages/trainer/settings/sections/
+├── TrainerProfileSection.tsx
+├── AvailabilitySection.tsx
+├── SessionDefaultsSection.tsx
+├── AppearanceSection.tsx          → re-exports ThemeSection
+├── TrainerNotifSection.tsx
+├── PrivacySection.tsx
+├── SecuritySection.tsx
+└── AccountSection.tsx
 ```
 
 ---
 
-## Reusable Sections Across Roles
+## Reusable Components Inventory
 
-| Section Component | Owner | Member | Trainer |
-|-------------------|-------|--------|---------|
-| `ThemeSection` | ✅ | ✅ (reuse) | ✅ (reuse) |
-| `SecuritySection` | ✅ | ✅ (adapt) | ✅ (adapt) |
-| `NotificationsSection` | ✅ (gym-wide) | New (personal) | New (personal) |
-| `OwnerProfileSection` | ✅ | ❌ | ❌ |
-| `MemberProfileSection` | ❌ | New | ❌ |
-| `TrainerProfileSection` | ❌ | ❌ | New |
-| `AvailabilitySection` | ❌ | ❌ | New |
-| `SessionDefaultsSection` | ❌ | ❌ | New |
-| `AccountSection` | ❌ | New | New |
-| `PrivacySection` | ❌ | New | New |
+### Currently shareable (in `pages/Settings/sections/`):
 
----
+| Component | Shareable With | Status |
+|-----------|---------------|--------|
+| `ThemeSection.tsx` | Member ✅, Trainer (unknown) | P1 — use in Member Settings |
+| `SecuritySection.tsx` | Member (adapt), Trainer (adapt) | P2 — evaluate if password endpoint is different |
 
-## CSS Strategy
-
-The Owner's `Settings.css` (121KB) contains all the styling needed for the settings shell (sidebar, layout, transitions). This file should be:
-1. Kept as-is for the shared shell styling
-2. Role-specific section CSS goes in each section's own CSS file
-3. No need for `MemberSettings.css` or `TrainerSettings.css` as separate layout CSS — only section-specific overrides
+### Owner-only (not shared):
+- `AuditLogSection.tsx`
+- `BillingRulesSection.tsx`
+- `GymProfileSection.tsx`
+- `MemberRulesSection.tsx`
+- `MembershipPoliciesSection.tsx`
+- `NotificationsSection.tsx` (gym-wide alerts — different from member notification prefs)
+- `OwnerProfileSection.tsx`
+- `RolesSection.tsx`
+- `StaffRulesSection.tsx`
+- `TrainerRulesSection.tsx`
+- `UserRulesSection.tsx`
 
 ---
 
-## File Structure After Refactoring
+## File Structure After Full Refactoring
 
 ```
 components/shared/
-├── SettingsShell.tsx          (extracted from owner Settings.tsx)
-├── SettingsShell.css          (extracted from Settings.css — shell styles only)
+└── SettingsShell.tsx              ← extracted (Phase 4)
 
 pages/Settings/
-├── Settings.tsx               (owner — thin wrapper using SettingsShell)
-├── sections/
-│   ├── OwnerProfileSection.tsx
-│   ├── ThemeSection.tsx        ← SHARED across all roles
-│   ├── SecuritySection.tsx     ← SHARED (with role prop)
-│   ├── NotificationsSection.tsx (owner-specific: gym-wide)
-│   └── ... (owner-specific sections)
+├── Settings.tsx                   ← owner, ~30 lines (Phase 4)
+├── Settings.css                   ← shared styles, keep as-is
+└── sections/
+    ├── ThemeSection.tsx           ← shared across all 3 roles
+    ├── SecuritySection.tsx        ← shared with role/endpoint prop
+    └── ... (owner-only sections)
 
 pages/member/settings/
-├── MemberSettings.tsx         (thin wrapper using SettingsShell)
-├── sections/
-│   ├── MemberProfileSection.tsx
-│   ├── MemberNotificationsSection.tsx
-│   ├── PrivacySection.tsx
-│   └── AccountSection.tsx
+├── MemberSettings.tsx             ← ~30 lines (Phase 4)
+└── sections/
+    ├── MemberProfileSection.tsx
+    ├── FitnessSection.tsx
+    ├── MemberMembershipSection.tsx
+    ├── BookingPrefsSection.tsx
+    ├── HealthSection.tsx
+    ├── AppearanceSection.tsx      → re-exports ThemeSection
+    ├── MemberNotifSection.tsx
+    └── MemberSecuritySection.tsx
 
 pages/trainer/settings/
-├── TrainerSettings.tsx        (thin wrapper using SettingsShell)
-├── sections/
-│   ├── TrainerProfileSection.tsx
-│   ├── AvailabilitySection.tsx
-│   ├── SessionDefaultsSection.tsx
-│   ├── TrainerNotificationsSection.tsx
-│   ├── PrivacySection.tsx
-│   ├── IntegrationsSection.tsx
-│   └── AccountSection.tsx
+├── TrainerSettings.tsx            ← ~30 lines (Phase 5)
+└── sections/
+    ├── TrainerProfileSection.tsx
+    ├── AvailabilitySection.tsx
+    ├── SessionDefaultsSection.tsx
+    ├── AppearanceSection.tsx      → re-exports ThemeSection
+    ├── TrainerNotifSection.tsx
+    ├── PrivacySection.tsx
+    ├── SecuritySection.tsx
+    └── AccountSection.tsx
 ```
 
 ---
 
 ## Implementation Priority
 
-| Phase | Items |
-|-------|-------|
-| **Phase 1** | Extract `SettingsShell` from owner Settings, verify owner still works |
-| **Phase 2** | Refactor Member Settings to use SettingsShell + create section files |
-| **Phase 3** | Refactor Trainer Settings to use SettingsShell + create section files |
-| **Phase 4** | Add new sections (Availability, Session Defaults, Account, Integrations) |
+| Phase | Items | Prerequisite |
+|-------|-------|-------------|
+| **Phase 1 (P0)** | Fix Member Settings no-op saves — wire all 8 section saves to real API | None |
+| **Phase 2 (P1)** | Replace Member Settings appearance section with `<ThemeSection />` | Phase 1 done |
+| **Phase 3 (P1)** | Extract Member Settings sections into separate files | Phase 1+2 done |
+| **Phase 4 (P2)** | Extract `SettingsShell` shared component; refactor Owner + Member to use it | Phase 3 done |
+| **Phase 5 (P2)** | Refactor Trainer Settings to use SettingsShell + section files | Phase 4 done |
 
----
-
-## Benefits
-
-- **Consistency:** All three settings pages look and behave identically
-- **Maintenance:** Update sidebar/transitions in one place, applies to all
-- **Code reduction:** Member goes from 654 → ~30 lines, Trainer from 724 → ~35 lines
-- **Reusable sections:** ThemeSection and SecuritySection shared across all roles
-- **Persistence:** All roles get sessionStorage active section memory
+> **Critical rule:** Never refactor for cleanliness while the feature is broken. Phase 1 (functional correctness) is a hard prerequisite for all phases.

@@ -1,4 +1,4 @@
-/* ============================================
+ /* ============================================
    MyProgress - Enhanced Progress Tracking Design
    ============================================ */
 
@@ -427,11 +427,14 @@
 
 .chart-container {
     min-height: 280px;
+    height: auto;
+    padding-bottom: 8px;
 }
 
 .chart-inner {
     width: 100%;
-    height: 280px;
+    min-height: 280px;
+    height: auto;
 }
 
 /* Custom Tooltip */
@@ -593,10 +596,21 @@
     transform: scale(1.2);
 }
 
-.heatmap-cell.intensity-1 { background: rgba(0, 122, 255, 0.25); }
-.heatmap-cell.intensity-2 { background: rgba(0, 122, 255, 0.45); }
-.heatmap-cell.intensity-3 { background: rgba(0, 122, 255, 0.65); }
-.heatmap-cell.intensity-4 { background: rgba(0, 122, 255, 0.9); }
+.heatmap-cell.intensity-1 {
+    background: rgba(0, 122, 255, 0.25);
+}
+
+.heatmap-cell.intensity-2 {
+    background: rgba(0, 122, 255, 0.45);
+}
+
+.heatmap-cell.intensity-3 {
+    background: rgba(0, 122, 255, 0.65);
+}
+
+.heatmap-cell.intensity-4 {
+    background: rgba(0, 122, 255, 0.9);
+}
 
 .heatmap-legend {
     display: flex;
@@ -620,14 +634,27 @@
     background: var(--macos-bg-tertiary);
 }
 
-.legend-cell.intensity-1 { background: rgba(0, 122, 255, 0.25); }
-.legend-cell.intensity-2 { background: rgba(0, 122, 255, 0.45); }
-.legend-cell.intensity-3 { background: rgba(0, 122, 255, 0.65); }
-.legend-cell.intensity-4 { background: rgba(0, 122, 255, 0.9); }
+.legend-cell.intensity-1 {
+    background: rgba(0, 122, 255, 0.25);
+}
+
+.legend-cell.intensity-2 {
+    background: rgba(0, 122, 255, 0.45);
+}
+
+.legend-cell.intensity-3 {
+    background: rgba(0, 122, 255, 0.65);
+}
+
+.legend-cell.intensity-4 {
+    background: rgba(0, 122, 255, 0.9);
+}
 
 /* Measurements Chart */
 .measurements-chart-container {
     padding: 12px 0;
+    min-height: 280px;
+    height: auto;
 }
 
 .measurements-visual {
@@ -1041,9 +1068,17 @@
     border-radius: 10px;
 }
 
-.icon-gold { color: #FFD60A; }
-.icon-blue { color: var(--macos-accent); }
-.icon-pink { color: var(--macos-pink); }
+.icon-gold {
+    color: #FFD60A;
+}
+
+.icon-blue {
+    color: var(--macos-accent);
+}
+
+.icon-pink {
+    color: var(--macos-pink);
+}
 
 /* Personal Bests */
 .pb-list {
@@ -1394,8 +1429,17 @@
 }
 
 @keyframes pulse {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.3); opacity: 0.7; }
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.3);
+        opacity: 0.7;
+    }
 }
 
 /* ============================================
@@ -1520,16 +1564,26 @@
 
 .form-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 16px;
 }
 
 .form-grid.six-col {
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(3, 1fr);
 }
 
-.form-grid.four-col {
-    grid-template-columns: repeat(4, 1fr);
+@media (max-width: 600px) {
+    .form-grid.six-col {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 400px) {
+
+    .form-grid.six-col,
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .form-group {
@@ -1640,7 +1694,9 @@
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .form-group input.optimistic-feedback {
@@ -1852,10 +1908,21 @@
     font-weight: 700;
 }
 
-.bmi-label.underweight span { color: #FF9F0A; }
-.bmi-label.healthy span { color: #30D158; }
-.bmi-label.overweight span { color: #FF3B30; }
-.bmi-label.obese span { color: #AF52DE; }
+.bmi-label.underweight span {
+    color: #FF9F0A;
+}
+
+.bmi-label.healthy span {
+    color: #30D158;
+}
+
+.bmi-label.overweight span {
+    color: #FF3B30;
+}
+
+.bmi-label.obese span {
+    color: #AF52DE;
+}
 
 /* Photo Gallery Preview */
 .photo-gallery-preview {
@@ -1879,47 +1946,75 @@
 }
 
 .photo-grid-preview {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 16px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    gap: 12px;
     margin-top: 16px;
+    overflow-x: auto;
+    padding-bottom: 4px;
 }
 
 .photo-preview-item {
-    aspect-ratio: 3/4;
-    border-radius: 12px;
-    overflow: hidden;
+    flex: 0 0 auto;
+    width: auto;
+    max-width: 220px;
+    min-width: 80px;
+    height: auto;
+    border-radius: 14px;
     position: relative;
     cursor: pointer;
     border: 1px solid var(--macos-border);
-    transition: transform 0.2s ease;
+    overflow: hidden;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    background: var(--macos-bg-tertiary);
+    line-height: 0;
 }
 
 .photo-preview-item:hover {
-    transform: scale(1.02);
     border-color: var(--macos-accent);
+    box-shadow: 0 0 0 2px var(--macos-accent);
 }
 
 .photo-preview-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 220px;
+    max-height: 260px;
+    min-width: 80px;
+    min-height: 60px;
+    object-fit: contain;
+    border-radius: 0;
 }
 
 .photo-date-overlay {
     position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 8px;
-    background: linear-gradient(transparent, rgba(0,0,0,0.7));
-    color: white;
-    font-size: 10px;
-    font-weight: 600;
+    bottom: 6px;
+    left: 6px;
+    background: rgba(0, 0, 0, 0.48);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    color: #fff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    pointer-events: none;
+    line-height: 1;
+}
+
+.photo-date-text {
+    font-size: 9px;
+    font-weight: 400;
+    letter-spacing: 0.2px;
+    color: rgba(255, 255, 255, 0.88);
+    white-space: nowrap;
 }
 
 .empty-photos {
-    grid-column: 1 / -1;
+    flex: 1;
+    min-height: 160px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1928,7 +2023,7 @@
     padding: 40px;
     background: var(--macos-bg-tertiary);
     border: 2px dashed var(--macos-border);
-    border-radius: 12px;
+    border-radius: 14px;
     color: var(--macos-text-tertiary);
     cursor: pointer;
 }
@@ -1939,10 +2034,14 @@
 }
 
 .add-photo-card {
-    aspect-ratio: 3/4;
-    border-radius: 12px;
+    flex: 0 0 110px;
+    width: 110px;
+    min-height: 110px;
+    height: auto;
+    align-self: flex-start;
+    border-radius: 14px;
     background: var(--macos-bg-tertiary);
-    border: 2px dashed var(--macos-border);
+    border: 2px dashed rgba(0, 122, 255, 0.35);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1951,12 +2050,13 @@
     color: var(--macos-text-tertiary);
     cursor: pointer;
     transition: all 0.2s ease;
+    font-size: 12px;
 }
 
 .add-photo-card:hover {
     border-color: var(--macos-accent);
     color: var(--macos-accent);
-    background: rgba(0, 122, 255, 0.05);
+    background: rgba(0, 122, 255, 0.06);
 }
 
 /* Gallery Modal Styles */
@@ -1994,15 +2094,14 @@
 }
 
 .gallery-image-container {
-    aspect-ratio: 3/4;
     position: relative;
-    overflow: hidden;
 }
 
 .gallery-image-container img {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
+    height: auto;
+    display: block;
+    object-fit: contain;
 }
 
 .delete-photo-btn {
@@ -2086,15 +2185,15 @@
     .stats-row {
         grid-template-columns: repeat(2, 1fr);
     }
-    
+
     .goals-grid {
         grid-template-columns: repeat(2, 1fr);
     }
-    
+
     .three-col-grid {
         grid-template-columns: repeat(2, 1fr);
     }
-    
+
     .three-col-grid .panel-card:last-child {
         grid-column: span 2;
     }
@@ -2105,12 +2204,12 @@
         grid-template-columns: 1fr;
         height: auto;
     }
-    
+
     .body-composition-chart {
         grid-template-columns: 1fr;
         height: auto;
     }
-    
+
     .composition-pie {
         padding-top: 20px;
     }
@@ -2120,63 +2219,63 @@
     .stats-row {
         grid-template-columns: 1fr;
     }
-    
+
     .goals-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .three-col-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .three-col-grid .panel-card:last-child {
         grid-column: span 1;
     }
-    
+
     .chart-section__header {
         flex-direction: column;
         align-items: flex-start;
         gap: 12px;
     }
-    
+
     .chart-tabs {
         width: 100%;
         overflow-x: auto;
     }
-    
+
     .summary-banner__content {
         flex-direction: column;
         gap: 12px;
     }
-    
+
     .summary-banner__stats {
         width: 100%;
         justify-content: space-around;
     }
-    
+
     .milestones-track {
         overflow-x: auto;
         justify-content: flex-start;
         gap: 32px;
         padding-bottom: 8px;
     }
-    
+
     .milestone-line {
         display: none;
     }
-    
+
     .form-grid.six-col {
         grid-template-columns: repeat(3, 1fr);
     }
-    
+
     .measurement-row {
         grid-template-columns: 60px 1fr 80px;
     }
-    
+
     .measurement-row__ideal {
         display: none;
     }
-    
+
     .chart-stats-summary {
         flex-wrap: nowrap;
         overflow-x: auto;
@@ -2188,27 +2287,27 @@
     .quick-actions-bar {
         flex-wrap: wrap;
     }
-    
+
     .quick-action-btn.history-btn {
         margin-left: 0;
     }
-    
+
     .form-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .form-grid.six-col {
         grid-template-columns: repeat(2, 1fr);
     }
-    
+
     .form-row {
         flex-direction: column;
     }
-    
+
     .stat-card {
         flex-wrap: wrap;
     }
-    
+
     .stat-card__right {
         width: 100%;
         flex-direction: row;
@@ -2611,22 +2710,1755 @@
         max-height: 90vh;
         border-radius: 16px 16px 0 0;
     }
-    
+
     .entry-metrics-grid {
         flex-direction: column;
     }
-    
+
     .metric-pill {
         width: 100%;
         justify-content: space-between;
     }
-    
+
     .action-btn span {
         display: none;
     }
-    
+
     .action-btn {
         padding: 10px;
         border-radius: 10px;
     }
+}
+
+/* ============================================
+   New Styles for Improvements
+   ============================================ */
+
+/* Empty state for chart tabs */
+.chart-tab-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    color: var(--macos-text-tertiary);
+    text-align: center;
+    gap: 12px;
+    height: 100%;
+}
+
+.empty-icon-container {
+    width: 80px;
+    height: 80px;
+    background: var(--macos-bg-tertiary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+    color: var(--macos-text-quaternary);
+}
+
+.chart-tab-empty h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--macos-text-primary);
+    margin: 0;
+}
+
+.chart-tab-empty p {
+    font-size: 14px;
+    color: var(--macos-text-secondary);
+    margin: 0 0 8px 0;
+    max-width: 300px;
+}
+
+/* ============================================
+   Premium Active Form UI
+   ============================================ */
+
+.modal-content.modal-premium-form {
+    max-width: 520px;
+    border-radius: 24px;
+    background: var(--macos-bg-secondary);
+    box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header-premium {
+    padding: 24px 24px 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.header-badge {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--macos-accent) 0%, #00C7BE 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: 0 8px 16px rgba(0, 122, 255, 0.2);
+}
+
+.header-info h2 {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0;
+    color: var(--macos-text-primary);
+}
+
+.header-info p {
+    font-size: 12px;
+    color: var(--macos-text-tertiary);
+    margin: 2px 0 0;
+}
+
+.close-btn-circle {
+    margin-left: auto;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: var(--macos-bg-tertiary);
+    color: var(--macos-text-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.close-btn-circle:hover {
+    background: var(--macos-error-bg);
+    color: var(--macos-error);
+}
+
+.modal-body-compact {
+    padding: 0 24px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Metrics Pods */
+.metrics-pod-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.metric-pod {
+    background: var(--macos-bg-tertiary);
+    border: 1px solid var(--macos-border);
+    border-radius: 16px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.2s ease;
+}
+
+.metric-pod:focus-within {
+    border-color: var(--macos-accent);
+    background: var(--macos-bg-glass-hover);
+    transform: translateY(-2px);
+}
+
+.pod-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.metric-pod.weight .pod-icon {
+    background: rgba(0, 122, 255, 0.1);
+    color: var(--macos-accent);
+}
+
+.metric-pod.fat .pod-icon {
+    background: rgba(255, 159, 10, 0.1);
+    color: #FF9F0A;
+}
+
+.metric-pod.muscle .pod-icon {
+    background: rgba(175, 82, 222, 0.1);
+    color: #AF52DE;
+}
+
+.pod-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.pod-content label {
+    display: block;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--macos-text-tertiary);
+    margin-bottom: 2px;
+}
+
+.input-with-unit {
+    display: flex;
+    align-items: baseline;
+    gap: 2px;
+}
+
+.input-with-unit input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--macos-text-primary);
+    padding: 0;
+}
+
+.input-with-unit input:focus {
+    outline: none;
+}
+
+.input-with-unit span {
+    font-size: 11px;
+    color: var(--macos-text-tertiary);
+    font-weight: 500;
+}
+
+/* Measurements Compact */
+.measurements-section-compact {
+    background: var(--macos-bg-tertiary);
+    border: 1px solid var(--macos-border);
+    border-radius: 18px;
+    padding: 16px;
+}
+
+.section-title-compact {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    color: var(--macos-text-secondary);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.compact-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.compact-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.compact-input-group label {
+    font-size: 11px;
+    color: var(--macos-text-tertiary);
+    padding-left: 2px;
+}
+
+.compact-input-group input {
+    width: 100%;
+    padding: 8px 10px;
+    background: var(--macos-bg-secondary);
+    border: 1px solid var(--macos-border);
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--macos-text-primary);
+    transition: all 0.2s ease;
+}
+
+.compact-input-group input:focus {
+    border-color: var(--macos-accent);
+    background: white;
+    outline: none;
+}
+
+/* Notes Pod */
+.notes-pod-compact {
+    background: var(--macos-bg-tertiary);
+    border: 1px solid var(--macos-border);
+    border-radius: 16px;
+    padding: 12px 16px;
+}
+
+.notes-pod-compact .pod-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.notes-pod-compact label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--macos-text-secondary);
+}
+
+.notes-pod-compact textarea {
+    width: 100%;
+    background: transparent;
+    border: none;
+    resize: none;
+    font-size: 13px;
+    color: var(--macos-text-primary);
+    line-height: 1.4;
+}
+
+.notes-pod-compact textarea:focus {
+    outline: none;
+}
+
+/* Footer Premium */
+.modal-footer-premium {
+    padding: 16px 24px 24px;
+    display: flex;
+    gap: 12px;
+}
+
+.btn-ghost-premium {
+    flex: 1;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid var(--macos-border);
+    background: transparent;
+    color: var(--macos-text-secondary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-active-premium {
+    flex: 2;
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    background: linear-gradient(135deg, var(--macos-accent) 0%, #0071FF 100%);
+    color: white;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(0, 122, 255, 0.25);
+    transition: all 0.2s ease;
+}
+
+.btn-active-premium:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(0, 122, 255, 0.35);
+}
+
+.loader-dots {
+    display: flex;
+    gap: 4px;
+}
+
+.loader-dots span {
+    width: 6px;
+    height: 6px;
+    background: white;
+    border-radius: 50%;
+    animation: dotPulse 1.4s infinite;
+}
+
+.loader-dots span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.loader-dots span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes dotPulse {
+
+    0%,
+    80%,
+    100% {
+        transform: scale(0.6);
+        opacity: 0.4;
+    }
+
+    40% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+}
+
+/* ============================================
+   Goal & Photo Modal Specific Styles
+   ============================================ */
+
+.goal-header .header-badge.target {
+    background: linear-gradient(135deg, #007AFF 0%, #00C7BE 100%);
+}
+
+.photo-header .header-badge.camera {
+    background: linear-gradient(135deg, #AF52DE 0%, #FF2D55 100%);
+}
+
+.gallery-header .header-badge.gallery {
+    background: linear-gradient(135deg, #5856D6 0%, #007AFF 100%);
+}
+
+.goal-type-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 4px;
+}
+
+.goal-type-option {
+    background: var(--macos-bg-tertiary);
+    border: 1px solid var(--macos-border);
+    border-radius: 14px;
+    padding: 12px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--macos-text-secondary);
+}
+
+.goal-type-option span {
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.goal-type-option:hover {
+    background: var(--macos-bg-glass-hover);
+    border-color: var(--macos-accent);
+}
+
+.goal-type-option.active {
+    background: rgba(0, 122, 255, 0.1);
+    border-color: var(--macos-accent);
+    color: var(--macos-accent);
+    transform: scale(1.02);
+}
+
+.form-row-compact {
+    display: flex;
+    gap: 12px;
+}
+
+/* Premium Upload Zone */
+.premium-upload-zone {
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: var(--macos-bg-tertiary);
+    border: 2px dashed var(--macos-border);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.premium-upload-zone:hover {
+    border-color: var(--macos-accent);
+    background: rgba(0, 122, 255, 0.05);
+}
+
+.premium-upload-zone.has-preview {
+    border-style: solid;
+    border-color: var(--macos-accent);
+}
+
+.upload-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 8px;
+}
+
+.upload-icon-pulse {
+    width: 64px;
+    height: 64px;
+    background: rgba(0, 122, 255, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--macos-accent);
+    margin-bottom: 8px;
+}
+
+.upload-placeholder h3 {
+    font-size: 15px;
+    margin: 0;
+    color: var(--macos-text-primary);
+}
+
+.upload-placeholder p {
+    font-size: 12px;
+    margin: 0;
+    color: var(--macos-text-secondary);
+}
+
+.upload-hint {
+    font-size: 10px;
+    color: var(--macos-text-tertiary);
+}
+
+.premium-preview-container {
+    width: 100%;
+    position: relative;
+}
+
+.premium-preview-container img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: contain;
+}
+
+.preview-overlay-active {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: white;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.premium-upload-zone:hover .preview-overlay-active {
+    opacity: 1;
+}
+
+.photo-meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.upload-tips-card {
+    background: rgba(175, 82, 222, 0.05);
+    border: 1px solid rgba(175, 82, 222, 0.1);
+    border-radius: 14px;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.tip-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.tip-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #AF52DE;
+}
+
+.tip-item p {
+    font-size: 11px;
+    margin: 0;
+    color: var(--macos-text-secondary);
+}
+
+/* Premium Gallery */
+.gallery-modal-premium {
+    max-height: 95vh;
+}
+
+.gallery-header {
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--macos-border);
+}
+
+.header-actions-premium {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.add-milestone-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: var(--macos-accent);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+    transition: all 0.2s ease;
+}
+
+.add-milestone-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0, 122, 255, 0.4);
+}
+
+.gallery-body-scroll {
+    overflow-y: auto;
+    padding: 24px;
+}
+
+.premium-photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 20px;
+}
+
+.premium-gallery-card {
+    background: var(--macos-bg-tertiary);
+    border: 1px solid var(--macos-border);
+    border-radius: 20px;
+    overflow: hidden;
+    transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.premium-gallery-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--macos-accent);
+}
+
+.gallery-image-wrapper {
+    width: 100%;
+    position: relative;
+}
+
+.gallery-image-wrapper img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: contain;
+    transition: transform 0.5s ease;
+}
+
+.premium-gallery-card:hover .gallery-image-wrapper img {
+    transform: scale(1.05);
+}
+
+.card-overlay-actions {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: flex;
+    gap: 8px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.premium-gallery-card:hover .card-overlay-actions {
+    opacity: 1;
+}
+
+.delete-photo-premium {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 59, 48, 0.9);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    backdrop-filter: blur(4px);
+}
+
+.card-date-floating {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.gallery-card-info {
+    padding: 12px 16px;
+    border-top: 1px solid var(--macos-border);
+}
+
+.gallery-card-info p {
+    margin: 0;
+    font-size: 12px;
+    color: var(--macos-text-secondary);
+    line-height: 1.4;
+}
+
+.empty-gallery-premium {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 16px;
+    padding: 60px 20px;
+}
+
+.empty-gallery-icon {
+    width: 100px;
+    height: 100px;
+    background: var(--macos-bg-tertiary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--macos-text-quaternary);
+}
+
+.empty-gallery-premium h3 {
+    font-size: 20px;
+    margin: 0;
+    color: var(--macos-text-primary);
+}
+
+.empty-gallery-premium p {
+    font-size: 14px;
+    max-width: 340px;
+    color: var(--macos-text-secondary);
+    margin: 0;
+}
+
+@media (max-width: 480px) {
+    .premium-photo-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .photo-meta-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ============================================
+   Progress Journey Timeline Styles
+   ============================================ */
+
+.history-journey-modal {
+    background: var(--macos-bg-secondary) !important;
+}
+
+.journey-header {
+    border-bottom: 1px solid var(--macos-border);
+    padding: 24px 24px 20px !important;
+}
+
+.journey-header .header-badge.journey {
+    background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: 0 8px 16px rgba(0, 122, 255, 0.2);
+}
+
+.journey-body-scroll {
+    padding: 30px 24px !important;
+    max-height: 70vh;
+    overflow-y: auto;
+    background: radial-gradient(circle at 10% 10%, rgba(0, 122, 255, 0.03) 0%, transparent 40%),
+        radial-gradient(circle at 90% 90%, rgba(175, 82, 222, 0.03) 0%, transparent 40%);
+}
+
+.premium-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+    padding-left: 20px;
+    margin-top: 10px;
+}
+
+.timeline-milestone {
+    display: flex;
+    gap: 30px;
+    position: relative;
+    padding-bottom: 40px;
+}
+
+.timeline-milestone:last-child {
+    padding-bottom: 20px;
+}
+
+.milestone-date-rail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 60px;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.rail-dot {
+    width: 14px;
+    height: 14px;
+    background: var(--macos-accent);
+    border: 3px solid var(--macos-bg-secondary);
+    border-radius: 50%;
+    z-index: 2;
+    box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
+}
+
+.rail-line {
+    position: absolute;
+    top: 14px;
+    bottom: -14px;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--macos-accent), var(--macos-border));
+    z-index: 1;
+}
+
+.timeline-milestone:last-child .rail-line {
+    background: linear-gradient(to bottom, var(--macos-accent), transparent);
+}
+
+.milestone-date-text {
+    margin-top: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--macos-text-primary);
+    text-align: center;
+}
+
+.milestone-year {
+    font-size: 10px;
+    color: var(--macos-text-tertiary);
+    font-weight: 600;
+}
+
+.milestone-card-premium {
+    flex: 1;
+    background: var(--macos-bg-tertiary);
+    border: 1px solid var(--macos-border);
+    border-radius: 20px;
+    padding: 24px;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--shadow-sm);
+}
+
+.milestone-card-premium:hover {
+    transform: translateY(-4px) translateX(4px);
+    border-color: rgba(0, 122, 255, 0.3);
+    box-shadow: var(--shadow-md), 0 0 20px rgba(0, 122, 255, 0.05);
+    background: var(--macos-bg-glass-hover);
+}
+
+.milestone-metrics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.milestone-pill {
+    padding: 12px 18px;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 110px;
+    background: var(--macos-bg-secondary);
+    border: 1px solid var(--macos-border);
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
+}
+
+.milestone-pill label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--macos-text-tertiary);
+    font-weight: 700;
+}
+
+.pill-value-group {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.milestone-pill .value {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--macos-text-primary);
+    letter-spacing: -0.5px;
+}
+
+.trend-tag {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 6px;
+}
+
+.trend-tag.good {
+    background: var(--macos-success-bg);
+    color: var(--macos-success);
+}
+
+.trend-tag.bad {
+    background: var(--macos-error-bg);
+    color: var(--macos-error);
+}
+
+.milestone-pill.weight {
+    border-left: 4px solid var(--macos-accent);
+}
+
+.milestone-pill.fat {
+    border-left: 4px solid #FF9F0A;
+}
+
+.milestone-pill.muscle {
+    border-left: 4px solid #AF52DE;
+}
+
+.milestone-sub-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+    gap: 12px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 14px;
+    margin-bottom: 20px;
+    border: 1px solid var(--macos-border);
+}
+
+.sub-metric {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.sub-metric span {
+    font-size: 10px;
+    color: var(--macos-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.sub-metric strong {
+    font-size: 14px;
+    color: var(--macos-text-secondary);
+    font-weight: 600;
+}
+
+.milestone-notes {
+    display: flex;
+    gap: 12px;
+    padding: 14px 16px;
+    background: rgba(255, 214, 10, 0.05);
+    border-radius: 14px;
+    border: 1px solid rgba(255, 214, 10, 0.1);
+    margin-bottom: 20px;
+}
+
+.milestone-notes svg {
+    color: #FFD60A;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.milestone-notes p {
+    font-size: 13px;
+    color: var(--macos-text-secondary);
+    line-height: 1.6;
+    margin: 0;
+    font-style: italic;
+}
+
+.milestone-actions {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    display: flex;
+    gap: 10px;
+    opacity: 0;
+    transition: all 0.3s ease;
+    transform: translateY(-5px);
+}
+
+.milestone-card-premium:hover .milestone-actions {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.milestone-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.milestone-btn.edit {
+    background: rgba(0, 122, 255, 0.1);
+    color: var(--macos-accent);
+    border-color: rgba(0, 122, 255, 0.1);
+}
+
+.milestone-btn.delete {
+    background: rgba(255, 59, 48, 0.1);
+    color: var(--macos-error);
+    border-color: rgba(255, 59, 48, 0.1);
+}
+
+.milestone-btn:hover {
+    transform: scale(1.15) translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.milestone-btn.edit:hover {
+    background: var(--macos-accent);
+    color: white;
+}
+
+.milestone-btn.delete:hover {
+    background: var(--macos-error);
+    color: white;
+}
+
+.inline-confirm-premium {
+    display: flex;
+    gap: 8px;
+    background: var(--macos-bg-secondary);
+    padding: 4px;
+    border-radius: 10px;
+    border: 1px solid var(--macos-border);
+    box-shadow: var(--shadow-md);
+}
+
+.confirm-yes,
+.confirm-no {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: white;
+    transition: all 0.2s ease;
+}
+
+.confirm-yes {
+    background: var(--macos-success);
+}
+
+.confirm-no {
+    background: var(--macos-error);
+}
+
+.confirm-yes:hover {
+    transform: scale(1.1);
+    filter: brightness(1.1);
+}
+
+.confirm-no:hover {
+    transform: scale(1.1);
+    filter: brightness(1.1);
+}
+
+.empty-journey-premium {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px;
+    text-align: center;
+}
+
+.empty-journey-icon {
+    width: 120px;
+    height: 120px;
+    background: var(--macos-bg-tertiary);
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--macos-text-quaternary);
+    margin-bottom: 30px;
+    transform: rotate(-10deg);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--macos-border);
+}
+
+.empty-journey-premium h3 {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--macos-text-primary);
+    margin-bottom: 16px;
+    letter-spacing: -0.5px;
+}
+
+.empty-journey-premium p {
+    font-size: 15px;
+    color: var(--macos-text-tertiary);
+    max-width: 340px;
+    margin-bottom: 40px;
+    line-height: 1.6;
+}
+
+@media (max-width: 600px) {
+    .premium-timeline {
+        padding-left: 0;
+    }
+
+    .timeline-milestone {
+        gap: 15px;
+    }
+
+    .milestone-date-rail {
+        width: 50px;
+    }
+
+    .milestone-card-premium {
+        padding: 18px;
+    }
+
+    .milestone-actions {
+        opacity: 1;
+        position: static;
+        margin-top: 15px;
+        justify-content: flex-end;
+        transform: none;
+    }
+
+    .milestone-pill {
+        min-width: calc(50% - 6px);
+        flex: 1;
+    }
+}
+
+.header-stats-mini {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.stat-tag {
+    font-size: 11px;
+    color: var(--macos-text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--macos-bg-tertiary);
+    padding: 2px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--macos-border);
+}
+
+.stat-tag strong {
+    color: var(--macos-accent);
+}
+
+.stat-separator {
+    width: 3px;
+    height: 3px;
+    background: var(--macos-text-tertiary);
+    border-radius: 50%;
+}
+
+.journey-duration {
+    background: rgba(175, 82, 222, 0.1) !important;
+    color: #AF52DE !important;
+    border-color: rgba(175, 82, 222, 0.2) !important;
+}
+
+/* Timeline Summary Card */
+.timeline-summary-card {
+    background: linear-gradient(135deg, rgba(0, 122, 255, 0.1) 0%, rgba(175, 82, 222, 0.1) 100%);
+    border: 1px solid rgba(0, 122, 255, 0.2);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 30px;
+    margin-left: 90px;
+    /* Align with milestone cards */
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+}
+
+.timeline-summary-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+    animation: rotate 20s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.summary-stat-group {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    position: relative;
+    z-index: 1;
+}
+
+.summary-icon {
+    width: 50px;
+    height: 50px;
+    background: white;
+    color: #FFD60A;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 20px rgba(255, 214, 10, 0.2);
+}
+
+.summary-details h4 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--macos-text-primary);
+    margin: 0 0 10px 0;
+}
+
+.summary-pills {
+    display: flex;
+    gap: 12px;
+}
+
+.summary-mini-pill {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 6px 12px;
+    border-radius: 10px;
+    font-size: 12px;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.summary-mini-pill span {
+    color: var(--macos-text-tertiary);
+}
+
+.summary-mini-pill strong {
+    color: var(--macos-text-primary);
+    font-weight: 700;
+}
+
+@media (max-width: 600px) {
+    .timeline-summary-card {
+        margin-left: 0;
+        padding: 15px;
+    }
+
+    .summary-stat-group {
+        gap: 15px;
+    }
+
+    .summary-icon {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+/* ============================================
+   Record New PR (Log Workout) Modal Styles
+   ============================================ */
+
+.pr-modal {
+    max-width: 500px !important;
+}
+
+.pr-header .header-badge.trophy {
+    background: linear-gradient(135deg, #FFD60A 0%, #FF9500 100%);
+    box-shadow: 0 8px 16px rgba(255, 149, 0, 0.2);
+}
+
+.form-section-premium {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background: var(--macos-bg-tertiary);
+    padding: 20px;
+    border-radius: 18px;
+    border: 1px solid var(--macos-border);
+}
+
+.premium-text-input {
+    width: 100%;
+    background: var(--macos-bg-secondary) !important;
+    border: 1px solid var(--macos-border) !important;
+    border-radius: 12px !important;
+    padding: 12px 16px !important;
+    font-size: 15px !important;
+    color: var(--macos-text-primary) !important;
+    transition: all 0.2s ease !important;
+}
+
+.premium-text-input:focus {
+    border-color: var(--macos-accent) !important;
+    box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1) !important;
+    background: white !important;
+}
+
+.category-select-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.category-select-wrapper label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--macos-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding-left: 4px;
+}
+
+.category-select-wrapper select {
+    width: 100%;
+    background: var(--macos-bg-secondary);
+    border: 1px solid var(--macos-border);
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 14px;
+    color: var(--macos-text-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.4)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+}
+
+.category-select-wrapper select:focus {
+    border-color: var(--macos-accent);
+    outline: none;
+}
+
+.pr-pods {
+    grid-template-columns: 1fr 1fr !important;
+}
+
+.weight-pod .pod-icon {
+    background: rgba(0, 122, 255, 0.1);
+    color: var(--macos-accent);
+}
+
+.reps-pod .pod-icon {
+    background: rgba(48, 209, 88, 0.1);
+    color: var(--macos-success);
+}
+
+.unit-selector-minimal {
+    background: var(--macos-bg-tertiary);
+    border: 1px solid var(--macos-border);
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--macos-text-secondary);
+    padding: 2px 6px;
+    cursor: pointer;
+    margin-left: 4px;
+}
+
+.unit-selector-minimal:focus {
+    outline: none;
+    border-color: var(--macos-accent);
+}
+
+.btn-active-premium.pr-btn {
+    background: linear-gradient(135deg, #FF9500 0%, #FF3B30 100%);
+    box-shadow: 0 8px 20px rgba(255, 59, 48, 0.25);
+}
+
+.btn-active-premium.pr-btn:hover {
+    box-shadow: 0 12px 24px rgba(255, 59, 48, 0.35);
+}
+
+/* Personal Best Enhancements */
+.pb-item {
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.pb-item:hover {
+    background: var(--macos-bg-glass-hover);
+    border-color: rgba(0, 122, 255, 0.2);
+    transform: translateX(4px);
+    box-shadow: var(--shadow-sm);
+}
+
+.pb-weight {
+    font-size: 15px !important;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, var(--macos-accent) 0%, var(--macos-purple) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.pb-exercise {
+    color: var(--macos-text-primary);
+    font-weight: 600 !important;
+}
+
+.pb-improvement {
+    background: var(--macos-success-bg);
+    padding: 1px 6px;
+    border-radius: 4px;
+}
+
+/* ============================================
+   PREMIUM OVERRIDES & ENHANCEMENTS (COMPACT & UNIFORM)
+   ============================================ */
+
+.macos-page.progress-page {
+    gap: 10px !important;
+    padding: 10px !important;
+    background: radial-gradient(circle at 0% 0%, rgba(0, 122, 255, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 100% 100%, rgba(175, 82, 222, 0.03) 0%, transparent 50%);
+}
+
+/* Quick Actions Bar - Floating Style (Compact) */
+.quick-actions-bar {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    padding: 4px 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 0px;
+    position: sticky;
+    top: 8px;
+    z-index: 100;
+}
+
+.quick-action-btn {
+    padding: 4px 10px;
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 6px;
+}
+
+/* Insight Banner (Compact) */
+.insight-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 9px 14px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(0, 122, 255, 0.12) 0%, rgba(48, 209, 88, 0.08) 100%);
+    border: 1px solid rgba(0, 122, 255, 0.18);
+    backdrop-filter: blur(8px);
+}
+
+.insight-banner__left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+}
+
+.insight-banner__right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.insight-icon-pulse {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: rgba(255, 214, 10, 0.15);
+    color: #FFD60A;
+    flex-shrink: 0;
+}
+
+.insight-text-group {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    flex-wrap: wrap;
+    min-width: 0;
+}
+
+.insight-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: rgba(0, 122, 255, 0.9);
+    flex-shrink: 0;
+}
+
+.insight-desc {
+    font-size: 12.5px;
+    line-height: 1.3;
+    color: var(--macos-text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.insight-desc strong {
+    color: var(--macos-text-primary);
+    font-weight: 600;
+}
+
+.insight-mini-stat {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.insight-stat-icon {
+    flex-shrink: 0;
+}
+
+.insight-stat-icon.streak-icon { color: #FF6B35; }
+.insight-stat-icon.workout-icon { color: #30D158; }
+.insight-stat-icon.trophy-icon { color: #FFD60A; }
+
+.insight-stat-val {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--macos-text-primary);
+}
+
+.insight-stat-lbl {
+    font-size: 10px;
+    color: var(--macos-text-tertiary);
+}
+
+.insight-close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    border: none;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--macos-text-tertiary);
+    cursor: pointer;
+    margin-left: 4px;
+    transition: background 0.15s, color 0.15s;
+    flex-shrink: 0;
+}
+
+.insight-close-btn:hover {
+    background: rgba(255, 59, 48, 0.15);
+    color: #FF3B30;
+}
+
+.mini-stat.premium {
+    padding: 6px 10px;
+    gap: 8px;
+    border-radius: 10px;
+}
+
+.mini-stat-icon {
+    width: 24px;
+    height: 24px;
+}
+
+.mini-stat__value {
+    font-size: 16px;
+}
+
+/* Stats Row (Compact) */
+.stats-row {
+    gap: 10px !important;
+    margin-bottom: 4px;
+}
+
+.stat-card {
+    padding: 12px;
+    border-radius: 14px;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.stat-card__icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+}
+
+.stat-card__icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+.stat-card__value {
+    font-size: 18px;
+    letter-spacing: -0.5px;
+}
+
+.stat-card__value span {
+    font-size: 11px;
+}
+
+.stat-card__label {
+    font-size: 10px;
+    margin-top: 1px;
+}
+
+.stat-card__detail {
+    font-size: 9px;
+    margin-top: 1px;
+}
+
+.stat-card__trend {
+    padding: 2px 6px;
+    font-size: 10px;
+    border-radius: 4px;
+}
+
+/* Chart & Goals Sections (Uniform Spacing) */
+.chart-section,
+.goals-section-enhanced {
+    padding: 14px !important;
+    border-radius: 16px !important;
+    margin-top: 0 !important;
+    background: rgba(255, 255, 255, 0.02) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.chart-stats-grid {
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.chart-stat {
+    padding: 8px;
+    border-radius: 10px;
+}
+
+.chart-stat-value {
+    font-size: 15px;
+}
+
+.chart-stat-label {
+    font-size: 9px;
+}
+
+/* Goals Grid (Compact) */
+.goals-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+}
+
+.goal-card,
+.goal-card-enhanced {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 14px !important;
+    padding: 10px !important;
+}
+
+.goal-card__header {
+    margin-bottom: 6px;
+}
+
+.goal-card__icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+}
+
+.goal-card__title {
+    font-size: 12px;
+}
+
+.goal-card__type {
+    font-size: 9px;
+}
+
+.goal-progress-bar {
+    height: 5px;
+    margin: 6px 0;
+}
+
+.goal-card__stats {
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.goal-stat__label {
+    font-size: 9px;
+}
+
+.goal-stat__value {
+    font-size: 10px;
 }

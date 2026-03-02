@@ -69,6 +69,21 @@ public class Membership {
     @JoinColumn(name = "approved_by")
     private User approvedBy;
 
+    @Column(name = "auto_renew")
+    private Boolean autoRenew = false;
+
+    @Column(name = "freeze_days_used")
+    private Integer freezeDaysUsed = 0;
+
+    @Column(name = "freeze_days_total")
+    private Integer freezeDaysTotal = 30;
+
+    @Column(name = "is_frozen")
+    private Boolean isFrozen = false;
+
+    @Column(name = "frozen_until")
+    private LocalDate frozenUntil;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -107,6 +122,26 @@ public class Membership {
         this.membershipPackage = membershipPackage;
     }
 
+    public void setAutoRenew(Boolean autoRenew) {
+        this.autoRenew = autoRenew;
+    }
+
+    public void setFreezeDaysUsed(Integer freezeDaysUsed) {
+        this.freezeDaysUsed = freezeDaysUsed;
+    }
+
+    public void setFreezeDaysTotal(Integer freezeDaysTotal) {
+        this.freezeDaysTotal = freezeDaysTotal;
+    }
+
+    public void setIsFrozen(Boolean isFrozen) {
+        this.isFrozen = isFrozen;
+    }
+
+    public void setFrozenUntil(LocalDate frozenUntil) {
+        this.frozenUntil = frozenUntil;
+    }
+
     // Getters
     public Long getId() {
         return id;
@@ -142,6 +177,26 @@ public class Membership {
 
     public MembershipPackage getMembershipPackage() {
         return membershipPackage;
+    }
+
+    public Boolean getAutoRenew() {
+        return autoRenew;
+    }
+
+    public Integer getFreezeDaysUsed() {
+        return freezeDaysUsed;
+    }
+
+    public Integer getFreezeDaysTotal() {
+        return freezeDaysTotal;
+    }
+
+    public Boolean getIsFrozen() {
+        return isFrozen;
+    }
+
+    public LocalDate getFrozenUntil() {
+        return frozenUntil;
     }
 
     public TieredMembershipPlan getTieredPlan() {

@@ -1,87 +1,198 @@
-# Member My Trainer — Improvement Plan
+# My Trainer — Improvement Plan
 
-## Current State Analysis
+## Current State (Confirmed from Actual Code — March 2026)
 
-**File:** `MyTrainer.tsx` (565 lines)  
-**Current features:** Assigned trainer display with stats, trainer search/browse, skill category filtering, trainer cards with specialization tags, request trainer button, search with text matching, animation variants.
+**File:** `MyTrainer.tsx` — **564 lines**
+**CSS:** `MyTrainer.css` (exists), also imports `MemberProfile.css` (tight coupling)
 
-**Problems:**
-- Mixes two different use cases: "My assigned trainer" profile view AND "Browse all trainers" marketplace — should be separated
-- No trainer comparison feature
-- No trainer reviews/testimonials from other members
-- No trainer availability/schedule view before requesting
-- `handleRequestTrainer` sends a request but no way to track request status
-- No direct message button on trainer card
-- Skill categories are hardcoded (`SKILL_CATEGORIES` constant) — should come from backend
-- Imports `MemberProfile.css` — unnecessary cross-page dependency
-- No trainer pricing/package info visible to member
+**Confirmed structure:**
+- Root `<motion.div className="member-profile">` — uses `MemberProfile.css` classes (coupling confirmed)
+- `<motion.div className="profile-hero">` — hero banner with animated ring, dynamic title based on `assignedTrainers.length`
+- 3 stat minis: `{trainers.length} Professionals`, `98% Member Sat` (hardcoded), `Elite Expertise` (hardcoded)
+- Toggle button: `showDiscovery` state → "Discover Trainers" / "Back to Team"
+- **Team view:** assigned trainer full cards + "Recommended for You" compact grid (top 3 unassigned)
+- **Discovery view:** search + category filter chips + sort dropdown + trainer grid
 
----
-
-## Missing Functionality
-
-| Priority | Feature | Description |
-|----------|---------|-------------|
-| **P0** | Separate assigned vs. browse | Split into "My Trainer" card (if assigned) + "Find a Trainer" section below |
-| **P0** | Trainer availability viewer | Show trainer's available time slots before requesting |
-| **P0** | Request status tracking | "Pending", "Accepted", "Declined" status for trainer requests |
-| **P0** | Direct message from card | "Message" button on trainer card to open chat |
-| **P1** | Trainer comparison | Select 2-3 trainers → side-by-side comparison (rating, experience, specializations, price) |
-| **P1** | Trainer reviews | Show ratings and reviews from other members |
-| **P1** | Session booking from trainer page | Book PT session directly after viewing trainer profile |
-| **P1** | Trainer package pricing | Show session rates, package deals (e.g., 10 sessions for ₹8,000) |
-| **P2** | Trainer match quiz | "Answer 5 questions → we'll recommend the best trainer for you" |
-| **P2** | Trainer portfolio | View trainer's before/after transformations, certifications |
-| **P2** | Change trainer request | Option to switch from current trainer to another |
-| **P3** | Trainer rating after session | Rate each PT session to build trainer's review profile |
+**Backend (MemberTrainerController.java — confirmed):**
+- `GET /api/member/trainers/assigned` — reads from `SecurityContextHolder` → returns `currentUser.getTrainers()`
+- `POST /api/member/trainers/{trainerId}/request` — immediately adds trainer to `currentUser.getTrainers()` (no approval flow)
+- `GET /api/member/trainers` — returns all users with TRAINER role
+- **No** `DELETE /api/member/trainers/{id}/unassign` endpoint
+- `matchPercentage` is NOT returned by backend — field is optional in DTO, always `null`/`undefined`
 
 ---
 
-## UI/UX Improvements
+## Confirmed Bugs (Line Numbers from Actual Source)
 
-### Layout Changes
-- **Page structure:**
-  1. **My Trainer section** (if assigned) — large featured card with trainer photo, stats, next session, quick actions (Message, Book Session, View Schedule)
-  2. **Browse Trainers** section — grid of trainer cards with search and filters
-- If no trainer assigned: Show only browse section with prominent "Find Your Perfect Trainer" header
+### Bug 1: "View Profile" button on recommended card ASSIGNS the trainer (line 421–425)
+```tsx
+// CURRENT (line 421-425) — misleading label:
+<button
+    className="macos-btn macos-btn--primary"
+    style={{ width: '100%', padding: '8px', fontSize: '12px' }}
+    onClick={() => handleRequestTrainer(trainer.userId, trainer.name)}
+>
+    View Profile   ← WRONG: this actually calls handleRequestTrainer which ASSIGNS the trainer
+</button>
+```
+**Fix:** Rename to "Add to My Team" or "Request Trainer".
 
-### Visual Enhancements
-- **Assigned trainer card:** Premium card design with gradient background, large avatar, rating stars, "Your Trainer Since [date]" badge
-- **Trainer cards:** Hover to expand with additional info (bio snippet, next available slot)
-- **Skill tags:** Color-coded chips matching the skill category
-- **Match percentage:** If algorithm exists, show "87% match" badge on recommended trainers
-- **Star rating:** Interactive star display (not just number) with review count
-- **Availability indicator:** Green/Yellow/Red dot for availability today
+### Bug 2: MessageSquare button has NO onClick (lines 297–300)
+```tsx
+// CURRENT:
+<button className="macos-btn macos-btn--secondary" style={{ padding: '8px' }} title="Send Message">
+    <MessageSquare size={18} />
+</button>
+// No onClick handler — clicking does nothing
+```
+**Fix:** `onClick={() => navigate('/member/messages?trainerId=${trainer.userId}')}`
 
-### Interactions
-- Click trainer card → slide-open detail panel (not new page) with:
-  - Full bio
-  - Certifications
-  - Specializations
-  - Reviews (last 5)
-  - Available time slots this week
-  - "Request" / "Book Session" / "Message" CTAs
-- Infinite scroll for trainer list
-- Filter animation with smooth card reflow
+### Bug 3: Info button has NO onClick (lines 301–303 and line 548–550)
+```tsx
+// In assigned trainer card (line 301):
+<button className="macos-btn macos-btn--secondary" style={{ padding: '8px' }} title="Trainer Details">
+    <Info size={18} />
+</button>
+// In discovery card (line 548):
+<button className="macos-btn macos-btn--secondary" style={{ padding: '8px' }}>
+    <Info size={16} />
+</button>
+// Both have no onClick
+```
+**Fix:** Open a `TrainerDetailModal` showing full bio, certifications, availability, stats.
+
+### Bug 4: `trainer.name[0]` crashes if name is undefined/null (lines 273, 387, 501)
+```tsx
+// Line 273 (assigned full card):
+fontSize: '36px', ...
+}>
+    {trainer.name[0]}   ← crashes if trainer.name is undefined, null, or empty string
+
+// Line 387 (recommended card):
+{trainer.name[0]}
+
+// Line 501 (discovery card):
+{trainer.name[0]}
+```
+**Fix (all 3 occurrences):**
+```tsx
+{(trainer.name || 'T').charAt(0).toUpperCase()}
+```
+
+### Bug 5: "98% Member Sat" is hardcoded (lines 209–214)
+```tsx
+<div className="profile-stat-mini">
+    <div className="profile-stat-mini__header">
+        <span className="profile-stat-mini__value">98%</span>
+        <Heart size={12} className="profile-stat-mini__icon" />
+    </div>
+    <span className="profile-stat-mini__label">Member Sat</span>
+</div>
+```
+This is a fabricated statistic shown to every member regardless of actual trainer ratings.
+
+**Fix:** Compute from real data: `const avgRating = trainers.length ? (trainers.reduce((sum, t) => sum + (t.stats?.rating || 0), 0) / trainers.length) : 0;` then display `{Math.round((avgRating / 5) * 100)}%`.
+
+### Bug 6: "Elite Expertise" is hardcoded (lines 215–221)
+Same pattern — fabricated. **Fix:** Replace with `{assignedTrainers.length > 0 ? assignedTrainers.length + ' Assigned' : 'Explore'}` or remove this stat entirely.
+
+### Bug 7: Discovery empty state is missing
+When `filteredAndSortedTrainers.length === 0` (after search/filter), the `trainer-grid` is empty — no message shown. Only blank space.
+
+**Fix:**
+```tsx
+{filteredAndSortedTrainers.length === 0 && (
+    <div style={{ textAlign: 'center', padding: '40px', opacity: 0.5 }}>
+        <Search size={32} style={{ marginBottom: '12px' }} />
+        <div>No trainers match your search</div>
+        <button onClick={() => { setSearchQuery(''); setSelectedCategory('All Skills'); }}>
+            Clear filters
+        </button>
+    </div>
+)}
+```
+
+### Bug 8: Sort by "Match" shows no differentiation
+`matchPercentage` is never set by backend (field not in `mapToDiscoveryDTO`). All trainers sort as `0`. Sort by "Match" is effectively random.
+
+**Fix Option A:** Remove "Sort: Match" from dropdown since it has no real data. Keep Rating and Experience.  
+**Fix Option B:** Backend adds `matchPercentage` based on member's `primaryGoal` from settings vs. trainer's `specializations`.
+
+### Bug 9: CSS coupling — uses `member-profile` and `profile-hero` from `MemberProfile.css`
+```tsx
+// Line 149:
+className="member-profile"
+// Line 154:
+className="profile-hero"
+```
+These classes are defined in `MemberProfile.css`. Any change to `MemberProfile.css` can break `MyTrainer.tsx`.
+
+**Fix:** Add `trainer-page` and `trainer-hero` classes to `MyTrainer.css` with equivalent styles. Remove `import './MemberProfile.css'`.
+
+### Bug 10: `fetchData` not in `useCallback`
+```tsx
+const fetchData = async () => { ... };  // line 82 — not memoized
+useEffect(() => { if (!authLoading) fetchData(); }, [authLoading]); // depends on fetchData
+```
+This is lint-clean since `fetchData` is stable (no deps), but it should be `useCallback` for correctness if deps are added later.
 
 ---
 
-## Things to Remove
-- **Import of `MemberProfile.css`** — use own CSS or shared system
-- **Hardcoded `SKILL_CATEGORIES`** — fetch from backend API
-- **Mixed assigned/browse logic** — separate into distinct sections
+## Missing Features (P1)
 
-## Things Showing Same Content
-- Trainer info shown here AND in MyBookings (trainer name on booking) AND in Dashboard (assigned trainer) — ensure consistent data source
-- Trainer specializations shown as tags here and as text in session details — unify component
+### Unassign trainer
+No "Remove" button on assigned trainer cards. No `DELETE /api/member/trainers/{id}/unassign` endpoint.
+
+**Frontend fix:**
+```tsx
+const handleUnassignTrainer = async (trainerId: number, trainerName: string) => {
+    if (!window.confirm(`Remove ${trainerName} from your team?`)) return;
+    // replace window.confirm with inline confirm UI
+    try {
+        await api.delete(`/member/trainers/${trainerId}/unassign`);
+        toast.success(`${trainerName} removed from your team`);
+        const res = await api.get('/member/trainers/assigned');
+        setAssignedTrainers(res.data || []);
+    } catch (err: any) {
+        toast.error(err.response?.data?.message || 'Failed to remove trainer');
+    }
+};
+```
+
+**Backend fix:** Add to `MemberTrainerController`:
+```java
+@DeleteMapping("/{trainerId}/unassign")
+public ResponseEntity<Map<String, String>> unassignTrainer(@PathVariable Long trainerId) {
+    String username = SecurityContextHolder.getContext().getAuthentication().getName();
+    User currentUser = userRepository.findByUsername(username).orElse(null);
+    User trainer = userRepository.findById(trainerId).orElse(null);
+    if (currentUser == null || trainer == null) return ResponseEntity.notFound().build();
+    currentUser.getTrainers().remove(trainer);
+    userRepository.save(currentUser);
+    return ResponseEntity.ok(Map.of("message", "Trainer removed from your team"));
+}
+```
+
+### Trainer detail modal (Info button fix)
+```tsx
+// New component: TrainerDetailModal.tsx
+// Props: trainer, isAssigned, onClose, onRequest, onUnassign
+// Content: avatar, name, rating, experience badge, bio, all specializations, availability grid, stats
+// Footer: [Close] [Request / Your Trainer]
+```
+
+### Trainer count in discovery view
+Add count label: `Showing {filteredAndSortedTrainers.length} of {trainers.length} professionals`
 
 ---
 
-## Performance Improvements
-- Lazy load trainer detail panel
-- Cache trainer list with SWR (trainers don't change frequently)
-- Paginate trainer list (for gyms with many trainers)
-- Compress trainer avatar images
+## Backend Gaps
+
+| Endpoint | Status | Priority |
+|----------|--------|----------|
+| `DELETE /api/member/trainers/{id}/unassign` | Missing | P1 |
+| `matchPercentage` in `GET /api/member/trainers` response | Missing (never computed) | P2 |
+| Full trainer profile (certifications, availability) in GET response | Present in `mapToDiscoveryDTO` but only when `TrainerDetails` exists | P0 — verify |
 
 ---
 
@@ -89,7 +200,19 @@
 
 | Phase | Items |
 |-------|-------|
-| **Phase 1** | Separate assigned/browse sections, trainer detail panel, request tracking |
-| **Phase 2** | Availability viewer, direct message, session booking |
-| **Phase 3** | Trainer reviews, comparison, package pricing |
-| **Phase 4** | Match quiz, portfolio, change trainer |
+| **Phase 1 (P0)** | Fix 3x `trainer.name[0]` crash; rename "View Profile" → "Request Trainer" on recommended card; wire MessageSquare onClick to navigate; remove hardcoded "98% satisfaction" stat |
+| **Phase 2 (P0)** | Add empty state for discovery grid (no results); remove Sort:Match option (or implement it); fix CSS coupling (add trainer-page/trainer-hero to MyTrainer.css, remove MemberProfile.css import) |
+| **Phase 3 (P1)** | Add `TrainerDetailModal` wired to Info buttons; add unassign button + backend endpoint |
+| **Phase 4 (P2)** | Implement `matchPercentage` backend logic; add trainer count label in discovery; add next-session info on assigned trainer card |
+
+---
+
+## File Scope
+
+| File | Changes |
+|------|---------|
+| `MyTrainer.tsx` | Fix name[0] crashes (3 spots); rename button; wire onClick (2 buttons); remove hardcoded stats; add empty state; add `TrainerDetailModal`; add unassign | ~600 lines |
+| `MyTrainer.css` | Add `trainer-page`, `trainer-hero`, `trainer-card--full`, `trainer-card__bio` (line-clamp) | +30 lines |
+| `MemberProfile.css` import | Remove from `MyTrainer.tsx` | -1 line |
+| `TrainerDetailModal.tsx` | New component | ~120 lines |
+| `MemberTrainerController.java` | Add `DELETE /{trainerId}/unassign` | +15 lines |

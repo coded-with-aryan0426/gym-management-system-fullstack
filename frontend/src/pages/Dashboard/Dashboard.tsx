@@ -273,13 +273,23 @@ const Dashboard: React.FC = () => {
   }, [analyticsData?.membershipBreakdown, data])
 
   const revenueBreakdown = useMemo(() => {
+    const prettifyCategory = (raw: string) => {
+      if (!raw) return "Other"
+      // Already title-cased (e.g. "Membership") — return as-is
+      if (raw === raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase()) return raw
+      // All caps short codes (e.g. "POS", "EMI") — keep uppercase
+      if (raw.length <= 4 && raw === raw.toUpperCase()) return raw
+      // All-caps long strings — title case them
+      if (raw === raw.toUpperCase()) return raw.charAt(0) + raw.slice(1).toLowerCase()
+      return raw
+    }
     // Primary: real income category stats from /finance/category-stats
     const stats = financeData?.categoryStats
     if (stats?.length) {
       const total = stats.reduce((s: number, c: any) => s + Number(c.total || 0), 0)
       const colors = ["#10b981","#3b82f6","#8b5cf6","#f59e0b","#f43f5e","#06b6d4"]
       return stats.slice(0, 6).map((c: any, i: number) => ({
-        label: c.category || "Other",
+        label: prettifyCategory(c.category || ""),
         value: Number(c.total || 0),
         pct: total > 0 ? Math.round((Number(c.total) / total) * 100) : 0,
         color: colors[i % colors.length],
@@ -307,8 +317,9 @@ const Dashboard: React.FC = () => {
   const revenueChange   = finOvr ? Number(finOvr.revenueChange  || 0) : (data?.revenueChange        || 0)
   const isPositive      = revenueChange >= 0
 
-  const isRealRevenue    = !!(financeData?.dailyTrend?.length || financeData?.chartFallback?.length)
-  const isRealAttendance = !!analyticsData?.dailyAttendance?.length
+    const isRealRevenue    = !!(financeData?.dailyTrend?.length || financeData?.chartFallback?.length)
+    const isRealAttendance = !!analyticsData?.dailyAttendance?.length
+    const isChartAllZero   = revenueChart.every(d => d.value === 0 && d.expenses === 0)
 
   if (loading && !data) return (
     <div className="dash-loading">
@@ -472,7 +483,15 @@ const Dashboard: React.FC = () => {
 
           {/* ── Chart ── */}
           <div className="dash__chart-area" style={{ opacity: chartLoading ? 0.5 : 1, transition: 'opacity 0.2s' }}>
-            <ResponsiveContainer width="100%" height={200}>
+            {isRealRevenue && isChartAllZero && !chartLoading ? (
+              <EmptyState
+                icon={<TrendingUp size={26} />}
+                label="No transactions this period"
+                hint="Record income or expenses to see the chart populate"
+                color="emerald"
+              />
+            ) : null}
+            <ResponsiveContainer width="100%" height={200} style={{ display: isRealRevenue && isChartAllZero && !chartLoading ? 'none' : undefined }}>
               <AreaChart
                 data={revenueChart}
                   margin={{ top: 8, right: 12, left: -10, bottom: chartPeriod === 'month' ? 42 : 20 }}
@@ -609,9 +628,9 @@ const Dashboard: React.FC = () => {
             </div>
             <div className="dash__donut-wrap">
               <div className="dash__donut-chart">
-                <ResponsiveContainer width="100%" height={140}>
+                <ResponsiveContainer width="100%" height={156}>
                     <PieChart>
-                      <Pie data={membershipDist} cx="50%" cy="50%" innerRadius={40} outerRadius={62}
+                      <Pie data={membershipDist} cx="50%" cy="50%" innerRadius={46} outerRadius={70}
                       paddingAngle={3} dataKey="value" strokeWidth={0}>
                       {membershipDist.map((e, i) => <Cell key={i} fill={e.color} />)}
                     </Pie>

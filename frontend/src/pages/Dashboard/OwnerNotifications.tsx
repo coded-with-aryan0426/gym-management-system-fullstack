@@ -6,12 +6,12 @@ import {
     Star, Trash2, Archive, Clock, TrendingUp,
     UserPlus, CreditCard, AlertCircle, Dumbbell, Inbox,
     ChevronRight, Filter, X, Check, MoreHorizontal,
-    RefreshCw, ExternalLink, Shield,
+    RefreshCw, ExternalLink,
     Zap, Eye, ArchiveRestore,
     ChevronDown, Mail, MailOpen, BellRing, Activity,
     BellOff, Sparkles, ArrowRight, ChevronUp, Heart,
     MessageSquare, BarChart3, Megaphone, Info, Volume2,
-    Wifi, WifiOff, CircleDot
+    Wifi, WifiOff, CircleDot, ChevronLeft
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
@@ -19,7 +19,6 @@ import { useAuth } from '../../contexts/AuthContext';
 import { notificationApi, type NotificationData, type NotificationStats } from '../../api/notificationApi';
 import './OwnerNotifications.css';
 
-// Category config for gym owners
 const CATEGORIES: Record<string, { icon: any; label: string; color: string; bg: string; desc: string }> = {
     PAYMENT: { icon: IndianRupee, label: 'Payments', color: '#34C759', bg: 'rgba(52,199,89,0.12)', desc: 'Revenue & billing updates' },
     MEMBERSHIP: { icon: CreditCard, label: 'Memberships', color: '#007AFF', bg: 'rgba(0,122,255,0.12)', desc: 'Renewals & expirations' },
@@ -52,6 +51,40 @@ const GYM_NOTIFICATION_TIPS = [
     { icon: AlertTriangle, title: 'Critical Alerts', desc: 'Immediate notifications for emergencies, system issues, or policy violations.', color: '#FF3B30' },
 ];
 
+// Maps a notification to the best deep-link route + optional scroll hash
+const getDeepLink = (notif: NotificationData, meta: any): { path: string; hash?: string; label: string } | null => {
+    const t = notif.type?.toUpperCase();
+    if (notif.link) return { path: notif.link, label: 'Go to linked page' };
+    switch (t) {
+        case 'PAYMENT':
+            return { path: '/financials', hash: 'payments', label: 'View in Financials' };
+        case 'MEMBERSHIP':
+            if (meta?.memberId) return { path: `/members/${meta.memberId}`, hash: 'membership', label: 'View Member' };
+            return { path: '/members', hash: 'memberships', label: 'View Members' };
+        case 'BOOKING':
+            return { path: '/classes', hash: 'sessions', label: 'View Bookings' };
+        case 'SCHEDULE':
+            return { path: '/classes', hash: 'schedule', label: 'View Schedule' };
+        case 'MEMBER':
+            if (meta?.memberId) return { path: `/members/${meta.memberId}`, label: 'View Member' };
+            return { path: '/members', label: 'View Members' };
+        case 'TRAINER':
+            if (meta?.trainerId) return { path: `/trainers/${meta.trainerId}`, label: 'View Trainer' };
+            return { path: '/trainers', label: 'View Trainers' };
+        case 'INVENTORY':
+            return { path: '/equipment', label: 'View Equipment' };
+        case 'REPORT':
+            return { path: '/financials', hash: 'analytics', label: 'View Reports' };
+        case 'ALERT':
+        case 'SYSTEM':
+            return { path: '/dashboard', label: 'Go to Dashboard' };
+        default:
+            return null;
+    }
+};
+
+const MSG_TRUNCATE = 120;
+
 const OwnerNotifications: React.FC = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
@@ -63,44 +96,57 @@ const OwnerNotifications: React.FC = () => {
     const [refreshing, setRefreshing] = useState(false);
     const [liveConnected, setLiveConnected] = useState(true);
 
-    // Filters
     const [viewFilter, setViewFilter] = useState<ViewFilter>('all');
     const [typeFilter, setTypeFilter] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [priorityFilter, setPriorityFilter] = useState<string | null>(null);
 
-    // Selection
     const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
     const [selectMode, setSelectMode] = useState(false);
 
-    // Detail panel
-    const [selectedNotif, setSelectedNotif] = useState<NotificationData | null>(null);
+    // Inline expanded card
+    const [expandedId, setExpandedId] = useState<number | null>(null);
+    // Detail modal (three-dot)
+    const [detailNotif, setDetailNotif] = useState<NotificationData | null>(null);
 
-    // Bulk dropdown
     const [showBulkMenu, setShowBulkMenu] = useState(false);
     const bulkRef = useRef<HTMLDivElement>(null);
 
-    // Sidebar collapse sections
-    const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
+    const ALL_SECTIONS = ['views', 'categories', 'priority'];
+    const STORAGE_KEY = 'on_sidebar_open_section';
 
-    // Mobile sidebar
+    const getInitialCollapsed = (): Set<string> => {
+        try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                const openSection = JSON.parse(saved) as string | null;
+                return new Set(ALL_SECTIONS.filter(s => s !== openSection));
+            }
+        } catch {}
+        return new Set(['categories', 'priority']);
+    };
+
+    const [collapsedSections, setCollapsedSections] = useState<Set<string>>(getInitialCollapsed);
     const [mobileSidebar, setMobileSidebar] = useState(false);
 
     const toggleSection = (key: string) => {
         setCollapsedSections(prev => {
-            const next = new Set(prev);
-            if (next.has(key)) next.delete(key);
-            else next.add(key);
+            let next: Set<string>;
+            if (prev.has(key)) {
+                next = new Set(ALL_SECTIONS.filter(s => s !== key));
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(key));
+            } else {
+                next = new Set(ALL_SECTIONS);
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(null));
+            }
             return next;
         });
     };
 
-    // Fetch data
     const fetchData = useCallback(async (showRefresh = false) => {
         if (!userId) return;
         if (showRefresh) setRefreshing(true);
         else setLoading(true);
-
         try {
             if (typeFilter) {
                 const data = await notificationApi.getByType(userId, typeFilter);
@@ -121,17 +167,12 @@ const OwnerNotifications: React.FC = () => {
         }
     }, [userId, viewFilter, typeFilter]);
 
-    useEffect(() => {
-        fetchData();
-    }, [fetchData]);
-
-    // Poll every 30s
+    useEffect(() => { fetchData(); }, [fetchData]);
     useEffect(() => {
         const interval = setInterval(() => fetchData(), 30000);
         return () => clearInterval(interval);
     }, [fetchData]);
 
-    // Close bulk menu on outside click
     useEffect(() => {
         const handler = (e: MouseEvent) => {
             if (bulkRef.current && !bulkRef.current.contains(e.target as Node)) setShowBulkMenu(false);
@@ -140,7 +181,13 @@ const OwnerNotifications: React.FC = () => {
         return () => document.removeEventListener('mousedown', handler);
     }, []);
 
-    // Search + priority filter
+    // Close detail modal on Escape
+    useEffect(() => {
+        const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setDetailNotif(null); };
+        document.addEventListener('keydown', handler);
+        return () => document.removeEventListener('keydown', handler);
+    }, []);
+
     const filteredNotifications = useMemo(() => {
         return notifications.filter(n => {
             if (searchQuery) {
@@ -152,7 +199,6 @@ const OwnerNotifications: React.FC = () => {
         });
     }, [notifications, searchQuery, priorityFilter]);
 
-    // Group by time
     const grouped = useMemo(() => {
         const now = new Date();
         const groups: { label: string; items: NotificationData[] }[] = [
@@ -173,7 +219,6 @@ const OwnerNotifications: React.FC = () => {
         return groups.filter(g => g.items.length > 0);
     }, [filteredNotifications]);
 
-    // Actions
     const handleMarkAsRead = async (id: number) => {
         try {
             await notificationApi.markAsRead(id);
@@ -193,7 +238,7 @@ const OwnerNotifications: React.FC = () => {
         try {
             await notificationApi.archive(id);
             setNotifications(prev => prev.filter(n => n.id !== id));
-            if (selectedNotif?.id === id) setSelectedNotif(null);
+            if (detailNotif?.id === id) setDetailNotif(null);
             toast.success('Archived');
             fetchData(true);
         } catch { toast.error('Failed'); }
@@ -203,7 +248,7 @@ const OwnerNotifications: React.FC = () => {
         try {
             await notificationApi.unarchive(id);
             setNotifications(prev => prev.filter(n => n.id !== id));
-            if (selectedNotif?.id === id) setSelectedNotif(null);
+            if (detailNotif?.id === id) setDetailNotif(null);
             toast.success('Restored');
             fetchData(true);
         } catch { toast.error('Failed'); }
@@ -213,7 +258,7 @@ const OwnerNotifications: React.FC = () => {
         try {
             await notificationApi.delete(id);
             setNotifications(prev => prev.filter(n => n.id !== id));
-            if (selectedNotif?.id === id) setSelectedNotif(null);
+            if (detailNotif?.id === id) setDetailNotif(null);
             toast.success('Deleted');
             fetchData(true);
         } catch { toast.error('Failed'); }
@@ -229,7 +274,6 @@ const OwnerNotifications: React.FC = () => {
         } catch { toast.error('Failed'); }
     };
 
-    // Bulk actions
     const handleBulkAction = async (action: string) => {
         const ids = Array.from(selectedIds);
         if (ids.length === 0) return;
@@ -257,18 +301,20 @@ const OwnerNotifications: React.FC = () => {
         else setSelectedIds(new Set(filteredNotifications.map(n => n.id)));
     };
 
-    const openNotif = (n: NotificationData) => {
-        setSelectedNotif(n);
+    const handleCardClick = (n: NotificationData) => {
+        if (selectMode) { toggleSelect(n.id); return; }
+        setExpandedId(prev => prev === n.id ? null : n.id);
         if (!n.isRead) handleMarkAsRead(n.id);
     };
 
-    const getCategory = (type: string) => {
-        return CATEGORIES[type?.toUpperCase()] || CATEGORIES.SYSTEM;
+    const openDetail = (e: React.MouseEvent, n: NotificationData) => {
+        e.stopPropagation();
+        setDetailNotif(n);
+        if (!n.isRead) handleMarkAsRead(n.id);
     };
 
-    const getPriority = (p: string) => {
-        return PRIORITY_CONFIG[p] || PRIORITY_CONFIG.normal;
-    };
+    const getCategory = (type: string) => CATEGORIES[type?.toUpperCase()] || CATEGORIES.SYSTEM;
+    const getPriority = (p: string) => PRIORITY_CONFIG[p] || PRIORITY_CONFIG.normal;
 
     const formatTime = (dateStr: string) => {
         const d = new Date(dateStr);
@@ -313,10 +359,16 @@ const OwnerNotifications: React.FC = () => {
         setViewFilter('all');
     };
 
-    // Render sidebar content (shared between desktop and mobile)
+    const handleDeepLink = (notif: NotificationData, meta: any) => {
+        const link = getDeepLink(notif, meta);
+        if (!link) return;
+        setDetailNotif(null);
+        const path = link.hash ? `${link.path}?section=${link.hash}` : link.path;
+        navigate(path, { state: { scrollTo: link.hash, fromNotif: notif.id } });
+    };
+
     const renderSidebarContent = () => (
         <>
-            {/* Views */}
             <div className="on-sidebar__section">
                 <button className="on-sidebar__heading" onClick={() => toggleSection('views')}>
                     <Eye size={11} />
@@ -353,7 +405,6 @@ const OwnerNotifications: React.FC = () => {
 
             <div className="on-sidebar__divider" />
 
-            {/* Categories */}
             <div className="on-sidebar__section">
                 <button className="on-sidebar__heading" onClick={() => toggleSection('categories')}>
                     <Filter size={11} />
@@ -389,7 +440,6 @@ const OwnerNotifications: React.FC = () => {
 
             <div className="on-sidebar__divider" />
 
-            {/* Priority */}
             <div className="on-sidebar__section">
                 <button className="on-sidebar__heading" onClick={() => toggleSection('priority')}>
                     <Zap size={11} />
@@ -416,12 +466,132 @@ const OwnerNotifications: React.FC = () => {
         </>
     );
 
+    const renderDetailModal = () => {
+        if (!detailNotif) return null;
+        const cat = getCategory(detailNotif.type);
+        const pri = getPriority(detailNotif.priority);
+        const meta = parseMeta(detailNotif.metaData);
+        const deepLink = getDeepLink(detailNotif, meta);
+
+        const metaFields = meta ? [
+            meta.amount && { icon: IndianRupee, label: 'Amount', value: meta.amount, color: '#34C759' },
+            meta.memberName && { icon: Users, label: 'Member', value: meta.memberName, color: '#007AFF' },
+            meta.trainerName && { icon: Dumbbell, label: 'Trainer', value: meta.trainerName, color: '#AF52DE' },
+            meta.className && { icon: Calendar, label: 'Class', value: meta.className, color: '#5856D6' },
+            meta.planName && { icon: CreditCard, label: 'Plan', value: meta.planName, color: '#007AFF' },
+            meta.sessionTime && { icon: Clock, label: 'Session Time', value: meta.sessionTime, color: '#007AFF' },
+            meta.expiryDate && { icon: AlertTriangle, label: 'Expiry', value: meta.expiryDate, color: '#FF3B30' },
+            meta.discount && { icon: Megaphone, label: 'Discount', value: meta.discount, color: '#FF2D55' },
+        ].filter(Boolean) : [];
+
+        return (
+            <AnimatePresence>
+                <motion.div
+                    className="on-modal-overlay"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    onClick={() => setDetailNotif(null)}
+                >
+                    <motion.div
+                        className="on-modal"
+                        initial={{ opacity: 0, y: 24, scale: 0.96 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 24, scale: 0.96 }}
+                        transition={{ type: 'spring', damping: 26, stiffness: 320 }}
+                        onClick={e => e.stopPropagation()}
+                    >
+                        {/* Modal header */}
+                        <div className="on-modal__header" style={{ background: `linear-gradient(135deg, ${cat.color}20, ${cat.color}08)` }}>
+                            <div className="on-modal__header-icon" style={{ background: cat.bg, color: cat.color }}>
+                                <cat.icon size={22} />
+                            </div>
+                            <div className="on-modal__header-info">
+                                <div className="on-modal__badges">
+                                    <span className="on-modal__badge" style={{ background: cat.bg, color: cat.color }}>{cat.label}</span>
+                                    <span className="on-modal__badge" style={{ background: pri.bg, color: pri.color }}>
+                                        <pri.icon size={9} /> {pri.label}
+                                    </span>
+                                    {!detailNotif.isRead && <span className="on-modal__badge on-modal__badge--unread">Unread</span>}
+                                </div>
+                                <div className="on-modal__timestamp">
+                                    <Clock size={11} />
+                                    <span>{formatFullDate(detailNotif.createdAt)}</span>
+                                </div>
+                            </div>
+                            <div className="on-modal__header-acts">
+                                <button
+                                    className={`on-detail-act ${detailNotif.isStarred ? 'starred' : ''}`}
+                                    onClick={() => handleToggleStar(detailNotif.id)}
+                                    title={detailNotif.isStarred ? 'Unstar' : 'Star'}
+                                >
+                                    <Star size={14} fill={detailNotif.isStarred ? 'currentColor' : 'none'} />
+                                </button>
+                                <button
+                                    className="on-detail-act"
+                                    onClick={() => viewFilter === 'archived' ? handleUnarchive(detailNotif.id) : handleArchive(detailNotif.id)}
+                                    title={viewFilter === 'archived' ? 'Restore' : 'Archive'}
+                                >
+                                    {viewFilter === 'archived' ? <ArchiveRestore size={14} /> : <Archive size={14} />}
+                                </button>
+                                <button className="on-detail-act on-detail-act--danger" onClick={() => handleDelete(detailNotif.id)} title="Delete">
+                                    <Trash2 size={14} />
+                                </button>
+                                <button className="on-modal__close" onClick={() => setDetailNotif(null)}>
+                                    <X size={16} />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Modal body */}
+                        <div className="on-modal__body">
+                            <h2 className="on-modal__title">{detailNotif.title}</h2>
+                            <p className="on-modal__message">{detailNotif.message}</p>
+
+                            {metaFields.length > 0 && (
+                                <>
+                                    <div className="on-modal__divider" />
+                                    <div className="on-modal__meta-label"><Info size={12} /> Additional Details</div>
+                                    <div className="on-modal__meta-grid">
+                                        {metaFields.map((f: any, i) => (
+                                            <div className="on-modal__meta-card" key={i}>
+                                                <div className="on-modal__meta-icon" style={{ background: `${f.color}18`, color: f.color }}>
+                                                    <f.icon size={13} />
+                                                </div>
+                                                <div className="on-modal__meta-text">
+                                                    <span className="label">{f.label}</span>
+                                                    <span className="value">{f.value}</span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </>
+                            )}
+
+                            {deepLink && (
+                                <>
+                                    <div className="on-modal__divider" />
+                                    <button
+                                        className="on-modal__goto-btn"
+                                        onClick={() => handleDeepLink(detailNotif, meta)}
+                                    >
+                                        <ExternalLink size={14} />
+                                        {deepLink.label}
+                                        <ArrowRight size={14} />
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                    </motion.div>
+                </motion.div>
+            </AnimatePresence>
+        );
+    };
+
     return (
         <div className="on-page">
-            {/* Header - single row */}
             <header className="on-header">
                 <div className="on-header__row">
-                    {/* Left: Icon + Title */}
                     <div className="on-header__left">
                         <div className="on-header__icon-wrap">
                             <Bell size={18} />
@@ -440,7 +610,6 @@ const OwnerNotifications: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Center: Stats */}
                     {stats && (
                         <div className="on-stats-strip">
                             {[
@@ -473,7 +642,6 @@ const OwnerNotifications: React.FC = () => {
                         </div>
                     )}
 
-                    {/* Right: Search + actions */}
                     <div className="on-header__right">
                         <div className="on-search-box">
                             <Search size={13} />
@@ -506,14 +674,11 @@ const OwnerNotifications: React.FC = () => {
                 </div>
             </header>
 
-            {/* Main Layout */}
             <div className="on-body">
-                {/* Desktop Sidebar */}
                 <aside className="on-sidebar">
                     {renderSidebarContent()}
                 </aside>
 
-                {/* Mobile Sidebar Overlay */}
                 <AnimatePresence>
                     {mobileSidebar && (
                         <>
@@ -541,12 +706,13 @@ const OwnerNotifications: React.FC = () => {
                     )}
                 </AnimatePresence>
 
-                {/* Content */}
                 <div className="on-content">
-                    {/* Toolbar */}
                     <div className="on-toolbar">
                         <div className="on-toolbar__left">
-                            <h3 className="on-toolbar__view-label">{activeFilterLabel}</h3>
+                            <h3 className="on-toolbar__view-label">
+                                {activeFilterLabel}
+                                <span className="on-toolbar__count">{filteredNotifications.length}</span>
+                            </h3>
 
                             <button
                                 className={`on-toolbar-btn ${selectMode ? 'active' : ''}`}
@@ -578,22 +744,12 @@ const OwnerNotifications: React.FC = () => {
                                                         exit={{ opacity: 0, y: -6, scale: 0.95 }}
                                                         transition={{ duration: 0.15 }}
                                                     >
-                                                        <button onClick={() => handleBulkAction('read')}>
-                                                            <MailOpen size={14} /> Mark as Read
-                                                        </button>
-                                                        <button onClick={() => handleBulkAction('unread')}>
-                                                            <Mail size={14} /> Mark as Unread
-                                                        </button>
-                                                        <button onClick={() => handleBulkAction('star')}>
-                                                            <Star size={14} /> Star Selected
-                                                        </button>
-                                                        <button onClick={() => handleBulkAction('archive')}>
-                                                            <Archive size={14} /> Archive Selected
-                                                        </button>
+                                                        <button onClick={() => handleBulkAction('read')}><MailOpen size={14} /> Mark as Read</button>
+                                                        <button onClick={() => handleBulkAction('unread')}><Mail size={14} /> Mark as Unread</button>
+                                                        <button onClick={() => handleBulkAction('star')}><Star size={14} /> Star Selected</button>
+                                                        <button onClick={() => handleBulkAction('archive')}><Archive size={14} /> Archive Selected</button>
                                                         <div className="on-bulk-divider" />
-                                                        <button className="danger" onClick={() => handleBulkAction('delete')}>
-                                                            <Trash2 size={14} /> Delete Selected
-                                                        </button>
+                                                        <button className="danger" onClick={() => handleBulkAction('delete')}><Trash2 size={14} /> Delete Selected</button>
                                                     </motion.div>
                                                 )}
                                             </AnimatePresence>
@@ -620,14 +776,11 @@ const OwnerNotifications: React.FC = () => {
                                     )}
                                     {searchQuery && (
                                         <span className="on-filter-chip">
-                                            <Search size={10} />
-                                            "{searchQuery}"
+                                            <Search size={10} />"{searchQuery}"
                                             <button onClick={() => setSearchQuery('')}><X size={10} /></button>
                                         </span>
                                     )}
-                                    <button className="on-filter-clear-all" onClick={clearAllFilters}>
-                                        Clear all
-                                    </button>
+                                    <button className="on-filter-clear-all" onClick={clearAllFilters}>Clear all</button>
                                 </div>
                             )}
                             <span className="on-result-count">
@@ -636,344 +789,197 @@ const OwnerNotifications: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Split View */}
-                    <div className="on-split">
-                        {/* List */}
-                        <div className={`on-list ${selectedNotif ? 'has-detail' : ''}`}>
-                            {loading ? (
-                                <div className="on-loading">
-                                    <div className="on-loading__spinner" />
-                                    <p>Loading notifications...</p>
-                                </div>
-                            ) : filteredNotifications.length === 0 ? (
-                                <div className="on-empty">
-                                    <div className="on-empty__hero">
-                                        <div className="on-empty__icon-ring">
-                                            <div className="on-empty__icon-inner">
-                                                {viewFilter === 'starred' ? <Star size={32} /> :
-                                                 viewFilter === 'archived' ? <Archive size={32} /> :
-                                                 viewFilter === 'unread' ? <CheckCheck size={32} /> :
-                                                 searchQuery ? <Search size={32} /> :
-                                                 <Bell size={32} />}
-                                            </div>
-                                            <div className="on-empty__ring-pulse" />
+                    {/* Full-width list (no split) */}
+                    <div className="on-list__scroll">
+                        {loading ? (
+                            <div className="on-loading">
+                                <div className="on-loading__spinner" />
+                                <p>Loading notifications...</p>
+                            </div>
+                        ) : filteredNotifications.length === 0 ? (
+                            <div className="on-empty">
+                                <div className="on-empty__hero">
+                                    <div className="on-empty__icon-ring">
+                                        <div className="on-empty__icon-inner">
+                                            {viewFilter === 'starred' ? <Star size={32} /> :
+                                             viewFilter === 'archived' ? <Archive size={32} /> :
+                                             viewFilter === 'unread' ? <CheckCheck size={32} /> :
+                                             searchQuery ? <Search size={32} /> :
+                                             <Bell size={32} />}
                                         </div>
-                                        <h2>
-                                            {searchQuery
-                                                ? `No results for "${searchQuery}"`
-                                                : viewFilter === 'archived'
-                                                    ? 'No archived notifications'
-                                                    : viewFilter === 'starred'
-                                                        ? 'No starred notifications'
-                                                        : viewFilter === 'unread'
-                                                            ? 'You\'re all caught up!'
-                                                            : 'No notifications yet'}
-                                        </h2>
-                                        <p>
-                                            {searchQuery
-                                                ? 'Try a different search term or clear your filters.'
-                                                : viewFilter === 'unread'
-                                                    ? 'Great job! You\'ve read all your notifications.'
-                                                    : viewFilter !== 'all'
-                                                        ? `You have no ${viewFilter} notifications right now.`
-                                                        : 'As your gym operates, notifications will appear here to keep you informed about everything important.'}
-                                        </p>
-                                        {hasActiveFilters && (
-                                            <button className="on-empty__clear-btn" onClick={clearAllFilters}>
-                                                <X size={14} /> Clear all filters
-                                            </button>
-                                        )}
+                                        <div className="on-empty__ring-pulse" />
                                     </div>
-
-                                    {!hasActiveFilters && viewFilter === 'all' && (
-                                        <div className="on-empty__tips">
-                                            <div className="on-empty__tips-header">
-                                                <Sparkles size={14} />
-                                                <span>What notifications will you receive?</span>
-                                            </div>
-                                            <div className="on-empty__tips-grid">
-                                                {GYM_NOTIFICATION_TIPS.map((tip, i) => (
-                                                    <motion.div
-                                                        key={i}
-                                                        className="on-empty__tip-card"
-                                                        initial={{ opacity: 0, y: 12 }}
-                                                        animate={{ opacity: 1, y: 0 }}
-                                                        transition={{ delay: i * 0.07, duration: 0.35 }}
-                                                    >
-                                                        <div className="on-empty__tip-icon" style={{ background: `${tip.color}18`, color: tip.color }}>
-                                                            <tip.icon size={18} />
-                                                        </div>
-                                                        <div className="on-empty__tip-text">
-                                                            <strong>{tip.title}</strong>
-                                                            <span>{tip.desc}</span>
-                                                        </div>
-                                                    </motion.div>
-                                                ))}
-                                            </div>
-                                        </div>
+                                    <h2>
+                                        {searchQuery ? `No results for "${searchQuery}"` :
+                                         viewFilter === 'archived' ? 'No archived notifications' :
+                                         viewFilter === 'starred' ? 'No starred notifications' :
+                                         viewFilter === 'unread' ? "You're all caught up!" :
+                                         'No notifications yet'}
+                                    </h2>
+                                    <p>
+                                        {searchQuery ? 'Try a different search term or clear your filters.' :
+                                         viewFilter === 'unread' ? "Great job! You've read all your notifications." :
+                                         viewFilter !== 'all' ? `You have no ${viewFilter} notifications right now.` :
+                                         'As your gym operates, notifications will appear here to keep you informed about everything important.'}
+                                    </p>
+                                    {hasActiveFilters && (
+                                        <button className="on-empty__clear-btn" onClick={clearAllFilters}>
+                                            <X size={14} /> Clear all filters
+                                        </button>
                                     )}
                                 </div>
-                            ) : (
-                                <div className="on-list__scroll">
-                                    {grouped.map(group => (
-                                        <div key={group.label} className="on-group">
-                                            <div className="on-group__header">
-                                                <span className="on-group__label">{group.label}</span>
-                                                <span className="on-group__count">{group.items.length}</span>
-                                                <div className="on-group__line" />
-                                            </div>
-                                            <div className="on-group__items">
-                                                <AnimatePresence>
-                                                    {group.items.map(notif => {
-                                                        const cat = getCategory(notif.type);
-                                                        const pri = getPriority(notif.priority);
-                                                        const meta = parseMeta(notif.metaData);
-                                                        const isSelected = selectedIds.has(notif.id);
-                                                        const isActive = selectedNotif?.id === notif.id;
 
-                                                        return (
-                                                            <motion.div
-                                                                key={notif.id}
-                                                                layout
-                                                                initial={{ opacity: 0, y: 6 }}
-                                                                animate={{ opacity: 1, y: 0 }}
-                                                                exit={{ opacity: 0, x: -20, height: 0 }}
-                                                                className={`on-item ${!notif.isRead ? 'unread' : ''} ${isActive ? 'active' : ''} ${notif.priority === 'urgent' ? 'urgent' : ''}`}
-                                                                onClick={() => selectMode ? toggleSelect(notif.id) : openNotif(notif)}
-                                                            >
-                                                                {selectMode && (
-                                                                    <div className={`on-item__check ${isSelected ? 'checked' : ''}`}>
-                                                                        {isSelected && <Check size={10} />}
-                                                                    </div>
-                                                                )}
-
-                                                                {!notif.isRead && <div className="on-item__unread-dot" />}
-
-                                                                <div className="on-item__icon" style={{ background: cat.bg, color: cat.color }}>
-                                                                    <cat.icon size={16} />
-                                                                </div>
-
-                                                                <div className="on-item__body">
-                                                                    <div className="on-item__row1">
-                                                                        <span className="on-item__title">{notif.title}</span>
-                                                                        <span className="on-item__time">{formatTime(notif.createdAt)}</span>
-                                                                    </div>
-                                                                    <p className="on-item__msg">{notif.message}</p>
-                                                                    <div className="on-item__tags">
-                                                                        <span className="on-tag" style={{ background: cat.bg, color: cat.color }}>
-                                                                            {cat.label}
-                                                                        </span>
-                                                                        {(notif.priority === 'urgent' || notif.priority === 'high') && (
-                                                                            <span className="on-tag" style={{ background: pri.bg, color: pri.color }}>
-                                                                                <pri.icon size={8} /> {pri.label}
-                                                                            </span>
-                                                                        )}
-                                                                        {meta?.amount && (
-                                                                            <span className="on-tag on-tag--money">
-                                                                                <IndianRupee size={8} /> {meta.amount}
-                                                                            </span>
-                                                                        )}
-                                                                    </div>
-                                                                </div>
-
-                                                                <div className="on-item__actions">
-                                                                    <button
-                                                                        className={`on-item-act ${notif.isStarred ? 'starred' : ''}`}
-                                                                        onClick={e => { e.stopPropagation(); handleToggleStar(notif.id); }}
-                                                                        title={notif.isStarred ? 'Unstar' : 'Star'}
-                                                                    >
-                                                                        <Star size={13} fill={notif.isStarred ? 'currentColor' : 'none'} />
-                                                                    </button>
-                                                                    {viewFilter === 'archived' ? (
-                                                                        <button
-                                                                            className="on-item-act"
-                                                                            onClick={e => { e.stopPropagation(); handleUnarchive(notif.id); }}
-                                                                            title="Restore"
-                                                                        >
-                                                                            <ArchiveRestore size={13} />
-                                                                        </button>
-                                                                    ) : (
-                                                                        <button
-                                                                            className="on-item-act"
-                                                                            onClick={e => { e.stopPropagation(); handleArchive(notif.id); }}
-                                                                            title="Archive"
-                                                                        >
-                                                                            <Archive size={13} />
-                                                                        </button>
-                                                                    )}
-                                                                    <button
-                                                                        className="on-item-act on-item-act--danger"
-                                                                        onClick={e => { e.stopPropagation(); handleDelete(notif.id); }}
-                                                                        title="Delete"
-                                                                    >
-                                                                        <Trash2 size={13} />
-                                                                    </button>
-                                                                </div>
-                                                            </motion.div>
-                                                        );
-                                                    })}
-                                                </AnimatePresence>
-                                            </div>
+                                {!hasActiveFilters && viewFilter === 'all' && (
+                                    <div className="on-empty__tips">
+                                        <div className="on-empty__tips-header">
+                                            <Sparkles size={14} />
+                                            <span>What notifications will you receive?</span>
                                         </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Detail Panel */}
-                        <AnimatePresence>
-                            {selectedNotif && (
-                                <motion.div
-                                    className="on-detail"
-                                    initial={{ opacity: 0, x: 24 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: 24 }}
-                                    transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                                >
-                                    <div className="on-detail__header">
-                                        <button className="on-detail__close" onClick={() => setSelectedNotif(null)}>
-                                            <X size={15} />
-                                        </button>
-                                        <span className="on-detail__header-title">Details</span>
-                                        <div className="on-detail__header-actions">
-                                            {!selectedNotif.isRead && (
-                                                <button className="on-detail-act" onClick={() => handleMarkAsRead(selectedNotif.id)} title="Mark as read">
-                                                    <Eye size={14} />
-                                                </button>
-                                            )}
-                                            <button
-                                                className={`on-detail-act ${selectedNotif.isStarred ? 'starred' : ''}`}
-                                                onClick={() => handleToggleStar(selectedNotif.id)}
-                                            >
-                                                <Star size={14} fill={selectedNotif.isStarred ? 'currentColor' : 'none'} />
-                                            </button>
-                                            <button className="on-detail-act" onClick={() => handleArchive(selectedNotif.id)}>
-                                                <Archive size={14} />
-                                            </button>
-                                            <button className="on-detail-act on-detail-act--danger" onClick={() => handleDelete(selectedNotif.id)}>
-                                                <Trash2 size={14} />
-                                            </button>
+                                        <div className="on-empty__tips-grid">
+                                            {GYM_NOTIFICATION_TIPS.map((tip, i) => (
+                                                <motion.div
+                                                    key={i}
+                                                    className="on-empty__tip-card"
+                                                    initial={{ opacity: 0, y: 12 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    transition={{ delay: i * 0.07, duration: 0.35 }}
+                                                >
+                                                    <div className="on-empty__tip-icon" style={{ background: `${tip.color}18`, color: tip.color }}>
+                                                        <tip.icon size={18} />
+                                                    </div>
+                                                    <div className="on-empty__tip-text">
+                                                        <strong>{tip.title}</strong>
+                                                        <span>{tip.desc}</span>
+                                                    </div>
+                                                </motion.div>
+                                            ))}
                                         </div>
                                     </div>
+                                )}
+                            </div>
+                        ) : (
+                            grouped.map(group => (
+                                <div key={group.label} className="on-group">
+                                    <div className="on-group__header">
+                                        <span className="on-group__label">{group.label}</span>
+                                        <span className="on-group__count">{group.items.length}</span>
+                                        <div className="on-group__line" />
+                                    </div>
+                                    <div className="on-group__items">
+                                        <AnimatePresence>
+                                            {group.items.map(notif => {
+                                                const cat = getCategory(notif.type);
+                                                const pri = getPriority(notif.priority);
+                                                const meta = parseMeta(notif.metaData);
+                                                const isSelected = selectedIds.has(notif.id);
+                                                const isExpanded = expandedId === notif.id;
+                                                const isLong = notif.message.length > MSG_TRUNCATE;
 
-                                    <div className="on-detail__body">
-                                        {(() => {
-                                            const cat = getCategory(selectedNotif.type);
-                                            const pri = getPriority(selectedNotif.priority);
-                                            const meta = parseMeta(selectedNotif.metaData);
-                                            return (
-                                                <>
-                                                    {/* Category banner */}
-                                                    <div className="on-detail__banner" style={{ background: `linear-gradient(135deg, ${cat.color}18, ${cat.color}08)` }}>
-                                                        <div className="on-detail__banner-icon" style={{ background: cat.bg, color: cat.color }}>
-                                                            <cat.icon size={24} />
-                                                        </div>
-                                                        <div className="on-detail__banner-badges">
-                                                            <span className="on-detail__cat-badge" style={{ background: cat.bg, color: cat.color }}>
-                                                                {cat.label}
-                                                            </span>
-                                                            <span className="on-detail__pri-badge" style={{ background: pri.bg, color: pri.color }}>
-                                                                <pri.icon size={9} /> {pri.label}
-                                                            </span>
-                                                            {!selectedNotif.isRead && (
-                                                                <span className="on-detail__unread-badge">Unread</span>
-                                                            )}
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="on-detail__content">
-                                                        <h2 className="on-detail__title">{selectedNotif.title}</h2>
-                                                        <div className="on-detail__timestamp">
-                                                            <Clock size={12} />
-                                                            <span>{formatFullDate(selectedNotif.createdAt)}</span>
-                                                        </div>
-
-                                                        <div className="on-detail__divider" />
-
-                                                        <div className="on-detail__message">
-                                                            {selectedNotif.message}
-                                                        </div>
-
-                                                        {meta && Object.keys(meta).length > 0 && (
-                                                            <>
-                                                                <div className="on-detail__divider" />
-                                                                <div className="on-detail__meta-section">
-                                                                    <h4><Info size={12} /> Additional Details</h4>
-                                                                    <div className="on-detail__meta-grid">
-                                                                        {meta.amount && (
-                                                                            <div className="on-detail__meta-card">
-                                                                                <div className="on-detail__meta-card-icon" style={{ background: 'rgba(52,199,89,0.1)', color: '#34C759' }}>
-                                                                                    <IndianRupee size={14} />
-                                                                                </div>
-                                                                                <div className="on-detail__meta-card-text">
-                                                                                    <span className="label">Amount</span>
-                                                                                    <span className="value">{meta.amount}</span>
-                                                                                </div>
-                                                                            </div>
-                                                                        )}
-                                                                        {meta.memberName && (
-                                                                            <div className="on-detail__meta-card">
-                                                                                <div className="on-detail__meta-card-icon" style={{ background: 'rgba(0,122,255,0.1)', color: '#007AFF' }}>
-                                                                                    <Users size={14} />
-                                                                                </div>
-                                                                                <div className="on-detail__meta-card-text">
-                                                                                    <span className="label">Member</span>
-                                                                                    <span className="value">{meta.memberName}</span>
-                                                                                </div>
-                                                                            </div>
-                                                                        )}
-                                                                        {meta.trainerName && (
-                                                                            <div className="on-detail__meta-card">
-                                                                                <div className="on-detail__meta-card-icon" style={{ background: 'rgba(175,82,222,0.1)', color: '#AF52DE' }}>
-                                                                                    <Dumbbell size={14} />
-                                                                                </div>
-                                                                                <div className="on-detail__meta-card-text">
-                                                                                    <span className="label">Trainer</span>
-                                                                                    <span className="value">{meta.trainerName}</span>
-                                                                                </div>
-                                                                            </div>
-                                                                        )}
-                                                                        {meta.className && (
-                                                                            <div className="on-detail__meta-card">
-                                                                                <div className="on-detail__meta-card-icon" style={{ background: 'rgba(88,86,214,0.1)', color: '#5856D6' }}>
-                                                                                    <Calendar size={14} />
-                                                                                </div>
-                                                                                <div className="on-detail__meta-card-text">
-                                                                                    <span className="label">Class</span>
-                                                                                    <span className="value">{meta.className}</span>
-                                                                                </div>
-                                                                            </div>
-                                                                        )}
-                                                                    </div>
-                                                                </div>
-                                                            </>
+                                                return (
+                                                    <motion.div
+                                                        key={notif.id}
+                                                        layout
+                                                        initial={{ opacity: 0, y: 6 }}
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                        exit={{ opacity: 0, x: -20, height: 0 }}
+                                                        className={`on-item ${!notif.isRead ? 'unread' : ''} ${isExpanded ? 'expanded' : ''} ${notif.priority === 'urgent' ? 'urgent' : ''}`}
+                                                        onClick={() => handleCardClick(notif)}
+                                                    >
+                                                        {selectMode && (
+                                                            <div className={`on-item__check ${isSelected ? 'checked' : ''}`}>
+                                                                {isSelected && <Check size={10} />}
+                                                            </div>
                                                         )}
 
-                                                        {selectedNotif.link && (
-                                                            <>
-                                                                <div className="on-detail__divider" />
+                                                        {!notif.isRead && <div className="on-item__unread-dot" />}
+
+                                                        <div className="on-item__icon" style={{ background: cat.bg, color: cat.color }}>
+                                                            <cat.icon size={16} />
+                                                        </div>
+
+                                                        <div className="on-item__body">
+                                                            <div className="on-item__row1">
+                                                                <span className="on-item__title">{notif.title}</span>
+                                                                <span className="on-item__time">{formatTime(notif.createdAt)}</span>
+                                                            </div>
+
+                                                            <p className="on-item__msg">
+                                                                {isExpanded || !isLong
+                                                                    ? notif.message
+                                                                    : notif.message.slice(0, MSG_TRUNCATE) + '…'}
+                                                            </p>
+
+                                                            {isLong && (
                                                                 <button
-                                                                    className="on-detail__link-btn"
-                                                                    onClick={() => navigate(selectedNotif.link!)}
+                                                                    className="on-item__show-more"
+                                                                    onClick={e => { e.stopPropagation(); setExpandedId(isExpanded ? null : notif.id); }}
                                                                 >
-                                                                    <ExternalLink size={14} />
-                                                                    View Full Details
-                                                                    <ArrowRight size={14} />
+                                                                    {isExpanded ? <><ChevronUp size={11} /> Show less</> : <><ChevronDown size={11} /> Show more</>}
                                                                 </button>
-                                                            </>
-                                                        )}
-                                                    </div>
-                                                </>
-                                            );
-                                        })()}
+                                                            )}
+
+                                                            <div className="on-item__tags">
+                                                                <span className="on-tag" style={{ background: cat.bg, color: cat.color }}>{cat.label}</span>
+                                                                {(notif.priority === 'urgent' || notif.priority === 'high') && (
+                                                                    <span className="on-tag" style={{ background: pri.bg, color: pri.color }}>
+                                                                        <pri.icon size={8} /> {pri.label}
+                                                                    </span>
+                                                                )}
+                                                                {meta?.amount && (
+                                                                    <span className="on-tag on-tag--money">
+                                                                        <IndianRupee size={8} /> {meta.amount}
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="on-item__actions">
+                                                            <button
+                                                                className={`on-item-act ${notif.isStarred ? 'starred' : ''}`}
+                                                                onClick={e => { e.stopPropagation(); handleToggleStar(notif.id); }}
+                                                                title={notif.isStarred ? 'Unstar' : 'Star'}
+                                                            >
+                                                                <Star size={13} fill={notif.isStarred ? 'currentColor' : 'none'} />
+                                                            </button>
+                                                            {viewFilter === 'archived' ? (
+                                                                <button className="on-item-act" onClick={e => { e.stopPropagation(); handleUnarchive(notif.id); }} title="Restore">
+                                                                    <ArchiveRestore size={13} />
+                                                                </button>
+                                                            ) : (
+                                                                <button className="on-item-act" onClick={e => { e.stopPropagation(); handleArchive(notif.id); }} title="Archive">
+                                                                    <Archive size={13} />
+                                                                </button>
+                                                            )}
+                                                            <button
+                                                                className="on-item-act on-item-act--danger"
+                                                                onClick={e => { e.stopPropagation(); handleDelete(notif.id); }}
+                                                                title="Delete"
+                                                            >
+                                                                <Trash2 size={13} />
+                                                            </button>
+                                                            <button
+                                                                className="on-item-act on-item-act--detail"
+                                                                onClick={e => openDetail(e, notif)}
+                                                                title="More details"
+                                                            >
+                                                                <MoreHorizontal size={13} />
+                                                            </button>
+                                                        </div>
+                                                    </motion.div>
+                                                );
+                                            })}
+                                        </AnimatePresence>
                                     </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </div>
             </div>
-m        </div>
+
+            {/* Detail modal */}
+            {renderDetailModal()}
+        </div>
     );
 };
 

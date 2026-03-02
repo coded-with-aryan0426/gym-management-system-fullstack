@@ -192,9 +192,9 @@ const WorkoutsTab: React.FC = () => {
                             </button>
                         </div>
                     ) : (
-                        filteredWorkouts.map((workout) => (
+                        filteredWorkouts.map((workout, wi) => (
                             <motion.div
-                                key={workout.id}
+                                key={`workout-${wi}-${workout.id ?? ''}`}
                                 className="workout-card"
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}

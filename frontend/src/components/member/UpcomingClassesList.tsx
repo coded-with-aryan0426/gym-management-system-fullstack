@@ -54,8 +54,8 @@ const UpcomingClassesList: React.FC<UpcomingClassesListProps> = ({ classes }) =>
                         </button>
                     </div>
                 ) : (
-                    classes.map((cls) => (
-                        <div key={cls.id} className="class-item">
+                    classes.map((cls, ci) => (
+                        <div key={`cls-${ci}-${cls.id ?? ''}`} className="class-item">
                             <div className="class-item__content">
                                 <div className="class-item__icon">
                                     {getClassEmoji(cls.type)}

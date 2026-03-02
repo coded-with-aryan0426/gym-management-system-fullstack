@@ -10,7 +10,7 @@ import {
     Zap, Eye, ArchiveRestore,
     ChevronDown, Mail, MailOpen, BellOff,
     ArrowRight, MessageSquare, Info,
-    CircleDot, Sparkles, Target, Award, Heart, Activity
+    CircleDot, Sparkles, Target, Award, Heart, Activity, ChevronUp
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
@@ -18,7 +18,6 @@ import { useAuth } from '../../contexts/AuthContext';
 import { notificationApi, type NotificationData, type NotificationStats } from '../../api/notificationApi';
 import './TrainerNotifications.css';
 
-// Trainer-specific categories
 const CATEGORIES: Record<string, { icon: any; label: string; color: string; bg: string; desc: string }> = {
     BOOKING: { icon: Calendar, label: 'Bookings', color: '#5856D6', bg: 'rgba(88,86,214,0.12)', desc: 'Session bookings & cancellations' },
     SCHEDULE: { icon: Clock, label: 'Schedule', color: '#007AFF', bg: 'rgba(0,122,255,0.12)', desc: 'Timetable & shift changes' },
@@ -49,6 +48,35 @@ const TRAINER_NOTIFICATION_TIPS = [
     { icon: AlertTriangle, title: 'Important Alerts', desc: 'Immediate notifications for emergencies, policy changes, or urgent matters.', color: '#FF3B30' },
 ];
 
+const getDeepLink = (notif: NotificationData, meta: any): { path: string; hash?: string; label: string } | null => {
+    const t = notif.type?.toUpperCase();
+    if (notif.link) return { path: notif.link, label: 'Go to linked page' };
+    switch (t) {
+        case 'BOOKING':
+            return { path: '/trainer/schedule', hash: 'sessions', label: 'View My Schedule' };
+        case 'SCHEDULE':
+            return { path: '/trainer/schedule', label: 'View Schedule' };
+        case 'MEMBER':
+            if (meta?.memberId) return { path: `/trainer/members`, hash: `member-${meta.memberId}`, label: 'View Client' };
+            return { path: '/trainer/members', label: 'View My Clients' };
+        case 'PAYMENT':
+            return { path: '/trainer', hash: 'earnings', label: 'View Earnings' };
+        case 'MESSAGE':
+            return { path: '/trainer/messages', label: 'Open Messages' };
+        case 'ACHIEVEMENT':
+        case 'PROGRESS':
+            if (meta?.memberId) return { path: `/trainer/members`, hash: `progress-${meta.memberId}`, label: 'View Client Progress' };
+            return { path: '/trainer/progress-notes', label: 'View Progress Notes' };
+        case 'ALERT':
+        case 'SYSTEM':
+            return { path: '/trainer', label: 'Go to Dashboard' };
+        default:
+            return null;
+    }
+};
+
+const MSG_TRUNCATE = 120;
+
 const TrainerNotifications: React.FC = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
@@ -68,19 +96,39 @@ const TrainerNotifications: React.FC = () => {
     const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
     const [selectMode, setSelectMode] = useState(false);
 
-    const [selectedNotif, setSelectedNotif] = useState<NotificationData | null>(null);
+    const [expandedId, setExpandedId] = useState<number | null>(null);
+    const [detailNotif, setDetailNotif] = useState<NotificationData | null>(null);
 
     const [showBulkMenu, setShowBulkMenu] = useState(false);
     const bulkRef = useRef<HTMLDivElement>(null);
 
-    const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
+    const ALL_SECTIONS = ['views', 'categories', 'priority'];
+    const STORAGE_KEY = 'tn_sidebar_open_section';
+
+    const getInitialCollapsed = (): Set<string> => {
+        try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                const openSection = JSON.parse(saved) as string | null;
+                return new Set(ALL_SECTIONS.filter(s => s !== openSection));
+            }
+        } catch {}
+        return new Set(['categories', 'priority']);
+    };
+
+    const [collapsedSections, setCollapsedSections] = useState<Set<string>>(getInitialCollapsed);
     const [mobileSidebar, setMobileSidebar] = useState(false);
 
     const toggleSection = (key: string) => {
         setCollapsedSections(prev => {
-            const next = new Set(prev);
-            if (next.has(key)) next.delete(key);
-            else next.add(key);
+            let next: Set<string>;
+            if (prev.has(key)) {
+                next = new Set(ALL_SECTIONS.filter(s => s !== key));
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(key));
+            } else {
+                next = new Set(ALL_SECTIONS);
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(null));
+            }
             return next;
         });
     };
@@ -89,7 +137,6 @@ const TrainerNotifications: React.FC = () => {
         if (!userId) return;
         if (showRefresh) setRefreshing(true);
         else setLoading(true);
-
         try {
             if (typeFilter) {
                 const data = await notificationApi.getByType(userId, typeFilter);
@@ -122,6 +169,12 @@ const TrainerNotifications: React.FC = () => {
         };
         document.addEventListener('mousedown', handler);
         return () => document.removeEventListener('mousedown', handler);
+    }, []);
+
+    useEffect(() => {
+        const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setDetailNotif(null); };
+        document.addEventListener('keydown', handler);
+        return () => document.removeEventListener('keydown', handler);
     }, []);
 
     const filteredNotifications = useMemo(() => {
@@ -174,7 +227,7 @@ const TrainerNotifications: React.FC = () => {
         try {
             await notificationApi.archive(id);
             setNotifications(prev => prev.filter(n => n.id !== id));
-            if (selectedNotif?.id === id) setSelectedNotif(null);
+            if (detailNotif?.id === id) setDetailNotif(null);
             toast.success('Archived');
             fetchData(true);
         } catch { toast.error('Failed'); }
@@ -184,7 +237,7 @@ const TrainerNotifications: React.FC = () => {
         try {
             await notificationApi.unarchive(id);
             setNotifications(prev => prev.filter(n => n.id !== id));
-            if (selectedNotif?.id === id) setSelectedNotif(null);
+            if (detailNotif?.id === id) setDetailNotif(null);
             toast.success('Restored');
             fetchData(true);
         } catch { toast.error('Failed'); }
@@ -194,7 +247,7 @@ const TrainerNotifications: React.FC = () => {
         try {
             await notificationApi.delete(id);
             setNotifications(prev => prev.filter(n => n.id !== id));
-            if (selectedNotif?.id === id) setSelectedNotif(null);
+            if (detailNotif?.id === id) setDetailNotif(null);
             toast.success('Deleted');
             fetchData(true);
         } catch { toast.error('Failed'); }
@@ -237,8 +290,15 @@ const TrainerNotifications: React.FC = () => {
         else setSelectedIds(new Set(filteredNotifications.map(n => n.id)));
     };
 
-    const openNotif = (n: NotificationData) => {
-        setSelectedNotif(n);
+    const handleCardClick = (n: NotificationData) => {
+        if (selectMode) { toggleSelect(n.id); return; }
+        setExpandedId(prev => prev === n.id ? null : n.id);
+        if (!n.isRead) handleMarkAsRead(n.id);
+    };
+
+    const openDetail = (e: React.MouseEvent, n: NotificationData) => {
+        e.stopPropagation();
+        setDetailNotif(n);
         if (!n.isRead) handleMarkAsRead(n.id);
     };
 
@@ -288,6 +348,14 @@ const TrainerNotifications: React.FC = () => {
         setViewFilter('all');
     };
 
+    const handleDeepLink = (notif: NotificationData, meta: any) => {
+        const link = getDeepLink(notif, meta);
+        if (!link) return;
+        setDetailNotif(null);
+        const path = link.hash ? `${link.path}?section=${link.hash}` : link.path;
+        navigate(path, { state: { scrollTo: link.hash, fromNotif: notif.id } });
+    };
+
     const renderSidebarContent = () => (
         <>
             <div className="tn-sidebar__section">
@@ -314,7 +382,7 @@ const TrainerNotifications: React.FC = () => {
                                 </div>
                                 <span className="tn-nav-label">{item.label}</span>
                                 {item.count !== undefined && item.count > 0 && (
-                                                    <span className={`tn-nav-count ${item.key === 'unread' && item.count > 0 ? 'tn-nav-count--alert' : ''}`}>
+                                    <span className={`tn-nav-count ${item.key === 'unread' && item.count > 0 ? 'tn-nav-count--alert' : ''}`}>
                                         {item.count}
                                     </span>
                                 )}
@@ -387,6 +455,123 @@ const TrainerNotifications: React.FC = () => {
         </>
     );
 
+    const renderDetailModal = () => {
+        if (!detailNotif) return null;
+        const cat = getCategory(detailNotif.type);
+        const pri = getPriority(detailNotif.priority);
+        const meta = parseMeta(detailNotif.metaData);
+        const deepLink = getDeepLink(detailNotif, meta);
+
+        const metaFields = meta ? [
+            meta.amount && { icon: IndianRupee, label: 'Amount', value: meta.amount, color: '#34C759' },
+            meta.memberName && { icon: Users, label: 'Client', value: meta.memberName, color: '#AF52DE' },
+            meta.className && { icon: Calendar, label: 'Class', value: meta.className, color: '#5856D6' },
+            meta.sessionTime && { icon: Clock, label: 'Session Time', value: meta.sessionTime, color: '#007AFF' },
+            meta.clientGoal && { icon: Target, label: 'Goal', value: meta.clientGoal, color: '#FF9500' },
+            meta.achievement && { icon: Award, label: 'Achievement', value: meta.achievement, color: '#FFD60A' },
+        ].filter(Boolean) : [];
+
+        return (
+            <AnimatePresence>
+                <motion.div
+                    className="tn-modal-overlay"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    onClick={() => setDetailNotif(null)}
+                >
+                    <motion.div
+                        className="tn-modal"
+                        initial={{ opacity: 0, y: 24, scale: 0.96 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 24, scale: 0.96 }}
+                        transition={{ type: 'spring', damping: 26, stiffness: 320 }}
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <div className="tn-modal__header" style={{ background: `linear-gradient(135deg, ${cat.color}20, ${cat.color}08)` }}>
+                            <div className="tn-modal__header-icon" style={{ background: cat.bg, color: cat.color }}>
+                                <cat.icon size={22} />
+                            </div>
+                            <div className="tn-modal__header-info">
+                                <div className="tn-modal__badges">
+                                    <span className="tn-modal__badge" style={{ background: cat.bg, color: cat.color }}>{cat.label}</span>
+                                    <span className="tn-modal__badge" style={{ background: pri.bg, color: pri.color }}>
+                                        <pri.icon size={9} /> {pri.label}
+                                    </span>
+                                    {!detailNotif.isRead && <span className="tn-modal__badge tn-modal__badge--unread">Unread</span>}
+                                </div>
+                                <div className="tn-modal__timestamp">
+                                    <Clock size={11} />
+                                    <span>{formatFullDate(detailNotif.createdAt)}</span>
+                                </div>
+                            </div>
+                            <div className="tn-modal__header-acts">
+                                <button
+                                    className={`tn-detail-act ${detailNotif.isStarred ? 'starred' : ''}`}
+                                    onClick={() => handleToggleStar(detailNotif.id)}
+                                    title={detailNotif.isStarred ? 'Unstar' : 'Star'}
+                                >
+                                    <Star size={14} fill={detailNotif.isStarred ? 'currentColor' : 'none'} />
+                                </button>
+                                <button
+                                    className="tn-detail-act"
+                                    onClick={() => viewFilter === 'archived' ? handleUnarchive(detailNotif.id) : handleArchive(detailNotif.id)}
+                                >
+                                    {viewFilter === 'archived' ? <ArchiveRestore size={14} /> : <Archive size={14} />}
+                                </button>
+                                <button className="tn-detail-act tn-detail-act--danger" onClick={() => handleDelete(detailNotif.id)}>
+                                    <Trash2 size={14} />
+                                </button>
+                                <button className="tn-modal__close" onClick={() => setDetailNotif(null)}>
+                                    <X size={16} />
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="tn-modal__body">
+                            <h2 className="tn-modal__title">{detailNotif.title}</h2>
+                            <p className="tn-modal__message">{detailNotif.message}</p>
+
+                            {metaFields.length > 0 && (
+                                <>
+                                    <div className="tn-modal__divider" />
+                                    <div className="tn-modal__meta-label"><Info size={12} /> Additional Details</div>
+                                    <div className="tn-modal__meta-grid">
+                                        {metaFields.map((f: any, i) => (
+                                            <div className="tn-modal__meta-card" key={i}>
+                                                <div className="tn-modal__meta-icon" style={{ background: `${f.color}18`, color: f.color }}>
+                                                    <f.icon size={13} />
+                                                </div>
+                                                <div className="tn-modal__meta-text">
+                                                    <span className="label">{f.label}</span>
+                                                    <span className="value">{f.value}</span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </>
+                            )}
+
+                            {deepLink && (
+                                <>
+                                    <div className="tn-modal__divider" />
+                                    <button
+                                        className="tn-modal__goto-btn"
+                                        onClick={() => handleDeepLink(detailNotif, meta)}
+                                    >
+                                        <ExternalLink size={14} />
+                                        {deepLink.label}
+                                        <ArrowRight size={14} />
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                    </motion.div>
+                </motion.div>
+            </AnimatePresence>
+        );
+    };
+
     return (
         <div className="tn-page">
             <header className="tn-header">
@@ -456,17 +641,13 @@ const TrainerNotifications: React.FC = () => {
                                 </button>
                             )}
                         </div>
-                        <button
-                            className={`tn-header-btn ${refreshing ? 'spinning' : ''}`}
-                            onClick={() => fetchData(true)}
-                            title="Refresh"
-                        >
+                        <button className={`tn-header-btn ${refreshing ? 'spinning' : ''}`} onClick={() => fetchData(true)} title="Refresh">
                             <RefreshCw size={14} />
                         </button>
                         <button className="tn-header-btn" onClick={handleMarkAllRead} title="Mark all read">
                             <CheckCheck size={14} />
                         </button>
-                        <button className="tn-header-btn on-header-btn--mobile-filter" onClick={() => setMobileSidebar(!mobileSidebar)} title="Filters">
+                        <button className="tn-header-btn tn-header-btn--mobile-filter" onClick={() => setMobileSidebar(!mobileSidebar)} title="Filters">
                             <Filter size={14} />
                         </button>
                     </div>
@@ -508,7 +689,10 @@ const TrainerNotifications: React.FC = () => {
                 <div className="tn-content">
                     <div className="tn-toolbar">
                         <div className="tn-toolbar__left">
-                            <h3 className="tn-toolbar__view-label">{activeFilterLabel}</h3>
+                            <h3 className="tn-toolbar__view-label">
+                                {activeFilterLabel}
+                                <span className="tn-toolbar__count">{filteredNotifications.length}</span>
+                            </h3>
 
                             <button
                                 className={`tn-toolbar-btn ${selectMode ? 'active' : ''}`}
@@ -526,7 +710,7 @@ const TrainerNotifications: React.FC = () => {
                                     </button>
                                     {selectedIds.size > 0 && (
                                         <div className="tn-bulk-wrap" ref={bulkRef}>
-                                            <button                                             className="tn-toolbar-btn tn-toolbar-btn--accent" onClick={() => setShowBulkMenu(!showBulkMenu)}>
+                                            <button className="tn-toolbar-btn tn-toolbar-btn--accent" onClick={() => setShowBulkMenu(!showBulkMenu)}>
                                                 <MoreHorizontal size={13} />
                                                 <span>Actions ({selectedIds.size})</span>
                                                 <ChevronDown size={11} />
@@ -540,22 +724,12 @@ const TrainerNotifications: React.FC = () => {
                                                         exit={{ opacity: 0, y: -6, scale: 0.95 }}
                                                         transition={{ duration: 0.15 }}
                                                     >
-                                                        <button onClick={() => handleBulkAction('read')}>
-                                                            <MailOpen size={14} /> Mark as Read
-                                                        </button>
-                                                        <button onClick={() => handleBulkAction('unread')}>
-                                                            <Mail size={14} /> Mark as Unread
-                                                        </button>
-                                                        <button onClick={() => handleBulkAction('star')}>
-                                                            <Star size={14} /> Star Selected
-                                                        </button>
-                                                        <button onClick={() => handleBulkAction('archive')}>
-                                                            <Archive size={14} /> Archive Selected
-                                                        </button>
+                                                        <button onClick={() => handleBulkAction('read')}><MailOpen size={14} /> Mark as Read</button>
+                                                        <button onClick={() => handleBulkAction('unread')}><Mail size={14} /> Mark as Unread</button>
+                                                        <button onClick={() => handleBulkAction('star')}><Star size={14} /> Star Selected</button>
+                                                        <button onClick={() => handleBulkAction('archive')}><Archive size={14} /> Archive Selected</button>
                                                         <div className="tn-bulk-divider" />
-                                                        <button className="danger" onClick={() => handleBulkAction('delete')}>
-                                                            <Trash2 size={14} /> Delete Selected
-                                                        </button>
+                                                        <button className="danger" onClick={() => handleBulkAction('delete')}><Trash2 size={14} /> Delete Selected</button>
                                                     </motion.div>
                                                 )}
                                             </AnimatePresence>
@@ -582,14 +756,11 @@ const TrainerNotifications: React.FC = () => {
                                     )}
                                     {searchQuery && (
                                         <span className="tn-filter-chip">
-                                            <Search size={10} />
-                                            "{searchQuery}"
+                                            <Search size={10} />"{searchQuery}"
                                             <button onClick={() => setSearchQuery('')}><X size={10} /></button>
                                         </span>
                                     )}
-                                    <button className="tn-filter-clear-all" onClick={clearAllFilters}>
-                                        Clear all
-                                    </button>
+                                    <button className="tn-filter-clear-all" onClick={clearAllFilters}>Clear all</button>
                                 </div>
                             )}
                             <span className="tn-result-count">
@@ -598,361 +769,194 @@ const TrainerNotifications: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="tn-split">
-                        <div className={`tn-list ${selectedNotif ? 'has-detail' : ''}`}>
-                            {loading ? (
-                                <div className="tn-loading">
-                                    <div className="tn-loading__spinner" />
-                                    <p>Loading notifications...</p>
-                                </div>
-                            ) : filteredNotifications.length === 0 ? (
-                                <div className="tn-empty">
-                                    <div className="tn-empty__hero">
-                                        <div className="tn-empty__icon-ring">
-                                            <div className="tn-empty__icon-inner">
-                                                {viewFilter === 'starred' ? <Star size={32} /> :
-                                                 viewFilter === 'archived' ? <Archive size={32} /> :
-                                                 viewFilter === 'unread' ? <CheckCheck size={32} /> :
-                                                 searchQuery ? <Search size={32} /> :
-                                                 <Bell size={32} />}
-                                            </div>
-                                            <div className="tn-empty__ring-pulse" />
+                    <div className="tn-list__scroll">
+                        {loading ? (
+                            <div className="tn-loading">
+                                <div className="tn-loading__spinner" />
+                                <p>Loading notifications...</p>
+                            </div>
+                        ) : filteredNotifications.length === 0 ? (
+                            <div className="tn-empty">
+                                <div className="tn-empty__hero">
+                                    <div className="tn-empty__icon-ring">
+                                        <div className="tn-empty__icon-inner">
+                                            {viewFilter === 'starred' ? <Star size={32} /> :
+                                             viewFilter === 'archived' ? <Archive size={32} /> :
+                                             viewFilter === 'unread' ? <CheckCheck size={32} /> :
+                                             searchQuery ? <Search size={32} /> :
+                                             <Bell size={32} />}
                                         </div>
-                                        <h2>
-                                            {searchQuery
-                                                ? `No results for "${searchQuery}"`
-                                                : viewFilter === 'archived'
-                                                    ? 'No archived notifications'
-                                                    : viewFilter === 'starred'
-                                                        ? 'No starred notifications'
-                                                        : viewFilter === 'unread'
-                                                            ? 'You\'re all caught up!'
-                                                            : 'No notifications yet'}
-                                        </h2>
-                                        <p>
-                                            {searchQuery
-                                                ? 'Try a different search term or clear your filters.'
-                                                : viewFilter === 'unread'
-                                                    ? 'Great job! You\'ve read all your notifications.'
-                                                    : viewFilter !== 'all'
-                                                        ? `You have no ${viewFilter} notifications right now.`
-                                                        : 'As you train clients and manage sessions, notifications will appear here to keep you informed.'}
-                                        </p>
-                                        {hasActiveFilters && (
-                                            <button className="tn-empty__clear-btn" onClick={clearAllFilters}>
-                                                <X size={14} /> Clear all filters
-                                            </button>
-                                        )}
+                                        <div className="tn-empty__ring-pulse" />
                                     </div>
-
-                                    {!hasActiveFilters && viewFilter === 'all' && (
-                                        <div className="tn-empty__tips">
-                                            <div className="tn-empty__tips-header">
-                                                <Sparkles size={14} />
-                                                <span>What notifications will you receive?</span>
-                                            </div>
-                                            <div className="tn-empty__tips-grid">
-                                                {TRAINER_NOTIFICATION_TIPS.map((tip, i) => (
-                                                    <motion.div
-                                                        key={i}
-                                                        className="tn-empty__tip-card"
-                                                        initial={{ opacity: 0, y: 12 }}
-                                                        animate={{ opacity: 1, y: 0 }}
-                                                        transition={{ delay: i * 0.07, duration: 0.35 }}
-                                                    >
-                                                        <div className="tn-empty__tip-icon" style={{ background: `${tip.color}18`, color: tip.color }}>
-                                                            <tip.icon size={18} />
-                                                        </div>
-                                                        <div className="tn-empty__tip-text">
-                                                            <strong>{tip.title}</strong>
-                                                            <span>{tip.desc}</span>
-                                                        </div>
-                                                    </motion.div>
-                                                ))}
-                                            </div>
-                                        </div>
+                                    <h2>
+                                        {searchQuery ? `No results for "${searchQuery}"` :
+                                         viewFilter === 'archived' ? 'No archived notifications' :
+                                         viewFilter === 'starred' ? 'No starred notifications' :
+                                         viewFilter === 'unread' ? "You're all caught up!" :
+                                         'No notifications yet'}
+                                    </h2>
+                                    <p>
+                                        {searchQuery ? 'Try a different search term or clear your filters.' :
+                                         viewFilter === 'unread' ? "Great job! You've read all your notifications." :
+                                         viewFilter !== 'all' ? `You have no ${viewFilter} notifications right now.` :
+                                         'As you train clients and manage sessions, notifications will appear here to keep you informed.'}
+                                    </p>
+                                    {hasActiveFilters && (
+                                        <button className="tn-empty__clear-btn" onClick={clearAllFilters}>
+                                            <X size={14} /> Clear all filters
+                                        </button>
                                     )}
                                 </div>
-                            ) : (
-                                <div className="tn-list__scroll">
-                                    {grouped.map(group => (
-                                        <div key={group.label} className="tn-group">
-                                            <div className="tn-group__header">
-                                                <span className="tn-group__label">{group.label}</span>
-                                                <span className="tn-group__count">{group.items.length}</span>
-                                                <div className="tn-group__line" />
-                                            </div>
-                                            <div className="tn-group__items">
-                                                <AnimatePresence>
-                                                    {group.items.map(notif => {
-                                                        const cat = getCategory(notif.type);
-                                                        const pri = getPriority(notif.priority);
-                                                        const meta = parseMeta(notif.metaData);
-                                                        const isSelected = selectedIds.has(notif.id);
-                                                        const isActive = selectedNotif?.id === notif.id;
 
-                                                        return (
-                                                            <motion.div
-                                                                key={notif.id}
-                                                                layout
-                                                                initial={{ opacity: 0, y: 6 }}
-                                                                animate={{ opacity: 1, y: 0 }}
-                                                                exit={{ opacity: 0, x: -20, height: 0 }}
-                                                                className={`tn-item ${!notif.isRead ? 'unread' : ''} ${isActive ? 'active' : ''} ${notif.priority === 'urgent' ? 'urgent' : ''}`}
-                                                                onClick={() => selectMode ? toggleSelect(notif.id) : openNotif(notif)}
-                                                            >
-                                                                {selectMode && (
-                                                                    <div className={`tn-item__check ${isSelected ? 'checked' : ''}`}>
-                                                                        {isSelected && <Check size={10} />}
-                                                                    </div>
-                                                                )}
-
-                                                                {!notif.isRead && <div className="tn-item__unread-dot" />}
-
-                                                                <div className="tn-item__icon" style={{ background: cat.bg, color: cat.color }}>
-                                                                    <cat.icon size={16} />
-                                                                </div>
-
-                                                                <div className="tn-item__body">
-                                                                    <div className="tn-item__row1">
-                                                                        <span className="tn-item__title">{notif.title}</span>
-                                                                        <span className="tn-item__time">{formatTime(notif.createdAt)}</span>
-                                                                    </div>
-                                                                    <p className="tn-item__msg">{notif.message}</p>
-                                                                    <div className="tn-item__tags">
-                                                                        <span className="tn-tag" style={{ background: cat.bg, color: cat.color }}>
-                                                                            {cat.label}
-                                                                        </span>
-                                                                        {(notif.priority === 'urgent' || notif.priority === 'high') && (
-                                                                            <span className="tn-tag" style={{ background: pri.bg, color: pri.color }}>
-                                                                                <pri.icon size={8} /> {pri.label}
-                                                                            </span>
-                                                                        )}
-                                                                        {meta?.amount && (
-                                                                            <span className="tn-tag tn-tag--money">
-                                                                                <IndianRupee size={8} /> {meta.amount}
-                                                                            </span>
-                                                                        )}
-                                                                    </div>
-                                                                </div>
-
-                                                                <div className="tn-item__actions">
-                                                                    <button
-                                                                        className={`tn-item-act ${notif.isStarred ? 'starred' : ''}`}
-                                                                        onClick={e => { e.stopPropagation(); handleToggleStar(notif.id); }}
-                                                                        title={notif.isStarred ? 'Unstar' : 'Star'}
-                                                                    >
-                                                                        <Star size={13} fill={notif.isStarred ? 'currentColor' : 'none'} />
-                                                                    </button>
-                                                                    {viewFilter === 'archived' ? (
-                                                                        <button
-                                                                            className="tn-item-act"
-                                                                            onClick={e => { e.stopPropagation(); handleUnarchive(notif.id); }}
-                                                                            title="Restore"
-                                                                        >
-                                                                            <ArchiveRestore size={13} />
-                                                                        </button>
-                                                                    ) : (
-                                                                        <button
-                                                                            className="tn-item-act"
-                                                                            onClick={e => { e.stopPropagation(); handleArchive(notif.id); }}
-                                                                            title="Archive"
-                                                                        >
-                                                                            <Archive size={13} />
-                                                                        </button>
-                                                                    )}
-                                                                    <button
-                                                                        className="tn-item-act tn-item-act--danger"
-                                                                        onClick={e => { e.stopPropagation(); handleDelete(notif.id); }}
-                                                                        title="Delete"
-                                                                    >
-                                                                        <Trash2 size={13} />
-                                                                    </button>
-                                                                </div>
-                                                            </motion.div>
-                                                        );
-                                                    })}
-                                                </AnimatePresence>
-                                            </div>
+                                {!hasActiveFilters && viewFilter === 'all' && (
+                                    <div className="tn-empty__tips">
+                                        <div className="tn-empty__tips-header">
+                                            <Sparkles size={14} />
+                                            <span>What notifications will you receive?</span>
                                         </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-
-                        <AnimatePresence>
-                            {selectedNotif && (
-                                <motion.div
-                                    className="tn-detail"
-                                    initial={{ opacity: 0, x: 24 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: 24 }}
-                                    transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                                >
-                                    <div className="tn-detail__header">
-                                        <button className="tn-detail__close" onClick={() => setSelectedNotif(null)}>
-                                            <X size={15} />
-                                        </button>
-                                        <span className="tn-detail__header-title">Details</span>
-                                        <div className="tn-detail__header-actions">
-                                            {!selectedNotif.isRead && (
-                                                <button className="tn-detail-act" onClick={() => handleMarkAsRead(selectedNotif.id)} title="Mark as read">
-                                                    <Eye size={14} />
-                                                </button>
-                                            )}
-                                            <button
-                                                className={`tn-detail-act ${selectedNotif.isStarred ? 'starred' : ''}`}
-                                                onClick={() => handleToggleStar(selectedNotif.id)}
-                                            >
-                                                <Star size={14} fill={selectedNotif.isStarred ? 'currentColor' : 'none'} />
-                                            </button>
-                                            <button className="tn-detail-act" onClick={() => handleArchive(selectedNotif.id)}>
-                                                <Archive size={14} />
-                                            </button>
-                                            <button                                                     className="tn-detail-act tn-detail-act--danger" onClick={() => handleDelete(selectedNotif.id)}>
-                                                <Trash2 size={14} />
-                                            </button>
+                                        <div className="tn-empty__tips-grid">
+                                            {TRAINER_NOTIFICATION_TIPS.map((tip, i) => (
+                                                <motion.div
+                                                    key={i}
+                                                    className="tn-empty__tip-card"
+                                                    initial={{ opacity: 0, y: 12 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    transition={{ delay: i * 0.07, duration: 0.35 }}
+                                                >
+                                                    <div className="tn-empty__tip-icon" style={{ background: `${tip.color}18`, color: tip.color }}>
+                                                        <tip.icon size={18} />
+                                                    </div>
+                                                    <div className="tn-empty__tip-text">
+                                                        <strong>{tip.title}</strong>
+                                                        <span>{tip.desc}</span>
+                                                    </div>
+                                                </motion.div>
+                                            ))}
                                         </div>
                                     </div>
+                                )}
+                            </div>
+                        ) : (
+                            grouped.map(group => (
+                                <div key={group.label} className="tn-group">
+                                    <div className="tn-group__header">
+                                        <span className="tn-group__label">{group.label}</span>
+                                        <span className="tn-group__count">{group.items.length}</span>
+                                        <div className="tn-group__line" />
+                                    </div>
+                                    <div className="tn-group__items">
+                                        <AnimatePresence>
+                                            {group.items.map(notif => {
+                                                const cat = getCategory(notif.type);
+                                                const pri = getPriority(notif.priority);
+                                                const meta = parseMeta(notif.metaData);
+                                                const isSelected = selectedIds.has(notif.id);
+                                                const isExpanded = expandedId === notif.id;
+                                                const isLong = notif.message.length > MSG_TRUNCATE;
 
-                                    <div className="tn-detail__body">
-                                        {(() => {
-                                            const cat = getCategory(selectedNotif.type);
-                                            const pri = getPriority(selectedNotif.priority);
-                                            const meta = parseMeta(selectedNotif.metaData);
-                                            return (
-                                                <>
-                                                    <div className="tn-detail__banner" style={{ background: `linear-gradient(135deg, ${cat.color}18, ${cat.color}08)` }}>
-                                                        <div className="tn-detail__banner-icon" style={{ background: cat.bg, color: cat.color }}>
-                                                            <cat.icon size={24} />
-                                                        </div>
-                                                        <div className="tn-detail__banner-badges">
-                                                            <span className="tn-detail__cat-badge" style={{ background: cat.bg, color: cat.color }}>
-                                                                {cat.label}
-                                                            </span>
-                                                            <span className="tn-detail__pri-badge" style={{ background: pri.bg, color: pri.color }}>
-                                                                <pri.icon size={9} /> {pri.label}
-                                                            </span>
-                                                            {!selectedNotif.isRead && (
-                                                                <span className="tn-detail__unread-badge">Unread</span>
-                                                            )}
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="tn-detail__content">
-                                                        <h2 className="tn-detail__title">{selectedNotif.title}</h2>
-                                                        <div className="tn-detail__timestamp">
-                                                            <Clock size={12} />
-                                                            <span>{formatFullDate(selectedNotif.createdAt)}</span>
-                                                        </div>
-
-                                                        <div className="tn-detail__divider" />
-
-                                                        <div className="tn-detail__message">
-                                                            {selectedNotif.message}
-                                                        </div>
-
-                                                        {meta && Object.keys(meta).length > 0 && (
-                                                            <>
-                                                                <div className="tn-detail__divider" />
-                                                                <div className="tn-detail__meta-section">
-                                                                    <h4><Info size={12} /> Additional Details</h4>
-                                                                    <div className="tn-detail__meta-grid">
-                                                                        {meta.amount && (
-                                                                            <div className="tn-detail__meta-card">
-                                                                                <div className="tn-detail__meta-card-icon" style={{ background: 'rgba(52,199,89,0.1)', color: '#34C759' }}>
-                                                                                    <IndianRupee size={14} />
-                                                                                </div>
-                                                                                <div className="tn-detail__meta-card-text">
-                                                                                    <span className="label">Amount</span>
-                                                                                    <span className="value">{meta.amount}</span>
-                                                                                </div>
-                                                                            </div>
-                                                                        )}
-                                                                        {meta.memberName && (
-                                                                            <div className="tn-detail__meta-card">
-                                                                                <div className="tn-detail__meta-card-icon" style={{ background: 'rgba(0,122,255,0.1)', color: '#007AFF' }}>
-                                                                                    <Users size={14} />
-                                                                                </div>
-                                                                                <div className="tn-detail__meta-card-text">
-                                                                                    <span className="label">Client</span>
-                                                                                    <span className="value">{meta.memberName}</span>
-                                                                                </div>
-                                                                            </div>
-                                                                        )}
-                                                                        {meta.trainerName && (
-                                                                            <div className="tn-detail__meta-card">
-                                                                                <div className="tn-detail__meta-card-icon" style={{ background: 'rgba(175,82,222,0.1)', color: '#AF52DE' }}>
-                                                                                    <Dumbbell size={14} />
-                                                                                </div>
-                                                                                <div className="tn-detail__meta-card-text">
-                                                                                    <span className="label">Trainer</span>
-                                                                                    <span className="value">{meta.trainerName}</span>
-                                                                                </div>
-                                                                            </div>
-                                                                        )}
-                                                                        {meta.className && (
-                                                                            <div className="tn-detail__meta-card">
-                                                                                <div className="tn-detail__meta-card-icon" style={{ background: 'rgba(88,86,214,0.1)', color: '#5856D6' }}>
-                                                                                    <Calendar size={14} />
-                                                                                </div>
-                                                                                <div className="tn-detail__meta-card-text">
-                                                                                    <span className="label">Class</span>
-                                                                                    <span className="value">{meta.className}</span>
-                                                                                </div>
-                                                                            </div>
-                                                                        )}
-                                                                        {meta.sessionTime && (
-                                                                            <div className="tn-detail__meta-card">
-                                                                                <div className="tn-detail__meta-card-icon" style={{ background: 'rgba(0,122,255,0.1)', color: '#007AFF' }}>
-                                                                                    <Clock size={14} />
-                                                                                </div>
-                                                                                <div className="tn-detail__meta-card-text">
-                                                                                    <span className="label">Session Time</span>
-                                                                                    <span className="value">{meta.sessionTime}</span>
-                                                                                </div>
-                                                                            </div>
-                                                                        )}
-                                                                        {meta.clientGoal && (
-                                                                            <div className="tn-detail__meta-card">
-                                                                                <div className="tn-detail__meta-card-icon" style={{ background: 'rgba(255,149,0,0.1)', color: '#FF9500' }}>
-                                                                                    <Target size={14} />
-                                                                                </div>
-                                                                                <div className="tn-detail__meta-card-text">
-                                                                                    <span className="label">Goal</span>
-                                                                                    <span className="value">{meta.clientGoal}</span>
-                                                                                </div>
-                                                                            </div>
-                                                                        )}
-                                                                    </div>
-                                                                </div>
-                                                            </>
+                                                return (
+                                                    <motion.div
+                                                        key={notif.id}
+                                                        layout
+                                                        initial={{ opacity: 0, y: 6 }}
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                        exit={{ opacity: 0, x: -20, height: 0 }}
+                                                        className={`tn-item ${!notif.isRead ? 'unread' : ''} ${isExpanded ? 'expanded' : ''} ${notif.priority === 'urgent' ? 'urgent' : ''}`}
+                                                        onClick={() => handleCardClick(notif)}
+                                                    >
+                                                        {selectMode && (
+                                                            <div className={`tn-item__check ${isSelected ? 'checked' : ''}`}>
+                                                                {isSelected && <Check size={10} />}
+                                                            </div>
                                                         )}
 
-                                                        {selectedNotif.link && (
-                                                            <>
-                                                                <div className="tn-detail__divider" />
+                                                        {!notif.isRead && <div className="tn-item__unread-dot" />}
+
+                                                        <div className="tn-item__icon" style={{ background: cat.bg, color: cat.color }}>
+                                                            <cat.icon size={16} />
+                                                        </div>
+
+                                                        <div className="tn-item__body">
+                                                            <div className="tn-item__row1">
+                                                                <span className="tn-item__title">{notif.title}</span>
+                                                                <span className="tn-item__time">{formatTime(notif.createdAt)}</span>
+                                                            </div>
+
+                                                            <p className="tn-item__msg">
+                                                                {isExpanded || !isLong
+                                                                    ? notif.message
+                                                                    : notif.message.slice(0, MSG_TRUNCATE) + '…'}
+                                                            </p>
+
+                                                            {isLong && (
                                                                 <button
-                                                                    className="tn-detail__link-btn"
-                                                                    onClick={() => navigate(selectedNotif.link!)}
+                                                                    className="tn-item__show-more"
+                                                                    onClick={e => { e.stopPropagation(); setExpandedId(isExpanded ? null : notif.id); }}
                                                                 >
-                                                                    <ExternalLink size={14} />
-                                                                    View Full Details
-                                                                    <ArrowRight size={14} />
+                                                                    {isExpanded ? <><ChevronUp size={11} /> Show less</> : <><ChevronDown size={11} /> Show more</>}
                                                                 </button>
-                                                            </>
-                                                        )}
-                                                    </div>
-                                                </>
-                                            );
-                                        })()}
+                                                            )}
+
+                                                            <div className="tn-item__tags">
+                                                                <span className="tn-tag" style={{ background: cat.bg, color: cat.color }}>{cat.label}</span>
+                                                                {(notif.priority === 'urgent' || notif.priority === 'high') && (
+                                                                    <span className="tn-tag" style={{ background: pri.bg, color: pri.color }}>
+                                                                        <pri.icon size={8} /> {pri.label}
+                                                                    </span>
+                                                                )}
+                                                                {meta?.amount && (
+                                                                    <span className="tn-tag tn-tag--money">
+                                                                        <IndianRupee size={8} /> {meta.amount}
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="tn-item__actions">
+                                                            <button
+                                                                className={`tn-item-act ${notif.isStarred ? 'starred' : ''}`}
+                                                                onClick={e => { e.stopPropagation(); handleToggleStar(notif.id); }}
+                                                                title={notif.isStarred ? 'Unstar' : 'Star'}
+                                                            >
+                                                                <Star size={13} fill={notif.isStarred ? 'currentColor' : 'none'} />
+                                                            </button>
+                                                            {viewFilter === 'archived' ? (
+                                                                <button className="tn-item-act" onClick={e => { e.stopPropagation(); handleUnarchive(notif.id); }} title="Restore">
+                                                                    <ArchiveRestore size={13} />
+                                                                </button>
+                                                            ) : (
+                                                                <button className="tn-item-act" onClick={e => { e.stopPropagation(); handleArchive(notif.id); }} title="Archive">
+                                                                    <Archive size={13} />
+                                                                </button>
+                                                            )}
+                                                            <button
+                                                                className="tn-item-act tn-item-act--danger"
+                                                                onClick={e => { e.stopPropagation(); handleDelete(notif.id); }}
+                                                                title="Delete"
+                                                            >
+                                                                <Trash2 size={13} />
+                                                            </button>
+                                                            <button
+                                                                className="tn-item-act tn-item-act--detail"
+                                                                onClick={e => openDetail(e, notif)}
+                                                                title="More details"
+                                                            >
+                                                                <MoreHorizontal size={13} />
+                                                            </button>
+                                                        </div>
+                                                    </motion.div>
+                                                );
+                                            })}
+                                        </AnimatePresence>
                                     </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </div>
             </div>
+
+            {renderDetailModal()}
         </div>
     );
 };

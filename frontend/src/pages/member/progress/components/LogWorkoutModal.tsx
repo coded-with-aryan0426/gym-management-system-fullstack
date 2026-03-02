@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { X, Check, Dumbbell, Trophy, Hash, Scale, MessageSquare, Target } from 'lucide-react';
 
 interface LogWorkoutModalProps {
     isOpen: boolean;
@@ -36,92 +37,120 @@ const LogWorkoutModal: React.FC<LogWorkoutModalProps> = ({
             onClick={onClose}
         >
             <motion.div
-                className="modal-content"
-                initial={{ scale: 0.95, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.95, opacity: 0 }}
+                className="modal-content modal-premium-form pr-modal"
+                initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.95, opacity: 0, y: 20 }}
                 onClick={e => e.stopPropagation()}
             >
-                <div className="modal-header">
-                    <h2>Log Personal Record</h2>
-                    <button className="modal-close" onClick={onClose}>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <line x1="18" y1="6" x2="6" y2="18"/>
-                            <line x1="6" y1="6" x2="18" y2="18"/>
-                        </svg>
+                <div className="modal-header-premium pr-header">
+                    <div className="header-badge trophy">
+                        <Trophy size={18} />
+                    </div>
+                    <div className="header-info">
+                        <h2>Record New PR</h2>
+                        <p>Push your limits, track your strength</p>
+                    </div>
+                    <button className="close-btn-circle" onClick={onClose}>
+                        <X size={18} />
                     </button>
                 </div>
-                <div className="modal-body">
-                    <div className="form-group">
-                        <label>Exercise Name</label>
-                        <input
-                            type="text"
-                            placeholder="e.g., Bench Press, Squat, Deadlift"
-                            value={newWorkout.exercise}
-                            onChange={e => setNewWorkout({ ...newWorkout, exercise: e.target.value })}
-                        />
-                    </div>
-                    <div className="form-group">
-                        <label>Category</label>
-                        <select
-                            value={newWorkout.category}
-                            onChange={e => setNewWorkout({ ...newWorkout, category: e.target.value })}
-                        >
-                            <option value="push">Push (Chest, Shoulders, Triceps)</option>
-                            <option value="pull">Pull (Back, Biceps)</option>
-                            <option value="legs">Legs (Quads, Hamstrings, Glutes)</option>
-                            <option value="core">Core (Abs, Obliques)</option>
-                            <option value="cardio">Cardio / Endurance</option>
-                        </select>
-                    </div>
-                    <div className="form-row">
-                        <div className="form-group flex-2">
-                            <label>Weight</label>
+
+                <div className="modal-body-compact">
+                    {/* Exercise & Category Section */}
+                    <div className="form-section-premium">
+                        <div className="compact-input-group active-focus">
+                            <label><Dumbbell size={12} /> Exercise Name</label>
                             <input
-                                type="number"
-                                placeholder="e.g., 185"
-                                value={newWorkout.weight}
-                                onChange={e => setNewWorkout({ ...newWorkout, weight: e.target.value })}
+                                type="text"
+                                placeholder="What did you crush today?"
+                                value={newWorkout.exercise}
+                                onChange={e => setNewWorkout({ ...newWorkout, exercise: e.target.value })}
+                                className="premium-text-input"
                             />
                         </div>
-                        <div className="form-group flex-1">
-                            <label>Unit</label>
+                        
+                        <div className="category-select-wrapper">
+                            <label>Training Category</label>
                             <select
-                                value={newWorkout.unit}
-                                onChange={e => setNewWorkout({ ...newWorkout, unit: e.target.value })}
+                                value={newWorkout.category}
+                                onChange={e => setNewWorkout({ ...newWorkout, category: e.target.value })}
                             >
-                                <option value="lbs">lbs</option>
-                                <option value="kg">kg</option>
+                                <option value="push">Push (Chest/Shoulders/Tri)</option>
+                                <option value="pull">Pull (Back/Biceps)</option>
+                                <option value="legs">Legs (Lower Body)</option>
+                                <option value="core">Core & Stability</option>
+                                <option value="cardio">Cardio & Endurance</option>
                             </select>
                         </div>
-                        <div className="form-group flex-1">
-                            <label>Reps</label>
-                            <input
-                                type="number"
-                                placeholder="e.g., 5"
-                                value={newWorkout.reps}
-                                onChange={e => setNewWorkout({ ...newWorkout, reps: e.target.value })}
-                            />
+                    </div>
+
+                    {/* PR Pods - Main Metrics */}
+                    <div className="metrics-pod-grid pr-pods">
+                        <div className="metric-pod weight-pod">
+                            <div className="pod-icon"><Scale size={16} /></div>
+                            <div className="pod-content">
+                                <label>Weight</label>
+                                <div className="input-with-unit">
+                                    <input
+                                        type="number"
+                                        step="0.5"
+                                        placeholder="0.0"
+                                        value={newWorkout.weight}
+                                        onChange={e => setNewWorkout({ ...newWorkout, weight: e.target.value })}
+                                    />
+                                    <select 
+                                        className="unit-selector-minimal"
+                                        value={newWorkout.unit}
+                                        onChange={e => setNewWorkout({ ...newWorkout, unit: e.target.value })}
+                                    >
+                                        <option value="lbs">lbs</option>
+                                        <option value="kg">kg</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="metric-pod reps-pod">
+                            <div className="pod-icon"><Hash size={16} /></div>
+                            <div className="pod-content">
+                                <label>Repetitions</label>
+                                <div className="input-with-unit">
+                                    <input
+                                        type="number"
+                                        placeholder="1"
+                                        value={newWorkout.reps}
+                                        onChange={e => setNewWorkout({ ...newWorkout, reps: e.target.value })}
+                                    />
+                                    <span>Reps</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div className="form-group">
-                        <label>Notes (optional)</label>
+
+                    {/* Notes Section */}
+                    <div className="notes-pod-compact">
+                        <div className="pod-header">
+                            <MessageSquare size={14} />
+                            <label>Form Notes (Optional)</label>
+                        </div>
                         <textarea
-                            placeholder="How did it feel? Any form notes?"
+                            placeholder="How did the set feel? Any technical cues?"
                             value={newWorkout.notes}
                             onChange={e => setNewWorkout({ ...newWorkout, notes: e.target.value })}
+                            rows={2}
                         />
                     </div>
                 </div>
-                <div className="modal-footer">
-                    <button className="btn-secondary" onClick={onClose}>Cancel</button>
-                    <button className="btn-primary" onClick={onSave}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M20 6h-8l-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2Z"/>
-                            <polyline points="16 16 12 12 16 8"/>
-                            <line x1="12" y1="12" x2="22" y2="12"/>
-                        </svg>
-                        Log PR
+
+                <div className="modal-footer-premium">
+                    <button className="btn-ghost-premium" onClick={onClose} disabled={saving}>Cancel</button>
+                    <button className={`btn-active-premium pr-btn ${saving ? 'loading' : ''}`} onClick={onSave} disabled={saving}>
+                        {saving ? <div className="loader-dots"><span></span><span></span><span></span></div> : (
+                            <>
+                                <span>Log Personal Best</span>
+                                <Check size={16} />
+                            </>
+                        )}
                     </button>
                 </div>
             </motion.div>

@@ -1,104 +1,182 @@
 # Member Messages — Improvement Plan
 
-## Current State Analysis
+## Current State (Confirmed from Actual Code — March 2026)
 
-**File:** `MemberMessages.tsx` (809 lines)  
-**Current features:** Contact list sidebar, chat window, message rendering, session request, progress update, attachments, reactions, reply-to, voice messages, typing indicator, online status.
+**File:** `MemberMessages.tsx` — **14 lines**
 
-**Problems:**
-- **100% hardcoded mock data** — contacts list, all messages, everything is static JS objects. No API integration whatsoever.
-- Does NOT use the `ChatLayout` component that TrainerMessages uses — completely different implementation
-- 809 lines in a single file with no extraction
-- Attachment system is faked (no file upload)
-- Voice message feature is UI-only (no recording capability)
-- No real-time messaging (no WebSocket/SSE)
-- No message search
-- Imports `useAuth` but has no API for member identity
-- Session request and progress update are mock flows
+```tsx
+// Exact current code:
+import React from 'react';
+import ChatLayout from '../../components/chat/ChatLayout';
 
----
+const MemberMessages: React.FC = () => {
+    return <ChatLayout />;
+};
 
-## Critical Issues
+export default MemberMessages;
+```
 
-> ⚠️ **This page is entirely non-functional.** Every single message, contact, and interaction is hardcoded. This is the highest priority fix among all member pages.
+The entire messaging experience is a direct pass-through to `ChatLayout` — a shared component used across all three roles. There is no wrapper, no member-specific context, no error boundary, and no title.
+
+**Backend (ChatController):** `GET /api/chat/conversations`, `POST /api/chat/send`, `GET /api/chat/messages/{conversationId}`, WebSocket at `/ws/chat`.
 
 ---
 
-## Missing Functionality
+## Real Gaps Found
 
-| Priority | Feature | Description |
-|----------|---------|-------------|
-| **P0** | Real API integration | Connect to chat backend endpoints |
-| **P0** | WebSocket/SSE for real-time | Live message delivery without page refresh |
-| **P0** | Use shared ChatLayout | Migrate to the same `ChatLayout` component used by TrainerMessages |
-| **P0** | Conversation list from API | Fetch actual conversations with trainers/support |
-| **P1** | File/image upload | Real attachment upload to backend (S3/local storage) |
-| **P1** | Message search | Search within conversations |
-| **P1** | Read receipts | Real delivery/read status tracking |
-| **P1** | Push notification on new message | Browser notification + badge count |
-| **P2** | Message pinning | Pin important messages (workout plans, schedules) |
-| **P2** | Message forwarding | Forward a message to another contact |
-| **P2** | Voice recording | Actual voice recording + playback (MediaRecorder API) |
-| **P2** | Emoji picker | Rich emoji selection beyond text reactions |
-| **P3** | Video/audio call | WebRTC-based call feature |
-| **P3** | Auto-translate | Translate messages between languages |
+### Gap 1 — No deep-link pre-selection
+**MyTrainer page** has a `MessageSquare` button that currently has **no `onClick` handler** (confirmed in `MyTrainer.tsx` line 297–300). The plan is to wire it to `navigate('/member/messages?trainerId={id}')`. But `ChatLayout` has no code to read `?trainerId=` and pre-select that conversation. This is a two-part fix.
+
+### Gap 2 — No unread badge in nav
+`MemberLayout.tsx` has no badge on the Messages nav item. `ChatContext.unreadCount` (if it exists) is not read. The badge only appears once `NavItem.badge` is wired in `MemberLayout` (see Layout plan).
+
+### Gap 3 — Height/scroll issues
+`ChatLayout` is rendered directly inside the member page content area. Without an explicit height container, the chat panel may either overflow the viewport or collapse to zero height depending on the layout wrapper. A `.member-chat-page { height: 100%; overflow: hidden; }` wrapper fixes this.
+
+### Gap 4 — No empty state for members with no conversations
+Members who just signed up have no conversations. `ChatLayout` likely shows a blank left panel. A member-specific empty state should show "Message your trainer to get started" with a CTA to `/member/trainer`.
+
+### Gap 5 — No role-based conversation filter
+`ChatContext` fetches all conversations for the user. For a member, this should only show conversations with trainers and gym staff — not other members. If `GET /api/chat/conversations` returns all users, members may see irrelevant conversations.
 
 ---
 
-## UI/UX Improvements
+## What Needs to Be Fixed
 
-### Architecture Change
-- **Replace entirely with `ChatLayout`** — The trainer side already uses `ChatLayout` (a shared 3-panel chat component). Member should use the same component.
-- This means `MemberMessages.tsx` should become a thin wrapper like `TrainerMessages.tsx` (14 lines):
-  ```tsx
-  const MemberMessages: React.FC = () => {
-      return <ChatLayout />;
-  };
-  ```
+### P0 — Broken/Missing
 
-### If Building Custom (fallback)
-- Split into:
-  - `ContactList.tsx` — sidebar with search and filter
-  - `ChatWindow.tsx` — message area with auto-scroll
-  - `MessageInput.tsx` — compose bar with attachments
-  - `MessageBubble.tsx` — individual message component
-- Mobile: Full-screen contact list → tap → full-screen chat (no split view)
+| Issue | Root Cause | Fix |
+|-------|-----------|-----|
+| `MessageSquare` button on MyTrainer is a no-op | No `onClick` in `MyTrainer.tsx` line 297 | Add `onClick={() => navigate('/member/messages?trainerId=${trainer.userId}')}` |
+| `ChatLayout` ignores `?trainerId=` param | No `useSearchParams` in ChatLayout | Add param reading + auto-select conversation on mount |
+| Chat panel height collapses | No height wrapper | Wrap `<ChatLayout />` in `.member-chat-page` with `height: 100%; display: flex; flex-direction: column; overflow: hidden` |
 
-### Visual Enhancements
-- Typing indicator with animated dots
-- Message grouping by date ("Today", "Yesterday", "Jan 15")
-- Smooth scroll-to-bottom button when scrolled up
-- Unread message divider line
-- Contact avatar with online status dot
-- Message reactions displayed as mini pills below bubble
+### P1 — Missing but Important
+
+| Feature | Fix |
+|---------|-----|
+| Empty state (no conversations) | ChatLayout: when `conversations.length === 0` and role is MEMBER, show "Start a conversation with your trainer" → `/member/trainer` CTA |
+| Unread badge in nav | Wire `ChatContext.unreadCount` to Messages nav item badge (see Layout plan) |
+| Role-filter conversations | Backend: ensure `GET /api/chat/conversations` filters by role — members only see trainer/staff conversations |
 
 ---
 
-## Things to Remove
-- **All 200+ lines of hardcoded mock data** — contacts, messages, attachments
-- **Custom message rendering** — replace with shared ChatLayout
-- **MemberMessages.css (24KB!)** — 24KB of CSS for a non-functional page. Delete entirely if using ChatLayout.
+## Implementation Details
 
-## Things Wasting Resources
-- **24KB CSS file** for hardcoded mock page — complete waste
-- **809 lines of component code** that renders static data — should be 14 lines
+### Fix 1: MyTrainer.tsx — wire MessageSquare button
+```tsx
+// Line 297 in MyTrainer.tsx — the button currently has no onClick:
+// BEFORE:
+<button className="macos-btn macos-btn--secondary" style={{ padding: '8px' }} title="Send Message">
+    <MessageSquare size={18} />
+</button>
+
+// AFTER:
+<button
+    className="macos-btn macos-btn--secondary"
+    style={{ padding: '8px' }}
+    title="Send Message"
+    onClick={() => navigate(`/member/messages?trainerId=${trainer.userId}`)}
+>
+    <MessageSquare size={18} />
+</button>
+// Also: add `const navigate = useNavigate();` at the top of MyTrainer component
+```
+
+### Fix 2: MemberMessages.tsx — add wrapper + pass trainerId
+```tsx
+import React from 'react';
+import ChatLayout from '../../components/chat/ChatLayout';
+import './MemberMessages.css'; // or inline style
+
+const MemberMessages: React.FC = () => (
+    <div className="member-chat-page">
+        <ChatLayout />
+    </div>
+);
+
+export default MemberMessages;
+```
+
+```css
+/* MemberMessages.css or in macos-member.css */
+.member-chat-page {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
+}
+
+.member-chat-page .chat-layout {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+```
+
+### Fix 3: ChatLayout.tsx — read ?trainerId= param
+```tsx
+// Add at the top of ChatLayout component:
+const [searchParams] = useSearchParams();
+const preSelectTrainerId = searchParams.get('trainerId');
+
+useEffect(() => {
+    if (!preSelectTrainerId || !conversations.length) return;
+    const targetConv = conversations.find(c =>
+        String(c.otherUserId) === preSelectTrainerId ||
+        String(c.participantId) === preSelectTrainerId
+    );
+    if (targetConv) setSelectedConversation(targetConv);
+}, [preSelectTrainerId, conversations]);
+```
+
+### Fix 4: Empty state for members with no conversations
+```tsx
+// In ChatLayout conversation list section:
+{conversations.length === 0 && role === 'MEMBER' && (
+    <div className="chat-empty-state">
+        <MessageSquare size={36} opacity={0.4} />
+        <h3>No Messages Yet</h3>
+        <p>Connect with a trainer to start messaging</p>
+        <button onClick={() => navigate('/member/trainer')}>
+            Find a Trainer
+        </button>
+    </div>
+)}
+```
 
 ---
 
-## Performance Improvements
-- Use virtual scrolling for message list (react-window)
-- Lazy load images/attachments in viewport only
-- WebSocket connection pooling
-- Message pagination (load last 50, fetch more on scroll up)
-- Debounce typing indicator (300ms)
+## Backend Gaps
+
+### Existing endpoints (confirmed):
+- `GET /api/chat/conversations` — returns conversation list
+- `POST /api/chat/send` — sends a message
+- `GET /api/chat/messages/{conversationId}` — fetches messages
+- WebSocket `/ws/chat` — real-time updates
+
+### Missing:
+| Endpoint | Need | Priority |
+|----------|------|----------|
+| `GET /api/chat/conversations` role filter | Ensure it filters to only trainer/staff for MEMBER role | P1 |
+| `GET /api/chat/unread-count?userId=` | For nav badge polling (alternative to ChatContext) | P1 |
 
 ---
 
-## Implementation Priority
+## What NOT to Add
+- No group chat — gym staff use Owner/Trainer dashboard for group comms
+- No read receipts per message
+- No voice/video calling
+- No emoji reactions
+- No file attachments in this phase
 
-| Phase | Items |
-|-------|-------|
-| **Phase 1** | Replace with ChatLayout wrapper (match TrainerMessages) |
-| **Phase 2** | Backend chat API integration, WebSocket setup |
-| **Phase 3** | File upload, message search, read receipts |
-| **Phase 4** | Voice recording, emoji picker, call features |
+---
+
+## File Scope
+| File | Change | Target Size |
+|------|--------|-------------|
+| `MemberMessages.tsx` | Add wrapper div + CSS class | ~20 lines |
+| `MyTrainer.tsx` | Add `navigate` import + wire MessageSquare `onClick` + wire Info `onClick` | +10 lines |
+| `ChatLayout.tsx` (shared) | Add `useSearchParams` deep-link pre-selection; add empty state for MEMBER role | +25 lines |
+| `MemberLayout.tsx` | Wire Messages unread badge from `ChatContext` | +8 lines |
