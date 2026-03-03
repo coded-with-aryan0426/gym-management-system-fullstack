@@ -82,6 +82,37 @@ export interface ApiResponse<T> {
     message?: string;
 }
 
+// B4 — paged message response from GET /conversations/{id}/messages
+export interface PagedMessages {
+    messages: ChatMessage[];
+    page: number;
+    totalPages: number;
+    hasMore: boolean;
+}
+
+// B5 — shared media item from GET /conversations/{id}/media
+export interface SharedMediaItem {
+    attachmentId: number;
+    fileType: 'IMAGE' | 'VIDEO' | 'DOCUMENT' | 'VOICE_NOTE' | 'AUDIO' | 'OTHER';
+    fileUrl: string;
+    fileName?: string;
+    fileSize?: number;
+    mimeType?: string;
+    thumbnailUrl?: string;
+    duration?: number;
+    createdAt: string;
+    messageId?: number;
+    senderId?: number;
+    senderName?: string;
+}
+
+export interface SharedMediaPage {
+    items: SharedMediaItem[];
+    page: number;
+    totalCount: number;
+    hasMore: boolean;
+}
+
 // ==================== HELPER ====================
 
 /**
@@ -130,12 +161,12 @@ export const getMessages = async (
     conversationId: number,
     page = 0,
     size = 50
-): Promise<ChatMessage[]> => {
+): Promise<PagedMessages> => {
     const response = await fetch(
         `${API_BASE}/conversations/${conversationId}/messages?page=${page}&size=${size}`,
         { headers: getAuthHeaders() }
     );
-    return handleResponse<ChatMessage[]>(response);
+    return handleResponse<PagedMessages>(response);
 };
 
 export const startPrivateChat = async (targetUserId: number): Promise<Conversation> => {
@@ -309,6 +340,31 @@ export const markConversationAsRead = async (conversationId: number): Promise<vo
     if (!response.ok) console.warn('markAsRead failed', conversationId);
 };
 
+// U6 — presence map: { userId: isOnline }
+export const getPresence = async (userIds: number[]): Promise<Record<number, boolean>> => {
+    if (!userIds.length) return {};
+    const params = userIds.map(id => `userIds=${id}`).join('&');
+    const response = await fetch(
+        `${API_BASE}/presence?${params}`,
+        { headers: getAuthHeaders() }
+    );
+    return handleResponse<Record<number, boolean>>(response);
+};
+
+// B5 — shared media for ContactInfoPanel
+export const getSharedMedia = async (
+    conversationId: number,
+    type: 'IMAGE' | 'VIDEO' | 'DOCUMENT' | 'VOICE_NOTE' | 'AUDIO' | 'OTHER' = 'IMAGE',
+    page = 0,
+    size = 18
+): Promise<SharedMediaPage> => {
+    const response = await fetch(
+        `${API_BASE}/conversations/${conversationId}/media?type=${type}&page=${page}&size=${size}`,
+        { headers: getAuthHeaders() }
+    );
+    return handleResponse<SharedMediaPage>(response);
+};
+
 // ==================== EXPORT ALL ====================
 
 export const chatApi = {
@@ -317,6 +373,8 @@ export const chatApi = {
     getMessages,
     startPrivateChat,
     markConversationAsRead,
+    getSharedMedia,
+    getPresence,
     // User Discovery
     getAvailableChatUsers,
     searchUsers,

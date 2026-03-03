@@ -11,6 +11,7 @@ import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import './TrainerReports.css';
 import { trainerReportsApi } from '../../services/trainerReportsApi';
+import { showToast } from '../../utils/toast';
 import type {
     ReportOverview,
     WeeklyActivity,
@@ -132,7 +133,7 @@ const TrainerReports: React.FC = () => {
             pdf.save(`trainer_report_${period.replace(' ', '_').toLowerCase()}.pdf`);
         } catch (err) {
             console.error('Client-side PDF export failed:', err);
-            alert('Failed to generate PDF report on the client.');
+            showToast.error('Failed to generate PDF report on the client.');
         }
     };
 

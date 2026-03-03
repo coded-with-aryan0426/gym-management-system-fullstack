@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import './AvatarPicker.css';
+import { showToast } from '../../utils/toast';
 
 interface AvatarOption {
     id: string;
@@ -94,13 +95,13 @@ const AvatarPicker: React.FC<AvatarPickerProps & { variant?: 'staff' | 'member' 
 
         // Validate file type
         if (!file.type.startsWith('image/')) {
-            alert('Please select an image file');
+            showToast.error('Please select an image file');
             return;
         }
 
         // Validate file size (max 500KB for localStorage)
         if (file.size > 500 * 1024) {
-            alert('Image must be less than 500KB');
+            showToast.error('Image must be less than 500KB');
             return;
         }
 

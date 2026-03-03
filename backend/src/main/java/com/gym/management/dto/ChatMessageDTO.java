@@ -21,6 +21,9 @@ public class ChatMessageDTO {
     // Delivery status for the requesting user's sent messages: SENT | DELIVERED | READ
     private String deliveryStatus;
 
+    // U10 — reply-to
+    private Long replyToMessageId;
+
     // Explicit getters and setters for Lombok compatibility
     public Long getMessageId() { return messageId; }
     public void setMessageId(Long messageId) { this.messageId = messageId; }
@@ -60,4 +63,7 @@ public class ChatMessageDTO {
 
     public String getDeliveryStatus() { return deliveryStatus; }
     public void setDeliveryStatus(String deliveryStatus) { this.deliveryStatus = deliveryStatus; }
+
+    public Long getReplyToMessageId() { return replyToMessageId; }
+    public void setReplyToMessageId(Long replyToMessageId) { this.replyToMessageId = replyToMessageId; }
 }

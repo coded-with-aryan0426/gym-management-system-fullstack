@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { BarChart3, Activity, Target, Dumbbell, Camera, Heart } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { memberProgressApi } from '../../services/api';
+import { showToast } from '../../../utils/toast';
 import '../../styles/macos-member.css';
 import './MyProgress.css';
 
@@ -93,12 +94,12 @@ const MyProgress: React.FC = () => {
     // Modal handlers
     const handleLogProgress = async () => {
         if (!memberId) {
-            alert('User session not found. Please log in again.');
+            showToast.error('User session not found. Please log in again.');
             return;
         }
 
         if (!newProgress.weight && !newProgress.bodyFat && !newProgress.muscleMass && !newProgress.waist && !newProgress.chest) {
-            alert('Please enter at least some data to log');
+            showToast.error('Please enter at least some data to log');
             return;
         }
 
@@ -130,7 +131,7 @@ const MyProgress: React.FC = () => {
         } catch (error: any) {
             console.error('Error saving progress:', error);
             const errorMsg = error.response?.data?.error || error.message || 'Unknown error';
-            alert(`Failed to save progress: ${errorMsg}`);
+            showToast.error(`Failed to save progress: ${errorMsg}`);
         } finally {
             setSaving(false);
         }
@@ -138,7 +139,7 @@ const MyProgress: React.FC = () => {
 
     const handleLogWorkout = async () => {
         if (!newWorkout.exercise || !newWorkout.weight) {
-            alert('Please enter exercise and weight');
+            showToast.error('Please enter exercise and weight');
             return;
         }
 
@@ -159,7 +160,7 @@ const MyProgress: React.FC = () => {
             setActiveModal(null);
         } catch (error) {
             console.error('Error saving PR:', error);
-            alert('Failed to save PR. Please try again.');
+            showToast.error('Failed to save PR. Please try again.');
         } finally {
             setSaving(false);
         }
@@ -167,7 +168,7 @@ const MyProgress: React.FC = () => {
 
     const handleCreateGoal = async () => {
         if (!newGoal.title || !newGoal.targetValue) {
-            alert('Please enter goal title and target value');
+            showToast.error('Please enter goal title and target value');
             return;
         }
 
@@ -191,7 +192,7 @@ const MyProgress: React.FC = () => {
             setActiveModal(null);
         } catch (error) {
             console.error('Error creating goal:', error);
-            alert('Failed to create goal. Please try again.');
+            showToast.error('Failed to create goal. Please try again.');
         } finally {
             setSaving(false);
         }
@@ -199,7 +200,7 @@ const MyProgress: React.FC = () => {
 
     const handlePhotoUpload = async () => {
         if (!photoFile || !memberId) {
-            alert('Please select a photo');
+            showToast.error('Please select a photo');
             return;
         }
 
@@ -214,7 +215,7 @@ const MyProgress: React.FC = () => {
             setActiveModal(null);
         } catch (error) {
             console.error('Error uploading photo:', error);
-            alert('Failed to upload photo');
+            showToast.error('Failed to upload photo');
         } finally {
             setSaving(false);
         }

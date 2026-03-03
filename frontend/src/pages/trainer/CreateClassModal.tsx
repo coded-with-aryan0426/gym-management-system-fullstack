@@ -7,6 +7,7 @@ import {
 import { trainerApi } from '../../services/trainerApi';
 import type { TrainerClassItem } from '../../services/trainerApi';
 import './CreateClassModal.css';
+import { showToast } from '../../utils/toast';
 
 interface CreateClassModalProps {
     isOpen: boolean;
@@ -103,7 +104,7 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ isOpen, onClose, on
             onClose();
         } catch (error) {
             console.error('Failed to save class:', error);
-            alert('Failed to save class. Please try again.');
+            showToast.error('Failed to save class. Please try again.');
         } finally {
             setLoading(false);
         }

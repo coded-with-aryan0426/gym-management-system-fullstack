@@ -260,8 +260,8 @@ const ChatSidebar: React.FC = () => {
                     )}
                 </div>
 
-                {/* Filter Tabs (Only show for Chats) */}
-                {activeTab === 'chats' && (
+                {/* Filter Tabs (Only show for Chats, hidden for MEMBER role) */}
+                {activeTab === 'chats' && user?.role !== 'MEMBER' && (
                     <div className="chat-filter-tabs">
                         {FILTER_TABS.map(tab => (
                             <button
@@ -280,7 +280,7 @@ const ChatSidebar: React.FC = () => {
                     {activeTab === 'requests' ? (
                         <div className="requests-list">
                             {requests.length === 0 ? (
-                                <div className="chat-window__empty" style={{ padding: '20px' }}>No pending requests</div>
+                            <div className="chat-window__empty chat-window__empty--sm">No pending requests</div>
                             ) : (
                                 requests.map(req => (
                                     <RequestItem key={req.requestId} request={req} onRespond={fetchRequests} />
@@ -290,9 +290,9 @@ const ChatSidebar: React.FC = () => {
                     ) : activeTab === 'members' ? (
                         <div className="members-list">
                             {loadingMembers ? (
-                                <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-tertiary)' }}>Loading...</div>
+                                <div className="chat-list__loading">Loading...</div>
                             ) : myMembers.length === 0 ? (
-                                <div className="chat-window__empty" style={{ padding: '20px' }}>No members assigned</div>
+                                <div className="chat-window__empty chat-window__empty--sm">No members assigned</div>
                             ) : (
                                 myMembers.map(member => (
                                     <div
@@ -318,9 +318,9 @@ const ChatSidebar: React.FC = () => {
                     ) : (
                         // Existing Chat List Logic
                         filteredConversations.length === 0 ? (
-                            <div className="chat-window__empty" style={{ padding: '40px 20px' }}>
-                                <MessageCircle size={40} style={{ opacity: 0.3, marginBottom: '12px' }} />
-                                <p style={{ fontSize: '14px', color: 'var(--text-tertiary)' }}>
+                            <div className="chat-window__empty chat-window__empty--padded">
+                                <MessageCircle size={40} className="chat-window__empty-icon-sm" />
+                                <p className="chat-window__empty-hint">
                                     {searchQuery ? 'No conversations found' : 'No messages yet'}
                                 </p>
                             </div>

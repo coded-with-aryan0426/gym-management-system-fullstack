@@ -1016,9 +1016,6 @@
 }
 
 .chat-input__emoji-btn {
-    position: absolute;
-    right: 12px;
-    bottom: 10px;
     background: none;
     border: none;
     color: #8696a0;
@@ -1146,6 +1143,10 @@
 
 .contact-panel__status {
     font-size: 12px;
+    color: #8696a0;
+}
+
+.contact-panel__status--online {
     color: #25d366;
 }
 
@@ -1713,4 +1714,610 @@
     }
 
     .message-bubble { max-width: 80%; }
+}
+
+/* ==================== INFINITE SCROLL LOAD MORE ==================== */
+
+.chat-messages__load-more {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 0;
+    font-size: 12px;
+    color: var(--color-text-secondary, #888);
+}
+
+.chat-messages__load-more-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-top-color: var(--color-primary, #007bff);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ==================== WORKOUT PLAN VIEW MODAL ==================== */
+
+.modal--workout-view {
+    max-width: 640px;
+    width: 100%;
+}
+
+.modal__subtitle {
+    font-size: 12px;
+    color: #8696a0;
+    margin: 2px 0 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.workout-view__table-wrap {
+    overflow-x: auto;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.workout-view__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.workout-view__table thead tr {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.workout-view__table th {
+    padding: 8px 12px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #8696a0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    white-space: nowrap;
+}
+
+.workout-view__table td {
+    padding: 9px 12px;
+    color: #e9edef;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.workout-view__table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.workout-view__table tbody tr:hover td {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.workout-view__num {
+    color: #8696a0;
+    font-size: 12px;
+    width: 28px;
+}
+
+.workout-view__name {
+    font-weight: 500;
+}
+
+.workout-view__notes {
+    color: #8696a0;
+    font-size: 12px;
+    max-width: 160px;
+}
+
+.workout-view__count {
+    margin: 10px 0 0;
+    font-size: 12px;
+    color: #8696a0;
+    text-align: right;
+}
+
+/* ==================== SIDEBAR UTILITY CLASSES (U1) ==================== */
+
+.chat-list__loading {
+    padding: 20px;
+    text-align: center;
+    color: #8696a0;
+    font-size: 13px;
+}
+
+.chat-window__empty--sm {
+    padding: 20px;
+}
+
+.chat-window__empty--padded {
+    padding: 40px 20px;
+}
+
+.chat-window__empty-icon-sm {
+    opacity: 0.3;
+    margin-bottom: 12px;
+    display: block;
+}
+
+.chat-window__empty-hint {
+    font-size: 14px;
+    color: #8696a0;
+    margin: 0;
+}
+
+/* ==================== EMOJI PICKER (U4) ==================== */
+
+.chat-input__emoji-wrapper {
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+    display: flex;
+    align-items: center;
+}
+
+.chat-input__emoji-picker-popup {
+    position: absolute;
+    bottom: calc(100% + 10px);
+    right: 0;
+    z-index: 500;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+}
+
+/* ==================== CONTACT PANEL MEDIA (U7) ==================== */
+
+.contact-panel__section--media {
+    padding-bottom: 4px;
+}
+
+.contact-panel__media-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 10px;
+}
+
+.contact-panel__media-tab {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: transparent;
+    color: #8696a0;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.contact-panel__media-tab--active {
+    background: var(--accent-primary);
+    border-color: var(--accent-primary);
+    color: white;
+}
+
+.contact-panel__media-tab:not(.contact-panel__media-tab--active):hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: #e9edef;
+}
+
+.contact-panel__media-loading {
+    padding: 16px 0;
+    font-size: 12px;
+    color: #8696a0;
+    text-align: center;
+}
+
+.contact-panel__media-empty {
+    padding: 16px 0;
+    font-size: 12px;
+    color: #8696a0;
+    text-align: center;
+    margin: 0;
+}
+
+/* 3-column photo grid */
+.contact-panel__photo-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.contact-panel__photo-cell {
+    aspect-ratio: 1;
+    padding: 0;
+    border: none;
+    background: rgba(255, 255, 255, 0.04);
+    cursor: pointer;
+    overflow: hidden;
+    position: relative;
+    transition: opacity 0.15s;
+}
+
+.contact-panel__photo-cell:hover {
+    opacity: 0.8;
+}
+
+.contact-panel__photo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.contact-panel__media-see-all {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    width: 100%;
+    margin-top: 8px;
+    padding: 6px;
+    background: rgba(255, 255, 255, 0.04);
+    border: none;
+    border-radius: 8px;
+    font-size: 12px;
+    color: #8696a0;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.contact-panel__media-see-all:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #e9edef;
+}
+
+/* File/document list */
+.contact-panel__doc-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.contact-panel__doc-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 6px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background 0.15s;
+}
+
+.contact-panel__doc-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.contact-panel__doc-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: rgba(220, 38, 38, 0.12);
+    color: var(--accent-primary);
+    flex-shrink: 0;
+}
+
+.contact-panel__doc-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.contact-panel__doc-name {
+    display: block;
+    font-size: 13px;
+    color: #e9edef;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.contact-panel__doc-meta {
+    display: block;
+    font-size: 11px;
+    color: #8696a0;
+    margin-top: 2px;
+}
+
+.contact-panel__doc-dl {
+    color: #8696a0;
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity 0.15s;
+}
+
+.contact-panel__doc-item:hover .contact-panel__doc-dl {
+    opacity: 1;
+}
+
+/* Block / unblock button cleanup */
+.contact-panel__action--btn {
+    width: 100%;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+}
+
+.contact-panel__action--btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.contact-panel__action--block {
+    color: #ef4444;
+}
+
+.contact-panel__action--unblock {
+    color: #8696a0;
+}
+
+/* ==================== MESSAGE SEARCH BAR (U9) ==================== */
+
+.chat-search-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: #1a2530;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    animation: slideDown 0.15s ease;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.chat-search-bar__icon {
+    color: #8696a0;
+    flex-shrink: 0;
+}
+
+.chat-search-bar__input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #e9edef;
+    font-size: 13px;
+    padding: 2px 0;
+}
+
+.chat-search-bar__input::placeholder {
+    color: #8696a0;
+}
+
+.chat-search-bar__count {
+    font-size: 11px;
+    color: #8696a0;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.chat-search-bar__nav,
+.chat-search-bar__close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    color: #8696a0;
+    cursor: pointer;
+    transition: all 0.12s;
+    flex-shrink: 0;
+}
+
+.chat-search-bar__nav:hover:not(:disabled),
+.chat-search-bar__close:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #e9edef;
+}
+
+.chat-search-bar__nav:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
+/* Search match highlight rows */
+.chat-msg-row--search-match {
+    background: rgba(255, 214, 0, 0.04);
+    border-radius: 8px;
+}
+
+.chat-msg-row--search-current {
+    background: rgba(255, 214, 0, 0.10);
+    border-radius: 8px;
+    outline: 1px solid rgba(255, 214, 0, 0.25);
+}
+
+/* Inline text highlight */
+.message-bubble__search-highlight {
+    background: rgba(255, 214, 0, 0.45);
+    color: #1a1a1a;
+    border-radius: 2px;
+    padding: 0 1px;
+}
+
+/* Search button active state */
+.chat-header__action-btn--active {
+    background: rgba(220, 38, 38, 0.15);
+    color: var(--accent-primary);
+}
+
+/* =============================================
+   U10 — REPLY-TO: preview bar above input
+   ============================================= */
+.chat-reply-preview {
+    display: flex;
+    align-items: stretch;
+    gap: 10px;
+    padding: 8px 14px;
+    background: rgba(255, 255, 255, 0.04);
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    animation: slideDown 0.15s ease;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.chat-reply-preview__bar {
+    flex-shrink: 0;
+    width: 3px;
+    border-radius: 2px;
+    background: var(--accent-primary, #e53e3e);
+}
+
+.chat-reply-preview__content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.chat-reply-preview__name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent-primary, #e53e3e);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chat-reply-preview__text {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.55);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chat-reply-preview__dismiss {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.4);
+    padding: 4px;
+    border-radius: 4px;
+    transition: color 0.15s, background 0.15s;
+}
+.chat-reply-preview__dismiss:hover {
+    color: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.07);
+}
+
+/* =============================================
+   U10 — REPLY-TO: quoted snippet inside bubble
+   ============================================= */
+.message-bubble__quote {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+    padding: 6px 10px;
+    margin-bottom: 6px;
+    background: rgba(0, 0, 0, 0.18);
+    border-radius: 6px;
+    cursor: default;
+}
+
+.message-bubble--sent .message-bubble__quote {
+    background: rgba(0, 0, 0, 0.22);
+}
+
+.message-bubble__quote-bar {
+    flex-shrink: 0;
+    width: 3px;
+    border-radius: 2px;
+    background: var(--accent-primary, #e53e3e);
+}
+
+.message-bubble__quote-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.message-bubble__quote-name {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent-primary, #e53e3e);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.message-bubble__quote-text {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.5);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* =============================================
+   R5 — Inline-style replacements
+   ============================================= */
+
+/* Disabled header action buttons (Phone / Video — coming soon) */
+.chat-header__action-btn--disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* "Scroll up for older messages" hint */
+.chat-messages__scroll-hint {
+    font-size: 12px;
+    color: #888;
+}
+
+/* Typing indicator name label */
+.chat-typing-indicator__name {
+    margin-left: 8px;
+    font-size: 12px;
+    color: #888;
+}
+
+/* MessageBubble clearfix */
+.message-bubble__clearfix {
+    clear: both;
+}
+
+/* RequestItem — disable pointer cursor */
+.request-item--no-pointer {
+    cursor: default;
+}
+
+/* Avatar img inside request item — fill the container */
+.conversation-item__avatar-img-fill {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
 }

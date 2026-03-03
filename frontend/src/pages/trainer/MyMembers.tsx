@@ -9,6 +9,7 @@ import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { trainerApi } from '../../services/trainerApi';
 import chatApi from '../../services/chatApi';
 import api from '../../services/api';
+import { showToast } from '../../utils/toast';
 import TrainerRequestPanel, { type TrainerRequestData } from './TrainerRequestPanel';
 import './MyMembers.css';
 
@@ -262,7 +263,7 @@ const MyMembers: React.FC = () => {
             const memberId = member.id || member.userId;
             const conversation = await chatApi.startPrivateChat(memberId);
             navigate('/trainer/messages', { state: { activeConversationId: conversation.conversationId } });
-        } catch { alert('Could not start chat. Please try again.'); }
+        } catch { showToast.error('Could not start chat. Please try again.'); }
     }, [navigate]);
 
     const handleExport = () => {

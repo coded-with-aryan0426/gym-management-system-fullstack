@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import type { ChatMessage } from '../../services/chatApi';
-import { Smile, Edit2, Trash2, Check, CheckCheck, X, Paperclip, BarChart2, FileText, Music, Download, Play } from 'lucide-react';
+import { Smile, Edit2, Trash2, Check, CheckCheck, X, Paperclip, BarChart2, FileText, Music, Download, Play, CornerUpLeft } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { format } from 'date-fns';
+import WorkoutPlanViewModal from './WorkoutPlanViewModal';
 
 interface MessageBubbleProps {
     message: ChatMessage;
@@ -12,6 +13,9 @@ interface MessageBubbleProps {
     onReact: (id: number, emoji: string) => void;
     onRemoveReaction: (id: number, emoji: string) => void;
     onImageClick?: (url: string) => void;
+    searchTerm?: string;
+    onReply?: (message: ChatMessage) => void;
+    allMessages?: ChatMessage[];
 }
 
 const COMMON_EMOJIS = ['👍', '❤️', '😂', '😮', '😢', '😡'];
@@ -31,12 +35,16 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
     onReact,
     onRemoveReaction,
     onImageClick,
+    searchTerm,
+    onReply,
+    allMessages = [],
 }) => {
     const { user } = useAuth();
     const [showActions, setShowActions] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [editContent, setEditContent] = useState(message.content);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+    const [showPlanModal, setShowPlanModal] = useState(false);
     const actionRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -87,6 +95,26 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
         }
     })();
 
+    // U9 — highlight search term in text
+    const highlightText = (text: string) => {
+        if (!searchTerm || !text) return <>{text}</>;
+        const parts = text.split(new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'));
+        return (
+            <>
+                {parts.map((part, i) =>
+                    part.toLowerCase() === searchTerm.toLowerCase()
+                        ? <mark key={i} className="message-bubble__search-highlight">{part}</mark>
+                        : part
+                )}
+            </>
+        );
+    };
+
+    // U10 — find quoted message
+    const quotedMessage = message.replyToMessageId
+        ? allMessages.find(m => m.messageId === message.replyToMessageId)
+        : null;
+
     const renderContent = () => {
         const { contentType } = message;
 
@@ -100,7 +128,12 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
                     <h4 className="workout-plan-card__title">
                         {parsedPayload.title || 'Training Session'}
                     </h4>
-                    <button className="workout-plan-card__btn workout-plan-card__btn--primary">View Plan</button>
+                    <button
+                        className="workout-plan-card__btn workout-plan-card__btn--primary"
+                        onClick={() => setShowPlanModal(true)}
+                    >
+                        View Plan
+                    </button>
                 </div>
             );
         }
@@ -208,7 +241,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
             );
         }
 
-        return <p className="message-bubble__text">{message.content}</p>;
+        return <p className="message-bubble__text">{highlightText(message.content)}</p>;
     };
 
     return (
@@ -218,8 +251,22 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
             onMouseLeave={() => !showEmojiPicker && setShowActions(false)}
         >
             <div className="message-bubble__content-wrapper" ref={actionRef}>
-                <div className="message-bubble__content">
-                    {renderContent()}
+                  <div className="message-bubble__content">
+                      {/* U10 — quoted message snippet */}
+                      {quotedMessage && (
+                          <div className="message-bubble__quote">
+                              <div className="message-bubble__quote-bar" />
+                              <div className="message-bubble__quote-body">
+                                  <span className="message-bubble__quote-name">{quotedMessage.senderName || 'Unknown'}</span>
+                                  <span className="message-bubble__quote-text">
+                                      {quotedMessage.content.length > 60
+                                          ? quotedMessage.content.slice(0, 60) + '…'
+                                          : quotedMessage.content}
+                                  </span>
+                              </div>
+                          </div>
+                      )}
+                      {renderContent()}
 
                     {/* Meta Info */}
                     <div className="message-bubble__meta">
@@ -241,7 +288,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
                     </div>
 
                     {/* Clear float from meta */}
-                    <div style={{ clear: 'both' }} />
+                    <div className="message-bubble__clearfix" />
 
                     {/* Reactions Display */}
                     {Object.keys(reactionCounts).length > 0 && (
@@ -256,35 +303,53 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
                 </div>
 
                 {/* Actions Menu */}
-                {showActions && !message.isSystemMessage && (
-                    <div className={`message-actions ${isMyMessage ? 'message-actions--left' : 'message-actions--right'}`}>
-                        <button className="message-action-btn" onClick={() => setShowEmojiPicker(!showEmojiPicker)}>
-                            <Smile size={16} />
-                        </button>
+                  {showActions && !message.isSystemMessage && (
+                      <div className={`message-actions ${isMyMessage ? 'message-actions--left' : 'message-actions--right'}`}>
+                          <button className="message-action-btn" onClick={() => setShowEmojiPicker(!showEmojiPicker)}>
+                              <Smile size={16} />
+                          </button>
 
-                        {isMyMessage && (
-                            <>
-                                <button className="message-action-btn" onClick={() => setIsEditing(true)}>
-                                    <Edit2 size={16} />
-                                </button>
-                                <button className="message-action-btn" onClick={() => onDelete(message.messageId)}>
-                                    <Trash2 size={16} />
-                                </button>
-                            </>
-                        )}
+                          {onReply && (
+                              <button
+                                  className="message-action-btn"
+                                  title="Reply"
+                                  onClick={() => { onReply(message); setShowActions(false); }}
+                              >
+                                  <CornerUpLeft size={16} />
+                              </button>
+                          )}
 
-                        {showEmojiPicker && (
-                            <div className="emoji-picker-tooltip">
-                                {COMMON_EMOJIS.map(emoji => (
-                                    <button key={emoji} onClick={() => toggleReaction(emoji)}>
-                                        {emoji}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                )}
+                          {isMyMessage && (
+                              <>
+                                  <button className="message-action-btn" onClick={() => setIsEditing(true)}>
+                                      <Edit2 size={16} />
+                                  </button>
+                                  <button className="message-action-btn" onClick={() => onDelete(message.messageId)}>
+                                      <Trash2 size={16} />
+                                  </button>
+                              </>
+                          )}
+
+                          {showEmojiPicker && (
+                              <div className="emoji-picker-tooltip">
+                                  {COMMON_EMOJIS.map(emoji => (
+                                      <button key={emoji} onClick={() => toggleReaction(emoji)}>
+                                          {emoji}
+                                      </button>
+                                  ))}
+                              </div>
+                          )}
+                      </div>
+                  )}
             </div>
+
+            {/* Workout Plan View Modal */}
+            {showPlanModal && parsedPayload && (
+                <WorkoutPlanViewModal
+                    payload={parsedPayload}
+                    onClose={() => setShowPlanModal(false)}
+                />
+            )}
         </div>
     );
 };

@@ -45,6 +45,9 @@ public class ChatController {
     @Autowired
     private com.gym.management.repository.MessageStatusRepository messageStatusRepository;
 
+    @Autowired
+    private com.gym.management.repository.MessageAttachmentRepository messageAttachmentRepository;
+
     // ==================== CONVERSATION ENDPOINTS ====================
 
     @GetMapping("/conversations")
@@ -161,6 +164,7 @@ public class ChatController {
             dto.setCreatedAt(m.getCreatedAt());
             dto.setIsSystemMessage(m.getIsSystemMessage());
             dto.setIsEdited(m.getEditHistory() != null && !m.getEditHistory().isEmpty());
+            dto.setReplyToMessageId(m.getReplyToMessageId());
 
             if (m.getSender() != null && m.getSender().getUserId().equals(currentUserId)) {
                 dto.setDeliveryStatus(deliveryMap.getOrDefault(m.getMessageId(), "SENT"));
@@ -183,7 +187,14 @@ public class ChatController {
             return dto;
         }).collect(java.util.stream.Collectors.toList());
 
-        return ResponseEntity.ok(apiResponse(true, dtos, null));
+        // B4 — return pagination metadata so frontend knows when to stop
+        Map<String, Object> paged = new HashMap<>();
+        paged.put("messages", dtos);
+        paged.put("page", messages.getNumber());
+        paged.put("totalPages", messages.getTotalPages());
+        paged.put("hasMore", messages.hasNext());
+
+        return ResponseEntity.ok(apiResponse(true, paged, null));
     }
 
     @PostMapping("/private")
@@ -501,6 +512,78 @@ public class ChatController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(apiResponse(false, null, e.getMessage()));
         }
+    }
+
+    // ==================== SHARED MEDIA (B5) ====================
+
+    /**
+     * GET /api/chat/conversations/{conversationId}/media?type=IMAGE&page=0&size=18
+     * Returns paginated attachments for a conversation, filtered by file type.
+     * type: IMAGE | VIDEO | DOCUMENT | VOICE_NOTE | AUDIO | OTHER (default: IMAGE)
+     */
+    @GetMapping("/conversations/{conversationId}/media")
+    public ResponseEntity<?> getSharedMedia(
+            @PathVariable Long conversationId,
+            @RequestParam(defaultValue = "IMAGE") String type,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "18") int size) {
+
+        com.gym.management.model.MessageAttachment.FileType fileType;
+        try {
+            fileType = com.gym.management.model.MessageAttachment.FileType.valueOf(type.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            fileType = com.gym.management.model.MessageAttachment.FileType.IMAGE;
+        }
+
+        // Fetch all then slice manually (repository returns List, not Page)
+        java.util.List<com.gym.management.model.MessageAttachment> all =
+                messageAttachmentRepository.findByConversationIdAndType(conversationId, fileType);
+
+        // Manual pagination
+        int start = page * size;
+        int end = Math.min(start + size, all.size());
+        java.util.List<com.gym.management.model.MessageAttachment> slice =
+                start >= all.size() ? java.util.Collections.emptyList() : all.subList(start, end);
+
+        java.util.List<Map<String, Object>> dtos = slice.stream().map(a -> {
+            Map<String, Object> dto = new HashMap<>();
+            dto.put("attachmentId", a.getAttachmentId());
+            dto.put("fileType", a.getFileType());
+            dto.put("fileUrl", a.getFileUrl());
+            dto.put("fileName", a.getFileName());
+            dto.put("fileSize", a.getFileSize());
+            dto.put("mimeType", a.getMimeType());
+            dto.put("thumbnailUrl", a.getThumbnailUrl());
+            dto.put("duration", a.getDuration());
+            dto.put("createdAt", a.getCreatedAt());
+            if (a.getMessage() != null) {
+                dto.put("messageId", a.getMessage().getMessageId());
+                if (a.getMessage().getSender() != null) {
+                    dto.put("senderId", a.getMessage().getSender().getUserId());
+                    dto.put("senderName", a.getMessage().getSender().getFullName());
+                }
+            }
+            return dto;
+        }).collect(java.util.stream.Collectors.toList());
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("items", dtos);
+        result.put("page", page);
+        result.put("totalCount", all.size());
+        result.put("hasMore", end < all.size());
+
+        return ResponseEntity.ok(apiResponse(true, result, null));
+    }
+
+    // ==================== PRESENCE ENDPOINT ====================
+
+    @Autowired
+    private com.gym.management.service.PresenceService presenceService;
+
+    @GetMapping("/presence")
+    public ResponseEntity<?> getPresence(@RequestParam List<Long> userIds) {
+        Map<Long, Boolean> presence = presenceService.getPresenceMap(userIds);
+        return ResponseEntity.ok(apiResponse(true, presence, null));
     }
 
     // ==================== HELPER METHODS ====================

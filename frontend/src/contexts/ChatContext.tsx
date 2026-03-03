@@ -4,6 +4,7 @@ import SockJS from 'sockjs-client';
 import { useAuth } from './AuthContext';
 import * as chatApi from '../services/chatApi';
 import type { Conversation, ChatMessage, BlockedUser, ChatUser } from '../services/chatApi';
+import { getPresence } from '../services/chatApi';
 
 // Re-export types for use in components
 export type { Conversation, ChatMessage, BlockedUser, ChatUser };
@@ -18,12 +19,20 @@ interface ChatContextType {
     blockedUsers: BlockedUser[];
     availableUsers: ChatUser[];
     typingUsers: Record<number, number[]>;
+    hasMoreMessages: boolean;
+    loadingMoreMessages: boolean;
+    // U6 — presence: userId -> isOnline
+    presenceMap: Record<number, boolean>;
+    // U10 — reply-to
+    replyToMessage: ChatMessage | null;
+    setReplyTo: (message: ChatMessage | null) => void;
 
     // Actions
     setActiveConversation: (conversation: Conversation | null) => void;
     sendMessage: (content: string, type?: string, payload?: any) => void;
     sendTyping: (isTyping: boolean) => void;
     loadConversations: () => Promise<void>;
+    loadMoreMessages: () => Promise<void>;
     startPrivateChat: (targetUserId: number) => Promise<void>;
 
     // Blocking
@@ -58,6 +67,21 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Typing state
     const [typingUsers, setTypingUsers] = useState<Record<number, number[]>>({});
 
+    // Pagination state for message infinite scroll
+    const [currentPage, setCurrentPage] = useState(0);
+    const [hasMoreMessages, setHasMoreMessages] = useState(false);
+    const [loadingMoreMessages, setLoadingMoreMessages] = useState(false);
+
+    // U6 — presence map: userId -> isOnline
+    const [presenceMap, setPresenceMap] = useState<Record<number, boolean>>({});
+    const presenceSubscriptionRef = useRef<any>(null);
+
+    // U10 — reply-to message state
+    const [replyToMessage, setReplyToMessage] = useState<ChatMessage | null>(null);
+    const setReplyTo = useCallback((message: ChatMessage | null) => {
+        setReplyToMessage(message);
+    }, []);
+
     const stompClientRef = useRef<Client | null>(null);
     const subscriptionRef = useRef<any>(null);
 
@@ -80,6 +104,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (activeConversation) {
             loadMessages(activeConversation.conversationId);
             subscribeToConversation(activeConversation.conversationId);
+            setReplyToMessage(null); // U10 — clear reply-to on conversation switch
         }
         return () => {
             if (subscriptionRef.current) {
@@ -115,6 +140,13 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
             onConnect: () => {
                 setConnected(true);
                 console.log('✅ Connected to WebSocket');
+                // U6 — subscribe to global presence topic
+                presenceSubscriptionRef.current = client.subscribe('/topic/presence', (msg) => {
+                    const event = JSON.parse(msg.body);
+                    if (event.type === 'PRESENCE') {
+                        setPresenceMap(prev => ({ ...prev, [event.userId]: event.online }));
+                    }
+                });
             },
             onDisconnect: () => {
                 setConnected(false);
@@ -205,6 +237,10 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
                         : m
                 ));
                 break;
+            case 'PRESENCE':
+                // Real-time presence update from backend broadcast
+                setPresenceMap(prev => ({ ...prev, [event.userId]: event.online }));
+                break;
         }
     }, []);
 
@@ -263,7 +299,17 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setLoading(true);
         try {
             const data = await chatApi.getConversations();
-            setConversations(sortConversations(data || []));
+            const sorted = sortConversations(data || []);
+            setConversations(sorted);
+            // U6 — fetch initial presence for all participants
+            const allUserIds = Array.from(new Set(
+                sorted.flatMap(c => c.participants?.map((p: any) => Number(p.userId)) || [])
+            ));
+            if (allUserIds.length) {
+                getPresence(allUserIds).then(map => {
+                    setPresenceMap(map as Record<number, boolean>);
+                }).catch(() => {});
+            }
         } catch (error) {
             console.error('Failed to load conversations:', error);
         } finally {
@@ -274,9 +320,11 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const loadMessages = useCallback(async (conversationId: number) => {
         if (!token) return;
         try {
-            const data = await chatApi.getMessages(conversationId);
-            // Reverse to show oldest first
-            setMessages((data || []).reverse());
+            const paged = await chatApi.getMessages(conversationId, 0);
+            // Reverse so oldest messages are at top
+            setMessages((paged.messages || []).reverse());
+            setCurrentPage(0);
+            setHasMoreMessages(paged.hasMore);
             // Mark as read — clears unread badge and updates delivery ticks for other participants
             chatApi.markConversationAsRead(conversationId).catch(() => {});
             // Zero out unread count in sidebar immediately
@@ -287,6 +335,25 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
             console.error('Failed to load messages:', error);
         }
     }, [token]);
+
+    // B4 — load older messages and prepend them (infinite scroll going up)
+    const loadMoreMessages = useCallback(async () => {
+        if (!token || !activeConversation || !hasMoreMessages || loadingMoreMessages) return;
+        setLoadingMoreMessages(true);
+        try {
+            const nextPage = currentPage + 1;
+            const paged = await chatApi.getMessages(activeConversation.conversationId, nextPage);
+            // New page comes in desc order (newest first), reverse to get oldest first, then prepend
+            const older = (paged.messages || []).reverse();
+            setMessages(prev => [...older, ...prev]);
+            setCurrentPage(nextPage);
+            setHasMoreMessages(paged.hasMore);
+        } catch (error) {
+            console.error('Failed to load more messages:', error);
+        } finally {
+            setLoadingMoreMessages(false);
+        }
+    }, [token, activeConversation, hasMoreMessages, loadingMoreMessages, currentPage]);
 
     const sendMessage = useCallback((content: string, type: string = 'TEXT', payload: any = null) => {
         if (!stompClientRef.current?.connected || !activeConversation) {
@@ -300,7 +367,9 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
             senderId: user?.userId || Number(user?.id),
             content: content,
             contentType: type,
-            payload: payload ? JSON.stringify(payload) : null
+            payload: payload ? JSON.stringify(payload) : null,
+            // U10 — include reply-to id if set
+            replyToMessageId: replyToMessage?.messageId ?? null,
         };
         console.log("Publishing message:", chatMessage);
 
@@ -308,7 +377,9 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
             destination: "/app/chat.sendMessage",
             body: JSON.stringify(chatMessage)
         });
-    }, [activeConversation, user?.id]);
+        // Clear reply-to after sending
+        setReplyToMessage(null);
+    }, [activeConversation, user?.id, replyToMessage]);
 
     const startPrivateChat = useCallback(async (targetUserId: number) => {
         if (!token) return;
@@ -411,11 +482,18 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         blockedUsers,
         availableUsers,
         typingUsers,
+        hasMoreMessages,
+        loadingMoreMessages,
+        presenceMap,
+        // U10 — reply-to
+        replyToMessage,
+        setReplyTo,
         // Actions
         setActiveConversation,
         sendMessage,
         sendTyping,
         loadConversations,
+        loadMoreMessages,
         startPrivateChat,
         // Blocking
         blockUser,

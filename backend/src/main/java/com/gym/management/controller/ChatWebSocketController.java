@@ -2,14 +2,20 @@ package com.gym.management.controller;
 
 import com.gym.management.model.Message;
 import com.gym.management.service.ChatService;
+import com.gym.management.service.PresenceService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.socket.messaging.SessionConnectedEvent;
+import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 import java.security.Principal;
+import java.util.HashMap;
+import java.util.Map;
 
 @Controller
 public class ChatWebSocketController {
@@ -20,6 +26,39 @@ public class ChatWebSocketController {
     @Autowired
     private ChatService chatService;
 
+    @Autowired
+    private PresenceService presenceService;
+
+    // ==================== PRESENCE EVENTS ====================
+
+    @EventListener
+    public void handleWebSocketConnectListener(SessionConnectedEvent event) {
+        Principal principal = event.getUser();
+        if (principal == null) return;
+        Long userId = getUserIdFromPrincipal(principal);
+        presenceService.setOnline(userId);
+        broadcastPresence(userId, true);
+    }
+
+    @EventListener
+    public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
+        Principal principal = event.getUser();
+        if (principal == null) return;
+        Long userId = getUserIdFromPrincipal(principal);
+        presenceService.setOffline(userId);
+        broadcastPresence(userId, false);
+    }
+
+    private void broadcastPresence(Long userId, boolean online) {
+        Map<String, Object> event = new HashMap<>();
+        event.put("type", "PRESENCE");
+        event.put("userId", userId);
+        event.put("online", online);
+        messagingTemplate.convertAndSend("/topic/presence", event);
+    }
+
+    // ==================== CHAT MESSAGE ====================
+
     @MessageMapping("/chat.sendMessage")
     public void sendMessage(@Payload com.gym.management.dto.ChatMessageDTO chatMessage, Principal principal) {
         Long senderId = getUserIdFromPrincipal(principal);
@@ -29,8 +68,9 @@ public class ChatWebSocketController {
                 chatMessage.getConversationId(),
                 senderId,
                 chatMessage.getContent(),
-                chatMessage.getContentType(), // Use getContentType() from shared DTO
-                chatMessage.getPayload());
+                chatMessage.getContentType(),
+                chatMessage.getPayload(),
+                chatMessage.getReplyToMessageId());
 
         // Map to DTO to send back (consistency)
         com.gym.management.dto.ChatMessageDTO responseDto = new com.gym.management.dto.ChatMessageDTO();
@@ -45,6 +85,7 @@ public class ChatWebSocketController {
         responseDto.setIsSystemMessage(savedMessage.getIsSystemMessage());
         responseDto.setIsEdited(false);
         responseDto.setReactions(new java.util.ArrayList<>());
+        responseDto.setReplyToMessageId(savedMessage.getReplyToMessageId());
 
         // Broadcast to conversation topic
         messagingTemplate.convertAndSend("/topic/conversation/" + chatMessage.getConversationId(), responseDto);
@@ -76,7 +117,4 @@ public class ChatWebSocketController {
         }
         throw new RuntimeException("Unauthorized: Valid user principal required");
     }
-
-    // Inner class ChatMessageDTO removed in favor of
-    // com.gym.management.dto.ChatMessageDTO
 }

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import api from '../../services/api';
+import { showToast } from '../../utils/toast';
 import '../../styles/Chat.css';
 
 interface RequestItemProps {
@@ -17,32 +18,32 @@ const RequestItem: React.FC<RequestItemProps> = ({ request, onRespond }) => {
             onRespond();
         } catch (error) {
             console.error('Failed to accept request', error);
-            alert('Failed to accept request');
+            showToast.error('Failed to accept request');
         } finally {
             setLoading(false);
         }
     };
 
     const handleReject = async () => {
-        if (!confirm('Are you sure you want to reject this request?')) return;
+        if (!window.confirm('Are you sure you want to reject this request?')) return;
         setLoading(true);
         try {
             await api.chat.rejectRequest(request.requestId);
             onRespond();
         } catch (error) {
             console.error('Failed to reject request', error);
-            alert('Failed to reject request');
+            showToast.error('Failed to reject request');
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="conversation-item request-item" style={{ cursor: 'default' }}>
+        <div className="conversation-item request-item request-item--no-pointer">
             <div className="conversation-item__avatar">
                 {request.senderAvatarId ? (
                     <div className="conversation-item__avatar-img">
-                        <img src={`/api/avatars/${request.senderAvatarId}`} alt="avatar" style={{ width: '100%', height: '100%', borderRadius: '50%' }} />
+                        <img src={`/api/avatars/${request.senderAvatarId}`} alt="avatar" className="conversation-item__avatar-img-fill" />
                     </div>
                 ) : (
                     <div className="conversation-item__avatar-img">

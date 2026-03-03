@@ -10,6 +10,7 @@ import {
 import './ProgressNotes.css';
 import { progressNoteApi, type ProgressNoteDTO } from '../../services/progressNoteApi';
 import { trainerApi, type TrainerMember } from '../../services/trainerApi';
+import { showToast } from '../../utils/toast';
 
 /* ── Per-category palette ── */
 const CAT_META: Record<string, { label: string; color: string; bg: string; border: string; icon: React.FC<any> }> = {
@@ -132,11 +133,11 @@ const ProgressNotes: React.FC = () => {
     }), [notes]);
 
     const handleSaveNote = async () => {
-        if (!selectedMemberName || !formData.content) { alert('Please select a member and enter content'); return; }
+        if (!selectedMemberName || !formData.content) { showToast.error('Please select a member and enter content'); return; }
         try {
             setIsSaving(true);
             const member = members.find(m => m.name === selectedMemberName);
-            if (!member) { alert('Invalid member selected'); return; }
+            if (!member) { showToast.error('Invalid member selected'); return; }
             const payload: ProgressNoteDTO = {
                 ...formData as ProgressNoteDTO,
                 member: { name: member.name, avatar: `https://ui-avatars.com/api/?name=${member.name}`, goal: member.goal || 'Fitness', startDate: new Date().toLocaleDateString() },
@@ -155,7 +156,7 @@ const ProgressNotes: React.FC = () => {
             setFormConcerns('');
             setFormTags('');
             setLinkedSessionId('');
-        } catch (e) { console.error(e); alert('Failed to save note'); }
+        } catch (e) { console.error(e); showToast.error('Failed to save note'); }
         finally { setIsSaving(false); }
     };
 

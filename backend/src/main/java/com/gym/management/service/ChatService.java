@@ -170,6 +170,11 @@ public class ChatService {
 
     @Transactional
     public Message sendMessage(Long conversationId, Long senderId, String content, String type, String payload) {
+        return sendMessage(conversationId, senderId, content, type, payload, null);
+    }
+
+    @Transactional
+    public Message sendMessage(Long conversationId, Long senderId, String content, String type, String payload, Long replyToMessageId) {
         Conversation conversation = conversationRepository.findById(conversationId)
                 .orElseThrow(() -> new RuntimeException("Conversation not found"));
 
@@ -185,6 +190,9 @@ public class ChatService {
         message.setContent(content);
         message.setContentType(type != null ? type : "TEXT");
         message.setPayload(payload);
+        if (replyToMessageId != null) {
+            message.setReplyToMessageId(replyToMessageId);
+        }
 
         message = messageRepository.save(message);
         final Message finalMessage = message;

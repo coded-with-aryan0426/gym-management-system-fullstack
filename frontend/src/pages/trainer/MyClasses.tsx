@@ -9,6 +9,7 @@ import {
 import { trainerApi } from '../../services/trainerApi';
 import type { TrainerClassItem } from '../../services/trainerApi';
 import './MyClasses.css';
+import { showToast } from '../../utils/toast';
 import CreateClassModal from './CreateClassModal';
 import ClassAttendanceModal from './ClassAttendanceModal';
 import ClassReportModal from './ClassReportModal';
@@ -139,7 +140,7 @@ const MyClasses: React.FC = () => {
             await fetchClasses();
         } catch (e) {
             console.error('Delete failed:', e);
-            alert('Failed to delete class. Please try again.');
+            showToast.error('Failed to delete class. Please try again.');
         } finally {
             setActionLoading(null);
             setActiveMenuId(null);
