@@ -13,6 +13,15 @@ public class ConversationDTO {
     private LocalDateTime updatedAt;
     private List<ParticipantDTO> participants;
 
+    // Last message preview fields (Phase 7 B1)
+    private String lastMessageContent;
+    private String lastMessageType;
+    private LocalDateTime lastMessageAt;
+    private Long lastMessageSenderId;
+
+    // Unread count per conversation (Phase 7 B2)
+    private int unreadCount;
+
     // Explicit getters and setters for Lombok compatibility
     public Long getConversationId() { return conversationId; }
     public void setConversationId(Long conversationId) { this.conversationId = conversationId; }
@@ -31,6 +40,21 @@ public class ConversationDTO {
     
     public List<ParticipantDTO> getParticipants() { return participants; }
     public void setParticipants(List<ParticipantDTO> participants) { this.participants = participants; }
+
+    public String getLastMessageContent() { return lastMessageContent; }
+    public void setLastMessageContent(String lastMessageContent) { this.lastMessageContent = lastMessageContent; }
+
+    public String getLastMessageType() { return lastMessageType; }
+    public void setLastMessageType(String lastMessageType) { this.lastMessageType = lastMessageType; }
+
+    public LocalDateTime getLastMessageAt() { return lastMessageAt; }
+    public void setLastMessageAt(LocalDateTime lastMessageAt) { this.lastMessageAt = lastMessageAt; }
+
+    public Long getLastMessageSenderId() { return lastMessageSenderId; }
+    public void setLastMessageSenderId(Long lastMessageSenderId) { this.lastMessageSenderId = lastMessageSenderId; }
+
+    public int getUnreadCount() { return unreadCount; }
+    public void setUnreadCount(int unreadCount) { this.unreadCount = unreadCount; }
 
     @Data
     public static class ParticipantDTO {

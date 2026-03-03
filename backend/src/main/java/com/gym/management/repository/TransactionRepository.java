@@ -66,7 +66,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
                         @Param("startDate") LocalDateTime startDate,
                         @Param("endDate") LocalDateTime endDate);
 
-        // Get expense breakdown by category (all statuses - expenses are liabilities regardless)
+        // Get expense breakdown by category (all statuses - expenses are liabilities
+        // regardless)
         @Query("SELECT t.category as category, SUM(t.amount) as total FROM Transaction t " +
                         "WHERE t.type = 'EXPENSE' AND t.dateTime BETWEEN :startDate AND :endDate " +
                         "GROUP BY t.category")
@@ -99,7 +100,13 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
                         @Param("endDate") LocalDateTime endDate);
 
         // Daily totals for trend — income = Completed only, expenses = all statuses
-        @Query(value = "SELECT TRUNC(DATE_TIME) AS dt, TYPE, SUM(AMOUNT) AS total FROM TRANSACTIONS WHERE ((TYPE = 'INCOME' AND STATUS = 'Completed') OR TYPE = 'EXPENSE') AND DATE_TIME BETWEEN :startDate AND :endDate GROUP BY TRUNC(DATE_TIME), TYPE ORDER BY TRUNC(DATE_TIME)", nativeQuery = true)
+        // Using JPQL instead of native SQL for cross-database compatibility (no TRUNC)
+        @Query("SELECT FUNCTION('DATE', t.dateTime) AS dt, t.type, SUM(t.amount) AS total " +
+                        "FROM Transaction t WHERE ((t.type = 'INCOME' AND t.status = 'Completed') OR t.type = 'EXPENSE') "
+                        +
+                        "AND t.dateTime BETWEEN :startDate AND :endDate " +
+                        "GROUP BY FUNCTION('DATE', t.dateTime), t.type " +
+                        "ORDER BY FUNCTION('DATE', t.dateTime)")
         List<Object[]> getDailyTotals(
                         @Param("startDate") LocalDateTime startDate,
                         @Param("endDate") LocalDateTime endDate);
@@ -114,7 +121,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
         BigDecimal getTodayRevenue(@Param("startOfDay") LocalDateTime startOfDay);
 
         // NEW METHODS FOR DASHBOARD ANALYTICS
-        
+
         // Get revenue for specific date range
         @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t WHERE t.type = 'INCOME' AND t.status = 'Completed' AND t.dateTime BETWEEN :startDate AND :endDate")
         BigDecimal getRevenueForDateRange(

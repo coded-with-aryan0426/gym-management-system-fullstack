@@ -34,6 +34,11 @@ export interface Conversation {
     participants: Participant[];
     updatedAt: string;
     unreadCount?: number;
+    // Phase 7 B1 — last message preview
+    lastMessageContent?: string;
+    lastMessageType?: string;
+    lastMessageAt?: string;
+    lastMessageSenderId?: number;
 }
 
 export interface MessageReaction {
@@ -51,12 +56,13 @@ export interface ChatMessage {
     senderName?: string;
     senderAvatarId?: string;
     content: string;
-    contentType: 'TEXT' | 'IMAGE' | 'WORKOUT_PLAN' | 'DIET_PLAN' | 'VOICE_NOTE';
+    contentType: 'TEXT' | 'IMAGE' | 'FILE' | 'VIDEO' | 'AUDIO' | 'WORKOUT_PLAN' | 'DIET_PLAN' | 'VOICE_NOTE';
     payload?: string;
     createdAt: string;
     isSystemMessage?: boolean;
     isEdited?: boolean;
     reactions?: MessageReaction[];
+    deliveryStatus?: 'SENT' | 'DELIVERED' | 'READ';
 }
 
 export interface BlockedUser {
@@ -214,6 +220,44 @@ export const checkBlocked = async (userId: number): Promise<BlockStatus> => {
     return handleResponse<BlockStatus>(response);
 };
 
+// ==================== CONVERSATION REQUEST APIs ====================
+
+export const sendConversationRequest = async (targetUserId: number): Promise<void> => {
+    const response = await fetch(
+        `${API_BASE}/requests`,
+        {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ targetUserId })
+        }
+    );
+    await handleResponse<null>(response);
+};
+
+export const getPendingRequests = async (): Promise<any[]> => {
+    const response = await fetch(
+        `${API_BASE}/requests`,
+        { headers: getAuthHeaders() }
+    );
+    return handleResponse<any[]>(response);
+};
+
+export const acceptRequest = async (requestId: number): Promise<void> => {
+    const response = await fetch(
+        `${API_BASE}/requests/${requestId}/accept`,
+        { method: 'POST', headers: getAuthHeaders() }
+    );
+    await handleResponse<null>(response);
+};
+
+export const rejectRequest = async (requestId: number): Promise<void> => {
+    const response = await fetch(
+        `${API_BASE}/requests/${requestId}/reject`,
+        { method: 'POST', headers: getAuthHeaders() }
+    );
+    await handleResponse<null>(response);
+};
+
 // ==================== MESSAGE ACTIONS APIs ====================
 
 export const editMessage = async (messageId: number, content: string): Promise<void> => {
@@ -256,6 +300,15 @@ export const removeReaction = async (messageId: number, emoji: string): Promise<
     await handleResponse<null>(response);
 };
 
+export const markConversationAsRead = async (conversationId: number): Promise<void> => {
+    const response = await fetch(
+        `${API_BASE}/conversations/${conversationId}/read`,
+        { method: 'POST', headers: getAuthHeaders() }
+    );
+    // Ignore errors silently — read receipt failure should never break the UI
+    if (!response.ok) console.warn('markAsRead failed', conversationId);
+};
+
 // ==================== EXPORT ALL ====================
 
 export const chatApi = {
@@ -263,6 +316,7 @@ export const chatApi = {
     getConversations,
     getMessages,
     startPrivateChat,
+    markConversationAsRead,
     // User Discovery
     getAvailableChatUsers,
     searchUsers,
@@ -272,7 +326,11 @@ export const chatApi = {
     unblockUser,
     getBlockedUsers,
     checkBlocked,
-
+    // Conversation Requests
+    sendConversationRequest,
+    getPendingRequests,
+    acceptRequest,
+    rejectRequest,
     // Message Actions
     editMessage,
     deleteMessage,

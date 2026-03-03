@@ -219,60 +219,6 @@ const api = {
     await apiClient.delete(`/users/${id}`);
   },
 
-  // Chat API
-  chat: {
-    async getConversations(page = 0, size = 20) {
-      const response = await apiClient.get('/chat/conversations', { params: { page, size } });
-      return response.data;
-    },
-    async getMessages(conversationId: number, page = 0, size = 50) {
-      const response = await apiClient.get(`/chat/conversations/${conversationId}/messages`, { params: { page, size } });
-      return response.data;
-    },
-    async startPrivateChat(targetUserId: number) {
-      const response = await apiClient.post('/chat/private', null, { params: { targetUserId } });
-      return response.data;
-    },
-    async getAvailableUsers() {
-      const response = await apiClient.get('/chat/users');
-      return response.data;
-    },
-    async searchUsers(query: string, gymId?: number, role?: string) {
-      const response = await apiClient.get('/chat/users/search', { params: { query, gymId, role } });
-      return response.data;
-    },
-    // Requests
-    async sendRequest(targetUserId: number) {
-      const response = await apiClient.post('/chat/requests', { targetUserId });
-      return response.data;
-    },
-    async getPendingRequests() {
-      const response = await apiClient.get('/chat/requests');
-      return response.data;
-    },
-    async acceptRequest(requestId: number) {
-      const response = await apiClient.post(`/chat/requests/${requestId}/accept`);
-      return response.data;
-    },
-    async rejectRequest(requestId: number) {
-      const response = await apiClient.post(`/chat/requests/${requestId}/reject`);
-      return response.data;
-    },
-    // Attachments
-    async uploadAttachment(file: File, conversationId?: number) {
-      const formData = new FormData();
-      formData.append('file', file);
-      if (conversationId) formData.append('conversationId', conversationId.toString());
-
-      const response = await apiClient.post('/chat/attachments', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      return response.data;
-    }
-  },
-
   // Auth endpoints
   async login(credentials: any): Promise<any> {
     const response = await apiClient.post('/auth/login', credentials);

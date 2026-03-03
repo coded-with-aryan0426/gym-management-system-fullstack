@@ -25,6 +25,7 @@ const Settings = lazy(() => import('./pages/Settings/Settings'));
 const StaffList = lazy(() => import('./pages/Staff/StaffList'));
 const StaffDetail = lazy(() => import('./pages/Staff/StaffDetail'));
 const OwnerNotifications = lazy(() => import('./pages/Dashboard/OwnerNotifications'));
+const OwnerMessages = lazy(() => import('./pages/Dashboard/OwnerMessages'));
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const UnauthorizedPage = lazy(() => import('./pages/UnauthorizedPage'));
 const ChangePasswordFirst = lazy(() => import('./pages/ChangePasswordFirst'));
@@ -213,8 +214,9 @@ function App() {
                             {/* Redirect old routes to new consolidated pages */}
                             <Route path="/pt-sessions" element={<Navigate to="/classes?tab=sessions" replace />} />
                             <Route path="/reports" element={<Navigate to="/financials?tab=analytics" replace />} />
-                            <Route path="/notifications" element={<OwnerNotifications />} />
-                            <Route path="/settings" element={<Settings />} />
+                              <Route path="/notifications" element={<OwnerNotifications />} />
+                              <Route path="/messages" element={<OwnerMessages />} />
+                              <Route path="/settings" element={<Settings />} />
                               <Route path="/check-in" element={<CheckIn />} />
                               <Route path="/attendance" element={<AttendancePage />} />
                               <Route path="/tasks" element={<TodoPage />} />

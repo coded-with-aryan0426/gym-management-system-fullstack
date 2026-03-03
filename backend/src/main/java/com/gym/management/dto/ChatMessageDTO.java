@@ -18,6 +18,9 @@ public class ChatMessageDTO {
     private Boolean isEdited;
     private java.util.List<MessageReactionDTO> reactions;
 
+    // Delivery status for the requesting user's sent messages: SENT | DELIVERED | READ
+    private String deliveryStatus;
+
     // Explicit getters and setters for Lombok compatibility
     public Long getMessageId() { return messageId; }
     public void setMessageId(Long messageId) { this.messageId = messageId; }
@@ -54,4 +57,7 @@ public class ChatMessageDTO {
     
     public java.util.List<MessageReactionDTO> getReactions() { return reactions; }
     public void setReactions(java.util.List<MessageReactionDTO> reactions) { this.reactions = reactions; }
+
+    public String getDeliveryStatus() { return deliveryStatus; }
+    public void setDeliveryStatus(String deliveryStatus) { this.deliveryStatus = deliveryStatus; }
 }

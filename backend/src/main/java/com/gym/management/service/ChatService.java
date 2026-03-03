@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -39,6 +40,9 @@ public class ChatService {
     private MessageAttachmentRepository messageAttachmentRepository;
 
     @Autowired
+    private MessageStatusRepository messageStatusRepository;
+
+    @Autowired
     private com.fasterxml.jackson.databind.ObjectMapper objectMapper;
 
     @Transactional
@@ -57,7 +61,8 @@ public class ChatService {
         User user1 = userRepository.findById(user1Id).orElseThrow(() -> new RuntimeException("User 1 not found"));
         User user2 = userRepository.findById(user2Id).orElseThrow(() -> new RuntimeException("User 2 not found"));
 
-        boolean isDirectAccess = isTrainerOf(user1, user2) || isTrainerOf(user2, user1);
+        boolean isDirectAccess = isTrainerOf(user1, user2) || isTrainerOf(user2, user1)
+                || isOwnerOf(user1, user2) || isOwnerOf(user2, user1);
 
         if (!isDirectAccess) {
             // If not direct access, we strictly require a conversation to ALREADY exist
@@ -154,8 +159,13 @@ public class ChatService {
     }
 
     private boolean isTrainerOf(User trainer, User customer) {
-        // Use the ManyToMany relationship
-        return trainer.getCustomers().contains(customer);
+        // Use native SQL to avoid Oracle lazy-load issues with trainer.getCustomers()
+        return userRepository.countAssignment(trainer.getUserId(), customer.getUserId()) > 0;
+    }
+
+    private boolean isOwnerOf(User owner, User target) {
+        // Check if owner is an OWNER role in the same gym as target via user_gym_roles
+        return userRepository.countOwnerOfTarget(owner.getUserId(), target.getUserId()) > 0;
     }
 
     @Transactional
@@ -179,6 +189,31 @@ public class ChatService {
         message = messageRepository.save(message);
         final Message finalMessage = message;
 
+        // Populate MessageStatus rows:
+        // - SENT row for the sender
+        // - DELIVERED row for every other participant (they receive it via WebSocket)
+        if (sender != null) {
+            MessageStatus sentStatus = new MessageStatus();
+            sentStatus.setId(new MessageStatus.StatusId(finalMessage.getMessageId(), sender.getUserId()));
+            sentStatus.setMessage(finalMessage);
+            sentStatus.setUser(sender);
+            sentStatus.setStatus("SENT");
+            messageStatusRepository.save(sentStatus);
+
+            List<ConversationParticipant> participants = participantRepository
+                    .findByConversationIdWithUser(conversation.getConversationId());
+            for (ConversationParticipant p : participants) {
+                if (!p.getUser().getUserId().equals(sender.getUserId())) {
+                    MessageStatus deliveredStatus = new MessageStatus();
+                    deliveredStatus.setId(new MessageStatus.StatusId(finalMessage.getMessageId(), p.getUser().getUserId()));
+                    deliveredStatus.setMessage(finalMessage);
+                    deliveredStatus.setUser(p.getUser());
+                    deliveredStatus.setStatus("DELIVERED");
+                    messageStatusRepository.save(deliveredStatus);
+                }
+            }
+        }
+
         // Link attachment if present in payload
         if (payload != null
                 && (type.equals("IMAGE") || type.equals("VOICE_NOTE") || type.equals("FILE") || type.equals("VIDEO"))) {
@@ -197,8 +232,9 @@ public class ChatService {
             }
         }
 
-        // Update conversation timestamp
+        // Update conversation timestamp and last_message_id (D5)
         conversation.setUpdatedAt(LocalDateTime.now());
+        conversation.setLastMessageId(message.getMessageId());
         conversationRepository.save(conversation);
 
         return message;
@@ -361,5 +397,34 @@ public class ChatService {
         event.put("conversationId", message.getConversation().getConversationId());
 
         messagingTemplate.convertAndSend("/topic/conversation/" + message.getConversation().getConversationId(), event);
+    }
+
+    /**
+     * Mark all messages in a conversation as READ for the given user.
+     * Updates MessageStatus rows to READ and advances lastReadMessageId on the participant.
+     */
+    @Transactional
+    public void markConversationAsRead(Long conversationId, Long userId) {
+        // Update message_status rows for this user in this conversation
+        messageStatusRepository.markConversationAsRead(conversationId, userId);
+
+        // Advance lastReadMessageId to the latest message
+        messageRepository.findTopByConversationConversationIdOrderByCreatedAtDesc(conversationId)
+                .ifPresent(lastMsg -> {
+                    ConversationParticipant participant = participantRepository
+                            .findById(new ConversationParticipant.ParticipantId(conversationId, userId))
+                            .orElse(null);
+                    if (participant != null) {
+                        participant.setLastReadMessageId(lastMsg.getMessageId());
+                        participantRepository.save(participant);
+                    }
+                });
+
+        // Notify other participants that their messages were read (updates their tick UI)
+        java.util.Map<String, Object> event = new java.util.HashMap<>();
+        event.put("type", "MESSAGES_READ");
+        event.put("conversationId", conversationId);
+        event.put("readByUserId", userId);
+        messagingTemplate.convertAndSend("/topic/conversation/" + conversationId, event);
     }
 }

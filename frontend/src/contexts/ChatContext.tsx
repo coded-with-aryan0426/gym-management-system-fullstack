@@ -89,6 +89,16 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         };
     }, [activeConversation?.conversationId, connected]);
 
+    // ==================== SORT HELPER ====================
+
+    // Sort conversations newest-first (by lastMessageAt, then updatedAt)
+    const sortConversations = (convs: Conversation[]): Conversation[] =>
+        [...convs].sort((a, b) => {
+            const ta = new Date(a.lastMessageAt ?? a.updatedAt ?? 0).getTime();
+            const tb = new Date(b.lastMessageAt ?? b.updatedAt ?? 0).getTime();
+            return tb - ta;
+        });
+
     // ==================== WEBSOCKET ====================
 
     const connectWebSocket = useCallback(() => {
@@ -187,6 +197,14 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     return prev;
                 });
                 break;
+            case 'MESSAGES_READ':
+                // The other participant read our messages — upgrade all SENT/DELIVERED to READ
+                setMessages(prev => prev.map(m =>
+                    m.senderId === user?.userId || m.senderId === Number(user?.id)
+                        ? { ...m, deliveryStatus: 'READ' as const }
+                        : m
+                ));
+                break;
         }
     }, []);
 
@@ -198,7 +216,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
             subscriptionRef.current.unsubscribe();
         }
 
-        console.log(`Subscribing to /topic/conversation/${conversationId}`);
+            console.log(`Subscribing to /topic/conversation/${conversationId}`);
         subscriptionRef.current = stompClientRef.current.subscribe(
             `/topic/conversation/${conversationId}`,
             (message) => {
@@ -211,7 +229,27 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     setMessages(prev => {
                         console.log("Adding new message to state:", newMessage);
                         if (prev.some(m => m.messageId === newMessage.messageId)) return prev;
-                        return [...prev, newMessage];
+                        // If this is our own message and has no deliveryStatus, default to SENT
+                        const currentUserId = user?.userId || Number(user?.id);
+                        const enriched = newMessage.senderId === currentUserId && !newMessage.deliveryStatus
+                            ? { ...newMessage, deliveryStatus: 'SENT' as const }
+                            : newMessage;
+                        return [...prev, enriched];
+                    });
+                    // Update the conversation's last-message preview and bubble it to top
+                    setConversations(prev => {
+                        const updated = prev.map(c => {
+                            if (c.conversationId !== newMessage.conversationId) return c;
+                            return {
+                                ...c,
+                                lastMessageContent: newMessage.content,
+                                lastMessageType: newMessage.contentType,
+                                lastMessageAt: newMessage.createdAt,
+                                lastMessageSenderId: newMessage.senderId,
+                                updatedAt: newMessage.createdAt,
+                            };
+                        });
+                        return sortConversations(updated);
                     });
                 }
             }
@@ -225,7 +263,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setLoading(true);
         try {
             const data = await chatApi.getConversations();
-            setConversations(data || []);
+            setConversations(sortConversations(data || []));
         } catch (error) {
             console.error('Failed to load conversations:', error);
         } finally {
@@ -239,6 +277,12 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const data = await chatApi.getMessages(conversationId);
             // Reverse to show oldest first
             setMessages((data || []).reverse());
+            // Mark as read — clears unread badge and updates delivery ticks for other participants
+            chatApi.markConversationAsRead(conversationId).catch(() => {});
+            // Zero out unread count in sidebar immediately
+            setConversations(prev => prev.map(c =>
+                c.conversationId === conversationId ? { ...c, unreadCount: 0 } : c
+            ));
         } catch (error) {
             console.error('Failed to load messages:', error);
         }

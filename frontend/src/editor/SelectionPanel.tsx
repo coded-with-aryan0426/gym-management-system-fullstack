@@ -1,13 +1,13 @@
 /**
  * SelectionPanel - Compact floating properties editor
- * 
- * Applies changes DIRECTLY to DOM elements + records in StyleHistory for undo/redo
+ *
+ * Applies changes DIRECTLY to DOM elements (instant feedback)
+ * AND records them via EditorProvider context (for export + undo/redo).
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useEditor } from './EditorProvider'
 import { EditableRegistry } from './EditableRegistry'
-import * as StyleHistory from './StyleHistory'
 import './editor.css'
 
 interface SelectionPanelProps {
@@ -21,7 +21,14 @@ const COLORS = [
 ]
 
 export function SelectionPanel({ elementId, elementRect }: SelectionPanelProps) {
-    const { setSelectedId } = useEditor()
+    const {
+        setSelectedId,
+        setSize,
+        setPadding: ctxSetPadding,
+        setBackground,
+        setRadius,
+        setOpacity,
+    } = useEditor()
 
     const [element, setElement] = useState<HTMLElement | null>(null)
     const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
@@ -31,7 +38,7 @@ export function SelectionPanel({ elementId, elementRect }: SelectionPanelProps) 
     const [opacityValue, setOpacityValue] = useState(100)
     const [showColors, setShowColors] = useState(false)
 
-    // Find element
+    // Find element and read its current styles
     useEffect(() => {
         if (!elementId) { setElement(null); return }
 
@@ -62,7 +69,7 @@ export function SelectionPanel({ elementId, elementRect }: SelectionPanelProps) 
     // Position panel - prefer left side, avoid blocking element
     const pos = useMemo(() => {
         const panelWidth = 240
-        const panelHeight = 280
+        const panelHeight = 320
         const gap = 12
 
         if (!elementRect) {
@@ -84,58 +91,56 @@ export function SelectionPanel({ elementId, elementRect }: SelectionPanelProps) 
         return { top, left }
     }, [elementRect])
 
-    // Apply size directly to element WITH history tracking
+    // Apply size: direct DOM + context record
     const applySize = useCallback((w: number, h: number) => {
         if (!element || !elementId) return
-        StyleHistory.recordChange(elementId, 'width', `${w}px`)
-        StyleHistory.recordChange(elementId, 'height', `${h}px`)
         element.style.width = `${w}px`
         element.style.height = `${h}px`
         setDimensions({ width: w, height: h })
-    }, [element, elementId])
+        setSize(elementId, w, h)
+    }, [element, elementId, setSize])
 
-    // Apply padding directly WITH history tracking
+    // Apply padding: direct DOM + context record
     const applyPadding = useCallback((side: string, value: number) => {
         if (!element || !elementId) return
-        const prop = `padding-${side}`
-        StyleHistory.recordChange(elementId, prop, `${value}px`)
-            ; (element.style as any)[`padding${side.charAt(0).toUpperCase() + side.slice(1)}`] = `${value}px`
-        setPadding(p => ({ ...p, [side]: value }))
-    }, [element, elementId])
+        ;(element.style as any)[`padding${side.charAt(0).toUpperCase() + side.slice(1)}`] = `${value}px`
+        const newPadding = { ...padding, [side]: value }
+        setPadding(newPadding)
+        ctxSetPadding(elementId, { [side]: value })
+    }, [element, elementId, padding, ctxSetPadding])
 
-    // Apply background directly WITH history tracking
+    // Apply background: direct DOM + context record
     const applyBg = useCallback((color: string) => {
         if (!element || !elementId) return
-        StyleHistory.recordChange(elementId, 'background-color', color)
         element.style.backgroundColor = color
         setBgColor(color)
         setShowColors(false)
-    }, [element, elementId])
+        setBackground(elementId, color)
+    }, [element, elementId, setBackground])
 
-    // Apply border radius directly WITH history tracking
+    // Apply border radius: direct DOM + context record
     const applyRadius = useCallback((value: number) => {
         if (!element || !elementId) return
-        StyleHistory.recordChange(elementId, 'border-radius', `${value}px`)
         element.style.borderRadius = `${value}px`
         setBorderRadius(value)
-    }, [element, elementId])
+        setRadius(elementId, value)
+    }, [element, elementId, setRadius])
 
-    // Apply opacity directly WITH history tracking
+    // Apply opacity: direct DOM + context record
     const applyOpacity = useCallback((value: number) => {
         if (!element || !elementId) return
-        StyleHistory.recordChange(elementId, 'opacity', String(value / 100))
         element.style.opacity = String(value / 100)
         setOpacityValue(value)
-    }, [element, elementId])
+        setOpacity(elementId, value / 100)
+    }, [element, elementId, setOpacity])
 
-    // Copy selector
+    // Copy selector to clipboard
     const copySelector = useCallback(() => {
         if (!element) return
         const id = element.id ? `#${element.id}` : ''
         const cls = element.className ? `.${element.className.toString().split(' ')[0]}` : ''
         const tag = element.tagName.toLowerCase()
-        const selector = id || cls || tag
-        navigator.clipboard.writeText(selector)
+        navigator.clipboard.writeText(id || cls || tag)
     }, [element])
 
     if (!elementId || !element) return null
@@ -158,7 +163,7 @@ export function SelectionPanel({ elementId, elementRect }: SelectionPanelProps) 
                             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
                         </svg>
                     </button>
-                    <button onClick={() => setSelectedId(null)} className="sp-btn-icon">
+                    <button onClick={() => setSelectedId(null)} className="sp-btn-icon" title="Deselect">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M18 6L6 18M6 6l12 12" />
                         </svg>
@@ -170,9 +175,17 @@ export function SelectionPanel({ elementId, elementRect }: SelectionPanelProps) 
             <div className="sp-section">
                 <label>Size</label>
                 <div className="sp-row">
-                    <input type="number" value={dimensions.width} onChange={e => applySize(+e.target.value || 0, dimensions.height)} />
+                    <input
+                        type="number"
+                        value={dimensions.width}
+                        onChange={e => applySize(+e.target.value || 0, dimensions.height)}
+                    />
                     <span>×</span>
-                    <input type="number" value={dimensions.height} onChange={e => applySize(dimensions.width, +e.target.value || 0)} />
+                    <input
+                        type="number"
+                        value={dimensions.height}
+                        onChange={e => applySize(dimensions.width, +e.target.value || 0)}
+                    />
                 </div>
             </div>
 
@@ -191,8 +204,17 @@ export function SelectionPanel({ elementId, elementRect }: SelectionPanelProps) 
             <div className="sp-section">
                 <label>Background</label>
                 <div className="sp-row">
-                    <div className="sp-color-box" style={{ background: bgColor || '#0000' }} onClick={() => setShowColors(!showColors)} />
-                    <input type="text" value={bgColor} onChange={e => applyBg(e.target.value)} placeholder="transparent" />
+                    <div
+                        className="sp-color-box"
+                        style={{ background: bgColor || '#0000' }}
+                        onClick={() => setShowColors(!showColors)}
+                    />
+                    <input
+                        type="text"
+                        value={bgColor}
+                        onChange={e => applyBg(e.target.value)}
+                        placeholder="transparent"
+                    />
                 </div>
                 {showColors && (
                     <div className="sp-colors">
@@ -206,13 +228,25 @@ export function SelectionPanel({ elementId, elementRect }: SelectionPanelProps) 
             {/* Border Radius */}
             <div className="sp-section">
                 <label>Radius</label>
-                <input type="number" value={borderRadius} onChange={e => applyRadius(+e.target.value || 0)} style={{ width: 60 }} />
+                <input
+                    type="number"
+                    value={borderRadius}
+                    onChange={e => applyRadius(+e.target.value || 0)}
+                    style={{ width: 60 }}
+                />
             </div>
 
             {/* Opacity */}
             <div className="sp-section">
                 <label>Opacity {opacityValue}%</label>
-                <input type="range" min={0} max={100} value={opacityValue} onChange={e => applyOpacity(+e.target.value)} className="sp-slider" />
+                <input
+                    type="range"
+                    min={0}
+                    max={100}
+                    value={opacityValue}
+                    onChange={e => applyOpacity(+e.target.value)}
+                    className="sp-slider"
+                />
             </div>
         </div>
     )

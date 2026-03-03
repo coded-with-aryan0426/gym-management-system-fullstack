@@ -47,25 +47,33 @@
     height: 7px;
     border-radius: 50%;
 }
-.summary-dot.emerald { background: var(--color-emerald); }
-.summary-dot.crimson { background: var(--color-crimson); }
+
+.summary-dot.emerald {
+    background: var(--color-emerald);
+}
+
+.summary-dot.crimson {
+    background: var(--color-crimson);
+}
 
 .summary-profit {
     font-size: 0.625rem;
     font-weight: 700;
     color: var(--color-emerald);
-    background: rgba(16,185,129,0.12);
+    background: rgba(16, 185, 129, 0.12);
     padding: 1px 6px;
     border-radius: 4px;
 }
+
 .summary-profit.loss {
     color: var(--color-crimson);
-    background: rgba(239,68,68,0.12);
+    background: rgba(239, 68, 68, 0.12);
 }
 
 /* Chart area */
 .chart-container {
     flex: 1;
+    height: 320px;
     min-height: 260px;
     padding: 8px 0 0;
 }
@@ -87,7 +95,7 @@
     border-radius: 8px;
     padding: 9px 12px;
     min-width: 160px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
 .tooltip-header {
@@ -109,10 +117,19 @@
 }
 
 .tooltip-row .dot {
-    width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
 }
-.tooltip-row .dot.emerald { background: var(--color-emerald); }
-.tooltip-row .dot.crimson { background: var(--color-crimson); }
+
+.tooltip-row .dot.emerald {
+    background: var(--color-emerald);
+}
+
+.tooltip-row .dot.crimson {
+    background: var(--color-crimson);
+}
 
 .tooltip-value {
     margin-left: auto;
@@ -120,11 +137,24 @@
     color: var(--text-primary);
     font-variant-numeric: tabular-nums;
 }
-.tooltip-value.emerald { color: var(--color-emerald); }
-.tooltip-value.crimson { color: var(--color-crimson); }
 
-.tooltip-divider { height: 1px; background: var(--border-secondary); margin: 5px 0; }
-.tooltip-row.profit { font-weight: 600; }
+.tooltip-value.emerald {
+    color: var(--color-emerald);
+}
+
+.tooltip-value.crimson {
+    color: var(--color-crimson);
+}
+
+.tooltip-divider {
+    height: 1px;
+    background: var(--border-secondary);
+    margin: 5px 0;
+}
+
+.tooltip-row.profit {
+    font-weight: 600;
+}
 
 /* Bottom insight bar */
 .chart-insight {
@@ -132,7 +162,7 @@
     align-items: center;
     gap: 7px;
     padding: 7px 14px;
-    background: linear-gradient(90deg, rgba(16,185,129,0.06) 0%, transparent 60%);
+    background: linear-gradient(90deg, rgba(16, 185, 129, 0.06) 0%, transparent 60%);
     border-top: 1px solid var(--border-primary);
     font-size: 0.6875rem;
     flex-shrink: 0;
@@ -142,18 +172,41 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 17px; height: 17px;
+    width: 17px;
+    height: 17px;
     border-radius: 50%;
     font-size: 0.625rem;
     font-weight: 700;
     flex-shrink: 0;
 }
-.insight-badge.good { background: rgba(16,185,129,0.15); color: var(--color-emerald); }
-.insight-badge.bad  { background: rgba(239,68,68,0.15);  color: var(--color-crimson); }
 
-.insight-text { color: var(--text-secondary); }
-.insight-text strong.positive { color: var(--color-emerald); }
-.insight-text strong.negative { color: var(--color-crimson); }
+.insight-badge.good {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--color-emerald);
+}
 
-.insight-divider { color: var(--text-tertiary); }
-.insight-sub { color: var(--text-tertiary); font-size: 0.625rem; }
+.insight-badge.bad {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--color-crimson);
+}
+
+.insight-text {
+    color: var(--text-secondary);
+}
+
+.insight-text strong.positive {
+    color: var(--color-emerald);
+}
+
+.insight-text strong.negative {
+    color: var(--color-crimson);
+}
+
+.insight-divider {
+    color: var(--text-tertiary);
+}
+
+.insight-sub {
+    color: var(--text-tertiary);
+    font-size: 0.625rem;
+}

@@ -4,6 +4,7 @@ import com.gym.management.dto.ChatUserDTO;
 import com.gym.management.model.Conversation;
 import com.gym.management.model.GymRole;
 import com.gym.management.model.Message;
+import com.gym.management.model.MessageStatus;
 import com.gym.management.security.CustomUserDetails;
 import com.gym.management.service.BlockingService;
 import com.gym.management.service.ChatService;
@@ -38,6 +39,12 @@ public class ChatController {
     @Autowired
     private com.gym.management.repository.ConversationParticipantRepository participantRepository;
 
+    @Autowired
+    private com.gym.management.repository.MessageRepository messageRepository;
+
+    @Autowired
+    private com.gym.management.repository.MessageStatusRepository messageStatusRepository;
+
     // ==================== CONVERSATION ENDPOINTS ====================
 
     @GetMapping("/conversations")
@@ -56,6 +63,36 @@ public class ChatController {
             dto.setTitle(c.getTitle());
             dto.setMetadata(c.getMetadata());
             dto.setUpdatedAt(c.getUpdatedAt());
+
+            // Populate last message preview using last_message_id FK (D5 — avoids N subqueries)
+            Long lastMsgId = c.getLastMessageId();
+            if (lastMsgId != null) {
+                messageRepository.findById(lastMsgId).ifPresent(lastMsg -> {
+                    String preview;
+                    if (lastMsg.getIsDeleted() != null && lastMsg.getIsDeleted()) {
+                        preview = "This message was deleted";
+                    } else if (lastMsg.getContentType() != null && !lastMsg.getContentType().equals("TEXT")) {
+                        preview = "[" + lastMsg.getContentType() + "]";
+                    } else {
+                        preview = lastMsg.getContent() != null ? lastMsg.getContent() : "";
+                    }
+                    dto.setLastMessageContent(preview);
+                    dto.setLastMessageType(lastMsg.getContentType());
+                    dto.setLastMessageAt(lastMsg.getCreatedAt());
+                    if (lastMsg.getSender() != null) {
+                        dto.setLastMessageSenderId(lastMsg.getSender().getUserId());
+                    }
+                });
+            }
+
+            // Populate unread count using lastReadMessageId from the participant row
+            com.gym.management.model.ConversationParticipant myParticipant = participantRepository
+                    .findById(new com.gym.management.model.ConversationParticipant.ParticipantId(c.getConversationId(), userId))
+                    .orElse(null);
+            Long lastReadId = myParticipant != null ? myParticipant.getLastReadMessageId() : null;
+            long unread = messageRepository.countUnreadForUser(c.getConversationId(), userId, lastReadId);
+            dto.setUnreadCount((int) unread);
+
             // Fetch participants explicitly with JOIN FETCH for User data
             java.util.List<com.gym.management.model.ConversationParticipant> participants = participantRepository
                     .findByConversationIdWithUser(c.getConversationId());
@@ -84,8 +121,30 @@ public class ChatController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
 
+        Long currentUserId = getAuthenticatedUserId();
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Page<Message> messages = chatService.getConversationMessages(conversationId, pageable);
+
+        // Pre-fetch all other-participant status rows for messages sent by current user in one query
+        List<Long> myMessageIds = messages.stream()
+                .filter(m -> m.getSender() != null && m.getSender().getUserId().equals(currentUserId))
+                .map(Message::getMessageId)
+                .collect(java.util.stream.Collectors.toList());
+
+        // Map: messageId -> effective status
+        Map<Long, String> deliveryMap = new HashMap<>();
+        if (!myMessageIds.isEmpty()) {
+            List<MessageStatus> statuses = messageStatusRepository
+                    .findByMessageIdsAndNotSender(myMessageIds, currentUserId);
+            // Group by messageId, pick best status
+            Map<Long, List<MessageStatus>> byMsg = statuses.stream()
+                    .collect(java.util.stream.Collectors.groupingBy(s -> s.getId().getMessageId()));
+            for (Map.Entry<Long, List<MessageStatus>> entry : byMsg.entrySet()) {
+                boolean anyRead = entry.getValue().stream().anyMatch(s -> "READ".equals(s.getStatus()));
+                boolean anyDelivered = entry.getValue().stream().anyMatch(s -> "DELIVERED".equals(s.getStatus()));
+                deliveryMap.put(entry.getKey(), anyRead ? "READ" : (anyDelivered ? "DELIVERED" : "SENT"));
+            }
+        }
 
         java.util.List<com.gym.management.dto.ChatMessageDTO> dtos = messages.stream().map(m -> {
             com.gym.management.dto.ChatMessageDTO dto = new com.gym.management.dto.ChatMessageDTO();
@@ -101,8 +160,12 @@ public class ChatController {
             dto.setPayload(m.getPayload());
             dto.setCreatedAt(m.getCreatedAt());
             dto.setIsSystemMessage(m.getIsSystemMessage());
-
             dto.setIsEdited(m.getEditHistory() != null && !m.getEditHistory().isEmpty());
+
+            if (m.getSender() != null && m.getSender().getUserId().equals(currentUserId)) {
+                dto.setDeliveryStatus(deliveryMap.getOrDefault(m.getMessageId(), "SENT"));
+            }
+
             if (m.getReactions() != null) {
                 dto.setReactions(m.getReactions().stream().map(r -> {
                     com.gym.management.dto.MessageReactionDTO rd = new com.gym.management.dto.MessageReactionDTO();
@@ -370,6 +433,17 @@ public class ChatController {
     }
 
     // ==================== MESSAGE ACTIONS ====================
+
+    @PostMapping("/conversations/{conversationId}/read")
+    public ResponseEntity<?> markAsRead(@PathVariable Long conversationId) {
+        Long userId = getAuthenticatedUserId();
+        try {
+            chatService.markConversationAsRead(conversationId, userId);
+            return ResponseEntity.ok(apiResponse(true, null, "Conversation marked as read"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(apiResponse(false, null, e.getMessage()));
+        }
+    }
 
     @PutMapping("/messages/{messageId}")
     public ResponseEntity<?> editMessage(@PathVariable Long messageId, @RequestBody Map<String, String> payload) {

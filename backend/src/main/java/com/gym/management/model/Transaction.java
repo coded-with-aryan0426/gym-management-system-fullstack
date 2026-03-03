@@ -25,11 +25,13 @@ public class Transaction {
     @Column(name = "TRANSACTION_ID")
     private Long transactionId;
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @Column(name = "gym_id")
     private Long gymId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "gym_id", insertable = false, updatable = false)
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private Gym gym;
 
     @Column(name = "DATE_TIME", nullable = false)

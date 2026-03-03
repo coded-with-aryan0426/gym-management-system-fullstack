@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useChat } from '../../contexts/ChatContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { showToast } from '../../utils/toast';
 import {
     X, Calendar, BarChart2, Star, Bell, Pin,
-    Phone, Video, Image as ImageIcon, FileText, Shield
+    Image as ImageIcon, FileText, Shield, ShieldOff
 } from 'lucide-react';
 
 interface ContactInfoPanelProps {
@@ -12,8 +13,9 @@ interface ContactInfoPanelProps {
 }
 
 const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({ isOpen, onClose }) => {
-    const { activeConversation } = useChat();
+    const { activeConversation, blockUser, unblockUser, isUserBlocked } = useChat();
     const { user } = useAuth();
+    const [blocking, setBlocking] = useState(false);
 
     if (!activeConversation) return null;
 
@@ -72,6 +74,36 @@ const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({ isOpen, onClose }) 
     };
 
     const otherParticipant = getOtherParticipant();
+
+    // Get the numeric userId of the other participant for block/unblock
+    const getOtherUserId = (): number | null => {
+        if (activeConversation.type === 'GROUP') return null;
+        const other = activeConversation.participants?.find(
+            (p: any) => Number(p.userId) !== Number(user?.id)
+        ) || activeConversation.participants?.[0];
+        return other ? Number(other.userId) : null;
+    };
+
+    const otherUserId = getOtherUserId();
+    const blocked = otherUserId ? isUserBlocked(otherUserId) : false;
+
+    const handleBlockToggle = async () => {
+        if (!otherUserId) return;
+        setBlocking(true);
+        try {
+            if (blocked) {
+                await unblockUser(otherUserId);
+                showToast.success('User unblocked');
+            } else {
+                await blockUser(otherUserId);
+                showToast.success('User blocked');
+            }
+        } catch {
+            showToast.error('Action failed. Please try again.');
+        } finally {
+            setBlocking(false);
+        }
+    };
 
     return (
         <div className={`contact-panel ${!isOpen ? 'contact-panel--hidden' : ''}`}>
@@ -151,17 +183,25 @@ const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({ isOpen, onClose }) 
             </div>
 
             {/* Privacy Section */}
-            <div className="contact-panel__section">
-                <h5 className="contact-panel__section-title">Privacy</h5>
+            {activeConversation.type === 'PRIVATE' && otherUserId && (
+                <div className="contact-panel__section">
+                    <h5 className="contact-panel__section-title">Privacy</h5>
 
-                <div
-                    className="contact-panel__action"
-                    style={{ color: '#ef4444' }}
-                >
-                    <span className="contact-panel__action-icon"><Shield size={18} /></span>
-                    <span className="contact-panel__action-text">Block User</span>
+                    <button
+                        className="contact-panel__action contact-panel__action--btn"
+                        style={{ color: blocked ? '#6b7280' : '#ef4444', width: '100%', background: 'none', border: 'none', cursor: blocking ? 'not-allowed' : 'pointer' }}
+                        onClick={handleBlockToggle}
+                        disabled={blocking}
+                    >
+                        <span className="contact-panel__action-icon">
+                            {blocked ? <ShieldOff size={18} /> : <Shield size={18} />}
+                        </span>
+                        <span className="contact-panel__action-text">
+                            {blocking ? 'Please wait...' : blocked ? 'Unblock User' : 'Block User'}
+                        </span>
+                    </button>
                 </div>
-            </div>
+            )}
         </div>
     );
 };

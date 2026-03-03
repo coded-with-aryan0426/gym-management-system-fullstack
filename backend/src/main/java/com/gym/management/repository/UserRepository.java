@@ -105,4 +105,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
          */
         @Query(value = "SELECT COUNT(*) FROM trainer_customer_map WHERE trainer_user_id = :trainerId AND customer_user_id = :memberId", nativeQuery = true)
         int countAssignment(@Param("trainerId") Long trainerId, @Param("memberId") Long memberId);
+
+        /**
+         * Check if ownerUserId is an OWNER in any gym where targetUserId is also a member/trainer.
+         * Uses user_gym_roles table — avoids any lazy-load issues.
+         */
+        @Query(value = "SELECT COUNT(*) FROM user_gym_roles ugr1 JOIN user_gym_roles ugr2 ON ugr1.gym_id = ugr2.gym_id WHERE ugr1.user_id = :ownerId AND ugr1.role = 'OWNER' AND ugr1.status = 'ACTIVE' AND ugr2.user_id = :targetId AND ugr2.status = 'ACTIVE'", nativeQuery = true)
+        int countOwnerOfTarget(@Param("ownerId") Long ownerId, @Param("targetId") Long targetId);
 }

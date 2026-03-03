@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useChat } from '../../contexts/ChatContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { Search, Plus, User, Users, MessageCircle } from 'lucide-react';
+import { Search, Plus, Users, MessageCircle } from 'lucide-react';
 import NewChatModal from './NewChatModal';
 import RequestItem from './RequestItem';
 import api from '../../services/api';
+import chatApi from '../../services/chatApi';
+import { showToast } from '../../utils/toast';
 
 interface FilterTab {
     id: string;
@@ -59,10 +61,8 @@ const ChatSidebar: React.FC = () => {
 
     const fetchRequests = async () => {
         try {
-            const response = await api.chat.getPendingRequests();
-            // API returns { success: true, data: [...] } - extract the data array
-            const requestsData = response?.data || response || [];
-            setRequests(Array.isArray(requestsData) ? requestsData : []);
+            const data = await chatApi.getPendingRequests();
+            setRequests(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error(error);
             setRequests([]);
@@ -112,22 +112,36 @@ const ChatSidebar: React.FC = () => {
         if (existing) {
             setActiveConversation(existing);
         } else {
-            // Start new
             try {
-                const result: any = await api.chat.startPrivateChat(member.userId);
-                // The result is usually { success: true, data: conversation }
-                if (result.success && result.data) {
-                    setActiveConversation(result.data);
-                    // Refresh conversations list to include the new conversation
-                    await loadConversations();
-                }
+                // chatApi.startPrivateChat already unwraps the ApiResponse
+                const conversation = await chatApi.startPrivateChat(member.userId);
+                setActiveConversation(conversation);
+                await loadConversations();
             } catch (err) {
                 console.error("Failed to start chat with member", err);
-                alert("Failed to start chat");
+                showToast.error("Failed to start chat");
             }
         }
-        // Switch to chats tab to show the active conversation
         setActiveTab('chats');
+    };
+
+    const getLastMessagePreview = (conv: any): string => {
+        const type = conv.lastMessageType as string | undefined;
+        const content = conv.lastMessageContent as string | undefined;
+        if (!type && !content) return 'No messages yet';
+
+        switch (type) {
+            case 'IMAGE': return '📷 Photo';
+            case 'FILE': return '📎 File';
+            case 'VOICE_NOTE':
+            case 'AUDIO': return '🎤 Voice message';
+            case 'VIDEO': return '🎬 Video';
+            case 'WORKOUT_PLAN': return '🏋️ Workout plan';
+            case 'DIET_PLAN': return '🥗 Diet plan';
+            default:
+                if (!content) return 'Message';
+                return content.length > 60 ? content.slice(0, 60) + '…' : content;
+        }
     };
 
     const getRoleBadgeClass = (role?: string) => {
@@ -186,7 +200,7 @@ const ChatSidebar: React.FC = () => {
         return true;
     });
 
-    const totalUnread = 3; // TODO: Calculate from conversations
+    const totalUnread = conversations.reduce((sum, c) => sum + (c.unreadCount ?? 0), 0);
 
     return (
         <>
@@ -223,22 +237,22 @@ const ChatSidebar: React.FC = () => {
                 </div>
 
                 {/* Main Tabs (Chats vs Requests) */}
-                <div className="chat-main-tabs" style={{ display: 'flex', borderBottom: '1px solid var(--border-color)', marginBottom: '10px' }}>
+                <div className="chat-main-tabs">
                     <button
-                        style={{ flex: 1, padding: '10px', background: activeTab === 'chats' ? 'var(--bg-secondary)' : 'transparent', border: 'none', cursor: 'pointer', fontWeight: activeTab === 'chats' ? 'bold' : 'normal', color: 'var(--text-primary)' }}
+                        className={`chat-main-tab ${activeTab === 'chats' ? 'chat-main-tab--active' : ''}`}
                         onClick={() => setActiveTab('chats')}
                     >
                         Chats
                     </button>
                     <button
-                        style={{ flex: 1, padding: '10px', background: activeTab === 'requests' ? 'var(--bg-secondary)' : 'transparent', border: 'none', cursor: 'pointer', fontWeight: activeTab === 'requests' ? 'bold' : 'normal', color: 'var(--text-primary)' }}
+                        className={`chat-main-tab ${activeTab === 'requests' ? 'chat-main-tab--active' : ''}`}
                         onClick={() => setActiveTab('requests')}
                     >
                         Requests {requests.length > 0 && `(${requests.length})`}
                     </button>
                     {user?.role === 'TRAINER' && (
                         <button
-                            style={{ flex: 1, padding: '10px', background: activeTab === 'members' ? 'var(--bg-secondary)' : 'transparent', border: 'none', cursor: 'pointer', fontWeight: activeTab === 'members' ? 'bold' : 'normal', color: 'var(--text-primary)' }}
+                            className={`chat-main-tab ${activeTab === 'members' ? 'chat-main-tab--active' : ''}`}
                             onClick={() => setActiveTab('members')}
                         >
                             Members
@@ -346,11 +360,11 @@ const ChatSidebar: React.FC = () => {
                                                     )}
                                                 </h4>
                                                 <span className="conversation-item__time">
-                                                    {formatTime(conv.updatedAt)}
+                                                    {formatTime(conv.lastMessageAt ?? conv.updatedAt)}
                                                 </span>
                                             </div>
                                             <p className="conversation-item__preview">
-                                                Tap to view message
+                                                {getLastMessagePreview(conv)}
                                             </p>
                                         </div>
 

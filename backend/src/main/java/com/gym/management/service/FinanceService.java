@@ -26,12 +26,12 @@ public class FinanceService {
     private LocalDateTime[] getDateRange(String period) {
         LocalDateTime endDate = LocalDateTime.now();
         LocalDateTime startDate = switch (period) {
-            case "day"     -> LocalDate.now().atStartOfDay();
-            case "week"    -> LocalDate.now().minusWeeks(1).atStartOfDay();
-            case "month"   -> LocalDate.now().minusMonths(1).atStartOfDay();
-            case "6month"  -> LocalDate.now().minusMonths(6).atStartOfDay();
-            case "year"    -> LocalDate.now().minusYears(1).atStartOfDay();
-            default        -> LocalDate.now().minusMonths(1).atStartOfDay();
+            case "day" -> LocalDate.now().atStartOfDay();
+            case "week" -> LocalDate.now().minusWeeks(1).atStartOfDay();
+            case "month" -> LocalDate.now().minusMonths(1).atStartOfDay();
+            case "6month" -> LocalDate.now().minusMonths(6).atStartOfDay();
+            case "year" -> LocalDate.now().minusYears(1).atStartOfDay();
+            default -> LocalDate.now().minusMonths(1).atStartOfDay();
         };
         return new LocalDateTime[] { startDate, endDate };
     }
@@ -68,13 +68,20 @@ public class FinanceService {
         Transaction tx = transactionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Transaction not found"));
 
-        tx.setDescription(details.getDescription());
-        tx.setCategory(details.getCategory());
-        tx.setAmount(details.getAmount());
-        tx.setType(details.getType());
-        tx.setStatus(details.getStatus());
-        tx.setReferenceNumber(details.getReferenceNumber());
-        tx.setDateTime(details.getDateTime());
+        if (details.getDescription() != null)
+            tx.setDescription(details.getDescription());
+        if (details.getCategory() != null)
+            tx.setCategory(details.getCategory());
+        if (details.getAmount() != null)
+            tx.setAmount(details.getAmount());
+        if (details.getType() != null)
+            tx.setType(details.getType());
+        if (details.getStatus() != null)
+            tx.setStatus(details.getStatus());
+        if (details.getReferenceNumber() != null)
+            tx.setReferenceNumber(details.getReferenceNumber());
+        if (details.getDateTime() != null)
+            tx.setDateTime(details.getDateTime());
 
         return transactionRepository.save(tx);
     }
@@ -91,17 +98,33 @@ public class FinanceService {
         // Revenue: only Completed income (cash actually received)
         BigDecimal totalRevenue = transactionRepository.sumAmountByTypeAndStatusAndDateRange("INCOME", "Completed",
                 range[0], range[1]);
+        if (totalRevenue == null)
+            totalRevenue = BigDecimal.ZERO;
+
         // Expenses: ALL statuses (an expense is a liability whether paid or pending)
         BigDecimal totalExpenses = transactionRepository.sumAmountByTypeAndDateRange("EXPENSE",
                 range[0], range[1]);
+        if (totalExpenses == null)
+            totalExpenses = BigDecimal.ZERO;
+
         BigDecimal pendingDues = transactionRepository.sumAmountByStatusAndDateRange("Pending", range[0], range[1]);
+        if (pendingDues == null)
+            pendingDues = BigDecimal.ZERO;
+
         Long pendingCount = transactionRepository.countPendingTransactions(range[0], range[1]);
+        if (pendingCount == null)
+            pendingCount = 0L;
 
         // Previous period for comparison
         BigDecimal prevRevenue = transactionRepository.sumAmountByTypeAndStatusAndDateRange("INCOME", "Completed",
                 prevRange[0], prevRange[1]);
+        if (prevRevenue == null)
+            prevRevenue = BigDecimal.ZERO;
+
         BigDecimal prevExpenses = transactionRepository.sumAmountByTypeAndDateRange("EXPENSE",
                 prevRange[0], prevRange[1]);
+        if (prevExpenses == null)
+            prevExpenses = BigDecimal.ZERO;
 
         BigDecimal netProfit = totalRevenue.subtract(totalExpenses);
         double profitMargin = totalRevenue.compareTo(BigDecimal.ZERO) > 0

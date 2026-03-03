@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useChat } from '../../contexts/ChatContext';
-import { Search, X, Users, Loader } from 'lucide-react';
+import { Search, X, Users, UserPlus, Loader } from 'lucide-react';
 import type { ChatUser } from '../../services/chatApi';
-import api from '../../services/api';
+import chatApi from '../../services/chatApi';
+import { showToast } from '../../utils/toast';
 
 interface FilterTab {
     id: string;
@@ -52,19 +53,12 @@ const NewChatModal: React.FC<NewChatModalProps> = ({ onClose }) => {
     }, [searchQuery]);
 
     const loadUsers = useCallback(async () => {
-        if (!api || !api.chat) {
-            console.error('API service not initialized');
-            setError('System error: API unavailable');
-            setLoading(false);
-            return;
-        }
-
         setLoading(true);
         setError(null);
         try {
-            const response: any = await api.chat.getAvailableUsers();
-            const userList = response.data && Array.isArray(response.data) ? response.data : [];
-            setUsers(userList);
+            // chatApi.getAvailableChatUsers already unwraps the ApiResponse wrapper
+            const userList = await chatApi.getAvailableChatUsers();
+            setUsers(Array.isArray(userList) ? userList : []);
         } catch (err) {
             setError('Failed to load users');
             console.error('Error loading chat users:', err);
@@ -74,15 +68,12 @@ const NewChatModal: React.FC<NewChatModalProps> = ({ onClose }) => {
     }, []);
 
     const searchUsers = useCallback(async (query: string) => {
-        if (!api || !api.chat) return;
         setSearching(true);
         try {
-            const response: any = await api.chat.searchUsers(query);
-            const userList = response.data && Array.isArray(response.data) ? response.data : [];
-            setUsers(userList);
+            const userList = await chatApi.searchUsers(query);
+            setUsers(Array.isArray(userList) ? userList : []);
         } catch (err) {
             console.error('Error searching users:', err);
-            // Keep existing users on search error
         } finally {
             setSearching(false);
         }
@@ -95,15 +86,14 @@ const NewChatModal: React.FC<NewChatModalProps> = ({ onClose }) => {
             onClose();
         } catch (err: any) {
             console.error('Failed to start chat:', err);
-            // Check if request required (looser check)
-            if (err.response?.status === 403 || err.response?.data?.error === 'CHAT_REQUEST_REQUIRED') {
-                if (confirm('This user accepts invitations only. Send a request?')) {
+            if (err?.message === 'CHAT_REQUEST_REQUIRED' || err?.response?.status === 403) {
+                if (window.confirm(`This user accepts invitations only. Send a request to ${targetUser.fullName || targetUser.username}?`)) {
                     try {
-                        await api.chat.sendRequest(targetUser.userId);
-                        alert('Invitation sent successfully!');
+                        await chatApi.sendConversationRequest(targetUser.userId);
+                        showToast.success('Invitation sent!');
                         onClose();
-                    } catch (reqErr: any) {
-                        alert(reqErr.response?.data?.message || 'Failed to send request');
+                    } catch {
+                        showToast.error('Failed to send request');
                     }
                 }
             } else {
@@ -368,10 +358,10 @@ const NewChatModal: React.FC<NewChatModalProps> = ({ onClose }) => {
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            if (confirm(`Send a conversation request to ${chatUser.fullName || chatUser.username}?`)) {
-                                                api.chat.sendRequest(chatUser.userId)
-                                                    .then(() => alert('Invitation sent successfully!'))
-                                                    .catch((err: any) => alert(err.response?.data?.message || 'Failed to send request'));
+                                            if (window.confirm(`Send a conversation request to ${chatUser.fullName || chatUser.username}?`)) {
+                                                chatApi.sendConversationRequest(chatUser.userId)
+                                                    .then(() => showToast.success('Invitation sent!'))
+                                                    .catch(() => showToast.error('Failed to send request'));
                                             }
                                         }}
                                         title="Send Request"
@@ -390,7 +380,7 @@ const NewChatModal: React.FC<NewChatModalProps> = ({ onClose }) => {
                                         onMouseEnter={(e) => e.currentTarget.style.color = 'var(--accent-primary)'}
                                         onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-tertiary)'}
                                     >
-                                        <Users size={16} /> {/* Using Users icon as generic 'Add' since UserPlus not imported */}
+                                        <UserPlus size={16} />
                                     </button>
                                 )}
                             </div>

@@ -37,6 +37,9 @@ public class Conversation {
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 
+    public Long getLastMessageId() { return lastMessageId; }
+    public void setLastMessageId(Long lastMessageId) { this.lastMessageId = lastMessageId; }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "conversation_id")
@@ -52,6 +55,9 @@ public class Conversation {
 
     @OneToMany(mappedBy = "conversation", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ConversationParticipant> participants = new HashSet<>();
+
+    @Column(name = "last_message_id")
+    private Long lastMessageId;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

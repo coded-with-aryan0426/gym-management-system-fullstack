@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import type { ChatMessage } from '../../services/chatApi';
-import { Smile, Edit2, Trash2, CheckCheck, MoreVertical, X, Paperclip, BarChart2 } from 'lucide-react';
+import { Smile, Edit2, Trash2, Check, CheckCheck, X, Paperclip, BarChart2, FileText, Music, Download, Play } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { format } from 'date-fns';
 
@@ -11,17 +11,26 @@ interface MessageBubbleProps {
     onDelete: (id: number) => void;
     onReact: (id: number, emoji: string) => void;
     onRemoveReaction: (id: number, emoji: string) => void;
+    onImageClick?: (url: string) => void;
 }
 
 const COMMON_EMOJIS = ['👍', '❤️', '😂', '😮', '😢', '😡'];
 
-const MessageBubble: React.FC<MessageBubbleProps> = ({ 
-    message, 
-    isMyMessage, 
-    onEdit, 
-    onDelete, 
-    onReact, 
-    onRemoveReaction 
+const formatFileSize = (bytes?: number): string => {
+    if (!bytes) return '';
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
+
+const MessageBubble: React.FC<MessageBubbleProps> = ({
+    message,
+    isMyMessage,
+    onEdit,
+    onDelete,
+    onReact,
+    onRemoveReaction,
+    onImageClick,
 }) => {
     const { user } = useAuth();
     const [showActions, setShowActions] = useState(false);
@@ -69,80 +78,170 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
         return acc;
     }, {} as Record<string, number>);
 
+    // Parse payload safely
+    const parsedPayload = (() => {
+        try {
+            return message.payload ? JSON.parse(message.payload) : null;
+        } catch {
+            return null;
+        }
+    })();
+
+    const renderContent = () => {
+        const { contentType } = message;
+
+        if (contentType === 'WORKOUT_PLAN' && parsedPayload) {
+            return (
+                <div className="workout-plan-card">
+                    <div className="workout-plan-card__header">
+                        <BarChart2 size={14} />
+                        <span className="workout-plan-card__type">Workout Plan</span>
+                    </div>
+                    <h4 className="workout-plan-card__title">
+                        {parsedPayload.title || 'Training Session'}
+                    </h4>
+                    <button className="workout-plan-card__btn workout-plan-card__btn--primary">View Plan</button>
+                </div>
+            );
+        }
+
+        if (contentType === 'IMAGE' && parsedPayload?.url) {
+            return (
+                <div className="message-attachment message-attachment--image">
+                    <img
+                        src={parsedPayload.url}
+                        alt={parsedPayload.fileName || 'Attachment'}
+                        className="message-attachment__img"
+                        onClick={() => onImageClick ? onImageClick(parsedPayload.url) : window.open(parsedPayload.url, '_blank')}
+                    />
+                </div>
+            );
+        }
+
+        if (contentType === 'VIDEO' && parsedPayload?.url) {
+            return (
+                <div className="message-attachment message-attachment--video">
+                    <video
+                        src={parsedPayload.url}
+                        controls
+                        className="message-attachment__video"
+                        preload="metadata"
+                    />
+                </div>
+            );
+        }
+
+        if ((contentType === 'AUDIO' || contentType === 'VOICE_NOTE') && parsedPayload?.url) {
+            return (
+                <div className="message-attachment message-attachment--audio">
+                    <div className="message-attachment__audio-icon">
+                        <Music size={16} />
+                    </div>
+                    <audio
+                        src={parsedPayload.url}
+                        controls
+                        className="message-attachment__audio"
+                        preload="metadata"
+                    />
+                </div>
+            );
+        }
+
+        if (contentType === 'FILE' && parsedPayload) {
+            return (
+                <div className="message-attachment message-attachment--file">
+                    <div className="message-attachment__file-icon">
+                        <FileText size={20} />
+                    </div>
+                    <div className="message-attachment__file-info">
+                        <span className="message-attachment__file-name">
+                            {parsedPayload.fileName || 'File'}
+                        </span>
+                        {parsedPayload.fileSize && (
+                            <span className="message-attachment__file-size">
+                                {formatFileSize(parsedPayload.fileSize)}
+                            </span>
+                        )}
+                    </div>
+                    {parsedPayload.url && (
+                        <a
+                            href={parsedPayload.url}
+                            download={parsedPayload.fileName}
+                            className="message-attachment__download-btn"
+                            target="_blank"
+                            rel="noreferrer"
+                            title="Download"
+                        >
+                            <Download size={16} />
+                        </a>
+                    )}
+                </div>
+            );
+        }
+
+        if (isEditing) {
+            return (
+                <div className="message-edit-box">
+                    <input
+                        type="text"
+                        value={editContent}
+                        onChange={(e) => setEditContent(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') handleSaveEdit();
+                            if (e.key === 'Escape') {
+                                setIsEditing(false);
+                                setEditContent(message.content);
+                            }
+                        }}
+                        autoFocus
+                        className="message-edit-input"
+                    />
+                    <div className="message-edit-actions">
+                        <button onClick={() => { setIsEditing(false); setEditContent(message.content); }}>
+                            <X size={14} />
+                        </button>
+                        <button onClick={handleSaveEdit}>
+                            <CheckCheck size={14} />
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
+        return <p className="message-bubble__text">{message.content}</p>;
+    };
+
     return (
-        <div 
+        <div
             className={`message-bubble ${isMyMessage ? 'message-bubble--sent' : 'message-bubble--received'}`}
             onMouseEnter={() => !isEditing && setShowActions(true)}
             onMouseLeave={() => !showEmojiPicker && setShowActions(false)}
         >
             <div className="message-bubble__content-wrapper" ref={actionRef}>
                 <div className="message-bubble__content">
-                    {/* Attachments & Special Content */}
-                    {message.contentType === 'WORKOUT_PLAN' && message.payload ? (
-                         <div className="workout-plan-card">
-                             <div className="workout-plan-card__header">
-                                 <BarChart2 size={14} />
-                                 <span className="workout-plan-card__type">Workout Plan</span>
-                             </div>
-                             <h4 className="workout-plan-card__title">
-                                 {JSON.parse(message.payload).title || 'Training Session'}
-                             </h4>
-                             <button className="workout-plan-card__btn workout-plan-card__btn--primary">View Plan</button>
-                         </div>
-                    ) : message.contentType === 'IMAGE' && message.payload ? (
-                        <div className="message-attachment message-attachment--image">
-                            <img
-                                src={JSON.parse(message.payload).url}
-                                alt="Attachment"
-                                style={{ maxWidth: '100%', borderRadius: '8px', cursor: 'pointer' }}
-                                onClick={() => {
-                                    if (message.payload) {
-                                        window.open(JSON.parse(message.payload).url, '_blank');
-                                    }
-                                }}
-                            />
-                        </div>
-                    ) : isEditing ? (
-                        <div className="message-edit-box">
-                            <input 
-                                type="text" 
-                                value={editContent} 
-                                onChange={(e) => setEditContent(e.target.value)}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') handleSaveEdit();
-                                    if (e.key === 'Escape') {
-                                        setIsEditing(false);
-                                        setEditContent(message.content);
-                                    }
-                                }}
-                                autoFocus
-                                className="message-edit-input"
-                            />
-                            <div className="message-edit-actions">
-                                <button onClick={() => { setIsEditing(false); setEditContent(message.content); }}>
-                                    <X size={14} />
-                                </button>
-                                <button onClick={handleSaveEdit}>
-                                    <CheckCheck size={14} />
-                                </button>
-                            </div>
-                        </div>
-                    ) : (
-                        <p className="message-bubble__text">{message.content}</p>
-                    )}
+                    {renderContent()}
 
                     {/* Meta Info */}
                     <div className="message-bubble__meta">
                         <span className="message-bubble__time">
                             {format(new Date(message.createdAt), 'HH:mm')}
                         </span>
-                        {message.isEdited && <span className="message-bubble__edited">(edited)</span>}
-                        {isMyMessage && (
-                            <span className="message-bubble__status">
-                                <CheckCheck size={14} />
-                            </span>
-                        )}
+                          {message.isEdited && <span className="message-bubble__edited">(edited)</span>}
+                          {isMyMessage && (
+                              <span className={`message-bubble__status message-bubble__status--${message.deliveryStatus?.toLowerCase() ?? 'sent'}`}>
+                                  {message.deliveryStatus === 'READ' ? (
+                                      <CheckCheck size={14} />
+                                  ) : message.deliveryStatus === 'DELIVERED' ? (
+                                      <CheckCheck size={14} />
+                                  ) : (
+                                      <Check size={14} />
+                                  )}
+                              </span>
+                          )}
                     </div>
+
+                    {/* Clear float from meta */}
+                    <div style={{ clear: 'both' }} />
 
                     {/* Reactions Display */}
                     {Object.keys(reactionCounts).length > 0 && (
@@ -162,7 +261,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
                         <button className="message-action-btn" onClick={() => setShowEmojiPicker(!showEmojiPicker)}>
                             <Smile size={16} />
                         </button>
-                        
+
                         {isMyMessage && (
                             <>
                                 <button className="message-action-btn" onClick={() => setIsEditing(true)}>

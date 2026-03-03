@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useChat } from '../../contexts/ChatContext';
 import { useAuth } from '../../contexts/AuthContext';
-import api from '../../services/api';
+import { apiClient } from '../../services/api';
 import chatApi from '../../services/chatApi';
+import { showToast } from '../../utils/toast';
 import {
     Send, Paperclip, Smile,
-    Phone, Video, User as UserIcon, Calendar,
+    Phone, Video, User as UserIcon,
     MessageCircle, ShieldOff, Shield, AlertCircle, MoreVertical
 } from 'lucide-react';
 import MessageBubble from './MessageBubble';
+import ImageLightbox from './ImageLightbox';
 
 interface ChatWindowProps {
     onToggleContactPanel?: () => void;
@@ -20,6 +22,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onToggleContactPanel }) => {
     const [newMessage, setNewMessage] = useState('');
     const [showMenu, setShowMenu] = useState(false);
     const [blocking, setBlocking] = useState(false);
+    const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const menuRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -28,23 +31,28 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onToggleContactPanel }) => {
         if (e.target.files && e.target.files[0] && activeConversation) {
             const file = e.target.files[0];
             try {
-                // Upload
-                const attachment = await api.chat.uploadAttachment(file, activeConversation.conversationId);
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('conversationId', activeConversation.conversationId.toString());
+                const response = await apiClient.post('/chat/attachments', formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+                const attachment = response.data?.data || response.data;
 
-                // Send message with attachment ID
-                const type = file.type.startsWith('image/') ? 'IMAGE' : 'FILE';
+                const type = file.type.startsWith('image/') ? 'IMAGE'
+                    : file.type.startsWith('video/') ? 'VIDEO'
+                    : file.type.startsWith('audio/') ? 'AUDIO'
+                    : 'FILE';
                 const payload = JSON.stringify({
                     attachmentId: attachment.attachmentId,
                     url: attachment.url,
                     fileName: attachment.fileName,
                     fileSize: attachment.fileSize
                 });
-
                 await sendMessage('Sent an attachment', type, payload);
-
             } catch (error) {
                 console.error('Failed to upload file', error);
-                alert('Failed to upload file');
+                showToast.error('Failed to upload file');
             } finally {
                 if (fileInputRef.current) fileInputRef.current.value = '';
             }
@@ -70,21 +78,21 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onToggleContactPanel }) => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         setNewMessage(e.target.value);
+        // Auto-resize textarea
+        e.target.style.height = 'auto';
+        e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
         if (activeConversation) {
-            if (e.target.value.length > 0) {
-                sendTyping(true);
-            } else {
-                sendTyping(false);
-            }
+            sendTyping(e.target.value.length > 0);
         }
     };
 
-    // Debounce logic for stop typing
+    // Stop-typing signal: fire sendTyping(false) 2s after last keystroke
     useEffect(() => {
+        if (!newMessage) return;
         const timeout = setTimeout(() => {
-            if (newMessage.length > 0) sendTyping(false);
+            sendTyping(false);
         }, 2000);
         return () => clearTimeout(timeout);
     }, [newMessage]);
@@ -194,6 +202,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onToggleContactPanel }) => {
     }, []);
 
     return (
+        <>
         <div className="chat-window">
             {/* Header */}
             <div className="chat-header">
@@ -211,9 +220,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onToggleContactPanel }) => {
                 </div>
 
                 <div className="chat-header__actions">
-                    <button className="chat-header__action-btn chat-header__action-btn--primary" title="Book Session">
-                        <Calendar size={18} />
-                    </button>
                     <button className="chat-header__action-btn" title="Voice Call (Coming Soon)" disabled style={{ opacity: 0.5 }}>
                         <Phone size={18} />
                     </button>
@@ -286,16 +292,17 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onToggleContactPanel }) => {
 
                     const isMyMessage = item.senderId === Number(user?.id);
 
-                    return (
-                        <MessageBubble
-                            key={item.messageId || index}
-                            message={item}
-                            isMyMessage={isMyMessage}
-                            onEdit={chatApi.editMessage}
-                            onDelete={chatApi.deleteMessage}
-                            onReact={chatApi.addReaction}
-                            onRemoveReaction={chatApi.removeReaction}
-                        />
+                          return (
+                          <MessageBubble
+                              key={item.messageId || index}
+                              message={item}
+                              isMyMessage={isMyMessage}
+                              onEdit={chatApi.editMessage}
+                              onDelete={chatApi.deleteMessage}
+                              onReact={chatApi.addReaction}
+                              onRemoveReaction={chatApi.removeReaction}
+                              onImageClick={(url) => setLightboxUrl(url)}
+                          />
                     );
                 })}
 
@@ -334,12 +341,18 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onToggleContactPanel }) => {
                     </button>
 
                     <div className="chat-input__field-wrapper">
-                        <input
-                            type="text"
+                        <textarea
+                            rows={1}
                             value={newMessage}
                             onChange={handleInputChange}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                    e.preventDefault();
+                                    handleSend(e as any);
+                                }
+                            }}
                             placeholder={isBlocked ? "You have blocked this user" : "Type a message..."}
-                            className="chat-input__field"
+                            className="chat-input__field chat-input__field--textarea"
                             disabled={isBlocked}
                         />
                         <button type="button" className="chat-input__emoji-btn" title="Emoji" disabled={isBlocked}>
@@ -358,6 +371,12 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onToggleContactPanel }) => {
                 </form>
             </div>
         </div>
+
+        {/* Image Lightbox */}
+        {lightboxUrl && (
+            <ImageLightbox url={lightboxUrl} onClose={() => setLightboxUrl(null)} />
+        )}
+        </>
     );
 };
 

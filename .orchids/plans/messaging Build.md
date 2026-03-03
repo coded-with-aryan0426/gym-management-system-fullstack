@@ -1,24 +1,72 @@
+## **What's next (in priority order)**
+
+### **Still in Phase 1 (critical bugs, not done yet)**
+
+- **F2 — Backend:** `isTrainerOf()` **Oracle lazy-load crash fix (Java)**
+- **F5 — Backend:** `MessageStatus` **never populated — ticks are meaningless (Java + frontend)**
+- **F7 — Backend:** `unreadCount` **not computed per conversation (Java)**
+
+### **Phase 6 — Database (backend)**
+
+- **D1 — Flyway migration** `V19__create_chat_tables.sql` **(replaces** `ddl-auto=update`**)**
+- **D2–D4 — Indexes on messages, message_status, conversation_requests**
+- **D5 — Add** `last_message_id` **FK to conversations**
+- **D6 — Populate** `message_status` **on every send**
+
+### **Phase 7 — Backend API**
+
+- **B1 — Add** `lastMessage` **fields to conversation list response**
+- **B2 — Add** `unreadCount` **to conversation list response**
+- **B3 —** `POST /conversations/{id}/read` **endpoint**
+- **B4 — Message pagination / infinite scroll**
+- **B5 — Shared media endpoint (for ContactInfoPanel)**
+
+### **Remaining Phase 4**
+
+- **T2 — "View Plan" button in MessageBubble opens a WorkoutPlanViewModal**
+- **T4 — Remove the dead "Book Session" button**
+
+### **Remaining Phase 5 — UI/UX polish**
+
+- **U1 — Remove all inline** `style={{}}` **from ChatSidebar → CSS classes**
+- **U4 — Emoji picker wired up**
+- **U5 — Delivery ticks (depends on F5 backend)**
+- **U6 — Online presence indicator (depends on backend PresenceService)**
+- **U7 — ContactInfoPanel full design (shared media grid)**
+- **U8 — Real unread badge counts (depends on F7 backend)**
+- **U9 — Message search within conversation**
+- **U10 — Reply-to message UI**
+- **U11 — Message reactions display + picker**
+- **U13 — Typing indicator dots display**
+
+### **Phase 8 — Cleanup**
+
+- **R1 Remove hardcoded** `totalUnread = 3`
+- **R2 Replace** `alert()` **with** `toast`
+- **R3 Hide filter tabs for member role**
+- **R5 Move all inline styles to CSS**
+
 # Messaging System — Complete Build Plan
 
-> **Project:** Internal Gym Management App — WhatsApp-style messaging between Owners, Trainers, and Members  
-> **Audit Date:** 2026-03-03  
-> **Scope:** Full audit of current architecture → fix all bugs → build missing features → improve DB, backend, and UI/UX
+> **Project:** Internal Gym Management App — WhatsApp-style messaging between Owners, Trainers, and Members\
+> \*\***Audit Date:** 2026-03-03\
+> \*\***Scope:** Full audit of current architecture → fix all bugs → build missing features → improve DB, backend, and UI/UX
 
 ---
 
 ## Table of Contents
 
-1. [Current Architecture Audit](#1-current-architecture-audit)
-   - 1.1 [Backend — What Exists](#11-backend--what-exists)
-   - 1.2 [Frontend — What Exists](#12-frontend--what-exists)
-2. [Phase 1 — Critical Bug Fixes](#phase-1--critical-bug-fixes)
-3. [Phase 2 — Owner Messages Feature](#phase-2--owner-messages-feature)
-4. [Phase 3 — Media & File Sending](#phase-3--media--file-sending)
-5. [Phase 4 — Trainer Workout Plan Sending](#phase-4--trainer-workout-plan-sending)
-6. [Phase 5 — UI/UX Improvements](#phase-5--uiux-improvements)
-7. [Phase 6 — Database Improvements](#phase-6--database-improvements)
-8. [Phase 7 — Backend API Improvements](#phase-7--backend-api-improvements)
-9. [Phase 8 — Cleanup & Removals](#phase-8--cleanup--removals)
+ 1. [Current Architecture Audit](#1-current-architecture-audit)
+    - 1.1 [Backend — What Exists](#11-backend--what-exists)
+    - 1.2 [Frontend — What Exists](#12-frontend--what-exists)
+ 2. [Phase 1 — Critical Bug Fixes](#phase-1--critical-bug-fixes)
+ 3. [Phase 2 — Owner Messages Feature](#phase-2--owner-messages-feature)
+ 4. [Phase 3 — Media & File Sending](#phase-3--media--file-sending)
+ 5. [Phase 4 — Trainer Workout Plan Sending](#phase-4--trainer-workout-plan-sending)
+ 6. [Phase 5 — UI/UX Improvements](#phase-5--uiux-improvements)
+ 7. [Phase 6 — Database Improvements](#phase-6--database-improvements)
+ 8. [Phase 7 — Backend API Improvements](#phase-7--backend-api-improvements)
+ 9. [Phase 8 — Cleanup & Removals](#phase-8--cleanup--removals)
 10. [Files To Create](#files-to-create)
 11. [Files To Modify](#files-to-modify)
 12. [Implementation Order](#implementation-order)
@@ -29,38 +77,13 @@
 
 ### 1.1 Backend — What Exists
 
-| Component | Status | Issues Found |
-|---|---|---|
-| `Conversation` + `ConversationParticipant` models | ✅ Built | None |
-| `Message` model — types: `TEXT, IMAGE, WORKOUT_PLAN, VOICE_NOTE, FILE, VIDEO` | ✅ Built | `FILE` type missing from frontend `ChatMessage` TypeScript interface |
-| `MessageAttachment` — stored to disk, served via `/api/chat/attachments/file/{name}` | ✅ Built | No audio/voice MIME type handling in controller pipeline |
-| `MessageStatus` — `SENT / DELIVERED / READ` per user | ✅ Model exists | **Never written to or read anywhere** — no endpoint, no WS broadcast |
-| `MessageReaction` + `MessageEditHistory` | ✅ Built | None |
-| `ConversationRequest` — `PENDING / ACCEPTED / REJECTED` | ✅ Built | None |
-| `ChatService` — send, edit, delete, react, accept/reject | ✅ Built | `isTrainerOf()` uses `trainer.getCustomers()` — **Oracle lazy-load crash** (same bug pattern as assign/unassign) |
-| `ChatWebSocketController` — `/app/chat.sendMessage`, `/app/chat.typing` | ✅ Built | `senderId` correctly taken from JWT token |
-| `AttachmentController` — `POST /api/chat/attachments`, `GET /api/chat/attachments/file/{name}` | ✅ Built | No `@PreAuthorize` auth check; no file size limit |
-| `ChatController` — all REST endpoints | ✅ Built | `lastMessage` not included in conversation list response; `unreadCount` not computed per conversation |
-| `ChatRetentionScheduler` | ✅ Built | Schedule not documented; retention policy not clear |
-| **Owner role — messages** | ❌ Missing | No route, no controller access, no page, no nav item |
+ComponentStatusIssues Found`Conversation` + `ConversationParticipant` models✅ BuiltNone`Message` model — types: `TEXT, IMAGE, WORKOUT_PLAN, VOICE_NOTE, FILE, VIDEO`✅ Built`FILE` type missing from frontend `ChatMessage` TypeScript interface`MessageAttachment` — stored to disk, served via `/api/chat/attachments/file/{name}`✅ BuiltNo audio/voice MIME type handling in controller pipeline`MessageStatus` — `SENT / DELIVERED / READ` per user✅ Model exists**Never written to or read anywhere** — no endpoint, no WS broadcast`MessageReaction` + `MessageEditHistory`✅ BuiltNone`ConversationRequest` — `PENDING / ACCEPTED / REJECTED`✅ BuiltNone`ChatService` — send, edit, delete, react, accept/reject✅ Built`isTrainerOf()` uses `trainer.getCustomers()` — **Oracle lazy-load crash** (same bug pattern as assign/unassign)`ChatWebSocketController` — `/app/chat.sendMessage`, `/app/chat.typing`✅ Built`senderId` correctly taken from JWT token`AttachmentController` — `POST /api/chat/attachments`, `GET /api/chat/attachments/file/{name}`✅ BuiltNo `@PreAuthorize` auth check; no file size limit`ChatController` — all REST endpoints✅ Built`lastMessage` not included in conversation list response; `unreadCount` not computed per conversation`ChatRetentionScheduler`✅ BuiltSchedule not documented; retention policy not clear**Owner role — messages**❌ MissingNo route, no controller access, no page, no nav item
 
 ---
 
 ### 1.2 Frontend — What Exists
 
-| Component | Status | Issues Found |
-|---|---|---|
-| `ChatContext` — WebSocket (STOMP/SockJS), conversations, messages, blocking | ✅ Built | `totalUnread` hardcoded as `3`; `lastMessage` preview always says "Tap to view message"; no WS reconnect on token refresh |
-| `ChatLayout` — 3-panel: sidebar + window + contact info | ✅ Built | **Imports `ContactInfoPanel` but the file does not exist → entire chat page crashes on load** |
-| `ChatSidebar` — Chats / Requests / Members tabs | ✅ Built | All tabs use raw `style={{}}` (no CSS classes); member list shows hardcoded "MEMBER" as preview text; `totalUnread` hardcoded; `alert()` calls instead of toasts |
-| `ChatWindow` — header, messages list, input bar | ✅ Built | File input has no `accept` filter (accepts everything); input is `<input type="text">` not `<textarea>` (no multiline); emoji button does nothing; `sendTyping` debounce logic is **inverted**; no read receipt trigger on open |
-| `MessageBubble` — text, image, workout plan, edit, delete, react | ✅ Built | `FILE` type renders nothing; `AUDIO` / `VOICE_NOTE` type renders nothing; `replyToMessageId` never rendered; "View Plan" button on `WORKOUT_PLAN` messages does nothing |
-| `NewChatModal` — search users, start chat | ✅ Built | Calls `api.chat.getAvailableUsers()` but `chatApi` exports `getAvailableChatUsers()` — **name mismatch causes runtime error**; passes raw `response.data` (double-unwrap bug) |
-| `chatApi.ts` — all REST calls | ✅ Built | Missing: `uploadAttachment`, `getPendingRequests`, `sendRequest` (these exist in `api.ts` instead causing split logic); `FILE`, `VIDEO`, `AUDIO` missing from `ChatMessage` TypeScript type |
-| `TrainerMessages.tsx` — action bar: Share Workout, Notes, Book Session | ✅ Built | All three actions navigate away from the chat instead of injecting a message |
-| `MemberMessages.tsx` — renders `<ChatLayout />` | ✅ Built | No member-specific features (e.g. quick "message my trainer" shortcut) |
-| **Owner messages page** | ❌ Missing | No page, no route, no nav item |
-| `Chat.css` | ✅ Built | Missing CSS classes for main tabs (currently all inline); no voice note player styles; no file card styles; no lightbox styles |
+ComponentStatusIssues Found`ChatContext` — WebSocket (STOMP/SockJS), conversations, messages, blocking✅ Built`totalUnread` hardcoded as `3`; `lastMessage` preview always says "Tap to view message"; no WS reconnect on token refresh`ChatLayout` — 3-panel: sidebar + window + contact info✅ Built**Imports** `ContactInfoPanel` **but the file does not exist → entire chat page crashes on load**`ChatSidebar` — Chats / Requests / Members tabs✅ BuiltAll tabs use raw `style={{}}` (no CSS classes); member list shows hardcoded "MEMBER" as preview text; `totalUnread` hardcoded; `alert()` calls instead of toasts`ChatWindow` — header, messages list, input bar✅ BuiltFile input has no `accept` filter (accepts everything); input is `<input type="text">` not `<textarea>` (no multiline); emoji button does nothing; `sendTyping` debounce logic is **inverted**; no read receipt trigger on open`MessageBubble` — text, image, workout plan, edit, delete, react✅ Built`FILE` type renders nothing; `AUDIO` / `VOICE_NOTE` type renders nothing; `replyToMessageId` never rendered; "View Plan" button on `WORKOUT_PLAN` messages does nothing`NewChatModal` — search users, start chat✅ BuiltCalls `api.chat.getAvailableUsers()` but `chatApi` exports `getAvailableChatUsers()` — **name mismatch causes runtime error**; passes raw `response.data` (double-unwrap bug)`chatApi.ts` — all REST calls✅ BuiltMissing: `uploadAttachment`, `getPendingRequests`, `sendRequest` (these exist in `api.ts` instead causing split logic); `FILE`, `VIDEO`, `AUDIO` missing from `ChatMessage` TypeScript type`TrainerMessages.tsx` — action bar: Share Workout, Notes, Book Session✅ BuiltAll three actions navigate away from the chat instead of injecting a message`MemberMessages.tsx` — renders `<ChatLayout />`✅ BuiltNo member-specific features (e.g. quick "message my trainer" shortcut)**Owner messages page**❌ MissingNo page, no route, no nav item`Chat.css`✅ BuiltMissing CSS classes for main tabs (currently all inline); no voice note player styles; no file card styles; no lightbox styles
 
 ---
 
@@ -75,6 +98,7 @@
 **Problem:** `ChatLayout.tsx` imports `./ContactInfoPanel` but the file does not exist. The entire `/trainer/messages` and `/member/messages` pages crash on load with a module-not-found error.
 
 **Fix:** Create `frontend/src/components/chat/ContactInfoPanel.tsx` with:
+
 - Participant avatar, name, role badge
 - Account joined date
 - Shared media mini-grid (images sent in this conversation)
@@ -116,12 +140,15 @@ Update `ChatService.isTrainerOf()` to call this repository method and check `cou
 ### F4 — `sendTyping` debounce is inverted
 
 **Problem:** Current code:
+
 ```ts
 if (newMessage.length > 0) sendTyping(false);  // stops typing when you ARE typing
 ```
+
 This sends a "stop typing" event every time the user types a character.
 
 **Fix:**
+
 ```ts
 // On keypress: send typing=true immediately
 sendTyping(true);
@@ -136,12 +163,14 @@ debouncedStopTyping();  // always fires after 2s idle, regardless of content
 **Problem:** The `message_status` table exists in the DB schema but nothing writes to it or reads from it. All messages show double grey ticks with no semantic meaning.
 
 **Fix — Backend:**
+
 - `ChatService.sendMessage()` → insert `MessageStatus(message, sender, SENT)` after save
 - `ChatWebSocketController` → when a message is delivered to a subscriber, broadcast `MessageStatus` update with `DELIVERED` to `/topic/user/{userId}/status`
 - `ChatController.getMessages()` → call `markAsDelivered(userId, conversationId)` on message fetch
 - `POST /api/chat/conversations/{id}/read` → mark all as `READ` for current user, broadcast `READ` events
 
 **Fix — Frontend:**
+
 - Subscribe to `/topic/user/{userId}/status` in `ChatContext`
 - In `MessageBubble`, render:
   - Single grey tick = `SENT`
@@ -153,12 +182,15 @@ debouncedStopTyping();  // always fires after 2s idle, regardless of content
 ### F6 — `ChatMessage` TypeScript type is incomplete
 
 **Problem:** Backend sends `FILE`, `VIDEO`, `AUDIO` content types. Frontend TS type only allows:
+
 ```ts
 contentType: 'TEXT' | 'IMAGE' | 'WORKOUT_PLAN' | 'DIET_PLAN' | 'VOICE_NOTE'
 ```
+
 Any `FILE` or `VIDEO` message causes a TypeScript type error and renders nothing.
 
 **Fix:** Update the type union in `chatApi.ts`:
+
 ```ts
 contentType: 'TEXT' | 'IMAGE' | 'FILE' | 'VIDEO' | 'AUDIO' | 'VOICE_NOTE' | 'WORKOUT_PLAN' | 'DIET_PLAN'
 ```
@@ -170,6 +202,7 @@ contentType: 'TEXT' | 'IMAGE' | 'FILE' | 'VIDEO' | 'AUDIO' | 'VOICE_NOTE' | 'WOR
 **Problem:** `ChatSidebar` hardcodes `const totalUnread = 3`. Backend conversation list endpoint does not compute `unreadCount` per conversation.
 
 **Fix — Backend:** In `ChatController.getConversations()`, for each conversation:
+
 ```java
 long unread = messageStatusRepository.countByConversationAndUserAndStatusNot(
     conv.getConversationId(), userId, MessageStatusType.READ
@@ -190,11 +223,13 @@ dto.setUnreadCount((int) unread);
 ### O1 — Owner Messages Page at `/owner/messages`
 
 **What to build:**
+
 - New page: `frontend/src/pages/Dashboard/OwnerMessages.tsx`
 - Add route `/messages` to the owner `AppShell` in `App.tsx`
 - Add "Messages" nav item to the owner sidebar with an unread badge
 
 **Owner-specific use cases:**
+
 1. Message any trainer in their gym directly (no request needed)
 2. Message any member in their gym directly (no request needed)
 3. Send broadcast announcements to all members or a filtered subset (e.g. "all members on Plan A")
@@ -206,12 +241,7 @@ dto.setUnreadCount((int) unread);
 
 The owner sidebar has different tabs than trainer/member:
 
-| Tab | Content |
-|---|---|
-| **Chats** | All active conversations (same as trainer/member) |
-| **Trainers** | List all trainers in the owner's gym — click to open/start direct chat |
-| **Members** | List all gym members — click to open/start direct chat |
-| **Announcements** | Past broadcasts + "New Announcement" button |
+TabContent**Chats**All active conversations (same as trainer/member)**Trainers**List all trainers in the owner's gym — click to open/start direct chat**Members**List all gym members — click to open/start direct chat**Announcements**Past broadcasts + "New Announcement" button
 
 ---
 
@@ -219,7 +249,8 @@ The owner sidebar has different tabs than trainer/member:
 
 **Problem:** `startOrGetConversation()` uses `isDirectAccess` flag to skip the conversation request flow. Currently this only checks trainer↔assigned-member. Owners bypass no one.
 
-**Fix — Add `isOwnerOf()` check:**
+**Fix — Add** `isOwnerOf()` **check:**
+
 ```java
 boolean isOwnerOf(User owner, User target) {
     // owner.getOwnedGym() contains target (member or trainer)
@@ -240,24 +271,21 @@ boolean isDirectAccess = isTrainerOf(user1, user2)
 
 Unlike the trainer action bar which sends workout plans, the owner action bar offers:
 
-| Button | Action |
-|---|---|
-| **Send Announcement** | Opens `AnnouncementModal` → select audience (all / by plan / by trainer) → sends as a group broadcast |
-| **View Member Profile** | Navigate to `/owner/members/:id` (opens in new tab or modal) |
-| **View Trainer Profile** | Navigate to `/owner/trainers/:id` |
-| **Payment Status** | Quick badge showing if member has an active plan |
+ButtonAction**Send Announcement**Opens `AnnouncementModal` → select audience (all / by plan / by trainer) → sends as a group broadcast**View Member Profile**Navigate to `/owner/members/:id` (opens in new tab or modal)**View Trainer Profile**Navigate to `/owner/trainers/:id`**Payment Status**Quick badge showing if member has an active plan
 
 ---
 
 ### O5 — Announcement / Broadcast Feature
 
 **Backend:**
+
 - `POST /api/chat/announcements` — owner creates a broadcast
 - Body: `{ title, content, audience: 'ALL' | 'BY_PLAN' | 'BY_TRAINER', planId?, trainerId? }`
 - Service: creates one `Message` per targeted member conversation (or a shared group conversation)
 - New `AnnouncementHistory` model to track what was sent, to whom, when
 
 **Frontend:**
+
 - `AnnouncementModal.tsx` — step 1: write message, step 2: choose audience, step 3: preview count, step 4: confirm send
 - Announcements show in the "Announcements" tab as sent cards with recipient count
 
@@ -274,6 +302,7 @@ Unlike the trainer action bar which sends workout plans, the owner action bar of
 **What's broken:** Clicking the image opens a new browser tab. No in-app viewer.
 
 **Fix:** Create `ImageLightbox.tsx` — a full-screen overlay modal with:
+
 - The image centered with `object-fit: contain`
 - Download button (top-right)
 - Close button or click-outside-to-close
@@ -286,6 +315,7 @@ Unlike the trainer action bar which sends workout plans, the owner action bar of
 **What's broken:** `FILE` content type renders nothing — the message appears blank.
 
 **Fix:** Parse the `payload` JSON and render a file card:
+
 ```tsx
 if (message.contentType === 'FILE' && message.payload) {
   const meta = JSON.parse(message.payload);
@@ -315,7 +345,8 @@ Create `FileCard.tsx` as a standalone reusable component. Add `.file-card` style
 
 **What's missing:** No recording UI. No playback UI.
 
-**Fix — Recording (`VoiceRecorder.tsx`):**
+**Fix — Recording (**`VoiceRecorder.tsx`**):**
+
 - Microphone button in the `ChatWindow` input bar (replaces the send button when no text is typed)
 - Press-and-hold to record using the browser `MediaRecorder` API
 - Recording state: animated pulse ring around the mic icon
@@ -323,7 +354,8 @@ Create `FileCard.tsx` as a standalone reusable component. Add `.file-card` style
 - On success → send a `VOICE_NOTE` message with `payload: { url, duration }`
 - Cancel by dragging left (standard voice message UX)
 
-**Fix — Playback (`MessageBubble`):**
+**Fix — Playback (**`MessageBubble`**):**
+
 ```tsx
 if (message.contentType === 'VOICE_NOTE' && message.payload) {
   const meta = JSON.parse(message.payload);
@@ -345,11 +377,13 @@ Add `.voice-note` styles to `Chat.css` with a custom audio player skin.
 **What's broken:** Single `<input type="file">` with no `accept` filter. User can attach anything, causing backend to receive unexpected MIME types.
 
 **Fix:** Split the paperclip button into a small popup menu with three options:
-```
+
+```plaintext
 📷 Photo / Video    accept="image/*,video/*"
 📎 Document         accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip"
 🎵 Audio File       accept="audio/*"
 ```
+
 Each triggers its own hidden `<input>` with the appropriate `accept` attribute.
 
 ---
@@ -363,6 +397,7 @@ Each triggers its own hidden `<input>` with the appropriate `accept` attribute.
 **Problem 3:** Filenames are stored as-is — path traversal risk (`../../etc/passwd`).
 
 **Fix:**
+
 ```java
 @PostMapping("/api/chat/attachments")
 @PreAuthorize("isAuthenticated()")
@@ -389,11 +424,17 @@ public ResponseEntity<?> uploadAttachment(
 **What's broken:** Trainer clicks "Share Workout Plan" in the action bar → navigated to `/trainer/members`, abandoning the chat entirely.
 
 **Fix:** Replace the navigation with a modal:
+
 - `WorkoutPlanModal.tsx` opens inline within `TrainerMessages.tsx`
+
 - Fetches the active conversation member's workout plans from the existing workout plan API
+
 - Shows a list of plans with exercise count and last updated date
+
 - Trainer selects a plan → click "Send"
+
 - Sends a `WORKOUT_PLAN` message with `payload` = serialized plan JSON:
+
   ```json
   {
     "planId": 12,
@@ -411,6 +452,7 @@ public ResponseEntity<?> uploadAttachment(
 **What's broken:** `WORKOUT_PLAN` messages render a card with a "View Plan" button. The button has no `onClick`.
 
 **Fix:**
+
 - Parse `message.payload` JSON on render
 - "View Plan" onClick → open `WorkoutPlanViewModal.tsx` showing the full plan:
   - Plan name + creation date
@@ -425,6 +467,7 @@ public ResponseEntity<?> uploadAttachment(
 **What's broken:** Trainer clicks "Share Progress Note" → navigated to `/trainer/progress-notes`, abandoning the chat.
 
 **Fix:** Open a `ProgressNoteModal.tsx` inline:
+
 - Lists the last 10 progress notes for the active conversation member
 - Trainer selects one → click "Share"
 - Sends as a styled card message (new content type `PROGRESS_NOTE` or rendered within `TEXT` with a special `payload`)
@@ -437,6 +480,7 @@ public ResponseEntity<?> uploadAttachment(
 **What's broken:** The "Book Session" button in the `ChatWindow` header has no `onClick` handler. It does nothing and confuses users.
 
 **Fix options (choose one):**
+
 - **Option A:** Wire it to open the scheduling/booking modal if one exists
 - **Option B:** Remove it entirely (also listed in Phase 8 cleanup)
 
@@ -453,6 +497,7 @@ For now, remove it (Phase 8 R4) and re-add when scheduling is built.
 **Problem:** The main tab buttons (Chats / Requests / Members) use raw `style={{}}` objects. Active state is also inline. This is unmaintainable and non-themeable.
 
 **Fix:** Add to `Chat.css`:
+
 ```css
 .chat-main-tab {
   padding: 8px 16px;
@@ -470,6 +515,7 @@ For now, remove it (Phase 8 R4) and re-add when scheduling is built.
   color: #fff;
 }
 ```
+
 Remove all `style={{}}` from tab buttons in `ChatSidebar.tsx`.
 
 ---
@@ -479,12 +525,14 @@ Remove all `style={{}}` from tab buttons in `ChatSidebar.tsx`.
 **Problem:** Every conversation preview shows "Tap to view message" regardless of actual last message.
 
 **Fix — Backend:** `ConversationDTO` must include:
+
 - `lastMessageContent: String` — truncated to 60 chars
 - `lastMessageType: String` — to show "📷 Photo", "🎤 Voice", "📎 File" prefixes
 - `lastMessageAt: LocalDateTime`
 - `lastMessageSenderId: Long` — to show "You: ..." prefix for own messages
 
 **Fix — Frontend:** In `ChatSidebar` conversation list item:
+
 ```tsx
 const preview = () => {
   if (!conv.lastMessageContent) return 'No messages yet';
@@ -503,6 +551,7 @@ const preview = () => {
 **Problem:** Single-line `<input type="text">` cannot handle multi-line messages. Pasting a paragraph puts everything on one line.
 
 **Fix:**
+
 ```tsx
 <textarea
   ref={textareaRef}
@@ -526,6 +575,7 @@ const preview = () => {
 ```
 
 Add to `Chat.css`:
+
 ```css
 .chat-input__textarea {
   resize: none;
@@ -544,6 +594,7 @@ Add to `Chat.css`:
 **Problem:** Emoji button exists in `ChatWindow` input bar but has no `onClick` and does nothing.
 
 **Fix:** Install `emoji-picker-react` (check if already in `package.json` first):
+
 ```bash
 npm install emoji-picker-react
 ```
@@ -574,7 +625,8 @@ const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
 > Depends on Phase 1 F5 (MessageStatus being written to DB)
 
-**Render logic in `MessageBubble`** (only for messages sent by current user):
+**Render logic in** `MessageBubble` (only for messages sent by current user):
+
 ```tsx
 const StatusTick = ({ status }: { status: string }) => {
   if (status === 'READ')      return <span className="tick tick--read">✓✓</span>;
@@ -584,6 +636,7 @@ const StatusTick = ({ status }: { status: string }) => {
 ```
 
 CSS:
+
 ```css
 .tick--sent      { color: #aaa; }
 .tick--delivered { color: #aaa; }
@@ -597,6 +650,7 @@ CSS:
 **Problem:** `isOnline` is hardcoded `false` everywhere. The green dot in the sidebar and header is never shown.
 
 **Fix — Backend:**
+
 - Add `PresenceService` — maintains a `ConcurrentHashMap<Long, Instant>` of userId → lastSeenAt
 - `ChatWebSocketController.afterConnectionEstablished()` → call `presenceService.setOnline(userId)`
 - `ChatWebSocketController.afterConnectionClosed()` → call `presenceService.setOffline(userId)`
@@ -604,6 +658,7 @@ CSS:
 - Add `GET /api/chat/presence?userIds=1,2,3` for initial state on page load
 
 **Fix — Frontend:**
+
 - In `ChatContext.connect()`, after WS subscribe, call the presence endpoint for all conversation participants
 - Subscribe to `/topic/presence` → update a `presenceMap: Map<number, boolean>` in context
 - Pass `isOnline={presenceMap.get(conv.otherUserId) ?? false}` to sidebar items and chat header
@@ -615,7 +670,8 @@ CSS:
 > Also required for Phase 1 F1 crash fix — create the file first, fill in design after
 
 Panel layout (right-side drawer, 280px wide):
-```
+
+```plaintext
 [ Avatar (large, centered) ]
 [ Full Name ]
 [ Role badge: TRAINER / MEMBER / OWNER ]
@@ -634,6 +690,7 @@ Panel layout (right-side drawer, 280px wide):
 ```
 
 Data sources:
+
 - Participant info: from `conversation.participants`
 - Shared media: `GET /api/chat/conversations/{id}/media` (new endpoint — see Phase 7 B7)
 - Shared files: same endpoint filtered by type `FILE`
@@ -656,10 +713,11 @@ Data sources:
 **Where:** Search icon in the `ChatWindow` header (top-right, next to the info icon).
 
 **Behaviour:**
+
 - Click icon → a search bar slides down below the header
 - User types → debounced filter on already-loaded `messages` array (client-side, instant)
 - If user scrolls to top and loads more (pagination) → re-filter against expanded list
-- For deep search (> 50 messages not loaded): show "Search all messages" button → calls `POST /api/chat/conversations/{id}/messages/search` (Phase 7 B6)
+- For deep search (&gt; 50 messages not loaded): show "Search all messages" button → calls `POST /api/chat/conversations/{id}/messages/search` (Phase 7 B6)
 - Matches highlighted in yellow in `MessageBubble`
 
 ---
@@ -669,18 +727,24 @@ Data sources:
 **What exists:** `Message` model has `replyToMessageId` field ✅. It is never set in the frontend.
 
 **Fix — Frontend:**
+
 - Hover/long-press on any `MessageBubble` → show reply icon (↩) in the action row
+
 - Click reply → sets `replyingTo: ChatMessage | null` state in `ChatWindow`
+
 - Above the input bar, show a compact quoted preview:
-  ```
+
+  ```plaintext
   ┌─────────────────────────┐
   │ ↩ Replying to John      │  [✕ cancel]
   │ "Can you share the plan?"│
   └─────────────────────────┘
   ```
+
 - Send → includes `replyToMessageId` in the WS message payload
 
-**Fix — `MessageBubble` rendering:**
+**Fix —** `MessageBubble` **rendering:**
+
 ```tsx
 {message.replyToMessage && (
   <div className="message-bubble__reply-preview">
@@ -699,7 +763,8 @@ Data sources:
 **What's broken:** Reactions are never displayed in `MessageBubble`. There's no UI to add/remove a reaction.
 
 **Fix:**
-- Below each `MessageBubble`, render reaction pills: `😊 2  ❤️ 1`
+
+- Below each `MessageBubble`, render reaction pills: `😊 2 ❤️ 1`
 - Clicking a pill toggles your reaction (add if not reacted, remove if already reacted)
 - Long-press on a message (or hover) shows a reaction picker bar with 6 quick emojis
 - New reactions broadcast via WS to the conversation topic
@@ -711,12 +776,14 @@ Data sources:
 **Problem:** Conversations may not be sorted by most recent message. The `lastMessageAt` field (Phase 2 B1) must be used as the sort key.
 
 **Fix:** In `ChatContext`, after loading conversations:
+
 ```ts
 conversations.sort((a, b) => 
   new Date(b.lastMessageAt ?? b.createdAt).getTime() - 
   new Date(a.lastMessageAt ?? a.createdAt).getTime()
 );
 ```
+
 Also re-sort when a new message arrives via WS (move that conversation to the top, WhatsApp style).
 
 ---
@@ -728,6 +795,7 @@ Also re-sort when a new message arrives via WS (move that conversation to the to
 **What's missing:** No visual display of "John is typing..." in `ChatWindow`.
 
 **Fix:** Below the last message (above the input), when `typingUsers` contains the other participant:
+
 ```tsx
 {isOtherUserTyping && (
   <div className="typing-indicator">
@@ -748,6 +816,7 @@ Also re-sort when a new message arrives via WS (move that conversation to the to
 ### D1 — Add Flyway Migration for Chat Tables
 
 **Problem:** All chat tables are created by Hibernate `ddl-auto=update`. This is fragile in production:
+
 - Order of table creation is non-deterministic
 - Oracle dialect differences can cause silent failures
 - No rollback path
@@ -755,6 +824,7 @@ Also re-sort when a new message arrives via WS (move that conversation to the to
 **Fix:** Create `backend/src/main/resources/db/migration/V19__create_chat_tables.sql`:
 
 Tables to include (Oracle-compatible DDL):
+
 - `conversations` (conversation_id, title, type, is_group, created_at, updated_at, last_message_id)
 - `conversation_participants` (id, conversation_id FK, user_id FK, joined_at, role)
 - `conversation_requests` (id, sender_id FK, receiver_id FK, status, message, created_at)
@@ -774,6 +844,7 @@ Set `ddl-auto=validate` after creating this migration to prevent Hibernate from 
 **Problem:** Every message fetch query does `ORDER BY created_at DESC WHERE conversation_id = ?`. Without an index, Oracle does a full table scan.
 
 **Fix:** Add to migration:
+
 ```sql
 CREATE INDEX idx_messages_conv_time ON messages (conversation_id, created_at DESC);
 ```
@@ -785,9 +856,11 @@ CREATE INDEX idx_messages_conv_time ON messages (conversation_id, created_at DES
 **Problem:** Read receipt queries look up status by `message_id + user_id`. No index.
 
 **Fix:**
+
 ```sql
 CREATE UNIQUE INDEX idx_msg_status_msg_user ON message_status (message_id, user_id);
 ```
+
 The unique constraint also prevents duplicate status rows per user per message.
 
 ---
@@ -797,6 +870,7 @@ The unique constraint also prevents duplicate status rows per user per message.
 **Problem:** `getPendingRequests()` queries `WHERE receiver_id = ? AND status = 'PENDING'`. No index → full scan.
 
 **Fix:**
+
 ```sql
 CREATE INDEX idx_conv_req_receiver_status ON conversation_requests (receiver_id, status);
 ```
@@ -808,10 +882,12 @@ CREATE INDEX idx_conv_req_receiver_status ON conversation_requests (receiver_id,
 **Problem:** Every conversation list load runs a subquery to find the latest message per conversation. With 100 conversations this is 100 subqueries.
 
 **Fix:** Add `last_message_id NUMBER(19)` to the `conversations` table. Update `ChatService.sendMessage()`:
+
 ```java
 conversation.setLastMessageId(savedMessage.getMessageId());
 conversationRepository.save(conversation);
 ```
+
 Join to `messages` in `getConversations()` to get the last message in a single query instead of N subqueries.
 
 ---
@@ -821,6 +897,7 @@ Join to `messages` in `getConversations()` to get the last message in a single q
 **Problem:** `message_status` table is always empty. All the status-related code in Phase 1 F5 depends on this being populated.
 
 **Fix:** In `ChatService.sendMessage()`, after `messageRepository.save(message)`:
+
 ```java
 MessageStatus sentStatus = new MessageStatus();
 sentStatus.setMessage(savedMessage);
@@ -840,6 +917,7 @@ messageStatusRepository.save(sentStatus);
 **Current:** `GET /api/chat/conversations` returns conversations with no last message data.
 
 **Fix:** In `ChatController.getConversations()`:
+
 ```java
 Message lastMsg = messageRepository
     .findTopByConversationConversationIdOrderByCreatedAtDesc(conv.getConversationId());
@@ -860,6 +938,7 @@ Add these four fields to `ConversationDTO`.
 ### B2 — Add `unreadCount` to Conversation List Response
 
 **Fix:** See Phase 1 F7. Add to each `ConversationDTO`:
+
 ```java
 long unread = messageStatusRepository
     .countByConversationIdAndUserIdAndStatusNot(conv.getConversationId(), userId, MessageStatusType.READ);
@@ -870,12 +949,13 @@ dto.setUnreadCount((int) unread);
 
 ### B3 — Add Read Receipt Endpoint
 
-```
+```plaintext
 POST /api/chat/conversations/{conversationId}/read
 Authorization: Bearer {token}
 ```
 
 **Service logic:**
+
 1. Find all messages in conversation where status for current user is `SENT` or `DELIVERED`
 2. Update all to `READ`
 3. Broadcast via WS to each message's sender: `{ type: 'READ_RECEIPT', conversationId, readBy: userId, readAt }`
@@ -892,6 +972,7 @@ Authorization: Bearer {token}
 **What exists:** `chatApi.ts` already accepts `page` and `size` params ✅.
 
 **Fix — Frontend:**
+
 - `ChatContext.loadMessages(conversationId, page)` appends to the message list when `page > 0` instead of replacing it
 - `ChatWindow` detects scroll to top → calls `loadMessages(conversationId, currentPage + 1)`
 - Show a loading spinner at the top during fetch
@@ -905,7 +986,7 @@ Authorization: Bearer {token}
 
 > Required by Phase 5 U7 (`ContactInfoPanel`)
 
-```
+```plaintext
 GET /api/chat/conversations/{conversationId}/media?type=IMAGE&page=0&size=18
 GET /api/chat/conversations/{conversationId}/media?type=FILE&page=0&size=10
 ```
@@ -918,7 +999,7 @@ Returns all `MessageAttachment` records for a conversation filtered by MIME type
 
 > Required by Phase 5 U9 (deep search)
 
-```
+```plaintext
 POST /api/chat/conversations/{conversationId}/messages/search
 Body: { "query": "workout plan", "page": 0, "size": 20 }
 ```
@@ -931,7 +1012,7 @@ Returns messages where `LOWER(content) LIKE LOWER('%query%')`. Supports paginati
 
 > Required by Phase 2 O5
 
-```
+```plaintext
 POST /api/chat/announcements
 Body: {
   "title": "Holiday Schedule Change",
@@ -943,6 +1024,7 @@ Body: {
 ```
 
 **Service logic:**
+
 1. Resolve target user IDs based on `audience` filter
 2. For each target user: `startOrGetConversation(owner, targetUser)` → `sendMessage(conversationId, content, TEXT)`
 3. Save an `Announcement` record with `recipientCount`
@@ -954,7 +1036,7 @@ Body: {
 
 > Required by Phase 5 U6
 
-```
+```plaintext
 GET /api/chat/presence?userIds=1,2,3,4
 Response: { "1": true, "2": false, "3": true, "4": false }
 ```
@@ -986,6 +1068,7 @@ const totalUnread = conversations.reduce((sum, c) => sum + (c.unreadCount ?? 0),
 Files: `ChatSidebar.tsx`, `NewChatModal.tsx`
 
 The project already uses `react-hot-toast`. Replace all `alert('...')` and `window.alert('...')` with:
+
 ```tsx
 import toast from 'react-hot-toast';
 toast.error('Could not start conversation. Please try again.');
@@ -1028,52 +1111,19 @@ Audit each file for `style={{...}}` props. Move every style to a named CSS class
 
 ## Files To Create
 
-| File | Purpose |
-|---|---|
-| `frontend/src/components/chat/ContactInfoPanel.tsx` | Fixes crash in Phase 1 F1; full design in Phase 5 U7 |
-| `frontend/src/components/chat/ContactInfoPanel.css` | Styles for the contact info panel |
-| `frontend/src/components/chat/FileCard.tsx` | Render FILE-type messages (Phase 3 M2) |
-| `frontend/src/components/chat/ImageLightbox.tsx` | Full-screen image viewer (Phase 3 M1) |
-| `frontend/src/components/chat/VoiceRecorder.tsx` | Hold-to-record mic button (Phase 3 M3) |
-| `frontend/src/components/chat/WorkoutPlanModal.tsx` | Trainer selects and sends a workout plan (Phase 4 T1) |
-| `frontend/src/components/chat/WorkoutPlanViewModal.tsx` | View full workout plan from a WORKOUT_PLAN message (Phase 4 T2) |
-| `frontend/src/components/chat/ProgressNoteModal.tsx` | Trainer selects and shares a progress note (Phase 4 T3) |
-| `frontend/src/components/chat/AnnouncementModal.tsx` | Owner creates a broadcast announcement (Phase 2 O5) |
-| `frontend/src/pages/Dashboard/OwnerMessages.tsx` | Owner messages page (Phase 2 O1) |
-| `frontend/src/pages/Dashboard/OwnerMessages.css` | Owner-specific chat layout styles |
-| `backend/.../V19__create_chat_tables.sql` | Flyway migration for all chat tables (Phase 6 D1) |
-| `backend/.../PresenceService.java` | Tracks online users in-memory (Phase 5 U6) |
-| `backend/.../AnnouncementController.java` | REST endpoint for owner broadcasts (Phase 7 B7) |
-| `backend/.../Announcement.java` | JPA model for announcement history (Phase 2 O5) |
+FilePurpose`frontend/src/components/chat/ContactInfoPanel.tsx`Fixes crash in Phase 1 F1; full design in Phase 5 U7`frontend/src/components/chat/ContactInfoPanel.css`Styles for the contact info panel`frontend/src/components/chat/FileCard.tsx`Render FILE-type messages (Phase 3 M2)`frontend/src/components/chat/ImageLightbox.tsx`Full-screen image viewer (Phase 3 M1)`frontend/src/components/chat/VoiceRecorder.tsx`Hold-to-record mic button (Phase 3 M3)`frontend/src/components/chat/WorkoutPlanModal.tsx`Trainer selects and sends a workout plan (Phase 4 T1)`frontend/src/components/chat/WorkoutPlanViewModal.tsx`View full workout plan from a WORKOUT_PLAN message (Phase 4 T2)`frontend/src/components/chat/ProgressNoteModal.tsx`Trainer selects and shares a progress note (Phase 4 T3)`frontend/src/components/chat/AnnouncementModal.tsx`Owner creates a broadcast announcement (Phase 2 O5)`frontend/src/pages/Dashboard/OwnerMessages.tsx`Owner messages page (Phase 2 O1)`frontend/src/pages/Dashboard/OwnerMessages.css`Owner-specific chat layout styles`backend/.../V19__create_chat_tables.sql`Flyway migration for all chat tables (Phase 6 D1)`backend/.../PresenceService.java`Tracks online users in-memory (Phase 5 U6)`backend/.../AnnouncementController.java`REST endpoint for owner broadcasts (Phase 7 B7)`backend/.../Announcement.java`JPA model for announcement history (Phase 2 O5)
 
 ---
 
 ## Files To Modify
 
-| File | Changes Required |
-|---|---|
-| `ChatLayout.tsx` | Fix ContactInfoPanel import path |
-| `ChatContext.tsx` | Add real unreadCount, presence map, read-on-open, pagination, WS reconnect on token refresh, re-sort conversations on new message |
-| `ChatSidebar.tsx` | Remove all inline styles → CSS classes, fix unread badge, add owner tabs (Trainers/Members/Announcements), replace alert() with toast |
-| `ChatWindow.tsx` | Fix typing debounce, replace input → textarea, wire emoji picker, separate file upload buttons, trigger read receipt on open |
-| `MessageBubble.tsx` | Add FILE rendering (FileCard), AUDIO/VOICE_NOTE rendering, reply-to snippet, reaction display, fix "View Plan" button, add delivery ticks |
-| `NewChatModal.tsx` | Fix API call name mismatch, fix double-unwrap bug |
-| `chatApi.ts` | Add FILE/VIDEO/AUDIO to content type union, add `uploadAttachment`, `markRead`, `searchMessages`, `getSharedMedia`, `getPresence` |
-| `TrainerMessages.tsx` | Fix action bar: open WorkoutPlanModal / ProgressNoteModal instead of navigating away |
-| `MemberMessages.tsx` | Add member-specific sidebar shortcut to message their trainer |
-| `App.tsx` | Add `/messages` route for owner + add nav item to owner sidebar |
-| `Chat.css` | Add: tab CSS classes, file card styles, voice note player styles, image lightbox overlay, reply-to preview styles, typing indicator styles, delivery tick styles, emoji picker popup positioning |
-| `ChatService.java` | Fix `isTrainerOf()` Oracle bug, add `isOwnerOf()`, write MessageStatus on send, mark delivered on fetch |
-| `ChatController.java` | Add `lastMessage` + `unreadCount` to conversation DTO, add `POST .../read` endpoint, add `GET .../media` endpoint, add `POST .../messages/search` endpoint |
-| `AttachmentController.java` | Add `@PreAuthorize("isAuthenticated()")`, add 25MB size limit, sanitize filename (UUID prefix, no path traversal) |
-| `ConversationDTO.java` | Add: `lastMessageContent`, `lastMessageType`, `lastMessageAt`, `lastMessageSenderId`, `unreadCount` fields |
-| `Message.java` | Ensure `replyToMessage` is fetched correctly (not lazy-loading in a loop) |
+FileChanges Required`ChatLayout.tsx`Fix ContactInfoPanel import path`ChatContext.tsx`Add real unreadCount, presence map, read-on-open, pagination, WS reconnect on token refresh, re-sort conversations on new message`ChatSidebar.tsx`Remove all inline styles → CSS classes, fix unread badge, add owner tabs (Trainers/Members/Announcements), replace alert() with toast`ChatWindow.tsx`Fix typing debounce, replace input → textarea, wire emoji picker, separate file upload buttons, trigger read receipt on open`MessageBubble.tsx`Add FILE rendering (FileCard), AUDIO/VOICE_NOTE rendering, reply-to snippet, reaction display, fix "View Plan" button, add delivery ticks`NewChatModal.tsx`Fix API call name mismatch, fix double-unwrap bug`chatApi.ts`Add FILE/VIDEO/AUDIO to content type union, add `uploadAttachment`, `markRead`, `searchMessages`, `getSharedMedia`, `getPresenceTrainerMessages.tsx`Fix action bar: open WorkoutPlanModal / ProgressNoteModal instead of navigating away`MemberMessages.tsx`Add member-specific sidebar shortcut to message their trainer`App.tsx`Add `/messages` route for owner + add nav item to owner sidebar`Chat.css`Add: tab CSS classes, file card styles, voice note player styles, image lightbox overlay, reply-to preview styles, typing indicator styles, delivery tick styles, emoji picker popup positioning`ChatService.java`Fix `isTrainerOf()` Oracle bug, add `isOwnerOf()`, write MessageStatus on send, mark delivered on fetch`ChatController.java`Add `lastMessage` + `unreadCount` to conversation DTO, add `POST .../read` endpoint, add `GET .../media` endpoint, add `POST .../messages/search` endpoint`AttachmentController.java`Add `@PreAuthorize("isAuthenticated()")`, add 25MB size limit, sanitize filename (UUID prefix, no path traversal)`ConversationDTO.java`Add: `lastMessageContent`, `lastMessageType`, `lastMessageAt`, `lastMessageSenderId`, `unreadCount` fields`Message.java`Ensure `replyToMessage` is fetched correctly (not lazy-loading in a loop)
 
 ---
 
 ## Implementation Order
 
-```
+```plaintext
 ┌─────────────────────────────────────────────────────────────┐
 │  PHASE 1 — Bug Fixes (F1–F7)                                │
 │  Must be done first. Pages crash without ContactInfoPanel.  │
@@ -1125,6 +1175,7 @@ Audit each file for `style={{...}}` props. Move every style to a named CSS class
 ```
 
 **Why this order:**
+
 - Phase 1 first because the pages crash without `ContactInfoPanel` and the Oracle bug breaks all sends
 - Phase 6 (DB) before Phase 7 (API) because the new API endpoints depend on the new columns and indexes
 - Phase 2 (Owner) can proceed in parallel with Phase 6 since it only needs Phase 1 to be complete
