@@ -8,6 +8,8 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -16,6 +18,7 @@ import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/chat/attachments")
@@ -24,13 +27,33 @@ public class AttachmentController {
     @Autowired
     private AttachmentService attachmentService;
 
+    private static final long MAX_FILE_SIZE = 25L * 1024 * 1024; // 25 MB
+
     @PostMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> uploadAttachment(
             @RequestParam("file") MultipartFile file,
             @RequestParam(value = "conversationId", required = false) Long conversationId) {
 
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "No file provided"));
+        }
+
+        if (file.getSize() > MAX_FILE_SIZE) {
+            return ResponseEntity.badRequest().body(Map.of("error", "File exceeds the 25 MB limit"));
+        }
+
+        // Sanitize filename: strip path components, prefix with UUID to prevent collisions
+        String originalName = StringUtils.cleanPath(
+                file.getOriginalFilename() != null ? file.getOriginalFilename() : "upload");
+        // Reject any remaining path traversal attempts
+        if (originalName.contains("..") || originalName.contains("/") || originalName.contains("\\")) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Invalid filename"));
+        }
+        String safeName = UUID.randomUUID() + "_" + originalName;
+
         try {
-            MessageAttachment attachment = attachmentService.storeAttachment(file, conversationId);
+            MessageAttachment attachment = attachmentService.storeAttachment(file, conversationId, safeName);
 
             // If validation passes, we save (assuming nullable message)
             attachment = attachmentService.saveForLater(attachment);

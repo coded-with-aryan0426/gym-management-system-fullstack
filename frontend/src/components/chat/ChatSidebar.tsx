@@ -20,6 +20,8 @@ const FILTER_TABS: FilterTab[] = [
     { id: 'support', label: 'Support', role: 'SUPPORT' },
 ];
 
+type MainTab = 'chats' | 'requests' | 'members' | 'trainers';
+
 const ChatSidebar: React.FC = () => {
     const { conversations, activeConversation, setActiveConversation, loadConversations } = useChat();
     const { user } = useAuth();
@@ -27,35 +29,70 @@ const ChatSidebar: React.FC = () => {
     const [activeFilter, setActiveFilter] = useState('all');
     const [showNewChatModal, setShowNewChatModal] = useState(false);
 
-    // Trainers members
+    // Members / trainers lists
     const [myMembers, setMyMembers] = useState<any[]>([]);
-    const [loadingMembers, setLoadingMembers] = useState(false);
+    const [gymTrainers, setGymTrainers] = useState<any[]>([]);
+    const [loadingList, setLoadingList] = useState(false);
 
-    // New state for tabs
-    const [activeTab, setActiveTab] = useState<'chats' | 'requests' | 'members'>(() => {
-        return user?.role === 'TRAINER' ? 'members' : 'chats';
+    const isOwner = user?.role === 'OWNER';
+    const isTrainer = user?.role === 'TRAINER';
+
+    const [activeTab, setActiveTab] = useState<MainTab>(() => {
+        if (isTrainer) return 'members';
+        return 'chats';
     });
     const [requests, setRequests] = useState<any[]>([]);
 
     React.useEffect(() => {
         if (activeTab === 'requests') {
             fetchRequests();
-        } else if (activeTab === 'members' && user?.role === 'TRAINER') {
+        } else if (activeTab === 'members' && isTrainer) {
             fetchMyMembers();
+        } else if (activeTab === 'members' && isOwner) {
+            fetchOwnerMembers();
+        } else if (activeTab === 'trainers' && isOwner) {
+            fetchOwnerTrainers();
         }
     }, [activeTab, user]);
 
     const fetchMyMembers = async () => {
         if (!user?.id) return;
-        setLoadingMembers(true);
+        setLoadingList(true);
         try {
-            // Assuming user.id is number, if not cast it
             const members = await api.getTrainerCustomers(Number(user.id));
             setMyMembers(members || []);
         } catch (error) {
             console.error('Failed to fetch members', error);
         } finally {
-            setLoadingMembers(false);
+            setLoadingList(false);
+        }
+    };
+
+    const fetchOwnerMembers = async () => {
+        const gymId = user?.activeGymId;
+        if (!gymId) return;
+        setLoadingList(true);
+        try {
+            const members = await chatApi.getUsersByRole(gymId, 'MEMBER');
+            setMyMembers(members || []);
+        } catch (error) {
+            console.error('Failed to fetch gym members', error);
+        } finally {
+            setLoadingList(false);
+        }
+    };
+
+    const fetchOwnerTrainers = async () => {
+        const gymId = user?.activeGymId;
+        if (!gymId) return;
+        setLoadingList(true);
+        try {
+            const trainers = await chatApi.getUsersByRole(gymId, 'TRAINER');
+            setGymTrainers(trainers || []);
+        } catch (error) {
+            console.error('Failed to fetch gym trainers', error);
+        } finally {
+            setLoadingList(false);
         }
     };
 
@@ -80,7 +117,6 @@ const ChatSidebar: React.FC = () => {
             };
         }
 
-        // For private chat, find the other participant
         const currentUserId = user?.userId || Number(user?.id);
         const otherParticipant = conv.participants?.find(
             (p: any) => Number(p.userId) !== currentUserId
@@ -91,7 +127,7 @@ const ChatSidebar: React.FC = () => {
             initials: getInitials(otherParticipant?.fullName || otherParticipant?.username),
             avatarId: otherParticipant?.avatarId,
             role: otherParticipant?.role || 'MEMBER',
-            isOnline: false // TODO: Implement presence
+            isOnline: false
         };
     };
 
@@ -102,24 +138,22 @@ const ChatSidebar: React.FC = () => {
         return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
     };
 
-    const handleMemberClick = async (member: any) => {
-        // Check if conversation exists
-        const existing = conversations.find(c => {
-            const other = c.participants?.find((p: any) => Number(p.userId) === member.userId);
-            return !!other;
-        });
+    const handlePersonClick = async (person: any) => {
+        const personId = person.userId ?? person.id;
+        const existing = conversations.find(c =>
+            c.participants?.some((p: any) => Number(p.userId) === Number(personId))
+        );
 
         if (existing) {
             setActiveConversation(existing);
         } else {
             try {
-                // chatApi.startPrivateChat already unwraps the ApiResponse
-                const conversation = await chatApi.startPrivateChat(member.userId);
+                const conversation = await chatApi.startPrivateChat(Number(personId));
                 setActiveConversation(conversation);
                 await loadConversations();
             } catch (err) {
-                console.error("Failed to start chat with member", err);
-                showToast.error("Failed to start chat");
+                console.error('Failed to start chat', err);
+                showToast.error('Failed to start chat');
             }
         }
         setActiveTab('chats');
@@ -180,16 +214,13 @@ const ChatSidebar: React.FC = () => {
         }
     };
 
-    // Filter conversations
     const filteredConversations = conversations.filter(conv => {
         const display = getConversationDisplay(conv);
 
-        // Search filter
         if (searchQuery && !display.name.toLowerCase().includes(searchQuery.toLowerCase())) {
             return false;
         }
 
-        // Role filter
         if (activeFilter !== 'all') {
             const filterTab = FILTER_TABS.find(t => t.id === activeFilter);
             if (filterTab?.role && display.role?.toUpperCase() !== filterTab.role) {
@@ -201,6 +232,30 @@ const ChatSidebar: React.FC = () => {
     });
 
     const totalUnread = conversations.reduce((sum, c) => sum + (c.unreadCount ?? 0), 0);
+
+    // Render a person row for Members/Trainers tabs
+    const renderPersonRow = (person: any, roleLabel: string) => {
+        const personId = person.userId ?? person.id;
+        return (
+            <div
+                key={personId}
+                className="conversation-item"
+                onClick={() => handlePersonClick(person)}
+            >
+                <div className="conversation-item__avatar">
+                    <div className={`conversation-item__avatar-img ${roleLabel === 'TRAINER' ? 'conversation-item__avatar-img--trainer' : ''}`}>
+                        {getInitials(person.fullName || person.username)}
+                    </div>
+                </div>
+                <div className="conversation-item__content">
+                    <div className="conversation-item__header">
+                        <h4 className="conversation-item__name">{person.fullName || person.username}</h4>
+                    </div>
+                    <div className="conversation-item__preview">{roleLabel}</div>
+                </div>
+            </div>
+        );
+    };
 
     return (
         <>
@@ -236,7 +291,7 @@ const ChatSidebar: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Main Tabs (Chats vs Requests) */}
+                {/* Main Tabs */}
                 <div className="chat-main-tabs">
                     <button
                         className={`chat-main-tab ${activeTab === 'chats' ? 'chat-main-tab--active' : ''}`}
@@ -250,7 +305,7 @@ const ChatSidebar: React.FC = () => {
                     >
                         Requests {requests.length > 0 && `(${requests.length})`}
                     </button>
-                    {user?.role === 'TRAINER' && (
+                    {isTrainer && (
                         <button
                             className={`chat-main-tab ${activeTab === 'members' ? 'chat-main-tab--active' : ''}`}
                             onClick={() => setActiveTab('members')}
@@ -258,9 +313,25 @@ const ChatSidebar: React.FC = () => {
                             Members
                         </button>
                     )}
+                    {isOwner && (
+                        <>
+                            <button
+                                className={`chat-main-tab ${activeTab === 'trainers' ? 'chat-main-tab--active' : ''}`}
+                                onClick={() => setActiveTab('trainers')}
+                            >
+                                Trainers
+                            </button>
+                            <button
+                                className={`chat-main-tab ${activeTab === 'members' ? 'chat-main-tab--active' : ''}`}
+                                onClick={() => setActiveTab('members')}
+                            >
+                                Members
+                            </button>
+                        </>
+                    )}
                 </div>
 
-                {/* Filter Tabs (Only show for Chats, hidden for MEMBER role) */}
+                {/* Filter Tabs (Only show for Chats tab, hidden for MEMBER role) */}
                 {activeTab === 'chats' && user?.role !== 'MEMBER' && (
                     <div className="chat-filter-tabs">
                         {FILTER_TABS.map(tab => (
@@ -280,7 +351,7 @@ const ChatSidebar: React.FC = () => {
                     {activeTab === 'requests' ? (
                         <div className="requests-list">
                             {requests.length === 0 ? (
-                            <div className="chat-window__empty chat-window__empty--sm">No pending requests</div>
+                                <div className="chat-window__empty chat-window__empty--sm">No pending requests</div>
                             ) : (
                                 requests.map(req => (
                                     <RequestItem key={req.requestId} request={req} onRespond={fetchRequests} />
@@ -289,34 +360,26 @@ const ChatSidebar: React.FC = () => {
                         </div>
                     ) : activeTab === 'members' ? (
                         <div className="members-list">
-                            {loadingMembers ? (
+                            {loadingList ? (
                                 <div className="chat-list__loading">Loading...</div>
                             ) : myMembers.length === 0 ? (
-                                <div className="chat-window__empty chat-window__empty--sm">No members assigned</div>
+                                <div className="chat-window__empty chat-window__empty--sm">No members found</div>
                             ) : (
-                                myMembers.map(member => (
-                                    <div
-                                        key={member.userId}
-                                        className="conversation-item"
-                                        onClick={() => handleMemberClick(member)}
-                                    >
-                                        <div className="conversation-item__avatar">
-                                            <div className="conversation-item__avatar-img conversation-item__avatar-img--owner"> {/* Using generic color */}
-                                                {getInitials(member.fullName || member.username)}
-                                            </div>
-                                        </div>
-                                        <div className="conversation-item__content">
-                                            <div className="conversation-item__header">
-                                                <h4 className="conversation-item__name">{member.fullName || member.username}</h4>
-                                            </div>
-                                            <div className="conversation-item__preview">MEMBER</div>
-                                        </div>
-                                    </div>
-                                ))
+                                myMembers.map(m => renderPersonRow(m, 'MEMBER'))
+                            )}
+                        </div>
+                    ) : activeTab === 'trainers' ? (
+                        <div className="members-list">
+                            {loadingList ? (
+                                <div className="chat-list__loading">Loading...</div>
+                            ) : gymTrainers.length === 0 ? (
+                                <div className="chat-window__empty chat-window__empty--sm">No trainers found</div>
+                            ) : (
+                                gymTrainers.map(t => renderPersonRow(t, 'TRAINER'))
                             )}
                         </div>
                     ) : (
-                        // Existing Chat List Logic
+                        // Chats tab
                         filteredConversations.length === 0 ? (
                             <div className="chat-window__empty chat-window__empty--padded">
                                 <MessageCircle size={40} className="chat-window__empty-icon-sm" />

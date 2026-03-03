@@ -48,6 +48,9 @@ public class ChatController {
     @Autowired
     private com.gym.management.repository.MessageAttachmentRepository messageAttachmentRepository;
 
+    @Autowired
+    private com.gym.management.repository.UserGymRoleRepository userGymRoleRepository;
+
     // ==================== CONVERSATION ENDPOINTS ====================
 
     @GetMapping("/conversations")
@@ -193,6 +196,54 @@ public class ChatController {
         paged.put("page", messages.getNumber());
         paged.put("totalPages", messages.getTotalPages());
         paged.put("hasMore", messages.hasNext());
+
+        return ResponseEntity.ok(apiResponse(true, paged, null));
+    }
+
+    // B6 — Server-side message search within a conversation
+    @PostMapping("/conversations/{conversationId}/messages/search")
+    public ResponseEntity<?> searchMessages(
+            @PathVariable Long conversationId,
+            @RequestBody Map<String, Object> body,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+
+        Long currentUserId = getAuthenticatedUserId();
+
+        // Verify the caller is a participant in this conversation
+        boolean isParticipant = participantRepository
+                .findByConversationConversationIdAndUserUserId(conversationId, currentUserId)
+                .isPresent();
+        if (!isParticipant) {
+            return ResponseEntity.status(403).body(apiResponse(false, null, "Not a participant"));
+        }
+
+        String query = body.getOrDefault("query", "").toString().trim();
+        if (query.isEmpty()) {
+            return ResponseEntity.badRequest().body(apiResponse(false, null, "Search query is required"));
+        }
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Message> results = messageRepository.searchByContent(conversationId, query, pageable);
+
+        java.util.List<Map<String, Object>> dtos = results.getContent().stream().map(m -> {
+            Map<String, Object> dto = new HashMap<>();
+            dto.put("messageId", m.getMessageId());
+            dto.put("content", m.getContent());
+            dto.put("contentType", m.getContentType());
+            dto.put("createdAt", m.getCreatedAt());
+            if (m.getSender() != null) {
+                dto.put("senderId", m.getSender().getUserId());
+                dto.put("senderName", m.getSender().getFullName());
+            }
+            return dto;
+        }).collect(java.util.stream.Collectors.toList());
+
+        Map<String, Object> paged = new HashMap<>();
+        paged.put("messages", dtos);
+        paged.put("page", results.getNumber());
+        paged.put("totalPages", results.getTotalPages());
+        paged.put("hasMore", results.hasNext());
 
         return ResponseEntity.ok(apiResponse(true, paged, null));
     }
@@ -573,6 +624,72 @@ public class ChatController {
         result.put("hasMore", end < all.size());
 
         return ResponseEntity.ok(apiResponse(true, result, null));
+    }
+
+    // ==================== ANNOUNCEMENT BROADCAST (B7 / O5) ====================
+
+    /**
+     * POST /api/chat/announcements
+     * Sends a message to every TRAINER and MEMBER in the owner's gym.
+     * Body: { "gymId": 1, "message": "...", "target": "ALL" | "TRAINERS" | "MEMBERS" }
+     */
+    @PostMapping("/announcements")
+    public ResponseEntity<?> sendAnnouncement(@RequestBody Map<String, Object> body) {
+        Long ownerId = getAuthenticatedUserId();
+
+        Object gymIdObj = body.get("gymId");
+        if (gymIdObj == null) {
+            return ResponseEntity.badRequest().body(apiResponse(false, null, "gymId required"));
+        }
+        Long gymId = Long.parseLong(gymIdObj.toString());
+
+        String message = body.getOrDefault("message", "").toString().trim();
+        if (message.isEmpty()) {
+            return ResponseEntity.badRequest().body(apiResponse(false, null, "message required"));
+        }
+
+        String target = body.getOrDefault("target", "ALL").toString().toUpperCase();
+
+        // Verify caller is OWNER of this gym
+        boolean isOwner = userGymRoleRepository.existsByUserUserIdAndGymGymIdAndRoleAndStatus(
+                ownerId, gymId, com.gym.management.model.GymRole.OWNER,
+                com.gym.management.model.RoleStatus.ACTIVE);
+        if (!isOwner) {
+            return ResponseEntity.status(403).body(apiResponse(false, null, "Not authorized for this gym"));
+        }
+
+        // Collect target user IDs
+        java.util.Set<Long> targetIds = new java.util.HashSet<>();
+        if ("ALL".equals(target) || "TRAINERS".equals(target)) {
+            userGymRoleRepository.findByGymGymIdAndRoleAndStatus(
+                    gymId, com.gym.management.model.GymRole.TRAINER,
+                    com.gym.management.model.RoleStatus.ACTIVE)
+                    .forEach(ugr -> targetIds.add(ugr.getUser().getUserId()));
+        }
+        if ("ALL".equals(target) || "MEMBERS".equals(target)) {
+            userGymRoleRepository.findByGymGymIdAndRoleAndStatus(
+                    gymId, com.gym.management.model.GymRole.MEMBER,
+                    com.gym.management.model.RoleStatus.ACTIVE)
+                    .forEach(ugr -> targetIds.add(ugr.getUser().getUserId()));
+        }
+
+        int sent = 0;
+        int failed = 0;
+        for (Long recipientId : targetIds) {
+            try {
+                Conversation conv = chatService.getOrCreatePrivateConversation(ownerId, recipientId);
+                chatService.sendMessage(conv.getConversationId(), ownerId, message, "TEXT", null, null);
+                sent++;
+            } catch (Exception e) {
+                failed++;
+            }
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("sent", sent);
+        result.put("failed", failed);
+        result.put("total", targetIds.size());
+        return ResponseEntity.ok(apiResponse(true, result, "Announcement dispatched"));
     }
 
     // ==================== PRESENCE ENDPOINT ====================

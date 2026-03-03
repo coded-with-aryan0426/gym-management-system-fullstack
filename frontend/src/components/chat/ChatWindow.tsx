@@ -13,6 +13,7 @@ import {
 import EmojiPicker, { Theme } from 'emoji-picker-react';
 import MessageBubble from './MessageBubble';
 import ImageLightbox from './ImageLightbox';
+import VoiceRecorder from './VoiceRecorder';
 
 interface ChatWindowProps {
     onToggleContactPanel?: () => void;
@@ -555,17 +556,27 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onToggleContactPanel }) => {
                                 </div>
                             )}
                         </div>
-                    </div>
+                      </div>
 
-                    <button
-                        type="submit"
-                        disabled={!newMessage.trim() || !connected || isBlocked}
-                        className="chat-input__send-btn"
-                        title="Send message"
-                    >
-                        <Send size={20} />
-                    </button>
-                </form>
+                      {newMessage.trim() ? (
+                          <button
+                              type="submit"
+                              disabled={!connected || isBlocked}
+                              className="chat-input__send-btn"
+                              title="Send message"
+                          >
+                              <Send size={20} />
+                          </button>
+                      ) : (
+                          <VoiceRecorder
+                              conversationId={activeConversation.conversationId}
+                              onSend={async (content, contentType, payload) => {
+                                  await sendMessage(content, contentType as any, payload);
+                              }}
+                              disabled={!connected || isBlocked}
+                          />
+                      )}
+                  </form>
             </div>
         </div>
 

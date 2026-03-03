@@ -4,6 +4,7 @@ import { Search, X, Users, UserPlus, Loader } from 'lucide-react';
 import type { ChatUser } from '../../services/chatApi';
 import chatApi from '../../services/chatApi';
 import { showToast } from '../../utils/toast';
+import '../../styles/Chat.css';
 
 interface FilterTab {
     id: string;
@@ -32,23 +33,11 @@ const NewChatModal: React.FC<NewChatModalProps> = ({ onClose }) => {
     const [starting, setStarting] = useState<number | null>(null);
     const [searching, setSearching] = useState(false);
 
-    // Load available users on mount
+    useEffect(() => { loadUsers(); }, []);
+
     useEffect(() => {
-        loadUsers();
-    }, []);
-
-    // Debounced search effect
-    useEffect(() => {
-        if (!searchQuery.trim()) {
-            // If search cleared, reload all users
-            loadUsers();
-            return;
-        }
-
-        const timer = setTimeout(() => {
-            searchUsers(searchQuery);
-        }, 300);
-
+        if (!searchQuery.trim()) { loadUsers(); return; }
+        const timer = setTimeout(() => searchUsers(searchQuery), 300);
         return () => clearTimeout(timer);
     }, [searchQuery]);
 
@@ -56,7 +45,6 @@ const NewChatModal: React.FC<NewChatModalProps> = ({ onClose }) => {
         setLoading(true);
         setError(null);
         try {
-            // chatApi.getAvailableChatUsers already unwraps the ApiResponse wrapper
             const userList = await chatApi.getAvailableChatUsers();
             setUsers(Array.isArray(userList) ? userList : []);
         } catch (err) {
@@ -111,116 +99,56 @@ const NewChatModal: React.FC<NewChatModalProps> = ({ onClose }) => {
         return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
     };
 
-    const getRoleBadgeStyle = (role?: string) => {
+    // Dynamic role badge colors — must remain inline (runtime values)
+    const getRoleBadgeStyle = (role?: string): React.CSSProperties => {
         switch (role?.toUpperCase()) {
-            case 'TRAINER':
-                return { background: 'rgba(16, 185, 129, 0.15)', color: '#10b981' };
-            case 'OWNER':
-                return { background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b' };
-            case 'ADMIN':
-                return { background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444' };
-            case 'NUTRITIONIST':
-                return { background: 'rgba(139, 92, 246, 0.15)', color: '#8b5cf6' };
-            default:
-                return { background: 'rgba(107, 114, 128, 0.15)', color: '#6b7280' };
+            case 'TRAINER':     return { background: 'rgba(16, 185, 129, 0.15)', color: '#10b981' };
+            case 'OWNER':       return { background: 'rgba(245, 158, 11, 0.15)',  color: '#f59e0b' };
+            case 'ADMIN':       return { background: 'rgba(239, 68, 68, 0.15)',   color: '#ef4444' };
+            case 'NUTRITIONIST':return { background: 'rgba(139, 92, 246, 0.15)',  color: '#8b5cf6' };
+            default:            return { background: 'rgba(107, 114, 128, 0.15)', color: '#6b7280' };
         }
     };
 
-    const getAvatarGradient = (role?: string) => {
+    // Dynamic avatar gradient — must remain inline (runtime values)
+    const getAvatarGradient = (role?: string): string => {
         switch (role?.toUpperCase()) {
-            case 'TRAINER':
-                return 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
-            case 'OWNER':
-                return 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
-            case 'ADMIN':
-                return 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
-            default:
-                return 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)';
+            case 'TRAINER': return 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+            case 'OWNER':   return 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
+            case 'ADMIN':   return 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+            default:        return 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)';
         }
     };
 
-    // Filter users by role tab and exclude blocked users
     const filteredUsers = users.filter(u => {
-        // Exclude blocked users
         if (isUserBlocked(u.userId)) return false;
-
-        // Role filter
         if (activeFilter !== 'all') {
             const filterTab = FILTER_TABS.find(t => t.id === activeFilter);
-            if (filterTab?.role && u.role?.toUpperCase() !== filterTab.role) {
-                return false;
-            }
+            if (filterTab?.role && u.role?.toUpperCase() !== filterTab.role) return false;
         }
         return true;
     });
 
     return (
         <div
-            className="modal-overlay"
+            className="new-chat-modal-overlay"
             onClick={(e) => e.target === e.currentTarget && onClose()}
-            style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                background: 'rgba(0, 0, 0, 0.7)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                zIndex: 1050,
-                backdropFilter: 'blur(4px)'
-            }}
         >
-            <div
-                className="modal-content"
-                style={{
-                    width: '100%',
-                    maxWidth: '480px',
-                    height: '600px', // Fixed height to prevent collapse
-                    maxHeight: '80vh',
-                    minHeight: '400px',
-                    background: '#1a1d21', // Explicit background color
-                    borderRadius: 'var(--radius-lg)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    overflow: 'hidden',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    position: 'relative',
-                    zIndex: 1060
-                }}
-            >
+            <div className="new-chat-modal-box">
                 {/* Header */}
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    padding: '20px 24px',
-                    borderBottom: '1px solid rgba(255, 255, 255, 0.06)'
-                }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <Users size={20} style={{ color: 'var(--accent-primary)' }} />
-                        <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 600, color: 'var(--text-primary)' }}>
-                            New Chat
-                        </h3>
+                <div className="new-chat-modal__header">
+                    <div className="new-chat-modal__header-left">
+                        <Users size={20} className="new-chat-modal__header-icon" />
+                        <h3 className="new-chat-modal__title">New Chat</h3>
                     </div>
-                    <button
-                        onClick={onClose}
-                        style={{
-                            background: 'none',
-                            border: 'none',
-                            color: 'var(--text-tertiary)',
-                            cursor: 'pointer',
-                            padding: '4px'
-                        }}
-                    >
+                    <button onClick={onClose} className="new-chat-modal__close-btn">
                         <X size={20} />
                     </button>
                 </div>
 
                 {/* Search */}
-                <div style={{ padding: '16px 24px' }}>
-                    <div className="chat-search" style={{ position: 'relative' }}>
+                <div className="new-chat-modal__search-wrap">
+                    <div className="chat-search new-chat-modal__search-inner">
                         <Search size={16} className="chat-search__icon" />
                         <input
                             type="text"
@@ -233,21 +161,14 @@ const NewChatModal: React.FC<NewChatModalProps> = ({ onClose }) => {
                         {searching && (
                             <Loader
                                 size={16}
-                                className="animate-spin"
-                                style={{
-                                    position: 'absolute',
-                                    right: '14px',
-                                    top: '50%',
-                                    transform: 'translateY(-50%)',
-                                    color: 'var(--text-tertiary)'
-                                }}
+                                className="animate-spin new-chat-modal__search-spinner"
                             />
                         )}
                     </div>
                 </div>
 
                 {/* Role Filter Tabs */}
-                <div className="chat-filter-tabs" style={{ paddingTop: 0 }}>
+                <div className="chat-filter-tabs new-chat-modal__filter-tabs">
                     {FILTER_TABS.map(tab => (
                         <button
                             key={tab.id}
@@ -260,100 +181,55 @@ const NewChatModal: React.FC<NewChatModalProps> = ({ onClose }) => {
                 </div>
 
                 {/* User List */}
-                <div className="new-chat-modal__user-list" style={{ flex: 1, overflowY: 'auto', padding: '0 12px 12px' }}>
+                <div className="new-chat-modal__user-list">
                     {loading ? (
-                        <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            padding: '40px',
-                            color: 'var(--text-tertiary)'
-                        }}>
+                        <div className="new-chat-modal__state-center">
                             <Loader size={24} className="animate-spin" />
                         </div>
                     ) : error ? (
-                        <div style={{
-                            textAlign: 'center',
-                            padding: '40px 20px',
-                            color: 'var(--text-tertiary)'
-                        }}>
+                        <div className="new-chat-modal__error-state">
                             <p>{error}</p>
-                            <button
-                                onClick={loadUsers}
-                                style={{
-                                    marginTop: '12px',
-                                    padding: '8px 16px',
-                                    background: 'var(--accent-primary)',
-                                    border: 'none',
-                                    borderRadius: 'var(--radius-md)',
-                                    color: 'white',
-                                    cursor: 'pointer'
-                                }}
-                            >
+                            <button onClick={loadUsers} className="new-chat-modal__retry-btn">
                                 Retry
                             </button>
                         </div>
                     ) : filteredUsers.length === 0 ? (
-                        <div style={{
-                            textAlign: 'center',
-                            padding: '40px 20px',
-                            color: 'var(--text-tertiary)'
-                        }}>
+                        <div className="new-chat-modal__empty-state">
                             {searchQuery ? 'No users found' : 'No users available'}
                         </div>
                     ) : (
                         filteredUsers.map(chatUser => (
                             <div
                                 key={chatUser.userId}
-                                className="new-chat-modal__user"
+                                className={`new-chat-modal__user ${starting === chatUser.userId ? 'new-chat-modal__user--loading' : ''}`}
                                 onClick={() => handleStartChat(chatUser)}
-                                style={{
-                                    opacity: starting === chatUser.userId ? 0.6 : 1,
-                                    pointerEvents: starting ? 'none' : 'auto'
-                                }}
                             >
+                                {/* Avatar — background is dynamic so kept inline */}
                                 <div
-                                    className="new-chat-modal__user-avatar"
-                                    style={{
-                                        background: getAvatarGradient(chatUser.role),
-                                        position: 'relative'
-                                    }}
+                                    className="new-chat-modal__user-avatar new-chat-modal__user-avatar--relative"
+                                    style={{ background: getAvatarGradient(chatUser.role) }}
                                 >
                                     {getInitials(chatUser.fullName)}
                                     {chatUser.online && (
-                                        <div
-                                            style={{
-                                                position: 'absolute',
-                                                bottom: 0,
-                                                right: 0,
-                                                width: '10px',
-                                                height: '10px',
-                                                borderRadius: '50%',
-                                                backgroundColor: '#22c55e',
-                                                border: '2px solid var(--bg-secondary)'
-                                            }}
-                                        />
+                                        <div className="new-chat-modal__online-dot" />
                                     )}
                                 </div>
+
                                 <div className="new-chat-modal__user-info">
                                     <h4 className="new-chat-modal__user-name">
                                         {chatUser.fullName || chatUser.username}
                                     </h4>
+                                    {/* Role badge colors are dynamic — kept inline */}
                                     <span
-                                        className="new-chat-modal__user-role"
-                                        style={{
-                                            ...getRoleBadgeStyle(chatUser.role),
-                                            padding: '2px 8px',
-                                            borderRadius: '12px',
-                                            fontSize: '11px',
-                                            fontWeight: 500
-                                        }}
+                                        className="new-chat-modal__user-role new-chat-modal__role-badge"
+                                        style={getRoleBadgeStyle(chatUser.role)}
                                     >
                                         {chatUser.role || 'Member'}
                                     </span>
                                 </div>
+
                                 {starting === chatUser.userId ? (
-                                    <Loader size={18} className="animate-spin" style={{ color: 'var(--accent-primary)' }} />
+                                    <Loader size={18} className="animate-spin new-chat-modal__spinner-icon" />
                                 ) : (
                                     <button
                                         onClick={(e) => {
@@ -365,20 +241,7 @@ const NewChatModal: React.FC<NewChatModalProps> = ({ onClose }) => {
                                             }
                                         }}
                                         title="Send Request"
-                                        style={{
-                                            background: 'none',
-                                            border: 'none',
-                                            color: 'var(--text-tertiary)',
-                                            padding: '8px',
-                                            cursor: 'pointer',
-                                            borderRadius: '50%',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            transition: 'all 0.2s',
-                                        }}
-                                        onMouseEnter={(e) => e.currentTarget.style.color = 'var(--accent-primary)'}
-                                        onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-tertiary)'}
+                                        className="new-chat-modal__request-btn"
                                     >
                                         <UserPlus size={16} />
                                     </button>

@@ -365,6 +365,41 @@ export const getSharedMedia = async (
     return handleResponse<SharedMediaPage>(response);
 };
 
+// B6 — server-side message search within a conversation
+export const searchMessages = async (
+    conversationId: number,
+    query: string,
+    page = 0,
+    size = 20
+): Promise<{ messages: Partial<ChatMessage>[]; page: number; totalPages: number; hasMore: boolean }> => {
+    const response = await fetch(
+        `${API_BASE}/conversations/${conversationId}/messages/search?page=${page}&size=${size}`,
+        {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ query })
+        }
+    );
+    return handleResponse(response);
+};
+
+// B7 / O5 — broadcast announcement to all gym members/trainers
+export const sendAnnouncement = async (
+    gymId: number,
+    message: string,
+    target: 'ALL' | 'TRAINERS' | 'MEMBERS' = 'ALL'
+): Promise<{ sent: number; failed: number; total: number }> => {
+    const response = await fetch(
+        `${API_BASE}/announcements`,
+        {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ gymId, message, target })
+        }
+    );
+    return handleResponse(response);
+};
+
 // ==================== EXPORT ALL ====================
 
 export const chatApi = {
@@ -375,6 +410,7 @@ export const chatApi = {
     markConversationAsRead,
     getSharedMedia,
     getPresence,
+    searchMessages,
     // User Discovery
     getAvailableChatUsers,
     searchUsers,
@@ -394,6 +430,8 @@ export const chatApi = {
     deleteMessage,
     addReaction,
     removeReaction,
+    // Announcement
+    sendAnnouncement,
 };
 
 export default chatApi;

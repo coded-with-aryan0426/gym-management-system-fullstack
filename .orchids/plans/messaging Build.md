@@ -1,10 +1,3 @@
-### **Phase 8 — Cleanup**
-
-- **R1 Remove hardcoded** `totalUnread = 3`
-- **R2 Replace** `alert()` **with** `toast`
-- **R3 Hide filter tabs for member role**
-- **R5 Move all inline styles to CSS**
-
 # Messaging System — Complete Build Plan
 
 > **Project:** Internal Gym Management App — WhatsApp-style messaging between Owners, Trainers, and Members\

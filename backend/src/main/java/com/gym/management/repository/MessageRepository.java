@@ -28,4 +28,16 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     @org.springframework.data.jpa.repository.Modifying
     @org.springframework.data.jpa.repository.Query("UPDATE Message m SET m.isDeleted = true, m.content = 'Message deleted due to retention policy' WHERE m.createdAt < :cutoffDate AND m.isDeleted = false")
     void softDeleteOlderThan(@org.springframework.data.repository.query.Param("cutoffDate") java.time.LocalDateTime cutoffDate);
+
+    // Full-text search within a conversation (case-insensitive LIKE)
+    @org.springframework.data.jpa.repository.Query(
+        "SELECT m FROM Message m WHERE m.conversation.conversationId = :convId " +
+        "AND m.isDeleted = false AND LOWER(m.content) LIKE LOWER(CONCAT('%', :query, '%')) " +
+        "ORDER BY m.createdAt DESC"
+    )
+    Page<Message> searchByContent(
+        @org.springframework.data.repository.query.Param("convId") Long conversationId,
+        @org.springframework.data.repository.query.Param("query") String query,
+        Pageable pageable
+    );
 }

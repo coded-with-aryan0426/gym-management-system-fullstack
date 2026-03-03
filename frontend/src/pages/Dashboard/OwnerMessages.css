@@ -2,3 +2,35 @@
    OwnerMessages page — page-level wrapper only.
    All chat UI styles live in Chat.css / ChatActionBar.css.
    ============================================================ */
+
+/* Announcement target selector */
+.announce-target-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+}
+
+.announce-target-btn {
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border-color, rgba(255,255,255,0.12));
+    background: transparent;
+    color: var(--text-secondary, rgba(255,255,255,0.6));
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.announce-target-btn:hover {
+    border-color: #f59e0b;
+    color: #f59e0b;
+}
+
+.announce-target-btn--active {
+    background: rgba(245, 158, 11, 0.15);
+    border-color: #f59e0b;
+    color: #f59e0b;
+    font-weight: 600;
+}
+

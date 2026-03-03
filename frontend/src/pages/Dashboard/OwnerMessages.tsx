@@ -4,6 +4,7 @@ import ChatLayout from '../../components/chat/ChatLayout';
 import ActionBar, { ActionItem } from '../../components/chat/ActionBar';
 import { useChat } from '../../contexts/ChatContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { sendAnnouncement } from '../../services/chatApi';
 import toast from 'react-hot-toast';
 import './OwnerMessages.css';
 
@@ -41,16 +42,22 @@ const OWNER_ACTIONS: ActionItem[] = [
 
 /* ── Announcement Modal ───────────────────────────────────────── */
 const AnnouncementModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
-    const { sendMessage } = useChat();
+    const { user } = useAuth();
     const [message, setMessage] = useState('');
+    const [target, setTarget] = useState<'ALL' | 'TRAINERS' | 'MEMBERS'>('ALL');
     const [sending, setSending] = useState(false);
 
     const handleSend = async () => {
         if (!message.trim()) return;
+        const gymId = user?.activeGymId;
+        if (!gymId) {
+            toast.error('No active gym found. Please select a gym first.');
+            return;
+        }
         setSending(true);
         try {
-            sendMessage(message.trim(), 'TEXT');
-            toast.success('Announcement sent!');
+            const result = await sendAnnouncement(gymId, message.trim(), target);
+            toast.success(`Announcement sent to ${result.sent} recipient${result.sent !== 1 ? 's' : ''}${result.failed > 0 ? ` (${result.failed} failed)` : ''}`);
             onClose();
         } catch {
             toast.error('Failed to send announcement');
@@ -72,6 +79,19 @@ const AnnouncementModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     </button>
                 </div>
                 <div className="chat-modal__body">
+                    <label className="chat-modal__label">Send to</label>
+                    <div className="announce-target-row">
+                        {(['ALL', 'TRAINERS', 'MEMBERS'] as const).map(t => (
+                            <button
+                                key={t}
+                                className={`announce-target-btn ${target === t ? 'announce-target-btn--active' : ''}`}
+                                onClick={() => setTarget(t)}
+                                type="button"
+                            >
+                                {t === 'ALL' ? 'Everyone' : t === 'TRAINERS' ? 'Trainers only' : 'Members only'}
+                            </button>
+                        ))}
+                    </div>
                     <label className="chat-modal__label">Message</label>
                     <textarea
                         className="chat-modal__textarea"
@@ -89,7 +109,7 @@ const AnnouncementModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                         onClick={handleSend}
                         disabled={!message.trim() || sending}
                     >
-                        {sending ? 'Sending…' : 'Send'}
+                        {sending ? 'Sending…' : 'Send to All'}
                     </button>
                 </div>
             </div>
