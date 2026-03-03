@@ -51,30 +51,32 @@ const GYM_NOTIFICATION_TIPS = [
     { icon: AlertTriangle, title: 'Critical Alerts', desc: 'Immediate notifications for emergencies, system issues, or policy violations.', color: '#FF3B30' },
 ];
 
-// Maps a notification to the best deep-link route + optional scroll hash
-const getDeepLink = (notif: NotificationData, meta: any): { path: string; hash?: string; label: string } | null => {
+// Maps a notification to the best deep-link route + tab
+const getDeepLink = (notif: NotificationData, meta: any): { path: string; tab?: string; label: string } | null => {
     const t = notif.type?.toUpperCase();
-    if (notif.link) return { path: notif.link, label: 'Go to linked page' };
+    // NOTE: deliberately NOT using notif.link — it points to staff routes
     switch (t) {
         case 'PAYMENT':
-            return { path: '/financials', hash: 'payments', label: 'View in Financials' };
+            if (meta?.memberId) return { path: `/members/${meta.memberId}`, tab: 'payments', label: 'View Payment' };
+            return { path: '/financials', tab: 'payments', label: 'View in Financials' };
         case 'MEMBERSHIP':
-            if (meta?.memberId) return { path: `/members/${meta.memberId}`, hash: 'membership', label: 'View Member' };
-            return { path: '/members', hash: 'memberships', label: 'View Members' };
+            if (meta?.memberId) return { path: `/members/${meta.memberId}`, tab: 'payments', label: 'View Membership' };
+            return { path: '/members', label: 'View Members' };
         case 'BOOKING':
-            return { path: '/classes', hash: 'sessions', label: 'View Bookings' };
+            if (meta?.memberId) return { path: `/members/${meta.memberId}`, tab: 'sessions', label: 'View Bookings' };
+            return { path: '/classes', label: 'View Bookings' };
         case 'SCHEDULE':
-            return { path: '/classes', hash: 'schedule', label: 'View Schedule' };
+            return { path: '/classes', label: 'View Schedule' };
         case 'MEMBER':
-            if (meta?.memberId) return { path: `/members/${meta.memberId}`, label: 'View Member' };
+            if (meta?.memberId) return { path: `/members/${meta.memberId}`, tab: 'overview', label: 'View Member Profile' };
             return { path: '/members', label: 'View Members' };
         case 'TRAINER':
-            if (meta?.trainerId) return { path: `/trainers/${meta.trainerId}`, label: 'View Trainer' };
+            if (meta?.trainerId) return { path: `/trainers/${meta.trainerId}`, tab: 'overview', label: 'View Trainer Profile' };
             return { path: '/trainers', label: 'View Trainers' };
         case 'INVENTORY':
             return { path: '/equipment', label: 'View Equipment' };
         case 'REPORT':
-            return { path: '/financials', hash: 'analytics', label: 'View Reports' };
+            return { path: '/financials', label: 'View Reports' };
         case 'ALERT':
         case 'SYSTEM':
             return { path: '/dashboard', label: 'Go to Dashboard' };
@@ -363,8 +365,8 @@ const OwnerNotifications: React.FC = () => {
         const link = getDeepLink(notif, meta);
         if (!link) return;
         setDetailNotif(null);
-        const path = link.hash ? `${link.path}?section=${link.hash}` : link.path;
-        navigate(path, { state: { scrollTo: link.hash, fromNotif: notif.id } });
+        const path = link.tab ? `${link.path}?tab=${link.tab}` : link.path;
+        navigate(path, { state: { fromNotif: notif.id } });
     };
 
     const renderSidebarContent = () => (
@@ -918,19 +920,33 @@ const OwnerNotifications: React.FC = () => {
                                                                 </button>
                                                             )}
 
-                                                            <div className="on-item__tags">
-                                                                <span className="on-tag" style={{ background: cat.bg, color: cat.color }}>{cat.label}</span>
-                                                                {(notif.priority === 'urgent' || notif.priority === 'high') && (
-                                                                    <span className="on-tag" style={{ background: pri.bg, color: pri.color }}>
-                                                                        <pri.icon size={8} /> {pri.label}
-                                                                    </span>
-                                                                )}
-                                                                {meta?.amount && (
-                                                                    <span className="on-tag on-tag--money">
-                                                                        <IndianRupee size={8} /> {meta.amount}
-                                                                    </span>
-                                                                )}
-                                                            </div>
+                                                              <div className="on-item__tags">
+                                                                  <span className="on-tag" style={{ background: cat.bg, color: cat.color }}>{cat.label}</span>
+                                                                  {(notif.priority === 'urgent' || notif.priority === 'high') && (
+                                                                      <span className="on-tag" style={{ background: pri.bg, color: pri.color }}>
+                                                                          <pri.icon size={8} /> {pri.label}
+                                                                      </span>
+                                                                  )}
+                                                                  {meta?.amount && (
+                                                                      <span className="on-tag on-tag--money">
+                                                                          <IndianRupee size={8} /> {meta.amount}
+                                                                      </span>
+                                                                  )}
+                                                              </div>
+
+                                                              {(() => {
+                                                                  const deepLink = getDeepLink(notif, meta);
+                                                                  return deepLink ? (
+                                                                      <button
+                                                                          className="on-item__goto"
+                                                                          onClick={e => { e.stopPropagation(); handleDeepLink(notif, meta); }}
+                                                                      >
+                                                                          <ExternalLink size={11} />
+                                                                          {deepLink.label}
+                                                                          <ArrowRight size={11} />
+                                                                      </button>
+                                                                  ) : null;
+                                                              })()}
                                                         </div>
 
                                                         <div className="on-item__actions">

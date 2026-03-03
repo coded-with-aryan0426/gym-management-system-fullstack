@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   FiArrowLeft, FiUser, FiCalendar, FiCreditCard, FiTrendingUp, 
   FiClock, FiDollarSign, FiStar, FiMail, FiPhone, FiAward,
@@ -16,9 +16,11 @@ type TabType = 'overview' | 'schedule' | 'members' | 'performance' | 'compensati
 const TrainerDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [trainer, setTrainer] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<TabType>('overview');
+  const initialTab = (searchParams.get('tab') as TabType) || 'overview';
+  const [activeTab, setActiveTab] = useState<TabType>(initialTab);
   const [performance, setPerformance] = useState<any>(null);
   const [compensation, setCompensation] = useState<any[]>([]);
   const [attendance, setAttendance] = useState<any[]>([]);

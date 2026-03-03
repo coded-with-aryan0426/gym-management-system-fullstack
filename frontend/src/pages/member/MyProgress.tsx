@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import {
@@ -121,7 +122,10 @@ const MyProgress: React.FC = () => {
     const [notes, setNotes] = useState<ProgressNote[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<TabType>('weight');
-    const [timeRange, setTimeRange] = useState<'7D' | '30D' | '90D' | '1Y' | 'ALL'>('30D');
+    const [timeRange, setTimeRange] = useState<'7D' | '30D' | '90D' | '1Y' | 'ALL'>(() => {
+        const saved = localStorage.getItem('progressTimeRange');
+        return (saved as '7D' | '30D' | '90D' | '1Y' | 'ALL') || 'ALL';
+    });
     const [activeModal, setActiveModal] = useState<ModalType>(null);
     const [expandedGoal, setExpandedGoal] = useState<number | null>(null);
     const [saving, setSaving] = useState(false);
@@ -1109,7 +1113,7 @@ const MyProgress: React.FC = () => {
                             <button
                                 key={range}
                                 className={`time-filter ${timeRange === range ? 'active' : ''}`}
-                                onClick={() => setTimeRange(range)}
+                                onClick={() => { setTimeRange(range); localStorage.setItem('progressTimeRange', range); }}
                             >
                                 {range}
                             </button>

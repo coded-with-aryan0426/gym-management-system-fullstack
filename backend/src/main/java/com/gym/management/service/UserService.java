@@ -555,14 +555,6 @@ public class UserService {
         dto.setEmergencyContactName(user.getEmergencyContactName());
         dto.setEmergencyContactPhone(user.getEmergencyContactPhone());
         dto.setEmergencyContactRelation(user.getEmergencyContactRelation());
-        if (user.getRoles() != null && !user.getRoles().isEmpty()) {
-            String roleName = user.getRoles().stream()
-                    .map(r -> r.getRoleName())
-                    .filter(r -> !r.equals("USER") && !r.equals("MEMBER") && !r.equals("TRAINER"))
-                    .findFirst()
-                    .orElse(user.getRoles().iterator().next().getRoleName());
-            dto.setStaffRole(roleName.replace("ROLE_", ""));
-        }
         return dto;
     }
 

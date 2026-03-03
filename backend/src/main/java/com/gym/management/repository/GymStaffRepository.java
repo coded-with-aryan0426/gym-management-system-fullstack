@@ -1,7 +1,6 @@
 package com.gym.management.repository;
 
 import com.gym.management.model.GymStaff;
-import com.gym.management.model.StaffRole;
 import com.gym.management.model.StaffStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -21,6 +20,4 @@ public interface GymStaffRepository extends JpaRepository<GymStaff, Long> {
     Optional<GymStaff> findByGymGymIdAndUserUserId(Long gymId, Long userId);
     
     boolean existsByGymGymIdAndUserUserId(Long gymId, Long userId);
-    
-    List<GymStaff> findByGymGymIdAndStaffRole(Long gymId, StaffRole staffRole);
 }

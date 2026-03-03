@@ -9,7 +9,6 @@ import api, { membershipPackageApi } from "../../services/api"
 import type { MembershipPackageDTO } from "../../types/membershipPackage"
 import { Button } from "../ui"
 import "./CreateUserModal.css"
-import Editable from "../editor/Editable"
 import MembershipAssignment from "../membership/MembershipAssignment"
 
 interface CreateUserModalProps {
@@ -60,7 +59,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClose, onSu
         duration: "1",
         startDate: new Date().toISOString().split('T')[0],
       })
-      setSelectedMembershipId(null)
+      setSelectedMembershipId(undefined)
     }
   }, [isOpen, initialRole])
 
@@ -274,9 +273,9 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClose, onSu
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
         >
-          <Editable id="create-user-modal" config={{ allowLayout: true, allowStyle: true, allowVisibility: true }}>
           <motion.div
             className={`create-user-modal ${step !== "FORM" ? "create-user-modal--selection" : ""}`}
+            data-edit-id="create-user-modal"
             onClick={(e) => e.stopPropagation()}
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -475,7 +474,6 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClose, onSu
               </div>
             </div>
           </motion.div>
-          </Editable>
         </motion.div>
       )}
     </AnimatePresence>

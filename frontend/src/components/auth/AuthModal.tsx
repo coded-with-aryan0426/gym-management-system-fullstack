@@ -116,7 +116,7 @@ export default function AuthModal() {
         const handleEscape = (e: KeyboardEvent) => {
             if (e.key === 'Escape' && isOpen) closeAuthModal();
         };
-        
+
         const handleClickOutside = (e: MouseEvent) => {
             if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
                 closeAuthModal();
@@ -316,8 +316,7 @@ export default function AuthModal() {
                 username: data.username,
                 email: data.email,
                 fullName: data.fullName,
-                role: data.staffRole || data.role || 'CUSTOMER',
-                staffRole: data.staffRole,
+                role: data.role || 'CUSTOMER',
                 token: data.token,
                 activeGymId: data.activeGymId,
                 activeGymName: data.activeGymName
@@ -329,7 +328,7 @@ export default function AuthModal() {
             setShowGymSelector(true);
         } else {
             closeAuthModal();
-            const role = (data.staffRole || data.role || '').toUpperCase();
+            const role = (data.role || '').toUpperCase();
             if (role === 'OWNER' || role === 'ADMIN') {
                 navigate('/dashboard');
             } else if (role === 'TRAINER') {
@@ -363,7 +362,7 @@ export default function AuthModal() {
 
     const handleGymNameComplete = (gymName: string) => {
         if (newUserData) {
-            const userData = { ...newUserData, gymName, staffRole: 'OWNER' };
+            const userData = { ...newUserData, gymName, role: 'OWNER' };
             localStorage.setItem(getStorageKey('user'), JSON.stringify(userData));
             localStorage.setItem(getStorageKey('token'), newUserData.token);
         }
@@ -404,233 +403,233 @@ export default function AuthModal() {
                     padding: '20px',
                 }}
             >
-                    <div
-                        ref={modalRef}
-                        style={{
-                            background: colors.bgSecondary,
-                            borderRadius: 20,
-                            width: '100%',
-                            maxWidth: 480,
-                            minWidth: 480,
-                            maxHeight: '90vh',
-                            overflowY: 'auto',
-                            boxShadow: isDark 
-                                ? '0 25px 60px -12px rgba(0, 0, 0, 0.9), 0 0 40px rgba(220, 38, 38, 0.1)' 
-                                : '0 25px 60px -12px rgba(0, 0, 0, 0.2), 0 0 40px rgba(220, 38, 38, 0.05)',
-                            border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}`,
-                            animation: 'modalSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
-                            transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                        }}
-                    >
-                        {/* Header - Premium Branded */}
-                        <div style={{
-                            padding: '20px 20px 16px',
-                            borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
-                            position: 'relative',
-                        }}>
-                            {/* Close Button */}
-                            <button
-                                onClick={closeAuthModal}
-                                style={{
-                                    position: 'absolute',
-                                    top: 14,
-                                    right: 14,
-                                    background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
-                                    border: 'none',
-                                    color: colors.textTertiary,
-                                    cursor: 'pointer',
-                                    padding: 6,
-                                    display: 'flex',
-                                    borderRadius: 8,
-                                    transition: 'all 0.2s ease',
-                                    zIndex: 1,
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
-                                }}
-                            >
-                                <X size={16} />
-                            </button>
-
-                            {/* Logo Brand Block */}
-                            <div style={{
+                <div
+                    ref={modalRef}
+                    style={{
+                        background: colors.bgSecondary,
+                        borderRadius: 20,
+                        width: '100%',
+                        maxWidth: 480,
+                        minWidth: 480,
+                        maxHeight: '90vh',
+                        overflowY: 'auto',
+                        boxShadow: isDark
+                            ? '0 25px 60px -12px rgba(0, 0, 0, 0.9), 0 0 40px rgba(220, 38, 38, 0.1)'
+                            : '0 25px 60px -12px rgba(0, 0, 0, 0.2), 0 0 40px rgba(220, 38, 38, 0.05)',
+                        border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}`,
+                        animation: 'modalSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
+                        transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                    }}
+                >
+                    {/* Header - Premium Branded */}
+                    <div style={{
+                        padding: '20px 20px 16px',
+                        borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+                        position: 'relative',
+                    }}>
+                        {/* Close Button */}
+                        <button
+                            onClick={closeAuthModal}
+                            style={{
+                                position: 'absolute',
+                                top: 14,
+                                right: 14,
+                                background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+                                border: 'none',
+                                color: colors.textTertiary,
+                                cursor: 'pointer',
+                                padding: 6,
                                 display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                gap: 12,
-                            }}>
-                                {/* Logo Pill */}
-                                <div style={{
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: 8,
-                                    padding: '8px 16px',
-                                    background: isDark 
-                                        ? 'rgba(220, 38, 38, 0.08)' 
-                                        : 'rgba(220, 38, 38, 0.05)',
-                                    border: `1px solid ${isDark ? 'rgba(220, 38, 38, 0.25)' : 'rgba(220, 38, 38, 0.15)'}`,
-                                    borderRadius: 50,
-                                    boxShadow: isDark 
-                                        ? '0 0 20px rgba(220, 38, 38, 0.1)' 
-                                        : '0 0 15px rgba(220, 38, 38, 0.06)',
-                                }}>
-                                    <Logo size={22} color="#DC2626" showText={false} />
-                                    <span style={{
-                                        fontSize: 13,
-                                        fontWeight: 800,
-                                        color: colors.crimson,
-                                        letterSpacing: '0.12em',
-                                        textTransform: 'uppercase',
-                                    }}>
-                                        AthlonX
-                                    </span>
-                                </div>
+                                borderRadius: 8,
+                                transition: 'all 0.2s ease',
+                                zIndex: 1,
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+                            }}
+                        >
+                            <X size={16} />
+                        </button>
 
-                                {/* Title & Subtitle */}
-                                <div style={{ textAlign: 'center' }}>
-                                    <h2 style={{ 
-                                        fontSize: 20, 
-                                        fontWeight: 800, 
-                                        color: colors.textPrimary, 
-                                        margin: 0,
-                                        letterSpacing: '-0.4px',
-                                        lineHeight: 1.2,
-                                    }}>
-                                        {activeTab === 'login' 
-                                            ? (loginStep === 'OTP' ? 'Verify Your Identity' : 'Welcome Back')
-                                            : (signupStep === 'OTP' ? 'Verify Your Email' : 'Start Your Journey')
-                                        }
-                                    </h2>
-                                    <p style={{
-                                        fontSize: 13,
-                                        color: colors.textSecondary,
-                                        margin: '6px 0 0 0',
-                                        lineHeight: 1.4,
-                                    }}>
-                                        {activeTab === 'login' 
-                                            ? (loginStep === 'OTP' ? 'Enter the 6-digit code sent to your email' : 'Sign in to manage your gym')
-                                            : (signupStep === 'OTP' ? 'Enter the 6-digit code sent to your email' : 'Create your gym owner account')
-                                        }
-                                    </p>
-                                </div>
+                        {/* Logo Brand Block */}
+                        <div style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: 12,
+                        }}>
+                            {/* Logo Pill */}
+                            <div style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: 8,
+                                padding: '8px 16px',
+                                background: isDark
+                                    ? 'rgba(220, 38, 38, 0.08)'
+                                    : 'rgba(220, 38, 38, 0.05)',
+                                border: `1px solid ${isDark ? 'rgba(220, 38, 38, 0.25)' : 'rgba(220, 38, 38, 0.15)'}`,
+                                borderRadius: 50,
+                                boxShadow: isDark
+                                    ? '0 0 20px rgba(220, 38, 38, 0.1)'
+                                    : '0 0 15px rgba(220, 38, 38, 0.06)',
+                            }}>
+                                <Logo size={22} color="#DC2626" showText={false} />
+                                <span style={{
+                                    fontSize: 13,
+                                    fontWeight: 800,
+                                    color: colors.crimson,
+                                    letterSpacing: '0.12em',
+                                    textTransform: 'uppercase',
+                                }}>
+                                    AthlonX
+                                </span>
+                            </div>
+
+                            {/* Title & Subtitle */}
+                            <div style={{ textAlign: 'center' }}>
+                                <h2 style={{
+                                    fontSize: 20,
+                                    fontWeight: 800,
+                                    color: colors.textPrimary,
+                                    margin: 0,
+                                    letterSpacing: '-0.4px',
+                                    lineHeight: 1.2,
+                                }}>
+                                    {activeTab === 'login'
+                                        ? (loginStep === 'OTP' ? 'Verify Your Identity' : 'Welcome Back')
+                                        : (signupStep === 'OTP' ? 'Verify Your Email' : 'Start Your Journey')
+                                    }
+                                </h2>
+                                <p style={{
+                                    fontSize: 13,
+                                    color: colors.textSecondary,
+                                    margin: '6px 0 0 0',
+                                    lineHeight: 1.4,
+                                }}>
+                                    {activeTab === 'login'
+                                        ? (loginStep === 'OTP' ? 'Enter the 6-digit code sent to your email' : 'Sign in to manage your gym')
+                                        : (signupStep === 'OTP' ? 'Enter the 6-digit code sent to your email' : 'Create your gym owner account')
+                                    }
+                                </p>
                             </div>
                         </div>
+                    </div>
 
-                        {/* Tab Switcher - Compact Slider */}
-                        {loginStep === 'CREDENTIALS' && signupStep === 'DETAILS' && (
-                            <div style={{ padding: '12px 20px 0' }}>
+                    {/* Tab Switcher - Compact Slider */}
+                    {loginStep === 'CREDENTIALS' && signupStep === 'DETAILS' && (
+                        <div style={{ padding: '12px 20px 0' }}>
+                            <div style={{
+                                position: 'relative',
+                                display: 'flex',
+                                background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)',
+                                borderRadius: 10,
+                                padding: 3,
+                            }}>
+                                {/* Sliding Indicator */}
                                 <div style={{
-                                    position: 'relative',
-                                    display: 'flex',
-                                    background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)',
-                                    borderRadius: 10,
-                                    padding: 3,
-                                }}>
-                                    {/* Sliding Indicator */}
-                                    <div style={{
-                                        position: 'absolute',
-                                        top: 3,
-                                        left: activeTab === 'login' ? 3 : 'calc(50% + 1.5px)',
-                                        width: 'calc(50% - 4.5px)',
-                                        height: 'calc(100% - 6px)',
-                                        background: 'linear-gradient(135deg, #DC2626 0%, #B91C1C 100%)',
+                                    position: 'absolute',
+                                    top: 3,
+                                    left: activeTab === 'login' ? 3 : 'calc(50% + 1.5px)',
+                                    width: 'calc(50% - 4.5px)',
+                                    height: 'calc(100% - 6px)',
+                                    background: 'linear-gradient(135deg, #DC2626 0%, #B91C1C 100%)',
+                                    borderRadius: 7,
+                                    boxShadow: '0 2px 8px rgba(220, 38, 38, 0.35)',
+                                    transition: 'left 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+                                    zIndex: 0,
+                                }} />
+                                {/* Login Tab */}
+                                <button
+                                    onClick={() => setActiveTab('login')}
+                                    style={{
+                                        flex: 1,
+                                        padding: '8px 16px',
+                                        background: 'transparent',
+                                        border: 'none',
                                         borderRadius: 7,
-                                        boxShadow: '0 2px 8px rgba(220, 38, 38, 0.35)',
-                                        transition: 'left 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-                                        zIndex: 0,
-                                    }} />
-                                    {/* Login Tab */}
-                                    <button
-                                        onClick={() => setActiveTab('login')}
-                                        style={{
-                                            flex: 1,
-                                            padding: '8px 16px',
-                                            background: 'transparent',
-                                            border: 'none',
-                                            borderRadius: 7,
-                                            color: activeTab === 'login' ? '#fff' : colors.textSecondary,
-                                            fontSize: 13,
-                                            fontWeight: 600,
-                                            cursor: 'pointer',
-                                            transition: 'color 0.25s ease',
-                                            position: 'relative',
-                                            zIndex: 1,
-                                        }}
-                                    >
-                                        Sign In
-                                    </button>
-                                    {/* Signup Tab */}
-                                    <button
-                                        onClick={() => setActiveTab('signup')}
-                                        style={{
-                                            flex: 1,
-                                            padding: '8px 16px',
-                                            background: 'transparent',
-                                            border: 'none',
-                                            borderRadius: 7,
-                                            color: activeTab === 'signup' ? '#fff' : colors.textSecondary,
-                                            fontSize: 13,
-                                            fontWeight: 600,
-                                            cursor: 'pointer',
-                                            transition: 'color 0.25s ease',
-                                            position: 'relative',
-                                            zIndex: 1,
-                                        }}
-                                    >
-                                        Gym Owner
-                                    </button>
-                                </div>
+                                        color: activeTab === 'login' ? '#fff' : colors.textSecondary,
+                                        fontSize: 13,
+                                        fontWeight: 600,
+                                        cursor: 'pointer',
+                                        transition: 'color 0.25s ease',
+                                        position: 'relative',
+                                        zIndex: 1,
+                                    }}
+                                >
+                                    Sign In
+                                </button>
+                                {/* Signup Tab */}
+                                <button
+                                    onClick={() => setActiveTab('signup')}
+                                    style={{
+                                        flex: 1,
+                                        padding: '8px 16px',
+                                        background: 'transparent',
+                                        border: 'none',
+                                        borderRadius: 7,
+                                        color: activeTab === 'signup' ? '#fff' : colors.textSecondary,
+                                        fontSize: 13,
+                                        fontWeight: 600,
+                                        cursor: 'pointer',
+                                        transition: 'color 0.25s ease',
+                                        position: 'relative',
+                                        zIndex: 1,
+                                    }}
+                                >
+                                    Gym Owner
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Content */}
+                    <div style={{
+                        padding: '16px 20px 20px',
+                        animation: 'tabSwitch 0.2s ease-out',
+                    }}
+                        key={activeTab + loginStep + signupStep}>
+                        {/* Messages - Compact */}
+                        {(error || successMessage) && (
+                            <div style={{ marginBottom: 12 }}>
+                                {error && (
+                                    <div style={{
+                                        padding: "10px 12px",
+                                        background: "rgba(220, 38, 38, 0.08)",
+                                        border: `1px solid rgba(220, 38, 38, 0.25)`,
+                                        borderRadius: 8,
+                                        color: colors.crimson,
+                                        fontSize: 12,
+                                        fontWeight: 500,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 8,
+                                        animation: 'fadeIn 0.2s ease',
+                                    }}>
+                                        <span style={{ fontSize: 14 }}>⚠</span> {error}
+                                    </div>
+                                )}
+                                {successMessage && (
+                                    <div style={{
+                                        padding: "10px 12px",
+                                        background: "rgba(16, 185, 129, 0.08)",
+                                        border: `1px solid rgba(16, 185, 129, 0.25)`,
+                                        borderRadius: 8,
+                                        color: colors.emerald,
+                                        fontSize: 12,
+                                        fontWeight: 500,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 8,
+                                        animation: 'fadeIn 0.2s ease',
+                                    }}>
+                                        <span style={{ fontSize: 14 }}>✓</span> {successMessage}
+                                    </div>
+                                )}
                             </div>
                         )}
-
-                        {/* Content */}
-                        <div style={{ 
-                            padding: '16px 20px 20px',
-                            animation: 'tabSwitch 0.2s ease-out',
-                        }}
-                        key={activeTab + loginStep + signupStep}>
-                            {/* Messages - Compact */}
-                            {(error || successMessage) && (
-                                <div style={{ marginBottom: 12 }}>
-                                    {error && (
-                                        <div style={{
-                                            padding: "10px 12px",
-                                            background: "rgba(220, 38, 38, 0.08)",
-                                            border: `1px solid rgba(220, 38, 38, 0.25)`,
-                                            borderRadius: 8,
-                                            color: colors.crimson,
-                                            fontSize: 12,
-                                            fontWeight: 500,
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: 8,
-                                            animation: 'fadeIn 0.2s ease',
-                                        }}>
-                                            <span style={{ fontSize: 14 }}>⚠</span> {error}
-                                        </div>
-                                    )}
-                                    {successMessage && (
-                                        <div style={{
-                                            padding: "10px 12px",
-                                            background: "rgba(16, 185, 129, 0.08)",
-                                            border: `1px solid rgba(16, 185, 129, 0.25)`,
-                                            borderRadius: 8,
-                                            color: colors.emerald,
-                                            fontSize: 12,
-                                            fontWeight: 500,
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: 8,
-                                            animation: 'fadeIn 0.2s ease',
-                                        }}>
-                                            <span style={{ fontSize: 14 }}>✓</span> {successMessage}
-                                        </div>
-                                    )}
-                                </div>
-                            )}
 
                         {/* LOGIN TAB */}
                         {activeTab === 'login' && (
@@ -749,7 +748,7 @@ export default function AuthModal() {
                                 ) : (
                                     <form onSubmit={handleLoginOtpSubmit}>
                                         <p style={{ color: colors.textSecondary, fontSize: 13, marginBottom: 20, textAlign: 'center', lineHeight: 1.5 }}>
-                                            Enter the code sent to<br/><strong style={{ color: colors.textPrimary }}>{verificationEmail || loginEmail}</strong>
+                                            Enter the code sent to<br /><strong style={{ color: colors.textPrimary }}>{verificationEmail || loginEmail}</strong>
                                         </p>
                                         <div style={{ marginBottom: 20 }}>
                                             <OtpInput value={loginOtp} onChange={setLoginOtp} length={6} disabled={isLoading} />
@@ -788,11 +787,11 @@ export default function AuthModal() {
                                             <button
                                                 type="button"
                                                 onClick={() => { setLoginStep('CREDENTIALS'); setLoginOtp(""); setError(""); }}
-                                                style={{ 
-                                                    background: 'none', 
-                                                    border: 'none', 
-                                                    color: colors.textSecondary, 
-                                                    fontSize: 13, 
+                                                style={{
+                                                    background: 'none',
+                                                    border: 'none',
+                                                    color: colors.textSecondary,
+                                                    fontSize: 13,
                                                     cursor: 'pointer',
                                                     fontWeight: 500,
                                                     transition: 'color 0.2s ease',
@@ -887,20 +886,20 @@ export default function AuthModal() {
                                             <div style={{ display: "flex", alignItems: 'center', gap: 8 }}>
                                                 <div style={{ display: "flex", gap: 3, flex: 1, height: 3 }}>
                                                     {[1, 2, 3, 4].map(i => (
-                                                        <div key={i} style={{ 
-                                                            flex: 1, 
-                                                            borderRadius: 3, 
-                                                            background: i <= passwordStrength 
-                                                                ? (passwordStrength < 3 ? colors.crimson : colors.emerald) 
+                                                        <div key={i} style={{
+                                                            flex: 1,
+                                                            borderRadius: 3,
+                                                            background: i <= passwordStrength
+                                                                ? (passwordStrength < 3 ? colors.crimson : colors.emerald)
                                                                 : (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'),
                                                             transition: 'background 0.2s ease'
                                                         }} />
                                                     ))}
                                                 </div>
-                                                <div style={{ 
-                                                    fontSize: 10, 
+                                                <div style={{
+                                                    fontSize: 10,
                                                     fontWeight: 600,
-                                                    color: passwordStrength === 4 ? colors.emerald : colors.textTertiary 
+                                                    color: passwordStrength === 4 ? colors.emerald : colors.textTertiary
                                                 }}>
                                                     {passwordStrength === 4 ? "Strong" : passwordStrength >= 2 ? "Medium" : "Weak"}
                                                 </div>
@@ -947,7 +946,7 @@ export default function AuthModal() {
                                 ) : (
                                     <form onSubmit={handleSignupRegister}>
                                         <p style={{ color: colors.textSecondary, fontSize: 13, marginBottom: 20, textAlign: 'center', lineHeight: 1.5 }}>
-                                            Enter the code sent to<br/><strong style={{ color: colors.textPrimary }}>{signupData.email}</strong>
+                                            Enter the code sent to<br /><strong style={{ color: colors.textPrimary }}>{signupData.email}</strong>
                                         </p>
                                         <div style={{ marginBottom: 20 }}>
                                             <OtpInput value={signupOtp} onChange={setSignupOtp} length={6} disabled={isLoading} />
@@ -986,11 +985,11 @@ export default function AuthModal() {
                                             <button
                                                 type="button"
                                                 onClick={() => { setSignupStep('DETAILS'); setSignupOtp(""); setError(""); }}
-                                                style={{ 
-                                                    background: 'none', 
-                                                    border: 'none', 
-                                                    color: colors.textSecondary, 
-                                                    fontSize: 13, 
+                                                style={{
+                                                    background: 'none',
+                                                    border: 'none',
+                                                    color: colors.textSecondary,
+                                                    fontSize: 13,
                                                     cursor: 'pointer',
                                                     fontWeight: 500,
                                                     transition: 'color 0.2s ease',
@@ -1118,12 +1117,12 @@ const InputField = ({ label, type = "text", value, onChange, error, placeholder,
                 }}
             />
             {isValid && (
-                <div style={{ 
-                    position: "absolute", 
-                    right: 10, 
-                    top: "50%", 
-                    transform: "translateY(-50%)", 
-                    color: colors.emerald, 
+                <div style={{
+                    position: "absolute",
+                    right: 10,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    color: colors.emerald,
                     fontSize: 12,
                     fontWeight: 600,
                     animation: 'fadeIn 0.2s ease'
@@ -1170,19 +1169,19 @@ const PasswordField = ({ label, value, onChange, error, show, onToggle, colors, 
                     transition: "all 0.2s ease"
                 }}
             />
-            <button 
-                type="button" 
-                onClick={onToggle} 
-                style={{ 
-                    position: "absolute", 
-                    right: 12, 
-                    top: "50%", 
-                    transform: "translateY(-50%)", 
-                    background: "none", 
-                    border: "none", 
-                    color: colors.textTertiary, 
-                    cursor: "pointer", 
-                    fontSize: 10, 
+            <button
+                type="button"
+                onClick={onToggle}
+                style={{
+                    position: "absolute",
+                    right: 12,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    background: "none",
+                    border: "none",
+                    color: colors.textTertiary,
+                    cursor: "pointer",
+                    fontSize: 10,
                     fontWeight: 600,
                     letterSpacing: '0.5px',
                     padding: '4px',

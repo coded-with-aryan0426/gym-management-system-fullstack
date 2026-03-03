@@ -178,6 +178,12 @@
     border-color: rgba(234, 179, 8, 0.3);
 }
 
+.status-btn.late.active {
+    background-color: rgba(251, 146, 60, 0.15);
+    color: #fb923c;
+    border-color: rgba(251, 146, 60, 0.3);
+}
+
 /* Tooltips */
 .status-btn::after {
     content: attr(title);
@@ -229,6 +235,10 @@
     color: #4ade80;
 }
 
+.summary-value.late {
+    color: #fb923c;
+}
+
 .summary-value.pending {
     color: #facc15;
 }
@@ -243,6 +253,60 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-top: 2px;
+}
+
+/* Status label colour per state */
+.attendee-status-label--confirmed {
+    color: #4ade80;
+}
+
+.attendee-status-label--late {
+    color: #fb923c;
+}
+
+.attendee-status-label--absent {
+    color: #f87171;
+}
+
+.attendee-status-label--pending {
+    color: #a1a1aa;
+}
+
+/* Bulk-action toolbar */
+.attendance-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding: 6px 10px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+}
+
+.attendance-toolbar__count {
+    font-size: 12px;
+    color: #71717a;
+}
+
+.attendance-toolbar__bulk-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.25);
+    border-radius: 6px;
+    color: #4ade80;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.attendance-toolbar__bulk-btn:hover {
+    background: rgba(34, 197, 94, 0.18);
+    border-color: rgba(34, 197, 94, 0.4);
 }
 
 /* Footer */

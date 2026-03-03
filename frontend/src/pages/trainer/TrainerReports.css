@@ -1408,3 +1408,42 @@
     flex-direction: column;
   }
 }
+
+/* Apply / PDF buttons */
+.trainer-reports__apply-btn {
+    padding: 0 14px;
+    height: 36px;
+    background: rgba(16,185,129,0.15);
+    border: 1px solid rgba(16,185,129,0.35);
+    border-radius: 8px;
+    color: #34d399;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+    flex-shrink: 0;
+}
+.trainer-reports__apply-btn:hover:not(:disabled) {
+    background: rgba(16,185,129,0.25);
+    border-color: rgba(16,185,129,0.5);
+}
+.trainer-reports__apply-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.trainer-reports__export-btn--pdf {
+    background: rgba(239,68,68,0.1);
+    border-color: rgba(239,68,68,0.25);
+    color: #f87171;
+}
+.trainer-reports__export-btn--pdf:hover {
+    background: rgba(239,68,68,0.2);
+    border-color: rgba(239,68,68,0.45);
+}
+
+.trainer-reports__export-dropdown {
+    display: flex;
+    gap: 6px;
+}

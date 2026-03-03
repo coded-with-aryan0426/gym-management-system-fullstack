@@ -91,7 +91,7 @@ class EditableRegistryClass {
      */
     private generateId(element: Element, type: ElementType): string {
         const tag = element.tagName.toLowerCase()
-        const existing = element.getAttribute('data-component-id')
+        const existing = element.getAttribute('data-edit-id') || element.getAttribute('data-component-id') || element.getAttribute('data-editable-id')
         if (existing) return existing
 
         // Try to create a meaningful ID from attributes
@@ -324,7 +324,9 @@ class EditableRegistryClass {
         }
 
         // Set data attribute for easy lookup
-        element.setAttribute('data-editable-id', id)
+        if (!element.hasAttribute('data-edit-id') && !element.hasAttribute('data-component-id')) {
+            element.setAttribute('data-editable-id', id)
+        }
 
         this.entries.set(id, entry)
         this.elementToId.set(element, id)
@@ -395,7 +397,7 @@ class EditableRegistryClass {
      * Find element in DOM by ID
      */
     findElement(id: string): Element | null {
-        return document.querySelector(`[data-editable-id="${id}"]`)
+        return document.querySelector(`[data-edit-id="${id}"], [data-editable-id="${id}"], [data-component-id="${id}"]`)
     }
 
     /**

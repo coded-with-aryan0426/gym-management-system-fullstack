@@ -13,12 +13,11 @@ import api from '../../services/api';
 import { formatCurrency } from '../../utils/formatters';
 import './TrainerDashboard.css';
 
-// New Components
+// Components
 import DashboardStatCard from '../../components/dashboard/shared/DashboardStatCard';
 import ActivityChart from './components/ActivityChart';
 import EarningsChart from './components/EarningsChart';
 import SessionPieChart from './components/SessionPieChart';
-import Editable from '../../components/editor/Editable';
 
 interface Session {
     id: string;
@@ -148,76 +147,76 @@ const TrainerDashboard: React.FC = () => {
 
     return (
         <div className="trainer-dashboard">
-            <Editable id="trainer-dashboard-header" config={{ allowLayout: true, allowStyle: true, allowVisibility: true }}>
-            <header className="dashboard-header">
-                <div className="header-content">
-                    <h1 className="welcome-text">
-                        Good {currentTime.getHours() < 12 ? 'Morning' : currentTime.getHours() < 18 ? 'Afternoon' : 'Evening'},
-                        <span className="highlight-text"> {trainerFirstName}</span>
-                    </h1>
-                    <p className="date-display">
-                        <Calendar size={14} />
-                        {format(currentTime, 'EEEE, MMMM do, yyyy')}
-                        <span className="time-separator">•</span>
-                        <Clock size={14} />
-                        {format(currentTime, 'HH:mm:ss')}
-                    </p>
-                </div>
-                <div className="header-actions">
-                    <button className="action-btn" onClick={() => navigate('/trainer/schedule')} {...buttonPress}>
-                        <Calendar size={18} /> Schedule
-                    </button>
-                    <button className="action-btn primary" onClick={() => navigate('/trainer/clients')} {...buttonPress}>
-                        <Users size={18} /> Clients
-                    </button>
-                </div>
-            </header>
-            </Editable>
+            <div data-edit-id="trainer-dashboard-header">
+                <header className="dashboard-header">
+                    <div className="header-content">
+                        <h1 className="welcome-text">
+                            Good {currentTime.getHours() < 12 ? 'Morning' : currentTime.getHours() < 18 ? 'Afternoon' : 'Evening'},
+                            <span className="highlight-text"> {trainerFirstName}</span>
+                        </h1>
+                        <p className="date-display">
+                            <Calendar size={14} />
+                            {format(currentTime, 'EEEE, MMMM do, yyyy')}
+                            <span className="time-separator">•</span>
+                            <Clock size={14} />
+                            {format(currentTime, 'HH:mm:ss')}
+                        </p>
+                    </div>
+                    <div className="header-actions">
+                        <button className="action-btn" onClick={() => navigate('/trainer/schedule')} {...buttonPress}>
+                            <Calendar size={18} /> Schedule
+                        </button>
+                        <button className="action-btn primary" onClick={() => navigate('/trainer/members')} {...buttonPress}>
+                            <Users size={18} /> Members
+                        </button>
+                    </div>
+                </header>
+            </div>
 
             {/* KPI Cards Grid */}
             <section className="kpi-grid">
-                <Editable id="trainer-dashboard-kpi-earnings" config={{ allowLayout: true, allowStyle: true, allowVisibility: true }}>
-                  <DashboardStatCard
-                      title="Today's Earnings"
+                <div data-edit-id="trainer-dashboard-kpi-earnings" style={{ display: 'contents' }}>
+                    <DashboardStatCard
+                        title="Today's Earnings"
                         value={formatCurrency(data.todayEarnings)}
-                      icon={IndianRupee}
-                      color="#10b981"
-                      delay={0.1}
-                      trend="vs yesterday"
-                      trendUp={true}
-                  />
-                </Editable>
-                <Editable id="trainer-dashboard-kpi-sessions" config={{ allowLayout: true, allowStyle: true, allowVisibility: true }}>
-                  <DashboardStatCard
-                      title="Sessions Today"
-                      value={`${data.completedToday}/${data.totalToday}`}
-                      icon={Dumbbell}
-                      color="#f8fafc"
-                      delay={0.1}
-                      trend={`${data.attendanceRate}% Rate`}
-                      trendUp={data.attendanceRate > 80}
-                  />
-                </Editable>
-                <Editable id="trainer-dashboard-kpi-active-clients" config={{ allowLayout: true, allowStyle: true, allowVisibility: true }}>
-                  <DashboardStatCard
-                      title="Active Clients"
-                      value={data.activeMembers}
-                      icon={Users}
-                      color="#f8fafc"
-                      delay={0.1}
-                  />
-                </Editable>
-                <Editable id="trainer-dashboard-kpi-pending-tasks" config={{ allowLayout: true, allowStyle: true, allowVisibility: true }}>
-                  <DashboardStatCard
-                      title="Pending Tasks"
-                      value={data.alerts.length}
-                      icon={Bell}
-                      color="#DC2626"
-                      delay={0.1}
-                      trend={data.alerts.length > 0 ? "Action Req." : "All Clear"}
-                      trendUp={data.alerts.length === 0}
-                  />
-                </Editable>
+                        icon={IndianRupee}
+                        color="#10b981"
+                        delay={0.1}
+                        trend="vs yesterday"
+                        trendUp={true}
+                    />
+                </div>
+                <div data-edit-id="trainer-dashboard-kpi-sessions" style={{ display: 'contents' }}>
+                    <DashboardStatCard
+                        title="Sessions Today"
+                        value={`${data.completedToday}/${data.totalToday}`}
+                        icon={Dumbbell}
+                        color="#6366F1"
+                        delay={0.1}
+                        trend={`${data.attendanceRate}% Rate`}
+                        trendUp={data.attendanceRate > 80}
+                    />
+                </div>
+                <div data-edit-id="trainer-dashboard-kpi-active-clients" style={{ display: 'contents' }}>
+                    <DashboardStatCard
+                        title="Active Clients"
+                        value={data.activeMembers}
+                        icon={Users}
+                        color="#3B82F6"
+                        delay={0.1}
+                    />
+                </div>
+                <div data-edit-id="trainer-dashboard-kpi-pending-tasks" style={{ display: 'contents' }}>
+                    <DashboardStatCard
+                        title="Pending Tasks"
+                        value={data.alerts.length}
+                        icon={Bell}
+                        color="#DC2626"
+                        delay={0.1}
+                        trend={data.alerts.length > 0 ? "Action Req." : "All Clear"}
+                        trendUp={data.alerts.length === 0}
+                    />
+                </div>
             </section>
 
             {/* Main Content Grid */}
@@ -225,101 +224,113 @@ const TrainerDashboard: React.FC = () => {
 
                 {/* Left Column: Charts */}
                 <div className="dashboard-column main-column">
-                    <Editable id="trainer-dashboard-activity-chart" config={{ allowLayout: true, allowStyle: true, allowContent: false, allowVisibility: true }}>
-                      <ActivityChart data={data.weeklyActivity} />
-                    </Editable>
+                    <div data-edit-id="trainer-dashboard-activity-chart">
+                        <ActivityChart data={data.weeklyActivity} />
+                    </div>
 
                     {/* Secondary Charts Row */}
                     <div className="charts-row">
-                        <Editable id="trainer-dashboard-earnings-chart" config={{ allowLayout: true, allowStyle: true, allowContent: false, allowVisibility: true }}>
-                          <EarningsChart data={data.monthlyEarningsHistory} />
-                        </Editable>
-                        <Editable id="trainer-dashboard-session-pie" config={{ allowLayout: true, allowStyle: true, allowContent: false, allowVisibility: true }}>
-                          <SessionPieChart data={data.sessionDistribution} />
-                        </Editable>
+                        <div data-edit-id="trainer-dashboard-earnings-chart">
+                            <EarningsChart data={data.monthlyEarningsHistory} />
+                        </div>
+                        <div data-edit-id="trainer-dashboard-session-pie">
+                            <SessionPieChart data={data.sessionDistribution} />
+                        </div>
                     </div>
                 </div>
 
                 {/* Right Column: Agenda & Alerts */}
                 <div className="dashboard-column side-column">
 
-                    <Editable id="trainer-dashboard-agenda" config={{ allowLayout: true, allowStyle: true, allowContent: false, allowVisibility: true }}>
-                    <div className="widget-panel agenda-panel">
-                        <div className="widget-header">
-                            <h3><Calendar size={16} /> Today's Agenda</h3>
-                            <button className="view-all-link" onClick={() => navigate('/trainer/schedule')}>View All</button>
-                        </div>
-                        <div className="agenda-list">
-                            {sessions.length > 0 ? (
-                                sessions.slice(0, 5).map((session) => (
-                                    <div key={session.id} className={`agenda-item ${session.status}`}>
-                                        <div className="agenda-time">
-                                            <span className="start-time">{format(session.startTime, 'HH:mm')}</span>
-                                            <span className="duration">{differenceInMinutes(session.endTime!, session.startTime)}m</span>
-                                        </div>
-                                        <div className="agenda-details">
-                                            <h4>{session.title}</h4>
-                                            <div className="agenda-meta">
-                                                <span className="room">{session.room}</span>
-                                                <span className={`status-badge ${session.status}`}>
-                                                    {session.status}
-                                                </span>
+                    <div data-edit-id="trainer-dashboard-agenda">
+                        <div className="widget-panel agenda-panel">
+                            <div className="widget-header">
+                                <h3><Calendar size={16} /> Today's Agenda</h3>
+                                <button className="view-all-link" onClick={() => navigate('/trainer/schedule')}>View All</button>
+                            </div>
+                            <div className="agenda-list">
+                                {sessions.length > 0 ? (
+                                    sessions.slice(0, 5).map((session) => (
+                                        <div key={session.id} className={`agenda-item ${session.status}`}>
+                                            <div className="agenda-time">
+                                                <span className="start-time">{format(session.startTime, 'HH:mm')}</span>
+                                                <span className="duration">{differenceInMinutes(session.endTime!, session.startTime)}m</span>
                                             </div>
+                                            <div className="agenda-details">
+                                                <h4>{session.title}</h4>
+                                                <div className="agenda-meta">
+                                                    <span className="room">{session.room}</span>
+                                                    <span className={`status-badge ${session.status}`}>
+                                                        {session.status}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            {session.status === 'upcoming' && (
+                                                <button className="check-in-btn" title="Start Session">
+                                                    <ChevronRight size={14} />
+                                                </button>
+                                            )}
                                         </div>
-                                        {session.status === 'upcoming' && (
-                                            <button className="check-in-btn" title="Start Session">
-                                                <ChevronRight size={14} />
-                                            </button>
-                                        )}
+                                    ))
+                                ) : (
+                                    <div className="empty-state">
+                                        <CheckCircle size={24} />
+                                        <p>No sessions scheduled</p>
                                     </div>
-                                ))
-                            ) : (
-                                <div className="empty-state">
-                                    <CheckCircle size={24} />
-                                    <p>No sessions scheduled</p>
-                                </div>
-                            )}
+                                )}
+                            </div>
                         </div>
                     </div>
-                    </Editable>
 
                     {/* Alerts Panel */}
-                    <Editable id="trainer-dashboard-alerts" config={{ allowLayout: true, allowStyle: true, allowVisibility: true }}>
-                    <div className="widget-panel alerts-panel">
-                        <div className="widget-header">
-                            <h3><AlertCircle size={18} /> Needs Attention</h3>
-                            {data.alerts.length > 0 && <span className="badge-count">{data.alerts.length}</span>}
-                        </div>
-                        <div className="alerts-list">
-                            {data.alerts.length > 0 ? (
-                                data.alerts.map(alert => (
-                                    <div key={alert.id} className={`alert-card ${alert.severity}`}>
-                                        <div className="alert-avatar" style={{ background: alert.severity === 'high' ? 'linear-gradient(135deg, #EF4444, #B91C1C)' : undefined }}>
-                                            <span>{getInitials(alert.memberName)}</span>
+                    <div data-edit-id="trainer-dashboard-alerts">
+                        <div className="widget-panel alerts-panel">
+                            <div className="widget-header">
+                                <h3><AlertCircle size={18} /> Needs Attention</h3>
+                                {data.alerts.length > 0 && <span className="badge-count">{data.alerts.length}</span>}
+                            </div>
+                            <div className="alerts-list">
+                                {data.alerts.length > 0 ? (
+                                    data.alerts.map(alert => (
+                                        <div key={alert.id} className={`alert-card ${alert.severity}`}>
+                                            <div className="alert-avatar" style={{ background: alert.severity === 'high' ? 'linear-gradient(135deg, #EF4444, #B91C1C)' : undefined }}>
+                                                <span>{getInitials(alert.memberName)}</span>
+                                            </div>
+                                            <div className="alert-content">
+                                                <h4>{alert.memberName}</h4>
+                                                <p>{alert.message}</p>
+                                                <span className="alert-time">{alert.time}</span>
+                                            </div>
+                                            <button
+                                                className="alert-action-btn"
+                                                title={alert.type === 'PENDING_NOTE' ? 'Write note' : alert.type === 'MISSED_SESSION' ? 'View schedule' : 'Open messages'}
+                                                onClick={() => {
+                                                    if (alert.type === 'PENDING_NOTE') navigate('/trainer/progress-notes');
+                                                    else if (alert.type === 'MISSED_SESSION') navigate('/trainer/schedule');
+                                                    else navigate('/trainer/messages');
+                                                }}
+                                                {...buttonPress}
+                                            >
+                                                {alert.type === 'PENDING_NOTE' ? <FileText size={14} /> :
+                                                    alert.type === 'MISSED_SESSION' ? <Calendar size={14} /> :
+                                                        <MessageSquare size={14} />}
+                                            </button>
                                         </div>
-                                        <div className="alert-content">
-                                            <h4>{alert.memberName}</h4>
-                                            <p>{alert.message}</p>
-                                            <span className="alert-time">{alert.time}</span>
-                                        </div>
-                                        <button className="alert-action-btn" {...buttonPress}>
-                                            {alert.type === 'PENDING_NOTE' ? <FileText size={14} /> : <MessageSquare size={14} />}
-                                        </button>
-                                    </div>
-                                ))
-                            ) : (
-                                <div className="empty-state">
-                                    <CheckCircle size={32} />
-                                    <p>All caught up!</p>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                    </Editable>
-                </div>
-            </div>
-        </div>
-    );
+                                    ))
+                                ) : (
+                                      <div className="empty-state">
+                                          <CheckCircle size={32} />
+                                          <p>All caught up!</p>
+                                      </div>
+                                  )}
+                              </div>
+                          </div>
+                      </div>
+
+                  </div>
+              </div>
+          </div>
+      );
 };
 
 export default TrainerDashboard;

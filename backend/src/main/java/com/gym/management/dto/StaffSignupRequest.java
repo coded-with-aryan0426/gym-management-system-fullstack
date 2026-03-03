@@ -14,9 +14,6 @@ public class StaffSignupRequest {
     private String fullName;
     private String phone;
 
-    // V1: Role selection (OWNER, TRAINER)
-    private String role;
-
     // V2 Future: Gym setup - either create new gym or join via invite code
     private boolean createNewGym;
 

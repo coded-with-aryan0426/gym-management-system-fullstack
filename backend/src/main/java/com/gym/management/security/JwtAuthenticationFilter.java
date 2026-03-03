@@ -43,18 +43,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         userDetails.getAuthorities());
 
                 String staffRole = tokenProvider.getStaffRoleFromJWT(jwt);
-                logger.info("JWT Validation: User=" + userDetails.getUsername() + ", StaffRole=" + staffRole);
+                String jwtContext = tokenProvider.getContextFromJWT(jwt);
+                logger.info("JWT Validation: User=" + userDetails.getUsername() + ", StaffRole=" + staffRole + ", Context=" + jwtContext);
+
+                // Add staffRole authority (TRAINER, OWNER, etc.) for STAFF context users
                 if (StringUtils.hasText(staffRole)) {
                     String roleAuth = "ROLE_" + staffRole.toUpperCase();
-                    boolean hasRole = authorities.stream()
-                            .anyMatch(a -> a.getAuthority().equals(roleAuth));
-
+                    boolean hasRole = authorities.stream().anyMatch(a -> a.getAuthority().equals(roleAuth));
                     if (!hasRole) {
                         logger.info("Adding authority from JWT: " + roleAuth);
-                        authorities
-                                .add(new org.springframework.security.core.authority.SimpleGrantedAuthority(roleAuth));
-                    } else {
-                        logger.info("User already has authority: " + roleAuth);
+                        authorities.add(new org.springframework.security.core.authority.SimpleGrantedAuthority(roleAuth));
+                    }
+                }
+
+                // Add ROLE_MEMBER and ROLE_CUSTOMER for MEMBER context users
+                if ("MEMBER".equalsIgnoreCase(jwtContext)) {
+                    for (String r : new String[]{"ROLE_MEMBER", "ROLE_CUSTOMER"}) {
+                        boolean has = authorities.stream().anyMatch(a -> a.getAuthority().equals(r));
+                        if (!has) {
+                            logger.info("Adding member authority from JWT context: " + r);
+                            authorities.add(new org.springframework.security.core.authority.SimpleGrantedAuthority(r));
+                        }
                     }
                 }
 

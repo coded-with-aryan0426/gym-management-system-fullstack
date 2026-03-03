@@ -52,24 +52,24 @@ const MEMBER_NOTIFICATION_TIPS = [
 
 const MSG_TRUNCATE = 120;
 
-const getDeepLink = (notif: NotificationData, meta: any): { path: string; hash?: string; label: string } | null => {
+const getDeepLink = (notif: NotificationData, meta: any): { path: string; tab?: string; label: string } | null => {
     const t = notif.type?.toUpperCase();
-    if (notif.link) return { path: notif.link, label: 'Go to linked page' };
+    // NOTE: deliberately NOT using notif.link — it may point to staff/wrong routes
     switch (t) {
         case 'MEMBERSHIP':
-            return { path: '/member/membership', label: 'View My Membership' };
+            return { path: '/member/membership', tab: 'overview', label: 'View My Membership' };
         case 'BOOKING':
             return { path: '/member/bookings', label: 'View My Bookings' };
         case 'SCHEDULE':
             return { path: '/member/classes', label: 'View Classes' };
         case 'PAYMENT':
-            return { path: '/member/membership', hash: 'payments', label: 'View Payment History' };
+            return { path: '/member/membership', tab: 'payments', label: 'View Payment History' };
         case 'TRAINER':
             return { path: '/member/trainer', label: 'View My Trainer' };
         case 'ACHIEVEMENT':
-            return { path: '/member/progress', hash: 'achievements', label: 'View Achievements' };
+            return { path: '/member/progress', tab: 'achievements', label: 'View Achievements' };
         case 'OFFER':
-            return { path: '/member/membership', hash: 'offers', label: 'View Offers' };
+            return { path: '/member/membership', tab: 'benefits', label: 'View Offers & Benefits' };
         case 'ALERT':
         case 'SYSTEM':
             return { path: '/member', label: 'Go to Dashboard' };
@@ -311,8 +311,8 @@ const MemberNotifications: React.FC = () => {
         const link = getDeepLink(notif, meta);
         if (!link) return;
         setDetailNotif(null);
-        const path = link.hash ? `${link.path}?section=${link.hash}` : link.path;
-        navigate(path, { state: { scrollTo: link.hash, fromNotif: notif.id } });
+        const path = link.tab ? `${link.path}?tab=${link.tab}` : link.path;
+        navigate(path, { state: { fromNotif: notif.id } });
     };
 
     const getCategory = (type: string) => CATEGORIES[type?.toUpperCase()] || CATEGORIES.SYSTEM;
@@ -361,10 +361,8 @@ const MemberNotifications: React.FC = () => {
         setViewFilter('all');
     };
 
-    // Sidebar content (shared desktop + mobile)
     const renderSidebarContent = () => (
         <>
-            {/* Views */}
             <div className="on-sidebar__section">
                 <button className="on-sidebar__heading" onClick={() => toggleSection('views')}>
                     <Eye size={11} />
@@ -374,21 +372,23 @@ const MemberNotifications: React.FC = () => {
                 {!collapsedSections.has('views') && (
                     <nav className="on-nav">
                         {[
-                            { key: 'all' as ViewFilter, icon: Inbox, label: 'All', count: stats?.total },
-                            { key: 'unread' as ViewFilter, icon: Mail, label: 'Unread', count: stats?.unread },
-                            { key: 'starred' as ViewFilter, icon: Star, label: 'Starred', count: stats?.starred },
-                            { key: 'archived' as ViewFilter, icon: Archive, label: 'Archived', count: stats?.archived },
-                        ].map(v => (
+                            { key: 'all' as ViewFilter, icon: Inbox, label: 'All Inbox', count: stats?.total, color: '#007AFF' },
+                            { key: 'unread' as ViewFilter, icon: Mail, label: 'Unread', count: stats?.unread, color: '#FF3B30' },
+                            { key: 'starred' as ViewFilter, icon: Star, label: 'Starred', count: stats?.starred, color: '#FFCC00' },
+                            { key: 'archived' as ViewFilter, icon: Archive, label: 'Archived', count: stats?.archived, color: '#8E8E93' },
+                        ].map(item => (
                             <button
-                                key={v.key}
-                                className={`on-nav-btn ${viewFilter === v.key && !typeFilter ? 'active' : ''}`}
-                                onClick={() => { setViewFilter(v.key); setTypeFilter(null); setMobileSidebar(false); }}
+                                key={item.key}
+                                className={`on-nav-btn ${viewFilter === item.key && !typeFilter ? 'active' : ''}`}
+                                onClick={() => { setViewFilter(item.key); setTypeFilter(null); setPriorityFilter(null); setMobileSidebar(false); }}
                             >
-                                <v.icon size={14} className="on-nav-icon" />
-                                <span className="on-nav-label">{v.label}</span>
-                                {(v.count ?? 0) > 0 && (
-                                    <span className={`on-nav-count ${v.key === 'unread' && (v.count ?? 0) > 0 ? 'on-nav-count--alert' : ''}`}>
-                                        {v.count}
+                                <div className="on-nav-icon" style={{ color: viewFilter === item.key && !typeFilter ? item.color : undefined }}>
+                                    <item.icon size={14} />
+                                </div>
+                                <span className="on-nav-label">{item.label}</span>
+                                {item.count !== undefined && item.count > 0 && (
+                                    <span className={`on-nav-count ${item.key === 'unread' && item.count > 0 ? 'on-nav-count--alert' : ''}`}>
+                                        {item.count}
                                     </span>
                                 )}
                             </button>
@@ -399,7 +399,6 @@ const MemberNotifications: React.FC = () => {
 
             <div className="on-sidebar__divider" />
 
-            {/* Categories */}
             <div className="on-sidebar__section">
                 <button className="on-sidebar__heading" onClick={() => toggleSection('categories')}>
                     <Filter size={11} />
@@ -408,44 +407,51 @@ const MemberNotifications: React.FC = () => {
                 </button>
                 {!collapsedSections.has('categories') && (
                     <nav className="on-nav">
-                        {Object.entries(CATEGORIES).map(([key, cat]) => (
-                            <button
-                                key={key}
-                                className={`on-nav-btn ${typeFilter === key ? 'active' : ''}`}
-                                onClick={() => { setTypeFilter(typeFilter === key ? null : key); setMobileSidebar(false); }}
-                            >
-                                <span className="on-nav-cat-icon" style={{ background: cat.bg, color: cat.color }}>
-                                    <cat.icon size={12} />
-                                </span>
-                                <div style={{ flex: 1, minWidth: 0 }}>
+                        {Object.entries(CATEGORIES).map(([key, cat]) => {
+                            const count = stats?.typeCounts?.[key] || stats?.typeCounts?.[key.toLowerCase()] || 0;
+                            return (
+                                <button
+                                    key={key}
+                                    className={`on-nav-btn ${typeFilter === key ? 'active' : ''}`}
+                                    onClick={() => {
+                                        setTypeFilter(typeFilter === key ? null : key);
+                                        setViewFilter('all');
+                                        setPriorityFilter(null);
+                                        setMobileSidebar(false);
+                                    }}
+                                >
+                                    <div className="on-nav-cat-icon" style={{ background: cat.bg, color: cat.color }}>
+                                        <cat.icon size={12} />
+                                    </div>
                                     <span className="on-nav-label">{cat.label}</span>
-                                    <span style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block', marginTop: '1px' }}>{cat.desc}</span>
-                                </div>
-                            </button>
-                        ))}
+                                    {count > 0 && <span className="on-nav-count">{count}</span>}
+                                </button>
+                            );
+                        })}
                     </nav>
                 )}
             </div>
 
             <div className="on-sidebar__divider" />
 
-            {/* Priority */}
             <div className="on-sidebar__section">
                 <button className="on-sidebar__heading" onClick={() => toggleSection('priority')}>
-                    <AlertCircle size={11} />
+                    <Zap size={11} />
                     <span>Priority</span>
                     {collapsedSections.has('priority') ? <ChevronRight size={10} /> : <ChevronDown size={10} />}
                 </button>
                 {!collapsedSections.has('priority') && (
                     <nav className="on-nav">
-                        {Object.entries(PRIORITY_CONFIG).map(([key, pri]) => (
+                        {Object.entries(PRIORITY_CONFIG).map(([key, p]) => (
                             <button
                                 key={key}
                                 className={`on-nav-btn ${priorityFilter === key ? 'active' : ''}`}
                                 onClick={() => { setPriorityFilter(priorityFilter === key ? null : key); setMobileSidebar(false); }}
                             >
-                                <span className="on-nav-priority-dot" style={{ background: pri.color }} />
-                                <span className="on-nav-label">{pri.label}</span>
+                                <div className="on-nav-priority-dot" style={{ background: p.color }}>
+                                    <p.icon size={9} />
+                                </div>
+                                <span className="on-nav-label">{p.label}</span>
                             </button>
                         ))}
                     </nav>
@@ -458,7 +464,7 @@ const MemberNotifications: React.FC = () => {
         if (!detailNotif) return null;
         const cat = getCategory(detailNotif.type);
         const pri = getPriority(detailNotif.priority);
-        const meta = parseMeta(detailNotif.metadata);
+        const meta = parseMeta(detailNotif.metaData);
         const deepLink = getDeepLink(detailNotif, meta);
         const metaFields = meta ? [
             meta.planName && { icon: CreditCard, label: 'Plan', value: meta.planName, color: '#007AFF' },
@@ -558,351 +564,369 @@ const MemberNotifications: React.FC = () => {
 
     return (
         <>
-        <div className="on-page">
-            {/* Header */}
-            <div className="on-header">
-                <div className="on-header__row">
-                    <div className="on-header__left">
-                        <div className="on-header__icon-wrap">
-                            <Bell size={22} />
+            <div className="on-page">
+                <header className="on-header">
+                    <div className="on-header__row">
+                        <div className="on-header__left">
+                            <div className="on-header__icon-wrap">
+                                <Bell size={18} />
+                                {stats && stats.unread > 0 && (
+                                    <span className="on-header__badge">{stats.unread > 99 ? '99+' : stats.unread}</span>
+                                )}
+                            </div>
+                            <div className="on-header__text">
+                                <h1>Notifications</h1>
+                                <div className="on-header__meta">
+                                    <span className={`on-header__live ${liveConnected ? 'connected' : 'disconnected'}`}>
+                                        <CircleDot size={7} />
+                                        {liveConnected ? 'Live' : 'Offline'}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
-                        <div className="on-header__text">
-                            <h1>Notifications</h1>
-                            <div className="on-header__meta">
-                                <span className={`on-header__badge ${liveConnected ? 'connected' : 'disconnected'}`}>
-                                    {liveConnected ? <Wifi size={10} /> : <WifiOff size={10} />}
-                                    {liveConnected ? 'Live' : 'Offline'}
+
+                        {stats && (
+                            <div className="on-stats-strip">
+                                {[
+                                    { key: 'all', icon: Inbox, num: stats.total, label: 'Total', color: '#007AFF', bg: 'rgba(0,122,255,0.1)' },
+                                    { key: 'unread', icon: Mail, num: stats.unread, label: 'Unread', color: '#FF3B30', bg: 'rgba(255,59,48,0.1)' },
+                                    { key: 'urgent', icon: Zap, num: stats.urgent || 0, label: 'Urgent', color: '#FF9500', bg: 'rgba(255,149,0,0.1)' },
+                                    { key: 'starred', icon: Star, num: stats.starred, label: 'Starred', color: '#FFCC00', bg: 'rgba(255,204,0,0.12)' },
+                                    { key: 'archived', icon: Archive, num: stats.archived, label: 'Archived', color: '#8E8E93', bg: 'rgba(142,142,147,0.1)' },
+                                ].map(s => (
+                                    <motion.button
+                                        key={s.key}
+                                        className={`on-stat-card ${viewFilter === s.key && !typeFilter ? 'active' : ''} ${s.key === 'urgent' && priorityFilter === 'urgent' ? 'active' : ''}`}
+                                        onClick={() => {
+                                            if (s.key === 'urgent') { setViewFilter('all'); setTypeFilter(null); setPriorityFilter('urgent'); }
+                                            else { setViewFilter(s.key as ViewFilter); setTypeFilter(null); setPriorityFilter(null); }
+                                        }}
+                                        whileHover={{ y: -1, scale: 1.03 }}
+                                        whileTap={{ scale: 0.97 }}
+                                    >
+                                        <div className="on-stat-icon" style={{ background: s.bg, color: s.color }}>
+                                            <s.icon size={13} />
+                                        </div>
+                                        <div className="on-stat-info">
+                                            <span className="on-stat-num" style={s.num > 0 ? { color: s.color } : undefined}>{s.num}</span>
+                                            <span className="on-stat-label">{s.label}</span>
+                                        </div>
+                                        {s.key === 'unread' && s.num > 0 && <div className="on-stat-pulse" style={{ background: s.color }} />}
+                                    </motion.button>
+                                ))}
+                            </div>
+                        )}
+
+                        <div className="on-header__right">
+                            <div className="on-search-box">
+                                <Search size={13} />
+                                <input
+                                    type="text"
+                                    placeholder="Search..."
+                                    value={searchQuery}
+                                    onChange={e => setSearchQuery(e.target.value)}
+                                />
+                                {searchQuery && (
+                                    <button className="on-search-clear" onClick={() => setSearchQuery('')}>
+                                        <X size={12} />
+                                    </button>
+                                )}
+                            </div>
+                            <button
+                                className={`on-header-btn ${refreshing ? 'spinning' : ''}`}
+                                onClick={() => fetchData(true)}
+                                title="Refresh"
+                            >
+                                <RefreshCw size={14} />
+                            </button>
+                            <button className="on-header-btn" onClick={handleMarkAllRead} title="Mark all read">
+                                <CheckCheck size={14} />
+                            </button>
+                            <button className="on-header-btn on-header-btn--mobile-filter" onClick={() => setMobileSidebar(!mobileSidebar)} title="Filters">
+                                <Filter size={14} />
+                            </button>
+                        </div>
+                    </div>
+                </header>
+
+                <div className="on-body">
+                    <aside className="on-sidebar">
+                        {renderSidebarContent()}
+                    </aside>
+
+                    <AnimatePresence>
+                        {mobileSidebar && (
+                            <>
+                                <motion.div
+                                    className="on-mobile-overlay"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    onClick={() => setMobileSidebar(false)}
+                                />
+                                <motion.aside
+                                    className="on-mobile-sidebar"
+                                    initial={{ x: -280 }}
+                                    animate={{ x: 0 }}
+                                    exit={{ x: -280 }}
+                                    transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                                >
+                                    <div className="on-mobile-sidebar__header">
+                                        <h3>Filters</h3>
+                                        <button onClick={() => setMobileSidebar(false)}><X size={16} /></button>
+                                    </div>
+                                    {renderSidebarContent()}
+                                </motion.aside>
+                            </>
+                        )}
+                    </AnimatePresence>
+
+                    <div className="on-content">
+                        <div className="on-toolbar">
+                            <div className="on-toolbar__left">
+                                <h3 className="on-toolbar__view-label">
+                                    {activeFilterLabel}
+                                    <span className="on-toolbar__count">{filteredNotifications.length}</span>
+                                </h3>
+
+                                <button
+                                    className={`on-toolbar-btn ${selectMode ? 'active' : ''}`}
+                                    onClick={() => { setSelectMode(!selectMode); setSelectedIds(new Set()); }}
+                                >
+                                    {selectMode ? <X size={13} /> : <Check size={13} />}
+                                    <span>{selectMode ? 'Cancel' : 'Select'}</span>
+                                </button>
+
+                                {selectMode && (
+                                    <>
+                                        <button className="on-toolbar-btn" onClick={selectAll}>
+                                            <CheckCheck size={13} />
+                                            <span>{selectedIds.size === filteredNotifications.length ? 'Deselect' : 'All'}</span>
+                                        </button>
+                                        {selectedIds.size > 0 && (
+                                            <div className="on-bulk-wrap" ref={bulkRef}>
+                                                <button className="on-toolbar-btn on-toolbar-btn--accent" onClick={() => setShowBulkMenu(!showBulkMenu)}>
+                                                    <MoreHorizontal size={13} />
+                                                    <span>Actions ({selectedIds.size})</span>
+                                                    <ChevronDown size={11} />
+                                                </button>
+                                                <AnimatePresence>
+                                                    {showBulkMenu && (
+                                                        <motion.div
+                                                            className="on-bulk-menu"
+                                                            initial={{ opacity: 0, y: -6, scale: 0.95 }}
+                                                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                            exit={{ opacity: 0, y: -6, scale: 0.95 }}
+                                                            transition={{ duration: 0.15 }}
+                                                        >
+                                                            <button onClick={() => handleBulkAction('read')}><MailOpen size={14} /> Mark as Read</button>
+                                                            <button onClick={() => handleBulkAction('unread')}><Mail size={14} /> Mark as Unread</button>
+                                                            <button onClick={() => handleBulkAction('star')}><Star size={14} /> Star Selected</button>
+                                                            <button onClick={() => handleBulkAction('archive')}><Archive size={14} /> Archive Selected</button>
+                                                            <div className="on-bulk-divider" />
+                                                            <button className="danger" onClick={() => handleBulkAction('delete')}><Trash2 size={14} /> Delete Selected</button>
+                                                        </motion.div>
+                                                    )}
+                                                </AnimatePresence>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+                            </div>
+
+                            <div className="on-toolbar__right">
+                                {hasActiveFilters && (
+                                    <div className="on-active-filters">
+                                        {typeFilter && (
+                                            <span className="on-filter-chip" style={{ background: `${getCategory(typeFilter).color}15`, color: getCategory(typeFilter).color }}>
+                                                {getCategory(typeFilter).label}
+                                                <button onClick={() => setTypeFilter(null)}><X size={10} /></button>
+                                            </span>
+                                        )}
+                                        {priorityFilter && (
+                                            <span className="on-filter-chip" style={{ background: `${getPriority(priorityFilter).color}15`, color: getPriority(priorityFilter).color }}>
+                                                {getPriority(priorityFilter).label}
+                                                <button onClick={() => setPriorityFilter(null)}><X size={10} /></button>
+                                            </span>
+                                        )}
+                                        {searchQuery && (
+                                            <span className="on-filter-chip">
+                                                <Search size={10} />"{searchQuery}"
+                                                <button onClick={() => setSearchQuery('')}><X size={10} /></button>
+                                            </span>
+                                        )}
+                                        <button className="on-filter-clear-all" onClick={clearAllFilters}>Clear all</button>
+                                    </div>
+                                )}
+                                <span className="on-result-count">
+                                    {filteredNotifications.length} result{filteredNotifications.length !== 1 ? 's' : ''}
                                 </span>
                             </div>
                         </div>
-                    </div>
-                    <div className="on-header__right">
-                        <button className="on-header-btn" onClick={() => fetchData(true)} title="Refresh">
-                            <RefreshCw size={15} className={refreshing ? 'spinning' : ''} />
-                        </button>
-                        <button className="on-header-btn" onClick={handleMarkAllRead} title="Mark all read">
-                            <CheckCheck size={15} />
-                        </button>
-                        <button className="on-header-btn" onClick={() => { setSelectMode(!selectMode); setSelectedIds(new Set()); }} title="Select mode">
-                            {selectMode ? <X size={15} /> : <Check size={15} />}
-                        </button>
-                    </div>
-                </div>
 
-                {/* Stats strip */}
-                <div className="on-stats-strip">
-                    {[
-                        { icon: Bell, label: 'Total', value: stats?.total ?? 0, color: '#007AFF' },
-                        { icon: Mail, label: 'Unread', value: stats?.unread ?? 0, color: '#FF9500' },
-                        { icon: Star, label: 'Starred', value: stats?.starred ?? 0, color: '#FFD60A' },
-                        { icon: Archive, label: 'Archived', value: stats?.archived ?? 0, color: '#8E8E93' },
-                    ].map((s, i) => (
-                        <div className="on-stat-card" key={i}>
-                            <div className="on-stat-icon" style={{ color: s.color }}>
-                                <s.icon size={14} />
-                                {s.label === 'Unread' && (s.value > 0) && <span className="on-stat-pulse" />}
-                            </div>
-                            <div className="on-stat-info">
-                                <span className="on-stat-num">{s.value}</span>
-                                <span className="on-stat-label">{s.label}</span>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            {/* Body */}
-            <div className="on-body">
-                {/* Mobile filter button */}
-                <button className="on-header-btn on-header-btn--mobile-filter" onClick={() => setMobileSidebar(true)}>
-                    <Filter size={16} />
-                    Filters
-                    {hasActiveFilters && <span className="on-mobile-filter-dot" />}
-                </button>
-
-                {/* Mobile sidebar overlay */}
-                <AnimatePresence>
-                    {mobileSidebar && (
-                        <>
-                            <motion.div
-                                className="on-mobile-overlay"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                onClick={() => setMobileSidebar(false)}
-                            />
-                            <motion.div
-                                className="on-mobile-sidebar"
-                                initial={{ x: -280 }}
-                                animate={{ x: 0 }}
-                                exit={{ x: -280 }}
-                                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                            >
-                                <div className="on-mobile-sidebar__header">
-                                    <h3>Filters</h3>
-                                    <button onClick={() => setMobileSidebar(false)}><X size={18} /></button>
+                        {/* Full-width list */}
+                        <div className="on-list__scroll">
+                            {loading ? (
+                                <div className="on-loading">
+                                    <div className="on-loading__spinner" />
                                 </div>
-                                {renderSidebarContent()}
-                            </motion.div>
-                        </>
-                    )}
-                </AnimatePresence>
+                            ) : filteredNotifications.length === 0 ? (
+                                <div className="on-empty">
+                                    <div className="on-empty__hero">
+                                        <div className="on-empty__icon-ring">
+                                            <div className="on-empty__ring-pulse" />
+                                            <div className="on-empty__icon-inner">
+                                                <Bell size={28} />
+                                            </div>
+                                        </div>
+                                        <Sparkles size={14} className="on-empty__sparkle on-empty__sparkle--1" style={{ color: '#FFD60A' }} />
+                                        <Sparkles size={10} className="on-empty__sparkle on-empty__sparkle--2" style={{ color: '#5856D6' }} />
+                                    </div>
+                                    <h3>You're all caught up!</h3>
+                                    <p>When something needs your attention, it'll show up here</p>
 
-                {/* Desktop sidebar */}
-                <div className="on-sidebar">
-                    {renderSidebarContent()}
-                </div>
+                                    {hasActiveFilters && (
+                                        <button className="on-empty__clear-btn" onClick={clearAllFilters}>
+                                            <X size={14} /> Clear filters
+                                        </button>
+                                    )}
 
-                {/* Main content */}
-                  <div className="on-content">
-                      {/* Toolbar */}
-                      <div className="on-toolbar">
-                          <div className="on-toolbar__left">
-                              <span className="on-toolbar__view-label">
-                                  {activeFilterLabel}
-                                  <span className="on-toolbar__count">{filteredNotifications.length}</span>
-                              </span>
-                              <button
-                                  className={`on-toolbar-btn ${selectMode ? 'active' : ''}`}
-                                  onClick={() => { setSelectMode(!selectMode); setSelectedIds(new Set()); }}
-                              >
-                                  {selectMode ? <X size={13} /> : <Check size={13} />}
-                                  <span>{selectMode ? 'Cancel' : 'Select'}</span>
-                              </button>
-                              {selectMode && (
-                                  <>
-                                      <button className="on-toolbar-btn" onClick={selectAll}>
-                                          <CheckCheck size={13} />
-                                          <span>{selectedIds.size === filteredNotifications.length ? 'Deselect' : 'All'}</span>
-                                      </button>
-                                      {selectedIds.size > 0 && (
-                                          <div className="on-bulk-wrap" ref={bulkRef}>
-                                              <button className="on-toolbar-btn on-toolbar-btn--accent" onClick={() => setShowBulkMenu(!showBulkMenu)}>
-                                                  <MoreHorizontal size={13} />
-                                                  <span>Actions ({selectedIds.size})</span>
-                                                  <ChevronDown size={11} />
-                                              </button>
-                                              <AnimatePresence>
-                                                  {showBulkMenu && (
-                                                      <motion.div
-                                                          className="on-bulk-menu"
-                                                          initial={{ opacity: 0, y: -6, scale: 0.95 }}
-                                                          animate={{ opacity: 1, y: 0, scale: 1 }}
-                                                          exit={{ opacity: 0, y: -6, scale: 0.95 }}
-                                                          transition={{ duration: 0.15 }}
-                                                      >
-                                                          <button onClick={() => handleBulkAction('read')}><MailOpen size={14} /> Mark as Read</button>
-                                                          <button onClick={() => handleBulkAction('unread')}><Mail size={14} /> Mark as Unread</button>
-                                                          <button onClick={() => handleBulkAction('star')}><Star size={14} /> Star Selected</button>
-                                                          <button onClick={() => handleBulkAction('archive')}><Archive size={14} /> Archive Selected</button>
-                                                          <div className="on-bulk-divider" />
-                                                          <button className="danger" onClick={() => handleBulkAction('delete')}><Trash2 size={14} /> Delete Selected</button>
-                                                      </motion.div>
-                                                  )}
-                                              </AnimatePresence>
-                                          </div>
-                                      )}
-                                  </>
-                              )}
-                          </div>
-                          <div className="on-toolbar__right">
-                              <div className="on-search-box">
-                                  <Search size={13} />
-                                  <input
-                                      type="text"
-                                      placeholder="Search notifications..."
-                                      value={searchQuery}
-                                      onChange={e => setSearchQuery(e.target.value)}
-                                  />
-                                  {searchQuery && (
-                                      <button className="on-search-clear" onClick={() => setSearchQuery('')}>
-                                          <X size={12} />
-                                      </button>
-                                  )}
-                              </div>
-                          </div>
-                      </div>
+                                    <div className="on-empty__tips">
+                                        <h4 className="on-empty__tips-header">
+                                            <Sparkles size={13} /> What you'll see here
+                                        </h4>
+                                        <div className="on-empty__tips-grid">
+                                            {MEMBER_NOTIFICATION_TIPS.map((tip, i) => (
+                                                <div className="on-empty__tip-card" key={i}>
+                                                    <div className="on-empty__tip-icon" style={{ background: `${tip.color}15`, color: tip.color }}>
+                                                        <tip.icon size={16} />
+                                                    </div>
+                                                    <div className="on-empty__tip-text">
+                                                        <strong>{tip.title}</strong>
+                                                        <span>{tip.desc}</span>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                grouped.map((group, gi) => (
+                                    <div className="on-group" key={gi}>
+                                        <div className="on-group__header">
+                                            <span className="on-group__label">{group.label}</span>
+                                            <span className="on-group__line" />
+                                            <span className="on-group__count">{group.items.length}</span>
+                                        </div>
+                                        <div className="on-group__items">
+                                            {group.items.map(n => {
+                                                const cat = getCategory(n.type);
+                                                const CatIcon = cat.icon;
+                                                const pri = getPriority(n.priority);
+                                                const meta = parseMeta(n.metaData);
+                                                const isChecked = selectedIds.has(n.id);
+                                                const isExpanded = expandedId === n.id;
+                                                const isLong = n.message.length > MSG_TRUNCATE;
 
-                      {/* Active filter chips */}
-                      {hasActiveFilters && (
-                          <div className="on-active-filters">
-                              {typeFilter && (() => {
-                                  const cat = getCategory(typeFilter);
-                                  return (
-                                      <span className="on-filter-chip" style={{ background: cat.bg, color: cat.color }}>
-                                          <cat.icon size={11} /> {cat.label}
-                                          <button onClick={() => setTypeFilter(null)}><X size={10} /></button>
-                                      </span>
-                                  );
-                              })()}
-                              {priorityFilter && (() => {
-                                  const pri = getPriority(priorityFilter);
-                                  return (
-                                      <span className="on-filter-chip" style={{ background: pri.bg, color: pri.color }}>
-                                          <pri.icon size={11} /> {pri.label}
-                                          <button onClick={() => setPriorityFilter(null)}><X size={10} /></button>
-                                      </span>
-                                  );
-                              })()}
-                              {searchQuery && (
-                                  <span className="on-filter-chip">
-                                      <Search size={11} /> "{searchQuery}"
-                                      <button onClick={() => setSearchQuery('')}><X size={10} /></button>
-                                  </span>
-                              )}
-                              <button className="on-filter-clear-all" onClick={clearAllFilters}>Clear all</button>
-                          </div>
-                      )}
+                                                return (
+                                                    <motion.div
+                                                        key={n.id}
+                                                        className={`on-item ${!n.isRead ? 'unread' : ''} ${isExpanded ? 'expanded' : ''} ${n.isStarred ? 'starred' : ''} ${n.priority === 'urgent' ? 'urgent' : ''} ${isChecked ? 'checked' : ''}`}
+                                                        onClick={() => handleCardClick(n)}
+                                                        layout
+                                                        initial={{ opacity: 0, y: 8 }}
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                        transition={{ duration: 0.15 }}
+                                                    >
+                                                        {selectMode && (
+                                                            <div className={`on-item__check ${isChecked ? 'checked' : ''}`} onClick={(e) => { e.stopPropagation(); toggleSelect(n.id); }}>
+                                                                {isChecked && <Check size={10} />}
+                                                            </div>
+                                                        )}
 
-                      {/* Full-width list */}
-                      <div className="on-list__scroll">
-                          {loading ? (
-                              <div className="on-loading">
-                                  <div className="on-loading__spinner" />
-                              </div>
-                          ) : filteredNotifications.length === 0 ? (
-                              <div className="on-empty">
-                                  <div className="on-empty__hero">
-                                      <div className="on-empty__icon-ring">
-                                          <div className="on-empty__ring-pulse" />
-                                          <div className="on-empty__icon-inner">
-                                              <Bell size={28} />
-                                          </div>
-                                      </div>
-                                      <Sparkles size={14} className="on-empty__sparkle on-empty__sparkle--1" style={{ color: '#FFD60A' }} />
-                                      <Sparkles size={10} className="on-empty__sparkle on-empty__sparkle--2" style={{ color: '#5856D6' }} />
-                                  </div>
-                                  <h3>You're all caught up!</h3>
-                                  <p>When something needs your attention, it'll show up here</p>
+                                                        {!n.isRead && <div className="on-item__unread-dot" />}
 
-                                  {hasActiveFilters && (
-                                      <button className="on-empty__clear-btn" onClick={clearAllFilters}>
-                                          <X size={14} /> Clear filters
-                                      </button>
-                                  )}
+                                                        <div className="on-item__icon" style={{ background: cat.bg, color: cat.color }}>
+                                                            <CatIcon size={15} />
+                                                        </div>
 
-                                  <div className="on-empty__tips">
-                                      <h4 className="on-empty__tips-header">
-                                          <Sparkles size={13} /> What you'll see here
-                                      </h4>
-                                      <div className="on-empty__tips-grid">
-                                          {MEMBER_NOTIFICATION_TIPS.map((tip, i) => (
-                                              <div className="on-empty__tip-card" key={i}>
-                                                  <div className="on-empty__tip-icon" style={{ background: `${tip.color}15`, color: tip.color }}>
-                                                      <tip.icon size={16} />
-                                                  </div>
-                                                  <div className="on-empty__tip-text">
-                                                      <strong>{tip.title}</strong>
-                                                      <span>{tip.desc}</span>
-                                                  </div>
-                                              </div>
-                                          ))}
-                                      </div>
-                                  </div>
-                              </div>
-                          ) : (
-                              grouped.map((group, gi) => (
-                                  <div className="on-group" key={gi}>
-                                      <div className="on-group__header">
-                                          <span className="on-group__label">{group.label}</span>
-                                          <span className="on-group__line" />
-                                          <span className="on-group__count">{group.items.length}</span>
-                                      </div>
-                                      <div className="on-group__items">
-                                          {group.items.map(n => {
-                                              const cat = getCategory(n.type);
-                                              const CatIcon = cat.icon;
-                                              const pri = getPriority(n.priority);
-                                              const meta = parseMeta(n.metadata);
-                                              const isChecked = selectedIds.has(n.id);
-                                              const isExpanded = expandedId === n.id;
-                                              const isLong = n.message.length > MSG_TRUNCATE;
+                                                        <div className="on-item__body">
+                                                            <div className="on-item__row1">
+                                                                <span className="on-item__title">{n.title}</span>
+                                                                <span className="on-item__time">{formatTime(n.createdAt)}</span>
+                                                            </div>
 
-                                              return (
-                                                  <motion.div
-                                                      key={n.id}
-                                                      className={`on-item ${!n.isRead ? 'unread' : ''} ${isExpanded ? 'expanded' : ''} ${n.isStarred ? 'starred' : ''} ${n.priority === 'urgent' ? 'urgent' : ''} ${isChecked ? 'checked' : ''}`}
-                                                      onClick={() => handleCardClick(n)}
-                                                      layout
-                                                      initial={{ opacity: 0, y: 8 }}
-                                                      animate={{ opacity: 1, y: 0 }}
-                                                      transition={{ duration: 0.15 }}
-                                                  >
-                                                      {selectMode && (
-                                                          <div className={`on-item__check ${isChecked ? 'checked' : ''}`} onClick={(e) => { e.stopPropagation(); toggleSelect(n.id); }}>
-                                                              {isChecked && <Check size={10} />}
-                                                          </div>
-                                                      )}
+                                                            <p className="on-item__msg">
+                                                                {isExpanded || !isLong
+                                                                    ? n.message
+                                                                    : n.message.slice(0, MSG_TRUNCATE) + '…'}
+                                                            </p>
 
-                                                      {!n.isRead && <div className="on-item__unread-dot" />}
+                                                            {isLong && (
+                                                                <button
+                                                                    className="on-item__show-more"
+                                                                    onClick={e => { e.stopPropagation(); setExpandedId(isExpanded ? null : n.id); }}
+                                                                >
+                                                                    {isExpanded ? <><ChevronUp size={11} /> Show less</> : <><ChevronDown size={11} /> Show more</>}
+                                                                </button>
+                                                            )}
 
-                                                      <div className="on-item__icon" style={{ background: cat.bg, color: cat.color }}>
-                                                          <CatIcon size={15} />
-                                                      </div>
+                                                              <div className="on-item__tags">
+                                                                  <span className="on-tag" style={{ background: cat.bg, color: cat.color }}>{cat.label}</span>
+                                                                  {(n.priority === 'urgent' || n.priority === 'high') && (
+                                                                      <span className="on-tag" style={{ background: pri.bg, color: pri.color }}>
+                                                                          <pri.icon size={8} /> {pri.label}
+                                                                      </span>
+                                                                  )}
+                                                                  {!n.isRead && <span className="on-tag on-tag--unread">New</span>}
+                                                              </div>
 
-                                                      <div className="on-item__body">
-                                                          <div className="on-item__row1">
-                                                              <span className="on-item__title">{n.title}</span>
-                                                              <span className="on-item__time">{formatTime(n.createdAt)}</span>
-                                                          </div>
+                                                              {(() => {
+                                                                  const deepLink = getDeepLink(n, meta);
+                                                                  return deepLink ? (
+                                                                      <button
+                                                                          className="on-item__goto"
+                                                                          onClick={e => { e.stopPropagation(); handleDeepLink(n, meta); }}
+                                                                      >
+                                                                          <ExternalLink size={11} />
+                                                                          {deepLink.label}
+                                                                          <ArrowRight size={11} />
+                                                                      </button>
+                                                                  ) : null;
+                                                              })()}
+                                                        </div>
 
-                                                          <p className="on-item__msg">
-                                                              {isExpanded || !isLong
-                                                                  ? n.message
-                                                                  : n.message.slice(0, MSG_TRUNCATE) + '…'}
-                                                          </p>
-
-                                                          {isLong && (
-                                                              <button
-                                                                  className="on-item__show-more"
-                                                                  onClick={e => { e.stopPropagation(); setExpandedId(isExpanded ? null : n.id); }}
-                                                              >
-                                                                  {isExpanded ? <><ChevronUp size={11} /> Show less</> : <><ChevronDown size={11} /> Show more</>}
-                                                              </button>
-                                                          )}
-
-                                                          <div className="on-item__tags">
-                                                              <span className="on-tag" style={{ background: cat.bg, color: cat.color }}>{cat.label}</span>
-                                                              {(n.priority === 'urgent' || n.priority === 'high') && (
-                                                                  <span className="on-tag" style={{ background: pri.bg, color: pri.color }}>
-                                                                      <pri.icon size={8} /> {pri.label}
-                                                                  </span>
-                                                              )}
-                                                              {!n.isRead && <span className="on-tag on-tag--unread">New</span>}
-                                                          </div>
-                                                      </div>
-
-                                                      <div className="on-item__actions">
-                                                          <button
-                                                              className={`on-item-act ${n.isStarred ? 'starred' : ''}`}
-                                                              onClick={(e) => { e.stopPropagation(); handleToggleStar(n.id); }}
-                                                              title={n.isStarred ? 'Unstar' : 'Star'}
-                                                          >
-                                                              <Star size={13} fill={n.isStarred ? '#FFD60A' : 'none'} />
-                                                          </button>
-                                                          {viewFilter === 'archived' ? (
-                                                              <button className="on-item-act" onClick={(e) => { e.stopPropagation(); handleUnarchive(n.id); }} title="Restore">
-                                                                  <ArchiveRestore size={13} />
-                                                              </button>
-                                                          ) : (
-                                                              <button className="on-item-act" onClick={(e) => { e.stopPropagation(); handleArchive(n.id); }} title="Archive">
-                                                                  <Archive size={13} />
-                                                              </button>
-                                                          )}
-                                                          <button className="on-item-act on-item-act--danger" onClick={(e) => { e.stopPropagation(); handleDelete(n.id); }} title="Delete">
-                                                              <Trash2 size={13} />
-                                                          </button>
-                                                          <button
-                                                              className="on-item-act on-item-act--detail"
-                                                              onClick={e => openDetail(e, n)}
-                                                              title="More details"
-                                                          >
-                                                              <MoreHorizontal size={13} />
-                                                          </button>
-                                                      </div>
-                                                  </motion.div>
-                                              );
-                                          })}
+                                                        <div className="on-item__actions">
+                                                            <button
+                                                                className={`on-item-act ${n.isStarred ? 'starred' : ''}`}
+                                                                onClick={(e) => { e.stopPropagation(); handleToggleStar(n.id); }}
+                                                                title={n.isStarred ? 'Unstar' : 'Star'}
+                                                            >
+                                                                <Star size={13} fill={n.isStarred ? '#FFD60A' : 'none'} />
+                                                            </button>
+                                                            {viewFilter === 'archived' ? (
+                                                                <button className="on-item-act" onClick={(e) => { e.stopPropagation(); handleUnarchive(n.id); }} title="Restore">
+                                                                    <ArchiveRestore size={13} />
+                                                                </button>
+                                                            ) : (
+                                                                <button className="on-item-act" onClick={(e) => { e.stopPropagation(); handleArchive(n.id); }} title="Archive">
+                                                                    <Archive size={13} />
+                                                                </button>
+                                                            )}
+                                                            <button className="on-item-act on-item-act--danger" onClick={(e) => { e.stopPropagation(); handleDelete(n.id); }} title="Delete">
+                                                                <Trash2 size={13} />
+                                                            </button>
+                                                            <button
+                                                                className="on-item-act on-item-act--detail"
+                                                                onClick={e => openDetail(e, n)}
+                                                                title="More details"
+                                                            >
+                                                                <MoreHorizontal size={13} />
+                                                            </button>
+                                                        </div>
+                                                    </motion.div>
+                                                );
+                                            })}
                                         </div>
                                     </div>
                                 ))

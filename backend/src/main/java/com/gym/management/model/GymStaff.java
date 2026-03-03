@@ -8,11 +8,12 @@ import java.time.LocalDateTime;
 
 /**
  * Entity representing a staff member's association with a gym.
- * Links users to gyms with a specific role (OWNER, ADMIN, TRAINER, RECEPTIONIST).
+ * Links users to gyms with a specific role (OWNER, ADMIN, TRAINER,
+ * RECEPTIONIST).
  */
 @Entity
 @Table(name = "gym_staff", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"gym_id", "user_id"})
+        @UniqueConstraint(columnNames = { "gym_id", "user_id" })
 })
 @Data
 @NoArgsConstructor
@@ -31,9 +32,7 @@ public class GymStaff {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "staff_role", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private StaffRole staffRole;
+    // The role enum and column have been removed.
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -53,11 +52,27 @@ public class GymStaff {
     }
 
     // Convenience getters
-    public Long getId() { return id; }
-    public Gym getGym() { return gym; }
-    public User getUser() { return user; }
-    public StaffRole getStaffRole() { return staffRole; }
-    public StaffStatus getStatus() { return status; }
-    public LocalDateTime getJoinedAt() { return joinedAt; }
-    public void setJoinedAt(LocalDateTime joinedAt) { this.joinedAt = joinedAt; }
+    public Long getId() {
+        return id;
+    }
+
+    public Gym getGym() {
+        return gym;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public StaffStatus getStatus() {
+        return status;
+    }
+
+    public LocalDateTime getJoinedAt() {
+        return joinedAt;
+    }
+
+    public void setJoinedAt(LocalDateTime joinedAt) {
+        this.joinedAt = joinedAt;
+    }
 }

@@ -37,17 +37,7 @@ const TRAINER_TYPES = [
     { value: "Other", label: "✏️ Other", desc: "Custom — specify below" },
 ]
 
-const STAFF_ROLES = [
-    { value: "RECEPTIONIST", label: "🗂️ Receptionist", desc: "Front desk & visitor management" },
-    { value: "FLOOR_MANAGER", label: "🏢 Floor Manager", desc: "Oversees gym floor operations" },
-    { value: "MAINTENANCE", label: "🔧 Maintenance", desc: "Equipment & facility upkeep" },
-    { value: "CLEANING", label: "🧹 Housekeeping", desc: "Cleanliness & hygiene" },
-    { value: "OPERATIONS", label: "⚙️ Operations", desc: "Day-to-day operations" },
-    { value: "SALES", label: "💼 Sales", desc: "Membership sales & renewals" },
-    { value: "ADMIN", label: "🛡️ Admin", desc: "Administrative tasks" },
-    { value: "TRAINER", label: "🏋️ Trainer", desc: "Fitness trainer on staff payroll" },
-    { value: "OTHER", label: "✏️ Other", desc: "Custom role — specify below" },
-]
+
 
 const DEPARTMENTS = [
     "Front Desk", "Fitness Floor", "Personal Training", "Sales",
@@ -63,8 +53,6 @@ const emptyForm = () => ({
     trainerType: "",
     customTrainerType: "",
     // staff
-    staffRole: "",
-    customStaffRole: "",
     department: "",
     customDepartment: "",
 })
@@ -173,11 +161,7 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({
                 return toast.error("Please specify the trainer type")
         }
 
-        if (view === "staffForm") {
-            if (!formData.staffRole) return toast.error("Please select a staff role")
-            if (formData.staffRole === "OTHER" && !formData.customStaffRole.trim())
-                return toast.error("Please specify the staff role")
-        }
+        // staff role validation removed
 
         // ── Build payload ────────────────────────────────────────────
         setLoading(true)
@@ -195,12 +179,8 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({
                     : formData.trainerType
             } else {
                 // staffForm
-                role = formData.staffRole === "TRAINER" ? "TRAINER" : "STAFF"
-                const matched = STAFF_ROLES.find(r => r.value === formData.staffRole)
-                const labelText = matched ? matched.label.replace(/^\S+\s/, "") : formData.staffRole
-                jobTitleValue = formData.staffRole === "OTHER"
-                    ? formData.customStaffRole.trim()
-                    : labelText
+                role = "STAFF"
+                jobTitleValue = undefined // removed staffRole mapping
                 departmentValue = formData.department === "Other"
                     ? formData.customDepartment.trim() || undefined
                     : formData.department || undefined
@@ -596,44 +576,6 @@ const CreateActionModal: React.FC<CreateActionModalProps> = ({
                                             </div>
                                         </div>
 
-                                        {/* Staff Role */}
-                                        <div className="cam-section cam-section--premium">
-                                            <div className="cam-section__header">
-                                                <div className="cam-section__icon cam-section__icon--accent"><Briefcase size={14} /></div>
-                                                <span>Staff Role</span>
-                                                {formData.staffRole && formData.staffRole !== "OTHER" && (
-                                                    <span className="cam-section__badge">
-                                                        {STAFF_ROLES.find(r => r.value === formData.staffRole)?.label.replace(/^\S+\s/, "") ?? formData.staffRole}
-                                                    </span>
-                                                )}
-                                            </div>
-                                            <div className="cam-trainer-types cam-staff-roles">
-                                                {STAFF_ROLES.map(role => (
-                                                    <button key={role.value} type="button"
-                                                        className={`cam-type-card ${formData.staffRole === role.value ? "cam-type-card--selected" : ""}`}
-                                                        onClick={() => setFormData(prev => ({ ...prev, staffRole: role.value, customStaffRole: "" }))}>
-                                                        <span className="cam-type-card__label">{role.label}</span>
-                                                        <span className="cam-type-card__desc">{role.desc}</span>
-                                                        {formData.staffRole === role.value && <Check size={12} className="cam-type-card__check" />}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                            <AnimatePresence>
-                                                {formData.staffRole === "OTHER" && (
-                                                    <motion.div className="cam-field cam-field--mt"
-                                                        initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}
-                                                        exit={{ opacity: 0, height: 0 }}>
-                                                        <label className="cam-label">Specify Role</label>
-                                                        <div className="cam-input-wrap">
-                                                            <Briefcase size={14} className="cam-input-icon" />
-                                                            <input type="text" name="customStaffRole" value={formData.customStaffRole} onChange={handleChange}
-                                                                className="cam-input" placeholder="e.g. Security Guard, Physiotherapist…" autoFocus />
-                                                            {formData.customStaffRole.trim() && <Check size={14} className="cam-input-check" />}
-                                                        </div>
-                                                    </motion.div>
-                                                )}
-                                            </AnimatePresence>
-                                        </div>
 
                                         {/* Department */}
                                         <div className="cam-section cam-section--premium">

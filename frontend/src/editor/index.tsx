@@ -19,6 +19,9 @@ export { ExportModal } from './ExportModal'
 export { EditableRegistry } from './EditableRegistry'
 export type { EditableEntry, ElementType, EditCapability } from './EditableRegistry'
 
+// Style Injection
+export { StyleInjector } from './StyleInjector'
+
 // Styles
 import './editor.css'
 
@@ -35,9 +38,10 @@ import { useState, useEffect } from 'react'
 import { EditorProvider } from './EditorProvider'
 import { InspectorOverlay } from './InspectorOverlay'
 import { SelectionPanel } from './SelectionPanel'
-import { EditorToolbar } from './EditorToolbar'
 import { useEditor } from './EditorProvider'
 import { EditableRegistry } from './EditableRegistry'
+import { StyleInjector } from './StyleInjector'
+import { EditorToolbar } from './EditorToolbar'
 
 function EditorUI() {
   const { selectedId, isEditing, editTool } = useEditor()
@@ -82,6 +86,12 @@ function EditorUI() {
 }
 
 export function EditorRoot({ children }: { children: React.ReactNode }) {
+  const isEnabled = import.meta.env.VITE_ENABLE_UI_EDITOR === 'true'
+
+  if (!isEnabled) {
+    return <StyleInjector>{children}</StyleInjector>
+  }
+
   return (
     <EditorProvider>
       <EditorUI />

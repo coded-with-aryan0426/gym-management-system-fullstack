@@ -14,29 +14,7 @@ import './Staff.css';
 
 type StatusFilter = 'all' | 'active' | 'inactive';
 
-const ROLE_LABELS: Record<string, string> = {
-  RECEPTIONIST: 'Receptionist',
-  FLOOR_MANAGER: 'Floor Manager',
-  MAINTENANCE: 'Maintenance',
-  CLEANING: 'Housekeeping',
-  OPERATIONS: 'Operations',
-  SALES: 'Sales',
-  ADMIN: 'Admin',
-  MANAGER: 'Manager',
-  STAFF: 'Staff',
-};
 
-const ROLE_COLORS: Record<string, string> = {
-  RECEPTIONIST: '#3b82f6',
-  FLOOR_MANAGER: '#8b5cf6',
-  MAINTENANCE: '#f59e0b',
-  CLEANING: '#10b981',
-  OPERATIONS: '#6366f1',
-  SALES: '#ec4899',
-  ADMIN: '#ef4444',
-  MANAGER: '#f97316',
-  STAFF: '#6b7280',
-};
 
 /* Dynamic row count based on available viewport height */
 const useAutoPageSize = (headerRef: React.RefObject<HTMLElement | null>, minRows: number = 5, maxRows: number = 50) => {
@@ -215,17 +193,7 @@ const Staff: React.FC = () => {
         </div>
       ),
     },
-    {
-      key: 'role', header: 'Role', width: '130px',
-      render: (s) => {
-        const role = (s as any).staffRole || 'STAFF';
-        return (
-          <span className="staff-role-pill" style={{ '--role-color': ROLE_COLORS[role] || '#6b7280' } as React.CSSProperties}>
-            {ROLE_LABELS[role] || role}
-          </span>
-        );
-      },
-    },
+
     {
       key: 'department', header: 'Department', width: '130px',
       render: (s) => <span className="staff-dept">{(s as any).department || '—'}</span>,
@@ -346,17 +314,7 @@ const Staff: React.FC = () => {
                 </div>
                 <div className="pg-filter-dropdown__body">
                   <div className="pg-filter-dropdown__row">
-                    <label className="pg-filter-dropdown__label">Dept</label>
-                    <select className="pg-filter-dropdown__select" value={filters.role} onChange={(e) => handleFilterChange('role', e.target.value)}>
-                      <option value="">All Departments</option>
-                      <option value="RECEPTIONIST">Reception</option>
-                      <option value="FLOOR_MANAGER">Floor Management</option>
-                      <option value="MAINTENANCE">Maintenance</option>
-                      <option value="CLEANING">Housekeeping</option>
-                      <option value="OPERATIONS">Operations</option>
-                      <option value="SALES">Sales</option>
-                      <option value="ADMIN">Administration</option>
-                    </select>
+                    <label className="pg-filter-dropdown__label">Filter disabled</label>
                   </div>
                 </div>
               </div>
@@ -380,12 +338,6 @@ const Staff: React.FC = () => {
       {/* === Active Filter Chips === */}
       {activeFilterCount > 0 && (
         <div className="pg-chips">
-          {filters.role && (
-            <span className="pg-chip">
-              Dept: {ROLE_LABELS[filters.role] || filters.role}
-              <button onClick={() => handleFilterChange('role', '')}>&times;</button>
-            </span>
-          )}
           <button className="pg-chips__clear" onClick={handleResetFilters}>Clear All</button>
         </div>
       )}
@@ -407,7 +359,6 @@ const Staff: React.FC = () => {
             onPageSizeChange: (size) => { setPageSize(size); setCurrentPage(0); },
           }}
           mobileCardRender={(s) => {
-            const role = (s as any).staffRole || 'STAFF';
             const status = getStatus(s);
             return (
               <div className="staff-mobile-card">
@@ -415,12 +366,6 @@ const Staff: React.FC = () => {
                   <Avatar name={s.fullName} size="md" userId={s.userId} />
                   <div className="staff-mobile-card__info">
                     <span className="staff-mobile-card__name">{s.fullName}</span>
-                    <span
-                      className="staff-mobile-card__role"
-                      style={{ color: ROLE_COLORS[role] || '#6b7280' }}
-                    >
-                      {ROLE_LABELS[role] || role}
-                    </span>
                   </div>
                   <Badge variant={getStatusVariant(status)}>{status}</Badge>
                 </div>

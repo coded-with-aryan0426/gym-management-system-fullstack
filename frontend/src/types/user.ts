@@ -43,7 +43,6 @@ export interface Member extends User {
 }
 
 export interface Staff extends User {
-    staffRole?: string;
     gymId?: number;
     gymName?: string;
     jobTitle?: string;

@@ -15,7 +15,9 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
+import api from '../../services/api';
 import { notificationApi, type NotificationData, type NotificationStats } from '../../api/notificationApi';
+import TrainerRequestPanel, { type TrainerRequestData } from './TrainerRequestPanel';
 import './TrainerNotifications.css';
 
 const CATEGORIES: Record<string, { icon: any; label: string; color: string; bg: string; desc: string }> = {
@@ -50,6 +52,10 @@ const TRAINER_NOTIFICATION_TIPS = [
 
 const getDeepLink = (notif: NotificationData, meta: any): { path: string; hash?: string; label: string } | null => {
     const t = notif.type?.toUpperCase();
+    // Trainer-request notifications always open the pending requests panel
+    if (meta?.action === 'TRAINER_REQUEST') {
+        return { path: '/trainer/members?tab=requests', label: 'View Pending Requests' };
+    }
     if (notif.link) return { path: notif.link, label: 'Go to linked page' };
     switch (t) {
         case 'BOOKING':
@@ -98,9 +104,38 @@ const TrainerNotifications: React.FC = () => {
 
     const [expandedId, setExpandedId] = useState<number | null>(null);
     const [detailNotif, setDetailNotif] = useState<NotificationData | null>(null);
+    const [trainerRequestModal, setTrainerRequestModal] = useState<TrainerRequestData | null>(null);
 
     const [showBulkMenu, setShowBulkMenu] = useState(false);
     const bulkRef = useRef<HTMLDivElement>(null);
+
+    /* ── Undo Snackbar ── */
+    type UndoSnack = { id: number; label: string; timer: ReturnType<typeof setTimeout> } | null;
+    const [undoSnack, setUndoSnack] = useState<UndoSnack>(null);
+    const pendingActionsRef = useRef<Map<number, () => Promise<void>>>(new Map());
+
+    const showUndoSnack = (id: number, label: string, action: () => Promise<void>) => {
+        // Cancel any existing snack first
+        if (undoSnack) {
+            clearTimeout(undoSnack.timer);
+            pendingActionsRef.current.get(undoSnack.id)?.();
+        }
+        pendingActionsRef.current.set(id, action);
+        const timer = setTimeout(async () => {
+            const fn = pendingActionsRef.current.get(id);
+            if (fn) { await fn(); pendingActionsRef.current.delete(id); }
+            setUndoSnack(null);
+        }, 4000);
+        setUndoSnack({ id, label, timer });
+    };
+
+    const handleUndo = () => {
+        if (!undoSnack) return;
+        clearTimeout(undoSnack.timer);
+        pendingActionsRef.current.delete(undoSnack.id);
+        setUndoSnack(null);
+        toast.success('Action undone');
+    };
 
     const ALL_SECTIONS = ['views', 'categories', 'priority'];
     const STORAGE_KEY = 'tn_sidebar_open_section';
@@ -112,7 +147,7 @@ const TrainerNotifications: React.FC = () => {
                 const openSection = JSON.parse(saved) as string | null;
                 return new Set(ALL_SECTIONS.filter(s => s !== openSection));
             }
-        } catch {}
+        } catch { }
         return new Set(['categories', 'priority']);
     };
 
@@ -224,13 +259,15 @@ const TrainerNotifications: React.FC = () => {
     };
 
     const handleArchive = async (id: number) => {
-        try {
-            await notificationApi.archive(id);
-            setNotifications(prev => prev.filter(n => n.id !== id));
-            if (detailNotif?.id === id) setDetailNotif(null);
-            toast.success('Archived');
-            fetchData(true);
-        } catch { toast.error('Failed'); }
+        // Immediately hide the card (optimistic), show undo
+        setNotifications(prev => prev.filter(n => n.id !== id));
+        if (detailNotif?.id === id) setDetailNotif(null);
+        showUndoSnack(id, 'Notification archived', async () => {
+            try {
+                await notificationApi.archive(id);
+                fetchData(true);
+            } catch { toast.error('Archive failed'); }
+        });
     };
 
     const handleUnarchive = async (id: number) => {
@@ -244,13 +281,20 @@ const TrainerNotifications: React.FC = () => {
     };
 
     const handleDelete = async (id: number) => {
-        try {
-            await notificationApi.delete(id);
-            setNotifications(prev => prev.filter(n => n.id !== id));
-            if (detailNotif?.id === id) setDetailNotif(null);
-            toast.success('Deleted');
-            fetchData(true);
-        } catch { toast.error('Failed'); }
+        // Optimistic remove + undo
+        const cached = notifications.find(n => n.id === id);
+        setNotifications(prev => prev.filter(n => n.id !== id));
+        if (detailNotif?.id === id) setDetailNotif(null);
+        showUndoSnack(id, 'Notification deleted', async () => {
+            try {
+                await notificationApi.delete(id);
+                fetchData(true);
+            } catch {
+                // Restore the card if deleted failed
+                if (cached) setNotifications(prev => [cached, ...prev]);
+                toast.error('Delete failed');
+            }
+        });
     };
 
     const handleMarkAllRead = async () => {
@@ -292,7 +336,24 @@ const TrainerNotifications: React.FC = () => {
 
     const handleCardClick = (n: NotificationData) => {
         if (selectMode) { toggleSelect(n.id); return; }
-        setExpandedId(prev => prev === n.id ? null : n.id);
+        // If this is a trainer request notification, open the request panel
+        const meta = parseMeta(n.metaData);
+        if (meta?.action === 'TRAINER_REQUEST' && meta?.requestId) {
+            // Fetch the full request data
+            api.get(`/trainer-requests/incoming`).then(res => {
+                const req = (res.data as TrainerRequestData[]).find((r: TrainerRequestData) => r.id === meta.requestId);
+                if (req) {
+                    setTrainerRequestModal(req);
+                } else {
+                    // Request already resolved — fall through to expand
+                    setExpandedId(prev => prev === n.id ? null : n.id);
+                }
+            }).catch(() => {
+                setExpandedId(prev => prev === n.id ? null : n.id);
+            });
+        } else {
+            setExpandedId(prev => prev === n.id ? null : n.id);
+        }
         if (!n.isRead) handleMarkAsRead(n.id);
     };
 
@@ -352,8 +413,9 @@ const TrainerNotifications: React.FC = () => {
         const link = getDeepLink(notif, meta);
         if (!link) return;
         setDetailNotif(null);
-        const path = link.hash ? `${link.path}?section=${link.hash}` : link.path;
-        navigate(path, { state: { scrollTo: link.hash, fromNotif: notif.id } });
+        const isTrainerRequest = meta?.action === 'TRAINER_REQUEST';
+        const path = link.path.includes('?') ? link.path : link.path;
+        navigate(path, { state: { fromNotif: notif.id, openRequests: isTrainerRequest } });
     };
 
     const renderSidebarContent = () => (
@@ -781,25 +843,25 @@ const TrainerNotifications: React.FC = () => {
                                     <div className="tn-empty__icon-ring">
                                         <div className="tn-empty__icon-inner">
                                             {viewFilter === 'starred' ? <Star size={32} /> :
-                                             viewFilter === 'archived' ? <Archive size={32} /> :
-                                             viewFilter === 'unread' ? <CheckCheck size={32} /> :
-                                             searchQuery ? <Search size={32} /> :
-                                             <Bell size={32} />}
+                                                viewFilter === 'archived' ? <Archive size={32} /> :
+                                                    viewFilter === 'unread' ? <CheckCheck size={32} /> :
+                                                        searchQuery ? <Search size={32} /> :
+                                                            <Bell size={32} />}
                                         </div>
                                         <div className="tn-empty__ring-pulse" />
                                     </div>
                                     <h2>
                                         {searchQuery ? `No results for "${searchQuery}"` :
-                                         viewFilter === 'archived' ? 'No archived notifications' :
-                                         viewFilter === 'starred' ? 'No starred notifications' :
-                                         viewFilter === 'unread' ? "You're all caught up!" :
-                                         'No notifications yet'}
+                                            viewFilter === 'archived' ? 'No archived notifications' :
+                                                viewFilter === 'starred' ? 'No starred notifications' :
+                                                    viewFilter === 'unread' ? "You're all caught up!" :
+                                                        'No notifications yet'}
                                     </h2>
                                     <p>
                                         {searchQuery ? 'Try a different search term or clear your filters.' :
-                                         viewFilter === 'unread' ? "Great job! You've read all your notifications." :
-                                         viewFilter !== 'all' ? `You have no ${viewFilter} notifications right now.` :
-                                         'As you train clients and manage sessions, notifications will appear here to keep you informed.'}
+                                            viewFilter === 'unread' ? "Great job! You've read all your notifications." :
+                                                viewFilter !== 'all' ? `You have no ${viewFilter} notifications right now.` :
+                                                    'As you train clients and manage sessions, notifications will appear here to keep you informed.'}
                                     </p>
                                     {hasActiveFilters && (
                                         <button className="tn-empty__clear-btn" onClick={clearAllFilters}>
@@ -897,19 +959,38 @@ const TrainerNotifications: React.FC = () => {
                                                                 </button>
                                                             )}
 
-                                                            <div className="tn-item__tags">
-                                                                <span className="tn-tag" style={{ background: cat.bg, color: cat.color }}>{cat.label}</span>
-                                                                {(notif.priority === 'urgent' || notif.priority === 'high') && (
-                                                                    <span className="tn-tag" style={{ background: pri.bg, color: pri.color }}>
-                                                                        <pri.icon size={8} /> {pri.label}
-                                                                    </span>
-                                                                )}
-                                                                {meta?.amount && (
-                                                                    <span className="tn-tag tn-tag--money">
-                                                                        <IndianRupee size={8} /> {meta.amount}
-                                                                    </span>
-                                                                )}
-                                                            </div>
+                                                              <div className="tn-item__tags">
+                                                                  <span className="tn-tag" style={{ background: cat.bg, color: cat.color }}>{cat.label}</span>
+                                                                  {(notif.priority === 'urgent' || notif.priority === 'high') && (
+                                                                      <span className="tn-tag" style={{ background: pri.bg, color: pri.color }}>
+                                                                          <pri.icon size={8} /> {pri.label}
+                                                                      </span>
+                                                                  )}
+                                                                  {meta?.action === 'TRAINER_REQUEST' && (
+                                                                      <span className="tn-tag" style={{ background: 'rgba(175,82,222,0.15)', color: '#AF52DE', fontWeight: 600 }}>
+                                                                          Tap to Review Request
+                                                                      </span>
+                                                                  )}
+                                                                  {meta?.amount && (
+                                                                      <span className="tn-tag tn-tag--money">
+                                                                          <IndianRupee size={8} /> {meta.amount}
+                                                                      </span>
+                                                                  )}
+                                                              </div>
+
+                                                              {(() => {
+                                                                  const deepLink = getDeepLink(notif, meta);
+                                                                  return deepLink ? (
+                                                                      <button
+                                                                          className="tn-item__goto"
+                                                                          onClick={e => { e.stopPropagation(); handleDeepLink(notif, meta); }}
+                                                                      >
+                                                                          <ExternalLink size={11} />
+                                                                          {deepLink.label}
+                                                                          <ArrowRight size={11} />
+                                                                      </button>
+                                                                  ) : null;
+                                                              })()}
                                                         </div>
 
                                                         <div className="tn-item__actions">
@@ -957,6 +1038,32 @@ const TrainerNotifications: React.FC = () => {
             </div>
 
             {renderDetailModal()}
+
+            {/* Trainer Request Panel */}
+            <AnimatePresence>
+                {trainerRequestModal && (
+                    <TrainerRequestPanel
+                        request={trainerRequestModal}
+                        onClose={() => setTrainerRequestModal(null)}
+                        onResolved={(requestId, newStatus) => {
+                            setTrainerRequestModal(null);
+                            // Refresh notifications so the card updates
+                            fetchData(true);
+                        }}
+                    />
+                )}
+            </AnimatePresence>
+
+            {/* Undo snackbar */}
+            {undoSnack && (
+                <div className="tn-undo-snack">
+                    <span className="tn-undo-snack__label">{undoSnack.label}</span>
+                    <button className="tn-undo-snack__btn" onClick={handleUndo}>
+                        Undo
+                    </button>
+                    <div className="tn-undo-snack__bar" />
+                </div>
+            )}
         </div>
     );
 };

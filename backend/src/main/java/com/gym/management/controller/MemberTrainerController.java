@@ -35,19 +35,18 @@ public class MemberTrainerController {
 
     @GetMapping("/assigned")
     public ResponseEntity<List<TrainerProfileDTO>> getAssignedTrainers(@RequestHeader("Authorization") String token) {
-        // In a real app, we'd get the user from the token
-        // For now, let's assume we can get the current user.
-        // We'll need a way to identify the current logged-in user.
-        // Let's use the security context.
         String username = org.springframework.security.core.context.SecurityContextHolder.getContext()
                 .getAuthentication().getName();
         User currentUser = userRepository.findByUsername(username).orElse(null);
 
-        if (currentUser == null || currentUser.getTrainers() == null) {
+        if (currentUser == null) {
             return ResponseEntity.ok(Collections.emptyList());
         }
 
-        List<TrainerProfileDTO> dtos = currentUser.getTrainers().stream()
+        // Query via owning side: find trainers who have this member in their customers set
+        List<User> assignedTrainers = userRepository.findTrainersByMemberId(currentUser.getUserId());
+
+        List<TrainerProfileDTO> dtos = assignedTrainers.stream()
                 .map(this::mapToDiscoveryDTO)
                 .collect(Collectors.toList());
 
@@ -65,13 +64,28 @@ public class MemberTrainerController {
             return ResponseEntity.badRequest().body(Map.of("message", "User or Trainer not found"));
         }
 
-        // For now, let's just add the trainer to the user's trainers list
-        // In a more complex system, this would create a 'TrainerRequest' entity
-        currentUser.getTrainers().add(trainer);
-        userRepository.save(currentUser);
+        // Direct native insert into trainer_customer_map (owning side)
+        userRepository.assignMemberToTrainer(trainer.getUserId(), currentUser.getUserId());
 
         return ResponseEntity
                 .ok(Map.of("message", "Trainer request successful! " + trainer.getFullName() + " has been assigned."));
+    }
+
+    @DeleteMapping("/{trainerId}/unassign")
+    public ResponseEntity<Map<String, String>> unassignTrainer(@PathVariable Long trainerId) {
+        String username = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        User currentUser = userRepository.findByUsername(username).orElse(null);
+        User trainer = userRepository.findById(trainerId).orElse(null);
+
+        if (currentUser == null || trainer == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "User or Trainer not found"));
+        }
+
+        // Remove via direct native DELETE from trainer_customer_map (bypasses Hibernate merge issues)
+        userRepository.unassignMemberFromTrainer(trainer.getUserId(), currentUser.getUserId());
+
+        return ResponseEntity.ok(Map.of("message", trainer.getFullName() + " has been removed from your team."));
     }
 
     @GetMapping

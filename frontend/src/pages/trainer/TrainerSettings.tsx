@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   User,
@@ -36,6 +36,7 @@ import { useTheme } from "../../contexts/ThemeContext"
 import { useAuth } from "../../contexts/AuthContext"
 import api from "../../services/api"
 import { toast } from "react-hot-toast"
+import ThemeSection from "../Settings/sections/ThemeSection"
 import "../Settings/Settings.css"
 
 /* ── Types ── */
@@ -69,37 +70,51 @@ interface AvailabilitySlot {
 
 /* ── Sidebar categories ── */
 const settingsCategories = [
-  { id: "profile",        label: "Trainer Profile",     icon: User,       desc: "Personal details & bio",       color: "#3b82f6" },
-  { id: "specialization", label: "Specialization",      icon: Dumbbell,   desc: "Skills & certifications",      color: "#10b981" },
-  { id: "availability",   label: "Availability",        icon: Calendar,   desc: "Working hours & schedule",     color: "#06b6d4" },
-  { id: "clients",        label: "Client Preferences",  icon: Target,     desc: "Training & client settings",   color: "#8b5cf6" },
-  { id: "appearance",     label: "Appearance",           icon: Palette,    desc: "Theme & display",              color: "#a855f7" },
-  { id: "notifications",  label: "Notifications",       icon: Bell,       desc: "Alerts & reminders",           color: "#f97316" },
-  { id: "security",       label: "Security",            icon: Shield,     desc: "Password & account safety",    color: "#ef4444" },
-  { id: "billing",        label: "Earnings & Payouts",  icon: CreditCard, desc: "Payment info & history",       color: "#f59e0b" },
-  { id: "reports",        label: "Reports & Logs",      icon: FileText,   desc: "Session logs & performance",   color: "#14b8a6" },
+  { id: "profile", label: "Trainer Profile", icon: User, desc: "Personal details & bio", color: "#3b82f6" },
+  { id: "specialization", label: "Specialization", icon: Dumbbell, desc: "Skills & certifications", color: "#10b981" },
+  { id: "availability", label: "Availability", icon: Calendar, desc: "Working hours & schedule", color: "#06b6d4" },
+  { id: "clients", label: "Client Preferences", icon: Target, desc: "Training & client settings", color: "#8b5cf6" },
+  { id: "appearance", label: "Appearance", icon: Palette, desc: "Theme & display", color: "#a855f7" },
+  { id: "notifications", label: "Notifications", icon: Bell, desc: "Alerts & reminders", color: "#f97316" },
+  { id: "security", label: "Security", icon: Shield, desc: "Password & account safety", color: "#ef4444" },
+  { id: "billing", label: "Earnings & Payouts", icon: CreditCard, desc: "Payment info & history", color: "#f59e0b" },
+  { id: "reports", label: "Reports & Logs", icon: FileText, desc: "Session logs & performance", color: "#14b8a6" },
 ]
 
 /* ── Defaults ── */
 const DEFAULT_AVAILABILITY: AvailabilitySlot[] = [
-  { day: "Monday",    enabled: true,  startTime: "06:00", endTime: "20:00" },
-  { day: "Tuesday",   enabled: true,  startTime: "06:00", endTime: "20:00" },
-  { day: "Wednesday", enabled: true,  startTime: "06:00", endTime: "20:00" },
-  { day: "Thursday",  enabled: true,  startTime: "06:00", endTime: "20:00" },
-  { day: "Friday",    enabled: true,  startTime: "06:00", endTime: "20:00" },
-  { day: "Saturday",  enabled: true,  startTime: "08:00", endTime: "16:00" },
-  { day: "Sunday",    enabled: false, startTime: "08:00", endTime: "12:00" },
+  { day: "Monday", enabled: true, startTime: "06:00", endTime: "20:00" },
+  { day: "Tuesday", enabled: true, startTime: "06:00", endTime: "20:00" },
+  { day: "Wednesday", enabled: true, startTime: "06:00", endTime: "20:00" },
+  { day: "Thursday", enabled: true, startTime: "06:00", endTime: "20:00" },
+  { day: "Friday", enabled: true, startTime: "06:00", endTime: "20:00" },
+  { day: "Saturday", enabled: true, startTime: "08:00", endTime: "16:00" },
+  { day: "Sunday", enabled: false, startTime: "08:00", endTime: "12:00" },
 ]
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 const TrainerSettings: React.FC = () => {
-  const { themeMode, setThemeMode } = useTheme()
   const { user } = useAuth()
 
   const [activeSection, setActiveSection] = useState(() =>
     sessionStorage.getItem("trainer_settings_section") || "profile"
   )
   const [saving, setSaving] = useState(false)
+  const [savedSection, setSavedSection] = useState<string | null>(null)
+
+  /* ── Auto-save debounce helper ── */
+  const autoSaveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
+
+  const scheduleAutoSave = useCallback((section: string, saveFn: () => Promise<void>) => {
+    clearTimeout(autoSaveTimers.current[section])
+    autoSaveTimers.current[section] = setTimeout(async () => {
+      try {
+        await saveFn()
+        setSavedSection(section)
+        setTimeout(() => setSavedSection(s => s === section ? null : s), 2000)
+      } catch { /* handled inside saveFns */ }
+    }, 1500)
+  }, [])
 
   /* ── Profile state ── */
   const [profile, setProfile] = useState<TrainerProfile>({
@@ -129,6 +144,7 @@ const TrainerSettings: React.FC = () => {
   const [allowGroupSessions, setAllowGroupSessions] = useState(true)
   const [maxGroupSize, setMaxGroupSize] = useState("8")
   const [restBetweenSessions, setRestBetweenSessions] = useState("15")
+  const [autoNoteTemplate, setAutoNoteTemplate] = useState("")
 
   /* ── Persist active section ── */
   useEffect(() => {
@@ -141,13 +157,39 @@ const TrainerSettings: React.FC = () => {
     fetchAvailability()
   }, [])
 
+  /* ── Auto-save effects ── */
+  // Profile auto-save (skip initial render)
+  const profileMounted = useRef(false)
+  useEffect(() => {
+    if (!profileMounted.current) { profileMounted.current = true; return; }
+    scheduleAutoSave('profile', handleSaveProfile)
+  }, [profile]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const notifMounted = useRef(false)
+  useEffect(() => {
+    if (!notifMounted.current) { notifMounted.current = true; return; }
+    scheduleAutoSave('notifications', handleSaveNotifications)
+  }, [notifications]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const availMounted = useRef(false)
+  useEffect(() => {
+    if (!availMounted.current) { availMounted.current = true; return; }
+    scheduleAutoSave('availability', handleSaveAvailability)
+  }, [availability]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const clientMounted = useRef(false)
+  useEffect(() => {
+    if (!clientMounted.current) { clientMounted.current = true; return; }
+    scheduleAutoSave('clients', handleSaveClientPreferences)
+  }, [maxClients, sessionDuration, autoAcceptBookings, allowGroupSessions, maxGroupSize, restBetweenSessions, autoNoteTemplate]) // eslint-disable-line react-hooks/exhaustive-deps
+
   /* ── API calls ── */
   const fetchProfile = async () => {
     try {
       const response = await api.get("/api/trainer/profile")
       if (response.data) {
         setProfile({
-          name: response.data.name || user?.name || "",
+          name: response.data.name || user?.fullName || "",
           email: response.data.email || user?.email || "",
           phone: response.data.phone || "",
           specialization: response.data.specialization || "",
@@ -158,7 +200,7 @@ const TrainerSettings: React.FC = () => {
         })
       }
     } catch {
-      setProfile(prev => ({ ...prev, name: user?.name || "", email: user?.email || "" }))
+      setProfile(prev => ({ ...prev, name: user?.fullName || "", email: user?.email || "" }))
     }
   }
 
@@ -221,7 +263,7 @@ const TrainerSettings: React.FC = () => {
       await api.put("/api/trainer/settings/client-preferences", {
         maxClients: Number(maxClients), sessionDuration: Number(sessionDuration),
         autoAcceptBookings, allowGroupSessions, maxGroupSize: Number(maxGroupSize),
-        restBetweenSessions: Number(restBetweenSessions),
+        restBetweenSessions: Number(restBetweenSessions), autoNoteTemplate,
       })
       toast.success("Client preferences saved")
     } catch { toast.error("Failed to save client preferences") }
@@ -232,16 +274,16 @@ const TrainerSettings: React.FC = () => {
 
   const renderSection = () => {
     switch (activeSection) {
-      case "profile":        return <ProfileSection />
+      case "profile": return <ProfileSection />
       case "specialization": return <SpecializationSection />
-      case "availability":   return <AvailabilitySection />
-      case "clients":        return <ClientPreferencesSection />
-      case "appearance":     return <AppearanceSection />
-      case "notifications":  return <NotificationsSection />
-      case "security":       return <SecuritySection />
-      case "billing":        return <BillingSection />
-      case "reports":        return <ReportsSection />
-      default:               return <ProfileSection />
+      case "availability": return <AvailabilitySection />
+      case "clients": return <ClientPreferencesSection />
+      case "appearance": return <ThemeSection />
+      case "notifications": return <NotificationsSection />
+      case "security": return <SecuritySection />
+      case "billing": return <BillingSection />
+      case "reports": return <ReportsSection />
+      default: return <ProfileSection />
     }
   }
 
@@ -257,8 +299,8 @@ const TrainerSettings: React.FC = () => {
           <p className="settings-section__description">Update your personal details and trainer bio</p>
         </div>
         <div className="settings-section__actions">
-          <button className="settings-btn settings-btn--primary" onClick={handleSaveProfile} disabled={saving}>
-            {saving ? <Loader2 size={14} className="spin" /> : <Save size={14} />} Save Changes
+          <button className={`settings-btn settings-btn--primary ${savedSection === 'profile' ? 'settings-btn--saved' : ''}`} onClick={handleSaveProfile} disabled={saving}>
+            {saving ? <Loader2 size={14} className="spin" /> : savedSection === 'profile' ? <Check size={14} /> : <Save size={14} />} {savedSection === 'profile' ? 'Saved ✓' : 'Save Changes'}
           </button>
         </div>
       </div>
@@ -377,8 +419,8 @@ const TrainerSettings: React.FC = () => {
           <p className="settings-section__description">Manage your training expertise and certifications</p>
         </div>
         <div className="settings-section__actions">
-          <button className="settings-btn settings-btn--primary" onClick={handleSaveProfile} disabled={saving}>
-            {saving ? <Loader2 size={14} className="spin" /> : <Save size={14} />} Save
+          <button className={`settings-btn settings-btn--primary ${savedSection === 'specialization' ? 'settings-btn--saved' : ''}`} onClick={handleSaveProfile} disabled={saving}>
+            {saving ? <Loader2 size={14} className="spin" /> : savedSection === 'specialization' ? <Check size={14} /> : <Save size={14} />} {savedSection === 'specialization' ? 'Saved ✓' : 'Save'}
           </button>
         </div>
       </div>
@@ -446,8 +488,8 @@ CrossFit Level 2"} rows={4} style={{ resize: "vertical" }} />
           <p className="settings-section__description">Set your working hours and available days</p>
         </div>
         <div className="settings-section__actions">
-          <button className="settings-btn settings-btn--primary" onClick={handleSaveAvailability} disabled={saving}>
-            {saving ? <Loader2 size={14} className="spin" /> : <Save size={14} />} Save
+          <button className={`settings-btn settings-btn--primary ${savedSection === 'availability' ? 'settings-btn--saved' : ''}`} onClick={handleSaveAvailability} disabled={saving}>
+            {saving ? <Loader2 size={14} className="spin" /> : savedSection === 'availability' ? <Check size={14} /> : <Save size={14} />} {savedSection === 'availability' ? 'Saved ✓' : 'Save'}
           </button>
         </div>
       </div>
@@ -515,8 +557,8 @@ CrossFit Level 2"} rows={4} style={{ resize: "vertical" }} />
           <p className="settings-section__description">Configure training session and client management settings</p>
         </div>
         <div className="settings-section__actions">
-          <button className="settings-btn settings-btn--primary" onClick={handleSaveClientPreferences} disabled={saving}>
-            {saving ? <Loader2 size={14} className="spin" /> : <Save size={14} />} Save
+          <button className={`settings-btn settings-btn--primary ${savedSection === 'clients' ? 'settings-btn--saved' : ''}`} onClick={handleSaveClientPreferences} disabled={saving}>
+            {saving ? <Loader2 size={14} className="spin" /> : savedSection === 'clients' ? <Check size={14} /> : <Save size={14} />} {savedSection === 'clients' ? 'Saved ✓' : 'Save'}
           </button>
         </div>
       </div>
@@ -570,6 +612,24 @@ CrossFit Level 2"} rows={4} style={{ resize: "vertical" }} />
               <input className="dense-input" type="number" value={maxGroupSize} onChange={e => setMaxGroupSize(e.target.value)} min="2" max="50" placeholder="8" />
             </div>
           </div>
+          <div className="form-grid" style={{ marginTop: "1rem" }}>
+            <div className="field-wrapper field-wrapper--full">
+              <label className="field-label">
+                Default Session Note Template
+                <div className="info-icon" data-tooltip="Auto-filled template for session notes">
+                  <Info size={14} />
+                </div>
+              </label>
+              <textarea
+                className="dense-input"
+                value={autoNoteTemplate}
+                onChange={e => setAutoNoteTemplate(e.target.value)}
+                placeholder="e.g. Focus area:\nExercises completed:\nClient feedback:\nNext steps:"
+                rows={4}
+                style={{ resize: "vertical" }}
+              />
+            </div>
+          </div>
         </div>
 
         <div className="form-group">
@@ -597,45 +657,6 @@ CrossFit Level 2"} rows={4} style={{ resize: "vertical" }} />
               </div>
               <label className="toggle-switch"><input type="checkbox" checked={allowGroupSessions} onChange={e => setAllowGroupSessions(e.target.checked)} /><span className="toggle-slider" /></label>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-
-  /* ── Appearance ── */
-  const AppearanceSection = () => (
-    <div className="settings-section" style={{ "--section-accent": "#a855f7" } as React.CSSProperties}>
-      <div className="settings-section__header">
-        <div className="settings-section__icon" style={{ background: "linear-gradient(135deg, #a855f7, #9333ea)" }}>
-          <Palette size={20} />
-        </div>
-        <div>
-          <h2 className="settings-section__title">Appearance</h2>
-          <p className="settings-section__description">Customize the look and feel of your dashboard</p>
-        </div>
-      </div>
-      <div className="settings-section__content">
-        <div className="form-group">
-          <div className="form-group__header">
-            <Palette size={16} />
-            <h4 className="form-group__title">Theme Mode</h4>
-          </div>
-          <div className="theme-options">
-            {([
-              { mode: "dark" as const, label: "Dark", icon: <Moon size={24} />, desc: "Easy on the eyes" },
-              { mode: "light" as const, label: "Light", icon: <Sun size={24} />, desc: "Clean and bright" },
-              { mode: "system" as const, label: "System", icon: <Monitor size={24} />, desc: "Match OS setting" },
-            ]).map(t => (
-              <button key={t.mode} className={`theme-option ${themeMode === t.mode ? "theme-option--active" : ""}`} onClick={() => setThemeMode(t.mode)}>
-                <div className="theme-option__preview">
-                  {t.icon}
-                </div>
-                <div className="theme-option__label">{t.label}</div>
-                <div className="theme-option__desc">{t.desc}</div>
-                {themeMode === t.mode && <div className="theme-option__check"><Check size={14} /></div>}
-              </button>
-            ))}
           </div>
         </div>
       </div>

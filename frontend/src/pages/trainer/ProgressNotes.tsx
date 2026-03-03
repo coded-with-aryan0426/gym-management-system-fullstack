@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import {
     Search, Plus, Download, ChevronDown, Trash2, Edit2,
     Paperclip, X, Calendar, Clock, Target, TrendingUp,
@@ -13,33 +13,38 @@ import { trainerApi, type TrainerMember } from '../../services/trainerApi';
 
 /* ── Per-category palette ── */
 const CAT_META: Record<string, { label: string; color: string; bg: string; border: string; icon: React.FC<any> }> = {
-    all:         { label: 'All',         color: '#14b8a6', bg: 'rgba(20,184,166,0.12)',  border: 'rgba(20,184,166,0.28)',  icon: BookOpen },
-    strength:    { label: 'Strength',    color: '#8b5cf6', bg: 'rgba(139,92,246,0.12)', border: 'rgba(139,92,246,0.28)', icon: Dumbbell },
-    cardio:      { label: 'Cardio',      color: '#f43f5e', bg: 'rgba(244,63,94,0.12)',  border: 'rgba(244,63,94,0.28)',  icon: Flame },
+    all: { label: 'All', color: '#14b8a6', bg: 'rgba(20,184,166,0.12)', border: 'rgba(20,184,166,0.28)', icon: BookOpen },
+    strength: { label: 'Strength', color: '#8b5cf6', bg: 'rgba(139,92,246,0.12)', border: 'rgba(139,92,246,0.28)', icon: Dumbbell },
+    cardio: { label: 'Cardio', color: '#f43f5e', bg: 'rgba(244,63,94,0.12)', border: 'rgba(244,63,94,0.28)', icon: Flame },
     flexibility: { label: 'Flexibility', color: '#10b981', bg: 'rgba(16,185,129,0.12)', border: 'rgba(16,185,129,0.28)', icon: Leaf },
-    nutrition:   { label: 'Nutrition',   color: '#f59e0b', bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.28)', icon: Apple },
-    general:     { label: 'General',     color: '#06b6d4', bg: 'rgba(6,182,212,0.12)',  border: 'rgba(6,182,212,0.28)',  icon: FileText },
+    nutrition: { label: 'Nutrition', color: '#f59e0b', bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.28)', icon: Apple },
+    general: { label: 'General', color: '#06b6d4', bg: 'rgba(6,182,212,0.12)', border: 'rgba(6,182,212,0.28)', icon: FileText },
 };
 
 const MOOD_META: Record<string, { color: string; bg: string; icon: React.FC<any>; label: string }> = {
-    excellent: { color: '#10b981', bg: 'rgba(16,185,129,0.15)', icon: Star,          label: 'Excellent' },
-    good:      { color: '#06b6d4', bg: 'rgba(6,182,212,0.15)',  icon: CheckCircle,   label: 'Good' },
-    average:   { color: '#f59e0b', bg: 'rgba(245,158,11,0.15)', icon: Activity,      label: 'Average' },
-    struggling:{ color: '#f43f5e', bg: 'rgba(244,63,94,0.15)',  icon: AlertTriangle, label: 'Struggling' },
+    excellent: { color: '#10b981', bg: 'rgba(16,185,129,0.15)', icon: Star, label: 'Excellent' },
+    good: { color: '#06b6d4', bg: 'rgba(6,182,212,0.15)', icon: CheckCircle, label: 'Good' },
+    average: { color: '#f59e0b', bg: 'rgba(245,158,11,0.15)', icon: Activity, label: 'Average' },
+    struggling: { color: '#f43f5e', bg: 'rgba(244,63,94,0.15)', icon: AlertTriangle, label: 'Struggling' },
 };
 
 const ProgressNotes: React.FC = () => {
-    const [isModalOpen, setIsModalOpen]   = useState(false);
-    const [isLoading, setIsLoading]       = useState(true);
-    const [isSaving, setIsSaving]         = useState(false);
-    const [notes, setNotes]               = useState<ProgressNoteDTO[]>([]);
-    const [members, setMembers]           = useState<TrainerMember[]>([]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
+    const [notes, setNotes] = useState<ProgressNoteDTO[]>([]);
+    const [members, setMembers] = useState<TrainerMember[]>([]);
     const [filterMember, setFilterMember] = useState('All Members');
     const [filterCategory, setFilterCategory] = useState('all');
-    const [filterTime, setFilterTime]     = useState('All Time');
-    const [searchQuery, setSearchQuery]   = useState('');
+    const [filterTime, setFilterTime] = useState('All Time');
+    const [searchQuery, setSearchQuery] = useState('');
     const [selectedNote, setSelectedNote] = useState<ProgressNoteDTO | null>(null);
-    const [openMenuId, setOpenMenuId]     = useState<string | null>(null);
+    const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+
+    const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [linkedSessionId, setLinkedSessionId] = useState<number | ''>('');
+    const [sessions, setSessions] = useState<any[]>([]);
 
     const initialFormState: Partial<ProgressNoteDTO> = {
         member: { name: '', goal: '' },
@@ -57,19 +62,19 @@ const ProgressNotes: React.FC = () => {
         private: false,
         followUp: ''
     };
-    const [formData, setFormData]                 = useState<Partial<ProgressNoteDTO>>(initialFormState);
-    const [formHighlights, setFormHighlights]     = useState('');
-    const [formConcerns, setFormConcerns]         = useState('');
-    const [formTags, setFormTags]                 = useState('');
+    const [formData, setFormData] = useState<Partial<ProgressNoteDTO>>(initialFormState);
+    const [formHighlights, setFormHighlights] = useState('');
+    const [formConcerns, setFormConcerns] = useState('');
+    const [formTags, setFormTags] = useState('');
     const [selectedMemberName, setSelectedMemberName] = useState('');
 
     const noteTemplates = [
         { label: 'Select a template...', value: '' },
-        { label: 'Strength Session',   value: 'strength',   data: { category: 'strength',    sessionType: 'Strength Training',       content: 'Completed strength training session.\n\nExercises performed:\n- \n- \n- \n\nForm observations: \nWeight progression: ', tags: 'strength', mood: 'good' as const } },
-        { label: 'Cardio Session',     value: 'cardio',     data: { category: 'cardio',       sessionType: 'Cardio Training',         content: 'Completed cardio session.\n\nActivities:\n- \n\nDuration: \nAvg Heart Rate: \nRecovery: ', tags: 'cardio', mood: 'good' as const } },
-        { label: 'Initial Assessment', value: 'assessment', data: { category: 'general',      sessionType: 'Initial Assessment',      content: 'Initial fitness assessment completed.\n\nGoals discussed:\n- \n\nCurrent fitness level: \nInjuries/Limitations: \nRecommended program: ', tags: 'assessment,new-member', mood: 'good' as const } },
-        { label: 'Progress Check-in',  value: 'checkin',    data: { category: 'general',      sessionType: 'Progress Review',         content: 'Monthly progress check-in.\n\nGoal progress:\n- \n\nMeasurement changes:\n- Weight: \n- Body fat: \n\nAdjustments needed: ', tags: 'progress,review', mood: 'good' as const } },
-        { label: 'Nutrition Review',   value: 'nutrition',  data: { category: 'nutrition',    sessionType: 'Nutrition Consultation',  content: 'Nutrition review session.\n\nCurrent diet observations:\n- \n\nRecommendations:\n- \n\nMeal plan adjustments: ', tags: 'nutrition', mood: 'good' as const } },
+        { label: 'Strength Session', value: 'strength', data: { category: 'strength', sessionType: 'Strength Training', content: 'Completed strength training session.\n\nExercises performed:\n- \n- \n- \n\nForm observations: \nWeight progression: ', tags: 'strength', mood: 'good' as const } },
+        { label: 'Cardio Session', value: 'cardio', data: { category: 'cardio', sessionType: 'Cardio Training', content: 'Completed cardio session.\n\nActivities:\n- \n\nDuration: \nAvg Heart Rate: \nRecovery: ', tags: 'cardio', mood: 'good' as const } },
+        { label: 'Initial Assessment', value: 'assessment', data: { category: 'general', sessionType: 'Initial Assessment', content: 'Initial fitness assessment completed.\n\nGoals discussed:\n- \n\nCurrent fitness level: \nInjuries/Limitations: \nRecommended program: ', tags: 'assessment,new-member', mood: 'good' as const } },
+        { label: 'Progress Check-in', value: 'checkin', data: { category: 'general', sessionType: 'Progress Review', content: 'Monthly progress check-in.\n\nGoal progress:\n- \n\nMeasurement changes:\n- Weight: \n- Body fat: \n\nAdjustments needed: ', tags: 'progress,review', mood: 'good' as const } },
+        { label: 'Nutrition Review', value: 'nutrition', data: { category: 'nutrition', sessionType: 'Nutrition Consultation', content: 'Nutrition review session.\n\nCurrent diet observations:\n- \n\nRecommendations:\n- \n\nMeal plan adjustments: ', tags: 'nutrition', mood: 'good' as const } },
     ];
 
     const applyTemplate = (v: string) => {
@@ -84,9 +89,19 @@ const ProgressNotes: React.FC = () => {
     const fetchInitialData = async () => {
         try {
             setIsLoading(true);
-            const [fn, fm] = await Promise.all([progressNoteApi.getAllNotes(), trainerApi.getMyMembers()]);
+            const today = new Date();
+            const weekAgo = new Date(); weekAgo.setDate(today.getDate() - 30);
+            const [fn, fm, fs] = await Promise.all([
+                progressNoteApi.getAllNotes(),
+                trainerApi.getMyMembers(),
+                trainerApi.getSchedule(
+                    weekAgo.toISOString().split('T')[0],
+                    today.toISOString().split('T')[0]
+                ).catch(() => []),
+            ]);
             setNotes(fn || []);
             setMembers(fm || []);
+            setSessions(fs || []);
         } catch (e) { console.error(e); }
         finally { setIsLoading(false); }
     };
@@ -94,7 +109,7 @@ const ProgressNotes: React.FC = () => {
     const categories = Object.entries(CAT_META).map(([value, m]) => ({ value, ...m }));
 
     const filteredNotes = useMemo(() => notes.filter(note => {
-        const matchesMember   = filterMember === 'All Members' || note.member?.name === filterMember;
+        const matchesMember = filterMember === 'All Members' || note.member?.name === filterMember;
         const matchesCategory = filterCategory === 'all' || note.category === filterCategory;
         let matchesTime = true;
         if (filterTime === 'This Month') {
@@ -110,10 +125,10 @@ const ProgressNotes: React.FC = () => {
     }), [notes, filterMember, filterCategory, filterTime, searchQuery]);
 
     const stats = useMemo(() => ({
-        totalNotes:     notes.length,
-        thisWeek:       notes.filter(n => (Date.now() - new Date(n.date).getTime()) / 86400000 <= 7).length,
+        totalNotes: notes.length,
+        thisWeek: notes.filter(n => (Date.now() - new Date(n.date).getTime()) / 86400000 <= 7).length,
         membersTracked: new Set(notes.map(n => n.member?.name)).size,
-        prsRecorded:    notes.filter(n => n.tags.includes('PR')).length,
+        prsRecorded: notes.filter(n => n.tags.includes('PR')).length,
     }), [notes]);
 
     const handleSaveNote = async () => {
@@ -126,15 +141,20 @@ const ProgressNotes: React.FC = () => {
                 ...formData as ProgressNoteDTO,
                 member: { name: member.name, avatar: `https://ui-avatars.com/api/?name=${member.name}`, goal: member.goal || 'Fitness', startDate: new Date().toLocaleDateString() },
                 highlights: formHighlights.split('\n').filter(s => s.trim()),
-                concerns:   formConcerns.split('\n').filter(s => s.trim()),
-                tags:       formTags.split(',').map(s => s.trim()).filter(s => s),
-                stats: [], attachments: []
+                concerns: formConcerns.split('\n').filter(s => s.trim()),
+                tags: formTags.split(',').map(s => s.trim()).filter(s => s),
+                stats: [], attachments: [],
+                ...(linkedSessionId !== '' ? { sessionId: linkedSessionId } : {}),
             };
             await progressNoteApi.createNoteForMember(member.id, payload);
             await fetchInitialData();
             setIsModalOpen(false);
             setFormData(initialFormState);
-            setSelectedMemberName(''); setFormHighlights(''); setFormConcerns(''); setFormTags('');
+            setSelectedMemberName('');
+            setFormHighlights('');
+            setFormConcerns('');
+            setFormTags('');
+            setLinkedSessionId('');
         } catch (e) { console.error(e); alert('Failed to save note'); }
         finally { setIsSaving(false); }
     };
@@ -335,7 +355,7 @@ const ProgressNotes: React.FC = () => {
                                                 {/* Menu */}
                                                 <button
                                                     className="pn-note__menu-btn"
-                                                    onClick={e => { e.stopPropagation(); setOpenMenuId(openMenuId === note.id ? null : note.id); }}
+                                                    onClick={e => { e.stopPropagation(); setOpenMenuId(openMenuId === (note.id ?? null) ? null : (note.id ?? null)); }}
                                                 >
                                                     <MoreVertical size={14} />
                                                 </button>
@@ -362,22 +382,22 @@ const ProgressNotes: React.FC = () => {
                                         <p className="pn-note__text">{note.content}</p>
 
                                         {/* Highlights */}
-                                        {note.highlights?.length > 0 && (
+                                        {(note.highlights?.length ?? 0) > 0 && (
                                             <div className="pn-note__highlights">
                                                 <span className="pn-note__section-label" style={{ color: '#10b981' }}>
                                                     <Award size={11} /> Highlights
                                                 </span>
-                                                <ul>{note.highlights.map((h, i) => <li key={i}>{h}</li>)}</ul>
+                                                <ul>{(note.highlights ?? []).map((h, i) => <li key={i}>{h}</li>)}</ul>
                                             </div>
                                         )}
 
                                         {/* Concerns */}
-                                        {note.concerns?.length > 0 && (
+                                        {(note.concerns?.length ?? 0) > 0 && (
                                             <div className="pn-note__concerns">
                                                 <span className="pn-note__section-label" style={{ color: '#f43f5e' }}>
                                                     <AlertTriangle size={11} /> Concerns
                                                 </span>
-                                                <ul>{note.concerns.map((c, i) => <li key={i}>{c}</li>)}</ul>
+                                                <ul>{(note.concerns ?? []).map((c, i) => <li key={i}>{c}</li>)}</ul>
                                             </div>
                                         )}
 
@@ -551,6 +571,24 @@ const ProgressNotes: React.FC = () => {
                                     </div>
                                 </div>
 
+                                {/* Link to session */}
+                                <div className="pn__field">
+                                    <label className="pn__label--link">🔗 Link to Session (optional)</label>
+                                    <select
+                                        className="pn__field-select"
+                                        value={linkedSessionId}
+                                        onChange={e => setLinkedSessionId(e.target.value === '' ? '' : Number(e.target.value))}
+                                    >
+                                        <option value="">No session linked</option>
+                                        {sessions.map((s: any) => (
+                                            <option key={s.sessionId ?? s.id} value={s.sessionId ?? s.id}>
+                                                {s.title || `Session #${s.sessionId ?? s.id}`}
+                                                {s.sessionDate ? ` — ${new Date(s.sessionDate).toLocaleDateString()}` : ''}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
                                 {/* Mood selector */}
                                 <div className="pn__field pn__field--mood">
                                     <label>Member Mood</label>
@@ -660,25 +698,41 @@ const ProgressNotes: React.FC = () => {
                                 {/* Attachments */}
                                 <div className="pn__field">
                                     <label>Attachments</label>
-                                    <div className="pn__upload-zone">
+                                    <div
+                                        className="pn__upload-zone"
+                                        onClick={() => fileInputRef.current?.click()}
+                                        style={{ cursor: 'pointer' }}
+                                    >
                                         <Camera size={18} />
                                         <span>Drop files or click to add photos, videos, or documents</span>
+                                        {selectedFiles.length > 0 && (
+                                            <span className="pn__upload-count">{selectedFiles.length} file{selectedFiles.length > 1 ? 's' : ''} selected</span>
+                                        )}
                                     </div>
+                                    <input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        multiple
+                                        accept="image/*,video/*,.pdf,.doc,.docx"
+                                        style={{ display: 'none' }}
+                                        onChange={e => setSelectedFiles(Array.from(e.target.files || []))}
+                                    />
                                 </div>
 
-                                {/* Private toggle */}
-                                <div className="pn__private-row">
-                                    <input
-                                        type="checkbox"
-                                        id="pn-private"
-                                        className="pn__checkbox"
-                                        checked={formData.private}
-                                        onChange={e => setFormData(p => ({ ...p, private: e.target.checked }))}
-                                    />
-                                    <label htmlFor="pn-private" className="pn__private-label">
-                                        <span className="pn__private-badge-icon">Private</span>
-                                        note — only visible to you
-                                    </label>
+                                {/* Visibility toggle — premium pill */}
+                                <div className="pn__visibility-row">
+                                    <button
+                                        type="button"
+                                        className={`pn__visibility-toggle ${formData.private ? 'pn__visibility-toggle--private' : 'pn__visibility-toggle--visible'}`}
+                                        onClick={() => setFormData(p => ({ ...p, private: !p.private }))}
+                                    >
+                                        <span className="pn__vis-track">
+                                            <span className="pn__vis-thumb" />
+                                        </span>
+                                        <span className="pn__vis-label">
+                                            {formData.private ? '🔒 Private — only visible to you' : '👁 Visible to member'}
+                                        </span>
+                                    </button>
                                 </div>
                             </div>
                         </div>

@@ -201,15 +201,19 @@ public class AuthController {
         // Returning user - issue token directly (no OTP needed)
         String userRole = determineUserRole(user);
 
+        // Determine correct context: MEMBER/CUSTOMER users get MEMBER context, staff/trainer/owner get STAFF
+        boolean isMemberOnly = "MEMBER".equals(userRole) || "CUSTOMER".equals(userRole);
+        String context = isMemberOnly ? "MEMBER" : "STAFF";
+
         AuthResponse response = new AuthResponse();
         response.setId(user.getUserId());
         response.setUsername(user.getUsername());
         response.setFullName(user.getFullName());
         response.setEmail(user.getEmail());
         response.setPhone(user.getPhone());
-        response.setContext("STAFF");
-        response.setStaffRole(userRole);
-        response.setHasStaffAccess(true);
+        response.setContext(context);
+        response.setStaffRole(isMemberOnly ? null : userRole);
+        response.setHasStaffAccess(!isMemberOnly);
         response.setHasMemberAccess(true);
         response.setIsFirstLogin(false);
         response.setOtpSent(false); // No OTP sent
@@ -223,8 +227,8 @@ public class AuthController {
                     });
         }
 
-        String token = tokenProvider.generateTokenFromUser(user, "STAFF", response.getActiveGymId(), userRole, null,
-                null, null, null);
+        String token = tokenProvider.generateTokenFromUser(user, context, response.getActiveGymId(),
+                isMemberOnly ? "CUSTOMER" : userRole, null, null, null, null);
         response.setToken(token);
 
         // Log successful login and create session
@@ -273,6 +277,8 @@ public class AuthController {
 
         // Determine Role Context using helper
         String userRole = determineUserRole(user);
+        boolean isMemberOnly = "MEMBER".equals(userRole) || "CUSTOMER".equals(userRole);
+        String context = isMemberOnly ? "MEMBER" : "STAFF";
 
         AuthResponse response = new AuthResponse();
         response.setId(user.getUserId());
@@ -280,9 +286,9 @@ public class AuthController {
         response.setFullName(user.getFullName());
         response.setEmail(user.getEmail());
         response.setPhone(user.getPhone());
-        response.setContext("STAFF");
-        response.setStaffRole(userRole);
-        response.setHasStaffAccess(true);
+        response.setContext(context);
+        response.setStaffRole(isMemberOnly ? null : userRole);
+        response.setHasStaffAccess(!isMemberOnly);
         response.setHasMemberAccess(true);
         response.setIsFirstLogin(Boolean.TRUE.equals(user.getIsFirstLogin()));
 
@@ -295,8 +301,8 @@ public class AuthController {
                     });
         }
 
-        String token = tokenProvider.generateTokenFromUser(user, "STAFF", response.getActiveGymId(), userRole, null,
-                null, null, null);
+        String token = tokenProvider.generateTokenFromUser(user, context, response.getActiveGymId(),
+                isMemberOnly ? "CUSTOMER" : userRole, null, null, null, null);
         response.setToken(token);
 
         return ResponseEntity.ok(response);
@@ -439,11 +445,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body(Map.of("error", "Email already registered"));
         }
 
-        // Determine role from request (default to TRAINER)
-        String requestedRole = request.getRole();
-        if (requestedRole == null) {
-            requestedRole = "TRAINER";
-        }
+        String requestedRole = "TRAINER";
 
         // Create user
         User user = new User();
@@ -456,11 +458,9 @@ public class AuthController {
         // Set role based on request
         Role role = roleRepository.findByRoleName(requestedRole.toUpperCase());
         if (role == null) {
-            role = roleRepository.findByRoleName("STAFF"); // Fallback
+            return ResponseEntity.badRequest().body(Map.of("error", "TRAINER role not found in system"));
         }
-        if (role != null) {
-            user.setRoles(new HashSet<>(Collections.singletonList(role)));
-        }
+        user.setRoles(new HashSet<>(Collections.singletonList(role)));
 
         user = userRepository.save(user);
 
@@ -560,7 +560,7 @@ public class AuthController {
         if ("STAFF".equalsIgnoreCase(context)) {
             Optional<GymStaff> gsOpt = gymStaffRepository.findByGymGymIdAndUserUserId(gymId, userId);
             if (gsOpt.isPresent()) {
-                staffRole = gsOpt.get().getStaffRole().name();
+                staffRole = determineUserRole(user);
                 response.setStaffRole(staffRole);
             } else {
                 return ResponseEntity.status(403).body(Map.of("error", "User is not staff at this gym"));
@@ -629,8 +629,8 @@ public class AuthController {
                 return "OWNER";
             }
 
-            // TRAINER has second priority
-            if (roleName.contains("TRAINER") || roleName.contains("STAFF")) {
+            // TRAINER has second priority — STAFF is NOT a trainer
+            if (roleName.equals("TRAINER")) {
                 hasTrainer = true;
             }
 

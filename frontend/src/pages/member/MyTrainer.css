@@ -2,6 +2,621 @@
    MyTrainer - macOS Style Specific Styles
    ============================================ */
 
+/* ── Page Root (decoupled from MemberProfile.css) ── */
+.trainer-page {
+    min-height: 100vh;
+    padding: 8px 12px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.trainer-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+/* ── Hero Banner — compact single row ── */
+.trainer-hero {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 10px;
+    border: 1px solid rgba(255,255,255,0.08);
+}
+
+.trainer-hero__bg {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #FF3B30 0%, #AF52DE 100%);
+    z-index: 0;
+}
+
+.trainer-hero__pattern {
+    position: absolute;
+    inset: 0;
+    opacity: 0.08;
+    background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0);
+    background-size: 20px 20px;
+    z-index: 1;
+}
+
+.trainer-hero__content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    flex-wrap: wrap;
+}
+
+/* Hide avatar in compact hero — saves space */
+.trainer-hero__avatar {
+    display: none;
+}
+
+.trainer-hero__avatar-ring { display: none; }
+.trainer-hero__avatar-image { display: none; }
+
+.trainer-hero__info {
+    flex: 1;
+    min-width: 160px;
+}
+
+.trainer-hero__name-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 2px;
+    flex-wrap: wrap;
+}
+
+.trainer-hero__name {
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+    letter-spacing: -0.3px;
+}
+
+.trainer-hero__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 7px;
+    border-radius: 20px;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.trainer-hero__badge--active {
+    background: rgba(52,199,89,0.15);
+    color: #34C759;
+}
+
+.trainer-hero__subtitle {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: rgba(255,255,255,0.55);
+    margin: 0;
+}
+
+/* Hide tagline — redundant */
+.trainer-hero__tagline { display: none; }
+
+.trainer-hero__stats {
+    display: flex;
+    gap: 12px;
+    padding-left: 12px;
+    border-left: 1px solid rgba(255,255,255,0.15);
+    flex-shrink: 0;
+}
+
+.trainer-hero__stat {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.trainer-hero__stat-header {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.trainer-hero__stat-value {
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+}
+
+.trainer-hero__stat-icon {
+    opacity: 0.5;
+    color: #5AC8FA;
+}
+
+.trainer-hero__stat-label {
+    font-size: 9px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.4);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.trainer-hero__action-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-left: 4px;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.trainer-hero__action-btn:hover {
+    background: rgba(255,255,255,0.14);
+}
+
+.trainer-hero__action-btn--active {
+    background: rgba(255,59,48,0.15);
+    border-color: rgba(255,59,48,0.3);
+    color: #FF3B30;
+}
+
+/* ── Section Headers ── */
+.trainer-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.trainer-section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 800;
+    color: rgba(255,255,255,0.4);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.trainer-section-subtitle {
+    font-size: 11px;
+    color: var(--macos-text-tertiary);
+}
+
+/* ── Assigned Trainer Compact Card (2-col grid) ── */
+.trainer-assigned-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+@media (max-width: 640px) {
+    .trainer-assigned-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Compact assigned card */
+.trainer-card--assigned-compact {
+    border: 1px solid var(--macos-border);
+    background: var(--macos-bg-glass);
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.trainer-card--assigned-compact:hover {
+    border-color: var(--macos-accent);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+
+.trainer-assigned-compact__top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ── Assigned Trainer Avatar (compact) ── */
+.trainer-full-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #007AFF, #5856D6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+    flex-shrink: 0;
+}
+
+/* ── Unassign Button ── */
+.trainer-unassign-btn {
+    background: rgba(255,59,48,0.08) !important;
+    border: 1px solid rgba(255,59,48,0.2) !important;
+    color: #FF3B30 !important;
+}
+
+.trainer-unassign-btn:hover {
+    background: rgba(255,59,48,0.15) !important;
+}
+
+/* ── Assigned badge on discovery cards ── */
+.trainer-assigned-badge {
+    position: absolute;
+    top: -12px;
+    right: 20px;
+    background: var(--macos-success, #34C759);
+    color: white;
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+    font-size: 11px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    z-index: 10;
+}
+
+/* ── Empty state ── */
+.trainer-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 60px 24px;
+    text-align: center;
+    color: var(--macos-text-secondary);
+    gap: 10px;
+}
+
+.trainer-empty-state__icon {
+    opacity: 0.3;
+    margin-bottom: 4px;
+}
+
+.trainer-empty-state__title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--macos-text-primary);
+}
+
+.trainer-empty-state__body {
+    font-size: 13px;
+    color: var(--macos-text-tertiary);
+    margin: 0 0 12px;
+}
+
+/* ── Trainer Detail Modal ── */
+.tdm-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(6px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.tdm-panel {
+    background: var(--popover-bg, #2A2A36);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 520px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+}
+
+.tdm-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    flex-shrink: 0;
+}
+
+.tdm-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #007AFF, #5856D6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.tdm-header__info {
+    flex: 1;
+}
+
+.tdm-header__name {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--macos-text-primary);
+    margin: 0 0 6px;
+}
+
+.tdm-header__meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--macos-text-secondary);
+    flex-wrap: wrap;
+}
+
+.tdm-dot {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--macos-text-tertiary);
+    flex-shrink: 0;
+}
+
+.tdm-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.tdm-badge--assigned {
+    background: rgba(52,199,89,0.15);
+    color: #34C759;
+}
+
+.tdm-close {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    color: var(--macos-text-secondary);
+    padding: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+}
+
+.tdm-close:hover {
+    background: rgba(255,255,255,0.1);
+    color: var(--macos-text-primary);
+}
+
+.tdm-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.tdm-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.tdm-section__label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--macos-text-tertiary);
+}
+
+.tdm-bio {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--macos-text-secondary);
+    margin: 0;
+}
+
+.tdm-contact-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--macos-text-secondary);
+}
+
+.tdm-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.tdm-tag {
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    background: rgba(59,130,246,0.1);
+    color: #60a5fa;
+    border: 1px solid rgba(59,130,246,0.2);
+}
+
+.tdm-skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 8px;
+}
+
+.tdm-skill-item {
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.tdm-skill-name {
+    font-size: 12px;
+    color: var(--macos-text-primary);
+    font-weight: 500;
+}
+
+.tdm-skill-level {
+    font-size: 10px;
+    color: var(--macos-text-tertiary);
+}
+
+.tdm-cert-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+.tdm-cert-item:last-child {
+    border-bottom: none;
+}
+
+.tdm-cert-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--macos-text-primary);
+}
+
+.tdm-cert-issuer {
+    font-size: 11px;
+    color: var(--macos-text-tertiary);
+    margin-top: 2px;
+}
+
+.tdm-avail-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.tdm-avail-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--macos-text-secondary);
+    padding: 6px 10px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+}
+
+.tdm-avail-day {
+    font-weight: 600;
+    color: var(--macos-text-primary);
+    min-width: 80px;
+}
+
+.tdm-avail-time {
+    color: var(--macos-text-tertiary);
+}
+
+.tdm-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 14px 20px;
+    border-top: 1px solid rgba(255,255,255,0.07);
+    flex-shrink: 0;
+}
+
+.tdm-footer__close {
+    min-width: 80px;
+}
+
+.tdm-footer__unassign {
+    background: rgba(255,59,48,0.1) !important;
+    border: 1px solid rgba(255,59,48,0.25) !important;
+    color: #FF3B30 !important;
+}
+
+.tdm-footer__unassign:hover {
+    background: rgba(255,59,48,0.18) !important;
+}
+
+/* ── Confirm Dialog ── */
+.tdm-confirm {
+    background: var(--popover-bg, #2A2A36);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    padding: 28px 24px 20px;
+    width: 100%;
+    max-width: 360px;
+    text-align: center;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+}
+
+.tdm-confirm__icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: rgba(255,59,48,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 14px;
+}
+
+.tdm-confirm__title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--macos-text-primary);
+    margin: 0 0 8px;
+}
+
+.tdm-confirm__body {
+    font-size: 13px;
+    color: var(--macos-text-secondary);
+    line-height: 1.5;
+    margin: 0 0 20px;
+}
+
+.tdm-confirm__actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
 .trainer-macos {
     max-width: 100%;
 }
@@ -164,9 +779,9 @@
 /* Trainer Grid */
 .trainer-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-    gap: var(--space-5);
-    margin-bottom: var(--space-8);
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 10px;
+    margin-bottom: 12px;
 }
 
 /* Trainer Card */
@@ -321,9 +936,468 @@
     .trainer-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .trainer-discovery__controls {
         flex-direction: column;
         align-items: stretch;
     }
 }
+
+/* ══════════════════════════════════════════════════
+   Send Request Modal (member side)
+   ══════════════════════════════════════════════════ */
+
+.srm-modal {
+    background: var(--macos-bg-secondary, #1C1C1E);
+    border: 1px solid var(--macos-border, rgba(255,255,255,0.1));
+    border-radius: 16px;
+    width: 100%;
+    max-width: 520px;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+.srm-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid var(--macos-border, rgba(255,255,255,0.08));
+    background: linear-gradient(135deg, rgba(0,122,255,0.06), transparent);
+}
+
+.srm-header__avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #007AFF, #5856D6);
+    color: #fff;
+    font-size: 20px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.srm-header__info { flex: 1; min-width: 0; }
+
+.srm-header__name {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--macos-text-primary, #fff);
+    margin: 0 0 3px;
+}
+
+.srm-header__sub {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--macos-text-tertiary, rgba(255,255,255,0.5));
+    margin: 0;
+}
+
+.srm-close {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 6px;
+    color: var(--macos-text-secondary, rgba(255,255,255,0.6));
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    transition: background 0.15s;
+}
+.srm-close:hover { background: rgba(255,255,255,0.12); }
+
+/* Steps indicator */
+.srm-steps {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    gap: 0;
+    background: rgba(255,255,255,0.02);
+    border-bottom: 1px solid var(--macos-border, rgba(255,255,255,0.06));
+}
+
+.srm-step {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--macos-text-tertiary, rgba(255,255,255,0.35));
+    white-space: nowrap;
+}
+
+.srm-step span {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.srm-step--done {
+    color: #34C759;
+}
+.srm-step--done span {
+    background: rgba(52,199,89,0.15);
+    border-color: rgba(52,199,89,0.4);
+    color: #34C759;
+}
+
+.srm-step--active {
+    color: #007AFF;
+}
+.srm-step--active span {
+    background: rgba(0,122,255,0.18);
+    border-color: rgba(0,122,255,0.5);
+    color: #007AFF;
+}
+
+.srm-step-line {
+    flex: 1;
+    height: 1px;
+    background: rgba(255,255,255,0.08);
+    margin: 0 8px;
+}
+.srm-step-line--done {
+    background: rgba(52,199,89,0.4);
+}
+
+/* Body */
+.srm-body {
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.srm-body__label {
+    font-size: 13px;
+    color: var(--macos-text-secondary, rgba(255,255,255,0.65));
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Quick-fill prompts */
+.srm-prompts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.srm-prompt-chip {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+    background: rgba(0,122,255,0.1);
+    border: 1px solid rgba(0,122,255,0.25);
+    color: #007AFF;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    white-space: nowrap;
+}
+.srm-prompt-chip:hover {
+    background: rgba(0,122,255,0.2);
+    transform: translateY(-1px);
+}
+.srm-prompt-chip:active { transform: scale(0.97); }
+
+/* Textarea */
+.srm-textarea-wrap {
+    position: relative;
+}
+
+.srm-textarea {
+    width: 100%;
+    box-sizing: border-box;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 10px 12px 28px;
+    font-size: 13px;
+    color: var(--macos-text-primary, #fff);
+    resize: none;
+    outline: none;
+    transition: border-color 0.2s;
+    font-family: inherit;
+    line-height: 1.5;
+}
+.srm-textarea:focus { border-color: rgba(0,122,255,0.5); }
+.srm-textarea::placeholder { color: rgba(255,255,255,0.25); }
+
+.srm-char-count {
+    position: absolute;
+    bottom: 8px;
+    right: 10px;
+    font-size: 10px;
+    color: var(--macos-text-tertiary, rgba(255,255,255,0.3));
+}
+.srm-char-count.warn { color: #FF9500; }
+
+/* Note */
+.srm-note {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--macos-text-tertiary, rgba(255,255,255,0.4));
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Footer */
+.srm-footer {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    padding: 14px 20px;
+    border-top: 1px solid var(--macos-border, rgba(255,255,255,0.08));
+    background: rgba(255,255,255,0.02);
+}
+
+.srm-footer__send {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 20px;
+    font-weight: 600;
+}
+
+/* ══════════════════════════════════════════════════
+   Trainer Request Panel (trainer side) — in TrainerNotifications
+   ══════════════════════════════════════════════════ */
+
+.trm-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.trm-modal {
+    background: var(--macos-bg-secondary, #1C1C1E);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 18px;
+    width: 100%;
+    max-width: 560px;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+}
+
+/* Member info header */
+.trm-header {
+    padding: 20px 22px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    background: linear-gradient(135deg, rgba(175,82,222,0.08), transparent);
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+}
+
+.trm-header__avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #AF52DE, #5856D6);
+    color: #fff;
+    font-size: 22px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.trm-header__info { flex: 1; min-width: 0; }
+
+.trm-header__name {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--macos-text-primary, #fff);
+    margin: 0 0 4px;
+}
+
+.trm-header__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--macos-text-tertiary, rgba(255,255,255,0.45));
+}
+
+.trm-header__meta span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.trm-header__badge {
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.trm-header__badge--new {
+    background: rgba(255,149,0,0.15);
+    color: #FF9500;
+    border: 1px solid rgba(255,149,0,0.3);
+}
+
+.trm-header__badge--time {
+    background: rgba(142,142,147,0.12);
+    color: #8E8E93;
+}
+
+.trm-close {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 6px;
+    color: var(--macos-text-secondary, rgba(255,255,255,0.6));
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    transition: background 0.15s;
+}
+.trm-close:hover { background: rgba(255,255,255,0.12); }
+
+/* Message bubble */
+.trm-message-section {
+    padding: 14px 22px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+.trm-message-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--macos-text-tertiary, rgba(255,255,255,0.35));
+    margin: 0 0 8px;
+}
+
+.trm-message-bubble {
+    background: rgba(0,122,255,0.08);
+    border: 1px solid rgba(0,122,255,0.2);
+    border-radius: 12px;
+    border-top-left-radius: 4px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--macos-text-secondary, rgba(255,255,255,0.75));
+    line-height: 1.55;
+    font-style: italic;
+}
+
+.trm-no-message {
+    font-size: 12px;
+    color: var(--macos-text-tertiary, rgba(255,255,255,0.3));
+    font-style: italic;
+}
+
+/* Response note area */
+.trm-note-section {
+    padding: 14px 22px;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.trm-note-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--macos-text-tertiary, rgba(255,255,255,0.35));
+    margin: 0 0 8px;
+}
+
+.trm-note-textarea {
+    width: 100%;
+    box-sizing: border-box;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 13px;
+    color: var(--macos-text-primary, #fff);
+    resize: none;
+    outline: none;
+    transition: border-color 0.2s;
+    font-family: inherit;
+    line-height: 1.5;
+}
+.trm-note-textarea:focus { border-color: rgba(0,122,255,0.45); }
+.trm-note-textarea::placeholder { color: rgba(255,255,255,0.22); }
+
+/* Footer action buttons */
+.trm-footer {
+    padding: 14px 22px;
+    border-top: 1px solid rgba(255,255,255,0.07);
+    background: rgba(255,255,255,0.02);
+    display: flex;
+    gap: 10px;
+}
+
+.trm-btn-decline {
+    flex: 1;
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    background: rgba(255,59,48,0.1);
+    border: 1px solid rgba(255,59,48,0.3);
+    color: #FF3B30;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    transition: background 0.15s, transform 0.1s;
+}
+.trm-btn-decline:hover { background: rgba(255,59,48,0.18); }
+.trm-btn-decline:active { transform: scale(0.98); }
+.trm-btn-decline:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.trm-btn-accept {
+    flex: 2;
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    background: linear-gradient(135deg, #34C759, #30D158);
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    transition: opacity 0.15s, transform 0.1s;
+    box-shadow: 0 4px 14px rgba(52,199,89,0.25);
+}
+.trm-btn-accept:hover { opacity: 0.9; }
+.trm-btn-accept:active { transform: scale(0.98); }
+.trm-btn-accept:disabled { opacity: 0.5; cursor: not-allowed; }

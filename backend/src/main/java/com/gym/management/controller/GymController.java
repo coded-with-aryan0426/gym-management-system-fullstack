@@ -114,11 +114,10 @@ public class GymController {
         membershipRepository.save(membership);
 
         return ResponseEntity.ok(Map.of(
-            "message", gym.getIsPublic() ? "Joined gym successfully" : "Membership request submitted",
-            "status", membership.getStatus().name(),
-            "gymId", gym.getGymId(),
-            "gymName", gym.getName()
-        ));
+                "message", gym.getIsPublic() ? "Joined gym successfully" : "Membership request submitted",
+                "status", membership.getStatus().name(),
+                "gymId", gym.getGymId(),
+                "gymName", gym.getName()));
     }
 
     /**
@@ -128,13 +127,12 @@ public class GymController {
     public ResponseEntity<?> getGymStaff(@PathVariable Long gymId) {
         List<GymStaff> staff = gymStaffRepository.findByGymGymIdAndStatus(gymId, StaffStatus.ACTIVE);
         return ResponseEntity.ok(staff.stream().map(s -> Map.of(
-            "id", s.getId(),
-            "userId", s.getUser().getUserId(),
-            "fullName", s.getUser().getFullName(),
-            "email", s.getUser().getEmail(),
-            "role", s.getStaffRole().name(),
-            "joinedAt", s.getJoinedAt() != null ? s.getJoinedAt().toString() : null
-        )).toList());
+                "id", s.getId(),
+                "userId", s.getUser().getUserId(),
+                "fullName", s.getUser().getFullName(),
+                "email", s.getUser().getEmail(),
+                "role", "STAFF",
+                "joinedAt", s.getJoinedAt() != null ? s.getJoinedAt().toString() : null)).toList());
     }
 
     /**
@@ -144,12 +142,11 @@ public class GymController {
     public ResponseEntity<?> getPendingMembers(@PathVariable Long gymId) {
         List<Membership> pending = membershipRepository.findByGymGymIdAndStatus(gymId, MembershipStatus.PENDING);
         return ResponseEntity.ok(pending.stream().map(m -> Map.of(
-            "id", m.getId(),
-            "userId", m.getUser().getUserId(),
-            "fullName", m.getUser().getFullName(),
-            "email", m.getUser().getEmail(),
-            "requestedAt", m.getCreatedAt().toString()
-        )).toList());
+                "id", m.getId(),
+                "userId", m.getUser().getUserId(),
+                "fullName", m.getUser().getFullName(),
+                "email", m.getUser().getEmail(),
+                "requestedAt", m.getCreatedAt().toString())).toList());
     }
 
     /**
@@ -162,8 +159,8 @@ public class GymController {
             @RequestBody Map<String, Object> request) {
 
         boolean approved = (boolean) request.getOrDefault("approved", true);
-        Long approvedById = request.get("approvedBy") != null ? 
-            Long.valueOf(request.get("approvedBy").toString()) : null;
+        Long approvedById = request.get("approvedBy") != null ? Long.valueOf(request.get("approvedBy").toString())
+                : null;
 
         Optional<Membership> membershipOpt = membershipRepository.findById(membershipId);
         if (membershipOpt.isEmpty()) {
@@ -185,9 +182,8 @@ public class GymController {
         membershipRepository.save(membership);
 
         return ResponseEntity.ok(Map.of(
-            "message", approved ? "Membership approved" : "Membership rejected",
-            "status", membership.getStatus().name()
-        ));
+                "message", approved ? "Membership approved" : "Membership rejected",
+                "status", membership.getStatus().name()));
     }
 
     /**
@@ -202,12 +198,18 @@ public class GymController {
 
         Gym gym = gymOpt.get();
 
-        if (updates.containsKey("name")) gym.setName((String) updates.get("name"));
-        if (updates.containsKey("address")) gym.setAddress((String) updates.get("address"));
-        if (updates.containsKey("city")) gym.setCity((String) updates.get("city"));
-        if (updates.containsKey("phone")) gym.setPhone((String) updates.get("phone"));
-        if (updates.containsKey("email")) gym.setEmail((String) updates.get("email"));
-        if (updates.containsKey("isPublic")) gym.setIsPublic((Boolean) updates.get("isPublic"));
+        if (updates.containsKey("name"))
+            gym.setName((String) updates.get("name"));
+        if (updates.containsKey("address"))
+            gym.setAddress((String) updates.get("address"));
+        if (updates.containsKey("city"))
+            gym.setCity((String) updates.get("city"));
+        if (updates.containsKey("phone"))
+            gym.setPhone((String) updates.get("phone"));
+        if (updates.containsKey("email"))
+            gym.setEmail((String) updates.get("email"));
+        if (updates.containsKey("isPublic"))
+            gym.setIsPublic((Boolean) updates.get("isPublic"));
 
         gymRepository.save(gym);
         return ResponseEntity.ok(gymToMap(gym));
@@ -220,11 +222,10 @@ public class GymController {
     public ResponseEntity<?> getUserStaffGyms(@PathVariable Long userId) {
         List<GymStaff> staffAssociations = gymStaffRepository.findByUserUserIdAndStatus(userId, StaffStatus.ACTIVE);
         return ResponseEntity.ok(staffAssociations.stream().map(s -> Map.of(
-            "gymId", s.getGym().getGymId(),
-            "gymName", s.getGym().getName(),
-            "role", s.getStaffRole().name(),
-            "inviteCode", s.getGym().getInviteCode()
-        )).toList());
+                "gymId", s.getGym().getGymId(),
+                "gymName", s.getGym().getName(),
+                "role", "STAFF",
+                "inviteCode", s.getGym().getInviteCode())).toList());
     }
 
     /**
@@ -234,12 +235,11 @@ public class GymController {
     public ResponseEntity<?> getUserMemberships(@PathVariable Long userId) {
         List<Membership> memberships = membershipRepository.findByUserUserId(userId);
         return ResponseEntity.ok(memberships.stream().map(m -> Map.of(
-            "gymId", m.getGym().getGymId(),
-            "gymName", m.getGym().getName(),
-            "status", m.getStatus().name(),
-            "startDate", m.getStartDate() != null ? m.getStartDate().toString() : null,
-            "endDate", m.getEndDate() != null ? m.getEndDate().toString() : null
-        )).toList());
+                "gymId", m.getGym().getGymId(),
+                "gymName", m.getGym().getName(),
+                "status", m.getStatus().name(),
+                "startDate", m.getStartDate() != null ? m.getStartDate().toString() : null,
+                "endDate", m.getEndDate() != null ? m.getEndDate().toString() : null)).toList());
     }
 
     private Map<String, Object> gymToMap(Gym gym) {

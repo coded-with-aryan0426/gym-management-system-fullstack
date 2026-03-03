@@ -148,9 +148,9 @@ export const trainerReportsApi = {
     /**
      * Get overview KPIs with period comparison
      */
-    async getOverview(period: string = 'This Month'): Promise<ReportOverview> {
+    async getOverview(period: string = 'This Month', startDate?: string, endDate?: string): Promise<ReportOverview> {
         const response = await apiClient.get('/trainer/reports/overview', {
-            params: { period }
+            params: { period, ...(startDate && { startDate }), ...(endDate && { endDate }) }
         });
         return unwrapResponse<ReportOverview>(response);
     },
@@ -158,9 +158,9 @@ export const trainerReportsApi = {
     /**
      * Get weekly session activity breakdown
      */
-    async getWeeklyActivity(period: string = 'This Week'): Promise<WeeklyActivity> {
+    async getWeeklyActivity(period: string = 'This Week', startDate?: string, endDate?: string): Promise<WeeklyActivity> {
         const response = await apiClient.get('/trainer/reports/weekly-activity', {
-            params: { period }
+            params: { period, ...(startDate && { startDate }), ...(endDate && { endDate }) }
         });
         return unwrapResponse<WeeklyActivity>(response);
     },
@@ -168,9 +168,9 @@ export const trainerReportsApi = {
     /**
      * Get session type distribution
      */
-    async getSessionTypes(period: string = 'This Month'): Promise<SessionTypesData> {
+    async getSessionTypes(period: string = 'This Month', startDate?: string, endDate?: string): Promise<SessionTypesData> {
         const response = await apiClient.get('/trainer/reports/session-types', {
-            params: { period }
+            params: { period, ...(startDate && { startDate }), ...(endDate && { endDate }) }
         });
         return unwrapResponse<SessionTypesData>(response);
     },
@@ -178,9 +178,9 @@ export const trainerReportsApi = {
     /**
      * Get performance metrics with confidence levels
      */
-    async getPerformance(period: string = 'This Month'): Promise<PerformanceMetrics> {
+    async getPerformance(period: string = 'This Month', startDate?: string, endDate?: string): Promise<PerformanceMetrics> {
         const response = await apiClient.get('/trainer/reports/performance', {
-            params: { period }
+            params: { period, ...(startDate && { startDate }), ...(endDate && { endDate }) }
         });
         return unwrapResponse<PerformanceMetrics>(response);
     },
@@ -201,13 +201,17 @@ export const trainerReportsApi = {
         status?: 'all' | 'completed' | 'cancelled' | 'no-show';
         page?: number;
         size?: number;
+        startDate?: string;
+        endDate?: string;
     } = {}): Promise<SessionsResponse> {
         const response = await apiClient.get('/trainer/reports/sessions', {
             params: {
                 period: params.period || 'This Month',
                 status: params.status || 'all',
                 page: params.page || 0,
-                size: params.size || 20
+                size: params.size || 20,
+                ...(params.startDate && { startDate: params.startDate }),
+                ...(params.endDate && { endDate: params.endDate }),
             }
         });
         return unwrapResponse<SessionsResponse>(response);
@@ -224,9 +228,9 @@ export const trainerReportsApi = {
     /**
      * Get earnings breakdown and projections
      */
-    async getEarnings(period: string = 'This Month'): Promise<Earnings> {
+    async getEarnings(period: string = 'This Month', startDate?: string, endDate?: string): Promise<Earnings> {
         const response = await apiClient.get('/trainer/reports/earnings', {
-            params: { period }
+            params: { period, ...(startDate && { startDate }), ...(endDate && { endDate }) }
         });
         return unwrapResponse<Earnings>(response);
     },
@@ -234,9 +238,20 @@ export const trainerReportsApi = {
     /**
      * Export report as CSV
      */
-    async exportCSV(type: 'sessions' | 'earnings', period: string = 'This Month'): Promise<Blob> {
+    async exportCSV(type: 'sessions' | 'earnings', period: string = 'This Month', startDate?: string, endDate?: string): Promise<Blob> {
         const response = await apiClient.get(`/trainer/reports/export/${type}`, {
-            params: { period },
+            params: { period, ...(startDate && { startDate }), ...(endDate && { endDate }) },
+            responseType: 'blob'
+        });
+        return response.data;
+    },
+
+    /**
+     * Export report as PDF
+     */
+    async exportPDF(period: string = 'This Month', startDate?: string, endDate?: string): Promise<Blob> {
+        const response = await apiClient.get('/trainer/reports/export/pdf', {
+            params: { period, ...(startDate && { startDate }), ...(endDate && { endDate }) },
             responseType: 'blob'
         });
         return response.data;

@@ -1,25 +1,626 @@
 /* ============================================================================
-   Trainer Theme - Red Primary with Colorful Accents
-   Dark Mode: Red & Black | Light Mode: Red & White
+   TrainerTheme.css — Unified Design System for ALL Trainer Pages
+   Every trainer page @imports this file and uses these tokens.
    ============================================================================ */
 
+/* ──────────────────────────────────────────────────────────────────────────
+   1. BRAND COLORS
+────────────────────────────────────────────────────────────────────────── */
 :root {
-  /* Primary Red Accent */
-  --trainer-primary: #DC2626;
-  --trainer-primary-hover: #B91C1C;
-  --trainer-primary-light: rgba(220, 38, 38, 0.15);
-  
-  /* Secondary Colors for variety */
-  --trainer-blue: #3B82F6;
-  --trainer-blue-light: rgba(59, 130, 246, 0.15);
-  --trainer-green: #10B981;
-  --trainer-green-light: rgba(16, 185, 129, 0.15);
-  --trainer-purple: #8B5CF6;
-  --trainer-purple-light: rgba(139, 92, 246, 0.15);
-  --trainer-orange: #F59E0B;
-  --trainer-orange-light: rgba(245, 158, 11, 0.15);
-  --trainer-pink: #EC4899;
-  --trainer-pink-light: rgba(236, 72, 153, 0.15);
-  --trainer-cyan: #06B6D4;
-  --trainer-cyan-light: rgba(6, 182, 212, 0.15);
+  /* Primary accent — red */
+  --t-primary: #DC2626;
+  --t-primary-hover: #B91C1C;
+  --t-primary-light: rgba(220, 38, 38, 0.15);
+  --t-primary-glow: rgba(220, 38, 38, 0.30);
+
+  /* Semantic accents */
+  --t-blue: #3B82F6;
+  --t-blue-light: rgba(59, 130, 246, 0.15);
+  --t-green: #10B981;
+  --t-green-light: rgba(16, 185, 129, 0.15);
+  --t-indigo: #6366F1;
+  --t-indigo-light: rgba(99, 102, 241, 0.15);
+  --t-violet: #8B5CF6;
+  --t-violet-light: rgba(139, 92, 246, 0.15);
+  --t-amber: #F59E0B;
+  --t-amber-light: rgba(245, 158, 11, 0.15);
+  --t-rose: #F43F5E;
+  --t-rose-light: rgba(244, 63, 94, 0.15);
+  --t-teal: #14B8A6;
+  --t-teal-light: rgba(20, 184, 166, 0.15);
+  --t-cyan: #06B6D4;
+  --t-cyan-light: rgba(6, 182, 212, 0.15);
+
+  /* Status */
+  --t-success: #10B981;
+  --t-warning: #F59E0B;
+  --t-danger: #EF4444;
+  --t-info: #3B82F6;
+
+  /* ────────────────────────────────────────────────────────────────────
+     2. SURFACE / BACKGROUND TOKENS
+  ─────────────────────────────────────────────────────────────────────── */
+  --t-bg-page: #070709;
+  /* page root background      */
+  --t-bg-card: rgba(18, 18, 22, 0.96);
+  /* card / widget       */
+  --t-bg-card-hover: rgba(255, 255, 255, 0.03);
+  --t-bg-input: rgba(255, 255, 255, 0.04);
+  --t-bg-modal: #0e0e12;
+  /* modal background          */
+  --t-bg-overlay: rgba(0, 0, 0, 0.65);
+  /* modal backdrop         */
+  --t-bg-dropdown: #1c1c22;
+  /* dropdown / menu           */
+  --t-bg-header: rgba(10, 10, 14, 0.98);
+  /* page header section */
+
+  /* ────────────────────────────────────────────────────────────────────
+     3. BORDER TOKENS
+  ─────────────────────────────────────────────────────────────────────── */
+  --t-border: rgba(255, 255, 255, 0.07);
+  --t-border-hover: rgba(255, 255, 255, 0.13);
+  --t-border-focus: var(--t-indigo);
+  --t-border-modal: rgba(255, 255, 255, 0.10);
+
+  /* ────────────────────────────────────────────────────────────────────
+     4. TEXT TOKENS
+  ─────────────────────────────────────────────────────────────────────── */
+  --t-text-primary: #f1f5f9;
+  --t-text-secondary: rgba(255, 255, 255, 0.65);
+  --t-text-tertiary: rgba(255, 255, 255, 0.40);
+  --t-text-muted: rgba(255, 255, 255, 0.25);
+  --t-text-label: rgba(255, 255, 255, 0.45);
+  /* section labels    */
+  --t-text-link: var(--t-indigo);
+
+  /* ────────────────────────────────────────────────────────────────────
+     5. SPACING TOKENS  (all trainer pages use these)
+  ─────────────────────────────────────────────────────────────────────── */
+  --t-page-pad: 24px;
+  /* outer page padding           */
+  --t-page-pad-sm: 16px;
+  /* outer padding on small screens */
+  --t-section-gap: 20px;
+  /* gap between sections         */
+  --t-card-pad: 16px;
+  /* inner card padding           */
+  --t-header-pad: 20px 24px;
+  /* page header section padding  */
+  --t-toolbar-pad: 12px 24px;
+  /* toolbar row padding          */
+
+  /* ────────────────────────────────────────────────────────────────────
+     6. SHAPE / BORDER-RADIUS TOKENS
+  ─────────────────────────────────────────────────────────────────────── */
+  --t-radius-xs: 6px;
+  --t-radius-sm: 8px;
+  --t-radius-md: 10px;
+  --t-radius-lg: 14px;
+  --t-radius-xl: 16px;
+  --t-radius-2xl: 20px;
+  --t-radius-full: 999px;
+  --t-radius-page-icon: 11px;
+  /* page title icon              */
+  --t-radius-card: var(--t-radius-lg);
+  --t-radius-modal: var(--t-radius-xl);
+  --t-radius-btn: var(--t-radius-md);
+  --t-radius-input: var(--t-radius-md);
+  --t-radius-chip: var(--t-radius-sm);
+  --t-radius-badge: var(--t-radius-2xl);
+
+  /* ────────────────────────────────────────────────────────────────────
+     7. TYPOGRAPHY TOKENS
+  ─────────────────────────────────────────────────────────────────────── */
+  --t-font: 'Inter', system-ui, sans-serif;
+
+  /* Page title */
+  --t-fs-page-title: 20px;
+  --t-fw-page-title: 700;
+  --t-ls-page-title: -0.02em;
+
+  /* Page subtitle */
+  --t-fs-page-sub: 12px;
+  --t-fw-page-sub: 400;
+
+  /* Section label */
+  --t-fs-section-label: 11px;
+  --t-fw-section-label: 700;
+  --t-ls-section-label: 0.05em;
+
+  /* Card title */
+  --t-fs-card-title: 14px;
+  --t-fw-card-title: 600;
+
+  /* Body / list item */
+  --t-fs-body: 13px;
+  --t-fw-body: 400;
+
+  /* Meta / caption */
+  --t-fs-meta: 11px;
+  --t-fw-meta: 500;
+
+  /* Badge / tag */
+  --t-fs-badge: 10px;
+  --t-fw-badge: 700;
+
+  /* Stat value large */
+  --t-fs-stat-lg: 22px;
+  --t-fw-stat-lg: 800;
+
+  /* Stat value small */
+  --t-fs-stat-sm: 15px;
+  --t-fw-stat-sm: 700;
+
+  /* Stat label */
+  --t-fs-stat-lbl: 9px;
+  --t-fw-stat-lbl: 600;
+
+  /* ────────────────────────────────────────────────────────────────────
+     8. BUTTON TOKENS  (canonical trainer button sizes)
+  ─────────────────────────────────────────────────────────────────────── */
+  --t-btn-h: 36px;
+  /* standard button height       */
+  --t-btn-h-sm: 30px;
+  --t-btn-pad: 0 16px;
+  /* standard button padding      */
+  --t-btn-pad-sm: 0 12px;
+  --t-btn-fs: 13px;
+  --t-btn-fw: 600;
+  --t-btn-radius: var(--t-radius-md);
+
+  /* Primary CTA button (red) */
+  --t-btn-primary-bg: var(--t-primary);
+  --t-btn-primary-hover: var(--t-primary-hover);
+  --t-btn-primary-shadow: 0 3px 12px var(--t-primary-glow);
+
+  /* Ghost button */
+  --t-btn-ghost-bg: rgba(255, 255, 255, 0.04);
+  --t-btn-ghost-border: rgba(255, 255, 255, 0.10);
+  --t-btn-ghost-color: var(--t-text-secondary);
+
+  /* Icon-only button */
+  --t-btn-icon-size: 36px;
+  --t-btn-icon-size-sm: 30px;
+
+  /* ────────────────────────────────────────────────────────────────────
+     9. PAGE-HEADER ICON TOKEN
+  ─────────────────────────────────────────────────────────────────────── */
+  --t-page-icon-size: 40px;
+  /* uniform page title icon      */
+
+  /* ────────────────────────────────────────────────────────────────────
+     10. FORM / INPUT TOKENS
+  ─────────────────────────────────────────────────────────────────────── */
+  --t-input-h: 36px;
+  --t-input-pad: 0 12px;
+  --t-input-bg: var(--t-bg-input);
+  --t-input-border: var(--t-border);
+  --t-input-border-focus: var(--t-indigo);
+  --t-input-color: var(--t-text-primary);
+  --t-input-placeholder: var(--t-text-tertiary);
+  --t-input-radius: var(--t-radius-input);
+  --t-input-shadow-focus: 0 0 0 3px rgba(99, 102, 241, 0.15);
+
+  /* ────────────────────────────────────────────────────────────────────
+     11. CARD / WIDGET TOKENS
+  ─────────────────────────────────────────────────────────────────────── */
+  --t-card-bg: var(--t-bg-card);
+  --t-card-border: var(--t-border);
+  --t-card-radius: var(--t-radius-card);
+  --t-card-shadow-hover: 0 8px 28px rgba(0, 0, 0, 0.35);
+
+  /* Accent bar (left strip on list items) */
+  --t-accent-bar-w: 4px;
+  --t-accent-bar-radius: 4px 0 0 4px;
+
+  /* ────────────────────────────────────────────────────────────────────
+     12. MODAL TOKENS
+  ─────────────────────────────────────────────────────────────────────── */
+  --t-modal-bg: var(--t-bg-modal);
+  --t-modal-border: var(--t-border-modal);
+  --t-modal-radius: var(--t-radius-modal);
+  --t-modal-shadow: 0 24px 64px rgba(0, 0, 0, 0.60);
+  --t-modal-max-w: 640px;
+  --t-modal-max-h: 90vh;
+  --t-overlay-bg: var(--t-bg-overlay);
+  --t-overlay-blur: blur(5px);
+
+  /* ────────────────────────────────────────────────────────────────────
+     13. STATUS BADGE TOKENS
+  ─────────────────────────────────────────────────────────────────────── */
+  --t-badge-active-bg: rgba(16, 185, 129, 0.14);
+  --t-badge-active-color: #10B981;
+  --t-badge-inactive-bg: rgba(239, 68, 68, 0.14);
+  --t-badge-inactive-color: #EF4444;
+  --t-badge-pending-bg: rgba(245, 158, 11, 0.14);
+  --t-badge-pending-color: #F59E0B;
+  --t-badge-radius: var(--t-radius-badge);
+
+  /* ────────────────────────────────────────────────────────────────────
+     14. TOOLBAR / FILTER CHIP TOKENS
+  ─────────────────────────────────────────────────────────────────────── */
+  --t-chip-h: 32px;
+  --t-chip-pad: 0 12px;
+  --t-chip-radius: var(--t-radius-chip);
+  --t-chip-bg: transparent;
+  --t-chip-border: var(--t-border);
+  --t-chip-color: var(--t-text-tertiary);
+
+  /* ────────────────────────────────────────────────────────────────────
+     15. TRANSITION TOKENS
+  ─────────────────────────────────────────────────────────────────────── */
+  --t-ease: all 0.18s ease;
+  --t-ease-fast: all 0.12s ease;
+  --t-ease-slow: all 0.28s ease;
+
+  /* ────────────────────────────────────────────────────────────────────
+     16. EMPTY STATE TOKENS
+  ─────────────────────────────────────────────────────────────────────── */
+  --t-empty-icon-size: 60px;
+  --t-empty-icon-radius: 14px;
+  --t-empty-fs-title: 15px;
+  --t-empty-fs-sub: 13px;
+
+  /* ────────────────────────────────────────────────────────────────────
+     17. DROPDOWN / MENU TOKENS
+  ─────────────────────────────────────────────────────────────────────── */
+  --t-dropdown-bg: var(--t-bg-dropdown);
+  --t-dropdown-border: var(--t-border-modal);
+  --t-dropdown-radius: var(--t-radius-md);
+  --t-dropdown-shadow: 0 12px 28px rgba(0, 0, 0, 0.50);
+  --t-dropdown-item-h: 36px;
+  --t-dropdown-item-pad: 0 12px;
+  --t-dropdown-item-fs: 12px;
+
+  /* ────────────────────────────────────────────────────────────────────
+     18. LOADING SPINNER
+  ─────────────────────────────────────────────────────────────────────── */
+  --t-spinner-size: 32px;
+  --t-spinner-border: 3px solid rgba(99, 102, 241, 0.20);
+  --t-spinner-color: var(--t-indigo);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   CANONICAL SHARED COMPONENTS
+   Use these classes across every trainer page for uniform repeated elements.
+────────────────────────────────────────────────────────────────────────── */
+
+/* ── Shared overlay backdrop ── */
+.t-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--t-overlay-bg);
+  backdrop-filter: var(--t-overlay-blur);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1000;
+  animation: t-fadein 0.15s ease;
+}
+
+/* ── Shared modal shell ── */
+.t-modal {
+  width: min(var(--t-modal-max-w), calc(100vw - 32px));
+  max-height: var(--t-modal-max-h);
+  background: var(--t-modal-bg);
+  border: 1px solid var(--t-modal-border);
+  border-radius: var(--t-modal-radius);
+  box-shadow: var(--t-modal-shadow);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: t-slidein 0.2s ease;
+}
+
+/* ── Dropdown menu ── */
+.t-dropdown {
+  position: absolute;
+  background: var(--t-dropdown-bg);
+  border: 1px solid var(--t-dropdown-border);
+  border-radius: var(--t-dropdown-radius);
+  box-shadow: var(--t-dropdown-shadow);
+  padding: 4px;
+  z-index: 100;
+  animation: t-fadein 0.12s ease;
+}
+
+.t-dropdown button {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  min-height: var(--t-dropdown-item-h);
+  padding: var(--t-dropdown-item-pad);
+  background: none;
+  border: none;
+  border-radius: var(--t-radius-xs);
+  font-size: var(--t-dropdown-item-fs);
+  color: var(--t-text-secondary);
+  cursor: pointer;
+  transition: var(--t-ease-fast);
+  text-align: left;
+}
+
+.t-dropdown button:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--t-text-primary);
+}
+
+.t-dropdown--danger {
+  color: var(--t-rose) !important;
+}
+
+.t-dropdown--danger:hover {
+  background: rgba(244, 63, 94, 0.10) !important;
+}
+
+/* ── Shared empty state ── */
+.t-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 72px 24px;
+  text-align: center;
+}
+
+.t-empty__icon {
+  width: var(--t-empty-icon-size);
+  height: var(--t-empty-icon-size);
+  border-radius: var(--t-empty-icon-radius);
+  background: var(--t-indigo-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--t-indigo);
+  margin-bottom: 8px;
+}
+
+.t-empty__title {
+  font-size: var(--t-empty-fs-title);
+  font-weight: 600;
+  color: var(--t-text-primary);
+  margin: 0;
+}
+
+.t-empty__sub {
+  font-size: var(--t-empty-fs-sub);
+  color: var(--t-text-tertiary);
+  margin: 0;
+}
+
+/* ── Shared inline spinner ── */
+.t-spinner {
+  width: var(--t-spinner-size);
+  height: var(--t-spinner-size);
+  border: var(--t-spinner-border);
+  border-top-color: var(--t-spinner-color);
+  border-radius: 50%;
+  animation: t-spin 0.8s linear infinite;
+}
+
+@keyframes t-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── Shared status badges ── */
+.t-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: var(--t-badge-radius);
+  font-size: var(--t-fs-badge);
+  font-weight: var(--t-fw-badge);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.t-badge--active {
+  background: var(--t-badge-active-bg);
+  color: var(--t-badge-active-color);
+}
+
+.t-badge--inactive {
+  background: var(--t-badge-inactive-bg);
+  color: var(--t-badge-inactive-color);
+}
+
+.t-badge--pending {
+  background: var(--t-badge-pending-bg);
+  color: var(--t-badge-pending-color);
+}
+
+.t-badge__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* ── Shared ghost filter button ── */
+.t-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: var(--t-btn-h);
+  padding: var(--t-btn-pad-sm);
+  background: var(--t-btn-ghost-bg);
+  border: 1px solid var(--t-btn-ghost-border);
+  border-radius: var(--t-radius-btn);
+  color: var(--t-btn-ghost-color);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--t-ease);
+  white-space: nowrap;
+}
+
+.t-filter-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--t-text-primary);
+}
+
+.t-filter-btn--active {
+  background: var(--t-indigo-light);
+  border-color: rgba(99, 102, 241, 0.35);
+  color: #a5b4fc;
+}
+
+/* ── Shared primary action button ── */
+.t-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: var(--t-btn-h);
+  padding: var(--t-btn-pad);
+  background: var(--t-btn-primary-bg);
+  border: none;
+  border-radius: var(--t-btn-radius);
+  color: #fff;
+  font-size: var(--t-btn-fs);
+  font-weight: var(--t-btn-fw);
+  cursor: pointer;
+  transition: var(--t-ease);
+  box-shadow: var(--t-btn-primary-shadow);
+}
+
+.t-btn-primary:hover {
+  background: var(--t-btn-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px var(--t-primary-glow);
+}
+
+.t-btn-primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ── Shared search input ── */
+.t-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.t-search__icon {
+  position: absolute;
+  left: 10px;
+  color: var(--t-text-tertiary);
+  pointer-events: none;
+}
+
+.t-search input {
+  width: 100%;
+  height: var(--t-input-h);
+  padding: 0 32px 0 34px;
+  background: var(--t-input-bg);
+  border: 1px solid var(--t-input-border);
+  border-radius: var(--t-radius-input);
+  font-size: var(--t-fs-body);
+  color: var(--t-input-color);
+  transition: border-color 0.15s;
+}
+
+.t-search input::placeholder {
+  color: var(--t-input-placeholder);
+}
+
+.t-search input:focus {
+  outline: none;
+  border-color: var(--t-input-border-focus);
+  box-shadow: var(--t-input-shadow-focus);
+}
+
+.t-search__clear {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  color: var(--t-text-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 0;
+}
+
+.t-search__clear:hover {
+  color: var(--t-rose);
+}
+
+/* ── Page-section divider ── */
+.t-section-divider {
+  height: 1px;
+  background: var(--t-border);
+  margin: var(--t-section-gap) 0;
+}
+
+/* ── Shared animations ── */
+@keyframes t-fadein {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes t-slidein {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes t-pulse {
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.40);
+  }
+
+  50% {
+    box-shadow: 0 0 0 6px rgba(99, 102, 241, 0);
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   LIGHT THEME OVERRIDES  (add .theme-light to <html> or root container)
+────────────────────────────────────────────────────────────────────────── */
+.theme-light {
+  --t-bg-page: #f4f5f8;
+  --t-bg-card: #ffffff;
+  --t-bg-card-hover: #f9fafb;
+  --t-bg-input: #ffffff;
+  --t-bg-modal: #ffffff;
+  --t-bg-overlay: rgba(0, 0, 0, 0.45);
+  --t-bg-dropdown: #ffffff;
+  --t-bg-header: #ffffff;
+
+  --t-border: rgba(0, 0, 0, 0.07);
+  --t-border-hover: rgba(0, 0, 0, 0.14);
+  --t-border-modal: rgba(0, 0, 0, 0.10);
+
+  --t-text-primary: #0f172a;
+  --t-text-secondary: #475569;
+  --t-text-tertiary: #94a3b8;
+  --t-text-muted: #cbd5e1;
+  --t-text-label: #64748b;
+
+  --t-card-shadow-hover: 0 6px 24px rgba(0, 0, 0, 0.09);
+  --t-dropdown-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
 }

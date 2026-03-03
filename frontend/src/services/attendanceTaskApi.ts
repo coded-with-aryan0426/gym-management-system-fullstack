@@ -36,6 +36,7 @@ export interface LiveCheckIn {
   checkInId: number;
   memberId: number;
   memberName: string;
+  role: string;
   checkInTime: string;
   minutesSince: number;
 }
@@ -45,6 +46,7 @@ export interface TodayCheckIn {
   memberId: number;
   memberName: string;
   email: string;
+  role: string;
   checkInTime: string;
   checkOutTime: string | null;
   status: string;
@@ -87,30 +89,35 @@ export interface TaskStats {
 // ─── Attendance API ───────────────────────────────────────────────────────────
 
 export const attendanceApi = {
-  async getStats(): Promise<AttendanceStats> {
-    const r = await client.get<AttendanceStats>('/attendance/stats');
+  async getStats(role?: string): Promise<AttendanceStats> {
+    const r = await client.get<AttendanceStats>('/attendance/stats', { params: { role } });
     return r.data;
   },
 
-  async getLive(): Promise<{ currentCount: number; members: LiveCheckIn[] }> {
-    const r = await client.get('/attendance/live');
+  async getLive(role?: string): Promise<{ currentCount: number; members: LiveCheckIn[] }> {
+    const r = await client.get('/attendance/live', { params: { role } });
     return r.data;
   },
 
-  async getToday(): Promise<TodayCheckIn[]> {
-    const r = await client.get<TodayCheckIn[]>('/attendance/today');
+  async getToday(role?: string): Promise<TodayCheckIn[]> {
+    const r = await client.get<TodayCheckIn[]>('/attendance/today', { params: { role } });
     return r.data;
   },
 
-  async getTrends(from: string, to: string): Promise<AttendanceTrendPoint[]> {
+  async getTrends(from: string, to: string, role?: string): Promise<AttendanceTrendPoint[]> {
     const r = await client.get<AttendanceTrendPoint[]>('/attendance/trends', {
-      params: { from, to },
+      params: { from, to, role },
     });
     return r.data;
   },
 
-  async getHeatmap(weeks = 8): Promise<HeatmapCell[]> {
-    const r = await client.get<HeatmapCell[]>('/attendance/heatmap', { params: { weeks } });
+  async getHeatmap(weeks = 8, role?: string): Promise<HeatmapCell[]> {
+    const r = await client.get<HeatmapCell[]>('/attendance/heatmap', { params: { weeks, role } });
+    return r.data;
+  },
+
+  async seedAttendance(): Promise<{ recordsSeeded: number; message: string }> {
+    const r = await client.post<{ recordsSeeded: number; message: string }>('/attendance/seed');
     return r.data;
   },
 };

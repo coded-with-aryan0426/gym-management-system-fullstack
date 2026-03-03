@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   FiArrowLeft, FiUser, FiCalendar, FiCreditCard, FiTrendingUp,
   FiClock, FiFileText, FiActivity, FiPhone, FiMail, FiHome,
@@ -17,9 +17,11 @@ type TabType = 'overview' | 'attendance' | 'payments' | 'progress' | 'sessions' 
 const MemberDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [member, setMember] = useState<MemberDTO | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<TabType>('overview');
+  const initialTab = (searchParams.get('tab') as TabType) || 'overview';
+  const [activeTab, setActiveTab] = useState<TabType>(initialTab);
   const [attendance, setAttendance] = useState<any[]>([]);
   const [payments, setPayments] = useState<any[]>([]);
   const [sessions, setSessions] = useState<any[]>([]);

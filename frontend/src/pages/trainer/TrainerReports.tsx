@@ -1,12 +1,14 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
     TrendingUp, TrendingDown, Users, Calendar, Clock, Download, ChevronDown,
     BarChart3, PieChart, Activity, Award, Target, RefreshCw,
     IndianRupee, Heart, Zap, Star, ArrowUpRight, ArrowDownRight,
-    Info, Eye,
+    Info, Eye, FileText,
     CheckCircle, XCircle, AlertCircle, Flame, Trophy, Medal, Crown, Loader2,
     type LucideIcon
 } from 'lucide-react';
+import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
 import './TrainerReports.css';
 import { trainerReportsApi } from '../../services/trainerReportsApi';
 import type {
@@ -31,6 +33,7 @@ const TrainerReports: React.FC = () => {
     const [sessionFilter, setSessionFilter] = useState<'all' | 'completed' | 'cancelled' | 'no-show'>('all');
     const [customStartDate, setCustomStartDate] = useState('');
     const [customEndDate, setCustomEndDate] = useState('');
+    const reportRef = useRef<HTMLDivElement>(null);
 
     // Loading and error states
     const [loading, setLoading] = useState(true);
@@ -53,13 +56,18 @@ const TrainerReports: React.FC = () => {
         else setLoading(true);
         setError(null);
 
+        // When period is 'Custom' pass explicit date bounds
+        const isCustom = period === 'Custom';
+        const sd = isCustom ? customStartDate : undefined;
+        const ed = isCustom ? customEndDate : undefined;
+
         try {
             if (activeTab === 'overview') {
                 const [overviewData, weeklyData, typesData, perfData, achieveData] = await Promise.all([
-                    trainerReportsApi.getOverview(period),
-                    trainerReportsApi.getWeeklyActivity(period),
-                    trainerReportsApi.getSessionTypes(period),
-                    trainerReportsApi.getPerformance(period),
+                    trainerReportsApi.getOverview(period, sd, ed),
+                    trainerReportsApi.getWeeklyActivity(period, sd, ed),
+                    trainerReportsApi.getSessionTypes(period, sd, ed),
+                    trainerReportsApi.getPerformance(period, sd, ed),
                     trainerReportsApi.getAchievements()
                 ]);
                 setOverview(overviewData);
@@ -71,14 +79,16 @@ const TrainerReports: React.FC = () => {
                 const sessionsData = await trainerReportsApi.getSessions({
                     period,
                     status: sessionFilter,
-                    size: 50
+                    size: 50,
+                    startDate: sd,
+                    endDate: ed,
                 });
                 setSessions(sessionsData.items);
             } else if (activeTab === 'members') {
                 const membersData = await trainerReportsApi.getMembersProgress();
                 setMembersProgress(membersData);
             } else if (activeTab === 'earnings') {
-                const earningsData = await trainerReportsApi.getEarnings(period);
+                const earningsData = await trainerReportsApi.getEarnings(period, sd, ed);
                 setEarnings(earningsData);
             }
         } catch (err: any) {
@@ -88,7 +98,7 @@ const TrainerReports: React.FC = () => {
             setLoading(false);
             setRefreshing(false);
         }
-    }, [activeTab, period, sessionFilter]);
+    }, [activeTab, period, sessionFilter, customStartDate, customEndDate]);
 
     useEffect(() => {
         fetchData();
@@ -99,11 +109,30 @@ const TrainerReports: React.FC = () => {
     };
 
     const handleExport = async (type: 'sessions' | 'earnings') => {
+        const isCustom = period === 'Custom';
+        const sd = isCustom ? customStartDate : undefined;
+        const ed = isCustom ? customEndDate : undefined;
         try {
-            const blob = await trainerReportsApi.exportCSV(type, period);
+            const blob = await trainerReportsApi.exportCSV(type, period, sd, ed);
             trainerReportsApi.downloadCSV(blob, `${type}_report_${period.replace(' ', '_').toLowerCase()}.csv`);
         } catch (err) {
             console.error('Export failed:', err);
+        }
+    };
+
+    const handleExportPDF = async () => {
+        if (!reportRef.current) return;
+        try {
+            const canvas = await html2canvas(reportRef.current, { scale: 2, useCORS: true });
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+            pdf.save(`trainer_report_${period.replace(' ', '_').toLowerCase()}.pdf`);
+        } catch (err) {
+            console.error('Client-side PDF export failed:', err);
+            alert('Failed to generate PDF report on the client.');
         }
     };
 
@@ -236,7 +265,7 @@ const TrainerReports: React.FC = () => {
     }
 
     return (
-        <div className="trainer-reports">
+        <div className="trainer-reports" ref={reportRef}>
             <div className="trainer-reports__header">
                 <div className="trainer-reports__header-content">
                     <div className="trainer-reports__title-section">
@@ -272,6 +301,14 @@ const TrainerReports: React.FC = () => {
                                     onChange={(e) => setCustomEndDate(e.target.value)}
                                     placeholder="End date"
                                 />
+                                <button
+                                    className="trainer-reports__apply-btn"
+                                    onClick={() => fetchData()}
+                                    disabled={!customStartDate || !customEndDate}
+                                    title="Apply date range"
+                                >
+                                    Apply
+                                </button>
                             </div>
                         )}
                         <button
@@ -288,8 +325,15 @@ const TrainerReports: React.FC = () => {
                                 onClick={() => handleExport(activeTab === 'earnings' ? 'earnings' : 'sessions')}
                             >
                                 <Download size={16} />
-                                Export
-                                <ChevronDown size={14} />
+                                CSV
+                            </button>
+                            <button
+                                className="trainer-reports__export-btn trainer-reports__export-btn--pdf"
+                                onClick={handleExportPDF}
+                                title="Export as PDF"
+                            >
+                                <FileText size={16} />
+                                PDF
                             </button>
                         </div>
                     </div>

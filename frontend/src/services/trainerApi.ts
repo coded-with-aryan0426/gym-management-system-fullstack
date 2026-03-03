@@ -170,7 +170,7 @@ export interface ClassAttendee {
     id: number;
     memberId: number;
     memberName?: string;
-    status: 'CONFIRMED' | 'PENDING' | 'ABSENT';
+    status: 'CONFIRMED' | 'PENDING' | 'ABSENT' | 'LATE';
 }
 
 export interface MemberSearchParams {
@@ -486,7 +486,7 @@ export const trainerApi = {
         return normalizeResponse<ClassAttendee[]>(response.data);
     },
 
-    async updateAttendance(classId: number, updates: { attendeeId: number, status: 'CONFIRMED' | 'PENDING' | 'ABSENT' }[]): Promise<any> {
+    async updateAttendance(classId: number, updates: { attendeeId: number, status: 'CONFIRMED' | 'PENDING' | 'ABSENT' | 'LATE' }[]): Promise<any> {
         const response = await apiClient.put(`/trainer/classes/${classId}/attendance`, updates);
         return response.data;
     },

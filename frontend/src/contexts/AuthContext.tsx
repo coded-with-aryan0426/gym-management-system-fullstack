@@ -14,7 +14,6 @@ export interface User {
     token?: string;
     avatar?: string;
     context?: string;
-    staffRole?: string;
     activeGymId?: number;
     activeGymName?: string;
     height?: number;

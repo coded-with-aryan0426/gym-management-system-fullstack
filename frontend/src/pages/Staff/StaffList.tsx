@@ -17,17 +17,6 @@ import './StaffList.css';
 
 type StatusFilter = 'all' | 'active' | 'inactive';
 
-const ROLE_LABELS: Record<string, string> = {
-  RECEPTIONIST: 'Receptionist', FLOOR_MANAGER: 'Floor Manager', MAINTENANCE: 'Maintenance',
-  CLEANING: 'Housekeeping', OPERATIONS: 'Operations', SALES: 'Sales',
-  ADMIN: 'Admin', MANAGER: 'Manager', STAFF: 'Staff',
-};
-
-const ROLE_COLORS: Record<string, string> = {
-  RECEPTIONIST: '#3b82f6', FLOOR_MANAGER: '#8b5cf6', MAINTENANCE: '#f59e0b',
-  CLEANING: '#10b981', OPERATIONS: '#6366f1', SALES: '#ec4899',
-  ADMIN: '#ef4444', MANAGER: '#f97316', STAFF: '#6b7280',
-};
 
 const useAutoPageSize = (headerRef: React.RefObject<HTMLElement | null>, minRows = 5, maxRows = 50) => {
   const [pageSize, setPageSize] = useState(10);
@@ -135,7 +124,7 @@ const StaffList: React.FC = () => {
   const loadStaffPaginated = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await api.getStaffPaginated(currentPage, pageSize, debouncedSearch||undefined, filters.role||undefined);
+      const response = await api.getStaffPaginated(currentPage, pageSize, debouncedSearch || undefined);
       setStaff(response.content);
       setTotalCount(response.totalCount);
     } catch (err) {
@@ -143,7 +132,7 @@ const StaffList: React.FC = () => {
       showToast('Failed to load staff', 'error');
       setStaff([]);
     } finally { setLoading(false); }
-  }, [currentPage, pageSize, debouncedSearch, filters.role]);
+  }, [currentPage, pageSize, debouncedSearch]);
 
   const loadGlobalCount = useCallback(async () => {
     try { const r = await api.getStaffPaginated(0, 1); setGlobalTotalCount(r.totalCount); }
@@ -156,7 +145,7 @@ const StaffList: React.FC = () => {
 
   useEffect(() => {
     const userId = searchParams.get('userId');
-    if (userId && staff.length > 0) { const m = staff.find(s => s.userId.toString()===userId); if (m) handleActionClick(m); }
+    if (userId && staff.length > 0) { const m = staff.find(s => s.userId.toString() === userId); if (m) handleActionClick(m); }
   }, [searchParams, staff]);
 
   const totalPages = useMemo(() => Math.ceil(totalCount / pageSize), [totalCount, pageSize]);
@@ -201,7 +190,7 @@ const StaffList: React.FC = () => {
         <div className="pl-user-cell" onClick={(e) => { e.stopPropagation(); handleActionClick(s); }}>
           <div className="pl-user-cell__avatar-wrap">
             <Avatar name={s.fullName} size="sm" />
-            <span className={`pl-dot ${getStatus(s)==='Active' ? 'pl-dot--active' : 'pl-dot--inactive'}`} />
+            <span className={`pl-dot ${getStatus(s) === 'Active' ? 'pl-dot--active' : 'pl-dot--inactive'}`} />
           </div>
           <div className="pl-user-cell__info">
             <span className="pl-user-cell__name">{s.fullName}</span>
@@ -217,19 +206,7 @@ const StaffList: React.FC = () => {
         return <span className="app-id-badge" title={id}>{id}</span>;
       },
     },
-    {
-      key: 'role', header: 'Role', width: '150px',
-        render: (s) => {
-          const sysRole = (s as any).staffRole || 'STAFF';
-          const jobTitle = (s as any).jobTitle;
-          const displayLabel = jobTitle || ROLE_LABELS[sysRole] || sysRole;
-          return (
-            <span className="pl-role" style={{ '--role-color': ROLE_COLORS[sysRole] || '#6b7280' } as React.CSSProperties}>
-              {displayLabel}
-            </span>
-          );
-        },
-      },
+
     {
       key: 'department', header: 'Department', width: '130px',
       render: (s) => <span className="staff-dept">{(s as any).department || '—'}</span>,
@@ -251,54 +228,54 @@ const StaffList: React.FC = () => {
       key: 'status', header: 'Status', width: '100px',
       render: (s) => <StaffStatusBadge status={getStatus(s)} />,
     },
-      {
-        key: 'actions',
-        header: (
-          <button
-            className={`dt-select-toggle-btn${selectMode ? ' dt-select-toggle-btn--active' : ''}`}
-            onClick={(e) => { e.stopPropagation(); toggleSelectMode(); }}
-            title={selectMode ? 'Exit selection mode' : 'Select rows'}
-          >
-            {selectMode ? '✕ Done' : '☑ Select'}
-          </button>
-        ),
-        width: '90px',
-        render: (s) => {
-          if (selectMode) {
-            const isChecked = selectedStaffIds.has(s.userId);
-            return (
-              <div className="pl-actions pl-actions--checkbox" onClick={(e) => e.stopPropagation()}>
-                <input
-                  type="checkbox"
-                  className="pl-row-checkbox"
-                  checked={isChecked}
-                  onChange={() => {
-                    setSelectedStaffIds(prev => {
-                      const next = new Set(prev);
-                      isChecked ? next.delete(s.userId) : next.add(s.userId);
-                      return next;
-                    });
-                  }}
-                />
-              </div>
-            );
-          }
+    {
+      key: 'actions',
+      header: (
+        <button
+          className={`dt-select-toggle-btn${selectMode ? ' dt-select-toggle-btn--active' : ''}`}
+          onClick={(e) => { e.stopPropagation(); toggleSelectMode(); }}
+          title={selectMode ? 'Exit selection mode' : 'Select rows'}
+        >
+          {selectMode ? '✕ Done' : '☑ Select'}
+        </button>
+      ),
+      width: '90px',
+      render: (s) => {
+        if (selectMode) {
+          const isChecked = selectedStaffIds.has(s.userId);
           return (
-            <div className="pl-actions">
-              <div className="pl-quick-actions">
-                <button className="pl-quick-btn pl-quick-btn--indigo" onClick={(e) => { e.stopPropagation(); openMessageSingle(s); }} title="Send Message">
-                  <FiMessageSquare size={13} />
-                </button>
-                <button className="pl-quick-btn pl-quick-btn--danger" onClick={(e) => { e.stopPropagation(); openDeleteSingle(s); }} title="Delete Staff">
-                  <FiTrash2 size={13} />
-                </button>
-              </div>
-              <ActionMenuButton onClick={(e) => { e.stopPropagation(); handleActionClick(s); }} />
+            <div className="pl-actions pl-actions--checkbox" onClick={(e) => e.stopPropagation()}>
+              <input
+                type="checkbox"
+                className="pl-row-checkbox"
+                checked={isChecked}
+                onChange={() => {
+                  setSelectedStaffIds(prev => {
+                    const next = new Set(prev);
+                    isChecked ? next.delete(s.userId) : next.add(s.userId);
+                    return next;
+                  });
+                }}
+              />
             </div>
           );
-        },
+        }
+        return (
+          <div className="pl-actions">
+            <div className="pl-quick-actions">
+              <button className="pl-quick-btn pl-quick-btn--indigo" onClick={(e) => { e.stopPropagation(); openMessageSingle(s); }} title="Send Message">
+                <FiMessageSquare size={13} />
+              </button>
+              <button className="pl-quick-btn pl-quick-btn--danger" onClick={(e) => { e.stopPropagation(); openDeleteSingle(s); }} title="Delete Staff">
+                <FiTrash2 size={13} />
+              </button>
+            </div>
+            <ActionMenuButton onClick={(e) => { e.stopPropagation(); handleActionClick(s); }} />
+          </div>
+        );
       },
-    ];
+    },
+  ];
 
   return (
     <div className="pg-page">
@@ -314,15 +291,15 @@ const StaffList: React.FC = () => {
         </div>
 
         <div className="pg-stats">
-          <button className={`pg-stat-card ${activeStatusFilter==='all' ? 'pg-stat-card--active' : ''}`} onClick={() => setActiveStatusFilter('all')}>
+          <button className={`pg-stat-card ${activeStatusFilter === 'all' ? 'pg-stat-card--active' : ''}`} onClick={() => setActiveStatusFilter('all')}>
             <div className="pg-stat-card__icon pg-stat-card__icon--total"><FiUsers size={14} /></div>
             <div className="pg-stat-card__data"><span className="pg-stat-card__value">{stats.total}</span><span className="pg-stat-card__label">Total</span></div>
           </button>
-          <button className={`pg-stat-card ${activeStatusFilter==='active' ? 'pg-stat-card--active' : ''}`} onClick={() => setActiveStatusFilter('active')}>
+          <button className={`pg-stat-card ${activeStatusFilter === 'active' ? 'pg-stat-card--active' : ''}`} onClick={() => setActiveStatusFilter('active')}>
             <div className="pg-stat-card__icon pg-stat-card__icon--active"><FiUserCheck size={14} /></div>
             <div className="pg-stat-card__data"><span className="pg-stat-card__value pg-stat-card__value--green">{stats.activeCount}</span><span className="pg-stat-card__label">Active</span></div>
           </button>
-          <button className={`pg-stat-card ${activeStatusFilter==='inactive' ? 'pg-stat-card--active' : ''}`} onClick={() => setActiveStatusFilter('inactive')}>
+          <button className={`pg-stat-card ${activeStatusFilter === 'inactive' ? 'pg-stat-card--active' : ''}`} onClick={() => setActiveStatusFilter('inactive')}>
             <div className="pg-stat-card__icon pg-stat-card__icon--inactive"><FiUser size={14} /></div>
             <div className="pg-stat-card__data"><span className="pg-stat-card__value pg-stat-card__value--red">{stats.inactiveCount}</span><span className="pg-stat-card__label">Inactive</span></div>
           </button>
@@ -347,19 +324,6 @@ const StaffList: React.FC = () => {
                   {activeFilterCount > 0 && <button className="pg-filter-dropdown__clear" onClick={handleResetFilters}>Clear</button>}
                 </div>
                 <div className="pg-filter-dropdown__body">
-                  <div className="pg-filter-dropdown__row">
-                    <label className="pg-filter-dropdown__label">Department</label>
-                    <select className="pg-filter-dropdown__select" value={filters.role} onChange={(e) => handleFilterChange('role', e.target.value)}>
-                      <option value="">All Departments</option>
-                      <option value="RECEPTIONIST">Reception</option>
-                      <option value="FLOOR_MANAGER">Floor Management</option>
-                      <option value="MAINTENANCE">Maintenance</option>
-                      <option value="CLEANING">Housekeeping</option>
-                      <option value="OPERATIONS">Operations</option>
-                      <option value="SALES">Sales</option>
-                      <option value="ADMIN">Administration</option>
-                    </select>
-                  </div>
                 </div>
               </div>
             )}
@@ -372,7 +336,6 @@ const StaffList: React.FC = () => {
       {/* Filter chips */}
       {activeFilterCount > 0 && (
         <div className="pg-chips">
-          {filters.role && <span className="pg-chip">Dept: {ROLE_LABELS[filters.role]||filters.role}<button onClick={() => handleFilterChange('role','')}>&times;</button></span>}
           <button className="pg-chips__clear" onClick={handleResetFilters}>Clear All</button>
         </div>
       )}
@@ -395,15 +358,12 @@ const StaffList: React.FC = () => {
       <div className="pg-table-wrap pl-table-wrap">
         <DataTable
           columns={columns} data={filteredStaff}
-            keyExtractor={(s) => s.userId} loading={loading}
-            emptyMessage={searchQuery||activeFilterCount>0 ? 'No staff match your filters' : 'No staff found. Add your first staff member!'}
+          keyExtractor={(s) => s.userId} loading={loading}
+          emptyMessage={searchQuery || activeFilterCount > 0 ? 'No staff match your filters' : 'No staff found. Add your first staff member!'}
           onRowClick={(s: StaffType) => handleActionClick(s)}
           compact stickyHeader showRowNumbers
           pagination={{ currentPage, totalPages, totalCount, pageSize, onPageChange: setCurrentPage, onPageSizeChange: (size) => { setPageSize(size); setCurrentPage(0); } }}
           mobileCardRender={(s) => {
-              const sysRole2 = (s as any).staffRole || 'STAFF';
-              const jobTitle2 = (s as any).jobTitle;
-              const roleDisplay = jobTitle2 || ROLE_LABELS[sysRole2] || sysRole2;
             const status = getStatus(s);
             const appId = getOrCreateAppId(s.userId, 'STAFF', s.createdAt);
             return (
@@ -411,7 +371,7 @@ const StaffList: React.FC = () => {
                 <div className="pl-mobile-card__top">
                   <div className="pl-user-cell__avatar-wrap">
                     <Avatar name={s.fullName} size="md" />
-                    <span className={`pl-dot ${status==='Active' ? 'pl-dot--active' : 'pl-dot--inactive'}`} />
+                    <span className={`pl-dot ${status === 'Active' ? 'pl-dot--active' : 'pl-dot--inactive'}`} />
                   </div>
                   <div className="pl-mobile-card__info">
                     <span className="pl-mobile-card__name">{s.fullName}</span>
@@ -420,10 +380,9 @@ const StaffList: React.FC = () => {
                   </div>
                   <StaffStatusBadge status={status} />
                 </div>
-                <div className="pl-mobile-card__stats" style={{ gridTemplateColumns: 'repeat(3,1fr)' }}>
-                    <div className="pl-mobile-card__stat"><span className="mobile-card__detail-label">Role</span><span className="mobile-card__detail-value">{roleDisplay}</span></div>
-                  <div className="pl-mobile-card__stat"><span className="mobile-card__detail-label">Dept</span><span className="mobile-card__detail-value">{(s as any).department||'—'}</span></div>
-                  <div className="pl-mobile-card__stat"><span className="mobile-card__detail-label">Shift</span><span className="mobile-card__detail-value">{(s as any).shiftTiming||'—'}</span></div>
+                <div className="pl-mobile-card__stats" style={{ gridTemplateColumns: 'repeat(2,1fr)' }}>
+                  <div className="pl-mobile-card__stat"><span className="mobile-card__detail-label">Dept</span><span className="mobile-card__detail-value">{(s as any).department || '—'}</span></div>
+                  <div className="pl-mobile-card__stat"><span className="mobile-card__detail-label">Shift</span><span className="mobile-card__detail-value">{(s as any).shiftTiming || '—'}</span></div>
                 </div>
                 <div className="pl-mobile-card__actions">
                   <ActionMenuButton onClick={(e) => { e.stopPropagation(); handleActionClick(s); }} />
@@ -434,24 +393,24 @@ const StaffList: React.FC = () => {
         />
       </div>
 
-        <EnhancedStaffActionModal isOpen={isActionModalOpen} onClose={handleCloseActionModal} staff={selectedStaff} onEditProfile={handleEditProfile} onUpdate={loadStaffPaginated} />
-        <CreateActionModal isOpen={isCreateModalOpen} onClose={() => { setIsCreateModalOpen(false); loadStaffPaginated(); }} initialView="staffForm" />
+      <EnhancedStaffActionModal isOpen={isActionModalOpen} onClose={handleCloseActionModal} staff={selectedStaff} onEditProfile={handleEditProfile} onUpdate={loadStaffPaginated} />
+      <CreateActionModal isOpen={isCreateModalOpen} onClose={() => { setIsCreateModalOpen(false); loadStaffPaginated(); }} initialView="staffForm" />
 
-          <SendMessageModal
-            isOpen={isMsgModalOpen}
-            onClose={() => setIsMsgModalOpen(false)}
-            target={messageTarget}
-            targets={messageTargets.length > 0 ? messageTargets : undefined}
-          />
-          <ConfirmDeleteModal
-            isOpen={isDeleteModalOpen}
-            onClose={() => setIsDeleteModalOpen(false)}
-            target={deleteTarget}
-            targets={deleteTargets.length > 0 ? deleteTargets : undefined}
-            onDeleted={() => { loadStaffPaginated(); setSelectedStaffIds(new Set()); setSelectMode(false); }}
-          />
-      </div>
-    );
-  };
+      <SendMessageModal
+        isOpen={isMsgModalOpen}
+        onClose={() => setIsMsgModalOpen(false)}
+        target={messageTarget}
+        targets={messageTargets.length > 0 ? messageTargets : undefined}
+      />
+      <ConfirmDeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        target={deleteTarget}
+        targets={deleteTargets.length > 0 ? deleteTargets : undefined}
+        onDeleted={() => { loadStaffPaginated(); setSelectedStaffIds(new Set()); setSelectMode(false); }}
+      />
+    </div>
+  );
+};
 
-  export default StaffList;
+export default StaffList;

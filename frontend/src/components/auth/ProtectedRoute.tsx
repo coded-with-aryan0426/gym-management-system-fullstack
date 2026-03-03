@@ -38,8 +38,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
         return <Navigate to="/" state={{ from: location, openAuth: true }} replace />;
     }
 
-    // Normalize user role (handle staffRole vs role, case insensitivity)
-    const userRole = (user.staffRole || user.role || '').toUpperCase();
+    // Normalize user role (handle role, case insensitivity)
+    const userRole = (user.role || '').toUpperCase();
 
     // Normalize allowed roles and check authorization
     const isAuthorized = allowedRoles.some(role => {

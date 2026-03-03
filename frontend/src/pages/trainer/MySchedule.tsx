@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
     ChevronLeft, ChevronRight, RefreshCw, Plus, Calendar as CalendarIcon,
     Clock, MapPin, Users, X, Repeat, CheckCircle, XCircle, List,
-    Zap, Filter, Activity, TrendingUp, Target, LayoutGrid
+    Zap, Filter, Activity, TrendingUp, Target, LayoutGrid, AlertTriangle
 } from 'lucide-react';
 import './TrainerSchedule.css';
 import {
@@ -30,54 +30,85 @@ interface ScheduleEvent {
 
 const STATUS_UI: Record<string, { color: string; bg: string; label: string; muted: boolean; gradient: string }> = {
     SCHEDULED: { color: '#10B981', bg: 'rgba(16,185,129,0.15)', label: 'Scheduled', muted: false, gradient: 'linear-gradient(135deg,#10B981,#059669)' },
-    UPCOMING:  { color: '#10B981', bg: 'rgba(16,185,129,0.15)', label: 'Upcoming',  muted: false, gradient: 'linear-gradient(135deg,#10B981,#059669)' },
-    COMPLETED: { color: '#6B7280', bg: 'rgba(107,114,128,0.12)', label: 'Completed', muted: true,  gradient: 'linear-gradient(135deg,#6B7280,#4B5563)' },
-    CANCELLED: { color: '#EF4444', bg: 'rgba(239,68,68,0.12)',   label: 'Cancelled', muted: true,  gradient: 'linear-gradient(135deg,#EF4444,#DC2626)' },
-    MISSED:    { color: '#F59E0B', bg: 'rgba(245,158,11,0.15)',  label: 'Missed',    muted: false, gradient: 'linear-gradient(135deg,#F59E0B,#D97706)' },
+    UPCOMING: { color: '#10B981', bg: 'rgba(16,185,129,0.15)', label: 'Upcoming', muted: false, gradient: 'linear-gradient(135deg,#10B981,#059669)' },
+    COMPLETED: { color: '#6B7280', bg: 'rgba(107,114,128,0.12)', label: 'Completed', muted: true, gradient: 'linear-gradient(135deg,#6B7280,#4B5563)' },
+    CANCELLED: { color: '#EF4444', bg: 'rgba(239,68,68,0.12)', label: 'Cancelled', muted: true, gradient: 'linear-gradient(135deg,#EF4444,#DC2626)' },
+    MISSED: { color: '#F59E0B', bg: 'rgba(245,158,11,0.15)', label: 'Missed', muted: false, gradient: 'linear-gradient(135deg,#F59E0B,#D97706)' },
 };
 
 const TYPE_CONFIG: Record<string, { color: string; bg: string; label: string; gradient: string }> = {
-    pt:      { color: '#10B981', bg: 'rgba(16,185,129,0.15)',  label: 'PT Session', gradient: 'linear-gradient(135deg,#10B981,#059669)' },
-    class:   { color: '#8B5CF6', bg: 'rgba(139,92,246,0.15)', label: 'Class',      gradient: 'linear-gradient(135deg,#8B5CF6,#7C3AED)' },
-    meeting: { color: '#F59E0B', bg: 'rgba(245,158,11,0.15)', label: 'Meeting',    gradient: 'linear-gradient(135deg,#F59E0B,#D97706)' },
-    break:   { color: '#6B7280', bg: 'rgba(107,114,128,0.15)',label: 'Break',      gradient: 'linear-gradient(135deg,#6B7280,#4B5563)' },
-    blocked: { color: '#EF4444', bg: 'rgba(239,68,68,0.15)',  label: 'Blocked',    gradient: 'linear-gradient(135deg,#EF4444,#DC2626)' },
+    pt: { color: '#10B981', bg: 'rgba(16,185,129,0.15)', label: 'PT Session', gradient: 'linear-gradient(135deg,#10B981,#059669)' },
+    class: { color: '#8B5CF6', bg: 'rgba(139,92,246,0.15)', label: 'Class', gradient: 'linear-gradient(135deg,#8B5CF6,#7C3AED)' },
+    meeting: { color: '#F59E0B', bg: 'rgba(245,158,11,0.15)', label: 'Meeting', gradient: 'linear-gradient(135deg,#F59E0B,#D97706)' },
+    break: { color: '#6B7280', bg: 'rgba(107,114,128,0.15)', label: 'Break', gradient: 'linear-gradient(135deg,#6B7280,#4B5563)' },
+    blocked: { color: '#EF4444', bg: 'rgba(239,68,68,0.15)', label: 'Blocked', gradient: 'linear-gradient(135deg,#EF4444,#DC2626)' },
 };
 
 const FILTER_CHIPS = [
     { key: 'SCHEDULED', label: 'Scheduled', color: '#10B981' },
     { key: 'COMPLETED', label: 'Completed', color: '#6B7280' },
     { key: 'CANCELLED', label: 'Cancelled', color: '#EF4444' },
-    { key: 'MISSED',    label: 'Missed',    color: '#F59E0B' },
+    { key: 'MISSED', label: 'Missed', color: '#F59E0B' },
 ];
 
 const TYPE_FILTER_CHIPS = [
-    { key: 'pt',      label: 'PT',      color: '#10B981' },
-    { key: 'class',   label: 'Class',   color: '#8B5CF6' },
+    { key: 'pt', label: 'PT', color: '#10B981' },
+    { key: 'class', label: 'Class', color: '#8B5CF6' },
     { key: 'meeting', label: 'Meeting', color: '#F59E0B' },
 ];
 
 const hours = Array.from({ length: 14 }, (_, i) => i + 6); // 6 AM – 7 PM
 const weekDayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
+// ── Conflict Toast ──────────────────────────────────────────────────────────
+interface ConflictToastProps {
+    conflict: ScheduleEvent;
+    onDismiss: () => void;
+    onScheduleAnyway: () => void;
+}
+const ConflictToast: React.FC<ConflictToastProps> = ({ conflict, onDismiss, onScheduleAnyway }) => (
+    <div className="ts-conflict-toast">
+        <div className="ts-conflict-toast__icon"><AlertTriangle size={16} /></div>
+        <div className="ts-conflict-toast__body">
+            <span className="ts-conflict-toast__title">Scheduling Conflict</span>
+            <span className="ts-conflict-toast__msg">
+                This slot overlaps with <strong>{conflict.title}</strong> (
+                {conflict.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}–
+                {conflict.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}).
+            </span>
+        </div>
+        <div className="ts-conflict-toast__actions">
+            <button className="ts-conflict-toast__anyway" onClick={onScheduleAnyway}>Schedule Anyway</button>
+            <button className="ts-conflict-toast__dismiss" onClick={onDismiss}><X size={12} /></button>
+        </div>
+    </div>
+);
+
 // ─────────────────────────────────────────────────────────────
 // Component
 // ─────────────────────────────────────────────────────────────
 const MySchedule: React.FC = () => {
-    const [currentDate, setCurrentDate]     = useState(new Date());
-    const [viewMode, setViewMode]           = useState<'day' | 'week' | 'agenda'>('week');
+    const [currentDate, setCurrentDate] = useState(new Date());
+    const [viewMode, setViewMode] = useState<'day' | 'week' | 'agenda'>('week');
     const [selectedEvent, setSelectedEvent] = useState<ScheduleEvent | null>(null);
-    const [showFilters, setShowFilters]     = useState(false);
+    const [showFilters, setShowFilters] = useState(false);
     const [activeStatusFilters, setActiveStatusFilters] = useState<string[]>([]);
-    const [activeTypeFilters, setActiveTypeFilters]     = useState<string[]>([]);
+    const [activeTypeFilters, setActiveTypeFilters] = useState<string[]>([]);
 
-    const [events, setEvents]   = useState<ScheduleEvent[]>([]);
+    const [events, setEvents] = useState<ScheduleEvent[]>([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError]     = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const [createModalDate, setCreateModalDate]     = useState<Date | undefined>();
-    const [createModalTime, setCreateModalTime]     = useState<number | undefined>();
+    const [createModalDate, setCreateModalDate] = useState<Date | undefined>();
+    const [createModalTime, setCreateModalTime] = useState<number | undefined>();
+
+    // Conflict detection
+    const [conflictWarning, setConflictWarning] = useState<{
+        conflict: ScheduleEvent;
+        pendingDate: Date;
+        pendingHour: number;
+    } | null>(null);
 
     const [now, setNow] = useState(new Date());
 
@@ -94,7 +125,7 @@ const MySchedule: React.FC = () => {
         setLoading(true); setError(null);
         try {
             const startStr = weekRange.start.toISOString().split('T')[0];
-            const endStr   = weekRange.end.toISOString().split('T')[0];
+            const endStr = weekRange.end.toISOString().split('T')[0];
             const [ptSessions, classesData] = await Promise.all([
                 trainerApi.getSchedule(startStr, endStr),
                 trainerApi.getClasses(startStr, endStr),
@@ -113,7 +144,7 @@ const MySchedule: React.FC = () => {
                 mapped.push({
                     id: cls.id + 10000, title: cls.title,
                     start: new Date(`${cls.date}T${cls.startTime}`),
-                    end:   new Date(`${cls.date}T${cls.endTime}`),
+                    end: new Date(`${cls.date}T${cls.endTime}`),
                     type: 'class', status: cls.status.toUpperCase(),
                     room: cls.room, recurring: cls.recurring, notes: cls.notes,
                 });
@@ -139,16 +170,16 @@ const MySchedule: React.FC = () => {
     const filteredEvents = useMemo(() => {
         let evs = events;
         if (activeStatusFilters.length > 0) evs = evs.filter(e => activeStatusFilters.includes(e.status));
-        if (activeTypeFilters.length > 0)   evs = evs.filter(e => activeTypeFilters.includes(e.type));
+        if (activeTypeFilters.length > 0) evs = evs.filter(e => activeTypeFilters.includes(e.type));
         return evs;
     }, [events, activeStatusFilters, activeTypeFilters]);
 
     // ── Stats ────────────────────────────────────────────────
     const stats = useMemo(() => {
-        const scheduled  = events.filter(e => e.status === 'SCHEDULED' || e.status === 'UPCOMING').length;
-        const completed  = events.filter(e => e.status === 'COMPLETED').length;
+        const scheduled = events.filter(e => e.status === 'SCHEDULED' || e.status === 'UPCOMING').length;
+        const completed = events.filter(e => e.status === 'COMPLETED').length;
         const totalHours = events.reduce((s, e) => s + (e.end.getTime() - e.start.getTime()) / 3600000, 0);
-        const ptCount    = events.filter(e => e.type === 'pt').length;
+        const ptCount = events.filter(e => e.type === 'pt').length;
         return { scheduled, completed, totalHours: Math.round(totalHours * 10) / 10, ptCount };
     }, [events]);
 
@@ -160,10 +191,32 @@ const MySchedule: React.FC = () => {
     };
 
     // ── Helpers ──────────────────────────────────────────────
+    const hasConflict = (date: Date, hour: number): ScheduleEvent | null => {
+        const slotStart = new Date(date); slotStart.setHours(hour, 0, 0, 0);
+        const slotEnd = new Date(date); slotEnd.setHours(hour + 1, 0, 0, 0);
+        return events.find(e =>
+            e.start.toDateString() === date.toDateString() &&
+            e.start < slotEnd &&
+            e.end > slotStart
+        ) ?? null;
+    };
+
+    const openCreateModal = (date: Date, hour: number) => {
+        setCreateModalDate(date);
+        setCreateModalTime(hour);
+        setIsCreateModalOpen(true);
+        setConflictWarning(null);
+    };
+
     const handleSlotClick = (date: Date, hour: number) => {
         const slot = new Date(date); slot.setHours(hour, 0, 0, 0);
         if (slot < new Date()) return;
-        setCreateModalDate(date); setCreateModalTime(hour); setIsCreateModalOpen(true);
+        const conflict = hasConflict(date, hour);
+        if (conflict) {
+            setConflictWarning({ conflict, pendingDate: date, pendingHour: hour });
+        } else {
+            openCreateModal(date, hour);
+        }
     };
 
     const getEventsForDay = (date: Date) =>
@@ -190,7 +243,7 @@ const MySchedule: React.FC = () => {
     };
 
     const statusCfg = (s: string) => STATUS_UI[s] || STATUS_UI.SCHEDULED;
-    const typeCfg   = (t: string) => TYPE_CONFIG[t] || TYPE_CONFIG.pt;
+    const typeCfg = (t: string) => TYPE_CONFIG[t] || TYPE_CONFIG.pt;
 
     const formatMonthYearRange = () => {
         const opts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
@@ -204,12 +257,12 @@ const MySchedule: React.FC = () => {
                 <div className="ts-header__left">
                     <div className="ts-header__icon-badge"><CalendarIcon size={18} /></div>
                     <div><h1 className="ts-header__title">My Schedule</h1>
-                    <p className="ts-header__sub">Loading your week…</p></div>
+                        <p className="ts-header__sub">Loading your week…</p></div>
                 </div>
             </div>
             <div className="ts-content">
                 <div className="ts-skeleton-grid">
-                    {Array.from({length:21}).map((_,i)=><div key={i} className="ts-skeleton-slot"/>)}
+                    {Array.from({ length: 21 }).map((_, i) => <div key={i} className="ts-skeleton-slot" />)}
                 </div>
             </div>
         </div>
@@ -219,10 +272,10 @@ const MySchedule: React.FC = () => {
     if (error) return (
         <div className="ts-page">
             <div className="ts-error-state">
-                <div className="ts-error-icon"><Activity size={32}/></div>
+                <div className="ts-error-icon"><Activity size={32} /></div>
                 <h3>Failed to load schedule</h3>
                 <p>{error}</p>
-                <button className="ts-btn ts-btn--primary" onClick={fetchSchedule}><RefreshCw size={14}/> Retry</button>
+                <button className="ts-btn ts-btn--primary" onClick={fetchSchedule}><RefreshCw size={14} /> Retry</button>
             </div>
         </div>
     );
@@ -234,7 +287,7 @@ const MySchedule: React.FC = () => {
             {/* ── HEADER ── */}
             <div className="ts-header">
                 <div className="ts-header__left">
-                    <div className="ts-header__icon-badge"><CalendarIcon size={18}/></div>
+                    <div className="ts-header__icon-badge"><CalendarIcon size={18} /></div>
                     <div>
                         <h1 className="ts-header__title">My Schedule</h1>
                         <p className="ts-header__sub">{formatMonthYearRange()}</p>
@@ -244,31 +297,31 @@ const MySchedule: React.FC = () => {
                 {/* Stat Pills */}
                 <div className="ts-header__stats">
                     <div className="ts-stat-pill ts-stat-pill--green">
-                        <Zap size={13}/>
+                        <Zap size={13} />
                         <span className="ts-stat-pill__val">{stats.scheduled}</span>
                         <span className="ts-stat-pill__lbl">Upcoming</span>
                     </div>
                     <div className="ts-stat-pill ts-stat-pill--blue">
-                        <CheckCircle size={13}/>
+                        <CheckCircle size={13} />
                         <span className="ts-stat-pill__val">{stats.completed}</span>
                         <span className="ts-stat-pill__lbl">Done</span>
                     </div>
                     <div className="ts-stat-pill ts-stat-pill--purple">
-                        <Clock size={13}/>
+                        <Clock size={13} />
                         <span className="ts-stat-pill__val">{stats.totalHours}h</span>
                         <span className="ts-stat-pill__lbl">Hours</span>
                     </div>
                     <div className="ts-stat-pill ts-stat-pill--amber">
-                        <Target size={13}/>
+                        <Target size={13} />
                         <span className="ts-stat-pill__val">{stats.ptCount}</span>
                         <span className="ts-stat-pill__lbl">PT Sessions</span>
                     </div>
                 </div>
 
                 <div className="ts-header__actions">
-                    <button className="ts-btn ts-btn--ghost" onClick={fetchSchedule}><RefreshCw size={13}/> Sync</button>
+                    <button className="ts-btn ts-btn--ghost" onClick={fetchSchedule}><RefreshCw size={13} /> Sync</button>
                     <button className="ts-btn ts-btn--primary" onClick={() => setIsCreateModalOpen(true)}>
-                        <Plus size={14}/> Schedule
+                        <Plus size={14} /> Schedule
                     </button>
                 </div>
             </div>
@@ -277,20 +330,20 @@ const MySchedule: React.FC = () => {
             <div className="ts-toolbar">
                 {/* View toggle */}
                 <div className="ts-view-toggle">
-                    {(['week','day','agenda'] as const).map(v => (
+                    {(['week', 'day', 'agenda'] as const).map(v => (
                         <button key={v} className={viewMode === v ? 'active' : ''} onClick={() => setViewMode(v)}>
-                            {v === 'week' ? <><LayoutGrid size={12}/> Week</> :
-                             v === 'day'  ? <><CalendarIcon size={12}/> Day</> :
-                                           <><List size={12}/> Agenda</>}
+                            {v === 'week' ? <><LayoutGrid size={12} /> Week</> :
+                                v === 'day' ? <><CalendarIcon size={12} /> Day</> :
+                                    <><List size={12} /> Agenda</>}
                         </button>
                     ))}
                 </div>
 
                 {/* Date nav */}
                 <div className="ts-date-nav">
-                    <button className="ts-nav-btn" onClick={() => navigate(-1)}><ChevronLeft size={14}/></button>
+                    <button className="ts-nav-btn" onClick={() => navigate(-1)}><ChevronLeft size={14} /></button>
                     <span className="ts-date-label">{formatMonthYearRange()}</span>
-                    <button className="ts-nav-btn" onClick={() => navigate(1)}><ChevronRight size={14}/></button>
+                    <button className="ts-nav-btn" onClick={() => navigate(1)}><ChevronRight size={14} /></button>
                     <button className="ts-today-btn" onClick={() => setCurrentDate(new Date())}>Today</button>
                 </div>
 
@@ -300,7 +353,7 @@ const MySchedule: React.FC = () => {
                         className={`ts-filter-btn ${showFilters ? 'active' : ''}`}
                         onClick={() => setShowFilters(p => !p)}
                     >
-                        <Filter size={13}/>
+                        <Filter size={13} />
                         Filters
                         {totalFilters > 0 && <span className="ts-filter-count">{totalFilters}</span>}
                     </button>
@@ -318,11 +371,11 @@ const MySchedule: React.FC = () => {
                             style={{ '--chip-color': c.color } as React.CSSProperties}
                             onClick={() => toggleStatusFilter(c.key)}
                         >
-                            <span className="ts-chip__dot" style={{ background: c.color }}/>
+                            <span className="ts-chip__dot" style={{ background: c.color }} />
                             {c.label}
                         </button>
                     ))}
-                    <span className="ts-filter-panel__sep"/>
+                    <span className="ts-filter-panel__sep" />
                     <span className="ts-filter-panel__label">Type</span>
                     {TYPE_FILTER_CHIPS.map(c => (
                         <button
@@ -331,7 +384,7 @@ const MySchedule: React.FC = () => {
                             style={{ '--chip-color': c.color } as React.CSSProperties}
                             onClick={() => toggleTypeFilter(c.key)}
                         >
-                            <span className="ts-chip__dot" style={{ background: c.color }}/>
+                            <span className="ts-chip__dot" style={{ background: c.color }} />
                             {c.label}
                         </button>
                     ))}
@@ -349,7 +402,7 @@ const MySchedule: React.FC = () => {
                     <div className="ts-week-view">
                         {/* Day headers */}
                         <div className="ts-week-header">
-                            <div className="ts-gutter"/>
+                            <div className="ts-gutter" />
                             {weekDates.map((date, i) => {
                                 const today = isToday(date);
                                 const count = getEventsForDay(date).length;
@@ -380,8 +433,8 @@ const MySchedule: React.FC = () => {
                                     <div key={di} className={`ts-day-col ${isToday(date) ? 'today' : ''}`}>
                                         {tp !== null && (
                                             <div className="ts-now-line" style={{ top: `${tp}%` }}>
-                                                <div className="ts-now-dot"/>
-                                                <div className="ts-now-bar"/>
+                                                <div className="ts-now-dot" />
+                                                <div className="ts-now-bar" />
                                             </div>
                                         )}
                                         {hours.map(hour => {
@@ -412,16 +465,16 @@ const MySchedule: React.FC = () => {
                                                                 {event.title}
                                                             </div>
                                                             {event.room && (
-                                                                <div className="ts-eb-room"><MapPin size={8}/>{event.room}</div>
+                                                                <div className="ts-eb-room"><MapPin size={8} />{event.room}</div>
                                                             )}
                                                             {event.recurring && (
-                                                                <Repeat size={9} className="ts-eb-recurring"/>
+                                                                <Repeat size={9} className="ts-eb-recurring" />
                                                             )}
                                                         </div>
                                                     )}
                                                     {!event && (
                                                         <div className="ts-empty-slot">
-                                                            <Plus size={10}/><span>Add</span>
+                                                            <Plus size={10} /><span>Add</span>
                                                         </div>
                                                     )}
                                                 </div>
@@ -461,8 +514,8 @@ const MySchedule: React.FC = () => {
                                     <div key={hour} className="ts-day-row">
                                         <div className="ts-day-time">
                                             {fmtHour(hour)}
-                                            {tp !== null && Math.floor(tp / (100/14)) === hour - 6 && (
-                                                <div className="ts-now-line-day"/>
+                                            {tp !== null && Math.floor(tp / (100 / 14)) === hour - 6 && (
+                                                <div className="ts-now-line-day" />
                                             )}
                                         </div>
                                         <div className="ts-day-events">
@@ -471,7 +524,7 @@ const MySchedule: React.FC = () => {
                                                     className="ts-day-empty-slot"
                                                     onClick={() => handleSlotClick(currentDate, hour)}
                                                 >
-                                                    <Plus size={12}/> Schedule something
+                                                    <Plus size={12} /> Schedule something
                                                 </div>
                                             ) : dayEvents.map(event => {
                                                 const tc = typeCfg(event.type);
@@ -493,10 +546,10 @@ const MySchedule: React.FC = () => {
                                                         </div>
                                                         <h4 className="ts-de-title" style={{ color: tc.color }}>{event.title}</h4>
                                                         <div className="ts-de-meta">
-                                                            <span><Clock size={11}/>{formatTime(event.start)}–{formatTime(event.end)}</span>
-                                                            {event.room && <span><MapPin size={11}/>{event.room}</span>}
-                                                            {event.client && <span><Users size={11}/>{event.client}</span>}
-                                                            {event.recurring && <span><Repeat size={11}/> Recurring</span>}
+                                                            <span><Clock size={11} />{formatTime(event.start)}–{formatTime(event.end)}</span>
+                                                            {event.room && <span><MapPin size={11} />{event.room}</span>}
+                                                            {event.client && <span><Users size={11} />{event.client}</span>}
+                                                            {event.recurring && <span><Repeat size={11} /> Recurring</span>}
                                                         </div>
                                                         {event.notes && <p className="ts-de-notes">{event.notes}</p>}
                                                     </div>
@@ -520,11 +573,11 @@ const MySchedule: React.FC = () => {
                         <div className="ts-agenda-list">
                             {filteredEvents.length === 0 ? (
                                 <div className="ts-agenda-empty">
-                                    <div className="ts-agenda-empty-icon"><CalendarIcon size={28}/></div>
+                                    <div className="ts-agenda-empty-icon"><CalendarIcon size={28} /></div>
                                     <h3>No sessions this week</h3>
                                     <p>Your schedule is clear. Click "Schedule" to add a session.</p>
                                     <button className="ts-btn ts-btn--primary" onClick={() => setIsCreateModalOpen(true)}>
-                                        <Plus size={14}/> Schedule Session
+                                        <Plus size={14} /> Schedule Session
                                     </button>
                                 </div>
                             ) : (
@@ -544,7 +597,7 @@ const MySchedule: React.FC = () => {
                                                 {/* Time column */}
                                                 <div className="ts-ac-time">
                                                     <span className="ts-ac-date">
-                                                        {event.start.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}
+                                                        {event.start.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                                                     </span>
                                                     <span className="ts-ac-start">{formatTime(event.start)}</span>
                                                     <span className="ts-ac-end">{formatTime(event.end)}</span>
@@ -563,11 +616,11 @@ const MySchedule: React.FC = () => {
                                                     </div>
                                                     <h3 className="ts-ac-title" style={{ color: tc.color }}>
                                                         {event.title}
-                                                        {event.recurring && <Repeat size={12} style={{ marginLeft: 6 }}/>}
+                                                        {event.recurring && <Repeat size={12} style={{ marginLeft: 6 }} />}
                                                     </h3>
                                                     <div className="ts-ac-meta">
-                                                        {event.room   && <span><MapPin size={11}/>{event.room}</span>}
-                                                        {event.client && <span><Users size={11}/>{event.client}</span>}
+                                                        {event.room && <span><MapPin size={11} />{event.room}</span>}
+                                                        {event.client && <span><Users size={11} />{event.client}</span>}
                                                     </div>
                                                     {event.notes && <p className="ts-ac-notes">{event.notes}</p>}
                                                 </div>
@@ -577,11 +630,11 @@ const MySchedule: React.FC = () => {
                                                     <div className="ts-ac-actions">
                                                         <button className="ts-ac-action ts-ac-action--green"
                                                             onClick={e => { e.stopPropagation(); }}>
-                                                            <CheckCircle size={15}/>
+                                                            <CheckCircle size={15} />
                                                         </button>
                                                         <button className="ts-ac-action ts-ac-action--red"
                                                             onClick={e => { e.stopPropagation(); }}>
-                                                            <XCircle size={15}/>
+                                                            <XCircle size={15} />
                                                         </button>
                                                     </div>
                                                 )}
@@ -597,7 +650,7 @@ const MySchedule: React.FC = () => {
                 <div className="ts-legend">
                     {Object.entries(TYPE_CONFIG).map(([key, cfg]) => (
                         <div key={key} className="ts-legend-item">
-                            <span className="ts-legend-dot" style={{ background: cfg.color }}/>
+                            <span className="ts-legend-dot" style={{ background: cfg.color }} />
                             {cfg.label}
                         </div>
                     ))}
@@ -613,10 +666,10 @@ const MySchedule: React.FC = () => {
                             className="ts-modal-header"
                             style={{ '--modal-color': typeCfg(selectedEvent.type).color } as React.CSSProperties}
                         >
-                            <div className="ts-modal-header-glow"/>
+                            <div className="ts-modal-header-glow" />
                             <div className="ts-modal-header-left">
                                 <div className="ts-modal-icon-badge" style={{ background: typeCfg(selectedEvent.type).gradient }}>
-                                    <CalendarIcon size={16}/>
+                                    <CalendarIcon size={16} />
                                 </div>
                                 <div>
                                     <div className="ts-modal-type-label">{typeCfg(selectedEvent.type).label}</div>
@@ -624,7 +677,7 @@ const MySchedule: React.FC = () => {
                                 </div>
                             </div>
                             <button className="ts-modal-close" onClick={() => setSelectedEvent(null)}>
-                                <X size={16}/>
+                                <X size={16} />
                             </button>
                         </div>
 
@@ -637,10 +690,10 @@ const MySchedule: React.FC = () => {
                                 color: statusCfg(selectedEvent.status).color,
                             }}
                         >
-                            <span className="ts-modal-status-dot" style={{ background: statusCfg(selectedEvent.status).color }}/>
+                            <span className="ts-modal-status-dot" style={{ background: statusCfg(selectedEvent.status).color }} />
                             {statusCfg(selectedEvent.status).label}
                             {selectedEvent.recurring && (
-                                <span className="ts-modal-recurring"><Repeat size={12}/> Recurring</span>
+                                <span className="ts-modal-recurring"><Repeat size={12} /> Recurring</span>
                             )}
                         </div>
 
@@ -649,25 +702,25 @@ const MySchedule: React.FC = () => {
                             <div className="ts-modal-details">
                                 <div className="ts-modal-detail">
                                     <div className="ts-modal-detail-icon" style={{ background: 'rgba(99,102,241,0.15)', color: '#818cf8' }}>
-                                        <CalendarIcon size={13}/>
+                                        <CalendarIcon size={13} />
                                     </div>
                                     <div>
                                         <div className="ts-modal-detail-lbl">Date</div>
                                         <div className="ts-modal-detail-val">
-                                            {selectedEvent.start.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})}
+                                            {selectedEvent.start.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
                                         </div>
                                     </div>
                                 </div>
                                 <div className="ts-modal-detail">
                                     <div className="ts-modal-detail-icon" style={{ background: 'rgba(16,185,129,0.15)', color: '#10B981' }}>
-                                        <Clock size={13}/>
+                                        <Clock size={13} />
                                     </div>
                                     <div>
                                         <div className="ts-modal-detail-lbl">Time</div>
                                         <div className="ts-modal-detail-val">
                                             {formatTime(selectedEvent.start)} – {formatTime(selectedEvent.end)}
                                             <span className="ts-modal-duration">
-                                                {Math.round((selectedEvent.end.getTime()-selectedEvent.start.getTime())/60000)}m
+                                                {Math.round((selectedEvent.end.getTime() - selectedEvent.start.getTime()) / 60000)}m
                                             </span>
                                         </div>
                                     </div>
@@ -675,7 +728,7 @@ const MySchedule: React.FC = () => {
                                 {selectedEvent.client && (
                                     <div className="ts-modal-detail">
                                         <div className="ts-modal-detail-icon" style={{ background: 'rgba(245,158,11,0.15)', color: '#F59E0B' }}>
-                                            <Users size={13}/>
+                                            <Users size={13} />
                                         </div>
                                         <div>
                                             <div className="ts-modal-detail-lbl">Client</div>
@@ -686,7 +739,7 @@ const MySchedule: React.FC = () => {
                                 {selectedEvent.room && (
                                     <div className="ts-modal-detail">
                                         <div className="ts-modal-detail-icon" style={{ background: 'rgba(139,92,246,0.15)', color: '#8B5CF6' }}>
-                                            <MapPin size={13}/>
+                                            <MapPin size={13} />
                                         </div>
                                         <div>
                                             <div className="ts-modal-detail-lbl">Location</div>
@@ -708,10 +761,10 @@ const MySchedule: React.FC = () => {
                         {(selectedEvent.status === 'SCHEDULED' || selectedEvent.status === 'UPCOMING') && (
                             <div className="ts-modal-actions">
                                 <button className="ts-modal-action ts-modal-action--complete">
-                                    <CheckCircle size={13}/> Mark Complete
+                                    <CheckCircle size={13} /> Mark Complete
                                 </button>
                                 <button className="ts-modal-action ts-modal-action--noshow">
-                                    <XCircle size={13}/> Mark No-Show
+                                    <XCircle size={13} /> Mark No-Show
                                 </button>
                                 <button className="ts-modal-action ts-modal-action--close" onClick={() => setSelectedEvent(null)}>
                                     Close
@@ -727,6 +780,15 @@ const MySchedule: React.FC = () => {
                         )}
                     </div>
                 </div>
+            )}
+
+            {/* Conflict warning toast */}
+            {conflictWarning && (
+                <ConflictToast
+                    conflict={conflictWarning.conflict}
+                    onDismiss={() => setConflictWarning(null)}
+                    onScheduleAnyway={() => openCreateModal(conflictWarning.pendingDate, conflictWarning.pendingHour)}
+                />
             )}
 
             {/* Create Session Modal */}

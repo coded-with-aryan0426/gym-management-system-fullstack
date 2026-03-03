@@ -756,3 +756,110 @@
     .ts-modal-actions { flex-wrap: wrap; }
     .ts-modal-action { flex: 1; justify-content: center; }
 }
+
+/* ============================================================
+   CONFLICT TOAST
+   ============================================================ */
+.ts-conflict-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 500;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #1a0f00;
+  border: 1px solid rgba(245,158,11,0.45);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(245,158,11,0.15);
+  max-width: 380px;
+  animation: ts-toast-in 0.25s cubic-bezier(0.16,1,0.3,1);
+}
+
+@keyframes ts-toast-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.ts-conflict-toast__icon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  background: rgba(245,158,11,0.15);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #F59E0B;
+}
+
+.ts-conflict-toast__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ts-conflict-toast__title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #F59E0B;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ts-conflict-toast__msg {
+  font-size: 12px;
+  color: rgba(255,255,255,0.65);
+  line-height: 1.4;
+}
+
+.ts-conflict-toast__msg strong {
+  color: rgba(255,255,255,0.9);
+  font-weight: 600;
+}
+
+.ts-conflict-toast__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.ts-conflict-toast__anyway {
+  padding: 5px 12px;
+  background: rgba(245,158,11,0.15);
+  border: 1px solid rgba(245,158,11,0.35);
+  border-radius: 7px;
+  color: #F59E0B;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+
+.ts-conflict-toast__anyway:hover {
+  background: rgba(245,158,11,0.25);
+  border-color: rgba(245,158,11,0.5);
+}
+
+.ts-conflict-toast__dismiss {
+  width: 26px;
+  height: 26px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 6px;
+  color: rgba(255,255,255,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.ts-conflict-toast__dismiss:hover {
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.8);
+}

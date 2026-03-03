@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     CreditCard, Check, Zap, Shield, Download, Star, Clock, Users,
@@ -69,9 +70,11 @@ const itemVariants = {
 
 const MyMembership: React.FC = () => {
     const { user } = useAuth();
+    const [searchParams] = useSearchParams();
     const [membership, setMembership] = useState<MembershipData | null>(null);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState<'overview' | 'benefits' | 'payments' | 'settings'>('overview');
+    const initialTab = (searchParams.get('tab') as 'overview' | 'benefits' | 'payments' | 'settings') || 'overview';
+    const [activeTab, setActiveTab] = useState<'overview' | 'benefits' | 'payments' | 'settings'>(initialTab);
     const [showQRCode, setShowQRCode] = useState(false);
     const [showFreezeModal, setShowFreezeModal] = useState(false);
     const [showAddCard, setShowAddCard] = useState(false);

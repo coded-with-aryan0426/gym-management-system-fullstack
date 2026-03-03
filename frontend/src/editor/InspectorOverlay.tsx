@@ -62,28 +62,29 @@ export function InspectorOverlay() {
             if (e.buttons !== 0) return // Skip during drag
 
             const el = document.elementFromPoint(e.clientX, e.clientY)
-            if (!el || shouldExclude(el)) {
+            const targetEl = el?.closest('[data-edit-id], [data-editable-id], [data-component-id]')
+            if (!targetEl || shouldExclude(targetEl)) {
                 setHoveredElement(null)
                 return
             }
 
             // Don't hover on selected element
-            if (selectedElement && el === selectedElement.element) {
+            if (selectedElement && targetEl === selectedElement.element) {
                 setHoveredElement(null)
                 return
             }
 
-            const rect = el.getBoundingClientRect()
+            const rect = targetEl.getBoundingClientRect()
             if (rect.width < 10 || rect.height < 10) {
                 setHoveredElement(null)
                 return
             }
 
             setHoveredElement({
-                element: el,
+                element: targetEl,
                 rect,
-                tagName: el.tagName.toLowerCase(),
-                className: el.className?.toString() || ''
+                tagName: targetEl.tagName.toLowerCase(),
+                className: targetEl.className?.toString() || ''
             })
         }
 
@@ -110,27 +111,28 @@ export function InspectorOverlay() {
             e.stopPropagation()
 
             const el = document.elementFromPoint(e.clientX, e.clientY)
+            const targetEl = el?.closest('[data-edit-id], [data-editable-id], [data-component-id]')
 
             // Skip html/body
-            if (!el || el.tagName === 'HTML' || el.tagName === 'BODY') {
+            if (!targetEl || targetEl.tagName === 'HTML' || targetEl.tagName === 'BODY') {
                 setSelectedElement(null)
                 setSelectedId(null)
                 return
             }
 
-            const rect = el.getBoundingClientRect()
+            const rect = targetEl.getBoundingClientRect()
             if (rect.width < 10 || rect.height < 10) return
 
             setSelectedElement({
-                element: el,
+                element: targetEl,
                 rect,
-                tagName: el.tagName.toLowerCase(),
-                className: el.className?.toString() || ''
+                tagName: targetEl.tagName.toLowerCase(),
+                className: targetEl.className?.toString() || ''
             })
             setHoveredElement(null)
 
             // Register in registry
-            const entry = EditableRegistry.register(el)
+            const entry = EditableRegistry.register(targetEl)
             if (entry) setSelectedId(entry.id)
         }
 

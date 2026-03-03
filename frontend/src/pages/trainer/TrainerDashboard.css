@@ -1,16 +1,17 @@
 /* ============================================================================
-   TRAINER DASHBOARD - AthlonX V3 (Red/Zinc Theme)
+   TRAINER DASHBOARD - AthlonX V3
    ============================================================================ */
+@import './TrainerTheme.css';
 
 .trainer-dashboard {
     min-height: 100vh;
-    padding: 24px;
-    background: #050505;
-    /* Deep Black/Zinc */
-    color: #e2e8f0;
+    padding: var(--t-page-pad);
+    background: var(--t-bg-page);
+    color: var(--t-text-primary);
     overflow-x: hidden;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--t-font);
 }
+
 
 /* ==================== HEADER ==================== */
 .dashboard-header {
@@ -613,18 +614,92 @@
 }
 
 
-/* ==================== ANIMATIONS ==================== */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
+/* ── Glass panel utility ── */
+.glass-panel {
+    background: rgba(18, 18, 22, 0.72);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--t-border);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.30);
+}
 
+/* ── Full-page loader ── */
+.tp-loader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background: var(--t-bg-page);
+    color: var(--t-text-tertiary);
+    gap: 16px;
+}
+
+.tp-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255, 255, 255, 0.08);
+    border-top-color: var(--t-indigo);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
     to {
-        opacity: 1;
-        transform: translateY(0);
+        transform: rotate(360deg);
     }
 }
+
+/* ── Responsive ── */
+@media (max-width: 1200px) {
+    .kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 1024px) {
+    .dashboard-main-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .charts-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 900px) {
+    .dashboard-main-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .trainer-dashboard {
+        padding: var(--t-page-pad-sm);
+    }
+
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .header-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .action-btn {
+        flex: 1;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 600px) {
+    .kpi-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 
 @keyframes pulse-ring {
     0% {

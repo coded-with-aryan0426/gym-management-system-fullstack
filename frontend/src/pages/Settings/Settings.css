@@ -5642,3 +5642,10 @@ body.light-mode .logout-btn:hover {
 /* settings-section--amber accent */
 .settings-section--amber { --section-accent: #f59e0b; }
 .settings-section__icon--amber { background: linear-gradient(135deg, #f59e0b, #d97706); }
+/* ── Saved state for Settings buttons ── */
+.settings-btn--saved {
+    background: linear-gradient(135deg, #065f46, #047857) !important;
+    border-color: rgba(16,185,129,0.5) !important;
+    color: #6ee7b7 !important;
+    transition: background 0.3s ease, color 0.3s ease !important;
+}

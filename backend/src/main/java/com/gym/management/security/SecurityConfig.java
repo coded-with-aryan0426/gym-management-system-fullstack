@@ -89,15 +89,17 @@ public class SecurityConfig {
                         .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/api/gyms/public/**").permitAll()
                         .requestMatchers("/api/dashboard/analytics/test").permitAll() // Test endpoint
-                        .requestMatchers("/api/tasks/seed").permitAll()  // Seed dummy data — no auth needed
-                        .requestMatchers("/api/tasks/**").permitAll()    // Task board — permit all (roles enforced at method level)
+                        .requestMatchers("/api/tasks/seed").permitAll() // Seed dummy data — no auth needed
+                        .requestMatchers("/api/tasks/**").permitAll() // Task board — permit all
+                        .requestMatchers("/api/attendance/**").permitAll() // Attendance analytics & seeding
 
                         .requestMatchers("/ws/**").permitAll() // WebSocket handshake
                         .requestMatchers("/error").permitAll()
 
                         // ==================== OWNER/ADMIN ONLY ====================
                         // These endpoints manage the entire gym operation
-                        .requestMatchers("/api/dashboard/analytics/**").permitAll() // Temporarily allow public access for testing
+                        .requestMatchers("/api/dashboard/analytics/**").permitAll() // Temporarily allow public access
+                                                                                    // for testing
                         .requestMatchers("/api/dashboard/**").hasAnyRole("OWNER", "ADMIN")
                         .requestMatchers("/api/stats/**").hasAnyRole("OWNER", "ADMIN")
                         .requestMatchers("/api/settings/**").hasAnyRole("OWNER", "ADMIN")
@@ -113,16 +115,20 @@ public class SecurityConfig {
                         // Trainers need access to manage their assigned members and sessions
                         .requestMatchers("/api/trainer/**").hasAnyRole("OWNER", "ADMIN", "TRAINER")
                         .requestMatchers("/api/trainer/equipment/**").hasAnyRole("OWNER", "ADMIN", "TRAINER")
-                        .requestMatchers("/api/pt-sessions/member/**").hasAnyRole("OWNER", "ADMIN", "TRAINER", "MEMBER", "CUSTOMER")
+                        .requestMatchers("/api/pt-sessions/member/**")
+                        .hasAnyRole("OWNER", "ADMIN", "TRAINER", "MEMBER", "CUSTOMER")
                         .requestMatchers("/api/pt-sessions/**").hasAnyRole("OWNER", "ADMIN", "TRAINER")
-                        .requestMatchers("/api/users/members").hasAnyRole("OWNER", "ADMIN", "TRAINER", "MEMBER", "CUSTOMER")
-                        .requestMatchers("/api/users/trainers").hasAnyRole("OWNER", "ADMIN", "TRAINER", "MEMBER", "CUSTOMER")
+                        .requestMatchers("/api/users/members")
+                        .hasAnyRole("OWNER", "ADMIN", "TRAINER", "MEMBER", "CUSTOMER")
+                        .requestMatchers("/api/users/trainers")
+                        .hasAnyRole("OWNER", "ADMIN", "TRAINER", "MEMBER", "CUSTOMER")
                         .requestMatchers("/api/progress-notes/**").hasAnyRole("OWNER", "ADMIN", "TRAINER")
                         .requestMatchers("/api/notifications/**").authenticated() // All users get notifications
 
                         // ==================== MEMBER ENDPOINTS ====================
                         // Members can access their own data, trainers/owners can also access
-                        .requestMatchers("/api/member/progress/photos/file/**").permitAll() // Public access for progress photos
+                        .requestMatchers("/api/member/progress/photos/file/**").permitAll() // Public access for
+                                                                                            // progress photos
                         .requestMatchers("/api/member/**").hasAnyRole("OWNER", "ADMIN", "TRAINER", "MEMBER", "CUSTOMER")
 
                         // ==================== CHAT (All authenticated users) ====================

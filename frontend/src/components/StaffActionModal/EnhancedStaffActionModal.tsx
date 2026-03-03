@@ -6,11 +6,6 @@ import api from '../../services/api';
 import type { Staff } from '../../types/user';
 import './StaffActionModal.css';
 
-const ROLE_LABELS: Record<string, string> = {
-  RECEPTIONIST: 'Receptionist', FLOOR_MANAGER: 'Floor Manager', MAINTENANCE: 'Maintenance',
-  CLEANING: 'Housekeeping', OPERATIONS: 'Operations', SALES: 'Sales',
-  ADMIN: 'Admin', MANAGER: 'Manager', STAFF: 'Staff',
-};
 
 const DEPT_ICONS: Record<string, string> = {
   'Front Desk': '🏢', 'Gym Floor': '🏋️', 'Maintenance': '🔧',
@@ -70,7 +65,6 @@ const EnhancedStaffActionModal: React.FC<Props> = ({ isOpen, onClose, staff, onU
 
   if (!isOpen || !localStaff) return null;
 
-  const role = localStaff.staffRole || 'STAFF';
   const statusRaw = localStaff.status || 'Active';
   const statusLower = statusRaw.toLowerCase();
 
@@ -97,9 +91,9 @@ const EnhancedStaffActionModal: React.FC<Props> = ({ isOpen, onClose, staff, onU
 
   const tenure = localStaff.createdAt
     ? (() => {
-        const months = Math.floor((Date.now() - new Date(localStaff.createdAt).getTime()) / (30.44 * 24 * 60 * 60 * 1000));
-        return months < 12 ? `${months}mo` : `${Math.floor(months / 12)}y ${months % 12}mo`;
-      })()
+      const months = Math.floor((Date.now() - new Date(localStaff.createdAt).getTime()) / (30.44 * 24 * 60 * 60 * 1000));
+      return months < 12 ? `${months}mo` : `${Math.floor(months / 12)}y ${months % 12}mo`;
+    })()
     : '—';
 
   const salaryFormatted = localStaff.salary ? `₹${Number(localStaff.salary).toLocaleString('en-IN')}` : '—';
@@ -295,11 +289,7 @@ const EnhancedStaffActionModal: React.FC<Props> = ({ isOpen, onClose, staff, onU
                 <span className="smod-dept-banner__dept">{localStaff.department || 'Unassigned'}</span>
                 <span className="smod-dept-banner__title">{localStaff.jobTitle || 'No title'}</span>
               </div>
-              <div className="smod-dept-banner__badge">
-                <span className={`smod-role-pill smod-role-pill--${role.toLowerCase()}`}>
-                  {ROLE_LABELS[role] || role}
-                </span>
-              </div>
+
             </div>
 
             {/* Job Info Grid */}
@@ -317,13 +307,7 @@ const EnhancedStaffActionModal: React.FC<Props> = ({ isOpen, onClose, staff, onU
                       <span className="smod-detail-row__value">{localStaff.jobTitle || '—'}</span>
                     </div>
                   </div>
-                  <div className="smod-detail-row">
-                    <div className="smod-detail-row__icon"><Icon type="user" size={14} /></div>
-                    <div className="smod-detail-row__content">
-                      <span className="smod-detail-row__label">Staff Role</span>
-                      <span className="smod-detail-row__value">{ROLE_LABELS[role] || role}</span>
-                    </div>
-                  </div>
+
                   <div className="smod-detail-row">
                     <div className="smod-detail-row__icon"><Icon type="hash" size={14} /></div>
                     <div className="smod-detail-row__content">
@@ -542,7 +526,6 @@ const EnhancedStaffActionModal: React.FC<Props> = ({ isOpen, onClose, staff, onU
               <div className="profile-header__info">
                 <h2 className="profile-header__name">{localStaff.fullName}</h2>
                 <div className="profile-header__meta">
-                  <span className={`smod-role-pill smod-role-pill--${role.toLowerCase()}`}>{ROLE_LABELS[role] || role}</span>
                   <span className={`modal-status-badge modal-status-badge--${statusLower}`}>
                     <span className="modal-status-badge__dot"></span> {statusRaw}
                   </span>

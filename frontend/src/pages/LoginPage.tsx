@@ -184,10 +184,7 @@ export default function LoginPage() {
                 username: data.username,
                 email: data.email,
                 fullName: data.fullName,
-                phone: data.phone,
-                role: data.staffRole || data.role || 'CUSTOMER',
-                staffRole: data.staffRole,
-                token: data.token,
+                role: data.role || 'CUSTOMER',
                 activeGymId: data.activeGymId,
                 activeGymName: data.activeGymName
             });
@@ -199,7 +196,7 @@ export default function LoginPage() {
             setShowGymSelector(true);
         } else {
             // Redirect based on role
-            const role = (data.staffRole || data.role || '').toUpperCase();
+            const role = (data.role || '').toUpperCase();
             if (role === 'OWNER' || role === 'ADMIN') {
                 navigate('/dashboard');
             } else if (role === 'TRAINER') {
@@ -240,7 +237,7 @@ export default function LoginPage() {
             const userData = {
                 ...newUserData,
                 gymName,
-                staffRole: 'OWNER'
+                role: 'OWNER'
             };
             localStorage.setItem(getStorageKey('user'), JSON.stringify(userData));
             localStorage.setItem(getStorageKey('token'), newUserData.token);
@@ -277,7 +274,7 @@ export default function LoginPage() {
                 <div style={{
                     position: "absolute",
                     inset: 0,
-                    background: isDark 
+                    background: isDark
                         ? `linear-gradient(to top, ${colors.bgPrimary} 0%, rgba(13, 13, 13, 0.6) 50%, rgba(13, 13, 13, 0.4) 100%)`
                         : `linear-gradient(to top, ${colors.bgPrimary} 0%, rgba(248, 250, 252, 0.6) 50%, rgba(248, 250, 252, 0.4) 100%)`
                 }} />

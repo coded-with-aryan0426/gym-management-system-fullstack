@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import DashboardLayout from '../../components/shared/DashboardLayout';
-import { Home, User, Users, BookOpen, Calendar, Bell, ClipboardList, MessageSquare, TrendingUp, Settings } from 'lucide-react';
+import { Home, User, Users, BookOpen, Calendar, ClipboardList, MessageSquare, TrendingUp } from 'lucide-react';
 import type { NavItem } from '../../components/Layout/CommandRail';
 import '../../styles/unified-design-system.css';
 
@@ -25,8 +25,6 @@ const TrainerLayout: React.FC<TrainerLayoutProps> = ({ children }) => {
         { path: '/trainer/progress-notes', icon: <ClipboardList size={20} />, label: 'Progress Notes', color: '#EC4899' },
         { path: '/trainer/messages', icon: <MessageSquare size={20} />, label: 'Messages', color: '#06B6D4' },
         { path: '/trainer/reports', icon: <TrendingUp size={20} />, label: 'Reports', color: '#6366F1' },
-        { path: '/trainer/notifications', icon: <Bell size={20} />, label: 'Notifications', color: '#F97316' },
-        { path: '/trainer/settings', icon: <Settings size={20} />, label: 'Settings', color: '#64748B' },
     ];
 
     return (

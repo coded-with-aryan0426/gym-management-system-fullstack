@@ -4,25 +4,27 @@
    ============================================================================ */
 
 :root {
-    /* Base Colors */
-    --bg-primary: #0A0A0F;
-    --bg-secondary: #121218;
-    --bg-tertiary: #1A1A22;
-    --bg-glass: rgba(255, 255, 255, 0.03);
-    --bg-glass-hover: rgba(255, 255, 255, 0.06);
-    --bg-glass-active: rgba(255, 255, 255, 0.08);
+    /* Base Colors — Dark Mode (default) */
+    --bg-primary: #0D0D12;
+    --bg-secondary: #17171E;
+    --bg-tertiary: #20202A;
+    --bg-elevated: #262632;
+    /* cards/surfaces sit above tertiary */
+    --bg-glass: rgba(255, 255, 255, 0.05);
+    --bg-glass-hover: rgba(255, 255, 255, 0.09);
+    --bg-glass-active: rgba(255, 255, 255, 0.13);
 
     /* Accent Colors (Premium Palette) */
-    --accent-blue: #007AFF;
-    --accent-blue-rgb: 0, 122, 255;
-    --accent-red: #FF3B30;
-    --accent-red-rgb: 255, 59, 48;
-    --accent-green: #34C759;
-    --accent-green-rgb: 52, 199, 89;
-    --accent-purple: #AF52DE;
-    --accent-purple-rgb: 175, 82, 222;
-    --accent-orange: #FF9500;
-    --accent-orange-rgb: 255, 149, 0;
+    --accent-blue: #3B9EFF;
+    --accent-blue-rgb: 59, 158, 255;
+    --accent-red: #FF4F44;
+    --accent-red-rgb: 255, 79, 68;
+    --accent-green: #2ECC72;
+    --accent-green-rgb: 46, 204, 114;
+    --accent-purple: #BF6FEF;
+    --accent-purple-rgb: 191, 111, 239;
+    --accent-orange: #FF9A00;
+    --accent-orange-rgb: 255, 154, 0;
     --accent-teal: #5AC8FA;
     --accent-teal-rgb: 90, 200, 250;
 
@@ -32,23 +34,37 @@
     --status-error: var(--accent-red);
     --status-info: var(--accent-blue);
 
-    /* Text Colors */
-    --text-primary: #FFFFFF;
-    --text-secondary: rgba(255, 255, 255, 0.7);
-    --text-tertiary: rgba(255, 255, 255, 0.4);
-    --text-quaternary: rgba(255, 255, 255, 0.25);
+    /* Text Colors — Dark Mode */
+    --text-primary: #F0F0F5;
+    --text-secondary: rgba(240, 240, 245, 0.72);
+    --text-tertiary: rgba(240, 240, 245, 0.45);
+    --text-quaternary: rgba(240, 240, 245, 0.28);
 
-    /* Borders & Glass */
-    --border-main: rgba(255, 255, 255, 0.08);
-    --border-focus: rgba(255, 255, 255, 0.15);
+    /* Borders — visible in dark */
+    --border-main: rgba(255, 255, 255, 0.14);
+    --border-strong: rgba(255, 255, 255, 0.22);
+    --border-focus: rgba(59, 158, 255, 0.55);
+
+    /* Popover — fully opaque so nothing bleeds through */
+    --popover-bg: #2A2A36;
     --glass-blur: blur(20px);
     --glass-saturate: saturate(180%);
 
+    /* Active state tints — dark mode */
+    --active-blue-bg: rgba(59, 158, 255, 0.22);
+    --active-blue-border: rgba(59, 158, 255, 0.65);
+    --active-green-bg: rgba(46, 204, 114, 0.18);
+    --active-green-border: rgba(46, 204, 114, 0.55);
+    --active-orange-bg: rgba(255, 154, 0, 0.18);
+    --active-orange-border: rgba(255, 154, 0, 0.55);
+    --active-red-bg: rgba(255, 79, 68, 0.18);
+    --active-red-border: rgba(255, 79, 68, 0.55);
+
     /* Shadows */
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
-    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35);
-    --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.45);
-    --shadow-glow: 0 0 30px rgba(0, 122, 255, 0.15);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.6);
+    --shadow-glow: 0 0 30px rgba(59, 158, 255, 0.25);
 
     /* Radius */
     --radius-sm: 8px;
@@ -69,24 +85,53 @@
 }
 
 :root.theme-light {
-    --bg-primary: #F2F2F7;
+    /* Base Colors — Light Mode */
+    --bg-primary: #F0F2F5;
     --bg-secondary: #FFFFFF;
-    --bg-tertiary: #E5E5EA;
-    --bg-glass: rgba(255, 255, 255, 0.7);
-    --bg-glass-hover: rgba(255, 255, 255, 0.8);
-    --bg-glass-active: rgba(255, 255, 255, 0.9);
+    --bg-tertiary: #E4E7ED;
+    --bg-elevated: #FFFFFF;
+    --bg-glass: rgba(255, 255, 255, 0.85);
+    --bg-glass-hover: #FFFFFF;
+    --bg-glass-active: #EBF3FF;
 
-    --text-primary: #000000;
-    --text-secondary: rgba(0, 0, 0, 0.6);
-    --text-tertiary: rgba(0, 0, 0, 0.4);
-    --text-quaternary: rgba(0, 0, 0, 0.25);
+    /* Accents — slightly deeper for light background */
+    --accent-blue: #0A6EE8;
+    --accent-blue-rgb: 10, 110, 232;
+    --accent-red: #E0302A;
+    --accent-red-rgb: 224, 48, 42;
+    --accent-green: #12A550;
+    --accent-green-rgb: 18, 165, 80;
+    --accent-orange: #C96D00;
+    --accent-orange-rgb: 201, 109, 0;
 
-    --border-main: rgba(0, 0, 0, 0.1);
-    --border-focus: rgba(0, 0, 0, 0.2);
+    /* Text Colors — Light Mode */
+    --text-primary: #111827;
+    --text-secondary: #374151;
+    --text-tertiary: #6B7280;
+    --text-quaternary: #9CA3AF;
 
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
-    --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.12);
+    /* Borders — clearly visible on light background */
+    --border-main: #D1D5DB;
+    --border-strong: #9CA3AF;
+    --border-focus: rgba(10, 110, 232, 0.6);
+
+    /* Popover — fully opaque white card */
+    --popover-bg: #FFFFFF;
+
+    /* Active state tints — light mode */
+    --active-blue-bg: rgba(10, 110, 232, 0.12);
+    --active-blue-border: rgba(10, 110, 232, 0.5);
+    --active-green-bg: rgba(18, 165, 80, 0.12);
+    --active-green-border: rgba(18, 165, 80, 0.5);
+    --active-orange-bg: rgba(201, 109, 0, 0.12);
+    --active-orange-border: rgba(201, 109, 0, 0.5);
+    --active-red-bg: rgba(224, 48, 42, 0.12);
+    --active-red-border: rgba(224, 48, 42, 0.5);
+
+    --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+    --shadow-lg: 0 12px 36px rgba(0, 0, 0, 0.14);
+    --shadow-glow: 0 0 20px rgba(10, 110, 232, 0.15);
 }
 
 /* Base Page Styling */

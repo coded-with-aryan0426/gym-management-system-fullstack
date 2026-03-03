@@ -9,7 +9,6 @@ import api from "../../services/api"
 import { showToast } from "../../utils/toast"
 import AvatarPicker from "../ui/AvatarPicker"
 import { getAvatarUrl } from "../ui/Avatar"
-import Editable from "../editor/Editable"
 import "./TrainerActionModal.css"
 
 // ============================================================================
@@ -343,19 +342,19 @@ const EnhancedTrainerActionModal: React.FC<EnhancedTrainerActionModalProps> = ({
       if (details.availability && details.availability.length > 0) {
         setAvailability(details.availability)
       } else {
-      setAvailability(DEFAULT_AVAILABILITY)
-    }
+        setAvailability(DEFAULT_AVAILABILITY)
+      }
 
-    // Load saved notes from localStorage
-    const savedOwnerNotes = localStorage.getItem(`trainer_notes_${trainer.userId}`)
-    if (savedOwnerNotes) {
-      setOwnerNotes(savedOwnerNotes)
-      setSavedNotes(savedOwnerNotes)
-    } else {
-      setOwnerNotes("")
-      setSavedNotes("")
-    }
-  } catch (error) {
+      // Load saved notes from localStorage
+      const savedOwnerNotes = localStorage.getItem(`trainer_notes_${trainer.userId}`)
+      if (savedOwnerNotes) {
+        setOwnerNotes(savedOwnerNotes)
+        setSavedNotes(savedOwnerNotes)
+      } else {
+        setOwnerNotes("")
+        setSavedNotes("")
+      }
+    } catch (error) {
       console.error('[TrainerModal] Failed to load details:', error)
     } finally {
       setDetailsLoading(false)
@@ -373,49 +372,49 @@ const EnhancedTrainerActionModal: React.FC<EnhancedTrainerActionModalProps> = ({
     }
   }, [trainer])
 
-    const searchMembers = async (query: string) => {
-      if (!trainer) return
-      try {
-        setIsSearching(true)
-        const members = await api.searchUsers('CUSTOMER', query)
-        setAvailableMembers(members)
-      } catch (error) {
-        console.error('[TrainerModal] Search failed:', error)
-        setAvailableMembers([])
-      } finally {
-        setIsSearching(false)
-      }
+  const searchMembers = async (query: string) => {
+    if (!trainer) return
+    try {
+      setIsSearching(true)
+      const members = await api.searchUsers('CUSTOMER', query)
+      setAvailableMembers(members)
+    } catch (error) {
+      console.error('[TrainerModal] Search failed:', error)
+      setAvailableMembers([])
+    } finally {
+      setIsSearching(false)
     }
+  }
 
-    const loadCompensation = useCallback(async () => {
-      if (!trainer) return
-      setCompensationLoading(true)
-      try {
-        const rules = await api.getTrainerCompensation(trainer.userId)
-        setCompensationRules(rules || [])
-      } catch (error) {
-        console.error('[TrainerModal] Failed to load compensation:', error)
-        setCompensationRules([])
-      } finally {
-        setCompensationLoading(false)
-      }
-    }, [trainer])
+  const loadCompensation = useCallback(async () => {
+    if (!trainer) return
+    setCompensationLoading(true)
+    try {
+      const rules = await api.getTrainerCompensation(trainer.userId)
+      setCompensationRules(rules || [])
+    } catch (error) {
+      console.error('[TrainerModal] Failed to load compensation:', error)
+      setCompensationRules([])
+    } finally {
+      setCompensationLoading(false)
+    }
+  }, [trainer])
 
-    const loadAttendance = useCallback(async (days: number = 30) => {
-      if (!trainer) return
-      setAttendanceLoading(true)
-      try {
-        const data = await api.getTrainerAttendance(trainer.userId, days)
-        setAttendanceRecords(data.records || [])
-        setAttendanceSummary(data.summary || null)
-      } catch (error) {
-        console.error('[TrainerModal] Failed to load attendance:', error)
-        setAttendanceRecords([])
-        setAttendanceSummary(null)
-      } finally {
-        setAttendanceLoading(false)
-      }
-    }, [trainer])
+  const loadAttendance = useCallback(async (days: number = 30) => {
+    if (!trainer) return
+    setAttendanceLoading(true)
+    try {
+      const data = await api.getTrainerAttendance(trainer.userId, days)
+      setAttendanceRecords(data.records || [])
+      setAttendanceSummary(data.summary || null)
+    } catch (error) {
+      console.error('[TrainerModal] Failed to load attendance:', error)
+      setAttendanceRecords([])
+      setAttendanceSummary(null)
+    } finally {
+      setAttendanceLoading(false)
+    }
+  }, [trainer])
 
   const handleSaveProfile = async () => {
     if (!trainer || !isFormValid) return
@@ -493,58 +492,58 @@ const EnhancedTrainerActionModal: React.FC<EnhancedTrainerActionModalProps> = ({
     }
   }
 
-    const handleAddCertification = () => {
-      if (!newCert.name || !newCert.issuer) return
-      setCertifications(prev => [...prev, { ...newCert }])
-      setNewCert({ name: "", issuer: "", year: "", valid: true, expires: "" })
-      setShowAddCert(false)
-    }
+  const handleAddCertification = () => {
+    if (!newCert.name || !newCert.issuer) return
+    setCertifications(prev => [...prev, { ...newCert }])
+    setNewCert({ name: "", issuer: "", year: "", valid: true, expires: "" })
+    setShowAddCert(false)
+  }
 
-    const handleRemoveCertification = (index: number) => {
-      setCertifications(prev => prev.filter((_, i) => i !== index))
-    }
+  const handleRemoveCertification = (index: number) => {
+    setCertifications(prev => prev.filter((_, i) => i !== index))
+  }
 
-    const handleAddCompensationRule = async () => {
-      if (!trainer) return
-      setIsSaving(true)
-      try {
-        await api.createCompensationRule(trainer.userId, {
-          perSessionRate: newCompensation.perSessionRate || null,
-          perHourRate: newCompensation.perHourRate || null,
-          perClassRate: newCompensation.perClassRate || null,
-          perAttendeeRate: newCompensation.perAttendeeRate || null,
-          commissionPercent: newCompensation.commissionPercent || null,
-          effectiveFrom: newCompensation.effectiveFrom || new Date().toISOString().split('T')[0],
-          effectiveTo: newCompensation.effectiveTo || null,
-        })
-        showToast.success("Compensation rule added")
-        setShowAddCompensation(false)
-        setNewCompensation({ perSessionRate: "", perHourRate: "", commissionPercent: "", effectiveFrom: new Date().toISOString().split('T')[0] })
-        loadCompensation()
-      } catch (error: any) {
-        showToast.error(error.message || "Failed to add compensation rule")
-      } finally {
-        setIsSaving(false)
-      }
+  const handleAddCompensationRule = async () => {
+    if (!trainer) return
+    setIsSaving(true)
+    try {
+      await api.createCompensationRule(trainer.userId, {
+        perSessionRate: newCompensation.perSessionRate || null,
+        perHourRate: newCompensation.perHourRate || null,
+        perClassRate: newCompensation.perClassRate || null,
+        perAttendeeRate: newCompensation.perAttendeeRate || null,
+        commissionPercent: newCompensation.commissionPercent || null,
+        effectiveFrom: newCompensation.effectiveFrom || new Date().toISOString().split('T')[0],
+        effectiveTo: newCompensation.effectiveTo || null,
+      })
+      showToast.success("Compensation rule added")
+      setShowAddCompensation(false)
+      setNewCompensation({ perSessionRate: "", perHourRate: "", commissionPercent: "", effectiveFrom: new Date().toISOString().split('T')[0] })
+      loadCompensation()
+    } catch (error: any) {
+      showToast.error(error.message || "Failed to add compensation rule")
+    } finally {
+      setIsSaving(false)
     }
+  }
 
-    const handleDeleteCompensationRule = async (ruleId: number) => {
-      if (!trainer) return
-      try {
-        await api.deleteCompensationRule(trainer.userId, ruleId)
-        showToast.success("Compensation rule deleted")
-        loadCompensation()
-      } catch (error: any) {
-        showToast.error(error.message || "Failed to delete")
-      }
+  const handleDeleteCompensationRule = async (ruleId: number) => {
+    if (!trainer) return
+    try {
+      await api.deleteCompensationRule(trainer.userId, ruleId)
+      showToast.success("Compensation rule deleted")
+      loadCompensation()
+    } catch (error: any) {
+      showToast.error(error.message || "Failed to delete")
     }
+  }
 
-    const handleSaveNotes = () => {
-      if (!trainer) return
-      localStorage.setItem(`trainer_notes_${trainer.userId}`, ownerNotes)
-      setSavedNotes(ownerNotes)
-      showToast.success("Notes saved")
-    }
+  const handleSaveNotes = () => {
+    if (!trainer) return
+    localStorage.setItem(`trainer_notes_${trainer.userId}`, ownerNotes)
+    setSavedNotes(ownerNotes)
+    showToast.success("Notes saved")
+  }
 
   const handleAddMember = async (member: User) => {
     if (!trainer) return
@@ -627,9 +626,9 @@ const EnhancedTrainerActionModal: React.FC<EnhancedTrainerActionModalProps> = ({
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
         >
-          <Editable id="trainer-action-modal" config={{ allowLayout: true, allowStyle: true, allowVisibility: true }}>
           <motion.div
             className="trainer-action-modal trainer-action-modal--redesigned"
+            data-edit-id="trainer-action-modal"
             onClick={(e) => e.stopPropagation()}
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
@@ -695,82 +694,82 @@ const EnhancedTrainerActionModal: React.FC<EnhancedTrainerActionModalProps> = ({
             {/* Content Grid */}
             <div className="trainer-action-modal__content-grid">
               {/* Left Navigation */}
-                <div className="trainer-action-modal__nav-column">
-                  <nav className="side-panel-nav">
-                    <span className="side-panel-nav__label">General</span>
-                    {([
-                      { id: "profile" as TabType, label: "Edit Profile", icon: "profile" },
-                      { id: "members" as TabType, label: "Assigned Members", icon: "members", badge: assignedMembers.length },
-                      { id: "specializations" as TabType, label: "Specializations", icon: "award" },
-                      { id: "schedule" as TabType, label: "Schedule", icon: "calendar" },
-                    ] as const).map(tab => (
-                      <button key={tab.id}
-                        className={`side-panel-nav__item ${activeTab === tab.id ? "side-panel-nav__item--active" : ""}`}
-                        onClick={() => setActiveTab(tab.id)}>
-                        <div className="nav-icon-wrap">
-                          {tab.id === "profile" && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>}
-                          {tab.id === "members" && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>}
-                          {tab.id === "specializations" && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="8" r="7" /><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" /></svg>}
-                          {tab.id === "schedule" && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>}
-                        </div>
-                        <span>{tab.label}</span>
-                        {'badge' in tab && tab.badge !== undefined && <span className="nav-badge">{tab.badge}</span>}
-                      </button>
-                    ))}
-
-                    <div className="side-panel-nav__divider" />
-                    <span className="side-panel-nav__label">Operations</span>
-                    {([
-                      { id: "salary" as TabType, label: "Salary & Pay", icon: "salary" },
-                      { id: "attendance" as TabType, label: "Attendance", icon: "attendance" },
-                      { id: "performance" as TabType, label: "Performance", icon: "chart" },
-                    ] as const).map(tab => (
-                      <button key={tab.id}
-                        className={`side-panel-nav__item ${activeTab === tab.id ? "side-panel-nav__item--active" : ""}`}
-                        onClick={() => {
-                          setActiveTab(tab.id)
-                          if (tab.id === "salary" && compensationRules.length === 0 && !compensationLoading) loadCompensation()
-                          if (tab.id === "attendance" && attendanceRecords.length === 0 && !attendanceLoading) loadAttendance(attendanceDays)
-                        }}>
-                        <div className="nav-icon-wrap">
-                          {tab.id === "salary" && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>}
-                          {tab.id === "attendance" && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><path d="M9 14l2 2 4-4" /></svg>}
-                          {tab.id === "performance" && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /></svg>}
-                        </div>
-                        <span>{tab.label}</span>
-                      </button>
-                    ))}
-
-                    <div className="side-panel-nav__divider" />
-                    <span className="side-panel-nav__label">Communication</span>
-                    {([
-                      { id: "notes" as TabType, label: "Owner Notes", icon: "notes" },
-                      { id: "message" as TabType, label: "Message", icon: "mail" },
-                    ] as const).map(tab => (
-                      <button key={tab.id}
-                        className={`side-panel-nav__item ${activeTab === tab.id ? "side-panel-nav__item--active" : ""}`}
-                        onClick={() => setActiveTab(tab.id)}>
-                        <div className="nav-icon-wrap">
-                          {tab.id === "notes" && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /></svg>}
-                          {tab.id === "message" && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>}
-                        </div>
-                        <span>{tab.label}</span>
-                      </button>
-                    ))}
-
-                    <button
-                      className={`side-panel-nav__item side-panel-nav__item--danger ${activeTab === "delete" ? "side-panel-nav__item--active" : ""}`}
-                      onClick={() => setActiveTab("delete")}>
+              <div className="trainer-action-modal__nav-column">
+                <nav className="side-panel-nav">
+                  <span className="side-panel-nav__label">General</span>
+                  {([
+                    { id: "profile" as TabType, label: "Edit Profile", icon: "profile" },
+                    { id: "members" as TabType, label: "Assigned Members", icon: "members", badge: assignedMembers.length },
+                    { id: "specializations" as TabType, label: "Specializations", icon: "award" },
+                    { id: "schedule" as TabType, label: "Schedule", icon: "calendar" },
+                  ] as const).map(tab => (
+                    <button key={tab.id}
+                      className={`side-panel-nav__item ${activeTab === tab.id ? "side-panel-nav__item--active" : ""}`}
+                      onClick={() => setActiveTab(tab.id)}>
                       <div className="nav-icon-wrap">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <polyline points="3 6 5 6 21 6" />
-                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                        </svg>
+                        {tab.id === "profile" && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>}
+                        {tab.id === "members" && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>}
+                        {tab.id === "specializations" && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="8" r="7" /><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" /></svg>}
+                        {tab.id === "schedule" && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>}
                       </div>
-                      <span>Delete Trainer</span>
+                      <span>{tab.label}</span>
+                      {'badge' in tab && tab.badge !== undefined && <span className="nav-badge">{tab.badge}</span>}
                     </button>
-                  </nav>
-                </div>
+                  ))}
+
+                  <div className="side-panel-nav__divider" />
+                  <span className="side-panel-nav__label">Operations</span>
+                  {([
+                    { id: "salary" as TabType, label: "Salary & Pay", icon: "salary" },
+                    { id: "attendance" as TabType, label: "Attendance", icon: "attendance" },
+                    { id: "performance" as TabType, label: "Performance", icon: "chart" },
+                  ] as const).map(tab => (
+                    <button key={tab.id}
+                      className={`side-panel-nav__item ${activeTab === tab.id ? "side-panel-nav__item--active" : ""}`}
+                      onClick={() => {
+                        setActiveTab(tab.id)
+                        if (tab.id === "salary" && compensationRules.length === 0 && !compensationLoading) loadCompensation()
+                        if (tab.id === "attendance" && attendanceRecords.length === 0 && !attendanceLoading) loadAttendance(attendanceDays)
+                      }}>
+                      <div className="nav-icon-wrap">
+                        {tab.id === "salary" && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>}
+                        {tab.id === "attendance" && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><path d="M9 14l2 2 4-4" /></svg>}
+                        {tab.id === "performance" && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /></svg>}
+                      </div>
+                      <span>{tab.label}</span>
+                    </button>
+                  ))}
+
+                  <div className="side-panel-nav__divider" />
+                  <span className="side-panel-nav__label">Communication</span>
+                  {([
+                    { id: "notes" as TabType, label: "Owner Notes", icon: "notes" },
+                    { id: "message" as TabType, label: "Message", icon: "mail" },
+                  ] as const).map(tab => (
+                    <button key={tab.id}
+                      className={`side-panel-nav__item ${activeTab === tab.id ? "side-panel-nav__item--active" : ""}`}
+                      onClick={() => setActiveTab(tab.id)}>
+                      <div className="nav-icon-wrap">
+                        {tab.id === "notes" && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /></svg>}
+                        {tab.id === "message" && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>}
+                      </div>
+                      <span>{tab.label}</span>
+                    </button>
+                  ))}
+
+                  <button
+                    className={`side-panel-nav__item side-panel-nav__item--danger ${activeTab === "delete" ? "side-panel-nav__item--active" : ""}`}
+                    onClick={() => setActiveTab("delete")}>
+                    <div className="nav-icon-wrap">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <polyline points="3 6 5 6 21 6" />
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                      </svg>
+                    </div>
+                    <span>Delete Trainer</span>
+                  </button>
+                </nav>
+              </div>
 
               {/* Right Content Panel */}
               <div className="trainer-action-modal__content-panel">
@@ -1692,7 +1691,6 @@ const EnhancedTrainerActionModal: React.FC<EnhancedTrainerActionModalProps> = ({
               </div>
             </div>
           </motion.div>
-        </Editable>
         </motion.div>
       )}
     </AnimatePresence>

@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { X, Check, UserX, Clock, Save, Loader2, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { X, Check, UserX, Clock, Save, Loader2, AlertCircle, Users } from 'lucide-react';
 import { trainerApi } from '../../services/trainerApi';
 import type { ClassAttendee } from '../../services/trainerApi';
 import './ClassAttendanceModal.css';
+
+type AttendanceStatus = 'CONFIRMED' | 'PENDING' | 'ABSENT' | 'LATE';
 
 interface ClassAttendanceModalProps {
     isOpen: boolean;
@@ -13,24 +15,16 @@ interface ClassAttendanceModalProps {
 }
 
 const ClassAttendanceModal: React.FC<ClassAttendanceModalProps> = ({
-    isOpen,
-    onClose,
-    classId,
-    classTitle,
-    onSave
+    isOpen, onClose, classId, classTitle, onSave
 }) => {
     const [attendees, setAttendees] = useState<ClassAttendee[]>([]);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Initial fetch when modal opens
     useEffect(() => {
-        if (isOpen && classId) {
-            fetchAttendees(classId);
-        } else {
-            setAttendees([]);
-        }
+        if (isOpen && classId) fetchAttendees(classId);
+        else setAttendees([]);
     }, [isOpen, classId]);
 
     const fetchAttendees = async (id: number) => {
@@ -47,23 +41,24 @@ const ClassAttendanceModal: React.FC<ClassAttendanceModalProps> = ({
         }
     };
 
-    const handleStatusChange = (memberId: number, newStatus: 'CONFIRMED' | 'PENDING' | 'ABSENT') => {
+    const handleStatusChange = useCallback((memberId: number, newStatus: AttendanceStatus) => {
         setAttendees(prev => prev.map(a =>
-            a.memberId === memberId ? { ...a, status: newStatus } : a
+            a.memberId === memberId ? { ...a, status: newStatus as any } : a
         ));
-    };
+    }, []);
+
+    // Bulk-mark all present (CONFIRMED)
+    const handleMarkAllPresent = useCallback(() => {
+        setAttendees(prev => prev.map(a => ({ ...a, status: 'CONFIRMED' as any })));
+    }, []);
 
     const handleSave = async () => {
         if (!classId) return;
         setSaving(true);
         try {
-            // Prepare updates payload
-            const updates = attendees.map(a => ({
-                attendeeId: a.id,
-                status: a.status
-            }));
+            const updates = attendees.map(a => ({ attendeeId: a.id, status: a.status }));
             await trainerApi.updateAttendance(classId, updates);
-            onSave(); // Trigger parent refresh
+            onSave();
             onClose();
         } catch (err) {
             console.error('Failed to save attendance:', err);
@@ -73,11 +68,11 @@ const ClassAttendanceModal: React.FC<ClassAttendanceModalProps> = ({
         }
     };
 
-    // Calculate summary stats
     const stats = {
         confirmed: attendees.filter(a => a.status === 'CONFIRMED').length,
+        late: attendees.filter(a => a.status === 'LATE').length,
         pending: attendees.filter(a => a.status === 'PENDING').length,
-        absent: attendees.filter(a => a.status === 'ABSENT').length
+        absent: attendees.filter(a => a.status === 'ABSENT').length,
     };
 
     if (!isOpen) return null;
@@ -85,15 +80,14 @@ const ClassAttendanceModal: React.FC<ClassAttendanceModalProps> = ({
     return (
         <div className="attendance-modal-overlay">
             <div className="attendance-modal">
+                {/* Header */}
                 <div className="attendance-modal__header">
                     <div className="attendance-modal__title">
                         <h2>Class Attendance</h2>
-                        <p className="attendance-modal__subtitle">
-                            {classTitle}
-                        </p>
+                        <p className="attendance-modal__subtitle">{classTitle}</p>
                     </div>
                     <button className="attendance-modal__close" onClick={onClose}>
-                        <X size={20} />
+                        <X size={18} />
                     </button>
                 </div>
 
@@ -118,10 +112,15 @@ const ClassAttendanceModal: React.FC<ClassAttendanceModalProps> = ({
                         </div>
                     ) : (
                         <>
+                            {/* Summary stats */}
                             <div className="attendance-summary">
                                 <div className="summary-item">
                                     <span className="summary-value confirmed">{stats.confirmed}</span>
                                     <span className="summary-label">Present</span>
+                                </div>
+                                <div className="summary-item">
+                                    <span className="summary-value late">{stats.late}</span>
+                                    <span className="summary-label">Late</span>
                                 </div>
                                 <div className="summary-item">
                                     <span className="summary-value pending">{stats.pending}</span>
@@ -133,6 +132,22 @@ const ClassAttendanceModal: React.FC<ClassAttendanceModalProps> = ({
                                 </div>
                             </div>
 
+                            {/* Bulk action toolbar */}
+                            <div className="attendance-toolbar">
+                                <span className="attendance-toolbar__count">
+                                    {attendees.length} member{attendees.length !== 1 ? 's' : ''}
+                                </span>
+                                <button
+                                    className="attendance-toolbar__bulk-btn"
+                                    onClick={handleMarkAllPresent}
+                                    title="Mark everyone present"
+                                >
+                                    <Users size={13} />
+                                    Mark All Present
+                                </button>
+                            </div>
+
+                            {/* Attendee list */}
                             <div className="attendance-list">
                                 {attendees.map(attendee => (
                                     <div key={attendee.id} className="attendee-item">
@@ -146,33 +161,34 @@ const ClassAttendanceModal: React.FC<ClassAttendanceModalProps> = ({
                                                 <span className="attendee-name">
                                                     {attendee.memberName || 'Unknown Member'}
                                                 </span>
-                                                <span className="attendee-status-label">
-                                                    {attendee.status.toLowerCase()}
+                                                <span className={`attendee-status-label attendee-status-label--${(attendee.status as string).toLowerCase()}`}>
+                                                    {(attendee.status as string).toLowerCase()}
                                                 </span>
                                             </div>
                                         </div>
 
+                                        {/* Status buttons: Present / Late / Pending / Absent */}
                                         <div className="attendee-actions">
                                             <button
                                                 className={`status-btn confirmed ${attendee.status === 'CONFIRMED' ? 'active' : ''}`}
                                                 onClick={() => handleStatusChange(attendee.memberId, 'CONFIRMED')}
                                                 title="Mark Present"
                                             >
-                                                <Check size={16} />
+                                                <Check size={14} />
                                             </button>
                                             <button
-                                                className={`status-btn pending ${attendee.status === 'PENDING' ? 'active' : ''}`}
-                                                onClick={() => handleStatusChange(attendee.memberId, 'PENDING')}
-                                                title="Mark Pending"
+                                                className={`status-btn late ${attendee.status === 'LATE' ? 'active' : ''}`}
+                                                onClick={() => handleStatusChange(attendee.memberId, 'LATE')}
+                                                title="Mark Late"
                                             >
-                                                <Clock size={16} />
+                                                <Clock size={14} />
                                             </button>
                                             <button
                                                 className={`status-btn absent ${attendee.status === 'ABSENT' ? 'active' : ''}`}
                                                 onClick={() => handleStatusChange(attendee.memberId, 'ABSENT')}
                                                 title="Mark Absent"
                                             >
-                                                <X size={16} />
+                                                <X size={14} />
                                             </button>
                                         </div>
                                     </div>
@@ -182,12 +198,11 @@ const ClassAttendanceModal: React.FC<ClassAttendanceModalProps> = ({
                     )}
                 </div>
 
+                {/* Footer */}
                 <div className="attendance-modal__footer">
-                    <button className="btn-secondary" onClick={onClose} disabled={saving}>
-                        Cancel
-                    </button>
+                    <button className="btn-secondary" onClick={onClose} disabled={saving}>Cancel</button>
                     <button className="btn-primary" onClick={handleSave} disabled={saving || loading}>
-                        {saving ? <Loader2 size={16} className="spinner" /> : <Save size={16} />}
+                        {saving ? <Loader2 size={15} className="spinner" /> : <Save size={15} />}
                         Save Changes
                     </button>
                 </div>
