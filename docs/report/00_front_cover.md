@@ -1,26 +1,41 @@
-<div align="center">
-  <h2>SMART GYM MANAGEMENT SYSTEM</h2>
-  <br>
-  <h4>A Full-Stack Web Application for Comprehensive Gym Operations Management (React + Spring Boot + Oracle)</h4>
-</div>
-<br>
+\begin{titlepage}
+\begin{center}
+\vspace*{1in}
 
-| | |
-|:--|:--|
-| **Enrolment Number:** | 23C25512 |
-| **Programme:** | B.Tech (IT) |
-| **Supervisor:** | Dr. Ashutosh Abhangi |
-| **School:** | School of Computer Science Engineering & Technology |
-| **University:** | ITM SLS Baroda University |
-| **Internship Period:** | 17th November 2025 – 17th May 2026 |
-| **Organisation:** | Bharti Soft Tech Pvt. Ltd. |
+{\Large \textbf{SMART GYM MANAGEMENT SYSTEM}}
 
-<br><br>
+\vspace{0.2in}
+{\small \textbf{A Full-Stack Web Application for Comprehensive Gym Operations Management\\(React + Spring Boot + Oracle)}}
 
-<div align="center">
-  <img src="docs/report/styles/university_logo.png" width="300" />
-  
-  <h3>School of Computer Science Engineering & Technology</h3>
-  <h2>ITM SLS BARODA UNIVERSITY</h2>
-  <p>Vadodara</p>
-</div>
+\vspace{0.8in}
+BY
+\vspace{0.2in}
+
+{\large \textbf{SUTHAR ARYAN SUJALKUMAR (23C25512)}}
+
+\vspace{0.8in}
+
+\includegraphics[width=1.7in]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/report/styles/university_logo.png}
+
+\vspace{0.6in}
+
+A REPORT\\
+\vspace{0.1in}
+SUBMITTED TO\\
+\vspace{0.1in}
+{\large \textbf{ITM SLS Baroda University}}\\
+\vspace{0.2in}
+in partial fulfillment of the requirements\\
+for the degree of\\
+\vspace{0.2in}
+{\large \textbf{BACHELOR OF TECHNOLOGY}}\\
+\vspace{0.1in}
+{\large \textbf{Information Technology}}
+
+\vspace{0.6in}
+School of Computer Science Engineering \& Technology\\
+\vspace{0.2in}
+May 2026
+
+\end{center}
+\end{titlepage}

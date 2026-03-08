@@ -1,24 +1,44 @@
-# Title Page {.unnumbered}
+\clearpage
+\pagenumbering{roman}
+\setcounter{page}{1}
 
-**SMART GYM MANAGEMENT SYSTEM**
+\begin{center}
+\vspace*{1in}
 
-*A Full-Stack Web Application for Comprehensive Gym Operations Management*
+{\Large \textbf{SMART GYM MANAGEMENT SYSTEM}}
 
-*(React + Spring Boot + Oracle)*
+\vspace{0.2in}
+{\small \textbf{A Full-Stack Web Application for Comprehensive Gym Operations Management\\(React + Spring Boot + Oracle)}}
 
-A report submitted in partial fulfilment of the requirements for the Bachelor of Technology in Information Technology.
+\vspace{0.8in}
+BY
+\vspace{0.2in}
 
-| | |
-|:--|:--|
-| **Submitted by:** | Suthar Aryan Sujalkumar |
-| **Enrolment Number:** | 23C25512 |
-| **Supervisor:** | Dr. Ashutosh Abhangi |
-| **School:** | School of Computer Science Engineering & Technology |
-| **University:** | ITM SLS Baroda University |
-| **Date:** | March 2026 |
+{\large \textbf{SUTHAR ARYAN SUJALKUMAR (23C25512)}}
 
-<br><br>
+\vspace{0.8in}
 
-<div align="center">
-  <img src="docs/report/styles/university_logo.png" width="300" />
-</div>
+\includegraphics[width=1.7in]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/report/styles/university_logo.png}
+
+\vspace{0.6in}
+
+A REPORT\\
+\vspace{0.1in}
+SUBMITTED TO\\
+\vspace{0.1in}
+{\large \textbf{ITM SLS Baroda University}}\\
+\vspace{0.2in}
+in partial fulfillment of the requirements\\
+for the degree of\\
+\vspace{0.2in}
+{\large \textbf{BACHELOR OF TECHNOLOGY}}\\
+\vspace{0.1in}
+{\large \textbf{Information Technology}}
+
+\vspace{0.6in}
+School of Computer Science Engineering \& Technology\\
+\vspace{0.2in}
+May 2026
+
+\end{center}
+\clearpage
