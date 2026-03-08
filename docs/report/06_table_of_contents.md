@@ -5,12 +5,12 @@
 
 \clearpage
 
-\addcontentsline{toc}{chapter}{List of Figures}
-\listoffigures
+\addcontentsline{toc}{chapter}{List of Tables}
+\listoftables
 
 \clearpage
 
-\addcontentsline{toc}{chapter}{List of Tables}
-\listoftables
+\addcontentsline{toc}{chapter}{List of Figures}
+\listoffigures
 
 \clearpage

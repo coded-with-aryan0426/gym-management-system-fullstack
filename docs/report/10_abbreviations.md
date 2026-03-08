@@ -1,3 +1,20 @@
+# List of Symbols {.unnumbered}
+
+---
+
+| Symbol | Meaning |
+|:-------|:--------|
+| → | Denotes a directional flow or transition |
+| ↔ | Denotes bi-directional communication |
+| < | Less than |
+| ≤ | Less than or equal to |
+| % | Percentage |
+| @ | Java annotation prefix (e.g. `@Entity`, `@Version`) |
+| * | Wildcard or zero-or-more occurrences |
+| { } | Denotes a set or a code block |
+
+---
+
 # List of Abbreviations {.unnumbered}
 
 ---
@@ -49,22 +66,5 @@
 | WCAG | Web Content Accessibility Guidelines |
 | WS | WebSocket |
 | XSS | Cross-Site Scripting |
-
----
-
-# List of Symbols {.unnumbered}
-
----
-
-| Symbol | Meaning |
-|:-------|:--------|
-| → | Denotes a directional flow or transition |
-| ↔ | Denotes bi-directional communication |
-| < | Less than |
-| ≤ | Less than or equal to |
-| % | Percentage |
-| @ | Java annotation prefix (e.g. `@Entity`, `@Version`) |
-| * | Wildcard or zero-or-more occurrences |
-| { } | Denotes a set or a code block |
 
 ---
