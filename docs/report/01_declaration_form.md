@@ -1,18 +1,18 @@
-# Report Status Declaration Form
+# Report Status Declaration Form {.unnumbered}
 
 ---
 
-**UNIVERSITI / UNIVERSITY:** [FILL\_IN: UNIVERSITY NAME]
+**UNIVERSITY:** ITM SLS Baroda University
 
 **SCHOOL / FACULTY:** School of Computer Science Engineering & Technology
 
-**PROGRAMME:** BTech CSE (CSE/IT/CSN/AI)
+**PROGRAMME:** B.Tech (IT)
 
 ---
 
 ## Report Title
 
-**GYM MANAGEMENT SYSTEM: A Full-Stack Web Application for Comprehensive Gym Operations Management**
+**SMART GYM MANAGEMENT SYSTEM: A Full-Stack Web Application for Comprehensive Gym Operations Management (React + Spring Boot + Oracle)**
 
 ---
 
@@ -29,17 +29,17 @@ I hereby declare and authorise the following:
 
 ---
 
-**Student Name:** [FILL\_IN: YOUR FULL NAME]
+**Student Name:** Suthar Aryan Sujalkumar
 
-**Enrolment Number:** [FILL\_IN: e.g. CSE-2024-XXXXXX]
+**Enrolment Number:** 23C25512
 
-**Programme:** BTech Computer Science Engineering
+**Programme:** B.Tech (Information Technology)
 
 **Semester:** [FILL\_IN: e.g. Semester 8]
 
-**Internship Period:** [FILL\_IN: e.g. January 2026 – March 2026]
+**Internship Period:** 17th November 2025 – 17th May 2026
 
-**Organisation / Company:** [FILL\_IN: INTERNSHIP COMPANY NAME]
+**Organisation / Company:** Bharti Soft Tech Pvt. Ltd.
 
 ---
 
@@ -47,7 +47,7 @@ I hereby declare and authorise the following:
 
 ---
 
-**Supervisor / Lecturer:** [FILL\_IN: SUPERVISOR NAME]
+**Supervisor / Lecturer:** Dr. Ashutosh Abhangi
 
 **Supervisor Signature:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ &nbsp;&nbsp;&nbsp; **Date:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_
 

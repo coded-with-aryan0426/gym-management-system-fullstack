@@ -2,48 +2,47 @@
 
 ## 1.1 Background of the Organisation
 
-[FILL\_IN: ORGANISATION NAME] is a [FILL\_IN: brief description of the company, e.g. technology solutions provider / fitness technology startup] based in [FILL\_IN: City, Country], established in [FILL\_IN: Year]. The organisation specialises in [FILL\_IN: domain, e.g. developing digital platforms for the health and fitness industry], serving clients across [FILL\_IN: regions or industries].
+Bharti Soft Tech Pvt. Ltd. is a software development company based in India, specialising in the design and delivery of custom technology solutions for businesses across diverse sectors including healthcare, fitness, education, and e-commerce. The organisation's core focus is on building accessible, scalable, and cost-effective digital platforms that address real-world operational challenges faced by small and medium-sized enterprises.
 
-During the internship period of [FILL\_IN: Start Date] to [FILL\_IN: End Date], the author was placed within the [FILL\_IN: Department Name, e.g. Software Development Department] and was tasked with contributing to the design and development of a full-stack Gym Management System. The organisation's technology team comprises [FILL\_IN: number] developers, designers, and project managers, operating under an agile development methodology with two-week sprint cycles.
+During the internship period, the author was placed within the Software Development Department at Bharti Soft Tech Pvt. Ltd. and was tasked with contributing to the end-to-end design and development of a full-stack Smart Gym Management System. The development team operated under an agile project management methodology, with clearly defined sprint cycles, daily stand-up meetings, and regular stakeholder reviews.
 
-The organisation aims to bridge the gap between the fitness industry's operational needs and modern software capabilities, enabling gym operators of all sizes to manage their businesses efficiently through a unified, accessible, and cost-effective digital platform.
+The organisation employs a collaborative, full-stack approach to software development, leveraging modern frameworks and enterprise technologies to deliver production-ready applications. Under the supervision of Dr. Ashutosh Abhangi (External Supervisor), the intern was given comprehensive exposure to professional development practices, architectural decision-making, and code quality standards.
 
 ## 1.2 Objectives of the Organisation
 
-The primary objectives of [FILL\_IN: ORGANISATION NAME] are as follows:
+The primary objectives of Bharti Soft Tech Pvt. Ltd. are as follows:
 
-1. To develop scalable, open-source software solutions for the fitness and wellness industry.
-2. To reduce the cost barrier associated with enterprise gym management systems for small and medium-sized gyms.
-3. To provide a modular, customisable platform that adapts to diverse gym workflows.
-4. To deliver a secure, role-based system that protects sensitive member and financial data.
-5. To foster real-time communication between gym operators, trainers, and members through integrated digital tools.
+1. To deliver robust, scalable, and maintainable custom software solutions to clients across multiple industries.
+2. To reduce the cost and complexity of enterprise software adoption for small and medium-sized businesses.
+3. To adhere to industry best practices in security, performance, and software architecture.
+4. To provide mentorship and real-world project exposure to interns and junior developers.
+5. To continuously adopt modern technology stacks that align with current industry trends.
 
-These objectives guided the functional and technical requirements of the Gym Management System developed during the internship.
+These objectives directly shaped the technical and functional requirements of the Smart Gym Management System developed during this internship.
 
 ## 1.3 Products and Main Services of the Organisation
 
-[FILL\_IN: ORGANISATION NAME] offers the following products and services:
+Bharti Soft Tech Pvt. Ltd. offers the following core products and services:
 
 | Product / Service | Description |
 |-------------------|-------------|
-| **Gym Management Platform** | A comprehensive full-stack application for membership, trainer, and financial management |
-| **Custom API Integration** | RESTful API services enabling third-party system integration |
-| **Consultancy Services** | Technical advisory for fitness businesses undergoing digital transformation |
-| **Mobile Application** | Companion mobile access for members (future roadmap) |
+| **Custom Web Application Development** | Full-stack web applications built to client specifications |
+| **Mobile Application Development** | Cross-platform mobile apps for Android and iOS |
+| **API Development & Integration** | RESTful API design and third-party service integration |
+| **Database Design & Optimisation** | Schema design, query tuning, and migration services |
+| **IT Consultancy** | Technical advisory for digital transformation projects |
 
-The Gym Management System developed during this internship constitutes the core product offering, encompassing member lifecycle management, real-time communication, personal training coordination, and business analytics.
+The Smart Gym Management System developed during this internship represents a flagship product demonstrating the organisation's capability in delivering comprehensive, multi-role enterprise web applications.
 
 ## 1.4 Organisation Structure and Workflow
 
-The organisational structure of [FILL\_IN: ORGANISATION NAME] follows a flat hierarchy that encourages cross-functional collaboration. The interns operated under the direct supervision of senior developers within the Software Development Department.
+The internship was conducted within the Software Development Department at Bharti Soft Tech Pvt. Ltd. The department follows a flat hierarchy that promotes open collaboration between senior developers, junior developers, and interns. The author worked under the direct supervision of Dr. Ashutosh Abhangi throughout the placement.
 
-The development workflow adhered to the Agile Scrum methodology:
+The development workflow followed the Agile Scrum methodology:
 
-- **Sprint Planning:** Requirements were broken down into user stories and allocated to sprint backlogs at the start of each two-week cycle.
-- **Daily Stand-ups:** Brief daily meetings ensured progress visibility and early identification of blockers.
-- **Sprint Reviews:** Completed features were demonstrated to stakeholders at the end of each sprint.
-- **Retrospectives:** Team reflections on process improvements were incorporated into subsequent sprints.
+- **Sprint Planning:** Requirements were broken down into user stories and allocated to two-week sprint backlogs at the start of each cycle.
+- **Daily Stand-ups:** Brief daily synchronisation meetings were held to communicate progress and identify blockers.
+- **Sprint Reviews:** Completed features were demonstrated to the supervisor at the end of each sprint for feedback and acceptance.
+- **Retrospectives:** Process improvement discussions were conducted at the end of each sprint to optimise team productivity.
 
-Version control was managed using Git with a branching strategy based on feature branches, pull request reviews, and protected main branches. The repository was hosted on GitHub, which also served as the issue tracker and project board.
-
-The technology stack decisions were made collaboratively by the development team, with the author contributing to frontend development using React and TypeScript, as well as backend service implementation using Spring Boot and Java.
+Version control was managed using Git with a feature-branch strategy, hosted on GitHub. Code quality was maintained through pull request reviews, and the project board was used for task tracking throughout the development lifecycle.

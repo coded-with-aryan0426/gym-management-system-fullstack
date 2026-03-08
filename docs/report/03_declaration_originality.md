@@ -2,7 +2,7 @@
 
 ---
 
-I, **[FILL\_IN: YOUR FULL NAME]**, holder of Enrolment Number **[FILL\_IN: CSE-2024-XXXXXX]**, hereby declare that:
+I, **Suthar Aryan Sujalkumar**, holder of Enrolment Number **23C25512**, hereby declare that:
 
 1. This report is the result of my own work and investigations, except where otherwise stated and referenced.
 
@@ -14,15 +14,15 @@ I, **[FILL\_IN: YOUR FULL NAME]**, holder of Enrolment Number **[FILL\_IN: CSE-2
 
 5. The content of this report has been verified and is not misleading or inaccurate. Any opinions expressed are my own.
 
-6. The work described in this report was carried out as part of the internship at **[FILL\_IN: ORGANISATION NAME]** during the period **[FILL\_IN: Start Date]** to **[FILL\_IN: End Date]**.
+6. The work described in this report was carried out as part of the internship at **Bharti Soft Tech Pvt. Ltd.** during the period **17th November 2025** to **17th May 2026**.
 
 ---
 
-**Student Name:** [FILL\_IN: YOUR FULL NAME]
+**Student Name:** Suthar Aryan Sujalkumar
 
-**Enrolment Number:** [FILL\_IN: CSE-2024-XXXXXX]
+**Enrolment Number:** 23C25512
 
-**Programme:** BTech Computer Science Engineering
+**Programme:** B.Tech (Information Technology)
 
 **Date:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
 
