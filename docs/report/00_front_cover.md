@@ -1,9 +1,9 @@
----
-title: "SMART GYM MANAGEMENT SYSTEM"
-subtitle: "A Full-Stack Web Application for Comprehensive Gym Operations Management (React + Spring Boot + Oracle)"
-author: "Suthar Aryan Sujalkumar"
-date: "March 2026"
----
+<div align="center">
+  <h2>SMART GYM MANAGEMENT SYSTEM</h2>
+  <br>
+  <h4>A Full-Stack Web Application for Comprehensive Gym Operations Management (React + Spring Boot + Oracle)</h4>
+</div>
+<br>
 
 | | |
 |:--|:--|

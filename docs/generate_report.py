@@ -48,6 +48,7 @@ FRONT_MATTER = [
     "03_declaration_originality.md",
     "04_acknowledgements.md",
     "05_abstract.md",
+    "06_table_of_contents.md",
     "10_abbreviations.md",
 ]
 
@@ -240,11 +241,14 @@ def build_pdf(combined_md: Path) -> bool:
         "--variable=fontsize:12pt",
         "--variable=papersize:a4paper",
         "--variable=geometry:a4paper,left=1.5in,right=1.0in,top=1.0in,bottom=1.0in,headheight=15pt,headsep=0.3in,footskip=0.4in",
-        "--toc",
-        "--toc-depth=3",
         "--number-sections",
         "--standalone",
     ]
+
+    # Also generate .tex for debugging
+    tex_cmd = cmd.copy()
+    tex_cmd[3] = str(OUTPUT_PDF.with_suffix(".tex"))
+    subprocess.run(tex_cmd, capture_output=True, text=True, timeout=120)
 
     print("\n  Running pandoc...")
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
@@ -299,7 +303,7 @@ def main() -> int:
     print(f"\n  Building PDF...\n{'-' * 60}")
     success = build_pdf(combined_md)
 
-    cleanup()
+    #cleanup()
 
     print("-" * 60)
     if success:
