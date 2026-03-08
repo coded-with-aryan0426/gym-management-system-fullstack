@@ -36,7 +36,6 @@ STYLES_DIR  = REPORT_DIR / "styles"
 TEMPLATE    = STYLES_DIR / "report.latex"
 TEMP_DIR    = DOCS_DIR / ".report_build"
 OUTPUT_PDF  = REPORT_DIR / "GymManagementSystem_Internship_Report.pdf"
-OUTPUT_DOCX = REPORT_DIR / "GymManagementSystem_Internship_Report.docx"
 
 # =============================================================================
 # Chapter Assembly Order
@@ -262,32 +261,6 @@ def build_pdf(combined_md: Path) -> bool:
 
 
 # =============================================================================
-# DOCX Generation (Apple Pages / Microsoft Word compatible)
-# =============================================================================
-
-def build_docx(combined_md: Path) -> bool:
-    """Run pandoc to produce a .docx — openable in Apple Pages and Word."""
-    # Strip raw LaTeX commands (\clearpage etc.) that don't work in docx
-    content = combined_md.read_text(encoding="utf-8")
-    content = re.sub(r'\\(clearpage|vfill|begin\{center\}|end\{center\})', '', content)
-    docx_md = combined_md.parent / "combined_docx.md"
-    docx_md.write_text(content, encoding="utf-8")
-
-    cmd = [
-        "pandoc", str(docx_md),
-        "-o", str(OUTPUT_DOCX),
-        "--toc",
-        "--toc-depth=3",
-        "--number-sections",
-        "--standalone",
-    ]
-    print("  Running pandoc (docx)...")
-    result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
-    docx_md.unlink(missing_ok=True)
-    return result.returncode == 0
-
-
-# =============================================================================
 # Cleanup
 # =============================================================================
 
@@ -326,23 +299,14 @@ def main() -> int:
     print(f"\n  Building PDF...\n{'-' * 60}")
     success = build_pdf(combined_md)
 
-    print(f"\n  Building DOCX (Pages/Word)...\n{'-' * 60}")
-    docx_ok = build_docx(combined_md)
-
     cleanup()
 
     print("-" * 60)
     if success:
         size_mb = OUTPUT_PDF.stat().st_size / 1024 / 1024
-        print(f"  PDF:  {OUTPUT_PDF} ({size_mb:.1f} MB)")
+        print(f"  SUCCESS: {OUTPUT_PDF} ({size_mb:.1f} MB)")
     else:
-        print("  PDF FAILED — check errors above.")
-    if docx_ok:
-        size_mb = OUTPUT_DOCX.stat().st_size / 1024 / 1024
-        print(f"  DOCX: {OUTPUT_DOCX} ({size_mb:.1f} MB)")
-        print("  TIP:  Open .docx in Apple Pages → Export as .pages if needed")
-    else:
-        print("  DOCX FAILED.")
+        print("  FAILED — check errors above.")
 
     print("=" * 60)
     return 0 if success else 1
