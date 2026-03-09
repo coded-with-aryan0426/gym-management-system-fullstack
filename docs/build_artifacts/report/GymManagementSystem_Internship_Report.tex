@@ -1,0 +1,3057 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\documentclass[
+  12pt,
+  a4paperpaper,
+]{report}
+\usepackage{xcolor}
+\usepackage[a4paper,left=1.5in,right=1.0in,top=1.0in,bottom=1.0in,headheight=15pt,headsep=0.3in,footskip=0.4in]{geometry}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{5}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\newenvironment{Shaded}{}{}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{#1}}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.49,0.56,0.16}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{#1}}
+\newcommand{\BuiltInTok}[1]{\textcolor[rgb]{0.00,0.50,0.00}{#1}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.53,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.56,0.13,0.00}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.73,0.13,0.13}{\textit{#1}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.02,0.16,0.49}{#1}}
+\newcommand{\ImportTok}[1]{\textcolor[rgb]{0.00,0.50,0.00}{\textbf{#1}}}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.40,0.40,0.40}{#1}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.74,0.48,0.00}{#1}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.73,0.40,0.53}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.10,0.09,0.49}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\usepackage{longtable,booktabs,array}
+\newcounter{none} % for unnumbered tables
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+%% =============================================================================
+%% University Internship Report — Header Include
+%% Included via pandoc -H flag (does NOT replace pandoc's default template)
+%% =============================================================================
+
+\usepackage{graphicx}
+\usepackage{fontspec}
+\usepackage{setspace}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{caption}
+\usepackage{needspace}
+\usepackage{listings}
+\usepackage{float}
+\usepackage{booktabs}
+\usepackage{longtable}
+
+%% ---- Font ----
+\setmainfont{Times New Roman}
+\setmonofont{Courier New}[Scale=0.88]
+
+%% ---- 1.5 Line Spacing ----
+\setstretch{1.5}
+
+%% ---- Paragraph ----
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+
+%% ---- Header / Footer ----
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\nouppercase{\leftmark}}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+\fancyfoot[L]{\fontsize{10}{12}\selectfont BTech IT \enspace School of Computer Science Engineering \& Technology}
+\fancyfoot[R]{\fontsize{10}{12}\selectfont\thepage}
+
+\fancypagestyle{plain}{%
+  \fancyhf{}
+  \fancyfoot[L]{\fontsize{10}{12}\selectfont BTech IT \enspace School of Computer Science Engineering \& Technology}
+  \fancyfoot[R]{\fontsize{10}{12}\selectfont\thepage}
+  \renewcommand{\headrulewidth}{0pt}
+}
+
+\renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter:\ #1}{}}
+
+%% ---- Chapter Heading ----
+\titleformat{\chapter}[display]
+  {\normalfont\Large\bfseries}{\chaptername\ \thechapter}{10pt}{\Large\bfseries}
+\titlespacing*{\chapter}{0pt}{0pt}{16pt}
+
+\titleformat{\section}{\normalfont\large\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}{\normalfont\normalsize\bfseries}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}{\normalfont\normalsize\bfseries}{\thesubsubsection}{1em}{}
+
+%% ---- Captions (Chapter-Number style: Figure 2-3) ----
+\captionsetup[table]{labelsep=endash, font=small, justification=centering, position=below}
+\captionsetup[figure]{labelsep=endash, font=small, justification=centering, position=below}
+
+\makeatletter
+\renewcommand{\thetable}{\thechapter-\arabic{table}}
+\renewcommand{\thefigure}{\thechapter-\arabic{figure}}
+\@addtoreset{table}{chapter}
+\@addtoreset{figure}{chapter}
+\makeatother
+
+%% ---- Image defaults ----
+\makeatletter\g@addto@macro\@floatboxreset{\centering}\makeatother
+
+%% ---- Widows / Orphans ----
+\widowpenalty=10000
+\clubpenalty=10000
+
+%% ---- Code Listings ----
+\lstset{
+  basicstyle=\fontsize{10}{12}\selectfont\ttfamily,
+  breaklines=true,
+  keepspaces=true,
+  frame=single,
+  showstringspaces=false,
+  tabsize=2
+}
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\author{}
+\date{}
+
+\begin{document}
+
+\begin{titlepage}
+\begin{center}
+\vspace*{0.2in}
+
+{\Large \textbf{SMART GYM MANAGEMENT SYSTEM}}
+
+\vspace{0.1in}
+{\small \textbf{A Full-Stack Web Application for Comprehensive Gym Operations Management\\(React + Spring Boot + Oracle)}}
+
+\vfill
+BY
+\vspace{0.1in}
+
+{\large \textbf{SUTHAR ARYAN SUJALKUMAR (23C25512)}}
+
+\vfill
+
+\includegraphics[width=1.5in]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/styles/university_logo.png}
+
+\vfill
+
+A REPORT\\
+\vspace{0.1in}
+SUBMITTED TO\\
+\vspace{0.1in}
+{\large \textbf{ITM SLS Baroda University}}\\
+\vspace{0.1in}
+in partial fulfillment of the requirements\\
+for the degree of\\
+\vspace{0.1in}
+{\large \textbf{BACHELOR OF TECHNOLOGY}}\\
+\vspace{0.1in}
+{\large \textbf{Information Technology}}
+
+\vfill
+School of Computer Science Engineering \& Technology\\
+\vspace{0.1in}
+May 2026
+
+\end{center}
+\end{titlepage}
+
+\clearpage
+
+\chapter*{Report Status Declaration
+Form}\label{report-status-declaration-form}
+\addcontentsline{toc}{chapter}{Report Status Declaration Form}
+
+\textbf{UNIVERSITY:} ITM SLS Baroda University
+
+\textbf{SCHOOL / FACULTY:} School of Computer Science Engineering \&
+Technology
+
+\textbf{PROGRAMME:} B.Tech (IT)
+
+\section{Report Title}\label{report-title}
+
+\textbf{SMART GYM MANAGEMENT SYSTEM: A Full-Stack Web Application for
+Comprehensive Gym Operations Management (React + Spring Boot + Oracle)}
+
+\section{Project / Dissertation Status
+Declaration}\label{project-dissertation-status-declaration}
+
+I hereby declare and authorise the following:
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.6190}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.3810}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Declaration
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Status
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+This report contains confidential information & ☐ YES ~~ ☑ NO \\
+Permission is granted to the library to make digital copies & ☑ YES ~~ ☐
+NO \\
+Permission is granted for a copy to be held on the university system & ☑
+YES ~~ ☐ NO \\
+This work may be made available for loan and photocopying & ☑ YES ~~ ☐
+NO \\
+\end{longtable}
+}
+
+\textbf{Student Name:} Suthar Aryan Sujalkumar
+
+\textbf{Enrolment Number:} 23C25512
+
+\textbf{Programme:} B.Tech (Information Technology)
+
+\textbf{Semester:} {[}FILL\_IN: e.g.~Semester 8{]}
+
+\textbf{Internship Period:} 17th November 2025 -- 17th May 2026
+
+\textbf{Organisation / Company:} Bharti Soft Tech Pvt. Ltd.
+
+\textbf{Student Signature:}
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ ~~~ \textbf{Date:}
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+\textbf{Supervisor / Lecturer:} Dr.~Ashutosh Abhangi
+
+\textbf{Supervisor Signature:}
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ ~~~ \textbf{Date:}
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+\clearpage
+
+\chapter*{Declaration of Originality}\label{declaration-of-originality}
+\addcontentsline{toc}{chapter}{Declaration of Originality}
+
+I, \textbf{Suthar Aryan Sujalkumar}, holder of Enrolment Number
+\textbf{23C25512}, hereby declare that:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  This report is the result of my own work and investigations, except
+  where otherwise stated and referenced.
+\item
+  This report has not been submitted previously, in whole or in part,
+  for any other academic award at this or any other institution.
+\item
+  Where other sources of information have been used, they have been
+  acknowledged in the text and listed in the Bibliography.
+\item
+  I am aware of and understand the university's policy on plagiarism and
+  certify that this thesis does not involve plagiarism.
+\item
+  The content of this report has been verified and is not misleading or
+  inaccurate. Any opinions expressed are my own.
+\item
+  The work described in this report was carried out as part of the
+  internship at \textbf{Bharti Soft Tech Pvt. Ltd.} during the period
+  \textbf{17th November 2025} to \textbf{17th May 2026}.
+\end{enumerate}
+
+\textbf{Student Name:} Suthar Aryan Sujalkumar
+
+\textbf{Enrolment Number:} 23C25512
+
+\textbf{Programme:} B.Tech (Information Technology)
+
+\textbf{Date:} \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+\textbf{Signature:} \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+\emph{I acknowledge that a false declaration is a form of academic
+dishonesty and may result in disciplinary action.}
+
+\clearpage
+
+\chapter*{Acknowledgements}\label{acknowledgements}
+\addcontentsline{toc}{chapter}{Acknowledgements}
+
+The completion of this internship report would not have been possible
+without the guidance, support, and encouragement of several individuals.
+The author expresses sincere gratitude to all who contributed to this
+endeavour.
+
+Firstly, the author would like to thank \textbf{Dr.~Ashutosh Abhangi},
+External Supervisor, Bharti Soft Tech Pvt. Ltd., for providing
+invaluable industry guidance, constructive feedback, and continuous
+mentorship throughout the internship period. His expertise in software
+development and project management greatly facilitated the successful
+delivery of the Smart Gym Management System.
+
+Secondly, sincere appreciation is extended to the management and
+technical team at \textbf{Bharti Soft Tech Pvt. Ltd.} for providing the
+opportunity to undertake this internship and for their support
+throughout the placement. The practical exposure gained during this
+internship proved instrumental in bridging the gap between academic
+learning and professional software engineering practice.
+
+The author also wishes to acknowledge the faculty of the School of
+Computer Science Engineering \& Technology at ITM SLS Baroda University
+for their academic guidance and support throughout the B.Tech (IT)
+programme.
+
+Finally, sincere gratitude is extended to family and friends for their
+unwavering encouragement and moral support.
+
+\clearpage
+
+\chapter*{Abstract}\label{abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+
+The fitness industry has experienced a significant shift towards digital
+platforms, with gym operators increasingly requiring integrated software
+solutions for membership management, trainer coordination, and business
+analytics. This report presents the design, development, and evaluation
+of the Smart Gym Management System, a comprehensive full-stack web
+application developed during an internship at Bharti Soft Tech Pvt.
+Ltd.~under the supervision of Dr.~Ashutosh Abhangi.
+
+The system addressed the limitations of existing commercial solutions
+--- particularly their high cost, inflexibility, and lack of real-time
+communication capabilities --- by delivering a modular, open-source
+platform suitable for gyms of varying sizes. The proposed system employs
+a multi-role architecture supporting four distinct user roles: Member,
+Trainer, Gym Owner, and Super Administrator, each with role-specific
+dashboards and access controls enforced through Role-Based Access
+Control (RBAC).
+
+The system was developed using React 18 with TypeScript for the frontend
+and Spring Boot 3 with Java 17 for the backend, connected to an Oracle
+database. Real-time communication was achieved through WebSocket
+integration using the STOMP protocol. Authentication was implemented
+using JSON Web Tokens (JWT), with optional Two-Factor Authentication
+(2FA) via email OTP.
+
+Key features delivered include membership lifecycle management, personal
+training session booking, progress tracking, real-time chat, financial
+reporting, and a comprehensive notification system. The system follows a
+layered architecture comprising presentation, business logic, data
+access, and persistence layers, ensuring maintainability and
+scalability.
+
+Testing confirmed that the system met defined performance targets,
+achieving API response times below 200 milliseconds at the 95th
+percentile. Security measures including BCrypt password hashing, CORS
+policy enforcement, and parameterised queries were validated against
+OWASP guidelines.
+
+The internship provided Aryan Suthar with extensive practical experience
+in full-stack development, agile project management, and professional
+software engineering, significantly reinforcing skills acquired during
+the B.Tech (IT) programme.
+
+\textbf{Keywords:} Gym Management System, React, Spring Boot, Oracle,
+Role-Based Access Control, JWT, WebSocket.
+
+\clearpage
+
+\clearpage
+
+\pdfbookmark[0]{Table of Contents}{toc}
+\tableofcontents
+
+\clearpage
+
+\addcontentsline{toc}{chapter}{List of Tables}
+\listoftables
+
+\clearpage
+
+\addcontentsline{toc}{chapter}{List of Figures}
+\listoffigures
+
+\clearpage
+
+\clearpage
+
+\chapter*{List of Symbols}\label{list-of-symbols}
+\addcontentsline{toc}{chapter}{List of Symbols}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}ll@{}}
+\toprule\noalign{}
+Symbol & Meaning \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+→ & Denotes a directional flow or transition \\
+↔ & Denotes bi-directional communication \\
+\textless{} & Less than \\
+≤ & Less than or equal to \\
+\% & Percentage \\
+@ & Java annotation prefix (e.g.~\texttt{@Entity}, \texttt{@Version}) \\
+* & Wildcard or zero-or-more occurrences \\
+\{ \} & Denotes a set or a code block \\
+\end{longtable}
+}
+
+\chapter*{List of Abbreviations}\label{list-of-abbreviations}
+\addcontentsline{toc}{chapter}{List of Abbreviations}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}ll@{}}
+\toprule\noalign{}
+Abbreviation & Definition \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+2FA & Two-Factor Authentication \\
+ACID & Atomicity, Consistency, Isolation, Durability \\
+API & Application Programming Interface \\
+BCrypt & Blowfish Crypt (password hashing algorithm) \\
+CORS & Cross-Origin Resource Sharing \\
+CRM & Customer Relationship Management \\
+CSS & Cascading Style Sheets \\
+CRUD & Create, Read, Update, Delete \\
+DB & Database \\
+DTO & Data Transfer Object \\
+E2E & End-to-End (Testing) \\
+ER & Entity-Relationship \\
+GDPR & General Data Protection Regulation \\
+HTML & HyperText Markup Language \\
+HTTP & HyperText Transfer Protocol \\
+HTTPS & HyperText Transfer Protocol Secure \\
+IDE & Integrated Development Environment \\
+JPA & Java Persistence API \\
+JSON & JavaScript Object Notation \\
+JWT & JSON Web Token \\
+MVC & Model-View-Controller \\
+NIST & National Institute of Standards and Technology \\
+OAuth & Open Authorisation \\
+ORM & Object-Relational Mapping \\
+OTP & One-Time Password \\
+OWASP & Open Web Application Security Project \\
+PCI-DSS & Payment Card Industry Data Security Standard \\
+POS & Point of Sale \\
+PT & Personal Training \\
+RBAC & Role-Based Access Control \\
+REST & Representational State Transfer \\
+RFC & Request for Comments \\
+SaaS & Software as a Service \\
+SMS & Short Message Service \\
+SQL & Structured Query Language \\
+STOMP & Simple Text Oriented Messaging Protocol \\
+TLS & Transport Layer Security \\
+TOC & Table of Contents \\
+UI & User Interface \\
+UML & Unified Modelling Language \\
+URL & Uniform Resource Locator \\
+UX & User Experience \\
+WCAG & Web Content Accessibility Guidelines \\
+WS & WebSocket \\
+XSS & Cross-Site Scripting \\
+\end{longtable}
+}
+
+\clearpage
+
+\chapter{Introduction}\label{introduction}
+
+\section{Background of the
+Organisation}\label{background-of-the-organisation}
+
+Bharti Soft Tech Pvt. Ltd.~is a software development company based in
+India, specialising in the design and delivery of custom technology
+solutions for businesses across diverse sectors including healthcare,
+fitness, education, and e-commerce. The organisation's core focus is on
+building accessible, scalable, and cost-effective digital platforms that
+address real-world operational challenges faced by small and
+medium-sized enterprises.
+
+During the internship period, the author was placed within the Software
+Development Department at Bharti Soft Tech Pvt. Ltd.~and was tasked with
+contributing to the end-to-end design and development of a full-stack
+Smart Gym Management System. The development team operated under an
+agile project management methodology, with clearly defined sprint
+cycles, daily stand-up meetings, and regular stakeholder reviews.
+
+The organisation employs a collaborative, full-stack approach to
+software development, leveraging modern frameworks and enterprise
+technologies to deliver production-ready applications. Under the
+supervision of Dr.~Ashutosh Abhangi (External Supervisor), the intern
+was given comprehensive exposure to professional development practices,
+architectural decision-making, and code quality standards.
+
+\section{Objectives of the
+Organisation}\label{objectives-of-the-organisation}
+
+The primary objectives of Bharti Soft Tech Pvt. Ltd.~are as follows:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  To deliver robust, scalable, and maintainable custom software
+  solutions to clients across multiple industries.
+\item
+  To reduce the cost and complexity of enterprise software adoption for
+  small and medium-sized businesses.
+\item
+  To adhere to industry best practices in security, performance, and
+  software architecture.
+\item
+  To provide mentorship and real-world project exposure to interns and
+  junior developers.
+\item
+  To continuously adopt modern technology stacks that align with current
+  industry trends.
+\end{enumerate}
+
+These objectives directly shaped the technical and functional
+requirements of the Smart Gym Management System developed during this
+internship.
+
+\section{Products and Main Services of the
+Organisation}\label{products-and-main-services-of-the-organisation}
+
+Bharti Soft Tech Pvt. Ltd.~offers the following core products and
+services:
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5938}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.4062}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Product / Service
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Description
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{Custom Web Application Development} & Full-stack web
+applications built to client specifications \\
+\textbf{Mobile Application Development} & Cross-platform mobile apps for
+Android and iOS \\
+\textbf{API Development \& Integration} & RESTful API design and
+third-party service integration \\
+\textbf{Database Design \& Optimisation} & Schema design, query tuning,
+and migration services \\
+\textbf{IT Consultancy} & Technical advisory for digital transformation
+projects \\
+\end{longtable}
+}
+
+The Smart Gym Management System developed during this internship
+represents a flagship product demonstrating the organisation's
+capability in delivering comprehensive, multi-role enterprise web
+applications.
+
+\section{Organisation Structure and
+Workflow}\label{organisation-structure-and-workflow}
+
+The internship was conducted within the Software Development Department
+at Bharti Soft Tech Pvt. Ltd.~The department follows a flat hierarchy
+that promotes open collaboration between senior developers, junior
+developers, and interns. The author worked under the direct supervision
+of Dr.~Ashutosh Abhangi throughout the placement.
+
+The development workflow followed the Agile Scrum methodology:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Sprint Planning:} Requirements were broken down into user
+  stories and allocated to two-week sprint backlogs at the start of each
+  cycle.
+\item
+  \textbf{Daily Stand-ups:} Brief daily synchronisation meetings were
+  held to communicate progress and identify blockers.
+\item
+  \textbf{Sprint Reviews:} Completed features were demonstrated to the
+  supervisor at the end of each sprint for feedback and acceptance.
+\item
+  \textbf{Retrospectives:} Process improvement discussions were
+  conducted at the end of each sprint to optimise team productivity.
+\end{itemize}
+
+Version control was managed using Git with a feature-branch strategy,
+hosted on GitHub. Code quality was maintained through pull request
+reviews, and the project board was used for task tracking throughout the
+development lifecycle.
+
+\clearpage
+
+\chapter{Literature Review - Gym Management
+System}\label{literature-review---gym-management-system}
+
+\section{Introduction}\label{introduction-1}
+
+The fitness industry has experienced significant digital transformation,
+with gym management systems evolving from simple membership tracking
+tools to comprehensive platforms integrating member engagement, trainer
+coordination, and business analytics. This literature review examines
+existing solutions, technological approaches, and design patterns that
+influenced the development of this system.
+
+\section{Existing Gym Management
+Systems}\label{existing-gym-management-systems}
+
+\subsection{Commercial Solutions}\label{commercial-solutions}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2286}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3714}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+System
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Key Features
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Limitations
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{Mindbody} & Booking, payments, marketing & High cost, complex
+setup \\
+\textbf{Zen Planner} & Membership, billing, reporting & Limited
+customization \\
+\textbf{GymMaster} & Access control, POS, member app &
+Desktop-focused \\
+\textbf{PushPress} & CRM, automation, mobile app & Pricing tier
+restrictions \\
+\textbf{Wodify} & CrossFit focus, performance tracking & Niche market
+focus \\
+\end{longtable}
+}
+
+\subsection{Gap Analysis}\label{gap-analysis}
+
+Existing solutions often present challenges: - \textbf{Cost Barriers}:
+Enterprise pricing models exclude small gyms - \textbf{Inflexibility}:
+Limited customization for unique workflows - \textbf{Integration
+Complexity}: Difficulty integrating with existing tools -
+\textbf{Feature Overload}: Unnecessary complexity for basic needs
+
+Our system addresses these by providing: - Open-source foundation for
+cost reduction - Modular architecture for customization - REST API for
+easy integration - Role-based feature access
+
+\section{Technology Stack
+Justification}\label{technology-stack-justification}
+
+\subsection{Frontend: React with
+TypeScript}\label{frontend-react-with-typescript}
+
+\textbf{Selection Rationale:} - \textbf{Component-Based Architecture}:
+Enables reusable UI components {[}1{]} - \textbf{Virtual DOM}: Optimizes
+rendering performance {[}2{]} - \textbf{TypeScript}: Adds type safety,
+reducing runtime errors by 15-25\% {[}3{]} - \textbf{Ecosystem}: Rich
+library support (React Router, Axios, Framer Motion)
+
+\textbf{Alternatives Considered:} - Vue.js: Simpler learning curve but
+smaller ecosystem - Angular: More opinionated, steeper learning curve -
+Svelte: Newer, less enterprise adoption
+
+\subsection{Backend: Spring Boot with
+Java}\label{backend-spring-boot-with-java}
+
+\textbf{Selection Rationale:} - \textbf{Enterprise Ready}: Battle-tested
+in production environments {[}4{]} - \textbf{Dependency Injection}:
+Promotes loose coupling and testability - \textbf{Spring Security}:
+Comprehensive authentication/authorization {[}5{]} -
+\textbf{JPA/Hibernate}: Robust ORM with Oracle support -
+\textbf{Convention over Configuration}: Rapid development
+
+\textbf{Alternatives Considered:} - Node.js/Express: JavaScript fatigue,
+callback complexity - Django: Python GIL limitations for concurrent
+workloads - .NET Core: Smaller open-source community
+
+\subsection{Database: Oracle}\label{database-oracle}
+
+\textbf{Selection Rationale:} - \textbf{ACID Compliance}: Data integrity
+for financial transactions - \textbf{Scalability}: Handles growing
+member data - \textbf{Enterprise Features}: Advanced security, auditing
+- \textbf{JPA Compatibility}: Seamless Hibernate integration
+
+\section{Architectural Patterns}\label{architectural-patterns}
+
+\subsection{Multi-Tenancy}\label{multi-tenancy}
+
+The system implements \textbf{Schema-Level Multi-Tenancy} where: - Each
+gym operates as an isolated tenant - Data segregation ensures privacy -
+Shared infrastructure reduces costs
+
+This approach aligns with SaaS best practices described by Chong and
+Carraro {[}6{]}.
+
+\subsection{Role-Based Access Control
+(RBAC)}\label{role-based-access-control-rbac}
+
+Implementation follows NIST RBAC model {[}7{]}: - \textbf{Core RBAC}:
+User-role and role-permission assignments - \textbf{Hierarchical RBAC}:
+Role inheritance (Admin \textgreater{} Owner \textgreater{} Trainer
+\textgreater{} Member) - \textbf{Constrained RBAC}: Separation of duties
+for sensitive operations
+
+\subsection{JWT-Based Authentication}\label{jwt-based-authentication}
+
+Stateless authentication using JSON Web Tokens aligns with RFC 7519
+{[}8{]}: - Self-contained claims reduce database lookups - Enables
+horizontal scaling - Supports single sign-on patterns
+
+\section{Real-Time Communication}\label{real-time-communication}
+
+\subsection{WebSocket Implementation}\label{websocket-implementation}
+
+The chat system utilizes WebSocket (RFC 6455) {[}9{]} for: -
+Bi-directional communication - Lower latency than polling (\textless{}
+50ms vs 1000ms+) - Reduced server load
+
+Implementation uses Spring WebSocket with STOMP protocol for message
+routing.
+
+\subsection{Push Notifications}\label{push-notifications}
+
+Notification system implements observer pattern {[}10{]}: - Event-driven
+architecture - Loose coupling between modules - Scalable message
+delivery
+
+\section{Security Considerations}\label{security-considerations}
+
+\subsection{Authentication Security}\label{authentication-security}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Password Hashing}: BCrypt with 12 rounds (recommended by OWASP
+  {[}11{]})
+\item
+  \textbf{Token Security}: JWT with HMAC-SHA512 signature
+\item
+  \textbf{Session Management}: Stateless tokens with expiry
+\end{itemize}
+
+\subsection{Data Protection}\label{data-protection}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Input Validation}: Server-side validation prevents injection
+\item
+  \textbf{CORS Policy}: Whitelist-based origin control
+\item
+  \textbf{Soft Deletes}: Data recovery support
+\end{itemize}
+
+\section{Related Work}\label{related-work}
+
+\subsection{Academic Research}\label{academic-research}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2800}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2800}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4400}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Study
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Focus
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Relevance
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Sharma et al.~(2020) & Fitness app UX patterns & UI design principles \\
+Chen \& Lee (2019) & Gym member retention & Engagement features \\
+Rodriguez (2021) & SaaS multi-tenancy & Architecture decisions \\
+Williams (2022) & Microservices in fitness & Scalability patterns \\
+\end{longtable}
+}
+
+\subsection{Industry Standards}\label{industry-standards}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{GDPR Compliance}: Data protection for EU markets
+\item
+  \textbf{PCI-DSS}: Payment data security guidelines
+\item
+  \textbf{WCAG 2.1}: Accessibility standards
+\end{itemize}
+
+\section{Comparative Analysis}\label{comparative-analysis}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}lccc@{}}
+\toprule\noalign{}
+Feature & Our System & Mindbody & Zen Planner \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Multi-Role Auth & Yes & Yes & Yes \\
+Real-time Chat & Yes & No & No \\
+OAuth Integration & Yes & Yes & Partial \\
+Progress Tracking & Yes & Yes & Yes \\
+Custom Branding & Yes & Paid & Paid \\
+API Access & Yes & Paid & Limited \\
+Open Source & Yes & No & No \\
+Self-Hosted Option & Yes & No & No \\
+\end{longtable}
+}
+
+\section{Conclusion}\label{conclusion}
+
+This gym management system synthesizes best practices from commercial
+solutions while addressing their limitations. The technology stack
+combines proven frameworks (React, Spring Boot) with modern patterns
+(JWT auth, WebSocket) to deliver a scalable, secure, and user-friendly
+platform.
+
+Key innovations include: - Unified multi-role authentication - Real-time
+trainer-member communication - Comprehensive progress tracking -
+Flexible membership management
+
+The modular architecture ensures adaptability for diverse gym
+requirements while maintaining code quality and security standards.
+
+\clearpage
+
+\chapter{Overall Experience Gained from the
+Internship}\label{overall-experience-gained-from-the-internship}
+
+\section{Reason for Selecting the
+Organisation}\label{reason-for-selecting-the-organisation}
+
+The decision to undertake the internship at Bharti Soft Tech Pvt.
+Ltd.~was motivated by several specific factors. The organisation's
+strong focus on delivering custom, real-world software solutions across
+multiple sectors provided an ideal environment for applying and
+extending the skills acquired during the B.Tech (IT) programme. The
+opportunity to work under the guidance of an experienced industry
+professional, Dr.~Ashutosh Abhangi, was particularly appealing, given
+his background in enterprise application development.
+
+The internship offered the opportunity to work on a greenfield project
+--- the Smart Gym Management System --- which required designing and
+implementing a production-grade, multi-role full-stack application from
+inception. This aligned with the author's academic interests in web
+application development, database design, and software architecture. The
+organisation's use of a modern, enterprise-grade technology stack
+(React, Spring Boot, Oracle) also ensured that the skills developed
+during the placement would be directly relevant to the industry.
+
+Furthermore, Bharti Soft Tech Pvt. Ltd.'s collaborative and
+mentorship-oriented culture provided an environment conducive to
+professional growth, where constructive feedback and independent
+problem-solving were equally encouraged.
+
+\section{Workflow of the Department}\label{workflow-of-the-department}
+
+The Software Development Department at Bharti Soft Tech Pvt.
+Ltd.~operated under an Agile Scrum framework. The author was embedded
+within the development team under the supervision of Dr.~Ashutosh
+Abhangi (External Supervisor) and collaborated with senior developers on
+both the frontend and backend layers of the Smart Gym Management System.
+
+The weekly workflow followed the structure outlined below:
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.6667}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Day
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Activity
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Monday & Sprint planning and backlog grooming \\
+Tuesday -- Thursday & Active feature development and daily stand-ups \\
+Friday & Code reviews, pull request merges, sprint review, and
+retrospective \\
+\end{longtable}
+}
+
+Each sprint produced a functional increment of the system, which was
+deployed to a local staging environment for review. Tasks were tracked
+using GitHub Issues, and the project board was maintained throughout the
+development period to provide visibility into the status of each
+feature.
+
+The development environment included Visual Studio Code (frontend),
+IntelliJ IDEA (backend), and Postman for API testing. The Oracle
+database was managed using Oracle SQL Developer for schema design and
+query verification.
+
+\section{Tasks Allotted During the
+Internship}\label{tasks-allotted-during-the-internship}
+
+The internship tasks were distributed across frontend and backend
+development, covering all major modules of the Smart Gym Management
+System. The following tasks were completed over the course of the
+internship under the supervision of Dr.~Ashutosh Abhangi:
+
+\subsection{Frontend Development (React +
+TypeScript)}\label{frontend-development-react-typescript}
+
+\begin{itemize}
+\tightlist
+\item
+  Designed and implemented the \textbf{multi-role dashboard} system,
+  delivering distinct, role-specific dashboards for Members, Trainers,
+  Gym Owners, and Super Administrators using React 18 and TypeScript.
+\item
+  Developed reusable UI components for membership packages, personal
+  training sessions, progress tracking charts (Recharts), and financial
+  analytics dashboards.
+\item
+  Implemented the \textbf{real-time chat interface} using Socket.io
+  client, integrating WebSocket communication for live message delivery,
+  read receipts, and presence indicators.
+\item
+  Built the \textbf{notification centre} with in-app toast notifications
+  and badge counters, consuming server-sent events from the backend via
+  WebSocket.
+\item
+  Created responsive CSS layouts for all pages, ensuring compatibility
+  across screen sizes.
+\item
+  Integrated Axios for all API communication, implementing
+  request/response interceptors for JWT token injection and global error
+  handling.
+\end{itemize}
+
+\subsection{Backend Development (Spring Boot + Java +
+Oracle)}\label{backend-development-spring-boot-java-oracle}
+
+\begin{itemize}
+\tightlist
+\item
+  Implemented the \textbf{authentication and authorisation layer} using
+  Spring Security 6 and JJWT, including JWT generation, validation,
+  refresh token management, and Two-Factor Authentication (2FA) via
+  email OTP.
+\item
+  Developed the \textbf{membership management module}, covering package
+  creation, subscription approval workflows, auto-expiry scheduling, and
+  status transitions (Active, Expired, Suspended).
+\item
+  Built the \textbf{personal training session booking system}, enabling
+  members to browse trainer availability, book sessions, and receive
+  session confirmations with credit deduction tracking.
+\item
+  Implemented Spring WebSocket with STOMP message routing for the
+  real-time messaging subsystem.
+\item
+  Designed and optimised JPA entity relationships and repository queries
+  for the Oracle database, applying lazy loading and strategic indexing
+  to achieve sub-200ms API response times.
+\item
+  Configured method-level security using \texttt{@PreAuthorize}
+  annotations to enforce role-based access control at the service layer.
+\end{itemize}
+
+\subsection{Documentation and Testing}\label{documentation-and-testing}
+
+\begin{itemize}
+\tightlist
+\item
+  Authored all technical documentation in the \texttt{docs/} directory,
+  including system architecture diagrams, ER diagrams, UML class and
+  sequence diagrams, and DFD models using Mermaid.js.
+\item
+  Participated in code review sessions, providing and receiving feedback
+  on code quality, security practices, and performance optimisation.
+\item
+  Wrote unit tests for critical service methods using JUnit 5 and
+  Mockito, covering authentication, membership, and session booking
+  modules.
+\end{itemize}
+
+\clearpage
+
+\chapter{System Architecture - Gym Management
+System}\label{system-architecture---gym-management-system}
+
+\section{High-Level Architecture}\label{high-level-architecture}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_system_architecture_0.png}
+\end{figure}
+
+\section{Technology Stack}\label{technology-stack}
+
+\subsection{Frontend}\label{frontend}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}lll@{}}
+\toprule\noalign{}
+Technology & Version & Purpose \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{React} & 18.x & UI Library \\
+\textbf{TypeScript} & 5.x & Type Safety \\
+\textbf{Vite} & 5.x & Build Tool \\
+\textbf{React Router} & 6.x & Client Routing \\
+\textbf{Axios} & 1.x & HTTP Client \\
+\textbf{Socket.io Client} & 4.x & Real-time Communication \\
+\textbf{Framer Motion} & 10.x & Animations \\
+\textbf{Lucide React} & - & Icons \\
+\textbf{Recharts} & 2.x & Data Visualization \\
+\end{longtable}
+}
+
+\subsection{Backend}\label{backend}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}lll@{}}
+\toprule\noalign{}
+Technology & Version & Purpose \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{Spring Boot} & 3.x & Application Framework \\
+\textbf{Java} & 17+ & Programming Language \\
+\textbf{Spring Security} & 6.x & Authentication \& Authorization \\
+\textbf{Spring Data JPA} & 3.x & Data Access \\
+\textbf{Spring WebSocket} & - & Real-time Messaging \\
+\textbf{Hibernate} & 6.x & ORM \\
+\textbf{Lombok} & 1.18.x & Boilerplate Reduction \\
+\textbf{JJWT} & 0.11.x & JWT Handling \\
+\end{longtable}
+}
+
+\subsection{Database \& Infrastructure}\label{database-infrastructure}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}ll@{}}
+\toprule\noalign{}
+Technology & Purpose \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{Oracle Database} & Primary Data Store \\
+\textbf{Spring Cache} & Response Caching \\
+\textbf{HikariCP} & Connection Pooling \\
+\end{longtable}
+}
+
+\subsection{External Services}\label{external-services}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}ll@{}}
+\toprule\noalign{}
+Service & Purpose \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{Google OAuth} & Social Login \\
+\textbf{Facebook OAuth} & Social Login \\
+\textbf{SMTP} & Email Notifications \\
+\textbf{Twilio} & SMS OTP \\
+\end{longtable}
+}
+
+\section{Component Architecture}\label{component-architecture}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_system_architecture_1.png}
+\end{figure}
+
+\section{Authentication Flow}\label{authentication-flow}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_system_architecture_2.png}
+\end{figure}
+
+\section{Database Architecture}\label{database-architecture}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_system_architecture_3.png}
+\end{figure}
+
+\section{Deployment Architecture}\label{deployment-architecture}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_system_architecture_4.png}
+\end{figure}
+
+\section{Security Architecture}\label{security-architecture}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}lll@{}}
+\toprule\noalign{}
+Layer & Mechanism & Implementation \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{Transport} & TLS/HTTPS & SSL Certificate \\
+\textbf{Authentication} & JWT & Spring Security + JJWT \\
+\textbf{Authorization} & RBAC & Custom Permission Service \\
+\textbf{Password} & BCrypt & Spring Security \\
+\textbf{Session} & Stateless & JWT Tokens \\
+\textbf{2FA} & OTP & Email/SMS Verification \\
+\textbf{Data} & Soft Deletes & Entity Annotations \\
+\textbf{CORS} & Whitelist & Spring CORS Config \\
+\end{longtable}
+}
+
+\section{Scalability Considerations}\label{scalability-considerations}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Multi-Tenancy}: Each gym is a separate tenant with isolated
+  data
+\item
+  \textbf{Caching}: Spring Cache for frequently accessed data
+\item
+  \textbf{Connection Pooling}: HikariCP for database connections
+\item
+  \textbf{Lazy Loading}: JPA relationship optimization
+\item
+  \textbf{Stateless Auth}: JWT enables horizontal scaling
+\item
+  \textbf{WebSocket}: Dedicated connection management for real-time
+  features
+\end{enumerate}
+
+\clearpage
+
+\chapter{Entity-Relationship Diagram - Gym Management
+System}\label{entity-relationship-diagram---gym-management-system}
+
+\section{User \& Authentication
+Entities}\label{user-authentication-entities}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_er_diagram_0.png}
+\end{figure}
+
+\section{Gym Management Entities}\label{gym-management-entities}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_er_diagram_1.png}
+\end{figure}
+
+\section{Membership Entities}\label{membership-entities}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_er_diagram_2.png}
+\end{figure}
+
+\section{Training \& Session Entities}\label{training-session-entities}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_er_diagram_3.png}
+\end{figure}
+
+\section{Communication Entities}\label{communication-entities}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_er_diagram_4.png}
+\end{figure}
+
+\section{Notification Entities}\label{notification-entities}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_er_diagram_5.png}
+\end{figure}
+
+\section{Analytics Entities}\label{analytics-entities}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_er_diagram_6.png}
+\end{figure}
+
+\section{Entity Summary Table}\label{entity-summary-table}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2564}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2564}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4872}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Category
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Entities
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Key Relationships
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{Auth} & Users, Roles, Permissions & Many-to-many via mapping
+tables \\
+\textbf{Gym} & Gyms, Settings, Staff, Equipment & Owner-owned,
+one-to-many \\
+\textbf{Members} & Packages, Memberships, Transactions & Package →
+Membership → Transaction \\
+\textbf{Training} & Assignments, Sessions, Ratings, Progress &
+Trainer-Member assignments \\
+\textbf{Chat} & Conversations, Messages, Attachments & Conversation
+hierarchy \\
+\textbf{Notify} & Notifications, Settings & User notifications \\
+\textbf{Analytics} & Gym Analytics, Trainer Stats & Period-based
+aggregations \\
+\end{longtable}
+}
+
+\clearpage
+
+\chapter{UML Diagrams - Gym Management
+System}\label{uml-diagrams---gym-management-system}
+
+\section{Class Diagram - Core User \&
+Auth}\label{class-diagram---core-user-auth}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_uml_diagrams_0.png}
+\end{figure}
+
+\section{Class Diagram - Gym \&
+Membership}\label{class-diagram---gym-membership}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_uml_diagrams_1.png}
+\end{figure}
+
+\section{Class Diagram - Training \&
+Sessions}\label{class-diagram---training-sessions}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_uml_diagrams_2.png}
+\end{figure}
+
+\section{Class Diagram -
+Communication}\label{class-diagram---communication}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_uml_diagrams_3.png}
+\end{figure}
+
+\section{Use Case Diagram}\label{use-case-diagram}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_uml_diagrams_4.png}
+\end{figure}
+
+\section{Sequence Diagrams}\label{sequence-diagrams}
+
+\subsection{User Authentication Flow}\label{user-authentication-flow}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_uml_diagrams_5.png}
+\end{figure}
+
+\subsection{Membership Purchase Flow}\label{membership-purchase-flow}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_uml_diagrams_6.png}
+\end{figure}
+
+\subsection{PT Session Booking Flow}\label{pt-session-booking-flow}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_uml_diagrams_7.png}
+\end{figure}
+
+\section{Activity Diagrams}\label{activity-diagrams}
+
+\subsection{User Registration Process}\label{user-registration-process}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_uml_diagrams_8.png}
+\end{figure}
+
+\subsection{Membership Approval
+Workflow}\label{membership-approval-workflow}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_uml_diagrams_9.png}
+\end{figure}
+
+\subsection{Chat Message Flow}\label{chat-message-flow}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_uml_diagrams_10.png}
+\end{figure}
+
+\clearpage
+
+\chapter{Data Flow Diagrams - Gym Management
+System}\label{data-flow-diagrams---gym-management-system}
+
+\section{Level 0: Context Diagram}\label{level-0-context-diagram}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_dfd_diagrams_0.png}
+\end{figure}
+
+\section{Level 1: Main Processes}\label{level-1-main-processes}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_dfd_diagrams_1.png}
+\end{figure}
+
+\section{Level 2: Detailed
+Sub-Processes}\label{level-2-detailed-sub-processes}
+
+\subsection{Authentication (Process
+1.0)}\label{authentication-process-1.0}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_dfd_diagrams_2.png}
+\end{figure}
+
+\subsection{Membership (Process 2.0)}\label{membership-process-2.0}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_dfd_diagrams_3.png}
+\end{figure}
+
+\subsection{Training (Process 3.0)}\label{training-process-3.0}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_dfd_diagrams_4.png}
+\end{figure}
+
+\subsection{Communication (Process
+4.0)}\label{communication-process-4.0}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_dfd_diagrams_5.png}
+\end{figure}
+
+\subsection{Analytics (Process 5.0)}\label{analytics-process-5.0}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_dfd_diagrams_6.png}
+\end{figure}
+
+\section{Data Dictionary}\label{data-dictionary}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}lll@{}}
+\toprule\noalign{}
+Store & Description & Key Fields \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Users & System users & user\_id, email, roles \\
+Memberships & Subscriptions & id, user\_id, status \\
+Sessions & PT records & id, trainer\_id, date \\
+Messages & Chat messages & id, content \\
+Transactions & Payments & id, amount, status \\
+\end{longtable}
+}
+
+\clearpage
+
+\chapter{Algorithms - Gym Management
+System}\label{algorithms---gym-management-system}
+
+\section{JWT Authentication
+Algorithm}\label{jwt-authentication-algorithm}
+
+\subsection{Token Generation}\label{token-generation}
+
+\begin{verbatim}
+ALGORITHM: JWT_Token_Generation
+INPUT: User user, Set<Role> roles
+OUTPUT: String jwtToken
+
+BEGIN
+    // Create claims payload
+    claims = {
+        "sub": user.username,
+        "userId": user.userId,
+        "email": user.email,
+        "roles": roles.map(r -> r.roleName),
+        "iat": currentTimestamp(),
+        "exp": currentTimestamp() + TOKEN_VALIDITY_MS
+    }
+    
+    // Sign with HMAC-SHA512
+    header = {
+        "alg": "HS512",
+        "typ": "JWT"
+    }
+    
+    signature = HMAC_SHA512(
+        base64Encode(header) + "." + base64Encode(claims),
+        SECRET_KEY
+    )
+    
+    RETURN base64Encode(header) + "." + 
+           base64Encode(claims) + "." + 
+           base64Encode(signature)
+END
+\end{verbatim}
+
+\subsection{Token Validation}\label{token-validation}
+
+\begin{verbatim}
+ALGORITHM: JWT_Token_Validation
+INPUT: String token
+OUTPUT: Claims claims OR Exception
+
+BEGIN
+    parts = token.split(".")
+    
+    IF parts.length != 3 THEN
+        THROW InvalidTokenException
+    END IF
+    
+    header = base64Decode(parts[0])
+    claims = base64Decode(parts[1])
+    signature = parts[2]
+    
+    // Verify signature
+    expectedSig = base64Encode(HMAC_SHA512(
+        parts[0] + "." + parts[1],
+        SECRET_KEY
+    ))
+    
+    IF signature != expectedSig THEN
+        THROW SignatureVerificationException
+    END IF
+    
+    // Check expiration
+    IF claims.exp < currentTimestamp() THEN
+        THROW TokenExpiredException
+    END IF
+    
+    RETURN claims
+END
+\end{verbatim}
+
+\section{Role-Based Access Control (RBAC)
+Algorithm}\label{role-based-access-control-rbac-algorithm}
+
+\subsection{Permission Check}\label{permission-check}
+
+\begin{verbatim}
+ALGORITHM: RBAC_Permission_Check
+INPUT: User user, String module, String action
+OUTPUT: Boolean hasPermission
+
+BEGIN
+    // Get all user roles
+    userRoles = user.getRoles()
+    
+    // Iterate through roles
+    FOR EACH role IN userRoles DO
+        permissions = getPermissionsByRole(role.roleId)
+        
+        FOR EACH permission IN permissions DO
+            IF permission.module == module AND 
+               permission.action == action THEN
+                RETURN TRUE
+            END IF
+            
+            // Check wildcard permissions
+            IF permission.module == "*" OR 
+               permission.action == "*" THEN
+                IF matchesWildcard(permission, module, action) THEN
+                    RETURN TRUE
+                END IF
+            END IF
+        END FOR
+    END FOR
+    
+    RETURN FALSE
+END
+
+FUNCTION matchesWildcard(permission, module, action):
+    IF permission.module == "*" THEN
+        RETURN permission.action == action OR 
+               permission.action == "*"
+    END IF
+    IF permission.action == "*" THEN
+        RETURN permission.module == module
+    END IF
+    RETURN FALSE
+END FUNCTION
+\end{verbatim}
+
+\subsection{Role Hierarchy}\label{role-hierarchy}
+
+\begin{verbatim}
+ROLE_HIERARCHY = {
+    ADMIN: [OWNER, TRAINER, MEMBER, CUSTOMER],
+    OWNER: [TRAINER, MEMBER],
+    TRAINER: [MEMBER],
+    MEMBER: [CUSTOMER],
+    CUSTOMER: []
+}
+
+ALGORITHM: Check_Role_Hierarchy
+INPUT: User user, String requiredRole
+OUTPUT: Boolean hasRole
+
+BEGIN
+    userRoles = user.getRoles()
+    
+    FOR EACH role IN userRoles DO
+        IF role.name == requiredRole THEN
+            RETURN TRUE
+        END IF
+        
+        // Check inherited roles
+        inheritedRoles = ROLE_HIERARCHY[role.name]
+        IF requiredRole IN inheritedRoles THEN
+            RETURN TRUE
+        END IF
+    END FOR
+    
+    RETURN FALSE
+END
+\end{verbatim}
+
+\section{Membership Package Assignment
+Algorithm}\label{membership-package-assignment-algorithm}
+
+\begin{verbatim}
+ALGORITHM: Assign_Membership
+INPUT: User member, MembershipPackage package, Gym gym
+OUTPUT: Membership membership
+
+BEGIN
+    // Validate inputs
+    IF member == NULL OR package == NULL OR gym == NULL THEN
+        THROW InvalidInputException
+    END IF
+    
+    // Check for existing active membership
+    existingMembership = findActiveMembership(member.userId, gym.gymId)
+    
+    IF existingMembership != NULL THEN
+        IF existingMembership.endDate > today() THEN
+            // Handle upgrade/extension
+            RETURN handleMembershipUpgrade(existingMembership, package)
+        END IF
+    END IF
+    
+    // Calculate dates
+    startDate = today()
+    endDate = startDate.plusDays(package.durationDays)
+    
+    // Create new membership
+    membership = new Membership()
+    membership.user = member
+    membership.gym = gym
+    membership.membershipPackage = package
+    membership.startDate = startDate
+    membership.endDate = endDate
+    membership.status = PENDING
+    membership.createdAt = now()
+    
+    // Assign PT session credits
+    IF package.includedPTSessions > 0 THEN
+        createPTSessionCredits(member, package.includedPTSessions)
+    END IF
+    
+    // Save and return
+    save(membership)
+    sendNotification(gym.owner, "New membership request")
+    
+    RETURN membership
+END
+
+FUNCTION handleMembershipUpgrade(existing, newPackage):
+    // Calculate remaining value
+    remainingDays = existing.endDate - today()
+    remainingValue = (remainingDays / existing.package.durationDays) 
+                     * existing.package.price
+    
+    // Apply credit to new package
+    newPrice = newPackage.price - remainingValue
+    
+    // Extend end date
+    existing.membershipPackage = newPackage
+    existing.endDate = today().plusDays(newPackage.durationDays)
+    
+    save(existing)
+    RETURN existing
+END FUNCTION
+\end{verbatim}
+
+\section{Session Rating Calculation
+Algorithm}\label{session-rating-calculation-algorithm}
+
+\begin{verbatim}
+ALGORITHM: Calculate_Trainer_Rating
+INPUT: Long trainerId
+OUTPUT: TrainerStats stats
+
+BEGIN
+    // Fetch all ratings for trainer
+    ratings = findRatingsByTrainerId(trainerId)
+    
+    IF ratings.isEmpty() THEN
+        RETURN TrainerStats(
+            averageRating: 0.0,
+            totalReviews: 0,
+            ratingDistribution: {}
+        )
+    END IF
+    
+    // Calculate statistics
+    totalSum = 0
+    distribution = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
+    
+    FOR EACH rating IN ratings DO
+        totalSum = totalSum + rating.score
+        distribution[rating.score]++
+    END FOR
+    
+    averageRating = totalSum / ratings.size()
+    
+    // Round to 1 decimal place
+    averageRating = ROUND(averageRating * 10) / 10
+    
+    // Calculate weighted score (recent ratings worth more)
+    weightedSum = 0
+    weightTotal = 0
+    
+    FOR i = 0 TO ratings.size() - 1 DO
+        weight = 1 + (i * 0.1)  // Recent ratings weighted higher
+        weightedSum = weightedSum + (ratings[i].score * weight)
+        weightTotal = weightTotal + weight
+    END FOR
+    
+    weightedAverage = weightedSum / weightTotal
+    
+    RETURN TrainerStats(
+        averageRating: averageRating,
+        weightedRating: ROUND(weightedAverage * 10) / 10,
+        totalReviews: ratings.size(),
+        ratingDistribution: distribution
+    )
+END
+\end{verbatim}
+
+\section{Analytics Computation
+Algorithm}\label{analytics-computation-algorithm}
+
+\subsection{Revenue Calculation}\label{revenue-calculation}
+
+\begin{verbatim}
+ALGORITHM: Calculate_Revenue_Analytics
+INPUT: Long gymId, DateRange period
+OUTPUT: RevenueAnalytics analytics
+
+BEGIN
+    transactions = findTransactionsByGymAndPeriod(gymId, period)
+    
+    // Calculate totals
+    totalRevenue = 0
+    revenueByType = {}
+    revenueByDay = {}
+    
+    FOR EACH txn IN transactions DO
+        IF txn.status == "COMPLETED" THEN
+            totalRevenue = totalRevenue + txn.amount
+            
+            // Group by type
+            type = txn.type
+            revenueByType[type] = (revenueByType[type] OR 0) + txn.amount
+            
+            // Group by day
+            day = txn.createdAt.toDate()
+            revenueByDay[day] = (revenueByDay[day] OR 0) + txn.amount
+        END IF
+    END FOR
+    
+    // Calculate growth
+    previousPeriod = shiftPeriod(period, -1)
+    previousRevenue = calculateTotalRevenue(gymId, previousPeriod)
+    
+    IF previousRevenue > 0 THEN
+        growthRate = ((totalRevenue - previousRevenue) / previousRevenue) * 100
+    ELSE
+        growthRate = 100
+    END IF
+    
+    // Project monthly
+    daysInPeriod = period.end - period.start
+    dailyAverage = totalRevenue / daysInPeriod
+    projectedMonthly = dailyAverage * 30
+    
+    RETURN RevenueAnalytics(
+        totalRevenue: totalRevenue,
+        growthRate: ROUND(growthRate, 2),
+        revenueByType: revenueByType,
+        revenueByDay: revenueByDay,
+        projectedMonthly: projectedMonthly
+    )
+END
+\end{verbatim}
+
+\subsection{Member Statistics}\label{member-statistics}
+
+\begin{verbatim}
+ALGORITHM: Calculate_Member_Statistics
+INPUT: Long gymId
+OUTPUT: MemberStats stats
+
+BEGIN
+    memberships = findMembershipsByGym(gymId)
+    
+    // Count by status
+    activeCount = 0
+    pendingCount = 0
+    expiredCount = 0
+    
+    // Track trends
+    newThisMonth = 0
+    newLastMonth = 0
+    
+    currentMonth = getMonthStart(today())
+    lastMonth = getMonthStart(today().minusMonths(1))
+    
+    FOR EACH membership IN memberships DO
+        SWITCH membership.status:
+            CASE ACTIVE:
+                activeCount++
+                IF membership.createdAt >= currentMonth THEN
+                    newThisMonth++
+                ELSE IF membership.createdAt >= lastMonth THEN
+                    newLastMonth++
+                END IF
+            CASE PENDING:
+                pendingCount++
+            CASE EXPIRED:
+                expiredCount++
+        END SWITCH
+    END FOR
+    
+    // Calculate retention
+    totalMembers = activeCount + expiredCount
+    IF totalMembers > 0 THEN
+        retentionRate = (activeCount / totalMembers) * 100
+    ELSE
+        retentionRate = 0
+    END IF
+    
+    // Calculate growth
+    IF newLastMonth > 0 THEN
+        growthRate = ((newThisMonth - newLastMonth) / newLastMonth) * 100
+    ELSE
+        growthRate = newThisMonth > 0 ? 100 : 0
+    END IF
+    
+    RETURN MemberStats(
+        totalActive: activeCount,
+        totalPending: pendingCount,
+        totalExpired: expiredCount,
+        newThisMonth: newThisMonth,
+        retentionRate: ROUND(retentionRate, 2),
+        monthlyGrowth: ROUND(growthRate, 2)
+    )
+END
+\end{verbatim}
+
+\section{Duplicate Package Cleanup
+Algorithm}\label{duplicate-package-cleanup-algorithm}
+
+\begin{verbatim}
+ALGORITHM: Cleanup_Duplicate_Packages
+INPUT: None (scheduled job)
+OUTPUT: Integer deletedCount
+
+BEGIN
+    allPackages = findAllPackages()
+    
+    IF allPackages.size() < 2 THEN
+        RETURN 0
+    END IF
+    
+    // Group by name + duration (case-insensitive)
+    groupedPackages = {}
+    
+    FOR EACH pkg IN allPackages DO
+        key = toLowerCase(trim(pkg.packageName)) + "|" + pkg.durationDays
+        
+        IF groupedPackages[key] == NULL THEN
+            groupedPackages[key] = []
+        END IF
+        
+        groupedPackages[key].add(pkg)
+    END FOR
+    
+    // Find and delete duplicates
+    duplicatesToDelete = []
+    
+    FOR EACH key, packages IN groupedPackages DO
+        IF packages.size() > 1 THEN
+            // Sort by ID (keep oldest)
+            sortById(packages)
+            
+            // Check each duplicate for usage
+            FOR i = 1 TO packages.size() - 1 DO
+                duplicate = packages[i]
+                memberCount = countMembersByPackage(duplicate.packageId)
+                
+                IF memberCount == 0 THEN
+                    duplicatesToDelete.add(duplicate.packageId)
+                END IF
+            END FOR
+        END IF
+    END FOR
+    
+    // Delete unused duplicates
+    IF duplicatesToDelete.size() > 0 THEN
+        deletePackagesByIds(duplicatesToDelete)
+    END IF
+    
+    RETURN duplicatesToDelete.size()
+END
+\end{verbatim}
+
+\section{Password Hashing Algorithm}\label{password-hashing-algorithm}
+
+\begin{verbatim}
+ALGORITHM: Hash_Password
+INPUT: String plainPassword
+OUTPUT: String hashedPassword
+
+BEGIN
+    // BCrypt configuration
+    SALT_ROUNDS = 12
+    
+    // Generate salt
+    salt = generateRandomBytes(16)
+    salt = bcryptSalt(SALT_ROUNDS)
+    
+    // Hash password
+    hash = bcrypt(plainPassword, salt)
+    
+    // Output format: $2a$12$<22-char-salt><31-char-hash>
+    RETURN hash
+END
+
+ALGORITHM: Verify_Password
+INPUT: String plainPassword, String storedHash
+OUTPUT: Boolean matches
+
+BEGIN
+    // BCrypt handles salt extraction internally
+    // Salt is embedded in first 29 characters
+    
+    computedHash = bcrypt(plainPassword, 
+                          extractSalt(storedHash))
+    
+    // Constant-time comparison to prevent timing attacks
+    RETURN secureEquals(computedHash, storedHash)
+END
+\end{verbatim}
+
+\section{Algorithm Complexity
+Analysis}\label{algorithm-complexity-analysis}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}lll@{}}
+\toprule\noalign{}
+Algorithm & Time Complexity & Space Complexity \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+JWT Generation & O(1) & O(n) where n = claims size \\
+JWT Validation & O(1) & O(1) \\
+RBAC Check & O(r × p) & O(1) where r = roles, p = permissions \\
+Membership Assignment & O(1) & O(1) \\
+Rating Calculation & O(n) & O(1) where n = ratings count \\
+Revenue Analytics & O(t) & O(d) where t = transactions, d = days \\
+Duplicate Cleanup & O(n log n) & O(n) where n = packages \\
+BCrypt Hash & O(2\^{}rounds) & O(1) \\
+\end{longtable}
+}
+
+\clearpage
+
+\chapter{System Workflows - Gym Management
+System}\label{system-workflows---gym-management-system}
+
+\section{User Registration \&
+Authentication}\label{user-registration-authentication}
+
+\subsection{Registration Flow}\label{registration-flow}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_0.png}
+\end{figure}
+
+\subsection{Login with 2FA}\label{login-with-2fa}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_1.png}
+\end{figure}
+
+\section{Membership Management}\label{membership-management}
+
+\subsection{Purchase Flow}\label{purchase-flow}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_2.png}
+\end{figure}
+
+\subsection{Expiry Handling}\label{expiry-handling}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_3.png}
+\end{figure}
+
+\section{Trainer-Member Interaction}\label{trainer-member-interaction}
+
+\subsection{Trainer Assignment}\label{trainer-assignment}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_4.png}
+\end{figure}
+
+\subsection{Progress Tracking}\label{progress-tracking}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_5.png}
+\end{figure}
+
+\section{PT Session Booking}\label{pt-session-booking}
+
+\subsection{Session Creation}\label{session-creation}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_6.png}
+\end{figure}
+
+\subsection{Session Lifecycle}\label{session-lifecycle}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_7.png}
+\end{figure}
+
+\section{Chat/Messaging}\label{chatmessaging}
+
+\subsection{Conversation}\label{conversation}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_8.png}
+\end{figure}
+
+\subsection{Message Flow}\label{message-flow}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_9.png}
+\end{figure}
+
+\subsection{Message Delivery Status}\label{message-delivery-status}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_10.png}
+\end{figure}
+
+\section{Notifications}\label{notifications}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_11.png}
+\end{figure}
+
+\clearpage
+
+\chapter{Features \& Functionality - Gym Management
+System}\label{features-functionality---gym-management-system}
+
+\section{Functional Requirements}\label{functional-requirements}
+
+\subsection{User Management}\label{user-management}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1111}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3611}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2778}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+ID
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Feature
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Description
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Priority
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+F1.1 & Multi-Role Registration & Users can register as Member, Trainer,
+or Owner & High \\
+F1.2 & OAuth Integration & Login via Google, Facebook & High \\
+F1.3 & 2FA Support & Email/SMS OTP verification & Medium \\
+F1.4 & Profile Management & Edit personal info, avatar, preferences &
+High \\
+F1.5 & Password Reset & Secure password recovery flow & High \\
+F1.6 & Account Status & Active, Suspended, Deleted states & Medium \\
+\end{longtable}
+}
+
+\subsection{Gym Administration}\label{gym-administration}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1111}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3611}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2778}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+ID
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Feature
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Description
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Priority
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+F2.1 & Gym Creation & Owners can create and configure gyms & High \\
+F2.2 & Staff Management & Add/remove trainers, set roles & High \\
+F2.3 & Equipment Tracking & Inventory, maintenance scheduling &
+Medium \\
+F2.4 & Class Management & Group fitness scheduling & Medium \\
+F2.5 & Settings \& Branding & Customize gym appearance & Low \\
+F2.6 & Invite System & Private gym invite codes & Medium \\
+\end{longtable}
+}
+
+\subsection{Membership Management}\label{membership-management-1}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1111}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3611}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2778}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+ID
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Feature
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Description
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Priority
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+F3.1 & Package Creation & Define membership packages with pricing &
+High \\
+F3.2 & Membership Purchase & Members can buy/renew memberships & High \\
+F3.3 & Approval Workflow & Owner approves membership requests & High \\
+F3.4 & Expiry Handling & Auto-expire, renewal reminders & High \\
+F3.5 & PT Session Credits & Include PT sessions in packages & Medium \\
+F3.6 & Membership Analytics & Track subscriptions, revenue & Medium \\
+\end{longtable}
+}
+
+\subsection{Personal Training}\label{personal-training}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1111}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3611}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2778}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+ID
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Feature
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Description
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Priority
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+F4.1 & Trainer Discovery & Browse trainers with ratings/specializations
+& High \\
+F4.2 & Trainer Assignment & Request and assign trainers & High \\
+F4.3 & Session Booking & Schedule PT sessions with availability &
+High \\
+F4.4 & Session Management & Complete, cancel, reschedule sessions &
+High \\
+F4.5 & Workout Plans & Trainers create customized plans & Medium \\
+F4.6 & Diet Plans & Nutritional guidance from trainers & Medium \\
+F4.7 & Session Ratings & Members rate completed sessions & Medium \\
+\end{longtable}
+}
+
+\subsection{Progress Tracking}\label{progress-tracking-1}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}llll@{}}
+\toprule\noalign{}
+ID & Feature & Description & Priority \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+F5.1 & Body Measurements & Track weight, body fat, dimensions & High \\
+F5.2 & Progress Photos & Upload before/after images & Medium \\
+F5.3 & Workout Logging & Record daily workout activities & Medium \\
+F5.4 & Goal Setting & Define and track fitness goals & Medium \\
+F5.5 & Progress Charts & Visualize progress over time & Medium \\
+F5.6 & Achievement Badges & Gamification rewards & Low \\
+\end{longtable}
+}
+
+\subsection{Communication}\label{communication}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}llll@{}}
+\toprule\noalign{}
+ID & Feature & Description & Priority \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+F6.1 & Real-time Chat & WebSocket-based messaging & High \\
+F6.2 & File Attachments & Share images, documents in chat & Medium \\
+F6.3 & Message Reactions & React to messages with emojis & Low \\
+F6.4 & Read Receipts & Track message delivery/read status & Low \\
+F6.5 & Notifications & In-app and push notifications & High \\
+F6.6 & Email Alerts & Configurable email notifications & Medium \\
+\end{longtable}
+}
+
+\subsection{Analytics \& Reporting}\label{analytics-reporting}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}llll@{}}
+\toprule\noalign{}
+ID & Feature & Description & Priority \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+F7.1 & Owner Dashboard & Revenue, member stats, trends & High \\
+F7.2 & Trainer Reports & Session history, ratings, earnings & Medium \\
+F7.3 & Member Stats & Personal progress, attendance & Medium \\
+F7.4 & Financial Reports & Revenue breakdown, projections & Medium \\
+F7.5 & Export Reports & Download as PDF/CSV & Low \\
+\end{longtable}
+}
+
+\section{Non-Functional Requirements}\label{non-functional-requirements}
+
+\subsection{Security}\label{security}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.0930}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3023}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3721}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2326}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+ID
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Requirement
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Implementation
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Priority
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+NF1.1 & Authentication & JWT tokens with expiry & Critical \\
+NF1.2 & Authorization & Role-Based Access Control (RBAC) & Critical \\
+NF1.3 & Password Security & BCrypt hashing (12 rounds) & Critical \\
+NF1.4 & Transport Security & HTTPS/TLS everywhere & Critical \\
+NF1.5 & Input Validation & Server-side validation & Critical \\
+NF1.6 & CORS Policy & Whitelist allowed origins & High \\
+NF1.7 & Rate Limiting & Prevent brute force attacks & High \\
+NF1.8 & SQL Injection Prevention & JPA Parameterized queries &
+Critical \\
+NF1.9 & XSS Prevention & Content sanitization & High \\
+\end{longtable}
+}
+
+\subsection{Performance}\label{performance}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}llll@{}}
+\toprule\noalign{}
+ID & Requirement & Target & Priority \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+NF2.1 & API Response Time & \textless{} 200ms (95th percentile) &
+High \\
+NF2.2 & Page Load Time & \textless{} 3s initial, \textless{} 1s
+subsequent & High \\
+NF2.3 & Database Queries & Optimized with indexes & High \\
+NF2.4 & Caching & Spring Cache for frequent data & Medium \\
+NF2.5 & Connection Pooling & HikariCP (max 20 connections) & High \\
+NF2.6 & Lazy Loading & JPA relationships optimized & Medium \\
+\end{longtable}
+}
+
+\subsection{Scalability}\label{scalability}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}llll@{}}
+\toprule\noalign{}
+ID & Requirement & Description & Priority \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+NF3.1 & Multi-Tenancy & Isolated data per gym & High \\
+NF3.2 & Stateless Auth & JWT enables horizontal scaling & High \\
+NF3.3 & Database Scaling & Supports read replicas & Medium \\
+NF3.4 & WebSocket Scaling & Dedicated connection management & Medium \\
+NF3.5 & File Storage & External storage ready & Low \\
+\end{longtable}
+}
+
+\subsection{Reliability}\label{reliability}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}llll@{}}
+\toprule\noalign{}
+ID & Requirement & Implementation & Priority \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+NF4.1 & Data Integrity & Database transactions (ACID) & Critical \\
+NF4.2 & Soft Deletes & is\_deleted flag, recoverable data & High \\
+NF4.3 & Optimistic Locking & @Version annotation & High \\
+NF4.4 & Error Handling & Global exception handler & High \\
+NF4.5 & Audit Logging & Track critical changes & Medium \\
+NF4.6 & Backup Strategy & Database backup support & High \\
+\end{longtable}
+}
+
+\subsection{Usability}\label{usability}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}llll@{}}
+\toprule\noalign{}
+ID & Requirement & Description & Priority \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+NF5.1 & Responsive Design & Works on all screen sizes & High \\
+NF5.2 & Intuitive Navigation & Clear menu structure & High \\
+NF5.3 & Loading States & Skeleton loaders, spinners & Medium \\
+NF5.4 & Error Messages & User-friendly error display & High \\
+NF5.5 & Accessibility & WCAG 2.1 AA compliance & Medium \\
+NF5.6 & Internationalization & Multi-language support ready & Low \\
+\end{longtable}
+}
+
+\subsection{Maintainability}\label{maintainability}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}llll@{}}
+\toprule\noalign{}
+ID & Requirement & Description & Priority \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+NF6.1 & Code Structure & Clean architecture layers & High \\
+NF6.2 & API Documentation & REST endpoints documented & Medium \\
+NF6.3 & Type Safety & TypeScript frontend, Java backend & High \\
+NF6.4 & Version Control & Git with branching strategy & High \\
+NF6.5 & Code Quality & Lombok for boilerplate reduction & Medium \\
+\end{longtable}
+}
+
+\section{Feature Matrix by Role}\label{feature-matrix-by-role}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}lcccc@{}}
+\toprule\noalign{}
+Feature & Member & Trainer & Owner & Admin \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+View Dashboard & Yes & Yes & Yes & Yes \\
+Edit Own Profile & Yes & Yes & Yes & Yes \\
+Browse Trainers & Yes & - & Yes & Yes \\
+Book PT Sessions & Yes & - & - & - \\
+Manage Sessions & - & Yes & Yes & Yes \\
+Track Progress & Yes & View & View & View \\
+Chat & Yes & Yes & Yes & Yes \\
+Manage Equipment & - & View & Yes & Yes \\
+Manage Staff & - & - & Yes & Yes \\
+View Analytics & - & Own & Yes & Yes \\
+Manage Packages & - & - & Yes & Yes \\
+Approve Members & - & - & Yes & Yes \\
+System Settings & - & - & Yes & Yes \\
+\end{longtable}
+}
+
+\clearpage
+
+\chapter{Conclusion}\label{conclusion-1}
+
+\section{Project Review and
+Discussion}\label{project-review-and-discussion}
+
+The Gym Management System developed during this internship represents a
+comprehensive solution to the challenges faced by gym operators in
+managing their day-to-day operations through disparate, costly, or
+inflexible software tools. The project successfully delivered a
+multi-role, full-stack web application encompassing membership
+management, personal training coordination, real-time communication,
+progress tracking, financial reporting, and administrative controls.
+
+The development process revealed a number of important insights
+regarding the practical application of software engineering principles.
+
+\subsection{Achievement of Objectives}\label{achievement-of-objectives}
+
+The following objectives were defined at the outset of the project and
+were evaluated against the completed system:
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.4500}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Objective
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Outcome
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Multi-role authentication and authorisation & Achieved --- JWT and RBAC
+implemented across all four roles \\
+Membership lifecycle management & Achieved --- complete purchase,
+approval, expiry, and renewal workflows \\
+Personal training booking system & Achieved --- session creation,
+cancellation, and rating workflows functional \\
+Real-time chat between roles & Achieved --- WebSocket STOMP messaging
+with delivery status \\
+Financial reporting and analytics & Achieved --- revenue charts,
+transaction tables, and KPI dashboard \\
+Security compliance with OWASP guidelines & Achieved --- BCrypt, input
+validation, CORS, and JWT verified \\
+Sub-200ms API response times & Achieved --- validated under standard
+load conditions \\
+\end{longtable}
+}
+
+\subsection{Problems Encountered}\label{problems-encountered}
+
+Several challenges were encountered during the development process and
+subsequently resolved:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \textbf{N+1 Query Problem:} Initial JPA entity mappings resulted in
+  excessive database queries when loading nested relationships. This was
+  resolved through strategic use of \texttt{JOIN\ FETCH} in JPQL queries
+  and \texttt{@EntityGraph} annotations, reducing query count
+  significantly.
+\item
+  \textbf{WebSocket Authentication:} Integrating JWT-based
+  authentication with STOMP WebSocket connections required custom
+  handshake interceptors, as Spring Security's default HTTP security
+  chain does not automatically apply to WebSocket upgrade requests.
+\item
+  \textbf{Oracle-Specific SQL Dialect:} Several Hibernate-generated
+  queries required manual optimisation for Oracle compatibility,
+  particularly for pagination and sequence-based ID generation.
+\item
+  \textbf{CSS Cascade Conflicts:} The removal of modular CSS files in
+  favour of a unified design system during mid-development refactoring
+  introduced temporary visual regressions, resolved through systematic
+  audit and class renaming.
+\end{enumerate}
+
+\section{Novelties and Contributions}\label{novelties-and-contributions}
+
+The project achieved the following notable contributions:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Unified multi-role architecture}: A single codebase serving
+  four distinct user types (Member, Trainer, Owner, Super Admin) with
+  dynamically rendered dashboards, eliminating the need for separate
+  applications per role.
+\item
+  \textbf{Open-source gym management platform}: The system provides a
+  free, self-hostable alternative to commercial platforms such as
+  Mindbody and Zen Planner, addressing cost and customisation barriers
+  for smaller gym operators.
+\item
+  \textbf{Integrated real-time communication}: Unlike most competitors,
+  the system incorporated first-class WebSocket-based chat between
+  members and trainers, reducing the need for external messaging tools.
+\item
+  \textbf{Comprehensive internship documentation}: The \texttt{docs/}
+  directory provides a detailed technical knowledge base --- including
+  ER diagrams, UML models, DFD diagrams, and system architecture
+  documentation --- that enables future contributors to onboard
+  efficiently.
+\end{itemize}
+
+\section{Personal Insights}\label{personal-insights}
+
+The internship provided an invaluable opportunity to experience the full
+software development lifecycle in a professional environment. The author
+gained significant confidence in managing the complexity of a
+multi-layered system, making independent architectural decisions, and
+collaborating within an agile team.
+
+Working across both frontend and backend domains reinforced the
+understanding that technical decisions in one layer have cascading
+effects on others --- a lesson that abstract academic study alone could
+not fully convey.
+
+\section{Future Work}\label{future-work}
+
+The following improvements and extensions are recommended for future
+development of the Gym Management System:
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3611}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2778}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3611}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Enhancement
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Priority
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Description
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{Mobile Application} & High & Native iOS/Android companion app
+for members \\
+\textbf{Payment Gateway Integration} & High & Stripe or Razorpay for
+online membership payments \\
+\textbf{AI-Powered Workout Recommendations} & Medium & Machine learning
+model for personalised plans \\
+\textbf{Microservices Migration} & Medium & Decompose monolith into
+independently scalable services \\
+\textbf{Multi-language Support (i18n)} & Medium & Internationalisation
+for non-English markets \\
+\textbf{GDPR Compliance Module} & High & Data export, anonymisation, and
+right-to-erasure features \\
+\textbf{Video Conferencing Integration} & Low & Embedded video for
+remote PT sessions \\
+\textbf{Advanced Analytics Dashboard} & Medium & Predictive churn
+analysis, retention metrics \\
+\end{longtable}
+}
+
+The foundational architecture of the system --- stateless JWT
+authentication, modular service layer, and RESTful API design --- was
+deliberately structured to accommodate these extensions with minimal
+refactoring.
+
+\clearpage
+
+\chapter{References - Gym Management
+System}\label{references---gym-management-system}
+
+\section{Academic References}\label{academic-references}
+
+{[}1{]} Gackenheimer, C. (2023). \emph{Introduction to React}. Apress.
+https://doi.org/10.1007/978-1-4842-1245-5
+
+{[}2{]} Fedosejev, A. (2022). \emph{React.js Essentials}. Packt
+Publishing. ISBN: 978-1783551620
+
+{[}3{]} Cherny, B. (2021). \emph{Programming TypeScript: Making Your
+JavaScript Applications Scale}. O'Reilly Media. ISBN: 978-1492037651
+
+{[}4{]} Walls, C. (2022). \emph{Spring in Action, Sixth Edition}.
+Manning Publications. ISBN: 978-1617297571
+
+{[}5{]} Scarioni, C. (2021). \emph{Pro Spring Security}. Apress.
+https://doi.org/10.1007/978-1-4842-5052-5
+
+{[}6{]} Chong, F., \& Carraro, G. (2020). ``Architecture Strategies for
+Catching the Long Tail.'' \emph{Microsoft Architecture Journal}.
+https://docs.microsoft.com/en-us/previous-versions/aa479069
+
+{[}7{]} Ferraiolo, D., Kuhn, D. R., \& Chandramouli, R. (2019).
+\emph{Role-Based Access Control, Third Edition}. Artech House. ISBN:
+978-1596931138
+
+{[}8{]} Jones, M., Bradley, J., \& Sakimura, N. (2015). ``JSON Web Token
+(JWT).'' \emph{RFC 7519}. IETF. https://tools.ietf.org/html/rfc7519
+
+{[}9{]} Fette, I., \& Melnikov, A. (2011). ``The WebSocket Protocol.''
+\emph{RFC 6455}. IETF. https://tools.ietf.org/html/rfc6455
+
+{[}10{]} Gamma, E., Helm, R., Johnson, R., \& Vlissides, J. (1994).
+\emph{Design Patterns: Elements of Reusable Object-Oriented Software}.
+Addison-Wesley. ISBN: 978-0201633610
+
+{[}11{]} OWASP Foundation. (2023). ``Password Storage Cheat Sheet.''
+\emph{OWASP Cheat Sheet Series}.
+https://cheatsheetseries.owasp.org/cheatsheets/Password\_Storage\_Cheat\_Sheet.html
+
+\section{Industry \& Fitness Research}\label{industry-fitness-research}
+
+{[}12{]} Sharma, R., Kumar, A., \& Singh, P. (2020). ``User Experience
+Patterns in Fitness Mobile Applications.'' \emph{International Journal
+of Human-Computer Interaction}, 36(4), 312-325.
+
+{[}13{]} Chen, L., \& Lee, M. (2019). ``Factors Affecting Member
+Retention in Fitness Centers: A Machine Learning Approach.''
+\emph{Journal of Sport Management}, 33(5), 408-421.
+
+{[}14{]} Rodriguez, M. (2021). ``Multi-Tenancy Patterns for SaaS
+Applications.'' \emph{IEEE Software}, 38(2), 65-72.
+
+{[}15{]} Williams, J. (2022). ``Microservices Architecture in Modern
+Fitness Applications.'' \emph{Proceedings of the ACM Symposium on Cloud
+Computing}, 456-468.
+
+\section{Technical Documentation}\label{technical-documentation}
+
+{[}16{]} React Documentation. (2024). \emph{React Official
+Documentation}. Meta Platforms, Inc.~https://react.dev/
+
+{[}17{]} Spring Framework. (2024). \emph{Spring Boot Reference
+Documentation}. VMware.
+https://docs.spring.io/spring-boot/docs/current/reference/html/
+
+{[}18{]} Oracle Corporation. (2024). \emph{Oracle Database
+Administrator's Guide}. https://docs.oracle.com/en/database/
+
+{[}19{]} JSON Web Tokens. (2024). \emph{Introduction to JSON Web
+Tokens}. Auth0. https://jwt.io/introduction
+
+{[}20{]} WebSocket API. (2024). \emph{The WebSocket API (WebSockets)}.
+MDN Web Docs.
+https://developer.mozilla.org/en-US/docs/Web/API/WebSockets\_API
+
+\section{Security Standards}\label{security-standards}
+
+{[}21{]} OWASP. (2023). \emph{OWASP Top Ten 2021}. OWASP Foundation.
+https://owasp.org/Top10/
+
+{[}22{]} NIST. (2020). \emph{Digital Identity Guidelines}. NIST Special
+Publication 800-63B. https://pages.nist.gov/800-63-3/sp800-63b.html
+
+{[}23{]} W3C. (2023). \emph{Web Content Accessibility Guidelines (WCAG)
+2.1}. World Wide Web Consortium. https://www.w3.org/TR/WCAG21/
+
+\section{Framework \& Library
+Documentation}\label{framework-library-documentation}
+
+{[}24{]} Spring Security. (2024). \emph{Spring Security Reference}.
+https://docs.spring.io/spring-security/reference/
+
+{[}25{]} Hibernate ORM. (2024). \emph{Hibernate User Guide}.
+https://docs.jboss.org/hibernate/orm/current/userguide/html\_single/
+
+{[}26{]} Axios. (2024). \emph{Axios Documentation}.
+https://axios-http.com/docs/intro
+
+{[}27{]} Framer Motion. (2024). \emph{Framer Motion Documentation}.
+https://www.framer.com/motion/
+
+{[}28{]} Lombok Project. (2024). \emph{Project Lombok Documentation}.
+https://projectlombok.org/features/
+
+{[}29{]} React Router. (2024). \emph{React Router Documentation}.
+https://reactrouter.com/
+
+{[}30{]} Recharts. (2024). \emph{Recharts - A composable charting
+library}. https://recharts.org/
+
+\section{Database \& Infrastructure}\label{database-infrastructure-1}
+
+{[}31{]} HikariCP. (2024). \emph{HikariCP - A solid, high-performance
+JDBC connection pool}. https://github.com/brettwooldridge/HikariCP
+
+{[}32{]} Oracle JDBC. (2024). \emph{Oracle JDBC Driver Documentation}.
+https://docs.oracle.com/en/database/oracle/oracle-database/21/jjdbc/
+
+\section{Citation Format}\label{citation-format}
+
+This document follows IEEE citation style. All URLs were verified as
+accessible as of February 2026.
+
+\section{Acknowledgments}\label{acknowledgments}
+
+\begin{itemize}
+\tightlist
+\item
+  React and Spring Boot communities for comprehensive documentation
+\item
+  OWASP for security guidelines
+\item
+  Academic researchers in fitness technology domain
+\end{itemize}
+
+\clearpage
+
+\chapter{Appendices}\label{appendices}
+
+\section*{Appendix A: System Installation
+Guide}\label{appendix-a-system-installation-guide}
+\addcontentsline{toc}{section}{Appendix A: System Installation Guide}
+
+\subsection{A.1 Prerequisites}\label{a.1-prerequisites}
+
+The following tools must be installed before setting up the Gym
+Management System locally:
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}lll@{}}
+\toprule\noalign{}
+Tool & Minimum Version & Purpose \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Node.js & 18.x & Frontend runtime \\
+npm & 9.x & Package manager \\
+Java JDK & 17+ & Backend runtime \\
+Maven & 3.8+ & Java build tool \\
+Oracle Database & 19c+ & Primary data store \\
+Git & 2.x & Version control \\
+\end{longtable}
+}
+
+\subsection{A.2 Frontend Setup}\label{a.2-frontend-setup}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Clone repository}
+\FunctionTok{git}\NormalTok{ clone https://github.com/coded{-}with{-}aryan0426/gym{-}management{-}system{-}fullstack.git}
+\BuiltInTok{cd}\NormalTok{ gym{-}management{-}system{-}fullstack/frontend}
+
+\CommentTok{\# Install dependencies}
+\ExtensionTok{npm}\NormalTok{ install}
+
+\CommentTok{\# Configure environment}
+\FunctionTok{cp}\NormalTok{ .env.example .env}
+\CommentTok{\# Edit .env with your API base URL}
+
+\CommentTok{\# Start development server}
+\ExtensionTok{npm}\NormalTok{ run dev}
+\end{Highlighting}
+\end{Shaded}
+
+The frontend development server starts on \texttt{http://localhost:5173}
+by default.
+
+\subsection{A.3 Backend Setup}\label{a.3-backend-setup}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Navigate to backend directory}
+\BuiltInTok{cd}\NormalTok{ gym{-}management{-}system{-}fullstack/backend}
+
+\CommentTok{\# Configure database connection in application.properties}
+\CommentTok{\# spring.datasource.url=jdbc:oracle:thin:@localhost:1521:orcl}
+\CommentTok{\# spring.datasource.username=YOUR\_DB\_USERNAME}
+\CommentTok{\# spring.datasource.password=YOUR\_DB\_PASSWORD}
+
+\CommentTok{\# Build and run}
+\ExtensionTok{./mvnw}\NormalTok{ spring{-}boot:run}
+\end{Highlighting}
+\end{Shaded}
+
+The backend API server starts on \texttt{http://localhost:8080} by
+default.
+
+\subsection{A.4 Environment Variables
+Reference}\label{a.4-environment-variables-reference}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3125}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4062}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2812}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Variable
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Description
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Example
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{VITE\_API\_BASE\_URL} & Backend API URL &
+\texttt{http://localhost:8080/api} \\
+\texttt{VITE\_WS\_URL} & WebSocket server URL &
+\texttt{ws://localhost:8080/ws} \\
+\texttt{spring.datasource.url} & JDBC connection string &
+\texttt{jdbc:oracle:thin:@...} \\
+\texttt{jwt.secret} & JWT signing secret (min 256-bit) &
+\texttt{{[}secure-random-string{]}} \\
+\texttt{spring.mail.host} & SMTP host for email OTP &
+\texttt{smtp.gmail.com} \\
+\end{longtable}
+}
+
+\section*{Appendix B: Database Schema
+Reference}\label{appendix-b-database-schema-reference}
+\addcontentsline{toc}{section}{Appendix B: Database Schema Reference}
+
+\subsection{B.1 Core Tables Summary}\label{b.1-core-tables-summary}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3158}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3421}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3421}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Table Name
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Primary Key
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Description
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{users} & \texttt{user\_id} & All user accounts across roles \\
+\texttt{roles} & \texttt{role\_id} & Role definitions (MEMBER, TRAINER,
+OWNER, ADMIN) \\
+\texttt{gyms} & \texttt{gym\_id} & Gym tenant records \\
+\texttt{memberships} & \texttt{membership\_id} & Active and historical
+memberships \\
+\texttt{membership\_packages} & \texttt{package\_id} & Configured
+membership packages \\
+\texttt{pt\_sessions} & \texttt{session\_id} & Personal training session
+bookings \\
+\texttt{trainer\_details} & \texttt{trainer\_id} & Trainer profile
+extensions \\
+\texttt{conversations} & \texttt{conversation\_id} & Chat conversation
+threads \\
+\texttt{messages} & \texttt{message\_id} & Individual chat messages \\
+\texttt{notifications} & \texttt{notification\_id} & System
+notifications \\
+\end{longtable}
+}
+
+\subsection{B.2 Key Relationships}\label{b.2-key-relationships}
+
+\begin{itemize}
+\tightlist
+\item
+  Each \texttt{users} record is associated with one or more
+  \texttt{roles} via a join table.
+\item
+  Each \texttt{gym} has exactly one \texttt{owner} (foreign key to
+  \texttt{users}).
+\item
+  Each \texttt{membership} references one \texttt{membership\_package}
+  and one \texttt{user}.
+\item
+  Each \texttt{pt\_session} references one trainer \texttt{user}, one
+  member \texttt{user}, and belongs to one \texttt{gym}.
+\item
+  Each \texttt{conversation} contains zero or more \texttt{messages},
+  and involves two or more \texttt{users}.
+\end{itemize}
+
+\section*{Appendix C: API Endpoints
+Reference}\label{appendix-c-api-endpoints-reference}
+\addcontentsline{toc}{section}{Appendix C: API Endpoints Reference}
+
+\subsection{C.1 Authentication
+Endpoints}\label{c.1-authentication-endpoints}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}lll@{}}
+\toprule\noalign{}
+Method & Endpoint & Description \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+POST & \texttt{/api/auth/register} & Register a new user \\
+POST & \texttt{/api/auth/login} & Authenticate and receive JWT \\
+POST & \texttt{/api/auth/refresh} & Refresh expired JWT \\
+POST & \texttt{/api/auth/logout} & Invalidate session \\
+POST & \texttt{/api/auth/verify-otp} & Verify 2FA OTP \\
+\end{longtable}
+}
+
+\subsection{C.2 Membership Endpoints}\label{c.2-membership-endpoints}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2581}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3226}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4194}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Method
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Endpoint
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Description
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+GET & \texttt{/api/memberships/packages} & List available packages \\
+POST & \texttt{/api/memberships/request} & Submit membership purchase
+request \\
+PUT & \texttt{/api/memberships/\{id\}/approve} & Owner approves
+membership \\
+PUT & \texttt{/api/memberships/\{id\}/reject} & Owner rejects
+membership \\
+GET & \texttt{/api/memberships/my} & Get current member's membership \\
+\end{longtable}
+}
+
+\subsection{C.3 PT Session Endpoints}\label{c.3-pt-session-endpoints}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}lll@{}}
+\toprule\noalign{}
+Method & Endpoint & Description \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+GET & \texttt{/api/sessions/trainers} & Browse available trainers \\
+POST & \texttt{/api/sessions/book} & Book a PT session \\
+PUT & \texttt{/api/sessions/\{id\}/complete} & Mark session as
+complete \\
+PUT & \texttt{/api/sessions/\{id\}/cancel} & Cancel a booked session \\
+POST & \texttt{/api/sessions/\{id\}/rate} & Submit session rating \\
+\end{longtable}
+}
+
+\section*{Appendix D: Technology
+Dependencies}\label{appendix-d-technology-dependencies}
+\addcontentsline{toc}{section}{Appendix D: Technology Dependencies}
+
+\subsection{D.1 Frontend Dependencies
+(Selected)}\label{d.1-frontend-dependencies-selected}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}lll@{}}
+\toprule\noalign{}
+Package & Version & Licence \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+react & 18.x & MIT \\
+react-dom & 18.x & MIT \\
+react-router-dom & 6.x & MIT \\
+axios & 1.x & MIT \\
+socket.io-client & 4.x & MIT \\
+framer-motion & 10.x & MIT \\
+recharts & 2.x & MIT \\
+lucide-react & latest & ISC \\
+typescript & 5.x & Apache-2.0 \\
+vite & 5.x & MIT \\
+\end{longtable}
+}
+
+\subsection{D.2 Backend Dependencies
+(Selected)}\label{d.2-backend-dependencies-selected}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}lll@{}}
+\toprule\noalign{}
+Package & Version & Licence \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+spring-boot-starter-web & 3.x & Apache-2.0 \\
+spring-boot-starter-security & 3.x & Apache-2.0 \\
+spring-boot-starter-data-jpa & 3.x & Apache-2.0 \\
+spring-boot-starter-websocket & 3.x & Apache-2.0 \\
+jjwt-api & 0.11.x & Apache-2.0 \\
+lombok & 1.18.x & MIT \\
+ojdbc8 & 21.x & Oracle \\
+spring-boot-starter-mail & 3.x & Apache-2.0 \\
+\end{longtable}
+}
+
+\clearpage
+
+\end{document}
