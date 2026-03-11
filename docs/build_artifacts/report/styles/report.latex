@@ -14,17 +14,24 @@
 \usepackage{float}
 \usepackage{booktabs}
 \usepackage{longtable}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{microtype}
 
 %% ---- Font ----
 \setmainfont{Times New Roman}
-\setmonofont{Courier New}[Scale=0.88]
+\setmonofont{Courier New}[Scale=0.85]
 
-%% ---- 1.5 Line Spacing ----
-\setstretch{1.5}
+%% ---- 1.4 Line Spacing (slightly tighter than 1.5) ----
+\setstretch{1.4}
 
 %% ---- Paragraph ----
 \setlength{\parindent}{0pt}
-\setlength{\parskip}{6pt plus 2pt minus 1pt}
+\setlength{\parskip}{4pt plus 1pt minus 1pt}
+
+%% ---- LongTable pre/post spacing ----
+\setlength{\LTpre}{6pt}
+\setlength{\LTpost}{6pt}
 
 %% ---- Header / Footer ----
 \pagestyle{fancy}
@@ -32,26 +39,29 @@
 \fancyhead[L]{\small\nouppercase{\leftmark}}
 \renewcommand{\headrulewidth}{0.4pt}
 \renewcommand{\footrulewidth}{0pt}
-\fancyfoot[L]{\fontsize{10}{12}\selectfont BTech IT \enspace School of Computer Science Engineering \& Technology}
-\fancyfoot[R]{\fontsize{10}{12}\selectfont\thepage}
+\fancyfoot[L]{\fontsize{9}{11}\selectfont BTech IT \enspace School of Computer Science Engineering \& Technology}
+\fancyfoot[R]{\fontsize{9}{11}\selectfont\thepage}
 
 \fancypagestyle{plain}{%
   \fancyhf{}
-  \fancyfoot[L]{\fontsize{10}{12}\selectfont BTech IT \enspace School of Computer Science Engineering \& Technology}
-  \fancyfoot[R]{\fontsize{10}{12}\selectfont\thepage}
+  \fancyfoot[L]{\fontsize{9}{11}\selectfont BTech IT \enspace School of Computer Science Engineering \& Technology}
+  \fancyfoot[R]{\fontsize{9}{11}\selectfont\thepage}
   \renewcommand{\headrulewidth}{0pt}
 }
 
 \renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter:\ #1}{}}
 
 %% ---- Chapter Heading ----
-\titleformat{\chapter}[display]
-  {\normalfont\Large\bfseries}{\chaptername\ \thechapter}{10pt}{\Large\bfseries}
-\titlespacing*{\chapter}{0pt}{0pt}{16pt}
+\titleformat{\chapter}[hang]
+  {\normalfont\Large\bfseries}{\chaptername\ \thechapter:}{6pt}{\Large\bfseries}
+\titlespacing*{\chapter}{0pt}{-10pt}{12pt}
 
 \titleformat{\section}{\normalfont\large\bfseries}{\thesection}{1em}{}
+\titlespacing*{\section}{0pt}{10pt plus 2pt}{4pt plus 1pt}
 \titleformat{\subsection}{\normalfont\normalsize\bfseries}{\thesubsection}{1em}{}
+\titlespacing*{\subsection}{0pt}{8pt plus 2pt}{3pt plus 1pt}
 \titleformat{\subsubsection}{\normalfont\normalsize\bfseries}{\thesubsubsection}{1em}{}
+\titlespacing*{\subsubsection}{0pt}{6pt plus 1pt}{2pt}
 
 %% ---- Captions (Chapter-Number style: Figure 2-3) ----
 \captionsetup[table]{labelsep=endash, font=small, justification=centering, position=below}
@@ -73,10 +83,30 @@
 
 %% ---- Code Listings ----
 \lstset{
-  basicstyle=\fontsize{10}{12}\selectfont\ttfamily,
+  basicstyle=\fontsize{9}{11}\selectfont\ttfamily,
   breaklines=true,
+  breakatwhitespace=false,
+  columns=fullflexible,
   keepspaces=true,
   frame=single,
   showstringspaces=false,
-  tabsize=2
+  tabsize=2,
+  xleftmargin=4pt,
+  xrightmargin=4pt
+}
+
+%% ---- Compact Algorithm Pseudocode Style ----
+\lstdefinestyle{algo}{
+  basicstyle=\fontsize{8}{9.5}\selectfont\ttfamily,
+  breaklines=true,
+  breakatwhitespace=false,
+  columns=fullflexible,
+  keepspaces=true,
+  frame=none,
+  showstringspaces=false,
+  tabsize=2,
+  aboveskip=3pt,
+  belowskip=3pt,
+  xleftmargin=8pt,
+  xrightmargin=4pt
 }

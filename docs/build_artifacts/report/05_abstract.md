@@ -1,6 +1,6 @@
 # Abstract {.unnumbered}
 
----
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
 
 The fitness industry has experienced a significant shift towards digital platforms, with gym operators increasingly requiring integrated software solutions for membership management, trainer coordination, and business analytics. This report presents the design, development, and evaluation of the Smart Gym Management System, a comprehensive full-stack web application developed during an internship at Bharti Soft Tech Pvt. Ltd. under the supervision of Dr. Ashutosh Abhangi.
 
@@ -14,6 +14,6 @@ Testing confirmed that the system met defined performance targets, achieving API
 
 The internship provided Aryan Suthar with extensive practical experience in full-stack development, agile project management, and professional software engineering, significantly reinforcing skills acquired during the B.Tech (IT) programme.
 
-**Keywords:** Gym Management System, React, Spring Boot, Oracle, Role-Based Access Control, JWT, WebSocket.
+\medskip\noindent\rule{\textwidth}{0.4pt}
 
----
+\noindent\textbf{Keywords:} Gym Management System, React, Spring Boot, Oracle, Role-Based Access Control, JWT, WebSocket.

@@ -1,6 +1,6 @@
 # List of Symbols {.unnumbered}
 
----
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
 
 | Symbol | Meaning |
 |:-------|:--------|
@@ -13,11 +13,11 @@
 | * | Wildcard or zero-or-more occurrences |
 | { } | Denotes a set or a code block |
 
----
+\bigskip
 
 # List of Abbreviations {.unnumbered}
 
----
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
 
 | Abbreviation | Definition |
 |:-------------|:-----------|
@@ -66,5 +66,3 @@
 | WCAG | Web Content Accessibility Guidelines |
 | WS | WebSocket |
 | XSS | Cross-Site Scripting |
-
----

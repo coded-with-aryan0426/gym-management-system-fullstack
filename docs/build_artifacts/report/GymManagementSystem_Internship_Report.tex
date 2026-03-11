@@ -6,7 +6,7 @@
   a4paperpaper,
 ]{report}
 \usepackage{xcolor}
-\usepackage[a4paper,left=1.5in,right=1.0in,top=1.0in,bottom=1.0in,headheight=15pt,headsep=0.3in,footskip=0.4in]{geometry}
+\usepackage[a4paper,left=0.70in,right=0.70in,top=1.0in,bottom=1.0in,headheight=14pt,headsep=0.15in,footskip=0.4in]{geometry}
 \usepackage{amsmath,amssymb}
 \setcounter{secnumdepth}{5}
 \usepackage{iftex}
@@ -107,17 +107,24 @@
 \usepackage{float}
 \usepackage{booktabs}
 \usepackage{longtable}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{microtype}
 
 %% ---- Font ----
 \setmainfont{Times New Roman}
-\setmonofont{Courier New}[Scale=0.88]
+\setmonofont{Courier New}[Scale=0.85]
 
-%% ---- 1.5 Line Spacing ----
-\setstretch{1.5}
+%% ---- 1.4 Line Spacing (slightly tighter than 1.5) ----
+\setstretch{1.4}
 
 %% ---- Paragraph ----
 \setlength{\parindent}{0pt}
-\setlength{\parskip}{6pt plus 2pt minus 1pt}
+\setlength{\parskip}{4pt plus 1pt minus 1pt}
+
+%% ---- LongTable pre/post spacing ----
+\setlength{\LTpre}{6pt}
+\setlength{\LTpost}{6pt}
 
 %% ---- Header / Footer ----
 \pagestyle{fancy}
@@ -125,26 +132,29 @@
 \fancyhead[L]{\small\nouppercase{\leftmark}}
 \renewcommand{\headrulewidth}{0.4pt}
 \renewcommand{\footrulewidth}{0pt}
-\fancyfoot[L]{\fontsize{10}{12}\selectfont BTech IT \enspace School of Computer Science Engineering \& Technology}
-\fancyfoot[R]{\fontsize{10}{12}\selectfont\thepage}
+\fancyfoot[L]{\fontsize{9}{11}\selectfont BTech IT \enspace School of Computer Science Engineering \& Technology}
+\fancyfoot[R]{\fontsize{9}{11}\selectfont\thepage}
 
 \fancypagestyle{plain}{%
   \fancyhf{}
-  \fancyfoot[L]{\fontsize{10}{12}\selectfont BTech IT \enspace School of Computer Science Engineering \& Technology}
-  \fancyfoot[R]{\fontsize{10}{12}\selectfont\thepage}
+  \fancyfoot[L]{\fontsize{9}{11}\selectfont BTech IT \enspace School of Computer Science Engineering \& Technology}
+  \fancyfoot[R]{\fontsize{9}{11}\selectfont\thepage}
   \renewcommand{\headrulewidth}{0pt}
 }
 
 \renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter:\ #1}{}}
 
 %% ---- Chapter Heading ----
-\titleformat{\chapter}[display]
-  {\normalfont\Large\bfseries}{\chaptername\ \thechapter}{10pt}{\Large\bfseries}
-\titlespacing*{\chapter}{0pt}{0pt}{16pt}
+\titleformat{\chapter}[hang]
+  {\normalfont\Large\bfseries}{\chaptername\ \thechapter:}{6pt}{\Large\bfseries}
+\titlespacing*{\chapter}{0pt}{-10pt}{12pt}
 
 \titleformat{\section}{\normalfont\large\bfseries}{\thesection}{1em}{}
+\titlespacing*{\section}{0pt}{10pt plus 2pt}{4pt plus 1pt}
 \titleformat{\subsection}{\normalfont\normalsize\bfseries}{\thesubsection}{1em}{}
+\titlespacing*{\subsection}{0pt}{8pt plus 2pt}{3pt plus 1pt}
 \titleformat{\subsubsection}{\normalfont\normalsize\bfseries}{\thesubsubsection}{1em}{}
+\titlespacing*{\subsubsection}{0pt}{6pt plus 1pt}{2pt}
 
 %% ---- Captions (Chapter-Number style: Figure 2-3) ----
 \captionsetup[table]{labelsep=endash, font=small, justification=centering, position=below}
@@ -166,12 +176,32 @@
 
 %% ---- Code Listings ----
 \lstset{
-  basicstyle=\fontsize{10}{12}\selectfont\ttfamily,
+  basicstyle=\fontsize{9}{11}\selectfont\ttfamily,
   breaklines=true,
+  breakatwhitespace=false,
+  columns=fullflexible,
   keepspaces=true,
   frame=single,
   showstringspaces=false,
-  tabsize=2
+  tabsize=2,
+  xleftmargin=4pt,
+  xrightmargin=4pt
+}
+
+%% ---- Compact Algorithm Pseudocode Style ----
+\lstdefinestyle{algo}{
+  basicstyle=\fontsize{8}{9.5}\selectfont\ttfamily,
+  breaklines=true,
+  breakatwhitespace=false,
+  columns=fullflexible,
+  keepspaces=true,
+  frame=none,
+  showstringspaces=false,
+  tabsize=2,
+  aboveskip=3pt,
+  belowskip=3pt,
+  xleftmargin=8pt,
+  xrightmargin=4pt
 }
 \usepackage{bookmark}
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
@@ -187,42 +217,42 @@
 
 \begin{titlepage}
 \begin{center}
-\vspace*{0.2in}
+\vspace*{0.3in}
+
+\noindent\rule{\textwidth}{1.5pt}
+\vspace{6pt}
 
 {\Large \textbf{SMART GYM MANAGEMENT SYSTEM}}
 
-\vspace{0.1in}
-{\small \textbf{A Full-Stack Web Application for Comprehensive Gym Operations Management\\(React + Spring Boot + Oracle)}}
+\vspace{4pt}
+{\normalsize \textbf{A Full-Stack Web Application for Comprehensive Gym Operations Management\\[2pt](React + Spring Boot + Oracle)}}
 
-\vfill
-BY
-\vspace{0.1in}
-
-{\large \textbf{SUTHAR ARYAN SUJALKUMAR (23C25512)}}
+\vspace{6pt}
+\noindent\rule{\textwidth}{1.5pt}
 
 \vfill
 
-\includegraphics[width=1.5in]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/styles/university_logo.png}
+{\normalsize BY}\\[6pt]
+{\large \textbf{SUTHAR ARYAN SUJALKUMAR}}\\[2pt]
+{\normalsize Enrolment No: 23C25512}
 
 \vfill
 
-A REPORT\\
-\vspace{0.1in}
-SUBMITTED TO\\
-\vspace{0.1in}
-{\large \textbf{ITM SLS Baroda University}}\\
-\vspace{0.1in}
-in partial fulfillment of the requirements\\
-for the degree of\\
-\vspace{0.1in}
-{\large \textbf{BACHELOR OF TECHNOLOGY}}\\
-\vspace{0.1in}
-{\large \textbf{Information Technology}}
+\includegraphics[width=1.6in]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/styles/university_logo.png}
 
 \vfill
-School of Computer Science Engineering \& Technology\\
-\vspace{0.1in}
-May 2026
+
+{\normalsize A REPORT SUBMITTED TO}\\[6pt]
+{\large \textbf{ITM SLS Baroda University}}\\[6pt]
+{\normalsize in partial fulfillment of the requirements for the degree of}\\[6pt]
+{\large \textbf{BACHELOR OF TECHNOLOGY}}\\[2pt]
+{\large \textbf{(Information Technology)}}
+
+\vfill
+
+\noindent\rule{\textwidth}{0.6pt}\\[4pt]
+{\normalsize School of Computer Science Engineering \& Technology \quad|\quad May 2026}\\[4pt]
+\noindent\rule{\textwidth}{0.6pt}
 
 \end{center}
 \end{titlepage}
@@ -233,9 +263,25 @@ May 2026
 Form}\label{report-status-declaration-form}
 \addcontentsline{toc}{chapter}{Report Status Declaration Form}
 
-\textbf{UNIVERSITY:} ITM SLS Baroda University \textbf{SCHOOL /
-FACULTY:} School of Computer Science Engineering \& Technology
-\textbf{PROGRAMME:} B.Tech (IT)
+\vspace{-8pt}
+
+\noindent
+
+\rule{\textwidth}{0.4pt}
+\vspace{2pt}
+
+\begin{tabular}{@{}p{4.5cm} p{\dimexpr\linewidth-4.5cm-2\tabcolsep}@{}}
+\textbf{University:}       & ITM SLS Baroda University \\[2pt]
+\textbf{School / Faculty:} & School of Computer Science Engineering \& Technology \\[2pt]
+\textbf{Programme:}        & B.Tech (Information Technology) \\
+\end{tabular}
+
+\vspace{3pt}
+
+\noindent
+
+\rule{\textwidth}{0.4pt}
+\vspace{3pt}
 
 \section{Report Title}\label{report-title}
 
@@ -261,38 +307,61 @@ Status
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-This report contains confidential information & ☐ YES ~~ ☑ NO \\
-Permission is granted to the library to make digital copies & ☑ YES ~~ ☐
-NO \\
+This report contains confidential information & ☐ YES \quad ☑ NO \\
+Permission is granted to the library to make digital copies & ☑ YES
+\quad ☐ NO \\
 Permission is granted for a copy to be held on the university system & ☑
-YES ~~ ☐ NO \\
-This work may be made available for loan and photocopying & ☑ YES ~~ ☐
-NO \\
+YES \quad ☐ NO \\
+This work may be made available for loan and photocopying & ☑ YES
+\quad ☐ NO \\
 \end{longtable}
 }
 
-\textbf{Student Name:} Suthar Aryan Sujalkumar \textbf{Enrolment
-Number:} 23C25512 \textbf{Programme:} B.Tech (Information Technology)
-\textbf{Semester:} {[}FILL\_IN: e.g.~Semester 8{]} \textbf{Internship
-Period:} 17th November 2025 -- 17th May 2026 \textbf{Organisation /
-Company:} Bharti Soft Tech Pvt. Ltd.
+\vspace{4pt}
 
-\vspace{0.4in}
+\begin{tabular}{@{}p{5.5cm} p{\dimexpr\linewidth-5.5cm-2\tabcolsep}@{}}
+\textbf{Student Name:}       & Suthar Aryan Sujalkumar \\[2pt]
+\textbf{Enrolment Number:}   & 23C25512 \\[2pt]
+\textbf{Programme:}          & B.Tech (Information Technology) \\[2pt]
+\textbf{Semester:}           & Semester 8 \\[2pt]
+\textbf{Internship Period:}  & 17th November 2025 -- 17th May 2026 \\[2pt]
+\textbf{Organisation:}       & Bharti Soft Tech Pvt. Ltd. \\
+\end{tabular}
 
-\textbf{Student Signature:} \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
-\hfill **Date:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_
+\vspace{0.15in}
 
-\vspace{0.2in}
+\noindent
 
-\textbf{Supervisor / Lecturer:} Dr.~Ashutosh Abhangi
+\begin{minipage}[t]{0.55\textwidth}
+\textbf{Student Signature:} \underline{\hspace{2.2in}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.4\textwidth}
+\textbf{Date:} \underline{\hspace{1.5in}}
+\end{minipage}
 
-\textbf{Supervisor Signature:} \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
-\hfill **Date:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_
+\vspace{0.1in}
+
+\noindent\textbf{Supervisor / Lecturer:} Dr.~Ashutosh Abhangi
+
+\vspace{0.08in}
+
+\noindent
+
+\begin{minipage}[t]{0.55\textwidth}
+\textbf{Supervisor Signature:} \underline{\hspace{2.0in}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.4\textwidth}
+\textbf{Date:} \underline{\hspace{1.5in}}
+\end{minipage}
 
 \clearpage
 
 \chapter*{Declaration of Originality}\label{declaration-of-originality}
 \addcontentsline{toc}{chapter}{Declaration of Originality}
+
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
 
 I, \textbf{Suthar Aryan Sujalkumar}, holder of Enrolment Number
 \textbf{23C25512}, hereby declare that:
@@ -320,15 +389,30 @@ I, \textbf{Suthar Aryan Sujalkumar}, holder of Enrolment Number
   \textbf{17th November 2025} to \textbf{17th May 2026}.
 \end{enumerate}
 
-\textbf{Student Name:} Suthar Aryan Sujalkumar
+\medskip\noindent
 
-\textbf{Enrolment Number:} 23C25512
+\rule{\textwidth}{0.4pt}\medskip
 
-\textbf{Programme:} B.Tech (Information Technology)
+\begin{tabular}{@{}p{5cm} p{\dimexpr\linewidth-5cm-2\tabcolsep}@{}}
+\textbf{Student Name:}     & Suthar Aryan Sujalkumar \\[3pt]
+\textbf{Enrolment Number:} & 23C25512 \\[3pt]
+\textbf{Programme:}        & B.Tech (Information Technology) \\
+\end{tabular}
 
-\textbf{Date:} \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+\vspace{0.25in}
 
-\textbf{Signature:} \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+\noindent
+
+\begin{minipage}[t]{0.50\textwidth}
+\textbf{Date:} \underline{\hspace{1.8in}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.45\textwidth}
+\textbf{Signature:} \underline{\hspace{1.8in}}
+\end{minipage}
+
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
 
 \emph{I acknowledge that a false declaration is a form of academic
 dishonesty and may result in disciplinary action.}
@@ -338,10 +422,16 @@ dishonesty and may result in disciplinary action.}
 \chapter*{Acknowledgements}\label{acknowledgements}
 \addcontentsline{toc}{chapter}{Acknowledgements}
 
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
+
 The completion of this internship report would not have been possible
 without the guidance, support, and encouragement of several individuals.
 The author expresses sincere gratitude to all who contributed to this
 endeavour.
+
+\medskip
 
 Firstly, the author would like to thank \textbf{Dr.~Ashutosh Abhangi},
 External Supervisor, Bharti Soft Tech Pvt. Ltd., for providing
@@ -350,6 +440,8 @@ mentorship throughout the internship period. His expertise in software
 development and project management greatly facilitated the successful
 delivery of the Smart Gym Management System.
 
+\medskip
+
 Secondly, sincere appreciation is extended to the management and
 technical team at \textbf{Bharti Soft Tech Pvt. Ltd.} for providing the
 opportunity to undertake this internship and for their support
@@ -357,18 +449,27 @@ throughout the placement. The practical exposure gained during this
 internship proved instrumental in bridging the gap between academic
 learning and professional software engineering practice.
 
+\medskip
+
 The author also wishes to acknowledge the faculty of the School of
 Computer Science Engineering \& Technology at ITM SLS Baroda University
 for their academic guidance and support throughout the B.Tech (IT)
 programme.
 
+\medskip
+
 Finally, sincere gratitude is extended to family and friends for their
-unwavering encouragement and moral support.
+unwavering encouragement and moral support throughout the internship
+period.
 
 \clearpage
 
 \chapter*{Abstract}\label{abstract}
 \addcontentsline{toc}{chapter}{Abstract}
+
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
 
 The fitness industry has experienced a significant shift towards digital
 platforms, with gym operators increasingly requiring integrated software
@@ -412,8 +513,12 @@ in full-stack development, agile project management, and professional
 software engineering, significantly reinforcing skills acquired during
 the B.Tech (IT) programme.
 
-\textbf{Keywords:} Gym Management System, React, Spring Boot, Oracle,
-Role-Based Access Control, JWT, WebSocket.
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}
+
+\noindent\textbf{Keywords:} Gym Management System, React, Spring Boot,
+Oracle, Role-Based Access Control, JWT, WebSocket.
 
 \clearpage
 
@@ -427,10 +532,41 @@ Role-Based Access Control, JWT, WebSocket.
 \addcontentsline{toc}{chapter}{List of Tables}
 \listoftables
 
+\noindent\textit{Note: All data tables in this report are embedded directly within their respective chapters and are numbered by chapter (e.g., Table~1-1 appears in Chapter~1). The following key tables are included throughout the document:}
+
+\medskip
+
+\noindent
+
+\begin{tabular}{@{} p{3cm} p{\dimexpr\linewidth-3cm-2\tabcolsep} @{}}
+Chapter 1 & Products and Services of Bharti Soft Tech Pvt.\ Ltd. \\[3pt]
+Chapter 3 & Weekly Workflow Schedule \\[3pt]
+Chapter 7 & Achievement of Objectives; Future Work Enhancements \\[3pt]
+Appendix A & Prerequisites; Environment Variables Reference \\[3pt]
+Appendix B & Core Database Tables Summary \\[3pt]
+Appendix C & API Endpoints (Authentication, Membership, PT Sessions) \\[3pt]
+Appendix D & Frontend and Backend Technology Dependencies \\
+\end{tabular}
+
 \clearpage
 
 \addcontentsline{toc}{chapter}{List of Figures}
 \listoffigures
+
+\noindent\textit{Note: All system diagrams in this report are rendered inline within their respective chapters. The following figures are included:}
+
+\medskip
+
+\noindent
+
+\begin{tabular}{@{} p{3cm} p{\dimexpr\linewidth-3cm-2\tabcolsep} @{}}
+Chapter 4 & System Architecture Overview Diagram \\[3pt]
+Chapter 5 & Entity-Relationship (ER) Diagram \\[3pt]
+Chapter 6 & UML Class Diagram; UML Sequence Diagrams \\[3pt]
+Chapter 7 & Data Flow Diagrams — Level 0 (Context) and Level 1 \\[3pt]
+Chapter 8 & Algorithm Flowcharts (Authentication, Membership, Booking) \\[3pt]
+Chapter 9 & System Workflow Diagrams \\
+\end{tabular}
 
 \clearpage
 
@@ -438,6 +574,10 @@ Role-Based Access Control, JWT, WebSocket.
 
 \chapter*{List of Symbols}\label{list-of-symbols}
 \addcontentsline{toc}{chapter}{List of Symbols}
+
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}ll@{}}
@@ -458,8 +598,14 @@ Symbol & Meaning \\
 \end{longtable}
 }
 
+\bigskip
+
 \chapter*{List of Abbreviations}\label{list-of-abbreviations}
 \addcontentsline{toc}{chapter}{List of Abbreviations}
+
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}ll@{}}
@@ -521,6 +667,8 @@ XSS & Cross-Site Scripting \\
 
 \chapter{Introduction}\label{introduction}
 
+\needspace{3\baselineskip}
+
 \section{Background of the
 Organisation}\label{background-of-the-organisation}
 
@@ -545,6 +693,8 @@ technologies to deliver production-ready applications. Under the
 supervision of Dr.~Ashutosh Abhangi (External Supervisor), the intern
 was given comprehensive exposure to professional development practices,
 architectural decision-making, and code quality standards.
+
+\needspace{3\baselineskip}
 
 \section{Objectives of the
 Organisation}\label{objectives-of-the-organisation}
@@ -575,43 +725,34 @@ These objectives directly shaped the technical and functional
 requirements of the Smart Gym Management System developed during this
 internship.
 
+\needspace{3\baselineskip}
+
 \section{Products and Main Services of the
 Organisation}\label{products-and-main-services-of-the-organisation}
 
 Bharti Soft Tech Pvt. Ltd.~offers the following core products and
 services:
 
-{\def\LTcaptype{none} % do not increment counter
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5938}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.4062}}@{}}
-\toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-Product / Service
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Description
-\end{minipage} \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-\textbf{Custom Web Application Development} & Full-stack web
-applications built to client specifications \\
-\textbf{Mobile Application Development} & Cross-platform mobile apps for
-Android and iOS \\
-\textbf{API Development \& Integration} & RESTful API design and
-third-party service integration \\
-\textbf{Database Design \& Optimisation} & Schema design, query tuning,
-and migration services \\
-\textbf{IT Consultancy} & Technical advisory for digital transformation
-projects \\
-\end{longtable}
-}
+\begin{tabular}{@{} p{5.2cm} p{\dimexpr\linewidth-5.2cm-2\tabcolsep} @{}}
+\toprule
+\textbf{Product / Service} & \textbf{Description} \\
+\midrule
+Custom Web Application Development & Full-stack web applications built to client specifications \\[4pt]
+Mobile Application Development & Cross-platform mobile apps for Android and iOS \\[4pt]
+API Development \& Integration & RESTful API design and third-party service integration \\[4pt]
+Database Design \& Optimisation & Schema design, query tuning, and migration services \\[4pt]
+IT Consultancy & Technical advisory for digital transformation projects \\
+\bottomrule
+\end{tabular}
+
+\medskip
 
 The Smart Gym Management System developed during this internship
 represents a flagship product demonstrating the organisation's
 capability in delivering comprehensive, multi-role enterprise web
 applications.
+
+\needspace{3\baselineskip}
 
 \section{Organisation Structure and
 Workflow}\label{organisation-structure-and-workflow}
@@ -660,6 +801,10 @@ coordination, and business analytics. This literature review examines
 existing solutions, technological approaches, and design patterns that
 influenced the development of this system.
 
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
+
 \section{Existing Gym Management
 Systems}\label{existing-gym-management-systems}
 
@@ -707,6 +852,10 @@ Our system addresses these by providing: - Open-source foundation for
 cost reduction - Modular architecture for customization - REST API for
 easy integration - Role-based feature access
 
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
+
 \section{Technology Stack
 Justification}\label{technology-stack-justification}
 
@@ -744,6 +893,10 @@ for financial transactions - \textbf{Scalability}: Handles growing
 member data - \textbf{Enterprise Features}: Advanced security, auditing
 - \textbf{JPA Compatibility}: Seamless Hibernate integration
 
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
+
 \section{Architectural Patterns}\label{architectural-patterns}
 
 \subsection{Multi-Tenancy}\label{multi-tenancy}
@@ -770,6 +923,10 @@ Stateless authentication using JSON Web Tokens aligns with RFC 7519
 {[}8{]}: - Self-contained claims reduce database lookups - Enables
 horizontal scaling - Supports single sign-on patterns
 
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
+
 \section{Real-Time Communication}\label{real-time-communication}
 
 \subsection{WebSocket Implementation}\label{websocket-implementation}
@@ -786,6 +943,10 @@ routing.
 Notification system implements observer pattern {[}10{]}: - Event-driven
 architecture - Loose coupling between modules - Scalable message
 delivery
+
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
 
 \section{Security Considerations}\label{security-considerations}
 
@@ -813,6 +974,10 @@ delivery
 \item
   \textbf{Soft Deletes}: Data recovery support
 \end{itemize}
+
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
 
 \section{Related Work}\label{related-work}
 
@@ -854,6 +1019,10 @@ Williams (2022) & Microservices in fitness & Scalability patterns \\
   \textbf{WCAG 2.1}: Accessibility standards
 \end{itemize}
 
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
+
 \section{Comparative Analysis}\label{comparative-analysis}
 
 {\def\LTcaptype{none} % do not increment counter
@@ -875,6 +1044,10 @@ Self-Hosted Option & Yes & No & No \\
 \end{longtable}
 }
 
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
+
 \section{Conclusion}\label{conclusion}
 
 This gym management system synthesizes best practices from commercial
@@ -894,6 +1067,8 @@ requirements while maintaining code quality and security standards.
 
 \chapter{Overall Experience Gained from the
 Internship}\label{overall-experience-gained-from-the-internship}
+
+\needspace{3\baselineskip}
 
 \section{Reason for Selecting the
 Organisation}\label{reason-for-selecting-the-organisation}
@@ -921,6 +1096,8 @@ mentorship-oriented culture provided an environment conducive to
 professional growth, where constructive feedback and independent
 problem-solving were equally encouraged.
 
+\needspace{3\baselineskip}
+
 \section{Workflow of the Department}\label{workflow-of-the-department}
 
 The Software Development Department at Bharti Soft Tech Pvt.
@@ -931,26 +1108,17 @@ both the frontend and backend layers of the Smart Gym Management System.
 
 The weekly workflow followed the structure outlined below:
 
-{\def\LTcaptype{none} % do not increment counter
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.3333}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.6667}}@{}}
-\toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-Day
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Activity
-\end{minipage} \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-Monday & Sprint planning and backlog grooming \\
-Tuesday -- Thursday & Active feature development and daily stand-ups \\
-Friday & Code reviews, pull request merges, sprint review, and
-retrospective \\
-\end{longtable}
-}
+\begin{tabular}{@{} p{3.5cm} p{\dimexpr\linewidth-3.5cm-2\tabcolsep} @{}}
+\toprule
+\textbf{Day} & \textbf{Activity} \\
+\midrule
+Monday & Sprint planning and backlog grooming \\[4pt]
+Tuesday -- Thursday & Active feature development and daily stand-ups \\[4pt]
+Friday & Code reviews, pull request merges, sprint review, and retrospective \\
+\bottomrule
+\end{tabular}
+
+\medskip
 
 Each sprint produced a functional increment of the system, which was
 deployed to a local staging environment for review. Tasks were tracked
@@ -963,16 +1131,26 @@ IntelliJ IDEA (backend), and Postman for API testing. The Oracle
 database was managed using Oracle SQL Developer for schema design and
 query verification.
 
+\needspace{3\baselineskip}
+
 \section{Tasks Allotted During the
 Internship}\label{tasks-allotted-during-the-internship}
 
 The internship tasks were distributed across frontend and backend
 development, covering all major modules of the Smart Gym Management
 System. The following tasks were completed over the course of the
-internship under the supervision of Dr.~Ashutosh Abhangi:
+internship under the supervision of Dr.~Ashutosh Abhangi.
+
+\medskip\noindent
+
+\rule{\textwidth}{0.3pt}
 
 \subsection{Frontend Development (React +
 TypeScript)}\label{frontend-development-react-typescript}
+
+\noindent
+
+\rule{\textwidth}{0.3pt}\medskip
 
 \begin{itemize}
 \tightlist
@@ -1001,8 +1179,16 @@ TypeScript)}\label{frontend-development-react-typescript}
   handling.
 \end{itemize}
 
+\medskip\noindent
+
+\rule{\textwidth}{0.3pt}
+
 \subsection{Backend Development (Spring Boot + Java +
 Oracle)}\label{backend-development-spring-boot-java-oracle}
+
+\noindent
+
+\rule{\textwidth}{0.3pt}\medskip
 
 \begin{itemize}
 \tightlist
@@ -1031,7 +1217,15 @@ Oracle)}\label{backend-development-spring-boot-java-oracle}
   annotations to enforce role-based access control at the service layer.
 \end{itemize}
 
+\medskip\noindent
+
+\rule{\textwidth}{0.3pt}
+
 \subsection{Documentation and Testing}\label{documentation-and-testing}
+
+\noindent
+
+\rule{\textwidth}{0.3pt}\medskip
 
 \begin{itemize}
 \tightlist
@@ -1059,6 +1253,10 @@ System}\label{system-architecture---gym-management-system}
 \centering
 \includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_system_architecture_0.png}
 \end{figure}
+
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
 
 \section{Technology Stack}\label{technology-stack}
 
@@ -1138,12 +1336,20 @@ Service & Purpose \\
 \end{longtable}
 }
 
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
+
 \section{Component Architecture}\label{component-architecture}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_system_architecture_1.png}
 \end{figure}
+
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
 
 \section{Authentication Flow}\label{authentication-flow}
 
@@ -1152,6 +1358,10 @@ Service & Purpose \\
 \includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_system_architecture_2.png}
 \end{figure}
 
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
+
 \section{Database Architecture}\label{database-architecture}
 
 \begin{figure}[H]
@@ -1159,12 +1369,20 @@ Service & Purpose \\
 \includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_system_architecture_3.png}
 \end{figure}
 
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
+
 \section{Deployment Architecture}\label{deployment-architecture}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_system_architecture_4.png}
 \end{figure}
+
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
 
 \section{Security Architecture}\label{security-architecture}
 
@@ -1186,6 +1404,10 @@ Layer & Mechanism & Implementation \\
 \textbf{CORS} & Whitelist & Spring CORS Config \\
 \end{longtable}
 }
+
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
 
 \section{Scalability Considerations}\label{scalability-considerations}
 
@@ -1221,12 +1443,20 @@ Entities}\label{user-authentication-entities}
 \includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_er_diagram_0.png}
 \end{figure}
 
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
+
 \section{Gym Management Entities}\label{gym-management-entities}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_er_diagram_1.png}
 \end{figure}
+
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
 
 \section{Membership Entities}\label{membership-entities}
 
@@ -1235,12 +1465,20 @@ Entities}\label{user-authentication-entities}
 \includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_er_diagram_2.png}
 \end{figure}
 
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
+
 \section{Training \& Session Entities}\label{training-session-entities}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_er_diagram_3.png}
 \end{figure}
+
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
 
 \section{Communication Entities}\label{communication-entities}
 
@@ -1249,6 +1487,10 @@ Entities}\label{user-authentication-entities}
 \includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_er_diagram_4.png}
 \end{figure}
 
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
+
 \section{Notification Entities}\label{notification-entities}
 
 \begin{figure}[H]
@@ -1256,12 +1498,20 @@ Entities}\label{user-authentication-entities}
 \includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_er_diagram_5.png}
 \end{figure}
 
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
+
 \section{Analytics Entities}\label{analytics-entities}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_er_diagram_6.png}
 \end{figure}
+
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
 
 \section{Entity Summary Table}\label{entity-summary-table}
 
@@ -1311,6 +1561,10 @@ Auth}\label{class-diagram---core-user-auth}
 \includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_uml_diagrams_0.png}
 \end{figure}
 
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
+
 \section{Class Diagram - Gym \&
 Membership}\label{class-diagram---gym-membership}
 
@@ -1318,6 +1572,10 @@ Membership}\label{class-diagram---gym-membership}
 \centering
 \includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_uml_diagrams_1.png}
 \end{figure}
+
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
 
 \section{Class Diagram - Training \&
 Sessions}\label{class-diagram---training-sessions}
@@ -1327,6 +1585,10 @@ Sessions}\label{class-diagram---training-sessions}
 \includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_uml_diagrams_2.png}
 \end{figure}
 
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
+
 \section{Class Diagram -
 Communication}\label{class-diagram---communication}
 
@@ -1335,12 +1597,20 @@ Communication}\label{class-diagram---communication}
 \includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_uml_diagrams_3.png}
 \end{figure}
 
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
+
 \section{Use Case Diagram}\label{use-case-diagram}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_uml_diagrams_4.png}
 \end{figure}
+
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
 
 \section{Sequence Diagrams}\label{sequence-diagrams}
 
@@ -1364,6 +1634,10 @@ Communication}\label{class-diagram---communication}
 \centering
 \includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_uml_diagrams_7.png}
 \end{figure}
+
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
 
 \section{Activity Diagrams}\label{activity-diagrams}
 
@@ -1401,12 +1675,20 @@ System}\label{data-flow-diagrams---gym-management-system}
 \includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_dfd_diagrams_0.png}
 \end{figure}
 
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
+
 \section{Level 1: Main Processes}\label{level-1-main-processes}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_dfd_diagrams_1.png}
 \end{figure}
+
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
 
 \section{Level 2: Detailed
 Sub-Processes}\label{level-2-detailed-sub-processes}
@@ -1448,6 +1730,10 @@ Sub-Processes}\label{level-2-detailed-sub-processes}
 \includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_dfd_diagrams_6.png}
 \end{figure}
 
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
+
 \section{Data Dictionary}\label{data-dictionary}
 
 {\def\LTcaptype{none} % do not increment counter
@@ -1476,7 +1762,7 @@ Algorithm}\label{jwt-authentication-algorithm}
 
 \subsection{Token Generation}\label{token-generation}
 
-\begin{verbatim}
+\begin{lstlisting}[style=algo]
 ALGORITHM: JWT_Token_Generation
 INPUT: User user, Set<Role> roles
 OUTPUT: String jwtToken
@@ -1507,11 +1793,11 @@ BEGIN
            base64Encode(claims) + "." + 
            base64Encode(signature)
 END
-\end{verbatim}
+\end{lstlisting}
 
 \subsection{Token Validation}\label{token-validation}
 
-\begin{verbatim}
+\begin{lstlisting}[style=algo]
 ALGORITHM: JWT_Token_Validation
 INPUT: String token
 OUTPUT: Claims claims OR Exception
@@ -1544,14 +1830,18 @@ BEGIN
     
     RETURN claims
 END
-\end{verbatim}
+\end{lstlisting}
+
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
 
 \section{Role-Based Access Control (RBAC)
 Algorithm}\label{role-based-access-control-rbac-algorithm}
 
 \subsection{Permission Check}\label{permission-check}
 
-\begin{verbatim}
+\begin{lstlisting}[style=algo]
 ALGORITHM: RBAC_Permission_Check
 INPUT: User user, String module, String action
 OUTPUT: Boolean hasPermission
@@ -1593,11 +1883,11 @@ FUNCTION matchesWildcard(permission, module, action):
     END IF
     RETURN FALSE
 END FUNCTION
-\end{verbatim}
+\end{lstlisting}
 
 \subsection{Role Hierarchy}\label{role-hierarchy}
 
-\begin{verbatim}
+\begin{lstlisting}[style=algo]
 ROLE_HIERARCHY = {
     ADMIN: [OWNER, TRAINER, MEMBER, CUSTOMER],
     OWNER: [TRAINER, MEMBER],
@@ -1627,12 +1917,16 @@ BEGIN
     
     RETURN FALSE
 END
-\end{verbatim}
+\end{lstlisting}
+
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
 
 \section{Membership Package Assignment
 Algorithm}\label{membership-package-assignment-algorithm}
 
-\begin{verbatim}
+\begin{lstlisting}[style=algo]
 ALGORITHM: Assign_Membership
 INPUT: User member, MembershipPackage package, Gym gym
 OUTPUT: Membership membership
@@ -1695,12 +1989,16 @@ FUNCTION handleMembershipUpgrade(existing, newPackage):
     save(existing)
     RETURN existing
 END FUNCTION
-\end{verbatim}
+\end{lstlisting}
+
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
 
 \section{Session Rating Calculation
 Algorithm}\label{session-rating-calculation-algorithm}
 
-\begin{verbatim}
+\begin{lstlisting}[style=algo]
 ALGORITHM: Calculate_Trainer_Rating
 INPUT: Long trainerId
 OUTPUT: TrainerStats stats
@@ -1750,14 +2048,18 @@ BEGIN
         ratingDistribution: distribution
     )
 END
-\end{verbatim}
+\end{lstlisting}
+
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
 
 \section{Analytics Computation
 Algorithm}\label{analytics-computation-algorithm}
 
 \subsection{Revenue Calculation}\label{revenue-calculation}
 
-\begin{verbatim}
+\begin{lstlisting}[style=algo]
 ALGORITHM: Calculate_Revenue_Analytics
 INPUT: Long gymId, DateRange period
 OUTPUT: RevenueAnalytics analytics
@@ -1807,11 +2109,11 @@ BEGIN
         projectedMonthly: projectedMonthly
     )
 END
-\end{verbatim}
+\end{lstlisting}
 
 \subsection{Member Statistics}\label{member-statistics}
 
-\begin{verbatim}
+\begin{lstlisting}[style=algo]
 ALGORITHM: Calculate_Member_Statistics
 INPUT: Long gymId
 OUTPUT: MemberStats stats
@@ -1871,12 +2173,16 @@ BEGIN
         monthlyGrowth: ROUND(growthRate, 2)
     )
 END
-\end{verbatim}
+\end{lstlisting}
+
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
 
 \section{Duplicate Package Cleanup
 Algorithm}\label{duplicate-package-cleanup-algorithm}
 
-\begin{verbatim}
+\begin{lstlisting}[style=algo]
 ALGORITHM: Cleanup_Duplicate_Packages
 INPUT: None (scheduled job)
 OUTPUT: Integer deletedCount
@@ -1928,11 +2234,15 @@ BEGIN
     
     RETURN duplicatesToDelete.size()
 END
-\end{verbatim}
+\end{lstlisting}
+
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
 
 \section{Password Hashing Algorithm}\label{password-hashing-algorithm}
 
-\begin{verbatim}
+\begin{lstlisting}[style=algo]
 ALGORITHM: Hash_Password
 INPUT: String plainPassword
 OUTPUT: String hashedPassword
@@ -1966,7 +2276,11 @@ BEGIN
     // Constant-time comparison to prevent timing attacks
     RETURN secureEquals(computedHash, storedHash)
 END
-\end{verbatim}
+\end{lstlisting}
+
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
 
 \section{Algorithm Complexity
 Analysis}\label{algorithm-complexity-analysis}
@@ -2012,6 +2326,10 @@ Authentication}\label{user-registration-authentication}
 \includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_1.png}
 \end{figure}
 
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
+
 \section{Membership Management}\label{membership-management}
 
 \subsection{Purchase Flow}\label{purchase-flow}
@@ -2027,6 +2345,10 @@ Authentication}\label{user-registration-authentication}
 \centering
 \includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_3.png}
 \end{figure}
+
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
 
 \section{Trainer-Member Interaction}\label{trainer-member-interaction}
 
@@ -2044,6 +2366,10 @@ Authentication}\label{user-registration-authentication}
 \includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_5.png}
 \end{figure}
 
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
+
 \section{PT Session Booking}\label{pt-session-booking}
 
 \subsection{Session Creation}\label{session-creation}
@@ -2059,6 +2385,10 @@ Authentication}\label{user-registration-authentication}
 \centering
 \includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_7.png}
 \end{figure}
+
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
 
 \section{Chat/Messaging}\label{chatmessaging}
 
@@ -2082,6 +2412,10 @@ Authentication}\label{user-registration-authentication}
 \centering
 \includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_10.png}
 \end{figure}
+
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
 
 \section{Notifications}\label{notifications}
 
@@ -2285,6 +2619,10 @@ F7.5 & Export Reports & Download as PDF/CSV & Low \\
 \end{longtable}
 }
 
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
+
 \section{Non-Functional Requirements}\label{non-functional-requirements}
 
 \subsection{Security}\label{security}
@@ -2417,6 +2755,10 @@ NF6.5 & Code Quality & Lombok for boilerplate reduction & Medium \\
 \end{longtable}
 }
 
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
+
 \section{Feature Matrix by Role}\label{feature-matrix-by-role}
 
 {\def\LTcaptype{none} % do not increment counter
@@ -2447,6 +2789,8 @@ System Settings & - & - & Yes & Yes \\
 
 \chapter{Conclusion}\label{conclusion-1}
 
+\needspace{3\baselineskip}
+
 \section{Project Review and
 Discussion}\label{project-review-and-discussion}
 
@@ -2461,41 +2805,28 @@ progress tracking, financial reporting, and administrative controls.
 The development process revealed a number of important insights
 regarding the practical application of software engineering principles.
 
+\needspace{3\baselineskip}
+
 \subsection{Achievement of Objectives}\label{achievement-of-objectives}
 
 The following objectives were defined at the outset of the project and
 were evaluated against the completed system:
 
-{\def\LTcaptype{none} % do not increment counter
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5500}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.4500}}@{}}
-\toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-Objective
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Outcome
-\end{minipage} \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-Multi-role authentication and authorisation & Achieved --- JWT and RBAC
-implemented across all four roles \\
-Membership lifecycle management & Achieved --- complete purchase,
-approval, expiry, and renewal workflows \\
-Personal training booking system & Achieved --- session creation,
-cancellation, and rating workflows functional \\
-Real-time chat between roles & Achieved --- WebSocket STOMP messaging
-with delivery status \\
-Financial reporting and analytics & Achieved --- revenue charts,
-transaction tables, and KPI dashboard \\
-Security compliance with OWASP guidelines & Achieved --- BCrypt, input
-validation, CORS, and JWT verified \\
-Sub-200ms API response times & Achieved --- validated under standard
-load conditions \\
-\end{longtable}
-}
+\begin{tabular}{@{} p{5.5cm} p{\dimexpr\linewidth-5.5cm-2\tabcolsep} @{}}
+\toprule
+\textbf{Objective} & \textbf{Outcome} \\
+\midrule
+Multi-role authentication and authorisation & Achieved — JWT and RBAC implemented across all four roles \\[4pt]
+Membership lifecycle management & Achieved — complete purchase, approval, expiry, and renewal workflows \\[4pt]
+Personal training booking system & Achieved — session creation, cancellation, and rating workflows functional \\[4pt]
+Real-time chat between roles & Achieved — WebSocket STOMP messaging with delivery status \\[4pt]
+Financial reporting and analytics & Achieved — revenue charts, transaction tables, and KPI dashboard \\[4pt]
+Security compliance with OWASP guidelines & Achieved — BCrypt, input validation, CORS, and JWT verified \\[4pt]
+Sub-200ms API response times & Achieved — validated under standard load conditions \\
+\bottomrule
+\end{tabular}
+
+\needspace{3\baselineskip}
 
 \subsection{Problems Encountered}\label{problems-encountered}
 
@@ -2526,6 +2857,8 @@ subsequently resolved:
   audit and class renaming.
 \end{enumerate}
 
+\needspace{3\baselineskip}
+
 \section{Novelties and Contributions}\label{novelties-and-contributions}
 
 The project achieved the following notable contributions:
@@ -2533,26 +2866,28 @@ The project achieved the following notable contributions:
 \begin{itemize}
 \tightlist
 \item
-  \textbf{Unified multi-role architecture}: A single codebase serving
+  \textbf{Unified multi-role architecture:} A single codebase serving
   four distinct user types (Member, Trainer, Owner, Super Admin) with
   dynamically rendered dashboards, eliminating the need for separate
   applications per role.
 \item
-  \textbf{Open-source gym management platform}: The system provides a
+  \textbf{Open-source gym management platform:} The system provides a
   free, self-hostable alternative to commercial platforms such as
   Mindbody and Zen Planner, addressing cost and customisation barriers
   for smaller gym operators.
 \item
-  \textbf{Integrated real-time communication}: Unlike most competitors,
+  \textbf{Integrated real-time communication:} Unlike most competitors,
   the system incorporated first-class WebSocket-based chat between
   members and trainers, reducing the need for external messaging tools.
 \item
-  \textbf{Comprehensive internship documentation}: The \texttt{docs/}
+  \textbf{Comprehensive internship documentation:} The \texttt{docs/}
   directory provides a detailed technical knowledge base --- including
   ER diagrams, UML models, DFD diagrams, and system architecture
   documentation --- that enables future contributors to onboard
   efficiently.
 \end{itemize}
+
+\needspace{3\baselineskip}
 
 \section{Personal Insights}\label{personal-insights}
 
@@ -2565,48 +2900,33 @@ collaborating within an agile team.
 Working across both frontend and backend domains reinforced the
 understanding that technical decisions in one layer have cascading
 effects on others --- a lesson that abstract academic study alone could
-not fully convey.
+not fully convey. The agile methodology, combined with regular
+supervisor feedback, provided a disciplined yet flexible framework that
+significantly increased development velocity and output quality.
+
+\needspace{3\baselineskip}
 
 \section{Future Work}\label{future-work}
 
 The following improvements and extensions are recommended for future
 development of the Gym Management System:
 
-{\def\LTcaptype{none} % do not increment counter
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3611}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2778}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3611}}@{}}
-\toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-Enhancement
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Priority
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Description
-\end{minipage} \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-\textbf{Mobile Application} & High & Native iOS/Android companion app
-for members \\
-\textbf{Payment Gateway Integration} & High & Stripe or Razorpay for
-online membership payments \\
-\textbf{AI-Powered Workout Recommendations} & Medium & Machine learning
-model for personalised plans \\
-\textbf{Microservices Migration} & Medium & Decompose monolith into
-independently scalable services \\
-\textbf{Multi-language Support (i18n)} & Medium & Internationalisation
-for non-English markets \\
-\textbf{GDPR Compliance Module} & High & Data export, anonymisation, and
-right-to-erasure features \\
-\textbf{Video Conferencing Integration} & Low & Embedded video for
-remote PT sessions \\
-\textbf{Advanced Analytics Dashboard} & Medium & Predictive churn
-analysis, retention metrics \\
-\end{longtable}
-}
+\begin{tabular}{@{} p{5.0cm} p{1.8cm} p{\dimexpr\linewidth-5.0cm-1.8cm-4\tabcolsep} @{}}
+\toprule
+\textbf{Enhancement} & \textbf{Priority} & \textbf{Description} \\
+\midrule
+Mobile Application & High & Native iOS/Android companion app for members \\[4pt]
+Payment Gateway Integration & High & Stripe or Razorpay for online membership payments \\[4pt]
+GDPR Compliance Module & High & Data export, anonymisation, and right-to-erasure features \\[4pt]
+AI-Powered Workout Recommendations & Medium & Machine learning model for personalised plans \\[4pt]
+Microservices Migration & Medium & Decompose monolith into independently scalable services \\[4pt]
+Multi-language Support (i18n) & Medium & Internationalisation for non-English markets \\[4pt]
+Advanced Analytics Dashboard & Medium & Predictive churn analysis, retention metrics \\[4pt]
+Video Conferencing Integration & Low & Embedded video for remote PT sessions \\
+\bottomrule
+\end{tabular}
+
+\medskip
 
 The foundational architecture of the system --- stateless JWT
 authentication, modular service layer, and RESTful API design --- was
@@ -2657,6 +2977,10 @@ Addison-Wesley. ISBN: 978-0201633610
 \emph{OWASP Cheat Sheet Series}.
 https://cheatsheetseries.owasp.org/cheatsheets/Password\_Storage\_Cheat\_Sheet.html
 
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
+
 \section{Industry \& Fitness Research}\label{industry-fitness-research}
 
 {[}12{]} Sharma, R., Kumar, A., \& Singh, P. (2020). ``User Experience
@@ -2673,6 +2997,10 @@ Applications.'' \emph{IEEE Software}, 38(2), 65-72.
 {[}15{]} Williams, J. (2022). ``Microservices Architecture in Modern
 Fitness Applications.'' \emph{Proceedings of the ACM Symposium on Cloud
 Computing}, 456-468.
+
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
 
 \section{Technical Documentation}\label{technical-documentation}
 
@@ -2693,6 +3021,10 @@ Tokens}. Auth0. https://jwt.io/introduction
 MDN Web Docs.
 https://developer.mozilla.org/en-US/docs/Web/API/WebSockets\_API
 
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
+
 \section{Security Standards}\label{security-standards}
 
 {[}21{]} OWASP. (2023). \emph{OWASP Top Ten 2021}. OWASP Foundation.
@@ -2703,6 +3035,10 @@ Publication 800-63B. https://pages.nist.gov/800-63-3/sp800-63b.html
 
 {[}23{]} W3C. (2023). \emph{Web Content Accessibility Guidelines (WCAG)
 2.1}. World Wide Web Consortium. https://www.w3.org/TR/WCAG21/
+
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
 
 \section{Framework \& Library
 Documentation}\label{framework-library-documentation}
@@ -2728,6 +3064,10 @@ https://reactrouter.com/
 {[}30{]} Recharts. (2024). \emph{Recharts - A composable charting
 library}. https://recharts.org/
 
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
+
 \section{Database \& Infrastructure}\label{database-infrastructure-1}
 
 {[}31{]} HikariCP. (2024). \emph{HikariCP - A solid, high-performance
@@ -2736,10 +3076,18 @@ JDBC connection pool}. https://github.com/brettwooldridge/HikariCP
 {[}32{]} Oracle JDBC. (2024). \emph{Oracle JDBC Driver Documentation}.
 https://docs.oracle.com/en/database/oracle/oracle-database/21/jjdbc/
 
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
+
 \section{Citation Format}\label{citation-format}
 
 This document follows IEEE citation style. All URLs were verified as
 accessible as of February 2026.
+
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
 
 \section{Acknowledgments}\label{acknowledgments}
 
@@ -2766,22 +3114,18 @@ Guide}\label{appendix-a-system-installation-guide}
 The following tools must be installed before setting up the Gym
 Management System locally:
 
-{\def\LTcaptype{none} % do not increment counter
-\begin{longtable}[]{@{}lll@{}}
-\toprule\noalign{}
-Tool & Minimum Version & Purpose \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-Node.js & 18.x & Frontend runtime \\
-npm & 9.x & Package manager \\
-Java JDK & 17+ & Backend runtime \\
-Maven & 3.8+ & Java build tool \\
-Oracle Database & 19c+ & Primary data store \\
-Git & 2.x & Version control \\
-\end{longtable}
-}
+\begin{tabular}{@{} p{4.5cm} p{2.5cm} p{\dimexpr\linewidth-4.5cm-2.5cm-4\tabcolsep} @{}}
+\toprule
+\textbf{Tool} & \textbf{Min. Version} & \textbf{Purpose} \\
+\midrule
+Node.js      & 18.x  & Frontend runtime \\[3pt]
+npm          & 9.x   & Package manager \\[3pt]
+Java JDK     & 17+   & Backend runtime \\[3pt]
+Maven        & 3.8+  & Java build tool \\[3pt]
+Oracle Database & 19c+ & Primary data store \\[3pt]
+Git          & 2.x   & Version control \\
+\bottomrule
+\end{tabular}
 
 \subsection{A.2 Frontend Setup}\label{a.2-frontend-setup}
 
@@ -2813,7 +3157,7 @@ by default.
 \CommentTok{\# Navigate to backend directory}
 \BuiltInTok{cd}\NormalTok{ gym{-}management{-}system{-}fullstack/backend}
 
-\CommentTok{\# Configure database connection in application.properties}
+\CommentTok{\# Configure database in application.properties:}
 \CommentTok{\# spring.datasource.url=jdbc:oracle:thin:@localhost:1521:orcl}
 \CommentTok{\# spring.datasource.username=YOUR\_DB\_USERNAME}
 \CommentTok{\# spring.datasource.password=YOUR\_DB\_PASSWORD}
@@ -2829,35 +3173,21 @@ default.
 \subsection{A.4 Environment Variables
 Reference}\label{a.4-environment-variables-reference}
 
-{\def\LTcaptype{none} % do not increment counter
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3125}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4062}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2812}}@{}}
-\toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-Variable
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Description
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Example
-\end{minipage} \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-\texttt{VITE\_API\_BASE\_URL} & Backend API URL &
-\texttt{http://localhost:8080/api} \\
-\texttt{VITE\_WS\_URL} & WebSocket server URL &
-\texttt{ws://localhost:8080/ws} \\
-\texttt{spring.datasource.url} & JDBC connection string &
-\texttt{jdbc:oracle:thin:@...} \\
-\texttt{jwt.secret} & JWT signing secret (min 256-bit) &
-\texttt{{[}secure-random-string{]}} \\
-\texttt{spring.mail.host} & SMTP host for email OTP &
-\texttt{smtp.gmail.com} \\
-\end{longtable}
-}
+\begin{tabular}{@{} p{4.5cm} p{4.0cm} p{\dimexpr\linewidth-4.5cm-4.0cm-4\tabcolsep} @{}}
+\toprule
+\textbf{Variable} & \textbf{Description} & \textbf{Example} \\
+\midrule
+\texttt{VITE\_API\_BASE\_URL} & Backend API URL & \texttt{http://localhost:8080/api} \\[3pt]
+\texttt{VITE\_WS\_URL} & WebSocket server URL & \texttt{ws://localhost:8080/ws} \\[3pt]
+\texttt{spring.datasource.url} & JDBC connection string & \texttt{jdbc:oracle:thin:@...} \\[3pt]
+\texttt{jwt.secret} & JWT signing secret (min 256-bit) & \texttt{[secure-random-string]} \\[3pt]
+\texttt{spring.mail.host} & SMTP host for email OTP & \texttt{smtp.gmail.com} \\
+\bottomrule
+\end{tabular}
+
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
 
 \section*{Appendix B: Database Schema
 Reference}\label{appendix-b-database-schema-reference}
@@ -2865,42 +3195,22 @@ Reference}\label{appendix-b-database-schema-reference}
 
 \subsection{B.1 Core Tables Summary}\label{b.1-core-tables-summary}
 
-{\def\LTcaptype{none} % do not increment counter
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3158}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3421}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3421}}@{}}
-\toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-Table Name
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Primary Key
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Description
-\end{minipage} \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-\texttt{users} & \texttt{user\_id} & All user accounts across roles \\
-\texttt{roles} & \texttt{role\_id} & Role definitions (MEMBER, TRAINER,
-OWNER, ADMIN) \\
-\texttt{gyms} & \texttt{gym\_id} & Gym tenant records \\
-\texttt{memberships} & \texttt{membership\_id} & Active and historical
-memberships \\
-\texttt{membership\_packages} & \texttt{package\_id} & Configured
-membership packages \\
-\texttt{pt\_sessions} & \texttt{session\_id} & Personal training session
-bookings \\
-\texttt{trainer\_details} & \texttt{trainer\_id} & Trainer profile
-extensions \\
-\texttt{conversations} & \texttt{conversation\_id} & Chat conversation
-threads \\
-\texttt{messages} & \texttt{message\_id} & Individual chat messages \\
-\texttt{notifications} & \texttt{notification\_id} & System
-notifications \\
-\end{longtable}
-}
+\begin{tabular}{@{} p{4.5cm} p{3.0cm} p{\dimexpr\linewidth-4.5cm-3.0cm-4\tabcolsep} @{}}
+\toprule
+\textbf{Table Name} & \textbf{Primary Key} & \textbf{Description} \\
+\midrule
+\texttt{users}              & \texttt{user\_id}         & All user accounts across roles \\[3pt]
+\texttt{roles}              & \texttt{role\_id}         & Role definitions (MEMBER, TRAINER, OWNER, ADMIN) \\[3pt]
+\texttt{gyms}               & \texttt{gym\_id}          & Gym tenant records \\[3pt]
+\texttt{memberships}        & \texttt{membership\_id}   & Active and historical memberships \\[3pt]
+\texttt{membership\_packages} & \texttt{package\_id}   & Configured membership packages \\[3pt]
+\texttt{pt\_sessions}       & \texttt{session\_id}      & Personal training session bookings \\[3pt]
+\texttt{trainer\_details}   & \texttt{trainer\_id}      & Trainer profile extensions \\[3pt]
+\texttt{conversations}      & \texttt{conversation\_id} & Chat conversation threads \\[3pt]
+\texttt{messages}           & \texttt{message\_id}      & Individual chat messages \\[3pt]
+\texttt{notifications}      & \texttt{notification\_id} & System notifications \\
+\bottomrule
+\end{tabular}
 
 \subsection{B.2 Key Relationships}\label{b.2-key-relationships}
 
@@ -2923,6 +3233,10 @@ notifications \\
   and involves two or more \texttt{users}.
 \end{itemize}
 
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
+
 \section*{Appendix C: API Endpoints
 Reference}\label{appendix-c-api-endpoints-reference}
 \addcontentsline{toc}{section}{Appendix C: API Endpoints Reference}
@@ -2930,70 +3244,49 @@ Reference}\label{appendix-c-api-endpoints-reference}
 \subsection{C.1 Authentication
 Endpoints}\label{c.1-authentication-endpoints}
 
-{\def\LTcaptype{none} % do not increment counter
-\begin{longtable}[]{@{}lll@{}}
-\toprule\noalign{}
-Method & Endpoint & Description \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-POST & \texttt{/api/auth/register} & Register a new user \\
-POST & \texttt{/api/auth/login} & Authenticate and receive JWT \\
-POST & \texttt{/api/auth/refresh} & Refresh expired JWT \\
-POST & \texttt{/api/auth/logout} & Invalidate session \\
-POST & \texttt{/api/auth/verify-otp} & Verify 2FA OTP \\
-\end{longtable}
-}
+\begin{tabular}{@{} p{1.5cm} p{5.5cm} p{\dimexpr\linewidth-1.5cm-5.5cm-4\tabcolsep} @{}}
+\toprule
+\textbf{Method} & \textbf{Endpoint} & \textbf{Description} \\
+\midrule
+POST & \texttt{/api/auth/register}    & Register a new user \\[3pt]
+POST & \texttt{/api/auth/login}       & Authenticate and receive JWT \\[3pt]
+POST & \texttt{/api/auth/refresh}     & Refresh expired JWT \\[3pt]
+POST & \texttt{/api/auth/logout}      & Invalidate session \\[3pt]
+POST & \texttt{/api/auth/verify-otp}  & Verify 2FA OTP \\
+\bottomrule
+\end{tabular}
 
 \subsection{C.2 Membership Endpoints}\label{c.2-membership-endpoints}
 
-{\def\LTcaptype{none} % do not increment counter
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2581}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3226}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4194}}@{}}
-\toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-Method
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Endpoint
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Description
-\end{minipage} \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-GET & \texttt{/api/memberships/packages} & List available packages \\
-POST & \texttt{/api/memberships/request} & Submit membership purchase
-request \\
-PUT & \texttt{/api/memberships/\{id\}/approve} & Owner approves
-membership \\
-PUT & \texttt{/api/memberships/\{id\}/reject} & Owner rejects
-membership \\
-GET & \texttt{/api/memberships/my} & Get current member's membership \\
-\end{longtable}
-}
+\begin{tabular}{@{} p{1.5cm} p{5.5cm} p{\dimexpr\linewidth-1.5cm-5.5cm-4\tabcolsep} @{}}
+\toprule
+\textbf{Method} & \textbf{Endpoint} & \textbf{Description} \\
+\midrule
+GET & \texttt{/api/memberships/packages}       & List available packages \\[3pt]
+POST & \texttt{/api/memberships/request}       & Submit membership purchase request \\[3pt]
+PUT & \texttt{/api/memberships/\{id\}/approve} & Owner approves membership \\[3pt]
+PUT & \texttt{/api/memberships/\{id\}/reject}  & Owner rejects membership \\[3pt]
+GET & \texttt{/api/memberships/my}             & Get current member's membership \\
+\bottomrule
+\end{tabular}
 
 \subsection{C.3 PT Session Endpoints}\label{c.3-pt-session-endpoints}
 
-{\def\LTcaptype{none} % do not increment counter
-\begin{longtable}[]{@{}lll@{}}
-\toprule\noalign{}
-Method & Endpoint & Description \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-GET & \texttt{/api/sessions/trainers} & Browse available trainers \\
-POST & \texttt{/api/sessions/book} & Book a PT session \\
-PUT & \texttt{/api/sessions/\{id\}/complete} & Mark session as
-complete \\
-PUT & \texttt{/api/sessions/\{id\}/cancel} & Cancel a booked session \\
-POST & \texttt{/api/sessions/\{id\}/rate} & Submit session rating \\
-\end{longtable}
-}
+\begin{tabular}{@{} p{1.5cm} p{5.5cm} p{\dimexpr\linewidth-1.5cm-5.5cm-4\tabcolsep} @{}}
+\toprule
+\textbf{Method} & \textbf{Endpoint} & \textbf{Description} \\
+\midrule
+GET  & \texttt{/api/sessions/trainers}         & Browse available trainers \\[3pt]
+POST & \texttt{/api/sessions/book}             & Book a PT session \\[3pt]
+PUT  & \texttt{/api/sessions/\{id\}/complete}  & Mark session as complete \\[3pt]
+PUT  & \texttt{/api/sessions/\{id\}/cancel}    & Cancel a booked session \\[3pt]
+POST & \texttt{/api/sessions/\{id\}/rate}      & Submit session rating \\
+\bottomrule
+\end{tabular}
+
+\medskip\noindent
+
+\rule{\textwidth}{0.4pt}\medskip
 
 \section*{Appendix D: Technology
 Dependencies}\label{appendix-d-technology-dependencies}
@@ -3002,48 +3295,40 @@ Dependencies}\label{appendix-d-technology-dependencies}
 \subsection{D.1 Frontend Dependencies
 (Selected)}\label{d.1-frontend-dependencies-selected}
 
-{\def\LTcaptype{none} % do not increment counter
-\begin{longtable}[]{@{}lll@{}}
-\toprule\noalign{}
-Package & Version & Licence \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-react & 18.x & MIT \\
-react-dom & 18.x & MIT \\
-react-router-dom & 6.x & MIT \\
-axios & 1.x & MIT \\
-socket.io-client & 4.x & MIT \\
-framer-motion & 10.x & MIT \\
-recharts & 2.x & MIT \\
-lucide-react & latest & ISC \\
-typescript & 5.x & Apache-2.0 \\
-vite & 5.x & MIT \\
-\end{longtable}
-}
+\begin{tabular}{@{} p{4.5cm} p{2.0cm} p{\dimexpr\linewidth-4.5cm-2.0cm-4\tabcolsep} @{}}
+\toprule
+\textbf{Package} & \textbf{Version} & \textbf{Licence} \\
+\midrule
+react              & 18.x   & MIT \\[3pt]
+react-dom          & 18.x   & MIT \\[3pt]
+react-router-dom   & 6.x    & MIT \\[3pt]
+axios              & 1.x    & MIT \\[3pt]
+socket.io-client   & 4.x    & MIT \\[3pt]
+framer-motion      & 10.x   & MIT \\[3pt]
+recharts           & 2.x    & MIT \\[3pt]
+lucide-react       & latest & ISC \\[3pt]
+typescript         & 5.x    & Apache-2.0 \\[3pt]
+vite               & 5.x    & MIT \\
+\bottomrule
+\end{tabular}
 
 \subsection{D.2 Backend Dependencies
 (Selected)}\label{d.2-backend-dependencies-selected}
 
-{\def\LTcaptype{none} % do not increment counter
-\begin{longtable}[]{@{}lll@{}}
-\toprule\noalign{}
-Package & Version & Licence \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-spring-boot-starter-web & 3.x & Apache-2.0 \\
-spring-boot-starter-security & 3.x & Apache-2.0 \\
-spring-boot-starter-data-jpa & 3.x & Apache-2.0 \\
-spring-boot-starter-websocket & 3.x & Apache-2.0 \\
-jjwt-api & 0.11.x & Apache-2.0 \\
-lombok & 1.18.x & MIT \\
-ojdbc8 & 21.x & Oracle \\
-spring-boot-starter-mail & 3.x & Apache-2.0 \\
-\end{longtable}
-}
+\begin{tabular}{@{} p{6.5cm} p{2.0cm} p{\dimexpr\linewidth-6.5cm-2.0cm-4\tabcolsep} @{}}
+\toprule
+\textbf{Package} & \textbf{Version} & \textbf{Licence} \\
+\midrule
+spring-boot-starter-web       & 3.x    & Apache-2.0 \\[3pt]
+spring-boot-starter-security  & 3.x    & Apache-2.0 \\[3pt]
+spring-boot-starter-data-jpa  & 3.x    & Apache-2.0 \\[3pt]
+spring-boot-starter-websocket & 3.x    & Apache-2.0 \\[3pt]
+jjwt-api                      & 0.11.x & Apache-2.0 \\[3pt]
+lombok                        & 1.18.x & MIT \\[3pt]
+ojdbc8                        & 21.x   & Oracle \\[3pt]
+spring-boot-starter-mail      & 3.x    & Apache-2.0 \\
+\bottomrule
+\end{tabular}
 
 \clearpage
 

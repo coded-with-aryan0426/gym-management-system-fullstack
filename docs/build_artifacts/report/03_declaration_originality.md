@@ -1,6 +1,6 @@
 # Declaration of Originality {.unnumbered}
 
----
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
 
 I, **Suthar Aryan Sujalkumar**, holder of Enrolment Number **23C25512**, hereby declare that:
 
@@ -16,20 +16,23 @@ I, **Suthar Aryan Sujalkumar**, holder of Enrolment Number **23C25512**, hereby 
 
 6. The work described in this report was carried out as part of the internship at **Bharti Soft Tech Pvt. Ltd.** during the period **17th November 2025** to **17th May 2026**.
 
----
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
 
-**Student Name:** Suthar Aryan Sujalkumar
+\begin{tabular}{@{}p{5cm} p{\dimexpr\linewidth-5cm-2\tabcolsep}@{}}
+\textbf{Student Name:}     & Suthar Aryan Sujalkumar \\[3pt]
+\textbf{Enrolment Number:} & 23C25512 \\[3pt]
+\textbf{Programme:}        & B.Tech (Information Technology) \\
+\end{tabular}
 
-**Enrolment Number:** 23C25512
+\vspace{0.25in}
 
-**Programme:** B.Tech (Information Technology)
+\noindent\begin{minipage}[t]{0.50\textwidth}
+\textbf{Date:} \underline{\hspace{1.8in}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.45\textwidth}
+\textbf{Signature:} \underline{\hspace{1.8in}}
+\end{minipage}
 
-**Date:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
-
-**Signature:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
-
----
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
 
 *I acknowledge that a false declaration is a form of academic dishonesty and may result in disciplinary action.*
-
----

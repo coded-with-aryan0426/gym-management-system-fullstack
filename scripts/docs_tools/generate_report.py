@@ -166,14 +166,54 @@ CHAPTER_H1_MAP = {
     "17_chapter7_conclusion":    "Conclusion",
 }
 
+
+def sanitise_md(content: str) -> str:
+    """Global sanitisation: replace bare --- HR lines with a LaTeX rule.
+
+    Pandoc's markdown parser treats a bare '---' line as a YAML front-matter
+    delimiter or a setext heading underline, producing unpredictable output.
+    We swap each one for an explicit LaTeX horizontal rule before pandoc sees it.
+    """
+    rule = (
+        "\n\\medskip"
+        "\\noindent\\rule{\\textwidth}{0.4pt}"
+        "\\medskip\n"
+    )
+    content = re.sub(r'(?m)^\s*---\s*$', lambda _: rule, content)
+    return content
+
+
+def compact_algo_blocks(content: str) -> str:
+    """Replace plain ```...``` fences in algorithms.md with compact lstlisting[style=algo].
+
+    Plain code fences render at the default 9/11pt with a frame.
+    The algo style uses 8/9.5pt, no frame, and 3pt above/below — saving
+    significant vertical space across the 8 algorithm definitions.
+    """
+    def replacer(m: re.Match) -> str:
+        body = m.group(1)
+        return (
+            "\n\\begin{lstlisting}[style=algo]\n"
+            + body
+            + "\\end{lstlisting}\n"
+        )
+    # Match plain fences (no language tag) only
+    return re.sub(r'```\n(.*?)```', replacer, content, flags=re.DOTALL)
+
+
 def process_md(src: Path, file_tag: str, mmdc_ok: bool) -> str:
     """Read, clean, and pre-process a markdown file."""
     content = src.read_text(encoding="utf-8")
 
     # Normalise excessive blank lines
     content = re.sub(r'\n{3,}', '\n\n', content)
-    # Remove bare hr lines (--- ) that pandoc may misinterpret
-    content = re.sub(r'^\s*---\s*$', '', content, flags=re.MULTILINE)
+
+    # Global: replace bare --- HR lines with a proper LaTeX rule
+    content = sanitise_md(content)
+
+    # For the algorithms chapter: convert plain code fences to compact algo blocks
+    if file_tag == "algorithms":
+        content = compact_algo_blocks(content)
 
     # Replace mermaid blocks
     content = replace_mermaid(content, file_tag, mmdc_ok)
@@ -182,6 +222,7 @@ def process_md(src: Path, file_tag: str, mmdc_ok: bool) -> str:
     content = content.replace('\n\\clearpage\n', '\n\n\\clearpage\n\n')
 
     return content
+
 
 
 # =============================================================================
@@ -236,7 +277,7 @@ def build_pdf(combined_md: Path) -> bool:
         "--variable=documentclass:report",
         "--variable=fontsize:12pt",
         "--variable=papersize:a4paper",
-        "--variable=geometry:a4paper,left=1.5in,right=1.0in,top=1.0in,bottom=1.0in,headheight=15pt,headsep=0.3in,footskip=0.4in",
+        "--variable=geometry:a4paper,left=0.70in,right=0.70in,top=1.0in,bottom=1.0in,headheight=14pt,headsep=0.15in,footskip=0.4in",
         "--number-sections",
         "--standalone",
     ]

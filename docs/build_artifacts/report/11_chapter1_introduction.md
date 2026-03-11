@@ -1,5 +1,6 @@
 # Introduction
 
+\needspace{3\baselineskip}
 ## Background of the Organisation
 
 Bharti Soft Tech Pvt. Ltd. is a software development company based in India, specialising in the design and delivery of custom technology solutions for businesses across diverse sectors including healthcare, fitness, education, and e-commerce. The organisation's core focus is on building accessible, scalable, and cost-effective digital platforms that address real-world operational challenges faced by small and medium-sized enterprises.
@@ -8,6 +9,7 @@ During the internship period, the author was placed within the Software Developm
 
 The organisation employs a collaborative, full-stack approach to software development, leveraging modern frameworks and enterprise technologies to deliver production-ready applications. Under the supervision of Dr. Ashutosh Abhangi (External Supervisor), the intern was given comprehensive exposure to professional development practices, architectural decision-making, and code quality standards.
 
+\needspace{3\baselineskip}
 ## Objectives of the Organisation
 
 The primary objectives of Bharti Soft Tech Pvt. Ltd. are as follows:
@@ -20,20 +22,28 @@ The primary objectives of Bharti Soft Tech Pvt. Ltd. are as follows:
 
 These objectives directly shaped the technical and functional requirements of the Smart Gym Management System developed during this internship.
 
+\needspace{3\baselineskip}
 ## Products and Main Services of the Organisation
 
 Bharti Soft Tech Pvt. Ltd. offers the following core products and services:
 
-| Product / Service | Description |
-|-------------------|-------------|
-| **Custom Web Application Development** | Full-stack web applications built to client specifications |
-| **Mobile Application Development** | Cross-platform mobile apps for Android and iOS |
-| **API Development & Integration** | RESTful API design and third-party service integration |
-| **Database Design & Optimisation** | Schema design, query tuning, and migration services |
-| **IT Consultancy** | Technical advisory for digital transformation projects |
+\begin{tabular}{@{} p{5.2cm} p{\dimexpr\linewidth-5.2cm-2\tabcolsep} @{}}
+\toprule
+\textbf{Product / Service} & \textbf{Description} \\
+\midrule
+Custom Web Application Development & Full-stack web applications built to client specifications \\[4pt]
+Mobile Application Development & Cross-platform mobile apps for Android and iOS \\[4pt]
+API Development \& Integration & RESTful API design and third-party service integration \\[4pt]
+Database Design \& Optimisation & Schema design, query tuning, and migration services \\[4pt]
+IT Consultancy & Technical advisory for digital transformation projects \\
+\bottomrule
+\end{tabular}
+
+\medskip
 
 The Smart Gym Management System developed during this internship represents a flagship product demonstrating the organisation's capability in delivering comprehensive, multi-role enterprise web applications.
 
+\needspace{3\baselineskip}
 ## Organisation Structure and Workflow
 
 The internship was conducted within the Software Development Department at Bharti Soft Tech Pvt. Ltd. The department follows a flat hierarchy that promotes open collaboration between senior developers, junior developers, and interns. The author worked under the direct supervision of Dr. Ashutosh Abhangi throughout the placement.
