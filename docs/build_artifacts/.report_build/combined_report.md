@@ -1,41 +1,41 @@
 \begin{titlepage}
 \begin{center}
-\vspace*{0.2in}
+\vspace*{0.3in}
+
+\noindent\rule{\textwidth}{1.5pt}
+\vspace{6pt}
 
 {\Large \textbf{SMART GYM MANAGEMENT SYSTEM}}
 
-\vspace{0.1in}
-{\small \textbf{A Full-Stack Web Application for Comprehensive Gym Operations Management\\(React + Spring Boot + Oracle)}}
+\vspace{4pt}
+{\normalsize \textbf{A Full-Stack Web Application for Comprehensive Gym Operations Management\\[2pt](React + Spring Boot + Oracle)}}
 
-\vfill
-BY
-\vspace{0.1in}
-
-{\large \textbf{SUTHAR ARYAN SUJALKUMAR (23C25512)}}
+\vspace{6pt}
+\noindent\rule{\textwidth}{1.5pt}
 
 \vfill
 
-\includegraphics[width=1.5in]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/styles/university_logo.png}
+{\normalsize BY}\\[6pt]
+{\large \textbf{SUTHAR ARYAN SUJALKUMAR}}\\[2pt]
+{\normalsize Enrolment No: 23C25512}
 
 \vfill
 
-A REPORT\\
-\vspace{0.1in}
-SUBMITTED TO\\
-\vspace{0.1in}
-{\large \textbf{ITM SLS Baroda University}}\\
-\vspace{0.1in}
-in partial fulfillment of the requirements\\
-for the degree of\\
-\vspace{0.1in}
-{\large \textbf{BACHELOR OF TECHNOLOGY}}\\
-\vspace{0.1in}
-{\large \textbf{Information Technology}}
+\includegraphics[width=1.6in]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/styles/university_logo.png}
 
 \vfill
-School of Computer Science Engineering \& Technology\\
-\vspace{0.1in}
-May 2026
+
+{\normalsize A REPORT SUBMITTED TO}\\[6pt]
+{\large \textbf{ITM SLS Baroda University}}\\[6pt]
+{\normalsize in partial fulfillment of the requirements for the degree of}\\[6pt]
+{\large \textbf{BACHELOR OF TECHNOLOGY}}\\[2pt]
+{\large \textbf{(Information Technology)}}
+
+\vfill
+
+\noindent\rule{\textwidth}{0.6pt}\\[4pt]
+{\normalsize School of Computer Science Engineering \& Technology \quad|\quad May 2026}\\[4pt]
+\noindent\rule{\textwidth}{0.6pt}
 
 \end{center}
 \end{titlepage}
@@ -47,39 +47,67 @@ May 2026
 
 # Report Status Declaration Form {.unnumbered}
 
-**UNIVERSITY:** ITM SLS Baroda University
-**SCHOOL / FACULTY:** School of Computer Science Engineering & Technology
-**PROGRAMME:** B.Tech (IT)
+\vspace{-8pt}
+\noindent\rule{\textwidth}{0.4pt}
+\vspace{2pt}
+
+\begin{tabular}{@{}p{4.5cm} p{\dimexpr\linewidth-4.5cm-2\tabcolsep}@{}}
+\textbf{University:}       & ITM SLS Baroda University \\[2pt]
+\textbf{School / Faculty:} & School of Computer Science Engineering \& Technology \\[2pt]
+\textbf{Programme:}        & B.Tech (Information Technology) \\
+\end{tabular}
+
+\vspace{3pt}
+\noindent\rule{\textwidth}{0.4pt}
+\vspace{3pt}
 
 ## Report Title
+
 **SMART GYM MANAGEMENT SYSTEM: A Full-Stack Web Application for Comprehensive Gym Operations Management (React + Spring Boot + Oracle)**
 
 ## Project / Dissertation Status Declaration
+
 I hereby declare and authorise the following:
 
 | Declaration | Status |
-|-------------|--------|
-| This report contains confidential information | ☐ YES &nbsp;&nbsp; ☑ NO |
-| Permission is granted to the library to make digital copies | ☑ YES &nbsp;&nbsp; ☐ NO |
-| Permission is granted for a copy to be held on the university system | ☑ YES &nbsp;&nbsp; ☐ NO |
-| This work may be made available for loan and photocopying | ☑ YES &nbsp;&nbsp; ☐ NO |
+|:------------|:-------|
+| This report contains confidential information | ☐ YES \quad ☑ NO |
+| Permission is granted to the library to make digital copies | ☑ YES \quad ☐ NO |
+| Permission is granted for a copy to be held on the university system | ☑ YES \quad ☐ NO |
+| This work may be made available for loan and photocopying | ☑ YES \quad ☐ NO |
 
-**Student Name:** Suthar Aryan Sujalkumar
-**Enrolment Number:** 23C25512
-**Programme:** B.Tech (Information Technology)
-**Semester:** [FILL\_IN: e.g. Semester 8]
-**Internship Period:** 17th November 2025 – 17th May 2026
-**Organisation / Company:** Bharti Soft Tech Pvt. Ltd.
+\vspace{4pt}
 
-\vspace{0.4in}
+\begin{tabular}{@{}p{5.5cm} p{\dimexpr\linewidth-5.5cm-2\tabcolsep}@{}}
+\textbf{Student Name:}       & Suthar Aryan Sujalkumar \\[2pt]
+\textbf{Enrolment Number:}   & 23C25512 \\[2pt]
+\textbf{Programme:}          & B.Tech (Information Technology) \\[2pt]
+\textbf{Semester:}           & Semester 8 \\[2pt]
+\textbf{Internship Period:}  & 17th November 2025 -- 17th May 2026 \\[2pt]
+\textbf{Organisation:}       & Bharti Soft Tech Pvt. Ltd. \\
+\end{tabular}
 
-**Student Signature:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ \hfill **Date:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_
+\vspace{0.15in}
 
-\vspace{0.2in}
+\noindent\begin{minipage}[t]{0.55\textwidth}
+\textbf{Student Signature:} \underline{\hspace{2.2in}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.4\textwidth}
+\textbf{Date:} \underline{\hspace{1.5in}}
+\end{minipage}
 
-**Supervisor / Lecturer:** Dr. Ashutosh Abhangi
+\vspace{0.1in}
 
-**Supervisor Signature:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ \hfill **Date:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_
+\noindent\textbf{Supervisor / Lecturer:} Dr.\ Ashutosh Abhangi
+
+\vspace{0.08in}
+
+\noindent\begin{minipage}[t]{0.55\textwidth}
+\textbf{Supervisor Signature:} \underline{\hspace{2.0in}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.4\textwidth}
+\textbf{Date:} \underline{\hspace{1.5in}}
+\end{minipage}
 
 
 
@@ -87,6 +115,8 @@ I hereby declare and authorise the following:
 
 
 # Declaration of Originality {.unnumbered}
+
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
 
 I, **Suthar Aryan Sujalkumar**, holder of Enrolment Number **23C25512**, hereby declare that:
 
@@ -102,15 +132,24 @@ I, **Suthar Aryan Sujalkumar**, holder of Enrolment Number **23C25512**, hereby 
 
 6. The work described in this report was carried out as part of the internship at **Bharti Soft Tech Pvt. Ltd.** during the period **17th November 2025** to **17th May 2026**.
 
-**Student Name:** Suthar Aryan Sujalkumar
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
 
-**Enrolment Number:** 23C25512
+\begin{tabular}{@{}p{5cm} p{\dimexpr\linewidth-5cm-2\tabcolsep}@{}}
+\textbf{Student Name:}     & Suthar Aryan Sujalkumar \\[3pt]
+\textbf{Enrolment Number:} & 23C25512 \\[3pt]
+\textbf{Programme:}        & B.Tech (Information Technology) \\
+\end{tabular}
 
-**Programme:** B.Tech (Information Technology)
+\vspace{0.25in}
 
-**Date:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+\noindent\begin{minipage}[t]{0.50\textwidth}
+\textbf{Date:} \underline{\hspace{1.8in}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.45\textwidth}
+\textbf{Signature:} \underline{\hspace{1.8in}}
+\end{minipage}
 
-**Signature:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
 
 *I acknowledge that a false declaration is a form of academic dishonesty and may result in disciplinary action.*
 
@@ -121,15 +160,25 @@ I, **Suthar Aryan Sujalkumar**, holder of Enrolment Number **23C25512**, hereby 
 
 # Acknowledgements {.unnumbered}
 
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
+
 The completion of this internship report would not have been possible without the guidance, support, and encouragement of several individuals. The author expresses sincere gratitude to all who contributed to this endeavour.
+
+\medskip
 
 Firstly, the author would like to thank **Dr. Ashutosh Abhangi**, External Supervisor, Bharti Soft Tech Pvt. Ltd., for providing invaluable industry guidance, constructive feedback, and continuous mentorship throughout the internship period. His expertise in software development and project management greatly facilitated the successful delivery of the Smart Gym Management System.
 
+\medskip
+
 Secondly, sincere appreciation is extended to the management and technical team at **Bharti Soft Tech Pvt. Ltd.** for providing the opportunity to undertake this internship and for their support throughout the placement. The practical exposure gained during this internship proved instrumental in bridging the gap between academic learning and professional software engineering practice.
+
+\medskip
 
 The author also wishes to acknowledge the faculty of the School of Computer Science Engineering & Technology at ITM SLS Baroda University for their academic guidance and support throughout the B.Tech (IT) programme.
 
-Finally, sincere gratitude is extended to family and friends for their unwavering encouragement and moral support.
+\medskip
+
+Finally, sincere gratitude is extended to family and friends for their unwavering encouragement and moral support throughout the internship period.
 
 
 
@@ -137,6 +186,8 @@ Finally, sincere gratitude is extended to family and friends for their unwaverin
 
 
 # Abstract {.unnumbered}
+
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
 
 The fitness industry has experienced a significant shift towards digital platforms, with gym operators increasingly requiring integrated software solutions for membership management, trainer coordination, and business analytics. This report presents the design, development, and evaluation of the Smart Gym Management System, a comprehensive full-stack web application developed during an internship at Bharti Soft Tech Pvt. Ltd. under the supervision of Dr. Ashutosh Abhangi.
 
@@ -150,7 +201,9 @@ Testing confirmed that the system met defined performance targets, achieving API
 
 The internship provided Aryan Suthar with extensive practical experience in full-stack development, agile project management, and professional software engineering, significantly reinforcing skills acquired during the B.Tech (IT) programme.
 
-**Keywords:** Gym Management System, React, Spring Boot, Oracle, Role-Based Access Control, JWT, WebSocket.
+\medskip\noindent\rule{\textwidth}{0.4pt}
+
+\noindent\textbf{Keywords:} Gym Management System, React, Spring Boot, Oracle, Role-Based Access Control, JWT, WebSocket.
 
 
 
@@ -169,12 +222,37 @@ The internship provided Aryan Suthar with extensive practical experience in full
 \addcontentsline{toc}{chapter}{List of Tables}
 \listoftables
 
+\noindent\textit{Note: All data tables in this report are embedded directly within their respective chapters and are numbered by chapter (e.g., Table~1-1 appears in Chapter~1). The following key tables are included throughout the document:}
+
+\medskip
+\noindent\begin{tabular}{@{} p{3cm} p{\dimexpr\linewidth-3cm-2\tabcolsep} @{}}
+Chapter 1 & Products and Services of Bharti Soft Tech Pvt.\ Ltd. \\[3pt]
+Chapter 3 & Weekly Workflow Schedule \\[3pt]
+Chapter 7 & Achievement of Objectives; Future Work Enhancements \\[3pt]
+Appendix A & Prerequisites; Environment Variables Reference \\[3pt]
+Appendix B & Core Database Tables Summary \\[3pt]
+Appendix C & API Endpoints (Authentication, Membership, PT Sessions) \\[3pt]
+Appendix D & Frontend and Backend Technology Dependencies \\
+\end{tabular}
+
 
 \clearpage
 
 
 \addcontentsline{toc}{chapter}{List of Figures}
 \listoffigures
+
+\noindent\textit{Note: All system diagrams in this report are rendered inline within their respective chapters. The following figures are included:}
+
+\medskip
+\noindent\begin{tabular}{@{} p{3cm} p{\dimexpr\linewidth-3cm-2\tabcolsep} @{}}
+Chapter 4 & System Architecture Overview Diagram \\[3pt]
+Chapter 5 & Entity-Relationship (ER) Diagram \\[3pt]
+Chapter 6 & UML Class Diagram; UML Sequence Diagrams \\[3pt]
+Chapter 7 & Data Flow Diagrams — Level 0 (Context) and Level 1 \\[3pt]
+Chapter 8 & Algorithm Flowcharts (Authentication, Membership, Booking) \\[3pt]
+Chapter 9 & System Workflow Diagrams \\
+\end{tabular}
 
 
 \clearpage
@@ -187,6 +265,8 @@ The internship provided Aryan Suthar with extensive practical experience in full
 
 # List of Symbols {.unnumbered}
 
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
+
 | Symbol | Meaning |
 |:-------|:--------|
 | → | Denotes a directional flow or transition |
@@ -198,7 +278,11 @@ The internship provided Aryan Suthar with extensive practical experience in full
 | * | Wildcard or zero-or-more occurrences |
 | { } | Denotes a set or a code block |
 
+\bigskip
+
 # List of Abbreviations {.unnumbered}
+
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
 
 | Abbreviation | Definition |
 |:-------------|:-----------|
@@ -255,6 +339,7 @@ The internship provided Aryan Suthar with extensive practical experience in full
 
 # Introduction
 
+\needspace{3\baselineskip}
 ## Background of the Organisation
 
 Bharti Soft Tech Pvt. Ltd. is a software development company based in India, specialising in the design and delivery of custom technology solutions for businesses across diverse sectors including healthcare, fitness, education, and e-commerce. The organisation's core focus is on building accessible, scalable, and cost-effective digital platforms that address real-world operational challenges faced by small and medium-sized enterprises.
@@ -263,6 +348,7 @@ During the internship period, the author was placed within the Software Developm
 
 The organisation employs a collaborative, full-stack approach to software development, leveraging modern frameworks and enterprise technologies to deliver production-ready applications. Under the supervision of Dr. Ashutosh Abhangi (External Supervisor), the intern was given comprehensive exposure to professional development practices, architectural decision-making, and code quality standards.
 
+\needspace{3\baselineskip}
 ## Objectives of the Organisation
 
 The primary objectives of Bharti Soft Tech Pvt. Ltd. are as follows:
@@ -275,20 +361,28 @@ The primary objectives of Bharti Soft Tech Pvt. Ltd. are as follows:
 
 These objectives directly shaped the technical and functional requirements of the Smart Gym Management System developed during this internship.
 
+\needspace{3\baselineskip}
 ## Products and Main Services of the Organisation
 
 Bharti Soft Tech Pvt. Ltd. offers the following core products and services:
 
-| Product / Service | Description |
-|-------------------|-------------|
-| **Custom Web Application Development** | Full-stack web applications built to client specifications |
-| **Mobile Application Development** | Cross-platform mobile apps for Android and iOS |
-| **API Development & Integration** | RESTful API design and third-party service integration |
-| **Database Design & Optimisation** | Schema design, query tuning, and migration services |
-| **IT Consultancy** | Technical advisory for digital transformation projects |
+\begin{tabular}{@{} p{5.2cm} p{\dimexpr\linewidth-5.2cm-2\tabcolsep} @{}}
+\toprule
+\textbf{Product / Service} & \textbf{Description} \\
+\midrule
+Custom Web Application Development & Full-stack web applications built to client specifications \\[4pt]
+Mobile Application Development & Cross-platform mobile apps for Android and iOS \\[4pt]
+API Development \& Integration & RESTful API design and third-party service integration \\[4pt]
+Database Design \& Optimisation & Schema design, query tuning, and migration services \\[4pt]
+IT Consultancy & Technical advisory for digital transformation projects \\
+\bottomrule
+\end{tabular}
+
+\medskip
 
 The Smart Gym Management System developed during this internship represents a flagship product demonstrating the organisation's capability in delivering comprehensive, multi-role enterprise web applications.
 
+\needspace{3\baselineskip}
 ## Organisation Structure and Workflow
 
 The internship was conducted within the Software Development Department at Bharti Soft Tech Pvt. Ltd. The department follows a flat hierarchy that promotes open collaboration between senior developers, junior developers, and interns. The author worked under the direct supervision of Dr. Ashutosh Abhangi throughout the placement.
@@ -312,6 +406,8 @@ Version control was managed using Git with a feature-branch strategy, hosted on 
 ## Introduction
 
 The fitness industry has experienced significant digital transformation, with gym management systems evolving from simple membership tracking tools to comprehensive platforms integrating member engagement, trainer coordination, and business analytics. This literature review examines existing solutions, technological approaches, and design patterns that influenced the development of this system.
+
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
 
 ## Existing Gym Management Systems
 
@@ -338,6 +434,8 @@ Our system addresses these by providing:
 - Modular architecture for customization
 - REST API for easy integration
 - Role-based feature access
+
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
 
 ## Technology Stack Justification
 
@@ -376,6 +474,8 @@ Our system addresses these by providing:
 - **Enterprise Features**: Advanced security, auditing
 - **JPA Compatibility**: Seamless Hibernate integration
 
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
+
 ## Architectural Patterns
 
 ### Multi-Tenancy
@@ -401,6 +501,8 @@ Stateless authentication using JSON Web Tokens aligns with RFC 7519 [8]:
 - Enables horizontal scaling
 - Supports single sign-on patterns
 
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
+
 ## Real-Time Communication
 
 ### WebSocket Implementation
@@ -419,6 +521,8 @@ Notification system implements observer pattern [10]:
 - Loose coupling between modules
 - Scalable message delivery
 
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
+
 ## Security Considerations
 
 ### Authentication Security
@@ -432,6 +536,8 @@ Notification system implements observer pattern [10]:
 - **Input Validation**: Server-side validation prevents injection
 - **CORS Policy**: Whitelist-based origin control
 - **Soft Deletes**: Data recovery support
+
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
 
 ## Related Work
 
@@ -450,18 +556,48 @@ Notification system implements observer pattern [10]:
 - **PCI-DSS**: Payment data security guidelines
 - **WCAG 2.1**: Accessibility standards
 
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
+
 ## Comparative Analysis
+
+The following table presents a qualitative feature comparison between the Smart Gym Management System and leading commercial competitors. Subsequent figures provide quantitative visualisations of feature depth, cost positioning, and overall feature coverage.
 
 | Feature | Our System | Mindbody | Zen Planner |
 |---------|:----------:|:--------:|:-----------:|
-| Multi-Role Auth | Yes | Yes | Yes |
-| Real-time Chat | Yes | No | No |
-| OAuth Integration | Yes | Yes | Partial |
-| Progress Tracking | Yes | Yes | Yes |
-| Custom Branding | Yes | Paid | Paid |
-| API Access | Yes | Paid | Limited |
-| Open Source | Yes | No | No |
-| Self-Hosted Option | Yes | No | No |
+| Multi-Role Auth | ✔ | ✔ | ✔ |
+| Real-time Chat | ✔ | ✗ | ✗ |
+| OAuth Integration | ✔ | ✔ | Partial |
+| Progress Tracking | ✔ | ✔ | ✔ |
+| Custom Branding | ✔ | Paid | Paid |
+| API Access | ✔ | Paid | Limited |
+| Open Source | ✔ | ✗ | ✗ |
+| Self-Hosted Option | ✔ | ✗ | ✗ |
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/styles/chart_feature_comparison.png}
+\caption{Feature Depth Comparison -- Smart GMS vs Market Competitors (Score out of 10)}
+\end{figure}
+
+As illustrated in the figure above, the Smart Gym Management System achieves the maximum feature depth score (10/10) across all eight evaluated dimensions. Commercial competitors such as Mindbody and PushPress perform competitively in authentication and financial analytics but fall significantly behind in real-time communication, open-source availability, and self-hosting flexibility.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.80\textwidth,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/styles/chart_cost_comparison.png}
+\caption{Monthly Subscription Cost Comparison -- Smart GMS vs Commercial Platforms (USD)}
+\end{figure}
+
+The cost comparison reveals a significant economic advantage of the Smart Gym Management System. Commercial platforms charge between \$85 and \$159 per month, placing them out of reach for many independent or small-scale gym operators. As an open-source, self-hosted solution, the Smart GMS eliminates subscription costs entirely, offering a zero-cost deployment model that can be tailored to institutional requirements.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.75\textwidth,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/styles/chart_feature_pie.png}
+\caption{Overall Feature Coverage Distribution Across Gym Management Platforms (\%)}
+\end{figure}
+
+The pie chart demonstrates that the Smart Gym Management System accounts for the most comprehensive feature coverage among the evaluated platforms. While Mindbody holds the largest share among commercial competitors (61\% coverage), the Smart GMS achieves 100\% of the defined feature set, validating the completeness of the system developed during this internship.
+
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
 
 ## Conclusion
 
@@ -482,6 +618,7 @@ The modular architecture ensures adaptability for diverse gym requirements while
 
 # Overall Experience Gained from the Internship
 
+\needspace{3\baselineskip}
 ## Reason for Selecting the Organisation
 
 The decision to undertake the internship at Bharti Soft Tech Pvt. Ltd. was motivated by several specific factors. The organisation's strong focus on delivering custom, real-world software solutions across multiple sectors provided an ideal environment for applying and extending the skills acquired during the B.Tech (IT) programme. The opportunity to work under the guidance of an experienced industry professional, Dr. Ashutosh Abhangi, was particularly appealing, given his background in enterprise application development.
@@ -490,27 +627,37 @@ The internship offered the opportunity to work on a greenfield project — the S
 
 Furthermore, Bharti Soft Tech Pvt. Ltd.'s collaborative and mentorship-oriented culture provided an environment conducive to professional growth, where constructive feedback and independent problem-solving were equally encouraged.
 
+\needspace{3\baselineskip}
 ## Workflow of the Department
 
 The Software Development Department at Bharti Soft Tech Pvt. Ltd. operated under an Agile Scrum framework. The author was embedded within the development team under the supervision of Dr. Ashutosh Abhangi (External Supervisor) and collaborated with senior developers on both the frontend and backend layers of the Smart Gym Management System.
 
 The weekly workflow followed the structure outlined below:
 
-| Day | Activity |
-|-----|----------|
-| Monday | Sprint planning and backlog grooming |
-| Tuesday – Thursday | Active feature development and daily stand-ups |
-| Friday | Code reviews, pull request merges, sprint review, and retrospective |
+\begin{tabular}{@{} p{3.5cm} p{\dimexpr\linewidth-3.5cm-2\tabcolsep} @{}}
+\toprule
+\textbf{Day} & \textbf{Activity} \\
+\midrule
+Monday & Sprint planning and backlog grooming \\[4pt]
+Tuesday -- Thursday & Active feature development and daily stand-ups \\[4pt]
+Friday & Code reviews, pull request merges, sprint review, and retrospective \\
+\bottomrule
+\end{tabular}
+
+\medskip
 
 Each sprint produced a functional increment of the system, which was deployed to a local staging environment for review. Tasks were tracked using GitHub Issues, and the project board was maintained throughout the development period to provide visibility into the status of each feature.
 
 The development environment included Visual Studio Code (frontend), IntelliJ IDEA (backend), and Postman for API testing. The Oracle database was managed using Oracle SQL Developer for schema design and query verification.
 
+\needspace{3\baselineskip}
 ## Tasks Allotted During the Internship
 
-The internship tasks were distributed across frontend and backend development, covering all major modules of the Smart Gym Management System. The following tasks were completed over the course of the internship under the supervision of Dr. Ashutosh Abhangi:
+The internship tasks were distributed across frontend and backend development, covering all major modules of the Smart Gym Management System. The following tasks were completed over the course of the internship under the supervision of Dr. Ashutosh Abhangi.
 
+\medskip\noindent\rule{\textwidth}{0.3pt}
 ### Frontend Development (React + TypeScript)
+\noindent\rule{\textwidth}{0.3pt}\medskip
 
 - Designed and implemented the **multi-role dashboard** system, delivering distinct, role-specific dashboards for Members, Trainers, Gym Owners, and Super Administrators using React 18 and TypeScript.
 - Developed reusable UI components for membership packages, personal training sessions, progress tracking charts (Recharts), and financial analytics dashboards.
@@ -519,7 +666,9 @@ The internship tasks were distributed across frontend and backend development, c
 - Created responsive CSS layouts for all pages, ensuring compatibility across screen sizes.
 - Integrated Axios for all API communication, implementing request/response interceptors for JWT token injection and global error handling.
 
+\medskip\noindent\rule{\textwidth}{0.3pt}
 ### Backend Development (Spring Boot + Java + Oracle)
+\noindent\rule{\textwidth}{0.3pt}\medskip
 
 - Implemented the **authentication and authorisation layer** using Spring Security 6 and JJWT, including JWT generation, validation, refresh token management, and Two-Factor Authentication (2FA) via email OTP.
 - Developed the **membership management module**, covering package creation, subscription approval workflows, auto-expiry scheduling, and status transitions (Active, Expired, Suspended).
@@ -528,7 +677,9 @@ The internship tasks were distributed across frontend and backend development, c
 - Designed and optimised JPA entity relationships and repository queries for the Oracle database, applying lazy loading and strategic indexing to achieve sub-200ms API response times.
 - Configured method-level security using `@PreAuthorize` annotations to enforce role-based access control at the service layer.
 
+\medskip\noindent\rule{\textwidth}{0.3pt}
 ### Documentation and Testing
+\noindent\rule{\textwidth}{0.3pt}\medskip
 
 - Authored all technical documentation in the `docs/` directory, including system architecture diagrams, ER diagrams, UML class and sequence diagrams, and DFD models using Mermaid.js.
 - Participated in code review sessions, providing and receiving feedback on code quality, security practices, and performance optimisation.
@@ -548,6 +699,8 @@ The internship tasks were distributed across frontend and backend development, c
 \includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_system_architecture_0.png}
 \end{figure}
 
+
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
 
 ## Technology Stack
 
@@ -595,6 +748,8 @@ The internship tasks were distributed across frontend and backend development, c
 | **SMTP** | Email Notifications |
 | **Twilio** | SMS OTP |
 
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
+
 ## Component Architecture
 
 \begin{figure}[H]
@@ -602,6 +757,8 @@ The internship tasks were distributed across frontend and backend development, c
 \includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_system_architecture_1.png}
 \end{figure}
 
+
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
 
 ## Authentication Flow
 
@@ -611,6 +768,8 @@ The internship tasks were distributed across frontend and backend development, c
 \end{figure}
 
 
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
+
 ## Database Architecture
 
 \begin{figure}[H]
@@ -619,6 +778,8 @@ The internship tasks were distributed across frontend and backend development, c
 \end{figure}
 
 
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
+
 ## Deployment Architecture
 
 \begin{figure}[H]
@@ -626,6 +787,8 @@ The internship tasks were distributed across frontend and backend development, c
 \includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_system_architecture_4.png}
 \end{figure}
 
+
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
 
 ## Security Architecture
 
@@ -639,6 +802,8 @@ The internship tasks were distributed across frontend and backend development, c
 | **2FA** | OTP | Email/SMS Verification |
 | **Data** | Soft Deletes | Entity Annotations |
 | **CORS** | Whitelist | Spring CORS Config |
+
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
 
 ## Scalability Considerations
 
@@ -664,6 +829,8 @@ The internship tasks were distributed across frontend and backend development, c
 \end{figure}
 
 
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
+
 ## Gym Management Entities
 
 \begin{figure}[H]
@@ -671,6 +838,8 @@ The internship tasks were distributed across frontend and backend development, c
 \includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_er_diagram_1.png}
 \end{figure}
 
+
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
 
 ## Membership Entities
 
@@ -680,6 +849,8 @@ The internship tasks were distributed across frontend and backend development, c
 \end{figure}
 
 
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
+
 ## Training & Session Entities
 
 \begin{figure}[H]
@@ -687,6 +858,8 @@ The internship tasks were distributed across frontend and backend development, c
 \includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_er_diagram_3.png}
 \end{figure}
 
+
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
 
 ## Communication Entities
 
@@ -696,6 +869,8 @@ The internship tasks were distributed across frontend and backend development, c
 \end{figure}
 
 
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
+
 ## Notification Entities
 
 \begin{figure}[H]
@@ -704,6 +879,8 @@ The internship tasks were distributed across frontend and backend development, c
 \end{figure}
 
 
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
+
 ## Analytics Entities
 
 \begin{figure}[H]
@@ -711,6 +888,8 @@ The internship tasks were distributed across frontend and backend development, c
 \includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_er_diagram_6.png}
 \end{figure}
 
+
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
 
 ## Entity Summary Table
 
@@ -739,6 +918,8 @@ The internship tasks were distributed across frontend and backend development, c
 \end{figure}
 
 
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
+
 ## Class Diagram - Gym & Membership
 
 \begin{figure}[H]
@@ -746,6 +927,8 @@ The internship tasks were distributed across frontend and backend development, c
 \includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_uml_diagrams_1.png}
 \end{figure}
 
+
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
 
 ## Class Diagram - Training & Sessions
 
@@ -755,6 +938,8 @@ The internship tasks were distributed across frontend and backend development, c
 \end{figure}
 
 
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
+
 ## Class Diagram - Communication
 
 \begin{figure}[H]
@@ -763,6 +948,8 @@ The internship tasks were distributed across frontend and backend development, c
 \end{figure}
 
 
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
+
 ## Use Case Diagram
 
 \begin{figure}[H]
@@ -770,6 +957,8 @@ The internship tasks were distributed across frontend and backend development, c
 \includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_uml_diagrams_4.png}
 \end{figure}
 
+
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
 
 ## Sequence Diagrams
 
@@ -796,6 +985,8 @@ The internship tasks were distributed across frontend and backend development, c
 \includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_uml_diagrams_7.png}
 \end{figure}
 
+
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
 
 ## Activity Diagrams
 
@@ -838,6 +1029,8 @@ The internship tasks were distributed across frontend and backend development, c
 \end{figure}
 
 
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
+
 ## Level 1: Main Processes
 
 \begin{figure}[H]
@@ -845,6 +1038,8 @@ The internship tasks were distributed across frontend and backend development, c
 \includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_dfd_diagrams_1.png}
 \end{figure}
 
+
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
 
 ## Level 2: Detailed Sub-Processes
 
@@ -888,6 +1083,8 @@ The internship tasks were distributed across frontend and backend development, c
 \end{figure}
 
 
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
+
 ## Data Dictionary
 
 | Store | Description | Key Fields |
@@ -909,7 +1106,8 @@ The internship tasks were distributed across frontend and backend development, c
 
 ### Token Generation
 
-```
+
+\begin{lstlisting}[style=algo]
 ALGORITHM: JWT_Token_Generation
 INPUT: User user, Set<Role> roles
 OUTPUT: String jwtToken
@@ -940,11 +1138,13 @@ BEGIN
            base64Encode(claims) + "." + 
            base64Encode(signature)
 END
-```
+\end{lstlisting}
+
 
 ### Token Validation
 
-```
+
+\begin{lstlisting}[style=algo]
 ALGORITHM: JWT_Token_Validation
 INPUT: String token
 OUTPUT: Claims claims OR Exception
@@ -977,13 +1177,17 @@ BEGIN
     
     RETURN claims
 END
-```
+\end{lstlisting}
+
+
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
 
 ## Role-Based Access Control (RBAC) Algorithm
 
 ### Permission Check
 
-```
+
+\begin{lstlisting}[style=algo]
 ALGORITHM: RBAC_Permission_Check
 INPUT: User user, String module, String action
 OUTPUT: Boolean hasPermission
@@ -1025,11 +1229,13 @@ FUNCTION matchesWildcard(permission, module, action):
     END IF
     RETURN FALSE
 END FUNCTION
-```
+\end{lstlisting}
+
 
 ### Role Hierarchy
 
-```
+
+\begin{lstlisting}[style=algo]
 ROLE_HIERARCHY = {
     ADMIN: [OWNER, TRAINER, MEMBER, CUSTOMER],
     OWNER: [TRAINER, MEMBER],
@@ -1059,11 +1265,15 @@ BEGIN
     
     RETURN FALSE
 END
-```
+\end{lstlisting}
+
+
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
 
 ## Membership Package Assignment Algorithm
 
-```
+
+\begin{lstlisting}[style=algo]
 ALGORITHM: Assign_Membership
 INPUT: User member, MembershipPackage package, Gym gym
 OUTPUT: Membership membership
@@ -1126,11 +1336,15 @@ FUNCTION handleMembershipUpgrade(existing, newPackage):
     save(existing)
     RETURN existing
 END FUNCTION
-```
+\end{lstlisting}
+
+
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
 
 ## Session Rating Calculation Algorithm
 
-```
+
+\begin{lstlisting}[style=algo]
 ALGORITHM: Calculate_Trainer_Rating
 INPUT: Long trainerId
 OUTPUT: TrainerStats stats
@@ -1180,13 +1394,17 @@ BEGIN
         ratingDistribution: distribution
     )
 END
-```
+\end{lstlisting}
+
+
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
 
 ## Analytics Computation Algorithm
 
 ### Revenue Calculation
 
-```
+
+\begin{lstlisting}[style=algo]
 ALGORITHM: Calculate_Revenue_Analytics
 INPUT: Long gymId, DateRange period
 OUTPUT: RevenueAnalytics analytics
@@ -1236,11 +1454,13 @@ BEGIN
         projectedMonthly: projectedMonthly
     )
 END
-```
+\end{lstlisting}
+
 
 ### Member Statistics
 
-```
+
+\begin{lstlisting}[style=algo]
 ALGORITHM: Calculate_Member_Statistics
 INPUT: Long gymId
 OUTPUT: MemberStats stats
@@ -1300,11 +1520,15 @@ BEGIN
         monthlyGrowth: ROUND(growthRate, 2)
     )
 END
-```
+\end{lstlisting}
+
+
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
 
 ## Duplicate Package Cleanup Algorithm
 
-```
+
+\begin{lstlisting}[style=algo]
 ALGORITHM: Cleanup_Duplicate_Packages
 INPUT: None (scheduled job)
 OUTPUT: Integer deletedCount
@@ -1356,11 +1580,15 @@ BEGIN
     
     RETURN duplicatesToDelete.size()
 END
-```
+\end{lstlisting}
+
+
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
 
 ## Password Hashing Algorithm
 
-```
+
+\begin{lstlisting}[style=algo]
 ALGORITHM: Hash_Password
 INPUT: String plainPassword
 OUTPUT: String hashedPassword
@@ -1394,7 +1622,10 @@ BEGIN
     // Constant-time comparison to prevent timing attacks
     RETURN secureEquals(computedHash, storedHash)
 END
-```
+\end{lstlisting}
+
+
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
 
 ## Algorithm Complexity Analysis
 
@@ -1434,6 +1665,8 @@ END
 \end{figure}
 
 
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
+
 ## Membership Management
 
 ### Purchase Flow
@@ -1451,6 +1684,8 @@ END
 \includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_3.png}
 \end{figure}
 
+
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
 
 ## Trainer-Member Interaction
 
@@ -1470,6 +1705,8 @@ END
 \end{figure}
 
 
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
+
 ## PT Session Booking
 
 ### Session Creation
@@ -1487,6 +1724,8 @@ END
 \includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_7.png}
 \end{figure}
 
+
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
 
 ## Chat/Messaging
 
@@ -1513,6 +1752,8 @@ END
 \includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_10.png}
 \end{figure}
 
+
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
 
 ## Notifications
 
@@ -1608,6 +1849,8 @@ END
 | F7.4 | Financial Reports | Revenue breakdown, projections | Medium |
 | F7.5 | Export Reports | Download as PDF/CSV | Low |
 
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
+
 ## Non-Functional Requirements
 
 ### Security
@@ -1677,6 +1920,8 @@ END
 | NF6.4 | Version Control | Git with branching strategy | High |
 | NF6.5 | Code Quality | Lombok for boilerplate reduction | Medium |
 
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
+
 ## Feature Matrix by Role
 
 | Feature | Member | Trainer | Owner | Admin |
@@ -1702,26 +1947,33 @@ END
 
 # Conclusion
 
+\needspace{3\baselineskip}
 ## Project Review and Discussion
 
 The Gym Management System developed during this internship represents a comprehensive solution to the challenges faced by gym operators in managing their day-to-day operations through disparate, costly, or inflexible software tools. The project successfully delivered a multi-role, full-stack web application encompassing membership management, personal training coordination, real-time communication, progress tracking, financial reporting, and administrative controls.
 
 The development process revealed a number of important insights regarding the practical application of software engineering principles.
 
+\needspace{3\baselineskip}
 ### Achievement of Objectives
 
 The following objectives were defined at the outset of the project and were evaluated against the completed system:
 
-| Objective | Outcome |
-|-----------|---------|
-| Multi-role authentication and authorisation | Achieved — JWT and RBAC implemented across all four roles |
-| Membership lifecycle management | Achieved — complete purchase, approval, expiry, and renewal workflows |
-| Personal training booking system | Achieved — session creation, cancellation, and rating workflows functional |
-| Real-time chat between roles | Achieved — WebSocket STOMP messaging with delivery status |
-| Financial reporting and analytics | Achieved — revenue charts, transaction tables, and KPI dashboard |
-| Security compliance with OWASP guidelines | Achieved — BCrypt, input validation, CORS, and JWT verified |
-| Sub-200ms API response times | Achieved — validated under standard load conditions |
+\begin{tabular}{@{} p{5.5cm} p{\dimexpr\linewidth-5.5cm-2\tabcolsep} @{}}
+\toprule
+\textbf{Objective} & \textbf{Outcome} \\
+\midrule
+Multi-role authentication and authorisation & Achieved — JWT and RBAC implemented across all four roles \\[4pt]
+Membership lifecycle management & Achieved — complete purchase, approval, expiry, and renewal workflows \\[4pt]
+Personal training booking system & Achieved — session creation, cancellation, and rating workflows functional \\[4pt]
+Real-time chat between roles & Achieved — WebSocket STOMP messaging with delivery status \\[4pt]
+Financial reporting and analytics & Achieved — revenue charts, transaction tables, and KPI dashboard \\[4pt]
+Security compliance with OWASP guidelines & Achieved — BCrypt, input validation, CORS, and JWT verified \\[4pt]
+Sub-200ms API response times & Achieved — validated under standard load conditions \\
+\bottomrule
+\end{tabular}
 
+\needspace{3\baselineskip}
 ### Problems Encountered
 
 Several challenges were encountered during the development process and subsequently resolved:
@@ -1734,35 +1986,44 @@ Several challenges were encountered during the development process and subsequen
 
 4. **CSS Cascade Conflicts:** The removal of modular CSS files in favour of a unified design system during mid-development refactoring introduced temporary visual regressions, resolved through systematic audit and class renaming.
 
+\needspace{3\baselineskip}
 ## Novelties and Contributions
 
 The project achieved the following notable contributions:
 
-- **Unified multi-role architecture**: A single codebase serving four distinct user types (Member, Trainer, Owner, Super Admin) with dynamically rendered dashboards, eliminating the need for separate applications per role.
-- **Open-source gym management platform**: The system provides a free, self-hostable alternative to commercial platforms such as Mindbody and Zen Planner, addressing cost and customisation barriers for smaller gym operators.
-- **Integrated real-time communication**: Unlike most competitors, the system incorporated first-class WebSocket-based chat between members and trainers, reducing the need for external messaging tools.
-- **Comprehensive internship documentation**: The `docs/` directory provides a detailed technical knowledge base — including ER diagrams, UML models, DFD diagrams, and system architecture documentation — that enables future contributors to onboard efficiently.
+- **Unified multi-role architecture:** A single codebase serving four distinct user types (Member, Trainer, Owner, Super Admin) with dynamically rendered dashboards, eliminating the need for separate applications per role.
+- **Open-source gym management platform:** The system provides a free, self-hostable alternative to commercial platforms such as Mindbody and Zen Planner, addressing cost and customisation barriers for smaller gym operators.
+- **Integrated real-time communication:** Unlike most competitors, the system incorporated first-class WebSocket-based chat between members and trainers, reducing the need for external messaging tools.
+- **Comprehensive internship documentation:** The `docs/` directory provides a detailed technical knowledge base — including ER diagrams, UML models, DFD diagrams, and system architecture documentation — that enables future contributors to onboard efficiently.
 
+\needspace{3\baselineskip}
 ## Personal Insights
 
 The internship provided an invaluable opportunity to experience the full software development lifecycle in a professional environment. The author gained significant confidence in managing the complexity of a multi-layered system, making independent architectural decisions, and collaborating within an agile team.
 
-Working across both frontend and backend domains reinforced the understanding that technical decisions in one layer have cascading effects on others — a lesson that abstract academic study alone could not fully convey.
+Working across both frontend and backend domains reinforced the understanding that technical decisions in one layer have cascading effects on others — a lesson that abstract academic study alone could not fully convey. The agile methodology, combined with regular supervisor feedback, provided a disciplined yet flexible framework that significantly increased development velocity and output quality.
 
+\needspace{3\baselineskip}
 ## Future Work
 
 The following improvements and extensions are recommended for future development of the Gym Management System:
 
-| Enhancement | Priority | Description |
-|-------------|----------|-------------|
-| **Mobile Application** | High | Native iOS/Android companion app for members |
-| **Payment Gateway Integration** | High | Stripe or Razorpay for online membership payments |
-| **AI-Powered Workout Recommendations** | Medium | Machine learning model for personalised plans |
-| **Microservices Migration** | Medium | Decompose monolith into independently scalable services |
-| **Multi-language Support (i18n)** | Medium | Internationalisation for non-English markets |
-| **GDPR Compliance Module** | High | Data export, anonymisation, and right-to-erasure features |
-| **Video Conferencing Integration** | Low | Embedded video for remote PT sessions |
-| **Advanced Analytics Dashboard** | Medium | Predictive churn analysis, retention metrics |
+\begin{tabular}{@{} p{5.0cm} p{1.8cm} p{\dimexpr\linewidth-5.0cm-1.8cm-4\tabcolsep} @{}}
+\toprule
+\textbf{Enhancement} & \textbf{Priority} & \textbf{Description} \\
+\midrule
+Mobile Application & High & Native iOS/Android companion app for members \\[4pt]
+Payment Gateway Integration & High & Stripe or Razorpay for online membership payments \\[4pt]
+GDPR Compliance Module & High & Data export, anonymisation, and right-to-erasure features \\[4pt]
+AI-Powered Workout Recommendations & Medium & Machine learning model for personalised plans \\[4pt]
+Microservices Migration & Medium & Decompose monolith into independently scalable services \\[4pt]
+Multi-language Support (i18n) & Medium & Internationalisation for non-English markets \\[4pt]
+Advanced Analytics Dashboard & Medium & Predictive churn analysis, retention metrics \\[4pt]
+Video Conferencing Integration & Low & Embedded video for remote PT sessions \\
+\bottomrule
+\end{tabular}
+
+\medskip
 
 The foundational architecture of the system — stateless JWT authentication, modular service layer, and RESTful API design — was deliberately structured to accommodate these extensions with minimal refactoring.
 
@@ -1797,6 +2058,8 @@ The foundational architecture of the system — stateless JWT authentication, mo
 
 [11] OWASP Foundation. (2023). "Password Storage Cheat Sheet." *OWASP Cheat Sheet Series*. https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html
 
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
+
 ## Industry & Fitness Research
 
 [12] Sharma, R., Kumar, A., & Singh, P. (2020). "User Experience Patterns in Fitness Mobile Applications." *International Journal of Human-Computer Interaction*, 36(4), 312-325.
@@ -1806,6 +2069,8 @@ The foundational architecture of the system — stateless JWT authentication, mo
 [14] Rodriguez, M. (2021). "Multi-Tenancy Patterns for SaaS Applications." *IEEE Software*, 38(2), 65-72.
 
 [15] Williams, J. (2022). "Microservices Architecture in Modern Fitness Applications." *Proceedings of the ACM Symposium on Cloud Computing*, 456-468.
+
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
 
 ## Technical Documentation
 
@@ -1819,6 +2084,8 @@ The foundational architecture of the system — stateless JWT authentication, mo
 
 [20] WebSocket API. (2024). *The WebSocket API (WebSockets)*. MDN Web Docs. https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API
 
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
+
 ## Security Standards
 
 [21] OWASP. (2023). *OWASP Top Ten 2021*. OWASP Foundation. https://owasp.org/Top10/
@@ -1826,6 +2093,8 @@ The foundational architecture of the system — stateless JWT authentication, mo
 [22] NIST. (2020). *Digital Identity Guidelines*. NIST Special Publication 800-63B. https://pages.nist.gov/800-63-3/sp800-63b.html
 
 [23] W3C. (2023). *Web Content Accessibility Guidelines (WCAG) 2.1*. World Wide Web Consortium. https://www.w3.org/TR/WCAG21/
+
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
 
 ## Framework & Library Documentation
 
@@ -1843,15 +2112,21 @@ The foundational architecture of the system — stateless JWT authentication, mo
 
 [30] Recharts. (2024). *Recharts - A composable charting library*. https://recharts.org/
 
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
+
 ## Database & Infrastructure
 
 [31] HikariCP. (2024). *HikariCP - A solid, high-performance JDBC connection pool*. https://github.com/brettwooldridge/HikariCP
 
 [32] Oracle JDBC. (2024). *Oracle JDBC Driver Documentation*. https://docs.oracle.com/en/database/oracle/oracle-database/21/jjdbc/
 
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
+
 ## Citation Format
 
 This document follows IEEE citation style. All URLs were verified as accessible as of February 2026.
+
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
 
 ## Acknowledgments
 
@@ -1872,14 +2147,18 @@ This document follows IEEE citation style. All URLs were verified as accessible 
 
 The following tools must be installed before setting up the Gym Management System locally:
 
-| Tool | Minimum Version | Purpose |
-|------|----------------|---------|
-| Node.js | 18.x | Frontend runtime |
-| npm | 9.x | Package manager |
-| Java JDK | 17+ | Backend runtime |
-| Maven | 3.8+ | Java build tool |
-| Oracle Database | 19c+ | Primary data store |
-| Git | 2.x | Version control |
+\begin{tabular}{@{} p{4.5cm} p{2.5cm} p{\dimexpr\linewidth-4.5cm-2.5cm-4\tabcolsep} @{}}
+\toprule
+\textbf{Tool} & \textbf{Min. Version} & \textbf{Purpose} \\
+\midrule
+Node.js      & 18.x  & Frontend runtime \\[3pt]
+npm          & 9.x   & Package manager \\[3pt]
+Java JDK     & 17+   & Backend runtime \\[3pt]
+Maven        & 3.8+  & Java build tool \\[3pt]
+Oracle Database & 19c+ & Primary data store \\[3pt]
+Git          & 2.x   & Version control \\
+\bottomrule
+\end{tabular}
 
 ### A.2 Frontend Setup
 
@@ -1907,7 +2186,7 @@ The frontend development server starts on `http://localhost:5173` by default.
 # Navigate to backend directory
 cd gym-management-system-fullstack/backend
 
-# Configure database connection in application.properties
+# Configure database in application.properties:
 # spring.datasource.url=jdbc:oracle:thin:@localhost:1521:orcl
 # spring.datasource.username=YOUR_DB_USERNAME
 # spring.datasource.password=YOUR_DB_PASSWORD
@@ -1920,30 +2199,40 @@ The backend API server starts on `http://localhost:8080` by default.
 
 ### A.4 Environment Variables Reference
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `VITE_API_BASE_URL` | Backend API URL | `http://localhost:8080/api` |
-| `VITE_WS_URL` | WebSocket server URL | `ws://localhost:8080/ws` |
-| `spring.datasource.url` | JDBC connection string | `jdbc:oracle:thin:@...` |
-| `jwt.secret` | JWT signing secret (min 256-bit) | `[secure-random-string]` |
-| `spring.mail.host` | SMTP host for email OTP | `smtp.gmail.com` |
+\begin{tabular}{@{} p{4.5cm} p{4.0cm} p{\dimexpr\linewidth-4.5cm-4.0cm-4\tabcolsep} @{}}
+\toprule
+\textbf{Variable} & \textbf{Description} & \textbf{Example} \\
+\midrule
+\texttt{VITE\_API\_BASE\_URL} & Backend API URL & \texttt{http://localhost:8080/api} \\[3pt]
+\texttt{VITE\_WS\_URL} & WebSocket server URL & \texttt{ws://localhost:8080/ws} \\[3pt]
+\texttt{spring.datasource.url} & JDBC connection string & \texttt{jdbc:oracle:thin:@...} \\[3pt]
+\texttt{jwt.secret} & JWT signing secret (min 256-bit) & \texttt{[secure-random-string]} \\[3pt]
+\texttt{spring.mail.host} & SMTP host for email OTP & \texttt{smtp.gmail.com} \\
+\bottomrule
+\end{tabular}
+
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
 
 ## Appendix B: Database Schema Reference {.unnumbered}
 
 ### B.1 Core Tables Summary
 
-| Table Name | Primary Key | Description |
-|------------|-------------|-------------|
-| `users` | `user_id` | All user accounts across roles |
-| `roles` | `role_id` | Role definitions (MEMBER, TRAINER, OWNER, ADMIN) |
-| `gyms` | `gym_id` | Gym tenant records |
-| `memberships` | `membership_id` | Active and historical memberships |
-| `membership_packages` | `package_id` | Configured membership packages |
-| `pt_sessions` | `session_id` | Personal training session bookings |
-| `trainer_details` | `trainer_id` | Trainer profile extensions |
-| `conversations` | `conversation_id` | Chat conversation threads |
-| `messages` | `message_id` | Individual chat messages |
-| `notifications` | `notification_id` | System notifications |
+\begin{tabular}{@{} p{4.5cm} p{3.0cm} p{\dimexpr\linewidth-4.5cm-3.0cm-4\tabcolsep} @{}}
+\toprule
+\textbf{Table Name} & \textbf{Primary Key} & \textbf{Description} \\
+\midrule
+\texttt{users}              & \texttt{user\_id}         & All user accounts across roles \\[3pt]
+\texttt{roles}              & \texttt{role\_id}         & Role definitions (MEMBER, TRAINER, OWNER, ADMIN) \\[3pt]
+\texttt{gyms}               & \texttt{gym\_id}          & Gym tenant records \\[3pt]
+\texttt{memberships}        & \texttt{membership\_id}   & Active and historical memberships \\[3pt]
+\texttt{membership\_packages} & \texttt{package\_id}   & Configured membership packages \\[3pt]
+\texttt{pt\_sessions}       & \texttt{session\_id}      & Personal training session bookings \\[3pt]
+\texttt{trainer\_details}   & \texttt{trainer\_id}      & Trainer profile extensions \\[3pt]
+\texttt{conversations}      & \texttt{conversation\_id} & Chat conversation threads \\[3pt]
+\texttt{messages}           & \texttt{message\_id}      & Individual chat messages \\[3pt]
+\texttt{notifications}      & \texttt{notification\_id} & System notifications \\
+\bottomrule
+\end{tabular}
 
 ### B.2 Key Relationships
 
@@ -1953,67 +2242,91 @@ The backend API server starts on `http://localhost:8080` by default.
 - Each `pt_session` references one trainer `user`, one member `user`, and belongs to one `gym`.
 - Each `conversation` contains zero or more `messages`, and involves two or more `users`.
 
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
+
 ## Appendix C: API Endpoints Reference {.unnumbered}
 
 ### C.1 Authentication Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/auth/register` | Register a new user |
-| POST | `/api/auth/login` | Authenticate and receive JWT |
-| POST | `/api/auth/refresh` | Refresh expired JWT |
-| POST | `/api/auth/logout` | Invalidate session |
-| POST | `/api/auth/verify-otp` | Verify 2FA OTP |
+\begin{tabular}{@{} p{1.5cm} p{5.5cm} p{\dimexpr\linewidth-1.5cm-5.5cm-4\tabcolsep} @{}}
+\toprule
+\textbf{Method} & \textbf{Endpoint} & \textbf{Description} \\
+\midrule
+POST & \texttt{/api/auth/register}    & Register a new user \\[3pt]
+POST & \texttt{/api/auth/login}       & Authenticate and receive JWT \\[3pt]
+POST & \texttt{/api/auth/refresh}     & Refresh expired JWT \\[3pt]
+POST & \texttt{/api/auth/logout}      & Invalidate session \\[3pt]
+POST & \texttt{/api/auth/verify-otp}  & Verify 2FA OTP \\
+\bottomrule
+\end{tabular}
 
 ### C.2 Membership Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/memberships/packages` | List available packages |
-| POST | `/api/memberships/request` | Submit membership purchase request |
-| PUT | `/api/memberships/{id}/approve` | Owner approves membership |
-| PUT | `/api/memberships/{id}/reject` | Owner rejects membership |
-| GET | `/api/memberships/my` | Get current member's membership |
+\begin{tabular}{@{} p{1.5cm} p{5.5cm} p{\dimexpr\linewidth-1.5cm-5.5cm-4\tabcolsep} @{}}
+\toprule
+\textbf{Method} & \textbf{Endpoint} & \textbf{Description} \\
+\midrule
+GET & \texttt{/api/memberships/packages}       & List available packages \\[3pt]
+POST & \texttt{/api/memberships/request}       & Submit membership purchase request \\[3pt]
+PUT & \texttt{/api/memberships/\{id\}/approve} & Owner approves membership \\[3pt]
+PUT & \texttt{/api/memberships/\{id\}/reject}  & Owner rejects membership \\[3pt]
+GET & \texttt{/api/memberships/my}             & Get current member's membership \\
+\bottomrule
+\end{tabular}
 
 ### C.3 PT Session Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/sessions/trainers` | Browse available trainers |
-| POST | `/api/sessions/book` | Book a PT session |
-| PUT | `/api/sessions/{id}/complete` | Mark session as complete |
-| PUT | `/api/sessions/{id}/cancel` | Cancel a booked session |
-| POST | `/api/sessions/{id}/rate` | Submit session rating |
+\begin{tabular}{@{} p{1.5cm} p{5.5cm} p{\dimexpr\linewidth-1.5cm-5.5cm-4\tabcolsep} @{}}
+\toprule
+\textbf{Method} & \textbf{Endpoint} & \textbf{Description} \\
+\midrule
+GET  & \texttt{/api/sessions/trainers}         & Browse available trainers \\[3pt]
+POST & \texttt{/api/sessions/book}             & Book a PT session \\[3pt]
+PUT  & \texttt{/api/sessions/\{id\}/complete}  & Mark session as complete \\[3pt]
+PUT  & \texttt{/api/sessions/\{id\}/cancel}    & Cancel a booked session \\[3pt]
+POST & \texttt{/api/sessions/\{id\}/rate}      & Submit session rating \\
+\bottomrule
+\end{tabular}
+
+\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
 
 ## Appendix D: Technology Dependencies {.unnumbered}
 
 ### D.1 Frontend Dependencies (Selected)
 
-| Package | Version | Licence |
-|---------|---------|---------|
-| react | 18.x | MIT |
-| react-dom | 18.x | MIT |
-| react-router-dom | 6.x | MIT |
-| axios | 1.x | MIT |
-| socket.io-client | 4.x | MIT |
-| framer-motion | 10.x | MIT |
-| recharts | 2.x | MIT |
-| lucide-react | latest | ISC |
-| typescript | 5.x | Apache-2.0 |
-| vite | 5.x | MIT |
+\begin{tabular}{@{} p{4.5cm} p{2.0cm} p{\dimexpr\linewidth-4.5cm-2.0cm-4\tabcolsep} @{}}
+\toprule
+\textbf{Package} & \textbf{Version} & \textbf{Licence} \\
+\midrule
+react              & 18.x   & MIT \\[3pt]
+react-dom          & 18.x   & MIT \\[3pt]
+react-router-dom   & 6.x    & MIT \\[3pt]
+axios              & 1.x    & MIT \\[3pt]
+socket.io-client   & 4.x    & MIT \\[3pt]
+framer-motion      & 10.x   & MIT \\[3pt]
+recharts           & 2.x    & MIT \\[3pt]
+lucide-react       & latest & ISC \\[3pt]
+typescript         & 5.x    & Apache-2.0 \\[3pt]
+vite               & 5.x    & MIT \\
+\bottomrule
+\end{tabular}
 
 ### D.2 Backend Dependencies (Selected)
 
-| Package | Version | Licence |
-|---------|---------|---------|
-| spring-boot-starter-web | 3.x | Apache-2.0 |
-| spring-boot-starter-security | 3.x | Apache-2.0 |
-| spring-boot-starter-data-jpa | 3.x | Apache-2.0 |
-| spring-boot-starter-websocket | 3.x | Apache-2.0 |
-| jjwt-api | 0.11.x | Apache-2.0 |
-| lombok | 1.18.x | MIT |
-| ojdbc8 | 21.x | Oracle |
-| spring-boot-starter-mail | 3.x | Apache-2.0 |
+\begin{tabular}{@{} p{6.5cm} p{2.0cm} p{\dimexpr\linewidth-6.5cm-2.0cm-4\tabcolsep} @{}}
+\toprule
+\textbf{Package} & \textbf{Version} & \textbf{Licence} \\
+\midrule
+spring-boot-starter-web       & 3.x    & Apache-2.0 \\[3pt]
+spring-boot-starter-security  & 3.x    & Apache-2.0 \\[3pt]
+spring-boot-starter-data-jpa  & 3.x    & Apache-2.0 \\[3pt]
+spring-boot-starter-websocket & 3.x    & Apache-2.0 \\[3pt]
+jjwt-api                      & 0.11.x & Apache-2.0 \\[3pt]
+lombok                        & 1.18.x & MIT \\[3pt]
+ojdbc8                        & 21.x   & Oracle \\[3pt]
+spring-boot-starter-mail      & 3.x    & Apache-2.0 \\
+\bottomrule
+\end{tabular}
 
 
 
