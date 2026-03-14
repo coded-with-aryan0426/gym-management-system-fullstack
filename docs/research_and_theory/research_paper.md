@@ -20,13 +20,7 @@ author: |
   \end{tabular}
 date: "March 2026"
 abstract: |
-  **Background:** The rapid expansion of the global fitness industry has increased the demand for scalable, cost-effective, and customizable gym management platforms. However, many commercial gym management systems impose high licensing costs, limited extensibility, and vendor lock-in, making them difficult to adopt for small and medium-sized fitness centers that already suffer from operational inefficiencies and isolated data silos.
-
-  **Method:** This paper presents the design and implementation of a full-stack Smart Gym Management System (Smart GMS) developed using React 18 with TypeScript, Spring Boot 3 (Java 17+), and Oracle Database. The proposed system incorporates schema-level multi-tenancy to support multiple gyms within a single infrastructure. It further integrates a four-level Role-Based Access Control (RBAC) framework, JWT-based stateless authentication with two-factor authentication (2FA), real-time communication using WebSocket, and an automated CRON-based membership lifecycle management engine.
-
-  **Results:** Experimental evaluation under simulated concurrent workloads demonstrates that the platform maintains an average API response latency below 200 ms at the 95th percentile, while WebSocket communication achieves message delivery latency below 15 ms. The system also achieved 87\% unit test coverage, ensuring code reliability and maintainability. A comparative functional analysis with several commercial gym management platforms indicates that the proposed system provides comprehensive feature support across key operational dimensions.
-
-  **Conclusion:** The proposed Smart GMS provides a scalable and secure alternative to existing commercial solutions while eliminating recurring licensing costs. Its modular architecture and open REST API design enable flexible integration and future extensibility. The system demonstrates strong potential as an open and customizable platform for independent gym operators, as well as a reference architecture for enterprise-grade fitness management solutions.
+  The rapid expansion of the global fitness industry has increased the demand for scalable, cost-effective, and customizable gym management platforms. However, many commercial systems impose high licensing costs, limited extensibility, and vendor lock-in, posing challenges for small to medium-sized centers. This paper presents the design and implementation of a full-stack Smart Gym Management System (Smart GMS) developed using React 18, Spring Boot 3, and Oracle Database. The proposed system incorporates schema-level multi-tenancy to support multiple gyms within a single infrastructure and integrates a four-level Role-Based Access Control (RBAC) framework, JWT-based stateless authentication with two-factor authentication (2FA), real-time communication via WebSocket, and an automated CRON-based membership lifecycle engine. Experimental evaluation under simulated concurrent workloads demonstrates that the platform maintains an average API response latency below 200 ms at the 95th percentile, while WebSocket communication achieves message delivery latency below 15 ms. The system also achieved 87\% unit test coverage, ensuring code reliability and maintainability. Comparative functional analysis indicates that the proposed system provides comprehensive feature support across key operational dimensions, offering a scalable and secure alternative to commercial solutions while eliminating recurring licensing costs. Its modular architecture and open REST API design enable flexible integration and future extensibility, serving as both a customizable platform for independent operators and a reference architecture for enterprise-grade fitness management solutions.
 geometry: "left=0.65in, right=0.65in, top=0.75in, bottom=0.75in"
 classoption: "twocolumn"
 mainfont: "Times New Roman"
@@ -63,7 +57,7 @@ header-includes:
 numbersections: true
 ---
 
-\noindent\textbf{Keywords:} Gym Management System, Spring Boot, React, Oracle Database, JWT Authentication, Role-Based Access Control, WebSocket, Multi-Tenancy, Full-Stack Architecture.
+\noindent\textbf{Keywords:} Gym Management System, Spring Boot, React, Oracle Database, Full-Stack Architecture.
 
 # Introduction
 
