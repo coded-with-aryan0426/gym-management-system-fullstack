@@ -20,7 +20,7 @@ author: |
   \end{tabular}
 date: "March 2026"
 abstract: |
-  **Background:** The rapid expansion of the global fitness industry has increased the demand for scalable, cost-effective, and customizable gym management platforms. However, many commercial gym management systems impose high licensing costs, limited extensibility, and vendor lock-in, making them difficult to adopt for small and medium-sized fitness centers.
+  **Background:** The rapid expansion of the global fitness industry has increased the demand for scalable, cost-effective, and customizable gym management platforms. However, many commercial gym management systems impose high licensing costs, limited extensibility, and vendor lock-in, making them difficult to adopt for small and medium-sized fitness centers that already suffer from operational inefficiencies and isolated data silos.
 
   **Method:** This paper presents the design and implementation of a full-stack Smart Gym Management System (Smart GMS) developed using React 18 with TypeScript, Spring Boot 3 (Java 17+), and Oracle Database. The proposed system incorporates schema-level multi-tenancy to support multiple gyms within a single infrastructure. It further integrates a four-level Role-Based Access Control (RBAC) framework, JWT-based stateless authentication with two-factor authentication (2FA), real-time communication using WebSocket, and an automated CRON-based membership lifecycle management engine.
 
@@ -65,13 +65,11 @@ numbersections: true
 
 \noindent\textbf{Keywords:} Gym Management System, Spring Boot, React, Oracle Database, JWT Authentication, Role-Based Access Control, WebSocket, Multi-Tenancy, Full-Stack Architecture.
 
-\noindent\rule{\linewidth}{0.4pt}
-
 # Introduction
 
-The global fitness industry, valued at over USD 87 billion, has undergone rapid digitalisation. Traditional gym management—reliant on manual ledgers, fragmented spreadsheets, and disconnected software—suffers from data silos, operational inefficiencies, and poor user experience. Existing commercial platforms such as Mindbody, Zen Planner, and GymMaster address some of these shortcomings, yet they impose prohibitive subscription costs, restrict API access, and offer limited customisation that hinders adoption for independent gyms, educational institutions, and research deployments.
+The USD 87 billion fitness industry has undergone rapid digitalisation. Traditional gym management—reliant on manual ledgers and disconnected software—suffers from poor user experience. Existing platforms like Mindbody address some shortcomings, yet they impose prohibitive subscription costs, restrict API access, and offer limited customisation that hinders adoption.
 
-To address these limitations, this paper presents the **Smart Gym Management System (Smart GMS)**—a comprehensive, open-source, full-stack web platform. The system automates membership lifecycle management, trainer-member coordination, real-time communication, and business intelligence analytics within a secure multi-tenant architecture.
+To address these limitations, this paper presents the **Smart Gym Management System (Smart GMS)**—a comprehensive, open-source, full-stack web platform. The system automates membership lifecycles, trainer coordination, real-time communication, and business analytics within a secure multi-tenant architecture.
 
 **The main contributions of this paper are:**
 
