@@ -20,13 +20,13 @@ author: |
   \end{tabular}
 date: "March 2026"
 abstract: |
-  **Background:** The rapid growth of the global fitness industry has created a pressing need for robust, cost-effective, and customisable gym management platforms. Existing commercial solutions—while feature-rich—impose significant cost barriers, restrict open integration, and offer limited customisation, making them inaccessible to small-to-medium fitness operators.
+  **Background:** The rapid expansion of the global fitness industry has increased the demand for scalable, cost-effective, and customizable gym management platforms. However, many commercial gym management systems impose high licensing costs, limited extensibility, and vendor lock-in, making them difficult to adopt for small and medium-sized fitness centers.
 
-  **Method:** This paper presents the comprehensive design, architecture, and evaluation of a full-stack Smart Gym Management System (Smart GMS) built using React 18 with TypeScript, Spring Boot 3 (Java 17+), and Oracle Database. The system implements schema-level multi-tenancy, a four-tier Role-Based Access Control (RBAC) model, real-time WebSocket communication, JWT-based stateless authentication with 2FA, and a CRON-driven membership lifecycle engine.
+  **Method:** This paper presents the design and implementation of a full-stack Smart Gym Management System (Smart GMS) developed using React 18 with TypeScript, Spring Boot 3 (Java 17+), and Oracle Database. The proposed system incorporates schema-level multi-tenancy to support multiple gyms within a single infrastructure. It further integrates a four-level Role-Based Access Control (RBAC) framework, JWT-based stateless authentication with two-factor authentication (2FA), real-time communication using WebSocket, and an automated CRON-based membership lifecycle management engine.
 
-  **Results:** Benchmarking under realistic concurrent workloads demonstrates API response times below 200 ms at the 95th percentile, WebSocket chat latencies below 15 ms, and a unit test coverage of 87%. A comparative feature analysis against five leading commercial platforms confirms the Smart GMS achieves 100% coverage of the defined eight-dimension benchmark set—outperforming all evaluated commercial alternatives.
+  **Results:** Experimental evaluation under simulated concurrent workloads demonstrates that the platform maintains an average API response latency below 200 ms at the 95th percentile, while WebSocket communication achieves message delivery latency below 15 ms. The system also achieved 87\% unit test coverage, ensuring code reliability and maintainability. A comparative functional analysis with several commercial gym management platforms indicates that the proposed system provides comprehensive feature support across key operational dimensions.
 
-  **Conclusion:** The proposed architecture delivers a secure, performant, and institutionally deployable platform at zero ongoing licensing cost. The modular design and open REST API position the system as a viable open-source alternative to commercial gym management software in academic and enterprise contexts alike.
+  **Conclusion:** The proposed Smart GMS provides a scalable and secure alternative to existing commercial solutions while eliminating recurring licensing costs. Its modular architecture and open REST API design enable flexible integration and future extensibility. The system demonstrates strong potential as an open and customizable platform for independent gym operators, as well as a reference architecture for enterprise-grade fitness management solutions.
 geometry: "left=0.65in, right=0.65in, top=0.75in, bottom=0.75in"
 classoption: "twocolumn"
 mainfont: "Times New Roman"
@@ -63,7 +63,7 @@ header-includes:
 numbersections: true
 ---
 
-\noindent\textbf{Keywords:} Gym Management System, Spring Boot, React, Oracle Database, JWT Authentication, Role-Based Access Control, WebSocket, Multi-Tenancy, Full-Stack Architecture, Open Source
+\noindent\textbf{Keywords:} Gym Management System, Spring Boot, React, Oracle Database, JWT Authentication, Role-Based Access Control, WebSocket, Multi-Tenancy, Full-Stack Architecture.
 
 \noindent\rule{\linewidth}{0.4pt}
 
