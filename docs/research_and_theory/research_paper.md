@@ -53,6 +53,7 @@ header-includes:
   - \usepackage{caption}
   - \captionsetup[table]{name=TABLE, labelsep=newline, textfont=sc, labelfont=sc, justification=centering}
   - \renewcommand{\thetable}{\Roman{table}}
+  - \captionsetup[figure]{name=Fig., labelsep=period}
   - \raggedbottom
 numbersections: true
 ---
@@ -189,7 +190,9 @@ The integrated chat subsystem supports 1-on-1 and group messaging. On entering a
 
 The RBAC permission check operates deterministically on every incoming API request. Let $R = \{r_1, r_2, \ldots, r_n\}$ be the set of roles assigned to user $u$, and $P(r_i)$ the set of module--action permission tuples for role $r_i$. The permission evaluation is:
 
-$$\text{hasPermission}(u, m, a) = \bigvee_{r_i \in R} \bigvee_{p \in P(r_i)} \left[p.m = m \wedge p.a = a\right]$$
+\begin{equation}
+\text{hasPermission}(u, m, a) = \bigvee_{r_i \in R} \bigvee_{p \in P(r_i)} \left[p.m = m \wedge p.a = a\right]
+\end{equation}
 
 Wildcard permissions extend this via a shortcircuiting `matchesWildcard` predicate. Worst-case time complexity is $O(r \times p)$, where $r = |R|$ and $p = \max_i |P(r_i)|$. Role hierarchy (Admin $\supset$ Owner $\supset$ Trainer $\supset$ Member) is enforced by recursive inherited-role expansion before the primary check.
 
@@ -210,10 +213,10 @@ RBAC_CHECK(user u, module m, action a):
 
 Tokens are signed using HMAC-SHA512. Let $H$ denote the base64-encoded header, $C$ the claims payload, and $K$ the 512-bit server secret. The token is:
 
-\begin{multline*}
+\begin{multline}
 \text{JWT} = \text{B64}(H) \,\|\, "." \,\|\, \text{B64}(C) \,\|\, "." \\
   \|\, \text{B64}\bigl(\text{HMAC-SHA512}(H\|C,\, K)\bigr)
-\end{multline*}
+\end{multline}
 
 Token validation recomputes the signature and checks `exp < currentTimestamp()` in $O(1)$ time. Stateless design enables horizontal scaling without shared session state.
 
@@ -221,7 +224,9 @@ Token validation recomputes the signature and checks `exp < currentTimestamp()` 
 
 To prevent historical stagnation in trainer scores, recent pedagogical ratings receive higher weight. Let $S_i$ be the $i$-th chronological rating score and $W_i = 1 + (i \times 0.1)$ its time-decay weight. The weighted average rating is:
 
-$$R_w = \frac{\displaystyle\sum_{i=1}^{n} S_i \cdot W_i}{\displaystyle\sum_{i=1}^{n} W_i}$$
+\begin{equation}
+R_w = \frac{\displaystyle\sum_{i=1}^{n} S_i \cdot W_i}{\displaystyle\sum_{i=1}^{n} W_i}
+\end{equation}
 
 This algorithm runs in $O(n)$ time where $n$ is the ratings count, ensuring trainers are incentivised to maintain consistently high instructional quality.
 
@@ -233,7 +238,9 @@ The assignment algorithm validates inputs, resolves active membership conflicts,
 
 Revenue aggregation operates in $O(t)$ time over $t$ transactions. Growth rate is computed as:
 
-$$g = \frac{\text{Revenue}_{\text{current}} - \text{Revenue}_{\text{previous}}}{\text{Revenue}_{\text{previous}}} \times 100\%$$
+\begin{equation}
+g = \frac{\text{Revenue}_{\text{current}} - \text{Revenue}_{\text{previous}}}{\text{Revenue}_{\text{previous}}} \times 100\%
+\end{equation}
 
 Daily averages are extrapolated to a 30-day projected monthly revenue figure.
 
