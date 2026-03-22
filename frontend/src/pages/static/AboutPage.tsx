@@ -462,7 +462,7 @@ export default function AboutPage() {
                                     lineHeight: 1.8,
                                     mb: 2
                                 }}>
-                                    In 2023, our founder Aryan was running a 200-member gym in Mumbai. Every day was 
+                                    In 2023, our founder Aryan was running a 200-member gym in Vadodara. Every day was 
                                     a struggle—member data in Excel, payments tracked on paper, trainers coordinating 
                                     via WhatsApp groups. Hours wasted on admin instead of helping members achieve their goals.
                                 </Typography>
@@ -784,7 +784,7 @@ export default function AboutPage() {
                                 color: isDark ? 'white' : '#0F172A',
                                 mb: 1
                             }}>
-                                Based in Mumbai, Building for the World
+                                Based in Vadodara, Building for the World
                             </Typography>
                             <Typography sx={{ 
                                 fontSize: '15px', 
@@ -794,7 +794,7 @@ export default function AboutPage() {
                                 mx: 'auto',
                                 lineHeight: 1.7
                             }}>
-                                Our headquarters are in Mumbai, India, but our vision is global. 
+                                Our headquarters are in Vadodara, India, but our vision is global. 
                                 We're here to help gyms everywhere succeed.
                             </Typography>
                             <Box 

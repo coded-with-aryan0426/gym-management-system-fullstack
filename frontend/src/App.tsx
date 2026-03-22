@@ -1,5 +1,5 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { lazy, Suspense } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { lazy, Suspense, useEffect } from 'react';
 import { AppProvider } from './contexts/AppProvider';
 import { EditorRoot } from './editor';
 import { AppShell } from './components/Layout';
@@ -94,9 +94,20 @@ const PageLoader = () => (
   </div>
 );
 
+function RouteScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [pathname]);
+
+  return null;
+}
+
 function App() {
   return (
     <BrowserRouter>
+      <RouteScrollToTop />
       <EditorRoot>
         <AppProvider>
               <ErrorBoundary>
