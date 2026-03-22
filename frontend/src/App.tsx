@@ -94,11 +94,22 @@ const PageLoader = () => (
   </div>
 );
 
-function RouteScrollToTop() {
+const PUBLIC_LANDING_ROUTES = new Set([
+  '/',
+  '/about',
+  '/contact',
+  '/privacy',
+  '/terms',
+  '/member-app',
+]);
+
+function ScrollToTopOnPublicRoutes() {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    if (PUBLIC_LANDING_ROUTES.has(pathname)) {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    }
   }, [pathname]);
 
   return null;
@@ -107,7 +118,7 @@ function RouteScrollToTop() {
 function App() {
   return (
     <BrowserRouter>
-      <RouteScrollToTop />
+      <ScrollToTopOnPublicRoutes />
       <EditorRoot>
         <AppProvider>
               <ErrorBoundary>
