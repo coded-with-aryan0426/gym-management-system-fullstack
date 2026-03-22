@@ -1,14 +1,15 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     BarChart3, TrendingUp, TrendingDown, Users, X, Download,
     Calendar, Globe, Smartphone, Monitor, Laptop, Tablet as TabletIcon,
-    ArrowRight, Filter, Clock, Activity, Eye, ChevronDown
+    ArrowRight, Filter, Clock, Activity, Eye, ChevronDown, Building2
 } from 'lucide-react';
 import {
     AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip,
     ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line
 } from 'recharts';
+import { superAdminApi, type SuperAdminAnalyticsData } from '../../services/superAdminApi';
 
 /* ─── Mock Data ─── */
 const GROWTH = [
@@ -102,13 +103,51 @@ const SAAnalytics: React.FC = () => {
     const [showCohortModal, setShowCohortModal] = useState(false);
     const [exportFormat, setExportFormat] = useState('csv');
 
-    const kpis = useMemo(() => [
-        { label: 'DAU', value: '598', change: +4.0, color: 'blue', icon: Users },
-        { label: 'WAU', value: '1,185', change: +3.9, color: 'violet', icon: Activity },
-        { label: 'MAU', value: '1,958', change: +2.0, color: 'emerald', icon: TrendingUp },
-        { label: 'Avg Session', value: '12m 34s', change: +1.2, color: 'cyan', icon: Clock },
-        { label: 'Bounce Rate', value: '22.1%', change: -1.5, color: 'rose', icon: Eye },
-    ], []);
+    const [analytics, setAnalytics] = useState<SuperAdminAnalyticsData | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const loadAnalytics = async () => {
+            setLoading(true);
+            try {
+                const data = await superAdminApi.getAnalytics();
+                setAnalytics(data);
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadAnalytics();
+    }, []);
+
+    const combinedGrowth = useMemo(() => {
+        if (!analytics) return GROWTH;
+        return analytics.userGrowth.map((u: { month: string; newUsers: number }) => ({
+            m: u.month,
+            users: u.newUsers,
+            gyms: analytics.gymSignups.find((g: { month: string; gyms: number }) => g.month === u.month)?.gyms || 0
+        }));
+    }, [analytics]);
+
+    const kpis = useMemo(() => {
+        if (!analytics) {
+            return [
+                { label: 'DAU', value: '598', change: +4.0, color: 'blue', icon: Users },
+                { label: 'WAU', value: '1,185', change: +3.9, color: 'violet', icon: Activity },
+                { label: 'MAU', value: '1,958', change: +2.0, color: 'emerald', icon: TrendingUp },
+                { label: 'Avg Session', value: '12m 34s', change: +1.2, color: 'cyan', icon: Clock },
+                { label: 'Bounce Rate', value: '22.1%', change: -1.5, color: 'rose', icon: Eye },
+            ];
+        }
+        return [
+            { label: 'Total Users', value: analytics.health.totalUsers.toLocaleString(), change: +4.0, color: 'blue', icon: Users },
+            { label: 'Total Gyms', value: analytics.health.totalGyms.toLocaleString(), change: +3.9, color: 'violet', icon: Building2 },
+            { label: 'Active Members', value: analytics.health.activeMembers.toLocaleString(), change: +2.0, color: 'emerald', icon: TrendingUp },
+            { label: 'Security Alerts', value: analytics.health.securityAlerts.toLocaleString(), change: -1.5, color: 'rose', icon: Eye },
+            { label: 'Audit Events', value: analytics.health.totalAuditEvents.toLocaleString(), change: +1.2, color: 'cyan', icon: Clock },
+        ];
+    }, [analytics]);
 
     return (
         <div className="sa">
@@ -158,7 +197,7 @@ const SAAnalytics: React.FC = () => {
                     </div>
                     <div style={{ height: 200 }}>
                         <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={GROWTH} margin={{ top: 8, right: 8, left: -10, bottom: 0 }}>
+                            <AreaChart data={combinedGrowth} margin={{ top: 8, right: 8, left: -10, bottom: 0 }}>
                                 <defs>
                                     <linearGradient id="usersG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#3b82f6" stopOpacity={0.3} /><stop offset="100%" stopColor="#3b82f6" stopOpacity={0} /></linearGradient>
                                 </defs>

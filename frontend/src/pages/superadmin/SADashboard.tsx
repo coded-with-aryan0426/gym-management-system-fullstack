@@ -10,7 +10,7 @@ import {
     AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip,
     ResponsiveContainer, LineChart, Line
 } from 'recharts';
-import { superAdminApi, type SuperAdminAlert, type SuperAdminDashboardData, type SuperAdminServiceStatus, type SuperAdminTopGym, type SuperAdminTrendPoint } from '../../services/superAdminApi';
+import { superAdminApi, type SuperAdminAlert, type SuperAdminDashboardData, type SuperAdminServiceStatus, type SuperAdminTopGym, type SuperAdminTrendPoint, type SuperAdminAuditLogEntry } from '../../services/superAdminApi';
 
 type KPI = {
     label: string;
@@ -35,6 +35,21 @@ const SADashboard: React.FC = () => {
     const [selectedAlert, setSelectedAlert] = useState<SuperAdminAlert | null>(null);
     const [showServicesModal, setShowServicesModal] = useState(false);
     const [showAuditModal, setShowAuditModal] = useState(false);
+    const [fullAuditLogs, setFullAuditLogs] = useState<SuperAdminAuditLogEntry[]>([]);
+    const [loadingAudit, setLoadingAudit] = useState(false);
+
+    const openAuditModal = async () => {
+        setShowAuditModal(true);
+        setLoadingAudit(true);
+        try {
+            const logs = await superAdminApi.getAuditLogs(50);
+            setFullAuditLogs(logs);
+        } catch (e) {
+            console.error('Failed to load audit logs', e);
+        } finally {
+            setLoadingAudit(false);
+        }
+    };
 
     const loadDashboard = async () => {
         setLoading(true);
@@ -124,7 +139,7 @@ const SADashboard: React.FC = () => {
                 <div style={{ display: 'flex', gap: 8 }}>
                     <button className="sa__btn sa__btn--ghost sa__btn--sm" onClick={loadDashboard}><RefreshCw size={14} /> Refresh</button>
                     <button className="sa__btn sa__btn--ghost sa__btn--sm" onClick={() => setShowServicesModal(true)}><Server size={14} /> Status</button>
-                    <button className="sa__btn sa__btn--ghost sa__btn--sm" onClick={() => setShowAuditModal(true)}><Eye size={14} /> Audit Log</button>
+                    <button className="sa__btn sa__btn--ghost sa__btn--sm" onClick={openAuditModal}><Eye size={14} /> Audit Log</button>
                 </div>
             </header>
 
@@ -402,24 +417,27 @@ const SADashboard: React.FC = () => {
                                 <button className="sa__modal-close" onClick={() => setShowAuditModal(false)}><X size={16} /></button>
                             </div>
                             <div className="sa__modal-body">
-                                {auditLog.map((log, i) => (
-                                    <div key={i} style={{ display: 'flex', gap: 12, padding: '12px 0', borderBottom: i < auditLog.length - 1 ? '1px solid var(--border-subtle)' : 'none' }}>
-                                        <div style={{ width: 32, height: 32, borderRadius: 8, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: log.type === 'security' ? 'rgba(239,68,68,0.08)' : log.type === 'config' ? 'rgba(59,130,246,0.08)' : log.type === 'system' ? 'rgba(34,197,94,0.08)' : 'rgba(139,92,246,0.08)' }}>
-                                            {log.type === 'security' ? <Shield size={14} style={{ color: '#ef4444' }} /> :
-                                                log.type === 'config' ? <Zap size={14} style={{ color: '#3b82f6' }} /> :
-                                                    log.type === 'system' ? <Server size={14} style={{ color: '#22c55e' }} /> :
-                                                        <Activity size={14} style={{ color: '#8b5cf6' }} />}
+                                {loadingAudit ? (
+                                    <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-muted)' }}>Loading audit records...</div>
+                                ) : (
+                                    fullAuditLogs.map((log) => (
+                                        <div key={log.id} style={{ display: 'flex', gap: 12, padding: '12px 0', borderBottom: '1px solid var(--border-subtle)' }}>
+                                            <div style={{ width: 32, height: 32, borderRadius: 8, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: log.severity === 'critical' || log.severity === 'high' ? 'rgba(239,68,68,0.08)' : log.severity === 'medium' ? 'rgba(245,158,11,0.08)' : 'rgba(59,130,246,0.08)' }}>
+                                                {log.severity === 'critical' || log.severity === 'high' ? <Shield size={14} style={{ color: '#ef4444' }} /> :
+                                                    log.severity === 'medium' ? <AlertTriangle size={14} style={{ color: '#f59e0b' }} /> :
+                                                        <Activity size={14} style={{ color: '#3b82f6' }} />}
+                                            </div>
+                                            <div style={{ flex: 1 }}>
+                                                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' }}>{log.action}</div>
+                                                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{log.details}</div>
+                                            </div>
+                                            <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                                                <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{log.userName} ({log.userRole})</div>
+                                                <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{new Date(log.timestamp).toLocaleString()}</div>
+                                            </div>
                                         </div>
-                                        <div style={{ flex: 1 }}>
-                                            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' }}>{log.action}</div>
-                                            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{log.detail}</div>
-                                        </div>
-                                        <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                                            <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{log.user}</div>
-                                            <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{log.time}</div>
-                                        </div>
-                                    </div>
-                                ))}
+                                    ))
+                                )}
                             </div>
                             <div className="sa__modal-footer">
                                 <button className="sa__btn sa__btn--ghost sa__btn--sm" onClick={() => setShowAuditModal(false)}>Close</button>

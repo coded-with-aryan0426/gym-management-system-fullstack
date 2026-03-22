@@ -429,6 +429,35 @@ public class SuperAdminController {
         return ResponseEntity.ok(result);
     }
 
+    /**
+     * Fetch platform errors/crashes from audit logs.
+     */
+    @GetMapping("/errors")
+    public ResponseEntity<List<Map<String, Object>>> getErrors(@RequestParam(defaultValue = "100") int limit) {
+        List<AuditLog> logs = auditLogRepository.findTop100ByOrderByTimestampDesc()
+                .stream()
+                .filter(l -> "error".equalsIgnoreCase(l.getSeverity()) || "critical".equalsIgnoreCase(l.getSeverity()) || "high".equalsIgnoreCase(l.getSeverity()))
+                .limit(Math.min(limit, 500))
+                .toList();
+
+        List<Map<String, Object>> result = logs.stream().map(log -> {
+            Map<String, Object> entry = new HashMap<>();
+            entry.put("id", "ERR-" + log.getAuditId());
+            entry.put("type", "error");
+            entry.put("service", nullSafe(log.getEntity(), "System"));
+            entry.put("message", nullSafe(log.getAction(), "Error") + (log.getDetails() != null ? ": " + log.getDetails() : ""));
+            entry.put("stackTrace", nullSafe(log.getChanges(), "No stack trace available."));
+            entry.put("timestamp", log.getTimestamp() != null ? log.getTimestamp().toString() : "—");
+            entry.put("status", "open");
+            entry.put("severity", nullSafe(log.getSeverity(), "high"));
+            entry.put("occurrences", 1);
+            entry.put("usersAffected", log.getUserName() != null ? 1 : 0);
+            return entry;
+        }).toList();
+
+        return ResponseEntity.ok(result);
+    }
+
     /** Suspend a gym — sets isPublic=false. Body: { "reason": "..." } */
     @PutMapping("/gyms/{gymId}/suspend")
     public ResponseEntity<Map<String, Object>> suspendGym(

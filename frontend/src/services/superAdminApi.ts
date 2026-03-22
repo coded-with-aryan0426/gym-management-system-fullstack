@@ -202,6 +202,19 @@ export interface SuperAdminAuditLogEntry {
   timestamp: string;
 }
 
+export interface SuperAdminError {
+  id: string;
+  type: string;
+  service: string;
+  message: string;
+  stackTrace: string;
+  timestamp: string;
+  status: string;
+  severity: 'high' | 'critical' | 'low' | 'medium';
+  occurrences: number;
+  usersAffected: number;
+}
+
 
 const getStorageKey = (key: string): string => {
   const port = typeof window !== 'undefined' ? window.location.port || '5173' : '5173';
@@ -420,6 +433,16 @@ export const superAdminApi = {
     const token = this.getToken();
     if (!token) throw new Error('Super Admin token missing or expired');
     const response = await apiClient.get<SuperAdminAuditLogEntry[]>('/superadmin/audit-logs', {
+      headers: { 'X-Superadmin-Token': token },
+      params: { limit },
+    });
+    return response.data;
+  },
+
+  async getErrors(limit = 100): Promise<SuperAdminError[]> {
+    const token = this.getToken();
+    if (!token) throw new Error('Super Admin token missing or expired');
+    const response = await apiClient.get<SuperAdminError[]>('/superadmin/errors', {
       headers: { 'X-Superadmin-Token': token },
       params: { limit },
     });
