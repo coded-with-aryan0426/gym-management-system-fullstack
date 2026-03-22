@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     DollarSign, TrendingUp, TrendingDown, Users, CreditCard,
@@ -10,12 +10,13 @@ import {
     AreaChart, Area, XAxis, YAxis, Tooltip,
     ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar
 } from 'recharts';
+import { superAdminApi, type SuperAdminRevenueData } from '../../services/superAdminApi';
 
-/* ─── Mock Data ─── */
-const REVENUE_TREND = [
-    { m: 'Sep', revenue: 142000, gyms: 225 }, { m: 'Oct', revenue: 151000, gyms: 231 },
-    { m: 'Nov', revenue: 159000, gyms: 237 }, { m: 'Dec', revenue: 168000, gyms: 240 },
-    { m: 'Jan', revenue: 176000, gyms: 245 }, { m: 'Feb', revenue: 184250, gyms: 247 },
+/* ─── Fallback Mock Data (used only when API returns empty) ─── */
+const FALLBACK_REVENUE_TREND = [
+    { m: 'Sep', revenue: 142000 }, { m: 'Oct', revenue: 151000 },
+    { m: 'Nov', revenue: 159000 }, { m: 'Dec', revenue: 168000 },
+    { m: 'Jan', revenue: 176000 }, { m: 'Feb', revenue: 184250 },
 ];
 
 const PLAN_DISTRIBUTION = [
@@ -26,36 +27,27 @@ const PLAN_DISTRIBUTION = [
 ];
 
 const RECENT_PAYMENTS = [
-    { id: 'PAY-2025-001', gym: 'FitZone Elite', owner: 'Rahul Sharma', amount: 499, plan: 'Enterprise', date: 'Today, 2:14 PM', status: 'success', method: 'Visa ****4242', gateway: 'Stripe', invoiceId: 'INV-FZ-2025-02', city: 'Mumbai' },
-    { id: 'PAY-2025-002', gym: 'IronForge', owner: 'Amit Singh', amount: 499, plan: 'Enterprise', date: 'Today, 1:30 PM', status: 'success', method: 'UPI — amit@paytm', gateway: 'Razorpay', invoiceId: 'INV-IF-2025-02', city: 'Bangalore' },
-    { id: 'PAY-2025-003', gym: 'Muscle Factory', owner: 'Vikram Reddy', amount: 199, plan: 'Pro', date: 'Today, 11:45 AM', status: 'success', method: 'Mastercard ****8811', gateway: 'Stripe', invoiceId: 'INV-MF-2025-02', city: 'Hyderabad' },
+    { id: 'PAY-2025-001', gym: 'FitZone Elite', owner: 'Rahul Sharma', amount: 499, plan: 'Enterprise', date: 'Today, 2:14 PM', status: 'success', method: 'Visa ****4242', gateway: 'Stripe', invoiceId: 'INV-FZ-2025-02', city: 'Vadodara' },
+    { id: 'PAY-2025-002', gym: 'IronForge', owner: 'Amit Singh', amount: 499, plan: 'Enterprise', date: 'Today, 1:30 PM', status: 'success', method: 'UPI — amit@paytm', gateway: 'Razorpay', invoiceId: 'INV-IF-2025-02', city: 'Ahmedabad' },
+    { id: 'PAY-2025-003', gym: 'Muscle Factory', owner: 'Vikram Reddy', amount: 199, plan: 'Pro', date: 'Today, 11:45 AM', status: 'success', method: 'Mastercard ****8811', gateway: 'Stripe', invoiceId: 'INV-MF-2025-02', city: 'Surat' },
     { id: 'PAY-2025-004', gym: 'PowerHouse Gym', owner: 'Priya Patel', amount: 199, plan: 'Pro', date: 'Yesterday', status: 'success', method: 'Visa ****1234', gateway: 'Stripe', invoiceId: 'INV-PH-2025-02', city: 'Delhi' },
-    { id: 'PAY-2025-005', gym: 'CrossTrain Hub', owner: 'Ananya Joshi', amount: 499, plan: 'Enterprise', date: 'Yesterday', status: 'success', method: 'NEFT Transfer', gateway: 'Bank', invoiceId: 'INV-CT-2025-02', city: 'Chennai' },
-    { id: 'PAY-2025-006', gym: 'Peak Performance', owner: 'Sanjay Kumar', amount: 199, plan: 'Pro', date: 'Feb 13', status: 'success', method: 'UPI — sanjay@gpay', gateway: 'Razorpay', invoiceId: 'INV-PP-2025-02', city: 'Kolkata' },
 ];
 
 const FAILED_PAYMENTS = [
     { id: 'FAIL-001', gym: 'FlexFit Studio', owner: 'Neha Gupta', amount: 99, plan: 'Starter', reason: 'Card declined — insufficient funds', attempts: 3, lastAttempt: 'Feb 10, 3:22 PM', method: 'Visa ****5678', nextRetry: 'Feb 16', city: 'Pune', daysPastDue: 5 },
     { id: 'FAIL-002', gym: 'BodyWorks Gym', owner: 'Rohit Mehta', amount: 199, plan: 'Pro', reason: 'Card expired — 01/2025', attempts: 2, lastAttempt: 'Feb 12, 10:15 AM', method: 'Mastercard ****9900', nextRetry: 'Feb 17', city: 'Ahmedabad', daysPastDue: 3 },
-    { id: 'FAIL-003', gym: 'TitanFit', owner: 'Arjun Nair', amount: 499, plan: 'Enterprise', reason: 'Payment gateway timeout', attempts: 1, lastAttempt: 'Feb 14, 8:45 PM', method: 'UPI — arjun@hdfc', nextRetry: 'Feb 15', city: 'Kochi', daysPastDue: 1 },
 ];
 
 const REVENUE_BY_CITY = [
-    { city: 'Mumbai', revenue: 48200, gyms: 28 }, { city: 'Bangalore', revenue: 42100, gyms: 24 },
-    { city: 'Delhi', revenue: 31800, gyms: 22 }, { city: 'Chennai', revenue: 22500, gyms: 15 },
-    { city: 'Hyderabad', revenue: 18900, gyms: 12 }, { city: 'Kolkata', revenue: 12400, gyms: 9 },
-    { city: 'Pune', revenue: 8350, gyms: 7 },
-];
-
-const FORECAST = [
-    { m: 'Mar (projected)', revenue: 192400 }, { m: 'Apr (projected)', revenue: 201100 }, { m: 'May (projected)', revenue: 210500 },
+    { city: 'Vadodara', revenue: 48200 }, { city: 'Ahmedabad', revenue: 42100 },
+    { city: 'Surat', revenue: 31800 }, { city: 'Delhi', revenue: 22500 },
+    { city: 'Hyderabad', revenue: 18900 }, { city: 'Kolkata', revenue: 12400 },
 ];
 
 const COUPONS = [
     { code: 'LAUNCH50', discount: '50%', type: 'percentage', usageLimit: 100, used: 67, validUntil: 'Mar 31, 2025', status: 'active' },
     { code: 'ANNUAL20', discount: '20%', type: 'percentage', usageLimit: 500, used: 234, validUntil: 'Dec 31, 2025', status: 'active' },
-    { code: 'FRIEND10', discount: '$10', type: 'flat', usageLimit: 200, used: 89, validUntil: 'Jun 30, 2025', status: 'active' },
-    { code: 'BETA100', discount: '100%', type: 'percentage', usageLimit: 50, used: 50, validUntil: 'Jan 31, 2025', status: 'expired' },
+    { code: 'FRIEND10', discount: '₹10', type: 'flat', usageLimit: 200, used: 89, validUntil: 'Jun 30, 2025', status: 'active' },
 ];
 
 type Payment = typeof RECENT_PAYMENTS[0];
@@ -72,13 +64,35 @@ const SARevenue: React.FC = () => {
     const [refundReason, setRefundReason] = useState('');
     const [exportFormat, setExportFormat] = useState('csv');
 
+    // ── Real API data ──
+    const [revenueData, setRevenueData] = useState<SuperAdminRevenueData | null>(null);
+
+    useEffect(() => {
+        superAdminApi.getRevenue()
+            .then(data => setRevenueData(data))
+            .catch(() => { /* silently fall back to mock data */ });
+    }, []);
+
+    // Use real API data when available, otherwise fall back to mock
+    const revenueTrend = revenueData?.monthlyTrend?.length
+        ? revenueData.monthlyTrend.map(p => ({ m: p.m, revenue: Number(p.revenue ?? 0) }))
+        : FALLBACK_REVENUE_TREND;
+
+    const mrrFormatted = revenueData
+        ? `₹${Number(revenueData.mrr).toLocaleString('en-IN')}`
+        : '₹1,84,250';
+    const arrFormatted = revenueData
+        ? `₹${(Number(revenueData.arr) / 100000).toFixed(2)}L`
+        : '₹22.1L';
+    const mrrChange = revenueData ? Number(revenueData.mrrChange.toFixed(1)) : 15.2;
+
     const kpis = useMemo(() => [
-        { label: 'MRR', value: '$184,250', change: +15.2, color: 'emerald', icon: DollarSign, drillKey: 'mrr' },
-        { label: 'ARR', value: '$2.21M', change: +15.2, color: 'blue', icon: TrendingUp, drillKey: 'arr' },
-        { label: 'Paying Gyms', value: '232', change: +4.8, color: 'violet', icon: Building2, drillKey: 'gyms' },
+        { label: 'MRR', value: mrrFormatted, change: mrrChange, color: 'emerald', icon: DollarSign, drillKey: 'mrr' },
+        { label: 'ARR', value: arrFormatted, change: mrrChange, color: 'blue', icon: TrendingUp, drillKey: 'arr' },
+        { label: 'Paying Gyms', value: revenueData ? String(revenueData.topGyms.length) : '—', change: +4.8, color: 'violet', icon: Building2, drillKey: 'gyms' },
         { label: 'Churn Rate', value: '2.1%', change: -0.3, color: 'cyan', icon: Users, drillKey: 'churn' },
         { label: 'Failed Payments', value: String(FAILED_PAYMENTS.length), change: +1, color: 'rose', icon: AlertCircle, drillKey: 'failed' },
-    ], []);
+    ], [revenueData, mrrFormatted, arrFormatted, mrrChange]);
 
     const planColor = (p: string) => p === 'Enterprise' ? 'violet' : p === 'Pro' ? 'blue' : p === 'Starter' ? 'gray' : 'amber';
 
@@ -86,7 +100,7 @@ const SARevenue: React.FC = () => {
         <div className="sa">
             <header className="sa__header">
                 <div className="sa__header-left">
-                    <h1>Revenue & Billing</h1>
+                    <h1>Revenue &amp; Billing</h1>
                     <p>Platform financials, payments, and subscription management</p>
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
@@ -120,18 +134,18 @@ const SARevenue: React.FC = () => {
 
             {/* Charts Row */}
             <div className="sa__grid">
-                {/* Revenue Trend + Forecast */}
+                {/* Revenue Trend */}
                 <section className="sa__card sa__card--span-7">
                     <div className="sa__card-head">
                         <div className="sa__card-icon sa__card-icon--emerald"><TrendingUp size={14} /></div>
                         <div>
-                            <h3 className="sa__card-title">Revenue Trend & Forecast</h3>
-                            <p className="sa__card-sub">6-month history + 3-month projection</p>
+                            <h3 className="sa__card-title">Revenue Trend</h3>
+                            <p className="sa__card-sub">{revenueData ? 'Live data from database' : '6-month history'}</p>
                         </div>
                     </div>
                     <div style={{ height: 200 }}>
                         <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={[...REVENUE_TREND, ...FORECAST]} margin={{ top: 8, right: 8, left: -10, bottom: 0 }}>
+                            <AreaChart data={revenueTrend} margin={{ top: 8, right: 8, left: -10, bottom: 0 }}>
                                 <defs>
                                     <linearGradient id="revG" x1="0" y1="0" x2="0" y2="1">
                                         <stop offset="0%" stopColor="#10b981" stopOpacity={0.3} />
@@ -139,9 +153,9 @@ const SARevenue: React.FC = () => {
                                     </linearGradient>
                                 </defs>
                                 <XAxis dataKey="m" axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.35)', fontSize: 10 }} />
-                                <YAxis axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.35)', fontSize: 10 }} tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}k`} />
-                                <Tooltip contentStyle={{ backgroundColor: '#1c1c1f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, fontSize: 11 }} formatter={(v: number) => [`$${v.toLocaleString()}`, 'Revenue']} />
-                                <Area type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={2} fill="url(#revG)" strokeDasharray={(_: unknown, i: number) => i >= REVENUE_TREND.length ? '5 5' : '0'} dot={false} />
+                                <YAxis axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.35)', fontSize: 10 }} tickFormatter={(v: number) => `₹${(v / 1000).toFixed(0)}k`} />
+                                <Tooltip contentStyle={{ backgroundColor: '#1c1c1f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, fontSize: 11 }} formatter={(v: number) => [`₹${v.toLocaleString('en-IN')}`, 'Revenue']} />
+                                <Area type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={2} fill="url(#revG)" dot={false} />
                             </AreaChart>
                         </ResponsiveContainer>
                     </div>
@@ -171,7 +185,7 @@ const SARevenue: React.FC = () => {
                                     <div style={{ width: 8, height: 8, borderRadius: 2, background: p.color, flexShrink: 0 }} />
                                     <span style={{ color: 'var(--text-secondary)', flex: 1 }}>{p.name}</span>
                                     <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{p.value}</span>
-                                    <span style={{ color: 'var(--text-muted)', fontSize: 10 }}>${p.price}/mo</span>
+                                    <span style={{ color: 'var(--text-muted)', fontSize: 10 }}>₹{p.price}/mo</span>
                                 </div>
                             ))}
                         </div>
@@ -192,8 +206,8 @@ const SARevenue: React.FC = () => {
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={REVENUE_BY_CITY} margin={{ top: 4, right: 4, left: -10, bottom: 0 }}>
                             <XAxis dataKey="city" axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.35)', fontSize: 10 }} />
-                            <YAxis axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.35)', fontSize: 10 }} tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}k`} />
-                            <Tooltip contentStyle={{ backgroundColor: '#1c1c1f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, fontSize: 11 }} formatter={(v: number) => [`$${v.toLocaleString()}`, 'Revenue']} />
+                            <YAxis axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.35)', fontSize: 10 }} tickFormatter={(v: number) => `₹${(v / 1000).toFixed(0)}k`} />
+                            <Tooltip contentStyle={{ backgroundColor: '#1c1c1f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, fontSize: 11 }} formatter={(v: number) => [`₹${v.toLocaleString('en-IN')}`, 'Revenue']} />
                             <Bar dataKey="revenue" radius={[4, 4, 0, 0]} barSize={32}>
                                 {REVENUE_BY_CITY.map((_, i) => <Cell key={i} fill={i === 0 ? '#10b981' : i === 1 ? '#3b82f6' : '#8b5cf6'} fillOpacity={0.6} />)}
                             </Bar>
@@ -220,7 +234,7 @@ const SARevenue: React.FC = () => {
                                 <tr key={p.id} onClick={() => setSelectedPayment(p)}>
                                     <td style={{ fontWeight: 600, fontSize: 12 }}>{p.gym}</td>
                                     <td><span className={`sa__badge sa__badge--${planColor(p.plan)}`}>{p.plan}</span></td>
-                                    <td style={{ fontWeight: 600, color: '#22c55e' }}>${p.amount}</td>
+                                    <td style={{ fontWeight: 600, color: '#22c55e' }}>₹{p.amount}</td>
                                     <td style={{ fontSize: 11, color: 'var(--text-muted)' }}>{p.method}</td>
                                     <td style={{ fontSize: 11, color: 'var(--text-muted)' }}>{p.date}</td>
                                     <td><ArrowRight size={12} style={{ color: 'var(--text-muted)' }} /></td>
@@ -245,7 +259,7 @@ const SARevenue: React.FC = () => {
                             {FAILED_PAYMENTS.map(f => (
                                 <tr key={f.id} onClick={() => setSelectedFailed(f)}>
                                     <td style={{ fontWeight: 600, fontSize: 12 }}>{f.gym}</td>
-                                    <td style={{ fontWeight: 600, color: '#ef4444' }}>${f.amount}</td>
+                                    <td style={{ fontWeight: 600, color: '#ef4444' }}>₹{f.amount}</td>
                                     <td><span className="sa__badge sa__badge--red">{f.attempts}×</span></td>
                                     <td style={{ fontSize: 11, color: '#f59e0b' }}>{f.daysPastDue}d</td>
                                     <td><ArrowRight size={12} style={{ color: 'var(--text-muted)' }} /></td>
@@ -489,8 +503,8 @@ const SARevenue: React.FC = () => {
                                         <table className="sa__table">
                                             <thead><tr><th>City</th><th>Gyms</th><th>Revenue/mo</th></tr></thead>
                                             <tbody>
-                                                {REVENUE_BY_CITY.map(c => (
-                                                    <tr key={c.city}><td style={{ fontWeight: 600 }}>{c.city}</td><td>{c.gyms}</td><td style={{ color: '#22c55e', fontWeight: 600 }}>${c.revenue.toLocaleString()}</td></tr>
+                                                 {REVENUE_BY_CITY.map(c => (
+                                                     <tr key={c.city}><td style={{ fontWeight: 600 }}>{c.city}</td><td>—</td><td style={{ color: '#22c55e', fontWeight: 600 }}>₹{c.revenue.toLocaleString('en-IN')}</td></tr>
                                                 ))}
                                             </tbody>
                                         </table>

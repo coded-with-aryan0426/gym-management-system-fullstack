@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Shield, Lock, AlertTriangle, ArrowRight, Terminal } from 'lucide-react';
+import { superAdminApi } from '../../services/superAdminApi';
 import './superadmin-portal.css';
-
-const MASTER_PASSPHRASE = 'Aryan@maker';
 
 // Matrix rain characters
 const MATRIX_CHARS = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789ABCDEF';
@@ -17,6 +16,7 @@ const SuperAdminPortal: React.FC = () => {
     const [attempts, setAttempts] = useState(0);
     const [typedText, setTypedText] = useState('');
     const [showTransition, setShowTransition] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
 
     // Focus input on mount
@@ -107,18 +107,20 @@ const SuperAdminPortal: React.FC = () => {
         };
     }, []);
 
-    const handleSubmit = useCallback((e: React.FormEvent) => {
+    const handleSubmit = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+        if (isSubmitting) return;
+        setIsSubmitting(true);
 
-        if (passphrase === MASTER_PASSPHRASE) {
+        try {
+            await superAdminApi.login(passphrase);
             // Success — show transition then navigate
             setShowTransition(true);
-            sessionStorage.setItem('sa_auth', 'true');
             setTimeout(() => {
                 navigate('/superadmin');
             }, 1800);
-        } else {
+        } catch {
             // Fail
             setAttempts(prev => prev + 1);
             setShake(true);
@@ -129,8 +131,10 @@ const SuperAdminPortal: React.FC = () => {
             );
             setTimeout(() => setShake(false), 500);
             setPassphrase('');
+        } finally {
+            setIsSubmitting(false);
         }
-    }, [passphrase, attempts, navigate]);
+    }, [passphrase, attempts, navigate, isSubmitting]);
 
     // Success transition overlay
     if (showTransition) {
@@ -211,7 +215,7 @@ const SuperAdminPortal: React.FC = () => {
                         </div>
                     )}
 
-                    <button type="submit" className="portal__submit">
+                    <button type="submit" className="portal__submit" disabled={isSubmitting}>
                         <span>Authenticate</span>
                         <ArrowRight size={14} />
                     </button>

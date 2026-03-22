@@ -6,6 +6,7 @@ import {
     Bug, ToggleRight, Shield, Database, BarChart3
 } from 'lucide-react';
 import type { NavItem } from '../../components/Layout/CommandRail';
+import { superAdminApi } from '../../services/superAdminApi';
 import '../../styles/unified-design-system.css';
 import './superadmin.css';
 
@@ -15,7 +16,7 @@ interface SuperAdminLayoutProps {
 
 const SuperAdminLayout: React.FC<SuperAdminLayoutProps> = ({ children }) => {
     // Portal auth guard — redirect if not authenticated via passphrase
-    const isPortalAuth = sessionStorage.getItem('sa_auth') === 'true';
+    const isPortalAuth = superAdminApi.isAuthenticated();
 
     useEffect(() => {
         if (isPortalAuth) {

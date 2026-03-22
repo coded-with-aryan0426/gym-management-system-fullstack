@@ -36,6 +36,7 @@ import {
 import { useAuth } from "../../contexts/AuthContext"
 import { useTheme } from "../../contexts/ThemeContext"
 import { useClickOutside } from "../../hooks"
+import { superAdminApi } from "../../services/superAdminApi"
 import { Logo } from "../ui/Logo"
 import Avatar from "../ui/Avatar"
 import "./CommandRail.css"
@@ -143,7 +144,7 @@ const CommandRail: React.FC<CommandRailProps> = ({ isCollapsed = false, onToggle
 
   const handleLogout = () => {
     if (isSuperAdmin) {
-      sessionStorage.removeItem('sa_auth');
+      superAdminApi.logout();
       navigate('/');
     } else {
       logout();

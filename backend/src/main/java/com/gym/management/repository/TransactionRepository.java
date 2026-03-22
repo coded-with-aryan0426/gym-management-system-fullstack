@@ -134,4 +134,30 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
                         @Param("category") String category,
                         @Param("startDate") LocalDateTime startDate,
                         @Param("endDate") LocalDateTime endDate);
+
+        @Query("SELECT t.gymId, COALESCE(SUM(t.amount), 0) " +
+                        "FROM Transaction t " +
+                        "WHERE t.gymId IS NOT NULL " +
+                        "AND t.type = 'INCOME' " +
+                        "AND t.status = 'Completed' " +
+                        "AND t.dateTime BETWEEN :startDate AND :endDate " +
+                        "GROUP BY t.gymId " +
+                        "ORDER BY COALESCE(SUM(t.amount), 0) DESC")
+        List<Object[]> findTopGymsByRevenue(
+                        @Param("startDate") LocalDateTime startDate,
+                        @Param("endDate") LocalDateTime endDate);
+
+        @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t " +
+                        "WHERE t.gymId = :gymId " +
+                        "AND t.type = :type " +
+                        "AND t.status = :status " +
+                        "AND t.dateTime BETWEEN :startDate AND :endDate")
+        BigDecimal sumAmountByGymIdAndTypeAndStatusAndDateRange(
+                        @Param("gymId") Long gymId,
+                        @Param("type") String type,
+                        @Param("status") String status,
+                        @Param("startDate") LocalDateTime startDate,
+                        @Param("endDate") LocalDateTime endDate);
+
+        List<Transaction> findTop10ByGymIdOrderByDateTimeDesc(Long gymId);
 }

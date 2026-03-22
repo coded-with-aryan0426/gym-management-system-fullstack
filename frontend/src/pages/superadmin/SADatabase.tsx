@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Database, HardDrive, Zap, Clock, X, AlertTriangle,
@@ -9,6 +9,7 @@ import {
     AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip,
     ResponsiveContainer, PieChart, Pie, Cell
 } from 'recharts';
+import { superAdminApi, SuperAdminDatabaseHealth, SuperAdminTableSize } from '../../services/superAdminApi';
 
 const DB_STATS = {
     size: '2.4 GB', activeConnections: 18, maxConnections: 50,
@@ -112,7 +113,34 @@ const SADatabase: React.FC = () => {
     const [showMigrationsModal, setShowMigrationsModal] = useState(false);
     const [showMaintenanceConfirm, setShowMaintenanceConfirm] = useState(false);
 
-    const poolUsed = Math.round((DB_STATS.activeConnections / DB_STATS.maxConnections) * 100);
+    const [health, setHealth] = useState<SuperAdminDatabaseHealth | null>(null);
+    const [tables, setTables] = useState<SuperAdminTableSize[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        loadData();
+    }, []);
+
+    const loadData = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+            const [healthData, tablesData] = await Promise.all([
+                superAdminApi.getDatabaseHealth(),
+                superAdminApi.getTableSizes()
+            ]);
+            setHealth(healthData);
+            setTables(tablesData);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to load database data');
+            console.error('Failed to load database data:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const poolUsed = health ? Math.round((health.activeConnections / health.maxConnections) * 100) : 0;
     const poolColor = poolUsed > 80 ? '#ef4444' : poolUsed > 50 ? '#f59e0b' : '#22c55e';
 
     return (
@@ -123,20 +151,50 @@ const SADatabase: React.FC = () => {
                     <p>Database performance, storage, and maintenance</p>
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
+                    <button className="sa__btn sa__btn--ghost sa__btn--sm" onClick={loadData} disabled={loading}>
+                        <RefreshCw size={14} className={loading ? 'spin' : ''} /> Refresh
+                    </button>
                     <button className="sa__btn sa__btn--ghost sa__btn--sm" onClick={() => setShowBackupsModal(true)}><Download size={14} /> Backups</button>
                     <button className="sa__btn sa__btn--ghost sa__btn--sm" onClick={() => setShowMigrationsModal(true)}><RefreshCw size={14} /> Migrations</button>
                     <button className="sa__btn sa__btn--danger sa__btn--sm" onClick={() => setShowMaintenanceConfirm(true)}><Settings size={14} /> Maintenance</button>
                 </div>
             </header>
 
+            {loading && !health && (
+                <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-muted)' }}>
+                    <RefreshCw size={32} className="spin" style={{ marginBottom: 12 }} />
+                    <p>Loading database health data...</p>
+                </div>
+            )}
+
+            {error && !loading && (
+                <div style={{ 
+                    padding: '20px', 
+                    background: 'rgba(239, 68, 68, 0.1)', 
+                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                    borderRadius: '8px',
+                    marginBottom: '16px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px'
+                }}>
+                    <AlertTriangle size={20} color="#ef4444" />
+                    <div>
+                        <div style={{ fontWeight: 600, marginBottom: 4 }}>Failed to Load Database Data</div>
+                        <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>{error}</div>
+                    </div>
+                </div>
+            )}
+
+            {health && !loading && (
+                <>
             {/* KPIs */}
             <div className="sa__kpi-row">
                 {[
-                    { label: 'Database Size', value: DB_STATS.size, color: 'blue', icon: HardDrive },
-                    { label: 'Connections', value: `${DB_STATS.activeConnections}/${DB_STATS.maxConnections}`, color: 'emerald', icon: Zap },
-                    { label: 'Avg Query Time', value: DB_STATS.avgQueryTime, color: 'violet', icon: Clock },
-                    { label: 'Cache Hit Rate', value: DB_STATS.cacheHitRate, color: 'cyan', icon: Activity },
-                    { label: 'Uptime', value: DB_STATS.uptime, color: 'emerald', icon: Server },
+                    { label: 'CPU Usage', value: `${health.cpu.toFixed(1)}%`, color: 'blue', icon: Activity },
+                    { label: 'Memory Usage', value: `${health.memory.toFixed(1)}%`, color: 'violet', icon: HardDrive },
+                    { label: 'Connections', value: `${health.activeConnections}/${health.maxConnections}`, color: 'emerald', icon: Zap },
+                    { label: 'Status', value: health.status, color: health.status === 'healthy' ? 'emerald' : 'red', icon: Server },
                 ].map((kpi, i) => (
                     <motion.div key={kpi.label} className={`sa__kpi sa__kpi--${kpi.color}`} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}
                         style={{ cursor: kpi.label === 'Connections' ? 'pointer' : 'default' }}
@@ -507,6 +565,8 @@ const SADatabase: React.FC = () => {
                 )}
 
             </AnimatePresence>
+                </>
+            )}
         </div>
     );
 };

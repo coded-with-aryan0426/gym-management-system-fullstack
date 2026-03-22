@@ -43,6 +43,9 @@ public class SecurityConfig {
     @Autowired
     private RateLimitFilter rateLimitFilter;
 
+    @Autowired
+    private SuperAdminAuthFilter superAdminAuthFilter;
+
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -87,6 +90,8 @@ public class SecurityConfig {
                         // ==================== PUBLIC ENDPOINTS ====================
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/public/**").permitAll()
+                        .requestMatchers("/api/superadmin/auth/**").permitAll()
+                        .requestMatchers("/api/superadmin/**").authenticated()
                         .requestMatchers("/api/gyms/public/**").permitAll()
                         .requestMatchers("/api/dashboard/analytics/test").permitAll() // Test endpoint
                         .requestMatchers("/api/tasks/seed").permitAll() // Seed dummy data — no auth needed
@@ -150,6 +155,9 @@ public class SecurityConfig {
 
         // Rate limiting filter runs first
         http.addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class);
+
+        // Super admin passphrase-token auth for /api/superadmin/**
+        http.addFilterAfter(superAdminAuthFilter, JwtAuthenticationFilter.class);
 
         // JWT filter for production authentication
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

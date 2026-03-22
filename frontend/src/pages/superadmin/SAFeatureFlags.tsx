@@ -1,100 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     ToggleRight, X, Plus, AlertTriangle, CheckCircle2,
     Edit3, Trash2, Clock, Building2, Users, Zap,
-    Shield, Smartphone, Globe, Calendar, History, Info
+    Shield, Smartphone, Globe, Calendar, History, Info, RefreshCw
 } from 'lucide-react';
+import { superAdminApi, SuperAdminFeatureFlag } from '../../services/superAdminApi';
 
-const MOCK_FLAGS = [
-    {
-        id: 'dark_mode', name: 'dark-mode', desc: 'Enable dark mode UI for member and trainer dashboards',
-        enabled: true, rollout: 100, strategy: 'all', gyms: [] as string[],
-        createdBy: 'Creator', createdAt: '2024-06-15', usersAffected: 1958, gymsAffected: 8,
-        category: 'UI',
-        changelog: [
-            { action: 'Enabled for all', by: 'Creator', date: 'Jan 15, 2025' },
-            { action: 'Rollout increased to 100%', by: 'Creator', date: 'Jan 10, 2025' },
-            { action: 'Created, rollout 50%', by: 'Creator', date: 'Jun 15, 2024' },
-        ],
-    },
-    {
-        id: 'ai_workout', name: 'ai-workout-generator', desc: 'AI-powered personalized workout plan generator using GPT-4',
-        enabled: true, rollout: 65, strategy: 'percentage', gyms: [] as string[],
-        createdBy: 'Creator', createdAt: '2024-11-20', usersAffected: 1270, gymsAffected: 5,
-        category: 'AI',
-        changelog: [
-            { action: 'Rollout increased to 65%', by: 'Creator', date: 'Feb 10, 2025' },
-            { action: 'Created at 25%', by: 'Creator', date: 'Nov 20, 2024' },
-        ],
-    },
-    {
-        id: 'stripe_v2', name: 'stripe-checkout-v2', desc: 'New Stripe checkout flow with Apple Pay and Google Pay support',
-        enabled: true, rollout: 30, strategy: 'gym-whitelist', gyms: ['FitZone Elite', 'IronForge', 'CrossTrain Hub'],
-        createdBy: 'Creator', createdAt: '2025-01-08', usersAffected: 1278, gymsAffected: 3,
-        category: 'Payments',
-        changelog: [
-            { action: 'Whitelisted CrossTrain Hub', by: 'Creator', date: 'Feb 5, 2025' },
-            { action: 'Whitelisted IronForge', by: 'Creator', date: 'Jan 20, 2025' },
-            { action: 'Created for FitZone Elite', by: 'Creator', date: 'Jan 8, 2025' },
-        ],
-    },
-    {
-        id: 'social_feed', name: 'social-activity-feed', desc: 'Community feed where members can share workouts, achievements, and photos',
-        enabled: false, rollout: 0, strategy: 'disabled', gyms: [] as string[],
-        createdBy: 'Creator', createdAt: '2025-02-01', usersAffected: 0, gymsAffected: 0,
-        category: 'Social',
-        changelog: [
-            { action: 'Created (disabled)', by: 'Creator', date: 'Feb 1, 2025' },
-        ],
-    },
-    {
-        id: 'push_notif', name: 'push-notifications', desc: 'Browser and mobile push notifications for class reminders and announcements',
-        enabled: true, rollout: 80, strategy: 'percentage', gyms: [] as string[],
-        createdBy: 'Creator', createdAt: '2024-09-15', usersAffected: 1560, gymsAffected: 7,
-        category: 'Notifications',
-        changelog: [
-            { action: 'Rollout increased to 80%', by: 'Creator', date: 'Feb 1, 2025' },
-            { action: 'Created at 40%', by: 'Creator', date: 'Sep 15, 2024' },
-        ],
-    },
-    {
-        id: 'member_qr', name: 'qr-code-checkin', desc: 'QR code based member check-in at gym entrance',
-        enabled: false, rollout: 0, strategy: 'disabled', gyms: [] as string[],
-        createdBy: 'Creator', createdAt: '2025-01-25', usersAffected: 0, gymsAffected: 0,
-        category: 'Operations',
-        changelog: [
-            { action: 'Created (disabled)', by: 'Creator', date: 'Jan 25, 2025' },
-        ],
-    },
-    {
-        id: 'analytics_v2', name: 'advanced-analytics', desc: 'Enhanced analytics dashboard with cohort analysis, funnel tracking, and custom reports',
-        enabled: true, rollout: 100, strategy: 'all', gyms: [] as string[],
-        createdBy: 'Creator', createdAt: '2024-08-01', usersAffected: 1958, gymsAffected: 8,
-        category: 'Analytics',
-        changelog: [
-            { action: 'Enabled for all', by: 'Creator', date: 'Dec 1, 2024' },
-            { action: 'Created at 50%', by: 'Creator', date: 'Aug 1, 2024' },
-        ],
-    },
-    {
-        id: 'equipment_iot', name: 'iot-equipment-tracking', desc: 'IoT sensor integration for real-time equipment usage tracking and maintenance prediction',
-        enabled: true, rollout: 15, strategy: 'gym-whitelist', gyms: ['IronForge'],
-        createdBy: 'Creator', createdAt: '2025-02-10', usersAffected: 524, gymsAffected: 1,
-        category: 'Hardware',
-        changelog: [
-            { action: 'Created, IronForge pilot', by: 'Creator', date: 'Feb 10, 2025' },
-        ],
-    },
-];
-
-type Flag = typeof MOCK_FLAGS[0];
+type Flag = SuperAdminFeatureFlag & {
+    id?: string;
+    desc?: string;
+    rollout?: number;
+    strategy?: string;
+    gyms?: string[];
+    createdBy?: string;
+    createdAt?: string;
+    usersAffected?: number;
+    gymsAffected?: number;
+    category?: string;
+    changelog?: { action: string; by: string; date: string }[];
+};
 
 const ALL_GYMS = ['FitZone Elite', 'IronForge', 'CrossTrain Hub', 'PowerHouse Gym', 'Muscle Factory', 'Peak Performance', 'FlexFit Studio', 'Zen Fitness'];
 const CATEGORIES = ['All', 'UI', 'AI', 'Payments', 'Social', 'Notifications', 'Operations', 'Analytics', 'Hardware'];
 
 const SAFeatureFlags: React.FC = () => {
-    const [flags, setFlags] = useState(MOCK_FLAGS);
+    const [flags, setFlags] = useState<Flag[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [selectedFlag, setSelectedFlag] = useState<Flag | null>(null);
     const [showToggleConfirm, setShowToggleConfirm] = useState<{ flag: Flag; newState: boolean } | null>(null);
     const [showCreateModal, setShowCreateModal] = useState(false);
@@ -108,23 +41,70 @@ const SAFeatureFlags: React.FC = () => {
     const [newCategory, setNewCategory] = useState('UI');
     const [newStrategy, setNewStrategy] = useState('disabled');
 
+    useEffect(() => {
+        loadFlags();
+    }, []);
+
+    const loadFlags = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+            const data = await superAdminApi.getFeatureFlags();
+            const mappedFlags: Flag[] = data.map(f => ({
+                ...f,
+                id: f.key,
+                desc: f.description,
+                rollout: f.rolloutPercentage,
+                strategy: f.enabled ? (f.rolloutPercentage === 100 ? 'all' : 'percentage') : 'disabled',
+                gyms: [],
+                createdBy: 'System',
+                createdAt: new Date(f.updatedAt).toLocaleDateString(),
+                usersAffected: 0,
+                gymsAffected: 0,
+                category: f.critical ? 'Critical' : 'Feature',
+                changelog: [],
+            }));
+            setFlags(mappedFlags);
+        } catch (err: any) {
+            setError(err.response?.data?.message || err.message || 'Failed to load feature flags');
+            console.error('Failed to load feature flags:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const filteredFlags = categoryFilter === 'All' ? flags : flags.filter(f => f.category === categoryFilter);
 
     const handleToggle = (flag: Flag) => {
         setShowToggleConfirm({ flag, newState: !flag.enabled });
     };
 
-    const confirmToggle = () => {
+    const confirmToggle = async () => {
         if (!showToggleConfirm) return;
+        const { flag, newState } = showToggleConfirm;
+        
+        // Optimistic update
         setFlags(prev => prev.map(f =>
-            f.id === showToggleConfirm.flag.id ? {
+            f.key === flag.key ? {
                 ...f,
-                enabled: showToggleConfirm.newState,
-                rollout: showToggleConfirm.newState ? (f.rollout || 100) : 0,
-                strategy: showToggleConfirm.newState ? (f.strategy === 'disabled' ? 'all' : f.strategy) : 'disabled',
+                enabled: newState,
+                rollout: newState ? (f.rollout || 100) : 0,
+                strategy: newState ? (f.strategy === 'disabled' ? 'all' : f.strategy) : 'disabled',
             } : f
         ));
         setShowToggleConfirm(null);
+
+        try {
+            await superAdminApi.updateFeatureFlag(flag.key, { 
+                enabled: newState,
+                rolloutPercentage: newState ? (flag.rolloutPercentage || 100) : 0
+            });
+        } catch (err: any) {
+            console.error('Failed to update feature flag:', err);
+            setError(err.response?.data?.message || err.message || 'Failed to update feature flag');
+            // Revert on error
+            loadFlags();
+        }
     };
 
     const strategyLabel = (s: string) =>
@@ -150,8 +130,35 @@ const SAFeatureFlags: React.FC = () => {
                     <h1>Feature Flags</h1>
                     <p>{flags.length} flags · {flags.filter(f => f.enabled).length} enabled · {flags.filter(f => !f.enabled).length} disabled</p>
                 </div>
-                <button className="sa__btn sa__btn--primary sa__btn--sm" onClick={() => setShowCreateModal(true)}><Plus size={14} /> Create Flag</button>
+                <div style={{ display: 'flex', gap: 8 }}>
+                    <button className="sa__btn sa__btn--ghost sa__btn--sm" onClick={loadFlags} disabled={loading}>
+                        <RefreshCw size={14} className={loading ? 'spinning' : ''} /> Refresh
+                    </button>
+                    <button className="sa__btn sa__btn--primary sa__btn--sm" onClick={() => setShowCreateModal(true)}><Plus size={14} /> Create Flag</button>
+                </div>
             </header>
+
+            {/* Loading State */}
+            {loading && flags.length === 0 && (
+                <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-muted)' }}>
+                    <RefreshCw size={32} className="spinning" style={{ marginBottom: 12, opacity: 0.5 }} />
+                    <div style={{ fontSize: 14, fontWeight: 600 }}>Loading feature flags...</div>
+                </div>
+            )}
+
+            {/* Error State */}
+            {error && (
+                <div style={{ padding: '14px 18px', background: 'rgba(239,68,68,0.06)', borderRadius: 14, marginBottom: 16, border: '1px solid rgba(239,68,68,0.15)', display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <AlertTriangle size={16} style={{ color: '#ef4444', flexShrink: 0 }} />
+                    <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: '#ef4444', marginBottom: 2 }}>Error loading feature flags</div>
+                        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{error}</div>
+                    </div>
+                    <button className="sa__btn sa__btn--ghost sa__btn--sm" onClick={loadFlags}>
+                        <RefreshCw size={12} /> Retry
+                    </button>
+                </div>
+            )}
 
             {/* Category Filter */}
             <div className="sa__toolbar">
@@ -163,6 +170,7 @@ const SAFeatureFlags: React.FC = () => {
             </div>
 
             {/* Flag Cards */}
+            {!loading && flags.length > 0 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {filteredFlags.map((flag, i) => (
                     <motion.div
@@ -174,13 +182,13 @@ const SAFeatureFlags: React.FC = () => {
                     >
                         <div className="sa__flag-head">
                             <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                                {categoryIcon(flag.category)} {flag.category}
+                                {categoryIcon(flag.category || 'Feature')} {flag.category || 'Feature'}
                             </div>
                             <div style={{ flex: 1 }} />
-                            {/* Impact Badge */}
-                            <span style={{ fontSize: 10, color: 'var(--text-muted)', marginRight: 8 }}>
-                                <Users size={10} style={{ marginRight: 2 }} />{flag.usersAffected.toLocaleString()} users · {flag.gymsAffected} gyms
-                            </span>
+                            {/* Critical Badge */}
+                            {flag.critical && (
+                                <span className="sa__badge sa__badge--red" style={{ fontSize: 9, marginRight: 8 }}>CRITICAL</span>
+                            )}
                             <label className="sa__toggle" onClick={e => { e.stopPropagation(); handleToggle(flag); }}>
                                 <input type="checkbox" checked={flag.enabled} readOnly />
                                 <span className="sa__toggle-track" />
@@ -190,15 +198,15 @@ const SAFeatureFlags: React.FC = () => {
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6, cursor: 'pointer' }} onClick={() => { setSelectedFlag(flag); setDetailTab('settings'); }}>
                             <div className="sa__flag-name">{flag.name}</div>
                         </div>
-                        <div className="sa__flag-desc">{flag.desc}</div>
+                        <div className="sa__flag-desc">{flag.description || flag.desc}</div>
                         <div className="sa__flag-footer">
                             <div className="sa__flag-progress" style={{ flex: 1 }}>
-                                <div className="sa__flag-rollout">Rollout: {flag.rollout}% · Strategy: {strategyLabel(flag.strategy)}</div>
+                                <div className="sa__flag-rollout">Rollout: {flag.rolloutPercentage}% · Strategy: {strategyLabel(flag.strategy || 'disabled')}</div>
                                 <div className="sa__progress">
-                                    <div className="sa__progress-fill" style={{ width: `${flag.rollout}%`, background: flag.enabled ? '#22c55e' : 'var(--bg-active)' }} />
+                                    <div className="sa__progress-fill" style={{ width: `${flag.rolloutPercentage}%`, background: flag.enabled ? '#22c55e' : 'var(--bg-active)' }} />
                                 </div>
                             </div>
-                            {flag.gyms.length > 0 && (
+                            {flag.gyms && flag.gyms.length > 0 && (
                                 <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
                                     {flag.gyms.map(g => <span key={g} className="sa__badge sa__badge--blue" style={{ fontSize: 9 }}>{g}</span>)}
                                 </div>
@@ -210,6 +218,19 @@ const SAFeatureFlags: React.FC = () => {
                     </motion.div>
                 ))}
             </div>
+            )}
+
+            {/* Empty State */}
+            {!loading && flags.length === 0 && !error && (
+                <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-muted)' }}>
+                    <ToggleRight size={48} style={{ marginBottom: 16, opacity: 0.3 }} />
+                    <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 8 }}>No feature flags found</div>
+                    <div style={{ fontSize: 13, marginBottom: 20 }}>Create your first feature flag to get started</div>
+                    <button className="sa__btn sa__btn--primary sa__btn--sm" onClick={() => setShowCreateModal(true)}>
+                        <Plus size={14} /> Create Flag
+                    </button>
+                </div>
+            )}
 
             {/* ═══════════ MODALS ═══════════ */}
             <AnimatePresence>
@@ -263,7 +284,8 @@ const SAFeatureFlags: React.FC = () => {
                                             <div className="sa__modal-title">{selectedFlag.name}</div>
                                             <div className="sa__modal-subtitle">
                                                 <span className={`sa__badge sa__badge--${selectedFlag.enabled ? 'green' : 'gray'}`}>{selectedFlag.enabled ? 'Enabled' : 'Disabled'}</span>{' '}
-                                                · {selectedFlag.category} · Created {selectedFlag.createdAt}
+                                                {selectedFlag.critical && <span className="sa__badge sa__badge--red">CRITICAL</span>}{' '}
+                                                · Updated {new Date(selectedFlag.updatedAt).toLocaleDateString()}
                                             </div>
                                         </div>
                                     </div>
@@ -283,20 +305,20 @@ const SAFeatureFlags: React.FC = () => {
                             <div className="sa__modal-body">
                                 {detailTab === 'settings' && (
                                     <>
-                                        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 20, lineHeight: 1.5 }}>{selectedFlag.desc}</div>
+                                        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 20, lineHeight: 1.5 }}>{selectedFlag.description || selectedFlag.desc}</div>
 
                                         <div className="sa__modal-stat-grid">
                                             <div className="sa__modal-stat">
-                                                <div className="sa__modal-stat-label"><Users size={10} />Users Affected</div>
-                                                <div className="sa__modal-stat-value">{selectedFlag.usersAffected.toLocaleString()}</div>
-                                            </div>
-                                            <div className="sa__modal-stat">
-                                                <div className="sa__modal-stat-label"><Building2 size={10} />Gyms Affected</div>
-                                                <div className="sa__modal-stat-value">{selectedFlag.gymsAffected}</div>
-                                            </div>
-                                            <div className="sa__modal-stat">
                                                 <div className="sa__modal-stat-label"><Zap size={10} />Rollout</div>
-                                                <div className="sa__modal-stat-value">{selectedFlag.rollout}%</div>
+                                                <div className="sa__modal-stat-value">{selectedFlag.rolloutPercentage}%</div>
+                                            </div>
+                                            <div className="sa__modal-stat">
+                                                <div className="sa__modal-stat-label"><Shield size={10} />Critical</div>
+                                                <div className="sa__modal-stat-value">{selectedFlag.critical ? 'Yes' : 'No'}</div>
+                                            </div>
+                                            <div className="sa__modal-stat">
+                                                <div className="sa__modal-stat-label"><Clock size={10} />Updated</div>
+                                                <div className="sa__modal-stat-value">{new Date(selectedFlag.updatedAt).toLocaleDateString()}</div>
                                             </div>
                                         </div>
 
@@ -305,11 +327,11 @@ const SAFeatureFlags: React.FC = () => {
                                             <div className="sa__modal-section-title">Rollout Percentage</div>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                                                 <input
-                                                    type="range" min={0} max={100} value={selectedFlag.rollout}
+                                                    type="range" min={0} max={100} value={selectedFlag.rolloutPercentage}
                                                     onChange={() => { }}
                                                     style={{ flex: 1, accentColor: '#3b82f6' }}
                                                 />
-                                                <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', minWidth: 40, textAlign: 'right' }}>{selectedFlag.rollout}%</span>
+                                                <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', minWidth: 40, textAlign: 'right' }}>{selectedFlag.rolloutPercentage}%</span>
                                             </div>
                                         </div>
 
@@ -356,16 +378,23 @@ const SAFeatureFlags: React.FC = () => {
                                 {detailTab === 'history' && (
                                     <>
                                         <div className="sa__modal-section-title">Change History</div>
-                                        {selectedFlag.changelog.map((entry, i) => (
-                                            <div key={i} style={{ display: 'flex', gap: 12, padding: '12px 14px', background: i % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent', borderRadius: 10, marginBottom: 4 }}>
-                                                <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#3b82f6', marginTop: 5, flexShrink: 0 }} />
-                                                <div style={{ flex: 1 }}>
-                                                    <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{entry.action}</div>
-                                                    <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>by {entry.by}</div>
+                                        {selectedFlag.changelog && selectedFlag.changelog.length > 0 ? (
+                                            selectedFlag.changelog.map((entry, i) => (
+                                                <div key={i} style={{ display: 'flex', gap: 12, padding: '12px 14px', background: i % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent', borderRadius: 10, marginBottom: 4 }}>
+                                                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#3b82f6', marginTop: 5, flexShrink: 0 }} />
+                                                    <div style={{ flex: 1 }}>
+                                                        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{entry.action}</div>
+                                                        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>by {entry.by}</div>
+                                                    </div>
+                                                    <span style={{ fontSize: 10, color: 'var(--text-muted)', whiteSpace: 'nowrap', marginTop: 2 }}>{entry.date}</span>
                                                 </div>
-                                                <span style={{ fontSize: 10, color: 'var(--text-muted)', whiteSpace: 'nowrap', marginTop: 2 }}>{entry.date}</span>
+                                            ))
+                                        ) : (
+                                            <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)' }}>
+                                                <History size={32} style={{ marginBottom: 12, opacity: 0.3 }} />
+                                                <div style={{ fontSize: 13 }}>No change history available</div>
                                             </div>
-                                        ))}
+                                        )}
                                     </>
                                 )}
                             </div>
@@ -457,13 +486,13 @@ const SAFeatureFlags: React.FC = () => {
                                     </div>
                                 </div>
                                 <div className="sa__stat-row"><span className="sa__stat-label">Currently Enabled</span><span className="sa__stat-value">{showDeleteConfirm.enabled ? 'Yes' : 'No'}</span></div>
-                                <div className="sa__stat-row"><span className="sa__stat-label">Users Depending</span><span className="sa__stat-value">{showDeleteConfirm.usersAffected.toLocaleString()}</span></div>
-                                <div className="sa__stat-row"><span className="sa__stat-label">Gyms Depending</span><span className="sa__stat-value">{showDeleteConfirm.gymsAffected}</span></div>
+                                <div className="sa__stat-row"><span className="sa__stat-label">Rollout Percentage</span><span className="sa__stat-value">{showDeleteConfirm.rolloutPercentage}%</span></div>
+                                <div className="sa__stat-row"><span className="sa__stat-label">Critical Flag</span><span className="sa__stat-value">{showDeleteConfirm.critical ? 'Yes' : 'No'}</span></div>
                             </div>
                             <div className="sa__modal-footer">
                                 <button className="sa__btn sa__btn--ghost sa__btn--sm" onClick={() => setShowDeleteConfirm(null)}>Cancel</button>
                                 <button className="sa__btn sa__btn--danger sa__btn--sm" onClick={() => {
-                                    setFlags(prev => prev.filter(f => f.id !== showDeleteConfirm.id));
+                                    setFlags(prev => prev.filter(f => f.key !== showDeleteConfirm.key));
                                     setShowDeleteConfirm(null);
                                 }}><Trash2 size={14} /> Delete Forever</button>
                             </div>

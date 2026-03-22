@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     LayoutDashboard, TrendingUp, TrendingDown, Users, Building2,
@@ -10,115 +10,133 @@ import {
     AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip,
     ResponsiveContainer, LineChart, Line
 } from 'recharts';
+import { superAdminApi, type SuperAdminAlert, type SuperAdminDashboardData, type SuperAdminServiceStatus, type SuperAdminTopGym, type SuperAdminTrendPoint } from '../../services/superAdminApi';
 
-const KPI_DATA = [
-    {
-        label: 'Total Users', value: '1,958', change: +4.2, icon: Users, color: 'blue',
-        breakdown: [
-            { label: 'Active', value: '1,640', pct: 83.8 },
-            { label: 'Inactive (30d+)', value: '218', pct: 11.1 },
-            { label: 'Suspended', value: '65', pct: 3.3 },
-            { label: 'New (7d)', value: '35', pct: 1.8 },
-        ],
-    },
-    {
-        label: 'Total Gyms', value: '247', change: +2.5, icon: Building2, color: 'emerald',
-        breakdown: [
-            { label: 'Active', value: '231', pct: 93.5 },
-            { label: 'Trial', value: '8', pct: 3.2 },
-            { label: 'Suspended', value: '5', pct: 2.0 },
-            { label: 'Churned', value: '3', pct: 1.2 },
-        ],
-    },
-    {
-        label: 'MRR', value: '₹24.5L', change: +6.8, icon: DollarSign, color: 'violet',
-        breakdown: [
-            { label: 'Enterprise', value: '₹14.2L', pct: 58.0 },
-            { label: 'Professional', value: '₹6.8L', pct: 27.8 },
-            { label: 'Basic', value: '₹2.9L', pct: 11.8 },
-            { label: 'Trial', value: '₹0.6L', pct: 2.4 },
-        ],
-    },
-    {
-        label: 'System Health', value: '99.8%', change: +0.2, icon: Activity, color: 'cyan',
-        breakdown: [
-            { label: 'API Uptime', value: '99.96%', pct: 99.96 },
-            { label: 'DB Uptime', value: '99.99%', pct: 99.99 },
-            { label: 'CDN Uptime', value: '99.95%', pct: 99.95 },
-            { label: 'Avg Response', value: '48ms', pct: 0 },
-        ],
-    },
+type KPI = {
+    label: string;
+    value: string;
+    change: number;
+    icon: typeof Users;
+    color: string;
+    breakdown: { label: string; value: string; pct: number }[];
+};
+
+type Alert = SuperAdminAlert;
+
+const FALLBACK_AUDIT_LOG = [
+    { action: 'Super Admin dashboard viewed', detail: 'Dashboard data fetched from backend', user: 'Super Admin', time: 'just now', type: 'system' },
 ];
-
-const ALERTS = [
-    { id: 1, title: 'High CPU on API Server', severity: 'critical', time: '5 min ago', description: 'API server cpu-3 is at 92% utilization. Auto-scaling triggered.', source: 'Infrastructure', affectedService: 'API Gateway', status: 'active', metric: 'CPU: 92%', action: 'Auto-scaling initiated — 2 additional instances being provisioned.' },
-    { id: 2, title: 'Payment Gateway Latency', severity: 'warning', time: '18 min ago', description: 'Payment processing latency exceeded 2s threshold (currently 2.4s).', source: 'Payments', affectedService: 'Razorpay Gateway', status: 'investigating', metric: 'Latency: 2.4s', action: 'Engineering team notified. Monitoring for auto-recovery.' },
-    { id: 3, title: 'Brute Force Attempt Blocked', severity: 'warning', time: '32 min ago', description: '213 failed login attempts from IP 45.33.104.88 — auto-blocked.', source: 'Security', affectedService: 'Auth Service', status: 'resolved', metric: '213 attempts', action: 'IP automatically blocked. No successful breaches.' },
-    { id: 4, title: 'Database Backup Completed', severity: 'info', time: '1 hr ago', description: 'Daily backup completed successfully. Size: 1.8 GB, Duration: 4m 32s.', source: 'Database', affectedService: 'PostgreSQL', status: 'resolved', metric: '1.8 GB', action: 'Backup verified and stored in S3.' },
-    { id: 5, title: 'New Gym Onboarded', severity: 'info', time: '2 hrs ago', description: 'PowerHouse Gym (Delhi) completed onboarding — Enterprise plan.', source: 'Platform', affectedService: 'Onboarding', status: 'resolved', metric: 'Enterprise', action: 'Welcome email sent. Account manager assigned.' },
-];
-
-const RESPONSE_TREND = [
-    { t: '12AM', avg: 42, p95: 120 }, { t: '3AM', avg: 35, p95: 85 },
-    { t: '6AM', avg: 38, p95: 95 }, { t: '9AM', avg: 52, p95: 145 },
-    { t: '12PM', avg: 68, p95: 180 }, { t: '3PM', avg: 75, p95: 195 },
-    { t: '6PM', avg: 58, p95: 160 }, { t: '9PM', avg: 48, p95: 130 },
-    { t: 'Now', avg: 45, p95: 118 },
-];
-
-const SERVICES = [
-    { name: 'API Gateway', status: 'operational', uptime: 99.96, latency: '45ms' },
-    { name: 'Auth Service', status: 'operational', uptime: 99.99, latency: '28ms' },
-    { name: 'Payment Service', status: 'degraded', uptime: 99.85, latency: '2.4s' },
-    { name: 'Database (Primary)', status: 'operational', uptime: 99.99, latency: '12ms' },
-    { name: 'Database (Replica)', status: 'operational', uptime: 99.98, latency: '15ms' },
-    { name: 'CDN / Static', status: 'operational', uptime: 99.95, latency: '8ms' },
-    { name: 'Email Service', status: 'operational', uptime: 99.90, latency: '350ms' },
-    { name: 'Push Notifications', status: 'operational', uptime: 99.88, latency: '180ms' },
-];
-
-const AUDIT_LOG = [
-    { action: 'Feature flag toggled', detail: 'dark_mode_v2 enabled globally', user: 'Super Admin', time: '12 min ago', type: 'config' },
-    { action: 'IP blocked', detail: '45.33.104.88 — Brute force', user: 'System', time: '32 min ago', type: 'security' },
-    { action: 'Gym suspended', detail: 'IronCore Fitness — Payment overdue', user: 'Super Admin', time: '1 hr ago', type: 'action' },
-    { action: 'Backup completed', detail: 'titan_prod — 1.8 GB', user: 'System', time: '1 hr ago', type: 'system' },
-    { action: 'New gym added', detail: 'PowerHouse Gym — Enterprise', user: 'System', time: '2 hrs ago', type: 'action' },
-    { action: 'Security rule updated', detail: 'Rate limit changed to 5/15min', user: 'Super Admin', time: '4 hrs ago', type: 'config' },
-];
-
-const TOP_GYMS = [
-    { name: 'FitZone Elite', city: 'Mumbai', members: 342, revenue: 12400, growth: +8.3 },
-    { name: 'FlexFit Studio', city: 'Bangalore', members: 287, revenue: 9800, growth: +6.1 },
-    { name: 'Muscle Factory', city: 'Hyderabad', members: 198, revenue: 7200, growth: +4.5 },
-    { name: 'PowerHouse Gym', city: 'Delhi', members: 265, revenue: 8900, growth: +9.2 },
-    { name: 'Zen Fitness', city: 'Chennai', members: 178, revenue: 6400, growth: +3.8 },
-];
-
-type Alert = typeof ALERTS[0];
-type KPI = typeof KPI_DATA[0];
 
 const SADashboard: React.FC = () => {
+    const [dashboardData, setDashboardData] = useState<SuperAdminDashboardData | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [selectedKPI, setSelectedKPI] = useState<KPI | null>(null);
-    const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
+    const [selectedAlert, setSelectedAlert] = useState<SuperAdminAlert | null>(null);
     const [showServicesModal, setShowServicesModal] = useState(false);
     const [showAuditModal, setShowAuditModal] = useState(false);
+
+    const loadDashboard = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const data = await superAdminApi.getDashboard();
+            setDashboardData(data);
+        } catch (err) {
+            setError('Failed to load Super Admin dashboard data');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        loadDashboard();
+    }, []);
+
+    const kpiData: KPI[] = dashboardData ? [
+        {
+            label: 'Total Users',
+            value: String(dashboardData.kpis.totalUsers.value),
+            change: dashboardData.kpis.totalUsers.change,
+            icon: Users,
+            color: 'blue',
+            breakdown: [
+                { label: 'Total Users', value: String(dashboardData.kpis.totalUsers.value), pct: 100 },
+                { label: 'Active Check-ins', value: String(dashboardData.summary.activeCheckIns), pct: 0 },
+                { label: 'Unread Alerts', value: String(dashboardData.summary.unreadAlerts), pct: 0 },
+            ],
+        },
+        {
+            label: 'Total Gyms',
+            value: String(dashboardData.kpis.totalGyms.value),
+            change: dashboardData.kpis.totalGyms.change,
+            icon: Building2,
+            color: 'emerald',
+            breakdown: [
+                { label: 'Total Gyms', value: String(dashboardData.kpis.totalGyms.value), pct: 100 },
+                { label: 'Critical Security Events', value: String(dashboardData.summary.criticalSecurityEvents), pct: 0 },
+                { label: 'Scheduled Sessions', value: String(dashboardData.summary.scheduledSessions), pct: 0 },
+            ],
+        },
+        {
+            label: 'MRR',
+            value: `₹${Number(dashboardData.kpis.mrr.value).toLocaleString('en-IN')}`,
+            change: dashboardData.kpis.mrr.change,
+            icon: DollarSign,
+            color: 'violet',
+            breakdown: [
+                { label: 'Current MRR', value: `₹${Number(dashboardData.kpis.mrr.value).toLocaleString('en-IN')}`, pct: 100 },
+            ],
+        },
+        {
+            label: 'System Health',
+            value: `${Number(dashboardData.kpis.systemHealth.value).toFixed(2)}%`,
+            change: dashboardData.kpis.systemHealth.change,
+            icon: Activity,
+            color: 'cyan',
+            breakdown: dashboardData.serviceStatus.map((s) => ({
+                label: s.name,
+                value: `${s.uptime}%`,
+                pct: s.uptime,
+            })),
+        },
+    ] : [];
+
+    const alerts = dashboardData?.alerts ?? [];
+    const topGyms = dashboardData?.topGyms ?? [];
+    const responseTrend = dashboardData?.responseTrend ?? [];
+    const services = dashboardData?.serviceStatus ?? [];
+    const auditLog = dashboardData?.activityStream?.map((item) => ({
+        action: item.type,
+        detail: item.message,
+        user: item.severity === 'critical' ? 'System' : 'Super Admin',
+        time: item.time,
+        type: item.severity === 'critical' ? 'security' : 'system',
+    })) ?? FALLBACK_AUDIT_LOG;
 
     return (
         <div className="sa">
             <header className="sa__header">
                 <div className="sa__header-left">
                     <h1>Super Admin Dashboard</h1>
-                    <p>Platform overview & system health</p>
+                    <p>{loading ? 'Loading dashboard...' : 'Platform overview & system health'}</p>
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
+                    <button className="sa__btn sa__btn--ghost sa__btn--sm" onClick={loadDashboard}><RefreshCw size={14} /> Refresh</button>
                     <button className="sa__btn sa__btn--ghost sa__btn--sm" onClick={() => setShowServicesModal(true)}><Server size={14} /> Status</button>
                     <button className="sa__btn sa__btn--ghost sa__btn--sm" onClick={() => setShowAuditModal(true)}><Eye size={14} /> Audit Log</button>
                 </div>
             </header>
 
+            {error && (
+                <div className="sa__card" style={{ marginBottom: 16, borderColor: 'rgba(239,68,68,0.4)' }}>
+                    <div style={{ color: '#ef4444', fontSize: 12 }}>{error}</div>
+                </div>
+            )}
+
             {/* Clickable KPIs */}
             <div className="sa__kpi-row">
-                {KPI_DATA.map((kpi, i) => (
+                {kpiData.map((kpi, i) => (
                     <motion.div
                         key={kpi.label}
                         className={`sa__kpi sa__kpi--${kpi.color}`}
@@ -131,8 +149,8 @@ const SADashboard: React.FC = () => {
                             <div className="sa__kpi-label">{kpi.label}</div>
                             <div className="sa__kpi-value">{kpi.value}</div>
                             <span style={{ fontSize: 10, color: kpi.change >= 0 ? '#22c55e' : '#ef4444', display: 'flex', alignItems: 'center', gap: 2 }}>
-                                {kpi.change >= 0 ? <TrendingUp size={9} /> : <TrendingDown size={9} />}
-                                {kpi.change > 0 ? '+' : ''}{kpi.change}%
+                                    {kpi.change >= 0 ? <TrendingUp size={9} /> : <TrendingDown size={9} />}
+                                {kpi.change > 0 ? '+' : ''}{kpi.change.toFixed(2)}%
                             </span>
                         </div>
                     </motion.div>
@@ -181,7 +199,7 @@ const SADashboard: React.FC = () => {
                     </div>
                     <div style={{ height: 180 }}>
                         <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={RESPONSE_TREND} margin={{ top: 8, right: 8, left: -10, bottom: 0 }}>
+                            <AreaChart data={responseTrend} margin={{ top: 8, right: 8, left: -10, bottom: 0 }}>
                                 <defs>
                                     <linearGradient id="avgG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#22c55e" stopOpacity={0.2} /><stop offset="100%" stopColor="#22c55e" stopOpacity={0} /></linearGradient>
                                 </defs>
@@ -207,15 +225,15 @@ const SADashboard: React.FC = () => {
                     <table className="sa__table">
                         <thead><tr><th>Gym</th><th>Members</th><th>Revenue</th><th>Growth</th></tr></thead>
                         <tbody>
-                            {TOP_GYMS.map(g => (
+                            {topGyms.map(g => (
                                 <tr key={g.name}>
                                     <td>
                                         <div style={{ fontWeight: 600, fontSize: 12 }}>{g.name}</div>
                                         <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{g.city}</div>
                                     </td>
                                     <td style={{ fontSize: 11 }}>{g.members}</td>
-                                    <td style={{ fontSize: 11, fontWeight: 600 }}>₹{(g.revenue / 1000).toFixed(1)}k</td>
-                                    <td style={{ fontSize: 11, color: '#22c55e' }}>+{g.growth}%</td>
+                                    <td style={{ fontSize: 11, fontWeight: 600 }}>₹{(Number(g.revenue) / 1000).toFixed(1)}k</td>
+                                    <td style={{ fontSize: 11, color: '#22c55e' }}>—</td>
                                 </tr>
                             ))}
                         </tbody>
@@ -233,7 +251,7 @@ const SADashboard: React.FC = () => {
                     </div>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 2, padding: '0 10px 10px' }}>
-                    {ALERTS.map(alert => (
+                    {alerts.map(alert => (
                         <div key={alert.id} onClick={() => setSelectedAlert(alert)} style={{
                             display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 8,
                             cursor: 'pointer', transition: 'background 0.15s',
@@ -357,8 +375,8 @@ const SADashboard: React.FC = () => {
                                 <button className="sa__modal-close" onClick={() => setShowServicesModal(false)}><X size={16} /></button>
                             </div>
                             <div className="sa__modal-body">
-                                {SERVICES.map((s, i) => (
-                                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0', borderBottom: i < SERVICES.length - 1 ? '1px solid var(--border-subtle)' : 'none' }}>
+                            {services.map((s, i) => (
+                                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0', borderBottom: i < services.length - 1 ? '1px solid var(--border-subtle)' : 'none' }}>
                                         <div style={{ width: 10, height: 10, borderRadius: '50%', background: s.status === 'operational' ? '#22c55e' : s.status === 'degraded' ? '#f59e0b' : '#ef4444' }} />
                                         <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{s.name}</span>
                                         <span style={{ fontSize: 11, fontWeight: 500, color: s.status === 'operational' ? '#22c55e' : '#f59e0b', minWidth: 80 }}>{s.status}</span>
@@ -384,8 +402,8 @@ const SADashboard: React.FC = () => {
                                 <button className="sa__modal-close" onClick={() => setShowAuditModal(false)}><X size={16} /></button>
                             </div>
                             <div className="sa__modal-body">
-                                {AUDIT_LOG.map((log, i) => (
-                                    <div key={i} style={{ display: 'flex', gap: 12, padding: '12px 0', borderBottom: i < AUDIT_LOG.length - 1 ? '1px solid var(--border-subtle)' : 'none' }}>
+                                {auditLog.map((log, i) => (
+                                    <div key={i} style={{ display: 'flex', gap: 12, padding: '12px 0', borderBottom: i < auditLog.length - 1 ? '1px solid var(--border-subtle)' : 'none' }}>
                                         <div style={{ width: 32, height: 32, borderRadius: 8, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: log.type === 'security' ? 'rgba(239,68,68,0.08)' : log.type === 'config' ? 'rgba(59,130,246,0.08)' : log.type === 'system' ? 'rgba(34,197,94,0.08)' : 'rgba(139,92,246,0.08)' }}>
                                             {log.type === 'security' ? <Shield size={14} style={{ color: '#ef4444' }} /> :
                                                 log.type === 'config' ? <Zap size={14} style={{ color: '#3b82f6' }} /> :
