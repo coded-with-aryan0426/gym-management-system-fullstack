@@ -45,7 +45,7 @@ public class AnalyticsService {
                                                 && s.getSessionDate().isBefore(endDate))
                                 .collect(Collectors.toList());
 
-                List<Transaction> transactions = transactionRepository.findByDateRange(startDate, endDate);
+                List<Transaction> transactions = transactionRepository.findByDateRange(startDate, endDate, null);
 
                 BigDecimal totalPTRevenue = transactions.stream()
                                 .filter(t -> "PERSONAL_TRAINING".equals(t.getCategory())

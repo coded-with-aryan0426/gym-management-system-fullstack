@@ -779,3 +779,677 @@
 .att-tooltip__val strong {
   margin-left: 4px;
 }
+
+/* ============================================================================
+   NEW FEATURES - Modals, Pagination, Sorting, Skeleton Loading
+   ============================================================================ */
+
+/* ─── Skeleton Loading ─────────────────────────────────────────────────────── */
+.att-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-tertiary) 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    var(--bg-tertiary) 100%
+  );
+  background-size: 200% 100%;
+  animation: att-skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes att-skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.att-skeleton__line {
+  height: 16px;
+  border-radius: 4px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  background-size: 200% 100%;
+  animation: att-skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
+.att-skeleton__line--short {
+  width: 40%;
+  height: 12px;
+  margin-bottom: 12px;
+}
+
+.att-skeleton__line--large {
+  width: 60%;
+  height: 32px;
+  margin-bottom: 16px;
+}
+
+.att-skeleton__line--medium {
+  width: 50%;
+  height: 12px;
+}
+
+.att-skeleton-row td {
+  padding: 16px 12px;
+}
+
+/* ─── Modal Overlay ────────────────────────────────────────────────────────── */
+.att-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.att-modal {
+  width: 100%;
+  max-width: 520px;
+  max-height: 80vh;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.att-modal--detail {
+  max-width: 420px;
+}
+
+.att-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.att-modal__header-content {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.att-modal__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(220, 38, 38, 0.15), rgba(220, 38, 38, 0.05));
+  color: var(--accent-crimson);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(220, 38, 38, 0.1);
+}
+
+.att-modal__title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.att-modal__subtitle {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0;
+  margin-top: 2px;
+}
+
+.att-modal__close {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.att-modal__close:hover {
+  background: rgba(220, 38, 38, 0.1);
+  color: var(--accent-crimson);
+  border-color: rgba(220, 38, 38, 0.2);
+}
+
+.att-modal__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px;
+}
+
+/* ─── Check-In Modal Search ────────────────────────────────────────────────── */
+.att-modal__search {
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.att-modal__search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-tertiary);
+}
+
+.att-modal__search-input {
+  width: 100%;
+  height: 48px;
+  padding: 0 44px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  color: var(--text-primary);
+  font-size: 15px;
+  transition: all 0.2s ease;
+}
+
+.att-modal__search-input:focus {
+  outline: none;
+  border-color: var(--accent-crimson);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+.att-modal__search-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.att-modal__search-spinner {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--accent-crimson);
+  animation: att-spin 1s linear infinite;
+}
+
+/* ─── Modal Results ────────────────────────────────────────────────────────── */
+.att-modal__results {
+  min-height: 200px;
+  max-height: 350px;
+  overflow-y: auto;
+}
+
+.att-modal__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px 20px;
+  color: var(--text-tertiary);
+  text-align: center;
+}
+
+.att-modal__empty p {
+  font-size: 14px;
+  margin: 0;
+}
+
+.att-modal__member-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.att-modal__member-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.att-modal__member-item:hover {
+  border-color: rgba(220, 38, 38, 0.3);
+  background: rgba(220, 38, 38, 0.03);
+}
+
+.att-modal__member-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.att-modal__member-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(220, 38, 38, 0.15), rgba(220, 38, 38, 0.05));
+  color: var(--accent-crimson);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.att-modal__member-avatar--large {
+  width: 52px;
+  height: 52px;
+  font-size: 18px;
+}
+
+.att-modal__member-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.att-modal__member-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.att-modal__member-email {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.att-modal__checkin-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: linear-gradient(135deg, var(--accent-crimson), #dc2626);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.att-modal__checkin-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+}
+
+.att-modal__checkin-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ─── Member Detail Modal ──────────────────────────────────────────────────── */
+.att-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.att-detail-item {
+  padding: 16px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+}
+
+.att-detail-item--full {
+  grid-column: 1 / -1;
+}
+
+.att-detail-item__label {
+  display: block;
+  font-size: 12px;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.att-detail-item__value {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.att-detail-item__value--large {
+  font-size: 24px;
+}
+
+/* ─── Sortable Table Headers ───────────────────────────────────────────────── */
+.att-table__sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease;
+}
+
+.att-table__sortable:hover {
+  color: var(--accent-crimson);
+}
+
+.att-table__sortable span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.att-sort-icon--inactive {
+  opacity: 0.3;
+}
+
+.att-table__row {
+  transition: background 0.2s ease;
+}
+
+.att-table__row:hover {
+  background: rgba(220, 38, 38, 0.02);
+}
+
+/* ─── Table Action Buttons ─────────────────────────────────────────────────── */
+.att-table__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.att-table__action-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.att-table__action-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+.att-table__action-btn--checkout {
+  background: rgba(220, 38, 38, 0.1);
+  border-color: rgba(220, 38, 38, 0.2);
+  color: var(--accent-crimson);
+}
+
+.att-table__action-btn--checkout:hover {
+  background: rgba(220, 38, 38, 0.2);
+  border-color: rgba(220, 38, 38, 0.3);
+}
+
+/* ─── Pagination ───────────────────────────────────────────────────────────── */
+.att-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.att-pagination__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.att-pagination__btn:hover:not(:disabled) {
+  background: rgba(220, 38, 38, 0.1);
+  color: var(--accent-crimson);
+  border-color: rgba(220, 38, 38, 0.2);
+}
+
+.att-pagination__btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.att-pagination__pages {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.att-pagination__page {
+  min-width: 36px;
+  height: 36px;
+  padding: 0 8px;
+  border-radius: 10px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.att-pagination__page:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+}
+
+.att-pagination__page.active {
+  background: linear-gradient(135deg, var(--accent-crimson), #dc2626);
+  color: white;
+  border-color: var(--accent-crimson);
+}
+
+/* ─── Page Size Selector ───────────────────────────────────────────────────── */
+.att-page-size {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.att-page-size__label {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.att-page-size__select {
+  height: 36px;
+  padding: 0 32px 0 12px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-size: 13px;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236B7280' d='M2.5 4.5L6 8 9.5 4.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+
+.att-page-size__select:focus {
+  outline: none;
+  border-color: var(--accent-crimson);
+}
+
+/* ─── Auto Refresh Badge ───────────────────────────────────────────────────── */
+.att-auto-refresh-badge {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 12px;
+  padding: 4px 10px;
+  background: rgba(16, 185, 129, 0.1);
+  color: #10B981;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  animation: att-fade 1.5s infinite;
+}
+
+/* ─── Primary Action Button ────────────────────────────────────────────────── */
+.att-action-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.att-action-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+.att-action-btn--primary {
+  background: linear-gradient(135deg, var(--accent-crimson), #dc2626);
+  color: white;
+  border-color: var(--accent-crimson);
+}
+
+.att-action-btn--primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+}
+
+.att-action-btn--active {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: #10B981;
+}
+
+.att-icon-spin {
+  animation: att-spin 1s linear infinite;
+}
+
+/* ─── Empty State Action ───────────────────────────────────────────────────── */
+.att-empty-state__action {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, var(--accent-crimson), #dc2626);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.att-empty-state__action:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+}
+
+/* ─── Responsive Adjustments for New Features ──────────────────────────────── */
+@media (max-width: 768px) {
+  .att-modal {
+    max-height: 90vh;
+    margin: 10px;
+  }
+
+  .att-pagination {
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 16px;
+  }
+
+  .att-pagination__pages {
+    width: 100%;
+    justify-content: center;
+    order: 2;
+    margin-top: 8px;
+  }
+
+  .att-page-size {
+    display: none;
+  }
+
+  .att-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .att-log-controls {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .att-table__actions {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .att-table__action-btn {
+    width: 100%;
+    height: 28px;
+  }
+}
+
+/* ─── Accessibility Focus States ───────────────────────────────────────────── */
+.att-modal__close:focus-visible,
+.att-modal__search-input:focus-visible,
+.att-modal__checkin-btn:focus-visible,
+.att-table__sortable:focus-visible,
+.att-table__action-btn:focus-visible,
+.att-pagination__btn:focus-visible,
+.att-pagination__page:focus-visible,
+.att-page-size__select:focus-visible,
+.att-action-btn:focus-visible,
+.att-empty-state__action:focus-visible {
+  outline: 2px solid var(--accent-crimson);
+  outline-offset: 2px;
+}
+
+.att-role-tab:focus-visible,
+.att-period-tab:focus-visible,
+.att-filter-chip:focus-visible {
+  outline: 2px solid var(--accent-crimson);
+  outline-offset: 2px;
+}

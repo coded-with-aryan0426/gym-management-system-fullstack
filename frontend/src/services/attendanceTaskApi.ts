@@ -62,6 +62,37 @@ export interface AttendanceStats {
   peakCapacity: number;
 }
 
+export interface CheckInRecord {
+  checkInId: number;
+  userId: number;
+  checkInTime: string;
+  checkOutTime: string | null;
+  status: string;
+}
+
+export interface MemberSearchResult {
+  userId: number;
+  fullName: string;
+  email: string;
+  phone?: string;
+  role: string;
+  avatarUrl?: string;
+  membershipStatus?: string;
+}
+
+// Internal type for API response mapping
+interface User {
+  userId?: number;
+  id?: number;
+  fullName?: string;
+  name?: string;
+  email: string;
+  phone?: string;
+  role: string;
+  avatarUrl?: string;
+  membershipStatus?: string;
+}
+
 export interface GymTask {
   taskId: number;
   title: string;
@@ -118,6 +149,53 @@ export const attendanceApi = {
 
   async seedAttendance(): Promise<{ recordsSeeded: number; message: string }> {
     const r = await client.post<{ recordsSeeded: number; message: string }>('/attendance/seed');
+    return r.data;
+  },
+
+  // Manual check-in/check-out operations
+  async checkIn(userId: number): Promise<CheckInRecord> {
+    const r = await client.post<CheckInRecord>(`/dashboard/check-in/${userId}`);
+    return r.data;
+  },
+
+  async checkOut(checkInId: number): Promise<CheckInRecord> {
+    const r = await client.post<CheckInRecord>(`/dashboard/check-out/${checkInId}`);
+    return r.data;
+  },
+
+  // Search members for check-in
+  async searchMembers(query: string, role?: string): Promise<MemberSearchResult[]> {
+    // Try CUSTOMER role first (common alias for MEMBER)
+    const searchRole = role || 'CUSTOMER';
+    const r = await client.get<User[]>('/users/search', { 
+      params: { q: query, role: searchRole } 
+    });
+    // Transform User to MemberSearchResult
+    return r.data.map(user => ({
+      userId: user.userId || user.id,
+      fullName: user.fullName || user.name || 'Unknown',
+      email: user.email,
+      phone: user.phone,
+      role: user.role,
+      avatarUrl: user.avatarUrl,
+      membershipStatus: user.membershipStatus
+    }));
+  },
+
+  // Get member attendance history
+  async getMemberAttendance(memberId: number): Promise<CheckInRecord[]> {
+    const r = await client.get<CheckInRecord[]>(`/members/${memberId}/attendance`);
+    return r.data;
+  },
+
+  // Export attendance data
+  async exportAttendance(from: string, to: string, role?: string, format: 'csv' | 'json' = 'csv'): Promise<Blob | TodayCheckIn[]> {
+    if (format === 'json') {
+      const r = await client.get<TodayCheckIn[]>('/attendance/today', { params: { role } });
+      return r.data;
+    }
+    // For CSV, we'll handle it client-side since backend might not support it
+    const r = await client.get<TodayCheckIn[]>('/attendance/today', { params: { role } });
     return r.data;
   },
 };

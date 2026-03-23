@@ -109,9 +109,6 @@ public class User {
     @Column(name = "google_id", unique = true)
     private String googleId;
 
-    @Column(name = "facebook_id", unique = true)
-    private String facebookId;
-
     @Column(name = "phone_number", unique = true)
     private String phoneNumberPersisted;
 
@@ -128,14 +125,6 @@ public class User {
 
     public void setGoogleId(String googleId) {
         this.googleId = googleId;
-    }
-
-    public String getFacebookId() {
-        return facebookId;
-    }
-
-    public void setFacebookId(String facebookId) {
-        this.facebookId = facebookId;
     }
 
     public String getPhoneNumberPersisted() {

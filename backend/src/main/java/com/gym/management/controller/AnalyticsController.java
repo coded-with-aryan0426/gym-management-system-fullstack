@@ -2,30 +2,53 @@ package com.gym.management.controller;
 
 import com.gym.management.dto.AnalyticsDTO.*;
 import com.gym.management.service.AnalyticsService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/analytics")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:5174", "http://localhost:5175"})
 public class AnalyticsController {
+
+    private static final Logger log = LoggerFactory.getLogger(AnalyticsController.class);
 
     @Autowired
     private AnalyticsService analyticsService;
 
     @GetMapping("/dashboard")
-    public ResponseEntity<FullAnalyticsDashboard> getFullDashboard(
+    @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
+    public ResponseEntity<?> getFullDashboard(
             @RequestParam(defaultValue = "30d") String period) {
-        return ResponseEntity.ok(analyticsService.getFullDashboard(period));
+        try {
+            FullAnalyticsDashboard dashboard = analyticsService.getFullDashboard(period);
+            return ResponseEntity.ok(dashboard);
+        } catch (Exception e) {
+            log.error("Failed to get full dashboard analytics for period: {}", period, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to retrieve dashboard analytics"));
+        }
     }
 
     @GetMapping("/pt-revenue")
-    public ResponseEntity<PTRevenueAnalytics> getPTRevenueAnalytics(
+    @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
+    public ResponseEntity<?> getPTRevenueAnalytics(
             @RequestParam(defaultValue = "30d") String period) {
-        return ResponseEntity.ok(analyticsService.getPTRevenueAnalytics(period));
+        try {
+            PTRevenueAnalytics analytics = analyticsService.getPTRevenueAnalytics(period);
+            return ResponseEntity.ok(analytics);
+        } catch (Exception e) {
+            log.error("Failed to get PT revenue analytics for period: {}", period, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to retrieve PT revenue analytics"));
+        }
     }
 
     @GetMapping("/staff-attendance")

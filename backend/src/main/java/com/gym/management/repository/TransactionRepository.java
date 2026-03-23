@@ -19,52 +19,59 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
         List<Transaction> findByCategoryOrderByDateTimeDesc(String category);
 
         // Find transactions within date range
-        @Query("SELECT t FROM Transaction t WHERE t.dateTime BETWEEN :startDate AND :endDate ORDER BY t.dateTime DESC")
+        @Query("SELECT t FROM Transaction t WHERE t.dateTime BETWEEN :startDate AND :endDate AND (:userId IS NULL OR t.userId = :userId) ORDER BY t.dateTime DESC")
         List<Transaction> findByDateRange(
                         @Param("startDate") LocalDateTime startDate,
-                        @Param("endDate") LocalDateTime endDate);
+                        @Param("endDate") LocalDateTime endDate,
+                        @Param("userId") Long userId);
 
         // Get sum of amount by Type and Status in date range
-        @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t WHERE t.type = :type AND t.status = :status AND t.dateTime BETWEEN :startDate AND :endDate")
+        @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t WHERE t.type = :type AND t.status = :status AND t.dateTime BETWEEN :startDate AND :endDate AND (:userId IS NULL OR t.userId = :userId)")
         BigDecimal sumAmountByTypeAndStatusAndDateRange(
                         @Param("type") String type,
                         @Param("status") String status,
                         @Param("startDate") LocalDateTime startDate,
-                        @Param("endDate") LocalDateTime endDate);
+                        @Param("endDate") LocalDateTime endDate,
+                        @Param("userId") Long userId);
 
         // Get sum of ALL expenses (any status) in date range
-        @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t WHERE t.type = :type AND t.dateTime BETWEEN :startDate AND :endDate")
+        @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t WHERE t.type = :type AND t.dateTime BETWEEN :startDate AND :endDate AND (:userId IS NULL OR t.userId = :userId)")
         BigDecimal sumAmountByTypeAndDateRange(
                         @Param("type") String type,
                         @Param("startDate") LocalDateTime startDate,
-                        @Param("endDate") LocalDateTime endDate);
+                        @Param("endDate") LocalDateTime endDate,
+                        @Param("userId") Long userId);
 
         // Get sum of amount by Status (e.g. Pending)
-        @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t WHERE t.status = :status AND t.dateTime BETWEEN :startDate AND :endDate")
+        @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t WHERE t.status = :status AND t.dateTime BETWEEN :startDate AND :endDate AND (:userId IS NULL OR t.userId = :userId)")
         BigDecimal sumAmountByStatusAndDateRange(
                         @Param("status") String status,
                         @Param("startDate") LocalDateTime startDate,
-                        @Param("endDate") LocalDateTime endDate);
+                        @Param("endDate") LocalDateTime endDate,
+                        @Param("userId") Long userId);
 
         // Get transactions pageable with filter
         @Query("SELECT t FROM Transaction t WHERE " +
                         "(:status IS NULL OR t.status = :status) AND " +
                         "(:category IS NULL OR t.category = :category) AND " +
+                        "(:userId IS NULL OR t.userId = :userId) AND " +
                         "(:search IS NULL OR LOWER(t.description) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(t.referenceNumber) LIKE LOWER(CONCAT('%', :search, '%')))")
         Page<Transaction> findAllWithFilters(
                         @Param("status") String status,
                         @Param("category") String category,
                         @Param("search") String search,
+                        @Param("userId") Long userId,
                         Pageable pageable);
 
         // Get revenue breakdown by category
         @Query("SELECT t.category as category, SUM(t.amount) as total FROM Transaction t " +
-                        "WHERE t.type = 'INCOME' AND t.status = 'Completed' AND t.dateTime BETWEEN :startDate AND :endDate "
-                        +
+                        "WHERE t.type = 'INCOME' AND t.status = 'Completed' AND t.dateTime BETWEEN :startDate AND :endDate " +
+                        "AND (:userId IS NULL OR t.userId = :userId) " +
                         "GROUP BY t.category")
         List<Object[]> getRevenueByCategory(
                         @Param("startDate") LocalDateTime startDate,
-                        @Param("endDate") LocalDateTime endDate);
+                        @Param("endDate") LocalDateTime endDate,
+                        @Param("userId") Long userId);
 
         // Get expense breakdown by category (all statuses - expenses are liabilities
         // regardless)
@@ -81,35 +88,38 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
         List<Transaction> findTop10ByOrderByDateTimeDesc();
 
         // Pending transactions
-        @Query("SELECT t FROM Transaction t WHERE t.status = 'Pending' AND t.dateTime BETWEEN :startDate AND :endDate ORDER BY t.amount DESC")
+        @Query("SELECT t FROM Transaction t WHERE t.status = 'Pending' AND t.dateTime BETWEEN :startDate AND :endDate AND (:userId IS NULL OR t.userId = :userId) ORDER BY t.amount DESC")
         List<Transaction> findPendingTransactions(
                         @Param("startDate") LocalDateTime startDate,
-                        @Param("endDate") LocalDateTime endDate);
+                        @Param("endDate") LocalDateTime endDate,
+                        @Param("userId") Long userId);
 
         // Count pending
-        @Query("SELECT COUNT(t) FROM Transaction t WHERE t.status = 'Pending' AND t.dateTime BETWEEN :startDate AND :endDate")
+        @Query("SELECT COUNT(t) FROM Transaction t WHERE t.status = 'Pending' AND t.dateTime BETWEEN :startDate AND :endDate AND (:userId IS NULL OR t.userId = :userId)")
         Long countPendingTransactions(
                         @Param("startDate") LocalDateTime startDate,
-                        @Param("endDate") LocalDateTime endDate);
+                        @Param("endDate") LocalDateTime endDate,
+                        @Param("userId") Long userId);
 
         // Category-wise transaction count
-        @Query("SELECT t.category, COUNT(t), SUM(t.amount) FROM Transaction t WHERE t.type = :type AND t.dateTime BETWEEN :startDate AND :endDate GROUP BY t.category ORDER BY SUM(t.amount) DESC")
+        @Query("SELECT t.category, COUNT(t), SUM(t.amount) FROM Transaction t WHERE t.type = :type AND t.dateTime BETWEEN :startDate AND :endDate AND (:userId IS NULL OR t.userId = :userId) GROUP BY t.category ORDER BY SUM(t.amount) DESC")
         List<Object[]> getCategoryStats(
                         @Param("type") String type,
                         @Param("startDate") LocalDateTime startDate,
-                        @Param("endDate") LocalDateTime endDate);
+                        @Param("endDate") LocalDateTime endDate,
+                        @Param("userId") Long userId);
 
         // Daily totals for trend — income = Completed only, expenses = all statuses
         // Using JPQL instead of native SQL for cross-database compatibility (no TRUNC)
         @Query("SELECT FUNCTION('DATE', t.dateTime) AS dt, t.type, SUM(t.amount) AS total " +
-                        "FROM Transaction t WHERE ((t.type = 'INCOME' AND t.status = 'Completed') OR t.type = 'EXPENSE') "
-                        +
-                        "AND t.dateTime BETWEEN :startDate AND :endDate " +
+                        "FROM Transaction t WHERE ((t.type = 'INCOME' AND t.status = 'Completed') OR t.type = 'EXPENSE') " +
+                        "AND t.dateTime BETWEEN :startDate AND :endDate AND (:userId IS NULL OR t.userId = :userId) " +
                         "GROUP BY FUNCTION('DATE', t.dateTime), t.type " +
                         "ORDER BY FUNCTION('DATE', t.dateTime)")
         List<Object[]> getDailyTotals(
                         @Param("startDate") LocalDateTime startDate,
-                        @Param("endDate") LocalDateTime endDate);
+                        @Param("endDate") LocalDateTime endDate,
+                        @Param("userId") Long userId);
 
         // LEGACY METHODS (Preserved to prevent compilation errors in legacy code)
         @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t WHERE t.type = 'INCOME' AND t.status = 'Completed' AND t.dateTime BETWEEN :startDate AND :endDate")

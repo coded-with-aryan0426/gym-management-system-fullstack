@@ -59,12 +59,20 @@ export default function AuthModal() {
     const modalRef = useRef<HTMLDivElement>(null);
 
     // Login State
-    const [loginStep, setLoginStep] = useState<'CREDENTIALS' | 'OTP'>('CREDENTIALS');
+    const [loginStep, setLoginStep] = useState<'CREDENTIALS' | 'OTP' | 'FORGOT_EMAIL' | 'FORGOT_OTP' | 'FORGOT_NEW_PASSWORD' | 'FORGOT_SUCCESS'>('CREDENTIALS');
     const [loginEmail, setLoginEmail] = useState("");
     const [loginPassword, setLoginPassword] = useState("");
     const [loginOtp, setLoginOtp] = useState("");
     const [showLoginPassword, setShowLoginPassword] = useState(false);
     const [verificationEmail, setVerificationEmail] = useState("");
+
+    // Forgot Password State
+    const [forgotEmail, setForgotEmail] = useState("");
+    const [forgotOtp, setForgotOtp] = useState("");
+    const [newPassword, setNewPassword] = useState("");
+    const [confirmNewPassword, setConfirmNewPassword] = useState("");
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
 
     // Signup State
     const [signupStep, setSignupStep] = useState<'DETAILS' | 'OTP'>('DETAILS');
@@ -103,6 +111,12 @@ export default function AuthModal() {
             setLoginEmail("");
             setLoginPassword("");
             setLoginOtp("");
+            setForgotEmail("");
+            setForgotOtp("");
+            setNewPassword("");
+            setConfirmNewPassword("");
+            setShowNewPassword(false);
+            setShowConfirmNewPassword(false);
             setSignupStep('DETAILS');
             setSignupData({ fullName: "", email: "", phone: "", password: "", confirmPassword: "", gymName: "" });
             setSignupOtp("");
@@ -294,6 +308,100 @@ export default function AuthModal() {
         }
     };
 
+    // FORGOT PASSWORD HANDLERS
+    const validateNewPassword = (password: string): string | null => {
+        if (password.length < 8) return 'Password must be at least 8 characters';
+        if (!/[A-Z]/.test(password)) return 'Password must contain at least one uppercase letter';
+        if (!/[a-z]/.test(password)) return 'Password must contain at least one lowercase letter';
+        if (!/[0-9]/.test(password)) return 'Password must contain at least one number';
+        return null;
+    };
+
+    const handleForgotPasswordRequest = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError("");
+
+        if (!forgotEmail || !isValidEmail(forgotEmail)) {
+            setError("Please enter a valid email address");
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+            await api.post('/auth/forgot-password/request', { email: forgotEmail });
+            setLoginStep('FORGOT_OTP');
+            setSuccessMessage("If an account exists with this email, you'll receive a verification code.");
+        } catch (err: any) {
+            // Don't reveal if email exists or not for security
+            setLoginStep('FORGOT_OTP');
+            setSuccessMessage("If an account exists with this email, you'll receive a verification code.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleForgotOtpVerify = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError("");
+
+        if (forgotOtp.length !== 6) {
+            setError("Please enter a valid 6-digit code");
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+            await api.post('/auth/forgot-password/verify', { email: forgotEmail, otp: forgotOtp });
+            setLoginStep('FORGOT_NEW_PASSWORD');
+            setSuccessMessage("");
+        } catch (err: any) {
+            setError(err.response?.data?.error || "Invalid or expired code. Please try again.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleForgotPasswordReset = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError("");
+
+        const passwordError = validateNewPassword(newPassword);
+        if (passwordError) {
+            setError(passwordError);
+            return;
+        }
+
+        if (newPassword !== confirmNewPassword) {
+            setError("Passwords do not match");
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+            await api.post('/auth/forgot-password/reset', {
+                email: forgotEmail,
+                otp: forgotOtp,
+                newPassword: newPassword
+            });
+            setLoginStep('FORGOT_SUCCESS');
+            setSuccessMessage("Password reset successful!");
+        } catch (err: any) {
+            setError(err.response?.data?.error || "Failed to reset password. Please try again.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleBackToLogin = () => {
+        setLoginStep('CREDENTIALS');
+        setForgotEmail("");
+        setForgotOtp("");
+        setNewPassword("");
+        setConfirmNewPassword("");
+        setError("");
+        setSuccessMessage("");
+    };
+
     // AUTH SUCCESS HANDLER
     const handleAuthSuccess = (data: any) => {
         if (data.isNewUser) {
@@ -316,7 +424,7 @@ export default function AuthModal() {
                 username: data.username,
                 email: data.email,
                 fullName: data.fullName,
-                role: data.role || 'CUSTOMER',
+                role: data.staffRole || data.primaryRole || data.role || 'CUSTOMER',
                 token: data.token,
                 activeGymId: data.activeGymId,
                 activeGymName: data.activeGymName
@@ -328,7 +436,7 @@ export default function AuthModal() {
             setShowGymSelector(true);
         } else {
             closeAuthModal();
-            const role = (data.role || '').toUpperCase();
+            const role = (data.staffRole || data.primaryRole || data.role || 'CUSTOMER').toUpperCase();
             if (role === 'OWNER' || role === 'ADMIN') {
                 navigate('/dashboard');
             } else if (role === 'TRAINER') {
@@ -499,7 +607,12 @@ export default function AuthModal() {
                                     lineHeight: 1.2,
                                 }}>
                                     {activeTab === 'login'
-                                        ? (loginStep === 'OTP' ? 'Verify Your Identity' : 'Welcome Back')
+                                        ? (loginStep === 'OTP' ? 'Verify Your Identity' 
+                                            : loginStep === 'FORGOT_EMAIL' ? 'Forgot Password'
+                                            : loginStep === 'FORGOT_OTP' ? 'Verify Your Email'
+                                            : loginStep === 'FORGOT_NEW_PASSWORD' ? 'Create New Password'
+                                            : loginStep === 'FORGOT_SUCCESS' ? 'Password Reset'
+                                            : 'Welcome Back')
                                         : (signupStep === 'OTP' ? 'Verify Your Email' : 'Start Your Journey')
                                     }
                                 </h2>
@@ -510,7 +623,12 @@ export default function AuthModal() {
                                     lineHeight: 1.4,
                                 }}>
                                     {activeTab === 'login'
-                                        ? (loginStep === 'OTP' ? 'Enter the 6-digit code sent to your email' : 'Sign in to manage your gym')
+                                        ? (loginStep === 'OTP' ? 'Enter the 6-digit code sent to your email'
+                                            : loginStep === 'FORGOT_EMAIL' ? 'Enter your email to receive a reset code'
+                                            : loginStep === 'FORGOT_OTP' ? 'Enter the 6-digit code sent to your email'
+                                            : loginStep === 'FORGOT_NEW_PASSWORD' ? 'Choose a strong password for your account'
+                                            : loginStep === 'FORGOT_SUCCESS' ? 'Your password has been successfully reset'
+                                            : 'Sign in to manage your gym')
                                         : (signupStep === 'OTP' ? 'Enter the 6-digit code sent to your email' : 'Create your gym owner account')
                                     }
                                 </p>
@@ -518,7 +636,7 @@ export default function AuthModal() {
                         </div>
                     </div>
 
-                    {/* Tab Switcher - Compact Slider */}
+                    {/* Tab Switcher - Compact Slider (Hide during forgot password flow) */}
                     {loginStep === 'CREDENTIALS' && signupStep === 'DETAILS' && (
                         <div style={{ padding: '12px 20px 0' }}>
                             <div style={{
@@ -634,7 +752,8 @@ export default function AuthModal() {
                         {/* LOGIN TAB */}
                         {activeTab === 'login' && (
                             <>
-                                {loginStep === 'CREDENTIALS' ? (
+                                {/* CREDENTIALS Step */}
+                                {loginStep === 'CREDENTIALS' && (
                                     <form onSubmit={handleLoginSubmit}>
                                         <div style={{ marginBottom: 12 }}>
                                             <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: colors.textSecondary, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.5px" }}>
@@ -646,6 +765,7 @@ export default function AuthModal() {
                                                 onChange={(e) => setLoginEmail(e.target.value)}
                                                 placeholder="name@company.com"
                                                 required
+                                                aria-label="Email or Phone"
                                                 style={{
                                                     width: "100%",
                                                     padding: "11px 14px",
@@ -664,7 +784,21 @@ export default function AuthModal() {
                                         <div style={{ marginBottom: 16 }}>
                                             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
                                                 <label style={{ fontSize: 11, fontWeight: 600, color: colors.textSecondary, textTransform: "uppercase", letterSpacing: "0.5px" }}>Password</label>
-                                                <a href="#" style={{ color: colors.crimson, textDecoration: "none", fontSize: 11, fontWeight: 600 }}>Forgot?</a>
+                                                <button 
+                                                    type="button"
+                                                    onClick={() => { setLoginStep('FORGOT_EMAIL'); setError(""); setSuccessMessage(""); }}
+                                                    style={{ 
+                                                        color: colors.crimson, 
+                                                        background: "none",
+                                                        border: "none",
+                                                        padding: 0,
+                                                        cursor: "pointer",
+                                                        fontSize: 11, 
+                                                        fontWeight: 600 
+                                                    }}
+                                                >
+                                                    Forgot?
+                                                </button>
                                             </div>
                                             <div style={{ position: "relative" }}>
                                                 <input
@@ -673,6 +807,7 @@ export default function AuthModal() {
                                                     onChange={(e) => setLoginPassword(e.target.value)}
                                                     placeholder="••••••••"
                                                     required
+                                                    aria-label="Password"
                                                     style={{
                                                         width: "100%",
                                                         padding: "11px 48px 11px 14px",
@@ -689,6 +824,7 @@ export default function AuthModal() {
                                                 <button
                                                     type="button"
                                                     onClick={() => setShowLoginPassword(!showLoginPassword)}
+                                                    aria-label={showLoginPassword ? "Hide password" : "Show password"}
                                                     style={{
                                                         position: "absolute",
                                                         right: 12,
@@ -701,6 +837,11 @@ export default function AuthModal() {
                                                         fontSize: 10,
                                                         fontWeight: 600,
                                                         letterSpacing: '0.5px',
+                                                        minHeight: 44,
+                                                        minWidth: 44,
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
                                                     }}
                                                 >
                                                     {showLoginPassword ? "HIDE" : "SHOW"}
@@ -714,6 +855,7 @@ export default function AuthModal() {
                                             style={{
                                                 width: "100%",
                                                 padding: "12px",
+                                                minHeight: 44,
                                                 background: 'linear-gradient(135deg, #DC2626 0%, #B91C1C 100%)',
                                                 border: "none",
                                                 borderRadius: 10,
@@ -745,7 +887,10 @@ export default function AuthModal() {
                                             mode="login"
                                         />
                                     </form>
-                                ) : (
+                                )}
+
+                                {/* LOGIN OTP Step */}
+                                {loginStep === 'OTP' && (
                                     <form onSubmit={handleLoginOtpSubmit}>
                                         <p style={{ color: colors.textSecondary, fontSize: 13, marginBottom: 20, textAlign: 'center', lineHeight: 1.5 }}>
                                             Enter the code sent to<br /><strong style={{ color: colors.textPrimary }}>{verificationEmail || loginEmail}</strong>
@@ -759,6 +904,7 @@ export default function AuthModal() {
                                             style={{
                                                 width: "100%",
                                                 padding: "12px",
+                                                minHeight: 44,
                                                 background: 'linear-gradient(135deg, #DC2626 0%, #B91C1C 100%)',
                                                 border: "none",
                                                 borderRadius: 10,
@@ -794,6 +940,7 @@ export default function AuthModal() {
                                                     fontSize: 13,
                                                     cursor: 'pointer',
                                                     fontWeight: 500,
+                                                    minHeight: 44,
                                                     transition: 'color 0.2s ease',
                                                 }}
                                                 onMouseEnter={(e) => e.currentTarget.style.color = colors.textPrimary}
@@ -803,6 +950,449 @@ export default function AuthModal() {
                                             </button>
                                         </div>
                                     </form>
+                                )}
+
+                                {/* FORGOT PASSWORD - Email Step */}
+                                {loginStep === 'FORGOT_EMAIL' && (
+                                    <form onSubmit={handleForgotPasswordRequest}>
+                                        <div style={{ marginBottom: 20 }}>
+                                            <label 
+                                                htmlFor="forgot-email"
+                                                style={{ display: "block", fontSize: 11, fontWeight: 600, color: colors.textSecondary, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.5px" }}
+                                            >
+                                                Email Address
+                                            </label>
+                                            <input
+                                                id="forgot-email"
+                                                type="email"
+                                                value={forgotEmail}
+                                                onChange={(e) => setForgotEmail(e.target.value)}
+                                                placeholder="name@company.com"
+                                                required
+                                                autoFocus
+                                                style={{
+                                                    width: "100%",
+                                                    padding: "11px 14px",
+                                                    background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
+                                                    border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
+                                                    borderRadius: 10,
+                                                    color: colors.textPrimary,
+                                                    fontSize: 14,
+                                                    outline: "none",
+                                                    boxSizing: 'border-box',
+                                                    transition: 'all 0.2s ease',
+                                                }}
+                                            />
+                                            <p style={{ 
+                                                fontSize: 12, 
+                                                color: colors.textTertiary, 
+                                                marginTop: 8,
+                                                lineHeight: 1.4 
+                                            }}>
+                                                We'll send a verification code to this email address.
+                                            </p>
+                                        </div>
+
+                                        <button
+                                            type="submit"
+                                            disabled={isLoading || !forgotEmail}
+                                            style={{
+                                                width: "100%",
+                                                padding: "12px",
+                                                minHeight: 44,
+                                                background: 'linear-gradient(135deg, #DC2626 0%, #B91C1C 100%)',
+                                                border: "none",
+                                                borderRadius: 10,
+                                                color: "#fff",
+                                                fontSize: 14,
+                                                fontWeight: 600,
+                                                cursor: isLoading || !forgotEmail ? "not-allowed" : "pointer",
+                                                opacity: isLoading || !forgotEmail ? 0.7 : 1,
+                                                boxShadow: '0 4px 12px rgba(220, 38, 38, 0.3)',
+                                                transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                if (!isLoading && forgotEmail) {
+                                                    e.currentTarget.style.boxShadow = '0 6px 20px rgba(220, 38, 38, 0.45)';
+                                                    e.currentTarget.style.transform = 'translateY(-1px)';
+                                                }
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(220, 38, 38, 0.3)';
+                                                e.currentTarget.style.transform = 'translateY(0)';
+                                            }}
+                                        >
+                                            {isLoading ? "Sending..." : "Send Reset Code"}
+                                        </button>
+
+                                        <div style={{ textAlign: 'center', marginTop: 14 }}>
+                                            <button
+                                                type="button"
+                                                onClick={handleBackToLogin}
+                                                style={{
+                                                    background: 'none',
+                                                    border: 'none',
+                                                    color: colors.textSecondary,
+                                                    fontSize: 13,
+                                                    cursor: 'pointer',
+                                                    fontWeight: 500,
+                                                    minHeight: 44,
+                                                    transition: 'color 0.2s ease',
+                                                }}
+                                                onMouseEnter={(e) => e.currentTarget.style.color = colors.textPrimary}
+                                                onMouseLeave={(e) => e.currentTarget.style.color = colors.textSecondary}
+                                            >
+                                                ← Back to Login
+                                            </button>
+                                        </div>
+                                    </form>
+                                )}
+
+                                {/* FORGOT PASSWORD - OTP Step */}
+                                {loginStep === 'FORGOT_OTP' && (
+                                    <form onSubmit={handleForgotOtpVerify}>
+                                        <p style={{ color: colors.textSecondary, fontSize: 13, marginBottom: 20, textAlign: 'center', lineHeight: 1.5 }}>
+                                            Enter the code sent to<br /><strong style={{ color: colors.textPrimary }}>{forgotEmail}</strong>
+                                        </p>
+                                        <div style={{ marginBottom: 20 }}>
+                                            <OtpInput value={forgotOtp} onChange={setForgotOtp} length={6} disabled={isLoading} />
+                                        </div>
+                                        <button
+                                            type="submit"
+                                            disabled={isLoading || forgotOtp.length !== 6}
+                                            style={{
+                                                width: "100%",
+                                                padding: "12px",
+                                                minHeight: 44,
+                                                background: 'linear-gradient(135deg, #DC2626 0%, #B91C1C 100%)',
+                                                border: "none",
+                                                borderRadius: 10,
+                                                color: "#fff",
+                                                fontSize: 14,
+                                                fontWeight: 600,
+                                                cursor: isLoading || forgotOtp.length !== 6 ? "not-allowed" : "pointer",
+                                                opacity: isLoading || forgotOtp.length !== 6 ? 0.7 : 1,
+                                                boxShadow: '0 4px 12px rgba(220, 38, 38, 0.3)',
+                                                transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                if (!isLoading && forgotOtp.length === 6) {
+                                                    e.currentTarget.style.boxShadow = '0 6px 20px rgba(220, 38, 38, 0.45)';
+                                                    e.currentTarget.style.transform = 'translateY(-1px)';
+                                                }
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(220, 38, 38, 0.3)';
+                                                e.currentTarget.style.transform = 'translateY(0)';
+                                            }}
+                                        >
+                                            {isLoading ? "Verifying..." : "Verify Code"}
+                                        </button>
+                                        <div style={{ textAlign: 'center', marginTop: 14 }}>
+                                            <button
+                                                type="button"
+                                                onClick={() => { setLoginStep('FORGOT_EMAIL'); setForgotOtp(""); setError(""); setSuccessMessage(""); }}
+                                                style={{
+                                                    background: 'none',
+                                                    border: 'none',
+                                                    color: colors.textSecondary,
+                                                    fontSize: 13,
+                                                    cursor: 'pointer',
+                                                    fontWeight: 500,
+                                                    minHeight: 44,
+                                                    transition: 'color 0.2s ease',
+                                                }}
+                                                onMouseEnter={(e) => e.currentTarget.style.color = colors.textPrimary}
+                                                onMouseLeave={(e) => e.currentTarget.style.color = colors.textSecondary}
+                                            >
+                                                ← Change Email
+                                            </button>
+                                        </div>
+                                    </form>
+                                )}
+
+                                {/* FORGOT PASSWORD - New Password Step */}
+                                {loginStep === 'FORGOT_NEW_PASSWORD' && (
+                                    <form onSubmit={handleForgotPasswordReset}>
+                                        {/* Password Field */}
+                                        <div style={{ marginBottom: 12 }}>
+                                            <label 
+                                                htmlFor="new-password"
+                                                style={{ display: "block", fontSize: 11, fontWeight: 600, color: colors.textSecondary, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.5px" }}
+                                            >
+                                                New Password
+                                            </label>
+                                            <div style={{ position: "relative" }}>
+                                                <input
+                                                    id="new-password"
+                                                    type={showNewPassword ? "text" : "password"}
+                                                    value={newPassword}
+                                                    onChange={(e) => setNewPassword(e.target.value)}
+                                                    placeholder="••••••••"
+                                                    required
+                                                    autoFocus
+                                                    style={{
+                                                        width: "100%",
+                                                        padding: "11px 48px 11px 14px",
+                                                        background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
+                                                        border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
+                                                        borderRadius: 10,
+                                                        color: colors.textPrimary,
+                                                        fontSize: 14,
+                                                        outline: "none",
+                                                        boxSizing: 'border-box',
+                                                        transition: 'all 0.2s ease',
+                                                    }}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowNewPassword(!showNewPassword)}
+                                                    aria-label={showNewPassword ? "Hide password" : "Show password"}
+                                                    style={{
+                                                        position: "absolute",
+                                                        right: 12,
+                                                        top: "50%",
+                                                        transform: "translateY(-50%)",
+                                                        background: "transparent",
+                                                        border: "none",
+                                                        color: colors.textTertiary,
+                                                        cursor: "pointer",
+                                                        fontSize: 10,
+                                                        fontWeight: 600,
+                                                        letterSpacing: '0.5px',
+                                                        minHeight: 44,
+                                                        minWidth: 44,
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                    }}
+                                                >
+                                                    {showNewPassword ? "HIDE" : "SHOW"}
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {/* Password Strength Indicator */}
+                                        {newPassword && (
+                                            <div style={{ marginBottom: 12 }}>
+                                                <div style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
+                                                    {[1, 2, 3, 4].map((level) => (
+                                                        <div
+                                                            key={level}
+                                                            style={{
+                                                                flex: 1,
+                                                                height: 4,
+                                                                borderRadius: 2,
+                                                                background: getPasswordStrength(newPassword) >= level
+                                                                    ? getPasswordStrength(newPassword) <= 1 ? '#EF4444'
+                                                                        : getPasswordStrength(newPassword) <= 2 ? '#F59E0B'
+                                                                        : '#10B981'
+                                                                    : isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+                                                                transition: 'background 0.2s ease',
+                                                            }}
+                                                        />
+                                                    ))}
+                                                </div>
+                                                <div style={{ fontSize: 11, color: colors.textTertiary }}>
+                                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 12px' }}>
+                                                        <span style={{ color: newPassword.length >= 8 ? colors.emerald : colors.textTertiary }}>
+                                                            {newPassword.length >= 8 ? '✓' : '○'} 8+ chars
+                                                        </span>
+                                                        <span style={{ color: /[A-Z]/.test(newPassword) ? colors.emerald : colors.textTertiary }}>
+                                                            {/[A-Z]/.test(newPassword) ? '✓' : '○'} Uppercase
+                                                        </span>
+                                                        <span style={{ color: /[a-z]/.test(newPassword) ? colors.emerald : colors.textTertiary }}>
+                                                            {/[a-z]/.test(newPassword) ? '✓' : '○'} Lowercase
+                                                        </span>
+                                                        <span style={{ color: /[0-9]/.test(newPassword) ? colors.emerald : colors.textTertiary }}>
+                                                            {/[0-9]/.test(newPassword) ? '✓' : '○'} Number
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Confirm Password Field */}
+                                        <div style={{ marginBottom: 20 }}>
+                                            <label 
+                                                htmlFor="confirm-new-password"
+                                                style={{ display: "block", fontSize: 11, fontWeight: 600, color: colors.textSecondary, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.5px" }}
+                                            >
+                                                Confirm Password
+                                            </label>
+                                            <div style={{ position: "relative" }}>
+                                                <input
+                                                    id="confirm-new-password"
+                                                    type={showConfirmNewPassword ? "text" : "password"}
+                                                    value={confirmNewPassword}
+                                                    onChange={(e) => setConfirmNewPassword(e.target.value)}
+                                                    placeholder="••••••••"
+                                                    required
+                                                    style={{
+                                                        width: "100%",
+                                                        padding: "11px 48px 11px 14px",
+                                                        background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
+                                                        border: `1px solid ${
+                                                            confirmNewPassword && confirmNewPassword !== newPassword 
+                                                                ? '#EF4444' 
+                                                                : isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'
+                                                        }`,
+                                                        borderRadius: 10,
+                                                        color: colors.textPrimary,
+                                                        fontSize: 14,
+                                                        outline: "none",
+                                                        boxSizing: 'border-box',
+                                                        transition: 'all 0.2s ease',
+                                                    }}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowConfirmNewPassword(!showConfirmNewPassword)}
+                                                    aria-label={showConfirmNewPassword ? "Hide password" : "Show password"}
+                                                    style={{
+                                                        position: "absolute",
+                                                        right: 12,
+                                                        top: "50%",
+                                                        transform: "translateY(-50%)",
+                                                        background: "transparent",
+                                                        border: "none",
+                                                        color: colors.textTertiary,
+                                                        cursor: "pointer",
+                                                        fontSize: 10,
+                                                        fontWeight: 600,
+                                                        letterSpacing: '0.5px',
+                                                        minHeight: 44,
+                                                        minWidth: 44,
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                    }}
+                                                >
+                                                    {showConfirmNewPassword ? "HIDE" : "SHOW"}
+                                                </button>
+                                            </div>
+                                            {confirmNewPassword && confirmNewPassword !== newPassword && (
+                                                <p style={{ fontSize: 11, color: '#EF4444', marginTop: 6 }}>
+                                                    Passwords do not match
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        <button
+                                            type="submit"
+                                            disabled={isLoading || !newPassword || !confirmNewPassword || newPassword !== confirmNewPassword}
+                                            style={{
+                                                width: "100%",
+                                                padding: "12px",
+                                                minHeight: 44,
+                                                background: 'linear-gradient(135deg, #DC2626 0%, #B91C1C 100%)',
+                                                border: "none",
+                                                borderRadius: 10,
+                                                color: "#fff",
+                                                fontSize: 14,
+                                                fontWeight: 600,
+                                                cursor: isLoading || !newPassword || !confirmNewPassword || newPassword !== confirmNewPassword ? "not-allowed" : "pointer",
+                                                opacity: isLoading || !newPassword || !confirmNewPassword || newPassword !== confirmNewPassword ? 0.7 : 1,
+                                                boxShadow: '0 4px 12px rgba(220, 38, 38, 0.3)',
+                                                transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                if (!isLoading && newPassword && confirmNewPassword && newPassword === confirmNewPassword) {
+                                                    e.currentTarget.style.boxShadow = '0 6px 20px rgba(220, 38, 38, 0.45)';
+                                                    e.currentTarget.style.transform = 'translateY(-1px)';
+                                                }
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(220, 38, 38, 0.3)';
+                                                e.currentTarget.style.transform = 'translateY(0)';
+                                            }}
+                                        >
+                                            {isLoading ? "Resetting..." : "Reset Password"}
+                                        </button>
+
+                                        <div style={{ textAlign: 'center', marginTop: 14 }}>
+                                            <button
+                                                type="button"
+                                                onClick={handleBackToLogin}
+                                                style={{
+                                                    background: 'none',
+                                                    border: 'none',
+                                                    color: colors.textSecondary,
+                                                    fontSize: 13,
+                                                    cursor: 'pointer',
+                                                    fontWeight: 500,
+                                                    minHeight: 44,
+                                                    transition: 'color 0.2s ease',
+                                                }}
+                                                onMouseEnter={(e) => e.currentTarget.style.color = colors.textPrimary}
+                                                onMouseLeave={(e) => e.currentTarget.style.color = colors.textSecondary}
+                                            >
+                                                ← Cancel
+                                            </button>
+                                        </div>
+                                    </form>
+                                )}
+
+                                {/* FORGOT PASSWORD - Success Step */}
+                                {loginStep === 'FORGOT_SUCCESS' && (
+                                    <div style={{ textAlign: 'center', padding: '20px 0' }}>
+                                        <div style={{
+                                            width: 64,
+                                            height: 64,
+                                            borderRadius: '50%',
+                                            background: 'rgba(16, 185, 129, 0.1)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            margin: '0 auto 20px',
+                                        }}>
+                                            <span style={{ fontSize: 32, color: colors.emerald }}>✓</span>
+                                        </div>
+                                        <h3 style={{ 
+                                            fontSize: 18, 
+                                            fontWeight: 700, 
+                                            color: colors.textPrimary, 
+                                            marginBottom: 8 
+                                        }}>
+                                            Password Reset Successful
+                                        </h3>
+                                        <p style={{ 
+                                            fontSize: 14, 
+                                            color: colors.textSecondary, 
+                                            marginBottom: 24,
+                                            lineHeight: 1.5 
+                                        }}>
+                                            Your password has been changed successfully. You can now sign in with your new password.
+                                        </p>
+                                        <button
+                                            type="button"
+                                            onClick={handleBackToLogin}
+                                            style={{
+                                                width: "100%",
+                                                padding: "12px",
+                                                minHeight: 44,
+                                                background: 'linear-gradient(135deg, #DC2626 0%, #B91C1C 100%)',
+                                                border: "none",
+                                                borderRadius: 10,
+                                                color: "#fff",
+                                                fontSize: 14,
+                                                fontWeight: 600,
+                                                cursor: "pointer",
+                                                boxShadow: '0 4px 12px rgba(220, 38, 38, 0.3)',
+                                                transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                e.currentTarget.style.boxShadow = '0 6px 20px rgba(220, 38, 38, 0.45)';
+                                                e.currentTarget.style.transform = 'translateY(-1px)';
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(220, 38, 38, 0.3)';
+                                                e.currentTarget.style.transform = 'translateY(0)';
+                                            }}
+                                        >
+                                            Sign In Now
+                                        </button>
+                                    </div>
                                 )}
                             </>
                         )}

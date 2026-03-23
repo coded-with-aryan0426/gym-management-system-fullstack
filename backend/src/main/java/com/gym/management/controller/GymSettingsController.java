@@ -110,9 +110,6 @@ public class GymSettingsController {
     @PutMapping("/owner-profile")
     public ResponseEntity<?> updateOwnerProfile(@RequestBody Map<String, Object> data) {
         try {
-            // Debug: Log received data
-            System.out.println("Received owner profile update data: " + data);
-
             Long userId = getCurrentUserId();
             if (userId == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -138,23 +135,16 @@ public class GymSettingsController {
             userRepository.save(user);
 
             // Update gym fields
-            System.out.println("Looking for gym with userId: " + userId);
             Optional<Gym> gymOpt = gymRepository.findFirstByOwnerUserIdOrderByCreatedAtDesc(userId);
-            System.out.println("Gym found: " + gymOpt.isPresent());
 
             if (gymOpt.isPresent()) {
                 Gym gym = gymOpt.get();
-                System.out.println("Found gym: " + gym.getName() + " (ID: " + gym.getGymId() + ")");
+                logger.debug("Updating gym profile for gym ID: {}", gym.getGymId());
 
                 if (data.containsKey("gymName")) {
                     String gymName = (String) data.get("gymName");
-                    System.out.println("Updating gym name: '" + gymName + "' (length: "
-                            + (gymName != null ? gymName.length() : "null") + ")");
                     if (gymName != null && !gymName.trim().isEmpty()) {
-                        System.out.println("Setting gym name to: '" + gymName.trim() + "'");
                         gym.setName(gymName.trim());
-                    } else {
-                        System.out.println("Gym name is null or empty, skipping update");
                     }
                 }
 
@@ -175,9 +165,9 @@ public class GymSettingsController {
                 }
                 gym.setUpdatedBy(userId);
                 gymRepository.save(gym);
-                System.out.println("Gym saved successfully!");
+                logger.info("Gym profile updated successfully for gym ID: {}", gym.getGymId());
             } else {
-                System.out.println("No gym found for userId: " + userId + " - creating new gym!");
+                logger.info("Creating new gym for user ID: {}", userId);
 
                 // Auto-create gym when none exists
                 Gym newGym = new Gym();
@@ -193,7 +183,6 @@ public class GymSettingsController {
 
                 if (data.containsKey("gymName")) {
                     String gymName = (String) data.get("gymName");
-                    System.out.println("Setting gym name for new gym: '" + gymName + "'");
                     if (gymName != null && !gymName.trim().isEmpty()) {
                         newGym.setName(gymName.trim());
                     }

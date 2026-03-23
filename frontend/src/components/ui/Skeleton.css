@@ -1,28 +1,49 @@
 /* ============================================================================
-   Skeleton Loading Component Styles
+   Skeleton Loading Component Styles - Comprehensive Library
    ============================================================================ */
 
+/* ─── Base Skeleton ────────────────────────────────────────────────────────── */
 .skeleton {
     background: linear-gradient(90deg,
             var(--bg-tertiary) 25%,
             var(--bg-elevated) 50%,
             var(--bg-tertiary) 75%);
     background-size: 200% 100%;
-    animation: skeleton-shimmer 1.5s infinite;
     border-radius: var(--button-radius);
+}
+
+/* Animation Variants */
+.skeleton--shimmer {
+    animation: skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
+.skeleton--pulse {
+    animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+.skeleton--none {
+    animation: none;
 }
 
 @keyframes skeleton-shimmer {
     0% {
         background-position: 200% 0;
     }
-
     100% {
         background-position: -200% 0;
     }
 }
 
-/* Variants */
+@keyframes skeleton-pulse {
+    0%, 100% {
+        opacity: 0.4;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+/* ─── Shape Variants ───────────────────────────────────────────────────────── */
 .skeleton--text {
     height: 16px;
     width: 100%;
@@ -42,16 +63,17 @@
     height: 200px;
 }
 
-/* Preset Components */
+/* ─── Text Skeleton ────────────────────────────────────────────────────────── */
 .skeleton-text {
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
 }
 
+/* ─── Card Skeleton ────────────────────────────────────────────────────────── */
 .skeleton-card {
     background-color: var(--bg-secondary);
-    border: 1px solid var(--border-secondary);
+    border: 1px solid var(--border-subtle);
     border-radius: var(--card-radius);
     overflow: hidden;
 }
@@ -63,20 +85,430 @@
     gap: var(--space-2);
 }
 
-.skeleton-table-row {
-    display: flex;
-    align-items: center;
-    gap: var(--space-4);
-    padding: var(--space-3) var(--space-4);
-    border-bottom: 1px solid var(--border-secondary);
+/* ─── Table Skeleton ───────────────────────────────────────────────────────── */
+.skeleton-table-container {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--card-radius);
+    overflow: hidden;
 }
 
+.skeleton-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.skeleton-table thead tr {
+    background: var(--bg-tertiary);
+}
+
+.skeleton-table th {
+    padding: var(--space-3) var(--space-4);
+    text-align: left;
+}
+
+.skeleton-table-row {
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.skeleton-table-row:last-child {
+    border-bottom: none;
+}
+
+.skeleton-table-cell {
+    padding: var(--space-3) var(--space-4);
+    vertical-align: middle;
+}
+
+.skeleton-user-cell {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.skeleton-user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.skeleton-actions {
+    display: flex;
+    gap: var(--space-2);
+}
+
+/* ─── Metric Card Skeleton ─────────────────────────────────────────────────── */
 .skeleton-metric-card {
     background-color: var(--bg-secondary);
-    border: 1px solid var(--border-secondary);
+    border: 1px solid var(--border-subtle);
     border-radius: var(--card-radius);
-    padding: var(--space-4);
+    padding: var(--space-5);
     display: flex;
     flex-direction: column;
     gap: var(--space-3);
+    position: relative;
+    overflow: hidden;
+}
+
+.skeleton-metric-card__top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.skeleton-metric-card__bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+}
+
+.skeleton-metric-icon {
+    border-radius: 12px;
+}
+
+/* ─── KPI Grid Skeleton ────────────────────────────────────────────────────── */
+.skeleton-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--space-4);
+}
+
+/* ─── Chart Skeleton ───────────────────────────────────────────────────────── */
+.skeleton-chart {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--card-radius);
+    padding: var(--space-5);
+}
+
+.skeleton-chart__header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+}
+
+.skeleton-chart__body {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.skeleton-chart__bars {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-around;
+    width: 100%;
+    height: 100%;
+    padding: 0 var(--space-4);
+}
+
+.skeleton-chart__bar {
+    flex: 1;
+    margin: 0 var(--space-2);
+    border-radius: 4px 4px 0 0;
+}
+
+.skeleton-chart__line {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.skeleton-chart__svg {
+    width: 100%;
+    height: 100%;
+    color: var(--bg-tertiary);
+}
+
+.skeleton-chart__path {
+    stroke-dasharray: 800;
+    stroke-dashoffset: 800;
+    animation: skeleton-path 2s ease-in-out infinite;
+}
+
+@keyframes skeleton-path {
+    0% {
+        stroke-dashoffset: 800;
+    }
+    50% {
+        stroke-dashoffset: 0;
+    }
+    100% {
+        stroke-dashoffset: -800;
+    }
+}
+
+.skeleton-chart__pie {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ─── Member Card Skeleton ─────────────────────────────────────────────────── */
+.skeleton-member-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--card-radius);
+    padding: var(--space-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.skeleton-member-card__header {
+    display: flex;
+    gap: var(--space-4);
+}
+
+.skeleton-member-card__info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    flex: 1;
+}
+
+.skeleton-badge {
+    border-radius: 20px;
+    margin-top: var(--space-2);
+}
+
+.skeleton-member-card__stats {
+    display: flex;
+    gap: var(--space-6);
+    padding: var(--space-3) 0;
+    border-top: 1px solid var(--border-subtle);
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.skeleton-stat {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.skeleton-member-card__actions {
+    display: flex;
+    gap: var(--space-3);
+}
+
+/* ─── List Item Skeleton ───────────────────────────────────────────────────── */
+.skeleton-list-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--card-radius);
+}
+
+.skeleton-list-item__content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* ─── Page Header Skeleton ─────────────────────────────────────────────────── */
+.skeleton-page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-4) var(--space-5);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--card-radius);
+    margin-bottom: var(--space-4);
+}
+
+.skeleton-page-header__left {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+}
+
+.skeleton-icon-box {
+    border-radius: 12px;
+}
+
+.skeleton-page-header__actions {
+    display: flex;
+    gap: var(--space-3);
+}
+
+/* ─── Profile Section Skeleton ─────────────────────────────────────────────── */
+.skeleton-profile-section {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--card-radius);
+    padding: var(--space-6);
+}
+
+.skeleton-profile-section__header {
+    display: flex;
+    gap: var(--space-5);
+    margin-bottom: var(--space-5);
+}
+
+.skeleton-profile-section__info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.skeleton-badges {
+    display: flex;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+}
+
+.skeleton-profile-section__stats {
+    display: flex;
+    gap: var(--space-6);
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--border-subtle);
+}
+
+.skeleton-profile-stat {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    align-items: center;
+}
+
+/* ─── Full Page Skeleton ───────────────────────────────────────────────────── */
+.skeleton-page {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    padding: var(--space-5);
+}
+
+.skeleton-chart-section {
+    margin: var(--space-4) 0;
+}
+
+/* ─── Heatmap Skeleton ─────────────────────────────────────────────────────── */
+.skeleton-heatmap {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--card-radius);
+    padding: var(--space-5);
+}
+
+.skeleton-heatmap__header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+}
+
+.skeleton-heatmap__grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.skeleton-heatmap__row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.skeleton-heatmap__cell {
+    border-radius: 4px;
+}
+
+/* ─── Form Skeleton ────────────────────────────────────────────────────────── */
+.skeleton-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--card-radius);
+    padding: var(--space-6);
+}
+
+.skeleton-form__field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.skeleton-form__actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: var(--space-4);
+}
+
+/* ─── Activity Feed Skeleton ───────────────────────────────────────────────── */
+.skeleton-activity-feed {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.skeleton-activity-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--card-radius);
+}
+
+.skeleton-activity-item__content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* ─── Responsive Adjustments ───────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .skeleton-kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .skeleton-page-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--space-4);
+    }
+
+    .skeleton-page-header__actions {
+        justify-content: flex-start;
+    }
+
+    .skeleton-profile-section__header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .skeleton-profile-section__stats {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .skeleton-member-card__stats {
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 480px) {
+    .skeleton-kpi-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .skeleton-table-container {
+        overflow-x: auto;
+    }
 }

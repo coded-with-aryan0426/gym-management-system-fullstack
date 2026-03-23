@@ -1,6 +1,7 @@
 package com.gym.management.controller;
 
 import com.gym.management.dto.ChatUserDTO;
+import com.gym.management.dto.ConversationDTO;
 import com.gym.management.model.Conversation;
 import com.gym.management.model.GymRole;
 import com.gym.management.model.Message;
@@ -62,8 +63,8 @@ public class ChatController {
         Pageable pageable = PageRequest.of(page, size);
         Page<Conversation> conversations = chatService.getUserConversations(userId, pageable);
 
-        java.util.List<com.gym.management.dto.ConversationDTO> dtos = conversations.stream().map(c -> {
-            com.gym.management.dto.ConversationDTO dto = new com.gym.management.dto.ConversationDTO();
+        java.util.List<ConversationDTO> dtos = conversations.stream().map(c -> {
+            ConversationDTO dto = new ConversationDTO();
             dto.setConversationId(c.getConversationId());
             dto.setType(c.getType());
             dto.setTitle(c.getTitle());
@@ -103,7 +104,7 @@ public class ChatController {
             java.util.List<com.gym.management.model.ConversationParticipant> participants = participantRepository
                     .findByConversationIdWithUser(c.getConversationId());
             dto.setParticipants(participants.stream().map(p -> {
-                com.gym.management.dto.ConversationDTO.ParticipantDTO pd = new com.gym.management.dto.ConversationDTO.ParticipantDTO();
+                ConversationDTO.ParticipantDTO pd = new ConversationDTO.ParticipantDTO();
                 pd.setUserId(p.getUser().getUserId());
                 String name = p.getUser().getFullName();
                 if (name == null || name.trim().isEmpty()) {
@@ -261,13 +262,13 @@ public class ChatController {
         try {
             Conversation c = chatService.getOrCreatePrivateConversation(currentUserId, targetUserId);
 
-            com.gym.management.dto.ConversationDTO dto = new com.gym.management.dto.ConversationDTO();
+            ConversationDTO dto = new ConversationDTO();
             dto.setConversationId(c.getConversationId());
             dto.setType(c.getType());
             dto.setTitle(c.getTitle());
             dto.setUpdatedAt(c.getUpdatedAt());
             dto.setParticipants(c.getParticipants().stream().map(p -> {
-                com.gym.management.dto.ConversationDTO.ParticipantDTO pd = new com.gym.management.dto.ConversationDTO.ParticipantDTO();
+                ConversationDTO.ParticipantDTO pd = new ConversationDTO.ParticipantDTO();
                 pd.setUserId(p.getUser().getUserId());
                 String name = p.getUser().getFullName();
                 if (name == null || name.trim().isEmpty()) {
@@ -340,13 +341,13 @@ public class ChatController {
         try {
             Conversation c = chatService.acceptRequest(requestId, userId);
             // Return conversation DTO
-            com.gym.management.dto.ConversationDTO dto = new com.gym.management.dto.ConversationDTO();
+            ConversationDTO dto = new ConversationDTO();
             dto.setConversationId(c.getConversationId());
             dto.setType(c.getType());
             dto.setTitle(c.getTitle());
             dto.setUpdatedAt(c.getUpdatedAt());
             dto.setParticipants(c.getParticipants().stream().map(p -> {
-                com.gym.management.dto.ConversationDTO.ParticipantDTO pd = new com.gym.management.dto.ConversationDTO.ParticipantDTO();
+                ConversationDTO.ParticipantDTO pd = new ConversationDTO.ParticipantDTO();
                 pd.setUserId(p.getUser().getUserId());
                 String name = p.getUser().getFullName();
                 if (name == null || name.trim().isEmpty()) {

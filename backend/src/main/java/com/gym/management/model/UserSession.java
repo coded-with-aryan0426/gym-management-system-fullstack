@@ -38,6 +38,7 @@ public class UserSession {
     @JoinColumn(name = "gym_id")
     private Gym gym;
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @Column(name = "token_hash", nullable = false, length = 256)
     private String tokenHash;
 

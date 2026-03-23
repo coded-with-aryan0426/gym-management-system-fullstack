@@ -15,10 +15,11 @@ import java.util.Optional;
 
 /**
  * Controller for OAuth2 social login and multi-channel OTP endpoints.
+ * Supports Google OAuth only.
  */
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:5174", "http://localhost:5175"})
 public class OAuth2Controller {
 
     @Autowired
@@ -36,6 +37,7 @@ public class OAuth2Controller {
     /**
      * Google OAuth token exchange.
      * Frontend sends Google ID token, backend verifies and returns JWT.
+     * If user's Google email matches their registered email, they get easy login.
      */
     @PostMapping("/oauth/google")
     public ResponseEntity<?> googleAuth(@RequestBody Map<String, String> request) {
@@ -47,34 +49,6 @@ public class OAuth2Controller {
         }
 
         OAuthService.AuthResult result = oAuthService.authenticateWithGoogle(idToken);
-
-        if (!result.success()) {
-            return ResponseEntity.badRequest().body(Map.of(
-                    "success", false,
-                    "message", result.message()));
-        }
-
-        return ResponseEntity.ok(Map.of(
-                "success", true,
-                "token", result.token(),
-                "isNewUser", result.isNewUser(),
-                "user", buildUserResponse(result.user(), result.isNewUser())));
-    }
-
-    /**
-     * Facebook OAuth token exchange.
-     * Frontend sends Facebook access token, backend verifies and returns JWT.
-     */
-    @PostMapping("/oauth/facebook")
-    public ResponseEntity<?> facebookAuth(@RequestBody Map<String, String> request) {
-        String accessToken = request.get("accessToken");
-        if (accessToken == null || accessToken.isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of(
-                    "success", false,
-                    "message", "Access token is required"));
-        }
-
-        OAuthService.AuthResult result = oAuthService.authenticateWithFacebook(accessToken);
 
         if (!result.success()) {
             return ResponseEntity.badRequest().body(Map.of(

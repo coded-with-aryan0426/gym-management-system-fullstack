@@ -44,11 +44,12 @@ public class FinanceService {
         return new LocalDateTime[] { prevStart, prevEnd };
     }
 
-    public Page<Transaction> getTransactions(String status, String category, String search, Pageable pageable) {
+    public Page<Transaction> getTransactions(String status, String category, String search, Long userId, Pageable pageable) {
         return transactionRepository.findAllWithFilters(
                 status != null && status.isEmpty() ? null : status,
                 category != null && category.isEmpty() ? null : category,
                 search != null && search.isEmpty() ? null : search,
+                userId,
                 pageable);
     }
 
@@ -91,38 +92,38 @@ public class FinanceService {
         transactionRepository.deleteById(id);
     }
 
-    public Map<String, Object> getFinancialStats(String period) {
+    public Map<String, Object> getFinancialStats(String period, Long userId) {
         LocalDateTime[] range = getDateRange(period);
         LocalDateTime[] prevRange = getPreviousDateRange(period);
 
         // Revenue: only Completed income (cash actually received)
         BigDecimal totalRevenue = transactionRepository.sumAmountByTypeAndStatusAndDateRange("INCOME", "Completed",
-                range[0], range[1]);
+                range[0], range[1], userId);
         if (totalRevenue == null)
             totalRevenue = BigDecimal.ZERO;
 
         // Expenses: ALL statuses (an expense is a liability whether paid or pending)
         BigDecimal totalExpenses = transactionRepository.sumAmountByTypeAndDateRange("EXPENSE",
-                range[0], range[1]);
+                range[0], range[1], userId);
         if (totalExpenses == null)
             totalExpenses = BigDecimal.ZERO;
 
-        BigDecimal pendingDues = transactionRepository.sumAmountByStatusAndDateRange("Pending", range[0], range[1]);
+        BigDecimal pendingDues = transactionRepository.sumAmountByStatusAndDateRange("Pending", range[0], range[1], userId);
         if (pendingDues == null)
             pendingDues = BigDecimal.ZERO;
 
-        Long pendingCount = transactionRepository.countPendingTransactions(range[0], range[1]);
+        Long pendingCount = transactionRepository.countPendingTransactions(range[0], range[1], userId);
         if (pendingCount == null)
             pendingCount = 0L;
 
         // Previous period for comparison
         BigDecimal prevRevenue = transactionRepository.sumAmountByTypeAndStatusAndDateRange("INCOME", "Completed",
-                prevRange[0], prevRange[1]);
+                prevRange[0], prevRange[1], userId);
         if (prevRevenue == null)
             prevRevenue = BigDecimal.ZERO;
 
         BigDecimal prevExpenses = transactionRepository.sumAmountByTypeAndDateRange("EXPENSE",
-                prevRange[0], prevRange[1]);
+                prevRange[0], prevRange[1], userId);
         if (prevExpenses == null)
             prevExpenses = BigDecimal.ZERO;
 
@@ -152,9 +153,9 @@ public class FinanceService {
         return stats;
     }
 
-    public List<Object[]> getRevenueBreakdown(String period) {
+    public List<Object[]> getRevenueBreakdown(String period, Long userId) {
         LocalDateTime[] range = getDateRange(period);
-        return transactionRepository.getRevenueByCategory(range[0], range[1]);
+        return transactionRepository.getRevenueByCategory(range[0], range[1], userId);
     }
 
     public List<Object[]> getExpenseBreakdown(String period) {
@@ -162,10 +163,10 @@ public class FinanceService {
         return transactionRepository.getExpenseByCategory(range[0], range[1]);
     }
 
-    public List<Map<String, Object>> getChartData(String period) {
+    public List<Map<String, Object>> getChartData(String period, Long userId) {
         LocalDateTime[] range = getDateRange(period);
 
-        List<Transaction> transactions = transactionRepository.findByDateRange(range[0], range[1]);
+        List<Transaction> transactions = transactionRepository.findByDateRange(range[0], range[1], userId);
 
         Map<String, Map<String, BigDecimal>> grouped = new java.util.TreeMap<>();
 
@@ -200,12 +201,12 @@ public class FinanceService {
 
     public List<Transaction> getPendingTransactions(String period) {
         LocalDateTime[] range = getDateRange(period);
-        return transactionRepository.findPendingTransactions(range[0], range[1]);
+        return transactionRepository.findPendingTransactions(range[0], range[1], null);
     }
 
-    public List<Map<String, Object>> getCategoryStats(String type, String period) {
+    public List<Map<String, Object>> getCategoryStats(String type, String period, Long userId) {
         LocalDateTime[] range = getDateRange(period);
-        List<Object[]> results = transactionRepository.getCategoryStats(type, range[0], range[1]);
+        List<Object[]> results = transactionRepository.getCategoryStats(type, range[0], range[1], userId);
         return results.stream().map(r -> {
             Map<String, Object> m = new HashMap<>();
             m.put("category", r[0]);
@@ -215,9 +216,9 @@ public class FinanceService {
         }).collect(Collectors.toList());
     }
 
-    public List<Map<String, Object>> getDailyTrend(String period) {
+    public List<Map<String, Object>> getDailyTrend(String period, Long userId) {
         LocalDateTime[] range = getDateRange(period);
-        List<Object[]> results = transactionRepository.getDailyTotals(range[0], range[1]);
+        List<Object[]> results = transactionRepository.getDailyTotals(range[0], range[1], userId);
 
         Map<String, Map<String, BigDecimal>> grouped = new java.util.TreeMap<>();
         for (Object[] r : results) {
@@ -253,9 +254,9 @@ public class FinanceService {
         }).collect(Collectors.toList());
     }
 
-    public List<Transaction> getTopTransactions(String type, String period, int limit) {
+    public List<Transaction> getTopTransactions(String type, String period, int limit, Long userId) {
         LocalDateTime[] range = getDateRange(period);
-        List<Transaction> all = transactionRepository.findByDateRange(range[0], range[1]);
+        List<Transaction> all = transactionRepository.findByDateRange(range[0], range[1], userId);
         return all.stream()
                 .filter(t -> type.equals(t.getType()) && "Completed".equals(t.getStatus()))
                 .sorted((a, b) -> b.getAmount().compareTo(a.getAmount()))

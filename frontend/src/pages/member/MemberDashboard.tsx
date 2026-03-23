@@ -98,7 +98,59 @@ const MemberDashboard: React.FC = () => {
         { icon: <Bell size={18} />, label: 'Notifications', path: '/member/notifications', color: 'var(--accent-orange)' }
     ];
 
-    if (loading) return <div className="member-dashboard-loading">Loading...</div>;
+    // Skeleton Loading State
+    if (loading) return (
+        <UnifiedPage className="member-dashboard-unified member-dashboard--skeleton">
+            <header className="member-dashboard__header member-dashboard__header--skeleton">
+                <div className="header-top-row">
+                    <div className="welcome-group">
+                        <div className="skeleton-line" style={{ width: 80, height: 14 }} />
+                        <div className="skeleton-line skeleton-line--lg" style={{ width: 150, marginTop: 8 }} />
+                    </div>
+                    <div className="skeleton-line" style={{ width: 140, height: 14 }} />
+                </div>
+                <div className="header-stats-grid">
+                    {[1, 2, 3].map(i => (
+                        <div key={i} className="skeleton-stat-card">
+                            <div className="skeleton-line" style={{ width: '60%', height: 12 }} />
+                            <div className="skeleton-line skeleton-line--lg" style={{ width: '40%', marginTop: 12 }} />
+                        </div>
+                    ))}
+                </div>
+            </header>
+            <div className="layout-dashboard">
+                <div className="layout-main-content">
+                    <div className="skeleton-card skeleton-card--banner">
+                        <div className="skeleton-line" style={{ width: 100, height: 14 }} />
+                        <div className="skeleton-line skeleton-line--lg" style={{ width: 200, marginTop: 12 }} />
+                        <div className="skeleton-line" style={{ width: 150, marginTop: 8, height: 12 }} />
+                    </div>
+                    <div className="skeleton-card">
+                        <div className="skeleton-line" style={{ width: 120, height: 18 }} />
+                        <div className="skeleton-quick-actions">
+                            {[1, 2, 3, 4].map(i => (
+                                <div key={i} className="skeleton-action-btn" />
+                            ))}
+                        </div>
+                    </div>
+                </div>
+                <aside className="layout-sidebar">
+                    <div className="skeleton-card">
+                        <div className="skeleton-line" style={{ width: 140, height: 16 }} />
+                        {[1, 2, 3].map(i => (
+                            <div key={i} className="skeleton-list-item" style={{ marginTop: 12 }}>
+                                <div className="skeleton-avatar" />
+                                <div style={{ flex: 1 }}>
+                                    <div className="skeleton-line" style={{ width: '70%' }} />
+                                    <div className="skeleton-line" style={{ width: '50%', marginTop: 6, height: 12 }} />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </aside>
+            </div>
+        </UnifiedPage>
+    );
 
     return (
         <UnifiedPage className="member-dashboard-unified">

@@ -11,6 +11,8 @@ import com.gym.management.repository.NotificationRepository;
 import com.gym.management.repository.ProgressNoteRepository;
 import com.gym.management.repository.UserRepository;
 import com.gym.management.service.MemberProfileService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -37,6 +39,8 @@ import com.gym.management.repository.TransactionRepository;
 @CrossOrigin(origins = { "http://localhost:5173", "http://localhost:5174", "http://localhost:5175" })
 @PreAuthorize("hasAnyRole('MEMBER', 'CUSTOMER', 'TRAINER', 'OWNER', 'ADMIN')")
 public class MemberDashboardController {
+
+    private static final Logger log = LoggerFactory.getLogger(MemberDashboardController.class);
 
     @Autowired
     private UserRepository userRepository;
@@ -347,8 +351,8 @@ public class MemberDashboardController {
 
             return ResponseEntity.ok(stats);
         } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+            log.error("Failed to fetch usage stats for member {}", memberId, e);
+            return ResponseEntity.status(500).body(Map.of("error", "Failed to fetch usage statistics"));
         }
     }
 
@@ -358,8 +362,8 @@ public class MemberDashboardController {
             List<Transaction> transactions = transactionRepository.findByUserIdOrderByDateTimeDesc(memberId);
             return ResponseEntity.ok(transactions);
         } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+            log.error("Failed to fetch payment history for member {}", memberId, e);
+            return ResponseEntity.status(500).body(Map.of("error", "Failed to fetch payment history"));
         }
     }
 }

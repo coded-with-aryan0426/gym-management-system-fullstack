@@ -321,10 +321,93 @@ const Dashboard: React.FC = () => {
     const isRealAttendance = !!analyticsData?.dailyAttendance?.length
     const isChartAllZero   = revenueChart.every(d => d.value === 0 && d.expenses === 0)
 
+  // ─── Skeleton Loading State ───────────────────────────────────────────────
   if (loading && !data) return (
-    <div className="dash-loading">
-      <div className="dash-loading__ring" />
-      <span>Loading Dashboard…</span>
+    <div className="dash" role="main" aria-busy="true" aria-label="Loading dashboard">
+      {/* Skeleton Header */}
+      <header className="dash__header dash__header--skeleton">
+        <div className="dash__header-greet">
+          <div className="skeleton-icon-circle" />
+          <div>
+            <div className="skeleton-line skeleton-line--lg" style={{ width: 200 }} />
+            <div className="skeleton-line" style={{ width: 160, marginTop: 8 }} />
+          </div>
+        </div>
+        <div className="dash__kpi-row dash__kpi-row--skeleton">
+          {[1, 2, 3, 4, 5].map(i => (
+            <div key={i} className="dash-kpi-skeleton">
+              <div className="skeleton-line" style={{ width: 60, height: 12 }} />
+              <div className="skeleton-line skeleton-line--lg" style={{ width: 80 }} />
+              <div className="skeleton-line" style={{ width: 50, height: 10 }} />
+            </div>
+          ))}
+        </div>
+      </header>
+
+      {/* Skeleton KPI Cards */}
+      <section className="dash__metrics dash__metrics--skeleton">
+        {[1, 2, 3, 4, 5, 6].map(i => (
+          <div key={i} className="dash-metric-skeleton">
+            <div className="dash-metric-skeleton__top">
+              <div className="skeleton-line" style={{ width: '50%', height: 14 }} />
+              <div className="skeleton-icon-box" />
+            </div>
+            <div className="skeleton-line skeleton-line--lg" style={{ width: '60%', marginTop: 12 }} />
+            <div className="skeleton-line" style={{ width: '40%', marginTop: 12, height: 12 }} />
+          </div>
+        ))}
+      </section>
+
+      {/* Skeleton Charts Row */}
+      <div className="dash__charts-row dash__charts-row--skeleton">
+        <div className="dash-chart-skeleton">
+          <div className="dash-chart-skeleton__header">
+            <div className="skeleton-line" style={{ width: 150, height: 18 }} />
+            <div className="skeleton-line" style={{ width: 100, height: 14 }} />
+          </div>
+          <div className="dash-chart-skeleton__body">
+            {[1, 2, 3, 4, 5, 6, 7].map(i => (
+              <div key={i} className="skeleton-bar" style={{ height: `${30 + Math.random() * 50}%` }} />
+            ))}
+          </div>
+        </div>
+        <div className="dash-chart-skeleton dash-chart-skeleton--sm">
+          <div className="dash-chart-skeleton__header">
+            <div className="skeleton-line" style={{ width: 120, height: 18 }} />
+          </div>
+          <div className="skeleton-pie-container">
+            <div className="skeleton-pie" />
+          </div>
+        </div>
+      </div>
+
+      {/* Skeleton Activity Section */}
+      <div className="dash__lists-row dash__lists-row--skeleton">
+        <div className="dash-list-skeleton">
+          <div className="skeleton-line" style={{ width: 140, height: 18, marginBottom: 16 }} />
+          {[1, 2, 3, 4, 5].map(i => (
+            <div key={i} className="dash-list-skeleton__item">
+              <div className="skeleton-avatar" />
+              <div className="dash-list-skeleton__content">
+                <div className="skeleton-line" style={{ width: '70%', height: 14 }} />
+                <div className="skeleton-line" style={{ width: '50%', height: 12 }} />
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="dash-list-skeleton">
+          <div className="skeleton-line" style={{ width: 120, height: 18, marginBottom: 16 }} />
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="dash-list-skeleton__item">
+              <div className="skeleton-icon-box skeleton-icon-box--sm" />
+              <div className="dash-list-skeleton__content">
+                <div className="skeleton-line" style={{ width: '80%', height: 14 }} />
+                <div className="skeleton-line" style={{ width: '40%', height: 12 }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   )
 

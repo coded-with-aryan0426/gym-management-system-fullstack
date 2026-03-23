@@ -2,6 +2,8 @@ package com.gym.management.controller;
 
 import com.gym.management.dto.owner.OwnerDashboardStatsDTO;
 import com.gym.management.repository.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,6 +20,8 @@ import java.util.stream.Collectors;
 @CrossOrigin(origins = { "http://localhost:5173", "http://localhost:5174", "http://localhost:5175" })
 @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
 public class OwnerDashboardController {
+
+        private static final Logger log = LoggerFactory.getLogger(OwnerDashboardController.class);
 
         @Autowired
         private TransactionRepository transactionRepository;
@@ -151,7 +155,7 @@ public class OwnerDashboardController {
 
                         return ResponseEntity.ok(stats);
                 } catch (Exception e) {
-                        e.printStackTrace();
+                        log.error("Failed to fetch owner dashboard", e);
                         return ResponseEntity.internalServerError().build();
                 }
         }

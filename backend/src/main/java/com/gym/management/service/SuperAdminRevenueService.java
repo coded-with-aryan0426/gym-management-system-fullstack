@@ -90,8 +90,8 @@ public class SuperAdminRevenueService {
     }
 
     private List<Map<String, Object>> buildCategoryBreakdown(LocalDateTime start, LocalDateTime end) {
-        List<Object[]> rows = transactionRepository.getRevenueByCategory(start, end);
-        return rows.stream().map(row -> {
+        List<Object[]> results = transactionRepository.getRevenueByCategory(start, end, null);
+        return results.stream().map(row -> {
             Map<String, Object> m = new HashMap<>();
             m.put("category", row[0] != null ? row[0].toString() : "Other");
             m.put("amount", row[1] != null ? row[1] : BigDecimal.ZERO);

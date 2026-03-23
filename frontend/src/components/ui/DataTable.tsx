@@ -34,6 +34,7 @@ interface DataTableProps<T> {
     compact?: boolean;
     stickyHeader?: boolean;
     showRowNumbers?: boolean;
+    skeletonRows?: number;
 }
 
 function DataTable<T>({
@@ -49,6 +50,7 @@ function DataTable<T>({
     compact = false,
     stickyHeader = false,
     showRowNumbers = false,
+    skeletonRows = 8,
 }: DataTableProps<T>) {
     const [isMobile, setIsMobile] = useState(false);
 
@@ -67,13 +69,70 @@ function DataTable<T>({
         stickyHeader ? 'data-table--sticky' : '',
     ].filter(Boolean).join(' ');
 
+    // Skeleton Loading State
     if (loading) {
         return (
-            <div className={tableClassNames}>
-                <div className="data-table__loading">
-                    <div className="data-table__spinner" />
-                    <span>Loading...</span>
-                </div>
+            <div className={tableClassNames} role="presentation" aria-busy="true" aria-label="Loading data">
+                {isMobile && mobileCardRender ? (
+                    // Mobile skeleton cards
+                    <div className="data-table__mobile-cards">
+                        {Array.from({ length: skeletonRows }).map((_, i) => (
+                            <div key={i} className="data-table__skeleton-card">
+                                <div className="data-table__skeleton-card-top">
+                                    <div className="data-table__skeleton-avatar" />
+                                    <div className="data-table__skeleton-info">
+                                        <div className="data-table__skeleton-line data-table__skeleton-line--lg" />
+                                        <div className="data-table__skeleton-line data-table__skeleton-line--sm" />
+                                    </div>
+                                    <div className="data-table__skeleton-badge" />
+                                </div>
+                                <div className="data-table__skeleton-card-actions">
+                                    <div className="data-table__skeleton-btn" />
+                                    <div className="data-table__skeleton-btn" />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    // Desktop skeleton table
+                    <table className="data-table__table">
+                        <thead>
+                            <tr>
+                                {showRowNumbers && <th style={{ width: '40px' }}><div className="data-table__skeleton-line" style={{ width: 20 }} /></th>}
+                                {columns.map((col, i) => (
+                                    <th key={col.key} style={{ width: col.width }}>
+                                        <div className="data-table__skeleton-line" style={{ width: `${40 + Math.random() * 30}%` }} />
+                                    </th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {Array.from({ length: skeletonRows }).map((_, rowIdx) => (
+                                <tr key={rowIdx} className="data-table__skeleton-row">
+                                    {showRowNumbers && (
+                                        <td><div className="data-table__skeleton-line" style={{ width: 20 }} /></td>
+                                    )}
+                                    {columns.map((col, colIdx) => (
+                                        <td key={col.key}>
+                                            {colIdx === 0 ? (
+                                                // First column: avatar + text (common pattern)
+                                                <div className="data-table__skeleton-cell-user">
+                                                    <div className="data-table__skeleton-avatar data-table__skeleton-avatar--sm" />
+                                                    <div className="data-table__skeleton-user-info">
+                                                        <div className="data-table__skeleton-line" style={{ width: '80%' }} />
+                                                        <div className="data-table__skeleton-line data-table__skeleton-line--sm" style={{ width: '60%' }} />
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="data-table__skeleton-line" style={{ width: `${50 + Math.random() * 40}%` }} />
+                                            )}
+                                        </td>
+                                    ))}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                )}
             </div>
         );
     }

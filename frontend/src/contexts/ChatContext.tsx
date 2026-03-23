@@ -134,12 +134,9 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
             connectHeaders: {
                 Authorization: `Bearer ${token}`
             },
-            debug: (str) => {
-                console.log(str);
-            },
+            debug: process.env.NODE_ENV === 'development' ? (str) => console.debug(str) : () => {},
             onConnect: () => {
                 setConnected(true);
-                console.log('✅ Connected to WebSocket');
                 // U6 — subscribe to global presence topic
                 presenceSubscriptionRef.current = client.subscribe('/topic/presence', (msg) => {
                     const event = JSON.parse(msg.body);
@@ -150,10 +147,12 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
             },
             onDisconnect: () => {
                 setConnected(false);
-                console.log('❌ Disconnected from WebSocket');
             },
             onStompError: (frame) => {
-                console.error('STOMP Error:', frame.headers['message']);
+                // Log errors server-side only in production
+                if (process.env.NODE_ENV === 'development') {
+                    console.error('STOMP Error:', frame.headers['message']);
+                }
             },
             reconnectDelay: 5000,
         });
@@ -252,11 +251,9 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
             subscriptionRef.current.unsubscribe();
         }
 
-            console.log(`Subscribing to /topic/conversation/${conversationId}`);
         subscriptionRef.current = stompClientRef.current.subscribe(
             `/topic/conversation/${conversationId}`,
             (message) => {
-                console.log("WebSocket received message:", message.body);
                 const body = JSON.parse(message.body);
                 if (body.type) {
                     handleWebSocketEvent(body);
@@ -357,11 +354,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const sendMessage = useCallback((content: string, type: string = 'TEXT', payload: any = null) => {
         if (!stompClientRef.current?.connected || !activeConversation) {
-            console.error("Cannot send: not connected or no active conversation");
             return;
         }
-
-        console.log("Sending status:", stompClientRef.current.connected, activeConversation);
         const chatMessage = {
             conversationId: activeConversation.conversationId,
             senderId: user?.userId || Number(user?.id),

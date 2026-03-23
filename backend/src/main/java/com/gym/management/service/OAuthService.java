@@ -11,17 +11,15 @@ import com.gym.management.security.JwtTokenProvider;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 
 /**
  * Service for handling OAuth2 social login flows.
- * Supports Google and Facebook authentication.
+ * Supports Google authentication only.
  */
 @Service
 public class OAuthService {
@@ -38,14 +36,7 @@ public class OAuthService {
     @Value("${google.client.id:}")
     private String googleClientId;
 
-    @Value("${facebook.app.id:}")
-    private String facebookAppId;
-
-    @Value("${facebook.app.secret:}")
-    private String facebookAppSecret;
-
     private GoogleIdTokenVerifier googleVerifier;
-    private final RestTemplate restTemplate = new RestTemplate();
 
     @PostConstruct
     public void init() {
@@ -82,7 +73,7 @@ public class OAuthService {
             // Profile picture URL available if needed: payload.get("picture")
 
             // Find or create user
-            FindResult findResult = findOrCreateUser(email, googleId, null, AuthProvider.GOOGLE, name);
+            FindResult findResult = findOrCreateUser(email, googleId, AuthProvider.GOOGLE, name);
             User user = findResult.user();
             boolean isNewUser = findResult.isNew();
 
@@ -104,88 +95,36 @@ public class OAuthService {
         }
     }
 
-    /**
-     * Authenticate user with Facebook access token.
-     */
-    @Transactional
-    public AuthResult authenticateWithFacebook(String accessToken) {
-        try {
-            // Verify token and get user info from Facebook
-            String url = "https://graph.facebook.com/me?fields=id,name,email&access_token=" + accessToken;
-
-            @SuppressWarnings("unchecked")
-            ResponseEntity<Map<String, Object>> response = restTemplate.getForEntity(url,
-                    (Class<Map<String, Object>>) (Class<?>) Map.class);
-
-            if (response.getStatusCode() != HttpStatus.OK || response.getBody() == null) {
-                return new AuthResult(false, null, "Invalid Facebook token");
-            }
-
-            Map<String, Object> fbUser = response.getBody();
-            String facebookId = (String) fbUser.get("id");
-            String email = (String) fbUser.get("email");
-            String name = (String) fbUser.get("name");
-
-            if (facebookId == null) {
-                return new AuthResult(false, null, "Could not get Facebook user ID");
-            }
-
-            // Find or create user
-            FindResult findResult = findOrCreateUser(email, null, facebookId, AuthProvider.FACEBOOK, name);
-            User user = findResult.user();
-            boolean isNewUser = findResult.isNew();
-
-            // Update Facebook ID if not set
-            if (user.getFacebookId() == null) {
-                user.setFacebookId(facebookId);
-                userRepository.save(user);
-            }
-
-            // Generate JWT
-            String token = jwtTokenProvider.generateTokenFromUser(user, "facebook_auth", null, null, null, null, null,
-                    null);
-
-            return new AuthResult(true, token, "Success", user, isNewUser);
-
-        } catch (Exception e) {
-            System.err.println("Facebook auth error: " + e.getMessage());
-            return new AuthResult(false, null, "Facebook authentication failed: " + e.getMessage());
-        }
-    }
-
     private record FindResult(User user, boolean isNew) {
     }
 
     /**
      * Find existing user or create new one for social login.
+     * If user's Google email matches their registered email, they get easy login.
+     * Otherwise, they need to use username/mobile and password.
      */
-    private FindResult findOrCreateUser(String email, String googleId, String facebookId,
+    private FindResult findOrCreateUser(String email, String googleId,
             AuthProvider provider, String name) {
-        // Try to find by social ID first
+        // Try to find by Google ID first
         Optional<User> existing = Optional.empty();
 
         if (googleId != null) {
             existing = userRepository.findByGoogleId(googleId);
-        } else if (facebookId != null) {
-            existing = userRepository.findByFacebookId(facebookId);
         }
 
-        // If found by social ID, return
+        // If found by Google ID, return (easy login)
         if (existing.isPresent()) {
             return new FindResult(existing.get(), false);
         }
 
-        // Try to find by email
+        // Try to find by email - this enables easy login if emails match
         if (email != null) {
             existing = userRepository.findByEmail(email);
             if (existing.isPresent()) {
-                // Link social account to existing user
+                // Link Google account to existing user (email match = easy login)
                 User user = existing.get();
                 if (googleId != null && user.getGoogleId() == null) {
                     user.setGoogleId(googleId);
-                }
-                if (facebookId != null && user.getFacebookId() == null) {
-                    user.setFacebookId(facebookId);
                 }
                 return new FindResult(userRepository.save(user), false);
             }
@@ -197,7 +136,6 @@ public class OAuthService {
         newUser.setUsername(generateUsername(name, email));
         newUser.setFullName(name);
         newUser.setGoogleId(googleId);
-        newUser.setFacebookId(facebookId);
         newUser.setAuthProvider(provider);
         newUser.setPassword(passwordEncoder.encode(UUID.randomUUID().toString())); // Random password
         newUser.setStatus("ACTIVE");

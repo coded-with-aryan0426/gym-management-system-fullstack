@@ -14,6 +14,8 @@ import com.gym.management.repository.ProgressNoteRepository;
 import com.gym.management.repository.SessionRatingRepository;
 import com.gym.management.repository.UserRepository;
 import com.gym.management.security.CustomUserDetails;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -45,6 +47,8 @@ import java.util.UUID;
 @CrossOrigin(origins = { "http://localhost:5173", "http://localhost:5174", "http://localhost:5175" })
 @PreAuthorize("hasAnyRole('TRAINER', 'OWNER', 'ADMIN')")
 public class TrainerDashboardController {
+
+    private static final Logger log = LoggerFactory.getLogger(TrainerDashboardController.class);
 
     @Autowired
     private UserRepository userRepository;
@@ -388,7 +392,7 @@ public class TrainerDashboardController {
                 details.setDocumentsJson(objectMapper.writeValueAsString(dto.getDocuments()));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to serialize trainer profile data for trainer {}", trainerId, e);
         }
 
         trainerDetailsRepository.save(details);
@@ -463,9 +467,9 @@ public class TrainerDashboardController {
             return ResponseEntity.ok(apiResponse(true, response, "File uploaded successfully"));
 
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Failed to upload file: {}", type, e);
             return ResponseEntity.internalServerError()
-                    .body(apiResponse(false, null, "Failed to upload file: " + e.getMessage()));
+                    .body(apiResponse(false, null, "Failed to upload file"));
         }
     }
 
@@ -909,7 +913,7 @@ public class TrainerDashboardController {
                     .status(mapStatusForFrontend(s))
                     .build();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to map session to DTO: session {}", s != null ? s.getSessionId() : "null", e);
             return null;
         }
     }

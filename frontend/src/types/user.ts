@@ -14,9 +14,8 @@ export interface User {
     roles: Role[];
     // Social auth fields
     googleId?: string;
-    facebookId?: string;
     phoneNumber?: string;
-    authProvider?: 'LOCAL' | 'GOOGLE' | 'FACEBOOK';
+    authProvider?: 'LOCAL' | 'GOOGLE';
 }
 
 export interface Role {

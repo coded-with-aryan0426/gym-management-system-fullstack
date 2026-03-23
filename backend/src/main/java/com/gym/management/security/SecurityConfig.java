@@ -88,6 +88,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                         // ==================== PUBLIC ENDPOINTS ====================
+                        .requestMatchers("/api/auth/list-users").hasAnyRole("OWNER", "ADMIN")
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/api/superadmin/auth/**").permitAll()
@@ -103,8 +104,7 @@ public class SecurityConfig {
 
                         // ==================== OWNER/ADMIN ONLY ====================
                         // These endpoints manage the entire gym operation
-                        .requestMatchers("/api/dashboard/analytics/**").permitAll() // Temporarily allow public access
-                                                                                    // for testing
+                        .requestMatchers("/api/dashboard/analytics/**").hasAnyRole("OWNER", "ADMIN")
                         .requestMatchers("/api/dashboard/**").hasAnyRole("OWNER", "ADMIN")
                         .requestMatchers("/api/stats/**").hasAnyRole("OWNER", "ADMIN")
                         .requestMatchers("/api/settings/**").hasAnyRole("OWNER", "ADMIN")
@@ -145,10 +145,14 @@ public class SecurityConfig {
                         .requestMatchers("/api/users/me/**").authenticated()
                         .requestMatchers("/api/users/profile/**").authenticated()
 
-                        // ==================== PROTECTED BY DEFAULT ====================
                         // Everything else requires authentication
                         .anyRequest().authenticated())
-                .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()));
+                .headers(headers -> {
+                        headers.frameOptions(frame -> frame.sameOrigin());
+                        headers.contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'"));
+                        headers.permissionsPolicy(permissions -> permissions.policy("geolocation=(), microphone=(), camera=()"));
+                        headers.httpStrictTransportSecurity(hsts -> hsts.includeSubDomains(true).maxAgeInSeconds(31536000));
+                });
 
         // Add authentication provider
         http.authenticationProvider(authenticationProvider());
@@ -157,7 +161,7 @@ public class SecurityConfig {
         http.addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class);
 
         // Super admin passphrase-token auth for /api/superadmin/**
-        http.addFilterAfter(superAdminAuthFilter, JwtAuthenticationFilter.class);
+        http.addFilterAfter(superAdminAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         // JWT filter for production authentication
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

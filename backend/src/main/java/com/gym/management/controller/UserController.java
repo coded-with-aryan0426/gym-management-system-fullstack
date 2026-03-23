@@ -1,10 +1,12 @@
 package com.gym.management.controller;
 
 import com.gym.management.model.User;
+import com.gym.management.model.Role;
 import com.gym.management.model.TrainerDetails;
 import com.gym.management.model.TrainerCompensationRule;
 import com.gym.management.model.CheckIn;
 import com.gym.management.dto.trainer.TrainerProfileDTO;
+import com.gym.management.dto.UserProfileDTO;
 import com.gym.management.repository.TrainerDetailsRepository;
 import com.gym.management.repository.TrainerCompensationRuleRepository;
 import com.gym.management.repository.CheckInRepository;
@@ -14,6 +16,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -22,8 +26,10 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "*") // Allow all origins for v1 simplicity
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:5174", "http://localhost:5175"})
 public class UserController {
+
+    private static final Logger log = LoggerFactory.getLogger(UserController.class);
 
     @Autowired
     private UserService userService;
@@ -44,11 +50,14 @@ public class UserController {
     private ObjectMapper objectMapper;
 
     @GetMapping
-    public List<User> getUsers(@RequestParam(required = false) String role) {
+    public List<UserProfileDTO> getUsers(@RequestParam(required = false) String role) {
+        List<User> users;
         if (role != null) {
-            return userService.getUsersByRole(role.toUpperCase());
+            users = userService.getUsersByRole(role.toUpperCase());
+        } else {
+            users = userService.getAllUsers();
         }
-        return userService.getAllUsers();
+        return users.stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 
     @GetMapping("/members/plan-names")
@@ -78,9 +87,9 @@ public class UserController {
         try {
             return ResponseEntity.ok(userService.getAllMembers());
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to retrieve members", e);
             return ResponseEntity.status(500)
-                    .body(java.util.Map.of("error", e.getMessage(), "type", e.getClass().getName()));
+                    .body(java.util.Map.of("error", "Failed to retrieve members. Please try again."));
         }
     }
 
@@ -94,9 +103,9 @@ public class UserController {
         try {
             return ResponseEntity.ok(userService.getMembersPaginated(page, size, search, status, plan));
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to retrieve paginated members", e);
             return ResponseEntity.status(500)
-                    .body(java.util.Map.of("error", e.getMessage(), "type", e.getClass().getName()));
+                    .body(java.util.Map.of("error", "Failed to retrieve members. Please try again."));
         }
     }
 
@@ -110,9 +119,9 @@ public class UserController {
         try {
             return ResponseEntity.ok(userService.getTrainersPaginated(page, size, search, role, status));
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to retrieve paginated trainers", e);
             return ResponseEntity.status(500)
-                    .body(java.util.Map.of("error", e.getMessage(), "type", e.getClass().getName()));
+                    .body(java.util.Map.of("error", "Failed to retrieve trainers. Please try again."));
         }
     }
 
@@ -144,30 +153,34 @@ public class UserController {
     }
 
     @GetMapping("/search")
-    public List<User> searchUsers(
+    public List<UserProfileDTO> searchUsers(
             @RequestParam String role,
             @RequestParam String q) {
-        return userService.searchUsers(role.toUpperCase(), q);
+        return userService.searchUsers(role.toUpperCase(), q)
+                .stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 
     @GetMapping("/{id:\\d+}")
-    public User getUser(@PathVariable Long id) {
-        return userService.getUserById(id);
+    public ResponseEntity<UserProfileDTO> getUser(@PathVariable Long id) {
+        User user = userService.getUserById(id);
+        return (user != null)
+                ? ResponseEntity.ok(convertToDTO(user))
+                : ResponseEntity.notFound().build();
     }
 
     @GetMapping("/{id}/customers")
-    public ResponseEntity<Set<User>> getCustomers(@PathVariable Long id) {
+    public ResponseEntity<Set<UserProfileDTO>> getCustomers(@PathVariable Long id) {
         User user = userService.getUserById(id);
         return (user != null)
-                ? ResponseEntity.ok(user.getCustomers())
+                ? ResponseEntity.ok(user.getCustomers().stream().map(this::convertToDTO).collect(Collectors.toSet()))
                 : ResponseEntity.notFound().build();
     }
 
     @GetMapping("/{id}/trainers")
-    public ResponseEntity<Set<User>> getTrainers(@PathVariable Long id) {
+    public ResponseEntity<Set<UserProfileDTO>> getTrainers(@PathVariable Long id) {
         User user = userService.getUserById(id);
         return (user != null)
-                ? ResponseEntity.ok(user.getTrainers())
+                ? ResponseEntity.ok(user.getTrainers().stream().map(this::convertToDTO).collect(Collectors.toSet()))
                 : ResponseEntity.notFound().build();
     }
 
@@ -175,7 +188,7 @@ public class UserController {
     public ResponseEntity<?> createUser(@RequestBody User user) {
         try {
             User created = userService.createUser(user);
-            return ResponseEntity.ok(created);
+            return ResponseEntity.ok(convertToDTO(created));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error creating user: " + e.getMessage());
         }
@@ -186,7 +199,7 @@ public class UserController {
         try {
             User updated = userService.updateUser(id, user);
             if (updated != null) {
-                return ResponseEntity.ok(updated);
+                return ResponseEntity.ok(convertToDTO(updated));
             }
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
@@ -636,5 +649,23 @@ public class UserController {
             return ResponseEntity.internalServerError()
                     .body(Map.of("error", "Failed to fetch attendance: " + e.getMessage()));
         }
+    }
+
+    private UserProfileDTO convertToDTO(User user) {
+        if (user == null) return null;
+        return UserProfileDTO.builder()
+                .userId(user.getUserId())
+                .username(user.getUsername())
+                .fullName(user.getFullName())
+                .email(user.getEmail())
+                .phone(user.getPhone())
+                .avatarId(user.getAvatarId())
+                .createdAt(user.getCreatedAt())
+                .leavingDate(user.getLeavingDate())
+                .status(user.getStatus())
+                .roles(user.getRoles().stream()
+                        .map(Role::getRoleName)
+                        .collect(Collectors.toSet()))
+                .build();
     }
 }

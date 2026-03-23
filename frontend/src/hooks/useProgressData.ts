@@ -54,7 +54,11 @@ export function useMemberSummary(memberId: number) {
     return useProgressData({
         fetchFn: () => memberProgressApi.getSummary(memberId),
         dependencies: [memberId],
-        onError: (error) => console.error('Error fetching summary:', error)
+        onError: (error) => {
+            if (process.env.NODE_ENV === 'development') {
+                console.error('Error fetching summary:', error);
+            }
+        }
     });
 }
 
@@ -62,7 +66,11 @@ export function useMemberMetrics(memberId: number, timeRange: string) {
     return useProgressData({
         fetchFn: () => memberProgressApi.getMetrics(memberId),
         dependencies: [memberId, timeRange],
-        onError: (error) => console.error('Error fetching metrics:', error)
+        onError: (error) => {
+            if (process.env.NODE_ENV === 'development') {
+                console.error('Error fetching metrics:', error);
+            }
+        }
     });
 }
 
@@ -70,7 +78,11 @@ export function useMemberMeasurements(memberId: number) {
     return useProgressData({
         fetchFn: () => memberProgressApi.getMeasurements(memberId),
         dependencies: [memberId],
-        onError: (error) => console.error('Error fetching measurements:', error)
+        onError: (error) => {
+            if (process.env.NODE_ENV === 'development') {
+                console.error('Error fetching measurements:', error);
+            }
+        }
     });
 }
 
@@ -78,7 +90,11 @@ export function useMemberGoals(memberId: number) {
     return useProgressData({
         fetchFn: () => memberProgressApi.getGoals(memberId),
         dependencies: [memberId],
-        onError: (error) => console.error('Error fetching goals:', error)
+        onError: (error) => {
+            if (process.env.NODE_ENV === 'development') {
+                console.error('Error fetching goals:', error);
+            }
+        }
     });
 }
 
@@ -86,7 +102,11 @@ export function useMemberWorkouts(memberId: number) {
     return useProgressData({
         fetchFn: () => memberProgressApi.getWorkouts(memberId),
         dependencies: [memberId],
-        onError: (error) => console.error('Error fetching workouts:', error)
+        onError: (error) => {
+            if (process.env.NODE_ENV === 'development') {
+                console.error('Error fetching workouts:', error);
+            }
+        }
     });
 }
 
@@ -94,7 +114,11 @@ export function useMemberPhotos(memberId: number) {
     return useProgressData({
         fetchFn: () => memberProgressApi.getPhotos(memberId),
         dependencies: [memberId],
-        onError: (error) => console.error('Error fetching photos:', error)
+        onError: (error) => {
+            if (process.env.NODE_ENV === 'development') {
+                console.error('Error fetching photos:', error);
+            }
+        }
     });
 }
 
@@ -102,6 +126,10 @@ export function useMemberNotes(memberId: number) {
     return useProgressData({
         fetchFn: () => memberProgressApi.getNotes(memberId),
         dependencies: [memberId],
-        onError: (error) => console.error('Error fetching notes:', error)
+        onError: (error) => {
+            if (process.env.NODE_ENV === 'development') {
+                console.error('Error fetching notes:', error);
+            }
+        }
     });
 }

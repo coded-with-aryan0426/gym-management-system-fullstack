@@ -14,7 +14,7 @@ import java.util.*;
  */
 @RestController
 @RequestMapping("/api/gyms")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:5174", "http://localhost:5175"})
 public class GymController {
 
     @Autowired

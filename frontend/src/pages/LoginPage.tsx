@@ -184,9 +184,10 @@ export default function LoginPage() {
                 username: data.username,
                 email: data.email,
                 fullName: data.fullName,
-                role: data.role || 'CUSTOMER',
+                role: data.staffRole || data.primaryRole || data.role || 'CUSTOMER',
                 activeGymId: data.activeGymId,
-                activeGymName: data.activeGymName
+                activeGymName: data.activeGymName,
+                token: data.token // BUG FIX: Added token to user object for chatApi.ts
             });
         }
 
@@ -196,7 +197,7 @@ export default function LoginPage() {
             setShowGymSelector(true);
         } else {
             // Redirect based on role
-            const role = (data.role || '').toUpperCase();
+            const role = (data.staffRole || data.primaryRole || data.role || 'CUSTOMER').toUpperCase();
             if (role === 'OWNER' || role === 'ADMIN') {
                 navigate('/dashboard');
             } else if (role === 'TRAINER') {
@@ -423,7 +424,7 @@ export default function LoginPage() {
                             <div style={{ marginBottom: 20 }}>
                                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
                                     <label style={{ fontSize: 11, fontWeight: 600, color: colors.textSecondary, textTransform: "uppercase", letterSpacing: "0.5px" }}>Password</label>
-                                    <a href="#" style={{ color: colors.crimson, textDecoration: "none", fontSize: 11, fontWeight: 500 }}>Forgot password?</a>
+                                    <a href="/forgot-password" style={{ color: colors.crimson, textDecoration: "none", fontSize: 11, fontWeight: 500 }}>Forgot password?</a>
                                 </div>
                                 <div style={{ position: "relative" }}>
                                     <input

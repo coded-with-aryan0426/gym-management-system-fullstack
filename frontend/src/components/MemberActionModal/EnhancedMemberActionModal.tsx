@@ -44,9 +44,6 @@ const EnhancedMemberActionModal: React.FC<EnhancedMemberActionModalProps> = ({
   realTimeEnabled = true,
   optimisticUpdates = true,
 }) => {
-  // Debug log to confirm enhanced modal is being used
-  console.log('🚀 EnhancedMemberActionModal loaded!', { member, isOpen });
-
   // Active tab state for dynamic right panel
   type TabType = "profile" | "payments" | "attendance" | "renew" | "message" | "trainers" | "delete";
   const [activeTab, setActiveTab] = useState<TabType>("profile")

@@ -41,7 +41,7 @@ public class DashboardAnalyticsService {
 
             // Get revenue for this day using existing method
             BigDecimal dailyRevenue = transactionRepository.sumAmountByTypeAndStatusAndDateRange(
-                    "INCOME", "Completed", startOfDay, endOfDay);
+                    "INCOME", "Completed", startOfDay, endOfDay, null);
             double revenue = dailyRevenue != null ? dailyRevenue.doubleValue() : 0.0;
 
             // If no real data, provide realistic demo data
@@ -166,7 +166,7 @@ public class DashboardAnalyticsService {
             LocalDateTime endOfDay = current.plusDays(1).atStartOfDay();
 
             // Get revenue by category using existing method
-            List<Object[]> categoryStats = transactionRepository.getCategoryStats("INCOME", startOfDay, endOfDay);
+            List<Object[]> categoryStats = transactionRepository.getCategoryStats("INCOME", startOfDay, endOfDay, null);
 
             double membership = 0.0, pt = 0.0, classes = 0.0, supplements = 0.0, other = 0.0;
 
@@ -346,7 +346,7 @@ public class DashboardAnalyticsService {
         // Get current month revenue using existing method
         LocalDateTime startOfMonth = firstDayOfMonth.atStartOfDay();
         BigDecimal currentRevenue = transactionRepository.sumAmountByTypeAndStatusAndDateRange(
-                "INCOME", "Completed", startOfMonth, LocalDateTime.now());
+                "INCOME", "Completed", startOfMonth, LocalDateTime.now(), null);
         double current = currentRevenue != null ? currentRevenue.doubleValue() : 0.0;
 
         // If no real data, provide realistic demo progress

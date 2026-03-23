@@ -881,3 +881,141 @@
   background: rgba(99, 102, 241, 0.06);
   color: #6366f1;
 }
+/* ============================================================================
+   Skeleton Loading Styles
+   ============================================================================ */
+@keyframes dt-skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.data-table__skeleton-line {
+  height: 14px;
+  background: linear-gradient(90deg, 
+    var(--bg-tertiary, rgba(255,255,255,0.05)) 25%, 
+    var(--bg-elevated, rgba(255,255,255,0.1)) 50%, 
+    var(--bg-tertiary, rgba(255,255,255,0.05)) 75%
+  );
+  background-size: 200% 100%;
+  animation: dt-skeleton-shimmer 1.5s ease-in-out infinite;
+  border-radius: 4px;
+}
+
+.data-table__skeleton-line--lg {
+  height: 16px;
+  width: 70%;
+}
+
+.data-table__skeleton-line--sm {
+  height: 12px;
+  width: 50%;
+  margin-top: 6px;
+}
+
+.data-table__skeleton-row {
+  border-bottom: 1px solid var(--border-subtle, rgba(255,255,255,0.06));
+}
+
+.data-table__skeleton-row td {
+  padding: 14px 12px;
+}
+
+.data-table__skeleton-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(90deg, 
+    var(--bg-tertiary, rgba(255,255,255,0.05)) 25%, 
+    var(--bg-elevated, rgba(255,255,255,0.1)) 50%, 
+    var(--bg-tertiary, rgba(255,255,255,0.05)) 75%
+  );
+  background-size: 200% 100%;
+  animation: dt-skeleton-shimmer 1.5s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.data-table__skeleton-avatar--sm {
+  width: 32px;
+  height: 32px;
+}
+
+.data-table__skeleton-cell-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.data-table__skeleton-user-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.data-table__skeleton-badge {
+  width: 70px;
+  height: 24px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, 
+    var(--bg-tertiary, rgba(255,255,255,0.05)) 25%, 
+    var(--bg-elevated, rgba(255,255,255,0.1)) 50%, 
+    var(--bg-tertiary, rgba(255,255,255,0.05)) 75%
+  );
+  background-size: 200% 100%;
+  animation: dt-skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
+/* Mobile Skeleton Cards */
+.data-table__skeleton-card {
+  background: var(--bg-secondary, rgba(255,255,255,0.04));
+  border: 1px solid var(--border-subtle, rgba(255,255,255,0.06));
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.data-table__skeleton-card-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.data-table__skeleton-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.data-table__skeleton-card-actions {
+  display: flex;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-subtle, rgba(255,255,255,0.06));
+}
+
+.data-table__skeleton-btn {
+  flex: 1;
+  height: 36px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, 
+    var(--bg-tertiary, rgba(255,255,255,0.05)) 25%, 
+    var(--bg-elevated, rgba(255,255,255,0.1)) 50%, 
+    var(--bg-tertiary, rgba(255,255,255,0.05)) 75%
+  );
+  background-size: 200% 100%;
+  animation: dt-skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
+/* Light Theme Skeleton */
+:root.theme-light .data-table__skeleton-line,
+:root.theme-light .data-table__skeleton-avatar,
+:root.theme-light .data-table__skeleton-badge,
+:root.theme-light .data-table__skeleton-btn {
+  background: linear-gradient(90deg, 
+    rgba(0,0,0,0.06) 25%, 
+    rgba(0,0,0,0.03) 50%, 
+    rgba(0,0,0,0.06) 75%
+  );
+  background-size: 200% 100%;
+}

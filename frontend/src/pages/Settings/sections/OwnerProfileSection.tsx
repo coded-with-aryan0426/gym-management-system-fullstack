@@ -235,14 +235,6 @@ const OwnerProfileSection: React.FC = () => {
       return
     }
 
-    // Debug: Log profile data before sending
-    console.log("Profile data before save:", {
-      gymName: profile.gymName,
-      gymNameLength: profile.gymName?.length,
-      gymNameTrimmed: profile.gymName?.trim(),
-      isGymNameEmpty: !profile.gymName || profile.gymName.trim().length === 0
-    })
-
     setIsSaving(true)
     try {
         // Prepare data for backend
@@ -261,9 +253,6 @@ const OwnerProfileSection: React.FC = () => {
           gymPhone: profile.phone, // Backend expects gymPhone for gym phone
           gymEmail: profile.email, // Backend expects gymEmail for gym email
         }
-        
-        // Debug: Log the request data
-        console.log("Sending profile update request:", JSON.stringify(requestData, null, 2))
         
         // Save to backend via owner-profile endpoint
         await api.put('/settings/gym/owner-profile', requestData)

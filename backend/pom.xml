@@ -156,6 +156,18 @@
 					</excludes>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.flywaydb</groupId>
+				<artifactId>flyway-maven-plugin</artifactId>
+				<version>9.22.3</version>
+				<configuration>
+					<!-- SECURITY WARNING: Hardcoded credentials. Use Maven properties or environment variables in production. -->
+					<url>jdbc:oracle:thin:@//localhost:1521/FREE</url>
+					<user>system</user>
+					<password>Oracle123</password>
+					<locations>classpath:db/migration</locations>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 

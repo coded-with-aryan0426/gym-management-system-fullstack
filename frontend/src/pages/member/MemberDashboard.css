@@ -442,3 +442,91 @@
         font-size: 26px;
     }
 }
+
+/* ============================================================================
+   Member Dashboard Skeleton Loading
+   ============================================================================ */
+@keyframes member-skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.member-dashboard--skeleton .skeleton-line {
+  background: linear-gradient(90deg, 
+    var(--bg-tertiary, rgba(255,255,255,0.05)) 25%, 
+    var(--bg-elevated, rgba(255,255,255,0.1)) 50%, 
+    var(--bg-tertiary, rgba(255,255,255,0.05)) 75%
+  );
+  background-size: 200% 100%;
+  animation: member-skeleton-shimmer 1.5s ease-in-out infinite;
+  border-radius: 6px;
+  height: 16px;
+}
+
+.member-dashboard--skeleton .skeleton-line--lg {
+  height: 28px;
+}
+
+.member-dashboard--skeleton .skeleton-stat-card {
+  background: var(--bg-secondary, rgba(255,255,255,0.04));
+  border: 1px solid var(--border-subtle, rgba(255,255,255,0.06));
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.member-dashboard--skeleton .skeleton-card {
+  background: var(--bg-secondary, rgba(255,255,255,0.04));
+  border: 1px solid var(--border-subtle, rgba(255,255,255,0.06));
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 16px;
+}
+
+.member-dashboard--skeleton .skeleton-card--banner {
+  min-height: 120px;
+}
+
+.member-dashboard--skeleton .skeleton-quick-actions {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.member-dashboard--skeleton .skeleton-action-btn {
+  height: 80px;
+  background: linear-gradient(90deg, 
+    var(--bg-tertiary, rgba(255,255,255,0.05)) 25%, 
+    var(--bg-elevated, rgba(255,255,255,0.1)) 50%, 
+    var(--bg-tertiary, rgba(255,255,255,0.05)) 75%
+  );
+  background-size: 200% 100%;
+  animation: member-skeleton-shimmer 1.5s ease-in-out infinite;
+  border-radius: 12px;
+}
+
+.member-dashboard--skeleton .skeleton-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(90deg, 
+    var(--bg-tertiary, rgba(255,255,255,0.05)) 25%, 
+    var(--bg-elevated, rgba(255,255,255,0.1)) 50%, 
+    var(--bg-tertiary, rgba(255,255,255,0.05)) 75%
+  );
+  background-size: 200% 100%;
+  animation: member-skeleton-shimmer 1.5s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.member-dashboard--skeleton .skeleton-list-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .member-dashboard--skeleton .skeleton-quick-actions {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

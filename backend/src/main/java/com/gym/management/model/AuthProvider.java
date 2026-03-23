@@ -6,6 +6,5 @@ package com.gym.management.model;
  */
 public enum AuthProvider {
     LOCAL, // Traditional email + password
-    GOOGLE, // Google OAuth
-    FACEBOOK // Facebook Login
+    GOOGLE // Google OAuth
 }

@@ -54,8 +54,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
         // Social auth finders
         java.util.Optional<User> findByGoogleId(String googleId);
 
-        java.util.Optional<User> findByFacebookId(String facebookId);
-
         // Custom queries to avoid eager loading issues
         @Query("SELECT u.fullName FROM User u WHERE u.userId = :userId")
         String findFullNameByUserId(@Param("userId") Long userId);

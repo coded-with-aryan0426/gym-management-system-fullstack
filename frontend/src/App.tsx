@@ -30,6 +30,8 @@ const LandingPage = lazy(() => import('./pages/LandingPage'));
 const UnauthorizedPage = lazy(() => import('./pages/UnauthorizedPage'));
 const ChangePasswordFirst = lazy(() => import('./pages/ChangePasswordFirst'));
 const GoogleCallback = lazy(() => import('./pages/auth/GoogleCallback'));
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
 
 // Static Pages
 const AboutPage = lazy(() => import('./pages/static/AboutPage'));
@@ -126,6 +128,8 @@ function App() {
                 <Routes>
                   {/* Public Routes */}
                   <Route path="/" element={<LandingPage />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                   <Route path="/portal" element={<SuperAdminPortal />} />
                   <Route path="/unauthorized" element={<UnauthorizedPage />} />
                   <Route path="/change-password" element={<ChangePasswordFirst />} />

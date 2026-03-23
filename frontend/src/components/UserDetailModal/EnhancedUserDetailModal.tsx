@@ -77,7 +77,6 @@ const EnhancedUserDetailModal: React.FC<EnhancedUserDetailModalProps> = ({
         userId: user.id,
         enabled: realTimeEnabled && isOpen,
         onUserUpdate: (updatedUser) => {
-            console.log('[EnhancedUserDetailModal] User updated:', updatedUser);
             // Update local state with new user data
             setEditForm({
                 name: updatedUser.fullName,
@@ -88,7 +87,6 @@ const EnhancedUserDetailModal: React.FC<EnhancedUserDetailModalProps> = ({
             });
         },
         onRelationshipUpdate: (relationships) => {
-            console.log('[EnhancedUserDetailModal] Relationships updated:', relationships);
             fetchRelatedUsers(true);
         }
     });

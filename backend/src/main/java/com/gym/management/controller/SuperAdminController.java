@@ -203,7 +203,7 @@ public class SuperAdminController {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime sixMonthsAgo = now.minusMonths(5).withDayOfMonth(1).toLocalDate().atStartOfDay();
 
-        List<Transaction> transactions = transactionRepository.findByDateRange(sixMonthsAgo, now).stream()
+        List<Transaction> transactions = transactionRepository.findByDateRange(sixMonthsAgo, now, null).stream()
                 .filter(t -> gymId.equals(t.getGymId()) && "INCOME".equalsIgnoreCase(t.getType()) && "Completed".equalsIgnoreCase(t.getStatus()))
                 .toList();
 
