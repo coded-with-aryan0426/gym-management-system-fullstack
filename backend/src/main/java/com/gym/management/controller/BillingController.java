@@ -1,7 +1,6 @@
 package com.gym.management.controller;
 
 import com.gym.management.dto.BillingSettingsDTO;
-import com.gym.management.security.CustomUserDetails;
 import com.gym.management.security.DataScopeValidator;
 import com.gym.management.service.BillingService;
 import org.slf4j.Logger;
@@ -10,8 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -198,13 +195,6 @@ public class BillingController {
 
     // ==================== Helper Methods ====================
 
-    private Long getCurrentUserId() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && auth.getPrincipal() instanceof CustomUserDetails) {
-            return ((CustomUserDetails) auth.getPrincipal()).getId();
-        }
-        return null;
-    }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleAllExceptions(Exception e) {

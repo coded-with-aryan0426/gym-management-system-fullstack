@@ -7,14 +7,9 @@ import com.gym.management.model.User;
 import com.gym.management.repository.CheckInRepository;
 import com.gym.management.repository.NotificationRepository;
 import com.gym.management.repository.TransactionRepository;
-import com.gym.management.security.DataScopeValidator;
 import com.gym.management.service.UserService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
@@ -28,8 +23,6 @@ import java.util.stream.Collectors;
 @CrossOrigin(origins = {"http://localhost:5173", "http://localhost:5174", "http://localhost:5175"})
 public class MemberDetailController {
 
-    private static final Logger log = LoggerFactory.getLogger(MemberDetailController.class);
-
     @Autowired
     private CheckInRepository checkInRepository;
 
@@ -42,9 +35,6 @@ public class MemberDetailController {
     @Autowired
     private UserService userService;
     
-    @Autowired
-    private DataScopeValidator dataScopeValidator;
-
     /**
      * GET /api/members/{memberId}/attendance
      */
