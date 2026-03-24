@@ -18,6 +18,7 @@ import com.gym.management.repository.RoleRepository;
 import com.gym.management.repository.UserRepository;
 import com.gym.management.repository.TieredMembershipPlanRepository;
 import com.gym.management.repository.PlanVariantRepository;
+import com.gym.management.service.FeatureFlagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -74,6 +75,9 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private FeatureFlagService featureFlagService;
+
     @Override
     public void run(String... args) throws Exception {
         // Initialize roles first (they are required for users)
@@ -100,6 +104,9 @@ public class DataInitializer implements CommandLineRunner {
         if (ptSessionRepository.count() == 0) {
             initializeSamplePTSessions();
         }
+
+        // Seed default feature flags if not present
+        featureFlagService.seedDefaultFlags();
     }
 
     private void initializeRoles() {

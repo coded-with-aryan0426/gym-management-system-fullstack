@@ -9,6 +9,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 
 // Import new design system
 import './styles/global.css';
+import FeedbackWidget from './components/feedback/FeedbackWidget';
 
 // Lazy load pages for faster initial load
 const Dashboard = lazy(() => import('./pages/Dashboard/Dashboard'));
@@ -39,6 +40,7 @@ const ContactPage = lazy(() => import('./pages/static/ContactPage'));
 const PrivacyPage = lazy(() => import('./pages/static/PrivacyPage'));
 const TermsPage = lazy(() => import('./pages/static/TermsPage'));
 const MemberAppPage = lazy(() => import('./pages/static/MemberAppPage'));
+const PricingPage = lazy(() => import('./pages/static/PricingPage'));
 
 // Trainer Dashboard Pages
 const TrainerLayout = lazy(() => import('./pages/trainer/TrainerLayout'));
@@ -74,9 +76,12 @@ const SAUsers = lazy(() => import('./pages/superadmin/SAUsers'));
 const SARevenue = lazy(() => import('./pages/superadmin/SARevenue'));
 const SAErrors = lazy(() => import('./pages/superadmin/SAErrors'));
 const SAFeatureFlags = lazy(() => import('./pages/superadmin/SAFeatureFlags'));
+const SAFeatures = lazy(() => import('./pages/superadmin/SAFeatures'));
 const SASecurity = lazy(() => import('./pages/superadmin/SASecurity'));
 const SADatabase = lazy(() => import('./pages/superadmin/SADatabase'));
 const SAAnalytics = lazy(() => import('./pages/superadmin/SAAnalytics'));
+const SABetaFeedback = lazy(() => import('./pages/superadmin/SABetaFeedback'));
+const SAInsights = lazy(() => import('./pages/superadmin/SAInsights'));
 const SuperAdminPortal = lazy(() => import('./pages/superadmin/SuperAdminPortal'));
 
 // Utility / Premium Pages
@@ -103,6 +108,7 @@ const PUBLIC_LANDING_ROUTES = new Set([
   '/privacy',
   '/terms',
   '/member-app',
+  '/pricing',
 ]);
 
 function ScrollToTopOnPublicRoutes() {
@@ -147,6 +153,7 @@ function App() {
                   <Route path="/privacy" element={<PrivacyPage />} />
                   <Route path="/terms" element={<TermsPage />} />
                   <Route path="/member-app" element={<MemberAppPage />} />
+                  <Route path="/pricing" element={<PricingPage />} />
 
                   {/* OAuth Callback Routes */}
                   <Route path="/auth/google/callback" element={<GoogleCallback />} />
@@ -211,9 +218,12 @@ function App() {
                           <Route path="revenue" element={<SARevenue />} />
                           <Route path="errors" element={<SAErrors />} />
                           <Route path="features" element={<SAFeatureFlags />} />
+                          <Route path="feature-toggles" element={<SAFeatures />} />
                           <Route path="security" element={<SASecurity />} />
                           <Route path="database" element={<SADatabase />} />
                           <Route path="analytics" element={<SAAnalytics />} />
+                          <Route path="feedback" element={<SABetaFeedback />} />
+                          <Route path="beta-insights" element={<SAInsights />} />
                           <Route path="*" element={<Navigate to="/superadmin" replace />} />
                         </Routes>
                       </SuperAdminLayout>
@@ -255,6 +265,7 @@ function App() {
                 </Routes>
               </Suspense>
             </ErrorBoundary>
+            <FeedbackWidget />
         </AppProvider>
       </EditorRoot>
     </BrowserRouter>

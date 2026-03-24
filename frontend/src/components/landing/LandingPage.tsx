@@ -12,6 +12,7 @@ import ValueStack from './ValueStack';
 import SocialProof from './SocialProof';
 import Transformation from './Transformation';
 import SecondaryCTA from './SecondaryCTA';
+import PricingPlans from './PricingPlans';
 import Footer from './Footer';
 import ScrollToTop from './ScrollToTop';
 import ScrollProgress from './ScrollProgress';
@@ -69,6 +70,10 @@ export default function LandingPage() {
 
         <section id="cta">
           <SecondaryCTA onSignupClick={handleOpenSignup} />
+        </section>
+
+        <section id="pricing">
+          <PricingPlans />
         </section>
       </main>
       <Footer />

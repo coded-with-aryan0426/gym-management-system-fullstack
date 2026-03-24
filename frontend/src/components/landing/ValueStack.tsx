@@ -4,6 +4,8 @@ import React from 'react';
 import { Box, Typography, Card, List, ListItem, ListItemIcon, ListItemText, Paper, Button, Grid, Container } from '@mui/material';
 import { Crown, Target, Smartphone, Settings, Check, ArrowRight, Lock } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useGeoLocation } from '../../hooks/useGeoLocation';
+import { formatPrice, convertPrice } from '../../utils/geo.utils';
 
 const valueTiers = [
   {
@@ -11,7 +13,7 @@ const valueTiers = [
     icon: Crown,
     title: 'Owner Command Center',
     subtitle: 'Complete business intelligence suite',
-    value: '₹2,49,750',
+    valueINR: 249750,
     features: [
       'Real-time revenue dashboard',
       'Multi-location management',
@@ -26,7 +28,7 @@ const valueTiers = [
     icon: Target,
     title: 'Trainer Toolkit',
     subtitle: 'Client management powerhouse',
-    value: '₹1,24,750',
+    valueINR: 124750,
     features: [
       'Client management system',
       'Workout plan builder (drag & drop)',
@@ -41,7 +43,7 @@ const valueTiers = [
     icon: Smartphone,
     title: 'Member Experience',
     subtitle: 'White-labeled mobile app',
-    value: '₹83,250',
+    valueINR: 83250,
     features: [
       'Branded mobile app (YOUR logo)',
       'Easy class booking',
@@ -56,7 +58,7 @@ const valueTiers = [
     icon: Settings,
     title: 'Operations Engine',
     subtitle: 'Automate your entire gym',
-    value: '₹1,24,750',
+    valueINR: 124750,
     features: [
       'Check-in system (QR/biometric)',
       'Equipment maintenance tracking',
@@ -68,22 +70,34 @@ const valueTiers = [
   },
 ];
 
+const PLAN_PRICE_INR = 4999;
+const TOTAL_VALUE_INR = 582500;
+const DAILY_VALUE_INR = 166;
+
 export default function ValueStack() {
   const { theme } = useTheme();
+  const { currency } = useGeoLocation();
   const isDark = theme === 'dark';
 
+  const planPrice = formatPrice(convertPrice(PLAN_PRICE_INR, currency), currency);
+  const totalValue = formatPrice(convertPrice(TOTAL_VALUE_INR, currency), currency);
+  const dailyValue = formatPrice(convertPrice(DAILY_VALUE_INR, currency), currency);
+
+  const getFormattedValue = (valueINR: number) => {
+    return formatPrice(convertPrice(valueINR, currency), currency);
+  };
+
   return (
-      <Box
-        sx={{
-          backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC',
-          paddingY: { xs: '48px', md: '72px' },
-          borderTop: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.05)',
-          transition: 'background-color 0.3s ease'
-        }}
-      >
-        <Container maxWidth="lg">
-          {/* Section Header */}
-          <Box sx={{ textAlign: 'center', marginBottom: 5, maxWidth: 800, marginX: 'auto' }}>
+    <Box
+      sx={{
+        backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC',
+        paddingY: { xs: '48px', md: '72px' },
+        borderTop: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.05)',
+        transition: 'background-color 0.3s ease'
+      }}
+    >
+      <Container maxWidth="lg">
+        <Box sx={{ textAlign: 'center', marginBottom: 5, maxWidth: 800, marginX: 'auto' }}>
           <Typography
             sx={{
               fontSize: '14px',
@@ -121,27 +135,25 @@ export default function ValueStack() {
           </Typography>
         </Box>
 
-        {/* Value Tiers Grid */}
         <Grid container spacing={3}>
           {valueTiers.map((tier) => (
             <Grid size={{ xs: 12, md: 6 }} key={tier.id}>
               <Card
-                  sx={{
-                    backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)',
-                    borderRadius: '24px',
-                    padding: 4,
-                    border: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.08)',
-                    height: '100%',
-                    transition: 'all 0.3s ease',
-                    boxShadow: isDark ? 'none' : '0 2px 8px rgba(0,0,0,0.05)',
-                    '&:hover': {
-                      borderColor: 'rgba(230, 57, 70, 0.3)',
-                      transform: 'translateY(-4px)',
-                      backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)',
-                    },
-                  }}
-                >
-                {/* Header Row */}
+                sx={{
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)',
+                  borderRadius: '24px',
+                  padding: 4,
+                  border: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.08)',
+                  height: '100%',
+                  transition: 'all 0.3s ease',
+                  boxShadow: isDark ? 'none' : '0 2px 8px rgba(0,0,0,0.05)',
+                  '&:hover': {
+                    borderColor: 'rgba(230, 57, 70, 0.3)',
+                    transform: 'translateY(-4px)',
+                    backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)',
+                  },
+                }}
+              >
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
                   <Box
                     sx={{
@@ -157,7 +169,6 @@ export default function ValueStack() {
                   >
                     <tier.icon size={28} color="white" />
                   </Box>
-
                   <Typography
                     sx={{
                       fontSize: '16px',
@@ -166,11 +177,10 @@ export default function ValueStack() {
                       textDecoration: 'line-through',
                     }}
                   >
-                    {tier.value} value
+                    {getFormattedValue(tier.valueINR)} value
                   </Typography>
                 </Box>
 
-                {/* Title */}
                 <Typography
                   variant="h5"
                   sx={{
@@ -195,7 +205,6 @@ export default function ValueStack() {
                   {tier.subtitle}
                 </Typography>
 
-                {/* Feature List */}
                 <List sx={{ padding: 0 }}>
                   {tier.features.map((feature) => (
                     <ListItem
@@ -224,12 +233,11 @@ export default function ValueStack() {
           ))}
         </Grid>
 
-          {/* Price Summary Card */}
-          <Paper
-            sx={{
-              maxWidth: 540,
-              margin: '0 auto',
-              marginTop: 6,
+        <Paper
+          sx={{
+            maxWidth: 540,
+            margin: '0 auto',
+            marginTop: 6,
             padding: 5,
             backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)',
             borderRadius: '32px',
@@ -249,7 +257,7 @@ export default function ValueStack() {
               fontWeight: 600
             }}
           >
-            Total Value: ₹5,82,500
+            Total Value: {totalValue}
           </Typography>
 
           <Typography
@@ -268,14 +276,14 @@ export default function ValueStack() {
           <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 1, marginBottom: 1 }}>
             <Typography
               sx={{
-                fontSize: '64px',
+                fontSize: { xs: '48px', md: '64px' },
                 fontWeight: 900,
                 fontFamily: 'var(--font-heading)',
                 color: isDark ? 'white' : '#0F172A',
                 letterSpacing: '-2px'
               }}
             >
-              ₹4,999
+              {planPrice}
             </Typography>
             <Typography
               sx={{
@@ -295,7 +303,7 @@ export default function ValueStack() {
               marginBottom: 4,
             }}
           >
-            That's ₹166/day — less than a single personal training session
+            That's {dailyValue}/day — less than a single personal training session
           </Typography>
 
           <Box

@@ -1530,3 +1530,530 @@
     width: 100%;
   }
 }
+
+/* ─── SA Beta Feedback Page ─── */
+.sa-beta-feedback-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px;
+  background: #f5f5f5;
+  min-height: 100vh;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.header-content {
+  flex: 1;
+}
+
+.page-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 8px 0;
+}
+
+.page-description {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.action-button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.action-button.primary {
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: white;
+}
+
+.action-button.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
+}
+
+.action-button.secondary {
+  background: white;
+  border: 1px solid #ddd;
+  color: #1e293b;
+}
+
+.action-button.secondary:hover {
+  background: #f8f9fa;
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.stats-section {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.filters-section {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.table-section {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.feedback-row {
+  transition: all 0.2s ease;
+}
+
+.feedback-row:hover {
+  background: #fafafa;
+  cursor: pointer;
+}
+
+/* ─── SA Insights Page ─── */
+.sa-insights-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px;
+  background: #f5f5f5;
+  min-height: 100vh;
+}
+
+.insights-overview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.overview-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #666;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.health-display {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.health-score-circle {
+  width: 100px;
+  height: 100px;
+  border: 4px solid;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.health-score-value {
+  font-size: 36px;
+  font-weight: 700;
+  color: inherit;
+}
+
+.health-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.health-label {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.health-pages {
+  font-size: 13px;
+  color: #999;
+  margin: 0;
+}
+
+.stat-display {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.stat-icon {
+  flex-shrink: 0;
+  color: #6366f1;
+}
+
+.stat-icon.bugs {
+  color: #ef4444;
+}
+
+.stat-icon.resolved {
+  color: #10b981;
+}
+
+.stat-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.stat-value.bugs {
+  color: #ef4444;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #999;
+  margin: 0;
+}
+
+.sort-controls {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.sort-label {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.sort-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.sort-button {
+  padding: 8px 14px;
+  background: #f0f0f0;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: #666;
+  transition: all 0.2s ease;
+}
+
+.sort-button:hover {
+  background: #e0e0e0;
+}
+
+.sort-button.active {
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: white;
+}
+
+.insights-table-section {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.section-heading {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 16px 0;
+}
+
+.loading-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.skeleton-row {
+  height: 50px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 6px;
+}
+
+.insights-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.insights-table thead {
+  background: #f8f9fa;
+  border-bottom: 1px solid #eee;
+}
+
+.insights-table th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 700;
+  color: #1e293b;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+}
+
+.insights-table tbody tr {
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.insights-table tbody tr:hover {
+  background: #fafafa;
+}
+
+.insights-table td {
+  padding: 12px;
+  vertical-align: middle;
+}
+
+.page-route {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 12px;
+  background: #f5f5f5;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: #333;
+}
+
+.issue-badge {
+  background: #f0f0f0;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-weight: 700;
+}
+
+.severity-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  min-width: 30px;
+  text-align: center;
+}
+
+.severity-badge.bug {
+  background: #fecaca;
+  color: #991b1b;
+}
+
+.severity-badge.ui {
+  background: #fed7aa;
+  color: #92400e;
+}
+
+.severity-badge.suggestion {
+  background: #bfdbfe;
+  color: #1e40af;
+}
+
+.severity-badge.improvement {
+  background: #bbf7d0;
+  color: #065f46;
+}
+
+.health-score-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border: 2px solid;
+  border-radius: 6px;
+  font-weight: 700;
+  text-align: center;
+  min-width: 40px;
+}
+
+.action-cell {
+  text-align: center;
+  color: #ddd;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  color: #999;
+}
+
+.top-problematic-section {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.problematic-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.problematic-card {
+  background: linear-gradient(135deg, #f8f9fa 0%, #eef2ff 100%);
+  border: 1px solid #e0e7ff;
+  border-radius: 10px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.problematic-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(99, 102, 241, 0.15);
+  border-color: #c7d2fe;
+}
+
+.card-rank {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  background: #6366f1;
+  color: white;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.card-page-route {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 12px 0;
+  padding-right: 30px;
+}
+
+.card-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stat-item .stat-label {
+  font-size: 12px;
+  color: #666;
+}
+
+.stat-item .stat-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.stat-item .stat-value.bugs {
+  color: #ef4444;
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+  }
+
+  .header-actions {
+    width: 100%;
+  }
+
+  .action-button {
+    flex: 1;
+  }
+
+  .insights-overview {
+    grid-template-columns: 1fr;
+  }
+
+  .sort-controls {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .problematic-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .table-wrapper {
+    overflow-x: auto;
+  }
+
+  .insights-table {
+    font-size: 12px;
+  }
+
+  .insights-table th,
+  .insights-table td {
+    padding: 8px 6px;
+  }
+}

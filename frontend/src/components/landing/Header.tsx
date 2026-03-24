@@ -13,7 +13,7 @@ const scrollNavItems = [
   { label: 'Features', id: 'future' },
   { label: 'Problems We Solve', id: 'problems' },
   { label: 'Testimonials', id: 'social' },
-  { label: 'Pricing', id: 'value' }
+  { label: 'Pricing', id: 'pricing' }
 ];
 
 // Page link items

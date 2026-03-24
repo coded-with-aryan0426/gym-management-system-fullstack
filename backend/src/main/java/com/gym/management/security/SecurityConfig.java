@@ -69,15 +69,26 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration corsConfig = new CorsConfiguration();
-                    // Allow all frontend ports for multi-role testing
-                    corsConfig.setAllowedOrigins(List.of(
-                            "http://localhost:5173", // Owner
-                            "http://localhost:5174", // Trainer
-                            "http://localhost:5175", // Member
-                            "http://localhost:3000" // Legacy/alternative
+                    // Use patterns to support wildcards for tunnels and deployments
+                    // setAllowedOriginPatterns is required when allowCredentials is true
+                    corsConfig.setAllowedOriginPatterns(List.of(
+                            // Local development ports
+                            "http://localhost:*",
+                            // Cloudflare tunnels (quick tunnels)
+                            "https://*.trycloudflare.com",
+                            // Vercel deployments
+                            "https://*.vercel.app",
+                            // Railway deployments
+                            "https://*.railway.app",
+                            "https://*.up.railway.app",
+                            // Render deployments
+                            "https://*.onrender.com",
+                            // Netlify deployments
+                            "https://*.netlify.app"
                     ));
                     corsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
                     corsConfig.setAllowedHeaders(List.of("*"));
+                    corsConfig.setExposedHeaders(List.of("Authorization", "Content-Disposition"));
                     corsConfig.setAllowCredentials(true);
                     corsConfig.setMaxAge(3600L);
                     return corsConfig;
@@ -101,6 +112,17 @@ public class SecurityConfig {
 
                         .requestMatchers("/ws/**").permitAll() // WebSocket handshake
                         .requestMatchers("/error").permitAll()
+
+                        // ==================== FEATURE FLAGS & BETA FEEDBACK ====================
+                        // Feature flags - authenticated users can check flags
+                        .requestMatchers("/api/features/**").authenticated()
+                        // Beta feedback - POST for authenticated users, GET/PATCH for ADMIN only
+                        .requestMatchers(HttpMethod.POST, "/api/beta/feedback").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/beta/feedback/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/beta/feedback/**").hasRole("ADMIN")
+                        .requestMatchers("/api/beta/feedback/export").hasRole("ADMIN")
+                        .requestMatchers("/api/beta/feedback/filter").hasRole("ADMIN")
+                        .requestMatchers("/api/beta/feedback/stats").hasRole("ADMIN")
 
                         // ==================== OWNER/ADMIN ONLY ====================
                         // These endpoints manage the entire gym operation

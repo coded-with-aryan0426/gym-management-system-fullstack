@@ -2,7 +2,6 @@ package com.gym.management.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -60,10 +59,12 @@ public class BetaFeedback {
     @Column(name = "subject", length = 500, nullable = false)
     private String subject;
 
-    @Column(name = "description", columnDefinition = "LONGTEXT")
+    @Lob
+    @Column(name = "description")
     private String description;
 
-    @Column(name = "steps_to_reproduce", columnDefinition = "LONGTEXT")
+    @Lob
+    @Column(name = "steps_to_reproduce")
     private String stepsToReproduce;
 
     @Column(name = "screenshot_url", length = 1000)
@@ -73,7 +74,8 @@ public class BetaFeedback {
     @Builder.Default
     private String status = "NEW"; // NEW, ACKNOWLEDGED, IN_PROGRESS, RESOLVED, WONT_FIX
 
-    @Column(name = "admin_notes", columnDefinition = "LONGTEXT")
+    @Lob
+    @Column(name = "admin_notes")
     private String adminNotes;
 
     @Column(name = "priority_score")

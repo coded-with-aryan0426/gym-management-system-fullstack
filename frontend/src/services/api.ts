@@ -4,7 +4,7 @@ import type { GymSettings, UpdateSettingsDto } from '../types/settings';
 import type { DashboardStats, PageResponse } from '../types/api';
 
 
-const BASE_URL = import.meta.env.VITE_API_URL || '/api';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || '/api';
 
 /**
  * Generate a storage key scoped to the current port for session isolation.
@@ -494,6 +494,52 @@ const api = {
     data: import('../types/feature.types').UpdateFeatureRequest,
   ): Promise<import('../types/feature.types').FeatureFlag> {
     const response = await apiClient.put<import('../types/feature.types').FeatureFlag>(`/features/${key}`, data);
+    return response.data;
+  },
+
+  // Beta Feedback endpoints
+  async addBetaFeedback(payload: {
+    pageRoute: string;
+    pageTitle: string;
+    section: string;
+    browser: string;
+    screenSize: string;
+    severity: string;
+    category: string;
+    subject: string;
+    description: string;
+    stepsToReproduce?: string;
+    screenshotUrl?: string;
+  }): Promise<unknown> {
+    const response = await apiClient.post('/beta/feedback', payload);
+    return response.data;
+  },
+
+  async getAllBetaFeedback(params?: Record<string, unknown>): Promise<unknown> {
+    const response = await apiClient.get('/beta/feedback', { params });
+    return response.data;
+  },
+
+  async getBetaFeedbackById(id: number): Promise<unknown> {
+    const response = await apiClient.get(`/beta/feedback/${id}`);
+    return response.data;
+  },
+
+  async updateBetaFeedbackStatus(
+    id: number,
+    data: { status: string; priorityScore?: number; adminNotes?: string }
+  ): Promise<unknown> {
+    const response = await apiClient.patch(`/beta/feedback/${id}/status`, data);
+    return response.data;
+  },
+
+  async getBetaFeedbackStats(): Promise<unknown> {
+    const response = await apiClient.get('/beta/feedback/stats');
+    return response.data;
+  },
+
+  async exportBetaFeedback(filters?: Record<string, unknown>): Promise<unknown> {
+    const response = await apiClient.get('/beta/feedback/export', { params: filters });
     return response.data;
   },
 
@@ -1096,5 +1142,49 @@ const gymClassApi = {
   }
 };
 
+// Beta Feedback API
+const betaFeedbackApi = {
+  async getAllFeedback(page: number = 0, size: number = 20, sortBy: string = 'submittedAt,desc'): Promise<any> {
+    const response = await apiClient.get('/beta/feedback', {
+      params: { page, size, sort: sortBy }
+    });
+    return response.data;
+  },
+
+  async getFeedbackById(id: number): Promise<any> {
+    const response = await apiClient.get(`/beta/feedback/${id}`);
+    return response.data;
+  },
+
+  async updateFeedbackStatus(id: number, updateRequest: { status: string; priorityScore?: number; adminNotes?: string }): Promise<any> {
+    const response = await apiClient.patch(`/beta/feedback/${id}/status`, updateRequest);
+    return response.data;
+  },
+
+  async getStats(): Promise<any> {
+    const response = await apiClient.get('/beta/feedback/stats');
+    return response.data;
+  },
+
+  async filterFeedback(filters: Record<string, any>, page: number = 0, size: number = 20): Promise<any> {
+    const response = await apiClient.post('/beta/feedback/filter', filters, {
+      params: { page, size }
+    });
+    return response.data;
+  },
+
+  async exportFeedback(): Promise<string> {
+    const response = await apiClient.get('/beta/feedback/export', {
+      responseType: 'text'
+    });
+    return response.data;
+  },
+
+  async submitFeedback(feedbackData: any): Promise<any> {
+    const response = await apiClient.post('/beta/feedback', feedbackData);
+    return response.data;
+  }
+};
+
 // Export all APIs
-export { ptSessionApi, trainerPerformanceApi, gymSettingsApi, membershipPackageApi, analyticsApi, memberProgressApi, gymClassApi };
+export { ptSessionApi, trainerPerformanceApi, gymSettingsApi, membershipPackageApi, analyticsApi, memberProgressApi, gymClassApi, betaFeedbackApi };

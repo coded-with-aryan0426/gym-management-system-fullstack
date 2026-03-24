@@ -13,7 +13,9 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.OptimisticLockException;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Global exception handler for consistent API error responses.
@@ -42,15 +44,35 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex, WebRequest request) {
         String traceId = generateTraceId();
-        String message = ex.getBindingResult().getFieldErrors().stream()
+        
+        // Collect all validation errors
+        String errors = ex.getBindingResult().getFieldErrors().stream()
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
-                .findFirst()
-                .orElse("Validation failed");
+                .collect(Collectors.joining("; "));
+        
+        String message = errors.isEmpty() ? "Validation failed" : errors;
 
         logger.warn("[{}] Validation error: {}", traceId, message);
 
         ErrorResponse error = new ErrorResponse(false, "VALIDATION_ERROR", message, traceId);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    /**
+     * Handle optimistic locking conflicts (409)
+     */
+    @ExceptionHandler(OptimisticLockException.class)
+    public ResponseEntity<ErrorResponse> handleOptimisticLock(OptimisticLockException ex, WebRequest request) {
+        String traceId = generateTraceId();
+        logger.warn("[{}] Optimistic lock exception: {}", traceId, ex.getMessage());
+
+        ErrorResponse error = new ErrorResponse(
+                false, 
+                "CONFLICT", 
+                "The resource was modified by another user. Please refresh and try again.", 
+                traceId
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 
     /**

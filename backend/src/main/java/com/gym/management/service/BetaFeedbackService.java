@@ -86,7 +86,7 @@ public class BetaFeedbackService {
     public FeedbackStatsDTO getStats() {
         FeedbackStatsDTO stats = new FeedbackStatsDTO();
 
-        stats.setTotalCount((long) betaFeedbackRepository.findAll().size());
+        stats.setTotalCount(betaFeedbackRepository.count());
         stats.setBugCount(betaFeedbackRepository.countBugFeedback());
         stats.setUiIssueCount(betaFeedbackRepository.countUIIssueFeedback());
         stats.setSuggestionCount(betaFeedbackRepository.countSuggestionFeedback());
