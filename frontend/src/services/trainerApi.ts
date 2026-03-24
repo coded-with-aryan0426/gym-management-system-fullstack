@@ -210,6 +210,16 @@ export interface TrainerMemberDetail extends TrainerMember {
     };
 }
 
+export interface WeeklyShift {
+    shiftId: number;
+    date: string;
+    dayOfWeek: string;
+    startTime: string;
+    endTime: string;
+    status: 'SCHEDULED' | 'COMPLETED' | 'MISSED' | 'CANCELLED';
+    durationHours: number;
+}
+
 // Standardized API Response shape
 export interface ApiResponse<T> {
     success: boolean;
@@ -494,6 +504,11 @@ export const trainerApi = {
     async getAssignedMembers(): Promise<TrainerMember[]> {
         const response = await apiClient.get('/trainer/members');
         return response.data;
+    },
+
+    async getWeeklyShifts(): Promise<WeeklyShift[]> {
+        const response = await apiClient.get('/trainer/weekly-shifts');
+        return normalizeResponse<WeeklyShift[]>(response.data);
     }
 };
 

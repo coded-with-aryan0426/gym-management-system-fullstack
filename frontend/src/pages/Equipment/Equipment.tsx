@@ -247,9 +247,8 @@ const EquipmentPage: React.FC = () => {
 
                         <button
                             onClick={loadData}
-                            className="toggle-btn-v2"
+                            className="btn-icon-premium"
                             title="Refresh"
-                            style={{ width: 42, height: 42, borderRadius: 12, background: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
                         >
                             <RefreshCw size={15} />
                         </button>

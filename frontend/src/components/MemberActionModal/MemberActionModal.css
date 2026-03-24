@@ -3125,14 +3125,15 @@ body.light-mode .renew-summary {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 11px 16px;
+  padding: 10px 14px;
   border-bottom: 1px solid rgba(255,255,255,0.06);
   background: rgba(255,255,255,0.03);
   /* Sticky but with forced rounded top corners via clip */
   position: sticky;
   top: 0;
   z-index: 2;
-  border-radius: 14px 14px 0 0;
+  border-radius: 12px 12px 0 0;
+  min-height: 40px;
 }
 .mam-section__title-row {
   display: flex;
@@ -3144,16 +3145,17 @@ body.light-mode .renew-summary {
 }
 .mam-section__title-row svg { color: var(--text-secondary, #a1a1aa); }
 .mam-section__body {
-  padding: 14px 16px;
+  padding: 12px 14px;
 }
 .mam-section__foot {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
-  padding-top: 12px;
+  padding: 10px 14px;
   border-top: 1px solid rgba(255,255,255,0.06);
-  margin-top: 14px;
+  margin-top: 12px;
+  min-height: 44px;
 }
 
 /* ════════════════════════════════════════
@@ -3162,9 +3164,9 @@ body.light-mode .renew-summary {
 .mam-form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 10px;
 }
-.mam-field { display: flex; flex-direction: column; gap: 5px; }
+.mam-field { display: flex; flex-direction: column; gap: 4px; }
 .mam-field--full { grid-column: 1 / -1; }
 .mam-label {
   font-size: 11px;
@@ -3212,9 +3214,10 @@ body.light-mode .renew-summary {
 .mam-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  padding: 8px 16px;
-  border-radius: 9px;
+  padding: 8px 14px;
+  border-radius: 8px;
   font-size: 13px;
   font-weight: 600;
   border: 1px solid transparent;
@@ -3222,9 +3225,11 @@ body.light-mode .renew-summary {
   transition: all 0.15s;
   white-space: nowrap;
   letter-spacing: -0.1px;
+  min-height: 36px;
+  min-width: 80px;
 }
 .mam-btn:disabled { opacity: 0.38; cursor: not-allowed; pointer-events: none; }
-.mam-btn--sm { padding: 5px 11px; font-size: 12px; border-radius: 7px; }
+.mam-btn--sm { padding: 6px 12px; font-size: 12px; border-radius: 7px; min-height: 32px; min-width: 70px; }
 .mam-btn--wide { width: 100%; justify-content: center; font-size: 14px; padding: 11px 16px; }
 
 /* Primary — indigo gradient */

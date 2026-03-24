@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { showToast } from '../../utils/showToast';
 import { trainerApi } from '../../services/trainerApi';
-import type { TrainerProfile as TrainerProfileType, TrainerSession, TrainerMember } from '../../services/trainerApi';
+import type { TrainerProfile as TrainerProfileType, TrainerSession, TrainerMember, WeeklyShift } from '../../services/trainerApi';
 import './TrainerProfile.css';
 import { format } from 'date-fns';
 
@@ -43,6 +43,7 @@ const TrainerProfile: React.FC = () => {
     const [formData, setFormData] = useState<Partial<TrainerProfileType>>({});
     const [sessions, setSessions] = useState<TrainerSession[]>([]);
     const [members, setMembers] = useState<TrainerMember[]>([]);
+    const [weeklyShifts, setWeeklyShifts] = useState<WeeklyShift[]>([]);
     const [showPasswordForm, setShowPasswordForm] = useState(false);
     const [passwordForm, setPasswordForm] = useState({ current: '', newPass: '', confirm: '' });
 
@@ -66,6 +67,11 @@ const TrainerProfile: React.FC = () => {
         trainerApi.getMyMembers().then(m => {
             setMembers(Array.isArray(m) ? m.slice(0, 5) : []);
         }).catch(() => {});
+        trainerApi.getWeeklyShifts().then(shifts => {
+            setWeeklyShifts(shifts);
+        }).catch((err) => {
+            console.error('Failed to load weekly shifts', err);
+        });
     };
 
     const handleSave = async () => {
@@ -544,7 +550,11 @@ const TrainerProfile: React.FC = () => {
                                         <div className="tp__card-head-icon tp__card-head-icon--green"><Clock size={15} /></div>
                                         <div>
                                             <h3 className="tp__card-title">Weekly Schedule</h3>
-                                            <p className="tp__card-desc">{profile.shift || 'Morning shift'}</p>
+                                            <p className="tp__card-desc">
+                                                {weeklyShifts.length > 0 
+                                                    ? `${weeklyShifts.length} shift${weeklyShifts.length !== 1 ? 's' : ''} this week`
+                                                    : 'No shifts assigned'}
+                                            </p>
                                         </div>
                                     </div>
                                     <div className="tp__sched-list">
@@ -552,13 +562,26 @@ const TrainerProfile: React.FC = () => {
                                             <div key={i} className={`tp__sched-row ${s.off ? 'tp__sched-row--off' : ''}`}>
                                                 <span className="tp__sched-day">{s.day}</span>
                                                 <div className="tp__sched-bar">
-                                                    {!s.off && <div className="tp__sched-bar-fill" />}
+                                                    {!s.off && (
+                                                        <div 
+                                                            className="tp__sched-bar-fill" 
+                                                            style={{ 
+                                                                width: s.duration ? `${Math.min(s.duration * 12.5, 100)}%` : '100%',
+                                                                opacity: s.status === 'COMPLETED' ? 0.6 : 1
+                                                            }}
+                                                            title={s.status || 'Scheduled'}
+                                                        />
+                                                    )}
                                                 </div>
                                                 <span className="tp__sched-hours">{s.hours}</span>
                                             </div>
                                         ))}
                                     </div>
-                                    {!profile.shift && <p className="tp__card-hint">Set shift in Work tab to update</p>}
+                                    {weeklyShifts.length === 0 && (
+                                        <p className="tp__card-hint">
+                                            <AlertTriangle size={12} /> No shifts assigned by admin yet
+                                        </p>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -790,19 +813,10 @@ const TrainerProfile: React.FC = () => {
                                     <h4>Password</h4>
                                     <p>Update your account password regularly for security</p>
                                 </div>
-                                <button className="tp__btn tp__btn--outline" onClick={() => setShowPasswordForm(v => !v)}>
-                                    {showPasswordForm ? 'Cancel' : 'Change Password'}
+                                <button className="tp__btn tp__btn--outline" onClick={() => setShowPasswordForm(true)}>
+                                    Change Password
                                 </button>
                             </div>
-                            {showPasswordForm && (
-                                <div className="tp__pwd-form">
-                                    <div className="tp__pwd-form-title"><Lock size={13} /> Update Password</div>
-                                    <input className="tp__input" type="password" placeholder="Current password" value={passwordForm.current} onChange={e => setPasswordForm(p => ({ ...p, current: e.target.value }))} />
-                                    <input className="tp__input" type="password" placeholder="New password (min 6 chars)" value={passwordForm.newPass} onChange={e => setPasswordForm(p => ({ ...p, newPass: e.target.value }))} />
-                                    <input className="tp__input" type="password" placeholder="Confirm new password" value={passwordForm.confirm} onChange={e => setPasswordForm(p => ({ ...p, confirm: e.target.value }))} />
-                                    <button className="tp__btn tp__btn--save" onClick={handleChangePassword}><Lock size={12} /> Update Password</button>
-                                </div>
-                            )}
 
                             {/* 2FA */}
                             <div className="tp__sec-card">
@@ -832,6 +846,59 @@ const TrainerProfile: React.FC = () => {
                     )}
                 </div>
             </div>
+
+            {/* Password Change Modal */}
+            {showPasswordForm && (
+                <div className="tp__modal-overlay" onClick={() => setShowPasswordForm(false)}>
+                    <div className="tp__modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="tp__modal-header">
+                            <Lock size={20} />
+                            <h3>Change Password</h3>
+                            <button className="tp__modal-close" onClick={() => setShowPasswordForm(false)}>×</button>
+                        </div>
+                        <div className="tp__modal-body">
+                            <div className="tp__modal-field">
+                                <label>Current Password</label>
+                                <input 
+                                    className="tp__input" 
+                                    type="password" 
+                                    placeholder="Enter current password" 
+                                    value={passwordForm.current} 
+                                    onChange={e => setPasswordForm(p => ({ ...p, current: e.target.value }))} 
+                                />
+                            </div>
+                            <div className="tp__modal-field">
+                                <label>New Password</label>
+                                <input 
+                                    className="tp__input" 
+                                    type="password" 
+                                    placeholder="Minimum 6 characters" 
+                                    value={passwordForm.newPass} 
+                                    onChange={e => setPasswordForm(p => ({ ...p, newPass: e.target.value }))} 
+                                />
+                            </div>
+                            <div className="tp__modal-field">
+                                <label>Confirm New Password</label>
+                                <input 
+                                    className="tp__input" 
+                                    type="password" 
+                                    placeholder="Re-enter new password" 
+                                    value={passwordForm.confirm} 
+                                    onChange={e => setPasswordForm(p => ({ ...p, confirm: e.target.value }))} 
+                                />
+                            </div>
+                        </div>
+                        <div className="tp__modal-footer">
+                            <button className="tp__btn tp__btn--cancel" onClick={() => setShowPasswordForm(false)}>
+                                Cancel
+                            </button>
+                            <button className="tp__btn tp__btn--save" onClick={handleChangePassword}>
+                                <Lock size={14} /> Update Password
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

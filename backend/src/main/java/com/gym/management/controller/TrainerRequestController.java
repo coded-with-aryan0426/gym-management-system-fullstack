@@ -226,10 +226,10 @@ public class TrainerRequestController {
     public ResponseEntity<?> acceptRequest(@PathVariable Long id,
                                             @RequestBody(required = false) Map<String, Object> body) {
         User trainer = currentUser();
-        if (trainer == null) return ResponseEntity.status(401).build();
+        if (trainer == null) return ResponseEntity.status(401).body(Map.of("message", "Unauthorized"));
 
         TrainerRequest req = trainerRequestRepository.findById(id).orElse(null);
-        if (req == null) return ResponseEntity.notFound().build();
+        if (req == null) return ResponseEntity.status(404).body(Map.of("message", "Request not found"));
         if (!req.getTrainer().getUserId().equals(trainer.getUserId()))
             return ResponseEntity.status(403).body(Map.of("message", "Not your request"));
         if (req.getStatus() != TrainerRequest.Status.PENDING)
@@ -237,55 +237,72 @@ public class TrainerRequestController {
 
         String note = (body != null && body.get("note") != null) ? body.get("note").toString().trim() : "";
 
-        // Update request
-        req.setStatus(TrainerRequest.Status.ACCEPTED);
-        req.setTrainerNote(note.isEmpty() ? null : note);
-        req.setResolvedAt(LocalDateTime.now());
-        trainerRequestRepository.save(req);
+        try {
+            // Update request status
+            req.setStatus(TrainerRequest.Status.ACCEPTED);
+            req.setTrainerNote(note.isEmpty() ? null : note);
+            req.setResolvedAt(LocalDateTime.now());
+            trainerRequestRepository.save(req);
 
-           // Assign member → trainer via direct native INSERT into trainer_customer_map.
-           // This bypasses Hibernate merge/detached-entity issues completely.
-           User member = req.getMember();
-           userRepository.assignMemberToTrainer(trainer.getUserId(), member.getUserId());
+            User member = req.getMember();
+            
+            // Check if assignment already exists (idempotency)
+            int existingCount = userRepository.countAssignment(trainer.getUserId(), member.getUserId());
+            if (existingCount == 0) {
+                // Assign member → trainer via direct native INSERT
+                userRepository.assignMemberToTrainer(trainer.getUserId(), member.getUserId());
+            }
 
-        // Notify member
-        String trainerName = trainer.getFullName() != null ? trainer.getFullName() : trainer.getUsername();
-        String noteSnippet = note.isEmpty() ? "" : " They said: \"" + note + "\"";
-        String metaJson = String.format(
-                "{\"requestId\":%d,\"trainerId\":%d,\"trainerName\":\"%s\",\"action\":\"REQUEST_ACCEPTED\"}",
-                req.getId(), trainer.getUserId(), trainerName.replace("\"", "'"));
-        Notification memberNotif = buildNotification(
-                member,
-                trainerName + " accepted your request!",
-                trainerName + " is now your personal trainer." + noteSnippet,
-                "MEMBER", "high",
-                trainer.getUserId(),
-                metaJson,
-                "/member/trainer");
-        notificationRepository.save(memberNotif);
+            // Fetch fresh user entities to avoid detached entity issues
+            User memberFresh = userRepository.findById(member.getUserId()).orElse(member);
+            User trainerFresh = userRepository.findById(trainer.getUserId()).orElse(trainer);
+            
+            // Notify member
+            String trainerName = trainerFresh.getFullName() != null ? trainerFresh.getFullName() : trainerFresh.getUsername();
+            String noteSnippet = note.isEmpty() ? "" : " They said: \"" + note + "\"";
+            String metaJson = String.format(
+                    "{\"requestId\":%d,\"trainerId\":%d,\"trainerName\":\"%s\",\"action\":\"REQUEST_ACCEPTED\"}",
+                    req.getId(), trainerFresh.getUserId(), trainerName.replace("\"", "'"));
+            Notification memberNotif = buildNotification(
+                    memberFresh,
+                    trainerName + " accepted your request!",
+                    trainerName + " is now your personal trainer." + noteSnippet,
+                    "MEMBER", "high",
+                    trainerFresh.getUserId(),
+                    metaJson,
+                    "/member/trainer");
+            notificationRepository.save(memberNotif);
 
-        // Notify owner(s) about the new trainer-member assignment
-        String memberName = member.getFullName() != null ? member.getFullName() : member.getUsername();
-        String ownerMetaJson = String.format(
-                "{\"requestId\":%d,\"trainerId\":%d,\"trainerName\":\"%s\",\"memberId\":%d,\"memberName\":\"%s\",\"action\":\"TRAINER_ASSIGNED\"}",
-                req.getId(), trainer.getUserId(), trainerName.replace("\"", "'"),
-                member.getUserId(), memberName.replace("\"", "'"));
-        List<User> owners = userRepository.findAllOwners();
-        for (User owner : owners) {
-            Notification ownerNotif = buildNotification(
-                    owner,
-                    "New Trainer Assignment",
-                    trainerName + " has accepted " + memberName + " as a new member.",
-                    "MEMBER", "normal",
-                    trainer.getUserId(),
-                    ownerMetaJson,
-                    "/staff");
-            notificationRepository.save(ownerNotif);
+            // Notify owner(s) about the new trainer-member assignment
+            String memberName = memberFresh.getFullName() != null ? memberFresh.getFullName() : memberFresh.getUsername();
+            String ownerMetaJson = String.format(
+                    "{\"requestId\":%d,\"trainerId\":%d,\"trainerName\":\"%s\",\"memberId\":%d,\"memberName\":\"%s\",\"action\":\"TRAINER_ASSIGNED\"}",
+                    req.getId(), trainerFresh.getUserId(), trainerName.replace("\"", "'"),
+                    memberFresh.getUserId(), memberName.replace("\"", "'"));
+            List<User> owners = userRepository.findAllOwners();
+            for (User owner : owners) {
+                Notification ownerNotif = buildNotification(
+                        owner,
+                        "New Trainer Assignment",
+                        trainerName + " has accepted " + memberName + " as a new member.",
+                        "MEMBER", "normal",
+                        trainerFresh.getUserId(),
+                        ownerMetaJson,
+                        "/staff");
+                notificationRepository.save(ownerNotif);
+            }
+
+            return ResponseEntity.ok(Map.of(
+                    "message", "Request accepted. " + memberName + " has been added to your members.",
+                    "status", "ACCEPTED"));
+                    
+        } catch (Exception e) {
+            // Log the error and return a user-friendly message
+            System.err.println("Error accepting trainer request " + id + ": " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of(
+                "message", "An error occurred while accepting the request. Please try again or contact support if the issue persists."));
         }
-
-        return ResponseEntity.ok(Map.of(
-                "message", "Request accepted. " + member.getFullName() + " has been added to your members.",
-                "status", "ACCEPTED"));
     }
 
     /**
@@ -308,31 +325,41 @@ public class TrainerRequestController {
 
         String note = (body != null && body.get("note") != null) ? body.get("note").toString().trim() : "";
 
-        req.setStatus(TrainerRequest.Status.DECLINED);
-        req.setTrainerNote(note.isEmpty() ? null : note);
-        req.setResolvedAt(LocalDateTime.now());
-        trainerRequestRepository.save(req);
+        try {
+            // Update request status
+            req.setStatus(TrainerRequest.Status.DECLINED);
+            req.setTrainerNote(note.isEmpty() ? null : note);
+            req.setResolvedAt(LocalDateTime.now());
+            trainerRequestRepository.save(req);
 
-        // Notify member
-        User member = req.getMember();
-        String trainerName = trainer.getFullName() != null ? trainer.getFullName() : trainer.getUsername();
-        String noteSnippet = note.isEmpty() ? " You can browse other trainers." : " Reason: \"" + note + "\"";
-        String metaJson = String.format(
-                "{\"requestId\":%d,\"trainerId\":%d,\"trainerName\":\"%s\",\"action\":\"REQUEST_DECLINED\"}",
-                req.getId(), trainer.getUserId(), trainerName.replace("\"", "'"));
-        Notification memberNotif = buildNotification(
-                member,
-                "Request to " + trainerName + " was not accepted",
-                trainerName + " is unable to take you on at this time." + noteSnippet,
-                "MEMBER", "normal",
-                trainer.getUserId(),
-                metaJson,
-                "/member/trainer");
-        notificationRepository.save(memberNotif);
+            // Notify member
+            User member = req.getMember();
+            String trainerName = trainer.getFullName() != null ? trainer.getFullName() : trainer.getUsername();
+            String noteSnippet = note.isEmpty() ? " You can browse other trainers." : " Reason: \"" + note + "\"";
+            String metaJson = String.format(
+                    "{\"requestId\":%d,\"trainerId\":%d,\"trainerName\":\"%s\",\"action\":\"REQUEST_DECLINED\"}",
+                    req.getId(), trainer.getUserId(), trainerName.replace("\"", "'"));
+            Notification memberNotif = buildNotification(
+                    member,
+                    "Request to " + trainerName + " was not accepted",
+                    trainerName + " is unable to take you on at this time." + noteSnippet,
+                    "MEMBER", "normal",
+                    trainer.getUserId(),
+                    metaJson,
+                    "/member/trainer");
+            notificationRepository.save(memberNotif);
 
-        return ResponseEntity.ok(Map.of(
-                "message", "Request declined.",
-                "status", "DECLINED"));
+            return ResponseEntity.ok(Map.of(
+                    "message", "Request declined.",
+                    "status", "DECLINED"));
+                    
+        } catch (Exception e) {
+            // Log the error and return a user-friendly message
+            System.err.println("Error declining trainer request " + id + ": " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of(
+                "message", "An error occurred while declining the request. Please try again or contact support if the issue persists."));
+        }
     }
 
     /** Quick check: get status of a specific request between current member and a trainer */

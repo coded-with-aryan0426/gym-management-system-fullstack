@@ -79,6 +79,9 @@ public class TrainerDashboardController {
     @Autowired
     private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private com.gym.management.repository.StaffShiftRepository staffShiftRepository;
+
     @GetMapping("/members")
     @org.springframework.transaction.annotation.Transactional
     public ResponseEntity<List<TrainerMemberDTO>> getAssignedMembers() {
@@ -630,6 +633,45 @@ public class TrainerDashboardController {
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(apiResponse(true, dtos, null));
+    }
+
+    /**
+     * Get trainer's weekly shift schedule from staff_shifts table
+     * This shows the shifts assigned by gym owner/admin
+     */
+    @GetMapping("/weekly-shifts")
+    public ResponseEntity<?> getWeeklyShifts() {
+        Long trainerId = getAuthenticatedTrainerId();
+        
+        // Get current week's shifts (Monday to Sunday)
+        LocalDate today = LocalDate.now();
+        LocalDate monday = today.with(java.time.DayOfWeek.MONDAY);
+        LocalDate sunday = monday.plusDays(6);
+        
+        List<com.gym.management.model.StaffShift> shifts = 
+            staffShiftRepository.findByStaffIdAndDateRange(trainerId, monday, sunday);
+        
+        // Convert to DTO
+        List<Map<String, Object>> shiftDTOs = shifts.stream().map(shift -> {
+            Map<String, Object> dto = new HashMap<>();
+            dto.put("shiftId", shift.getShiftId());
+            dto.put("date", shift.getShiftDate());
+            dto.put("dayOfWeek", shift.getShiftDate().getDayOfWeek().toString());
+            dto.put("startTime", shift.getStartTime());
+            dto.put("endTime", shift.getEndTime());
+            dto.put("status", shift.getStatus());
+            
+            // Calculate duration in hours
+            long durationMinutes = java.time.Duration.between(
+                shift.getStartTime(), 
+                shift.getEndTime()
+            ).toMinutes();
+            dto.put("durationHours", durationMinutes / 60.0);
+            
+            return dto;
+        }).collect(Collectors.toList());
+        
+        return ResponseEntity.ok(apiResponse(true, shiftDTOs, null));
     }
 
     @GetMapping("/members/{memberId}/notes")

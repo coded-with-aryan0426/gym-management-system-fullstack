@@ -68,9 +68,13 @@ public class TransactionController {
 
             // RBAC: TRAINER can only create transactions for assigned members
             if (dataScopeValidator.isTrainer()) {
-                // TODO: Add validation to check if trainer is assigned to this member
-                // For now, trainers can create transactions for any member (business logic dependent)
-                log.info("Trainer {} creating transaction for user {}", currentUserId, userId);
+                if (!dataScopeValidator.canTrainerAccessMember(currentUserId, userId)) {
+                    log.warn("RBAC VIOLATION: Trainer {} attempted to create transaction for unassigned user {}", 
+                             currentUserId, userId);
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                            .body(Map.of("error", "Access denied: You can only create transactions for your assigned members"));
+                }
+                log.info("Trainer {} creating transaction for assigned user {}", currentUserId, userId);
             }
 
             // RBAC: Prevent unauthorized transaction creation
@@ -126,9 +130,10 @@ public class TransactionController {
             } 
             else if (dataScopeValidator.isTrainer()) {
                 // TRAINER: Filter to transactions related to their assigned members
-                // TODO: Implement trainer-member assignment check
-                // For now, return all transactions (business logic dependent)
-                log.debug("Trainer {} accessing transactions", currentUserId);
+                transactions = transactions.stream()
+                        .filter(t -> t.getUserId() != null && dataScopeValidator.canTrainerAccessMember(currentUserId, t.getUserId()))
+                        .collect(Collectors.toList());
+                log.debug("Filtered {} transactions for trainer {}", transactions.size(), currentUserId);
             }
             // ADMIN/OWNER: Return all transactions (no filter)
 

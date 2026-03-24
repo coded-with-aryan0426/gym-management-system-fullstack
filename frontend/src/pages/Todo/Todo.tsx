@@ -4,7 +4,7 @@ import {
   CheckSquare, Plus, Search, RefreshCw, Trash2,
   Edit3, X, Check, AlertCircle, Clock, ArrowUp, Minus,
   LayoutGrid, List, Tag, Calendar, User,
-  Zap, Circle, CheckCircle2, Loader2, Flag, TrendingUp, Database
+  Zap, Circle, CheckCircle2, Loader2, Flag, TrendingUp
 } from 'lucide-react';
 import { taskApi } from '../../services/attendanceTaskApi';
 import type { GymTask, TaskStats } from '../../services/attendanceTaskApi';
@@ -15,7 +15,7 @@ const CARD = {
   hidden: { opacity: 0, y: 14, scale: 0.97 },
   visible: (i: number) => ({
     opacity: 1, y: 0, scale: 1,
-    transition: { duration: 0.36, delay: i * 0.04, ease: [0.16, 1, 0.3, 1] }
+    transition: { duration: 0.36, delay: i * 0.04, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] }
   }),
   exit: { opacity: 0, scale: 0.95, y: -6, transition: { duration: 0.18 } }
 };
@@ -324,12 +324,11 @@ const TodoPage: React.FC = () => {
   const [stats, setStats] = useState<TaskStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [seeding, setSeeding] = useState(false);
-  const [seedMsg, setSeedMsg] = useState<string | null>(null);
   const [view, setView] = useState<'kanban' | 'list'>('kanban');
   const [search, setSearch] = useState('');
   const [filterPriority, setFilterPriority] = useState<GymTask['priority'] | 'ALL'>('ALL');
   const [filterCategory, setFilterCategory] = useState<string>('ALL');
+  const [filterStatus, setFilterStatus] = useState<string>('ALL');
   const [modalTask, setModalTask] = useState<Partial<GymTask> | null | false>(false);
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
 
@@ -355,7 +354,15 @@ const TodoPage: React.FC = () => {
       (t.assignedTo || '').toLowerCase().includes(search.toLowerCase());
     const matchPriority = filterPriority === 'ALL' || t.priority === filterPriority;
     const matchCat = filterCategory === 'ALL' || t.category === filterCategory;
-    return matchSearch && matchPriority && matchCat;
+    let matchStatus = true;
+    if (filterStatus === 'DONE' || filterStatus === 'IN_PROGRESS' || filterStatus === 'TODO') {
+      matchStatus = t.status === filterStatus;
+    } else if (filterStatus === 'URGENT') {
+      matchStatus = t.priority === 'URGENT';
+    } else if (filterStatus === 'OVERDUE') {
+      matchStatus = !!t.dueDate && t.status !== 'DONE' && new Date(t.dueDate) < new Date();
+    }
+    return matchSearch && matchPriority && matchCat && matchStatus;
   });
 
   const byStatus = (status: GymTask['status']) => filtered.filter(t => t.status === status);
@@ -393,20 +400,7 @@ const TodoPage: React.FC = () => {
     setStats(s);
   };
 
-  const handleSeed = async () => {
-    setSeeding(true);
-    setSeedMsg(null);
-    try {
-      const res = await taskApi.seed();
-      setSeedMsg(res.message);
-      await loadData(true);
-    } catch (e) {
-      setSeedMsg('Seed failed — check backend logs.');
-    } finally {
-      setSeeding(false);
-      setTimeout(() => setSeedMsg(null), 4000);
-    }
-  };
+
 
   const uniqueCategories = Array.from(new Set(tasks.map(t => t.category).filter(Boolean)));
 
@@ -431,7 +425,6 @@ const TodoPage: React.FC = () => {
             <h1 className="todo-header__title">Task Board</h1>
             <p className="todo-header__sub">Gym operations · task management</p>
           </div>
-          {/* Completion pill */}
           {stats && stats.total > 0 && (
             <div className="todo-live-pill">
               <TrendingUp size={9} />
@@ -439,6 +432,43 @@ const TodoPage: React.FC = () => {
             </div>
           )}
         </div>
+        {stats && stats.total > 0 && (
+            <div className="todo-header__stats">
+              <div className="todo-header-stat todo-header-stat--total">
+                <span className="todo-header-stat__value" style={{ color: '#3b82f6' }}>{stats.total}</span>
+                <span className="todo-header-stat__label">Total</span>
+              </div>
+              <div className="todo-header-stat todo-header-stat--todo">
+                <span className="todo-header-stat__value" style={{ color: '#a8a8c8' }}>{stats.todo}</span>
+                <span className="todo-header-stat__label">To Do</span>
+              </div>
+              <div className="todo-header-stat todo-header-stat--inprog">
+                <span className="todo-header-stat__value" style={{ color: '#3b82f6' }}>{stats.inProgress}</span>
+                <span className="todo-header-stat__label">In Prog</span>
+              </div>
+              <div
+                className={`todo-header-stat todo-header-stat--done ${filterStatus === 'DONE' ? 'todo-header-stat--active' : ''}`}
+                onClick={() => setFilterStatus(s => s === 'DONE' ? 'ALL' : 'DONE')}
+              >
+                <span className="todo-header-stat__value" style={{ color: '#10b981' }}>{stats.done}</span>
+                <span className="todo-header-stat__label">Done</span>
+              </div>
+              <div
+                className={`todo-header-stat todo-header-stat--urgent ${filterStatus === 'URGENT' ? 'todo-header-stat--active' : ''}`}
+                onClick={() => setFilterStatus(s => s === 'URGENT' ? 'ALL' : 'URGENT')}
+              >
+                <span className="todo-header-stat__value" style={{ color: '#f43f5e' }}>{stats.urgent}</span>
+                <span className="todo-header-stat__label">Urgent</span>
+              </div>
+              <div
+                className={`todo-header-stat todo-header-stat--overdue ${filterStatus === 'OVERDUE' ? 'todo-header-stat--active' : ''}`}
+                onClick={() => setFilterStatus(s => s === 'OVERDUE' ? 'ALL' : 'OVERDUE')}
+              >
+                <span className="todo-header-stat__value" style={{ color: '#f59e0b' }}>{stats.overdue}</span>
+                <span className="todo-header-stat__label">Overdue</span>
+              </div>
+            </div>
+          )}
           <div className="todo-header__right">
             <div className="todo-view-toggle">
               <button
@@ -457,52 +487,16 @@ const TodoPage: React.FC = () => {
             <button
               className={`todo-refresh-btn ${refreshing ? 'todo-refresh-btn--spinning' : ''}`}
               onClick={() => loadData(true)}
+              disabled={refreshing}
               title="Refresh"
             >
               <RefreshCw size={14} />
-            </button>
-            <button
-              className={`todo-seed-btn ${seeding ? 'todo-seed-btn--loading' : ''}`}
-              onClick={handleSeed}
-              disabled={seeding}
-              title="Insert 20 dummy tasks into database"
-            >
-              {seeding ? <Loader2 size={13} className="spin" /> : <Database size={13} />}
-              {seeding ? 'Seeding…' : 'Seed Data'}
             </button>
             <button className="todo-add-btn" onClick={() => setModalTask({})}>
               <Plus size={15} /> New Task
             </button>
           </div>
       </div>
-
-      {/* ── Seed feedback toast ──────────────────────────────────────────── */}
-      <AnimatePresence>
-        {seedMsg && (
-          <motion.div
-            className="todo-seed-toast"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.22 }}
-          >
-            <Database size={13} />
-            {seedMsg}
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* ── Stats strip ─────────────────────────────────────────────────── */}
-      {stats && (
-        <div className="todo-stats-strip">
-          <StatCard label="Total"       value={stats.total}      color="#a8a8c8" glowColor="#6b7280" mod="total"   index={0} />
-          <StatCard label="To Do"       value={stats.todo}       color="#a8a8c8" glowColor="#6b7280" mod="todo"    index={1} />
-          <StatCard label="In Progress" value={stats.inProgress} color="#3b82f6" glowColor="#3b82f6" mod="inprog"  index={2} />
-          <StatCard label="Done"        value={stats.done}       color="#10b981" glowColor="#10b981" mod="done"    index={3} />
-          <StatCard label="Urgent"      value={stats.urgent}     color="#f43f5e" glowColor="#f43f5e" mod="urgent"  index={4} />
-          <StatCard label="Overdue"     value={stats.overdue}    color="#f59e0b" glowColor="#f59e0b" mod="overdue" index={5} />
-        </div>
-      )}
 
       {/* ── Filters ─────────────────────────────────────────────────────── */}
       <div className="todo-filters">
@@ -570,16 +564,14 @@ const TodoPage: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
             >
-              <Database size={38} className="todo-empty-state__icon" />
+              <CheckSquare size={38} className="todo-empty-state__icon" />
               <h3>No tasks yet</h3>
-              <p>Click <strong>Seed Data</strong> to insert 20 realistic dummy tasks covering all priorities, statuses and categories into the database.</p>
+              <p>Click <strong>New Task</strong> to create your first task.</p>
               <button
-                className={`todo-seed-btn todo-seed-btn--lg ${seeding ? 'todo-seed-btn--loading' : ''}`}
-                onClick={handleSeed}
-                disabled={seeding}
+                className="todo-add-btn"
+                onClick={() => setModalTask({})}
               >
-                {seeding ? <Loader2 size={15} className="spin" /> : <Database size={15} />}
-                {seeding ? 'Seeding…' : 'Seed 20 Dummy Tasks'}
+                <Plus size={15} /> New Task
               </button>
             </motion.div>
           )}

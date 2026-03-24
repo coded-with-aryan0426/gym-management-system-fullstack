@@ -4,7 +4,7 @@ import {
   Users, Activity, Clock, TrendingUp, TrendingDown,
   Zap, Calendar, Search, RefreshCw, UserCheck,
   ChevronLeft, ChevronRight, BarChart3, Filter,
-  Download, ArrowUpRight, ArrowDownRight, Database,
+  Download, ArrowUpRight, ArrowDownRight,
   UserCircle2, ShieldCheck, Dumbbell, X, Plus,
   LogOut, History, ChevronDown, SortAsc, SortDesc,
   FileSpreadsheet, Loader2, AlertCircle, CheckCircle2,
@@ -427,7 +427,7 @@ const AttendancePage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'checked-out'>('all');
   const [chartType, setChartType] = useState<'area' | 'bar'>('area');
-  const [seeding, setSeeding] = useState(false);
+
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -497,20 +497,7 @@ const AttendancePage: React.FC = () => {
   }, [autoRefresh, loadData]);
 
   // ─── Handlers ─────────────────────────────────────────────────────────────
-  const handleSeedData = async () => {
-    if (!window.confirm('This will generate mock check-ins for the last 30 days. Proceed?')) return;
-    setSeeding(true);
-    const t = toast.loading('Seeding demo data...');
-    try {
-      const res = await attendanceApi.seedAttendance();
-      toast.success(res.message, { id: t });
-      loadData();
-    } catch (err) {
-      toast.error('Failed to seed data', { id: t });
-    } finally {
-      setSeeding(false);
-    }
-  };
+
 
   const handleCheckOut = async (checkInId: number, memberName: string) => {
     const t = toast.loading(`Checking out ${memberName}...`);
@@ -634,8 +621,7 @@ const AttendancePage: React.FC = () => {
     <th 
       className="att-table__sortable"
       onClick={() => handleSort(field)}
-      role="columnheader"
-      aria-sort={sortField === field ? sortDirection : 'none'}
+      aria-sort={sortField === field ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'}
       tabIndex={0}
       onKeyDown={(e) => e.key === 'Enter' && handleSort(field)}
     >
@@ -720,12 +706,14 @@ const AttendancePage: React.FC = () => {
           </div>
           <div className="att-header__actions">
             <button
-              className={`att-action-btn ${autoRefresh ? 'att-action-btn--active' : ''}`}
-              onClick={() => setAutoRefresh(!autoRefresh)}
-              title={autoRefresh ? 'Disable auto-refresh' : 'Enable auto-refresh (30s)'}
-              aria-pressed={autoRefresh}
+              className={`att-action-btn att-action-btn--refresh ${autoRefresh ? 'att-action-btn--active' : ''}`}
+              onClick={() => loadData(true)}
+              onDoubleClick={() => setAutoRefresh(!autoRefresh)}
+              title={autoRefresh ? 'Auto-refresh ON (30s) — double-click to disable' : 'Refresh — double-click to enable auto-refresh'}
+              disabled={refreshing}
+              aria-label="Refresh data"
             >
-              <RefreshCw size={15} className={autoRefresh ? 'att-icon-spin' : ''} />
+              <RefreshCw size={15} className={refreshing || autoRefresh ? 'att-icon-spin' : ''} />
             </button>
             <button
               className="att-action-btn att-action-btn--primary"
@@ -742,24 +730,6 @@ const AttendancePage: React.FC = () => {
               aria-label="Export attendance data"
             >
               <Download size={15} />
-            </button>
-            <button
-              className="att-seed-btn"
-              onClick={handleSeedData}
-              disabled={seeding}
-              title="Seed Mock Data"
-              aria-label="Generate test data"
-            >
-              <Database size={15} />
-            </button>
-            <button
-              className="att-refresh-btn"
-              onClick={() => loadData(true)}
-              title="Refresh Stats"
-              disabled={refreshing}
-              aria-label="Refresh data"
-            >
-              <RefreshCw size={15} className={refreshing ? 'att-icon-spin' : ''} />
             </button>
           </div>
         </div>

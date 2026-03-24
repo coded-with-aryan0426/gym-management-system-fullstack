@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     X, Mail, Phone, Clock, CheckCircle2, XCircle,
-    MessageSquare, User, Zap, Check
+    MessageSquare, User, Zap, Check, AlertCircle
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import api from '../../services/api';
@@ -30,6 +30,7 @@ interface TrainerRequestPanelProps {
 const TrainerRequestPanel: React.FC<TrainerRequestPanelProps> = ({ request, onClose, onResolved }) => {
     const [note, setNote] = useState('');
     const [loading, setLoading] = useState<'accept' | 'decline' | null>(null);
+    const [error, setError] = useState<string | null>(null);
     const maxNote = 300;
 
     const formatTime = (dateStr: string) => {
@@ -45,13 +46,16 @@ const TrainerRequestPanel: React.FC<TrainerRequestPanelProps> = ({ request, onCl
 
     const handleAccept = async () => {
         setLoading('accept');
+        setError(null);
         try {
             await api.post(`/trainer-requests/${request.id}/accept`, { note: note.trim() || undefined });
             toast.success(`${request.member.name} added to your members!`);
             onResolved(request.id, 'ACCEPTED');
             onClose();
         } catch (err: any) {
-            toast.error(err.response?.data?.message || 'Failed to accept request');
+            const errorMsg = err.response?.data?.message || 'Failed to accept request. Please try again.';
+            setError(errorMsg);
+            toast.error(errorMsg);
         } finally {
             setLoading(null);
         }
@@ -59,13 +63,16 @@ const TrainerRequestPanel: React.FC<TrainerRequestPanelProps> = ({ request, onCl
 
     const handleDecline = async () => {
         setLoading('decline');
+        setError(null);
         try {
             await api.post(`/trainer-requests/${request.id}/decline`, { note: note.trim() || undefined });
             toast.success('Request declined.');
             onResolved(request.id, 'DECLINED');
             onClose();
         } catch (err: any) {
-            toast.error(err.response?.data?.message || 'Failed to decline request');
+            const errorMsg = err.response?.data?.message || 'Failed to decline request. Please try again.';
+            setError(errorMsg);
+            toast.error(errorMsg);
         } finally {
             setLoading(null);
         }
@@ -142,6 +149,14 @@ const TrainerRequestPanel: React.FC<TrainerRequestPanelProps> = ({ request, onCl
                         {request.member.name} will be notified of your decision with your note.
                     </p>
                 </div>
+
+                {/* Error Display */}
+                {error && (
+                    <div className="trm-error-banner">
+                        <AlertCircle size={14} />
+                        <span>{error}</span>
+                    </div>
+                )}
 
                 {/* Actions */}
                 <div className="trm-footer">
