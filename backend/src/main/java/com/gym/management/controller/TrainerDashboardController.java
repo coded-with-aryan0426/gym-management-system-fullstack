@@ -128,7 +128,11 @@ public class TrainerDashboardController {
                     AttendeeStatus.CONFIRMED);
             long ptCompleted = ptSessionRepository.countByMemberUserIdAndStatus(member.getUserId(),
                     SessionStatus.COMPLETED);
-            dto.setStats(new TrainerMemberDTO.MemberStats((int) classes, "N/A", String.valueOf(ptCompleted)));
+            
+            // Get weight - show N/A if null
+            String weight = member.getWeight() != null ? member.getWeight().toString() : "N/A";
+            
+            dto.setStats(new TrainerMemberDTO.MemberStats((int) classes, weight, String.valueOf(ptCompleted)));
 
             // Last Session
             PTSession lastSession = ptSessionRepository.findTopByMemberUserIdOrderBySessionDateDesc(member.getUserId());
@@ -605,15 +609,65 @@ public class TrainerDashboardController {
                 .filter(c -> q == null || c.getFullName().toLowerCase().contains(q.toLowerCase()))
                 .collect(Collectors.toList());
 
+        // Transform to DTO to include stats and weight
+        List<TrainerMemberDTO> dtos = filtered.stream().map(member -> {
+            TrainerMemberDTO dto = new TrainerMemberDTO();
+            dto.setId(member.getUserId());
+            dto.setName(member.getFullName());
+            dto.setEmail(member.getEmail());
+            dto.setPhone(member.getPhone());
+
+            // Plan & Status
+            Optional<com.gym.management.model.Membership> membershipOpt = membershipRepository
+                    .findTopByUserUserIdAndStatusOrderByEndDateDesc(member.getUserId(), MembershipStatus.ACTIVE);
+            if (membershipOpt.isPresent()) {
+                com.gym.management.model.Membership membership = membershipOpt.get();
+                dto.setStatus("ACTIVE");
+                dto.setPlan(
+                        membership.getMembershipPackage() != null ? membership.getMembershipPackage().getPackageName()
+                                : "Standard");
+
+                long days = 0;
+                if (membership.getEndDate() != null) {
+                    days = java.time.temporal.ChronoUnit.DAYS.between(java.time.LocalDate.now(),
+                            membership.getEndDate());
+                }
+                dto.setDaysLeft((int) days);
+            } else {
+                dto.setStatus("INACTIVE");
+                dto.setPlan("-");
+                dto.setDaysLeft(0);
+            }
+
+            // Stats with weight
+            long classes = trainerClassAttendeeRepository.countByMemberIdAndStatus(member.getUserId(),
+                    AttendeeStatus.CONFIRMED);
+            long ptCompleted = ptSessionRepository.countByMemberUserIdAndStatus(member.getUserId(),
+                    SessionStatus.COMPLETED);
+            String weight = member.getWeight() != null ? member.getWeight().toString() : "N/A";
+            dto.setStats(new TrainerMemberDTO.MemberStats((int) classes, weight, String.valueOf(ptCompleted)));
+
+            // Last Session
+            PTSession lastSession = ptSessionRepository.findTopByMemberUserIdOrderBySessionDateDesc(member.getUserId());
+            if (lastSession != null) {
+                dto.setLastSession(lastSession.getSessionDate().toLocalDate().toString());
+            } else {
+                dto.setLastSession("Never");
+            }
+
+            dto.setGoal("Fitness");
+            return dto;
+        }).collect(Collectors.toList());
+
         // Simple pagination
-        int fromIndex = Math.min(page * size, filtered.size());
-        int toIndex = Math.min(fromIndex + size, filtered.size());
-        List<User> pageContent = filtered.subList(fromIndex, toIndex);
+        int fromIndex = Math.min(page * size, dtos.size());
+        int toIndex = Math.min(fromIndex + size, dtos.size());
+        List<TrainerMemberDTO> pageContent = dtos.subList(fromIndex, toIndex);
 
         Map<String, Object> result = new HashMap<>();
         result.put("items", pageContent);
-        result.put("totalItems", filtered.size());
-        result.put("totalPages", (int) Math.ceil((double) filtered.size() / size));
+        result.put("totalItems", dtos.size());
+        result.put("totalPages", (int) Math.ceil((double) dtos.size() / size));
 
         return ResponseEntity.ok(apiResponse(true, result, null));
     }

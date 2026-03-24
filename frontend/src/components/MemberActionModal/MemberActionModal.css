@@ -3291,7 +3291,7 @@ body.light-mode .renew-summary {
 .validation-icon--invalid { color: #f87171; }
 
 /* ════════════════════════════════════════
-   BUTTONS — improved visual weight
+   BUTTONS — Advanced UI/UX with Micro-interactions
 ════════════════════════════════════════ */
 .mam-btn {
   display: inline-flex;
@@ -3304,14 +3304,38 @@ body.light-mode .renew-summary {
   font-weight: 600;
   border: 1px solid transparent;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
   letter-spacing: -0.1px;
   min-height: 36px;
   min-width: 80px;
+  position: relative;
+  overflow: hidden;
+}
+.mam-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255,255,255,0.15);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.4s ease, height 0.4s ease;
+}
+.mam-btn:hover::before {
+  width: 300px;
+  height: 300px;
 }
 .mam-btn:disabled { opacity: 0.38; cursor: not-allowed; pointer-events: none; }
-.mam-btn--sm { padding: 6px 12px; font-size: 12px; border-radius: 7px; min-height: 32px; min-width: 70px; }
+.mam-btn--sm { 
+  padding: 6px 12px; 
+  font-size: 12px; 
+  border-radius: 7px; 
+  min-height: 32px; 
+  min-width: 70px; 
+}
 .mam-btn--wide { width: 100%; justify-content: center; font-size: 14px; padding: 11px 16px; }
 
 /* Primary — indigo gradient */
