@@ -342,7 +342,7 @@ export default function PricingPage() {
                 style={{ '--accent': gym.color } as React.CSSProperties}
               >
                 <div className="gym-icon-wrapper">
-                  <Icon size={32} style={{ color: gym.color }} />
+                  <Icon size={32} style={{ color: '#ffffff' }} />
                 </div>
                 <h3>{gym.name}</h3>
                 <p>{gym.description}</p>

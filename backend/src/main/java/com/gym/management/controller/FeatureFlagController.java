@@ -57,9 +57,6 @@ public class FeatureFlagController {
     @GetMapping("/all")
     public ResponseEntity<List<FeatureFlagDTO>> getAllFlagsForUser() {
         CustomUserDetails userDetails = getCurrentUserDetails();
-        if (userDetails == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
 
         List<FeatureFlagDTO> flags = featureFlagService.getAllFlagsForUser(userDetails);
         return ResponseEntity.ok(flags);

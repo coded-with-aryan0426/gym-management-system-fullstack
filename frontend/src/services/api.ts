@@ -38,11 +38,19 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401) {
       const isLoginRequest = error.config?.url?.includes('/auth/login');
       const isLoginPage = window.location.pathname === '/login';
+      const isSuperAdminPage = window.location.pathname.startsWith('/superadmin') || window.location.pathname === '/portal';
 
       if (!isLoginRequest && !isLoginPage) {
-        localStorage.removeItem(getStorageKey('token'));
-        localStorage.removeItem(getStorageKey('user'));
-        window.location.href = '/login';
+        if (isSuperAdminPage) {
+          localStorage.removeItem('sa_token');
+          if (window.location.pathname !== '/portal') {
+            window.location.href = '/portal';
+          }
+        } else {
+          localStorage.removeItem(getStorageKey('token'));
+          localStorage.removeItem(getStorageKey('user'));
+          window.location.href = '/login';
+        }
       }
     }
     return Promise.reject(error);

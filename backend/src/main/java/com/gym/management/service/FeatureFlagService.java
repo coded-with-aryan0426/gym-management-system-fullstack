@@ -46,6 +46,14 @@ public class FeatureFlagService {
                 .map(String::toUpperCase)
                 .collect(Collectors.toList());
 
+        if (allowedRoleList.contains("PUBLIC") || allowedRoleList.contains("GUEST")) {
+            return true;
+        }
+
+        if (userDetails == null || userDetails.getAuthorities() == null) {
+            return false;
+        }
+
         return userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .map(auth -> auth.replace("ROLE_", ""))

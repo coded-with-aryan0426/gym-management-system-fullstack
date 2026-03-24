@@ -1,6 +1,8 @@
 package com.gym.management.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.SQLRestriction;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -58,6 +60,7 @@ public class Gym {
     private LocalDateTime createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @NotFound(action = NotFoundAction.IGNORE)
     @JoinColumn(name = "owner_id")
     private User owner;
 

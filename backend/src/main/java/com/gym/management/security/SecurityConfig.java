@@ -103,7 +103,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/api/superadmin/auth/**").permitAll()
-                        .requestMatchers("/api/superadmin/**").authenticated()
+                        .requestMatchers("/api/superadmin/**").permitAll() // Protected internally by SuperAdminAuthFilter
                         .requestMatchers("/api/gyms/public/**").permitAll()
                         .requestMatchers("/api/dashboard/analytics/test").permitAll() // Test endpoint
                         .requestMatchers("/api/tasks/seed").permitAll() // Seed dummy data — no auth needed
@@ -114,8 +114,8 @@ public class SecurityConfig {
                         .requestMatchers("/error").permitAll()
 
                         // ==================== FEATURE FLAGS & BETA FEEDBACK ====================
-                        // Feature flags - authenticated users can check flags
-                        .requestMatchers("/api/features/**").authenticated()
+                        // Feature flags - anyone can check flags
+                        .requestMatchers("/api/features/**").permitAll()
                         // Beta feedback - POST for authenticated users, GET/PATCH for ADMIN only
                         .requestMatchers(HttpMethod.POST, "/api/beta/feedback").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/beta/feedback/**").hasRole("ADMIN")

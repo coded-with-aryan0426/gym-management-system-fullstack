@@ -20,6 +20,7 @@ import com.gym.management.repository.GymStaffRepository;
 import com.gym.management.repository.MembershipRepository;
 import com.gym.management.repository.TransactionRepository;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -126,6 +127,7 @@ public class SuperAdminController {
     }
 
     @GetMapping("/gyms")
+    @Transactional(readOnly = true)
     public ResponseEntity<List<Map<String, Object>>> gyms() {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime thirtyDaysAgo = now.minusDays(30);
@@ -193,6 +195,7 @@ public class SuperAdminController {
     }
 
     @GetMapping("/gyms/{gymId}/deep-dive")
+    @Transactional(readOnly = true)
     public ResponseEntity<?> gymDeepDive(@org.springframework.web.bind.annotation.PathVariable Long gymId) {
         Optional<Gym> gymOpt = gymRepository.findById(gymId);
         if (gymOpt.isEmpty()) {
