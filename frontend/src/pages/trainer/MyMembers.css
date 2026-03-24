@@ -1326,12 +1326,13 @@
 .mm__panel-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(4px);
-  z-index: 200;
+  z-index: 1000;
   display: flex;
-  justify-content: flex-end;
-  animation: mm-fadein 0.18s ease;
+  align-items: center;
+  justify-content: center;
+  animation: mm-fadein 0.2s ease;
 }
 
 @keyframes mm-fadein {
@@ -1345,24 +1346,27 @@
 }
 
 .mm__panel {
-  width: min(400px, calc(100vw - 32px));
-  height: 100%;
-  background: #0d0d10;
-  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  width: min(500px, calc(100vw - 32px));
+  max-height: 85vh;
+  background: var(--sidebar-bg, rgba(18, 18, 20, 0.95));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  animation: mm-slidein 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: -16px 0 48px rgba(0, 0, 0, 0.5);
+  animation: mm-pop-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(59, 130, 246, 0.1);
 }
 
-@keyframes mm-slidein {
+@keyframes mm-pop-in {
   from {
-    transform: translateX(100%);
+    opacity: 0;
+    transform: scale(0.95) translateY(-20px);
   }
 
   to {
-    transform: translateX(0);
+    opacity: 1;
+    transform: scale(1) translateY(0);
   }
 }
 
