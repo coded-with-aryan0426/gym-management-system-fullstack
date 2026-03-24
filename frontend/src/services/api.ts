@@ -478,6 +478,25 @@ const api = {
     }
   },
 
+  // Feature Flag endpoints (JWT-authenticated, for in-app feature toggles)
+  async getAllFeatures(): Promise<import('../types/feature.types').FeatureFlag[]> {
+    const response = await apiClient.get<import('../types/feature.types').FeatureFlag[]>('/features/all');
+    return response.data;
+  },
+
+  async getFeature(key: string): Promise<import('../types/feature.types').FeatureFlag> {
+    const response = await apiClient.get<import('../types/feature.types').FeatureFlag>(`/features/${key}`);
+    return response.data;
+  },
+
+  async updateFeature(
+    key: string,
+    data: import('../types/feature.types').UpdateFeatureRequest,
+  ): Promise<import('../types/feature.types').FeatureFlag> {
+    const response = await apiClient.put<import('../types/feature.types').FeatureFlag>(`/features/${key}`, data);
+    return response.data;
+  },
+
   // Generic methods to allow direct apiClient usage through the api object
   get: (url: string, config?: any) => apiClient.get(url, config),
   post: (url: string, data?: any, config?: any) => apiClient.post(url, data, config),
