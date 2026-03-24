@@ -1,23 +1,33 @@
 # Beta Testing Strategy — Gym Management Platform
-> Version 1.0 | Date: 2026-03-03 | Stack: React 19 + Vite / Spring Boot / MySQL
+> Version 2.0 | Date: 2026-03-24 | Stack: React 19 + Vite / Spring Boot / MySQL
 
 ---
 
 ## Table of Contents
 1. [Context & Goals](#1-context--goals)
 2. [Application Architecture Summary](#2-application-architecture-summary)
-3. [Public Hosting Options — Detailed Comparison](#3-public-hosting-options--detailed-comparison)
-4. [Recommended Hosting Setup (Step-by-Step)](#4-recommended-hosting-setup-step-by-step)
-5. [Access Control Strategy](#5-access-control-strategy)
-6. [Problems You WILL Face & Their Solutions](#6-problems-you-will-face--their-solutions)
-7. [Integrated Feedback System Architecture](#7-integrated-feedback-system-architecture)
-8. [Feedback System Implementation Plan](#8-feedback-system-implementation-plan)
-9. [Beta Testing Session Protocol](#9-beta-testing-session-protocol)
-10. [Tester Onboarding Checklist](#10-tester-onboarding-checklist)
-11. [Feedback Workflow & Triage Process](#11-feedback-workflow--triage-process)
-12. [Export & Reporting](#12-export--reporting)
-13. [Risk Register](#13-risk-register)
-14. [Emergency Runbook](#14-emergency-runbook)
+3. [Phase 1: Development & Beta Preparation](#3-phase-1--development--beta-preparation)
+   - [1A: Global Feedback System with Toggle](#1a-global-feedback-system-with-toggle)
+   - [1B: Multi-Stage Beta Testing Strategy](#1b-multi-stage-beta-testing-strategy)
+   - [1C: Development Improvements Before Beta](#1c-development-improvements-before-beta)
+4. [Phase 2: Deployment & Release](#4-phase-2--deployment--release)
+   - [2A: Staging Environment Setup](#2a-staging-environment-setup)
+   - [2B: Deployment Improvements](#2b-deployment-improvements)
+   - [2C: Rollback Strategy](#2c-rollback-strategy)
+5. [Public Hosting Options — Detailed Comparison](#5-public-hosting-options--detailed-comparison)
+6. [Access Control Strategy](#6-access-control-strategy)
+7. [Problems You WILL Face & Their Solutions](#7-problems-you-will-face--their-solutions)
+8. [Integrated Feedback System Architecture](#8-integrated-feedback-system-architecture)
+9. [Feedback System Implementation Plan](#9-feedback-system-implementation-plan)
+10. [Beta Testing Session Protocol](#10-beta-testing-session-protocol)
+11. [Tester Onboarding Checklist](#11-tester-onboarding-checklist)
+12. [Feedback Workflow & Triage Process](#12-feedback-workflow--triage-process)
+13. [Export & Reporting](#13-export--reporting)
+14. [Post-Beta Cleanup Checklist](#14-post-beta-cleanup-checklist)
+15. [Security Testing Strategy](#15-security-testing-strategy)
+16. [Performance Testing Baseline](#16-performance-testing-baseline)
+17. [Risk Register](#17-risk-register)
+18. [Emergency Runbook](#18-emergency-runbook)
 
 ---
 
@@ -37,6 +47,7 @@
 | UX friction identified | Every tester submits ≥3 feedback items |
 | Trainer-request flow validated end-to-end | Accept/Decline cycle completed by 5+ tester pairs |
 | Feedback collected in structured, searchable format | Zero feedback lost in chat/email |
+| Global feature toggle works correctly | Feedback widget toggles on/off without redeployment |
 
 ### Testers
 - ~10 concurrent users
@@ -69,7 +80,712 @@ This is the most commonly overlooked problem in local beta testing setups.
 
 ---
 
-## 3. Public Hosting Options — Detailed Comparison
+## 3. Phase 1: Development & Beta Preparation
+
+### 1A: Global Feedback System with Toggle
+
+#### Overview
+The feedback system MUST have a global toggle that can enable/disable it without code changes or redeployment. This allows:
+- **Production**: Keep feedback widget hidden but functional
+- **Beta**: Enable for testers only
+- **Development**: Enable for internal testing
+
+#### Feature Toggle Architecture
+
+```
+┌─────────────────────────────────────────────┐
+│         Backend: Feature Flag Service        │
+├─────────────────────────────────────────────┤
+│  GET /api/features/feedback                 │
+│  Response: { enabled: boolean, version: "2.0" } │
+└─────────────────────────────────────────────┘
+                    │
+                    │ JWT-protected endpoint
+                    ▼
+┌─────────────────────────────────────────────┐
+│      Frontend: FeedbackWidgetProvider        │
+├─────────────────────────────────────────────┤
+│  1. Check feature flag on app mount         │
+│  2. Store in React Context / Zustand        │
+│  3. Conditionally render widget             │
+│  4. Poll every 5 minutes for updates        │
+└─────────────────────────────────────────────┘
+```
+
+#### Backend Implementation
+
+**New Entity: FeatureFlag.java**
+```java
+@Entity
+@Table(name = "feature_flags")
+public class FeatureFlag {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(unique = true, nullable = false)
+    private String featureKey;  // e.g., "feedback_widget", "beta_mode"
+
+    @Column(nullable = false)
+    private Boolean enabled;
+
+    private String description;
+    private String allowedRoles;  // comma-separated: "ADMIN,OWNER,TRAINER,MEMBER"
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private LocalDateTime updatedAt;
+
+    // Only ADMIN can toggle these
+}
+```
+
+**New Endpoint: FeatureFlagController.java**
+```java
+@RestController
+@RequestMapping("/api/features")
+public class FeatureFlagController {
+
+    @GetMapping("/{featureKey}")
+    public ResponseEntity<FeatureFlagDTO> getFeatureFlag(
+            @PathVariable String featureKey,
+            @AuthenticationPrincipal UserDetails user) {
+
+        FeatureFlag flag = featureFlagService.getByKey(featureKey);
+
+        // Check role permission
+        if (!featureFlagService.isAllowedForUser(flag, user)) {
+            return ResponseEntity.status(403).build();
+        }
+
+        return ResponseEntity.ok(new FeatureFlagDTO(flag));
+    }
+
+    // Only ADMIN can update
+    @PutMapping("/{featureKey}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<FeatureFlagDTO> updateFeatureFlag(
+            @PathVariable String featureKey,
+            @RequestBody UpdateFeatureFlagRequest request) {
+
+        FeatureFlag flag = featureFlagService.update(featureKey, request);
+        return ResponseEntity.ok(new FeatureFlagDTO(flag));
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<FeatureFlagDTO>> getAllFlags(@AuthenticationPrincipal UserDetails user) {
+        return ResponseEntity.ok(
+            featureFlagService.getAllFlagsForUser(user).stream()
+                .map(FeatureFlagDTO::new)
+                .collect(Collectors.toList())
+        );
+    }
+}
+```
+
+**Database Migration**
+```sql
+CREATE TABLE feature_flags (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    feature_key VARCHAR(100) UNIQUE NOT NULL,
+    enabled BOOLEAN NOT NULL DEFAULT FALSE,
+    description VARCHAR(500),
+    allowed_roles VARCHAR(255),
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Seed initial values
+INSERT INTO feature_flags (feature_key, enabled, description, allowed_roles) VALUES
+('feedback_widget', FALSE, 'Global feedback widget toggle', 'ADMIN,OWNER,TRAINER,MEMBER'),
+('beta_mode', FALSE, 'Enable beta-specific features', 'ADMIN,OWNER'),
+('new_ui', FALSE, 'New UI/UX improvements', 'ADMIN'),
+('debug_mode', FALSE, 'Developer debug information', 'ADMIN');
+```
+
+#### Frontend Implementation
+
+**FeedbackWidgetProvider.tsx**
+```typescript
+interface FeatureContextType {
+  features: Record<string, boolean>;
+  isLoading: boolean;
+  refetchFeatures: () => Promise<void>;
+}
+
+const FeatureContext = createContext<FeatureContextType | null>(null);
+
+export const FeatureProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [features, setFeatures] = useState<Record<string, boolean>>({});
+  const [isLoading, setIsLoading] = useState(true);
+
+  const refetchFeatures = useCallback(async () => {
+    try {
+      const response = await api.get('/features/all');
+      const featureMap = response.data.reduce((acc: Record<string, boolean>, flag: any) => {
+        acc[flag.featureKey] = flag.enabled;
+        return acc;
+      }, {});
+      setFeatures(featureMap);
+      localStorage.setItem('features', JSON.stringify(featureMap));
+    } catch (error) {
+      console.error('Failed to fetch features, using cached:', error);
+      const cached = localStorage.getItem('features');
+      if (cached) setFeatures(JSON.parse(cached));
+    }
+  }, []);
+
+  useEffect(() => {
+    // Load cached features immediately
+    const cached = localStorage.getItem('features');
+    if (cached) setFeatures(JSON.parse(cached));
+
+    // Then fetch fresh
+    refetchFeatures().finally(() => setIsLoading(false));
+
+    // Poll every 5 minutes
+    const interval = setInterval(refetchFeatures, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [refetchFeatures]);
+
+  return (
+    <FeatureContext.Provider value={{ features, isLoading, refetchFeatures }}>
+      {children}
+    </FeatureContext.Provider>
+  );
+};
+
+export const useFeature = (featureKey: string): boolean => {
+  const { features } = useContext(FeatureContext) || { features: {} };
+  return features[featureKey] ?? false;
+};
+```
+
+**Enhanced FeedbackWidget.tsx**
+```typescript
+export const FeedbackWidget: React.FC = () => {
+  const isFeedbackEnabled = useFeature('feedback_widget');
+  const [isOpen, setIsOpen] = useState(false);
+
+  // Don't render if feature is disabled
+  if (!isFeedbackEnabled) return null;
+
+  return (
+    <>
+      <FloatingButton onClick={() => setIsOpen(true)} />
+      <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
+        <FeedbackForm />
+      </Modal>
+    </>
+  );
+};
+```
+
+**SuperAdmin Feature Management Page: /superadmin/features**
+```typescript
+// Features management page
+export const SAFeaturesPage: React.FC = () => {
+  const { features, refetchFeatures } = useFeatures();
+  const [updating, setUpdating] = useState<string | null>(null);
+
+  const toggleFeature = async (key: string, enabled: boolean) => {
+    setUpdating(key);
+    try {
+      await api.put(`/features/${key}`, { enabled });
+      await refetchFeatures();
+      toast.success(`Feature "${key}" ${enabled ? 'enabled' : 'disabled'}`);
+    } catch (error) {
+      toast.error('Failed to update feature');
+    } finally {
+      setUpdating(null);
+    }
+  };
+
+  return (
+    <div className="sa-features">
+      <h1>Feature Toggles</h1>
+      <table>
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>Status</th>
+            <th>Allowed Roles</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {features.map((flag) => (
+            <tr key={flag.featureKey}>
+              <td>
+                <strong>{flag.featureKey}</strong>
+                <p>{flag.description}</p>
+              </td>
+              <td>
+                <Badge type={flag.enabled ? 'success' : 'neutral'}>
+                  {flag.enabled ? 'ENABLED' : 'DISABLED'}
+                </Badge>
+              </td>
+              <td>{flag.allowedRoles}</td>
+              <td>
+                <Switch
+                  checked={flag.enabled}
+                  onChange={(checked) => toggleFeature(flag.featureKey, checked)}
+                  disabled={updating === flag.featureKey}
+                />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+```
+
+#### Admin Toggle Instructions
+1. Go to `/superadmin/features`
+2. Find `feedback_widget` in the list
+3. Toggle switch to **ENABLED**
+4. Widget appears on all pages within 5 minutes (or immediately on next page refresh)
+5. To disable: toggle back to **DISABLED**
+
+---
+
+### 1B: Multi-Stage Beta Testing Strategy
+
+#### Beta Stages Overview
+
+| Stage | Focus | Testers | Duration | Goals |
+|-------|-------|---------|----------|-------|
+| **Alpha** | Core flows, critical bugs | Internal (you + 1-2 devs) | 1-2 days | Find P0/P1 bugs before external testers |
+| **Private Beta** | All features, UX feedback | 3-5 trusted users | 3-5 days | Validate all flows, gather UX feedback |
+| **Public Beta** | Scale testing, edge cases | 10+ external users | 1 week | Stress test, find edge cases, polish |
+
+#### Stage 1: Alpha Testing (Internal)
+
+**Timeline**: Day -7 to Day -6 (before private beta)
+
+**Testers**: You + 1-2 developers
+
+**Test Focus**:
+- [ ] All authentication flows (login, logout, password reset)
+- [ ] JWT token handling (expiry, refresh)
+- [ ] Basic CRUD operations for each role
+- [ ] API error handling (400, 401, 403, 404, 500)
+- [ ] CORS configuration validation
+- [ ] Database connection stability
+
+**Success Criteria**:
+- Zero P0 bugs (app-breaking)
+- Maximum 3 P1 bugs (core flow broken but workaround exists)
+- All API endpoints return appropriate error messages
+
+**Exit Gate**: Must pass 100% of P0 test cases before proceeding
+
+#### Stage 2: Private Beta (Trusted Users)
+
+**Timeline**: Day -5 to Day -1 (before public beta)
+
+**Testers**: 3-5 trusted users (friends, colleagues, early adopters)
+
+**Test Focus**:
+- [ ] All user flows from Section 9 of this document
+- [ ] Trainer request end-to-end (Flow 1)
+- [ ] Member registration and membership (Flow 2)
+- [ ] Class booking (Flow 3)
+- [ ] Financial flows (Flow 4)
+- [ ] Feedback widget functionality
+- [ ] Real-time notifications via WebSocket
+
+**Success Criteria**:
+- All flows completed successfully by at least 2 testers
+- Feedback widget receives ≥10 submissions
+- Zero P0 bugs, maximum 5 P1 bugs
+- No security vulnerabilities found
+
+**Exit Gate**: Must have 3+ testers confirm core flows work without P0 issues
+
+#### Stage 3: Public Beta (External Users)
+
+**Timeline**: Day 0 to Day 7
+
+**Testers**: 10+ external users via Cloudflare invitations
+
+**Test Focus**:
+- [ ] All flows from Section 9 with broader user base
+- [ ] Edge cases (concurrent users, large data sets)
+- [ ] Mobile responsiveness
+- [ ] Performance under load
+- [ ] User experience feedback
+- [ ] Cross-browser compatibility (Chrome, Firefox, Safari, Edge)
+
+**Success Criteria**:
+- All flows validated by multiple testers
+- Feedback widget receives ≥30 submissions
+- Performance metrics within acceptable range (see Section 16)
+- No critical security issues
+
+#### Beta Phase Gate Review
+
+Before moving from each stage to the next:
+
+| Stage Transition | Gate Criteria |
+|------------------|---------------|
+| Alpha → Private Beta | 0 P0 bugs, <3 P1 bugs, all core APIs validated |
+| Private Beta → Public Beta | <5 P1 bugs, 3+ testers completed all flows, no security issues |
+
+---
+
+### 1C: Development Improvements Before Beta
+
+#### Required Fixes Before Alpha
+
+1. **CORS Configuration** (P0 - Will break all testing)
+```java
+// Must use allowedOriginPatterns for tunnel URLs
+@Bean
+public CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration config = new CorsConfiguration();
+    config.setAllowedOriginPatterns(Arrays.asList(
+        "http://localhost:*",
+        "https://*.trycloudflare.com",
+        "https://*.vercel.app",
+        "https://*.railway.app",
+        "https://*.up.railway.app"
+    ));
+    config.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE","PATCH","OPTIONS"));
+    config.setAllowedHeaders(List.of("*"));
+    config.setAllowCredentials(true);
+    config.setMaxAge(3600L);
+    // ...
+}
+```
+
+2. **JWT Expiration for Beta** (P1 - Will annoy testers)
+```properties
+# application-beta.properties
+jwt.expiration=28800000  # 8 hours in milliseconds
+```
+
+3. **WebSocket Heartbeat Configuration** (P1 - Will lose real-time updates)
+```typescript
+// In your STOMP client config
+client.heartbeatIncoming = 10000;  // 10s
+client.heartbeatOutgoing = 10000;
+client.reconnectDelay = 5000;
+```
+
+4. **Feature Toggle Entity & Controller** (P0 - Required for feedback widget toggle)
+
+5. **localStorage Write-Ahead Log for Feedback** (P1 - Prevents feedback loss)
+```typescript
+// See Section 9 for implementation
+```
+
+6. **Error Handler for OptimisticLockException** (P1 - Shows ugly errors)
+```java
+@ExceptionHandler(OptimisticLockException.class)
+public ResponseEntity<ErrorResponse> handleOptimisticLock(OptimisticLockException ex) {
+    return ResponseEntity.status(409)
+        .body(new ErrorResponse("Data was modified by another user. Please refresh and try again."));
+}
+```
+
+7. **Health Check Endpoint** (P1 - Required for monitoring)
+```java
+@GetMapping("/api/health")
+public ResponseEntity<Map<String, String>> health() {
+    return ResponseEntity.ok(Map.of(
+        "status", "UP",
+        "timestamp", Instant.now().toString()
+    ));
+}
+```
+
+#### Required Fixes Before Private Beta
+
+8. **Separate Beta Database Schema**
+```sql
+CREATE DATABASE gym_beta;
+-- All beta testing uses this schema
+```
+
+9. **Beta Seed Data Script**
+```sql
+-- scripts/seed-beta.sql
+-- See Section 10 for tester account creation
+```
+
+10. **Feedback Widget Fully Functional** with:
+    - [ ] localStorage WAL
+    - [ ] Auto-capture page context
+    - [ ] Screenshot capture
+    - [ ] SuperAdmin dashboard
+
+11. **Uptime Monitoring Setup** (UptimeRobot or similar)
+
+#### Required Fixes Before Public Beta
+
+12. **All P0/P1 bugs from Alpha & Private Beta resolved**
+
+13. **Performance baseline established** (see Section 16)
+
+14. **Security scan completed** (basic OWASP checklist)
+
+15. **Rollback procedure documented and tested**
+
+---
+
+## 4. Phase 2: Deployment & Release
+
+### 2A: Staging Environment Setup
+
+#### Environment Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    DEVELOPMENT                                │
+│  localhost:5173 (frontend)                                   │
+│  localhost:8080 (backend)                                     │
+│  Local MySQL                                                 │
+│  - Used by developers daily                                  │
+│  - Auto-deploy on git push to develop branch                 │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            │ Pull Request Merge
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    STAGING                                    │
+│  staging.gym.yourdomain.com (or Railway staging)           │
+│  Separate MySQL instance (staging_db)                        │
+│  - Mirror of production configuration                         │
+│  - Beta testers use this during Private Beta                 │
+│  - Manual deploy from main branch                            │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            │ Release tag + manual approval
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    PRODUCTION                                │
+│  gym.yourdomain.com                                         │
+│  Production MySQL                                            │
+│  - Zero downtime deployment strategy                          │
+│  - Feature flags control rollout                              │
+│  - Immediate rollback capability                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### Staging Environment Setup Steps
+
+**Option 1: Railway Staging** (Recommended)
+```bash
+# Create staging environment on Railway
+railway environment create staging
+railway up --environment staging
+
+# Set environment variables
+railway variables set SPRING_PROFILES_ACTIVE=staging
+railway variables set DATABASE_URL=$MYSQL_URL_STAGING
+railway variables set JWT_EXPIRATION=28800000
+
+# Get staging URL
+railway domain
+# → https://gym-backend.staging.railway.app
+```
+
+**Option 2: Local Staging with Tunnels**
+```bash
+# Use separate ports for staging
+cloudflared tunnel create gym-staging-frontend --port 5183
+cloudflared tunnel create gym-staging-backend --port 8081
+
+# Start backend on port 8081
+./mvnw spring-boot:run -Dspring-boot.run.profiles=staging
+```
+
+#### Staging Configuration
+
+**application-staging.properties**
+```properties
+# Server
+server.port=8080
+
+# Database
+spring.datasource.url=${STAGING_DB_URL}
+spring.datasource.username=${STAGING_DB_USER}
+spring.datasource.password=${STAGING_DB_PASSWORD}
+
+# JWT - 8 hours for beta testing
+jwt.expiration=28800000
+
+# Feature Flags - Beta mode ON
+feature.feedback.default=true
+feature.beta.mode=true
+
+# Logging
+logging.level.root=INFO
+logging.level.com.gym=DEBUG
+
+# CORS
+cors.allowed-origins=${STAGING_FRONTEND_URL}
+```
+
+---
+
+### 2B: Deployment Improvements
+
+#### Pre-Deployment Checklist
+
+- [ ] All tests passing locally (`npm test` and `./mvnw test`)
+- [ ] No P0/P1 bugs in feedback tracker
+- [ ] Staging environment fully tested
+- [ ] Production database backup completed
+- [ ] Rollback procedure tested on staging
+- [ ] Feature toggle states verified for production
+- [ ] Communication plan sent to stakeholders
+- [ ] Monitoring dashboards configured
+
+#### Zero-Downtime Deployment Strategy
+
+**Blue-Green Deployment Pattern**
+```
+┌──────────────────────────────────────────────────────────────┐
+│                     LOAD BALANCER                             │
+│              (Cloudflare, Railway, or AWS ALB)               │
+└──────────────────────────────────────────────────────────────┘
+                    │                    │
+                    ▼                    ▼
+┌─────────────────────────┐  ┌─────────────────────────┐
+│     BLUE ENVIRONMENT     │  │    GREEN ENVIRONMENT    │
+│   Current Production    │  │   New Version (Deploy)  │
+│                         │  │                        │
+│  gym-backend-v1.2.3     │  │   gym-backend-v1.2.4   │
+│  healthy ✓              │  │   healthy ✓            │
+└─────────────────────────┘  └─────────────────────────┘
+         │                              │
+         │                              │ Test green
+         │                              │ Health checks pass
+         │                              ▼
+         │                    ┌─────────────────────────┐
+         │                    │  Switch traffic 10%   │
+         │                    │  Monitor error rates    │
+         │                    └─────────────────────────┘
+         │                              │
+         │              ┌───────────────┴───────────────┐
+         │              │                               │
+         │              ▼                               ▼
+         │    If errors < 1%:              If errors > 1%:
+         │    Continue rollout             Automatic rollback
+         │    25% → 50% → 100%            to blue
+         │              │
+         └──────────────┴──────────────────────────────┘
+                          │
+                          ▼
+               ┌─────────────────────────┐
+               │    BLUE = GREEN         │
+               │  Old version stopped    │
+               │  Deployment complete    │
+               └─────────────────────────┘
+```
+
+#### Railway Deployment Steps
+
+```bash
+# 1. Ensure you're on main branch with clean state
+git checkout main
+git pull origin main
+
+# 2. Create production release tag
+git tag -a v1.2.4 -m "Beta release with feedback system"
+git push origin v1.2.4
+
+# 3. Deploy backend to Railway
+cd backend
+railway login
+railway init --environment production
+railway up
+
+# 4. Set production environment variables
+railway variables set SPRING_PROFILES_ACTIVE=production
+railway variables set JWT_EXPIRATION=86400000  # 24 hours for production
+railway variables set DATABASE_URL=$MYSQL_URL_PROD
+
+# 5. Deploy frontend to Vercel
+cd ../frontend
+vercel --prod
+
+# 6. Configure custom domain
+vercel domains add gym.yourdomain.com
+# Or via Cloudflare DNS
+
+# 7. Verify deployment
+curl https://gym-backend.yourdomain.com/api/health
+# Expected: {"status":"UP","timestamp":"..."}
+
+# 8. Enable feature flags for production
+# Go to /superadmin/features and enable desired features
+```
+
+---
+
+### 2C: Rollback Strategy
+
+#### Automatic Rollback Triggers
+
+| Metric | Threshold | Action |
+|--------|-----------|--------|
+| Error rate | > 1% over 5 minutes | Auto-rollback |
+| Latency | p99 > 3000ms | Alert, manual decision |
+| Health check failures | 3 consecutive failures | Auto-rollback |
+| Database connection failures | Any | Auto-rollback |
+
+#### Rollback Procedures
+
+**Railway Rollback**
+```bash
+# List recent deployments
+railway deployments list
+
+# Get specific deployment ID to rollback to
+railway rollback [DEPLOYMENT_ID]
+
+# Verify rollback
+curl https://gym-backend.yourdomain.com/api/health
+```
+
+**Manual Emergency Rollback**
+```bash
+# If Railway console is down, use CLI
+railway rollback [LAST_STABLE_DEPLOYMENT_ID]
+
+# Check logs during rollback
+railway logs --deployment [DEPLOYMENT_ID]
+```
+
+**Frontend Rollback**
+```bash
+# List recent deployments
+vercel ls
+
+# Rollback to specific version
+vercel rollback [DEPLOYMENT_URL]
+
+# Or redeploy previous production deployment
+vercel --prod --force
+```
+
+#### Feature Flag Emergency Disable
+
+If a feature causes issues in production:
+
+1. Go to `/superadmin/features`
+2. Toggle the problematic feature to **DISABLED**
+3. Changes take effect within 5 minutes (polling interval)
+4. Or force refresh: clear localStorage `features` key
+
+**No redeployment needed** — feature flags work without restart.
+
+---
+
+## 5. Public Hosting Options — Detailed Comparison
 
 ### Option A — Tunneling (Recommended for Speed)
 
@@ -119,99 +835,7 @@ Run your laptop as the server. Share your home/office IP.
 
 ---
 
-## 4. Recommended Hosting Setup (Step-by-Step)
-
-### Phase 1: Same-Day (Tunneling) Setup — Cloudflare Tunnel
-
-**Prerequisites**: Node.js, Java 21, MySQL running locally
-
-**Step 1 — Install cloudflared**
-```bash
-# macOS
-brew install cloudflared
-
-# Or direct download
-curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-darwin-amd64.tgz | tar xz
-```
-
-**Step 2 — Authenticate**
-```bash
-cloudflared tunnel login
-# Opens browser → log in with your Cloudflare account (free account works)
-```
-
-**Step 3 — Create named tunnels (persistent URLs)**
-```bash
-cloudflared tunnel create gym-frontend
-cloudflared tunnel create gym-backend
-```
-
-**Step 4 — Create DNS routes** (if you have a domain) OR use trycloudflare for zero-config:
-```bash
-# Zero-config, no account needed (random URL, good for 1-day sessions)
-cloudflared tunnel --url http://localhost:5173
-cloudflared tunnel --url http://localhost:8080
-```
-
-**Step 5 — Update frontend API base URL**
-
-In `/frontend/.env.beta` (create this file):
-```env
-VITE_API_BASE_URL=https://YOUR-BACKEND-TUNNEL-URL.trycloudflare.com
-```
-
-Then build/start frontend with:
-```bash
-VITE_API_BASE_URL=https://gym-backend.yourdomain.com npm run dev -- --host 0.0.0.0
-```
-
-**Step 6 — Configure CORS on backend**
-
-In your Spring Boot CORS config, add the tunnel URLs to allowed origins:
-```java
-// In your CORS configuration bean / WebMvcConfigurer
-config.setAllowedOrigins(Arrays.asList(
-    "http://localhost:5173",
-    "https://YOUR-FRONTEND-TUNNEL.trycloudflare.com",
-    "https://YOUR-FRONTEND.vercel.app"
-));
-```
-
-**Step 7 — Zero Trust Access (invite-only)**
-1. Go to Cloudflare Zero Trust dashboard (free)
-2. Create an Access Application pointing to your frontend tunnel URL
-3. Add policy: "Allow emails" → add all 10 testers' email addresses
-4. Testers get a one-time code in their email to access the app
-
-### Phase 2: Multi-Day (Cloud Deploy) Setup — Vercel + Railway
-
-**Frontend → Vercel** (already in your repo)
-```bash
-cd frontend
-npm run build
-vercel --prod
-# Set env var: VITE_API_BASE_URL = https://your-railway-backend.up.railway.app
-```
-
-**Backend → Railway**
-```bash
-# Create Dockerfile in /backend if not exists, then:
-railway login
-railway init
-railway up
-# Railway auto-provisions MySQL, sets DATABASE_URL env var
-```
-
-**Update application.properties for Railway**:
-```properties
-spring.datasource.url=${DATABASE_URL}
-spring.datasource.username=${MYSQLUSER}
-spring.datasource.password=${MYSQLPASSWORD}
-```
-
----
-
-## 5. Access Control Strategy
+## 6. Access Control Strategy
 
 ### Problem
 Your app has JWT-based auth but once the URL is public, ANYONE with the link can hit `/login` or `/portal`.
@@ -244,7 +868,7 @@ Your app has JWT-based auth but once the URL is public, ANYONE with the link can
 
 ---
 
-## 6. Problems You WILL Face & Their Solutions
+## 7. Problems You WILL Face & Their Solutions
 
 ### P1 — CORS Errors (WILL HAPPEN)
 
@@ -379,7 +1003,7 @@ client.reconnectDelay = 5000;      // auto-reconnect
 **Problem**: You give 10 people access. They click around randomly. You get vague feedback like "it looks good" or "seems slow". Zero actionable data.
 
 **Solution**:
-- Create a structured test script (included in Section 9)
+- Create a structured test script (included in Section 10)
 - Assign each tester a specific role AND a specific flow to test
 - Use the in-app feedback widget with **pre-filled section context** — when they're on `/trainer/members`, the widget auto-sets section to "MyMembers"
 
@@ -418,7 +1042,31 @@ client.reconnectDelay = 5000;      // auto-reconnect
 
 ---
 
-## 7. Integrated Feedback System Architecture
+### P13 — Feature Toggle Not Propagating Immediately
+
+**Problem**: You disable the feedback widget, but some users still see it for several minutes.
+
+**Solution**:
+- Implement polling with 5-minute intervals (as described in Section 3A)
+- Add manual "Check for updates" button in the widget
+- Clear localStorage to force immediate refresh
+- Document the delay in admin UI: "Changes take up to 5 minutes"
+
+---
+
+### P14 — Beta Data Contaminates Production
+
+**Problem**: After beta, someone accidentally points production to the beta database, losing all production data.
+
+**Solution**:
+- Use completely separate database schemas (gym_prod vs gym_beta)
+- Environment variables stored in separate secret managers
+- No code changes between environments — only env vars differ
+- Add deployment checklist verification step
+
+---
+
+## 8. Integrated Feedback System Architecture
 
 ### Overview
 
@@ -505,7 +1153,7 @@ CREATE TABLE beta_feedback (
 
 ---
 
-## 8. Feedback System Implementation Plan
+## 9. Feedback System Implementation Plan
 
 ### Frontend: FeedbackWidget Component
 
@@ -535,7 +1183,7 @@ const submitFeedback = async (data: FeedbackPayload) => {
   // 1. Save to localStorage first
   const key = `feedback_pending_${Date.now()}`;
   localStorage.setItem(key, JSON.stringify(data));
-  
+
   try {
     // 2. POST to backend
     await api.post('/beta/feedback', data);
@@ -595,7 +1243,7 @@ useEffect(() => {
 
 ---
 
-## 9. Beta Testing Session Protocol
+## 10. Beta Testing Session Protocol
 
 ### Pre-Session Checklist (You — 30 minutes before)
 - [ ] `caffeinate -i -s &` running on your Mac
@@ -651,7 +1299,7 @@ useEffect(() => {
 
 ---
 
-## 10. Tester Onboarding Checklist
+## 11. Tester Onboarding Checklist
 
 ### What to Send Each Tester
 
@@ -675,7 +1323,7 @@ IMPORTANT:
 - Do NOT use real personal data
 
 YOUR TASKS:
-[Attach their specific test flow from Section 9]
+[Attach their specific test flow from Section 10]
 
 FEEDBACK: Use the blue "Feedback" button on every page.
 ISSUES DURING SESSION: Message me on WhatsApp: [your number]
@@ -688,11 +1336,11 @@ Thank you!
 2. Redirected to app → login page → enters credentials
 3. Forced password change (your `isFirstLogin` flow)
 4. Lands on their role dashboard
-5. FeedbackWidget visible bottom-right
+5. FeedbackWidget visible bottom-right (if feature enabled)
 
 ---
 
-## 11. Feedback Workflow & Triage Process
+## 12. Feedback Workflow & Triage Process
 
 ### Daily Triage (During Beta Week)
 Run this every morning:
@@ -722,7 +1370,7 @@ Run this every morning:
 
 ---
 
-## 12. Export & Reporting
+## 13. Export & Reporting
 
 ### CSV Export Format
 ```
@@ -754,6 +1402,13 @@ Generate this manually or via the dashboard export:
 ## Top Suggestions
 1. ...
 
+## Beta Phase Results
+| Phase | Testers | Duration | Bugs Found | Critical Issues |
+|-------|---------|----------|------------|-----------------|
+| Alpha | 2 | 2 days | X | X |
+| Private Beta | 5 | 5 days | X | X |
+| Public Beta | 10 | 7 days | X | X |
+
 ## Next Steps
 - [ ] Fix all P8+ bugs before next release
 - [ ] Review top 5 suggestions with team
@@ -762,13 +1417,197 @@ Generate this manually or via the dashboard export:
 
 ---
 
-## 13. Risk Register
+## 14. Post-Beta Cleanup Checklist
+
+### Data Management
+- [ ] Export final feedback report (CSV + PDF summary)
+- [ ] Backup beta database before cleanup: `mysqldump gym_beta > backup_gym_beta_$(date +%Y%m%d).sql`
+- [ ] Archive feedback in long-term storage
+- [ ] Delete beta database OR keep for future testing
+- [ ] Notify testers of beta closure
+
+### Access Revocation
+- [ ] Disable all beta tester accounts (or delete if not needed in production)
+- [ ] Revoke Cloudflare Zero Trust access for all testers
+- [ ] Remove beta invite codes from authentication flow
+- [ ] Disable beta feature flags (`feedback_widget = false`, `beta_mode = false`)
+
+### Infrastructure Cleanup
+- [ ] Stop tunnel processes on local machine
+- [ ] Delete tunnel configurations: `cloudflared tunnel delete gym-frontend`
+- [ ] Take down staging environment if separate
+- [ ] Update production environment variables (remove beta-specific configs)
+- [ ] Set JWT expiration back to production value (24h or appropriate)
+
+### Documentation
+- [ ] Update README with production URLs
+- [ ] Document any bugs found that weren't fixed
+- [ ] Create follow-up tickets for P3+ issues
+- [ ] Update feature flag documentation
+- [ ] Archive beta testing plan (create v2.0 for next beta)
+
+### Retrospective
+- [ ] Conduct beta retrospective meeting
+- [ ] Document what went well and what to improve
+- [ ] Update beta testing plan for next iteration
+- [ ] Thank testers and share summary of changes made based on their feedback
+
+---
+
+## 15. Security Testing Strategy
+
+### Pre-Beta Security Checklist
+
+- [ ] **Authentication**
+  - [ ] JWT secret is strong and not default
+  - [ ] Password policy enforced (min length, complexity)
+  - [ ] Account lockout after failed attempts
+  - [ ] Session timeout working
+
+- [ ] **Authorization**
+  - [ ] Role-based access control tested for all roles
+  - [ ] Trainers cannot access Owner features
+  - [ ] Members cannot access Admin features
+  - [ ] API endpoints protected by authentication
+
+- [ ] **Input Validation**
+  - [ ] SQL injection prevention (parameterized queries)
+  - [ ] XSS prevention (input sanitization)
+  - [ ] File upload validation (if applicable)
+
+- [ ] **Data Protection**
+  - [ ] Sensitive data not logged
+  - [ ] Database connections encrypted (SSL/TLS in production)
+  - [ ] Backup encryption
+
+### Security Testing During Beta
+
+**Basic OWASP Top 10 Check**:
+1. **A01: Broken Access Control** — Test each role accessing their own data only
+2. **A02: Cryptographic Failures** — Verify sensitive data in transit is encrypted
+3. **A03: Injection** — Try SQL injection in feedback form, login fields
+4. **A04: Insecure Design** — Document any security-related UX friction
+5. **A05: Security Misconfiguration** — Verify debug mode is off in staging/prod
+
+### Incident Response During Beta
+
+If a security vulnerability is found:
+
+1. **P0 Security Issue** (data breach, unauthorized access):
+   - Immediately disable affected feature/user
+   - Revoke all beta access
+   - Assess scope of vulnerability
+   - Fix before resuming beta
+   - Notify affected testers
+
+2. **P1 Security Issue** (potential vulnerability):
+   - Document and assign priority
+   - Fix within 24-48 hours
+   - Resume beta after fix
+
+---
+
+## 16. Performance Testing Baseline
+
+### Metrics to Capture Before Beta
+
+Run these tests against your local or staging environment with representative data.
+
+**Tool**: Use `k6` (free, open-source) or Apache Bench for simple tests.
+
+### API Response Time Baselines
+
+| Endpoint | p50 | p95 | p99 | Max Acceptable |
+|----------|-----|-----|-----|----------------|
+| `/api/auth/login` | <200ms | <500ms | <1s | 2s |
+| `/api/members` | <150ms | <400ms | <800ms | 1.5s |
+| `/api/trainers` | <100ms | <300ms | <600ms | 1s |
+| `/api/notifications` | <100ms | <250ms | <500ms | 1s |
+| `/api/feedback` (POST) | <200ms | <400ms | <800ms | 1.5s |
+
+### Load Test Script (k6)
+
+```javascript
+// k6-load-test.js
+import http from 'k6/http';
+import { check, sleep } from 'k6';
+
+export const options = {
+  stages: [
+    { duration: '30s', target: 5 },   // Ramp up
+    { duration: '1m', target: 10 },   // Steady state
+    { duration: '30s', target: 0 },   // Ramp down
+  ],
+  thresholds: {
+    http_req_duration: ['p(95)<1000'],  // 95% under 1s
+    errors: ['rate<0.1'],               // <10% error rate
+  },
+};
+
+export default function () {
+  const baseUrl = 'https://your-backend.railway.app';
+
+  // Test public endpoints
+  check(http.get(`${baseUrl}/api/health`), {
+    'health check passed': (r) => r.status === 200,
+  });
+
+  // Auth flow
+  const loginRes = http.post(`${baseUrl}/api/auth/login`, JSON.stringify({
+    username: 'test@test.com',
+    password: 'testpassword'
+  }), { headers: { 'Content-Type': 'application/json' } });
+
+  check(loginRes, {
+    'login successful': (r) => r.status === 200,
+    'has JWT token': (r) => r.json('token') !== undefined,
+  });
+
+  const token = loginRes.json('token');
+
+  // Test authenticated endpoints
+  check(http.get(`${baseUrl}/api/members`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  }), {
+    'members fetched': (r) => r.status === 200,
+  });
+
+  sleep(1);
+}
+```
+
+Run with:
+```bash
+k6 run k6-load-test.js
+```
+
+### Performance Budget
+
+| Metric | Target | Warning | Critical |
+|--------|--------|---------|----------|
+| Page Load (LCP) | <2.5s | 2.5-4s | >4s |
+| Time to Interactive | <3s | 3-5s | >5s |
+| API p95 | <500ms | 500ms-1s | >1s |
+| Error Rate | <1% | 1-5% | >5% |
+
+### Performance Issues Found During Beta
+
+If testers report slowness:
+1. Check database query times with `EXPLAIN ANALYZE`
+2. Add indexes on frequently queried columns
+3. Implement caching for read-heavy endpoints
+4. Consider lazy loading for large lists
+5. Optimize images (WebP, lazy loading)
+
+---
+
+## 17. Risk Register
 
 | Risk | Probability | Impact | Mitigation |
 |------|-------------|--------|-----------|
 | Backend crashes mid-session | Medium | High | UptimeRobot alert, restart script ready |
 | Tunnel URL changes | Medium | High | Named tunnel or cloud deploy |
-| Tester submits feedback, backend down | Medium | Medium | localStorage WAL in FeedbackWidget |
+| Feedback submitted, backend down | Medium | Medium | localStorage WAL in FeedbackWidget |
 | CORS blocks all API calls | High | Critical | Use `allowedOriginPatterns` with wildcards |
 | JWT expiry kicks testers out | Medium | Medium | Set 8h expiry for beta profile |
 | Tester accidentally deletes data | Low | High | Separate beta DB schema |
@@ -778,10 +1617,13 @@ Generate this manually or via the dashboard export:
 | Tester gives vague feedback | High | Medium | Structured test flows + mandatory fields |
 | Security: tunnel URL leaks | Low | High | Cloudflare Zero Trust email allowlist |
 | MySQL query slowdown | Low | Medium | Index on feedback/notification tables |
+| Feature toggle not propagating | Medium | Low | 5-min polling, document delay |
+| Beta data contaminates production | Low | Critical | Separate schemas, strict env management |
+| Performance degradation under load | Medium | Medium | Pre-baseline, caching, optimization |
 
 ---
 
-## 14. Emergency Runbook
+## 18. Emergency Runbook
 
 ### "All testers can't reach the app"
 ```bash
@@ -830,41 +1672,104 @@ cloudflared tunnel run gym-backend &
 3. If CORS: check backend allowed origins includes current frontend URL
 4. Feedback is saved in localStorage — it will auto-retry next session
 
+### "Performance has degraded significantly"
+1. Check database query performance: `SHOW PROCESSLIST;`
+2. Check application logs for slow queries
+3. Verify no unusual traffic patterns (DDoS)
+4. Scale up Railway instance if needed
+5. Enable caching if not already
+
+### "Security incident detected"
+1. Immediately disable affected feature via `/superadmin/features`
+2. Revoke all beta access temporarily
+3. Assess scope of vulnerability
+4. Do NOT notify testers until scope is understood
+5. Fix and security-test before resuming beta
+
 ---
 
 ## Implementation Steps (In Order)
 
-### Day 0 — Setup (Before inviting testers)
-- [ ] Create `application-beta.properties` with 8h JWT, beta DB URL
-- [ ] Create `gym_beta` schema in MySQL, run all migrations
-- [ ] Seed beta DB with `scripts/seed-beta.sql` (10 members, 5 trainers, dummy classes/memberships)
-- [ ] Add `BetaFeedback.java` entity and controller to backend
-- [ ] Add `FeedbackWidget.tsx` to frontend
-- [ ] Wire FeedbackWidget into `App.tsx` (renders on all routes)
-- [ ] Add `/superadmin/feedback` route and `SABetaFeedback.tsx`
-- [ ] Set up Cloudflare Tunnel (or Railway+Vercel deploy)
-- [ ] Configure CORS allowed origin patterns
-- [ ] Test full flow: submit feedback → appears in superadmin dashboard
+### Phase 1: Development (Week -2 to Week -1)
 
-### Day 1 — Soft Launch (2-3 testers)
-- [ ] Invite T01 (Owner), T03 (Trainer), T06 (Member)
-- [ ] Run Flow 1 (Trainer Request) and Flow 2 (Member Registration)
+#### Day 1-2: Feature Toggle Implementation
+- [ ] Create `feature_flags` table and entity
+- [ ] Implement `FeatureFlagController` with role-based access
+- [ ] Add `FeatureProvider` and `useFeature` hook to frontend
+- [ ] Create `/superadmin/features` page
+- [ ] Test toggle on/off without redeployment
+
+#### Day 3-4: Feedback System Implementation
+- [ ] Create `BetaFeedback` entity and repository
+- [ ] Implement `BetaFeedbackController`
+- [ ] Build `FeedbackWidget.tsx` with localStorage WAL
+- [ ] Wire widget into App.tsx (respects feature toggle)
+- [ ] Create `/superadmin/feedback` dashboard
+- [ ] Test full flow: submit → dashboard appears
+
+#### Day 5: Pre-Beta Fixes
+- [ ] Fix CORS configuration (use `allowedOriginPatterns`)
+- [ ] Set JWT expiration to 8h for beta
+- [ ] Add WebSocket heartbeat configuration
+- [ ] Add `OptimisticLockException` handler
+- [ ] Create beta database schema
+- [ ] Create seed script with test data
+
+### Phase 2: Alpha Testing (Week -1, Days 1-2)
+
+#### Day 1: Internal Testing
+- [ ] Run `k6` load test against local environment
+- [ ] Document performance baselines
+- [ ] Test all authentication flows
+- [ ] Verify feature toggle works correctly
+
+#### Day 2: Bug Fixes
+- [ ] Fix all P0 bugs found in alpha
+- [ ] Fix P1 bugs if time permits
+- [ ] Update CORS if needed for staging URLs
+- [ ] Verify feedback widget auto-retries on failure
+
+### Phase 3: Private Beta (Week -1, Days 3-5)
+
+#### Day 3: Private Beta Launch
+- [ ] Deploy to staging (Railway or tunnel)
+- [ ] Invite 3-5 trusted testers
 - [ ] Monitor feedback dashboard in real-time
-- [ ] Fix any P8+ bugs immediately
+- [ ] Run structured test flows
 
-### Day 2-3 — Full Beta
-- [ ] Invite all 10 testers
-- [ ] Daily triage at 9am
-- [ ] Fix and re-deploy critical bugs
-- [ ] Keep `debug.log` and `application.log` open in another terminal
+#### Day 4-5: Private Beta Monitoring
+- [ ] Daily triage at 9am and 5pm
+- [ ] Fix P0 bugs immediately
+- [ ] Collect UX feedback from testers
+- [ ] Document all issues found
 
-### Day 4-5 — Wrap Up
-- [ ] Export final feedback CSV
-- [ ] Generate end-of-beta report
-- [ ] Prioritize backlog
-- [ ] Revoke Cloudflare Zero Trust access
-- [ ] Archive beta DB
+### Phase 4: Public Beta (Week 0, Days 1-7)
+
+#### Day 1: Public Beta Launch
+- [ ] Deploy latest build to production URLs
+- [ ] Enable all feature flags
+- [ ] Invite all 10+ testers via Cloudflare
+- [ ] Monitor error rates and performance
+
+#### Days 2-7: Continuous Monitoring
+- [ ] Daily triage process
+- [ ] Fix bugs with <24h SLA for P7+
+- [ ] Weekly performance baseline comparison
+- [ ] Respond to tester questions within 2 hours
+
+### Phase 5: Post-Beta (Week 1+)
+
+#### Cleanup (Week 1, Days 1-2)
+- [ ] Execute post-beta cleanup checklist (Section 14)
+- [ ] Export and archive all feedback
+- [ ] Conduct retrospective meeting
+
+#### Next Iteration Planning (Week 1, Days 3-5)
+- [ ] Prioritize bug backlog
+- [ ] Review suggestions for next release
+- [ ] Update beta testing plan with lessons learned
+- [ ] Schedule Beta Round 2 if needed
 
 ---
 
-*This plan is generated from the actual codebase. All file paths, entity names, and routes are accurate to the current project state.*
+*This plan is generated from the actual codebase. All file paths, entity names, and routes are accurate to the current project state. Version 2.0 adds Phase-based structure, global feature toggle, multi-stage beta testing, and comprehensive deployment strategy.*
