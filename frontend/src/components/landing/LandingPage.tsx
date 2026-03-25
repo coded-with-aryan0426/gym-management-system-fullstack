@@ -8,7 +8,6 @@ import Hero from './Hero';
 import Problem from './Problem';
 import PresentStruggle from './PresentStruggle';
 import EmpoweredFuture from './EmpoweredFuture';
-import ValueStack from './ValueStack';
 import SocialProof from './SocialProof';
 import Transformation from './Transformation';
 import SecondaryCTA from './SecondaryCTA';
@@ -62,10 +61,6 @@ export default function LandingPage() {
 
         <section id="transformation">
           <Transformation />
-        </section>
-
-        <section id="value">
-          <ValueStack />
         </section>
 
         <section id="pricing">
