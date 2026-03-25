@@ -122,35 +122,45 @@ export default function PricingPlans() {
         </div>
 
         <Paper className={`pricing-summary-card ${isDark ? 'dark' : 'light'}`}>
-          <div className="summary-total-value">
-            Total Value: {totalValue}
-          </div>
+          <div className="pricing-summary-inner">
+            <div className="summary-total-value">
+              Total Value: {totalValue}
+            </div>
 
-          <div className="summary-label">YOUR INVESTMENT</div>
+            <div className="summary-label">YOUR INVESTMENT</div>
 
-          <div className="summary-price">
-            {planPrice}<span className="summary-period">/month</span>
-          </div>
+            <div className="summary-price-container">
+              <div className="summary-price">
+                {planPrice}
+              </div>
+              <div className="summary-period">/month</div>
+            </div>
 
-          <div className="summary-daily">
-            That's {dailyValue}/day — less than a single personal training session
-          </div>
+            <div className="summary-daily">
+              That's {dailyValue}/day — less than a single personal training session
+            </div>
 
-          <div className="summary-highlight">
-            One late payment collected pays for your entire year.
-          </div>
+            <div className="summary-highlights">
+              <div className="summary-highlight">
+                One late payment collected pays for your entire year
+              </div>
+              <div className="summary-highlight">
+                No credit card required. Cancel anytime
+              </div>
+            </div>
 
-          <Button
-            className="summary-cta"
-            variant="contained"
-            endIcon={<ArrowRight size={20} />}
-          >
-            Start Your 14-Day Free Trial
-          </Button>
+            <Button
+              className="summary-cta"
+              variant="contained"
+              endIcon={<ArrowRight size={20} />}
+            >
+              Start Your 14-Day Free Trial
+            </Button>
 
-          <div className="summary-footer">
-            <Lock size={16} />
-            No credit card required. Cancel anytime.
+            <div className="summary-footer">
+              <Lock size={16} />
+              100% risk-free. Start today.
+            </div>
           </div>
         </Paper>
 
