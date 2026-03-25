@@ -75,7 +75,7 @@ class LoadTester:
         self.duration = duration
         self.sessions: List[UserSession] = []
         self.all_results: List[RequestResult] = []
-        self.start_time: Optional[float] = None
+        self.start_time: float = 0.0
         
     async def setup_sessions(self):
         """Create user sessions for testing"""
@@ -148,13 +148,13 @@ class LoadTester:
         selected = random.choices(endpoints, weights=weights, k=1)[0]
         return selected[0], selected[1]
     
-    async def simulate_user(self, user: UserSession, session: aiohttp.ClientSession):
+    async def simulate_user(self, user: UserSession, http_session: aiohttp.ClientSession):
         """Simulate a single user making requests over the test duration"""
         end_time = self.start_time + self.duration
         
         while time.time() < end_time:
             method, endpoint = self.select_endpoint(user.role)
-            result = await self.make_request(session, user, method, endpoint)
+            result = await self.make_request(http_session, user, method, endpoint)
             user.results.append(result)
             self.all_results.append(result)
             
@@ -176,12 +176,12 @@ class LoadTester:
         connector = aiohttp.TCPConnector(limit=100, limit_per_host=50)
         timeout = aiohttp.ClientTimeout(total=30)
         
-        async with aiohttp.ClientSession(connector=connector, timeout=timeout) as session:
+        async with aiohttp.ClientSession(connector=connector, timeout=timeout) as http_session:
             self.start_time = time.time()
             
             # Create tasks for all users
             tasks = [
-                self.simulate_user(user, session)
+                self.simulate_user(user, http_session)
                 for user in self.sessions
             ]
             
