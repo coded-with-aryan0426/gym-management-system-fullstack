@@ -318,3 +318,5 @@ export const SABetaFeedback: React.FC = () => {
     </div>
   );
 };
+
+export default SABetaFeedback;
