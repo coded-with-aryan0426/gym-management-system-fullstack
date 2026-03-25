@@ -19,6 +19,7 @@ const valueTiers = [
     features: ['Up to 30 members', 'QR check-in', 'Basic scheduling', 'Email support'],
     recommended: false,
     tierValueINR: 83250,
+    yearlyPriceINR: 9590,
   },
   {
     id: 'professional',
@@ -28,6 +29,7 @@ const valueTiers = [
     features: ['Up to 100 members', 'PT booking', 'Payment collection', 'Mobile app', 'Priority support'],
     recommended: true,
     tierValueINR: 249750,
+    yearlyPriceINR: 28790,
   },
   {
     id: 'business',
@@ -37,6 +39,7 @@ const valueTiers = [
     features: ['Up to 500 members', 'Multi-gateway', 'Staff payroll', 'Advanced analytics', 'API access'],
     recommended: false,
     tierValueINR: 124750,
+    yearlyPriceINR: 76790,
   },
   {
     id: 'enterprise',
@@ -46,6 +49,7 @@ const valueTiers = [
     features: ['Unlimited members', 'Multi-location', 'White-label', 'Custom API', '24/7 support'],
     recommended: false,
     tierValueINR: 124750,
+    yearlyPriceINR: 191990,
   },
 ];
 
@@ -77,7 +81,7 @@ export default function PricingPlans() {
         <div className="pricing-plans-grid">
           {valueTiers.map((plan) => {
             const monthlyPrice = convertPrice(plan.basePriceINR, currency);
-            const annualPrice = Math.round(monthlyPrice * 12 * (1 - annualDiscount));
+            const annualPrice = convertPrice(plan.yearlyPriceINR, currency);
 
             return (
               <div

@@ -68,12 +68,12 @@ export default function LandingPage() {
           <ValueStack />
         </section>
 
-        <section id="cta">
-          <SecondaryCTA onSignupClick={handleOpenSignup} />
-        </section>
-
         <section id="pricing">
           <PricingPlans />
+        </section>
+
+        <section id="cta">
+          <SecondaryCTA onSignupClick={handleOpenSignup} />
         </section>
       </main>
       <Footer />
