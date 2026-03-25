@@ -311,35 +311,14 @@
 }
 
 .pricing-summary-card {
-  max-width: 580px;
+  max-width: 600px;
   margin: 0 auto 48px;
   padding: 0;
   border-radius: 24px;
-  text-align: center;
-  transition: all 0.3s ease;
   overflow: hidden;
-  background: linear-gradient(135deg, #E63946 0%, #FF6B6B 100%);
-  position: relative;
-}
-
-.light .pricing-summary-card {
-  box-shadow: 0 20px 60px rgba(230, 57, 70, 0.25);
-}
-
-.dark .pricing-summary-card {
-  box-shadow: 0 20px 60px rgba(230, 57, 70, 0.35);
-}
-
-.pricing-summary-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100"><defs><pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse"><path d="M 100 0 L 0 0 0 100" fill="none" stroke="white" stroke-width="0.5" opacity="0.1"/></pattern></defs><rect width="1000" height="100" fill="url(%23grid)"/></svg>');
-  pointer-events: none;
-  opacity: 0.5;
+  background: linear-gradient(135deg, #E63946 0%, #FF6B6B 100%) !important;
+  box-shadow: 0 20px 60px rgba(230, 57, 70, 0.35) !important;
+  border: none !important;
 }
 
 .pricing-summary-inner {
@@ -348,46 +327,50 @@
   padding: 56px 48px;
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 24px;
+  text-align: center;
 }
 
 .summary-total-value {
   font-size: 15px;
   text-decoration: line-through;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(255, 255, 255, 0.9);
   letter-spacing: 0.5px;
   text-transform: uppercase;
+  margin: 0;
 }
 
 .summary-label {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.95);
   text-transform: uppercase;
   letter-spacing: 2px;
   font-weight: 900;
-  opacity: 0.95;
+  margin: 0;
 }
 
 .summary-price-container {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 
 .summary-price {
-  font-size: 72px;
+  font-size: 68px;
   font-weight: 900;
-  letter-spacing: -3px;
+  letter-spacing: -2px;
   line-height: 1;
   color: #FFFFFF;
-  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  margin: 0;
 }
 
 .summary-period {
   font-size: 18px;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.95);
+  margin: 0;
 }
 
 .summary-daily {
@@ -395,27 +378,30 @@
   color: rgba(255, 255, 255, 0.95);
   font-weight: 500;
   line-height: 1.6;
+  margin: 0;
 }
 
 .summary-highlights {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  margin: 8px 0;
 }
 
 .summary-highlight {
   border-radius: 12px;
-  padding: 14px 16px;
-  border: none;
-  background: rgba(255, 255, 255, 0.15);
+  padding: 14px 18px;
+  border: none !important;
+  background: rgba(255, 255, 255, 0.2) !important;
   backdrop-filter: blur(10px);
   font-size: 14px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.95);
+  color: rgba(255, 255, 255, 0.99) !important;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
+  margin: 0 !important;
 }
 
 .summary-highlight::before {
@@ -423,25 +409,26 @@
   font-weight: 900;
   font-size: 16px;
   color: rgba(255, 255, 255, 1);
+  flex-shrink: 0;
 }
 
 .summary-cta {
   width: 100%;
   height: 56px !important;
-  background: rgba(255, 255, 255, 0.95) !important;
+  background: rgba(255, 255, 255, 0.98) !important;
   border-radius: 12px !important;
   font-size: 16px !important;
   font-weight: 800 !important;
   text-transform: none !important;
   color: #E63946 !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
   transition: all 0.3s ease !important;
-  margin: 0 !important;
+  margin: 12px 0 0 0 !important;
 }
 
 .summary-cta:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3) !important;
+  transform: translateY(-3px) !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25) !important;
   background: #FFFFFF !important;
 }
 
@@ -452,8 +439,8 @@
   gap: 8px;
   font-size: 13px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.9);
-  padding-top: 8px;
+  color: rgba(255, 255, 255, 0.95);
+  margin: 4px 0 0 0;
 }
 
 .summary-footer svg {
