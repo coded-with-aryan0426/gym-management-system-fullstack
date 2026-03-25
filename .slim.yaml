@@ -1,4 +1,0 @@
-tunnels:
-  frontend:
-    port: 5173
-    subdomain: glad-bay
