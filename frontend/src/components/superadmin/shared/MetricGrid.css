@@ -1,0 +1,52 @@
+/* ============================================================================
+   MetricGrid Component - Responsive grid for metric displays
+   ============================================================================ */
+
+.metric-grid {
+    display: grid;
+    width: 100%;
+}
+
+.metric-grid--2-col {
+    grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+}
+
+.metric-grid--3-col {
+    grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+}
+
+.metric-grid--4-col {
+    grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+}
+
+.metric-grid--gap-sm {
+    gap: var(--s-3);
+}
+
+.metric-grid--gap-md {
+    gap: var(--s-4);
+}
+
+.metric-grid--gap-lg {
+    gap: var(--s-6);
+}
+
+/* Responsive breakpoints */
+@media (max-width: 1200px) {
+    .metric-grid--4-col {
+        grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .metric-grid--3-col,
+    .metric-grid--4-col {
+        grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+    }
+}
+
+@media (max-width: 480px) {
+    .metric-grid {
+        grid-template-columns: 1fr;
+    }
+}

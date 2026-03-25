@@ -1,0 +1,64 @@
+/* ============================================================================
+   TrendIndicator Component - Trend arrows with color coding
+   ============================================================================ */
+
+.trend-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-1);
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    padding: var(--s-1) var(--s-2);
+    width: fit-content;
+}
+
+.trend-indicator--sm {
+    font-size: 11px;
+    padding: 2px var(--s-1);
+}
+
+.trend-indicator--md {
+    font-size: 12px;
+}
+
+.trend-indicator--lg {
+    font-size: 14px;
+    padding: var(--s-2) var(--s-3);
+}
+
+.trend-indicator--up {
+    color: var(--accent-green);
+    background: var(--active-green-bg);
+}
+
+.trend-indicator--down {
+    color: var(--accent-red);
+    background: var(--active-red-bg);
+}
+
+.trend-indicator--neutral {
+    color: var(--text-secondary);
+    background: var(--bg-glass);
+}
+
+.trend-indicator__value {
+    line-height: 1;
+}
+
+/* Standalone (no background) variant */
+.trend-indicator--standalone {
+    background: transparent;
+    padding: 0;
+}
+
+.trend-indicator--standalone.trend-indicator--up {
+    color: var(--accent-green);
+}
+
+.trend-indicator--standalone.trend-indicator--down {
+    color: var(--accent-red);
+}
+
+.trend-indicator--standalone.trend-indicator--neutral {
+    color: var(--text-tertiary);
+}

@@ -1,0 +1,197 @@
+/* ============================================================================
+   StatCard Component - Compact metric display with trend indicators
+   ============================================================================ */
+
+.stat-card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-main);
+    border-radius: var(--radius-md);
+    padding: var(--s-4);
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card--compact {
+    padding: var(--s-3);
+}
+
+.stat-card--expanded {
+    padding: var(--s-5);
+}
+
+.stat-card--clickable {
+    cursor: pointer;
+}
+
+.stat-card--clickable:hover {
+    border-color: var(--border-strong);
+    background: var(--bg-glass-hover);
+}
+
+.stat-card__header {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--s-3);
+}
+
+.stat-card__icon {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    border: 1px solid;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.stat-card--compact .stat-card__icon {
+    width: 32px;
+    height: 32px;
+}
+
+.stat-card__content {
+    flex: 1;
+    min-width: 0;
+}
+
+.stat-card__label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: var(--s-1);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-card__value {
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: var(--s-2);
+}
+
+.stat-card--compact .stat-card__value {
+    font-size: 20px;
+}
+
+.stat-card__skeleton {
+    height: 24px;
+    width: 80px;
+    background: var(--bg-glass);
+    border-radius: var(--radius-sm);
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.stat-card__change {
+    display: flex;
+    align-items: center;
+    gap: var(--s-1);
+    font-size: 11px;
+    font-weight: 600;
+    margin-top: var(--s-2);
+    padding: var(--s-1) var(--s-2);
+    border-radius: var(--radius-sm);
+    width: fit-content;
+}
+
+.stat-card__change--up {
+    color: var(--accent-green);
+    background: var(--active-green-bg);
+}
+
+.stat-card__change--down {
+    color: var(--accent-red);
+    background: var(--active-red-bg);
+}
+
+.stat-card__change--neutral {
+    color: var(--text-secondary);
+    background: var(--bg-glass);
+}
+
+.stat-card__change-label {
+    color: var(--text-tertiary);
+    font-weight: 500;
+    margin-left: var(--s-1);
+}
+
+.stat-card__breakdown {
+    margin-top: var(--s-4);
+    padding-top: var(--s-4);
+    border-top: 1px solid var(--border-main);
+    overflow: hidden;
+}
+
+.stat-card__breakdown-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--s-2) 0;
+    font-size: 13px;
+}
+
+.stat-card__breakdown-item:not(:last-child) {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.stat-card__breakdown-label {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.stat-card__breakdown-value {
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-left: auto;
+    margin-right: var(--s-2);
+}
+
+.stat-card__breakdown-pct {
+    color: var(--text-tertiary);
+    font-size: 11px;
+}
+
+/* Minimal Variant */
+.stat-card--minimal {
+    padding: var(--s-3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-1);
+}
+
+.stat-card__label-minimal {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-card__value-minimal {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .stat-card {
+        padding: var(--s-3);
+    }
+    
+    .stat-card__value {
+        font-size: 20px;
+    }
+    
+    .stat-card__icon {
+        width: 32px;
+        height: 32px;
+    }
+}

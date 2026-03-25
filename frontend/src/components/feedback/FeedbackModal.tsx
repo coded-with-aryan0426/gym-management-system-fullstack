@@ -1,5 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { X } from 'lucide-react';
+import { useTheme } from '../../contexts/ThemeContext';
 import { FeedbackForm } from './FeedbackForm';
 import type { FeedbackSeverity, FeedbackCategory } from '../../types/feedback.types';
 
@@ -18,6 +19,8 @@ interface FeedbackModalProps {
 }
 
 export function FeedbackModal({ isOpen, onClose, onSubmit, section, isSubmitting }: FeedbackModalProps) {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const modalRef = useRef<HTMLDivElement>(null);
   const previousActiveElement = useRef<HTMLElement | null>(null);
 
@@ -74,6 +77,11 @@ export function FeedbackModal({ isOpen, onClose, onSubmit, section, isSubmitting
     }
   };
 
+  const bgColor = isDark ? '#1e293b' : 'white';
+  const textColor = isDark ? '#f1f5f9' : '#1e293b';
+  const borderColor = isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0';
+  const mutedColor = isDark ? '#94a3b8' : '#64748b';
+
   return (
     <div
       onClick={handleBackdropClick}
@@ -83,7 +91,7 @@ export function FeedbackModal({ isOpen, onClose, onSubmit, section, isSubmitting
       style={{
         position: 'fixed',
         inset: 0,
-        background: 'rgba(0, 0, 0, 0.5)',
+        background: isDark ? 'rgba(0, 0, 0, 0.7)' : 'rgba(0, 0, 0, 0.5)',
         backdropFilter: 'blur(4px)',
         display: 'flex',
         alignItems: 'center',
@@ -96,13 +104,16 @@ export function FeedbackModal({ isOpen, onClose, onSubmit, section, isSubmitting
       <div
         ref={modalRef}
         style={{
-          background: 'white',
+          background: bgColor,
           borderRadius: '16px',
           width: '100%',
           maxWidth: '560px',
           maxHeight: '90vh',
           overflow: 'auto',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+          boxShadow: isDark
+            ? '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+            : '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+          border: isDark ? '1px solid rgba(255,255,255,0.1)' : 'none',
           animation: 'slideUp 0.3s ease-out',
         }}
       >
@@ -112,7 +123,7 @@ export function FeedbackModal({ isOpen, onClose, onSubmit, section, isSubmitting
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: '20px 24px',
-            borderBottom: '1px solid #e2e8f0',
+            borderBottom: `1px solid ${borderColor}`,
           }}
         >
           <h2
@@ -121,7 +132,7 @@ export function FeedbackModal({ isOpen, onClose, onSubmit, section, isSubmitting
               margin: 0,
               fontSize: '18px',
               fontWeight: 600,
-              color: '#1e293b',
+              color: textColor,
             }}
           >
             Submit Feedback
@@ -134,8 +145,8 @@ export function FeedbackModal({ isOpen, onClose, onSubmit, section, isSubmitting
               height: '32px',
               borderRadius: '8px',
               border: 'none',
-              background: '#f1f5f9',
-              color: '#64748b',
+              background: isDark ? 'rgba(255,255,255,0.1)' : '#f1f5f9',
+              color: mutedColor,
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -143,12 +154,12 @@ export function FeedbackModal({ isOpen, onClose, onSubmit, section, isSubmitting
               transition: 'all 0.2s ease',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = '#e2e8f0';
-              e.currentTarget.style.color = '#1e293b';
+              e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.2)' : '#e2e8f0';
+              e.currentTarget.style.color = textColor;
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = '#f1f5f9';
-              e.currentTarget.style.color = '#64748b';
+              e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.1)' : '#f1f5f9';
+              e.currentTarget.style.color = mutedColor;
             }}
           >
             <X size={18} />

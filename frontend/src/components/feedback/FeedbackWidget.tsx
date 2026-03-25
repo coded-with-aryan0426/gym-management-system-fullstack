@@ -31,13 +31,30 @@ export function FeedbackWidget({ section = '' }: FeedbackWidgetProps) {
     setPendingCount(pending.length);
   }, [isModalOpen]);
 
+  const getCurrentUser = () => {
+    try {
+      const userStr = localStorage.getItem('authUser');
+      if (userStr) {
+        return JSON.parse(userStr);
+      }
+    } catch (e) {
+      console.warn('Could not parse user from localStorage');
+    }
+    return null;
+  };
+
   const retryPendingFeedback = useCallback(async () => {
     const pending = getPendingFeedback();
     if (pending.length === 0) return;
+    const user = getCurrentUser();
 
     for (const feedback of pending) {
       try {
         await api.addBetaFeedback({
+          userId: user?.id || null,
+          testerName: user?.fullName || user?.name || 'Anonymous',
+          testerEmail: user?.email || 'anonymous@gym.com',
+          testerRole: user?.role || 'MEMBER',
           pageRoute: feedback.pageRoute,
           pageTitle: feedback.pageTitle,
           section: feedback.section,
@@ -88,6 +105,10 @@ export function FeedbackWidget({ section = '' }: FeedbackWidgetProps) {
 
       try {
         await api.addBetaFeedback({
+          userId: getCurrentUser()?.id || null,
+          testerName: getCurrentUser()?.fullName || getCurrentUser()?.name || 'Anonymous',
+          testerEmail: getCurrentUser()?.email || 'anonymous@gym.com',
+          testerRole: getCurrentUser()?.role || 'MEMBER',
           pageRoute: payload.pageRoute,
           pageTitle: payload.pageTitle,
           section: payload.section,

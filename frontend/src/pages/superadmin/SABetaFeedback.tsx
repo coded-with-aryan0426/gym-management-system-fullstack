@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Download, RefreshCw, AlertCircle } from 'lucide-react';
+import { Download, RefreshCw, AlertCircle, ToggleLeft, ToggleRight, Sun, Moon } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
+import { useTheme } from '../../contexts/ThemeContext';
 import FeedbackStatsComponent from '../../components/superadmin/FeedbackStats';
 import FeedbackFilters, { type FilterValues } from '../../components/superadmin/FeedbackFilters';
 import FeedbackTable from '../../components/superadmin/FeedbackTable';
 import FeedbackDetailDrawer from '../../components/superadmin/FeedbackDetailDrawer';
 import type { BetaFeedback } from '../../types/feedback.types';
 import { betaFeedbackApi } from '../../services/api';
+import { superAdminApi } from '../../services/superAdminApi';
 import './superadmin.css';
 
 export const SABetaFeedback: React.FC = () => {
@@ -32,6 +34,36 @@ export const SABetaFeedback: React.FC = () => {
 
   const [allPages, setAllPages] = useState<string[]>([]);
   const [allTesters, setAllTesters] = useState<string[]>([]);
+  const [isWidgetEnabled, setIsWidgetEnabled] = useState(false);
+  const [isToggling, setIsToggling] = useState(false);
+  const { theme, toggleTheme } = useTheme();
+
+  // Fetch widget enabled status
+  const fetchWidgetStatus = useCallback(async () => {
+    try {
+      const flags = await superAdminApi.getFeatureFlags();
+      const fbFlag = flags.find((f: any) => f.key === 'feedback_widget');
+      setIsWidgetEnabled(fbFlag?.enabled || false);
+    } catch (err) {
+      console.error('Error fetching widget status:', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchWidgetStatus();
+  }, [fetchWidgetStatus]);
+
+  const handleToggleWidget = async () => {
+    try {
+      setIsToggling(true);
+      await superAdminApi.updateFeatureFlag('feedback_widget', { enabled: !isWidgetEnabled, rolloutPercentage: 100 });
+      setIsWidgetEnabled(!isWidgetEnabled);
+    } catch (err) {
+      console.error('Error toggling widget:', err);
+    } finally {
+      setIsToggling(false);
+    }
+  };
 
   // Fetch feedback with current filters
   const fetchFeedback = useCallback(async () => {
@@ -124,7 +156,7 @@ export const SABetaFeedback: React.FC = () => {
   };
 
   return (
-    <div className="sa-beta-feedback-page">
+    <div className="sa-beta-feedback-page" data-theme={theme}>
       {/* Header */}
       <div className="page-header">
         <div className="header-content">
@@ -132,6 +164,30 @@ export const SABetaFeedback: React.FC = () => {
           <p className="page-description">Review and manage user feedback from beta testing</p>
         </div>
         <div className="header-actions">
+          {/* Theme Toggle */}
+          <button
+            onClick={toggleTheme}
+            className="theme-toggle-button"
+            title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+          >
+            {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+          </button>
+          
+          {/* Widget Status */}
+          <div className="widget-status-container">
+            <span className={`widget-status-text ${isWidgetEnabled ? 'enabled' : 'disabled'}`}>
+              {isWidgetEnabled ? 'Widget ON' : 'Widget OFF'}
+            </span>
+            <button
+              onClick={handleToggleWidget}
+              disabled={isToggling}
+              className={`widget-toggle-button ${isToggling ? 'toggling' : ''}`}
+            >
+              {isWidgetEnabled ? <ToggleRight size={28} /> : <ToggleLeft size={28} />}
+            </button>
+          </div>
+          
+          {/* Action Buttons */}
           <button
             onClick={fetchFeedback}
             disabled={isLoading}

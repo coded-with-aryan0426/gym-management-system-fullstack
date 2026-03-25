@@ -50,7 +50,9 @@ const SAFeatureFlags: React.FC = () => {
             setLoading(true);
             setError(null);
             const data = await superAdminApi.getFeatureFlags();
-            const mappedFlags: Flag[] = data.map(f => ({
+            const mappedFlags: Flag[] = data
+              .filter(f => f.key !== 'feedback_widget')
+              .map(f => ({
                 ...f,
                 id: f.key,
                 desc: f.description,
@@ -131,6 +133,20 @@ const SAFeatureFlags: React.FC = () => {
                     <p>{flags.length} flags · {flags.filter(f => f.enabled).length} enabled · {flags.filter(f => !f.enabled).length} disabled</p>
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
+                    <button
+                        className="sa__btn sa__btn--primary sa__btn--sm"
+                        style={{ background: '#22c55e', minWidth: 160 }}
+                        onClick={() => {
+                            const fbFlag = flags.find(f => f.key === 'feedback_widget');
+                            if (fbFlag) {
+                                setShowToggleConfirm({ flag: fbFlag, newState: !fbFlag.enabled });
+                            } else {
+                                alert('feedback_widget flag not found! Restart backend.');
+                            }
+                        }}
+                    >
+                        🧪 Toggle Feedback Widget
+                    </button>
                     <button className="sa__btn sa__btn--ghost sa__btn--sm" onClick={loadFlags} disabled={loading}>
                         <RefreshCw size={14} className={loading ? 'spinning' : ''} /> Refresh
                     </button>

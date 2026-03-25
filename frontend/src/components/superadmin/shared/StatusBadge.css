@@ -1,0 +1,172 @@
+/* ============================================================================
+   StatusBadge Component - Semantic status indicators
+   ============================================================================ */
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-1);
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    width: fit-content;
+}
+
+/* Sizes */
+.status-badge--sm {
+    font-size: 11px;
+    padding: 2px var(--s-2);
+}
+
+.status-badge--md {
+    font-size: 12px;
+    padding: var(--s-1) var(--s-2);
+}
+
+.status-badge--lg {
+    font-size: 13px;
+    padding: var(--s-2) var(--s-3);
+}
+
+.status-badge__icon {
+    flex-shrink: 0;
+}
+
+.status-badge__label {
+    line-height: 1;
+}
+
+/* Variants - Success */
+.status-badge--success.status-badge--solid {
+    background: var(--accent-green);
+    color: #000;
+}
+
+.status-badge--success.status-badge--outline {
+    background: transparent;
+    border: 1px solid var(--accent-green);
+    color: var(--accent-green);
+}
+
+.status-badge--success.status-badge--subtle {
+    background: var(--active-green-bg);
+    color: var(--accent-green);
+}
+
+/* Variants - Warning */
+.status-badge--warning.status-badge--solid {
+    background: var(--accent-orange);
+    color: #000;
+}
+
+.status-badge--warning.status-badge--outline {
+    background: transparent;
+    border: 1px solid var(--accent-orange);
+    color: var(--accent-orange);
+}
+
+.status-badge--warning.status-badge--subtle {
+    background: var(--active-orange-bg);
+    color: var(--accent-orange);
+}
+
+/* Variants - Error */
+.status-badge--error.status-badge--solid {
+    background: var(--accent-red);
+    color: #fff;
+}
+
+.status-badge--error.status-badge--outline {
+    background: transparent;
+    border: 1px solid var(--accent-red);
+    color: var(--accent-red);
+}
+
+.status-badge--error.status-badge--subtle {
+    background: var(--active-red-bg);
+    color: var(--accent-red);
+}
+
+/* Variants - Info */
+.status-badge--info.status-badge--solid {
+    background: var(--accent-blue);
+    color: #fff;
+}
+
+.status-badge--info.status-badge--outline {
+    background: transparent;
+    border: 1px solid var(--accent-blue);
+    color: var(--accent-blue);
+}
+
+.status-badge--info.status-badge--subtle {
+    background: var(--active-blue-bg);
+    color: var(--accent-blue);
+}
+
+/* Variants - Pending */
+.status-badge--pending.status-badge--solid {
+    background: var(--accent-orange);
+    color: #000;
+}
+
+.status-badge--pending.status-badge--outline {
+    background: transparent;
+    border: 1px solid var(--accent-orange);
+    color: var(--accent-orange);
+}
+
+.status-badge--pending.status-badge--subtle {
+    background: var(--active-orange-bg);
+    color: var(--accent-orange);
+}
+
+/* Variants - Active */
+.status-badge--active.status-badge--solid {
+    background: var(--accent-green);
+    color: #000;
+}
+
+.status-badge--active.status-badge--outline {
+    background: transparent;
+    border: 1px solid var(--accent-green);
+    color: var(--accent-green);
+}
+
+.status-badge--active.status-badge--subtle {
+    background: var(--active-green-bg);
+    color: var(--accent-green);
+}
+
+/* Variants - Inactive */
+.status-badge--inactive.status-badge--solid {
+    background: var(--text-tertiary);
+    color: var(--bg-primary);
+}
+
+.status-badge--inactive.status-badge--outline {
+    background: transparent;
+    border: 1px solid var(--text-tertiary);
+    color: var(--text-tertiary);
+}
+
+.status-badge--inactive.status-badge--subtle {
+    background: var(--bg-glass);
+    color: var(--text-tertiary);
+}
+
+/* Variants - Neutral */
+.status-badge--neutral.status-badge--solid {
+    background: var(--text-secondary);
+    color: var(--bg-primary);
+}
+
+.status-badge--neutral.status-badge--outline {
+    background: transparent;
+    border: 1px solid var(--text-secondary);
+    color: var(--text-secondary);
+}
+
+.status-badge--neutral.status-badge--subtle {
+    background: var(--bg-glass);
+    color: var(--text-secondary);
+}

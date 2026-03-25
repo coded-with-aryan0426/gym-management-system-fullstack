@@ -1,0 +1,128 @@
+/* ============================================================================
+   ChartCard Component - Wrapper for charts with consistent styling
+   ============================================================================ */
+
+.chart-card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-main);
+    border-radius: var(--radius-md);
+    padding: var(--s-5);
+    transition: border-color 0.2s ease;
+}
+
+.chart-card--compact {
+    padding: var(--s-4);
+}
+
+.chart-card:hover {
+    border-color: var(--border-strong);
+}
+
+.chart-card__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: var(--s-4);
+    gap: var(--s-3);
+}
+
+.chart-card__title-section {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--s-2);
+    min-width: 0;
+}
+
+.chart-card__icon {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-glass);
+    border: 1px solid var(--border-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.chart-card__title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+    line-height: 1.4;
+}
+
+.chart-card__subtitle {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    margin: var(--s-1) 0 0 0;
+    line-height: 1.4;
+}
+
+.chart-card__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+    flex-shrink: 0;
+}
+
+.chart-card__content {
+    position: relative;
+    width: 100%;
+    /* Height is set via inline style to ensure ResponsiveContainer works */
+    min-height: 150px;
+}
+
+/* Ensure chart children fill the container */
+.chart-card__content > * {
+    width: 100%;
+    height: 100%;
+}
+
+.chart-card__loading,
+.chart-card__error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--text-tertiary);
+    font-size: 13px;
+    gap: var(--s-2);
+}
+
+.chart-card__error {
+    color: var(--accent-red);
+}
+
+.chart-card__spinner {
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--bg-glass);
+    border-top-color: var(--accent-blue);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .chart-card {
+        padding: var(--s-4);
+    }
+    
+    .chart-card__header {
+        flex-direction: column;
+        gap: var(--s-2);
+    }
+    
+    .chart-card__actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}

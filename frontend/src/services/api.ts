@@ -23,9 +23,16 @@ const apiClient: AxiosInstance = axios.create({
 
 // Request interceptor for auth token (port-scoped)
 apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem(getStorageKey('token'));
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  // Check for super admin token first (for superadmin routes)
+  const superAdminToken = sessionStorage.getItem(getStorageKey('sa_token'));
+  if (superAdminToken) {
+    config.headers.Authorization = `Bearer ${superAdminToken}`;
+  } else {
+    // Fall back to regular user token
+    const token = localStorage.getItem(getStorageKey('token'));
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
   }
   return config;
 });
@@ -507,15 +514,19 @@ const api = {
 
   // Beta Feedback endpoints
   async addBetaFeedback(payload: {
+    userId?: number | null;
+    testerName: string;
+    testerEmail: string;
+    testerRole: string;
     pageRoute: string;
-    pageTitle: string;
-    section: string;
-    browser: string;
-    screenSize: string;
+    pageTitle?: string;
+    section?: string;
+    browser?: string;
+    screenSize?: string;
     severity: string;
-    category: string;
+    category?: string;
     subject: string;
-    description: string;
+    description?: string;
     stepsToReproduce?: string;
     screenshotUrl?: string;
   }): Promise<unknown> {

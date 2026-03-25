@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTheme } from '../../contexts/ThemeContext';
 import type { FeedbackSeverity, FeedbackCategory } from '../../types/feedback.types';
 import { getFeedbackContext } from '../../utils/feedback.utils';
 
@@ -33,6 +34,8 @@ const CATEGORY_OPTIONS: { value: FeedbackCategory; label: string }[] = [
 ];
 
 export function FeedbackForm({ section, onSubmit, onCancel, isSubmitting }: FeedbackFormProps) {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const [severity, setSeverity] = useState<FeedbackSeverity>('BUG');
   const [category, setCategory] = useState<FeedbackCategory>('UI');
   const [subject, setSubject] = useState('');
@@ -46,6 +49,13 @@ export function FeedbackForm({ section, onSubmit, onCancel, isSubmitting }: Feed
     browser: '',
     screenSize: '',
   });
+
+  const bgColor = isDark ? '#0f172a' : '#f8fafc';
+  const cardBg = isDark ? '#1e293b' : 'white';
+  const textColor = isDark ? '#f1f5f9' : '#1e293b';
+  const mutedColor = isDark ? '#94a3b8' : '#64748b';
+  const borderColor = isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0';
+  const inputBg = isDark ? '#0f172a' : 'white';
 
   useEffect(() => {
     const ctx = getFeedbackContext();
@@ -78,27 +88,27 @@ export function FeedbackForm({ section, onSubmit, onCancel, isSubmitting }: Feed
 
   return (
     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', padding: '12px', background: '#f8fafc', borderRadius: '8px', fontSize: '13px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', padding: '12px', background: bgColor, borderRadius: '8px', fontSize: '13px', border: `1px solid ${borderColor}` }}>
         <div>
-          <span style={{ color: '#64748b', fontWeight: 500 }}>Page:</span>
-          <span style={{ marginLeft: '8px', color: '#1e293b' }}>{context.pageRoute}</span>
+          <span style={{ color: mutedColor, fontWeight: 500 }}>Page:</span>
+          <span style={{ marginLeft: '8px', color: textColor }}>{context.pageRoute}</span>
         </div>
         <div>
-          <span style={{ color: '#64748b', fontWeight: 500 }}>Section:</span>
-          <span style={{ marginLeft: '8px', color: '#1e293b' }}>{section || 'N/A'}</span>
+          <span style={{ color: mutedColor, fontWeight: 500 }}>Section:</span>
+          <span style={{ marginLeft: '8px', color: textColor }}>{section || 'N/A'}</span>
         </div>
         <div>
-          <span style={{ color: '#64748b', fontWeight: 500 }}>Browser:</span>
-          <span style={{ marginLeft: '8px', color: '#1e293b' }}>{context.browser}</span>
+          <span style={{ color: mutedColor, fontWeight: 500 }}>Browser:</span>
+          <span style={{ marginLeft: '8px', color: textColor }}>{context.browser}</span>
         </div>
         <div>
-          <span style={{ color: '#64748b', fontWeight: 500 }}>Screen:</span>
-          <span style={{ marginLeft: '8px', color: '#1e293b' }}>{context.screenSize}</span>
+          <span style={{ color: mutedColor, fontWeight: 500 }}>Screen:</span>
+          <span style={{ marginLeft: '8px', color: textColor }}>{context.screenSize}</span>
         </div>
       </div>
 
       <div>
-        <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, marginBottom: '8px', color: '#1e293b' }}>
+        <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, marginBottom: '8px', color: textColor }}>
           Severity *
         </label>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -110,9 +120,9 @@ export function FeedbackForm({ section, onSubmit, onCancel, isSubmitting }: Feed
               style={{
                 padding: '6px 14px',
                 borderRadius: '20px',
-                border: `2px solid ${severity === option.value ? option.color : '#e2e8f0'}`,
-                background: severity === option.value ? `${option.color}15` : 'white',
-                color: severity === option.value ? option.color : '#64748b',
+                border: `2px solid ${severity === option.value ? option.color : borderColor}`,
+                background: severity === option.value ? `${option.color}20` : cardBg,
+                color: severity === option.value ? option.color : mutedColor,
                 fontSize: '13px',
                 fontWeight: 500,
                 cursor: 'pointer',
@@ -126,7 +136,7 @@ export function FeedbackForm({ section, onSubmit, onCancel, isSubmitting }: Feed
       </div>
 
       <div>
-        <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, marginBottom: '8px', color: '#1e293b' }}>
+        <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, marginBottom: '8px', color: textColor }}>
           Category *
         </label>
         <select
@@ -136,10 +146,10 @@ export function FeedbackForm({ section, onSubmit, onCancel, isSubmitting }: Feed
             width: '100%',
             padding: '10px 12px',
             borderRadius: '8px',
-            border: '1px solid #e2e8f0',
+            border: `1px solid ${borderColor}`,
             fontSize: '14px',
-            color: '#1e293b',
-            background: 'white',
+            color: textColor,
+            background: inputBg,
             cursor: 'pointer',
           }}
         >
@@ -152,7 +162,7 @@ export function FeedbackForm({ section, onSubmit, onCancel, isSubmitting }: Feed
       </div>
 
       <div>
-        <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, marginBottom: '8px', color: '#1e293b' }}>
+        <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, marginBottom: '8px', color: textColor }}>
           Subject * ({subject.length}/200)
         </label>
         <input
@@ -165,9 +175,10 @@ export function FeedbackForm({ section, onSubmit, onCancel, isSubmitting }: Feed
             width: '100%',
             padding: '10px 12px',
             borderRadius: '8px',
-            border: `1px solid ${errors.subject ? '#ef4444' : '#e2e8f0'}`,
+            border: `1px solid ${errors.subject ? '#ef4444' : borderColor}`,
             fontSize: '14px',
-            color: '#1e293b',
+            color: textColor,
+            background: inputBg,
             outline: 'none',
             boxSizing: 'border-box',
           }}
@@ -176,7 +187,7 @@ export function FeedbackForm({ section, onSubmit, onCancel, isSubmitting }: Feed
       </div>
 
       <div>
-        <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, marginBottom: '8px', color: '#1e293b' }}>
+        <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, marginBottom: '8px', color: textColor }}>
           Description * ({description.length}/2000)
         </label>
         <textarea
@@ -189,9 +200,10 @@ export function FeedbackForm({ section, onSubmit, onCancel, isSubmitting }: Feed
             width: '100%',
             padding: '10px 12px',
             borderRadius: '8px',
-            border: `1px solid ${errors.description ? '#ef4444' : '#e2e8f0'}`,
+            border: `1px solid ${errors.description ? '#ef4444' : borderColor}`,
             fontSize: '14px',
-            color: '#1e293b',
+            color: textColor,
+            background: inputBg,
             outline: 'none',
             resize: 'vertical',
             minHeight: '80px',
@@ -204,7 +216,7 @@ export function FeedbackForm({ section, onSubmit, onCancel, isSubmitting }: Feed
 
       {severity === 'BUG' && (
         <div>
-          <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, marginBottom: '8px', color: '#1e293b' }}>
+          <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, marginBottom: '8px', color: textColor }}>
             Steps to Reproduce * ({stepsToReproduce.length}/500)
           </label>
           <textarea
@@ -217,9 +229,10 @@ export function FeedbackForm({ section, onSubmit, onCancel, isSubmitting }: Feed
               width: '100%',
               padding: '10px 12px',
               borderRadius: '8px',
-              border: `1px solid ${errors.stepsToReproduce ? '#ef4444' : '#e2e8f0'}`,
+              border: `1px solid ${errors.stepsToReproduce ? '#ef4444' : borderColor}`,
               fontSize: '14px',
-              color: '#1e293b',
+              color: textColor,
+              background: inputBg,
               outline: 'none',
               resize: 'vertical',
               minHeight: '60px',
@@ -239,9 +252,9 @@ export function FeedbackForm({ section, onSubmit, onCancel, isSubmitting }: Feed
           style={{
             padding: '10px 20px',
             borderRadius: '8px',
-            border: '1px solid #e2e8f0',
-            background: 'white',
-            color: '#64748b',
+            border: `1px solid ${borderColor}`,
+            background: cardBg,
+            color: mutedColor,
             fontSize: '14px',
             fontWeight: 500,
             cursor: isSubmitting ? 'not-allowed' : 'pointer',
