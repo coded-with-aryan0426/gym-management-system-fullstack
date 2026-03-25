@@ -76,7 +76,7 @@
   font-weight: 800;
   font-family: var(--font-heading, inherit);
   margin-bottom: 8px;
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+  background: linear-gradient(135deg, #DC2626 0%, #EF4444 50%, #F87171 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -135,7 +135,7 @@
 }
 
 .detected-location svg {
-  color: #6366f1;
+  color: #DC2626;
 }
 
 .currency-selector-wrapper {
@@ -244,7 +244,7 @@
 }
 
 .currency-option.active {
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: linear-gradient(135deg, #DC2626, #EF4444);
   color: white;
 }
 
@@ -581,7 +581,7 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #6366f1, #8b5cf6, #a855f7);
+  background: linear-gradient(90deg, #DC2626, #EF4444, #F87171);
   opacity: 0;
   transition: opacity 0.3s;
 }
@@ -615,7 +615,7 @@
 }
 
 .plan-card.recommended {
-  border: 2px solid #6366f1;
+  border: 2px solid #DC2626;
 }
 
 .light .plan-card.recommended {
@@ -638,7 +638,7 @@
   position: absolute;
   top: 16px;
   right: 16px;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: linear-gradient(135deg, #DC2626, #EF4444);
   color: white;
   padding: 6px 14px;
   border-radius: 20px;
@@ -816,9 +816,9 @@
 }
 
 .plan-cta.primary {
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: linear-gradient(135deg, #DC2626, #EF4444);
   color: white;
-  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+  box-shadow: 0 4px 16px rgba(220, 38, 38, 0.4);
 }
 
 .plan-cta:hover {
@@ -826,7 +826,7 @@
 }
 
 .plan-cta.primary:hover {
-  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.5);
+  box-shadow: 0 8px 24px rgba(220, 38, 38, 0.5);
 }
 
 .light .plan-cta:hover {
@@ -926,7 +926,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: linear-gradient(135deg, #DC2626, #EF4444);
   color: white;
   flex-shrink: 0;
 }
@@ -1084,7 +1084,7 @@
 }
 
 .light .plan-header-cell {
-  color: #6366f1;
+  color: #DC2626;
 }
 
 .dark .plan-header-cell {
@@ -1221,7 +1221,7 @@
   border-radius: 32px;
   padding: 64px 32px;
   margin-bottom: 48px;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6, #a855f7);
+  background: linear-gradient(135deg, #DC2626, #EF4444, #F87171);
   position: relative;
   overflow: hidden;
 }
@@ -1273,7 +1273,7 @@
 .cta-primary {
   padding: 16px 36px;
   background: white;
-  color: #6366f1;
+  color: #DC2626;
   border: none;
   border-radius: 14px;
   font-size: 16px;
@@ -1354,7 +1354,7 @@
   font-size: 32px;
   font-weight: 800;
   font-family: var(--font-heading, inherit);
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: linear-gradient(135deg, #DC2626, #EF4444);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
