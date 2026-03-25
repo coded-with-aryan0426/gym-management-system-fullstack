@@ -80,16 +80,22 @@ export const FeedbackDetailDrawer: React.FC<FeedbackDetailDrawerProps> = ({
   const handleExport = () => {
     if (!feedback) return;
 
-    const csv = `ID,Tester,Email,Role,Page,Section,Severity,Category,Subject,Description,Status,Priority,Submitted
-${feedback.id},"${feedback.testerName}","${feedback.testerEmail}","${feedback.testerRole}","${feedback.pageRoute}","${feedback.section}","${feedback.severity}","${feedback.category}","${feedback.subject}","${feedback.description}","${feedback.status}",${feedback.priorityScore},"${format(new Date(feedback.submittedAt), 'yyyy-MM-dd HH:mm:ss')}"`;
+    try {
+      const feedbackId = String(feedback.id || '');
+      const submittedDate = format(new Date(feedback.submittedAt || new Date()), 'yyyy-MM-dd HH:mm:ss');
+      const csv = `ID,Tester,Email,Role,Page,Section,Severity,Category,Subject,Description,Status,Priority,Submitted
+${feedbackId},"${(feedback.testerName || '').replace(/"/g, '""')}","${(feedback.testerEmail || '').replace(/"/g, '""')}","${(feedback.testerRole || '').replace(/"/g, '""')}","${(feedback.pageRoute || '').replace(/"/g, '""')}","${(feedback.section || '').replace(/"/g, '""')}","${(feedback.severity || '').replace(/"/g, '""')}","${(feedback.category || '').replace(/"/g, '""')}","${(feedback.subject || '').replace(/"/g, '""')}","${(feedback.description || '').replace(/"/g, '""')}","${(feedback.status || '').replace(/"/g, '""')}",${Number(feedback.priorityScore) || 0},"${submittedDate}"`;
 
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `feedback-${feedback.id}.csv`;
-    a.click();
-    window.URL.revokeObjectURL(url);
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `feedback-${feedbackId}.csv`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error exporting feedback:', error);
+    }
   };
 
   return (
@@ -131,19 +137,19 @@ ${feedback.id},"${feedback.testerName}","${feedback.testerEmail}","${feedback.te
                     <div className="info-grid">
                       <div className="info-item">
                         <label>ID</label>
-                        <span>#{feedback.id}</span>
+                        <span>#{String(feedback.id)}</span>
                       </div>
                       <div className="info-item">
                         <label>Tester</label>
-                        <span>{feedback.testerName}</span>
+                        <span>{feedback.testerName || '—'}</span>
                       </div>
                       <div className="info-item">
                         <label>Email</label>
-                        <span>{feedback.testerEmail}</span>
+                        <span>{feedback.testerEmail || '—'}</span>
                       </div>
                       <div className="info-item">
                         <label>Role</label>
-                        <span>{feedback.testerRole}</span>
+                        <span>{feedback.testerRole || '—'}</span>
                       </div>
                     </div>
                   </section>
@@ -177,7 +183,7 @@ ${feedback.id},"${feedback.testerName}","${feedback.testerEmail}","${feedback.te
                     <div className="info-grid">
                       <div className="info-item">
                         <label>Severity</label>
-                        <span className="chip-text">{feedback.severity.replace('_', ' ')}</span>
+                        <span className="chip-text">{(feedback.severity || '').replace('_', ' ')}</span>
                       </div>
                       <div className="info-item">
                         <label>Category</label>
@@ -225,11 +231,11 @@ ${feedback.id},"${feedback.testerName}","${feedback.testerEmail}","${feedback.te
                     <div className="info-grid">
                       <div className="info-item">
                         <label>Submitted</label>
-                        <span>{format(new Date(feedback.submittedAt), 'MMM dd, yyyy HH:mm:ss')}</span>
+                        <span>{feedback.submittedAt ? format(new Date(feedback.submittedAt), 'MMM dd, yyyy HH:mm:ss') : '—'}</span>
                       </div>
                       <div className="info-item">
                         <label>Session ID</label>
-                        <span className="code-text">{feedback.sessionId}</span>
+                        <span className="code-text">{feedback.sessionId || '—'}</span>
                       </div>
                     </div>
                   </section>
@@ -242,7 +248,7 @@ ${feedback.id},"${feedback.testerName}","${feedback.testerEmail}","${feedback.te
                       <div className="edit-view">
                         <div className="info-item">
                           <label>Status</label>
-                          <span className="chip-text">{feedback.status.replace('_', ' ')}</span>
+                          <span className="chip-text">{(feedback.status || '').replace('_', ' ')}</span>
                         </div>
                         <div className="info-item">
                           <label>Priority Score</label>
