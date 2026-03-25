@@ -91,8 +91,9 @@ def main():
                         help="Open terminals in external Terminal app")
     args = parser.parse_args()
     
-    # If --external is specified, disable vscode mode
-    use_vscode = not args.external
+    # Type hints for mypy/pyre
+    public_mode: bool = args.public
+    use_vscode: bool = not args.external
     
     if sys.platform != "darwin":
         print("This script is designed for macOS.")
@@ -106,12 +107,12 @@ def main():
         return
 
     print("🚀 Starting Gym Management System...")
-    print(f"   Mode: {'Public (cloudflared)' if args.public else 'Local only'}")
+    print(f"   Mode: {'Public (cloudflared)' if public_mode else 'Local only'}")
     print(f"   Terminals: {'VS Code integrated' if use_vscode else 'External Terminal app'}")
     print()
 
     # Check cloudflared if public mode requested
-    if args.public:
+    if public_mode:
         if not check_cloudflared():
             print("⚠️  cloudflared not found.")
             response = input("   Install via Homebrew? (y/n): ").strip().lower()
@@ -120,7 +121,7 @@ def main():
                     return
             else:
                 print("   Continuing without public URLs...")
-                args.public = False
+                public_mode = False
 
     # Terminal runner function
     run_terminal = run_in_vscode_terminal if use_vscode else run_in_external_terminal
@@ -140,7 +141,7 @@ def main():
     run_terminal("Frontend", frontend_cmd, pwd)
 
     # ===== Tunnels (if public mode) =====
-    if args.public:
+    if public_mode:
         print()
         print("🌐 Setting up cloudflared tunnels...")
         print("   (Public URLs will appear in each terminal)")
@@ -184,7 +185,7 @@ def main():
     print("   Trainer Portal: http://localhost:5174")
     print("   Member Portal:  http://localhost:5175")
     
-    if args.public:
+    if public_mode:
         print()
         print("🌐 Public URLs: Check each tunnel terminal for the")
         print("   cloudflared URLs (*.trycloudflare.com)")
@@ -193,7 +194,7 @@ def main():
     print("💡 Tips:")
     print("   - Backend takes ~30-60 seconds to fully start")
     print("   - Wait for 'Started GymApplication' in backend terminal")
-    if args.public:
+    if public_mode:
         print("   - Share the *.trycloudflare.com URLs with beta testers")
         print("   - Tunnels are temporary and change on restart")
 

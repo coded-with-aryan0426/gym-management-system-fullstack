@@ -141,7 +141,7 @@ class LoadTester:
                 error=str(e)
             )
     
-    def select_endpoint(self, role: str) -> tuple:
+    def select_endpoint(self, role: str) -> tuple[str, str]:
         """Select a random endpoint weighted by frequency"""
         endpoints = self.ENDPOINTS[role] + self.ENDPOINTS['COMMON']
         weights = [e[2] for e in endpoints]
@@ -200,7 +200,7 @@ class LoadTester:
         try:
             while True:
                 elapsed = time.time() - self.start_time
-                remaining = max(0, self.duration - elapsed)
+                remaining = max(0.0, self.duration - elapsed)
                 total_requests = len(self.all_results)
                 
                 print(f"\rProgress: {elapsed:.0f}/{self.duration}s | "
@@ -296,11 +296,11 @@ class LoadTester:
         print("-" * 40)
         
         issues = []
-        if avg_response > 200:
+        if avg_response > 200.0:
             issues.append(f"⚠️  Average response time ({avg_response:.0f}ms) exceeds 200ms target")
-        if p95_response > 500:
+        if p95_response > 500.0:
             issues.append(f"⚠️  P95 response time ({p95_response:.0f}ms) exceeds 500ms threshold")
-        if failed / total_requests > 0.01:
+        if total_requests > 0 and failed / total_requests > 0.01:
             issues.append(f"⚠️  Error rate ({failed/total_requests*100:.1f}%) exceeds 1% threshold")
         
         if issues:
