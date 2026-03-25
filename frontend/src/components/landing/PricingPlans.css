@@ -450,14 +450,14 @@
 }
 
 .light .summary-highlight {
-  border-color: rgba(0,0,0,0.08) !important;
-  background: rgba(99, 102, 241, 0.05) !important;
+  border-color: rgba(220, 38, 38, 0.15) !important;
+  background: rgba(220, 38, 38, 0.08) !important;
   color: #0F172A !important;
 }
 
 .dark .summary-highlight {
-  border-color: rgba(255,255,255,0.1) !important;
-  background: rgba(99, 102, 241, 0.1) !important;
+  border-color: rgba(220, 38, 38, 0.25) !important;
+  background: rgba(220, 38, 38, 0.12) !important;
   color: #E2E8F0 !important;
 }
 
@@ -465,7 +465,7 @@
   content: '✓';
   font-weight: 900;
   font-size: 14px;
-  color: #6366f1;
+  color: #DC2626;
   flex-shrink: 0;
 }
 
