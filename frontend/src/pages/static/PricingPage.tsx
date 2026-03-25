@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Check, X, Star, Zap, Users, Building2, Crown, ChevronDown, ChevronUp, Globe, MapPin } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Check, X, Star, Zap, Users, Building2, Crown, ChevronDown, ChevronUp, Globe, MapPin, ArrowLeft } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useGeoLocation } from '../../hooks/useGeoLocation';
 import {
@@ -237,6 +238,7 @@ const CURRENCIES: { code: Currency; symbol: string; name: string; flag: string }
 const CURRENCY_SELECTOR_OPTIONS = ['INR', 'USD', 'GBP', 'EUR'] as const;
 
 export default function PricingPage() {
+  const navigate = useNavigate();
   const { theme } = useTheme();
   const { location, currency, isLoading, setCurrency } = useGeoLocation();
   const isDark = theme === 'dark';
@@ -272,6 +274,13 @@ export default function PricingPage() {
       <div className="pricing-hero">
         <div className="pricing-header-row">
           <div className="pricing-header-left">
+            <button 
+              className="back-button"
+              onClick={() => navigate(-1)}
+              title="Go back"
+            >
+              <ArrowLeft size={20} />
+            </button>
             <h1 className="pricing-title">Simple, Transparent Pricing</h1>
             <p className="pricing-tagline">Everything you need to run your gym, from solo trainer to franchise chain</p>
           </div>
@@ -291,23 +300,21 @@ export default function PricingPage() {
                 {currency}
                 <ChevronDown size={14} />
               </button>
-              {showCurrencyDropdown && (
-                <div className="currency-dropdown">
-                  {CURRENCIES.map(curr => (
-                    <button
-                      key={curr.code}
-                      className={`currency-option ${currency === curr.code ? 'active' : ''}`}
-                      onClick={() => {
-                        setCurrency(curr.code);
-                        setShowCurrencyDropdown(false);
-                      }}
-                    >
-                      <span>{curr.flag}</span>
-                      <span>{curr.code}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
+              <div className={`currency-dropdown ${showCurrencyDropdown ? 'show' : ''}`}>
+                {CURRENCIES.map(curr => (
+                  <button
+                    key={curr.code}
+                    className={`currency-option ${currency === curr.code ? 'active' : ''}`}
+                    onClick={() => {
+                      setCurrency(curr.code);
+                      setShowCurrencyDropdown(false);
+                    }}
+                  >
+                    <span>{curr.flag}</span>
+                    <span>{curr.code}</span>
+                  </button>
+                ))}
+              </div>
             </div>
             <div className="billing-toggle">
               <button
