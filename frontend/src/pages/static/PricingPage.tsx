@@ -274,14 +274,16 @@ export default function PricingPage() {
       <div className="pricing-hero">
         <div className="pricing-header-row">
           <div className="pricing-header-left">
-            <button 
-              className="back-button"
-              onClick={() => navigate(-1)}
-              title="Go back"
-            >
-              <ArrowLeft size={20} />
-            </button>
-            <h1 className="pricing-title">Simple, Transparent Pricing</h1>
+            <div className="pricing-header-top">
+              <button 
+                className="back-button"
+                onClick={() => navigate(-1)}
+                title="Go back"
+              >
+                <ArrowLeft size={20} />
+              </button>
+              <h1 className="pricing-title">Simple, Transparent Pricing</h1>
+            </div>
             <p className="pricing-tagline">Everything you need to run your gym, from solo trainer to franchise chain</p>
           </div>
           <div className="pricing-controls">
