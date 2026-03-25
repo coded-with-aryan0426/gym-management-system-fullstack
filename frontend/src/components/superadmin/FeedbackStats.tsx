@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import { motion } from 'framer-motion';
 import { AlertCircle, CheckCircle, Clock, MessageSquare, TrendingUp, BarChart3 } from 'lucide-react';
 import type { FeedbackStats } from '../../types/feedback.types';
-import { betaFeedbackApi } from '../../services/api';
+import { superAdminApi } from '../../services/superAdminApi';
 import './feedback-dashboard.css';
 
 interface FeedbackStatsProps {
@@ -21,12 +22,48 @@ export const FeedbackStatsComponent: React.FC<FeedbackStatsProps> = ({ onFilterC
   const fetchStats = async () => {
     try {
       setLoading(true);
-      const data = await betaFeedbackApi.getStats();
+      const data = await superAdminApi.getBetaFeedbackStats();
       setStats(data);
       setError(null);
     } catch (err) {
-      setError('Failed to load statistics');
-      console.error('Error fetching stats:', err);
+      if (axios.isAxiosError(err) && err.response?.status === 403) {
+        setError(null);
+        setStats({
+          totalCount: 0,
+          openCount: 0,
+          resolvedCount: 0,
+          bugCount: 0,
+          uiIssueCount: 0,
+          suggestionCount: 0,
+          improvementCount: 0,
+          questionCount: 0,
+          byPage: {},
+          byStatus: {
+            NEW: 0,
+            ACKNOWLEDGED: 0,
+            IN_PROGRESS: 0,
+            RESOLVED: 0,
+            WONT_FIX: 0
+          },
+          bySeverity: {
+            BUG: 0,
+            UI_ISSUE: 0,
+            SUGGESTION: 0,
+            IMPROVEMENT: 0,
+            QUESTION: 0
+          },
+          byCategory: {
+            UI: 0,
+            PERFORMANCE: 0,
+            LOGIC: 0,
+            FEATURE: 0,
+            SECURITY: 0,
+            DATA: 0
+          }
+        });
+      } else {
+        setError('Unable to load statistics right now');
+      }
     } finally {
       setLoading(false);
     }
@@ -118,7 +155,7 @@ export const FeedbackStatsComponent: React.FC<FeedbackStatsProps> = ({ onFilterC
                 </div>
                 <h3 className="stat-title">{card.title}</h3>
               </div>
-              <div className="stat-value">{card.value.toLocaleString()}</div>
+              <div className="stat-value">{Number(card.value ?? 0).toLocaleString()}</div>
             </motion.div>
           );
         })}

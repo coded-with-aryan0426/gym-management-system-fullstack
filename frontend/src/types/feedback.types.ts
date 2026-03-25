@@ -4,6 +4,8 @@ export type FeedbackCategory = 'UI' | 'PERFORMANCE' | 'LOGIC' | 'FEATURE' | 'SEC
 
 export type FeedbackStatus = 'NEW' | 'ACKNOWLEDGED' | 'IN_PROGRESS' | 'RESOLVED' | 'WONT_FIX';
 
+export type SelectionMode = 'idle' | 'selecting' | 'selected' | 'submitting';
+
 export interface FeedbackPayload {
   pageRoute: string;
   pageTitle: string;
@@ -18,6 +20,20 @@ export interface FeedbackPayload {
   screenshotUrl?: string;
 }
 
+export interface ElementSelection {
+  cssSelector: string;
+  nthChildIndex: number[];
+  boundingBox: {
+    top: number;
+    left: number;
+    width: number;
+    height: number;
+  };
+  semanticLabel: string;
+  visibleText: string;
+  elementPath: string;
+}
+
 export interface BetaFeedback extends FeedbackPayload {
   id: number;
   userId: number;
@@ -29,6 +45,17 @@ export interface BetaFeedback extends FeedbackPayload {
   adminNotes?: string;
   submittedAt: string;
   sessionId: string;
+  elementPath?: string;
+  elementSelector?: string;
+  elementNthChild?: string;
+  elementSemanticLabel?: string;
+  elementBoundingBox?: string;
+}
+
+export interface ElementFeedbackPayload extends FeedbackPayload {
+  elementSelection: ElementSelection;
+  reporterId?: number;
+  timestamp: string;
 }
 
 export interface PendingFeedback extends FeedbackPayload {
@@ -37,6 +64,7 @@ export interface PendingFeedback extends FeedbackPayload {
   userId?: number;
   userName?: string;
   userEmail?: string;
+  elementSelection?: ElementSelection;
 }
 
 export interface FeedbackStats {

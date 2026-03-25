@@ -18,7 +18,7 @@ public class TrainerClass {
     @Column(nullable = false, length = 100)
     private String title;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "trainer_id", nullable = false)
     private User trainer; // Changed from Long to User entity
 

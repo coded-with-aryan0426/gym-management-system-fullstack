@@ -6,8 +6,9 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
-    host: true, // Expose to network
+    host: true,
     port: 5173,
+    allowedHosts: ['norm-occurred-vacation-analyst.trycloudflare.com', '.trycloudflare.com'],
     proxy: {
       '/api': {
         target: 'http://127.0.0.1:8081',

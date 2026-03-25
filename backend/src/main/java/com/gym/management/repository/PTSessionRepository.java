@@ -200,4 +200,34 @@ public interface PTSessionRepository extends JpaRepository<PTSession, Long> {
                         @Param("trainerId") Long trainerId,
                         @Param("startDate") LocalDateTime startDate,
                         @Param("endDate") LocalDateTime endDate);
+
+        // ==========================================
+        // OPTIMIZED QUERIES FOR ANALYTICS (Performance)
+        // ==========================================
+
+        /**
+         * Find all sessions within a date range with trainer and member eagerly fetched
+         * Used for analytics - avoids N+1 queries
+         */
+        @Query("SELECT s FROM PTSession s LEFT JOIN FETCH s.trainer LEFT JOIN FETCH s.member " +
+                        "WHERE s.sessionDate BETWEEN :startDate AND :endDate")
+        List<PTSession> findSessionsByDateRangeWithUsers(
+                        @Param("startDate") LocalDateTime startDate,
+                        @Param("endDate") LocalDateTime endDate);
+
+        /**
+         * Count sessions by status within date range - efficient aggregate
+         */
+        @Query("SELECT s.status, COUNT(s) FROM PTSession s " +
+                        "WHERE s.sessionDate BETWEEN :startDate AND :endDate " +
+                        "GROUP BY s.status")
+        List<Object[]> countSessionsByStatusInDateRange(
+                        @Param("startDate") LocalDateTime startDate,
+                        @Param("endDate") LocalDateTime endDate);
+
+        /**
+         * Count total sessions efficiently
+         */
+        @Query("SELECT COUNT(s) FROM PTSession s")
+        long countAllSessions();
 }

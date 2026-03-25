@@ -227,6 +227,11 @@ public class BetaFeedbackService {
                 .resolvedAt(entity.getResolvedAt())
                 .sessionId(entity.getSessionId())
                 .betaVersion(entity.getBetaVersion())
+                .elementPath(entity.getElementPath())
+                .elementSelector(entity.getElementSelector())
+                .elementNthChild(entity.getElementNthChild())
+                .elementSemanticLabel(entity.getElementSemanticLabel())
+                .elementBoundingBox(entity.getElementBoundingBox())
                 .build();
     }
 
@@ -256,6 +261,11 @@ public class BetaFeedbackService {
                 .resolvedAt(dto.getResolvedAt())
                 .sessionId(dto.getSessionId())
                 .betaVersion(dto.getBetaVersion())
+                .elementPath(dto.getElementPath())
+                .elementSelector(dto.getElementSelector())
+                .elementNthChild(dto.getElementNthChild())
+                .elementSemanticLabel(dto.getElementSemanticLabel())
+                .elementBoundingBox(dto.getElementBoundingBox())
                 .build();
     }
 }

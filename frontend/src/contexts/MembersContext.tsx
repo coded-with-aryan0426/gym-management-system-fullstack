@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, type ReactNode, useMemo, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, type ReactNode, useMemo, useCallback, useRef } from 'react';
 import api from '../services/api';
 import { type MemberDTO } from '../types/user';
 import { useAuth } from './AuthContext';
@@ -23,6 +23,8 @@ export const MembersProvider: React.FC<{ children: ReactNode }> = ({ children })
     const { user, isAuthenticated } = useAuth();
     const [members, setMembers] = useState<MemberDTO[]>([]);
     const [loading, setLoading] = useState(true);
+    // Use ref to track initial load - avoids circular dependency issue
+    const isInitialLoadRef = useRef(true);
 
     const fetchMembers = useCallback(async () => {
         if (!isAuthenticated || !user) {
@@ -30,21 +32,22 @@ export const MembersProvider: React.FC<{ children: ReactNode }> = ({ children })
             return;
         }
 
-        // Keep loading true only on initial fetch or full refresh if needed
-        // Usually we might want silent refresh, but for now specific loading state is OK
-        // Start loading only if we have no members (initial load) to avoid Flicker
-        if (members.length === 0) setLoading(true);
+        // Only show loading spinner on initial load to avoid flicker
+        if (isInitialLoadRef.current) {
+            setLoading(true);
+        }
 
         try {
             const data = await api.getMembers();
             setMembers(Array.isArray(data) ? data : []);
+            isInitialLoadRef.current = false;
         } catch (error) {
             console.warn("Failed to load members", error);
             setMembers([]); // Fallback
         } finally {
             setLoading(false);
         }
-    }, [isAuthenticated, user, members.length]);
+    }, [isAuthenticated, user]); // Removed members.length dependency - fixes circular issue
 
     useEffect(() => {
         if (isAuthenticated) {

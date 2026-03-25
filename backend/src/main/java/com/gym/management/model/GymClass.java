@@ -25,7 +25,7 @@ public class GymClass {
     @Column(name = "description", columnDefinition = "CLOB")
     private String description;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "trainer_id")
     private User trainer;
 

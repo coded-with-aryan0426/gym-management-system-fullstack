@@ -77,4 +77,14 @@ public class BetaFeedbackDTO {
     private String sessionId;
 
     private String betaVersion;
+
+    private String elementPath;
+
+    private String elementSelector;
+
+    private String elementNthChild;
+
+    private String elementSemanticLabel;
+
+    private String elementBoundingBox;
 }

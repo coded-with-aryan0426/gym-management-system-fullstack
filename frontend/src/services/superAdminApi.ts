@@ -492,5 +492,48 @@ export const superAdminApi = {
     );
     return response.data;
   },
+
+  async getBetaFeedbackStats(): Promise<any> {
+    const token = this.getToken();
+    if (!token) throw new Error('Super Admin token missing or expired');
+    const response = await apiClient.get('/beta/feedback/stats', {
+      headers: { 'X-Superadmin-Token': token },
+    });
+    return response.data.data;
+  },
+
+  async getBetaFeedback(filterObject: Record<string, any> = {}, page: number = 0, size: number = 20): Promise<any> {
+    const token = this.getToken();
+    if (!token) throw new Error('Super Admin token missing or expired');
+    const response = await apiClient.post('/beta/feedback/filter', filterObject, {
+      headers: { 'X-Superadmin-Token': token },
+      params: { page, size },
+    });
+    const payload = response.data;
+    return {
+      content: payload.data || [],
+      totalItems: payload.totalItems || 0,
+      totalPages: payload.totalPages || 1,
+      currentPage: payload.currentPage || 0,
+    };
+  },
+
+  async getBetaFeedbackById(id: number): Promise<any> {
+    const token = this.getToken();
+    if (!token) throw new Error('Super Admin token missing or expired');
+    const response = await apiClient.get(`/beta/feedback/${id}`, {
+      headers: { 'X-Superadmin-Token': token },
+    });
+    return response.data;
+  },
+
+  async updateBetaFeedbackStatus(id: number, status: string, adminNotes?: string): Promise<any> {
+    const token = this.getToken();
+    if (!token) throw new Error('Super Admin token missing or expired');
+    const response = await apiClient.patch(`/beta/feedback/${id}/status`, { status, adminNotes }, {
+      headers: { 'X-Superadmin-Token': token },
+    });
+    return response.data;
+  },
 };
 

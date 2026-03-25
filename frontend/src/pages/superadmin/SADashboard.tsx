@@ -18,6 +18,7 @@ import {
     DataTable,
     ActionPanel,
     StatusBadge,
+    FilterBar,
     DetailDrawer,
     type Column
 } from '../../components/superadmin/shared';
@@ -415,7 +416,7 @@ const SADashboard: React.FC = () => {
                     </motion.div>
                 )}
 
-                {/* ── Service Status Modal ── */}
+                {/* ── Service Status Modal ── Enhanced with Component Library */}
                 {showServicesModal && (
                     <motion.div className="sa__modal-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowServicesModal(false)}>
                         <motion.div className="sa__modal sa__modal--wide" initial={{ opacity: 0, scale: 0.92, y: 30 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.92, y: 30 }} transition={{ type: 'spring', damping: 28, stiffness: 380 }} onClick={e => e.stopPropagation()}>
@@ -425,15 +426,73 @@ const SADashboard: React.FC = () => {
                                 <button className="sa__modal-close" onClick={() => setShowServicesModal(false)}><X size={16} /></button>
                             </div>
                             <div className="sa__modal-body">
-                            {services.map((s, i) => (
-                                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0', borderBottom: i < services.length - 1 ? '1px solid var(--border-subtle)' : 'none' }}>
-                                        <div style={{ width: 10, height: 10, borderRadius: '50%', background: s.status === 'operational' ? '#22c55e' : s.status === 'degraded' ? '#f59e0b' : '#ef4444' }} />
-                                        <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{s.name}</span>
-                                        <span style={{ fontSize: 11, fontWeight: 500, color: s.status === 'operational' ? '#22c55e' : '#f59e0b', minWidth: 80 }}>{s.status}</span>
-                                        <span style={{ fontSize: 11, color: 'var(--text-muted)', minWidth: 60, textAlign: 'right' }}>{s.uptime}%</span>
-                                        <span style={{ fontSize: 11, fontFamily: 'monospace', color: 'var(--text-muted)', minWidth: 55, textAlign: 'right' }}>{s.latency}</span>
-                                    </div>
-                                ))}
+                                <DataTable
+                                    data={services}
+                                    columns={[
+                                        {
+                                            key: 'name',
+                                            label: 'Service',
+                                            sortable: true,
+                                            render: (value, row) => (
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                    <Server size={14} style={{ color: 'var(--text-tertiary)' }} />
+                                                    <span style={{ fontWeight: 600 }}>{value}</span>
+                                                </div>
+                                            )
+                                        },
+                                        {
+                                            key: 'status',
+                                            label: 'Status',
+                                            sortable: true,
+                                            render: (value) => (
+                                                <StatusBadge
+                                                    status={value === 'operational' ? 'success' : value === 'degraded' ? 'warning' : 'error'}
+                                                    label={value}
+                                                    variant="filled"
+                                                    size="sm"
+                                                />
+                                            )
+                                        },
+                                        {
+                                            key: 'uptime',
+                                            label: 'Uptime',
+                                            sortable: true,
+                                            render: (value) => (
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                                    <div style={{ 
+                                                        flex: '0 0 60px', 
+                                                        height: 4, 
+                                                        borderRadius: 2, 
+                                                        background: 'rgba(255,255,255,0.06)', 
+                                                        overflow: 'hidden' 
+                                                    }}>
+                                                        <div style={{ 
+                                                            width: `${value}%`, 
+                                                            height: '100%', 
+                                                            background: value >= 99 ? '#22c55e' : value >= 95 ? '#f59e0b' : '#ef4444',
+                                                            transition: 'width 0.3s ease'
+                                                        }} />
+                                                    </div>
+                                                    <span style={{ fontSize: 11, fontFamily: 'monospace', color: 'var(--text-secondary)' }}>
+                                                        {value.toFixed(2)}%
+                                                    </span>
+                                                </div>
+                                            )
+                                        },
+                                        {
+                                            key: 'latency',
+                                            label: 'Latency',
+                                            sortable: true,
+                                            render: (value) => (
+                                                <span style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--text-secondary)' }}>
+                                                    {value}
+                                                </span>
+                                            )
+                                        }
+                                    ]}
+                                    pageSize={10}
+                                    stickyHeader
+                                />
                             </div>
                             <div className="sa__modal-footer">
                                 <button className="sa__btn sa__btn--ghost sa__btn--sm" onClick={() => setShowServicesModal(false)}>Close</button>
@@ -442,7 +501,7 @@ const SADashboard: React.FC = () => {
                     </motion.div>
                 )}
 
-                {/* ── Audit Log Modal ── */}
+                {/* ── Audit Log Modal ── Enhanced with Component Library */}
                 {showAuditModal && (
                     <motion.div className="sa__modal-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowAuditModal(false)}>
                         <motion.div className="sa__modal sa__modal--wide" initial={{ opacity: 0, scale: 0.92, y: 30 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.92, y: 30 }} transition={{ type: 'spring', damping: 28, stiffness: 380 }} onClick={e => e.stopPropagation()}>
@@ -455,23 +514,104 @@ const SADashboard: React.FC = () => {
                                 {loadingAudit ? (
                                     <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-muted)' }}>Loading audit records...</div>
                                 ) : (
-                                    fullAuditLogs.map((log) => (
-                                        <div key={log.id} style={{ display: 'flex', gap: 12, padding: '12px 0', borderBottom: '1px solid var(--border-subtle)' }}>
-                                            <div style={{ width: 32, height: 32, borderRadius: 8, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: log.severity === 'critical' || log.severity === 'high' ? 'rgba(239,68,68,0.08)' : log.severity === 'medium' ? 'rgba(245,158,11,0.08)' : 'rgba(59,130,246,0.08)' }}>
-                                                {log.severity === 'critical' || log.severity === 'high' ? <Shield size={14} style={{ color: '#ef4444' }} /> :
-                                                    log.severity === 'medium' ? <AlertTriangle size={14} style={{ color: '#f59e0b' }} /> :
-                                                        <Activity size={14} style={{ color: '#3b82f6' }} />}
-                                            </div>
-                                            <div style={{ flex: 1 }}>
-                                                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' }}>{log.action}</div>
-                                                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{log.details}</div>
-                                            </div>
-                                            <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                                                <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{log.userName} ({log.userRole})</div>
-                                                <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{new Date(log.timestamp).toLocaleString()}</div>
-                                            </div>
-                                        </div>
-                                    ))
+                                    <>
+                                        <FilterBar
+                                            searchPlaceholder="Search actions, users, or details..."
+                                            onSearchChange={(value) => console.log('Search:', value)}
+                                            filters={[
+                                                {
+                                                    type: 'select',
+                                                    placeholder: 'Severity',
+                                                    value: '',
+                                                    onChange: (value) => console.log('Severity:', value),
+                                                    options: [
+                                                        { value: '', label: 'All Severities' },
+                                                        { value: 'critical', label: 'Critical' },
+                                                        { value: 'high', label: 'High' },
+                                                        { value: 'medium', label: 'Medium' },
+                                                        { value: 'low', label: 'Low' },
+                                                    ]
+                                                },
+                                                {
+                                                    type: 'select',
+                                                    placeholder: 'User Role',
+                                                    value: '',
+                                                    onChange: (value) => console.log('Role:', value),
+                                                    options: [
+                                                        { value: '', label: 'All Roles' },
+                                                        { value: 'SUPER_ADMIN', label: 'Super Admin' },
+                                                        { value: 'GYM_OWNER', label: 'Gym Owner' },
+                                                        { value: 'TRAINER', label: 'Trainer' },
+                                                    ]
+                                                }
+                                            ]}
+                                            onClearAll={() => console.log('Clear all filters')}
+                                            style={{ marginBottom: 16 }}
+                                        />
+                                        <DataTable
+                                            data={fullAuditLogs}
+                                            columns={[
+                                                {
+                                                    key: 'severity',
+                                                    label: '',
+                                                    render: (value) => (
+                                                        <StatusBadge
+                                                            status={value === 'critical' || value === 'high' ? 'error' : value === 'medium' ? 'warning' : 'info'}
+                                                            variant="filled"
+                                                            size="sm"
+                                                        />
+                                                    )
+                                                },
+                                                {
+                                                    key: 'action',
+                                                    label: 'Action',
+                                                    sortable: true,
+                                                    render: (value, row) => (
+                                                        <div>
+                                                            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' }}>
+                                                                {value}
+                                                            </div>
+                                                            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+                                                                {row.details}
+                                                            </div>
+                                                        </div>
+                                                    )
+                                                },
+                                                {
+                                                    key: 'userName',
+                                                    label: 'User',
+                                                    sortable: true,
+                                                    render: (value, row) => (
+                                                        <div>
+                                                            <div style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 500 }}>
+                                                                {value}
+                                                            </div>
+                                                            <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>
+                                                                {row.userRole}
+                                                            </div>
+                                                        </div>
+                                                    )
+                                                },
+                                                {
+                                                    key: 'timestamp',
+                                                    label: 'Time',
+                                                    sortable: true,
+                                                    render: (value) => (
+                                                        <div style={{ fontSize: 10, fontFamily: 'monospace', color: 'var(--text-muted)' }}>
+                                                            {new Date(value).toLocaleString('en-US', {
+                                                                month: 'short',
+                                                                day: 'numeric',
+                                                                hour: '2-digit',
+                                                                minute: '2-digit'
+                                                            })}
+                                                        </div>
+                                                    )
+                                                }
+                                            ]}
+                                            pageSize={10}
+                                            stickyHeader
+                                        />
+                                    </>
                                 )}
                             </div>
                             <div className="sa__modal-footer">

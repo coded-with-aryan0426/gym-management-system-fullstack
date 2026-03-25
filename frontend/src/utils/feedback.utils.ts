@@ -1,5 +1,4 @@
 import type { PendingFeedback } from '../types/feedback.types';
-import type { User } from '../contexts/AuthContext';
 
 const PENDING_FEEDBACK_PREFIX = 'feedback_pending_';
 const SESSION_ID_KEY = 'feedback_session_id';
@@ -135,8 +134,10 @@ export function extractUserInfoFromToken(): { userId?: number; userName?: string
     if (parts.length !== 3) return {};
 
     const payload = JSON.parse(atob(parts[1]));
+    const rawUserId = payload.id ?? payload.userId ?? payload.sub;
+    const parsedUserId = typeof rawUserId === 'number' ? rawUserId : Number(rawUserId);
     return {
-      userId: payload.id || payload.userId || payload.sub,
+      userId: Number.isFinite(parsedUserId) ? parsedUserId : undefined,
       userName: payload.fullName || payload.name || payload.username,
       userEmail: payload.email,
     };

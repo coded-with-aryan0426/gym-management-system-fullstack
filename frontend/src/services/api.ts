@@ -23,17 +23,28 @@ const apiClient: AxiosInstance = axios.create({
 
 // Request interceptor for auth token (port-scoped)
 apiClient.interceptors.request.use((config) => {
-  // Check for super admin token first (for superadmin routes)
+  const rawUrl = String(config.url || '');
+  const normalizedPath = rawUrl.replace(/^https?:\/\/[^/]+/i, '').split('?')[0].toLowerCase();
+  const method = String(config.method || 'get').toLowerCase();
+
+  const isSuperAdminRoute = normalizedPath.startsWith('/superadmin/');
+  const isBetaFeedbackRoute = normalizedPath.startsWith('/beta/feedback');
+  const isBetaFeedbackSubmit = isBetaFeedbackRoute && method === 'post' && normalizedPath === '/beta/feedback';
+  const isBetaAdminRoute = isBetaFeedbackRoute && !isBetaFeedbackSubmit;
+
   const superAdminToken = sessionStorage.getItem(getStorageKey('sa_token'));
-  if (superAdminToken) {
-    config.headers.Authorization = `Bearer ${superAdminToken}`;
-  } else {
-    // Fall back to regular user token
-    const token = localStorage.getItem(getStorageKey('token'));
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+  const userToken = localStorage.getItem(getStorageKey('token'));
+
+  config.headers = config.headers ?? ({} as any);
+
+  if (superAdminToken && (isSuperAdminRoute || isBetaAdminRoute)) {
+    (config.headers as Record<string, string>)['X-Superadmin-Token'] = superAdminToken;
   }
+
+  if (userToken) {
+    (config.headers as Record<string, string>).Authorization = `Bearer ${userToken}`;
+  }
+
   return config;
 });
 
@@ -49,7 +60,9 @@ apiClient.interceptors.response.use(
 
       if (!isLoginRequest && !isLoginPage) {
         if (isSuperAdminPage) {
-          localStorage.removeItem('sa_token');
+          sessionStorage.removeItem(getStorageKey('sa_token'));
+          sessionStorage.removeItem(getStorageKey('sa_auth'));
+          sessionStorage.removeItem(getStorageKey('sa_expires_at'));
           if (window.location.pathname !== '/portal') {
             window.location.href = '/portal';
           }
@@ -529,6 +542,16 @@ const api = {
     description?: string;
     stepsToReproduce?: string;
     screenshotUrl?: string;
+    elementPath?: string;
+    elementSelector?: string;
+    elementNthChild?: number[];
+    elementSemanticLabel?: string;
+    elementBoundingBox?: {
+      top: number;
+      left: number;
+      width: number;
+      height: number;
+    };
   }): Promise<unknown> {
     const response = await apiClient.post('/beta/feedback', payload);
     return response.data;

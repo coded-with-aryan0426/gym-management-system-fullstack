@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Save, CheckCircle, Share2, Download } from 'lucide-react';
+import { X, Save, CheckCircle, Share2, Download, ExternalLink, Copy, MapPin } from 'lucide-react';
 import { format } from 'date-fns';
 import type { BetaFeedback, FeedbackStatus } from '../../types/feedback.types';
 import { betaFeedbackApi } from '../../services/api';
@@ -26,6 +26,7 @@ export const FeedbackDetailDrawer: React.FC<FeedbackDetailDrawerProps> = ({
     priorityScore: 0,
     adminNotes: '',
   });
+  const [showJsonPayload, setShowJsonPayload] = useState(false);
 
   useEffect(() => {
     if (feedback) {
@@ -239,6 +240,123 @@ ${feedbackId},"${(feedback.testerName || '').replace(/"/g, '""')}","${(feedback.
                       </div>
                     </div>
                   </section>
+
+                  {/* Element Information */}
+                  {feedback.elementPath && (
+                    <section className="info-section">
+                      <h3 className="section-title">
+                        <MapPin size={16} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
+                        Selected Element
+                      </h3>
+                      <div className="info-grid">
+                        <div className="info-item">
+                          <label>Semantic Label</label>
+                          <span>{feedback.elementSemanticLabel || '—'}</span>
+                        </div>
+                        <div className="info-item">
+                          <label>Element Path</label>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span className="code-text" style={{ fontSize: '11px', wordBreak: 'break-all', maxWidth: '300px' }}>
+                              {feedback.elementPath}
+                            </span>
+                            <button
+                              onClick={() => navigator.clipboard.writeText(feedback.elementPath || '')}
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                padding: '4px',
+                                color: '#3b82f6',
+                              }}
+                              title="Copy element path"
+                            >
+                              <Copy size={14} />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="info-item">
+                          <label>CSS Selector</label>
+                          <span className="code-text">{feedback.elementSelector || '—'}</span>
+                        </div>
+                        <div className="info-item">
+                          <label>Bounding Box</label>
+                          <span className="code-text">{feedback.elementBoundingBox || '—'}</span>
+                        </div>
+                      </div>
+                      <div style={{ marginTop: '12px', display: 'flex', gap: '8px' }}>
+                        <a
+                          href={`${feedback.pageRoute}?highlight=${encodeURIComponent(feedback.elementPath || '')}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="action-link"
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '8px 12px',
+                            background: 'rgba(59, 130, 246, 0.1)',
+                            color: '#3b82f6',
+                            borderRadius: '6px',
+                            fontSize: '12px',
+                            textDecoration: 'none',
+                          }}
+                        >
+                          <ExternalLink size={14} />
+                          View in Context
+                        </a>
+                        <button
+                          onClick={() => setShowJsonPayload(!showJsonPayload)}
+                          className="action-link"
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '8px 12px',
+                            background: 'rgba(139, 92, 246, 0.1)',
+                            color: '#8b5cf6',
+                            borderRadius: '6px',
+                            fontSize: '12px',
+                            border: 'none',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <Copy size={14} />
+                          {showJsonPayload ? 'Hide' : 'Show'} JSON
+                        </button>
+                      </div>
+                      {showJsonPayload && (
+                        <pre style={{
+                          marginTop: '12px',
+                          padding: '12px',
+                          background: 'rgba(0, 0, 0, 0.3)',
+                          borderRadius: '6px',
+                          fontSize: '11px',
+                          overflow: 'auto',
+                          maxHeight: '200px',
+                        }}>
+                          {JSON.stringify({
+                            page: feedback.pageRoute,
+                            section: feedback.section,
+                            elementPath: feedback.elementPath,
+                            elementSelector: feedback.elementSelector,
+                            elementSemanticLabel: feedback.elementSemanticLabel,
+                            elementBoundingBox: feedback.elementBoundingBox,
+                            severity: feedback.severity,
+                            category: feedback.category,
+                            subject: feedback.subject,
+                            description: feedback.description,
+                            tester: {
+                              name: feedback.testerName,
+                              email: feedback.testerEmail,
+                              role: feedback.testerRole,
+                            },
+                            browser: feedback.browser,
+                            screenSize: feedback.screenSize,
+                          }, null, 2)}
+                        </pre>
+                      )}
+                    </section>
+                  )}
 
                   {/* Edit Section */}
                   <section className="edit-section">

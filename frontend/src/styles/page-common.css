@@ -313,6 +313,11 @@
   justify-content: center;
 }
 
+.pg-stats--inline {
+  flex: 0 0 auto;
+  justify-content: flex-start;
+}
+
 .pg-stat-card {
   display: flex;
   align-items: center;
@@ -328,6 +333,21 @@
   font-family: inherit;
   overflow: hidden;
   white-space: nowrap;
+}
+
+.pg-stat-card--sm {
+  padding: 3px 8px;
+  gap: 4px;
+  border-radius: 8px;
+}
+
+.pg-stat-card--sm .pg-stat-card__value {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.pg-stat-card--sm .pg-stat-card__label {
+  font-size: 10px;
 }
 
 .pg-stat-card::after {
@@ -444,6 +464,21 @@
 .pg-stat-card__icon--rating {
   background: rgba(236, 72, 153, 0.12);
   color: #F9A8D4;
+}
+
+.pg-stat-card__icon--new {
+  background: rgba(6, 182, 212, 0.12);
+  color: #22d3ee;
+}
+
+.pg-stat-card__icon--progress {
+  background: rgba(139, 92, 246, 0.12);
+  color: #a78bfa;
+}
+
+.pg-stat-card__icon--resolved {
+  background: rgba(16, 185, 129, 0.12);
+  color: #6ee7b7;
 }
 
 .pg-stat-card__data {
@@ -1420,6 +1455,21 @@ body.light-mode {
   & .pg-stat-card__icon--rating {
     background: rgba(236, 72, 153, 0.1);
     color: #db2777;
+  }
+
+  & .pg-stat-card__icon--new {
+    background: rgba(6, 182, 212, 0.1);
+    color: #0891b2;
+  }
+
+  & .pg-stat-card__icon--progress {
+    background: rgba(139, 92, 246, 0.1);
+    color: #7c3aed;
+  }
+
+  & .pg-stat-card__icon--resolved {
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
   }
 
   /* Tabs */

@@ -95,6 +95,21 @@ public class BetaFeedback {
     @Builder.Default
     private String betaVersion = "1.0";
 
+    @Column(name = "element_path", length = 1000)
+    private String elementPath;
+
+    @Column(name = "element_selector", length = 500)
+    private String elementSelector;
+
+    @Column(name = "element_nth_child")
+    private String elementNthChild;
+
+    @Column(name = "element_semantic_label", length = 500)
+    private String elementSemanticLabel;
+
+    @Column(name = "element_bounding_box")
+    private String elementBoundingBox;
+
     @PrePersist
     protected void onCreate() {
         if (submittedAt == null) {
