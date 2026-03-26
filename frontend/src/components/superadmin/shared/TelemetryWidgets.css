@@ -1,0 +1,226 @@
+.telemetry-widget {
+  background: var(--sa-bg-secondary, #1c1c1f);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 14px;
+  transition: all 0.2s ease;
+}
+
+.telemetry-widget:hover {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.telemetry-widget--warning {
+  border-color: rgba(239, 68, 68, 0.3);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.1);
+  animation: pulse-warning 2s ease-in-out infinite;
+}
+
+@keyframes pulse-warning {
+  0%, 100% { box-shadow: 0 0 20px rgba(239, 68, 68, 0.1); }
+  50% { box-shadow: 0 0 30px rgba(239, 68, 68, 0.2); }
+}
+
+.telemetry-widget__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.telemetry-widget__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 6px;
+  color: #3b82f6;
+}
+
+.telemetry-widget--db .telemetry-widget__icon {
+  background: rgba(139, 92, 246, 0.1);
+  color: #8b5cf6;
+}
+
+.telemetry-widget--redis .telemetry-widget__icon {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.telemetry-widget__title {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  flex: 1;
+}
+
+.telemetry-widget__alert {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  letter-spacing: 0.05em;
+  animation: blink-alert 1s ease-in-out infinite;
+}
+
+@keyframes blink-alert {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.telemetry-widget__chart {
+  margin: 0 -4px;
+}
+
+.telemetry-widget__stats {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.telemetry-widget__stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.telemetry-widget__stat-label {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.35);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.telemetry-widget__stat-value {
+  font-size: 14px;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.telemetry-widget__footer {
+  margin-top: 8px;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.25);
+  text-align: right;
+}
+
+.telemetry-widget__gauge {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.telemetry-widget__gauge-svg {
+  width: 100%;
+  height: auto;
+}
+
+.telemetry-widget__gauge-value {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -20%);
+  text-align: center;
+}
+
+.telemetry-widget__gauge-number {
+  font-size: 22px;
+  font-weight: 800;
+  font-family: 'JetBrains Mono', monospace;
+  color: rgba(255, 255, 255, 0.95);
+  display: block;
+}
+
+.telemetry-widget__gauge-total {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.telemetry-widget__progress {
+  margin-top: 8px;
+}
+
+.telemetry-widget__progress-bar {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.telemetry-widget__progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.5s ease;
+}
+
+.telemetry-widget__progress-label {
+  display: block;
+  margin-top: 4px;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.35);
+  text-align: right;
+}
+
+.telemetry-widget__big-number {
+  font-size: 28px;
+  font-weight: 800;
+  font-family: 'JetBrains Mono', monospace;
+  line-height: 1;
+  margin-bottom: 12px;
+}
+
+.telemetry-widget__big-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.35);
+  margin-top: 4px;
+  letter-spacing: 0.03em;
+}
+
+.telemetry-widget__stats-row {
+  display: flex;
+  gap: 16px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.telemetry-widget__stat-inline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.telemetry-widget__stat-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.telemetry-widget__stat-dot--hit {
+  background: #22c55e;
+}
+
+.telemetry-widget__stat-dot--miss {
+  background: #ef4444;
+}
+
+.telemetry-widget__stat-inline .telemetry-widget__stat-label {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.telemetry-widget__stat-inline .telemetry-widget__stat-value {
+  font-size: 12px;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+}

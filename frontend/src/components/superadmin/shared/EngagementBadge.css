@@ -1,0 +1,52 @@
+.engagement-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.engagement-badge__emoji {
+  font-size: 12px;
+  line-height: 1;
+}
+
+.engagement-badge__score {
+  font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+}
+
+.engagement-badge__label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.engagement-badge--sm {
+  padding: 2px 6px;
+  gap: 3px;
+}
+
+.engagement-badge--sm .engagement-badge__emoji {
+  font-size: 10px;
+}
+
+.engagement-badge--sm .engagement-badge__score {
+  font-size: 10px;
+}
+
+.engagement-badge--lg {
+  padding: 6px 12px;
+  gap: 6px;
+}
+
+.engagement-badge--lg .engagement-badge__emoji {
+  font-size: 16px;
+}
+
+.engagement-badge--lg .engagement-badge__score {
+  font-size: 16px;
+}

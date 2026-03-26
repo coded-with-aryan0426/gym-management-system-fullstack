@@ -1,0 +1,145 @@
+.ledger-mismatch-alert {
+  position: relative;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, rgba(239, 68, 68, 0.08) 100%);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.ledger-mismatch-alert__container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  flex-wrap: wrap;
+}
+
+.ledger-mismatch-alert__content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ledger-mismatch-alert__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: rgba(239, 68, 68, 0.15);
+  border-radius: 10px;
+  color: #ef4444;
+  flex-shrink: 0;
+}
+
+.ledger-mismatch-alert__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ledger-mismatch-alert__title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #ef4444;
+}
+
+.ledger-mismatch-alert__description {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.ledger-mismatch-alert__time {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.ledger-mismatch-alert__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ledger-mismatch-alert__btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: none;
+}
+
+.ledger-mismatch-alert__btn--primary {
+  background: #ef4444;
+  color: white;
+}
+
+.ledger-mismatch-alert__btn--primary:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+.ledger-mismatch-alert__btn--primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.ledger-mismatch-alert__btn--ghost {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ledger-mismatch-alert__btn--ghost:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.ledger-mismatch-alert__spinner {
+  display: flex;
+}
+
+.ledger-mismatch-alert__details {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.ledger-mismatch-alert__details:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.ledger-mismatch-alert__pulse {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #ef4444, transparent);
+  pointer-events: none;
+}
+
+@media (max-width: 640px) {
+  .ledger-mismatch-alert__container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ledger-mismatch-alert__actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}

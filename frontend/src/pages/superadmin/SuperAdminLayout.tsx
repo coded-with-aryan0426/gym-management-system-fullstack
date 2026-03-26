@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import type { NavItem } from '../../components/Layout/CommandRail';
 import { superAdminApi } from '../../services/superAdminApi';
+import { SuperAdminProvider } from '../../contexts/SuperAdminContext';
 import '../../styles/unified-design-system.css';
 import './superadmin.css';
 
@@ -38,6 +39,7 @@ const SuperAdminLayout: React.FC<SuperAdminLayoutProps> = ({ children }) => {
         { path: '/superadmin/revenue', icon: <DollarSign size={20} />, label: 'Revenue', color: '#10b981' },
         { path: '/superadmin/errors', icon: <Bug size={20} />, label: 'Errors', color: '#ef4444' },
         { path: '/superadmin/feedback', icon: <MessageSquare size={20} />, label: 'Beta Feedback', color: '#ec4899' },
+        { path: '/superadmin/feedback-center', icon: <MessageSquare size={20} />, label: 'Feedback Center', color: '#f472b6' },
         { path: '/superadmin/features', icon: <ToggleRight size={20} />, label: 'Features', color: '#f59e0b' },
         { path: '/superadmin/security', icon: <Shield size={20} />, label: 'Security', color: '#06b6d4' },
         { path: '/superadmin/database', icon: <Database size={20} />, label: 'Database', color: '#a78bfa' },
@@ -45,9 +47,11 @@ const SuperAdminLayout: React.FC<SuperAdminLayoutProps> = ({ children }) => {
     ];
 
     return (
+        <SuperAdminProvider>
         <DashboardLayout navItems={navItems}>
             {children ? children : <Outlet />}
         </DashboardLayout>
+        </SuperAdminProvider>
     );
 };
 

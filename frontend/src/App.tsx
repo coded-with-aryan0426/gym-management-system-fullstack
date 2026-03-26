@@ -81,6 +81,7 @@ const SASecurity = lazy(() => import('./pages/superadmin/SASecurity'));
 const SADatabase = lazy(() => import('./pages/superadmin/SADatabase'));
 const SAAnalytics = lazy(() => import('./pages/superadmin/SAAnalytics'));
 const SABetaFeedback = lazy(() => import('./pages/superadmin/SABetaFeedback'));
+const SAFeedback = lazy(() => import('./pages/superadmin/SAFeedback'));
 const SAInsights = lazy(() => import('./pages/superadmin/SAInsights'));
 const SuperAdminPortal = lazy(() => import('./pages/superadmin/SuperAdminPortal'));
 
@@ -223,6 +224,7 @@ function App() {
                           <Route path="database" element={<SADatabase />} />
                           <Route path="analytics" element={<SAAnalytics />} />
                           <Route path="feedback" element={<SABetaFeedback />} />
+                          <Route path="feedback-center" element={<SAFeedback />} />
                           <Route path="beta-insights" element={<SAInsights />} />
                           <Route path="*" element={<Navigate to="/superadmin" replace />} />
                         </Routes>

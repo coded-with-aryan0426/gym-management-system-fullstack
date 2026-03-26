@@ -1,0 +1,118 @@
+.revenue-metric-card {
+  position: relative;
+  background: var(--sa-bg-secondary, #1c1c1f);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 16px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.revenue-metric-card--clickable {
+  cursor: pointer;
+}
+
+.revenue-metric-card--clickable:hover {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.revenue-metric-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.revenue-metric-card__label {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.revenue-metric-card__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+}
+
+.revenue-metric-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.revenue-metric-card__value {
+  font-size: 24px;
+  font-weight: 800;
+  font-family: 'JetBrains Mono', monospace;
+  color: rgba(255, 255, 255, 0.95);
+  letter-spacing: -0.02em;
+}
+
+.revenue-metric-card__change {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.revenue-metric-card__change--positive {
+  color: #10b981;
+}
+
+.revenue-metric-card__change--negative {
+  color: #ef4444;
+}
+
+.revenue-metric-card__change-label {
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 400;
+  margin-left: 4px;
+}
+
+.revenue-metric-card__accent {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  opacity: 0.6;
+}
+
+.revenue-metric-card--loading {
+  pointer-events: none;
+}
+
+.revenue-metric-card__skeleton {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+.revenue-metric-card__skeleton--label {
+  width: 60%;
+  height: 12px;
+  margin-bottom: 12px;
+}
+
+.revenue-metric-card__skeleton--value {
+  width: 80%;
+  height: 28px;
+  margin-bottom: 8px;
+}
+
+.revenue-metric-card__skeleton--change {
+  width: 40%;
+  height: 14px;
+}
+
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.8; }
+}

@@ -1,0 +1,116 @@
+.feature-flags-pills {
+  width: 100%;
+}
+
+.feature-flags-pills__container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.feature-flags-pills__loading {
+  display: flex;
+  gap: 8px;
+}
+
+.feature-flag-skeleton {
+  width: 80px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 14px;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.8; }
+}
+
+.feature-flag-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 14px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  background: transparent;
+  white-space: nowrap;
+}
+
+.feature-flag-pill:hover {
+  transform: translateY(-1px);
+}
+
+.feature-flag-pill__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.feature-flag-pill__label {
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.feature-flag-pill__percentage {
+  font-size: 9px;
+  opacity: 0.8;
+}
+
+.feature-flag-pill__link {
+  opacity: 0;
+  margin-left: 2px;
+  transition: opacity 0.15s ease;
+}
+
+.feature-flag-pill:hover .feature-flag-pill__link {
+  opacity: 0.6;
+}
+
+.feature-flag-pill--enabled {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.25);
+  color: #10b981;
+}
+
+.feature-flag-pill--enabled:hover {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+.feature-flag-pill--disabled {
+  background: rgba(107, 114, 128, 0.1);
+  border-color: rgba(107, 114, 128, 0.2);
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.feature-flag-pill--disabled:hover {
+  background: rgba(107, 114, 128, 0.15);
+}
+
+.feature-flag-pill--canary {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.25);
+  color: #f59e0b;
+}
+
+.feature-flag-pill--canary:hover {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.35);
+}
+
+.feature-flag-pill--more {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.feature-flag-pill--more:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
+}

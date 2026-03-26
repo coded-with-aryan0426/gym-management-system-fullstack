@@ -1,0 +1,70 @@
+.cross-gym-affiliation {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+
+.cross-gym-affiliation--empty {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.3);
+  font-style: italic;
+}
+
+.cross-gym-affiliation__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 6px;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 4px;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.7);
+  transition: all 0.15s ease;
+}
+
+.cross-gym-affiliation__pill:hover {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.cross-gym-affiliation__pill--primary {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.25);
+  color: #10b981;
+}
+
+.cross-gym-affiliation__name {
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cross-gym-affiliation__primary-badge {
+  color: #10b981;
+  font-size: 8px;
+}
+
+.cross-gym-affiliation__more {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 5px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+}
+
+.cross-gym-affiliation--sm .cross-gym-affiliation__pill {
+  padding: 1px 4px;
+  font-size: 9px;
+}
+
+.cross-gym-affiliation--sm .cross-gym-affiliation__name {
+  max-width: 60px;
+}

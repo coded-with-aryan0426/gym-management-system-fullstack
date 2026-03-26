@@ -4,7 +4,7 @@ import {
     LayoutDashboard, TrendingUp, TrendingDown, Users, Building2,
     DollarSign, Activity, X, AlertTriangle, CheckCircle2, Shield,
     Clock, Zap, Eye, Bell, ChevronRight, Server, Wifi, WifiOff,
-    RefreshCw, Globe, HardDrive, Download
+    RefreshCw, Globe, HardDrive, Download, Command
 } from 'lucide-react';
 import {
     AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip,
@@ -20,7 +20,16 @@ import {
     StatusBadge,
     FilterBar,
     DetailDrawer,
-    type Column
+    ActivityStreamTerminal,
+    CommandPalette,
+    ApiLatencyWidget,
+    DbConnectionsWidget,
+    RedisHitRatioWidget,
+    FeatureFlagsPills,
+    ChurnRiskWidget,
+    type Column,
+    type ActivityEvent,
+    type Command as CommandType
 } from '../../components/superadmin/shared';
 
 type KPI = {
@@ -48,6 +57,10 @@ const SADashboard: React.FC = () => {
     const [showAuditModal, setShowAuditModal] = useState(false);
     const [fullAuditLogs, setFullAuditLogs] = useState<SuperAdminAuditLogEntry[]>([]);
     const [loadingAudit, setLoadingAudit] = useState(false);
+    const [showCommandPalette, setShowCommandPalette] = useState(false);
+    const [activityEvents, setActivityEvents] = useState<ActivityEvent[]>([]);
+    const [telemetryData, setTelemetryData] = useState<{ timestamp: string; value: number }[]>([]);
+    const [featureFlags, setFeatureFlags] = useState<{ id: string; key: string; name: string; enabled: boolean; rolloutPercentage?: number }[]>([]);
 
     const openAuditModal = async () => {
         setShowAuditModal(true);
@@ -76,8 +89,32 @@ const SADashboard: React.FC = () => {
     };
 
     useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                setShowCommandPalette(true);
+            }
+        };
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, []);
+
+    useEffect(() => {
         loadDashboard();
     }, []);
+
+    const commands: CommandType[] = [
+        { id: 'refresh', type: 'action', label: 'Refresh Dashboard', icon: <RefreshCw size={16} />, action: () => loadDashboard(), keywords: ['refresh', 'reload', 'update'], group: 'Actions' },
+        { id: 'clear-cache', type: 'action', label: 'Clear Cache', icon: <Zap size={16} />, action: () => console.log('Clear cache'), keywords: ['cache', 'clear', 'flush'], group: 'Actions' },
+        { id: 'export', type: 'action', label: 'Export Data', icon: <Download size={16} />, action: () => console.log('Export'), keywords: ['export', 'download', 'backup'], group: 'Actions' },
+        { id: 'nav-dashboard', type: 'navigation', label: 'Go to Dashboard', icon: <LayoutDashboard size={16} />, action: () => {}, keywords: ['dashboard', 'home', 'main'], group: 'Navigation' },
+        { id: 'nav-gyms', type: 'navigation', label: 'Go to Gyms', icon: <Building2 size={16} />, action: () => {}, keywords: ['gyms', 'gym', 'clubs'], group: 'Navigation' },
+        { id: 'nav-users', type: 'navigation', label: 'Go to Users', icon: <Users size={16} />, action: () => {}, keywords: ['users', 'members', 'people'], group: 'Navigation' },
+        { id: 'nav-errors', type: 'navigation', label: 'Go to Errors', icon: <AlertTriangle size={16} />, action: () => {}, keywords: ['errors', 'issues', 'bugs'], group: 'Navigation' },
+        { id: 'nav-revenue', type: 'navigation', label: 'Go to Revenue', icon: <DollarSign size={16} />, action: () => {}, keywords: ['revenue', 'money', 'payments'], group: 'Navigation' },
+        { id: 'show-services', type: 'action', label: 'Show Service Status', icon: <Server size={16} />, action: () => setShowServicesModal(true), keywords: ['services', 'status', 'health'], group: 'Actions' },
+        { id: 'show-audit', type: 'action', label: 'Show Audit Log', icon: <Eye size={16} />, action: () => openAuditModal(), keywords: ['audit', 'logs', 'history'], group: 'Actions' },
+    ];
 
     const kpiData: KPI[] = dashboardData ? [
         {
@@ -165,7 +202,8 @@ const SADashboard: React.FC = () => {
             )}
 
             {/* KPI Cards - New Component System */}
-            <MetricGrid columns={4} gap="md" style={{ marginBottom: 16 }}>
+            <div style={{ marginBottom: 16 }}>
+            <MetricGrid columns={4} gap="md">
                 {kpiData.map((kpi, i) => (
                     <motion.div
                         key={kpi.label}
@@ -187,6 +225,7 @@ const SADashboard: React.FC = () => {
                     </motion.div>
                 ))}
             </MetricGrid>
+            </div>
 
             {/* Uptime Bar */}
             <div className="sa__card" style={{ marginBottom: 16 }}>
@@ -320,6 +359,58 @@ const SADashboard: React.FC = () => {
                     ))}
                 </div>
             </div>
+
+            {/* ═══════════ NEW ENHANCED SECTIONS ═══════════ */}
+
+            {/* Telemetry Widgets Row */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 16 }}>
+                <ApiLatencyWidget
+                    data={telemetryData.length > 0 ? telemetryData : responseTrend.map((d) => ({ timestamp: d.t, value: d.avg || 0 }))}
+                    threshold={800}
+                    unit="ms"
+                    isLoading={loading}
+                />
+                <DbConnectionsWidget
+                    active={Math.floor(Math.random() * 30) + 10}
+                    total={100}
+                    threshold={80}
+                    isLoading={loading}
+                />
+                <RedisHitRatioWidget
+                    hits={Math.floor(Math.random() * 9000) + 1000}
+                    misses={Math.floor(Math.random() * 500) + 100}
+                    threshold={80}
+                    isLoading={loading}
+                />
+            </div>
+
+            {/* Activity Stream Terminal */}
+            <div style={{ marginBottom: 16 }}>
+                <ActivityStreamTerminal
+                    events={activityEvents}
+                    autoScroll={true}
+                    maxEvents={50}
+                />
+            </div>
+
+            {/* Feature Flags Pills */}
+            <div style={{ marginBottom: 16 }}>
+                <FeatureFlagsPills
+                    flags={featureFlags}
+                    maxDisplay={8}
+                    isLoading={loading}
+                />
+            </div>
+
+            {/* Command Palette Trigger */}
+            <button
+                className="sa__btn sa__btn--ghost"
+                onClick={() => setShowCommandPalette(true)}
+                style={{ position: 'fixed', bottom: 24, right: 24, borderRadius: 12, padding: '12px 16px', boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}
+            >
+                <Command size={16} style={{ marginRight: 8 }} />
+                Cmd+K
+            </button>
 
             {/* ═══════════ MODALS ═══════════ */}
             <AnimatePresence>
@@ -620,6 +711,14 @@ const SADashboard: React.FC = () => {
                         </motion.div>
                     </motion.div>
                 )}
+
+                {/* ── Command Palette ── */}
+                <CommandPalette
+                    isOpen={showCommandPalette}
+                    onClose={() => setShowCommandPalette(false)}
+                    commands={commands}
+                    placeholder="Type a command or search..."
+                />
 
             </AnimatePresence>
         </div>

@@ -1,0 +1,141 @@
+.churn-risk-widget {
+  background: var(--sa-bg-secondary, #1c1c1f);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.churn-risk-widget__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.churn-risk-widget__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  background: rgba(245, 158, 11, 0.1);
+  border-radius: 6px;
+  color: #f59e0b;
+}
+
+.churn-risk-widget__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.churn-risk-widget__count {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-left: auto;
+}
+
+.churn-risk-widget__subtitle {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.35);
+  margin-bottom: 14px;
+  padding-left: 34px;
+}
+
+.churn-risk-widget__loading {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+.churn-risk-skeleton {
+  height: 40px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 6px;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+.churn-risk-widget__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 32px 16px;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 12px;
+}
+
+.churn-risk-widget__empty-icon {
+  color: #10b981;
+  opacity: 0.5;
+}
+
+.churn-risk-cell__name {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.churn-risk-cell__city {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.35);
+  margin-top: 2px;
+}
+
+.churn-risk-drop {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.churn-risk-drop__icon {
+  color: #ef4444;
+}
+
+.churn-risk-drop__value {
+  font-size: 12px;
+  font-weight: 700;
+  color: #ef4444;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.churn-risk-stat {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.6);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.churn-risk-login {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.churn-risk-contact-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 6px;
+  color: #3b82f6;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.churn-risk-contact-btn:hover {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.3);
+}

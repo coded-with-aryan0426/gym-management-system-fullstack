@@ -6,6 +6,10 @@ import {
     Shield, Smartphone, Globe, Calendar, History, Info, RefreshCw
 } from 'lucide-react';
 import { superAdminApi, SuperAdminFeatureFlag } from '../../services/superAdminApi';
+import { ToggleSwitch } from '../../components/superadmin/shared/ToggleSwitch';
+import { PercentageRolloutSlider, RolloutStrategy } from '../../components/superadmin/shared/PercentageRolloutSlider';
+import { CriticalFlagConfirmModal } from '../../components/superadmin/shared/CriticalFlagConfirmModal';
+import { ImpactCounter } from '../../components/superadmin/shared/ImpactCounter';
 
 type Flag = SuperAdminFeatureFlag & {
     id?: string;
@@ -205,11 +209,11 @@ const SAFeatureFlags: React.FC = () => {
                             {flag.critical && (
                                 <span className="sa__badge sa__badge--red" style={{ fontSize: 9, marginRight: 8 }}>CRITICAL</span>
                             )}
-                            <label className="sa__toggle" onClick={e => { e.stopPropagation(); handleToggle(flag); }}>
-                                <input type="checkbox" checked={flag.enabled} readOnly />
-                                <span className="sa__toggle-track" />
-                                <span className="sa__toggle-thumb" />
-                            </label>
+                            <ToggleSwitch
+                                checked={flag.enabled}
+                                onChange={() => handleToggle(flag)}
+                                size="sm"
+                            />
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6, cursor: 'pointer' }} onClick={() => { setSelectedFlag(flag); setDetailTab('settings'); }}>
                             <div className="sa__flag-name">{flag.name}</div>
@@ -251,8 +255,20 @@ const SAFeatureFlags: React.FC = () => {
             {/* ═══════════ MODALS ═══════════ */}
             <AnimatePresence>
 
-                {/* ── Toggle Confirmation Modal ── */}
-                {showToggleConfirm && (
+                {/* ── Critical Flag Confirmation Modal ── */}
+                {showToggleConfirm && showToggleConfirm.flag.critical && (
+                    <CriticalFlagConfirmModal
+                        isOpen={true}
+                        onClose={() => setShowToggleConfirm(null)}
+                        onConfirm={confirmToggle}
+                        flagName={showToggleConfirm.flag.name}
+                        flagKey={showToggleConfirm.flag.key}
+                        newState={showToggleConfirm.newState}
+                    />
+                )}
+
+                {/* ── Standard Toggle Confirmation Modal ── */}
+                {showToggleConfirm && !showToggleConfirm.flag.critical && (
                     <motion.div className="sa__modal-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowToggleConfirm(null)}>
                         <motion.div className="sa__modal" style={{ width: 480 }} initial={{ opacity: 0, scale: 0.92, y: 30 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.92, y: 30 }} transition={{ type: 'spring', damping: 28, stiffness: 380 }} onClick={e => e.stopPropagation()}>
                             <div className="sa__modal-header">
@@ -269,10 +285,10 @@ const SAFeatureFlags: React.FC = () => {
                                 </div>
 
                                 <div className="sa__modal-section-title">Impact</div>
-                                <div className="sa__stat-row"><span className="sa__stat-label">Users Affected</span><span className="sa__stat-value">{showToggleConfirm.flag.usersAffected.toLocaleString()}</span></div>
-                                <div className="sa__stat-row"><span className="sa__stat-label">Gyms Affected</span><span className="sa__stat-value">{showToggleConfirm.flag.gymsAffected}</span></div>
-                                <div className="sa__stat-row"><span className="sa__stat-label">Current Rollout</span><span className="sa__stat-value">{showToggleConfirm.flag.rollout}%</span></div>
-                                <div className="sa__stat-row"><span className="sa__stat-label">Strategy</span><span className="sa__stat-value">{strategyLabel(showToggleConfirm.flag.strategy)}</span></div>
+                                <div className="sa__stat-row"><span className="sa__stat-label">Users Affected</span><span className="sa__stat-value">{(showToggleConfirm.flag.usersAffected ?? 0).toLocaleString()}</span></div>
+                                <div className="sa__stat-row"><span className="sa__stat-label">Gyms Affected</span><span className="sa__stat-value">{showToggleConfirm.flag.gymsAffected ?? 0}</span></div>
+                                <div className="sa__stat-row"><span className="sa__stat-label">Current Rollout</span><span className="sa__stat-value">{showToggleConfirm.flag.rollout ?? 0}%</span></div>
+                                <div className="sa__stat-row"><span className="sa__stat-label">Strategy</span><span className="sa__stat-value">{strategyLabel(showToggleConfirm.flag.strategy || 'disabled')}</span></div>
                             </div>
                             <div className="sa__modal-footer">
                                 <button className="sa__btn sa__btn--ghost sa__btn--sm" onClick={() => setShowToggleConfirm(null)}>Cancel</button>
@@ -338,47 +354,55 @@ const SAFeatureFlags: React.FC = () => {
                                             </div>
                                         </div>
 
-                                        {/* Rollout Slider */}
+                                        {/* Impact Counter */}
                                         <div style={{ marginBottom: 20 }}>
-                                            <div className="sa__modal-section-title">Rollout Percentage</div>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                                                <input
-                                                    type="range" min={0} max={100} value={selectedFlag.rolloutPercentage}
-                                                    onChange={() => { }}
-                                                    style={{ flex: 1, accentColor: '#3b82f6' }}
-                                                />
-                                                <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', minWidth: 40, textAlign: 'right' }}>{selectedFlag.rolloutPercentage}%</span>
-                                            </div>
+                                            <ImpactCounter
+                                                usersAffected={selectedFlag.usersAffected ?? 0}
+                                                gymsAffected={selectedFlag.gymsAffected ?? 0}
+                                                totalUsers={50000}
+                                                totalGyms={500}
+                                            />
                                         </div>
 
-                                        {/* Strategy */}
+                                        {/* Rollout Slider */}
                                         <div style={{ marginBottom: 20 }}>
-                                            <div className="sa__modal-section-title">Rollout Strategy</div>
-                                            <div style={{ display: 'flex', gap: 6 }}>
-                                                {[
-                                                    { value: 'all', label: 'All Users', icon: Globe },
-                                                    { value: 'percentage', label: 'Percentage', icon: Users },
-                                                    { value: 'gym-whitelist', label: 'Gym Whitelist', icon: Building2 },
-                                                    { value: 'disabled', label: 'Disabled', icon: Shield },
-                                                ].map(s => (
-                                                    <button
-                                                        key={s.value}
-                                                        className={`sa__btn ${selectedFlag.strategy === s.value ? 'sa__btn--primary' : 'sa__btn--ghost'} sa__btn--sm`}
-                                                        style={{ flex: 1 }}
-                                                    >
-                                                        <s.icon size={12} /> {s.label}
-                                                    </button>
-                                                ))}
-                                            </div>
+                                            <PercentageRolloutSlider
+                                                value={selectedFlag.rolloutPercentage}
+                                                onChange={(value) => {
+                                                    setFlags(prev => prev.map(f =>
+                                                        f.key === selectedFlag.key
+                                                            ? { ...f, rolloutPercentage: value }
+                                                            : f
+                                                    ));
+                                                    setSelectedFlag(prev => prev ? { ...prev, rolloutPercentage: value } : null);
+                                                }}
+                                                strategy={(selectedFlag.strategy || 'disabled') as RolloutStrategy}
+                                                onStrategyChange={(strategy) => {
+                                                    const strategyMap: Record<RolloutStrategy, string> = {
+                                                        'global': 'all',
+                                                        'percentage': 'percentage',
+                                                        'gym-specific': 'gym-whitelist',
+                                                        'admin-only': 'admin-only'
+                                                    };
+                                                    setFlags(prev => prev.map(f =>
+                                                        f.key === selectedFlag.key
+                                                            ? { ...f, strategy: strategyMap[strategy] }
+                                                            : f
+                                                    ));
+                                                    setSelectedFlag(prev => prev ? { ...prev, strategy: strategyMap[strategy] } : null);
+                                                }}
+                                                totalUsers={50000}
+                                                totalGyms={500}
+                                            />
                                         </div>
 
                                         {/* Gym whitelist */}
                                         {selectedFlag.strategy === 'gym-whitelist' && (
                                             <div>
-                                                <div className="sa__modal-section-title">Whitelisted Gyms ({selectedFlag.gyms.length})</div>
+                                                <div className="sa__modal-section-title">Whitelisted Gyms ({(selectedFlag.gyms ?? []).length})</div>
                                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                                                     {ALL_GYMS.map(g => {
-                                                        const isSelected = selectedFlag.gyms.includes(g);
+                                                        const isSelected = (selectedFlag.gyms ?? []).includes(g);
                                                         return (
                                                             <button key={g} className={`sa__btn ${isSelected ? 'sa__btn--primary' : 'sa__btn--ghost'} sa__btn--sm`}>
                                                                 <Building2 size={10} /> {g}

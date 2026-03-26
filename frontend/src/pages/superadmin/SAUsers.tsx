@@ -10,6 +10,12 @@ import {
     ResponsiveContainer, BarChart, Bar, Cell, XAxis, YAxis, Tooltip
 } from 'recharts';
 import { superAdminApi, SuperAdminUser, SuperAdminUserTelemetry } from '../../services/superAdminApi';
+import {
+    EngagementBadge,
+    CrossGymAffiliation,
+    GhostAccountsFilter,
+    ActivityHeatmap
+} from '../../components/superadmin/shared';
 
 type User = SuperAdminUser;
 type UserDetail = SuperAdminUserTelemetry;

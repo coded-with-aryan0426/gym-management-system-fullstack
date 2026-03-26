@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Bug, AlertCircle, AlertTriangle, Info, X, Download,
@@ -10,8 +10,28 @@ import {
     AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer
 } from 'recharts';
 
-import { useEffect } from 'react';
 import { superAdminApi, type SuperAdminError } from '../../services/superAdminApi';
+
+function useContainerDimensions(containerRef: React.RefObject<HTMLDivElement | null>) {
+    const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+
+    useEffect(() => {
+        const measure = () => {
+            if (containerRef.current) {
+                const { width, height } = containerRef.current.getBoundingClientRect();
+                setDimensions({ width, height });
+            }
+        };
+        measure();
+        const observer = new ResizeObserver(measure);
+        if (containerRef.current) {
+            observer.observe(containerRef.current);
+        }
+        return () => observer.disconnect();
+    }, [containerRef]);
+
+    return dimensions;
+}
 
 const ERROR_TREND = [
     { d: 'Feb 9', critical: 2, warning: 8, info: 15 },
@@ -24,6 +44,8 @@ const ERROR_TREND = [
 ];
 
 const SAErrors: React.FC = () => {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const dimensions = useContainerDimensions(containerRef);
     const [search, setSearch] = useState('');
     const [severityFilter, setSeverityFilter] = useState<string>('all');
     const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -73,7 +95,7 @@ const SAErrors: React.FC = () => {
     const statusColor = (s: string) => s === 'open' ? 'red' : s === 'investigating' ? 'amber' : s === 'resolved' ? 'green' : 'gray';
 
     return (
-        <div className="sa">
+        <div className="sa" ref={containerRef}>
             <header className="sa__header">
                 <div className="sa__header-left">
                     <h1>Error Tracker</h1>
@@ -115,6 +137,7 @@ const SAErrors: React.FC = () => {
                     </div>
                 </div>
                 <div style={{ height: 150 }}>
+                    {dimensions.width > 0 && dimensions.height > 0 ? (
                     <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={ERROR_TREND} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
                             <defs>
@@ -129,6 +152,7 @@ const SAErrors: React.FC = () => {
                             <Area type="monotone" dataKey="info" stroke="#3b82f6" strokeWidth={1} fill="none" dot={false} />
                         </AreaChart>
                     </ResponsiveContainer>
+                    ) : <div style={{ height: '100%', minHeight: 150 }} />}
                 </div>
                 <div style={{ display: 'flex', gap: 16, justifyContent: 'center', marginTop: 8 }}>
                     {[{ label: 'Critical', color: '#ef4444' }, { label: 'Warning', color: '#f59e0b' }, { label: 'Info', color: '#3b82f6' }].map(l => (

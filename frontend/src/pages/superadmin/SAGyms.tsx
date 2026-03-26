@@ -11,6 +11,12 @@ import {
     ResponsiveContainer, BarChart, Bar, Cell
 } from 'recharts';
 import { superAdminApi, SuperAdminGym, SuperAdminGymDeepDive } from '../../services/superAdminApi';
+import {
+    GymHealthScore,
+    RevenueLeakageBadge,
+    InlineSparkline,
+    OwnerActivityStatus
+} from '../../components/superadmin/shared';
 
 type Gym = SuperAdminGym;
 type GymDetail = SuperAdminGymDeepDive;
@@ -181,20 +187,28 @@ const SAGyms: React.FC = () => {
                 <table className="sa__table">
                     <thead>
                         <tr>
+                            <th style={{ width: 60 }}>Health</th>
                             <th>Gym Name</th>
                             <th>Owner</th>
                             <th>Plan</th>
                             <th>Status</th>
-                            <th>Health</th>
                             <th>Members</th>
                             <th>Rev/mo</th>
-                            <th>Growth</th>
-                            <th>Last Active</th>
+                            <th>7-Day Trend</th>
+                            <th>Owner Activity</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
                         {filtered.map(gym => (
                             <tr key={gym.id} onClick={() => { handleGymClick(gym); setDetailTab('overview'); }}>
+                                <td>
+                                    <GymHealthScore
+                                        score={gym.healthScore}
+                                        size={40}
+                                        strokeWidth={3}
+                                    />
+                                </td>
                                 <td style={{ fontWeight: 600 }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                                         <Building2 size={14} style={{ color: '#3b82f6', flexShrink: 0 }} />
@@ -209,23 +223,30 @@ const SAGyms: React.FC = () => {
                                 <td style={{ fontSize: 12 }}>{gym.owner}</td>
                                 <td><span className={`sa__badge sa__badge--${planColor(gym.plan)}`}>{gym.plan}</span></td>
                                 <td><span className={`sa__badge sa__badge--${statusColor(gym.status)}`}>{gym.status}</span></td>
-                                <td>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                        <div style={{ width: 32, height: 4, borderRadius: 2, background: 'var(--bg-active)' }}>
-                                            <div style={{ width: `${gym.healthScore}%`, height: '100%', borderRadius: 2, background: healthColor(gym.healthScore) }} />
-                                        </div>
-                                        <span style={{ fontSize: 11, fontWeight: 600, color: healthColor(gym.healthScore) }}>{gym.healthScore}</span>
-                                    </div>
-                                </td>
                                 <td>{gym.members.toLocaleString()}</td>
                                 <td>${gym.revenue.toLocaleString()}</td>
                                 <td>
-                                    <span style={{ fontSize: 11, fontWeight: 600, color: gym.growth >= 0 ? '#22c55e' : '#ef4444', display: 'flex', alignItems: 'center', gap: 2 }}>
-                                        {gym.growth >= 0 ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
-                                        {gym.growth > 0 ? '+' : ''}{gym.growth}%
-                                    </span>
+                                    <InlineSparkline
+                                        values={[12, 19, 15, 22, 18, 25, 21]}
+                                        width={60}
+                                        height={24}
+                                        showTrend={true}
+                                    />
                                 </td>
-                                <td style={{ color: 'var(--text-muted)', fontSize: 11 }}>{gym.lastActive}</td>
+                                <td>
+                                    <OwnerActivityStatus
+                                        lastLogin={gym.lastActive}
+                                        size="sm"
+                                    />
+                                </td>
+                                <td>
+                                    {(gym as any).hasRevenueLeakage && (
+                                        <RevenueLeakageBadge
+                                            amount={(gym as any).stuckAmount || 0}
+                                            failedPayments={(gym as any).failedPayments || 0}
+                                        />
+                                    )}
+                                </td>
                             </tr>
                         ))}
                     </tbody>

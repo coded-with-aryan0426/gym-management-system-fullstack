@@ -1,0 +1,98 @@
+.blast-radius {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid;
+  font-size: 12px;
+  transition: all 0.15s ease;
+}
+
+.blast-radius--clickable {
+  cursor: pointer;
+}
+
+.blast-radius__count {
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.blast-radius__label {
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 500;
+}
+
+.blast-radius__sep {
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 10px;
+}
+
+.blast-radius--expanded {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  min-width: 200px;
+}
+
+.blast-radius__header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.blast-radius__severity {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.blast-radius__stats {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.blast-radius__stat {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.blast-radius__stat-icon {
+  opacity: 0.7;
+}
+
+.blast-radius__stat-value {
+  font-size: 14px;
+  font-weight: 800;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.blast-radius__stat-label {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.4);
+  margin-left: 2px;
+}
+
+.blast-radius__divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.blast-radius__impact-bar {
+  width: 100%;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.blast-radius__impact-fill {
+  height: 100%;
+  border-radius: 2px;
+}

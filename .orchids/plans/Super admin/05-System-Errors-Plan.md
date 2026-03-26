@@ -1,42 +1,319 @@
-# 05: Super Admin System Errors Plan (Creator Edition)
+# 05: Super Admin System Errors Plan
 
 ## 1. Ultimate Goal
-Transform `SAErrors.tsx` into a real-time command center mimicking Sentry or Datadog. As the developer, you shouldn't have to SSH into a Linux server and run `tail -f logs/debug.log` to see why a user's app just crashed. The UI must aggressively capture and organize both frontend and backend panics instantly.
 
-## 2. Advanced Creator & Business Insights (What's Missing)
-*   **The "Blast Radius" Indicator:**
-    *   For every unique error (e.g., `NullPointerException at Checkout`), show a badge calculating how many *distinct users* and *distinct gyms* experienced this exact stack trace today.
-    *   *UI Execution:* A pill next to the error title: `[🔥 IMPACT: 42 Users across 3 Gyms]`.
-*   **"AI Stacktrace Summarizer" (Optional Hook):**
-    *   Reading 100 lines of Java stack traces is tedious. Add a magic wand icon: "Explain this Crash". It sends the stack trace to an LLM endpoint which returns a 1-sentence plain English summary: *"The database sequence for Booking IDs ran out of numbers."*
+Transform `SAErrors.tsx` into a real-time command center mimicking Sentry or Datadog. The operator should never need to SSH into servers to debug crashes. The UI must aggressively capture and organize both frontend and backend panics instantly with actionable insights.
 
-## 3. UI/UX Interactive Micro-Details & Layout
-*   **Error Feed Badges:**
-    *   `FATAL`: Deep red background, pulsing animation (`@keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); } 70% { box-shadow: 0 0 0 6px rgba(239,68,68,0); } }`). 
-    *   `ERROR`: Standard red badge.
-    *   `WARN`: Amber/Yellow badge `#F59E0B`.
-*   **Stack Trace Accordion (The Console Look):**
-    *   Clicking an error row expands an accordion smoothly.
-    *   Inside, render the raw Java/Node stack trace in a `<pre><code className="language-java">` block equipped with `Prism.js` syntax highlighting over a pitch-black `#000000` background.
-*   **"Copy Trace" & "Mark Resolved" Actions:**
-    *   *Copy Icon:* `Copy`. Uses `navigator.clipboard.writeText(...)`. Icon swaps instantly to a green `Check` mark for 2 seconds.
-    *   *Resolve Icon:* `CheckCircle2` (Green). Clicking strikes through the error title, fades the row's opacity to `0.4`, and slides it out of the active feed using Framer Motion.
+---
 
-## 4. Frontend Implementation & State Management Gaps
-*   **Client-Side React Crash Catching (The Missing Link):**
-    *   Currently, if the frontend React DOM crashes, the screen goes white and you (the creator) never know about it.
-    *   *Fix:* The top-level `App.tsx` MUST wrap the entire routing tree in an `ErrorBoundary`. 
-    *   In `componentDidCatch(error, info)`, it fires an un-authenticated POST request to `/api/v1/telemetry/client-error` including the user's OS (`navigator.userAgent`), window size, and the React component stack. The Super Admin error feed then displays these client-side bugs alongside backend database bugs.
+## 2. Current Page Analysis
 
-## 5. Backend Architectural Gaps & Implementation
-*   **Global Exception Interception (The Gap):**
-    *   *Fix:* Implement a Spring `@ControllerAdvice`.
-    *   Override methods for `Exception.class`. When an unhandled 500 Internal Server Error occurs, the Advice must catch it, extract the stack trace via `ExceptionUtils.getStackTrace(e)`, grab the requested URL, grab the user's JWT ID (if present to determine Blast Radius), and save all of this asynchronously (`@Async`) to the `system_error_logs` table.
-    *   *CRITICAL SECURITY:* Strip all plaintext passwords, Authorization headers, or credit card PAN numbers from the HTTP request payloads *before* logging them to the DB.
+### 2.1 File Location
+`/Users/aryan/Sem 8/Intership/frontend/src/pages/superadmin/SAErrors.tsx`
 
-## 6. Database Strategy & Extreme Performance
-*   **Storage Ballooning Crash (The 50KB Rule):**
-    *   Storing 50KB stack traces for 10,000 errors a day will crash the Neon PostgreSQL database storage within a month, taking down the entire Titan platform.
-    *   *Fix:* The `system_error_logs` table MUST have a strict data retention policy.
-    *   *Implementation:* A nightly Spring Boot `@Scheduled` cron job executes: `DELETE FROM system_error_logs WHERE created_at < NOW() - INTERVAL '30 days' AND status = 'RESOLVED';`
-    *   Create a partial index: `CREATE INDEX idx_errors_resolved_old ON system_error_logs (created_at) WHERE status = 'RESOLVED';` to make pruning instantaneous.
+### 2.2 Current Implementation
+- Error trend chart (7-day area chart)
+- Error list with severity filtering
+- Error details expandable accordion
+- Error count KPIs (total, critical, open, resolved)
+
+### 2.3 Identified Issues
+| Issue | Severity | Impact |
+|-------|----------|--------|
+| Recharts dimension warnings | Medium | Visual glitches on load |
+| No real-time feed | High | Must refresh manually |
+| No blast radius calculation | Medium | Can't prioritize fixes |
+| No AI stacktrace summarization | Low | Nice to have |
+| No client-side crash catching | High | Missing React errors |
+
+---
+
+## 3. Enhanced Features Specification
+
+### 3.1 The "Blast Radius" Indicator
+
+#### Calculation
+- Count distinct users affected
+- Count distinct gyms affected
+- Group by identical stack trace
+
+#### Visual Display
+```
+┌────────────────────────────────────────────────────────────┐
+│ NullPointerException at CheckoutController        [IMPACT] │
+│ 🔥 42 Users across 3 Gyms                                  │
+└────────────────────────────────────────────────────────────┘
+```
+
+### 3.2 Real-Time Error Feed (SSE)
+
+#### Event Types
+| Type | Severity | Visual |
+|------|---------|-------|
+| FATAL | Critical | Pulsing red badge |
+| ERROR | Error | Standard red badge |
+| WARN | Warning | Amber badge |
+| INFO | Low | Gray badge |
+
+#### Feed Behavior
+- New errors slide in from top
+- Auto-pause when scrolling up
+- Click to expand stack trace
+- "Resume" button to catch up
+
+### 3.3 Stack Trace Accordion
+
+#### Display
+- Monospace font in `<pre><code>` block
+- Syntax highlighting (Prism.js)
+- Pitch-black background (`#000000`)
+- Line numbers
+- Collapsible (show first 10 lines, expand all)
+
+#### Actions
+- "Copy Trace" - clipboard with check confirmation
+- "Mark Resolved" - strikethrough + fade out animation
+- "View in Logs" - link to log aggregator
+
+### 3.4 Client-Side React Error Catching
+
+#### Error Boundary Implementation
+```typescript
+class ReactErrorBoundary extends React.Component {
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    // Extract component stack
+    const componentStack = info.componentStack || '';
+
+    // Fire to backend
+    apiClient.post('/api/superadmin/telemetry/client-error', {
+      message: error.message,
+      stack: error.stack,
+      componentStack,
+      userAgent: navigator.userAgent,
+      url: window.location.href,
+      timestamp: new Date().toISOString(),
+    });
+  }
+}
+```
+
+---
+
+## 4. UI/UX Layout Specification
+
+### 4.1 Error Tracker Layout
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│ 🐛 Error Tracker                           [Auto-refresh 🔄] [Export] [Settings] │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│ ┌─────────────┬─────────────┬─────────────┬─────────────────────────────────────┐│
+│ │ Total: 847 │ Critical: 12│ Open: 156   │ Resolved Today: 23                    ││
+│ └─────────────┴─────────────┴─────────────┴─────────────────────────────────────┘│
+├─────────────────────────────────────────────────────────────────────────────────┤
+│ ERROR TREND (7 DAYS)                                                          │
+│ [AreaChart with stacked critical/warning/info]                                │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│ FILTERS: [Severity ▾] [Status ▾] [Search: _______________] [Show Resolved ☐] │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│ ┌────────────────────────────────────────────────────────────────────────────┐ │
+│ │ FATAL ●  NullPointerException at CheckoutController     [IMPACT: 42 users]│ │
+│ │ 2:45 PM   #ERR-1234                                           [Expand ▼]  │ │
+│ ├────────────────────────────────────────────────────────────────────────────┤ │
+│ │ │ at CheckoutController.processPayment(Order.java:156)                  │ │
+│ │ │ at PaymentService.process(PaymentService.java:89)                       │ │
+│ │ │ ... 12 more frames                                                    │ │
+│ │ │                                              [Copy] [Resolve] [Details]│ │
+│ └────────────────────────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 5. Frontend Implementation
+
+### 5.1 SSE Connection for Real-Time Errors
+
+```typescript
+// hooks/useErrorStream.ts
+export const useErrorStream = (onError: (error: SystemError) => void) => {
+  useEffect(() => {
+    const eventSource = new EventSource('/api/superadmin/errors/stream');
+    eventSource.onmessage = (e) => {
+      const error = JSON.parse(e.data);
+      onError(error);
+    };
+    return () => eventSource.close();
+  }, [onError]);
+};
+```
+
+### 5.2 Error Expansion Animation
+
+```typescript
+// Framer Motion for accordion
+<motion.div
+  initial={{ height: 0, opacity: 0 }}
+  animate={{ height: 'auto', opacity: 1 }}
+  exit={{ height: 0, opacity: 0 }}
+  transition={{ duration: 0.3, ease: 'easeInOut' }}
+>
+  <pre><code>{error.stackTrace}</code></pre>
+</motion.div>
+```
+
+### 5.3 Copy to Clipboard
+
+```typescript
+const copyToClipboard = async (text: string) => {
+  await navigator.clipboard.writeText(text);
+  setCopied(true);
+  setTimeout(() => setCopied(false), 2000);
+};
+```
+
+---
+
+## 6. Backend Implementation
+
+### 6.1 Global Exception Handler
+
+```java
+@ControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleUncaughtException(
+            Exception e, HttpServletRequest request) {
+
+        // Extract sanitized stack trace
+        String stackTrace = ExceptionUtils.getStackTrace(e);
+
+        // Create error record
+        SystemError error = SystemError.builder()
+            .type(e.getClass().getSimpleName())
+            .message(e.getMessage())
+            .stackTrace(sanitize(stackTrace)) // Remove passwords, tokens
+            .url(request.getRequestURI())
+            .method(request.getMethod())
+            .timestamp(LocalDateTime.now())
+            .severity(determineSeverity(e))
+            .build();
+
+        // Save asynchronously
+        systemErrorService.saveAsync(error);
+
+        // Return safe error to client
+        return ResponseEntity.status(500)
+            .body(new ErrorResponse("An unexpected error occurred"));
+    }
+}
+```
+
+### 6.2 Security Sanitization
+
+```java
+private String sanitize(String stackTrace) {
+    return stackTrace
+        .replaceAll("password=[^&\\s]*", "password=***")
+        .replaceAll("Authorization:[^\\n]*", "Authorization:***")
+        .replaceAll("Bearer [A-Za-z0-9.-]*", "Bearer ***")
+        .replaceAll("\\d{4}[\\s-]?\\d{4}[\\s-]?\\d{4}[\\s-]?\\d{4}", "****-****-****-****"); // PAN
+}
+```
+
+### 6.3 Required Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/superadmin/errors` | Paginated error list |
+| GET | `/api/superadmin/errors/{id}` | Error details |
+| GET | `/api/superadmin/errors/stream` | SSE real-time feed |
+| PUT | `/api/superadmin/errors/{id}/resolve` | Mark resolved |
+| POST | `/api/superadmin/telemetry/client-error` | Client-side crash |
+| DELETE | `/api/superadmin/errors/cleanup` | Purge old resolved |
+
+---
+
+## 7. Database Strategy
+
+### 7.1 Data Retention Policy
+
+```sql
+-- Nightly cleanup of old resolved errors
+DELETE FROM system_error_logs
+WHERE created_at < NOW() - INTERVAL '30 days'
+  AND status = 'RESOLVED';
+
+-- Partial index for fast pruning
+CREATE INDEX idx_errors_resolved_old
+ON system_error_logs (created_at)
+WHERE status = 'RESOLVED';
+```
+
+### 7.2 Error Grouping (Fingerprint)
+
+```java
+// Group errors by fingerprint to count blast radius
+public String calculateFingerprint(Exception e) {
+    // Use first 3 stack frames as fingerprint
+    StackTraceElement[] stack = e.getStackTrace();
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < Math.min(3, stack.length); i++) {
+        sb.append(stack[i].toString());
+        sb.append("|");
+    }
+    return sb.toString();
+}
+```
+
+---
+
+## 8. Testing Procedures
+
+### 8.1 Error Capture Tests
+```typescript
+it('catches React render errors', () => {
+  const errorBoundary = render(<ErrorComponent />);
+  expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+});
+```
+
+### 8.2 Sanitization Tests
+```java
+@Test
+void sanitizeStackTrace_removesPasswords() {
+    String input = "password=secret123&token=bearer";
+    String result = sanitizer.sanitize(input);
+    assertFalse(result.contains("secret123"));
+    assertFalse(result.contains("bearer"));
+}
+```
+
+---
+
+## 9. Success Criteria
+
+| Criterion | Target | Validation |
+|-----------|--------|------------|
+| Error capture latency | < 100ms | SSE timestamp |
+| Frontend error catching | 100% React errors | Error boundary test |
+| Blast radius accuracy | Distinct users | Query verification |
+| Data retention | 30-day auto-prune | Cron verification |
+| Accessibility | WCAG 2.1 AA | axe-core |
+
+---
+
+## 10. Deliverables Checklist
+
+- [ ] `SAErrors.tsx` with fixed chart containers
+- [ ] Real-time SSE error stream
+- [ ] Blast radius indicator
+- [ ] Stack trace accordion with syntax highlighting
+- [ ] Copy to clipboard functionality
+- [ ] Mark resolved with animation
+- [ ] React ErrorBoundary for client crashes
+- [ ] Global exception handler in backend
+- [ ] Security sanitization for stack traces
+- [ ] Data retention policy (30 days)
+- [ ] Unit tests >80% coverage

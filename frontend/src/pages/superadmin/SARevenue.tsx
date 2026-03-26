@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     DollarSign, TrendingUp, TrendingDown, Users, CreditCard,
@@ -11,6 +11,34 @@ import {
     ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar
 } from 'recharts';
 import { superAdminApi, type SuperAdminRevenueData } from '../../services/superAdminApi';
+import {
+    RevenueMetricCard,
+    LedgerMismatchAlert,
+    GymPayoutLedger,
+    TransactionForensicDrawer,
+    type TransactionForensicData
+} from '../../components/superadmin/shared';
+
+function useContainerDimensions(containerRef: React.RefObject<HTMLDivElement | null>) {
+    const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+
+    useEffect(() => {
+        const measure = () => {
+            if (containerRef.current) {
+                const { width, height } = containerRef.current.getBoundingClientRect();
+                setDimensions({ width, height });
+            }
+        };
+        measure();
+        const observer = new ResizeObserver(measure);
+        if (containerRef.current) {
+            observer.observe(containerRef.current);
+        }
+        return () => observer.disconnect();
+    }, [containerRef]);
+
+    return dimensions;
+}
 
 /* ─── Fallback Mock Data (used only when API returns empty) ─── */
 const FALLBACK_REVENUE_TREND = [
@@ -54,6 +82,8 @@ type Payment = typeof RECENT_PAYMENTS[0];
 type FailedPayment = typeof FAILED_PAYMENTS[0];
 
 const SARevenue: React.FC = () => {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const dimensions = useContainerDimensions(containerRef);
     const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
     const [selectedFailed, setSelectedFailed] = useState<FailedPayment | null>(null);
     const [showRefundModal, setShowRefundModal] = useState<Payment | null>(null);
@@ -97,7 +127,7 @@ const SARevenue: React.FC = () => {
     const planColor = (p: string) => p === 'Enterprise' ? 'violet' : p === 'Pro' ? 'blue' : p === 'Starter' ? 'gray' : 'amber';
 
     return (
-        <div className="sa">
+        <div className="sa" ref={containerRef}>
             <header className="sa__header">
                 <div className="sa__header-left">
                     <h1>Revenue &amp; Billing</h1>
@@ -144,6 +174,7 @@ const SARevenue: React.FC = () => {
                         </div>
                     </div>
                     <div style={{ height: 200 }}>
+                        {dimensions.width > 0 && dimensions.height > 0 ? (
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={revenueTrend} margin={{ top: 8, right: 8, left: -10, bottom: 0 }}>
                                 <defs>
@@ -158,6 +189,7 @@ const SARevenue: React.FC = () => {
                                 <Area type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={2} fill="url(#revG)" dot={false} />
                             </AreaChart>
                         </ResponsiveContainer>
+                        ) : <div style={{ height: '100%', minHeight: 200 }} />}
                     </div>
                 </section>
 
@@ -171,6 +203,7 @@ const SARevenue: React.FC = () => {
                         </div>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 16, height: 180 }}>
+                        {dimensions.width > 0 && dimensions.height > 0 ? (
                         <ResponsiveContainer width="50%" height="100%">
                             <PieChart>
                                 <Pie data={PLAN_DISTRIBUTION} cx="50%" cy="50%" innerRadius={45} outerRadius={70} dataKey="value" stroke="none">
@@ -179,6 +212,7 @@ const SARevenue: React.FC = () => {
                                 <Tooltip contentStyle={{ backgroundColor: '#1c1c1f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, fontSize: 11 }} />
                             </PieChart>
                         </ResponsiveContainer>
+                        ) : <div style={{ width: '50%', height: '100%', minHeight: 180 }} />}
                         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
                             {PLAN_DISTRIBUTION.map(p => (
                                 <div key={p.name} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11 }}>
@@ -203,6 +237,7 @@ const SARevenue: React.FC = () => {
                     </div>
                 </div>
                 <div style={{ height: 140 }}>
+                    {dimensions.width > 0 && dimensions.height > 0 ? (
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={REVENUE_BY_CITY} margin={{ top: 4, right: 4, left: -10, bottom: 0 }}>
                             <XAxis dataKey="city" axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.35)', fontSize: 10 }} />
@@ -213,6 +248,7 @@ const SARevenue: React.FC = () => {
                             </Bar>
                         </BarChart>
                     </ResponsiveContainer>
+                    ) : <div style={{ height: '100%', minHeight: 140 }} />}
                 </div>
             </div>
 

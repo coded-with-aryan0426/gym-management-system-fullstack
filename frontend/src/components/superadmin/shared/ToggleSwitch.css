@@ -1,0 +1,101 @@
+.toggle-switch-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toggle-switch {
+  position: relative;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  outline: none;
+}
+
+.toggle-switch:focus-visible .toggle-switch__track {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.toggle-switch--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.toggle-switch__track {
+  position: relative;
+  border-radius: 9999px;
+  transition: background-color 0.2s ease;
+}
+
+.toggle-switch--sm .toggle-switch__track {
+  width: 32px;
+  height: 18px;
+}
+
+.toggle-switch--md .toggle-switch__track {
+  width: 44px;
+  height: 24px;
+}
+
+.toggle-switch--lg .toggle-switch__track {
+  width: 56px;
+  height: 30px;
+}
+
+.toggle-switch__thumb {
+  position: absolute;
+  top: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.toggle-switch--sm .toggle-switch__thumb {
+  width: 14px;
+  height: 14px;
+}
+
+.toggle-switch--md .toggle-switch__thumb {
+  width: 20px;
+  height: 20px;
+}
+
+.toggle-switch--lg .toggle-switch__thumb {
+  width: 26px;
+  height: 26px;
+}
+
+.toggle-switch:hover:not(.toggle-switch--disabled) .toggle-switch__thumb {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.toggle-switch__spinner {
+  animation: spin 1s linear infinite;
+  color: #6b7280;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.toggle-switch__label {
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggle-switch--on .toggle-switch__label {
+  color: #10b981;
+}
+
+.toggle-switch--off .toggle-switch__label {
+  color: rgba(255, 255, 255, 0.5);
+}

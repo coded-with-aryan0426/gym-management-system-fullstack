@@ -1,0 +1,77 @@
+.sa-confirm-modal-overlay {
+  font-family: var(--sa-font-family, 'Inter', -apple-system, BlinkMacSystemFont, sans-serif);
+}
+
+.sa-confirm-modal__close:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.sa-confirm-modal__action-btn--primary {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.sa-confirm-modal__action-btn--primary:hover:not(:disabled) {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.sa-confirm-modal__action-btn--primary:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.sa-confirm-modal__action-btn--danger {
+  background: var(--color-danger, #ef4444) !important;
+}
+
+.sa-confirm-modal__action-btn--danger:hover:not(:disabled) {
+  background: var(--color-danger-hover, #dc2626) !important;
+}
+
+.sa-confirm-modal__action-btn--ghost:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.sa-confirm-modal__audit {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+}
+
+.sa-confirm-modal__audit-badge {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+[data-audit-type="GYM_SUSPENSION"] .sa-confirm-modal__audit-badge,
+[data-audit-type="USER_BAN"] .sa-confirm-modal__audit-badge {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+[data-audit-type="GYM_ACTIVATION"] .sa-confirm-modal__audit-badge,
+[data-audit-type="USER_UNBAN"] .sa-confirm-modal__audit-badge {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
