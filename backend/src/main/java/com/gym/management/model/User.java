@@ -340,21 +340,21 @@ public class User {
     @Column(name = "two_factor_enabled")
     private Boolean twoFactorEnabled = false;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_role_map", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
 
     @lombok.ToString.Exclude
     @lombok.EqualsAndHashCode.Exclude
     @com.fasterxml.jackson.annotation.JsonIgnore
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "trainer_customer_map", joinColumns = @JoinColumn(name = "trainer_user_id"), inverseJoinColumns = @JoinColumn(name = "customer_user_id"))
     private Set<User> customers = new HashSet<>();
 
     @lombok.ToString.Exclude
     @lombok.EqualsAndHashCode.Exclude
     @com.fasterxml.jackson.annotation.JsonIgnore
-    @ManyToMany(mappedBy = "customers", fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "customers", fetch = FetchType.EAGER)
     private Set<User> trainers = new HashSet<>();
 
     // Multi-role support fields

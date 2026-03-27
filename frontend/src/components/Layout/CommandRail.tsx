@@ -40,6 +40,7 @@ import { superAdminApi } from "../../services/superAdminApi"
 import { Logo } from "../ui/Logo"
 import Avatar from "../ui/Avatar"
 import "./CommandRail.css"
+import { useFeatureContext } from "../../contexts/FeatureContext"
 
 export interface NavItem {
   path: string;
@@ -136,7 +137,13 @@ const CommandRail: React.FC<CommandRailProps> = ({ isCollapsed = false, onToggle
   const displayName = isSuperAdmin ? 'Creator' : (user?.fullName || 'User');
   const displayEmail = isSuperAdmin ? 'creator@titan.dev' : (user?.email || '—');
 
+  // Check if chat is enabled
+  const { localFeatures } = useFeatureContext();
+  const isChatEnabled = localFeatures['chat-enabled'] !== false;
+
   const itemsToRender = navItems === defaultNavItems ? navItems.filter(item => {
+    // Filter out chat/messages when disabled
+    if (!isChatEnabled && item.id === 'messages') return false;
     if (role === 'OWNER' || role === 'ADMIN') return true;
     const restricted = ['/financials', '/reports'];
     return !restricted.includes(item.path);

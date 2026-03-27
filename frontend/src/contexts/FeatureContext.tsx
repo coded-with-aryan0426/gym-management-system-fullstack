@@ -7,6 +7,10 @@ interface FeatureContextType {
   isLoading: boolean;
   error: string | null;
   refetchFeatures: () => Promise<void>;
+  // Local feature toggles (stored in localStorage)
+  localFeatures: Record<string, boolean>;
+  toggleLocalFeature: (key: string) => void;
+  isChatEnabled: () => boolean;
 }
 
 const FeatureContext = createContext<FeatureContextType>({
@@ -14,9 +18,14 @@ const FeatureContext = createContext<FeatureContextType>({
   isLoading: true,
   error: null,
   refetchFeatures: async () => {},
+  localFeatures: {},
+  toggleLocalFeature: () => {},
+  isChatEnabled: () => true,
 });
 
 const CACHE_KEY = 'features';
+const LOCAL_FEATURES_KEY = 'local-features';
+const CHAT_FEATURE_KEY = 'chat-enabled';
 const POLL_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
 
 export const FeatureProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -30,6 +39,32 @@ export const FeatureProvider: React.FC<{ children: React.ReactNode }> = ({ child
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Initialize local features from localStorage
+  const [localFeatures, setLocalFeatures] = useState<Record<string, boolean>>(() => {
+    try {
+      const cached = localStorage.getItem(LOCAL_FEATURES_KEY);
+      if (cached) {
+        return JSON.parse(cached);
+      }
+      // Default: chat enabled
+      return { [CHAT_FEATURE_KEY]: true };
+    } catch {
+      return { [CHAT_FEATURE_KEY]: true };
+    }
+  });
+
+  const toggleLocalFeature = useCallback((key: string) => {
+    setLocalFeatures(prev => {
+      const updated = { ...prev, [key]: !prev[key] };
+      localStorage.setItem(LOCAL_FEATURES_KEY, JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  const isChatEnabled = useCallback(() => {
+    return localFeatures[CHAT_FEATURE_KEY] !== false;
+  }, [localFeatures]);
 
   const refetchFeatures = useCallback(async () => {
     try {
@@ -62,7 +97,7 @@ export const FeatureProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, [refetchFeatures]);
 
   return (
-    <FeatureContext.Provider value={{ features, isLoading, error, refetchFeatures }}>
+    <FeatureContext.Provider value={{ features, isLoading, error, refetchFeatures, localFeatures, toggleLocalFeature, isChatEnabled }}>
       {children}
     </FeatureContext.Provider>
   );

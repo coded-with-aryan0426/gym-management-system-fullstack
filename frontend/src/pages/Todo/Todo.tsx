@@ -71,8 +71,8 @@ interface TaskCardProps {
 }
 
 const TaskCard: React.FC<TaskCardProps> = ({ task, index, onEdit, onDelete, onStatusChange }) => {
-  const pm = PRIORITY_META[task.priority];
-  const sm = STATUS_META[task.status];
+  const pm = PRIORITY_META[task.priority] || PRIORITY_META.MEDIUM;
+  const sm = STATUS_META[task.status] || STATUS_META.TODO;
   const overdue = isOverdue(task);
   const nextStatus: GymTask['status'] | null =
     task.status === 'TODO' ? 'IN_PROGRESS' :
@@ -577,7 +577,7 @@ const TodoPage: React.FC = () => {
           )}
 
           {tasks.length > 0 && COLUMN_ORDER.map(status => {
-            const sm = STATUS_META[status];
+            const sm = STATUS_META[status] || STATUS_META.TODO;
             const col = byStatus(status);
             return (
               <div key={status} className={`todo-kanban__col ${COL_CSS[status]}`}>
@@ -660,8 +660,8 @@ const TodoPage: React.FC = () => {
               <tbody>
                 <AnimatePresence>
                   {filtered.map(t => {
-                    const pm = PRIORITY_META[t.priority];
-                    const sm = STATUS_META[t.status];
+                    const pm = PRIORITY_META[t.priority] || PRIORITY_META.MEDIUM;
+                    const sm = STATUS_META[t.status] || STATUS_META.TODO;
                     const overdue = isOverdue(t);
                     const nextStatus: GymTask['status'] | null =
                       t.status === 'TODO' ? 'IN_PROGRESS' :

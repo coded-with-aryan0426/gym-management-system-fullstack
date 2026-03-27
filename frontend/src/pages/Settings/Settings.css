@@ -5649,3 +5649,100 @@ body.light-mode .logout-btn:hover {
     color: #6ee7b7 !important;
     transition: background 0.3s ease, color 0.3s ease !important;
 }
+
+/* =============================================================================
+   Toggle Switch - Chat Feature
+   ============================================================================= */
+
+.toggle-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--settings-border-subtle);
+    border-radius: 10px;
+    transition: all 0.2s ease;
+}
+
+.toggle-option:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: var(--settings-border);
+}
+
+.toggle-option__info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.toggle-option__label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--settings-text-primary);
+}
+
+.toggle-option__desc {
+    font-size: 12px;
+    color: var(--settings-text-tertiary);
+    line-height: 1.4;
+}
+
+.toggle-switch {
+    position: relative;
+    width: 48px;
+    height: 26px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 13px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    flex-shrink: 0;
+}
+
+.toggle-switch:hover {
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+.toggle-switch--active {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    border-color: rgba(34, 197, 94, 0.5);
+}
+
+.toggle-switch__thumb {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform 0.25s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.toggle-switch--active .toggle-switch__thumb {
+    transform: translateX(22px);
+}
+
+/* Light mode overrides */
+:root.theme-light .toggle-option,
+[data-theme="light"] .toggle-option,
+body.light-mode .toggle-option {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.08);
+}
+
+:root.theme-light .toggle-option:hover,
+[data-theme="light"] .toggle-option:hover,
+body.light-mode .toggle-option:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+:root.theme-light .toggle-switch,
+[data-theme="light"] .toggle-switch,
+body.light-mode .toggle-switch {
+    background: rgba(0, 0, 0, 0.1);
+    border-color: rgba(0, 0, 0, 0.15);
+}

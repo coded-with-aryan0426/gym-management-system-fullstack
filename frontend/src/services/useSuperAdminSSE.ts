@@ -113,10 +113,8 @@ export function useSuperAdminSSE(options: UseSuperAdminSSEOptions = {}) {
       onFeedback?.(data);
     });
 
-    eventSource.addEventListener('error', (event) => {
-      const data: SSEEvent = JSON.parse((event as MessageEvent).data);
-      setLastEvent(data);
-      onError?.(data);
+    eventSource.addEventListener('error', () => {
+      // SSE error event doesn't have data payload - connection errors are handled by onerror
     });
 
     eventSource.addEventListener('heartbeat', () => {

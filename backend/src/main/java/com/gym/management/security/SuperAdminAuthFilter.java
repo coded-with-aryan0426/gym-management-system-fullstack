@@ -75,10 +75,19 @@ public class SuperAdminAuthFilter extends OncePerRequestFilter {
     }
 
     private String extractSuperAdminToken(HttpServletRequest request) {
+        // Check query parameter first (used by SSE connections)
+        String queryToken = request.getParameter("token");
+        if (StringUtils.hasText(queryToken)) {
+            return queryToken;
+        }
+
+        // Check X-Superadmin-Token header
         String headerToken = request.getHeader("X-Superadmin-Token");
         if (StringUtils.hasText(headerToken)) {
             return headerToken;
         }
+
+        // Check Authorization Bearer header
         String authHeader = request.getHeader("Authorization");
         if (StringUtils.hasText(authHeader) && authHeader.startsWith("Bearer ")) {
             return authHeader.substring(7);

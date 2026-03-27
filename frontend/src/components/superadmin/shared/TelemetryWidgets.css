@@ -73,7 +73,8 @@
 }
 
 .telemetry-widget__chart {
-  margin: 0 -4px;
+  min-height: 60px;
+  min-width: 100px;
 }
 
 .telemetry-widget__stats {

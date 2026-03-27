@@ -69,23 +69,7 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration corsConfig = new CorsConfiguration();
-                    // Use patterns to support wildcards for tunnels and deployments
-                    // setAllowedOriginPatterns is required when allowCredentials is true
-                    corsConfig.setAllowedOriginPatterns(List.of(
-                            // Local development ports
-                            "http://localhost:*",
-                            // Cloudflare tunnels (quick tunnels)
-                            "https://*.trycloudflare.com",
-                            // Vercel deployments
-                            "https://*.vercel.app",
-                            // Railway deployments
-                            "https://*.railway.app",
-                            "https://*.up.railway.app",
-                            // Render deployments
-                            "https://*.onrender.com",
-                            // Netlify deployments
-                            "https://*.netlify.app"
-                    ));
+                    corsConfig.setAllowedOriginPatterns(List.of("*"));
                     corsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
                     corsConfig.setAllowedHeaders(List.of("*"));
                     corsConfig.setExposedHeaders(List.of("Authorization", "Content-Disposition"));

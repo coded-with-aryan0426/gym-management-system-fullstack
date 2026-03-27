@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Toaster } from 'react-hot-toast';
+import { lazy, Suspense, useState, useEffect } from 'react';
 import { QueryProvider } from '../services/queryClient';
 import { AuthProvider } from './AuthContext';
 import { ThemeProvider } from './ThemeContext';
@@ -8,16 +9,40 @@ import { MembersProvider } from './MembersContext';
 import { TrainerProvider } from './TrainerContext';
 import { ClassesProvider } from './ClassesContext';
 import { NavbarProvider } from './NavbarContext';
-import { ChatProvider } from './ChatContext';
 import { EditorProvider } from './EditorContext';
 import { AuthModalProvider } from './AuthModalContext';
-import { FeatureProvider } from './FeatureContext';
+import { FeatureProvider, useFeatureContext } from './FeatureContext';
 import EditorOverlay from '../components/editor/EditorOverlay';
 import AuthModal from '../components/auth/AuthModal';
 
 interface AppProviderProps {
     children: ReactNode;
 }
+
+// Lazy-loaded ChatProvider wrapper - only renders if chat is enabled
+const ChatProviderWrapper: React.FC<{ children: ReactNode }> = ({ children }) => {
+    const { isChatEnabled } = useFeatureContext();
+    const [ChatContext, setChatContext] = useState<any>(null);
+
+    useEffect(() => {
+        if (isChatEnabled()) {
+            // Dynamic import when enabled
+            import('./ChatContext').then(module => {
+                setChatContext(() => module.ChatProvider);
+            });
+        }
+    }, [isChatEnabled]);
+
+    if (!isChatEnabled()) {
+        return <>{children}</>;
+    }
+
+    if (!ChatContext) {
+        return <>{children}</>;
+    }
+
+    return <ChatContext>{children}</ChatContext>;
+};
 
 export function AppProvider({ children }: AppProviderProps) {
     return (
@@ -31,7 +56,7 @@ export function AppProvider({ children }: AppProviderProps) {
                                     <TrainerProvider>
                                         <ClassesProvider>
                                             <NavbarProvider>
-                                                <ChatProvider>
+                                                <ChatProviderWrapper>
                                                     <EditorProvider>
                                                         <Toaster
                                                             position="top-center"
@@ -79,7 +104,7 @@ export function AppProvider({ children }: AppProviderProps) {
                                                         <AuthModal />
                                                         {children}
                                                     </EditorProvider>
-                                                </ChatProvider>
+                                                </ChatProviderWrapper>
                                             </NavbarProvider>
                                         </ClassesProvider>
                                     </TrainerProvider>

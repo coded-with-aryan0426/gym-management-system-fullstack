@@ -1,12 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { AppBar, Toolbar, Button, Box, useScrollTrigger, Typography, IconButton, Drawer, List, ListItem, ListItemButton, ListItemText, Divider } from '@mui/material';
-import { Menu, X, Sun, Moon } from 'lucide-react';
+import { AppBar, Toolbar, Button, Box, useScrollTrigger, Typography, IconButton, Drawer, List, ListItem, ListItemButton, ListItemText, Divider, Avatar, Menu as MuiMenu, MenuItem } from '@mui/material';
+import { Menu as LucideMenu, X, Sun, Moon, User, LogOut, Settings } from 'lucide-react';
 import { Logo } from '../ui/Logo';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuthModal } from '../../contexts/AuthModalContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 // Navigation items - scroll sections on homepage
 const scrollNavItems = [
@@ -30,6 +31,30 @@ export default function Header() {
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === 'dark';
   const { openAuthModal } = useAuthModal();
+  const { user, isAuthenticated, logout } = useAuth();
+
+  // Profile menu state
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const menuOpen = Boolean(anchorEl);
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    handleMenuClose();
+    logout();
+  };
+
+  const handleProfileClick = () => {
+    handleMenuClose();
+    // All users go to their dashboard - no /portal route
+    navigate('/dashboard');
+  };
 
   // Custom scroll listener for smoother control
   useEffect(() => {
@@ -178,66 +203,131 @@ export default function Header() {
                 {isDark ? <Sun size={20} /> : <Moon size={20} />}
               </IconButton>
 
-              {/* Login - Hidden on xs */}
-              <Button
-              variant="text"
-              onClick={() => openAuthModal('login')}
-              sx={{
-                display: { xs: 'none', sm: 'flex' },
-                color: isDark ? 'white' : 'var(--text-primary)',
-                textTransform: 'none',
-                fontWeight: 500,
-                fontSize: { sm: 14, md: 16 },
-                padding: { sm: '6px 12px', md: '8px 16px' },
-                '&:hover': {
-                  color: '#FF495C',
-                  backgroundColor: 'rgba(255, 73, 92, 0.1)',
-                }
-              }}
-            >
-              Log In
-            </Button>
+              {isAuthenticated ? (
+                /* Logged In - Show Profile */
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Button
+                    onClick={handleMenuOpen}
+                    sx={{
+                      textTransform: 'none',
+                      color: isDark ? 'white' : 'var(--text-primary)',
+                      padding: '6px 12px',
+                      borderRadius: '10px',
+                      '&:hover': {
+                        backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
+                      }
+                    }}
+                  >
+                    <Avatar
+                      sx={{
+                        width: 32,
+                        height: 32,
+                        mr: 1,
+                        backgroundColor: 'var(--color-crimson)',
+                        fontSize: 14,
+                        fontWeight: 600,
+                      }}
+                    >
+                      {user?.fullName?.charAt(0).toUpperCase() || 'U'}
+                    </Avatar>
+                    <Typography sx={{ fontSize: 14, fontWeight: 500, maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {user?.fullName || 'User'}
+                    </Typography>
+                  </Button>
 
-            {/* CTA Button - Always visible but smaller on mobile */}
-            <Button
-              variant="contained"
-              onClick={() => openAuthModal('signup')}
-              sx={{
-                height: { xs: 40, sm: 44, md: 48 },
-                padding: { xs: '0 16px', sm: '0 20px', md: '0 28px' },
-                background: 'var(--gradient-cta)',
-                borderRadius: { xs: '10px', md: '12px' },
-                textTransform: 'none',
-                fontWeight: 600,
-                fontSize: { xs: 13, sm: 14, md: 16 },
-                boxShadow: '0 4px 15px rgba(230, 57, 70, 0.3)',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                whiteSpace: 'nowrap',
-                '&:hover': {
-                  transform: 'translateY(-2px)',
-                  boxShadow: '0 8px 25px rgba(230, 57, 70, 0.4)',
-                }
-              }}
-            >
-              <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>Start Free Trial</Box>
-              <Box component="span" sx={{ display: { xs: 'inline', sm: 'none' } }}>Start Free</Box>
-            </Button>
+                  <MuiMenu
+                    anchorEl={anchorEl}
+                    open={menuOpen}
+                    onClose={handleMenuClose}
+                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                    transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                    PaperProps={{
+                      sx: {
+                        mt: 1,
+                        minWidth: 180,
+                        backgroundColor: isDark ? '#1a1a1a' : '#ffffff',
+                        border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)',
+                      }
+                    }}
+                  >
+                    <MenuItem onClick={handleProfileClick} sx={{ gap: 1.5, color: isDark ? 'white' : 'var(--text-primary)' }}>
+                      <User size={16} />
+                      Dashboard
+                    </MenuItem>
+                    <MenuItem onClick={() => { handleMenuClose(); navigate('/settings'); }} sx={{ gap: 1.5, color: isDark ? 'white' : 'var(--text-primary)' }}>
+                      <Settings size={16} />
+                      Settings
+                    </MenuItem>
+                    <Divider />
+                    <MenuItem onClick={handleLogout} sx={{ gap: 1.5, color: 'error.main' }}>
+                      <LogOut size={16} />
+                      Log Out
+                    </MenuItem>
+                  </MuiMenu>
+                </Box>
+              ) : (
+                /* Logged Out - Show Login/Signup */
+                <>
+                  <Button
+                    variant="text"
+                    onClick={() => openAuthModal('login')}
+                    sx={{
+                      display: { xs: 'none', sm: 'flex' },
+                      color: isDark ? 'white' : 'var(--text-primary)',
+                      textTransform: 'none',
+                      fontWeight: 500,
+                      fontSize: { sm: 14, md: 16 },
+                      padding: { sm: '6px 12px', md: '8px 16px' },
+                      '&:hover': {
+                        color: '#FF495C',
+                        backgroundColor: 'rgba(255, 73, 92, 0.1)',
+                      }
+                    }}
+                  >
+                    Log In
+                  </Button>
 
-            {/* Mobile Menu Toggle - Only on mobile/tablet */}
-            <IconButton
-              onClick={toggleMobileMenu}
-              sx={{
-                display: { xs: 'flex', lg: 'none' },
-                color: isDark ? 'white' : 'var(--text-primary)',
-                padding: '8px',
-                '&:hover': {
-                  backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
-                }
-              }}
-            >
-              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </IconButton>
-          </Box>
+                  <Button
+                    variant="contained"
+                    onClick={() => openAuthModal('signup')}
+                    sx={{
+                      height: { xs: 40, sm: 44, md: 48 },
+                      padding: { xs: '0 16px', sm: '0 20px', md: '0 28px' },
+                      background: 'var(--gradient-cta)',
+                      borderRadius: { xs: '10px', md: '12px' },
+                      textTransform: 'none',
+                      fontWeight: 600,
+                      fontSize: { xs: 13, sm: 14, md: 16 },
+                      boxShadow: '0 4px 15px rgba(230, 57, 70, 0.3)',
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                      whiteSpace: 'nowrap',
+                      '&:hover': {
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 8px 25px rgba(230, 57, 70, 0.4)',
+                      }
+                    }}
+                  >
+                    <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>Start Free Trial</Box>
+                    <Box component="span" sx={{ display: { xs: 'inline', sm: 'none' } }}>Start Free</Box>
+                  </Button>
+                </>
+              )}
+
+              {/* Mobile Menu Toggle */}
+              <IconButton
+                onClick={toggleMobileMenu}
+                sx={{
+                  display: { xs: 'flex', lg: 'none' },
+                  color: isDark ? 'white' : 'var(--text-primary)',
+                  padding: '8px',
+                  '&:hover': {
+                    backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+                  }
+                }}
+              >
+                {mobileMenuOpen ? <X size={24} /> : <LucideMenu size={24} />}
+              </IconButton>
+            </Box>
         </Toolbar>
       </AppBar>
 
@@ -369,46 +459,119 @@ export default function Header() {
 
           <Divider sx={{ borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)', marginY: 3 }} />
 
-          {/* Mobile Login Button */}
-            <Button
-              fullWidth
-              variant="outlined"
-              onClick={() => { openAuthModal('login'); setMobileMenuOpen(false); }}
-              sx={{
+          {isAuthenticated ? (
+            /* Logged In - Show Profile Options */
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2,
+                  padding: '16px 20px',
+                  borderRadius: '12px',
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+                }}
+              >
+                <Avatar
+                  sx={{
+                    width: 48,
+                    height: 48,
+                    backgroundColor: 'var(--color-crimson)',
+                    fontSize: 20,
+                    fontWeight: 600,
+                  }}
+                >
+                  {user?.fullName?.charAt(0).toUpperCase() || 'U'}
+                </Avatar>
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography sx={{ color: isDark ? 'white' : 'var(--text-primary)', fontWeight: 600, fontSize: 16, wordBreak: 'break-word' }}>
+                    {user?.fullName || 'User'}
+                  </Typography>
+                  <Typography sx={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'var(--text-tertiary)', fontSize: 13 }}>
+                    {user?.email || ''}
+                  </Typography>
+                </Box>
+              </Box>
+
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={() => { handleProfileClick(); setMobileMenuOpen(false); }}
+                sx={{
+                  height: 52,
+                  background: 'var(--gradient-cta)',
+                  fontSize: 16,
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  borderRadius: '12px',
+                }}
+              >
+                Dashboard
+              </Button>
+
+              <Button
+                fullWidth
+                variant="outlined"
+                onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
+                sx={{
+                  height: 52,
+                  borderColor: 'error.main',
+                  color: 'error.main',
+                  fontSize: 16,
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  borderRadius: '12px',
+                  '&:hover': {
+                    borderColor: 'error.main',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                  }
+                }}
+              >
+                Log Out
+              </Button>
+            </Box>
+          ) : (
+            /* Logged Out - Show Login/Signup */
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Button
+                fullWidth
+                variant="outlined"
+                onClick={() => { openAuthModal('login'); setMobileMenuOpen(false); }}
+                sx={{
+                  height: 52,
+                  borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
+                  color: isDark ? 'white' : 'var(--text-primary)',
+                  fontSize: 16,
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  borderRadius: '12px',
+                  '&:hover': {
+                    borderColor: '#E63946',
+                    backgroundColor: 'rgba(230, 57, 70, 0.1)',
+                  }
+                }}
+              >
+                Log In
+              </Button>
+
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={() => { openAuthModal('signup'); setMobileMenuOpen(false); }}
+                sx={{
                 height: 52,
-                borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
-                color: isDark ? 'white' : 'var(--text-primary)',
+                background: 'var(--gradient-cta)',
                 fontSize: 16,
-                fontWeight: 600,
+                fontWeight: 700,
                 textTransform: 'none',
                 borderRadius: '12px',
-                marginBottom: 2,
-                '&:hover': {
-                  borderColor: '#E63946',
-                  backgroundColor: 'rgba(230, 57, 70, 0.1)',
-                }
+                boxShadow: '0 4px 20px rgba(230, 57, 70, 0.3)',
               }}
             >
-              Log In
+              Start Free Trial
             </Button>
-
-            {/* Mobile CTA Button */}
-            <Button
-              fullWidth
-              variant="contained"
-              onClick={() => { openAuthModal('signup'); setMobileMenuOpen(false); }}
-              sx={{
-              height: 52,
-              background: 'var(--gradient-cta)',
-              fontSize: 16,
-              fontWeight: 700,
-              textTransform: 'none',
-              borderRadius: '12px',
-              boxShadow: '0 4px 20px rgba(230, 57, 70, 0.3)',
-            }}
-          >
-            Start Free Trial
-          </Button>
+            </Box>
+          )}
         </Box>
       </Drawer>
     </>

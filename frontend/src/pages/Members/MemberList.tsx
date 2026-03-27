@@ -515,6 +515,46 @@ const MemberList: React.FC = () => {
     },
   ]
 
+  if (loading && members.length === 0) {
+    return (
+      <div className="pg-page">
+        <header className="pg-header pg-header--single-line">
+          <div className="pg-header__title-group">
+            <div className="pg-header__icon"><FiUsers size={16} /></div>
+            <div className="pg-header__title-stack">
+              <h1 className="pg-header__title">Members</h1>
+            </div>
+          </div>
+        </header>
+        <div className="pg-content">
+          <div className="pg-skeleton-list">
+            <div className="pg-skeleton-header">
+              <div className="skeleton-line" style={{ width: 150, height: 20 }} />
+              <div className="pg-skeleton-actions">
+                <div className="skeleton-line" style={{ width: 200, height: 36 }} />
+                <div className="skeleton-line" style={{ width: 100, height: 36 }} />
+              </div>
+            </div>
+            <div className="pg-skeleton-table">
+              <div className="pg-skeleton-table-header">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="skeleton-line" style={{ width: '80%', height: 14 }} />
+                ))}
+              </div>
+              {Array.from({ length: 8 }).map((_, rowIndex) => (
+                <div key={rowIndex} className="pg-skeleton-table-row">
+                  {Array.from({ length: 6 }).map((_, colIndex) => (
+                    <div key={colIndex} className="skeleton-line" style={{ width: '70%', height: 16 }} />
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="pg-page">
       {/* ── Single-line header ── */}

@@ -1,11 +1,15 @@
 "use client"
 
 import type React from "react"
-import { Monitor, Sun, Moon, Palette } from "lucide-react"
+import { Monitor, Sun, Moon, Palette, MessageSquare } from "lucide-react"
 import { useTheme, type ThemeMode } from "../../../contexts/ThemeContext"
+import { useFeatureContext } from "../../../contexts/FeatureContext"
 
 const ThemeSection: React.FC = () => {
     const { themeMode, setThemeMode, resolvedTheme } = useTheme()
+    const { localFeatures, toggleLocalFeature } = useFeatureContext()
+
+    const isChatEnabled = localFeatures['chat-enabled'] !== false
 
     const themeOptions: { id: ThemeMode; label: string; icon: React.ReactNode; desc: string }[] = [
         {
@@ -83,6 +87,40 @@ const ThemeSection: React.FC = () => {
                         <span>
                             <strong>Current theme:</strong> {resolvedTheme === 'dark' ? 'Dark' : 'Light'} mode
                             {themeMode === 'system' && ' (following system preference)'}
+                        </span>
+                    </div>
+                </div>
+
+                <div className="form-group">
+                    <div className="form-group__header">
+                        <MessageSquare size={16} />
+                        <h4 className="form-group__title">Chat Feature</h4>
+                    </div>
+
+                    <div className="toggle-option">
+                        <div className="toggle-option__info">
+                            <span className="toggle-option__label">Enable Chat</span>
+                            <span className="toggle-option__desc">
+                                Show chat messages, notifications, and real-time messaging
+                            </span>
+                        </div>
+                        <button
+                            className={`toggle-switch ${isChatEnabled ? 'toggle-switch--active' : ''}`}
+                            onClick={() => toggleLocalFeature('chat-enabled')}
+                            role="switch"
+                            aria-checked={isChatEnabled}
+                        >
+                            <span className="toggle-switch__thumb" />
+                        </button>
+                    </div>
+
+                    <div className="policy-note">
+                        <div className="policy-note__icon">
+                            <MessageSquare size={16} />
+                        </div>
+                        <span>
+                            <strong>Status:</strong> {isChatEnabled ? 'Chat is enabled' : 'Chat is disabled'}
+                            {!isChatEnabled && ' - Disabling saves bandwidth and CPU'}
                         </span>
                     </div>
                 </div>

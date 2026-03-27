@@ -36,7 +36,8 @@ public class SuperAdminUsersService {
             if (search != null && !search.isEmpty()) {
                 String searchLower = search.toLowerCase();
                 users = userRepository.findAll().stream()
-                    .filter(u -> u.getFullName().toLowerCase().contains(searchLower) || 
+                    .filter(u -> u != null && u.getFullName() != null && u.getEmail() != null)
+                    .filter(u -> u.getFullName().toLowerCase().contains(searchLower) ||
                                  u.getEmail().toLowerCase().contains(searchLower))
                     .limit(100)
                     .collect(Collectors.toList());
@@ -45,23 +46,38 @@ public class SuperAdminUsersService {
             }
         }
 
+        if (users == null) {
+            return Collections.emptyList();
+        }
+
         return users.stream().map(this::mapUserToDto).collect(Collectors.toList());
     }
 
     private Map<String, Object> mapUserToDto(User user) {
+        if (user == null) {
+            return Collections.emptyMap();
+        }
+
         Map<String, Object> dto = new HashMap<>();
         dto.put("id", user.getUserId());
         dto.put("name", user.getFullName() != null ? user.getFullName() : "N/A");
-        dto.put("email", user.getEmail());
+        dto.put("email", user.getEmail() != null ? user.getEmail() : "N/A");
         dto.put("phone", user.getPhoneNumberPersisted() != null ? user.getPhoneNumberPersisted() : "N/A");
-        
-        // Extract primary role
+
+        // Extract primary role with null safety
         String role = "USER";
         if (user.getRoles() != null && !user.getRoles().isEmpty()) {
-            role = user.getRoles().iterator().next().getRoleName();
+            try {
+                var roleEntity = user.getRoles().iterator().next();
+                if (roleEntity != null && roleEntity.getRoleName() != null) {
+                    role = roleEntity.getRoleName();
+                }
+            } catch (Exception e) {
+                role = "USER";
+            }
         }
         dto.put("role", role);
-        
+
         dto.put("status", user.getIsDeleted() != null && user.getIsDeleted() ? "inactive" : "active");
         
         // Format join date

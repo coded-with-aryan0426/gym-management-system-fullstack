@@ -48,6 +48,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
         java.util.Optional<User> findByEmail(String email);
 
+        @Query("SELECT u FROM User u LEFT JOIN FETCH u.roles WHERE u.userId = :userId")
+        java.util.Optional<User> findByIdWithRoles(@Param("userId") Long userId);
+
+        boolean existsByUserId(Long userId);
+
         @Query("SELECT u FROM User u JOIN u.roles r WHERE r.roleName = :roleName AND (LOWER(u.fullName) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(u.email) LIKE LOWER(CONCAT('%', :query, '%')))")
         List<User> searchUsers(@Param("roleName") String roleName, @Param("query") String query);
 

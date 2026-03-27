@@ -35,6 +35,23 @@ npm run dev:all
 
 ---
 
+## 🌐 Public URL Setup (Cloudflare Tunnels)
+
+# Terminal 1 - Backend
+cd backend && mvn spring-boot:run
+
+# Terminal 2 - Frontend (single instance)
+cd frontend && npm run dev
+
+# Terminal 3 - Frontend tunnel (for public access)
+cloudflared tunnel --url http://localhost:5173
+```
+Use THIS URL to access your app publicly.
+
+---
+
+That's it! Any random Cloudflare tunnel URL will work automatically.
+
 ## 🔑 Access Credentials
 
 | Role | Username | Password | Email |
@@ -42,7 +59,7 @@ npm run dev:all
 | 👑 **Admin** | `admin` | `Aryan@194` | `AryanFit3@gmail.com` |
 | 🔑 **Owner** | `owner` | `pass2233` | `owner@fitpro.com` |
 | 🏋️ **Trainer** | `john.smith` | `password12` | `john.smith@fitpro.com` |
-| 🏋️ **Trainer** | `sarah.jones` | `password123` | `sarah.jones@fitpro.com` |
+| 🏋️ **Trainer** | `sarah.jones` | `Sarah@fit123` | `sarah.jones@fitpro.com` |
 | 🧑 **Member** | `member1` | `password123` | `member1@email.com` |
 | 🧑 **Member** | `jane.doe` | `password123` | `jane.doe@email.com` |
 
@@ -58,23 +75,3 @@ We have reorganized the project for better discoverability.
 
 ### ⚙️ Operations (`/ops`)
 - **Scripts**: Utility shell scripts (`/ops/scripts`)
-- **Logs**: System and error logs (`/ops/logs`)
-
-### 💻 Source Code
-- **`/backend`**: Java Spring Boot Application
-- **`/frontend`**: React + TypeScript Application
-- **`/database`**: SQL Migrations & Seeds
-
----
-
-## 🛑 Troubleshooting
-
-**Ports Blocked?**
-If you see "Address already in use", run this command to clear the ports:
-```bash
-lsof -ti :8081,5173,5174,5175 | xargs kill -9
-```
-
-**Database Connection Failed?**
-- Check if `colima` is running (`colima status`).
-- Verify connection string in `backend/src/main/resources/application.properties`.
