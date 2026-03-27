@@ -701,26 +701,19 @@ export const SAFeedback: React.FC = () => {
           >
             <RefreshCw size={14} className={loading ? 'spinning' : ''} />
           </button>
+
+          <div className="feedback-header-toggle">
+            <button
+              className={`feedback-toggle-btn ${featureFlag?.enabled ? 'feedback-toggle-btn--on' : ''}`}
+              onClick={() => handleFeatureToggle(!featureFlag?.enabled)}
+              disabled={toggleLoading}
+              title="Feedback System"
+            >
+              {toggleLoading ? <Loader2 size={12} className="spinning" /> : (featureFlag?.enabled ? 'ON' : 'OFF')}
+            </button>
+          </div>
         </div>
       </header>
-
-      {/* Feature Toggle Bar */}
-      <div className="feedback-feature-toggle-bar">
-        <div className="feedback-feature-toggle-inline">
-          <ToggleLeft size={16} />
-          <span>Feedback System</span>
-          <button
-            className={`feedback-toggle-btn ${featureFlag?.enabled ? 'feedback-toggle-btn--on' : ''}`}
-            onClick={() => handleFeatureToggle(!featureFlag?.enabled)}
-            disabled={toggleLoading}
-          >
-            {toggleLoading ? <Loader2 size={14} className="spinning" /> : (featureFlag?.enabled ? 'ON' : 'OFF')}
-          </button>
-          <span className="feedback-toggle-desc">
-            {featureFlag?.enabled ? 'Visible to all users' : 'Hidden from users'}
-          </span>
-        </div>
-      </div>
 
       <div className="sa__content">
         {error && (
