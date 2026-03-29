@@ -238,7 +238,7 @@
 
 \vfill
 
-\includegraphics[width=1.6in]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/styles/university_logo.png}
+\includegraphics[width=1.6in]{styles/university_logo.png}
 
 \vfill
 
@@ -268,15 +268,12 @@ Form}\label{report-status-declaration-form}
 \noindent
 
 \rule{\textwidth}{0.4pt}
-\vspace{2pt}
 
 \begin{tabular}{@{}p{4.5cm} p{\dimexpr\linewidth-4.5cm-2\tabcolsep}@{}}
 \textbf{University:}       & ITM SLS Baroda University \\[2pt]
 \textbf{School / Faculty:} & School of Computer Science Engineering \& Technology \\[2pt]
 \textbf{Programme:}        & B.Tech (Information Technology) \\
 \end{tabular}
-
-\vspace{3pt}
 
 \noindent
 
@@ -295,8 +292,8 @@ I hereby declare and authorise the following:
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.6190}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.3810}}@{}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.7400}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.2600}}@{}}
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
 Declaration
@@ -529,6 +526,11 @@ Oracle, Role-Based Access Control, JWT, WebSocket.
 
 \clearpage
 
+% --- List of Tables and List of Figures on the same page ---
+% Patch \clearpage to a no-op so \listoftables/\listoffigures don't force new pages
+\begingroup
+\renewcommand{\clearpage}{}
+
 \addcontentsline{toc}{chapter}{List of Tables}
 \listoftables
 
@@ -548,7 +550,7 @@ Appendix C & API Endpoints (Authentication, Membership, PT Sessions) \\[3pt]
 Appendix D & Frontend and Backend Technology Dependencies \\
 \end{tabular}
 
-\clearpage
+\vspace{16pt}
 
 \addcontentsline{toc}{chapter}{List of Figures}
 \listoffigures
@@ -563,12 +565,12 @@ Appendix D & Frontend and Backend Technology Dependencies \\
 Chapter 4 & System Architecture Overview Diagram \\[3pt]
 Chapter 5 & Entity-Relationship (ER) Diagram \\[3pt]
 Chapter 6 & UML Class Diagram; UML Sequence Diagrams \\[3pt]
-Chapter 7 & Data Flow Diagrams — Level 0 (Context) and Level 1 \\[3pt]
+Chapter 7 & Data Flow Diagrams --- Level 0 (Context) and Level 1 \\[3pt]
 Chapter 8 & Algorithm Flowcharts (Authentication, Membership, Booking) \\[3pt]
 Chapter 9 & System Workflow Diagrams \\
 \end{tabular}
 
-\clearpage
+\endgroup
 
 \clearpage
 
@@ -605,63 +607,38 @@ Symbol & Meaning \\
 
 \medskip\noindent
 
-\rule{\textwidth}{0.4pt}\medskip
-
-{\def\LTcaptype{none} % do not increment counter
-\begin{longtable}[]{@{}ll@{}}
-\toprule\noalign{}
-Abbreviation & Definition \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-2FA & Two-Factor Authentication \\
-ACID & Atomicity, Consistency, Isolation, Durability \\
-API & Application Programming Interface \\
-BCrypt & Blowfish Crypt (password hashing algorithm) \\
-CORS & Cross-Origin Resource Sharing \\
-CRM & Customer Relationship Management \\
-CSS & Cascading Style Sheets \\
-CRUD & Create, Read, Update, Delete \\
-DB & Database \\
-DTO & Data Transfer Object \\
-E2E & End-to-End (Testing) \\
-ER & Entity-Relationship \\
-GDPR & General Data Protection Regulation \\
-HTML & HyperText Markup Language \\
-HTTP & HyperText Transfer Protocol \\
-HTTPS & HyperText Transfer Protocol Secure \\
-IDE & Integrated Development Environment \\
-JPA & Java Persistence API \\
-JSON & JavaScript Object Notation \\
-JWT & JSON Web Token \\
-MVC & Model-View-Controller \\
-NIST & National Institute of Standards and Technology \\
-OAuth & Open Authorisation \\
-ORM & Object-Relational Mapping \\
-OTP & One-Time Password \\
-OWASP & Open Web Application Security Project \\
-PCI-DSS & Payment Card Industry Data Security Standard \\
-POS & Point of Sale \\
-PT & Personal Training \\
-RBAC & Role-Based Access Control \\
-REST & Representational State Transfer \\
-RFC & Request for Comments \\
-SaaS & Software as a Service \\
-SMS & Short Message Service \\
-SQL & Structured Query Language \\
-STOMP & Simple Text Oriented Messaging Protocol \\
-TLS & Transport Layer Security \\
-TOC & Table of Contents \\
-UI & User Interface \\
-UML & Unified Modelling Language \\
-URL & Uniform Resource Locator \\
-UX & User Experience \\
-WCAG & Web Content Accessibility Guidelines \\
-WS & WebSocket \\
-XSS & Cross-Site Scripting \\
-\end{longtable}
-}
+\noindent
+\noindent
+\footnotesize
+\begin{tabular}{@{} p{1.2cm} p{\dimexpr0.47\linewidth-1.2cm-\tabcolsep} @{\hspace{0.06\linewidth}} p{1.2cm} p{\dimexpr0.47\linewidth-1.2cm-\tabcolsep} @{}}
+\toprule
+\textbf{Abbr.} & \textbf{Definition} & \textbf{Abbr.} & \textbf{Definition} \\
+\cmidrule(r){1-2} \cmidrule(l){3-4}
+2FA     & Two-Factor Authentication                  & ORM     & Object-Relational Mapping \\
+ACID    & Atomicity, Consistency, Isolation, Durability & OTP     & One-Time Password \\
+API     & Application Programming Interface          & OWASP   & Open Web Application Security Project \\
+BCrypt  & Blowfish Crypt (password hashing)          & PCI-DSS & Payment Card Industry Data Security Standard \\
+CORS    & Cross-Origin Resource Sharing              & POS     & Point of Sale \\
+CRM     & Customer Relationship Management           & PT      & Personal Training \\
+CSS     & Cascading Style Sheets                     & RBAC    & Role-Based Access Control \\
+CRUD    & Create, Read, Update, Delete               & REST    & Representational State Transfer \\
+DB      & Database                                   & RFC     & Request for Comments \\
+DTO     & Data Transfer Object                       & SaaS    & Software as a Service \\
+E2E     & End-to-End (Testing)                       & SMS     & Short Message Service \\
+ER      & Entity-Relationship                        & SQL     & Structured Query Language \\
+GDPR    & General Data Protection Regulation         & STOMP   & Simple Text Oriented Messaging Protocol \\
+HTML    & HyperText Markup Language                  & TLS     & Transport Layer Security \\
+HTTP    & HyperText Transfer Protocol                & TOC     & Table of Contents \\
+HTTPS   & HyperText Transfer Protocol Secure         & UI      & User Interface \\
+IDE     & Integrated Development Environment         & UML     & Unified Modelling Language \\
+JPA     & Java Persistence API                       & URL     & Uniform Resource Locator \\
+JSON    & JavaScript Object Notation                 & UX      & User Experience \\
+JWT     & JSON Web Token                             & WCAG    & Web Content Accessibility Guidelines \\
+MVC     & Model-View-Controller                      & WS      & WebSocket \\
+NIST    & National Institute of Standards \& Tech.   & XSS     & Cross-Site Scripting \\
+OAuth   & Open Authorisation                         &         & \\
+\bottomrule
+\end{tabular}
 
 \clearpage
 
@@ -1051,7 +1028,7 @@ Self-Hosted Option & ✔ & ✗ & ✗ \\
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.95\textwidth,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/styles/chart_feature_comparison.png}
+\includegraphics[width=0.95\textwidth,keepaspectratio]{styles/chart_feature_comparison.png}
 \caption{Feature Depth Comparison -- Smart GMS vs Market Competitors (Score out of 10)}
 \end{figure}
 
@@ -1064,7 +1041,7 @@ open-source availability, and self-hosting flexibility.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.80\textwidth,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/styles/chart_cost_comparison.png}
+\includegraphics[width=0.80\textwidth,keepaspectratio]{styles/chart_cost_comparison.png}
 \caption{Monthly Subscription Cost Comparison -- Smart GMS vs Commercial Platforms (USD)}
 \end{figure}
 
@@ -1077,7 +1054,7 @@ deployment model that can be tailored to institutional requirements.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.75\textwidth,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/styles/chart_feature_pie.png}
+\includegraphics[width=0.75\textwidth,keepaspectratio]{styles/chart_feature_pie.png}
 \caption{Overall Feature Coverage Distribution Across Gym Management Platforms (\%)}
 \end{figure}
 
@@ -1295,7 +1272,7 @@ System}\label{system-architecture---gym-management-system}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_system_architecture_0.png}
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{mermaid_system_architecture_0.png}
 \end{figure}
 
 \medskip\noindent
@@ -1388,7 +1365,7 @@ Service & Purpose \\
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_system_architecture_1.png}
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{mermaid_system_architecture_1.png}
 \end{figure}
 
 \medskip\noindent
@@ -1399,7 +1376,7 @@ Service & Purpose \\
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_system_architecture_2.png}
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{mermaid_system_architecture_2.png}
 \end{figure}
 
 \medskip\noindent
@@ -1410,7 +1387,7 @@ Service & Purpose \\
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_system_architecture_3.png}
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{mermaid_system_architecture_3.png}
 \end{figure}
 
 \medskip\noindent
@@ -1421,7 +1398,7 @@ Service & Purpose \\
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_system_architecture_4.png}
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{mermaid_system_architecture_4.png}
 \end{figure}
 
 \medskip\noindent
@@ -1484,7 +1461,7 @@ Entities}\label{user-authentication-entities}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_er_diagram_0.png}
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{mermaid_er_diagram_0.png}
 \end{figure}
 
 \medskip\noindent
@@ -1495,7 +1472,7 @@ Entities}\label{user-authentication-entities}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_er_diagram_1.png}
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{mermaid_er_diagram_1.png}
 \end{figure}
 
 \medskip\noindent
@@ -1506,7 +1483,7 @@ Entities}\label{user-authentication-entities}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_er_diagram_2.png}
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{mermaid_er_diagram_2.png}
 \end{figure}
 
 \medskip\noindent
@@ -1517,7 +1494,7 @@ Entities}\label{user-authentication-entities}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_er_diagram_3.png}
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{mermaid_er_diagram_3.png}
 \end{figure}
 
 \medskip\noindent
@@ -1528,7 +1505,7 @@ Entities}\label{user-authentication-entities}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_er_diagram_4.png}
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{mermaid_er_diagram_4.png}
 \end{figure}
 
 \medskip\noindent
@@ -1539,7 +1516,7 @@ Entities}\label{user-authentication-entities}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_er_diagram_5.png}
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{mermaid_er_diagram_5.png}
 \end{figure}
 
 \medskip\noindent
@@ -1550,7 +1527,7 @@ Entities}\label{user-authentication-entities}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_er_diagram_6.png}
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{mermaid_er_diagram_6.png}
 \end{figure}
 
 \medskip\noindent
@@ -1602,7 +1579,7 @@ Auth}\label{class-diagram---core-user-auth}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_uml_diagrams_0.png}
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{mermaid_uml_diagrams_0.png}
 \end{figure}
 
 \medskip\noindent
@@ -1614,7 +1591,7 @@ Membership}\label{class-diagram---gym-membership}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_uml_diagrams_1.png}
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{mermaid_uml_diagrams_1.png}
 \end{figure}
 
 \medskip\noindent
@@ -1626,7 +1603,7 @@ Sessions}\label{class-diagram---training-sessions}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_uml_diagrams_2.png}
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{mermaid_uml_diagrams_2.png}
 \end{figure}
 
 \medskip\noindent
@@ -1638,7 +1615,7 @@ Communication}\label{class-diagram---communication}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_uml_diagrams_3.png}
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{mermaid_uml_diagrams_3.png}
 \end{figure}
 
 \medskip\noindent
@@ -1649,7 +1626,7 @@ Communication}\label{class-diagram---communication}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_uml_diagrams_4.png}
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{mermaid_uml_diagrams_4.png}
 \end{figure}
 
 \medskip\noindent
@@ -1662,21 +1639,21 @@ Communication}\label{class-diagram---communication}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_uml_diagrams_5.png}
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{mermaid_uml_diagrams_5.png}
 \end{figure}
 
 \subsection{Membership Purchase Flow}\label{membership-purchase-flow}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_uml_diagrams_6.png}
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{mermaid_uml_diagrams_6.png}
 \end{figure}
 
 \subsection{PT Session Booking Flow}\label{pt-session-booking-flow}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_uml_diagrams_7.png}
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{mermaid_uml_diagrams_7.png}
 \end{figure}
 
 \medskip\noindent
@@ -1689,7 +1666,7 @@ Communication}\label{class-diagram---communication}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_uml_diagrams_8.png}
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{mermaid_uml_diagrams_8.png}
 \end{figure}
 
 \subsection{Membership Approval
@@ -1697,14 +1674,14 @@ Workflow}\label{membership-approval-workflow}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_uml_diagrams_9.png}
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{mermaid_uml_diagrams_9.png}
 \end{figure}
 
 \subsection{Chat Message Flow}\label{chat-message-flow}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_uml_diagrams_10.png}
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{mermaid_uml_diagrams_10.png}
 \end{figure}
 
 \clearpage
@@ -1716,7 +1693,7 @@ System}\label{data-flow-diagrams---gym-management-system}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_dfd_diagrams_0.png}
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{mermaid_dfd_diagrams_0.png}
 \end{figure}
 
 \medskip\noindent
@@ -1727,7 +1704,7 @@ System}\label{data-flow-diagrams---gym-management-system}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_dfd_diagrams_1.png}
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{mermaid_dfd_diagrams_1.png}
 \end{figure}
 
 \medskip\noindent
@@ -1742,21 +1719,21 @@ Sub-Processes}\label{level-2-detailed-sub-processes}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_dfd_diagrams_2.png}
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{mermaid_dfd_diagrams_2.png}
 \end{figure}
 
 \subsection{Membership (Process 2.0)}\label{membership-process-2.0}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_dfd_diagrams_3.png}
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{mermaid_dfd_diagrams_3.png}
 \end{figure}
 
 \subsection{Training (Process 3.0)}\label{training-process-3.0}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_dfd_diagrams_4.png}
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{mermaid_dfd_diagrams_4.png}
 \end{figure}
 
 \subsection{Communication (Process
@@ -1764,14 +1741,14 @@ Sub-Processes}\label{level-2-detailed-sub-processes}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_dfd_diagrams_5.png}
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{mermaid_dfd_diagrams_5.png}
 \end{figure}
 
 \subsection{Analytics (Process 5.0)}\label{analytics-process-5.0}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_dfd_diagrams_6.png}
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{mermaid_dfd_diagrams_6.png}
 \end{figure}
 
 \medskip\noindent
@@ -2360,14 +2337,14 @@ Authentication}\label{user-registration-authentication}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_0.png}
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{mermaid_workflows_0.png}
 \end{figure}
 
 \subsection{Login with 2FA}\label{login-with-2fa}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_1.png}
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{mermaid_workflows_1.png}
 \end{figure}
 
 \medskip\noindent
@@ -2380,14 +2357,14 @@ Authentication}\label{user-registration-authentication}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_2.png}
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{mermaid_workflows_2.png}
 \end{figure}
 
 \subsection{Expiry Handling}\label{expiry-handling}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_3.png}
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{mermaid_workflows_3.png}
 \end{figure}
 
 \medskip\noindent
@@ -2400,14 +2377,14 @@ Authentication}\label{user-registration-authentication}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_4.png}
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{mermaid_workflows_4.png}
 \end{figure}
 
 \subsection{Progress Tracking}\label{progress-tracking}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_5.png}
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{mermaid_workflows_5.png}
 \end{figure}
 
 \medskip\noindent
@@ -2420,14 +2397,14 @@ Authentication}\label{user-registration-authentication}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_6.png}
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{mermaid_workflows_6.png}
 \end{figure}
 
 \subsection{Session Lifecycle}\label{session-lifecycle}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_7.png}
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{mermaid_workflows_7.png}
 \end{figure}
 
 \medskip\noindent
@@ -2440,21 +2417,21 @@ Authentication}\label{user-registration-authentication}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_8.png}
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{mermaid_workflows_8.png}
 \end{figure}
 
 \subsection{Message Flow}\label{message-flow}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_9.png}
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{mermaid_workflows_9.png}
 \end{figure}
 
 \subsection{Message Delivery Status}\label{message-delivery-status}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_10.png}
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{mermaid_workflows_10.png}
 \end{figure}
 
 \medskip\noindent
@@ -2465,7 +2442,7 @@ Authentication}\label{user-registration-authentication}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_11.png}
+\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{mermaid_workflows_11.png}
 \end{figure}
 
 \clearpage
