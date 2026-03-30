@@ -59,7 +59,12 @@ const TableRowComponent = <T,>({
     onRowClick,
     showRowNumbers,
 }: TableRowProps<T>) => {
-    const handleClick = useCallback(() => {
+    const handleClick = useCallback((e: React.MouseEvent<HTMLTableRowElement>) => {
+        // Check if the clicked element has data-no-action-modal attribute
+        const target = e.target as HTMLElement;
+        if (target.closest('[data-no-action-modal="true"]')) {
+            return; // Don't trigger row click if a special button was clicked
+        }
         onRowClick?.(item);
     }, [onRowClick, item]);
 

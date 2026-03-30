@@ -705,12 +705,16 @@ const Members: React.FC = () => {
       render: (member) => (
         <button
           className="member-id-copy"
+          data-no-action-modal="true"
           onClick={(e) => {
+            e.preventDefault()
             e.stopPropagation()
             navigator.clipboard.writeText(member.userId.toString())
             showToast(`ID ${member.userId} copied`, 'success')
           }}
+          onMouseDown={(e) => e.stopPropagation()}
           title="Click to copy ID"
+          type="button"
         >
           #{member.userId}
         </button>
