@@ -212,9 +212,18 @@ public class UserController {
         try {
             userService.deleteUser(id);
             return ResponseEntity.ok(java.util.Map.of("success", true, "message", "User deleted successfully"));
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            log.error("FK constraint violation while deleting user {}: {}", id, e.getMessage());
+            return ResponseEntity.status(400).body(java.util.Map.of(
+                "success", false, 
+                "error", "User has active dependencies. Please deactivate memberships or pt_sessions first."
+            ));
         } catch (Exception e) {
-            log.error("Failed to delete user {}", id, e);
-            return ResponseEntity.status(500).body(java.util.Map.of("success", false, "error", e.getMessage()));
+            log.error("Failed to delete user {}: {}", id, e.getMessage(), e);
+            return ResponseEntity.status(500).body(java.util.Map.of(
+                "success", false, 
+                "error", "An unexpected error occurred: " + e.getMessage()
+            ));
         }
     }
 

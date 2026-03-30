@@ -1003,6 +1003,18 @@ public class UserService {
             userRole = user.getRoles().iterator().next().getRoleName();
         }
 
+        // Before soft deleting, mark all active memberships as cancelled
+        // This prevents FK constraint violations
+        try {
+            entityManager.createNativeQuery(
+                "UPDATE memberships SET status = 'CANCELLED' WHERE user_id = :userId AND status IN ('ACTIVE', 'PENDING', 'EXPIRING_SOON')")
+                .setParameter("userId", id)
+                .executeUpdate();
+            log.info("Deactivated memberships for user {} before deletion", id);
+        } catch (Exception e) {
+            log.warn("Could not deactivate memberships for user {}: {}", id, e.getMessage());
+        }
+
         user.setIsDeleted(true);
         user.setStatus("DELETED");
         userRepository.save(user);
