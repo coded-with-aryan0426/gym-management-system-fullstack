@@ -53,7 +53,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
         boolean existsByUserId(Long userId);
 
-        @Query("SELECT u FROM User u JOIN u.roles r WHERE r.roleName = :roleName AND (LOWER(u.fullName) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(u.email) LIKE LOWER(CONCAT('%', :query, '%')))")
+        @Query("SELECT u FROM User u JOIN u.roles r WHERE r.roleName = :roleName AND (LOWER(u.fullName) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(u.email) LIKE LOWER(CONCAT('%', :query, '%')) OR CAST(u.userId AS STRING) LIKE CONCAT('%', :query, '%'))")
         List<User> searchUsers(@Param("roleName") String roleName, @Param("query") String query);
 
         // Social auth finders
