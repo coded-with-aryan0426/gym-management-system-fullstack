@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { FiX, FiMessageSquare, FiTrash2, FiAlertTriangle, FiSend, FiUser } from 'react-icons/fi'
+import { FiX, FiMessageSquare, FiTrash2, FiAlertTriangle, FiSend, FiUser, FiCopy } from 'react-icons/fi'
 import api from '../../services/api'
 import { showToast } from '../../utils/showToast'
 import './UserActionModals.css'
@@ -211,7 +211,20 @@ export const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
       onClose()
     } catch (err: any) {
       console.error('[DeleteUser] Failed:', err)
-      showToast('Failed to delete', 'error', err?.message || 'Please try again')
+      
+      // Better error handling based on status code
+      let errorMessage = 'Failed to delete user'
+      if (err.response?.status === 400) {
+        errorMessage = 'Cannot delete this user. Please check permissions or dependencies.'
+      } else if (err.response?.status === 403) {
+        errorMessage = 'You do not have permission to delete this user'
+      } else if (err.response?.status === 404) {
+        errorMessage = 'User not found'
+      } else if (err.response?.status === 500) {
+        errorMessage = 'Server error. User may have dependencies that cannot be deleted.'
+      }
+      
+      showToast(errorMessage, 'error', err?.response?.data?.message || 'Please try again')
     } finally {
       setDeleting(false)
     }
@@ -231,7 +244,24 @@ export const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
             <FiAlertTriangle size={18} />
           </div>
           <div className="uam__header-text">
-            <h2 className="uam__title">Delete {isBatch ? `${recipients.length} Users` : recipients[0]?.fullName}</h2>
+            <h2 className="uam__title">
+              <span>DELETE</span>
+              <button
+                className="uam__title-copy"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  const label = `DELETE ${isBatch ? `${recipients.length} USERS` : recipients[0]?.fullName || ''}`
+                  navigator.clipboard.writeText(label)
+                  showToast('Label copied', 'success')
+                }}
+                title="Copy DELETE label"
+                type="button"
+                aria-label="Copy DELETE label"
+              >
+                <FiCopy size={12} />
+              </button>
+              <span>{isBatch ? `${recipients.length} USERS` : recipients[0]?.fullName?.toUpperCase()}</span>
+            </h2>
             <p className="uam__subtitle">This action cannot be undone</p>
           </div>
           <button className="uam__close" onClick={onClose} aria-label="Close"><FiX size={16} /></button>
@@ -274,13 +304,27 @@ export const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
 
           <div className="uam__field uam__field--confirm">
             <label className="uam__label">
-              Type <strong className="uam__confirm-word">{CONFIRM_WORD}</strong> to confirm
+              <span className="uam__confirm-label">Type</span>
+              <strong className="uam__confirm-word">DELETE</strong>
+              <span className="uam__confirm-label">to confirm</span>
+              <button
+                className="uam__copy-btn"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  navigator.clipboard.writeText('DELETE')
+                  showToast('Copied to clipboard', 'success')
+                }}
+                title="Copy DELETE"
+                type="button"
+              >
+                <FiCopy size={11} />
+              </button>
             </label>
             <input
               ref={inputRef}
               type="text"
               className={`uam__input uam__input--confirm ${confirmText === CONFIRM_WORD ? 'uam__input--valid' : confirmText ? 'uam__input--invalid' : ''}`}
-              placeholder={CONFIRM_WORD}
+              placeholder="DELETE"
               value={confirmText}
               onChange={e => setConfirmText(e.target.value.toUpperCase())}
               disabled={deleting}
@@ -298,7 +342,7 @@ export const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
             disabled={!canDelete}
           >
             {deleting ? <span className="uam__spinner" /> : <FiTrash2 size={14} />}
-            {deleting ? 'Deleting…' : isBatch ? `Delete ${recipients.length} Users` : 'Delete User'}
+            {deleting ? 'Deleting…' : isBatch ? `DELETE ${recipients.length} USERS` : 'DELETE USER'}
           </button>
         </div>
       </div>

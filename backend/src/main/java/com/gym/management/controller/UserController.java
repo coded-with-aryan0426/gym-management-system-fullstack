@@ -208,8 +208,14 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
+    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+        try {
+            userService.deleteUser(id);
+            return ResponseEntity.ok(java.util.Map.of("success", true, "message", "User deleted successfully"));
+        } catch (Exception e) {
+            log.error("Failed to delete user {}", id, e);
+            return ResponseEntity.status(500).body(java.util.Map.of("success", false, "error", e.getMessage()));
+        }
     }
 
     // Assign customer to trainer

@@ -10,6 +10,8 @@ import com.gym.management.model.Membership;
 import com.gym.management.model.MembershipStatus;
 import com.gym.management.repository.RoleRepository;
 import com.gym.management.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +25,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserService {
+
+    private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
     @Autowired
     private UserRepository userRepository;
@@ -988,57 +992,34 @@ public class UserService {
         Objects.requireNonNull(id, "User ID must not be null");
         User user = userRepository.findById(id).orElse(null);
         if (user == null) {
-            return; // Or throw exception
+            log.warn("User not found for deletion: {}", id);
+            return;
         }
 
-        // Capture user info for audit log before deletion
         String userName = user.getFullName();
         String userEmail = user.getEmail();
-        String userRole = user.getRoles() != null && !user.getRoles().isEmpty()
-                ? user.getRoles().iterator().next().getRoleName()
-                : "USER";
-
-        // 1. Clear ManyToMany relationships (Trainer <-> Customer)
-        // We need to remove this user from others' lists to avoid FK constraint issues
-        // in bridging tables
-
-        // Remove as customer from all trainers
-        for (User trainer : user.getTrainers()) {
-            trainer.getCustomers().remove(user);
-            userRepository.save(trainer);
+        String userRole = "USER";
+        if (user.getRoles() != null && !user.getRoles().isEmpty()) {
+            userRole = user.getRoles().iterator().next().getRoleName();
         }
-        user.getTrainers().clear();
 
-        // Remove as trainer from all customers
-        for (User customer : user.getCustomers()) {
-            customer.getTrainers().remove(user);
-            userRepository.save(customer);
-        }
-        user.getCustomers().clear();
-
-        // Save to update join tables
-        userRepository.save(user);
-
-        // 2. Keep historical memberships/sessions/ratings and soft-delete only.
-        // Deleting child rows here causes FK violations because many historical tables
-        // (class bookings, ratings, notes, notifications, etc.) still reference this
-        // user.
-
-        // 3. Soft-delete user to avoid FK constraint failures from historical records
-        // while hiding the profile from regular queries via @SQLRestriction.
         user.setIsDeleted(true);
-        user.setStatus("Deleted");
+        user.setStatus("DELETED");
         userRepository.save(user);
+        log.info("Soft deleted user {} ({})", id, userName);
 
-        // Log the deletion in audit log
-        auditLogService.logDelete(
-                "User",
-                id.toString(),
-                userName,
-                null, // We don't know who deleted, could be passed as param
-                1L, // Default gym ID
-                String.format("%s deleted: %s (%s)", userRole, userName, userEmail),
-                null);
+        try {
+            auditLogService.logDelete(
+                    "User",
+                    id.toString(),
+                    userName,
+                    null,
+                    1L,
+                    String.format("%s deleted: %s (%s)", userRole, userName, userEmail),
+                    null);
+        } catch (Exception e) {
+            log.warn("Failed to log user deletion for {}: {}", id, e.getMessage());
+        }
     }
 
     /**

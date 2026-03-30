@@ -163,9 +163,12 @@ const Members: React.FC = () => {
         let filtered = allMembers
         if (debouncedSearch) {
           const q = debouncedSearch.toLowerCase()
+          const searchId = parseInt(debouncedSearch)
+          const isNumericSearch = !isNaN(searchId)
           filtered = filtered.filter(m =>
             m.fullName?.toLowerCase().includes(q) ||
-            m.email?.toLowerCase().includes(q)
+            m.email?.toLowerCase().includes(q) ||
+            (isNumericSearch && m.userId === searchId)
           )
         }
         if (statusFilter) {
@@ -695,6 +698,24 @@ const Members: React.FC = () => {
   }
 
   const columns: Column<MemberDTO>[] = [
+    {
+      key: "userId",
+      header: "ID",
+      width: "70px",
+      render: (member) => (
+        <button
+          className="member-id-copy"
+          onClick={(e) => {
+            e.stopPropagation()
+            navigator.clipboard.writeText(member.userId.toString())
+            showToast(`ID ${member.userId} copied`, 'success')
+          }}
+          title="Click to copy ID"
+        >
+          #{member.userId}
+        </button>
+      ),
+    },
     {
       key: "fullName",
       header: "Member",
