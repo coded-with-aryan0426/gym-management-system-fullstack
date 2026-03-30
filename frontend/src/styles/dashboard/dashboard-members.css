@@ -1,0 +1,733 @@
+/* ============================================================================
+   DASHBOARD MEMBERS CSS — Member Portal Extensions
+   
+   Extends dashboard-core.css with member-specific components and overrides.
+   Import after dashboard-core.css
+   
+   @import '../dashboard/dashboard-core.css';
+   @import '../dashboard/dashboard-members.css';
+   ============================================================================ */
+
+/* ════════════════════════════════════════════════════════════════════════════
+   1. MEMBER THEME OVERRIDES
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.dash--member {
+  /* Member brand colors - blue accent */
+  --dash-brand-primary: #3B82F6;
+  --dash-brand-primary-hover: #2563EB;
+  --dash-brand-primary-light: rgba(59, 130, 246, 0.12);
+  
+  /* Member background with blue accent gradient */
+  background-image:
+    radial-gradient(ellipse 50% 30% at 10% 0%, rgba(59, 130, 246, 0.06) 0%, transparent 55%),
+    radial-gradient(ellipse 40% 25% at 90% 0%, rgba(99, 102, 241, 0.04) 0%, transparent 55%);
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   2. MEMBER HEADER COMPONENT
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.dash-member__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dash-space-4);
+  margin-bottom: var(--dash-space-5);
+}
+
+.dash-member__header__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--dash-space-4);
+}
+
+.dash-member__header__profile {
+  display: flex;
+  align-items: center;
+  gap: var(--dash-space-3);
+}
+
+.dash-member__avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--dash-fs-xl);
+  font-weight: var(--dash-fw-bold);
+  color: #fff;
+  background: linear-gradient(135deg, var(--dash-blue), var(--dash-indigo));
+  flex-shrink: 0;
+}
+
+.dash-member__header__welcome {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dash-member__header__title {
+  font-size: var(--dash-fs-xl);
+  font-weight: var(--dash-fw-bold);
+  color: var(--dash-text);
+  letter-spacing: var(--dash-ls-tight);
+}
+
+.dash-member__header__subtitle {
+  font-size: var(--dash-fs-sm);
+  color: var(--dash-text-secondary);
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   3. MEMBER MEMBERSHIP STATUS CARD
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.dash-member__membership {
+  position: relative;
+  background: var(--dash-bg-card);
+  border: 1px solid var(--dash-border);
+  border-radius: var(--dash-radius-lg);
+  padding: var(--dash-space-4);
+  overflow: hidden;
+}
+
+.dash-member__membership::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--dash-blue), var(--dash-indigo));
+}
+
+.dash-member__membership--premium::before {
+  background: linear-gradient(90deg, var(--dash-amber), #f59e0b);
+}
+
+.dash-member__membership__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--dash-space-4);
+}
+
+.dash-member__membership__type {
+  display: flex;
+  align-items: center;
+  gap: var(--dash-space-2);
+}
+
+.dash-member__membership__badge {
+  font-size: var(--dash-fs-xs);
+  font-weight: var(--dash-fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 4px 10px;
+  border-radius: var(--dash-radius-full);
+  background: var(--dash-blue-light);
+  color: var(--dash-blue);
+}
+
+.dash-member__membership__badge--premium {
+  background: var(--dash-amber-light);
+  color: var(--dash-amber);
+}
+
+.dash-member__membership__name {
+  font-size: var(--dash-fs-md);
+  font-weight: var(--dash-fw-semibold);
+  color: var(--dash-text);
+}
+
+.dash-member__membership__body {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--dash-space-4);
+  margin-bottom: var(--dash-space-4);
+}
+
+.dash-member__membership__stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dash-member__membership__stat__value {
+  font-size: var(--dash-fs-xl);
+  font-weight: var(--dash-fw-bold);
+  color: var(--dash-text);
+}
+
+.dash-member__membership__stat__label {
+  font-size: var(--dash-fs-xs);
+  color: var(--dash-text-secondary);
+}
+
+.dash-member__membership__expiry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--dash-space-3);
+  background: var(--dash-bg-card-hover);
+  border-radius: var(--dash-radius-md);
+}
+
+.dash-member__membership__expiry__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dash-member__membership__expiry__label {
+  font-size: var(--dash-fs-xs);
+  color: var(--dash-text-secondary);
+}
+
+.dash-member__membership__expiry__date {
+  font-size: var(--dash-fs-sm);
+  font-weight: var(--dash-fw-semibold);
+  color: var(--dash-text);
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   4. MEMBER QUICK STATS
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.dash-member__stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--dash-space-3);
+}
+
+.dash-member__stat {
+  background: var(--dash-bg-card);
+  border: 1px solid var(--dash-border);
+  border-radius: var(--dash-radius-lg);
+  padding: var(--dash-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--dash-space-3);
+  transition: all var(--dash-transition-normal);
+}
+
+.dash-member__stat:hover {
+  border-color: var(--dash-border-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--dash-shadow-md);
+}
+
+.dash-member__stat__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--dash-radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dash-member__stat__icon--workouts  { background: var(--dash-blue-light); color: var(--dash-blue); }
+.dash-member__stat__icon--streak    { background: var(--dash-amber-light); color: var(--dash-amber); }
+.dash-member__stat__icon--classes   { background: var(--dash-violet-light); color: var(--dash-violet); }
+.dash-member__stat__icon--calories  { background: var(--dash-rose-light); color: var(--dash-rose); }
+
+.dash-member__stat__value {
+  font-size: var(--dash-fs-2xl);
+  font-weight: var(--dash-fw-extrabold);
+  color: var(--dash-text);
+}
+
+.dash-member__stat__label {
+  font-size: var(--dash-fs-sm);
+  color: var(--dash-text-secondary);
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   5. MEMBER UPCOMING CLASSES
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.dash-member__classes {
+  background: var(--dash-bg-card);
+  border: 1px solid var(--dash-border);
+  border-radius: var(--dash-radius-lg);
+  padding: var(--dash-space-4);
+}
+
+.dash-member__classes__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--dash-space-4);
+}
+
+.dash-member__classes__title {
+  font-size: var(--dash-fs-md);
+  font-weight: var(--dash-fw-semibold);
+  color: var(--dash-text);
+}
+
+.dash-member__classes__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dash-space-2);
+}
+
+.dash-member__class-row {
+  display: flex;
+  align-items: center;
+  gap: var(--dash-space-3);
+  padding: var(--dash-space-3);
+  background: var(--dash-bg-card-hover);
+  border: 1px solid var(--dash-border);
+  border-radius: var(--dash-radius-md);
+  transition: all var(--dash-transition-fast);
+}
+
+.dash-member__class-row:hover {
+  border-color: var(--dash-border-hover);
+  transform: translateX(4px);
+}
+
+.dash-member__class__date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 48px;
+  padding: var(--dash-space-2);
+  background: var(--dash-glass-bg);
+  border-radius: var(--dash-radius-sm);
+}
+
+.dash-member__class__day {
+  font-size: var(--dash-fs-lg);
+  font-weight: var(--dash-fw-bold);
+  color: var(--dash-brand-primary);
+}
+
+.dash-member__class__month {
+  font-size: var(--dash-fs-xs);
+  color: var(--dash-text-tertiary);
+  text-transform: uppercase;
+}
+
+.dash-member__class__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.dash-member__class__name {
+  font-size: var(--dash-fs-sm);
+  font-weight: var(--dash-fw-semibold);
+  color: var(--dash-text);
+}
+
+.dash-member__class__meta {
+  font-size: var(--dash-fs-xs);
+  color: var(--dash-text-secondary);
+}
+
+.dash-member__class__trainer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dash-member__class__trainer__avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--dash-violet), var(--dash-indigo));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--dash-fs-xs);
+  font-weight: var(--dash-fw-bold);
+  color: #fff;
+}
+
+.dash-member__class__trainer__name {
+  font-size: var(--dash-fs-xs);
+  color: var(--dash-text-secondary);
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   6. MEMBER PROGRESS TRACKER
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.dash-member__progress {
+  background: var(--dash-bg-card);
+  border: 1px solid var(--dash-border);
+  border-radius: var(--dash-radius-lg);
+  padding: var(--dash-space-4);
+}
+
+.dash-member__progress__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--dash-space-4);
+}
+
+.dash-member__progress__title {
+  font-size: var(--dash-fs-md);
+  font-weight: var(--dash-fw-semibold);
+  color: var(--dash-text);
+}
+
+.dash-member__progress__chart {
+  flex-shrink: 0;
+  min-height: 200px;
+}
+
+.dash-member__progress__goals {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dash-space-3);
+  margin-top: var(--dash-space-4);
+}
+
+.dash-member__goal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dash-space-2);
+}
+
+.dash-member__goal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dash-member__goal__name {
+  font-size: var(--dash-fs-sm);
+  font-weight: var(--dash-fw-medium);
+  color: var(--dash-text);
+}
+
+.dash-member__goal__value {
+  font-size: var(--dash-fs-xs);
+  color: var(--dash-text-secondary);
+}
+
+.dash-member__goal__bar {
+  height: 6px;
+  background: var(--dash-glass-bg);
+  border-radius: var(--dash-radius-full);
+  overflow: hidden;
+}
+
+.dash-member__goal__fill {
+  height: 100%;
+  border-radius: var(--dash-radius-full);
+  transition: width var(--dash-transition-slow);
+}
+
+.dash-member__goal__fill--blue   { background: var(--dash-blue); }
+.dash-member__goal__fill--green  { background: var(--dash-green); }
+.dash-member__goal__fill--violet { background: var(--dash-violet); }
+.dash-member__goal__fill--amber  { background: var(--dash-amber); }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   7. MEMBER TRAINER CARD
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.dash-member__trainer-card {
+  background: var(--dash-bg-card);
+  border: 1px solid var(--dash-border);
+  border-radius: var(--dash-radius-lg);
+  padding: var(--dash-space-4);
+}
+
+.dash-member__trainer-card__header {
+  display: flex;
+  align-items: center;
+  gap: var(--dash-space-3);
+  margin-bottom: var(--dash-space-4);
+}
+
+.dash-member__trainer-card__avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--dash-fs-lg);
+  font-weight: var(--dash-fw-bold);
+  color: #fff;
+  background: linear-gradient(135deg, var(--dash-brand-primary), var(--dash-violet));
+}
+
+.dash-member__trainer-card__info {
+  flex: 1;
+}
+
+.dash-member__trainer-card__name {
+  font-size: var(--dash-fs-md);
+  font-weight: var(--dash-fw-semibold);
+  color: var(--dash-text);
+}
+
+.dash-member__trainer-card__specialty {
+  font-size: var(--dash-fs-sm);
+  color: var(--dash-text-secondary);
+}
+
+.dash-member__trainer-card__stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--dash-space-3);
+  margin-bottom: var(--dash-space-4);
+}
+
+.dash-member__trainer-card__stat {
+  display: flex;
+  flex-direction: column;
+  padding: var(--dash-space-3);
+  background: var(--dash-bg-card-hover);
+  border-radius: var(--dash-radius-md);
+  text-align: center;
+}
+
+.dash-member__trainer-card__stat__value {
+  font-size: var(--dash-fs-lg);
+  font-weight: var(--dash-fw-bold);
+  color: var(--dash-text);
+}
+
+.dash-member__trainer-card__stat__label {
+  font-size: var(--dash-fs-xs);
+  color: var(--dash-text-tertiary);
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   8. MEMBER ACTIVITY FEED
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.dash-member__activity {
+  background: var(--dash-bg-card);
+  border: 1px solid var(--dash-border);
+  border-radius: var(--dash-radius-lg);
+  padding: var(--dash-space-4);
+}
+
+.dash-member__activity__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--dash-space-4);
+}
+
+.dash-member__activity__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dash-space-2);
+}
+
+.dash-member__activity__item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--dash-space-3);
+  padding: var(--dash-space-3);
+  background: var(--dash-bg-card-hover);
+  border-radius: var(--dash-radius-md);
+}
+
+.dash-member__activity__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--dash-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dash-member__activity__icon--workout { background: var(--dash-blue-light); color: var(--dash-blue); }
+.dash-member__activity__icon--class   { background: var(--dash-violet-light); color: var(--dash-violet); }
+.dash-member__activity__icon--goal    { background: var(--dash-green-light); color: var(--dash-green); }
+.dash-member__activity__icon--streak  { background: var(--dash-amber-light); color: var(--dash-amber); }
+
+.dash-member__activity__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.dash-member__activity__text {
+  font-size: var(--dash-fs-sm);
+  color: var(--dash-text);
+}
+
+.dash-member__activity__time {
+  font-size: var(--dash-fs-xs);
+  color: var(--dash-text-tertiary);
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   9. MEMBER QUICK ACTIONS
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.dash-member__actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--dash-space-2);
+}
+
+.dash-member__action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--dash-space-2);
+  padding: var(--dash-space-4);
+  background: var(--dash-bg-card);
+  border: 1px solid var(--dash-border);
+  border-radius: var(--dash-radius-md);
+  font-size: var(--dash-fs-sm);
+  font-weight: var(--dash-fw-medium);
+  color: var(--dash-text-secondary);
+  cursor: pointer;
+  transition: all var(--dash-transition-fast);
+  text-align: center;
+}
+
+.dash-member__action-btn:hover {
+  background: var(--dash-glass-bg-hover);
+  border-color: var(--dash-border-hover);
+  color: var(--dash-text);
+  transform: translateY(-2px);
+}
+
+.dash-member__action-btn__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--dash-radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--dash-glass-bg);
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   10. MEMBER LAYOUT GRID
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.dash-member__layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: var(--dash-space-5);
+}
+
+.dash-member__main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dash-space-5);
+}
+
+.dash-member__sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dash-space-4);
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   11. MEMBER FIXED-HEIGHT CARDS
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.dash-member__card--membership {
+  height: 280px;
+  min-height: 280px;
+  max-height: 280px;
+}
+
+.dash-member__card--classes {
+  height: 340px;
+  min-height: 340px;
+  max-height: 340px;
+}
+
+.dash-member__card--progress {
+  height: 380px;
+  min-height: 380px;
+  max-height: 380px;
+}
+
+.dash-member__card--activity {
+  height: 300px;
+  min-height: 300px;
+  max-height: 300px;
+}
+
+.dash-member__card--trainer {
+  height: 280px;
+  min-height: 280px;
+  max-height: 280px;
+}
+
+/* Scrollable lists */
+.dash-member__classes__list--scroll,
+.dash-member__activity__list--scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.06) transparent;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   12. MEMBER RESPONSIVE OVERRIDES
+   ════════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 1280px) {
+  .dash-member__layout {
+    grid-template-columns: 1fr 300px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .dash-member__layout {
+    grid-template-columns: 1fr;
+  }
+  
+  .dash-member__sidebar {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--dash-space-4);
+  }
+  
+  .dash-member__stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .dash-member__header__top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--dash-space-3);
+  }
+  
+  .dash-member__sidebar {
+    grid-template-columns: 1fr;
+  }
+  
+  .dash-member__membership__body {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .dash--member {
+    padding: var(--dash-page-pad-mobile);
+  }
+  
+  .dash-member__stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .dash-member__actions {
+    grid-template-columns: 1fr;
+  }
+}

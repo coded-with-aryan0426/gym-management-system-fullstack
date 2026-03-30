@@ -1,0 +1,958 @@
+/* ============================================================================
+   DASHBOARD OWNERS CSS — Owner Portal Extensions
+   
+   Extends dashboard-core.css with owner-specific components and overrides.
+   Import after dashboard-core.css
+   
+   @import '../dashboard/dashboard-core.css';
+   @import '../dashboard/dashboard-owners.css';
+   ============================================================================ */
+
+/* ════════════════════════════════════════════════════════════════════════════
+   1. OWNER THEME OVERRIDES
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.dash--owner {
+  /* Owner-specific background with subtle gradients */
+  background-image:
+    radial-gradient(ellipse 60% 30% at 15% 0%, rgba(16, 185, 129, 0.05) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 25% at 85% 0%, rgba(139, 92, 246, 0.04) 0%, transparent 55%);
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   2. OWNER HEADER COMPONENT
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.dash-owner__header {
+  display: flex;
+  align-items: center;
+  gap: var(--dash-space-4);
+  padding: var(--dash-space-3) var(--dash-space-4);
+  background: var(--dash-bg-elevated);
+  border: 1px solid var(--dash-border);
+  border-radius: var(--dash-radius-lg);
+  margin-bottom: var(--dash-space-4);
+  flex-wrap: wrap;
+}
+
+.dash-owner__header__greet {
+  display: flex;
+  align-items: center;
+  gap: var(--dash-space-2);
+  flex-shrink: 0;
+  padding-right: var(--dash-space-4);
+  border-right: 1px solid var(--dash-border);
+}
+
+.dash-owner__header__greet__emoji {
+  font-size: var(--dash-fs-xl);
+}
+
+.dash-owner__header__greet__text {
+  display: flex;
+  flex-direction: column;
+}
+
+.dash-owner__header__greet__title {
+  font-size: var(--dash-fs-base);
+  font-weight: var(--dash-fw-semibold);
+  color: var(--dash-text);
+}
+
+.dash-owner__header__greet__date {
+  font-size: var(--dash-fs-xs);
+  color: var(--dash-text-secondary);
+}
+
+.dash-owner__header__kpi-row {
+  display: flex;
+  gap: var(--dash-space-2);
+  flex: 1;
+  min-width: 0;
+}
+
+.dash-owner__header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--dash-space-2);
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+/* Live Indicator */
+.dash-owner__live {
+  display: flex;
+  align-items: center;
+  gap: var(--dash-space-1);
+  font-size: var(--dash-fs-xs);
+  font-weight: var(--dash-fw-semibold);
+  color: var(--dash-green);
+  background: var(--dash-green-light);
+  padding: 4px 10px;
+  border-radius: var(--dash-radius-full);
+  border: 1px solid rgba(16, 185, 129, 0.22);
+}
+
+.dash-owner__live__dot {
+  width: 6px;
+  height: 6px;
+  background: var(--dash-green);
+  border-radius: 50%;
+  animation: dash-pulse 2s infinite;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   3. OWNER KPI CARDS (Header Chips)
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.dash-owner__kpi {
+  position: relative;
+  overflow: hidden;
+  background: var(--dash-bg-card);
+  border: 1px solid var(--dash-border);
+  border-radius: var(--dash-radius-md);
+  padding: 5px 9px 5px 7px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--dash-space-2);
+  flex: 1;
+  min-width: 0;
+  transition: transform var(--dash-transition-fast), box-shadow var(--dash-transition-fast);
+}
+
+.dash-owner__kpi::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  border-radius: 0 2px 2px 0;
+}
+
+.dash-owner__kpi:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--dash-shadow-xs);
+}
+
+/* KPI Accent Colors */
+.dash-owner__kpi--green::after  { background: var(--dash-green); box-shadow: 0 0 6px var(--dash-green-glow); }
+.dash-owner__kpi--blue::after   { background: var(--dash-blue); box-shadow: 0 0 6px var(--dash-blue-glow); }
+.dash-owner__kpi--violet::after { background: var(--dash-violet); box-shadow: 0 0 6px var(--dash-violet-glow); }
+.dash-owner__kpi--amber::after  { background: var(--dash-amber); box-shadow: 0 0 6px var(--dash-amber-glow); }
+.dash-owner__kpi--rose::after   { background: var(--dash-rose); box-shadow: 0 0 6px var(--dash-rose-glow); }
+
+.dash-owner__kpi__icon {
+  width: 26px;
+  height: 26px;
+  border-radius: var(--dash-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dash-owner__kpi__content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.dash-owner__kpi__label {
+  font-size: 0.58rem;
+  font-weight: var(--dash-fw-medium);
+  color: var(--dash-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.dash-owner__kpi__value {
+  font-size: var(--dash-fs-base);
+  font-weight: var(--dash-fw-extrabold);
+  color: var(--dash-text);
+  line-height: 1.1;
+}
+
+.dash-owner__kpi__spark {
+  width: 50px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   4. OWNER FINANCE CARD COMPONENTS
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* Money Flow Header */
+.dash-owner__mf-header {
+  display: flex;
+  align-items: center;
+  gap: var(--dash-space-2);
+  margin-bottom: var(--dash-space-2);
+  flex-shrink: 0;
+  flex-wrap: nowrap;
+  min-width: 0;
+}
+
+.dash-owner__mf-title {
+  flex-shrink: 0;
+}
+
+/* Period Tabs */
+.dash-owner__period-tabs {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--dash-border);
+  border-radius: var(--dash-radius-sm);
+  padding: 2px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.dash-owner__period-tab {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.6rem;
+  font-weight: var(--dash-fw-bold);
+  padding: 2px 7px;
+  border-radius: 4px;
+  color: var(--dash-text-secondary);
+  transition: all var(--dash-transition-fast);
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.dash-owner__period-tab:hover {
+  color: var(--dash-text);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.dash-owner__period-tab--active {
+  background: var(--dash-green-light);
+  color: var(--dash-green);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.2);
+}
+
+/* Revenue Stats Strip */
+.dash-owner__rev-stats {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-shrink: 1;
+}
+
+.dash-owner__rev-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0;
+  padding: 1px 7px;
+  border-right: 1px solid var(--dash-border);
+}
+
+.dash-owner__rev-stat:last-of-type {
+  border-right: none;
+  padding-right: 0;
+}
+
+.dash-owner__rev-stat__label {
+  font-size: 0.46rem;
+  color: var(--dash-text-tertiary);
+  font-weight: var(--dash-fw-semibold);
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.dash-owner__rev-stat__value {
+  font-size: 0.68rem;
+  font-weight: var(--dash-fw-extrabold);
+  color: var(--dash-text);
+  white-space: nowrap;
+}
+
+.dash-owner__rev-stat__value--green { color: var(--dash-green); }
+.dash-owner__rev-stat__value--red   { color: var(--dash-rose); }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   5. OWNER BREAKDOWN BARS (Revenue Sources)
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.dash-owner__bkdn-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dash-space-3);
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.06) transparent;
+}
+
+.dash-owner__bkdn-row {
+  display: grid;
+  grid-template-columns: 100px 1fr 66px;
+  align-items: center;
+  gap: var(--dash-space-2);
+}
+
+.dash-owner__bkdn-info {
+  display: flex;
+  align-items: center;
+  gap: var(--dash-space-2);
+  min-width: 0;
+}
+
+.dash-owner__bkdn-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.dash-owner__bkdn-label {
+  font-size: 0.67rem;
+  color: var(--dash-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-transform: capitalize;
+}
+
+.dash-owner__bkdn-track {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.dash-owner__bkdn-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.6s ease;
+}
+
+.dash-owner__bkdn-amount {
+  font-size: 0.68rem;
+  font-weight: var(--dash-fw-bold);
+  text-align: right;
+  white-space: nowrap;
+  color: var(--dash-text);
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   6. OWNER MEMBER ROWS
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* Expiring Member Row */
+.dash-owner__expire-row {
+  display: flex;
+  align-items: center;
+  gap: var(--dash-space-2);
+  padding: var(--dash-space-2) var(--dash-space-3);
+  background: var(--dash-bg-card-hover);
+  border: 1px solid var(--dash-border);
+  border-radius: var(--dash-radius-md);
+  transition: all var(--dash-transition-fast);
+}
+
+.dash-owner__expire-row:hover {
+  background: var(--dash-glass-bg-hover);
+  border-color: var(--dash-border-hover);
+}
+
+.dash-owner__expire-row--urgent {
+  border-color: rgba(244, 63, 94, 0.2);
+  background: rgba(244, 63, 94, 0.04);
+}
+
+.dash-owner__expire-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, var(--dash-amber), #f97316);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.62rem;
+  font-weight: var(--dash-fw-bold);
+  color: #fff;
+  box-shadow: 0 2px 7px rgba(245, 158, 11, 0.35);
+}
+
+.dash-owner__expire-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.dash-owner__expire-name {
+  font-size: 0.72rem;
+  font-weight: var(--dash-fw-semibold);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--dash-text);
+}
+
+.dash-owner__expire-plan {
+  font-size: 0.59rem;
+  color: var(--dash-text-secondary);
+}
+
+.dash-owner__expire-days {
+  font-size: 0.67rem;
+  font-weight: var(--dash-fw-bold);
+  padding: 2px 8px;
+  border-radius: var(--dash-radius-xs);
+  flex-shrink: 0;
+  background: var(--dash-amber-light);
+  color: var(--dash-amber);
+  border: 1px solid rgba(245, 158, 11, 0.22);
+}
+
+.dash-owner__expire-days--warn {
+  color: #fb923c;
+  background: rgba(251, 146, 60, 0.12);
+  border-color: rgba(251, 146, 60, 0.22);
+}
+
+.dash-owner__expire-days--urgent {
+  color: var(--dash-rose);
+  background: var(--dash-rose-light);
+  border-color: rgba(244, 63, 94, 0.24);
+  animation: dash-pulse 2s infinite;
+}
+
+/* Overdue Payment Row */
+.dash-owner__overdue-row {
+  display: flex;
+  align-items: center;
+  gap: var(--dash-space-2);
+  padding: var(--dash-space-2) var(--dash-space-3);
+  background: rgba(244, 63, 94, 0.04);
+  border: 1px solid rgba(244, 63, 94, 0.12);
+  border-radius: var(--dash-radius-md);
+  transition: all var(--dash-transition-fast);
+}
+
+.dash-owner__overdue-row:hover {
+  background: rgba(244, 63, 94, 0.08);
+  border-color: rgba(244, 63, 94, 0.24);
+}
+
+.dash-owner__overdue-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, var(--dash-rose), #e11d48);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.62rem;
+  font-weight: var(--dash-fw-bold);
+  color: #fff;
+  box-shadow: 0 2px 7px rgba(244, 63, 94, 0.35);
+}
+
+.dash-owner__overdue-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  flex-shrink: 0;
+}
+
+.dash-owner__overdue-days {
+  font-size: 0.58rem;
+  color: var(--dash-amber);
+  font-weight: var(--dash-fw-semibold);
+}
+
+.dash-owner__overdue-amount {
+  font-size: 0.75rem;
+  font-weight: var(--dash-fw-bold);
+  color: var(--dash-rose);
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   7. OWNER TRAINER ROWS
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.dash-owner__trainer-row {
+  display: flex;
+  align-items: center;
+  gap: var(--dash-space-2);
+  padding: var(--dash-space-2) var(--dash-space-3);
+  background: var(--dash-bg-card-hover);
+  border: 1px solid var(--dash-border);
+  border-radius: var(--dash-radius-md);
+  transition: all var(--dash-transition-fast);
+}
+
+.dash-owner__trainer-row:hover {
+  background: var(--dash-glass-bg-hover);
+  border-color: var(--dash-border-hover);
+  transform: translateX(2px);
+}
+
+.dash-owner__trainer-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--dash-radius-md);
+  flex-shrink: 0;
+  background: linear-gradient(135deg, var(--dash-violet), var(--dash-blue));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.64rem;
+  font-weight: var(--dash-fw-bold);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.35);
+}
+
+.dash-owner__trainer-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.dash-owner__trainer-name {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: var(--dash-fw-semibold);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--dash-text);
+}
+
+.dash-owner__trainer-meta {
+  font-size: 0.59rem;
+  color: var(--dash-text-secondary);
+}
+
+.dash-owner__trainer-slots {
+  display: flex;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.dash-owner__slot {
+  font-size: 0.55rem;
+  font-weight: var(--dash-fw-semibold);
+  padding: 2px 5px;
+  border-radius: 3px;
+}
+
+.dash-owner__slot--available {
+  background: var(--dash-green-light);
+  color: var(--dash-green);
+  border: 1px solid rgba(16, 185, 129, 0.22);
+}
+
+.dash-owner__slot--booked {
+  background: var(--dash-rose-light);
+  color: var(--dash-rose);
+  border: 1px solid rgba(244, 63, 94, 0.22);
+}
+
+.dash-owner__slot--limited {
+  background: var(--dash-amber-light);
+  color: var(--dash-amber);
+  border: 1px solid rgba(245, 158, 11, 0.22);
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   8. OWNER CLASS ROWS
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.dash-owner__class-row {
+  display: flex;
+  align-items: center;
+  gap: var(--dash-space-2);
+  padding: var(--dash-space-2) var(--dash-space-3) var(--dash-space-2) var(--dash-space-3);
+  background: var(--dash-bg-card-hover);
+  border: 1px solid var(--dash-border);
+  border-left: 3px solid transparent;
+  border-radius: var(--dash-radius-md);
+  transition: all var(--dash-transition-fast);
+}
+
+.dash-owner__class-row:hover {
+  background: var(--dash-glass-bg-hover);
+}
+
+.dash-owner__class-row--upcoming {
+  border-left-color: var(--dash-amber);
+}
+
+.dash-owner__class-row--in_progress {
+  border-left-color: var(--dash-green);
+  background: rgba(16, 185, 129, 0.05);
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.07);
+}
+
+.dash-owner__class-row--completed {
+  border-left-color: rgba(255, 255, 255, 0.12);
+  opacity: 0.55;
+}
+
+.dash-owner__class-time {
+  font-size: 0.62rem;
+  font-weight: var(--dash-fw-semibold);
+  color: var(--dash-text-secondary);
+  width: 44px;
+  flex-shrink: 0;
+}
+
+.dash-owner__class-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.dash-owner__class-name {
+  font-size: 0.72rem;
+  font-weight: var(--dash-fw-semibold);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--dash-text);
+}
+
+.dash-owner__class-meta {
+  font-size: 0.59rem;
+  color: var(--dash-text-secondary);
+}
+
+.dash-owner__class-badge {
+  font-size: 0.52rem;
+  font-weight: var(--dash-fw-bold);
+  padding: 2px 7px;
+  border-radius: var(--dash-radius-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+}
+
+.dash-owner__class-badge--live {
+  background: var(--dash-green);
+  color: #fff;
+  animation: dash-pulse 2s infinite;
+}
+
+.dash-owner__class-badge--upcoming {
+  background: var(--dash-amber-light);
+  color: var(--dash-amber);
+  border: 1px solid rgba(245, 158, 11, 0.24);
+}
+
+.dash-owner__class-badge--completed {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--dash-text-secondary);
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   9. OWNER QUICK ACTIONS GRID
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.dash-owner__action-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--dash-space-2);
+  flex: 1;
+}
+
+.dash-owner__action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--dash-space-2);
+  padding: var(--dash-space-3) var(--dash-space-2);
+  border-radius: var(--dash-radius-md);
+  border: 1px solid var(--dash-border);
+  cursor: pointer;
+  font-size: 0.64rem;
+  font-weight: var(--dash-fw-medium);
+  transition: all var(--dash-transition-normal);
+  background: var(--dash-bg-card-hover);
+  color: var(--dash-text-secondary);
+  position: relative;
+  overflow: hidden;
+}
+
+.dash-owner__action-btn::before {
+  content: '';
+  position: absolute;
+  bottom: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 28px;
+  border-radius: 50%;
+  filter: blur(12px);
+  opacity: 0;
+  transition: opacity var(--dash-transition-normal);
+}
+
+.dash-owner__action-btn:hover {
+  transform: translateY(-2px);
+  color: var(--dash-text);
+}
+
+.dash-owner__action-btn:hover::before {
+  opacity: 1;
+}
+
+.dash-owner__action-btn--blue::before    { background: var(--dash-blue); }
+.dash-owner__action-btn--green::before   { background: var(--dash-green); }
+.dash-owner__action-btn--violet::before  { background: var(--dash-violet); }
+.dash-owner__action-btn--cyan::before    { background: var(--dash-cyan); }
+.dash-owner__action-btn--amber::before   { background: var(--dash-amber); }
+.dash-owner__action-btn--rose::before    { background: var(--dash-rose); }
+
+.dash-owner__action-btn--blue:hover    { background: var(--dash-blue-light); border-color: rgba(59, 130, 246, 0.3); color: var(--dash-blue); }
+.dash-owner__action-btn--green:hover   { background: var(--dash-green-light); border-color: rgba(16, 185, 129, 0.3); color: var(--dash-green); }
+.dash-owner__action-btn--violet:hover  { background: var(--dash-violet-light); border-color: rgba(139, 92, 246, 0.3); color: var(--dash-violet); }
+.dash-owner__action-btn--cyan:hover    { background: var(--dash-cyan-light); border-color: rgba(6, 182, 212, 0.3); color: var(--dash-cyan); }
+.dash-owner__action-btn--amber:hover   { background: var(--dash-amber-light); border-color: rgba(245, 158, 11, 0.3); color: var(--dash-amber); }
+.dash-owner__action-btn--rose:hover    { background: var(--dash-rose-light); border-color: rgba(244, 63, 94, 0.3); color: var(--dash-rose); }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   10. OWNER METRICS (Occupancy & Progress)
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.dash-owner__metric-block {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.dash-owner__metric-block--sep {
+  margin-top: var(--dash-space-3);
+  padding-top: var(--dash-space-3);
+  border-top: 1px solid var(--dash-border);
+}
+
+/* Occupancy Gauge */
+.dash-owner__occ-row {
+  display: flex;
+  align-items: center;
+  gap: var(--dash-space-3);
+}
+
+.dash-owner__occ-gauge {
+  position: relative;
+  width: 78px;
+  height: 78px;
+  flex-shrink: 0;
+}
+
+.dash-owner__occ-pct {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.95rem;
+  font-weight: var(--dash-fw-extrabold);
+  letter-spacing: -0.03em;
+}
+
+.dash-owner__occ-pct--low    { color: var(--dash-green); text-shadow: 0 0 12px rgba(52, 211, 153, 0.5); }
+.dash-owner__occ-pct--medium { color: var(--dash-amber); text-shadow: 0 0 12px rgba(251, 191, 36, 0.5); }
+.dash-owner__occ-pct--high   { color: var(--dash-rose); text-shadow: 0 0 12px rgba(251, 113, 133, 0.5); }
+
+.dash-owner__occ-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+}
+
+.dash-owner__occ-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 3px 7px;
+  background: var(--dash-bg-card-hover);
+  border-radius: var(--dash-radius-sm);
+  border: 1px solid var(--dash-border);
+}
+
+.dash-owner__occ-stat__label {
+  font-size: 0.57rem;
+  color: var(--dash-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dash-owner__occ-stat__value {
+  font-size: 0.78rem;
+  font-weight: var(--dash-fw-bold);
+  color: var(--dash-text);
+}
+
+/* Progress Bar */
+.dash-owner__prog-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--dash-space-2);
+}
+
+.dash-owner__prog-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--dash-space-3);
+}
+
+.dash-owner__prog-bar {
+  flex: 1;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: var(--dash-radius-full);
+  overflow: hidden;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.dash-owner__prog-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--dash-cyan), var(--dash-blue));
+  border-radius: var(--dash-radius-full);
+  transition: width 0.7s ease;
+  box-shadow: 0 0 8px rgba(6, 182, 212, 0.45);
+}
+
+.dash-owner__prog-pct {
+  font-size: var(--dash-fs-base);
+  font-weight: var(--dash-fw-extrabold);
+  color: var(--dash-cyan);
+  min-width: 36px;
+  text-align: right;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   11. OWNER FIXED-HEIGHT CARD SYSTEM
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* Finance Row: 8+4 */
+.dash-owner__card--revenue,
+.dash-owner__card--breakdown {
+  height: 320px;
+  min-height: 320px;
+  max-height: 320px;
+}
+
+/* Members Row: 4×3 */
+.dash-owner__card--membership,
+.dash-owner__card--expiring,
+.dash-owner__card--overdue,
+.dash-owner__card--activity {
+  height: 280px;
+  min-height: 280px;
+  max-height: 280px;
+}
+
+/* Trainers Row: 3×4 */
+.dash-owner__card--trainers,
+.dash-owner__card--top-trainers,
+.dash-owner__card--schedule {
+  height: 260px;
+  min-height: 260px;
+  max-height: 260px;
+}
+
+/* Equipment Row: 3×4 */
+.dash-owner__card--equip-status,
+.dash-owner__card--equip-maintenance,
+.dash-owner__card--equip-util {
+  height: 260px;
+  min-height: 260px;
+  max-height: 260px;
+}
+
+/* Gym Ops Row: 6+6 */
+.dash-owner__card--metrics,
+.dash-owner__card--attendance {
+  height: 300px;
+  min-height: 300px;
+  max-height: 300px;
+}
+
+/* Alerts Row: 6+6 */
+.dash-owner__card--birthdays,
+.dash-owner__card--actions {
+  height: 240px;
+  min-height: 240px;
+  max-height: 240px;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   12. OWNER RESPONSIVE OVERRIDES
+   ════════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 1400px) {
+  .dash-owner__kpi__spark {
+    display: none;
+  }
+}
+
+@media (max-width: 1100px) {
+  .dash-owner__header__kpi-row {
+    flex-wrap: wrap;
+  }
+  
+  .dash-owner__kpi {
+    min-width: calc(50% - 4px);
+  }
+}
+
+@media (max-width: 900px) {
+  .dash-owner__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .dash-owner__header__greet {
+    border-right: none;
+    padding-right: 0;
+    padding-bottom: var(--dash-space-2);
+    border-bottom: 1px solid var(--dash-border);
+  }
+  
+  .dash-owner__header__actions {
+    justify-content: flex-end;
+  }
+  
+  .dash-owner__action-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .dash--owner {
+    padding: var(--dash-space-2);
+  }
+  
+  .dash-owner__header__kpi-row {
+    flex-direction: column;
+  }
+  
+  .dash-owner__kpi {
+    min-width: 100%;
+  }
+  
+  .dash-owner__action-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

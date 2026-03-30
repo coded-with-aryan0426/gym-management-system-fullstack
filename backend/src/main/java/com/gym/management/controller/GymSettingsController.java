@@ -19,6 +19,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -108,6 +109,7 @@ public class GymSettingsController {
     }
 
     @PutMapping("/owner-profile")
+    @Transactional
     public ResponseEntity<?> updateOwnerProfile(@RequestBody Map<String, Object> data) {
         try {
             Long userId = getCurrentUserId();

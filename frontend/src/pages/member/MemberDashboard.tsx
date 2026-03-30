@@ -23,12 +23,15 @@ import {
     Star,
     Award,
     Play,
-    Pause
+    Pause,
+    Users
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useAuth } from '../../contexts/AuthContext';
-import { UnifiedPage } from '../../components/shared/UnifiedPage';
-import { UnifiedCard } from '../../components/shared/UnifiedCard';
+
+// Import unified dashboard CSS
+import '../../styles/dashboard/dashboard-core.css';
+import '../../styles/dashboard/dashboard-members.css';
 import './MemberDashboard.css';
 
 interface DashboardData {
@@ -100,212 +103,236 @@ const MemberDashboard: React.FC = () => {
 
     // Skeleton Loading State
     if (loading) return (
-        <UnifiedPage className="member-dashboard-unified member-dashboard--skeleton">
-            <header className="member-dashboard__header member-dashboard__header--skeleton">
-                <div className="header-top-row">
-                    <div className="welcome-group">
-                        <div className="skeleton-line" style={{ width: 80, height: 14 }} />
-                        <div className="skeleton-line skeleton-line--lg" style={{ width: 150, marginTop: 8 }} />
-                    </div>
-                    <div className="skeleton-line" style={{ width: 140, height: 14 }} />
+        <div className="dash dash--member">
+            <div className="dash-skeleton">
+                <div className="dash-skeleton__header"></div>
+                <div className="dash-skeleton__kpi-grid">
+                    {[1, 2, 3, 4].map(i => <div key={i} className="dash-skeleton__card"></div>)}
                 </div>
-                <div className="header-stats-grid">
-                    {[1, 2, 3].map(i => (
-                        <div key={i} className="skeleton-stat-card">
-                            <div className="skeleton-line" style={{ width: '60%', height: 12 }} />
-                            <div className="skeleton-line skeleton-line--lg" style={{ width: '40%', marginTop: 12 }} />
-                        </div>
-                    ))}
-                </div>
-            </header>
-            <div className="layout-dashboard">
-                <div className="layout-main-content">
-                    <div className="skeleton-card skeleton-card--banner">
-                        <div className="skeleton-line" style={{ width: 100, height: 14 }} />
-                        <div className="skeleton-line skeleton-line--lg" style={{ width: 200, marginTop: 12 }} />
-                        <div className="skeleton-line" style={{ width: 150, marginTop: 8, height: 12 }} />
-                    </div>
-                    <div className="skeleton-card">
-                        <div className="skeleton-line" style={{ width: 120, height: 18 }} />
-                        <div className="skeleton-quick-actions">
-                            {[1, 2, 3, 4].map(i => (
-                                <div key={i} className="skeleton-action-btn" />
-                            ))}
-                        </div>
-                    </div>
-                </div>
-                <aside className="layout-sidebar">
-                    <div className="skeleton-card">
-                        <div className="skeleton-line" style={{ width: 140, height: 16 }} />
-                        {[1, 2, 3].map(i => (
-                            <div key={i} className="skeleton-list-item" style={{ marginTop: 12 }}>
-                                <div className="skeleton-avatar" />
-                                <div style={{ flex: 1 }}>
-                                    <div className="skeleton-line" style={{ width: '70%' }} />
-                                    <div className="skeleton-line" style={{ width: '50%', marginTop: 6, height: 12 }} />
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </aside>
+                <div className="dash-skeleton__content"></div>
             </div>
-        </UnifiedPage>
+        </div>
     );
 
     return (
-        <UnifiedPage className="member-dashboard-unified">
-            <header className="member-dashboard__header">
-                <div className="header-top-row">
-                    <div className="welcome-group">
-                        <span className="text-greeting">{getGreeting()},</span>
-                        <h1 className="heading-hero">{firstName}</h1>
+        <div className="dash dash--member">
+            {/* Header */}
+            <header className="dash-member__header">
+                <div className="dash-member__header__top">
+                    <div className="dash-member__header__profile">
+                        <div className="dash-member__avatar">
+                            {firstName.charAt(0)}
+                        </div>
+                        <div className="dash-member__header__welcome">
+                            <h1 className="dash-member__header__title">
+                                {getGreeting()}, {firstName}
+                            </h1>
+                            <p className="dash-member__header__subtitle">
+                                Let's crush your fitness goals today
+                            </p>
+                        </div>
                     </div>
-                    <div className="header-date-display">
+                    <div className="dash-trainer__header__date">
                         <Calendar size={14} />
-                        <span>{format(currentTime, 'EEE, MMM d')} • {format(currentTime, 'h:mm a')}</span>
+                        {format(currentTime, 'EEE, MMM d')}
+                        <span style={{ opacity: 0.5 }}>•</span>
+                        {format(currentTime, 'h:mm a')}
                     </div>
-                </div>
-
-                <div className="header-stats-grid">
-                    <UnifiedCard hover={false} className="header-stat-card">
-                        <div className="header-stat-label">Membership</div>
-                        <div className="header-stat-value">
-                            {membership.daysRemaining} 
-                            <span className="header-stat-unit">Days Left</span>
-                        </div>
-                    </UnifiedCard>
-                    <UnifiedCard hover={false} className="header-stat-card">
-                        <div className="header-stat-label">Bookings</div>
-                        <div className="header-stat-value">
-                            {dashboard?.bookedClassesCount || 0} 
-                            <span className="header-stat-unit">Classes</span>
-                        </div>
-                    </UnifiedCard>
-                    <UnifiedCard hover={false} className="header-stat-card">
-                        <div className="header-stat-label">Activity</div>
-                        <div className="header-stat-value">
-                            {stats.streakDays} 
-                            <span className="header-stat-unit">Day Streak</span>
-                        </div>
-                    </UnifiedCard>
                 </div>
             </header>
 
-            <div className="layout-dashboard">
-                <div className="layout-main-content">
-                    {upcomingClasses.length > 0 && (
-                        <UnifiedCard className="current-session-banner-unified" hover={false}>
-                            <div className="session-banner-content">
-                                <div>
-                                    <div className="session-tag">
-                                        <Zap size={14} fill="currentColor" /> NEXT SESSION
-                                    </div>
-                                    <h2 className="session-title">{upcomingClasses[0].title}</h2>
-                                    <p className="session-info">{upcomingClasses[0].location} • {upcomingClasses[0].time}</p>
-                                </div>
-                                <button className="btn-premium" onClick={() => navigate('/member/classes')}>
-                                    Check In
-                                </button>
-                            </div>
-                        </UnifiedCard>
-                    )}
+            {/* Stats Grid */}
+            <section className="dash-member__stats-grid">
+                <div className="dash-member__stat">
+                    <div className="dash-member__stat__icon dash-member__stat__icon--workouts">
+                        <Dumbbell size={20} />
+                    </div>
+                    <span className="dash-member__stat__value">18</span>
+                    <span className="dash-member__stat__label">This Month</span>
+                </div>
+                <div className="dash-member__stat">
+                    <div className="dash-member__stat__icon dash-member__stat__icon--streak">
+                        <Flame size={20} />
+                    </div>
+                    <span className="dash-member__stat__value">{stats.streakDays}</span>
+                    <span className="dash-member__stat__label">Day Streak</span>
+                </div>
+                <div className="dash-member__stat">
+                    <div className="dash-member__stat__icon dash-member__stat__icon--classes">
+                        <Calendar size={20} />
+                    </div>
+                    <span className="dash-member__stat__value">{dashboard?.bookedClassesCount || 0}</span>
+                    <span className="dash-member__stat__label">Booked Classes</span>
+                </div>
+                <div className="dash-member__stat">
+                    <div className="dash-member__stat__icon dash-member__stat__icon--calories">
+                        <Heart size={20} />
+                    </div>
+                    <span className="dash-member__stat__value">2,450</span>
+                    <span className="dash-member__stat__label">Avg. Calories</span>
+                </div>
+            </section>
 
-                    <section>
-                        <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                            <h2 className="section-title" style={{ margin: 0 }}><Calendar size={18} /> My Schedule</h2>
-                            <button onClick={() => navigate('/member/bookings')} style={{ background: 'none', border: 'none', color: 'var(--accent-blue)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontSize: 13, fontWeight: 600 }}>
+            {/* Main Layout */}
+            <div className="dash-member__layout">
+                {/* Main Content */}
+                <div className="dash-member__main">
+                    {/* Membership Card */}
+                    <div className={`dash-member__membership ${membership.packageName?.toLowerCase().includes('premium') ? 'dash-member__membership--premium' : ''}`}>
+                        <div className="dash-member__membership__header">
+                            <div className="dash-member__membership__type">
+                                <span className={`dash-member__membership__badge ${membership.packageName?.toLowerCase().includes('premium') ? 'dash-member__membership__badge--premium' : ''}`}>
+                                    {membership.packageName?.toLowerCase().includes('premium') ? '⭐ PREMIUM' : 'STANDARD'}
+                                </span>
+                                <span className="dash-member__membership__name">{membership.packageName}</span>
+                            </div>
+                            <span className={`dash-badge dash-badge--${membership.status === 'Active' ? 'success' : 'warning'}`}>
+                                {membership.status}
+                            </span>
+                        </div>
+                        <div className="dash-member__membership__body">
+                            <div className="dash-member__membership__stat">
+                                <span className="dash-member__membership__stat__value">{membership.daysRemaining}</span>
+                                <span className="dash-member__membership__stat__label">Days Left</span>
+                            </div>
+                            <div className="dash-member__membership__stat">
+                                <span className="dash-member__membership__stat__value">∞</span>
+                                <span className="dash-member__membership__stat__label">Gym Access</span>
+                            </div>
+                            <div className="dash-member__membership__stat">
+                                <span className="dash-member__membership__stat__value">5</span>
+                                <span className="dash-member__membership__stat__label">PT Sessions</span>
+                            </div>
+                        </div>
+                        <div className="dash-member__membership__expiry">
+                            <div className="dash-member__membership__expiry__info">
+                                <span className="dash-member__membership__expiry__label">Membership Ends</span>
+                                <span className="dash-member__membership__expiry__date">{membership.endDate}</span>
+                            </div>
+                            <button className="dash-btn dash-btn--primary dash-btn--sm" onClick={() => navigate('/member/membership')}>
+                                Renew
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Upcoming Classes */}
+                    <div className="dash-member__classes dash-card dash-member__card--classes">
+                        <div className="dash-member__classes__header">
+                            <h3 className="dash-member__classes__title">
+                                <Calendar size={18} /> Upcoming Classes
+                            </h3>
+                            <button className="dash-link" onClick={() => navigate('/member/bookings')}>
                                 View All <ChevronRight size={14} />
                             </button>
                         </div>
-                        <div className="schedule-list">
-                            {upcomingClasses.map((cls, idx) => (
-                                <UnifiedCard key={cls.id} delay={idx * 0.05} className="class-card-compact">
-                                    <div className="class-time-block">
-                                        <div className="class-time-hour">{cls.time.split(' ')[0]}</div>
-                                        <div className="class-time-ampm">{cls.time.split(' ')[1]}</div>
+                        <div className="dash-member__classes__list dash-member__classes__list--scroll">
+                            {upcomingClasses.map((cls) => (
+                                <div key={cls.id} className="dash-member__class-row">
+                                    <div className="dash-member__class__date">
+                                        <span className="dash-member__class__day">{cls.date.split(',')[0].split(' ')[1] || cls.date.split(' ')[0]}</span>
+                                        <span className="dash-member__class__month">{cls.date.includes(',') ? cls.date.split(',')[0].split(' ')[0] : 'TMW'}</span>
                                     </div>
-                                    <div className="class-divider" />
-                                    <div className="class-details">
-                                        <div className="class-type-tag">{cls.type.toUpperCase()}</div>
-                                        <h3 className="class-name">{cls.title}</h3>
-                                        <p className="class-meta">{cls.location} • Coach {cls.trainer}</p>
+                                    <div className="dash-member__class__info">
+                                        <span className="dash-member__class__name">{cls.title}</span>
+                                        <span className="dash-member__class__meta">
+                                            <Clock size={12} /> {cls.time} • <MapPin size={12} /> {cls.location}
+                                        </span>
                                     </div>
-                                    <div className="class-action-area">
-                                        <span className="class-date-label">{cls.date}</span>
-                                        <ChevronRight size={16} color="var(--text-tertiary)" />
+                                    <div className="dash-member__class__trainer">
+                                        <div className="dash-member__class__trainer__avatar">
+                                            {cls.trainer.split(' ').map(n => n[0]).join('')}
+                                        </div>
+                                        <span className="dash-member__class__trainer__name">{cls.trainer.split(' ')[0]}</span>
                                     </div>
-                                </UnifiedCard>
+                                </div>
                             ))}
                         </div>
-                    </section>
+                    </div>
                 </div>
 
-                <aside className="layout-sidebar">
-                    <UnifiedCard>
-                        <h3 className="sidebar-section-title">Quick Actions</h3>
-                        <div className="quick-actions-grid">
+                {/* Sidebar */}
+                <div className="dash-member__sidebar">
+                    {/* Quick Actions */}
+                    <div className="dash-card">
+                        <h3 className="dash-card__title">Quick Actions</h3>
+                        <div className="dash-member__actions">
                             {quickActions.map(action => (
-                                <button key={action.label} onClick={() => navigate(action.path)} className="quick-action-btn-dashboard">
-                                    <div className="quick-action-icon" style={{ color: action.color }}>{action.icon}</div>
-                                    <span className="quick-action-label">{action.label}</span>
+                                <button key={action.label} className="dash-member__action-btn" onClick={() => navigate(action.path)}>
+                                    <div className="dash-member__action-btn__icon" style={{ color: action.color }}>
+                                        {action.icon}
+                                    </div>
+                                    <span>{action.label}</span>
                                 </button>
                             ))}
                         </div>
-                    </UnifiedCard>
+                    </div>
 
-                    <UnifiedCard>
-                        <h3 className="sidebar-section-title">My Trainer</h3>
-                        <div className="trainer-card-compact">
-                            <div className="trainer-avatar-sm">
+                    {/* My Trainer */}
+                    <div className="dash-member__trainer-card">
+                        <div className="dash-member__trainer-card__header">
+                            <div className="dash-member__trainer-card__avatar">
                                 {trainer.fullName.split(' ').map(n => n[0]).join('')}
                             </div>
-                            <div>
-                                <div className="trainer-name-sm">{trainer.fullName}</div>
-                                <div className="trainer-special-sm">{trainer.specialization}</div>
+                            <div className="dash-member__trainer-card__info">
+                                <span className="dash-member__trainer-card__name">{trainer.fullName}</span>
+                                <span className="dash-member__trainer-card__specialty">{trainer.specialization}</span>
                             </div>
                         </div>
-                        <button className="btn-premium" style={{ width: '100%', justifyContent: 'center' }} onClick={() => navigate('/member/trainer')}>
-                            Message
+                        <div className="dash-member__trainer-card__stats">
+                            <div className="dash-member__trainer-card__stat">
+                                <span className="dash-member__trainer-card__stat__value">12</span>
+                                <span className="dash-member__trainer-card__stat__label">Sessions</span>
+                            </div>
+                            <div className="dash-member__trainer-card__stat">
+                                <span className="dash-member__trainer-card__stat__value">4.9</span>
+                                <span className="dash-member__trainer-card__stat__label">Rating</span>
+                            </div>
+                        </div>
+                        <button className="dash-btn dash-btn--primary" onClick={() => navigate('/member/trainer')} style={{ width: '100%', justifyContent: 'center' }}>
+                            <MessageSquare size={16} /> Message Trainer
                         </button>
-                    </UnifiedCard>
+                    </div>
 
-                    <UnifiedCard>
-                        <h3 className="sidebar-section-title">Membership Status</h3>
-                        <div className="membership-status-bar">
-                            <span style={{ fontWeight: 600, fontSize: 14 }}>{membership.packageName}</span>
-                            <span className="membership-badge">{membership.status}</span>
+                    {/* Progress Snapshot */}
+                    <div className="dash-member__progress dash-member__card--activity">
+                        <div className="dash-member__progress__header">
+                            <h3 className="dash-member__progress__title">
+                                <TrendingUp size={16} /> Progress
+                            </h3>
                         </div>
-                        <div className="progress-bar-container">
-                            <div className="progress-bar-fill" style={{ width: `${Math.min(100, (membership.daysRemaining || 0) / 30 * 100)}%` }} />
-                        </div>
-                        <div style={{ fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'center', marginTop: 8 }}>
-                            Ends {membership.endDate}
-                        </div>
-                    </UnifiedCard>
-
-                    <UnifiedCard>
-                        <h3 className="sidebar-section-title">Progress Snapshot</h3>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8, fontWeight: 500 }}>
-                            <span>Weight: 78kg</span>
-                            <span>Goal: 75kg</span>
-                        </div>
-                        <div className="progress-bar-container">
-                            <div className="progress-bar-fill" style={{ width: '70%' }} />
-                        </div>
-                        <div className="progress-snapshot-metrics">
-                            <div className="metric-item">
-                                <div className="metric-value">18</div>
-                                <div className="metric-label">Workouts</div>
+                        <div className="dash-member__progress__goals">
+                            <div className="dash-member__goal">
+                                <div className="dash-member__goal__header">
+                                    <span className="dash-member__goal__name">Weight Goal</span>
+                                    <span className="dash-member__goal__value">78kg → 75kg</span>
+                                </div>
+                                <div className="dash-member__goal__bar">
+                                    <div className="dash-member__goal__fill dash-member__goal__fill--blue" style={{ width: '70%' }}></div>
+                                </div>
                             </div>
-                            <div className="metric-item">
-                                <div className="metric-value">92%</div>
-                                <div className="metric-label">Accuracy</div>
+                            <div className="dash-member__goal">
+                                <div className="dash-member__goal__header">
+                                    <span className="dash-member__goal__name">Weekly Workouts</span>
+                                    <span className="dash-member__goal__value">4/5</span>
+                                </div>
+                                <div className="dash-member__goal__bar">
+                                    <div className="dash-member__goal__fill dash-member__goal__fill--green" style={{ width: '80%' }}></div>
+                                </div>
+                            </div>
+                            <div className="dash-member__goal">
+                                <div className="dash-member__goal__header">
+                                    <span className="dash-member__goal__name">Strength Progress</span>
+                                    <span className="dash-member__goal__value">Level 3</span>
+                                </div>
+                                <div className="dash-member__goal__bar">
+                                    <div className="dash-member__goal__fill dash-member__goal__fill--violet" style={{ width: '60%' }}></div>
+                                </div>
                             </div>
                         </div>
-                    </UnifiedCard>
-                </aside>
+                    </div>
+                </div>
             </div>
-        </UnifiedPage>
+        </div>
     );
 };
 

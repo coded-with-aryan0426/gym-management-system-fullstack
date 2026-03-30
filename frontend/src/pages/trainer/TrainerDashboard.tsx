@@ -3,14 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import {
     Users, Calendar, Bell,
     MessageSquare, TrendingUp, ChevronRight,
-    CheckCircle, IndianRupee,
-    Dumbbell, FileText, AlertCircle, Clock
+    CheckCircle, IndianRupee, Star,
+    Dumbbell, FileText, AlertCircle, Clock, Flame, Target
 } from 'lucide-react';
 import { format, differenceInMinutes } from 'date-fns';
 import { usePageEntry, useButtonPress } from '../../hooks/useAnimations';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
 import { formatCurrency } from '../../utils/formatters';
+
+// Import unified dashboard CSS
+import '../../styles/dashboard/dashboard-core.css';
+import '../../styles/dashboard/dashboard-trainers.css';
 import './TrainerDashboard.css';
 
 // Components
@@ -138,199 +142,272 @@ const TrainerDashboard: React.FC = () => {
             .substring(0, 2);
     };
 
-    if (!data) return <div className="tp-loader">
-        <div className="tp-spinner"></div>
-        <div className="tp-text">Loading Mission Control...</div>
-    </div>;
+    if (!data) return (
+        <div className="dash dash--trainer">
+            <div className="dash-skeleton">
+                <div className="dash-skeleton__header"></div>
+                <div className="dash-skeleton__kpi-grid">
+                    {[1, 2, 3, 4].map(i => <div key={i} className="dash-skeleton__card"></div>)}
+                </div>
+                <div className="dash-skeleton__content"></div>
+            </div>
+        </div>
+    );
 
     const trainerFirstName = (user?.fullName || data.trainerName || 'Trainer').split(' ')[0] || 'Trainer';
+    const greeting = currentTime.getHours() < 12 ? 'Morning' : currentTime.getHours() < 18 ? 'Afternoon' : 'Evening';
 
     return (
-        <div className="trainer-dashboard">
-            <div data-edit-id="trainer-dashboard-header">
-                <header className="dashboard-header">
-                    <div className="header-content">
-                        <h1 className="welcome-text">
-                            Good {currentTime.getHours() < 12 ? 'Morning' : currentTime.getHours() < 18 ? 'Afternoon' : 'Evening'},
-                            <span className="highlight-text"> {trainerFirstName}</span>
+        <div className="dash dash--trainer">
+            {/* Header */}
+            <header className="dash-trainer__header">
+                <div className="dash-trainer__header__top">
+                    <div className="dash-trainer__header__welcome">
+                        <h1 className="dash-trainer__header__title">
+                            Good {greeting}, <span style={{ color: 'var(--dash-brand-primary)' }}>{trainerFirstName}</span>
                         </h1>
-                        <p className="date-display">
-                            <Calendar size={14} />
-                            {format(currentTime, 'EEEE, MMMM do, yyyy')}
-                            <span className="time-separator">•</span>
-                            <Clock size={14} />
-                            {format(currentTime, 'HH:mm:ss')}
+                        <p className="dash-trainer__header__subtitle">
+                            Here's your training overview for today
                         </p>
                     </div>
-                    <div className="header-actions">
-                        <button className="action-btn" onClick={() => navigate('/trainer/schedule')} {...buttonPress}>
-                            <Calendar size={18} /> Schedule
-                        </button>
-                        <button className="action-btn primary" onClick={() => navigate('/trainer/members')} {...buttonPress}>
-                            <Users size={18} /> Members
-                        </button>
+                    <div className="dash-trainer__header__date">
+                        <Calendar size={14} />
+                        {format(currentTime, 'EEEE, MMMM d')}
+                        <span style={{ opacity: 0.5 }}>•</span>
+                        <Clock size={14} />
+                        {format(currentTime, 'HH:mm')}
                     </div>
-                </header>
-            </div>
+                </div>
+            </header>
 
-            {/* KPI Cards Grid */}
-            <section className="kpi-grid">
-                <div data-edit-id="trainer-dashboard-kpi-earnings" style={{ display: 'contents' }}>
-                    <DashboardStatCard
-                        title="Today's Earnings"
-                        value={formatCurrency(data.todayEarnings)}
-                        icon={IndianRupee}
-                        color="#10b981"
-                        delay={0.1}
-                        trend="vs yesterday"
-                        trendUp={true}
-                    />
+            {/* KPI Grid */}
+            <section className="dash-trainer__kpi-grid">
+                <div className="dash-trainer__kpi dash-trainer__kpi--earnings">
+                    <div className="dash-trainer__kpi__header">
+                        <div className="dash-trainer__kpi__icon dash-trainer__kpi__icon--earnings">
+                            <IndianRupee size={20} />
+                        </div>
+                        {data.todayEarnings > 0 && (
+                            <span className="dash-trainer__kpi__trend dash-trainer__kpi__trend--up">
+                                <TrendingUp size={12} /> +12%
+                            </span>
+                        )}
+                    </div>
+                    <div className="dash-trainer__kpi__body">
+                        <span className="dash-trainer__kpi__value">{formatCurrency(data.todayEarnings)}</span>
+                        <span className="dash-trainer__kpi__label">Today's Earnings</span>
+                    </div>
                 </div>
-                <div data-edit-id="trainer-dashboard-kpi-sessions" style={{ display: 'contents' }}>
-                    <DashboardStatCard
-                        title="Sessions Today"
-                        value={`${data.completedToday}/${data.totalToday}`}
-                        icon={Dumbbell}
-                        color="#6366F1"
-                        delay={0.1}
-                        trend={`${data.attendanceRate}% Rate`}
-                        trendUp={data.attendanceRate > 80}
-                    />
+
+                <div className="dash-trainer__kpi dash-trainer__kpi--sessions">
+                    <div className="dash-trainer__kpi__header">
+                        <div className="dash-trainer__kpi__icon dash-trainer__kpi__icon--sessions">
+                            <Dumbbell size={20} />
+                        </div>
+                        {data.attendanceRate > 80 && (
+                            <span className="dash-trainer__kpi__trend dash-trainer__kpi__trend--up">
+                                {data.attendanceRate}%
+                            </span>
+                        )}
+                    </div>
+                    <div className="dash-trainer__kpi__body">
+                        <span className="dash-trainer__kpi__value">{data.completedToday}/{data.totalToday}</span>
+                        <span className="dash-trainer__kpi__label">Sessions Today</span>
+                    </div>
                 </div>
-                <div data-edit-id="trainer-dashboard-kpi-active-clients" style={{ display: 'contents' }}>
-                    <DashboardStatCard
-                        title="Active Clients"
-                        value={data.activeMembers}
-                        icon={Users}
-                        color="#3B82F6"
-                        delay={0.1}
-                    />
+
+                <div className="dash-trainer__kpi dash-trainer__kpi--clients">
+                    <div className="dash-trainer__kpi__header">
+                        <div className="dash-trainer__kpi__icon dash-trainer__kpi__icon--clients">
+                            <Users size={20} />
+                        </div>
+                    </div>
+                    <div className="dash-trainer__kpi__body">
+                        <span className="dash-trainer__kpi__value">{data.activeMembers}</span>
+                        <span className="dash-trainer__kpi__label">Active Clients</span>
+                    </div>
                 </div>
-                <div data-edit-id="trainer-dashboard-kpi-pending-tasks" style={{ display: 'contents' }}>
-                    <DashboardStatCard
-                        title="Pending Tasks"
-                        value={data.alerts.length}
-                        icon={Bell}
-                        color="#DC2626"
-                        delay={0.1}
-                        trend={data.alerts.length > 0 ? "Action Req." : "All Clear"}
-                        trendUp={data.alerts.length === 0}
-                    />
+
+                <div className="dash-trainer__kpi dash-trainer__kpi--rating">
+                    <div className="dash-trainer__kpi__header">
+                        <div className="dash-trainer__kpi__icon dash-trainer__kpi__icon--rating">
+                            <Star size={20} />
+                        </div>
+                    </div>
+                    <div className="dash-trainer__kpi__body">
+                        <span className="dash-trainer__kpi__value">4.9</span>
+                        <span className="dash-trainer__kpi__label">Avg. Rating</span>
+                    </div>
                 </div>
             </section>
 
-            {/* Main Content Grid */}
-            <div className="dashboard-main-grid">
-
-                {/* Left Column: Charts */}
-                <div className="dashboard-column main-column">
-                    <div data-edit-id="trainer-dashboard-activity-chart">
-                        <ActivityChart data={data.weeklyActivity} />
+            {/* Main Layout */}
+            <div className="dash-trainer__layout">
+                {/* Main Column */}
+                <div className="dash-trainer__main">
+                    {/* Today's Schedule */}
+                    <div className="dash-trainer__schedule dash-card dash-trainer__card--schedule">
+                        <div className="dash-trainer__schedule__header">
+                            <h3 className="dash-trainer__schedule__title">
+                                <Calendar size={18} /> Today's Schedule
+                            </h3>
+                            <span className="dash-trainer__schedule__count">{sessions.length} sessions</span>
+                        </div>
+                        <div className="dash-trainer__schedule__list dash-trainer__schedule__list--scroll">
+                            {sessions.length > 0 ? (
+                                sessions.map((session) => (
+                                    <div key={session.id} className={`dash-trainer__session dash-trainer__session--${session.status}`}>
+                                        <div className="dash-trainer__session__time">
+                                            <span className="dash-trainer__session__time-start">
+                                                {format(session.startTime, 'HH:mm')}
+                                            </span>
+                                            <span className="dash-trainer__session__time-end">
+                                                {session.endTime ? format(session.endTime, 'HH:mm') : '--:--'}
+                                            </span>
+                                        </div>
+                                        <div className="dash-trainer__session__client">
+                                            <div className="dash-trainer__session__avatar">
+                                                {session.title.charAt(0)}
+                                            </div>
+                                            <div className="dash-trainer__session__info">
+                                                <span className="dash-trainer__session__name">{session.title}</span>
+                                                <span className="dash-trainer__session__type">{session.room} • {session.enrolled}/{session.capacity}</span>
+                                            </div>
+                                        </div>
+                                        <div className="dash-trainer__session__status">
+                                            <span className={`dash-badge dash-badge--${session.status === 'completed' ? 'success' : session.status === 'in-progress' ? 'primary' : 'default'}`}>
+                                                {session.status}
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="dash-empty">
+                                    <CheckCircle size={32} />
+                                    <p>No sessions scheduled for today</p>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
-                    {/* Secondary Charts Row */}
-                    <div className="charts-row">
-                        <div data-edit-id="trainer-dashboard-earnings-chart">
-                            <EarningsChart data={data.monthlyEarningsHistory} />
+                    {/* Charts Row */}
+                    <div className="dash-row dash-row--2">
+                        <div className="dash-card">
+                            <ActivityChart data={data.weeklyActivity} />
                         </div>
-                        <div data-edit-id="trainer-dashboard-session-pie">
-                            <SessionPieChart data={data.sessionDistribution} />
+                        <div className="dash-card">
+                            <EarningsChart data={data.monthlyEarningsHistory} />
                         </div>
                     </div>
                 </div>
 
-                {/* Right Column: Agenda & Alerts */}
-                <div className="dashboard-column side-column">
-
-                    <div data-edit-id="trainer-dashboard-agenda">
-                        <div className="widget-panel agenda-panel">
-                            <div className="widget-header">
-                                <h3><Calendar size={16} /> Today's Agenda</h3>
-                                <button className="view-all-link" onClick={() => navigate('/trainer/schedule')}>View All</button>
-                            </div>
-                            <div className="agenda-list">
-                                {sessions.length > 0 ? (
-                                    sessions.slice(0, 5).map((session) => (
-                                        <div key={session.id} className={`agenda-item ${session.status}`}>
-                                            <div className="agenda-time">
-                                                <span className="start-time">{format(session.startTime, 'HH:mm')}</span>
-                                                <span className="duration">{differenceInMinutes(session.endTime!, session.startTime)}m</span>
-                                            </div>
-                                            <div className="agenda-details">
-                                                <h4>{session.title}</h4>
-                                                <div className="agenda-meta">
-                                                    <span className="room">{session.room}</span>
-                                                    <span className={`status-badge ${session.status}`}>
-                                                        {session.status}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            {session.status === 'upcoming' && (
-                                                <button className="check-in-btn" title="Start Session">
-                                                    <ChevronRight size={14} />
-                                                </button>
-                                            )}
-                                        </div>
-                                    ))
-                                ) : (
-                                    <div className="empty-state">
-                                        <CheckCircle size={24} />
-                                        <p>No sessions scheduled</p>
-                                    </div>
-                                )}
-                            </div>
+                {/* Sidebar */}
+                <div className="dash-trainer__sidebar">
+                    {/* Quick Actions */}
+                    <div className="dash-card">
+                        <h3 className="dash-card__title">Quick Actions</h3>
+                        <div className="dash-trainer__actions">
+                            <button className="dash-trainer__action-btn dash-trainer__action-btn--primary" onClick={() => navigate('/trainer/schedule')} {...buttonPress}>
+                                <div className="dash-trainer__action-btn__icon"><Calendar size={18} /></div>
+                                <span>Schedule</span>
+                            </button>
+                            <button className="dash-trainer__action-btn" onClick={() => navigate('/trainer/members')} {...buttonPress}>
+                                <div className="dash-trainer__action-btn__icon"><Users size={18} /></div>
+                                <span>Members</span>
+                            </button>
+                            <button className="dash-trainer__action-btn" onClick={() => navigate('/trainer/messages')} {...buttonPress}>
+                                <div className="dash-trainer__action-btn__icon"><MessageSquare size={18} /></div>
+                                <span>Messages</span>
+                            </button>
+                            <button className="dash-trainer__action-btn" onClick={() => navigate('/trainer/progress-notes')} {...buttonPress}>
+                                <div className="dash-trainer__action-btn__icon"><FileText size={18} /></div>
+                                <span>Notes</span>
+                            </button>
                         </div>
                     </div>
 
                     {/* Alerts Panel */}
-                    <div data-edit-id="trainer-dashboard-alerts">
-                        <div className="widget-panel alerts-panel">
-                            <div className="widget-header">
-                                <h3><AlertCircle size={18} /> Needs Attention</h3>
-                                {data.alerts.length > 0 && <span className="badge-count">{data.alerts.length}</span>}
-                            </div>
-                            <div className="alerts-list">
-                                {data.alerts.length > 0 ? (
-                                    data.alerts.map(alert => (
-                                        <div key={alert.id} className={`alert-card ${alert.severity}`}>
-                                            <div className="alert-avatar" style={{ background: alert.severity === 'high' ? 'linear-gradient(135deg, #EF4444, #B91C1C)' : undefined }}>
-                                                <span>{getInitials(alert.memberName)}</span>
-                                            </div>
-                                            <div className="alert-content">
-                                                <h4>{alert.memberName}</h4>
-                                                <p>{alert.message}</p>
-                                                <span className="alert-time">{alert.time}</span>
-                                            </div>
-                                            <button
-                                                className="alert-action-btn"
-                                                title={alert.type === 'PENDING_NOTE' ? 'Write note' : alert.type === 'MISSED_SESSION' ? 'View schedule' : 'Open messages'}
-                                                onClick={() => {
-                                                    if (alert.type === 'PENDING_NOTE') navigate('/trainer/progress-notes');
-                                                    else if (alert.type === 'MISSED_SESSION') navigate('/trainer/schedule');
-                                                    else navigate('/trainer/messages');
-                                                }}
-                                                {...buttonPress}
-                                            >
-                                                {alert.type === 'PENDING_NOTE' ? <FileText size={14} /> :
-                                                    alert.type === 'MISSED_SESSION' ? <Calendar size={14} /> :
-                                                        <MessageSquare size={14} />}
-                                            </button>
+                    <div className="dash-card dash-trainer__card--clients">
+                        <div className="dash-card__header">
+                            <h3 className="dash-card__title">
+                                <AlertCircle size={16} /> Needs Attention
+                            </h3>
+                            {data.alerts.length > 0 && (
+                                <span className="dash-badge dash-badge--danger">{data.alerts.length}</span>
+                            )}
+                        </div>
+                        <div className="dash-trainer__clients__list--scroll">
+                            {data.alerts.length > 0 ? (
+                                data.alerts.map(alert => (
+                                    <div key={alert.id} className="dash-trainer__client-row">
+                                        <div 
+                                            className="dash-trainer__client__avatar" 
+                                            style={{ 
+                                                background: alert.severity === 'high' 
+                                                    ? 'linear-gradient(135deg, #EF4444, #B91C1C)' 
+                                                    : 'linear-gradient(135deg, var(--dash-violet), var(--dash-indigo))' 
+                                            }}
+                                        >
+                                            {getInitials(alert.memberName)}
                                         </div>
-                                    ))
-                                ) : (
-                                      <div className="empty-state">
-                                          <CheckCircle size={32} />
-                                          <p>All caught up!</p>
-                                      </div>
-                                  )}
-                              </div>
-                          </div>
-                      </div>
+                                        <div className="dash-trainer__client__info">
+                                            <span className="dash-trainer__client__name">{alert.memberName}</span>
+                                            <span className="dash-trainer__client__meta">{alert.message}</span>
+                                        </div>
+                                        <button
+                                            className="dash-btn dash-btn--ghost dash-btn--sm"
+                                            onClick={() => {
+                                                if (alert.type === 'PENDING_NOTE') navigate('/trainer/progress-notes');
+                                                else if (alert.type === 'MISSED_SESSION') navigate('/trainer/schedule');
+                                                else navigate('/trainer/messages');
+                                            }}
+                                            {...buttonPress}
+                                        >
+                                            <ChevronRight size={16} />
+                                        </button>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="dash-empty">
+                                    <CheckCircle size={24} />
+                                    <p>All caught up!</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
 
-                  </div>
-              </div>
-          </div>
-      );
+                    {/* Performance Card */}
+                    <div className="dash-card dash-trainer__card--performance">
+                        <h3 className="dash-card__title">Performance</h3>
+                        <div className="dash-trainer__performance">
+                            <div className="dash-trainer__performance__metric">
+                                <span className="dash-trainer__performance__label">
+                                    <Target size={14} /> Sessions This Week
+                                </span>
+                                <span className="dash-trainer__performance__value">{data.totalToday * 5}</span>
+                            </div>
+                            <div className="dash-trainer__performance__metric">
+                                <span className="dash-trainer__performance__label">
+                                    <Flame size={14} /> Retention Rate
+                                </span>
+                                <span className="dash-trainer__performance__value">94%</span>
+                            </div>
+                            <div className="dash-trainer__performance__metric">
+                                <span className="dash-trainer__performance__label">
+                                    <Star size={14} /> Client Rating
+                                </span>
+                                <div className="dash-trainer__rating">
+                                    {[1, 2, 3, 4, 5].map(i => (
+                                        <Star key={i} size={14} className={i <= 4 ? 'dash-trainer__rating__star' : 'dash-trainer__rating__star--empty'} fill={i <= 4 ? 'currentColor' : 'none'} />
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
 };
 
 export default TrainerDashboard;

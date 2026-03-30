@@ -364,6 +364,156 @@
 
 .dash__card--overdue:hover { border-color: rgba(244,63,94,0.22); box-shadow: 0 10px 36px rgba(244,63,94,0.07); }
 
+/* ══════════════════════════════════════════════════════════════════
+   FIXED-HEIGHT LAYOUT SYSTEM
+   Each row has uniform card heights. Charts/graphs stay static.
+   Only list content scrolls within its container.
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── Row Height Definitions ── */
+/* Finance Row: Money Flow (chart) + Revenue Sources (list) - taller for chart */
+.dash__card--revenue,
+.dash__card--breakdown {
+  height: 320px;
+  min-height: 320px;
+  max-height: 320px;
+}
+
+/* Members Row: 4 cards × 3col - uniform height */
+.dash__card--membership,
+.dash__card--expiring,
+.dash__card--overdue,
+.dash__card--activity {
+  height: 280px;
+  min-height: 280px;
+  max-height: 280px;
+}
+
+/* Trainers Row: 3 cards × 4col - uniform height */
+.dash__card--trainers,
+.dash__card--top-trainers,
+.dash__card--schedule {
+  height: 260px;
+  min-height: 260px;
+  max-height: 260px;
+}
+
+/* Equipment Row: 3 cards × 4col - uniform height */
+.dash__card--equip-status,
+.dash__card--equip-maintenance,
+.dash__card--equip-util {
+  height: 260px;
+  min-height: 260px;
+  max-height: 260px;
+}
+
+/* Gym Operations Row: Metrics + Attendance - uniform height */
+.dash__card--metrics,
+.dash__card--attendance {
+  height: 300px;
+  min-height: 300px;
+  max-height: 300px;
+}
+
+/* Alerts Row: Birthdays + Quick Actions - uniform height */
+.dash__card--birthdays,
+.dash__card--actions {
+  height: 240px;
+  min-height: 240px;
+  max-height: 240px;
+}
+
+/* ── Ensure card content fills available space ── */
+.dash__card--revenue,
+.dash__card--breakdown,
+.dash__card--membership,
+.dash__card--expiring,
+.dash__card--overdue,
+.dash__card--activity,
+.dash__card--trainers,
+.dash__card--top-trainers,
+.dash__card--schedule,
+.dash__card--equip-status,
+.dash__card--equip-maintenance,
+.dash__card--equip-util,
+.dash__card--metrics,
+.dash__card--attendance,
+.dash__card--birthdays,
+.dash__card--actions {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Chart containers stay static (no scroll) ── */
+.dash__chart-area,
+.dash__chart-area--sm,
+.dash__donut-wrap,
+.dash__occ-row,
+.dash__equip-status-grid,
+.dash__prog-body,
+.dash__action-grid {
+  flex-shrink: 0;
+  overflow: visible;
+}
+
+/* ── List containers get flexible height and scroll ── */
+.dash__list-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* ── Revenue Sources list (breakdown) - scrollable ── */
+.dash__bkdn-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.06) transparent;
+}
+.dash__bkdn-list::-webkit-scrollbar { width: 3px; }
+.dash__bkdn-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
+
+/* ── Donut legend - scrollable when needed ── */
+.dash__donut-legend {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.06) transparent;
+}
+.dash__donut-legend::-webkit-scrollbar { width: 3px; }
+.dash__donut-legend::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
+
+/* ── Metrics card dual-block layout ── */
+.dash__card--metrics {
+  display: flex;
+  flex-direction: column;
+}
+.dash__card--metrics .dash__metric-block {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.dash__card--metrics .dash__metric-block--sep {
+  flex: 1 1 auto;
+}
+
+/* ── Empty state centering within fixed-height containers ── */
+.dash__empty {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   END FIXED-HEIGHT LAYOUT SYSTEM
+   ══════════════════════════════════════════════════════════════════ */
+
 /* ── Card head ── */
 .dash__card-head {
   display: flex; align-items: center; gap: 8px;
@@ -507,8 +657,8 @@
 
 /* ── Scroll list ── */
 .dash__list-scroll {
-  flex: 1; display: flex; flex-direction: column; gap: 4px;
-  overflow-y: auto; max-height: 210px; position: relative; z-index: 1;
+  flex: 1 1 auto; display: flex; flex-direction: column; gap: 4px;
+  overflow-y: auto; min-height: 0; position: relative; z-index: 1;
   scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.06) transparent;
 }
 .dash__list-scroll::-webkit-scrollbar { width: 3px; }
@@ -596,7 +746,9 @@
 .dash__donut-total { font-size: 1.95rem; font-weight: 900; display: block; line-height: 1; letter-spacing: -0.05em; color: var(--text); }
 .dash__donut-label { font-size: 0.5rem; color: var(--t2); letter-spacing: 0.12em; text-transform: uppercase; }
 
-.dash__donut-legend { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.dash__donut-legend { flex: 1 1 auto; display: flex; flex-direction: column; gap: 4px; min-height: 0; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.06) transparent; }
+.dash__donut-legend::-webkit-scrollbar { width: 3px; }
+.dash__donut-legend::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
 .dash__legend-row {
   display: flex; align-items: center; gap: 7px; padding: 4px 8px;
   background: var(--s2); border: 1px solid var(--border);
@@ -623,7 +775,9 @@
 /* ══════════════════════
    REVENUE BREAKDOWN BARS
    ══════════════════════ */
-.dash__bkdn-list { display: flex; flex-direction: column; gap: 9px; flex: 1; position: relative; z-index: 1; }
+.dash__bkdn-list { display: flex; flex-direction: column; gap: 9px; flex: 1 1 auto; min-height: 0; position: relative; z-index: 1; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.06) transparent; }
+.dash__bkdn-list::-webkit-scrollbar { width: 3px; }
+.dash__bkdn-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
 .dash__bkdn-row  { display: grid; grid-template-columns: 100px 1fr 66px; align-items: center; gap: 7px; }
 .dash__bkdn-info { display: flex; align-items: center; gap: 6px; min-width: 0; }
 .dash__bkdn-dot  { width: 7px; height: 7px; border-radius: 2px; flex-shrink: 0; }
@@ -1001,6 +1155,24 @@
   .dash__card--attendance,
   .dash__card--birthdays,
   .dash__card--actions    { grid-column: span 3; }
+
+  /* Responsive fixed heights at 900px */
+  .dash__card--revenue,
+  .dash__card--breakdown { height: 300px; min-height: 300px; max-height: 300px; }
+  .dash__card--membership,
+  .dash__card--expiring,
+  .dash__card--overdue,
+  .dash__card--activity { height: 260px; min-height: 260px; max-height: 260px; }
+  .dash__card--trainers,
+  .dash__card--top-trainers,
+  .dash__card--schedule { height: 240px; min-height: 240px; max-height: 240px; }
+  .dash__card--equip-status,
+  .dash__card--equip-maintenance,
+  .dash__card--equip-util { height: 240px; min-height: 240px; max-height: 240px; }
+  .dash__card--metrics,
+  .dash__card--attendance { height: 280px; min-height: 280px; max-height: 280px; }
+  .dash__card--birthdays,
+  .dash__card--actions { height: 220px; min-height: 220px; max-height: 220px; }
 }
 
 @media (max-width: 640px) {
@@ -1026,6 +1198,24 @@
   .dash__card--actions    { grid-column: span 1; }
   .dash__donut-wrap { flex-direction: column; }
   .dash__donut-chart { width: 100%; }
+
+  /* Mobile fixed heights - allow auto height for single column */
+  .dash__card--revenue { height: auto; min-height: 320px; max-height: none; }
+  .dash__card--breakdown { height: auto; min-height: 200px; max-height: none; }
+  .dash__card--membership { height: auto; min-height: 320px; max-height: none; }
+  .dash__card--expiring,
+  .dash__card--overdue,
+  .dash__card--activity { height: 240px; min-height: 240px; max-height: 240px; }
+  .dash__card--trainers,
+  .dash__card--top-trainers,
+  .dash__card--schedule { height: 240px; min-height: 240px; max-height: 240px; }
+  .dash__card--equip-status { height: auto; min-height: 180px; max-height: none; }
+  .dash__card--equip-maintenance,
+  .dash__card--equip-util { height: 240px; min-height: 240px; max-height: 240px; }
+  .dash__card--metrics { height: auto; min-height: 300px; max-height: none; }
+  .dash__card--attendance { height: auto; min-height: 180px; max-height: none; }
+  .dash__card--birthdays { height: 220px; min-height: 220px; max-height: 220px; }
+  .dash__card--actions { height: auto; min-height: 180px; max-height: none; }
 }
 
 /* ══════════════════════
