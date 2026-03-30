@@ -24,7 +24,6 @@ const copyToClipboard = async (text: string): Promise<boolean> => {
       return success
     }
   } catch (err) {
-    console.error('Copy failed:', err)
     return false
   }
 }
@@ -92,8 +91,8 @@ export const SendMessageModal: React.FC<SendMessageModalProps> = ({ isOpen, onCl
       )
       onClose()
     } catch (err: any) {
-      console.error('[SendMessage] Failed:', err)
-      showToast('Failed to send message', 'error', err?.message || 'Please try again')
+      const message = err?.response?.data?.error || err?.response?.data?.message || err?.message || 'Please try again'
+      showToast('Failed to send message', 'error', message)
     } finally {
       setSending(false)
     }
@@ -235,9 +234,6 @@ export const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
       onDeleted?.()
       onClose()
     } catch (err: any) {
-      console.error('[DeleteUser] Failed:', err)
-      
-      // Better error handling based on status code
       let errorMessage = 'Failed to delete user'
       if (err.response?.status === 400) {
         errorMessage = 'Cannot delete this user. Please check permissions or dependencies.'
@@ -246,10 +242,11 @@ export const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
       } else if (err.response?.status === 404) {
         errorMessage = 'User not found'
       } else if (err.response?.status === 500) {
-        errorMessage = 'Server error. User may have dependencies that cannot be deleted.'
+        errorMessage = 'Server error while deleting user. We kept the profile safe. Please try again.'
       }
-      
-      showToast(errorMessage, 'error', err?.response?.data?.message || 'Please try again')
+
+      const detail = err?.response?.data?.error || err?.response?.data?.message || 'Please try again'
+      showToast(errorMessage, 'error', detail)
     } finally {
       setDeleting(false)
     }

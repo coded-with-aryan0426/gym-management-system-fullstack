@@ -73,4 +73,13 @@ public interface MembershipRepository extends JpaRepository<Membership, Long> {
      */
     @org.springframework.data.jpa.repository.Query("SELECT COUNT(m) FROM Membership m WHERE m.status = 'EXPIRED'")
     Integer countExpiredMemberships();
+
+    /**
+     * Find memberships by status and date range (for notification scheduling)
+     */
+    @org.springframework.data.jpa.repository.Query("SELECT m FROM Membership m LEFT JOIN FETCH m.user LEFT JOIN FETCH m.membershipPackage WHERE m.status = :status AND m.endDate BETWEEN :startDate AND :endDate ORDER BY m.endDate ASC")
+    List<Membership> findByStatusAndEndDateBetweenOrderByEndDateAsc(
+            @org.springframework.data.repository.query.Param("status") String status,
+            @org.springframework.data.repository.query.Param("startDate") java.time.LocalDateTime startDate,
+            @org.springframework.data.repository.query.Param("endDate") java.time.LocalDateTime endDate);
 }

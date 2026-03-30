@@ -170,4 +170,12 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
                         @Param("endDate") LocalDateTime endDate);
 
         List<Transaction> findTop10ByGymIdOrderByDateTimeDesc(Long gymId);
+
+    /**
+     * Find pending transactions by status and date range (for notification scheduling)
+     */
+    List<Transaction> findByStatusAndDateTimeBetweenOrderByDateTimeDesc(
+            String status,
+            java.time.LocalDateTime startDate,
+            java.time.LocalDateTime endDate);
 }

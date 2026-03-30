@@ -113,6 +113,7 @@ const OwnerNotifications: React.FC = () => {
 
     const [showBulkMenu, setShowBulkMenu] = useState(false);
     const bulkRef = useRef<HTMLDivElement>(null);
+    const fetchErrorShownRef = useRef(false);
 
     const ALL_SECTIONS = ['views', 'categories', 'priority'];
     const STORAGE_KEY = 'on_sidebar_open_section';
@@ -160,9 +161,13 @@ const OwnerNotifications: React.FC = () => {
             const statsData = await notificationApi.getStats(userId);
             setStats(statsData);
             setLiveConnected(true);
+            fetchErrorShownRef.current = false;
         } catch (err) {
-            console.error('Failed to fetch notifications:', err);
             setLiveConnected(false);
+            if (!fetchErrorShownRef.current) {
+                toast.error('Could not load notifications right now. Retrying automatically.');
+                fetchErrorShownRef.current = true;
+            }
         } finally {
             setLoading(false);
             setRefreshing(false);
