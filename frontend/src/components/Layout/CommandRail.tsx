@@ -62,7 +62,6 @@ const defaultNavItems: NavItem[] = [
   { path: "/financials", label: "Finance", id: "billing", icon: <CreditCard size={18} />, color: "#a78bfa" },
   { path: "/attendance", label: "Attendance", id: "attendance", icon: <Activity size={18} />, color: "#f472b6" },
   { path: "/tasks", label: "Tasks", id: "tasks", icon: <CheckSquare size={18} />, color: "#38bdf8" },
-  { path: "/messages", label: "Messages", id: "messages", icon: <MessageSquare size={18} />, color: "#a78bfa" },
 ];
 
 interface CommandRailProps {

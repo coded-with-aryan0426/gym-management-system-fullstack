@@ -8,7 +8,7 @@ import {
     Send, Paperclip, Smile,
     Phone, Video, User as UserIcon,
     MessageCircle, ShieldOff, Shield, AlertCircle, MoreVertical,
-    Search, X as XIcon, ChevronUp, ChevronDown
+    Search, X as XIcon, ChevronUp, ChevronDown, Pause, Play
 } from 'lucide-react';
 import EmojiPicker, { Theme } from 'emoji-picker-react';
 import MessageBubble from './MessageBubble';
@@ -27,6 +27,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onToggleContactPanel }) => {
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [blocking, setBlocking] = useState(false);
     const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+    const [isPaused, setIsPaused] = useState(false);
     // U9 — message search
     const [showSearch, setShowSearch] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
@@ -231,7 +232,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onToggleContactPanel }) => {
         const now = new Date();
         const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
 
-        if (diffDays === 0) return 'Today';
+        if (diffDays === 0) {
+            // Show only time for Today
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
         if (diffDays === 1) return 'Yesterday';
         return date.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' });
     };
@@ -316,6 +320,13 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onToggleContactPanel }) => {
                     </button>
                     <button className="chat-header__action-btn chat-header__action-btn--disabled" title="Video Call (Coming Soon)" disabled>
                         <Video size={18} />
+                    </button>
+                    <button
+                        className={`chat-header__action-btn${isPaused ? ' chat-header__action-btn--active' : ''}`}
+                        onClick={() => setIsPaused(!isPaused)}
+                        title={isPaused ? 'Resume messages' : 'Pause messages'}
+                    >
+                        {isPaused ? <Play size={18} /> : <Pause size={18} />}
                     </button>
                     {/* U9 — search toggle */}
                     <button
@@ -414,18 +425,24 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onToggleContactPanel }) => {
             {/* Messages Area */}
             <div className="chat-messages" ref={messagesContainerRef}>
                 {/* B4 — load more spinner at top */}
-                {loadingMoreMessages && (
+                {!isPaused && loadingMoreMessages && (
                     <div className="chat-messages__load-more">
                         <span className="chat-messages__load-more-spinner" />
                         <span>Loading older messages...</span>
                     </div>
                 )}
-                {!loadingMoreMessages && hasMoreMessages && (
+                {!isPaused && !loadingMoreMessages && hasMoreMessages && (
                     <div className="chat-messages__load-more">
                         <span className="chat-messages__scroll-hint">Scroll up for older messages</span>
                     </div>
                 )}
-                {groupedMessages.map((item, index) => {
+                {isPaused && (
+                    <div className="chat-messages__pause-banner">
+                        <Pause size={18} />
+                        <span>Messages paused</span>
+                    </div>
+                )}
+                {!isPaused && groupedMessages.map((item, index) => {
                     if (item.type === 'date') {
                         return (
                             <div key={`date-${index}`} className="chat-messages__date-divider">
@@ -461,7 +478,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onToggleContactPanel }) => {
                 })}
 
                 {/* Typing Indicator */}
-                {isOtherTyping && (
+                {!isPaused && isOtherTyping && (
                     <div className="chat-typing-indicator">
                         <span className="typing-dot"></span>
                         <span className="typing-dot"></span>

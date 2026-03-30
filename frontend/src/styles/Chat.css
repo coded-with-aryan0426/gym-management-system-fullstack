@@ -595,6 +595,21 @@
     font-weight: 500;
 }
 
+.chat-messages__pause-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px;
+    background: rgba(84, 175, 233, 0.1);
+    border: 1px solid rgba(84, 175, 233, 0.3);
+    color: #54afe9;
+    font-size: 12px;
+    font-weight: 500;
+    margin: 12px;
+    border-radius: 8px;
+}
+
 /* ==================== MESSAGE BUBBLE ==================== */
 
 .message-bubble {

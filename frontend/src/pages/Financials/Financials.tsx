@@ -28,6 +28,58 @@ const PERIODS: { key: Period; label: string }[] = [
     { key: 'month', label: 'Month' },
 ];
 
+const generateDateSequence = (period: Period): string[] => {
+    const dates: string[] = [];
+    const today = new Date();
+
+    if (period === 'day') {
+        for (let i = 0; i < 24; i++) {
+            const d = new Date(today);
+            d.setHours(i, 0, 0, 0);
+            dates.push(d.toISOString());
+        }
+    } else if (period === 'week') {
+        for (let i = 6; i >= 0; i--) {
+            const d = new Date(today);
+            d.setDate(d.getDate() - i);
+            d.setHours(0, 0, 0, 0);
+            dates.push(d.toISOString().split('T')[0]);
+        }
+    } else {
+        for (let i = 29; i >= 0; i--) {
+            const d = new Date(today);
+            d.setDate(d.getDate() - i);
+            d.setHours(0, 0, 0, 0);
+            dates.push(d.toISOString().split('T')[0]);
+        }
+    }
+    return dates;
+};
+
+const processChartData = (apiData: any[], period: Period): { name: string; revenue: number; expenses: number; profit: number }[] => {
+    const dateSequence = generateDateSequence(period);
+    const dataMap = new Map<string, { revenue: number; expenses: number }>();
+
+    apiData.forEach(item => {
+        if (item.date) {
+            dataMap.set(item.date, {
+                revenue: item.revenue || 0,
+                expenses: item.expenses || 0
+            });
+        }
+    });
+
+    return dateSequence.map(date => {
+        const data = dataMap.get(date) || { revenue: 0, expenses: 0 };
+        return {
+            name: date,
+            revenue: data.revenue,
+            expenses: data.expenses,
+            profit: data.revenue - data.expenses
+        };
+    });
+};
+
 const Financials: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -107,7 +159,7 @@ const Financials: React.FC = () => {
 
             setTransactions(mappedTxs);
             setBreakdownData(breakdown || { revenue: [], expenses: [] });
-            setChartData(cData || []);
+            setChartData(processChartData(cData || [], chartPeriod));
             setPendingTxs(pending || []);
             setIncomeCatStats(incStats || []);
             setExpenseCatStats(expStats || []);

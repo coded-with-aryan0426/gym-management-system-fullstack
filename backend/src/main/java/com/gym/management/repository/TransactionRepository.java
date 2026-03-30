@@ -110,12 +110,12 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
                         @Param("userId") Long userId);
 
         // Daily totals for trend — income = Completed only, expenses = all statuses
-        // Using JPQL instead of native SQL for cross-database compatibility (no TRUNC)
-        @Query("SELECT FUNCTION('DATE', t.dateTime) AS dt, t.type, SUM(t.amount) AS total " +
-                        "FROM Transaction t WHERE ((t.type = 'INCOME' AND t.status = 'Completed') OR t.type = 'EXPENSE') " +
-                        "AND t.dateTime BETWEEN :startDate AND :endDate AND (:userId IS NULL OR t.userId = :userId) " +
-                        "GROUP BY FUNCTION('DATE', t.dateTime), t.type " +
-                        "ORDER BY FUNCTION('DATE', t.dateTime)")
+        // Using native query for Oracle compatibility
+        @Query(value = "SELECT TO_CHAR(t.DATE_TIME, 'YYYY-MM-DD'), t.TYPE, SUM(t.AMOUNT) AS total " +
+                        "FROM TRANSACTIONS t WHERE ((t.TYPE = 'INCOME' AND t.STATUS = 'Completed') OR t.TYPE = 'EXPENSE') " +
+                        "AND t.DATE_TIME BETWEEN :startDate AND :endDate AND (:userId IS NULL OR t.USER_ID = :userId) " +
+                        "GROUP BY TO_CHAR(t.DATE_TIME, 'YYYY-MM-DD'), t.TYPE " +
+                        "ORDER BY TO_CHAR(t.DATE_TIME, 'YYYY-MM-DD')", nativeQuery = true)
         List<Object[]> getDailyTotals(
                         @Param("startDate") LocalDateTime startDate,
                         @Param("endDate") LocalDateTime endDate,
