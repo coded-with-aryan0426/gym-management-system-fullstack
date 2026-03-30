@@ -1,0 +1,181 @@
+\documentclass[14pt]{extarticle}
+\usepackage[margin=1.2cm, a3paper]{geometry}
+\usepackage{graphicx}
+\usepackage[table]{xcolor}
+\usepackage{multicol}
+\usepackage{tcolorbox}
+\usepackage{tabularx}
+\usepackage{titling}
+\usepackage{enumitem}
+
+% Define colors from sample
+\definecolor{itmblue}{RGB}{0, 75, 153}
+\definecolor{itmred}{RGB}{204, 0, 0}
+\definecolor{lightbluetable}{RGB}{220, 235, 245}
+
+% Tighten global list spacing
+\setlist[itemize]{noitemsep, topsep=2pt, parsep=0pt, partopsep=0pt, leftmargin=1.2em}
+
+% Remove page numbers
+\pagestyle{empty}
+
+\begin{document}
+
+% Thick blue border around the entire page
+\begin{tcolorbox}[colframe=itmblue, colback=white, boxrule=3pt, arc=0pt, outer arc=0pt, 
+                  width=\textwidth, height=\textheight, enlarge top by=-1cm, enlarge bottom by=-1cm]
+
+% Header Section
+\begin{minipage}[c]{0.22\textwidth}
+    \includegraphics[width=0.9\textwidth]{../docs/build_artifacts/report/styles/university_logo.png}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{0.75\textwidth}
+    \begin{center}
+        \textcolor{itmred}{\LARGE\textbf{FULL-STACK}} \\[0.1cm]
+        \textcolor{itmred}{\LARGE\textbf{GYM MANAGEMENT SYSTEM}}
+    \end{center}
+\end{minipage}
+
+\vspace{0.2cm}
+% Blue Divider Line
+\noindent\textcolor{itmblue}{\rule{\textwidth}{2pt}}
+\vspace{-0.9cm}
+
+% === BRIEF DESCRIPTION ===
+\section*{\textcolor{itmred}{\large Brief Description}}
+\vspace{-0.4cm}
+This is a robust, event-driven, full-stack platform designed to streamline and modernize daily fitness center operations. Leveraging an advanced Next.js/React frontend and a highly secure Spring Boot backend, the system offers a user-friendly digital environment for gym administrators, trainers, and members. It automates critical workflows including subscription management, attendance tracking, secure payment processing, and role-based data isolation. By integrating real-time notifications and scalable background processing, the platform ensures high operational efficiency and fosters elevated member engagement.
+
+\vspace{-0.4cm}
+
+% === PRINCIPLE ===
+\section*{\textcolor{itmred}{\large Principle}}
+\vspace{-0.4cm}
+\begin{itemize}
+    \item \textbf{Event-Driven Architecture:} Utilizes continuous background event processors to trigger real-time notifications, payment reminders, and systemic audit logs asynchronously without blocking primary user workflows.
+    \item \textbf{Role-Based Access Control (RBAC):} Adopts enterprise-grade security protocols utilizing JSON Web Tokens (JWT) and 2FA, enforcing strict data boundaries so Super Admins, Trainers, and Members access only authorized information.
+    \item \textbf{Stateless Scalability:} Engineered with a decoupled React/Spring Boot microservice-inspired architecture, allowing the API and User Interface to be independently scaled, maintained, and deployed on modern edge networks.
+    \item \textbf{Data-Driven Analytics:} Processes raw operational metrics (attendance, revenue, active subscriptions) into comprehensive visual dashboards, empowering decision-makers with actionable insights.
+\end{itemize}
+
+\vspace{-0.1cm}
+
+% === BENEFICIARIES & BENEFITS (compact side-by-side) ===
+\noindent
+\begin{minipage}[t]{0.35\textwidth}
+    \vspace{0pt}
+    {\large \textbf{\textcolor{itmred}{Beneficiaries}}}\\[-0.2cm]
+    \begin{itemize}
+        \item[$\succ$] Center Owners \& Operators
+        \item[$\succ$] Admins and Front-desk Staff
+        \item[$\succ$] Personal Trainers \& Coaches
+        \item[$\succ$] Gym Members \& Subscribers
+        \item[$\succ$] Financial Auditors \& Maintainers
+    \end{itemize}
+\end{minipage}
+\hspace{0.3cm}
+\begin{minipage}[t]{0.58\textwidth}
+    \vspace{0pt}
+    {\large \textbf{\textcolor{itmred}{Benefits}}}\\[-0.2cm]
+    \begin{itemize}
+        \item[$\succ$] Significantly Reduced Administrative Overhead
+        \item[$\succ$] Automated Subscription \& Revenue Tracking
+        \item[$\succ$] Enhanced Transparency via Tamper-proof Audit Logs
+        \item[$\succ$] Improved Stakeholder Communication (Real-time)
+        \item[$\succ$] Scalable Architecture for Multi-Branch Expansion
+    \end{itemize}
+\end{minipage}
+
+\vspace{0.4cm}
+
+% === MIDDLE SECTION: Diagram + Highlights ===
+\noindent
+\begin{minipage}[t]{0.38\textwidth}
+    \vspace{0pt}
+    \centering
+    {\large \textbf{\textcolor{itmred}{System Architecture}}}\\[0.1cm]
+    \includegraphics[width=\textwidth]{architecture_diagram_v4.png}
+    \begin{center}
+        \textit{\small Figure 1: Full-Stack IT Architecture \& Core Services}
+    \end{center}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.59\textwidth}
+    \vspace{0pt}
+    {\large \textbf{\textcolor{itmred}{Enterprise Architectural \& Security Highlights}}}
+    \vspace{0.05cm}
+    
+    \begin{tcolorbox}[colback=lightbluetable, colframe=itmblue, boxrule=1pt, arc=2pt, left=4pt, right=4pt, top=3pt, bottom=3pt]
+    \textbf{High-Performance Implementation}
+    \begin{itemize}
+        \item \textbf{Rapid Client UI:} Built with React 18, TypeScript, and functional components ensuring seamless engagement.
+        \item \textbf{Backend Engine:} Secured REST API on Java 17 / Spring Boot 3 handling operations with under 200ms latency.
+        \item \textbf{Data Integrity:} Optimised, ACID-compliant data persistence via Oracle Database using strictly parameterised SQL.
+    \end{itemize}
+    \end{tcolorbox}
+    
+    \vspace{0.05cm}
+    
+    \begin{tcolorbox}[colback=white, colframe=itmred, boxrule=1pt, arc=2pt, left=4pt, right=4pt, top=3pt, bottom=3pt]
+    \textbf{Security \& Real-time Functional Modules}
+    \begin{itemize}
+        \item \textbf{Zero-Trust Security:} Full OWASP compliance via BCrypt hashing, JWT Auth, and Email OTP 2-Factor Authentication.
+        \item \textbf{Advanced RBAC:} Multi-tier dynamic isolation strictly governing data interfaces for Admins, Owners, Trainers, and Members.
+        \item \textbf{Low-Latency Messaging:} Bi-directional WebSockets (STOMP Protocol) facilitating critical alerts and live chat seamlessly.
+    \end{itemize}
+    \end{tcolorbox}
+\end{minipage}
+
+\vspace{0.15cm}
+
+
+% === BOTTOM SECTION: Functional Modules + Future Scope + Info Table ===
+\noindent
+\begin{minipage}[b]{0.30\textwidth}
+    {\large \textbf{\textcolor{itmred}{Functional Modules}}}\\[-0.2cm]
+    \begin{itemize}[itemsep=3pt]
+        \item[$\succ$] Multi-Role Dashboard System
+        \item[$\succ$] Membership Lifecycle Management
+        \item[$\succ$] Attendance \& Progress Tracking
+        \item[$\succ$] Subscription \& Payment Workflows
+        \item[$\succ$] Trainer--Member Live Chat
+        \item[$\succ$] Super Admin Audit Logging
+    \end{itemize}
+\end{minipage}
+\hspace{0.2cm}
+\begin{minipage}[b]{0.30\textwidth}
+    {\large \textbf{\textcolor{itmred}{Future Scope}}}\\[-0.2cm]
+    \begin{itemize}[itemsep=3pt]
+        \item[$\succ$] AI-Driven Workout Plans
+        \item[$\succ$] Biometric Login Integration
+        \item[$\succ$] Mobile App (React Native)
+        \item[$\succ$] Multi-Branch Franchise Mode
+        \item[$\succ$] Payment Gateway (Stripe)
+        \item[$\succ$] Wearable Device Sync
+        \item[$\succ$] Offline Mode \& Caching
+    \end{itemize}
+\end{minipage}
+\hfill
+\begin{minipage}[b]{0.36\textwidth}
+    \renewcommand{\arraystretch}{1.3}
+    \begin{tabularx}{\textwidth}{ 
+      | >{\columncolor{lightbluetable}\bfseries}l 
+      | >{\columncolor{lightbluetable}}X | }
+        \hline
+        Department & B.Tech IT \\
+        \hline
+        Semester & Semester -- VIII \\
+        \hline
+        Name & Suthar Aryan Sujalkumar \\
+        \hline
+        Guide & Dr. Ashutosh Abhangi \\
+        \hline
+    \end{tabularx}
+    \vspace{0.75cm}
+\end{minipage}
+
+\vspace{1.2cm}
+\end{tcolorbox}
+
+\end{document}
