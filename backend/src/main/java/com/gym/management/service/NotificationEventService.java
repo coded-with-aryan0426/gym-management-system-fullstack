@@ -292,4 +292,33 @@ public class NotificationEventService {
 
         return notificationRepository.save(notification);
     }
+
+    /**
+     * Create notification for gym owner when new trainer joins
+     */
+    @Transactional
+    public void notifyNewTrainerSignup(User trainer) {
+        try {
+            Optional<User> ownerOpt = userRepository.findByRoleName("OWNER").stream().findFirst();
+            if (ownerOpt.isEmpty()) return;
+
+            User owner = ownerOpt.get();
+            String message = String.format(
+                "New trainer joined: %s (%s). Assign their certifications and availability in Staff settings.",
+                trainer.getFullName(), trainer.getEmail()
+            );
+
+            createNotification(owner,
+                "New Trainer Added - " + trainer.getFullName(),
+                message,
+                "TRAINER", "normal",
+                "{\"trainerId\":" + trainer.getUserId() + ",\"name\":\"" + trainer.getFullName() + "\"}",
+                "/staff"
+            );
+
+            log.info("Created notification for new trainer signup: {}", trainer.getFullName());
+        } catch (Exception e) {
+            log.warn("Failed to create new trainer signup notification: {}", e.getMessage());
+        }
+    }
 }
